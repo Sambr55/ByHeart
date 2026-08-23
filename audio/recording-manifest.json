@@ -1,0 +1,2297 @@
+{
+  "locale": "pt-PT",
+  "generated_from": "content/roots.ts",
+  "count": 229,
+  "lines": [
+    {
+      "pt": "Fala comigo, Goose.",
+      "en": "Say something. I need you with me.",
+      "direction": "Direct, close, urgent. You reach for this when you genuinely need someone to engage.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_goose",
+      "role": "recognise",
+      "slug": "fala-comigo-goose",
+      "speaker": "any"
+    },
+    {
+      "pt": "comigo",
+      "en": "with me",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_goose",
+      "role": "piece",
+      "slug": "comigo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Vem comigo.",
+      "en": "Come with me.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_goose",
+      "role": "branch",
+      "slug": "vem-comigo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Fica comigo.",
+      "en": "Stay with me.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_goose",
+      "role": "branch",
+      "slug": "fica-comigo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Podes vir comigo?",
+      "en": "Can you come with me?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_goose",
+      "role": "branch",
+      "slug": "podes-vir-comigo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Podes ser o meu parceiro quando quiseres.",
+      "en": "You can be my partner whenever you want.",
+      "direction": "Warm permission rather than formal ability. PODES is one of the highest-leverage pieces in the language.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman",
+      "role": "recognise",
+      "slug": "podes-ser-o-meu-parceiro-quando-quiseres",
+      "speaker": "any"
+    },
+    {
+      "pt": "podes",
+      "en": "you can",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman",
+      "role": "piece",
+      "slug": "podes",
+      "speaker": "any"
+    },
+    {
+      "pt": "quando quiseres",
+      "en": "whenever you want",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman",
+      "role": "piece",
+      "slug": "quando-quiseres",
+      "speaker": "any"
+    },
+    {
+      "pt": "Podes dizer outra vez?",
+      "en": "Can you say it again?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman",
+      "role": "branch",
+      "slug": "podes-dizer-outra-vez",
+      "speaker": "any"
+    },
+    {
+      "pt": "Podes repetir?",
+      "en": "Can you repeat?",
+      "direction": "QUICK, BETWEEN FRIENDS — Someone you already call tu — a friend, a colleague you know, someone your own age.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman",
+      "role": "voice",
+      "slug": "podes-repetir",
+      "speaker": "any"
+    },
+    {
+      "pt": "Podes repetir, por favor?",
+      "en": "Can you repeat, please?",
+      "direction": "THE POLITE VERSION — Same friend, but you are interrupting, or you have already asked once.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman",
+      "role": "voice",
+      "slug": "podes-repetir-por-favor",
+      "speaker": "any"
+    },
+    {
+      "pt": "Em que estavas a pensar?",
+      "en": "What was going through your head?",
+      "direction": "Curious, intimate or accusatory depending entirely on how you say it.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_thinking",
+      "role": "recognise",
+      "slug": "em-que-estavas-a-pensar",
+      "speaker": "any"
+    },
+    {
+      "pt": "estavas a…",
+      "en": "you were …ing",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_thinking",
+      "role": "piece",
+      "slug": "estavas-a",
+      "speaker": "any"
+    },
+    {
+      "pt": "em que…?",
+      "en": "what … about?",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_thinking",
+      "role": "piece",
+      "slug": "em-que",
+      "speaker": "any"
+    },
+    {
+      "pt": "Em que estás a pensar?",
+      "en": "What are you thinking about?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_thinking",
+      "role": "branch",
+      "slug": "em-que-estas-a-pensar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estava a pensar…",
+      "en": "I was thinking…",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_thinking",
+      "role": "branch",
+      "slug": "estava-a-pensar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estava a pensar em ti.",
+      "en": "I was thinking about you.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_thinking",
+      "role": "branch",
+      "slug": "estava-a-pensar-em-ti",
+      "speaker": "any"
+    },
+    {
+      "pt": "Sinto que preciso…",
+      "en": "I need something, badly.",
+      "direction": "Neutral, everyday, endlessly useful. This is the product beating subtitle literalism.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_need",
+      "role": "recognise",
+      "slug": "sinto-que-preciso",
+      "speaker": "any"
+    },
+    {
+      "pt": "preciso de…",
+      "en": "I need…",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_need",
+      "role": "piece",
+      "slug": "preciso-de",
+      "speaker": "any"
+    },
+    {
+      "pt": "Preciso de ajuda.",
+      "en": "I need help.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_need",
+      "role": "branch",
+      "slug": "preciso-de-ajuda",
+      "speaker": "any"
+    },
+    {
+      "pt": "Preciso de um táxi.",
+      "en": "I need a taxi.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_need",
+      "role": "branch",
+      "slug": "preciso-de-um-taxi",
+      "speaker": "any"
+    },
+    {
+      "pt": "Preciso de tempo.",
+      "en": "I need time.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_need",
+      "role": "branch",
+      "slug": "preciso-de-tempo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não vou deixar o meu parceiro.",
+      "en": "I am not going to abandon my partner.",
+      "direction": "Firm intention. More conversational than a formal future tense this early.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman_leave",
+      "role": "recognise",
+      "slug": "nao-vou-deixar-o-meu-parceiro",
+      "speaker": "any"
+    },
+    {
+      "pt": "não vou…",
+      "en": "I’m not going to…",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman_leave",
+      "role": "piece",
+      "slug": "nao-vou",
+      "speaker": "any"
+    },
+    {
+      "pt": "deixar",
+      "en": "to leave / to let",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman_leave",
+      "role": "piece",
+      "slug": "deixar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não vou sair.",
+      "en": "I’m not going out.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman_leave",
+      "role": "branch",
+      "slug": "nao-vou-sair",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não vou amanhã.",
+      "en": "I’m not going tomorrow.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman_leave",
+      "role": "branch",
+      "slug": "nao-vou-amanha",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não vou fazer isso.",
+      "en": "I’m not going to do that.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman_leave",
+      "role": "branch",
+      "slug": "nao-vou-fazer-isso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Vou deixar isso.",
+      "en": "I’m going to leave that.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman_leave",
+      "role": "branch",
+      "slug": "vou-deixar-isso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Acho que não vou.",
+      "en": "I don’t think I’ll go.",
+      "direction": "THE SOFT NO — Turning down an invitation without closing the door. Literally “I think I’m not going” — everyone hears it as no.",
+      "crate": "TOP GUN QUOTES",
+      "root": "tg_wingman_leave",
+      "role": "voice",
+      "slug": "acho-que-nao-vou",
+      "speaker": "any"
+    },
+    {
+      "pt": "Chamo-me… James Bond.",
+      "en": "The most famous introduction in film.",
+      "direction": "A perfect freebie: culturally unmistakable and useful within an hour of landing.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_name",
+      "role": "recognise",
+      "slug": "chamo-me-james-bond",
+      "speaker": "any"
+    },
+    {
+      "pt": "chamo-me…",
+      "en": "my name is…",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_name",
+      "role": "piece",
+      "slug": "chamo-me",
+      "speaker": "any"
+    },
+    {
+      "pt": "Chamo-me Sam.",
+      "en": "My name is Sam.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_name",
+      "role": "branch",
+      "slug": "chamo-me-sam",
+      "speaker": "any"
+    },
+    {
+      "pt": "E tu, como te chamas?",
+      "en": "And you, what’s your name?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_name",
+      "role": "branch",
+      "slug": "e-tu-como-te-chamas",
+      "speaker": "any"
+    },
+    {
+      "pt": "Como se chama?",
+      "en": "What is it called?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_name",
+      "role": "branch",
+      "slug": "como-se-chama",
+      "speaker": "any"
+    },
+    {
+      "pt": "Amanhã nunca morre.",
+      "en": "Tomorrow never dies.",
+      "direction": "Time and absolute frequency in one recognisable title — far more productive than a title that is only a place name.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_tomorrow",
+      "role": "recognise",
+      "slug": "amanha-nunca-morre",
+      "speaker": "any"
+    },
+    {
+      "pt": "amanhã",
+      "en": "tomorrow",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_tomorrow",
+      "role": "piece",
+      "slug": "amanha",
+      "speaker": "any"
+    },
+    {
+      "pt": "nunca",
+      "en": "never",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_tomorrow",
+      "role": "piece",
+      "slug": "nunca",
+      "speaker": "any"
+    },
+    {
+      "pt": "Até amanhã.",
+      "en": "See you tomorrow.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_tomorrow",
+      "role": "branch",
+      "slug": "ate-amanha",
+      "speaker": "any"
+    },
+    {
+      "pt": "Amanhã não posso.",
+      "en": "I can’t tomorrow.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_tomorrow",
+      "role": "branch",
+      "slug": "amanha-nao-posso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Nunca mais.",
+      "en": "Never again.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_tomorrow",
+      "role": "branch",
+      "slug": "nunca-mais",
+      "speaker": "any"
+    },
+    {
+      "pt": "Da Rússia com amor.",
+      "en": "From Russia, with love.",
+      "direction": "A compact root that quietly explains a piece you already have while handing you the general form.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_russia",
+      "role": "recognise",
+      "slug": "da-russia-com-amor",
+      "speaker": "any"
+    },
+    {
+      "pt": "com",
+      "en": "with",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_russia",
+      "role": "piece",
+      "slug": "com",
+      "speaker": "any"
+    },
+    {
+      "pt": "amor",
+      "en": "love",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_russia",
+      "role": "piece",
+      "slug": "amor",
+      "speaker": "any"
+    },
+    {
+      "pt": "Café com leite.",
+      "en": "Coffee with milk.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_russia",
+      "role": "branch",
+      "slug": "cafe-com-leite",
+      "speaker": "any"
+    },
+    {
+      "pt": "Com açúcar?",
+      "en": "With sugar?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_russia",
+      "role": "branch",
+      "slug": "com-acucar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Com amor.",
+      "en": "With love.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_russia",
+      "role": "branch",
+      "slug": "com-amor",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não digas “nunca” outra vez.",
+      "en": "Don’t say “never” again.",
+      "direction": "Playful, and unusually practical: OUTRA VEZ is what rescues you when you did not catch something.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_never_again",
+      "role": "recognise",
+      "slug": "nao-digas-nunca-outra-vez",
+      "speaker": "any"
+    },
+    {
+      "pt": "outra vez",
+      "en": "again",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_never_again",
+      "role": "piece",
+      "slug": "outra-vez",
+      "speaker": "any"
+    },
+    {
+      "pt": "não digas",
+      "en": "don’t say",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_never_again",
+      "role": "piece",
+      "slug": "nao-digas",
+      "speaker": "any"
+    },
+    {
+      "pt": "Diz outra vez.",
+      "en": "Say it again.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_never_again",
+      "role": "branch",
+      "slug": "diz-outra-vez",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não digas isso.",
+      "en": "Don’t say that.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_never_again",
+      "role": "branch",
+      "slug": "nao-digas-isso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Podes dizer outra vez, por favor?",
+      "en": "Can you say it again, please?",
+      "direction": "THE FULL ASK — When you want to be unmistakably polite, or you are already asking a second time.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_never_again",
+      "role": "voice",
+      "slug": "podes-dizer-outra-vez-por-favor",
+      "speaker": "any"
+    },
+    {
+      "pt": "Sem tempo para morrer.",
+      "en": "There is no time to die.",
+      "direction": "Genuinely useful travel language pulled out of a very dramatic title. Enjoy the contrast.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_no_time",
+      "role": "recognise",
+      "slug": "sem-tempo-para-morrer",
+      "speaker": "any"
+    },
+    {
+      "pt": "sem",
+      "en": "without",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_no_time",
+      "role": "piece",
+      "slug": "sem",
+      "speaker": "any"
+    },
+    {
+      "pt": "tempo",
+      "en": "time",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_no_time",
+      "role": "piece",
+      "slug": "tempo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Sem açúcar.",
+      "en": "Without sugar.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_no_time",
+      "role": "branch",
+      "slug": "sem-acucar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Sem gelo.",
+      "en": "Without ice.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_no_time",
+      "role": "branch",
+      "slug": "sem-gelo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não tenho tempo.",
+      "en": "I don’t have time.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "JAMES BOND FILM TITLES",
+      "root": "jb_no_time",
+      "role": "branch",
+      "slug": "nao-tenho-tempo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Falei demais.",
+      "en": "I said too much.",
+      "direction": "Self-aware, human, lightly comic. Said with a wince rather than an apology.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_overshare",
+      "role": "recognise",
+      "slug": "falei-demais",
+      "speaker": "any"
+    },
+    {
+      "pt": "demais",
+      "en": "too much",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_overshare",
+      "role": "piece",
+      "slug": "demais",
+      "speaker": "any"
+    },
+    {
+      "pt": "falei",
+      "en": "I spoke / I said",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_overshare",
+      "role": "piece",
+      "slug": "falei",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa, falei demais.",
+      "en": "Sorry, I said too much.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_overshare",
+      "role": "branch",
+      "slug": "desculpa-falei-demais",
+      "speaker": "any"
+    },
+    {
+      "pt": "Comi demais.",
+      "en": "I ate too much.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_overshare",
+      "role": "branch",
+      "slug": "comi-demais",
+      "speaker": "any"
+    },
+    {
+      "pt": "Bebi demais.",
+      "en": "I drank too much.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_overshare",
+      "role": "branch",
+      "slug": "bebi-demais",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa o atraso.",
+      "en": "Sorry I’m late.",
+      "direction": "Warm, everyday repair. How formal you go is a real choice, not a rule.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_late",
+      "role": "recognise",
+      "slug": "desculpa-o-atraso",
+      "speaker": "any"
+    },
+    {
+      "pt": "desculpa",
+      "en": "sorry",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_late",
+      "role": "piece",
+      "slug": "desculpa",
+      "speaker": "any"
+    },
+    {
+      "pt": "o atraso",
+      "en": "the delay",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_late",
+      "role": "piece",
+      "slug": "o-atraso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Peço desculpa.",
+      "en": "I apologise.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_late",
+      "role": "branch",
+      "slug": "peco-desculpa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa… como te chamas?",
+      "en": "Sorry… what’s your name?",
+      "direction": "Embarrassing but entirely recoverable. Everyone has done it.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_forgot_name",
+      "role": "recognise",
+      "slug": "desculpa-como-te-chamas",
+      "speaker": "any"
+    },
+    {
+      "pt": "como te chamas?",
+      "en": "what’s your name?",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_forgot_name",
+      "role": "piece",
+      "slug": "como-te-chamas",
+      "speaker": "any"
+    },
+    {
+      "pt": "Chamo-me Ana.",
+      "en": "My name is Ana.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_forgot_name",
+      "role": "branch",
+      "slug": "chamo-me-ana",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa. Não era isso que queria dizer.",
+      "en": "Sorry. That’s not what I meant.",
+      "direction": "The most valuable language an imperfect speaker can own: it gives you permission to recover instead of freeze.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_wrong_thing",
+      "role": "recognise",
+      "slug": "desculpa-nao-era-isso-que-queria-dizer",
+      "speaker": "any"
+    },
+    {
+      "pt": "queria dizer…",
+      "en": "I meant…",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_wrong_thing",
+      "role": "piece",
+      "slug": "queria-dizer",
+      "speaker": "any"
+    },
+    {
+      "pt": "não era isso",
+      "en": "that wasn’t it",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_wrong_thing",
+      "role": "piece",
+      "slug": "nao-era-isso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa, queria dizer outra coisa.",
+      "en": "Sorry, I meant something else.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_wrong_thing",
+      "role": "branch",
+      "slug": "desculpa-queria-dizer-outra-coisa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Era uma piada.",
+      "en": "It was a joke.",
+      "direction": "“Era uma piada” can sound sheepish. “Estou a brincar” is lighter and lands better in the moment.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_joke",
+      "role": "recognise",
+      "slug": "era-uma-piada",
+      "speaker": "any"
+    },
+    {
+      "pt": "era…",
+      "en": "it was…",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_joke",
+      "role": "piece",
+      "slug": "era",
+      "speaker": "any"
+    },
+    {
+      "pt": "uma piada",
+      "en": "a joke",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_joke",
+      "role": "piece",
+      "slug": "uma-piada",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estou a brincar.",
+      "en": "I’m joking.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_joke",
+      "role": "branch",
+      "slug": "estou-a-brincar",
+      "speaker": "any"
+    },
+    {
+      "pt": "É uma piada?",
+      "en": "Is it a joke?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "BRIDGET JONES CRINGE MOMENTS",
+      "root": "bj_joke",
+      "role": "branch",
+      "slug": "e-uma-piada",
+      "speaker": "any"
+    },
+    {
+      "pt": "Royale com queijo.",
+      "en": "A Royale with cheese.",
+      "direction": "A fast wink, not a lesson. If you already have COM, this is a nod rather than a discovery.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_royale",
+      "role": "recognise",
+      "slug": "royale-com-queijo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Com gelo.",
+      "en": "With ice.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_royale",
+      "role": "branch",
+      "slug": "com-gelo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Com queijo.",
+      "en": "With cheese.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_royale",
+      "role": "branch",
+      "slug": "com-queijo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Diz “o quê” outra vez!",
+      "en": "Say “what” one more time.",
+      "direction": "The film gives this line menace. Keep the polite version — that is the one you will actually need.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_say_what",
+      "role": "recognise",
+      "slug": "diz-o-que-outra-vez",
+      "speaker": "any"
+    },
+    {
+      "pt": "diz",
+      "en": "say",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_say_what",
+      "role": "piece",
+      "slug": "diz",
+      "speaker": "any"
+    },
+    {
+      "pt": "o quê?",
+      "en": "what?",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_say_what",
+      "role": "piece",
+      "slug": "o-que",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa, o quê?",
+      "en": "Sorry, what?",
+      "direction": "WITH ANYONE — One word in front and the same question turns polite. Reach for this one by default.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_say_what",
+      "role": "voice",
+      "slug": "desculpa-o-que",
+      "speaker": "any"
+    },
+    {
+      "pt": "Esse hambúrguer é mesmo bom.",
+      "en": "That burger is really good.",
+      "direction": "A signature moment: natural speech beating dictionary fidelity.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_burger",
+      "role": "recognise",
+      "slug": "esse-hamburguer-e-mesmo-bom",
+      "speaker": "any"
+    },
+    {
+      "pt": "mesmo",
+      "en": "really",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_burger",
+      "role": "piece",
+      "slug": "mesmo",
+      "speaker": "any"
+    },
+    {
+      "pt": "bom",
+      "en": "good",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_burger",
+      "role": "piece",
+      "slug": "bom",
+      "speaker": "any"
+    },
+    {
+      "pt": "Isso é mesmo bom.",
+      "en": "That is really good.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_burger",
+      "role": "branch",
+      "slug": "isso-e-mesmo-bom",
+      "speaker": "any"
+    },
+    {
+      "pt": "Muito bom.",
+      "en": "Very good.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_burger",
+      "role": "branch",
+      "slug": "muito-bom",
+      "speaker": "any"
+    },
+    {
+      "pt": "Esse é bom.",
+      "en": "That one is good.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_burger",
+      "role": "branch",
+      "slug": "esse-e-bom",
+      "speaker": "any"
+    },
+    {
+      "pt": "Tem calma.",
+      "en": "Calm down.",
+      "direction": "Register matters enormously. TEM CALMA can soothe or infuriate; CALMA alone is softer.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_be_cool",
+      "role": "recognise",
+      "slug": "tem-calma",
+      "speaker": "any"
+    },
+    {
+      "pt": "calma",
+      "en": "calm / easy",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_be_cool",
+      "role": "piece",
+      "slug": "calma",
+      "speaker": "any"
+    },
+    {
+      "pt": "Está tudo bem.",
+      "en": "It’s all right.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_be_cool",
+      "role": "branch",
+      "slug": "esta-tudo-bem",
+      "speaker": "any"
+    },
+    {
+      "pt": "Como é que se chama?",
+      "en": "What is it called?",
+      "direction": "This is where the film unexpectedly turns into survival language.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_what_do_they_call_it",
+      "role": "recognise",
+      "slug": "como-e-que-se-chama",
+      "speaker": "any"
+    },
+    {
+      "pt": "Como se chama isto?",
+      "en": "What is this called?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_what_do_they_call_it",
+      "role": "branch",
+      "slug": "como-se-chama-isto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Chama-se…",
+      "en": "It’s called…",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "PULP FICTION BANGER QUOTES",
+      "root": "pf_what_do_they_call_it",
+      "role": "branch",
+      "slug": "chama-se",
+      "speaker": "any"
+    },
+    {
+      "pt": "Paris é sempre uma boa ideia.",
+      "en": "Paris is always a good idea.",
+      "direction": "Elegant, warm, instantly usable. BOA IDEIA is how you agree to almost anything.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_paris",
+      "role": "recognise",
+      "slug": "paris-e-sempre-uma-boa-ideia",
+      "speaker": "any"
+    },
+    {
+      "pt": "sempre",
+      "en": "always",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_paris",
+      "role": "piece",
+      "slug": "sempre",
+      "speaker": "any"
+    },
+    {
+      "pt": "boa ideia",
+      "en": "good idea",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_paris",
+      "role": "piece",
+      "slug": "boa-ideia",
+      "speaker": "any"
+    },
+    {
+      "pt": "É uma boa ideia.",
+      "en": "It’s a good idea.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_paris",
+      "role": "branch",
+      "slug": "e-uma-boa-ideia",
+      "speaker": "any"
+    },
+    {
+      "pt": "Acho que é uma boa ideia.",
+      "en": "I think it’s a good idea.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_paris",
+      "role": "branch",
+      "slug": "acho-que-e-uma-boa-ideia",
+      "speaker": "any"
+    },
+    {
+      "pt": "Aproveita a vida.",
+      "en": "Make the most of your life.",
+      "direction": "Positive without being saccharine. You will hear it shouted across a car park.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_enjoy",
+      "role": "recognise",
+      "slug": "aproveita-a-vida",
+      "speaker": "any"
+    },
+    {
+      "pt": "aproveita",
+      "en": "enjoy / make the most of",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_enjoy",
+      "role": "piece",
+      "slug": "aproveita",
+      "speaker": "any"
+    },
+    {
+      "pt": "vida",
+      "en": "life",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_enjoy",
+      "role": "piece",
+      "slug": "vida",
+      "speaker": "any"
+    },
+    {
+      "pt": "Aproveita o dia.",
+      "en": "Enjoy the day.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_enjoy",
+      "role": "branch",
+      "slug": "aproveita-o-dia",
+      "speaker": "any"
+    },
+    {
+      "pt": "Quero aproveitar.",
+      "en": "I want to make the most of it.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_enjoy",
+      "role": "branch",
+      "slug": "quero-aproveitar",
+      "speaker": "any"
+    },
+    {
+      "pt": "É a vida.",
+      "en": "That’s life.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_enjoy",
+      "role": "branch",
+      "slug": "e-a-vida",
+      "speaker": "any"
+    },
+    {
+      "pt": "As pessoas importam mais do que as coisas.",
+      "en": "People matter more than things.",
+      "direction": "Warm and emotionally useful, rather than phrasebook language.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_people",
+      "role": "recognise",
+      "slug": "as-pessoas-importam-mais-do-que-as-coisas",
+      "speaker": "any"
+    },
+    {
+      "pt": "mais do que",
+      "en": "more than",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_people",
+      "role": "piece",
+      "slug": "mais-do-que",
+      "speaker": "any"
+    },
+    {
+      "pt": "importa",
+      "en": "it matters",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_people",
+      "role": "piece",
+      "slug": "importa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Tu importas.",
+      "en": "You matter.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_people",
+      "role": "branch",
+      "slug": "tu-importas",
+      "speaker": "any"
+    },
+    {
+      "pt": "Mais do que isso.",
+      "en": "More than that.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_people",
+      "role": "branch",
+      "slug": "mais-do-que-isso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Isto importa.",
+      "en": "This matters.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_people",
+      "role": "branch",
+      "slug": "isto-importa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Procura o lado bom das pessoas.",
+      "en": "Look for the good side of people.",
+      "direction": "Gentle but active. Warm language that still does everyday work.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_good_side",
+      "role": "recognise",
+      "slug": "procura-o-lado-bom-das-pessoas",
+      "speaker": "any"
+    },
+    {
+      "pt": "procura",
+      "en": "look for",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_good_side",
+      "role": "piece",
+      "slug": "procura",
+      "speaker": "any"
+    },
+    {
+      "pt": "o lado bom",
+      "en": "the good side",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_good_side",
+      "role": "piece",
+      "slug": "o-lado-bom",
+      "speaker": "any"
+    },
+    {
+      "pt": "Procura aqui.",
+      "en": "Look here.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_good_side",
+      "role": "branch",
+      "slug": "procura-aqui",
+      "speaker": "any"
+    },
+    {
+      "pt": "É uma boa pessoa.",
+      "en": "They’re a good person.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_good_side",
+      "role": "branch",
+      "slug": "e-uma-boa-pessoa",
+      "speaker": "any"
+    },
+    {
+      "pt": "O mais importante é ser feliz.",
+      "en": "The most important thing is to be happy.",
+      "direction": "Aspirational on the surface, structurally very ordinary underneath.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_happy",
+      "role": "recognise",
+      "slug": "o-mais-importante-e-ser-feliz",
+      "speaker": "any"
+    },
+    {
+      "pt": "o mais importante",
+      "en": "the most important thing",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_happy",
+      "role": "piece",
+      "slug": "o-mais-importante",
+      "speaker": "any"
+    },
+    {
+      "pt": "feliz",
+      "en": "happy",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_happy",
+      "role": "piece",
+      "slug": "feliz",
+      "speaker": "any"
+    },
+    {
+      "pt": "É importante.",
+      "en": "It’s important.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_happy",
+      "role": "branch",
+      "slug": "e-importante",
+      "speaker": "any"
+    },
+    {
+      "pt": "O que é mais importante?",
+      "en": "What is most important?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_happy",
+      "role": "branch",
+      "slug": "o-que-e-mais-importante",
+      "speaker": "any"
+    },
+    {
+      "pt": "Quero ser feliz.",
+      "en": "I want to be happy.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_happy",
+      "role": "branch",
+      "slug": "quero-ser-feliz",
+      "speaker": "any"
+    },
+    {
+      "pt": "O mais importante é isto.",
+      "en": "The most important thing is this.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_happy",
+      "role": "branch",
+      "slug": "o-mais-importante-e-isto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Para mim é importante.",
+      "en": "It matters to me.",
+      "direction": "MAKING IT YOURS — “For me, it matters.” Same point, without telling anyone else what to think.",
+      "crate": "AUDREY HEPBURN MUSINGS",
+      "root": "ah_happy",
+      "role": "voice",
+      "slug": "para-mim-e-importante",
+      "speaker": "any"
+    },
+    {
+      "pt": "Controla o que podes controlar.",
+      "en": "Control what you can control.",
+      "direction": "Calm and practical. It sounds modern despite being nearly two thousand years old.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_control",
+      "role": "recognise",
+      "slug": "controla-o-que-podes-controlar",
+      "speaker": "any"
+    },
+    {
+      "pt": "O que posso fazer?",
+      "en": "What can I do?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_control",
+      "role": "branch",
+      "slug": "o-que-posso-fazer",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não posso controlar isso.",
+      "en": "I can’t control that.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_control",
+      "role": "branch",
+      "slug": "nao-posso-controlar-isso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Podes controlar isto.",
+      "en": "You can control this.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_control",
+      "role": "branch",
+      "slug": "podes-controlar-isto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não controlas o que acontece. Controlas como reages.",
+      "en": "You control your response, not the event.",
+      "direction": "A reflection root that unexpectedly unlocks the most everyday questions there are.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_react",
+      "role": "recognise",
+      "slug": "nao-controlas-o-que-acontece-controlas-como-reages",
+      "speaker": "any"
+    },
+    {
+      "pt": "o que acontece",
+      "en": "what happens",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_react",
+      "role": "piece",
+      "slug": "o-que-acontece",
+      "speaker": "any"
+    },
+    {
+      "pt": "como",
+      "en": "how",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_react",
+      "role": "piece",
+      "slug": "como",
+      "speaker": "any"
+    },
+    {
+      "pt": "O que aconteceu?",
+      "en": "What happened?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_react",
+      "role": "branch",
+      "slug": "o-que-aconteceu",
+      "speaker": "any"
+    },
+    {
+      "pt": "Como reagiste?",
+      "en": "How did you react?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_react",
+      "role": "branch",
+      "slug": "como-reagiste",
+      "speaker": "any"
+    },
+    {
+      "pt": "O único momento que tens é agora.",
+      "en": "Now is all you have.",
+      "direction": "The wisdom evaporates fast. AGORA and TENS stay for good.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_now",
+      "role": "recognise",
+      "slug": "o-unico-momento-que-tens-e-agora",
+      "speaker": "any"
+    },
+    {
+      "pt": "agora",
+      "en": "now",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_now",
+      "role": "piece",
+      "slug": "agora",
+      "speaker": "any"
+    },
+    {
+      "pt": "tens",
+      "en": "you have",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_now",
+      "role": "piece",
+      "slug": "tens",
+      "speaker": "any"
+    },
+    {
+      "pt": "Agora não.",
+      "en": "Not now.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_now",
+      "role": "branch",
+      "slug": "agora-nao",
+      "speaker": "any"
+    },
+    {
+      "pt": "E agora?",
+      "en": "And now?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_now",
+      "role": "branch",
+      "slug": "e-agora",
+      "speaker": "any"
+    },
+    {
+      "pt": "Tens tempo?",
+      "en": "Do you have time?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_now",
+      "role": "branch",
+      "slug": "tens-tempo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Agora não posso, desculpa.",
+      "en": "I can’t right now, sorry.",
+      "direction": "WITH A REASON ATTACHED — “I can’t right now, sorry.” A reason and an apology in four words.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_now",
+      "role": "voice",
+      "slug": "agora-nao-posso-desculpa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Se não é verdade, não digas.",
+      "en": "Don’t say it if it isn’t true.",
+      "direction": "Simple moral language that turns into ordinary reactions almost immediately.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_true",
+      "role": "recognise",
+      "slug": "se-nao-e-verdade-nao-digas",
+      "speaker": "any"
+    },
+    {
+      "pt": "se",
+      "en": "if",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_true",
+      "role": "piece",
+      "slug": "se",
+      "speaker": "any"
+    },
+    {
+      "pt": "é verdade",
+      "en": "it is true",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_true",
+      "role": "piece",
+      "slug": "e-verdade",
+      "speaker": "any"
+    },
+    {
+      "pt": "Se quiseres.",
+      "en": "If you want.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_true",
+      "role": "branch",
+      "slug": "se-quiseres",
+      "speaker": "any"
+    },
+    {
+      "pt": "Aceita o que não podes mudar.",
+      "en": "Accept what you cannot change.",
+      "direction": "Reflective on the surface, extremely practical underneath.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_accept",
+      "role": "recognise",
+      "slug": "aceita-o-que-nao-podes-mudar",
+      "speaker": "any"
+    },
+    {
+      "pt": "não podes",
+      "en": "you can’t",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_accept",
+      "role": "piece",
+      "slug": "nao-podes",
+      "speaker": "any"
+    },
+    {
+      "pt": "mudar",
+      "en": "to change",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_accept",
+      "role": "piece",
+      "slug": "mudar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Posso mudar isto?",
+      "en": "Can I change this?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_accept",
+      "role": "branch",
+      "slug": "posso-mudar-isto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não posso mudar isso.",
+      "en": "I can’t change that.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_accept",
+      "role": "branch",
+      "slug": "nao-posso-mudar-isso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Quero mudar.",
+      "en": "I want to change.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_accept",
+      "role": "branch",
+      "slug": "quero-mudar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não podes mudar isso.",
+      "en": "You can’t change that.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_accept",
+      "role": "branch",
+      "slug": "nao-podes-mudar-isso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não posso.",
+      "en": "I can’t.",
+      "direction": "FINAL — It genuinely is not possible and you would rather not be asked twice.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_accept",
+      "role": "voice",
+      "slug": "nao-posso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Acho que não posso.",
+      "en": "I don’t think I can.",
+      "direction": "LEAVING THE DOOR OPEN — Probably no, but you would rather not be blunt about it. Very common in Portugal.",
+      "crate": "MARCUS AURELIUS WISDOM",
+      "root": "ma_accept",
+      "role": "voice",
+      "slug": "acho-que-nao-posso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Vai à merda, estou farto.",
+      "en": "Go away. I am fed up.",
+      "direction": "Final, not playful. This ends a conversation rather than seasoning one.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_vai_a_merda",
+      "role": "recognise",
+      "slug": "vai-a-merda-estou-farto",
+      "speaker": "man"
+    },
+    {
+      "pt": "Vai",
+      "en": "go (an order)",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_vai_a_merda",
+      "role": "piece",
+      "slug": "vai",
+      "speaker": "any"
+    },
+    {
+      "pt": "estou farto",
+      "en": "I’m fed up",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_vai_a_merda",
+      "role": "piece",
+      "slug": "estou-farto",
+      "speaker": "man"
+    },
+    {
+      "pt": "Vai para casa.",
+      "en": "Go home.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_vai_a_merda",
+      "role": "branch",
+      "slug": "vai-para-casa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estou farto disto.",
+      "en": "I’m fed up with this.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_vai_a_merda",
+      "role": "branch",
+      "slug": "estou-farto-disto",
+      "speaker": "man"
+    },
+    {
+      "pt": "Vai com calma.",
+      "en": "Take it easy.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_vai_a_merda",
+      "role": "branch",
+      "slug": "vai-com-calma",
+      "speaker": "any"
+    },
+    {
+      "pt": "Foda-se, esqueci-me.",
+      "en": "The all-purpose explosion, followed by the reason for it.",
+      "direction": "Frustration at the situation, not at a person. Nobody is being insulted here.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_foda_se",
+      "role": "recognise",
+      "slug": "foda-se-esqueci-me",
+      "speaker": "any"
+    },
+    {
+      "pt": "Foda-se",
+      "en": "for f***’s sake",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_foda_se",
+      "role": "piece",
+      "slug": "foda-se",
+      "speaker": "any"
+    },
+    {
+      "pt": "esqueci-me",
+      "en": "I forgot",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_foda_se",
+      "role": "piece",
+      "slug": "esqueci-me",
+      "speaker": "any"
+    },
+    {
+      "pt": "Esqueci-me do telemóvel.",
+      "en": "I forgot my phone.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_foda_se",
+      "role": "branch",
+      "slug": "esqueci-me-do-telemovel",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa, esqueci-me.",
+      "en": "Sorry, I forgot.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_foda_se",
+      "role": "branch",
+      "slug": "desculpa-esqueci-me",
+      "speaker": "any"
+    },
+    {
+      "pt": "Foda-se, outra vez!",
+      "en": "For f***’s sake, again!",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_foda_se",
+      "role": "branch",
+      "slug": "foda-se-outra-vez",
+      "speaker": "any"
+    },
+    {
+      "pt": "Fogo!",
+      "en": "For crying out loud!",
+      "direction": "THE CLEAN TWIN — The identical moment, in front of absolutely anybody. Literally “fire”, and nobody blinks.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_foda_se",
+      "role": "voice",
+      "slug": "fogo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Que se foda, vou na mesma.",
+      "en": "Writing something off, and carrying on regardless.",
+      "direction": "Not anger. A decision, made out loud, that something no longer gets a vote.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_que_se_foda",
+      "role": "recognise",
+      "slug": "que-se-foda-vou-na-mesma",
+      "speaker": "any"
+    },
+    {
+      "pt": "Que se foda",
+      "en": "sod it",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_que_se_foda",
+      "role": "piece",
+      "slug": "que-se-foda",
+      "speaker": "any"
+    },
+    {
+      "pt": "na mesma",
+      "en": "anyway / all the same",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_que_se_foda",
+      "role": "piece",
+      "slug": "na-mesma",
+      "speaker": "any"
+    },
+    {
+      "pt": "Vou na mesma.",
+      "en": "I’m going anyway.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_que_se_foda",
+      "role": "branch",
+      "slug": "vou-na-mesma",
+      "speaker": "any"
+    },
+    {
+      "pt": "Obrigado na mesma.",
+      "en": "Thanks anyway.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_que_se_foda",
+      "role": "branch",
+      "slug": "obrigado-na-mesma",
+      "speaker": "man"
+    },
+    {
+      "pt": "Que se foda, vamos.",
+      "en": "Sod it, let’s go.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_que_se_foda",
+      "role": "branch",
+      "slug": "que-se-foda-vamos",
+      "speaker": "any"
+    },
+    {
+      "pt": "Que caralho é isto?",
+      "en": "Genuine confusion, expressed at volume.",
+      "direction": "Aimed at the object, not the person. Pointed at a person it becomes a challenge.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_caralho",
+      "role": "recognise",
+      "slug": "que-caralho-e-isto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Que caralho",
+      "en": "what the f***",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_caralho",
+      "role": "piece",
+      "slug": "que-caralho",
+      "speaker": "any"
+    },
+    {
+      "pt": "isto",
+      "en": "this",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_caralho",
+      "role": "piece",
+      "slug": "isto",
+      "speaker": "any"
+    },
+    {
+      "pt": "O que é isto?",
+      "en": "What is this?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_caralho",
+      "role": "branch",
+      "slug": "o-que-e-isto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Isto é do caralho!",
+      "en": "This is bloody brilliant!",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_caralho",
+      "role": "branch",
+      "slug": "isto-e-do-caralho",
+      "speaker": "any"
+    },
+    {
+      "pt": "Que caralho estás a fazer?",
+      "en": "What the f*** are you doing?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_caralho",
+      "role": "branch",
+      "slug": "que-caralho-estas-a-fazer",
+      "speaker": "any"
+    },
+    {
+      "pt": "Que raio é isto?",
+      "en": "What on earth is this?",
+      "direction": "BAFFLED, NOT OBSCENE — The same confusion, the same frame, safe in front of anyone at all.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_caralho",
+      "role": "voice",
+      "slug": "que-raio-e-isto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Hoje estou uma merda.",
+      "en": "Today, specifically, you are not at your best.",
+      "direction": "Ordinary, unremarkable complaining. This is closer to “rough” than to obscene.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_merda",
+      "role": "recognise",
+      "slug": "hoje-estou-uma-merda",
+      "speaker": "any"
+    },
+    {
+      "pt": "uma merda",
+      "en": "crap / rubbish",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_merda",
+      "role": "piece",
+      "slug": "uma-merda",
+      "speaker": "any"
+    },
+    {
+      "pt": "Hoje",
+      "en": "today",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_merda",
+      "role": "piece",
+      "slug": "hoje",
+      "speaker": "any"
+    },
+    {
+      "pt": "Hoje não.",
+      "en": "Not today.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_merda",
+      "role": "branch",
+      "slug": "hoje-nao",
+      "speaker": "any"
+    },
+    {
+      "pt": "O filme é uma merda.",
+      "en": "The film is crap.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_merda",
+      "role": "branch",
+      "slug": "o-filme-e-uma-merda",
+      "speaker": "any"
+    },
+    {
+      "pt": "Isto é uma merda.",
+      "en": "This is rubbish.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_merda",
+      "role": "branch",
+      "slug": "isto-e-uma-merda",
+      "speaker": "any"
+    },
+    {
+      "pt": "És um grande cabrão.",
+      "en": "Said to a close friend, this is nearly affectionate. Said to anyone else, it is not.",
+      "direction": "Register does all the work. Between friends it is warmth; anywhere else it is a genuine insult.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_cabrao",
+      "role": "recognise",
+      "slug": "es-um-grande-cabrao",
+      "speaker": "man"
+    },
+    {
+      "pt": "grande",
+      "en": "utter / total (in front of the word)",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_cabrao",
+      "role": "piece",
+      "slug": "grande",
+      "speaker": "any"
+    },
+    {
+      "pt": "cabrão",
+      "en": "bastard",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_cabrao",
+      "role": "piece",
+      "slug": "cabrao",
+      "speaker": "man"
+    },
+    {
+      "pt": "És uma grande cabra.",
+      "en": "You’re an utter cow.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_cabrao",
+      "role": "branch",
+      "slug": "es-uma-grande-cabra",
+      "speaker": "woman"
+    },
+    {
+      "pt": "És um grande amigo.",
+      "en": "You’re a great friend.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_cabrao",
+      "role": "branch",
+      "slug": "es-um-grande-amigo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Que grande merda.",
+      "en": "What an utter mess.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_cabrao",
+      "role": "branch",
+      "slug": "que-grande-merda",
+      "speaker": "any"
+    },
+    {
+      "pt": "Que cabrão!",
+      "en": "What a bastard!",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_cabrao",
+      "role": "branch",
+      "slug": "que-cabrao",
+      "speaker": "man"
+    },
+    {
+      "pt": "És um grande chato.",
+      "en": "You’re a total pain.",
+      "direction": "EXASPERATED, NOT RUDE — Same structure, same affection, and you can say it to a colleague.",
+      "crate": "HOW TO SWEAR IN PORTUGUESE",
+      "root": "sw_cabrao",
+      "role": "voice",
+      "slug": "es-um-grande-chato",
+      "speaker": "any"
+    },
+    {
+      "pt": "Obrigado.",
+      "en": "Thank you.",
+      "direction": "Said about yourself, unremarkably. The man’s form of the same sentence.",
+      "speaker": "man",
+      "crate": "Speaking as a man or a woman",
+      "root": null,
+      "role": "profile",
+      "slug": "obrigado"
+    },
+    {
+      "pt": "Sou inglês.",
+      "en": "I’m English.",
+      "direction": "Said about yourself, unremarkably. The man’s form of the same sentence.",
+      "speaker": "man",
+      "crate": "Speaking as a man or a woman",
+      "root": null,
+      "role": "profile",
+      "slug": "sou-ingles"
+    },
+    {
+      "pt": "Estou cansado.",
+      "en": "I’m tired.",
+      "direction": "Said about yourself, unremarkably. The man’s form of the same sentence.",
+      "speaker": "man",
+      "crate": "Speaking as a man or a woman",
+      "root": null,
+      "role": "profile",
+      "slug": "estou-cansado"
+    },
+    {
+      "pt": "Estou pronto.",
+      "en": "I’m ready.",
+      "direction": "Said about yourself, unremarkably. The man’s form of the same sentence.",
+      "speaker": "man",
+      "crate": "Speaking as a man or a woman",
+      "root": null,
+      "role": "profile",
+      "slug": "estou-pronto"
+    },
+    {
+      "pt": "Obrigada.",
+      "en": "Thank you.",
+      "direction": "Said about yourself, unremarkably. The woman’s form of the same sentence.",
+      "speaker": "woman",
+      "crate": "Speaking as a man or a woman",
+      "root": null,
+      "role": "profile",
+      "slug": "obrigada"
+    },
+    {
+      "pt": "Sou inglesa.",
+      "en": "I’m English.",
+      "direction": "Said about yourself, unremarkably. The woman’s form of the same sentence.",
+      "speaker": "woman",
+      "crate": "Speaking as a man or a woman",
+      "root": null,
+      "role": "profile",
+      "slug": "sou-inglesa"
+    },
+    {
+      "pt": "Estou cansada.",
+      "en": "I’m tired.",
+      "direction": "Said about yourself, unremarkably. The woman’s form of the same sentence.",
+      "speaker": "woman",
+      "crate": "Speaking as a man or a woman",
+      "root": null,
+      "role": "profile",
+      "slug": "estou-cansada"
+    },
+    {
+      "pt": "Estou pronta.",
+      "en": "I’m ready.",
+      "direction": "Said about yourself, unremarkably. The woman’s form of the same sentence.",
+      "speaker": "woman",
+      "crate": "Speaking as a man or a woman",
+      "root": null,
+      "role": "profile",
+      "slug": "estou-pronta"
+    },
+    {
+      "pt": "Pode repetir?",
+      "en": "Can you repeat?",
+      "direction": "The formal form. One letter shorter, and a completely different level of respect.",
+      "crate": "Who you are speaking to",
+      "root": null,
+      "role": "profile",
+      "slug": "pode-repetir",
+      "speaker": "any"
+    },
+    {
+      "pt": "Hoje não vou.",
+      "en": "I’m not going today.",
+      "direction": "Neutral. A friend asks whether you are coming out later.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "hoje-nao-vou",
+      "speaker": "any"
+    },
+    {
+      "pt": "Isto outra vez?",
+      "en": "This again?",
+      "direction": "Neutral. The same problem has now come back for the third time.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "isto-outra-vez",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa, estou farto.",
+      "en": "Sorry, I’m fed up.",
+      "direction": "Neutral. You need to leave a party that is going nowhere.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "desculpa-estou-farto",
+      "speaker": "man"
+    },
+    {
+      "pt": "A vida é uma merda.",
+      "en": "Life is crap.",
+      "direction": "Neutral. Your friend has had the worst week you can remember.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "a-vida-e-uma-merda",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não podes mudar isto.",
+      "en": "You can’t change this.",
+      "direction": "Neutral. Someone is raging about a decision that was made without them.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "nao-podes-mudar-isto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Podes vir comigo amanhã?",
+      "en": "Can you come with me tomorrow?",
+      "direction": "Neutral. You want to see someone, but not today.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "podes-vir-comigo-amanha",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa. Podes dizer outra vez?",
+      "en": "Sorry. Can you say it again?",
+      "direction": "Neutral. You missed what someone said, and you feel bad about it.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "desculpa-podes-dizer-outra-vez",
+      "speaker": "any"
+    },
+    {
+      "pt": "Isso é mesmo uma boa ideia.",
+      "en": "That is really a good idea.",
+      "direction": "Neutral. Someone suggests something and you genuinely like it.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "isso-e-mesmo-uma-boa-ideia",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não vou agora.",
+      "en": "I’m not going now.",
+      "direction": "Neutral. You have decided, and the timing matters.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "nao-vou-agora",
+      "speaker": "any"
+    },
+    {
+      "pt": "Calma. Diz outra vez.",
+      "en": "Easy. Say it again.",
+      "direction": "Neutral. Someone is flustered and talking far too fast.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "calma-diz-outra-vez",
+      "speaker": "any"
+    },
+    {
+      "pt": "Chamo-me Sam. Como se chama isto?",
+      "en": "My name is Sam. What is this called?",
+      "direction": "Neutral. You are introducing yourself and pointing at something at once.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "chamo-me-sam-como-se-chama-isto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa, preciso de ajuda.",
+      "en": "Sorry, I need help.",
+      "direction": "Neutral. You need help, and you are interrupting someone to ask for it.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "desculpa-preciso-de-ajuda",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa, agora não.",
+      "en": "Sorry, not now.",
+      "direction": "Neutral. Someone wants you, and you cannot right this second.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "desculpa-agora-nao",
+      "speaker": "any"
+    },
+    {
+      "pt": "Calma. Não vou.",
+      "en": "Easy. I’m not going.",
+      "direction": "Neutral. Someone is pushing, and you have already decided.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "calma-nao-vou",
+      "speaker": "any"
+    },
+    {
+      "pt": "Amanhã? Boa ideia.",
+      "en": "Tomorrow? Good idea.",
+      "direction": "Neutral. They suggest a day and you like it.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "amanha-boa-ideia",
+      "speaker": "any"
+    },
+    {
+      "pt": "Podes mesmo?",
+      "en": "Can you really?",
+      "direction": "Neutral. Someone offers something you did not expect.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "podes-mesmo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Podes vir sempre.",
+      "en": "You can always come.",
+      "direction": "Neutral. You are telling someone the door is open.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "podes-vir-sempre",
+      "speaker": "any"
+    },
+    {
+      "pt": "Calma. Era uma piada.",
+      "en": "Easy. It was a joke.",
+      "direction": "Neutral. It did not land, and they have taken it badly.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "calma-era-uma-piada",
+      "speaker": "any"
+    },
+    {
+      "pt": "Peço sempre desculpa.",
+      "en": "I always apologise.",
+      "direction": "Neutral. You are owning up to a habit.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "peco-sempre-desculpa",
+      "speaker": "any"
+    },
+    {
+      "pt": "É mesmo verdade?",
+      "en": "Is it really true?",
+      "direction": "Neutral. Someone tells you something you were not expecting.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "e-mesmo-verdade",
+      "speaker": "any"
+    },
+    {
+      "pt": "Aproveita agora.",
+      "en": "Make the most of now.",
+      "direction": "Neutral. Something good is happening and it will not wait.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "aproveita-agora",
+      "speaker": "any"
+    }
+  ]
+}

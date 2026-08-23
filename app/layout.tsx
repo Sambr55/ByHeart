@@ -17,6 +17,17 @@ const sans = Inter({
 export const metadata: Metadata = {
   title: BRAND.title,
   description: BRAND.description,
+  applicationName: BRAND.name,
+  // Installed on a phone, DUB should look like an app rather than a saved page.
+  appleWebApp: { capable: true, title: BRAND.name, statusBarStyle: 'black-translucent' },
+  formatDetection: { telephone: false },
+  openGraph: {
+    type: 'website',
+    siteName: BRAND.name,
+    title: BRAND.title,
+    description: BRAND.description,
+  },
+  twitter: { card: 'summary_large_image', title: BRAND.title, description: BRAND.description },
 }
 
 export const viewport: Viewport = {
@@ -24,6 +35,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  // Standalone on a notched phone: the app paints into the safe areas itself.
+  viewportFit: 'cover',
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

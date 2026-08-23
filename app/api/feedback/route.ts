@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { FeedbackSubmission } from '@/content/feedback'
+import { adminKeyValid, currentUser, ensureDevice } from '@/lib/auth'
+import { layer, listFeedback, saveFeedback } from '@/lib/store'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -12,30 +14,11 @@ export const dynamic = 'force-dynamic'
  * set yet — so when nothing is configured the route says so honestly and the client
  * falls back to a local download the facilitator can collect by hand.
  *
- * To turn on persistence:
- *   1. Vercel dashboard → Storage → create a Blob store, connect it to the project
- *   2. `vercel env pull` (or redeploy) so BLOB_READ_WRITE_TOKEN is present
+ * Preference order is Postgres, then Blob, then nothing. To turn on the good one:
+ *   1. provision any Postgres (Neon, Supabase, Vercel Postgres)
+ *   2. set DATABASE_URL, then `npm run db:migrate`
  *   3. set FEEDBACK_ADMIN_KEY to any long random string — it gates reads
  */
-
-const PREFIX = 'feedback/'
-
-function adminKeyOk(request: Request): boolean {
-  const expected = process.env.FEEDBACK_ADMIN_KEY
-  if (!expected) return false
-  const given =
-    new URL(request.url).searchParams.get('key') ??
-    request.headers.get('x-admin-key') ??
-    ''
-  // Length-independent comparison is overkill here, but the key is the only gate.
-  return given.length === expected.length && given === expected
-}
-
-async function blob() {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) return null
-  return import('@vercel/blob')
-}
-
 export async function POST(request: Request) {
   let body: FeedbackSubmission
   try {
@@ -47,49 +30,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'missing submission_id or answers' }, { status: 400 })
   }
 
-  const store = await blob()
-  if (!store) {
+  const device = await ensureDevice()
+  const user = await currentUser()
+  const where = await saveFeedback(device, user?.id ?? null, {
+    submission_id: body.submission_id,
+    tester_label: (body as { tester_label?: string }).tester_label,
+    answers: body.answers,
+    recorded_at: body.submitted_at,
+  })
+
+  if (where === 'none') {
     return NextResponse.json(
       {
         stored: false,
         reason:
-          'No blob store configured. Set BLOB_READ_WRITE_TOKEN to persist; the client keeps a local copy meanwhile.',
+          'No store configured. Set DATABASE_URL or BLOB_READ_WRITE_TOKEN to persist; the client keeps a local copy meanwhile.',
       },
       { status: 503 },
     )
   }
-
-  const key =
-    PREFIX + body.submitted_at.slice(0, 10) + '/' + body.submission_id + '.json'
-  await store.put(key, JSON.stringify(body, null, 2), {
-    // Tester answers are personal. A public blob is readable by anyone who learns the
-    // URL, and these URLs are not secret enough to carry that.
-    access: 'private',
-    contentType: 'application/json',
-    addRandomSuffix: false,
-  })
-  return NextResponse.json({ stored: true, key })
+  return NextResponse.json({ stored: true, layer: where })
 }
 
 export async function GET(request: Request) {
-  if (!adminKeyOk(request)) {
+  const key = new URL(request.url).searchParams.get('key') ?? request.headers.get('x-admin-key')
+  if (!adminKeyValid(key)) {
     return NextResponse.json({ error: 'unauthorised' }, { status: 401 })
   }
-  const store = await blob()
-  if (!store) {
-    return NextResponse.json({ submissions: [], stored: false, reason: 'no blob store' })
-  }
-  const { blobs } = await store.list({ prefix: PREFIX, limit: 1000 })
-  const submissions = await Promise.all(
-    blobs.map(async (b: { pathname: string }) => {
-      // Private blobs are not fetchable by URL; they are read back through the token.
-      const found = await store.get(b.pathname, { access: 'private' })
-      if (!found) return null
-      const res = new Response(found.stream)
-      return (await res.json()) as FeedbackSubmission
-    }),
-  )
-  const clean = submissions.filter(Boolean) as FeedbackSubmission[]
-  clean.sort((a, b) => a.submitted_at.localeCompare(b.submitted_at))
-  return NextResponse.json({ stored: true, count: clean.length, submissions: clean })
+  const submissions = await listFeedback()
+  return NextResponse.json({
+    stored: layer() !== 'none',
+    layer: layer(),
+    count: submissions.length,
+    submissions,
+  })
 }
