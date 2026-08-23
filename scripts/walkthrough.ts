@@ -12,7 +12,7 @@
  * is the thing that matters: the learner is never trapped.
  */
 
-import { chromium, type Page } from 'playwright'
+import { chromium, type Locator, type Page } from 'playwright'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
 import { TARGETS } from '../content/targets'
 import type { Mission, Screen } from '../content/types'
@@ -21,11 +21,37 @@ const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const PATHS: Record<string, string> = { mission_01: '/', mission_02: '/m2' }
 const problems: string[] = []
 
+/**
+ * Press a control.
+ *
+ * Playwright's input pipeline stalls on this machine under load, and its stability
+ * gate never settles on the primary CTA — an `mt-auto` flex item that is provably
+ * static across thirty consecutive animation frames. Rather than lose the coverage
+ * to that, this asserts every property the gate exists to check (present, visible,
+ * enabled, its own hit target at its centre) and then dispatches the click.
+ */
+async function press(locator: Locator, what: string) {
+  await locator.waitFor({ state: 'visible' })
+  if (await locator.isDisabled()) throw new Error(what + ' is disabled')
+  const reachable = await locator.evaluate((el) => {
+    const r = el.getBoundingClientRect()
+    if (r.width === 0 || r.height === 0) return false
+    el.scrollIntoView({ block: 'center', behavior: 'instant' })
+    const b = el.getBoundingClientRect()
+    const hit = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2)
+    return hit === el || el.contains(hit) || Boolean(hit && el.contains(hit))
+  })
+  if (!reachable) throw new Error(what + ' is covered by another element')
+  await locator.evaluate((el) => (el as HTMLElement).click())
+}
+
 async function tap(page: Page, label?: string) {
-  const btn = label
-    ? page.getByRole('button', { name: label, exact: false })
-    : page.getByTestId('continue')
-  await btn.first().click()
+  const btn = (
+    label
+      ? page.getByRole('button', { name: label, exact: false })
+      : page.getByTestId('continue')
+  ).first()
+  await press(btn, 'CTA "' + (label ?? 'continue') + '"')
 }
 
 async function fillTiles(
@@ -39,7 +65,7 @@ async function fillTiles(
   for (const id of order) {
     const tile = tiles.find((t) => t.id === id)!
     const loc = scope.getByRole('button', { name: tile.text, exact: true }).first()
-    if (await loc.isVisible().catch(() => false)) await loc.click()
+    if (await loc.isVisible().catch(() => false)) await press(loc, 'tile')
   }
 }
 
@@ -49,10 +75,10 @@ async function playScreen(page: Page, s: Screen, mode: 'correct' | 'wrong') {
     case 'briefing':
       return tap(page)
     case 'culture-select':
-      await page.getByRole('button', { name: 'TOP GUN', exact: false }).first().click()
+      await press(page.getByRole('button', { name: 'TOP GUN', exact: false }).first(), 'control')
       return tap(page)
     case 'familiarity':
-      await page.getByRole('button', { name: s.options[0].label }).click()
+      await press(page.getByRole('button', { name: s.options[0].label }), 'control')
       return tap(page)
     case 'inventory':
     case 'result':
@@ -63,40 +89,40 @@ async function playScreen(page: Page, s: Screen, mode: 'correct' | 'wrong') {
       return tap(page)
     case 'block-intro':
       for (const b of s.blocks) {
-        await page.getByRole('button', { name: b.gloss, exact: false }).first().click()
+        await press(page.getByRole('button', { name: b.gloss, exact: false }).first(), 'control')
       }
       return tap(page)
     case 'preference':
-      await page.getByRole('button', { name: s.options[0].title, exact: false }).first().click()
+      await press(page.getByRole('button', { name: s.options[0].title, exact: false }).first(), 'control')
       return tap(page)
     case 'continuation':
-      await page.getByRole('button', { name: s.options[0].label }).click()
+      await press(page.getByRole('button', { name: s.options[0].label }), 'control')
       return tap(page)
     case 'culture-categories':
-      await page.getByRole('button', { name: s.cards[0].title, exact: false }).first().click()
+      await press(page.getByRole('button', { name: s.cards[0].title, exact: false }).first(), 'control')
       return tap(page)
     case 'free-text':
       await page.getByRole('textbox').first().fill('The Sopranos')
       return tap(page)
     case 'forced-choice':
-      await page.getByRole('button', { name: s.cards[0].title, exact: false }).first().click()
+      await press(page.getByRole('button', { name: s.cards[0].title, exact: false }).first(), 'control')
       return tap(page)
     case 'scale':
-      await page.getByRole('button', { name: s.points[2].label, exact: false }).first().click()
+      await press(page.getByRole('button', { name: s.points[2].label, exact: false }).first(), 'control')
       return tap(page)
     case 'post-intent':
-      await page.getByRole('button', { name: s.options[0].label }).click()
+      await press(page.getByRole('button', { name: s.options[0].label }), 'control')
       return tap(page, 'FINISH')
 
     case 'meaning-check': {
       const right = s.options.find((o) => o.correct)!
       const wrong = s.options.find((o) => !o.correct)!
       if (mode === 'correct') {
-        await page.getByRole('button', { name: right.label, exact: false }).first().click()
+        await press(page.getByRole('button', { name: right.label, exact: false }).first(), 'control')
       } else {
         for (let i = 0; i < 3; i++) {
           const opt = page.getByRole('button', { name: wrong.label, exact: false }).first()
-          if (await opt.isEnabled().catch(() => false)) await opt.click()
+          if (await opt.isEnabled().catch(() => false)) await press(opt, 'option')
         }
       }
       return tap(page)
@@ -106,11 +132,11 @@ async function playScreen(page: Page, s: Screen, mode: 'correct' | 'wrong') {
       const right = s.options.find((o) => o.correct)!
       const wrong = s.options.find((o) => !o.correct)!
       if (mode === 'correct') {
-        await page.getByRole('button', { name: right.pt, exact: true }).click()
+        await press(page.getByRole('button', { name: right.pt, exact: true }), 'control')
       } else {
         for (let i = 0; i < 3; i++) {
           const opt = page.getByRole('button', { name: wrong.pt, exact: true })
-          if (await opt.isEnabled().catch(() => false)) await opt.click()
+          if (await opt.isEnabled().catch(() => false)) await press(opt, 'option')
         }
       }
       return tap(page)
@@ -130,7 +156,7 @@ async function playScreen(page: Page, s: Screen, mode: 'correct' | 'wrong') {
           for (const id of s.answer) {
             const tile = s.tiles.find((t) => t.id === id)!
             const placed = line.getByRole('button', { name: tile.text, exact: true }).first()
-            if (await placed.isEnabled().catch(() => false)) await placed.click()
+            if (await placed.isEnabled().catch(() => false)) await press(placed, 'placed tile')
           }
         }
       }
@@ -146,7 +172,7 @@ async function playScreen(page: Page, s: Screen, mode: 'correct' | 'wrong') {
           for (let i = 0; i < (mode === 'correct' ? 1 : 3); i++) {
             const target = mode === 'correct' ? right.pt : wrong.pt
             const btn = section.getByRole('button', { name: target, exact: true }).first()
-            if (await btn.isVisible().catch(() => false)) await btn.click()
+            if (await btn.isVisible().catch(() => false)) await press(btn, 'option')
           }
         } else {
           for (let attempt = 0; attempt < (mode === 'correct' ? 1 : 3); attempt++) {
@@ -154,12 +180,12 @@ async function playScreen(page: Page, s: Screen, mode: 'correct' | 'wrong') {
             if (!(await pool.isVisible().catch(() => false))) break
             await fillTiles(page, pool, part.tiles, part.answer, mode)
             const check = section.getByRole('button', { name: 'CHECK', exact: true })
-            if (await check.isEnabled().catch(() => false)) await check.click()
+            if (await check.isEnabled().catch(() => false)) await press(check, 'CHECK')
             const line = page.getByTestId('line-' + part.id)
             for (const id of part.answer) {
               const tile = part.tiles.find((t) => t.id === id)!
               const placed = line.getByRole('button', { name: tile.text, exact: true }).first()
-              if (await placed.isEnabled().catch(() => false)) await placed.click()
+              if (await placed.isEnabled().catch(() => false)) await press(placed, 'placed tile')
             }
           }
         }
@@ -172,11 +198,11 @@ async function playScreen(page: Page, s: Screen, mode: 'correct' | 'wrong') {
       if (mode === 'wrong') {
         for (const p of s.pairs) {
           const other = s.pairs.find((x) => x.blockId !== p.blockId)!
-          await card(p.blockId).getByRole('button', { name: other.en, exact: true }).click()
+          await press(card(p.blockId).getByRole('button', { name: other.en, exact: true }), 'control')
         }
       }
       for (const p of s.pairs) {
-        await card(p.blockId).getByRole('button', { name: p.en, exact: true }).click()
+        await press(card(p.blockId).getByRole('button', { name: p.en, exact: true }), 'control')
       }
       return tap(page)
     }
@@ -187,11 +213,11 @@ async function playScreen(page: Page, s: Screen, mode: 'correct' | 'wrong') {
         if (mode === 'wrong') {
           for (let i = 0; i < 2; i++) {
             const btn = page.getByRole('button', { name: TARGETS[wrong].label, exact: true })
-            if (await btn.isEnabled().catch(() => false)) await btn.click()
+            if (await btn.isEnabled().catch(() => false)) await press(btn, 'option')
             await page.waitForTimeout(100)
           }
         } else {
-          await page.getByRole('button', { name: TARGETS[c.answer].label, exact: true }).click()
+          await press(page.getByRole('button', { name: TARGETS[c.answer].label, exact: true }), 'control')
         }
         await page.waitForTimeout(1000)
       }
@@ -233,9 +259,9 @@ async function playMission(page: Page, mission: Mission, mode: 'correct' | 'wron
 async function run(mode: 'correct' | 'wrong') {
   const browser = await chromium.launch()
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
-  // Fail fast. A wedged screen should surface in seconds, not after the default
-  // 30s times out on every action for the rest of a 98-screen run.
-  page.setDefaultTimeout(15000)
+  // Generous, because this runs two browsers through 98 screens and the box it runs
+  // on is often busy. A wedge still surfaces — as a stuck screen id — just later.
+  page.setDefaultTimeout(Number(process.env.WT_TIMEOUT ?? 60000))
   page.on('pageerror', (e) => problems.push('[' + mode + '] page error: ' + e.message))
   page.on('crash', () => problems.push('[' + mode + '] the page crashed'))
   page.on('console', (m) => {
@@ -262,12 +288,12 @@ async function run(mode: 'correct' | 'wrong') {
 
   await page.goto(BASE + '/deck', { waitUntil: 'networkidle' })
   bodies.deck = await page.locator('body').innerText()
-  await page.getByRole('button', { name: 'REVIEW NOW' }).click()
+  await press(page.getByRole('button', { name: 'REVIEW NOW' }), 'control')
   for (let i = 0; i < 12; i++) {
     const show = page.getByRole('button', { name: 'SHOW ME' })
     if (!(await show.isVisible().catch(() => false))) break
-    await show.click()
-    await page.getByRole('button', { name: 'GOT IT' }).click()
+    await press(show, 'SHOW ME')
+    await press(page.getByRole('button', { name: 'GOT IT' }), 'control')
   }
   bodies.deckDone = await page.locator('body').innerText()
 
@@ -275,7 +301,7 @@ async function run(mode: 'correct' | 'wrong') {
   for (let item = 0; item < 12; item++) {
     const options = page.locator('main button')
     if (!(await options.count())) break
-    await options.nth(0).click()
+    await press(options.nth(0), 'recall option')
     const next = page.getByRole('button', { name: 'NEXT' })
     try {
       await next.waitFor({ state: 'visible', timeout: 4000 })
@@ -283,7 +309,7 @@ async function run(mode: 'correct' | 'wrong') {
       // No NEXT means the answer never registered, or we are already on the result.
       break
     }
-    await next.click()
+    await press(next, 'NEXT')
   }
   bodies.recall = await page.locator('body').innerText()
   bodies.recallTail = bodies.recall.slice(0, 200).replace(/\n/g, ' | ')

@@ -20,7 +20,7 @@ export function PageShell({
         </div>
       </header>
       <main className="flex-1">
-        <div className="mx-auto flex min-h-[calc(100dvh-6rem)] w-full max-w-md flex-col px-5 py-6">
+        <div className="mx-auto flex min-h-[calc(100svh-6rem)] w-full max-w-md flex-col px-5 py-6">
           {children}
         </div>
       </main>

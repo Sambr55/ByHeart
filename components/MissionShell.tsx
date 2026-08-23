@@ -25,7 +25,7 @@ export function MissionShell({ children }: { children: ReactNode }) {
       <main className="instrument-field flex-1">
         <div
           key={screen.id}
-          className="animate-rise mx-auto flex min-h-[calc(100dvh-9.5rem)] w-full max-w-md flex-col px-5 py-6"
+          className="animate-rise mx-auto flex min-h-[calc(100svh-9.5rem)] w-full max-w-md flex-col px-5 py-6"
         >
           {children}
         </div>

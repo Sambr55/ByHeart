@@ -61,6 +61,11 @@ body {
   color: var(--fg);
 }
 
+/* Reserve the scrollbar gutter so its appearance never changes the layout width. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
