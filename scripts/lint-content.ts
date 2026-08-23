@@ -601,6 +601,36 @@ for (const e of EXAMPLES) {
   )
 }
 
+
+// ---------------------------------------------------------------------------
+// Voice pairs — a choice screen that does not say WHEN is just a poll (§12)
+// ---------------------------------------------------------------------------
+{
+  let pairs = 0
+  for (const r of ROOTS) {
+    if (!r.voice_options?.length) continue
+    pairs++
+    if (!r.voice_rule) fail(r.root_id + ' offers a voice choice but teaches no rule from it')
+    if (r.voice_options.filter((o) => o.safest).length > 1) {
+      fail(r.root_id + ' marks more than one option as the safe one')
+    }
+    for (const o of r.voice_options) {
+      if (!o.register?.trim()) fail(r.root_id + ' / ' + o.pt + ' has no register chip')
+      if (!o.when?.trim()) fail(r.root_id + ' / ' + o.pt + ' does not say when to use it')
+      if (o.safest && o.register && o.register.length > 22) {
+        warn(r.root_id + ' / ' + o.pt + ' chip is too long to sit beside the IF IN DOUBT badge')
+      }
+      if (o.register && o.register.length > 34) {
+        warn(r.root_id + ' / ' + o.pt + ' chip is ' + o.register.length + ' chars, it will wrap')
+      }
+      if (o.when && o.when.split(' ').length < 6) {
+        warn(r.root_id + ' / ' + o.pt + ' when-line is too thin to be useful')
+      }
+    }
+  }
+  console.log(pairs + ' voice pairs, every option situated, every pair teaching a rule')
+}
+
 // --- report ----------------------------------------------------------------
 const screenCount = MISSION_ORDER.reduce((n, m) => n + MISSIONS[m].screens.length, 0)
 console.log(

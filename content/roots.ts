@@ -49,6 +49,14 @@ export interface VoiceOption {
   pt: string
   en: string
   signal: 'direct' | 'softened' | 'dry' | 'warm' | 'casual' | 'polite'
+  /** The chip: which room this one belongs in. */
+  register: string
+  /** Who you would say it to, and when. The reason this screen exists. */
+  when: string
+  /** Where the short version bites. Only the options that can misfire carry one. */
+  risk?: string
+  /** At most one per pair: reach for this if you cannot read the room. */
+  safest?: boolean
 }
 
 export interface Root {
@@ -71,6 +79,8 @@ export interface Root {
   /** Extract ids from other roots this can strengthen. */
   reinforces: string[]
   voice_options?: VoiceOption[]
+  /** The transferable rule the pair is really teaching (§12). */
+  voice_rule?: string
   /**
    * Words that appear in a branch without being a learning target. §06: helper words
    * may appear, but with an English gloss — never quietly tested. Every word the
@@ -167,9 +177,20 @@ export const TOP_GUN: Root[] = [
     ],
     reinforces: ['comigo'],
     voice_options: [
-      { pt: 'Podes repetir?', en: 'Can you repeat?', signal: 'direct' },
-      { pt: 'Podes repetir, por favor?', en: 'Can you repeat, please?', signal: 'polite' },
+      {
+        pt: 'Podes repetir?', en: 'Can you repeat?', signal: 'direct',
+        register: 'QUICK, BETWEEN FRIENDS',
+        when: 'Someone you already call tu — a friend, a colleague you know, someone your own age.',
+        risk: 'Fine with friends. To a stranger or anyone older, podes is the wrong word.',
+      },
+      {
+        pt: 'Podes repetir, por favor?', en: 'Can you repeat, please?', signal: 'polite',
+        register: 'THE POLITE VERSION',
+        when: 'Same friend, but you are interrupting, or you have already asked once.',
+        safest: true,
+      },
     ],
+    voice_rule: 'Both of these are the friendly tu form. For a stranger or someone older you swap podes for pode — same sentence, one letter, a completely different level of respect.',
     helpers: {
       'vir': 'to come',
       'dizer': 'to say',
@@ -258,9 +279,20 @@ export const TOP_GUN: Root[] = [
       { pt: 'Vou deixar isso.', en: 'I’m going to leave that.' },
     ],
     voice_options: [
-      { pt: 'Não vou.', en: 'I’m not going.', signal: 'direct' },
-      { pt: 'Acho que não vou.', en: 'I don’t think I’ll go.', signal: 'softened' },
+      {
+        pt: 'Não vou.', en: 'I’m not going.', signal: 'direct',
+        register: 'A FLAT NO',
+        when: 'When the answer really is no and you would rather not be talked round.',
+        risk: 'A bare no lands colder in Portugal than it does in English.',
+      },
+      {
+        pt: 'Acho que não vou.', en: 'I don’t think I’ll go.', signal: 'softened',
+        register: 'THE SOFT NO',
+        when: 'Turning down an invitation without closing the door. Literally “I think I’m not going” — everyone hears it as no.',
+        safest: true,
+      },
     ],
+    voice_rule: 'Acho que in front of anything turns a statement into an opinion. It is the cheapest politeness in Portuguese.',
     helpers: {
       'Vou': 'I’m going to',
       'deixar': 'to leave',
@@ -343,9 +375,18 @@ export const JAMES_BOND: Root[] = [
 
     },
     voice_options: [
-      { pt: 'Amanhã.', en: 'Tomorrow.', signal: 'direct' },
-      { pt: 'Até amanhã!', en: 'See you tomorrow!', signal: 'warm' },
+      {
+        pt: 'Amanhã.', en: 'Tomorrow.', signal: 'direct',
+        register: 'ANSWERING “WHEN?”',
+        when: '“When?” — “Tomorrow.” This is information, not a goodbye.',
+      },
+      {
+        pt: 'Até amanhã!', en: 'See you tomorrow!', signal: 'warm',
+        register: 'LEAVING',
+        when: 'Said on the way out the door. You will use this one most days.',
+      },
     ],
+    voice_rule: 'These do different jobs. Até means “until”, so até amanhã, até logo, até já — that is how Portuguese says goodbye with a time attached.',
     transfer_prompt: { context: 'Someone asks whether today works.', ask: 'Tomorrow.', answer: 'Amanhã.' },
     rights_status: 'title-reference',
     starter_tags: ['time', 'compact'],
@@ -410,9 +451,20 @@ export const JAMES_BOND: Root[] = [
     ],
     reinforces: ['podes', 'nunca'],
     voice_options: [
-      { pt: 'Outra vez?', en: 'Again?', signal: 'casual' },
-      { pt: 'Podes dizer outra vez, por favor?', en: 'Can you say it again, please?', signal: 'polite' },
+      {
+        pt: 'Outra vez?', en: 'Again?', signal: 'casual',
+        register: 'TWO WORDS, ANYWHERE',
+        when: 'You missed it. Two words and a raised eyebrow does the whole job.',
+        risk: 'Said flatly to a stranger it can read as impatient — your face is doing half the work.',
+      },
+      {
+        pt: 'Podes dizer outra vez, por favor?', en: 'Can you say it again, please?', signal: 'polite',
+        register: 'THE FULL ASK',
+        when: 'When you want to be unmistakably polite, or you are already asking a second time.',
+        safest: true,
+      },
     ],
+    voice_rule: 'Portuguese lets you be very short, as long as your tone is friendly. When you cannot rely on tone — on the phone, or with someone official — use the whole sentence.',
     helpers: {
       'isso': 'that',
       'Diz': 'say',
@@ -522,9 +574,20 @@ export const BRIDGET_JONES: Root[] = [
       { pt: 'Peço desculpa.', en: 'I apologise.' },
     ],
     voice_options: [
-      { pt: 'Desculpa.', en: 'Sorry.', signal: 'casual' },
-      { pt: 'Peço desculpa.', en: 'I do apologise.', signal: 'polite' },
+      {
+        pt: 'Desculpa.', en: 'Sorry.', signal: 'casual',
+        register: 'EVERYDAY SORRY',
+        when: 'Bumping into someone, being two minutes late, squeezing past on a bus.',
+        risk: 'This is the tu form. To someone older or official you want desculpe, with an e.',
+      },
+      {
+        pt: 'Peço desculpa.', en: 'I do apologise.', signal: 'polite',
+        register: 'WHEN YOU MEAN IT',
+        when: 'A real apology — properly late, genuinely wrong, or talking to a stranger or a boss.',
+        safest: true,
+      },
     ],
+    voice_rule: 'Desculpa for small things, peço desculpa for real ones. And watch the last letter: desculpa to a friend, desculpe to anyone you would call “sir”.',
     helpers: {
       'Peço': 'I ask for',
       'sempre': 'always',
@@ -623,9 +686,19 @@ export const BRIDGET_JONES: Root[] = [
     ],
     reinforces: ['estavas_a'],
     voice_options: [
-      { pt: 'Era uma piada.', en: 'It was a joke.', signal: 'dry' },
-      { pt: 'Estou a brincar!', en: 'I’m only joking!', signal: 'warm' },
+      {
+        pt: 'Era uma piada.', en: 'It was a joke.', signal: 'dry',
+        register: 'RESCUING A JOKE THAT DIED',
+        when: 'Past tense. The joke has already landed badly and you are explaining it. Slightly wry.',
+      },
+      {
+        pt: 'Estou a brincar!', en: 'I’m only joking!', signal: 'warm',
+        register: 'BEFORE IT LANDS BADLY',
+        when: 'Said immediately, while their face is still changing. Warmer, and it gets there first.',
+        safest: true,
+      },
     ],
+    voice_rule: 'Estou a + verb is how European Portuguese says “I am ...-ing”. Estou a brincar, estou a falar, estou a pensar. Brazilians drop the a; in Portugal you keep it.',
     helpers: {
       'Estou': 'I am',
       'brincar': 'joking',
@@ -695,9 +768,20 @@ export const PULP_FICTION: Root[] = [
     ],
     reinforces: ['outra_vez', 'podes'],
     voice_options: [
-      { pt: 'O quê?', en: 'What?', signal: 'direct' },
-      { pt: 'Desculpa, o quê?', en: 'Sorry, what?', signal: 'softened' },
+      {
+        pt: 'O quê?', en: 'What?', signal: 'direct',
+        register: 'WITH PEOPLE YOU KNOW',
+        when: 'A friend says something surprising, or you simply did not hear it.',
+        risk: 'On its own, to a stranger, this is close to “what?!” in English. It can sound aggressive.',
+      },
+      {
+        pt: 'Desculpa, o quê?', en: 'Sorry, what?', signal: 'softened',
+        register: 'WITH ANYONE',
+        when: 'One word in front and the same question turns polite. Reach for this one by default.',
+        safest: true,
+      },
     ],
+    voice_rule: 'Desculpa in front of a question is the Portuguese “sorry, ...”. It costs you one word and removes almost all of the risk.',
     helpers: {
       'Diz': 'say',
       'dizer': 'to say',
@@ -756,9 +840,20 @@ export const PULP_FICTION: Root[] = [
       { pt: 'Está tudo bem.', en: 'It’s all right.' },
     ],
     voice_options: [
-      { pt: 'Calma.', en: 'Easy.', signal: 'dry' },
-      { pt: 'Está tudo bem.', en: 'It’s all right.', signal: 'warm' },
+      {
+        pt: 'Calma.', en: 'Easy.', signal: 'dry',
+        register: 'TAKING THE HEAT OUT',
+        when: 'Someone is getting wound up. One word, said gently, is completely normal here.',
+        risk: 'Said sharply it becomes a telling-off. Tone is doing all the work.',
+      },
+      {
+        pt: 'Está tudo bem.', en: 'It’s all right.', signal: 'warm',
+        register: 'REASSURING',
+        when: '“It’s all fine.” You are not asking them to calm down, you are saying there is nothing to fix.',
+        safest: true,
+      },
     ],
+    voice_rule: 'Calma manages the person. Está tudo bem manages the situation. The second one is almost never wrong.',
     helpers: {
       'Era': 'it was',
       'uma': 'a',
@@ -840,9 +935,18 @@ export const AUDREY_HEPBURN: Root[] = [
 
     },
     voice_options: [
-      { pt: 'Boa ideia.', en: 'Good idea.', signal: 'casual' },
-      { pt: 'Acho que é uma boa ideia.', en: 'I think it’s a good idea.', signal: 'softened' },
+      {
+        pt: 'Boa ideia.', en: 'Good idea.', signal: 'casual',
+        register: 'QUICK AGREEMENT',
+        when: 'Someone suggests something and you are in. Two words is entirely natural.',
+      },
+      {
+        pt: 'Acho que é uma boa ideia.', en: 'I think it’s a good idea.', signal: 'softened',
+        register: 'WEIGHING IN',
+        when: 'A meeting, a decision, anywhere you would rather sound considered than eager.',
+      },
     ],
+    voice_rule: 'Acho que — “I think that” — is the most useful three syllables you can carry. It buys you a second to think and softens whatever comes after it.',
     transfer_prompt: { context: 'A friend suggests lunch outside.', ask: 'Good idea.', answer: 'Boa ideia.' },
     freebie_flag: true,
     starter_tags: ['warm', 'agreement'],
@@ -988,9 +1092,20 @@ export const AUDREY_HEPBURN: Root[] = [
 
     },
     voice_options: [
-      { pt: 'É importante.', en: 'It’s important.', signal: 'direct' },
-      { pt: 'Para mim é importante.', en: 'It matters to me.', signal: 'warm' },
+      {
+        pt: 'É importante.', en: 'It’s important.', signal: 'direct',
+        register: 'STATING A FACT',
+        when: 'You are saying this matters, full stop, as though everyone already agrees.',
+        risk: 'Stated flatly about someone else’s choices it can sound like a verdict.',
+      },
+      {
+        pt: 'Para mim é importante.', en: 'It matters to me.', signal: 'warm',
+        register: 'MAKING IT YOURS',
+        when: '“For me, it matters.” Same point, without telling anyone else what to think.',
+        safest: true,
+      },
     ],
+    voice_rule: 'Para mim in front of an opinion is how you disagree politely in Portuguese. It turns a verdict into a view.',
     transfer_prompt: { context: 'You are explaining a decision.', ask: 'It’s important.', answer: 'É importante.' },
     rights_status: 'dub-authored',
     starter_tags: ['warm', 'identity'],
@@ -1104,9 +1219,20 @@ export const MARCUS_AURELIUS: Root[] = [
     ],
     reinforces: ['tempo'],
     voice_options: [
-      { pt: 'Agora não.', en: 'Not now.', signal: 'direct' },
-      { pt: 'Agora não posso, desculpa.', en: 'I can’t right now, sorry.', signal: 'softened' },
+      {
+        pt: 'Agora não.', en: 'Not now.', signal: 'direct',
+        register: 'SHORT AND CLEAR',
+        when: 'A shop, a street seller, anyone you owe no explanation to.',
+        risk: 'To a friend or a colleague this can sound like you are annoyed with them.',
+      },
+      {
+        pt: 'Agora não posso, desculpa.', en: 'I can’t right now, sorry.', signal: 'softened',
+        register: 'WITH A REASON ATTACHED',
+        when: '“I can’t right now, sorry.” A reason and an apology in four words.',
+        safest: true,
+      },
     ],
+    voice_rule: 'Portuguese expects a small reason alongside a refusal. Não posso plus desculpa is enough — you never have to explain what you are doing instead.',
     helpers: {
       'não': 'not',
       'E': 'and',
@@ -1189,9 +1315,19 @@ export const MARCUS_AURELIUS: Root[] = [
 
     },
     voice_options: [
-      { pt: 'Não posso.', en: 'I can’t.', signal: 'direct' },
-      { pt: 'Acho que não posso.', en: 'I don’t think I can.', signal: 'softened' },
+      {
+        pt: 'Não posso.', en: 'I can’t.', signal: 'direct',
+        register: 'FINAL',
+        when: 'It genuinely is not possible and you would rather not be asked twice.',
+        risk: 'With no softener attached, expect the conversation to stop dead.',
+      },
+      {
+        pt: 'Acho que não posso.', en: 'I don’t think I can.', signal: 'softened',
+        register: 'LEAVING THE DOOR OPEN',
+        when: 'Probably no, but you would rather not be blunt about it. Very common in Portugal.',
+      },
     ],
+    voice_rule: 'That is acho que for the third time. You have now watched it soften a plan, an opinion and a refusal. It goes in front of almost any sentence you own.',
     transfer_prompt: { context: 'You need to alter a booking.', ask: 'Can I change this?', answer: 'Posso mudar isto?' },
     rights_status: 'dub-authored',
     starter_tags: ['reflective', 'practical'],

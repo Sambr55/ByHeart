@@ -722,10 +722,14 @@ function RootBeatView({
   }
 
   if (beat === 'voice' && root.voice_options?.length) {
+    const picked = root.voice_options.find((o) => o.pt === choice)
     return (
       <Shell stage={stage} eyebrow={family.title}>
-        <p className="display text-balance text-2xl">Which would you actually say?</p>
-        <p className="mt-2 text-sm text-muted">Both are correct. Neither is scored.</p>
+        <p className="display text-balance text-2xl">Here are two ways to say it.</p>
+        <p className="mt-2 text-sm text-muted">
+          Same meaning. Different room. Neither one is scored — but knowing which is
+          which is the difference between polite and blunt.
+        </p>
         <div className="mt-6 space-y-3">
           {root.voice_options.map((o) => (
             <button
@@ -741,11 +745,31 @@ function RootBeatView({
                 (choice === o.pt ? 'border-accent bg-accent/10' : 'border-line bg-surface')
               }
             >
-              <span className="pt block text-lg text-accent">{o.pt}</span>
+              <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="eyebrow text-accent">{o.register}</span>
+                {o.safest ? (
+                  <span className="eyebrow rounded-full border border-line px-2 py-0.5 text-muted">
+                    IF IN DOUBT
+                  </span>
+                ) : null}
+              </span>
+              <span className="pt mt-2 block text-lg text-fg">{o.pt}</span>
               <span className="mt-0.5 block text-xs text-muted">{o.en}</span>
+              <span className="mt-3 block text-sm text-fg/80">{o.when}</span>
+              {o.risk ? (
+                <span className="mt-2 block border-l-2 border-line pl-3 text-xs text-muted">
+                  Careful: {o.risk}
+                </span>
+              ) : null}
             </button>
           ))}
         </div>
+        {picked && root.voice_rule ? (
+          <div className="animate-bank mt-6 rounded-xl border border-line bg-surface p-4">
+            <p className="eyebrow text-muted">THE RULE UNDERNEATH</p>
+            <p className="mt-2 text-sm">{root.voice_rule}</p>
+          </div>
+        ) : null}
         <VoiceReflection />
         {choice ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
       </Shell>
