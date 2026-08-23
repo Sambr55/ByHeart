@@ -1,6 +1,6 @@
 'use client'
 
-import { MISSION_01 } from '@/content/missions'
+import { MISSION_02 } from '@/content/missions'
 import { MissionShell } from '@/components/MissionShell'
 import { ScreenRouter } from '@/components/ScreenRouter'
 import { HighlightProvider } from '@/engine/highlight'
@@ -8,7 +8,7 @@ import { MissionProvider } from '@/engine/session'
 
 export default function Page() {
   return (
-    <MissionProvider mission={MISSION_01}>
+    <MissionProvider mission={MISSION_02}>
       <HighlightProvider>
         <MissionShell>
           <ScreenRouter />

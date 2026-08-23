@@ -10,7 +10,8 @@
 
 import { mkdir } from 'node:fs/promises'
 import { chromium, type Page } from 'playwright'
-import { SCREENS } from '../content/topgun-pt'
+import { MISSION_01 } from '../content/missions/mission-01'
+const SCREENS = MISSION_01.screens
 import { TARGETS } from '../content/targets'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'

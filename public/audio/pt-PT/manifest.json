@@ -52,6 +52,36 @@
       "kind": "example"
     },
     {
+      "slug": "chamo-me",
+      "text": "chamo-me",
+      "kind": "block"
+    },
+    {
+      "slug": "queria",
+      "text": "queria",
+      "kind": "block"
+    },
+    {
+      "slug": "posso",
+      "text": "posso?",
+      "kind": "block"
+    },
+    {
+      "slug": "onde-fica",
+      "text": "onde fica?",
+      "kind": "block"
+    },
+    {
+      "slug": "amanha",
+      "text": "Amanhã.",
+      "kind": "example"
+    },
+    {
+      "slug": "outra-vez",
+      "text": "Outra vez.",
+      "kind": "example"
+    },
+    {
       "slug": "fala-comigo",
       "text": "Fala comigo.",
       "kind": "example"
@@ -134,6 +164,106 @@
     {
       "slug": "quando-vamos",
       "text": "Quando vamos?",
+      "kind": "example"
+    },
+    {
+      "slug": "chamo-me-ana",
+      "text": "Chamo-me Ana.",
+      "kind": "example"
+    },
+    {
+      "slug": "chamo-me-miguel",
+      "text": "Chamo-me Miguel.",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-agua",
+      "text": "Queria água.",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-um-cafe",
+      "text": "Queria um café.",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-pagar",
+      "text": "Posso pagar?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-entrar",
+      "text": "Posso entrar?",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-fica-a-estacao",
+      "text": "Onde fica a estação?",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-fica-a-saida",
+      "text": "Onde fica a saída?",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-fica-a-praca-de-taxis",
+      "text": "Onde fica a praça de táxis?",
+      "kind": "example"
+    },
+    {
+      "slug": "outra-vez-por-favor",
+      "text": "Outra vez, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-vir-amanha",
+      "text": "Podes vir amanhã?",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-dizer-outra-vez",
+      "text": "Podes dizer outra vez?",
+      "kind": "example"
+    },
+    {
+      "slug": "preciso-de-um-bilhete",
+      "text": "Preciso de um bilhete.",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-vir-comigo-outra-vez",
+      "text": "Podes vir comigo outra vez?",
+      "kind": "example"
+    },
+    {
+      "slug": "chamo-me-sofia",
+      "text": "Chamo-me Sofia.",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-um-cha",
+      "text": "Queria um chá.",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-fica-o-hotel",
+      "text": "Onde fica o hotel?",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-fica-a-paragem",
+      "text": "Onde fica a paragem?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-ouvir-outra-vez",
+      "text": "Posso ouvir outra vez?",
+      "kind": "example"
+    },
+    {
+      "slug": "chamo-me-james-bond",
+      "text": "Chamo-me James Bond.",
       "kind": "example"
     }
   ]

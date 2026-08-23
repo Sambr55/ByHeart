@@ -10,6 +10,7 @@ import type {
 import { track } from '@/engine/analytics'
 import { primeAudio } from '@/engine/audio'
 import { useSession } from '@/engine/session'
+import { setFamiliarity } from '@/engine/learner'
 import { Continue, FeedbackNote } from '../MissionShell'
 import { Prompt } from '../Prompt'
 
@@ -81,8 +82,10 @@ export function CultureSelectView({ screen }: { screen: CultureSelectScreen }) {
   )
 }
 
+const FAMILIARITY_SCALE: Record<string, number> = { high: 5, medium: 3, low: 1 }
+
 export function FamiliarityView({ screen }: { screen: FamiliarityScreen }) {
-  const { next, setFamiliarity } = useSession()
+  const { next, answer, mission } = useSession()
   const [picked, setPicked] = useState<string | null>(null)
   return (
     <>
@@ -94,7 +97,11 @@ export function FamiliarityView({ screen }: { screen: FamiliarityScreen }) {
             type="button"
             onClick={() => {
               setPicked(o.id)
-              setFamiliarity(o.id)
+              answer('familiarity', o.id)
+              // Store on a 1–5 scale so Mission 01's three bands and Mission 02's
+              // five-point scale live in one comparable covariate.
+              setFamiliarity(mission.property_id, FAMILIARITY_SCALE[o.id])
+              track('top_gun_familiarity', { familiarity: o.id })
             }}
             className={
               'tap-target eyebrow w-full rounded-xl border px-4 py-5 text-left transition ' +

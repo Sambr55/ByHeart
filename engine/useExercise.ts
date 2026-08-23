@@ -2,7 +2,6 @@
 
 import { useCallback, useRef, useState } from 'react'
 import type { Screen } from '@/content/types'
-import { FINAL_TEST_ITEMS } from '@/content/topgun-pt'
 import { TARGETS } from '@/content/targets'
 import { track } from './analytics'
 import { useSession } from './session'
@@ -25,7 +24,7 @@ export interface Feedback {
  * ladder, diagnostic feedback, silent latency measurement, and the item record.
  */
 export function useExercise(screen: Screen, opts: { maxErrors?: number } = {}) {
-  const { record, acquire } = useSession()
+  const { record, acquire, mission } = useSession()
   const { setHighlight } = useHighlight()
   const [attempts, setAttempts] = useState(0)
   const [hintLevel, setHintLevel] = useState<HintLevel>(0)
@@ -50,11 +49,11 @@ export function useExercise(screen: Screen, opts: { maxErrors?: number } = {}) {
         hintLevel: level,
         outcome: outcomeFor(finalAttempts, level),
         responseMs,
-        isFinalTest: FINAL_TEST_ITEMS.includes(screen.id),
+        isFinalTest: mission.transfer_items.includes(screen.id),
       })
       if (screen.acquires) acquire(screen.acquires)
     },
-    [acquire, record, screen.acquires, screen.id, setHighlight],
+    [acquire, mission.transfer_items, record, screen.acquires, screen.id, setHighlight],
   )
 
   const submit = useCallback(

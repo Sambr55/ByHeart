@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
+import { BRAND } from '@/content/brand'
 import { AUDIO_MANIFEST } from '@/content/audio-manifest'
 import { BLOCK_ORDER, EXAMPLES, TARGETS } from '@/content/targets'
-import { SCREENS } from '@/content/topgun-pt'
+import { allScreens } from '@/content/missions'
 import type { BlockId } from '@/content/types'
 
 export const metadata: Metadata = {
-  title: 'BY HEART — European Portuguese QA sheet',
+  title: 'DUB — European Portuguese QA sheet',
 }
 
 /**
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
  * in content/targets.ts and propagates to the lesson and the audio build.
  */
 export default function QaPage() {
+  const SCREENS = allScreens()
   const screensFor = (id: BlockId) =>
     SCREENS.filter(
       (s) =>
@@ -24,7 +26,7 @@ export default function QaPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10 text-fg">
-      <p className="eyebrow text-accent">BY HEART · MISSION 01</p>
+      <p className="eyebrow text-accent">{BRAND.name} · CURRICULUM</p>
       <h1 className="display mt-3 text-3xl">European Portuguese QA sheet</h1>
       <p className="mt-3 max-w-prose text-sm text-muted">
         Every Portuguese string the prototype can show or speak. All of it is European

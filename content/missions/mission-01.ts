@@ -1,5 +1,5 @@
-import type { Screen, SessionContent } from './types'
-import { EXAMPLES, MOMENTS, TARGETS } from './targets'
+import type { Mission, Screen } from '../types'
+import { BRAND } from '../brand'
 
 /**
  * Mission 01 — Top Gun / European Portuguese.
@@ -24,7 +24,7 @@ export const SCREENS: Screen[] = [
     timecode: '00:00–00:10',
     purpose: 'Establish the proposition in one glance.',
     type: 'promise',
-    wordmark: 'BY HEART',
+    wordmark: BRAND.name,
     headline: 'Learn Portuguese through something you already know.',
     sub: '10 minutes. One film. Language you can actually use.',
     cta: 'START A MISSION',
@@ -883,17 +883,25 @@ export const SCREENS: Screen[] = [
 /** The eight Lisbon items that make up the transfer score. */
 export const FINAL_TEST_ITEMS = ['L01', 'L02', 'L03', 'L04', 'L05', 'L06', 'L07', 'L08']
 
-export const SESSION: SessionContent = {
-  session_id: 'top_gun_pt_pt_v1',
-  culture_property: 'Top Gun',
+export const MISSION_01: Mission = {
+  mission_id: 'mission_01',
+  property_id: 'top_gun',
+  property_label: 'Top Gun',
   locale: 'pt-PT',
-  targets: TARGETS,
-  moments: MOMENTS,
-  examples: EXAMPLES,
+  targets_new: [
+    'comigo',
+    'podes',
+    'preciso_de',
+    'nao_consigo',
+    'perdi',
+    'nao_vou',
+    'o_que_estas_a',
+    'quando',
+    'claro',
+    'porque_nao',
+  ],
+  targets_reinforced: [],
+  stages: ['PRE-FLIGHT', 'TAKE-OFF', 'CRUISE', 'FINAL APPROACH', 'LISBON'],
   screens: SCREENS,
-  final_test_items: FINAL_TEST_ITEMS,
-}
-
-export function screenIndexById(id: string): number {
-  return SCREENS.findIndex((s) => s.id === id)
+  transfer_items: FINAL_TEST_ITEMS,
 }

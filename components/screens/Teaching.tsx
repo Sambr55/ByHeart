@@ -176,12 +176,12 @@ export function MatchView({ screen }: { screen: MatchScreen }) {
 
 /** Your Portuguese. Accumulation made visible before it is tested. */
 export function InventoryView({ screen }: { screen: InventoryScreen }) {
-  const { next, state } = useSession()
+  const { next, inventory } = useSession()
   return (
     <div className="flex min-h-[55dvh] flex-col justify-center">
       <Prompt screen={screen} />
       <div className="mt-6">
-        <InventoryDrawer blocks={state.inventory} />
+        <InventoryDrawer blocks={inventory} />
       </div>
       {screen.caption ? (
         <p className="mt-5 text-sm text-muted">{screen.caption}</p>
@@ -190,7 +190,7 @@ export function InventoryView({ screen }: { screen: InventoryScreen }) {
       <Continue
         label={screen.cta}
         onClick={() => {
-          track('inventory_view', { view: screen.view, blocks: state.inventory })
+          track('inventory_view', { view: screen.view, blocks: inventory })
           next()
         }}
       />

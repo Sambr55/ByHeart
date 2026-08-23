@@ -1,8 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { STAGES, type Stage } from '@/content/types'
-import { SCREENS } from '@/content/topgun-pt'
+import type { Stage } from '@/content/types'
 import { useSession } from '@/engine/session'
 import { InventoryRail } from './Inventory'
 
@@ -12,7 +11,7 @@ import { InventoryRail } from './Inventory'
  * break rather than a restyled cockpit.
  */
 export function MissionShell({ children }: { children: ReactNode }) {
-  const { state, screen } = useSession()
+  const { state, screen, mission, screens, inventory } = useSession()
   const stage = screen.stage
 
   return (
@@ -21,7 +20,7 @@ export function MissionShell({ children }: { children: ReactNode }) {
       data-screen={screen.id}
       className="flex min-h-dvh flex-col bg-bg text-fg transition-colors duration-700"
     >
-      <StageRail current={stage} index={state.index} />
+      <StageRail current={stage} index={state.index} stages={mission.stages} screens={screens} />
 
       <main className="instrument-field flex-1">
         <div
@@ -33,8 +32,8 @@ export function MissionShell({ children }: { children: ReactNode }) {
       </main>
 
       <footer className="sticky bottom-0 border-t border-line bg-bg-elev/95 px-5 py-3 backdrop-blur">
-        <InventoryRail blocks={state.inventory} />
-        {state.inventory.length ? null : (
+        <InventoryRail blocks={inventory} />
+        {inventory.length ? null : (
           <p className="text-xs text-muted">Your Portuguese fills up as you go.</p>
         )}
       </footer>
@@ -42,16 +41,26 @@ export function MissionShell({ children }: { children: ReactNode }) {
   )
 }
 
-function StageRail({ current, index }: { current: Stage; index: number }) {
-  const currentPos = STAGES.indexOf(current)
+function StageRail({
+  current,
+  index,
+  stages,
+  screens,
+}: {
+  current: Stage
+  index: number
+  stages: Stage[]
+  screens: { id: string; stage: Stage }[]
+}) {
+  const currentPos = stages.indexOf(current)
   return (
     <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
       <div className="mx-auto w-full max-w-md px-5 pb-2 pt-3">
         <p className="eyebrow text-accent">{current}</p>
         <div className="mt-2 flex gap-1" aria-hidden="true">
-          {STAGES.map((s, i) => {
-            const screensInStage = SCREENS.filter((sc) => sc.stage === s)
-            const doneInStage = SCREENS.slice(0, index + 1).filter(
+          {stages.map((s, i) => {
+            const screensInStage = screens.filter((sc) => sc.stage === s)
+            const doneInStage = screens.slice(0, index + 1).filter(
               (sc) => sc.stage === s,
             ).length
             const pct =
@@ -71,7 +80,7 @@ function StageRail({ current, index }: { current: Stage; index: number }) {
           })}
         </div>
         <p className="sr-only" role="status">
-          Stage {currentPos + 1} of {STAGES.length}: {current}
+          Stage {currentPos + 1} of {stages.length}: {current}
         </p>
       </div>
     </header>

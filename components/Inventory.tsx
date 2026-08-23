@@ -3,6 +3,13 @@
 import type { BlockId } from '@/content/types'
 import { TARGETS } from '@/content/targets'
 import { useHighlight } from '@/engine/highlight'
+import { useLearner } from '@/engine/useLearner'
+import type { PropertyId } from '@/content/types'
+
+const PROPERTY_LABEL: Record<PropertyId, string> = {
+  top_gun: 'Top Gun',
+  james_bond: 'Bond',
+}
 
 export function InventoryChip({
   block,
@@ -50,6 +57,40 @@ export function InventoryDrawer({ blocks }: { blocks: BlockId[] }) {
       {blocks.map((b) => (
         <InventoryChip key={b} block={b} size="lg" />
       ))}
+    </div>
+  )
+}
+
+/**
+ * The compound view. The source badge says where the memory started; the state says
+ * what the learner can now do with it. Those are deliberately different lines —
+ * culture must never read as owning the phrase (spec §8 design principle).
+ */
+export function SourceChip({ block }: { block: BlockId }) {
+  const learner = useLearner()
+  const target = TARGETS[block]
+  const item = learner.inventory[block]
+  const sources = item
+    ? [item.acquired_source, ...item.reinforced_sources].filter(Boolean)
+    : [target.source]
+  const state = item?.latest_state ?? 'NEW'
+  const strengthened = (item?.reinforced_sources.length ?? 0) > 0
+
+  return (
+    <div
+      className={
+        'rounded-xl border px-3 py-2.5 ' +
+        (strengthened ? 'border-accent/60 bg-accent/5' : 'border-line bg-chip')
+      }
+    >
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="pt text-sm font-semibold">{target.label}</span>
+        <span className="text-[0.6rem] uppercase tracking-wider text-muted">{state}</span>
+      </div>
+      <p className="mt-0.5 text-xs text-muted">{target.gloss}</p>
+      <p className="mt-1 text-[0.6rem] uppercase tracking-wider text-accent/80">
+        {(sources as PropertyId[]).map((s) => PROPERTY_LABEL[s]).join(' → ')}
+      </p>
     </div>
   )
 }

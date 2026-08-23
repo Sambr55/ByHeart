@@ -8,7 +8,8 @@ import type {
   ResultScreen,
 } from '@/content/types'
 import { slugFor } from '@/content/audio-manifest'
-import { downloadSession, track } from '@/engine/analytics'
+import { track } from '@/engine/analytics'
+import { setAffinity } from '@/engine/learner'
 import { useSession } from '@/engine/session'
 import { AudioButton } from '../AudioButton'
 import { Continue, FeedbackNote } from '../MissionShell'
@@ -86,7 +87,7 @@ export function GenerativityView({ screen }: { screen: GenerativityScreen }) {
 }
 
 export function PreferenceView({ screen }: { screen: PreferenceScreen }) {
-  const { next, setWorlds } = useSession()
+  const { next } = useSession()
   const [picked, setPicked] = useState<string[]>([])
   return (
     <>
@@ -127,7 +128,8 @@ export function PreferenceView({ screen }: { screen: PreferenceScreen }) {
         label={screen.cta}
         disabled={!picked.length}
         onClick={() => {
-          setWorlds(picked)
+          setAffinity({ next_world_pre: picked[0] ?? null })
+          track('next_world_interest', { worlds: picked })
           next()
         }}
       />
@@ -136,10 +138,8 @@ export function PreferenceView({ screen }: { screen: PreferenceScreen }) {
 }
 
 export function ContinuationView({ screen }: { screen: ContinuationScreen }) {
-  const { state, setIntent, setFeedback, finish } = useSession()
+  const { state, answer, finish } = useSession()
   const [picked, setPicked] = useState<ContinuationScreen['options'][number] | null>(null)
-
-  if (state.complete) return <SessionComplete />
 
   return (
     <div className="flex min-h-[55dvh] flex-col justify-center">
@@ -151,7 +151,8 @@ export function ContinuationView({ screen }: { screen: ContinuationScreen }) {
             type="button"
             onClick={() => {
               setPicked(o)
-              setIntent(o.id)
+              answer('continue_intent', o.id)
+              track('continue_intent', { intent: o.id })
             }}
             className={
               'tap-target eyebrow w-full rounded-xl border px-4 py-5 text-left transition ' +
@@ -172,8 +173,8 @@ export function ContinuationView({ screen }: { screen: ContinuationScreen }) {
             <span className="text-sm text-muted">{screen.followUp}</span>
             <textarea
               rows={3}
-              value={state.feedbackText}
-              onChange={(e) => setFeedback(e.target.value)}
+              value={String(state.answers.qualitative_feedback ?? '')}
+              onChange={(e) => answer('qualitative_feedback', e.target.value)}
               className="mt-2 w-full rounded-xl border border-line bg-surface p-3 text-sm text-fg outline-none focus:border-accent"
               placeholder="Optional"
             />
@@ -181,64 +182,15 @@ export function ContinuationView({ screen }: { screen: ContinuationScreen }) {
           <Continue
             label="FINISH"
             onClick={() => {
-              track('continue_intent', {
+              track('qualitative_feedback', {
                 intent: picked.id,
-                qualitative_feedback: state.feedbackText,
+                text: state.answers.qualitative_feedback ?? '',
               })
               finish()
             }}
           />
         </>
       ) : null}
-    </div>
-  )
-}
-
-/**
- * Observer hand-off. Not part of the learner's ten minutes — this is where the
- * moderator takes the session file before handing the phone to the next tester.
- */
-function SessionComplete() {
-  const { state, scores } = useSession()
-  return (
-    <div className="flex min-h-[60dvh] flex-col justify-center">
-      <p className="eyebrow text-accent">SESSION COMPLETE</p>
-      <h1 className="display mt-4 text-balance text-3xl">Obrigado.</h1>
-      <p className="mt-4 text-sm text-muted">
-        Hand the phone back to the observer. Nothing here is shown to the next tester.
-      </p>
-      <dl className="mt-6 grid grid-cols-2 gap-3 text-sm">
-        <Stat label="Transferred" value={scores.transferred + '/' + scores.total} />
-        <Stat label="First try" value={scores.firstTry + '/' + scores.total} />
-        <Stat label="Needed a hint" value={String(scores.assisted)} />
-        <Stat
-          label="Taught first try"
-          value={scores.firstTryAcquisition + '/' + scores.teachingItems}
-        />
-      </dl>
-      <Continue
-        label="DOWNLOAD SESSION JSON"
-        onClick={() =>
-          downloadSession({
-            familiarity: state.familiarity,
-            inventory: state.inventory,
-            items: state.items,
-            scores,
-            next_worlds: state.nextWorlds,
-            continue_intent: state.continueIntent,
-            qualitative_feedback: state.feedbackText,
-          })
-        }
-      />
-    </div>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-line bg-surface px-4 py-3">
-      <dt className="text-xs text-muted">{label}</dt>
-      <dd className="display mt-1 text-2xl tabular-nums">{value}</dd>
     </div>
   )
 }

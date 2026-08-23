@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Archivo, Inter } from 'next/font/google'
+import { BRAND } from '@/content/brand'
 import './globals.css'
 
 const display = Archivo({
@@ -14,8 +15,8 @@ const sans = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'BY HEART — Top Gun / Portuguese',
-  description: 'Learn a language through things you already know.',
+  title: BRAND.title,
+  description: BRAND.description,
 }
 
 export const viewport: Viewport = {

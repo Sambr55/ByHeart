@@ -1,11 +1,19 @@
-import type { BlockId, CulturalMoment, Example, LearningTarget } from './types'
+import type {
+  BlockId,
+  CulturalMoment,
+  Example,
+  LearningTarget,
+  PropertyId,
+} from './types'
 
 /**
- * The curriculum. Spec §4 session inventory.
- * Nothing here references Top Gun — that separation is the whole point of §12.
+ * The curriculum across both worlds. Mission 01 §4 inventory plus the six Mission 02
+ * blocks. Nothing here is written in terms of a film: `source` records where the
+ * memory started, which is provenance, not ownership (Mission 02 §8).
  */
 export const TARGETS: Record<BlockId, LearningTarget> = {
   comigo: {
+    source: 'top_gun' as PropertyId,
     target_id: 'pt_comigo_001',
     locale: 'pt-PT',
     block: 'comigo',
@@ -18,6 +26,7 @@ export const TARGETS: Record<BlockId, LearningTarget> = {
     generativity: ['Fala comigo', 'Vem comigo', 'Fica comigo'],
   },
   podes: {
+    source: 'top_gun' as PropertyId,
     target_id: 'pt_podes_002',
     locale: 'pt-PT',
     block: 'podes…',
@@ -30,6 +39,7 @@ export const TARGETS: Record<BlockId, LearningTarget> = {
     generativity: ['Podes vir comigo?', 'Podes repetir?'],
   },
   preciso_de: {
+    source: 'top_gun' as PropertyId,
     target_id: 'pt_preciso_de_003',
     locale: 'pt-PT',
     block: 'preciso de…',
@@ -42,6 +52,7 @@ export const TARGETS: Record<BlockId, LearningTarget> = {
     generativity: ['Preciso de água', 'Preciso de um táxi'],
   },
   nao_consigo: {
+    source: 'top_gun' as PropertyId,
     target_id: 'pt_nao_consigo_004',
     locale: 'pt-PT',
     block: 'não consigo…',
@@ -54,6 +65,7 @@ export const TARGETS: Record<BlockId, LearningTarget> = {
     generativity: ['Não consigo perceber', 'Não consigo dormir'],
   },
   perdi: {
+    source: 'top_gun' as PropertyId,
     target_id: 'pt_perdi_005',
     locale: 'pt-PT',
     block: 'perdi…',
@@ -66,6 +78,7 @@ export const TARGETS: Record<BlockId, LearningTarget> = {
     generativity: ['Perdi as chaves', 'Perdi o bilhete'],
   },
   nao_vou: {
+    source: 'top_gun' as PropertyId,
     target_id: 'pt_nao_vou_006',
     locale: 'pt-PT',
     block: 'não vou…',
@@ -78,6 +91,7 @@ export const TARGETS: Record<BlockId, LearningTarget> = {
     generativity: ['Não vou esperar', 'Não vou beber'],
   },
   o_que_estas_a: {
+    source: 'top_gun' as PropertyId,
     target_id: 'pt_o_que_estas_a_007',
     locale: 'pt-PT',
     block: 'o que estás a…?',
@@ -90,6 +104,7 @@ export const TARGETS: Record<BlockId, LearningTarget> = {
     generativity: ['O que estás a fazer?', 'O que estás a beber?'],
   },
   quando: {
+    source: 'top_gun' as PropertyId,
     target_id: 'pt_quando_008',
     locale: 'pt-PT',
     block: 'quando',
@@ -102,6 +117,7 @@ export const TARGETS: Record<BlockId, LearningTarget> = {
     generativity: ['Quando vais?', 'Quando vamos?'],
   },
   claro: {
+    source: 'top_gun' as PropertyId,
     target_id: 'pt_claro_009',
     locale: 'pt-PT',
     block: 'claro',
@@ -113,6 +129,7 @@ export const TARGETS: Record<BlockId, LearningTarget> = {
     generativity: ['Claro.'],
   },
   porque_nao: {
+    source: 'top_gun' as PropertyId,
     target_id: 'pt_porque_nao_010',
     locale: 'pt-PT',
     block: 'porque não?',
@@ -123,6 +140,83 @@ export const TARGETS: Record<BlockId, LearningTarget> = {
     grammar_note_internal:
       'Written as two words in a question. Distinct from the conjunction porque.',
     generativity: ['Porque não?'],
+  },
+  chamo_me: {
+    source: 'james_bond' as PropertyId,
+    target_id: 'pt_chamo_me_011',
+    locale: 'pt-PT',
+    block: 'chamo-me…',
+    label: 'CHAMO-ME…',
+    gloss: 'my name is…',
+    type: 'chunk',
+    frequency_priority: 11,
+    grammar_note_internal:
+      'Reflexive chamar-se with enclitic pronoun. Affirmative statements take chamo-me, not the Brazilian me chamo.',
+    generativity: ['Chamo-me Ana.', 'Chamo-me Miguel.'],
+  },
+  queria: {
+    source: 'james_bond' as PropertyId,
+    target_id: 'pt_queria_012',
+    locale: 'pt-PT',
+    block: 'queria…',
+    label: 'QUERIA…',
+    gloss: 'I’d like…',
+    type: 'chunk',
+    frequency_priority: 12,
+    grammar_note_internal:
+      'Imperfect of querer used as a politeness softener. Noticeably more polite than quero in Portugal.',
+    generativity: ['Queria um café.', 'Queria água.'],
+  },
+  posso: {
+    source: 'james_bond' as PropertyId,
+    target_id: 'pt_posso_013',
+    locale: 'pt-PT',
+    block: 'posso…?',
+    label: 'POSSO…?',
+    gloss: 'can I / may I…?',
+    type: 'hinge',
+    frequency_priority: 13,
+    grammar_note_internal:
+      '1sg of poder. Deliberately taught against podes so the learner acquires a person contrast, not a second vocabulary item.',
+    generativity: ['Posso entrar?', 'Posso pagar?'],
+  },
+  onde_fica: {
+    source: 'james_bond' as PropertyId,
+    target_id: 'pt_onde_fica_014',
+    locale: 'pt-PT',
+    block: 'onde fica…?',
+    label: 'ONDE FICA…?',
+    gloss: 'where is…?',
+    type: 'chunk',
+    frequency_priority: 14,
+    grammar_note_internal:
+      'ficar for the fixed location of places. Onde é? exists but ficar is the idiomatic choice for buildings and streets.',
+    generativity: ['Onde fica a estação?', 'Onde fica a saída?'],
+  },
+  amanha: {
+    source: 'james_bond' as PropertyId,
+    target_id: 'pt_amanha_015',
+    locale: 'pt-PT',
+    block: 'amanhã',
+    label: 'AMANHÃ',
+    gloss: 'tomorrow',
+    type: 'hinge',
+    frequency_priority: 15,
+    grammar_note_internal: 'Time adverb, no article. Answers quando directly.',
+    generativity: ['Amanhã.', 'Podes vir amanhã?'],
+  },
+  outra_vez: {
+    source: 'james_bond' as PropertyId,
+    target_id: 'pt_outra_vez_016',
+    locale: 'pt-PT',
+    block: 'outra vez',
+    label: 'OUTRA VEZ',
+    gloss: 'again',
+    type: 'chunk',
+    frequency_priority: 16,
+    grammar_note_internal:
+      'Literally "another time". Everyday spoken alternative to de novo; pairs naturally with por favor.',
+    generativity: ['Outra vez, por favor.', 'Podes dizer outra vez?'],
   },
 }
 
@@ -136,6 +230,24 @@ export const BLOCK_ORDER: BlockId[] = [
   'o_que_estas_a',
   'quando',
   'claro',
+  'porque_nao',
+  'chamo_me',
+  'queria',
+  'posso',
+  'onde_fica',
+  'amanha',
+  'outra_vez',
+]
+
+/** The four Top Gun blocks Mission 02 deliberately re-uses (spec §3). */
+export const REINFORCED_IN_BOND: BlockId[] = ['comigo', 'podes', 'quando', 'claro']
+
+/** Taught in Top Gun and left alone in Bond — the control side of H3. */
+export const NOT_REINFORCED_IN_BOND: BlockId[] = [
+  'nao_consigo',
+  'perdi',
+  'nao_vou',
+  'o_que_estas_a',
   'porque_nao',
 ]
 
@@ -208,6 +320,54 @@ export const MOMENTS: CulturalMoment[] = [
     rights_status: 'brief-reference-prototype',
     thematic_tags: ['time', 'defiance'],
   },
+  {
+    property_id: 'james_bond',
+    moment_id: 'jb_name',
+    short_reference_hook: 'BOND. JAMES BOND.',
+    familiarity_weight: 'high',
+    rights_status: 'brief-reference-prototype',
+    thematic_tags: ['identity', 'introduction'],
+  },
+  {
+    property_id: 'james_bond',
+    moment_id: 'jb_order',
+    short_reference_hook: '',
+    familiarity_weight: 'high',
+    rights_status: 'brief-reference-prototype',
+    thematic_tags: ['ordering', 'ritual'],
+  },
+  {
+    property_id: 'james_bond',
+    moment_id: 'jb_licence',
+    short_reference_hook: '',
+    familiarity_weight: 'high',
+    rights_status: 'brief-reference-prototype',
+    thematic_tags: ['permission', 'licence'],
+  },
+  {
+    property_id: 'james_bond',
+    moment_id: 'jb_location',
+    short_reference_hook: '',
+    familiarity_weight: 'medium',
+    rights_status: 'brief-reference-prototype',
+    thematic_tags: ['location', 'mission'],
+  },
+  {
+    property_id: 'james_bond',
+    moment_id: 'jb_tomorrow',
+    short_reference_hook: 'TOMORROW NEVER DIES.',
+    familiarity_weight: 'medium',
+    rights_status: 'brief-reference-prototype',
+    thematic_tags: ['time', 'title'],
+  },
+  {
+    property_id: 'james_bond',
+    moment_id: 'jb_again',
+    short_reference_hook: 'NEVER SAY NEVER AGAIN.',
+    familiarity_weight: 'medium',
+    rights_status: 'brief-reference-prototype',
+    thematic_tags: ['repetition', 'title'],
+  },
 ]
 
 /**
@@ -235,6 +395,30 @@ export const EXAMPLES: Example[] = [
   { example_id: 'ex_017', target_id: 'quando', pt_text: 'Quando vamos?', en_gloss: 'When are we going?', audio_asset: 'quando-vamos', context_tag: 'transfer', role: 'Question word' },
   { example_id: 'ex_018', target_id: 'claro', pt_text: 'Claro.', en_gloss: 'Of course.', audio_asset: 'claro', context_tag: 'booster', role: 'Booster' },
   { example_id: 'ex_019', target_id: 'porque_nao', pt_text: 'Porque não?', en_gloss: 'Why not?', audio_asset: 'porque-nao', context_tag: 'booster', role: 'Booster' },
+  // Mission 02 — James Bond
+  { example_id: 'ex_020', target_id: 'chamo_me', pt_text: 'Chamo-me Ana.', en_gloss: 'My name is Ana.', audio_asset: 'chamo-me-ana', context_tag: 'manipulate', role: 'Bond — CHAMO-ME' },
+  { example_id: 'ex_021', target_id: 'chamo_me', pt_text: 'Chamo-me Miguel.', en_gloss: 'My name is Miguel.', audio_asset: 'chamo-me-miguel', context_tag: 'transfer', role: 'Bond — CHAMO-ME' },
+  { example_id: 'ex_022', target_id: 'queria', pt_text: 'Queria água.', en_gloss: 'I’d like water.', audio_asset: 'queria-agua', context_tag: 'manipulate', role: 'Bond — QUERIA' },
+  { example_id: 'ex_023', target_id: 'queria', pt_text: 'Queria um café.', en_gloss: 'I’d like a coffee.', audio_asset: 'queria-um-cafe', context_tag: 'transfer', role: 'Bond — QUERIA' },
+  { example_id: 'ex_024', target_id: 'posso', pt_text: 'Posso pagar?', en_gloss: 'Can I pay?', audio_asset: 'posso-pagar', context_tag: 'transfer', role: 'Bond — POSSO' },
+  { example_id: 'ex_025', target_id: 'posso', pt_text: 'Posso entrar?', en_gloss: 'Can I come in?', audio_asset: 'posso-entrar', context_tag: 'transfer', role: 'Bond — POSSO' },
+  { example_id: 'ex_026', target_id: 'onde_fica', pt_text: 'Onde fica a estação?', en_gloss: 'Where is the station?', audio_asset: 'onde-fica-a-estacao', context_tag: 'manipulate', role: 'Bond — ONDE FICA' },
+  { example_id: 'ex_027', target_id: 'onde_fica', pt_text: 'Onde fica a saída?', en_gloss: 'Where is the exit?', audio_asset: 'onde-fica-a-saida', context_tag: 'transfer', role: 'Bond — ONDE FICA' },
+  { example_id: 'ex_028', target_id: 'onde_fica', pt_text: 'Onde fica a praça de táxis?', en_gloss: 'Where is the taxi rank?', audio_asset: 'onde-fica-a-praca-de-taxis', context_tag: 'transfer', role: 'Bond — ONDE FICA' },
+  { example_id: 'ex_029', target_id: 'amanha', pt_text: 'Amanhã.', en_gloss: 'Tomorrow.', audio_asset: 'amanha', context_tag: 'booster', role: 'Bond — AMANHÃ' },
+  { example_id: 'ex_030', target_id: 'outra_vez', pt_text: 'Outra vez.', en_gloss: 'Again.', audio_asset: 'outra-vez', context_tag: 'booster', role: 'Bond — OUTRA VEZ' },
+  { example_id: 'ex_031', target_id: 'outra_vez', pt_text: 'Outra vez, por favor.', en_gloss: 'Again, please.', audio_asset: 'outra-vez-por-favor', context_tag: 'transfer', role: 'Bond — OUTRA VEZ' },
+  // Compounds — no single world taught these as a line
+  { example_id: 'ex_032', target_id: 'podes', pt_text: 'Podes vir amanhã?', en_gloss: 'Can you come tomorrow?', audio_asset: 'podes-vir-amanha', context_tag: 'transfer', role: 'Compound — Top Gun + Bond' },
+  { example_id: 'ex_033', target_id: 'outra_vez', pt_text: 'Podes dizer outra vez?', en_gloss: 'Can you say it again?', audio_asset: 'podes-dizer-outra-vez', context_tag: 'transfer', role: 'Compound — Top Gun + Bond' },
+  { example_id: 'ex_034', target_id: 'preciso_de', pt_text: 'Preciso de um bilhete.', en_gloss: 'I need a ticket.', audio_asset: 'preciso-de-um-bilhete', context_tag: 'transfer', role: 'Top Gun — crossover' },
+  { example_id: 'ex_035', target_id: 'outra_vez', pt_text: 'Podes vir comigo outra vez?', en_gloss: 'Can you come with me again?', audio_asset: 'podes-vir-comigo-outra-vez', context_tag: 'transfer', role: 'Compound — crossover' },
+  { example_id: 'ex_036', target_id: 'chamo_me', pt_text: 'Chamo-me Sofia.', en_gloss: 'My name is Sofia.', audio_asset: 'chamo-me-sofia', context_tag: 'transfer', role: 'Bond — crossover' },
+  { example_id: 'ex_037', target_id: 'queria', pt_text: 'Queria um chá.', en_gloss: 'I’d like a tea.', audio_asset: 'queria-um-cha', context_tag: 'transfer', role: 'Bond — crossover' },
+  { example_id: 'ex_038', target_id: 'onde_fica', pt_text: 'Onde fica o hotel?', en_gloss: 'Where is the hotel?', audio_asset: 'onde-fica-o-hotel', context_tag: 'transfer', role: 'Bond — crossover' },
+  { example_id: 'ex_039', target_id: 'onde_fica', pt_text: 'Onde fica a paragem?', en_gloss: 'Where is the bus stop?', audio_asset: 'onde-fica-a-paragem', context_tag: 'transfer', role: 'Bond — crossover' },
+  { example_id: 'ex_040', target_id: 'posso', pt_text: 'Posso ouvir outra vez?', en_gloss: 'Can I hear it again?', audio_asset: 'posso-ouvir-outra-vez', context_tag: 'transfer', role: 'Compound — crossover' },
+  { example_id: 'ex_041', target_id: 'chamo_me', pt_text: 'Chamo-me James Bond.', en_gloss: 'My name is James Bond.', audio_asset: 'chamo-me-james-bond', context_tag: 'hook', role: 'Bond — hook phrase' },
 ]
 
 /** Bare blocks also need audio — they are revealed and tapped on their own screens. */
@@ -249,4 +433,10 @@ export const BLOCK_AUDIO: Record<BlockId, string> = {
   quando: 'quando',
   claro: 'claro',
   porque_nao: 'porque-nao',
+  chamo_me: 'chamo-me',
+  queria: 'queria',
+  posso: 'posso',
+  onde_fica: 'onde-fica',
+  amanha: 'amanha',
+  outra_vez: 'outra-vez',
 }
