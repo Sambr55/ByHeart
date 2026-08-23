@@ -8,7 +8,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
 import { acquirePiece, setAffinity, setTester, voiceLean } from '@/engine/learner'
-import { capabilities, useJourney, type WhereNext } from '@/engine/journey'
+import { branchesFor, buildTargetFor, capabilities, useJourney } from '@/engine/journey'
 import { useLearner } from '@/engine/useLearner'
 import { AudioButton } from './AudioButton'
 
@@ -279,23 +279,51 @@ function Picker() {
 // ------------------------------------------------------------------ a root
 
 /** Build one branch from its own words. Production, not recognition. */
+/**
+ * Build one line from its own words.
+ *
+ * No decoys. A wrong tile made of a word the learner has never seen tests nothing
+ * except whether they can recognise a stranger — the task is word order, so the tiles
+ * are exactly the right words in the wrong order. Anything in the line that has not
+ * been taught is glossed openly above it rather than quietly examined (§06).
+ */
 function MiniBuild({
   target,
-  distractor,
+  helpers,
   onSolved,
 }: {
   target: string
-  distractor?: string
+  helpers?: Record<string, string>
   onSolved: () => void
 }) {
   const tiles = useMemo(() => {
     const words = target.split(' ')
-    const extra = distractor?.split(' ').find((w) => !words.includes(w))
-    const all = extra ? [...words, extra] : words
-    return all
-      .map((text, i) => ({ id: text + i, text }))
-      .sort(() => Math.random() - 0.5)
-  }, [target, distractor])
+    const shuffled = words.map((text, i) => ({ id: text + i, text }))
+    // Never hand back the answer already in order.
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    if (words.length > 1 && shuffled.every((s, i) => s.text === words[i])) {
+      ;[shuffled[0], shuffled[1]] = [shuffled[1], shuffled[0]]
+    }
+    return shuffled
+  }, [target])
+
+  const glosses = useMemo(() => {
+    if (!helpers) return []
+    const words = target.replace(/[.?,]/g, '').split(' ')
+    const seen = new Set<string>()
+    return Object.entries(helpers)
+      .filter(([w]) => {
+        const bare = w.replace(/[.?,]/g, '')
+        if (!words.some((x) => x.toLowerCase() === bare.toLowerCase())) return false
+        if (seen.has(bare.toLowerCase())) return false
+        seen.add(bare.toLowerCase())
+        return true
+      })
+      .slice(0, 3)
+  }, [helpers, target])
 
   const answer = target.split(' ')
   const [placed, setPlaced] = useState<{ id: string; text: string }[]>([])
@@ -316,6 +344,11 @@ function MiniBuild({
 
   return (
     <div className="mt-5">
+      {glosses.length ? (
+        <p className="pt mb-3 text-sm text-accent/80">
+          {glosses.map(([w, g]) => w.replace(/[.,]/g, '') + ' = ' + g).join('   ·   ')}
+        </p>
+      ) : null}
       <div
         data-testid="tile-line"
         /* A seam for the walkthrough. The tile pool is shuffled, so without this the
@@ -386,7 +419,15 @@ function MiniBuild({
 }
 
 /** Highlight the extracted pieces where they sit inside the natural Portuguese. */
-function Highlighted({ line, pieces }: { line: string; pieces: string[] }) {
+function Highlighted({
+  line,
+  pieces,
+  dim = 'text-accent/70',
+}: {
+  line: string
+  pieces: string[]
+  dim?: string
+}) {
   const spans = pieces
     .map((p) => {
       const needle = p.replace(/[…?]/g, '').trim()
@@ -396,24 +437,30 @@ function Highlighted({ line, pieces }: { line: string; pieces: string[] }) {
     .filter(Boolean)
     .sort((a, b) => a!.at - b!.at) as { at: number; len: number }[]
 
-  if (!spans.length) return <>{line}</>
+  if (!spans.length) return <span className={dim}>{line}</span>
 
   const out: React.ReactNode[] = []
   let cursor = 0
+  const rest = (text: string, key: string) =>
+    text ? (
+      <span key={key} className={dim}>
+        {text}
+      </span>
+    ) : null
+
   spans.forEach((s, i) => {
     if (s.at < cursor) return
-    out.push(line.slice(cursor, s.at))
+    out.push(rest(line.slice(cursor, s.at), 'r' + i))
+    // The useful bit is the bright thing on the screen; the sentence it came out of
+    // steps back. It was the wrong way round.
     out.push(
-      <span
-        key={i}
-        className="font-semibold text-accent underline decoration-accent/40 underline-offset-4"
-      >
+      <span key={'h' + i} className="font-semibold text-fg">
         {line.slice(s.at, s.at + s.len)}
       </span>,
     )
     cursor = s.at + s.len
   })
-  out.push(line.slice(cursor))
+  out.push(rest(line.slice(cursor), 'rend'))
   return <>{out}</>
 }
 
@@ -511,8 +558,8 @@ function RootBeatView({
             {pieceIndex + 1} of {total}
           </p>
         ) : null}
-        <p className="pt mt-3 text-balance text-lg text-fg/50">
-          <Highlighted line={root.pt_natural} pieces={[e.pt]} />
+        <p className="pt mt-3 text-balance text-lg">
+          <Highlighted line={root.pt_natural} pieces={[e.pt]} dim="text-accent/45" />
         </p>
 
         <div className="mt-8 flex items-center gap-3">
@@ -530,7 +577,7 @@ function RootBeatView({
         ) : null}
 
         <Cta
-          label={last ? 'WHAT CAN I DO WITH THESE?' : 'AND THE NEXT ONE'}
+          label={'WHAT DOES ' + e.pt.replace('…', '').trim().toUpperCase() + ' GIVE ME?'}
           onClick={() => {
             acquirePiece(e.id, root.culture_family)
             next()
@@ -540,11 +587,59 @@ function RootBeatView({
     )
   }
 
+  if (beat === 'piece-branch' && pieceIndex !== undefined) {
+    const e = root.extracts[pieceIndex]
+    const own = branchesFor(root, e.id)
+    const more = pieceIndex < root.extracts.length - 1
+    return (
+      <Shell stage={stage} eyebrow={family.title}>
+        <p className="eyebrow text-accent">{e.pt.replace('…', '').trim().toUpperCase()}</p>
+        <p className="display mt-3 text-balance text-xl">
+          {own.length === 1
+            ? 'One thing you can say with it.'
+            : own.length + ' things you can say with it.'}
+        </p>
+        <ul className="mt-6 space-y-3">
+          {own.map((b, i) => (
+            <li
+              key={b.pt}
+              style={{ animationDelay: i * 110 + 'ms' }}
+              className="animate-bank flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+            >
+              <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
+              <span>
+                <span className="pt block text-lg text-accent">{b.pt}</span>
+                <span className="mt-0.5 block text-xs text-muted">{b.en}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <Cta
+          label={
+            more
+              ? 'NOW THE OTHER ONE: ' +
+                root.extracts[pieceIndex + 1].pt.replace('…', '').trim().toUpperCase()
+              : 'PUT THEM BACK TOGETHER'
+          }
+          onClick={next}
+        />
+      </Shell>
+    )
+  }
+
   if (beat === 'branch') {
     return (
       <Shell stage={stage} eyebrow={family.title}>
-        <p className="display text-balance text-2xl">
+        <p className="eyebrow text-muted">BOTH PIECES, BACK IN ONE PLACE</p>
+        <p className="display mt-3 text-balance text-2xl">
           One {root.root_type === 'title' ? 'title' : 'line'}. {root.branches.length} things you can say.
+        </p>
+        <p className="pt mt-4 text-sm">
+          <Highlighted
+            line={root.pt_natural}
+            pieces={root.extracts.map((x) => x.pt)}
+            dim="text-accent/45"
+          />
         </p>
         <ul className="mt-6 space-y-3">
           {root.branches.map((b, i) => (
@@ -567,16 +662,12 @@ function RootBeatView({
   }
 
   if (beat === 'build') {
-    const target = root.branches[0]
+    const target = buildTargetFor(root)
     return (
       <Shell stage={stage} eyebrow={family.title}>
         <p className="eyebrow text-muted">YOUR TURN</p>
         <p className="display mt-2 text-balance text-2xl">“{target.en}”</p>
-        <MiniBuild
-          target={target.pt}
-          distractor={root.branches[1]?.pt}
-          onSolved={() => setDone(true)}
-        />
+        <MiniBuild target={target.pt} helpers={root.helpers} onSolved={() => setDone(true)} />
         {done ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
       </Shell>
     )
@@ -619,7 +710,11 @@ function RootBeatView({
       <p className="eyebrow text-muted">NO FILM. NO CLUES.</p>
       <p className="mt-3 text-sm font-semibold">{root.transfer_prompt.context}</p>
       <p className="display mt-2 text-balance text-2xl">“{root.transfer_prompt.ask}”</p>
-      <MiniBuild target={root.transfer_prompt.answer} onSolved={() => setDone(true)} />
+      <MiniBuild
+        target={root.transfer_prompt.answer}
+        helpers={root.helpers}
+        onSolved={() => setDone(true)}
+      />
       {done ? (
         <>
           <p className="mt-5 text-sm text-muted">

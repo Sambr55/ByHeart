@@ -21,6 +21,7 @@ import {
 import { AUDIO_MANIFEST, normalisePhrase, slugFor } from '../content/audio-manifest'
 import { ANCHOR_CARDS, BLOCK_CARDS, COMBINATION_CARDS } from '../content/deck'
 import { COLLISIONS, FAMILIES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
+import { branchesFor, buildTargetFor } from '../engine/journey'
 import { CULTURE_FREE_STAGES, isExercise, type BlockId, type Mission, type Screen } from '../content/types'
 
 const errors: string[] = []
@@ -408,6 +409,36 @@ for (const e of EXAMPLES) {
     for (const p of root.reinforces) {
       if (!PIECES[p]) fail(R + 'claims to reinforce "' + p + '", which no root teaches')
     }
+    // Every word the learner is asked to place must be one they were taught or one
+    // they were shown. A build is a word-order task; making it a vocabulary ambush is
+    // the fastest way to lose someone (§06).
+    const target = buildTargetFor(root)
+    if (target) {
+      const taught = new Set(
+        [...root.extracts.map((e) => e.pt), ...Object.keys(PIECES).map((k) => PIECES[k].pt)]
+          .flatMap((s) => s.replace(/[…?.,]/g, '').toLowerCase().split(' '))
+          .filter(Boolean),
+      )
+      const glossed = new Set(
+        Object.keys(root.helpers ?? {}).map((w) => w.replace(/[…?.,]/g, '').toLowerCase()),
+      )
+      for (const word of target.pt.replace(/[.?,]/g, '').split(' ')) {
+        const w = word.toLowerCase()
+        if (!w || taught.has(w) || glossed.has(w)) continue
+        if (/^[A-Z]/.test(word)) continue // a name
+        fail(R + 'build "' + target.pt + '" uses untaught, unglossed word "' + word + '"')
+      }
+    }
+
+    // Each extract has to actually demonstrate itself, or unpacking it teaches nothing.
+    if (root.extracts.length > 1) {
+      for (const e of root.extracts) {
+        if (!branchesFor(root, e.id).length) {
+          warn(R + 'extract "' + e.pt + '" has no branch of its own to unpack')
+        }
+      }
+    }
+
     // §14: extract from pieces genuinely contained in, or immediately implied by, the
     // natural Portuguese — not from anything that happens to be useful.
     const line = root.pt_natural.toLowerCase()

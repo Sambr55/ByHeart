@@ -57,6 +57,7 @@ export type RootBeat =
   | 'translate'
   | 'extract'
   | 'piece'
+  | 'piece-branch'
   | 'branch'
   | 'build'
   | 'voice'
@@ -67,18 +68,50 @@ export type RootBeat =
  * §20.14 makes this order non-negotiable, so it is generated from the root rather
  * than hand-authored per screen — a root physically cannot skip its bridge.
  */
+/**
+ * Which branches belong to which extracted piece. A branch that contains the piece is a
+ * demonstration of that piece; anything else is somebody else's example.
+ */
+export function branchesFor(root: Root, extractId: string) {
+  const extract = root.extracts.find((e) => e.id === extractId)
+  if (!extract) return []
+  const stem = extract.pt.replace(/[…?]/g, '').trim().toLowerCase()
+  return root.branches.filter((b) => b.pt.toLowerCase().includes(stem))
+}
+
+/**
+ * The build should never be the place a learner meets a word for the first time as a
+ * puzzle. Prefer a branch of two or more words with no trailing ellipsis.
+ */
+export function buildTargetFor(root: Root) {
+  return (
+    root.branches.find((b) => !b.pt.includes('…') && b.pt.split(' ').length > 1) ??
+    root.branches[0]
+  )
+}
+
 export function beatsFor(root: Root): { beat: RootBeat; pieceIndex?: number }[] {
   const b = (beat: RootBeat) => ({ beat })
-  // The useful bits are shown together inside the line, then unpacked one at a time.
-  // Two pieces on one screen means the second is skimmed; PODES and QUANDO QUISERES
-  // each deserve their own moment.
-  const pieces = root.extracts.map((_, pieceIndex) => ({ beat: 'piece' as RootBeat, pieceIndex }))
+  /**
+   * Each piece is unpacked completely — the piece itself, then what that piece alone
+   * lets you say — before the next one starts. Only once every piece has had its turn
+   * do they come back together under "one line, three things you can say".
+   */
+  const pieces = root.extracts.flatMap((e, pieceIndex) => {
+    const own = branchesFor(root, e.id)
+    const steps: { beat: RootBeat; pieceIndex?: number }[] = [{ beat: 'piece', pieceIndex }]
+    if (own.length) steps.push({ beat: 'piece-branch', pieceIndex })
+    return steps
+  })
 
   if (root.freebie_flag) {
     // §B10: a freebie is a ten-second wink. Recognition -> Portuguese -> takeaway.
     return [b('recognise'), b('translate'), b('extract'), ...pieces, b('release')]
   }
-  const beats = [b('recognise'), b('translate'), b('extract'), ...pieces, b('branch'), b('build')]
+  const beats = [b('recognise'), b('translate'), b('extract'), ...pieces]
+  // Bringing them back together only earns its place when there was more than one.
+  if (root.extracts.length > 1) beats.push(b('branch'))
+  beats.push(b('build'))
   if (root.voice_options?.length) beats.push(b('voice'))
   beats.push(b('release'))
   return beats
