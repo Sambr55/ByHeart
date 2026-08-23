@@ -51,7 +51,9 @@ export async function POST(request: Request) {
   // One object per session, overwritten as it progresses, so a tester who reloads does
   // not fragment into several partial records.
   await store.put(PREFIX + at.slice(0, 10) + '/' + id + '.json', JSON.stringify(body, null, 2), {
-    access: 'public',
+    // Tester answers are personal. A public blob is readable by anyone who learns the
+    // URL, and these URLs are not secret enough to carry that.
+    access: 'private',
     contentType: 'application/json',
     addRandomSuffix: false,
     allowOverwrite: true,
@@ -67,11 +69,15 @@ export async function GET(request: Request) {
   if (!store) return NextResponse.json({ sessions: [], stored: false, reason: 'no blob store' })
   const { blobs } = await store.list({ prefix: PREFIX, limit: 1000 })
   const sessions = await Promise.all(
-    blobs.map(async (b: { url: string }) => {
-      const res = await fetch(b.url, { cache: 'no-store' })
+    blobs.map(async (b: { pathname: string }) => {
+      // Private blobs are not fetchable by URL; they are read back through the token.
+      const found = await store.get(b.pathname, { access: 'private' })
+      if (!found) return null
+      const res = new Response(found.stream)
       return (await res.json()) as Record<string, unknown>
     }),
   )
-  sessions.sort((a, b) => String(a.recorded_at).localeCompare(String(b.recorded_at)))
-  return NextResponse.json({ stored: true, count: sessions.length, sessions })
+  const clean = sessions.filter(Boolean) as Record<string, unknown>[]
+  clean.sort((a, b) => String(a.recorded_at).localeCompare(String(b.recorded_at)))
+  return NextResponse.json({ stored: true, count: clean.length, sessions: clean })
 }

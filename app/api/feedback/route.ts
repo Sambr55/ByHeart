@@ -62,7 +62,9 @@ export async function POST(request: Request) {
   const key =
     PREFIX + body.submitted_at.slice(0, 10) + '/' + body.submission_id + '.json'
   await store.put(key, JSON.stringify(body, null, 2), {
-    access: 'public',
+    // Tester answers are personal. A public blob is readable by anyone who learns the
+    // URL, and these URLs are not secret enough to carry that.
+    access: 'private',
     contentType: 'application/json',
     addRandomSuffix: false,
   })
@@ -79,11 +81,15 @@ export async function GET(request: Request) {
   }
   const { blobs } = await store.list({ prefix: PREFIX, limit: 1000 })
   const submissions = await Promise.all(
-    blobs.map(async (b: { url: string }) => {
-      const res = await fetch(b.url, { cache: 'no-store' })
+    blobs.map(async (b: { pathname: string }) => {
+      // Private blobs are not fetchable by URL; they are read back through the token.
+      const found = await store.get(b.pathname, { access: 'private' })
+      if (!found) return null
+      const res = new Response(found.stream)
       return (await res.json()) as FeedbackSubmission
     }),
   )
-  submissions.sort((a, b) => a.submitted_at.localeCompare(b.submitted_at))
-  return NextResponse.json({ stored: true, count: submissions.length, submissions })
+  const clean = submissions.filter(Boolean) as FeedbackSubmission[]
+  clean.sort((a, b) => a.submitted_at.localeCompare(b.submitted_at))
+  return NextResponse.json({ stored: true, count: clean.length, submissions: clean })
 }
