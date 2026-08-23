@@ -139,8 +139,13 @@ async function main() {
       }
     }
     const voice = page.locator('button[aria-pressed]')
-    if ((await voice.count()) > 0 && /Which would you actually say/.test(body)) {
+    if ((await voice.count()) > 0 && /two ways to say it/i.test(body)) {
       await press(voice.first(), 'voice')
+      // The rule the pair teaches is the reason the screen exists — it must appear.
+      const after = await page.evaluate(() => document.body.innerText)
+      if (!/THE RULE UNDERNEATH/.test(after)) {
+        problems.push('a voice pair taught no rule at step ' + guard)
+      }
     }
     const cta = page.getByTestId('continue')
     if (await cta.isVisible().catch(() => false)) {
