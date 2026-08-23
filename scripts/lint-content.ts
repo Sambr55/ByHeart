@@ -22,6 +22,7 @@ import { AUDIO_MANIFEST, normalisePhrase, slugFor } from '../content/audio-manif
 import { ANCHOR_CARDS, BLOCK_CARDS, COMBINATION_CARDS } from '../content/deck'
 import { COLLISIONS, FAMILIES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
 import { INSIGHTS } from '../content/osmosis'
+import { GOAL_NEEDS, QUESTIONS_IN_ORDER } from '../content/profile'
 import { branchesFor, buildTargetFor } from '../engine/journey'
 import { CULTURE_FREE_STAGES, isExercise, type BlockId, type Mission, type Screen } from '../content/types'
 
@@ -567,6 +568,37 @@ for (const e of EXAMPLES) {
     }
   }
   console.log(INSIGHTS.length + ' osmosis insights, every family covered')
+}
+
+
+
+// ---------------------------------------------------------------------------
+// Profile payoffs — every promise must be one the graph can keep
+// ---------------------------------------------------------------------------
+{
+  for (const [goal, needs] of Object.entries(GOAL_NEEDS)) {
+    for (const n of needs) {
+      for (const piece of n.pieces) {
+        if (!PIECES[piece]) {
+          fail(
+            'goal "' + goal + '" promises "' + n.label + '" via "' + piece +
+              '", which no root teaches',
+          )
+        }
+      }
+    }
+    if (goal !== 'curious' && needs.length < 4) {
+      warn('goal "' + goal + '" lists only ' + needs.length + ' things to work towards')
+    }
+  }
+  // A question is only worth asking if its answer changes something on the spot.
+  for (const q of QUESTIONS_IN_ORDER) {
+    if (!q.why.trim()) fail('profile question ' + q.id + ' does not say why it is being asked')
+    if (!q.skip.trim()) fail('profile question ' + q.id + ' cannot be skipped')
+  }
+  console.log(
+    QUESTIONS_IN_ORDER.length + ' profile questions, all skippable, all payoffs deliverable',
+  )
 }
 
 // --- report ----------------------------------------------------------------

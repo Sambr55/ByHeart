@@ -103,6 +103,17 @@ async function main() {
       problems.push('a "where next?" appeared inside a section')
       break
     }
+    // A profile question can appear between sections; answer the first option.
+    const gender = page.getByTestId('profile-m')
+    const age = page.getByTestId('profile-under25')
+    const goal = page.getByTestId('profile-trip')
+    for (const q of [gender, age, goal]) {
+      if (await q.isVisible().catch(() => false)) {
+        await press(q, 'profile answer')
+        break
+      }
+    }
+
     const done = page.getByTestId('im-done')
     if (await done.isVisible().catch(() => false)) {
       // Take one more area the first time, then finish — so the test exercises both

@@ -1,0 +1,181 @@
+/**
+ * Three questions, one between sections, each of which pays out immediately.
+ *
+ * The rule that makes these tolerable: every question is asked because the answer
+ * changes what the learner is told next, and the change is shown on the same screen
+ * before they move on. A question that does not visibly alter the Portuguese is a form,
+ * and testers are right to resent forms.
+ *
+ * The gender question is about grammatical gender — which endings come out of your
+ * mouth — not about identity. Portuguese makes you choose before it will let you say
+ * thank you, and that is the honest reason to ask.
+ */
+
+export type LanguageGender = 'm' | 'f'
+export type AgeBand = 'under25' | '25to39' | '40to59' | '60plus'
+export type Goal = 'trip' | 'someone' | 'moving' | 'work' | 'curious'
+
+export interface ProfileQuestion {
+  id: 'gender' | 'age' | 'goal'
+  /** Who asks. The product's own questions get the same treatment as its lessons. */
+  asker: string
+  askerLine: string
+  headline: string
+  /** Why we are asking, in terms of what they get. Never in terms of what we get. */
+  why: string
+  options: { id: string; label: string; sub?: string }[]
+  skip: string
+  skipNote: string
+}
+
+export const GENDER_QUESTION: ProfileQuestion = {
+  id: 'gender',
+  asker: 'Bridget',
+  askerLine: 'Sorry — slightly personal, but Portuguese is going to insist.',
+  headline: 'Are you speaking as a man or a woman?',
+  why:
+    'Not about who you are. About which ending comes out of your mouth. Portuguese will not let you say thank you until it knows.',
+  options: [
+    { id: 'm', label: 'AS A MAN', sub: 'obrigado' },
+    { id: 'f', label: 'AS A WOMAN', sub: 'obrigada' },
+  ],
+  skip: 'SHOW ME BOTH',
+  skipNote: 'Then we will always show both forms. Nothing is lost.',
+}
+
+export const AGE_QUESTION: ProfileQuestion = {
+  id: 'age',
+  asker: 'Marcus',
+  askerLine: 'How long have you been at this business of being alive?',
+  headline: 'Roughly where are you?',
+  why:
+    'Portugal changes how it speaks to you depending on your age, and expects you to change back. This decides which version you are taught.',
+  options: [
+    { id: 'under25', label: 'UNDER 25' },
+    { id: '25to39', label: '25 TO 39' },
+    { id: '40to59', label: '40 TO 59' },
+    { id: '60plus', label: '60 OR MORE' },
+  ],
+  skip: 'SKIP THIS',
+  skipNote: 'Then we will teach you the middle ground, which is safe everywhere.',
+}
+
+export const GOAL_QUESTION: ProfileQuestion = {
+  id: 'goal',
+  asker: 'Maverick',
+  askerLine: 'What is this actually for?',
+  headline: 'Why are you here?',
+  why:
+    'So the next things you learn are the ones standing between you and that, rather than whatever came next in a list.',
+  options: [
+    { id: 'trip', label: 'I’VE GOT A TRIP COMING', sub: 'days or weeks, not years' },
+    { id: 'someone', label: 'SOMEONE IN MY LIFE SPEAKS IT', sub: 'and I would like to keep up' },
+    { id: 'moving', label: 'I’M MOVING THERE', sub: 'or seriously thinking about it' },
+    { id: 'work', label: 'IT’S FOR WORK', sub: 'colleagues, clients, calls' },
+    { id: 'curious', label: 'NO REASON. I JUST LIKE IT', sub: 'the best reason there is' },
+  ],
+  skip: 'NOT SURE YET',
+  skipNote: 'Fair enough. We will keep giving you the things people actually say.',
+}
+
+export const QUESTIONS_IN_ORDER = [GENDER_QUESTION, AGE_QUESTION, GOAL_QUESTION]
+
+/**
+ * The payoff. A 56-year-old Englishman needs to know how HE should speak — not how a
+ * 30-year-old American woman should. So the answers come back as his forms, with the
+ * ones that are not his shown greyed beside them.
+ */
+export const GENDER_PAYOFF: Record<LanguageGender, { yours: string; theirs: string; en: string }[]> =
+  {
+    m: [
+      { yours: 'Obrigado.', theirs: 'Obrigada.', en: 'Thank you.' },
+      { yours: 'Sou inglês.', theirs: 'Sou inglesa.', en: 'I’m English.' },
+      { yours: 'Estou cansado.', theirs: 'Estou cansada.', en: 'I’m tired.' },
+      { yours: 'Estou pronto.', theirs: 'Estou pronta.', en: 'I’m ready.' },
+    ],
+    f: [
+      { yours: 'Obrigada.', theirs: 'Obrigado.', en: 'Thank you.' },
+      { yours: 'Sou inglesa.', theirs: 'Sou inglês.', en: 'I’m English.' },
+      { yours: 'Estou cansada.', theirs: 'Estou cansado.', en: 'I’m tired.' },
+      { yours: 'Estou pronta.', theirs: 'Estou pronto.', en: 'I’m ready.' },
+    ],
+  }
+
+export const GENDER_RULE: Record<LanguageGender, string> = {
+  m: 'Almost anything you say about yourself ends in -o. That is the whole rule, and you now own it.',
+  f: 'Almost anything you say about yourself ends in -a. That is the whole rule, and you now own it.',
+}
+
+export const AGE_PAYOFF: Record<AgeBand, { headline: string; body: string }> = {
+  under25: {
+    headline: 'You will get tu almost everywhere.',
+    body:
+      'Portugal is informal with people your age, and you can be informal straight back. Podes repetir? is right nearly all the time.',
+  },
+  '25to39': {
+    headline: 'Tu with your own age, você in a bank.',
+    body:
+      'Roughly: tu with anyone about your age or younger, você with someone much older or somewhere official. Podes repetir? and Pode repetir? are the same question, one step apart.',
+  },
+  '40to59': {
+    headline: 'Shops will mostly use você with you.',
+    body:
+      'That is not distance, it is the default politeness. You can still use tu with friends and with anyone noticeably younger, and nobody will blink.',
+  },
+  '60plus': {
+    headline: 'You will be given o senhor or a senhora a lot.',
+    body:
+      'That is respect rather than formality for its own sake. Tu stays for people you actually know, and você is your safe setting with everyone else.',
+  },
+}
+
+export const AGE_PAIR = { tu: 'Podes repetir?', voce: 'Pode repetir?', en: 'Can you repeat?' }
+
+/**
+ * What stands between the learner and the thing they said they wanted. Every entry maps
+ * to pieces the graph can genuinely teach — promising a capability the content cannot
+ * deliver would be the most expensive lie in the product.
+ */
+export const GOAL_NEEDS: Record<Goal, { label: string; pieces: string[] }[]> = {
+  trip: [
+    { label: 'say what you need', pieces: ['preciso_de'] },
+    { label: 'order it the way you like it', pieces: ['com', 'sem'] },
+    { label: 'ask someone to say it again', pieces: ['outra_vez'] },
+    { label: 'ask what something is called', pieces: ['como_se_chama'] },
+    { label: 'apologise for getting it wrong', pieces: ['desculpa'] },
+    { label: 'say when', pieces: ['amanha'] },
+  ],
+  someone: [
+    { label: 'ask them to come with you', pieces: ['comigo'] },
+    { label: 'say you were thinking about them', pieces: ['estavas_a'] },
+    { label: 'apologise properly', pieces: ['desculpa'] },
+    { label: 'tell them they matter', pieces: ['importa'] },
+    { label: 'make a plan', pieces: ['amanha'] },
+    { label: 'take back what you just said', pieces: ['queria_dizer'] },
+  ],
+  moving: [
+    { label: 'say what you need', pieces: ['preciso_de'] },
+    { label: 'ask what happened', pieces: ['o_que_acontece'] },
+    { label: 'ask to change something', pieces: ['mudar'] },
+    { label: 'say you can’t', pieces: ['nao_podes'] },
+    { label: 'ask someone to say it again', pieces: ['outra_vez'] },
+    { label: 'introduce yourself', pieces: ['chamo_me'] },
+  ],
+  work: [
+    { label: 'introduce yourself', pieces: ['chamo_me'] },
+    { label: 'ask who someone is', pieces: ['como_te_chamas'] },
+    { label: 'ask for a repeat without losing face', pieces: ['outra_vez'] },
+    { label: 'buy yourself a moment', pieces: ['agora', 'tens'] },
+    { label: 'be firm without being rude', pieces: ['nao_vou'] },
+    { label: 'check you understood', pieces: ['e_verdade'] },
+  ],
+  curious: [],
+}
+
+export const GOAL_LABEL: Record<Goal, string> = {
+  trip: 'the trip',
+  someone: 'keeping up with them',
+  moving: 'living there',
+  work: 'work',
+  curious: 'no particular destination',
+}

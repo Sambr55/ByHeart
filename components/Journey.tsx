@@ -8,8 +8,34 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
 import { insightsFor } from '@/content/osmosis'
-import { acquirePiece, markOsmosisSeen, setAffinity, voiceLean } from '@/engine/learner'
-import { branchesFor, buildTargetFor, capabilities, useJourney } from '@/engine/journey'
+import {
+  AGE_PAIR,
+  AGE_PAYOFF,
+  AGE_QUESTION,
+  GENDER_PAYOFF,
+  GENDER_QUESTION,
+  GENDER_RULE,
+  GOAL_LABEL,
+  GOAL_NEEDS,
+  GOAL_QUESTION,
+  type AgeBand,
+  type Goal,
+  type LanguageGender,
+} from '@/content/profile'
+import {
+  acquirePiece,
+  markOsmosisSeen,
+  setAffinity,
+  setProfile,
+  voiceLean,
+} from '@/engine/learner'
+import {
+  branchesFor,
+  buildTargetFor,
+  capabilities,
+  nextProfileQuestion,
+  useJourney,
+} from '@/engine/journey'
 import { useLearner } from '@/engine/useLearner'
 import { AudioButton } from './AudioButton'
 
@@ -128,6 +154,8 @@ export function Journey() {
       )
     case 'osmosis':
       return <Osmosis />
+    case 'profile':
+      return <ProfileStep key={step.which} which={step.which} />
     case 'section-complete':
       return <SectionComplete />
     case 'collision':
@@ -786,9 +814,12 @@ function VoiceReflection() {
 function Osmosis() {
   const { next, owned } = useJourney()
   const learner = useLearner()
+  // A question is coming too. Three insights plus a question is more between-sections
+  // than section, so the interstitial gives way rather than the question.
+  const room = nextProfileQuestion() ? 2 : 3
   const insights = useMemo(
-    () => insightsFor(owned, learner.osmosis_seen ?? []),
-    [owned, learner.osmosis_seen],
+    () => insightsFor(owned, learner.osmosis_seen ?? [], room),
+    [owned, learner.osmosis_seen, room],
   )
 
   if (!insights.length) {
@@ -851,6 +882,181 @@ function Osmosis() {
         }}
       />
     </Shell>
+  )
+}
+
+/**
+ * A question about them, and its answer, on one screen.
+ *
+ * Ask and pay out in the same place. A question whose consequence arrives two screens
+ * later, or never, reads as data collection — and the learner is right about that. Each
+ * of these is skippable in one tap, with the skip stated as a loss to them rather than
+ * to us, because that is the truth of it.
+ */
+function ProfileStep({ which }: { which: 'gender' | 'age' | 'goal' }) {
+  const { next, owned } = useJourney()
+  const learner = useLearner()
+  const q = which === 'gender' ? GENDER_QUESTION : which === 'age' ? AGE_QUESTION : GOAL_QUESTION
+  const [answer, setAnswer] = useState<string | null>(null)
+  const [skipped, setSkipped] = useState(false)
+
+  const field = which === 'gender' ? 'gender' : which === 'age' ? 'age_band' : 'goal'
+
+  function choose(id: string) {
+    setAnswer(id)
+    setProfile(field, id)
+    track('profile_answer', { question: which, answer: id })
+  }
+
+  return (
+    <Shell stage="CHOICE">
+      <p className="eyebrow text-accent">{q.asker.toUpperCase()} ASKS</p>
+      <p className="mt-2 text-sm italic text-muted">“{q.askerLine}”</p>
+      <h1 className="display mt-5 text-balance text-2xl">{q.headline}</h1>
+      <p className="mt-3 text-sm leading-relaxed text-muted">{q.why}</p>
+
+      {!answer && !skipped ? (
+        <>
+          <div className="mt-6 space-y-2">
+            {q.options.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                data-testid={'profile-' + o.id}
+                onClick={() => choose(o.id)}
+                className="tap-target flex w-full items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-4 text-left transition hover:border-accent/50"
+              >
+                <span className="eyebrow">{o.label}</span>
+                {o.sub ? <span className="pt text-sm text-accent">{o.sub}</span> : null}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            data-testid="profile-skip"
+            onClick={() => {
+              setSkipped(true)
+              setProfile(field, null)
+              track('profile_skip', { question: which })
+            }}
+            className="tap-target mt-5 w-full text-center text-xs uppercase tracking-wider text-muted underline underline-offset-4"
+          >
+            {q.skip}
+          </button>
+        </>
+      ) : null}
+
+      {skipped ? (
+        <>
+          <p className="animate-bank mt-8 text-sm text-muted">{q.skipNote}</p>
+          <Cta label="CONTINUE" onClick={next} />
+        </>
+      ) : null}
+
+      {answer ? (
+        <>
+          <div className="animate-bank mt-7">
+            {which === 'gender' ? <GenderPayoff gender={answer as LanguageGender} /> : null}
+            {which === 'age' ? <AgePayoff band={answer as AgeBand} /> : null}
+            {which === 'goal' ? <GoalPayoff goal={answer as Goal} owned={owned} /> : null}
+          </div>
+          <Cta label="CONTINUE" onClick={next} />
+        </>
+      ) : null}
+    </Shell>
+  )
+}
+
+/** Their forms, with the ones that are not theirs greyed beside them. */
+function GenderPayoff({ gender }: { gender: LanguageGender }) {
+  return (
+    <div>
+      <p className="eyebrow text-accent">SO THIS IS HOW YOU SPEAK</p>
+      <ul className="mt-4 space-y-3">
+        {GENDER_PAYOFF[gender].map((row) => (
+          <li key={row.en} className="rounded-xl border border-line bg-surface px-4 py-3">
+            <div className="flex flex-wrap items-baseline gap-x-3">
+              <span className="pt text-lg text-fg">{row.yours}</span>
+              <span className="pt text-sm text-muted/60 line-through">{row.theirs}</span>
+            </div>
+            <span className="mt-0.5 block text-xs text-muted">{row.en}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-4 text-sm leading-relaxed">{GENDER_RULE[gender]}</p>
+    </div>
+  )
+}
+
+function AgePayoff({ band }: { band: AgeBand }) {
+  const p = AGE_PAYOFF[band]
+  return (
+    <div>
+      <p className="eyebrow text-accent">SO THIS IS HOW PEOPLE WILL SPEAK TO YOU</p>
+      <p className="display mt-3 text-balance text-xl">{p.headline}</p>
+      <p className="mt-3 text-sm leading-relaxed text-muted">{p.body}</p>
+      <div className="mt-5 space-y-2">
+        <div className="flex items-baseline gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+          <span className="pt text-base text-fg">{AGE_PAIR.tu}</span>
+          <span className="text-[0.6rem] uppercase tracking-wider text-muted">informal</span>
+        </div>
+        <div className="flex items-baseline gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+          <span className="pt text-base text-fg">{AGE_PAIR.voce}</span>
+          <span className="text-[0.6rem] uppercase tracking-wider text-muted">polite</span>
+        </div>
+      </div>
+      <p className="mt-3 text-xs text-muted">Same question. One step apart.</p>
+    </div>
+  )
+}
+
+/** What stands between them and the thing they said they wanted. */
+function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
+  const needs = GOAL_NEEDS[goal]
+  if (!needs.length) {
+    return (
+      <div>
+        <p className="eyebrow text-accent">NO DESTINATION, THEN</p>
+        <p className="display mt-3 text-balance text-xl">
+          We will keep giving you the things people actually say.
+        </p>
+        <p className="mt-3 text-sm text-muted">
+          That is how most people who end up fluent got there, incidentally.
+        </p>
+      </div>
+    )
+  }
+  const has = new Set(owned)
+  const done = needs.filter((n) => n.pieces.every((p) => has.has(p)))
+  return (
+    <div>
+      <p className="eyebrow text-accent">WHAT STANDS BETWEEN YOU AND {GOAL_LABEL[goal].toUpperCase()}</p>
+      <p className="display mt-3 text-balance text-xl">
+        {done.length} of {needs.length} already yours.
+      </p>
+      <ul className="mt-4 space-y-2">
+        {needs.map((n) => {
+          const got = n.pieces.every((p) => has.has(p))
+          return (
+            <li
+              key={n.label}
+              className={
+                'flex items-center gap-3 rounded-xl border px-4 py-2.5 text-sm ' +
+                (got ? 'border-correct/40 bg-correct/5' : 'border-line bg-surface/50 text-muted')
+              }
+            >
+              <span aria-hidden="true" className={got ? 'text-correct' : 'text-muted/50'}>
+                {got ? '✓' : '○'}
+              </span>
+              {n.label}
+            </li>
+          )
+        })}
+      </ul>
+      <p className="mt-4 text-sm text-muted">
+        The rest are in the areas you have not opened yet.
+      </p>
+    </div>
   )
 }
 

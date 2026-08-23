@@ -76,6 +76,8 @@ export type EventName =
   | 'section_decision'
   | 'return_home'
   | 'osmosis_view'
+  | 'profile_answer'
+  | 'profile_skip'
 
 export interface AnalyticsEvent {
   seq: number

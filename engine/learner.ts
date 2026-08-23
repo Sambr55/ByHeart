@@ -98,6 +98,17 @@ export interface LearnerState {
   voice_signals: VoiceSignal[]
   /** Grammar points already surfaced, so no section repeats another section's. */
   osmosis_seen: string[]
+  /**
+   * What they told us about themselves, and what it is for. `gender` is grammatical —
+   * which endings they use — not an identity claim. Every field is optional because
+   * every question is skippable, and a skip is recorded as a skip rather than a blank.
+   */
+  profile: {
+    gender: 'm' | 'f' | null
+    age_band: string | null
+    goal: string | null
+    skipped: string[]
+  }
   created_at: string
   missions_completed: MissionId[]
   /** ISO timestamp each mission finished, for previous_session_age_hours. */
@@ -126,6 +137,7 @@ export function emptyLearner(): LearnerState {
     tester_label: '',
     voice_signals: [],
     osmosis_seen: [],
+    profile: { gender: null, age_band: null, goal: null, skipped: [] },
     created_at: new Date().toISOString(),
     missions_completed: [],
     mission_completed_at: {},
@@ -240,6 +252,17 @@ export function markOsmosisSeen(ids: string[]) {
   })
 }
 
+export function setProfile(field: 'gender' | 'age_band' | 'goal', value: string | null) {
+  update((s) => {
+    s.profile = { ...(s.profile ?? { gender: null, age_band: null, goal: null, skipped: [] }) }
+    if (value === null) {
+      s.profile.skipped = [...new Set([...s.profile.skipped, field])]
+    } else {
+      ;(s.profile as Record<string, unknown>)[field] = value
+    }
+  })
+}
+
 export function voiceLean(): { lean: string; count: number } | null {
   const signals = getLearner().voice_signals
   if (signals.length < 3) return null
@@ -269,6 +292,7 @@ export async function syncSession(reason: string): Promise<boolean> {
         reason,
         experiment: s.experiment,
         affinity: s.affinity,
+        profile: s.profile,
         inventory: s.inventory,
         voice_signals: s.voice_signals,
         evidence: s.evidence.slice(-400),

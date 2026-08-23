@@ -48,6 +48,7 @@ export type Step =
   | { kind: 'root'; rootId: string; beat: RootBeat; pieceIndex?: number }
   | { kind: 'collision'; collisionId: string }
   | { kind: 'osmosis' }
+  | { kind: 'profile'; which: 'gender' | 'age' | 'goal' }
   | { kind: 'section-complete' }
   | { kind: 'nocue'; i: number }
   | { kind: 'cansay' }
@@ -159,6 +160,15 @@ const initial: JourneyState = {
   collisionsPlayed: [],
   answers: {},
   complete: false,
+}
+
+/** Gender first, then age, then why. Skipped counts as answered — we do not re-ask. */
+export function nextProfileQuestion(): 'gender' | 'age' | 'goal' | null {
+  const p = getLearner().profile ?? { gender: null, age_band: null, goal: null, skipped: [] }
+  if (!p.gender && !p.skipped.includes('gender')) return 'gender'
+  if (!p.age_band && !p.skipped.includes('age_band')) return 'age'
+  if (!p.goal && !p.skipped.includes('goal')) return 'goal'
+  return null
 }
 
 function rootSteps(root: Root): Step[] {
@@ -370,7 +380,12 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
       if (bridging) steps.push({ kind: 'collision', collisionId: bridging.id })
 
       steps.push(...roots.flatMap((r) => rootSteps(r)))
-      steps.push({ kind: 'osmosis' }, { kind: 'section-complete' })
+      steps.push({ kind: 'osmosis' })
+      // One question between sections, never two, and only once the learner has
+      // something to show for the time they have given us.
+      const due = nextProfileQuestion()
+      if (due) steps.push({ kind: 'profile', which: due })
+      steps.push({ kind: 'section-complete' })
       dispatch({
         type: 'append',
         steps,
