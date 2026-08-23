@@ -60,6 +60,19 @@ export type EventName =
   | 'delayed_recall'
   | 'delayed_recall_score'
   | 'interview_tag'
+  // v0.6 journey — §17.13
+  | 'culture_start_choice'
+  | 'next_root_choice'
+  | 'root_view'
+  | 'root_familiarity'
+  | 'branch_reveal'
+  | 'build_attempt'
+  | 'voice_choice'
+  | 'voice_reflection'
+  | 'collision_attempt'
+  | 'no_cue_attempt'
+  | 'capability_view'
+  | 'session_sync'
 
 export interface AnalyticsEvent {
   seq: number

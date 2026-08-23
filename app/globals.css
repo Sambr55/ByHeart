@@ -26,6 +26,13 @@
   Landing in Lisbon strips every aviation cue, including the palette.
   Warm ground, azulejo blue. The learner should feel the film leave the room.
 */
+/*
+  The cue fading out. LANDING and DEMO carry the brand; ROOT gives the cultural thought
+  space; CHOICE is neutral because the learner is deciding, not being sold to; REAL WORLD
+  strips everything back, because the absence of culture is the point (§16).
+*/
+[data-stage="REAL WORLD"],
+[data-stage="CHOICE"],
 [data-stage="LISBON"] {
   --bg: #0c0b09;
   --bg-elev: #171410;
@@ -102,6 +109,7 @@ body {
   background-size: 100% 40px;
 }
 
+[data-stage="REAL WORLD"] .instrument-field,
 [data-stage="LISBON"] .instrument-field {
   /* No altitude lines in Lisbon — the aviation motif is gone, not restyled. */
   background-image: none;

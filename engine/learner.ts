@@ -9,8 +9,14 @@
  * tester's own phone plus a resume link that carries the whole state in the URL.
  */
 
-import type { BlockId, MissionId, PropertyId } from '@/content/types'
+import type { MissionId, PropertyId } from '@/content/types'
 import { BLOCK_ORDER, TARGETS } from '@/content/targets'
+
+/**
+ * A piece id. The two original missions used a closed PieceId union; the v0.6 root
+ * graph mints pieces from content, so this is deliberately open.
+ */
+export type PieceId = string
 
 const KEY = 'byheart.learner.v1'
 const VERSION = 1
@@ -38,7 +44,7 @@ export type EvidenceType =
   | 'delayed_recall'
 
 export interface LearningEvidence {
-  target_id: BlockId
+  target_id: PieceId
   event_type: EvidenceType
   correct_first_try: boolean
   hint_count: number
@@ -52,7 +58,7 @@ export interface LearningEvidence {
 }
 
 export interface InventoryItem {
-  target_id: BlockId
+  target_id: PieceId
   acquired_source: PropertyId | null
   reinforced_sources: PropertyId[]
   latest_state: InventoryState
@@ -73,9 +79,23 @@ export interface Experiment {
   cohort_tag: string
 }
 
+export interface VoiceSignal {
+  signal: string
+  pt: string
+  at: string
+}
+
 export interface LearnerState {
   version: number
   learner_id: string
+  /**
+   * Who this is, for multi-user testing. Set from ?tester= on the link the facilitator
+   * sends, or typed on the way in. Never used for anything but joining a session to a
+   * feedback form.
+   */
+  tester_label: string
+  /** §12 — collected invisibly through meaningful choices, never a personality quiz. */
+  voice_signals: VoiceSignal[]
   created_at: string
   missions_completed: MissionId[]
   /** ISO timestamp each mission finished, for previous_session_age_hours. */
@@ -101,6 +121,8 @@ export function emptyLearner(): LearnerState {
   return {
     version: VERSION,
     learner_id: uid(),
+    tester_label: '',
+    voice_signals: [],
     created_at: new Date().toISOString(),
     missions_completed: [],
     mission_completed_at: {},
@@ -196,6 +218,62 @@ export function setFamiliarity(property: PropertyId, value: number) {
   })
 }
 
+export function setTester(label: string) {
+  update((s) => {
+    s.tester_label = label.trim().slice(0, 60)
+  })
+}
+
+/** §12 — after three to five signals the product may reflect something back. */
+export function recordVoiceSignal(signal: string, pt: string) {
+  update((s) => {
+    s.voice_signals = [...s.voice_signals, { signal, pt, at: new Date().toISOString() }]
+  })
+}
+
+export function voiceLean(): { lean: string; count: number } | null {
+  const signals = getLearner().voice_signals
+  if (signals.length < 3) return null
+  const tally: Record<string, number> = {}
+  for (const s of signals) tally[s.signal] = (tally[s.signal] ?? 0) + 1
+  const [lean] = Object.entries(tally).sort((a, b) => b[1] - a[1])[0]
+  return { lean, count: signals.length }
+}
+
+/**
+ * Push the whole session somewhere a facilitator can read it. Multi-user testing on
+ * twelve phones is unreadable if each phone keeps its own record — but a failed POST
+ * must never cost the tester anything, so this is fire-and-forget and the local copy
+ * stays authoritative.
+ */
+export async function syncSession(reason: string): Promise<boolean> {
+  if (typeof window === 'undefined') return false
+  const s = getLearner()
+  try {
+    const res = await fetch('/api/session', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        session_id: s.learner_id,
+        tester_label: s.tester_label,
+        recorded_at: new Date().toISOString(),
+        reason,
+        experiment: s.experiment,
+        affinity: s.affinity,
+        inventory: s.inventory,
+        voice_signals: s.voice_signals,
+        evidence: s.evidence.slice(-400),
+        missions_completed: s.missions_completed,
+        user_agent: navigator.userAgent,
+      }),
+    })
+    const body = await res.json()
+    return Boolean(body?.stored)
+  } catch {
+    return false
+  }
+}
+
 export function setDisplayName(name: string) {
   update((s) => {
     s.display_name = name.trim()
@@ -228,7 +306,7 @@ export function hoursSinceLastMission(): number | null {
  * −1 when the answer had to be revealed. The events are stored, not just the total,
  * so a better model can be fitted later without re-running any tester.
  */
-export function scoreFor(target: BlockId): number {
+export function scoreFor(target: PieceId): number {
   const evidence = getLearner().evidence.filter((e) => e.target_id === target)
   let score = 0
   for (const e of evidence) {
@@ -247,7 +325,7 @@ export function scoreFor(target: BlockId): number {
   return score
 }
 
-function deriveState(target: BlockId): InventoryState {
+function deriveState(target: PieceId): InventoryState {
   const evidence = getLearner().evidence.filter((e) => e.target_id === target)
   if (!evidence.length) return 'NEW'
 
@@ -291,7 +369,8 @@ export function recordEvidence(
         }
 
     if (ev.event_type === 'acquire' && !existing.acquired_source) {
-      existing.acquired_source = ev.culture_context ?? TARGETS[ev.target_id].source
+      existing.acquired_source =
+        ev.culture_context ?? TARGETS[ev.target_id as keyof typeof TARGETS]?.source ?? null
     }
     if (
       ev.event_type === 'reinforce' &&
@@ -323,18 +402,34 @@ export function recordEvidence(
   })
 }
 
-/** Blocks the learner has met at all, in curriculum order. */
-export function ownedBlocks(): BlockId[] {
+/** Blocks the learner has met at all, in curriculum order then arrival order. */
+export function ownedBlocks(): PieceId[] {
   const s = getLearner()
-  return BLOCK_ORDER.filter((b) => s.inventory[b])
+  const known = BLOCK_ORDER.filter((b) => s.inventory[b])
+  const rest = Object.keys(s.inventory).filter((b) => !known.includes(b as never))
+  return [...known, ...rest]
 }
 
-export function itemFor(target: BlockId): InventoryItem | undefined {
+/** Bank a piece from the root graph. */
+export function acquirePiece(id: PieceId, family: string) {
+  recordEvidence({
+    target_id: id,
+    event_type: 'acquire',
+    correct_first_try: true,
+    hint_count: 0,
+    revealed: false,
+    latency_ms: 0,
+    culture_context: family as PropertyId,
+    mission_id: null,
+  })
+}
+
+export function itemFor(target: PieceId): InventoryItem | undefined {
   return getLearner().inventory[target]
 }
 
 /** Weakest first: reveals, then hints, then slow. Drives deck selection (§9). */
-export function weakestBlocks(limit: number, pool?: BlockId[]): BlockId[] {
+export function weakestBlocks(limit: number, pool?: PieceId[]): PieceId[] {
   const s = getLearner()
   const candidates = pool ?? ownedBlocks()
   return [...candidates]

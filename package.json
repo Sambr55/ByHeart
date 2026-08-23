@@ -10,7 +10,8 @@
     "audio:generate": "tsx scripts/generate-audio.ts",
     "check": "npm run lint:content && next build",
     "walkthrough": "tsx scripts/walkthrough.ts",
-    "shots": "tsx scripts/screenshots.ts"
+    "shots": "tsx scripts/screenshots.ts",
+    "journey": "tsx scripts/journey-smoke.ts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

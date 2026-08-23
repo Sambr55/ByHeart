@@ -1,5 +1,7 @@
 import { BLOCK_AUDIO, EXAMPLES, TARGETS } from './targets'
 import { BLOCK_ORDER } from './targets'
+import { COLLISIONS, ROOTS } from './roots'
+import { NO_CUE_PROMPTS } from './front-door'
 
 /** Deterministic slug for any Portuguese string, so generation and playback agree. */
 export function slugify(text: string): string {
@@ -64,5 +66,20 @@ export const AUDIO_MANIFEST: AudioEntry[] = (() => {
       kind: 'example',
     })
   }
+  // Everything the v0.6 root graph can speak. Roots, their branches, their culture-free
+  // release, the collisions and the no-cue prompts — the whole spoken surface.
+  const add = (text: string) => {
+    const slug = slugify(text)
+    if (!bySlug.has(slug)) bySlug.set(slug, { slug, text, kind: 'example' })
+  }
+  for (const root of ROOTS) {
+    add(root.pt_natural)
+    root.branches.forEach((b) => add(b.pt))
+    root.extracts.forEach((e) => add(e.pt.replace('…', '').trim()))
+    root.voice_options?.forEach((v) => add(v.pt))
+    add(root.transfer_prompt.answer)
+  }
+  COLLISIONS.forEach((c) => add(c.answer))
+  NO_CUE_PROMPTS.forEach((p) => add(p.answer))
   return [...bySlug.values()]
 })()

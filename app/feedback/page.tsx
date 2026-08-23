@@ -82,8 +82,7 @@ export default function FeedbackPage() {
       <h1 className="display text-balance text-3xl">Now take it apart.</h1>
       <p className="mt-3 text-sm text-muted">
         Be as critical as you can be. Praise is pleasant and useless; the sharpest
-        thing you say is the most valuable thing on this page. Skip anything you have
-        no view on.
+        thing you say is the most valuable thing on this page.
       </p>
 
       <div className="mt-8 space-y-8">
@@ -148,27 +147,6 @@ function Field({
               onChange={(e) => onChange(e.target.value)}
               className="mt-3 w-full rounded-xl border border-line bg-surface p-3 text-sm text-fg outline-none focus:border-accent"
             />
-          ) : null}
-
-          {question.kind === 'choice' ? (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {question.options?.map((o) => (
-                <button
-                  key={o.id}
-                  type="button"
-                  aria-pressed={value === o.id}
-                  onClick={() => onChange(o.id)}
-                  className={
-                    'tap-target rounded-lg border px-3 py-2 text-sm transition ' +
-                    (value === o.id
-                      ? 'border-accent bg-accent/10'
-                      : 'border-line bg-surface')
-                  }
-                >
-                  {o.label}
-                </button>
-              ))}
-            </div>
           ) : null}
 
           {question.kind === 'scale' ? (

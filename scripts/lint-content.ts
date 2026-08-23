@@ -20,6 +20,7 @@ import {
 } from '../content/targets'
 import { AUDIO_MANIFEST, normalisePhrase, slugFor } from '../content/audio-manifest'
 import { ANCHOR_CARDS, BLOCK_CARDS, COMBINATION_CARDS } from '../content/deck'
+import { COLLISIONS, FAMILIES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
 import { CULTURE_FREE_STAGES, isExercise, type BlockId, type Mission, type Screen } from '../content/types'
 
 const errors: string[] = []
@@ -376,6 +377,80 @@ for (const phrase of spoken) {
 }
 for (const e of EXAMPLES) {
   if (!TARGETS[e.target_id]) fail('Example ' + e.example_id + ' has an unknown target')
+}
+
+
+
+// ---------------------------------------------------------------------------
+// v0.6 root graph — §05, §10, §B10
+// ---------------------------------------------------------------------------
+{
+
+  for (const root of ROOTS) {
+    const R = 'root ' + root.root_id + ': '
+    // The bridge is what stops the product jumping from a famous name to merely
+    // adjacent vocabulary. A root without one is not shippable (§10).
+    if (!root.semantic_bridge.trim()) fail(R + 'has no semantic bridge')
+    if (root.semantic_bridge.trim().length < 40) {
+      warn(R + 'semantic bridge is very short — check it actually explains the crossing')
+    }
+    if (!root.subtext.trim()) fail(R + 'has no subtext (§07.2 requires how it feels in use)')
+    if (!root.extracts.length || root.extracts.length > 3) {
+      fail(R + 'has ' + root.extracts.length + ' extracts; the spec allows 1–3')
+    }
+    if (root.branches.length < 3) {
+      fail(R + 'branches into ' + root.branches.length + '; §05 requires at least 3')
+    }
+    if (!root.transfer_prompt?.answer) fail(R + 'has no culture-free release')
+    if (root.transfer_prompt?.answer === root.pt_natural) {
+      fail(R + 'release repeats the root line, so it proves nothing')
+    }
+    for (const p of root.reinforces) {
+      if (!PIECES[p]) fail(R + 'claims to reinforce "' + p + '", which no root teaches')
+    }
+    // §14: extract from pieces genuinely contained in, or immediately implied by, the
+    // natural Portuguese — not from anything that happens to be useful.
+    const line = root.pt_natural.toLowerCase()
+    for (const e of root.extracts) {
+      const stem = e.pt.replace(/[…?]/g, '').trim().toLowerCase().split(' ')[0]
+      if (stem.length > 2 && !line.includes(stem)) {
+        warn(R + 'extract "' + e.pt + '" is not visible in "' + root.pt_natural + '"')
+      }
+    }
+  }
+
+  for (const family of FAMILIES) {
+    const roots = ROOTS_BY_FAMILY[family.id] ?? []
+    const freebies = roots.filter((r) => r.freebie_flag)
+    // §B10 — maximum one freebie per cultural family per session.
+    if (freebies.length > 1) {
+      fail('family ' + family.id + ' has ' + freebies.length + ' freebies; the cap is one')
+    }
+    const strong = roots.filter((r) => !r.freebie_flag)
+    if (strong.length < 4) {
+      fail(
+        'family ' + family.id + ' has ' + strong.length +
+          ' strong roots; §17.4 requires at least 4',
+      )
+    }
+  }
+
+  // §11 — a collision must genuinely span two cultural worlds, or it is just revision.
+  for (const c of COLLISIONS) {
+    const families = new Set(c.requires.map((p) => PIECES[p]?.family).filter(Boolean))
+    for (const p of c.requires) {
+      if (!PIECES[p]) fail('collision ' + c.id + ' needs "' + p + '", which no root teaches')
+    }
+    if (families.size < 2) {
+      fail('collision ' + c.id + ' draws on ' + families.size + ' family; §11 requires two')
+    }
+    if (!c.provenance.trim()) warn('collision ' + c.id + ' surfaces no provenance after success')
+  }
+
+  console.log(
+    ROOTS.length + ' roots · ' + FAMILIES.length + ' families · ' +
+      Object.keys(PIECES).length + ' pieces · ' + COLLISIONS.length + ' collisions',
+  )
 }
 
 // --- report ----------------------------------------------------------------

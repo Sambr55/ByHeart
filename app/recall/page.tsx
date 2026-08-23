@@ -57,7 +57,7 @@ export default function RecallPage() {
 
   const items = useMemo<Item[]>(() => {
     if (!ready) return []
-    const owned = ownedBlocks()
+    const owned = ownedBlocks().filter((b): b is BlockId => b in BLOCK_CARDS)
     return buildRecallSet(8).map((block) => {
       const card = BLOCK_CARDS[block]
       const answer = card.reveal[0].pt

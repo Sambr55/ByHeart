@@ -21,6 +21,9 @@ import {
 } from '@/content/deck'
 import { getLearner, itemFor, ownedBlocks, weakestBlocks } from './learner'
 
+/** The inventory is open-keyed now; only pieces with a card can enter the deck. */
+const hasCard = (id: string): id is BlockId => id in BLOCK_CARDS
+
 export type SelectionReason =
   | 'anchor'
   | 'needs another look'
@@ -57,7 +60,7 @@ function decorate(t: DeckCardTemplate, reason: SelectionReason): DeckCard {
 }
 
 export function buildDeck(): DeckCard[] {
-  const owned = new Set(ownedBlocks())
+  const owned = new Set(ownedBlocks().filter(hasCard))
   const cards: DeckCard[] = []
   const usedBlocks = new Set<BlockId>()
 
@@ -74,12 +77,14 @@ export function buildDeck(): DeckCard[] {
   }
 
   // 2. Weakest three.
-  const weak = weakestBlocks(6).filter((b) => !usedBlocks.has(b))
+  const weak = weakestBlocks(6).filter(
+    (b): b is BlockId => hasCard(b) && !usedBlocks.has(b as BlockId),
+  )
   for (const b of weak.slice(0, 3)) take(BLOCK_CARDS[b], 'needs another look')
 
   // 3. Newest blocks not already covered.
   const newest = [...owned]
-    .filter((b) => !usedBlocks.has(b))
+    .filter((b) => hasCard(b) && !usedBlocks.has(b))
     .sort((a, b) => {
       const ea = getLearner().evidence.findLast((e) => e.target_id === a)
       const eb = getLearner().evidence.findLast((e) => e.target_id === b)
@@ -105,8 +110,8 @@ export function buildDeck(): DeckCard[] {
 
 /** Prompts for the 24–72 hour recall: weak first, then a spread across both worlds. */
 export function buildRecallSet(limit = 8): BlockId[] {
-  const owned = ownedBlocks()
-  const weak = weakestBlocks(limit, owned)
+  const owned = ownedBlocks().filter(hasCard)
+  const weak = weakestBlocks(limit, owned).filter(hasCard)
   const rest = owned.filter((b) => !weak.includes(b))
   return [...weak, ...rest].slice(0, limit)
 }

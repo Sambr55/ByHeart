@@ -51,6 +51,7 @@ export default function FacilitatorPage() {
       </p>
 
       <Section title="This tester">
+        <Row k="Tester" v={learner.tester_label || '(unlabelled)'} />
         <Row k="Learner" v={learner.learner_id.slice(0, 8)} />
         <Row k="Arm" v={learner.experiment.test_variant} />
         <Row k="Condition" v={learner.experiment.same_or_delayed} />
@@ -70,15 +71,21 @@ export default function FacilitatorPage() {
         />
       </Section>
 
+      <TesterLinks />
+
       <Section title="Start a run">
+        <div className="flex items-center justify-between gap-3 py-1.5">
+          <span className="text-sm font-semibold">DUB journey (v0.6)</span>
+          <span className="flex gap-2">
+            <Pill href="/">open</Pill>
+            <Pill href="/?tester=demo">as “demo”</Pill>
+          </span>
+        </div>
         {MISSION_ORDER.map((id) => (
           <div key={id} className="flex items-center justify-between gap-3 py-1.5">
             <span className="text-sm">{MISSIONS[id].property_label}</span>
             <span className="flex gap-2">
-              <Pill href={id === 'mission_01' ? '/' : '/m2'}>full</Pill>
-              <Pill href={(id === 'mission_01' ? '/' : '/m2') + '?variant=neutral'}>
-                neutral
-              </Pill>
+              <Pill href={id === 'mission_01' ? '/tg' : '/m2'}>legacy</Pill>
             </span>
           </div>
         ))}
@@ -152,6 +159,58 @@ export default function FacilitatorPage() {
         </Link>
       </div>
     </PageShell>
+  )
+}
+
+/**
+ * One link per tester. The label rides in the URL so a session and a feedback form can
+ * be joined later without asking anyone to type an identifier — the tester just opens
+ * the link they were sent and never sees the plumbing.
+ */
+function TesterLinks() {
+  const [names, setNames] = useState('')
+  const origin = typeof window === 'undefined' ? '' : window.location.origin
+  const links = names
+    .split(/[\n,]/)
+    .map((n) => n.trim())
+    .filter(Boolean)
+    .map((n) => ({ name: n, url: origin + '/?tester=' + encodeURIComponent(n) }))
+
+  return (
+    <Section title="Tester links">
+      <p className="text-xs text-muted">
+        One name per line. Send each person their own link — it tags their session and
+        their feedback so the two can be read together.
+      </p>
+      <textarea
+        rows={4}
+        value={names}
+        onChange={(e) => setNames(e.target.value)}
+        placeholder={'Ana\nMiguel\nSofia'}
+        className="mt-2 w-full rounded-lg border border-line bg-bg-elev p-2 text-sm text-fg outline-none focus:border-accent"
+      />
+      {links.length ? (
+        <ul className="mt-3 space-y-2">
+          {links.map((l) => (
+            <li key={l.name} className="rounded-lg border border-line bg-bg-elev p-2">
+              <p className="text-xs font-semibold">{l.name}</p>
+              <p className="mt-1 break-all font-mono text-[0.6rem] text-muted">{l.url}</p>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {links.length ? (
+        <button
+          type="button"
+          onClick={() =>
+            navigator.clipboard?.writeText(links.map((l) => l.name + ': ' + l.url).join('\n'))
+          }
+          className="tap-target eyebrow mt-2 w-full rounded-lg border border-line px-3 py-2 text-muted"
+        >
+          COPY ALL
+        </button>
+      ) : null}
+    </Section>
   )
 }
 

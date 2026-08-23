@@ -19,6 +19,7 @@ export function buildSubmission(
   return {
     submission_id: uid(),
     learner_id: learner.learner_id,
+    tester_label: learner.tester_label,
     submitted_at: new Date().toISOString(),
     feedback_version: FEEDBACK_VERSION,
     missions_completed: learner.missions_completed,

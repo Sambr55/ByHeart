@@ -1,133 +1,98 @@
 import type { MissionId } from './types'
 
 /**
- * Tester feedback.
+ * The five questions. §19, with §18A explaining why each exists: every one closes a
+ * loop the product itself opened. None of it is satisfaction research.
  *
- * ⚠️ PLACEHOLDER SET. The questions Sam attached did not come through with the
- * request, so this is seeded from the facilitator interview script in the Mission 02
- * spec (Appendix B) plus the roast-test questions in §11. Replace `QUESTIONS` with
- * the attached set — the capture screen, the API, the store and the collation table
- * are all driven from this array, so swapping it changes everything downstream.
- *
- * Design rules carried over from §11, because they are what make the answers worth
- * collecting at all:
- *   - never open with "did you like it?"
- *   - never supply the desired answer inside the question
- *   - ask for the strongest argument against, not for reassurance
- *   - capture performance before opinion, which the mission flow already does
+ * The spec is emphatic that this stays at exactly five — no NPS, no demographics, no
+ * "what next?" (that signal is captured through the in-product cultural choices before
+ * the form), no optional "why?" fields, no extra diagnostics. Delayed recall runs as a
+ * separate research follow-up rather than being bolted on here.
  */
 
-export type QuestionKind = 'text' | 'scale' | 'choice'
+export type QuestionKind = 'text' | 'scale'
 
 export interface Question {
   id: string
   prompt: string
-  /** Shown under the prompt in small type. */
   hint?: string
   kind: QuestionKind
-  required?: boolean
-  /** scale only */
+  required: boolean
   points?: { value: number; label: string }[]
-  /** choice only */
-  options?: { id: string; label: string }[]
+  /** The product beat this closes the loop on (§18A). Facilitator-facing. */
+  closes: string
 }
 
-export const FEEDBACK_VERSION = 'placeholder-appendix-b-v1'
+export const FEEDBACK_VERSION = 'v0.6-five-question-spine'
 
 export const QUESTIONS: Question[] = [
   {
-    id: 'what_is_it_for',
-    prompt: 'Without anyone explaining it, what do you think this is trying to do?',
+    id: 'what_is_it',
+    prompt: 'In one sentence, what do you think this product is?',
     kind: 'text',
     required: true,
+    closes: 'Landing proposition — is DUB a recognisably different way to learn?',
   },
   {
-    id: 'what_learned',
-    prompt: 'What do you believe you learned?',
+    id: 'what_you_remember',
+    prompt: 'Without looking back, what Portuguese words or phrases can you remember?',
+    hint: 'Don’t scroll back. Whatever comes out is the answer.',
     kind: 'text',
     required: true,
+    closes: 'Demo and roots — does familiar culture create memorable hooks?',
   },
   {
-    id: 'unprompted_recall',
-    prompt: 'Type as much Portuguese as you can remember right now.',
-    hint: 'Do not scroll back. Whatever comes out is the answer.',
-    kind: 'text',
+    id: 'familiarity_helped',
+    prompt:
+      'Did starting with something culturally familiar make the Portuguese easier to understand and remember?',
+    kind: 'scale',
     required: true,
+    points: [
+      { value: 1, label: 'Not at all' },
+      { value: 2, label: 'A little' },
+      { value: 3, label: 'Somewhat' },
+      { value: 4, label: 'Quite a lot' },
+      { value: 5, label: 'Enormously' },
+    ],
+    closes: 'Learner-chosen starting point — does personal familiarity help?',
   },
   {
-    id: 'strongest_argument_against',
-    prompt: 'What is the strongest argument that this does not work?',
+    id: 'real_conversation_confidence',
+    prompt:
+      'How confident do you feel that you could use something you just learned in a real conversation?',
+    kind: 'scale',
+    required: true,
+    points: [
+      { value: 1, label: 'Not at all confident' },
+      { value: 2, label: 'Slightly' },
+      { value: 3, label: 'Moderately' },
+      { value: 4, label: 'Quite confident' },
+      { value: 5, label: 'Very confident' },
+    ],
+    closes: 'Build → collision → no-cue release — does the language escape its source?',
+  },
+  {
+    id: 'why_not_return',
+    prompt:
+      'Be brutal: what is the biggest reason you would NOT come back and use this again?',
     hint: 'This is the most useful box on the page.',
     kind: 'text',
     required: true,
-  },
-  {
-    id: 'culture_helped',
-    prompt: 'Where did the culture genuinely help your memory, and where was it just decoration?',
-    kind: 'text',
-  },
-  {
-    id: 'switch_point',
-    prompt: 'At what point, if any, did you stop thinking about the films and start thinking in Portuguese?',
-    kind: 'text',
-  },
-  {
-    id: 'second_helped_first',
-    prompt: 'Did the second world make anything from the first world feel easier? Give a concrete example.',
-    kind: 'text',
-  },
-  {
-    id: 'weak_or_fake',
-    prompt: 'What felt weak, fake, childish, over-designed or too easy?',
-    kind: 'text',
-  },
-  {
-    id: 'remove_entirely',
-    prompt: 'What part would you remove entirely?',
-    kind: 'text',
-  },
-  {
-    id: 'unfamiliar_culture',
-    prompt: 'Would this still work with culture you do not know well? Why?',
-    kind: 'text',
-  },
-  {
-    id: 'stop_after_three_days',
-    prompt: 'What would make you stop using this after three days?',
-    kind: 'text',
-  },
-  {
-    id: 'would_open_tomorrow',
-    prompt: 'If I sent you a five-minute deck tomorrow, would you open it?',
-    kind: 'choice',
-    options: [
-      { id: 'yes', label: 'Yes' },
-      { id: 'probably', label: 'Probably' },
-      { id: 'probably_not', label: 'Probably not' },
-      { id: 'no', label: 'No' },
-    ],
-    required: true,
-  },
-  {
-    id: 'would_miss',
-    prompt: 'Imagine this prototype is deleted tonight. What, if anything, would you actually miss?',
-    hint: 'If the honest answer is "nothing", say nothing.',
-    kind: 'text',
-    required: true,
+    closes: 'The whole experience — is the difference enough to earn another session?',
   },
 ]
 
 export interface FeedbackSubmission {
   submission_id: string
   learner_id: string
+  /** Who this was, for multi-user testing. */
+  tester_label: string
   submitted_at: string
   feedback_version: string
-  /** Which missions this tester had actually done when they answered. */
   missions_completed: MissionId[]
   test_variant: string
   cohort_tag: string
   answers: Record<string, string | number>
-  /** Performance travels with the opinion, or the opinion cannot be read. */
   performance: Record<string, unknown>
   user_agent: string
 }
