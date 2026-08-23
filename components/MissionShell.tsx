@@ -24,7 +24,10 @@ export function MissionShell({ children }: { children: ReactNode }) {
       <StageRail current={stage} index={state.index} />
 
       <main className="instrument-field flex-1">
-        <div key={screen.id} className="animate-rise mx-auto w-full max-w-md px-5 py-6">
+        <div
+          key={screen.id}
+          className="animate-rise mx-auto flex min-h-[calc(100dvh-9.5rem)] w-full max-w-md flex-col px-5 py-6"
+        >
           {children}
         </div>
       </main>
@@ -44,12 +47,7 @@ function StageRail({ current, index }: { current: Stage; index: number }) {
   return (
     <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
       <div className="mx-auto w-full max-w-md px-5 pb-2 pt-3">
-        <div className="flex items-baseline justify-between">
-          <p className="eyebrow text-accent">{current}</p>
-          <p className="text-[0.65rem] tabular-nums text-muted">
-            {index + 1} / {SCREENS.length}
-          </p>
-        </div>
+        <p className="eyebrow text-accent">{current}</p>
         <div className="mt-2 flex gap-1" aria-hidden="true">
           {STAGES.map((s, i) => {
             const screensInStage = SCREENS.filter((sc) => sc.stage === s)
@@ -95,7 +93,7 @@ export function Continue({
       data-testid="continue"
       onClick={onClick}
       disabled={disabled}
-      className="tap-target eyebrow mt-6 w-full rounded-xl bg-accent px-5 py-4 text-accent-ink transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-chip disabled:text-muted"
+      className="tap-target eyebrow mt-auto w-full rounded-xl mt-6 bg-accent px-5 py-4 text-accent-ink transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-chip disabled:text-muted"
     >
       {label}
     </button>

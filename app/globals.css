@@ -19,7 +19,7 @@
   --correct: #74d19a;
   --coach: #e8b04b;       /* wrong answers coach in amber, never red */
   --chip: #1a222b;
-  --grid: rgba(232, 176, 75, 0.08);
+  --grid: rgba(232, 176, 75, 0.045);
 }
 
 /*

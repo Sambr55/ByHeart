@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import type { TilesScreen } from '@/content/types'
-import { slugFor } from '@/content/audio-manifest'
+import { canonicalPhrase, slugFor } from '@/content/audio-manifest'
 import { evaluateTiles } from '@/engine/hints'
 import { useExercise } from '@/engine/useExercise'
 import { track } from '@/engine/analytics'
@@ -21,10 +21,11 @@ export function TileBuilder({ screen }: { screen: TilesScreen }) {
   const { feedback, solved, revealed, submit } = useExercise(screen)
   const [placed, setPlaced] = useState<string[]>([])
 
-  const answerText = screen.answer
+  const built = screen.answer
     .map((id) => screen.tiles.find((t) => t.id === id)!.text)
     .join(' ')
     .replace(/ \?$/, '?')
+  const answerText = canonicalPhrase(built)
 
   const shown = revealed ? screen.answer : placed
   const pool = screen.tiles.filter((t) => !shown.includes(t.id))
@@ -99,7 +100,7 @@ export function TileBuilder({ screen }: { screen: TilesScreen }) {
       {solved ? (
         <div className="mt-4 flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
           <AudioButton
-            slug={slugFor(answerText)}
+            slug={slugFor(built)}
             text={answerText}
             screenId={screen.id}
           />

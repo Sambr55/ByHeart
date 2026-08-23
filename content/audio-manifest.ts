@@ -17,6 +17,17 @@ export function slugFor(text: string): string {
   return byText.get(text) ?? slugify(text)
 }
 
+const bySlug = new Map(EXAMPLES.map((e) => [e.audio_asset, e.pt_text]))
+
+/**
+ * Tiles carry bare words, so a built sentence comes out unpunctuated ("Vem comigo").
+ * Display the reviewed form from the QA sheet instead — the Portuguese is the hero,
+ * and it should never appear on screen in a shape a native reviewer never signed off.
+ */
+export function canonicalPhrase(text: string): string {
+  return bySlug.get(slugFor(text)) ?? text
+}
+
 export interface AudioEntry {
   slug: string
   text: string
