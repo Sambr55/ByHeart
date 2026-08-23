@@ -21,6 +21,7 @@ import {
 import { AUDIO_MANIFEST, normalisePhrase, slugFor } from '../content/audio-manifest'
 import { ANCHOR_CARDS, BLOCK_CARDS, COMBINATION_CARDS } from '../content/deck'
 import { COLLISIONS, FAMILIES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
+import { INSIGHTS } from '../content/osmosis'
 import { branchesFor, buildTargetFor } from '../engine/journey'
 import { CULTURE_FREE_STAGES, isExercise, type BlockId, type Mission, type Screen } from '../content/types'
 
@@ -518,6 +519,54 @@ for (const e of EXAMPLES) {
       Object.keys(PIECES).length + ' pieces · ' + COLLISIONS.length + ' collisions · ' +
       (15 - pairs.length) + '/15 family pairs collide',
   )
+}
+
+
+
+// ---------------------------------------------------------------------------
+// Osmosis interstitials — the claims made about what a learner absorbed
+// ---------------------------------------------------------------------------
+{
+  const all = ROOTS.flatMap((r) => [
+    r.pt_natural,
+    r.transfer_prompt.answer,
+    ...r.branches.map((b) => b.pt),
+    ...r.extracts.map((e) => e.pt),
+    ...(r.voice_options ?? []).map((v) => v.pt),
+  ])
+    .join(' | ')
+    .toLowerCase()
+
+  for (const i of INSIGHTS) {
+    const I = 'insight ' + i.id + ': '
+    for (const p of i.requires) {
+      if (!PIECES[p]) fail(I + 'requires "' + p + '", which no root teaches')
+    }
+    if (!i.requires.length) fail(I + 'fires for everyone, so it is not about their session')
+    // Evidence must be something they actually saw. Quoting an invented example turns
+    // "look what you did" into a lie the attentive ones will catch.
+    for (const e of i.evidence) {
+      const needle = e.pt.replace(/[.?!]$/, '').toLowerCase()
+      if (!all.includes(needle)) {
+        fail(I + 'quotes "' + e.pt + '", which appears in no root the learner could have seen')
+      }
+    }
+    if (/conjugat|reflexiv|preterite|imperative|periphrast|enclitic|demonstrativ/i.test(i.headline)) {
+      fail(I + 'headline uses grammar jargon; it belongs in proper_name, not the headline')
+    }
+  }
+
+  // A section that ends with nothing to say about itself is a wasted screen.
+  for (const family of FAMILIES) {
+    const owned = new Set(
+      (ROOTS_BY_FAMILY[family.id] ?? []).flatMap((r) => r.extracts.map((e) => e.id)),
+    )
+    const fires = INSIGHTS.filter((i) => i.requires.every((p) => owned.has(p)))
+    if (!fires.length) {
+      fail('family ' + family.id + ' can finish a section with no osmosis insight to show')
+    }
+  }
+  console.log(INSIGHTS.length + ' osmosis insights, every family covered')
 }
 
 // --- report ----------------------------------------------------------------

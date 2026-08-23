@@ -47,6 +47,7 @@ export type Step =
   | { kind: 'picker' }
   | { kind: 'root'; rootId: string; beat: RootBeat; pieceIndex?: number }
   | { kind: 'collision'; collisionId: string }
+  | { kind: 'osmosis' }
   | { kind: 'section-complete' }
   | { kind: 'nocue'; i: number }
   | { kind: 'cansay' }
@@ -369,7 +370,7 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
       if (bridging) steps.push({ kind: 'collision', collisionId: bridging.id })
 
       steps.push(...roots.flatMap((r) => rootSteps(r)))
-      steps.push({ kind: 'section-complete' })
+      steps.push({ kind: 'osmosis' }, { kind: 'section-complete' })
       dispatch({
         type: 'append',
         steps,

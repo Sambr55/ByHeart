@@ -7,7 +7,8 @@ import { CLOSE, DEMO_BEATS, DEMO_CLOSE, LANDING, NO_CUE_PROMPTS, PICKER } from '
 import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
-import { acquirePiece, setAffinity, setTester, voiceLean } from '@/engine/learner'
+import { insightsFor } from '@/content/osmosis'
+import { acquirePiece, markOsmosisSeen, setAffinity, voiceLean } from '@/engine/learner'
 import { branchesFor, buildTargetFor, capabilities, useJourney } from '@/engine/journey'
 import { useLearner } from '@/engine/useLearner'
 import { AudioButton } from './AudioButton'
@@ -125,6 +126,8 @@ export function Journey() {
           pieceIndex={step.pieceIndex}
         />
       )
+    case 'osmosis':
+      return <Osmosis />
     case 'section-complete':
       return <SectionComplete />
     case 'collision':
@@ -771,6 +774,85 @@ function VoiceReflection() {
 }
 
 // ------------------------------------------------------- agency and payoff
+
+/**
+ * What they picked up without being taught it.
+ *
+ * Deliberately not a lesson. It names things they have already done correctly, quotes
+ * the line they did it in, and puts the technical term last and small — for the two
+ * people in twelve who want it. Nobody is asked to remember any of this, and the screen
+ * says so, because the fastest way to make an easy thing feel hard is to imply a test.
+ */
+function Osmosis() {
+  const { next, owned } = useJourney()
+  const learner = useLearner()
+  const insights = useMemo(
+    () => insightsFor(owned, learner.osmosis_seen ?? []),
+    [owned, learner.osmosis_seen],
+  )
+
+  if (!insights.length) {
+    return (
+      <Shell stage="CHOICE">
+        <div className="flex flex-1 flex-col justify-center">
+          <p className="eyebrow text-accent">STILL IN THERE</p>
+          <p className="display mt-4 text-balance text-2xl">
+            Everything you picked up last time is still holding.
+          </p>
+        </div>
+        <Cta label="CONTINUE" onClick={next} />
+      </Shell>
+    )
+  }
+
+  return (
+    <Shell stage="CHOICE">
+      <p className="eyebrow text-accent">YOU WEREN’T TAUGHT THIS. YOU JUST DID IT.</p>
+      <p className="display mt-3 text-balance text-2xl">
+        {insights.length === 1
+          ? 'One thing you absorbed on the way past.'
+          : insights.length + ' things you absorbed on the way past.'}
+      </p>
+
+      <div className="mt-6 space-y-4">
+        {insights.map((i, n) => (
+          <section
+            key={i.id}
+            style={{ animationDelay: n * 120 + 'ms' }}
+            className="animate-bank rounded-xl border border-line bg-surface p-4"
+          >
+            <p className="text-balance text-base font-semibold">{i.headline}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted">{i.body}</p>
+            <ul className="mt-3 space-y-1.5 border-t border-line/60 pt-3">
+              {i.evidence.map((e) => (
+                <li key={e.pt} className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="pt text-sm text-accent">{e.pt}</span>
+                  <span className="text-xs text-muted">{e.en}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-[0.6rem] uppercase tracking-wider text-muted/70">
+              Linguists call this {i.proper_name}. You do not have to.
+            </p>
+          </section>
+        ))}
+      </div>
+
+      <p className="mb-2 mt-6 text-sm text-muted">
+        None of this gets tested. It is already in there.
+      </p>
+
+      <Cta
+        label="CONTINUE"
+        onClick={() => {
+          markOsmosisSeen(insights.map((i) => i.id))
+          track('osmosis_view', { insights: insights.map((i) => i.id) })
+          next()
+        }}
+      />
+    </Shell>
+  )
+}
 
 /**
  * The end of a section. §08 still says the learner chooses what comes next — but the

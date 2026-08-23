@@ -96,6 +96,8 @@ export interface LearnerState {
   tester_label: string
   /** §12 — collected invisibly through meaningful choices, never a personality quiz. */
   voice_signals: VoiceSignal[]
+  /** Grammar points already surfaced, so no section repeats another section's. */
+  osmosis_seen: string[]
   created_at: string
   missions_completed: MissionId[]
   /** ISO timestamp each mission finished, for previous_session_age_hours. */
@@ -123,6 +125,7 @@ export function emptyLearner(): LearnerState {
     learner_id: uid(),
     tester_label: '',
     voice_signals: [],
+    osmosis_seen: [],
     created_at: new Date().toISOString(),
     missions_completed: [],
     mission_completed_at: {},
@@ -228,6 +231,12 @@ export function setTester(label: string) {
 export function recordVoiceSignal(signal: string, pt: string) {
   update((s) => {
     s.voice_signals = [...s.voice_signals, { signal, pt, at: new Date().toISOString() }]
+  })
+}
+
+export function markOsmosisSeen(ids: string[]) {
+  update((s) => {
+    s.osmosis_seen = [...new Set([...(s.osmosis_seen ?? []), ...ids])]
   })
 }
 

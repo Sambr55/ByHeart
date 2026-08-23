@@ -75,6 +75,7 @@ export type EventName =
   | 'session_sync'
   | 'section_decision'
   | 'return_home'
+  | 'osmosis_view'
 
 export interface AnalyticsEvent {
   seq: number
