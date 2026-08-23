@@ -23,16 +23,35 @@ export interface AudioEntry {
   kind: 'block' | 'example'
 }
 
-/** Everything the pt-PT audio build must produce. Feed this to the TTS script. */
-export const AUDIO_MANIFEST: AudioEntry[] = [
-  ...BLOCK_ORDER.map((id) => ({
-    slug: BLOCK_AUDIO[id],
-    text: TARGETS[id].block.replace('…', '').replace(' + verb', '').trim(),
-    kind: 'block' as const,
-  })),
-  ...EXAMPLES.map((e) => ({
-    slug: e.audio_asset,
-    text: e.pt_text,
-    kind: 'example' as const,
-  })),
-]
+/** Two entries are the same recording if they differ only in case or trailing marks. */
+export function normalisePhrase(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[.…?!]+$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * Everything the pt-PT audio build must produce, one entry per slug. A bare block and
+ * a booster example can resolve to the same recording (claro / Claro.) — the example
+ * wins, because that is the form a speaker would actually say.
+ */
+export const AUDIO_MANIFEST: AudioEntry[] = (() => {
+  const bySlug = new Map<string, AudioEntry>()
+  for (const id of BLOCK_ORDER) {
+    bySlug.set(BLOCK_AUDIO[id], {
+      slug: BLOCK_AUDIO[id],
+      text: TARGETS[id].block.replace('…', '').replace(' + verb', '').trim(),
+      kind: 'block',
+    })
+  }
+  for (const e of EXAMPLES) {
+    bySlug.set(e.audio_asset, {
+      slug: e.audio_asset,
+      text: e.pt_text,
+      kind: 'example',
+    })
+  }
+  return [...bySlug.values()]
+})()

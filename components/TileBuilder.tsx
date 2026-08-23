@@ -35,6 +35,7 @@ export function TileBuilder({ screen }: { screen: TilesScreen }) {
 
       {/* Construction line */}
       <div
+        data-testid="tile-line"
         className="mt-6 min-h-[4.5rem] rounded-xl border border-dashed border-line bg-surface/60 p-3"
         aria-label="Your sentence"
       >
@@ -69,7 +70,7 @@ export function TileBuilder({ screen }: { screen: TilesScreen }) {
 
       {/* Pool */}
       {solved ? null : (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div data-testid="tile-pool" className="mt-4 flex flex-wrap gap-2">
           {pool.map((t) => (
             <button
               key={t.id}

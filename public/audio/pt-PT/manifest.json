@@ -1,0 +1,140 @@
+{
+  "locale": "pt-PT",
+  "assets": [
+    {
+      "slug": "comigo",
+      "text": "comigo",
+      "kind": "block"
+    },
+    {
+      "slug": "podes",
+      "text": "podes",
+      "kind": "block"
+    },
+    {
+      "slug": "preciso-de",
+      "text": "preciso de",
+      "kind": "block"
+    },
+    {
+      "slug": "nao-consigo",
+      "text": "não consigo",
+      "kind": "block"
+    },
+    {
+      "slug": "perdi",
+      "text": "perdi",
+      "kind": "block"
+    },
+    {
+      "slug": "nao-vou",
+      "text": "não vou",
+      "kind": "block"
+    },
+    {
+      "slug": "o-que-estas-a",
+      "text": "o que estás a?",
+      "kind": "block"
+    },
+    {
+      "slug": "quando",
+      "text": "quando",
+      "kind": "block"
+    },
+    {
+      "slug": "claro",
+      "text": "Claro.",
+      "kind": "example"
+    },
+    {
+      "slug": "porque-nao",
+      "text": "Porque não?",
+      "kind": "example"
+    },
+    {
+      "slug": "fala-comigo",
+      "text": "Fala comigo.",
+      "kind": "example"
+    },
+    {
+      "slug": "vem-comigo",
+      "text": "Vem comigo.",
+      "kind": "example"
+    },
+    {
+      "slug": "fica-comigo",
+      "text": "Fica comigo.",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-vir-comigo",
+      "text": "Podes vir comigo?",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-repetir",
+      "text": "Podes repetir?",
+      "kind": "example"
+    },
+    {
+      "slug": "preciso-de-agua",
+      "text": "Preciso de água.",
+      "kind": "example"
+    },
+    {
+      "slug": "preciso-de-um-taxi",
+      "text": "Preciso de um táxi.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-consigo-perceber",
+      "text": "Não consigo perceber.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-consigo-dormir",
+      "text": "Não consigo dormir.",
+      "kind": "example"
+    },
+    {
+      "slug": "perdi-as-chaves",
+      "text": "Perdi as chaves.",
+      "kind": "example"
+    },
+    {
+      "slug": "perdi-o-bilhete",
+      "text": "Perdi o bilhete.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-vou-esperar",
+      "text": "Não vou esperar.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-vou-beber",
+      "text": "Não vou beber.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que-estas-a-beber",
+      "text": "O que estás a beber?",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que-estas-a-fazer",
+      "text": "O que estás a fazer?",
+      "kind": "example"
+    },
+    {
+      "slug": "quando-vais",
+      "text": "Quando vais?",
+      "kind": "example"
+    },
+    {
+      "slug": "quando-vamos",
+      "text": "Quando vamos?",
+      "kind": "example"
+    }
+  ]
+}

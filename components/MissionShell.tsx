@@ -18,6 +18,7 @@ export function MissionShell({ children }: { children: ReactNode }) {
   return (
     <div
       data-stage={stage}
+      data-screen={screen.id}
       className="flex min-h-dvh flex-col bg-bg text-fg transition-colors duration-700"
     >
       <StageRail current={stage} index={state.index} />
@@ -91,6 +92,7 @@ export function Continue({
   return (
     <button
       type="button"
+      data-testid="continue"
       onClick={onClick}
       disabled={disabled}
       className="tap-target eyebrow mt-6 w-full rounded-xl bg-accent px-5 py-4 text-accent-ink transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-chip disabled:text-muted"

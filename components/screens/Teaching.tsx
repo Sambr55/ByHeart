@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { BlockIntroScreen, InventoryScreen, MatchScreen } from '@/content/types'
 import { BLOCK_AUDIO } from '@/content/targets'
 import { slugFor } from '@/content/audio-manifest'
+import { play } from '@/engine/audio'
 import { track } from '@/engine/analytics'
 import { useSession } from '@/engine/session'
 import { useExercise } from '@/engine/useExercise'
@@ -41,20 +42,11 @@ export function BlockIntroView({ screen }: { screen: BlockIntroScreen }) {
         {screen.blocks.map((b) => {
           const isTapped = tapped.includes(b.id)
           return (
-            <button
+            <div
               key={b.id}
-              type="button"
-              onClick={() => {
-                if (!isTapped) {
-                  setTapped((t) => [...t, b.id])
-                  track('block_intro', { block: b.id, screen: screen.id })
-                }
-              }}
               className={
-                'tap-target flex w-full items-center gap-3 rounded-xl border px-4 py-4 text-left transition active:scale-[0.99] ' +
-                (isTapped
-                  ? 'border-accent bg-accent/10'
-                  : 'border-line bg-surface hover:border-accent/50')
+                'flex items-center gap-3 rounded-xl border px-3 py-3 transition ' +
+                (isTapped ? 'border-accent bg-accent/10' : 'border-line bg-surface')
               }
             >
               <AudioButton
@@ -63,11 +55,21 @@ export function BlockIntroView({ screen }: { screen: BlockIntroScreen }) {
                 screenId={screen.id}
                 size="sm"
               />
-              <span>
+              <button
+                type="button"
+                onClick={() => {
+                  play({ slug: BLOCK_AUDIO[b.id], text: b.pt }, { screenId: screen.id })
+                  if (!isTapped) {
+                    setTapped((t) => [...t, b.id])
+                    track('block_intro', { block: b.id, screen: screen.id })
+                  }
+                }}
+                className="tap-target flex-1 text-left"
+              >
                 <span className="pt block text-2xl text-accent">{b.pt}</span>
                 <span className="mt-1 block text-sm text-muted">{b.gloss}</span>
-              </span>
-            </button>
+              </button>
+            </div>
           )
         })}
       </div>
@@ -90,13 +92,27 @@ export function BlockIntroView({ screen }: { screen: BlockIntroScreen }) {
   )
 }
 
-/** Two boosters, two moods. Match each phrase to the intention it serves. */
+/** Two boosters, two moods. Both pairs must land before the screen resolves. */
 export function MatchView({ screen }: { screen: MatchScreen }) {
   const { next } = useSession()
   const { feedback, solved, submit } = useExercise(screen)
-  const [pick, setPick] = useState<string | null>(null)
+  const [choices, setChoices] = useState<Record<string, string>>({})
 
   const englishes = screen.pairs.map((p) => p.en)
+
+  function choose(blockId: string, en: string) {
+    const nextChoices = { ...choices, [blockId]: en }
+    setChoices(nextChoices)
+    if (Object.keys(nextChoices).length < screen.pairs.length) return
+
+    const allRight = screen.pairs.every((p) => nextChoices[p.blockId] === p.en)
+    submit(
+      { correct: allRight, message: allRight ? undefined : screen.swapFeedback },
+      { choices: nextChoices },
+    )
+    // A wrong pairing clears the board so the learner can try the other way round.
+    if (!allRight) setChoices({})
+  }
 
   return (
     <>
@@ -104,7 +120,11 @@ export function MatchView({ screen }: { screen: MatchScreen }) {
 
       <div className="mt-6 space-y-4">
         {screen.pairs.map((p) => (
-          <div key={p.blockId} className="rounded-xl border border-line bg-surface p-4">
+          <div
+            key={p.blockId}
+            data-testid={'pair-' + p.blockId}
+            className="rounded-xl border border-line bg-surface p-4"
+          >
             <div className="flex items-center gap-3">
               <AudioButton
                 slug={slugFor(p.pt)}
@@ -116,21 +136,15 @@ export function MatchView({ screen }: { screen: MatchScreen }) {
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
               {englishes.map((en) => {
-                const chosen = pick === p.blockId + en
+                const chosen = choices[p.blockId] === en
                 const right = solved && en === p.en
                 return (
                   <button
                     key={en}
                     type="button"
                     disabled={solved}
-                    onClick={() => {
-                      setPick(p.blockId + en)
-                      const correct = en === p.en
-                      submit(
-                        { correct, message: correct ? undefined : screen.swapFeedback },
-                        { pair: p.blockId, chose: en },
-                      )
-                    }}
+                    aria-pressed={chosen}
+                    onClick={() => choose(p.blockId, en)}
                     className={
                       'tap-target rounded-lg border px-3 py-3 text-sm transition ' +
                       (right
