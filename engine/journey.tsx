@@ -44,11 +44,10 @@ import { useLearner } from './useLearner'
 export type Step =
   | { kind: 'landing' }
   | { kind: 'demo'; i: number }
-  | { kind: 'freetext' }
   | { kind: 'picker' }
-  | { kind: 'root'; rootId: string; beat: RootBeat }
-  | { kind: 'wherenext' }
+  | { kind: 'root'; rootId: string; beat: RootBeat; pieceIndex?: number }
   | { kind: 'collision'; collisionId: string }
+  | { kind: 'section-complete' }
   | { kind: 'nocue'; i: number }
   | { kind: 'cansay' }
   | { kind: 'close' }
@@ -57,6 +56,7 @@ export type RootBeat =
   | 'recognise'
   | 'translate'
   | 'extract'
+  | 'piece'
   | 'branch'
   | 'build'
   | 'voice'
@@ -67,14 +67,20 @@ export type RootBeat =
  * §20.14 makes this order non-negotiable, so it is generated from the root rather
  * than hand-authored per screen — a root physically cannot skip its bridge.
  */
-export function beatsFor(root: Root): RootBeat[] {
+export function beatsFor(root: Root): { beat: RootBeat; pieceIndex?: number }[] {
+  const b = (beat: RootBeat) => ({ beat })
+  // The useful bits are shown together inside the line, then unpacked one at a time.
+  // Two pieces on one screen means the second is skimmed; PODES and QUANDO QUISERES
+  // each deserve their own moment.
+  const pieces = root.extracts.map((_, pieceIndex) => ({ beat: 'piece' as RootBeat, pieceIndex }))
+
   if (root.freebie_flag) {
     // §B10: a freebie is a ten-second wink. Recognition -> Portuguese -> takeaway.
-    return ['recognise', 'translate', 'extract', 'release']
+    return [b('recognise'), b('translate'), b('extract'), ...pieces, b('release')]
   }
-  const beats: RootBeat[] = ['recognise', 'translate', 'extract', 'branch', 'build']
-  if (root.voice_options?.length) beats.push('voice')
-  beats.push('release')
+  const beats = [b('recognise'), b('translate'), b('extract'), ...pieces, b('branch'), b('build')]
+  if (root.voice_options?.length) beats.push(b('voice'))
+  beats.push(b('release'))
   return beats
 }
 
@@ -92,8 +98,10 @@ interface JourneyState {
 
 type Action =
   | { type: 'choose-family'; family: CultureFamily }
-  | { type: 'append'; steps: Step[]; rootId?: string; collisionId?: string }
+  | { type: 'append'; steps: Step[]; rootId?: string; rootIds?: string[]; collisionId?: string }
   | { type: 'next' }
+  | { type: 'back' }
+  | { type: 'goto'; index: number }
   | { type: 'answer'; key: string; value: unknown }
   | { type: 'complete' }
 
@@ -101,7 +109,6 @@ const initial: JourneyState = {
   steps: [
     { kind: 'landing' },
     ...DEMO_BEATS.map((_, i) => ({ kind: 'demo' as const, i })),
-    { kind: 'freetext' },
     { kind: 'picker' },
   ],
   index: 0,
@@ -113,7 +120,12 @@ const initial: JourneyState = {
 }
 
 function rootSteps(root: Root): Step[] {
-  return beatsFor(root).map((beat) => ({ kind: 'root' as const, rootId: root.root_id, beat }))
+  return beatsFor(root).map(({ beat, pieceIndex }) => ({
+    kind: 'root' as const,
+    rootId: root.root_id,
+    beat,
+    pieceIndex,
+  }))
 }
 
 function reducer(state: JourneyState, action: Action): JourneyState {
@@ -124,15 +136,21 @@ function reducer(state: JourneyState, action: Action): JourneyState {
       return {
         ...state,
         steps: [...state.steps, ...action.steps],
-        rootsPlayed: action.rootId
-          ? [...state.rootsPlayed, action.rootId]
-          : state.rootsPlayed,
+        rootsPlayed: action.rootIds
+          ? [...state.rootsPlayed, ...action.rootIds]
+          : action.rootId
+            ? [...state.rootsPlayed, action.rootId]
+            : state.rootsPlayed,
         collisionsPlayed: action.collisionId
           ? [...state.collisionsPlayed, action.collisionId]
           : state.collisionsPlayed,
       }
     case 'next':
       return { ...state, index: Math.min(state.index + 1, state.steps.length) }
+    case 'back':
+      return { ...state, index: Math.max(state.index - 1, 0) }
+    case 'goto':
+      return { ...state, index: Math.max(0, Math.min(action.index, state.steps.length - 1)) }
     case 'answer':
       return { ...state, answers: { ...state.answers, [action.key]: action.value } }
     case 'complete':
@@ -237,8 +255,11 @@ interface JourneyApi {
   step: Step
   root: Root | null
   next: () => void
+  back: () => void
+  goHome: () => void
+  canGoBack: boolean
   chooseFamily: (family: CultureFamily) => void
-  chooseNext: (choice: WhereNext) => void
+  finishSection: (decision: 'another' | 'done') => void
   answer: (key: string, value: unknown) => void
   recordVoice: (signal: string, pt: string) => void
   finish: () => void
@@ -285,45 +306,47 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
       setAffinity({ next_world_pre: family })
       track('culture_start_choice', { family, offered: Object.keys(ROOTS_BY_FAMILY) })
       void syncSession('culture_chosen')
-      const first = ROOTS_BY_FAMILY[family][0]
+      // A section is played whole. Offering "where next?" between every root turned the
+      // choice into a tax; the learner picks an area, works through it, and then decides.
+      const roots = ROOTS_BY_FAMILY[family].filter((r) => !state.rootsPlayed.includes(r.root_id))
+      const steps: Step[] = roots.flatMap((r) => rootSteps(r))
+      steps.push({ kind: 'section-complete' })
       dispatch({
         type: 'append',
-        steps: [...rootSteps(first), { kind: 'wherenext' }],
-        rootId: first.root_id,
+        steps,
+        rootIds: roots.map((r) => r.root_id),
       })
       dispatch({ type: 'next' })
     },
     [],
   )
 
-  const chooseNext = useCallback(
-    (choice: WhereNext) => {
-      const played = [...state.rootsPlayed]
-      const next = pickRoot(choice, state.family, played)
-      track('next_root_choice', { choice, root: next.root_id, family: next.culture_family })
-      void syncSession('root_' + (state.rootsPlayed.length + 1))
-      const steps: Step[] = [...rootSteps(next)]
-      const collision = availableCollision(played, state.collisionsPlayed)
-      const rootCount = played.length + 1
-      if (collision && (rootCount === 2 || rootCount === 4)) {
-        steps.push({ kind: 'collision', collisionId: collision.id })
+  /** Finish here, or go back to the areas and pick another. */
+  const finishSection = useCallback(
+    (decision: 'another' | 'done') => {
+      track('section_decision', { decision, roots: state.rootsPlayed.length })
+      void syncSession('section_' + decision)
+      if (decision === 'another') {
+        const picker = state.steps.findIndex((s) => s.kind === 'picker')
+        dispatch({ type: 'goto', index: picker < 0 ? 0 : picker })
+        return
       }
-      if (rootCount >= ROOTS_PER_SESSION) {
-        steps.push({ kind: 'nocue', i: 0 }, { kind: 'nocue', i: 1 }, { kind: 'nocue', i: 2 })
-        steps.push({ kind: 'cansay' }, { kind: 'close' })
-      } else {
-        steps.push({ kind: 'wherenext' })
-      }
-      dispatch({
-        type: 'append',
-        steps,
-        rootId: next.root_id,
-        collisionId: collision && (rootCount === 2 || rootCount === 4) ? collision.id : undefined,
-      })
+      const steps: Step[] = []
+      const collision = availableCollision(state.rootsPlayed, state.collisionsPlayed)
+      if (collision) steps.push({ kind: 'collision', collisionId: collision.id })
+      steps.push({ kind: 'nocue', i: 0 }, { kind: 'nocue', i: 1 }, { kind: 'nocue', i: 2 })
+      steps.push({ kind: 'cansay' }, { kind: 'close' })
+      dispatch({ type: 'append', steps, collisionId: collision?.id })
       dispatch({ type: 'next' })
     },
-    [state.collisionsPlayed, state.family, state.rootsPlayed],
+    [state.collisionsPlayed, state.rootsPlayed, state.steps],
   )
+
+  const goHome = useCallback(() => {
+    const picker = state.steps.findIndex((s) => s.kind === 'picker')
+    track('return_home', { from: state.steps[state.index]?.kind })
+    dispatch({ type: 'goto', index: picker < 0 ? 0 : picker })
+  }, [state.index, state.steps])
 
   const api = useMemo<JourneyApi>(
     () => ({
@@ -332,8 +355,11 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
       root,
       owned: Object.keys(learner.inventory),
       next: () => dispatch({ type: 'next' }),
+      back: () => dispatch({ type: 'back' }),
+      goHome,
+      canGoBack: state.index > 0,
       chooseFamily,
-      chooseNext,
+      finishSection,
       answer: (key, value) => dispatch({ type: 'answer', key, value }),
       recordVoice: (signal, pt) => {
         recordVoiceSignal(signal, pt)
@@ -345,7 +371,7 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
         void syncSession('journey_complete')
       },
     }),
-    [state, step, root, learner.inventory, chooseFamily, chooseNext],
+    [state, step, root, learner.inventory, chooseFamily, finishSection, goHome],
   )
 
   return <Ctx.Provider value={api}>{children}</Ctx.Provider>

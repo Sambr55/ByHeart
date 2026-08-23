@@ -43,6 +43,7 @@ async function main() {
   await page.goto(BASE + '/?tester=smoke', { waitUntil: 'networkidle' })
 
   const seen: string[] = []
+  let sections = 0
   const stage = async () =>
     (await page.evaluate(() => document.querySelector('[data-stage]')?.getAttribute('data-stage'))) ?? '?'
 
@@ -53,27 +54,25 @@ async function main() {
 
   await press(page.getByTestId('continue'), 'landing cta')
 
-  // five demo beats
-  for (let i = 0; i < 5; i++) {
-    const b = await page.evaluate(() => document.body.innerText)
-    if (i === 0 && !/TALK TO ME, GOOSE/.test(b)) problems.push('demo beat 1 wrong')
-    if (i === 1 && !/FALA COMIGO, GOOSE/.test(b)) problems.push('demo beat 2 wrong')
-    if (i === 2 && !/COMIGO = WITH ME/.test(b)) problems.push('demo beat 3 wrong')
-    if (i === 4) {
-      const reveal = page.getByRole('button', { name: 'SAY IT, THEN TAP' })
-      if (await reveal.isVisible().catch(() => false)) await press(reveal, 'reveal')
-      const after = await page.evaluate(() => document.body.innerText)
-      if (!/That’s DUB/.test(after)) problems.push('demo close line missing')
-    }
-    await press(page.getByTestId('continue'), 'demo cta')
-  }
+  // Beat 1 stages three reveals on one screen.
+  const d1 = await page.evaluate(() => document.body.innerText)
+  if (!/TALK TO ME, GOOSE/.test(d1)) problems.push('demo beat 1 wrong')
+  await press(page.getByTestId('continue'), 'reveal translation')
+  const d2 = await page.evaluate(() => document.body.innerText)
+  if (!/FALA COMIGO, GOOSE/.test(d2)) problems.push('translation did not animate in')
+  await press(page.getByTestId('continue'), 'reveal takeaway')
+  const d3 = await page.evaluate(() => document.body.innerText)
+  if (!/COMIGO = WITH ME/.test(d3)) problems.push('takeaway missing')
+  await press(page.getByTestId('continue'), 'to branches')
 
-  const b1 = await page.evaluate(() => document.body.innerText)
-  if (!/WHAT DO YOU ALREADY KNOW BY HEART/.test(b1)) problems.push('free-text prompt missing')
-  await page.getByRole('textbox').first().fill('The Sopranos')
-  await press(page.getByTestId('continue'), 'free text')
+  const d4 = await page.evaluate(() => document.body.innerText)
+  if (!/Three things you can say/i.test(d4)) problems.push('branch beat missing')
+  if (!/That’s DUB/.test(d4)) problems.push('demo close line missing')
+  await press(page.getByTestId('continue'), 'to picker')
 
   const b2 = await page.evaluate(() => document.body.innerText)
+  if (!/Select an area to get going with/i.test(b2)) problems.push('picker headline wrong')
+  if (/WHAT DO YOU ALREADY KNOW BY HEART/.test(b2)) problems.push('free-text screen still present')
   for (const f of FAMILIES) {
     if (!b2.includes(f.title)) problems.push('picker missing family ' + f.title)
   }
@@ -82,16 +81,43 @@ async function main() {
   await press(page.getByRole('button', { name: chosen.title, exact: false }).first(), 'family')
   await press(page.getByTestId('continue'), 'start here')
 
+  // The back button has to work from anywhere the tester might be.
+  const back = page.getByTestId('back')
+  if (!(await back.isVisible().catch(() => false))) problems.push('no back button inside a section')
+  else {
+    const before = await page.evaluate(() => document.body.innerText)
+    await press(back, 'back')
+    const after = await page.evaluate(() => document.body.innerText)
+    if (before === after) problems.push('back button did not move the learner')
+    await press(page.getByTestId('continue'), 'forward again')
+  }
+
   // Walk roots until the close.
-  for (let guard = 0; guard < 80; guard++) {
+  for (let guard = 0; guard < 260; guard++) {
     const body = await page.evaluate(() => document.body.innerText)
     seen.push(await stage())
 
     if (/YOU ALREADY KNOW MORE THAN YOU THINK/.test(body)) break
 
     if (/Where next\?/.test(body)) {
-      const choice = ['stay', 'mood', 'surprise'][guard % 3]
-      await press(page.getByTestId('wherenext-' + choice), 'where next')
+      problems.push('a "where next?" appeared inside a section')
+      break
+    }
+    const done = page.getByTestId('im-done')
+    if (await done.isVisible().catch(() => false)) {
+      // Take one more area the first time, then finish — so the test exercises both
+      // exits from a section.
+      const another = page.getByTestId('another-area')
+      const takeAnother = sections === 0 && (await another.isVisible().catch(() => false))
+      sections++
+      await press(takeAnother ? another : done, 'section exit')
+      if (takeAnother) {
+        await press(
+          page.getByRole('button', { name: FAMILIES.find((f) => f.id !== family)!.title, exact: false }).first(),
+          'second family',
+        )
+        await press(page.getByTestId('continue'), 'start second area')
+      }
       continue
     }
     if (await page.getByTestId('tile-pool').isVisible().catch(() => false)) {

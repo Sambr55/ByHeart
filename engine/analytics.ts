@@ -73,6 +73,8 @@ export type EventName =
   | 'no_cue_attempt'
   | 'capability_view'
   | 'session_sync'
+  | 'section_decision'
+  | 'return_home'
 
 export interface AnalyticsEvent {
   seq: number

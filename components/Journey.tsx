@@ -25,16 +25,44 @@ function Shell({
   stage,
   children,
   eyebrow,
+  nav = true,
 }: {
   stage: string
   eyebrow?: string
+  nav?: boolean
   children: React.ReactNode
 }) {
+  const { back, goHome, canGoBack } = useJourney()
   return (
     <div data-stage={stage} className="flex min-h-dvh flex-col bg-bg text-fg transition-colors duration-700">
-      {eyebrow ? (
-        <header className="sticky top-0 z-10 border-b border-line bg-bg/90 px-5 py-3 backdrop-blur">
-          <p className="eyebrow mx-auto w-full max-w-md text-accent">{eyebrow}</p>
+      {nav || eyebrow ? (
+        <header className="sticky top-0 z-10 border-b border-line bg-bg/90 px-5 py-2.5 backdrop-blur">
+          <div className="mx-auto flex w-full max-w-md items-center gap-3">
+            {nav && canGoBack ? (
+              <button
+                type="button"
+                data-testid="back"
+                onClick={back}
+                aria-label="Back"
+                className="tap-target -ml-2 flex items-center justify-center rounded-lg px-2 text-muted transition hover:text-fg"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
+                  <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            ) : null}
+            <p className="eyebrow flex-1 truncate text-accent">{eyebrow ?? ''}</p>
+            {nav && canGoBack ? (
+              <button
+                type="button"
+                data-testid="home"
+                onClick={goHome}
+                className="tap-target text-[0.6rem] uppercase tracking-wider text-muted transition hover:text-fg"
+              >
+                Areas
+              </button>
+            ) : null}
+          </div>
         </header>
       ) : null}
       <main className="flex-1">
@@ -86,14 +114,19 @@ export function Journey() {
       return <Landing />
     case 'demo':
       return <Demo i={step.i} />
-    case 'freetext':
-      return <FreeText />
     case 'picker':
       return <Picker />
     case 'root':
-      return <RootBeatView key={step.rootId + step.beat} rootId={step.rootId} beat={step.beat} />
-    case 'wherenext':
-      return <WhereNextView />
+      return (
+        <RootBeatView
+          key={step.rootId + step.beat + (step.pieceIndex ?? '')}
+          rootId={step.rootId}
+          beat={step.beat}
+          pieceIndex={step.pieceIndex}
+        />
+      )
+    case 'section-complete':
+      return <SectionComplete />
     case 'collision':
       return <CollisionView key={step.collisionId} id={step.collisionId} />
     case 'nocue':
@@ -114,12 +147,16 @@ function Landing() {
       <div className="flex flex-1 flex-col justify-center">
         <p className="display text-5xl tracking-tight">{LANDING.wordmark}</p>
         <p className="mt-2 text-balance text-xl text-accent">{LANDING.line}</p>
-        <div className="mt-10 space-y-6">
+        <div className="mt-10 space-y-7">
           <p className="display text-balance text-2xl">{LANDING.lines[0]}</p>
           <p className="text-pretty text-sm text-muted">{LANDING.lines[1]}</p>
-          <p className="display whitespace-pre-line text-balance text-xl leading-snug">
-            {LANDING.lines[2]}
-          </p>
+          <div className="space-y-4">
+            {LANDING.lines[2].split('\n').map((l) => (
+              <p key={l} className="display text-balance text-xl leading-snug">
+                {l}
+              </p>
+            ))}
+          </div>
           <p className="text-balance text-base font-semibold">{LANDING.lines[3]}</p>
         </div>
       </div>
@@ -128,29 +165,57 @@ function Landing() {
   )
 }
 
+/**
+ * Recognition, translation and takeaway on one screen, staged.
+ *
+ * The point of the demo is that the trick looks like a trick: you already know the
+ * line, here it is living in Portuguese, and here is the piece you just got for free.
+ * Three taps broke that into three unrelated assertions.
+ */
 function Demo({ i }: { i: number }) {
   const { next } = useJourney()
   const beat = DEMO_BEATS[i]
-  const last = i === DEMO_BEATS.length - 1
-  const [revealed, setRevealed] = useState(false)
+  const [reveal, setReveal] = useState(0)
+  const staged = Boolean(beat.translation)
+  const ready = !staged || reveal >= 2
 
   return (
-    <Shell stage="DEMO">
+    <Shell stage="DEMO" nav>
       <div className="flex flex-1 flex-col justify-center">
         <p className="display text-balance text-3xl sm:text-4xl">{beat.display}</p>
         {beat.gloss ? <p className="mt-3 text-sm text-muted">{beat.gloss}</p> : null}
 
-        {beat.key === 'translation' ? (
-          <div className="mt-6 flex items-center gap-3">
-            <AudioButton slug={slugFor('Fala comigo.')} text="Fala comigo, Goose." />
-            <span className="text-xs text-muted">Hear it</span>
+        {staged ? (
+          <div className="mt-10 min-h-[9rem]">
+            {reveal >= 1 ? (
+              <div className="animate-bank">
+                <div className="flex items-center gap-3">
+                  <AudioButton slug={slugFor('Fala comigo.')} text="Fala comigo, Goose." size="sm" />
+                  <p className="pt text-balance text-2xl text-accent sm:text-3xl">
+                    {beat.translation!.pt}
+                  </p>
+                </div>
+                <p className="mt-2 text-sm text-muted">{beat.translation!.en}</p>
+              </div>
+            ) : null}
+
+            {reveal >= 2 && beat.takeaway ? (
+              <div className="animate-bank mt-7 rounded-xl border border-accent/50 bg-accent/10 p-4">
+                <p className="pt text-xl font-semibold text-accent">{beat.takeaway.display}</p>
+                <p className="mt-1 text-sm text-muted">{beat.takeaway.gloss}</p>
+              </div>
+            ) : null}
           </div>
         ) : null}
 
         {beat.branches ? (
           <ul className="mt-6 space-y-3">
-            {beat.branches.map((b) => (
-              <li key={b.pt} className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+            {beat.branches.map((b, n) => (
+              <li
+                key={b.pt}
+                style={{ animationDelay: n * 110 + 'ms' }}
+                className="animate-bank flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+              >
                 <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
                 <span>
                   <span className="pt block text-lg text-accent">{b.pt}</span>
@@ -161,75 +226,32 @@ function Demo({ i }: { i: number }) {
           </ul>
         ) : null}
 
-        {beat.release ? (
-          <div className="mt-6">
-            <p className="eyebrow text-muted">{beat.release.context}</p>
-            <p className="display mt-2 text-2xl">“{beat.release.ask}”</p>
-            {revealed ? (
-              <div className="animate-bank mt-4 flex items-center gap-3 rounded-xl border border-correct/40 bg-correct/10 px-4 py-3">
-                <AudioButton slug={slugFor(beat.release.answer)} text={beat.release.answer} size="sm" />
-                <span className="pt text-xl">{beat.release.answer}</span>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setRevealed(true)}
-                className="tap-target eyebrow mt-4 w-full rounded-xl border border-accent bg-accent/10 px-4 py-3 text-accent"
-              >
-                SAY IT, THEN TAP
-              </button>
-            )}
-          </div>
-        ) : null}
-
-        {last && revealed ? (
-          <p className="mt-8 text-balance text-sm font-semibold">{DEMO_CLOSE}</p>
+        {beat.close ? (
+          <p className="mt-8 text-balance text-sm font-semibold leading-relaxed">{beat.close}</p>
         ) : null}
       </div>
-      <Cta
-        label={beat.cta}
-        disabled={Boolean(beat.release) && !revealed}
-        onClick={next}
-      />
-    </Shell>
-  )
-}
 
-function FreeText() {
-  const { next } = useJourney()
-  const [text, setText] = useState('')
-  return (
-    <Shell stage="CHOICE">
-      <div className="flex flex-1 flex-col justify-center">
-        <h1 className="display text-balance text-2xl">{PICKER.headline}</h1>
-        <p className="mt-3 text-sm text-muted">{PICKER.sub}</p>
-        <textarea
-          rows={2}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={PICKER.placeholder}
-          className="pt mt-6 w-full rounded-xl border border-line bg-surface p-4 text-xl text-fg outline-none focus:border-accent"
+      {staged && !ready ? (
+        <Cta
+          label={reveal === 0 ? 'IN PORTUGUESE?' : 'SO WHAT DO I KEEP?'}
+          onClick={() => setReveal((r) => r + 1)}
         />
-      </div>
-      <Cta
-        label={PICKER.cta}
-        onClick={() => {
-          setAffinity({ free_text_favourite: text.trim() })
-          track('culture_free_text', { text: text.trim() })
-          next()
-        }}
-      />
+      ) : (
+        <Cta label={beat.cta} onClick={next} />
+      )}
     </Shell>
   )
 }
 
 function Picker() {
-  const { chooseFamily } = useJourney()
-  const [picked, setPicked] = useState<CultureFamily | null>(null)
+  const { chooseFamily, state } = useJourney()
+  // Remember what they chose. Stepping back onto this screen and finding the choice
+  // wiped is the kind of small betrayal that makes a product feel unreliable.
+  const [picked, setPicked] = useState<CultureFamily | null>(state.family)
   return (
     <Shell stage="CHOICE">
-      <p className="display text-balance text-xl">{PICKER.fallback}</p>
-      <p className="mt-1 text-sm text-muted">{PICKER.cardsHeadline}</p>
+      <h1 className="display text-balance text-2xl">{PICKER.headline}</h1>
+      <p className="mt-2 text-sm text-muted">{PICKER.sub}</p>
       <div className="mt-5 space-y-2">
         {FAMILIES.map((f) => (
           <button
@@ -249,11 +271,7 @@ function Picker() {
           </button>
         ))}
       </div>
-      <Cta
-        label="START HERE"
-        disabled={!picked}
-        onClick={() => picked && chooseFamily(picked)}
-      />
+      <Cta label={PICKER.cta} disabled={!picked} onClick={() => picked && chooseFamily(picked)} />
     </Shell>
   )
 }
@@ -367,23 +385,47 @@ function MiniBuild({
   )
 }
 
-/** Highlight the extracted piece where it sits inside the natural Portuguese. */
-function Highlighted({ line, piece }: { line: string; piece: string }) {
-  const at = line.toLowerCase().indexOf(piece.toLowerCase().replace('…', '').trim())
-  if (at < 0) return <>{line}</>
-  const len = piece.replace('…', '').trim().length
-  return (
-    <>
-      {line.slice(0, at)}
-      <span className="font-semibold text-accent underline decoration-accent/40 underline-offset-4">
-        {line.slice(at, at + len)}
-      </span>
-      {line.slice(at + len)}
-    </>
-  )
+/** Highlight the extracted pieces where they sit inside the natural Portuguese. */
+function Highlighted({ line, pieces }: { line: string; pieces: string[] }) {
+  const spans = pieces
+    .map((p) => {
+      const needle = p.replace(/[…?]/g, '').trim()
+      const at = line.toLowerCase().indexOf(needle.toLowerCase())
+      return at < 0 ? null : { at, len: needle.length }
+    })
+    .filter(Boolean)
+    .sort((a, b) => a!.at - b!.at) as { at: number; len: number }[]
+
+  if (!spans.length) return <>{line}</>
+
+  const out: React.ReactNode[] = []
+  let cursor = 0
+  spans.forEach((s, i) => {
+    if (s.at < cursor) return
+    out.push(line.slice(cursor, s.at))
+    out.push(
+      <span
+        key={i}
+        className="font-semibold text-accent underline decoration-accent/40 underline-offset-4"
+      >
+        {line.slice(s.at, s.at + s.len)}
+      </span>,
+    )
+    cursor = s.at + s.len
+  })
+  out.push(line.slice(cursor))
+  return <>{out}</>
 }
 
-function RootBeatView({ rootId, beat }: { rootId: string; beat: string }) {
+function RootBeatView({
+  rootId,
+  beat,
+  pieceIndex,
+}: {
+  rootId: string
+  beat: string
+  pieceIndex?: number
+}) {
   const { next, recordVoice } = useJourney()
   const root = rootById(rootId)!
   const family = FAMILIES.find((f) => f.id === root.culture_family)!
@@ -434,32 +476,63 @@ function RootBeatView({ rootId, beat }: { rootId: string; beat: string }) {
     )
   }
 
+  // Show every useful bit at once, sitting inside the line it came from…
   if (beat === 'extract') {
+    const many = root.extracts.length > 1
     return (
       <Shell stage={stage} eyebrow={family.title}>
-        <p className="pt text-balance text-2xl text-fg/70">
-          <Highlighted line={root.pt_natural} piece={root.extracts[0].pt} />
+        <p className="eyebrow text-muted">
+          {many ? root.extracts.length + ' USEFUL BITS IN HERE' : 'THE USEFUL BIT'}
         </p>
-        <p className="eyebrow mt-8 text-accent">YOURS NOW</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {root.extracts.map((e) => (
-            <Piece key={e.id} pt={e.pt} gloss={e.gloss} />
-          ))}
-        </div>
-        {root.reinforces.length ? (
-          <p className="mt-6 text-xs text-muted">
-            This also strengthens{' '}
-            {root.reinforces
-              .filter((r) => PIECES[r])
-              .map((r) => PIECES[r].pt)
-              .join(', ') || 'something you already have'}
-            .
+        <p className="pt mt-4 text-balance text-2xl leading-relaxed">
+          <Highlighted line={root.pt_natural} pieces={root.extracts.map((e) => e.pt)} />
+        </p>
+        <p className="mt-6 text-sm text-muted">
+          {many
+            ? 'Two things worth keeping. One at a time.'
+            : 'One thing worth keeping.'}
+        </p>
+        <Cta label={many ? 'TAKE THE FIRST' : 'TAKE IT'} onClick={next} />
+      </Shell>
+    )
+  }
+
+  // …then unpack them one per screen. Two pieces on one screen means the second is
+  // skimmed, and the second is often the better one.
+  if (beat === 'piece' && pieceIndex !== undefined) {
+    const e = root.extracts[pieceIndex]
+    const total = root.extracts.length
+    const last = pieceIndex === total - 1
+    const reinforced = root.reinforces.filter((r) => PIECES[r])
+    return (
+      <Shell stage={stage} eyebrow={family.title}>
+        {total > 1 ? (
+          <p className="text-xs tabular-nums text-muted">
+            {pieceIndex + 1} of {total}
           </p>
         ) : null}
+        <p className="pt mt-3 text-balance text-lg text-fg/50">
+          <Highlighted line={root.pt_natural} pieces={[e.pt]} />
+        </p>
+
+        <div className="mt-8 flex items-center gap-3">
+          <AudioButton slug={slugFor(e.pt.replace('…', '').trim())} text={e.pt} />
+          <div>
+            <p className="pt text-3xl text-accent">{e.pt}</p>
+            <p className="mt-1 text-sm text-muted">{e.gloss}</p>
+          </div>
+        </div>
+
+        {pieceIndex === 0 && reinforced.length ? (
+          <p className="mt-8 text-xs text-muted">
+            This also strengthens {reinforced.map((r) => PIECES[r].pt).join(', ')}.
+          </p>
+        ) : null}
+
         <Cta
-          label="WHAT CAN I DO WITH IT?"
+          label={last ? 'WHAT CAN I DO WITH THESE?' : 'AND THE NEXT ONE'}
           onClick={() => {
-            for (const e of root.extracts) acquirePiece(e.id, root.culture_family)
+            acquirePiece(e.id, root.culture_family)
             next()
           }}
         />
@@ -588,41 +661,59 @@ function VoiceReflection() {
 // ------------------------------------------------------- agency and payoff
 
 /**
- * §08 — after each root, hand the choice back. The recommendation engine can optimise
- * coverage underneath, but the card must read as a cultural choice, never as a
- * syllabus step, so no grammar rationale appears here.
+ * The end of a section. §08 still says the learner chooses what comes next — but the
+ * choice belongs here, once they have something to show for the area they picked,
+ * rather than between every single root.
  */
-function WhereNextView() {
-  const { chooseNext, state } = useJourney()
-  const current = state.family ? FAMILIES.find((f) => f.id === state.family) : null
-  const options: { id: WhereNext; title: string; blurb: string }[] = [
-    {
-      id: 'stay',
-      title: 'STAY CLOSE',
-      blurb: current ? 'More from ' + current.title.toLowerCase() + '.' : 'More of the same.',
-    },
-    { id: 'mood', title: 'CHANGE THE MOOD', blurb: 'Somewhere that feels completely different.' },
-    { id: 'surprise', title: 'SURPRISE ME', blurb: 'Somewhere you would not have picked.' },
-  ]
+function SectionComplete() {
+  const { finishSection, owned, state } = useJourney()
+  const acts = capabilities(owned)
+  const family = state.family ? FAMILIES.find((f) => f.id === state.family) : null
+  const remaining = FAMILIES.filter(
+    (f) =>
+      !state.rootsPlayed.some((id) => rootById(id)?.culture_family === f.id),
+  )
+
   return (
     <Shell stage="CHOICE">
       <div className="flex flex-1 flex-col justify-center">
-        <p className="display text-balance text-2xl">Where next?</p>
-        <div className="mt-6 space-y-3">
-          {options.map((o) => (
-            <button
-              key={o.id}
-              type="button"
-              data-testid={'wherenext-' + o.id}
-              onClick={() => chooseNext(o.id)}
-              className="tap-target w-full rounded-xl border border-line bg-surface px-4 py-4 text-left transition hover:border-accent/50"
-            >
-              <span className="display block text-base">{o.title}</span>
-              <span className="mt-0.5 block text-xs text-muted">{o.blurb}</span>
-            </button>
+        <p className="eyebrow text-accent">{family ? family.title + ' — DONE' : 'AREA COMPLETE'}</p>
+        <p className="display mt-4 text-balance text-2xl">
+          {acts.length
+            ? 'You can now ' + acts.slice(0, 3).join(', ') + (acts.length > 3 ? ' — and more.' : '.')
+            : 'That area is done.'}
+        </p>
+        <div className="mt-6 flex flex-wrap gap-2">
+          {owned.filter((p) => PIECES[p]).map((p) => (
+            <Piece key={p} pt={PIECES[p].pt} gloss={PIECES[p].gloss} />
           ))}
         </div>
+        {remaining.length ? (
+          <p className="mt-7 text-sm text-muted">
+            {remaining.length} more {remaining.length === 1 ? 'area' : 'areas'} to raid, whenever
+            you want them.
+          </p>
+        ) : null}
       </div>
+
+      {remaining.length ? (
+        <button
+          type="button"
+          data-testid="another-area"
+          onClick={() => finishSection('another')}
+          className="tap-target eyebrow mt-6 w-full rounded-xl bg-accent px-5 py-4 text-accent-ink"
+        >
+          PICK ANOTHER AREA
+        </button>
+      ) : null}
+      <button
+        type="button"
+        data-testid="im-done"
+        onClick={() => finishSection('done')}
+        className="tap-target eyebrow mt-3 w-full rounded-xl border border-line px-5 py-4 text-fg"
+      >
+        I’M DONE — SHOW ME WHAT I’VE GOT
+      </button>
     </Shell>
   )
 }

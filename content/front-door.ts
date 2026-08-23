@@ -20,15 +20,19 @@ export const LANDING = {
 } as const
 
 export interface DemoBeat {
-  key: 'recognition' | 'translation' | 'extract' | 'build' | 'release'
+  key: 'recognise' | 'build'
   /** The big thing on screen. */
   display: string
   /** The quiet line under it. */
   gloss?: string
-  /** Beat 4 only: the explosion. */
+  /** Staged in on the same screen, after the recognition has landed. */
+  translation?: { pt: string; en: string }
+  /** Staged in last: the piece the line just handed over. */
+  takeaway?: { display: string; gloss: string }
+  /** The explosion. */
   branches?: { pt: string; en: string }[]
-  /** Beat 5 only: the culture-free ask. */
-  release?: { context: string; ask: string; answer: string }
+  /** Shown under the branches on the final beat. */
+  close?: string
   cta: string
 }
 
@@ -37,24 +41,26 @@ export interface DemoBeat {
  * demonstration — showing them as wrong answers in a quiz, which is what the old
  * Mission 01 did, inverts the whole point of the beat.
  */
+/**
+ * Two screens, not five.
+ *
+ * Recognition, translation and extraction are one thought, so they belong on one screen
+ * with the translation animating in and the takeaway arriving after it — splitting them
+ * across three taps made the learner work for a reveal that should feel like a magic
+ * trick. The culture-free release has moved out of the demo entirely: every root ends
+ * with one, so proving it here as well only delayed the learner's own choice.
+ */
 export const DEMO_BEATS: DemoBeat[] = [
   {
-    key: 'recognition',
+    key: 'recognise',
     display: 'TALK TO ME, GOOSE.',
     gloss: 'You already know what Maverick means.',
-    cta: 'GO ON',
-  },
-  {
-    key: 'translation',
-    display: 'FALA COMIGO, GOOSE.',
-    gloss: 'Talk to me, Goose.',
-    cta: 'AND?',
-  },
-  {
-    key: 'extract',
-    display: 'COMIGO = WITH ME',
-    gloss: 'That one familiar line just gave you something useful.',
-    cta: 'SHOW ME',
+    translation: { pt: 'FALA COMIGO, GOOSE.', en: 'Talk to me, Goose.' },
+    takeaway: {
+      display: 'COMIGO = WITH ME',
+      gloss: 'That one familiar line just gave you something useful.',
+    },
+    cta: 'SHOW ME WHAT THAT UNLOCKS',
   },
   {
     key: 'build',
@@ -64,13 +70,9 @@ export const DEMO_BEATS: DemoBeat[] = [
       { pt: 'Fica comigo.', en: 'Stay with me.' },
       { pt: 'Podes vir comigo?', en: 'Can you come with me?' },
     ],
-    cta: 'NOW TAKE THE FILM AWAY',
-  },
-  {
-    key: 'release',
-    display: 'Your friend is leaving.',
-    release: { context: 'No film. No clues.', ask: 'Come with me.', answer: 'Vem comigo.' },
-    cta: 'CONTINUE',
+    close:
+      'That’s DUB. Start with something you already know. Find the useful language inside it. Make it yours.',
+    cta: 'MY TURN',
   },
 ]
 
@@ -79,12 +81,9 @@ export const DEMO_CLOSE =
 
 /** §08 / §09 — the first meaningful learner choice, and it comes after the demo. */
 export const PICKER = {
-  headline: 'WHAT DO YOU ALREADY KNOW BY HEART?',
-  sub: 'Type a film, person, show, book, song, team or anything else that feels like yours.',
-  placeholder: 'Anything at all',
-  cta: 'THAT ONE',
-  fallback: 'Or start somewhere here.',
-  cardsHeadline: 'Start anywhere.',
+  headline: 'Select an area to get going with, and start building your useful vocabulary bank.',
+  sub: 'Whichever one you already carry around in your head. There is no wrong answer, and no order.',
+  cta: 'START HERE',
 } as const
 
 /** §09 (7:30–8:35) — no cue, no styling, no culture. The absence is the point. */
