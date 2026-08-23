@@ -12,6 +12,7 @@ import { track } from '@/engine/analytics'
 import { setAffinity } from '@/engine/learner'
 import { useSession } from '@/engine/session'
 import { AudioButton } from '../AudioButton'
+import { BuiltTag } from './Mission02'
 import { Continue, FeedbackNote } from '../MissionShell'
 import { Prompt } from '../Prompt'
 
@@ -104,21 +105,25 @@ export function PreferenceView({ screen }: { screen: PreferenceScreen }) {
                 setPicked((p) => (on ? p.filter((x) => x !== o.id) : [...p, o.id]))
               }
               className={
-                'tap-target flex w-full items-center justify-between rounded-xl border px-4 py-4 text-left transition ' +
+                'tap-target flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-4 text-left transition ' +
                 (on
                   ? 'border-accent bg-accent/10'
-                  : 'border-line bg-surface hover:border-accent/50')
+                  : o.built
+                    ? 'border-line bg-surface hover:border-accent/50'
+                    : 'border-line/60 bg-surface/40 hover:border-accent/40')
               }
             >
               <span>
-                <span className="display block text-lg">{o.title}</span>
+                <span
+                  className={
+                    'display block text-lg ' + (o.built || on ? 'text-fg' : 'text-muted')
+                  }
+                >
+                  {o.title}
+                </span>
                 <span className="mt-0.5 block text-xs text-muted">{o.desc}</span>
               </span>
-              {on ? (
-                <span aria-hidden="true" className="text-accent">
-                  ✓
-                </span>
-              ) : null}
+              <BuiltTag built={o.built} />
             </button>
           )
         })}

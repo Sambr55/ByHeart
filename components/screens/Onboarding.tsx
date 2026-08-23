@@ -70,6 +70,9 @@ export function CultureSelectView({ screen }: { screen: CultureSelectScreen }) {
           </button>
         ))}
       </div>
+      {screen.unbuiltNote ? (
+        <p className="mt-3 text-xs text-muted">{screen.unbuiltNote}</p>
+      ) : null}
       <Continue
         label={screen.cta}
         disabled={!picked}

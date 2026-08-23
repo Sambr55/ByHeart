@@ -97,6 +97,53 @@ export default function QaPage() {
         share a recording where they are the same utterance.
       </p>
 
+      <h2 className="display mt-12 text-xl">Source lines and their translations</h2>
+      <p className="mt-2 max-w-prose text-sm text-muted">
+        Each cultural moment is shown with the whole line in Portuguese underneath, and
+        that line stays in view while the block is being taught. These renderings are
+        the bridge between the moment and the language, so they need checking twice:
+        for naturalness, and for whether they actually make the target block visible
+        inside the sentence. The film titles are the released Portuguese titles as far
+        as I can establish them — please correct any that are wrong, or that differ in
+        Portugal from what is listed.
+      </p>
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full min-w-[42rem] border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-muted">
+              <th className="py-2 pr-4">Source</th>
+              <th className="py-2 pr-4">Line</th>
+              <th className="py-2 pr-4">Portuguese shown</th>
+              <th className="py-2">Screens</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(
+              SCREENS.filter((s) => s.source).reduce<
+                Record<string, { from: string; line: string; pt: string; ids: string[] }>
+              >((acc, s) => {
+                const src = s.source!
+                const key = src.pt
+                acc[key] ??= { from: src.from ?? '', line: src.line, pt: src.pt, ids: [] }
+                acc[key].ids.push(s.id)
+                return acc
+              }, {}),
+            ).map(([key, v]) => (
+              <tr key={key} className="border-b border-line/60 align-top">
+                <td className="py-3 pr-4 text-xs uppercase tracking-wider text-muted">
+                  {v.from}
+                </td>
+                <td className="py-3 pr-4">“{v.line}”</td>
+                <td className="py-3 pr-4">
+                  <span className="pt text-base text-accent">{v.pt}</span>
+                </td>
+                <td className="py-3 font-mono text-xs text-muted">{v.ids.join(', ')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       <h2 className="display mt-12 text-xl">Cultural hooks in use</h2>
       <ul className="mt-4 space-y-2 text-sm">
         {SCREENS.filter((s) => s.hook).map((s) => (

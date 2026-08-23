@@ -10,8 +10,10 @@
 
 import { mkdir } from 'node:fs/promises'
 import { chromium, type Page } from 'playwright'
-import { MISSION_01 } from '../content/missions/mission-01'
-const SCREENS = MISSION_01.screens
+import { MISSIONS } from '../content/missions'
+const MISSION = MISSIONS[(process.env.MISSION ?? 'mission_01') as 'mission_01']
+const SCREENS = MISSION.screens
+const PATH = MISSION.mission_id === 'mission_01' ? '/' : '/m2'
 import { TARGETS } from '../content/targets'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -25,7 +27,7 @@ async function main() {
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 2,
   })
-  await page.goto(BASE, { waitUntil: 'networkidle' })
+  await page.goto(BASE + PATH, { waitUntil: 'networkidle' })
 
   let taken = 0
   const shoot = async (p: Page, id: string, suffix = '') => {
@@ -80,6 +82,43 @@ async function main() {
           .getByTestId('pair-' + p.blockId)
           .getByRole('button', { name: p.en, exact: true })
           .click()
+      }
+      await shoot(page, s.id, '-solved')
+    } else if (s.type === 'meaning-check') {
+      await page
+        .getByRole('button', { name: s.options.find((o) => o.correct)!.label, exact: false })
+        .first()
+        .click()
+      await shoot(page, s.id, '-solved')
+    } else if (s.type === 'culture-categories') {
+      await page.getByRole('button', { name: s.cards[0].title, exact: false }).first().click()
+    } else if (s.type === 'free-text') {
+      await page.getByRole('textbox').first().fill('The Sopranos')
+    } else if (s.type === 'forced-choice') {
+      await page.getByRole('button', { name: s.cards[0].title, exact: false }).first().click()
+    } else if (s.type === 'scale') {
+      await page.getByRole('button', { name: s.points[2].label, exact: false }).first().click()
+    } else if (s.type === 'post-intent') {
+      await page.getByRole('button', { name: s.options[0].label }).click()
+    } else if (s.type === 'composite') {
+      for (const part of s.parts) {
+        const section = page.getByTestId('part-' + part.id)
+        if (part.kind === 'choice') {
+          await section
+            .getByRole('button', { name: part.options.find((o) => o.correct)!.pt, exact: true })
+            .first()
+            .click()
+        } else {
+          for (const id of part.answer) {
+            const tile = part.tiles.find((x) => x.id === id)!
+            await page
+              .getByTestId('pool-' + part.id)
+              .getByRole('button', { name: tile.text, exact: true })
+              .first()
+              .click()
+          }
+          await section.getByRole('button', { name: 'CHECK', exact: true }).click()
+        }
       }
       await shoot(page, s.id, '-solved')
     } else if (s.type === 'recall-burst') {

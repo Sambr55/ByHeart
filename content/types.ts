@@ -91,6 +91,28 @@ export interface ScreenBase {
   eyebrow?: string
   /** Brief cultural hook. Rendered in quotes; never more than one line. */
   hook?: string
+  /**
+   * The cultural moment this screen sits inside, carried through every screen that
+   * teaches from it. Without this the hook is a one-screen joke: the learner meets a
+   * line they know, then works on fragments with nothing tying the two together.
+   * Showing the whole line in Portuguese underneath — and keeping it in view — is
+   * what makes the block feel extracted from the moment rather than merely adjacent
+   * to it.
+   */
+  source?: {
+    /** The line as the learner already knows it. */
+    line: string
+    /** The same line in European Portuguese. */
+    pt: string
+    /** Where the line comes from, e.g. "Top Gun" or "Film title". */
+    from?: string
+    /**
+     * The word being lifted out, highlighted inside the Portuguese line. This is the
+     * whole trick made visible: the learner sees the piece they are about to own
+     * sitting inside a sentence they already know the meaning of.
+     */
+    key?: string
+  }
   /** Scene-setting line above the prompt, e.g. "Taxi rank. No Maverick." */
   context?: string
   headline?: string
@@ -144,6 +166,8 @@ export interface PromiseScreen extends ScreenBase {
 export interface CultureSelectScreen extends ScreenBase {
   type: 'culture-select'
   cards: { id: string; title: string; meta: string; active: boolean }[]
+  /** Copy for the greyed-out cards, so the convention is stated once. */
+  unbuiltNote?: string
   cta: string
 }
 
@@ -228,7 +252,7 @@ export interface GenerativityScreen extends ScreenBase {
 
 export interface PreferenceScreen extends ScreenBase {
   type: 'preference'
-  options: { id: string; title: string; desc: string }[]
+  options: { id: string; title: string; desc: string; built?: boolean }[]
   cta: string
 }
 
@@ -274,9 +298,10 @@ export interface FreeTextScreen extends ScreenBase {
 
 export interface ForcedChoiceScreen extends ScreenBase {
   type: 'forced-choice'
-  cards: { id: string; title: string }[]
+  /** `built` drives the silver thread: what exists today is visibly distinct. */
+  cards: { id: string; title: string; built?: boolean }[]
   /** Appended after the shuffle so it never occupies a random slot. */
-  escapeHatch?: { id: string; title: string }
+  escapeHatch?: { id: string; title: string; built?: boolean }
   field: 'next_world_pre' | 'next_world_post'
   cta: string
 }

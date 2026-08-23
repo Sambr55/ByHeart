@@ -375,10 +375,15 @@ export function useSession(): SessionApi {
 }
 
 /** Cultural setup swapped for the control variant; the Portuguese never changes. */
-export function useCopy(screen: Screen) {
+export function useCopy(screen: Screen): Screen {
   const { variant } = useSession()
-  if (variant === 'culture_full' || !screen.neutral) return screen
-  return { ...screen, ...screen.neutral }
+  if (variant === 'culture_full') return screen
+  return {
+    ...screen,
+    ...(screen.neutral ?? {}),
+    hook: screen.neutral?.hook,
+    source: undefined,
+  } as Screen
 }
 
 export { ownedBlocks }

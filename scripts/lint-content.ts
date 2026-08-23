@@ -194,9 +194,14 @@ for (const missionId of MISSION_ORDER) {
     const copy = [s.eyebrow, s.headline, s.sub, s.context, s.note].join(' ')
     if (measured.has(s.id)) {
       if (s.hook) fail(M + s.id + ' shows a cultural hook on a measured screen')
+      if (s.source) {
+        fail(M + s.id + ' carries a source moment on a measured screen')
+      }
       if (CULTURE_WORDS.test(copy)) {
         fail(M + s.id + ' names a cultural property on a measured screen')
       }
+    } else if (CULTURE_FREE_STAGES.has(s.stage) && s.source) {
+      fail(M + s.id + ' carries a source moment inside a culture-free stage')
     } else if (CULTURE_FREE_STAGES.has(s.stage) && s.hook) {
       fail(M + s.id + ' shows a cultural hook inside a culture-free stage')
     }
@@ -208,6 +213,9 @@ for (const missionId of MISSION_ORDER) {
   // arm silently leaks the very thing it is controlling for.
   for (const s of mission.screens) {
     if (CULTURE_FREE_STAGES.has(s.stage)) continue
+    // `source` is not listed here: useCopy strips it unconditionally in the control
+    // arm, so unlike free copy it cannot leak by omission. What still needs an
+    // explicit neutral is anything written into the screen's own words.
     const cue = [s.hook, s.eyebrow, s.headline, s.sub, s.context].join(' ')
     const carriesCulture = Boolean(s.hook) || CULTURE_WORDS.test(cue)
     if (

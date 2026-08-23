@@ -23,6 +23,26 @@ import { SourceChip } from '../Inventory'
 import { Continue, FeedbackNote } from '../MissionShell'
 import { Prompt } from '../Prompt'
 
+/**
+ * The silver thread. One convention, everywhere a world is offered: what exists today
+ * reads as lit, what does not reads as greyed with the reason stated. On the demand
+ * probes the greyed options stay tappable on purpose — the question is hypothetical
+ * ("if these were all live tomorrow"), and disabling them would destroy the very
+ * signal the screen exists to collect.
+ */
+export function BuiltTag({ built }: { built?: boolean }) {
+  return (
+    <span
+      className={
+        'shrink-0 rounded-full border px-2 py-0.5 text-[0.55rem] uppercase tracking-wider ' +
+        (built ? 'border-correct/50 text-correct' : 'border-line text-muted')
+      }
+    >
+      {built ? 'built' : 'not built yet'}
+    </span>
+  )
+}
+
 /** Stable per mount so a re-render never reshuffles under the learner's finger. */
 function useShuffled<T>(items: T[]): T[] {
   const [shuffled] = useState(() => {
@@ -243,13 +263,16 @@ export function ForcedChoiceView({ screen }: { screen: ForcedChoiceScreen }) {
             aria-pressed={picked === c.id}
             onClick={() => setPicked(c.id)}
             className={
-              'tap-target eyebrow w-full rounded-xl border px-4 py-4 text-left transition ' +
+              'tap-target eyebrow flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-4 text-left transition ' +
               (picked === c.id
-                ? 'border-accent bg-accent/10'
-                : 'border-line bg-surface hover:border-accent/50')
+                ? 'border-accent bg-accent/10 text-fg'
+                : c.built
+                  ? 'border-line bg-surface text-fg hover:border-accent/50'
+                  : 'border-line/60 bg-surface/40 text-muted hover:border-accent/40')
             }
           >
             {c.title}
+            <BuiltTag built={c.built} />
           </button>
         ))}
       </div>
