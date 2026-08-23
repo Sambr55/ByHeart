@@ -478,9 +478,45 @@ for (const e of EXAMPLES) {
     if (!c.provenance.trim()) warn('collision ' + c.id + ' surfaces no provenance after success')
   }
 
+  /**
+   * A learner who takes two areas must find something that collides. Otherwise the
+   * compounding claim — the reason the six families exist at all — is never once shown
+   * to the person we are asking about it.
+   */
+  const inCollisions: Record<string, number> = {}
+  for (const c of COLLISIONS) {
+    for (const f of new Set(c.requires.map((p) => PIECES[p]?.family).filter(Boolean))) {
+      inCollisions[f as string] = (inCollisions[f as string] ?? 0) + 1
+    }
+  }
+  for (const f of FAMILIES) {
+    const n = inCollisions[f.id] ?? 0
+    if (n === 0) fail('family ' + f.id + ' appears in no collision at all')
+    else if (n < 2) warn('family ' + f.id + ' appears in only one collision')
+  }
+  const pairs: string[] = []
+  for (let i = 0; i < FAMILIES.length; i++) {
+    for (let j = i + 1; j < FAMILIES.length; j++) {
+      const a = FAMILIES[i].id
+      const b = FAMILIES[j].id
+      const covered = COLLISIONS.some((c) => {
+        const fams = new Set(c.requires.map((p) => PIECES[p]?.family))
+        return fams.has(a) && fams.has(b)
+      })
+      if (!covered) pairs.push(a + '+' + b)
+    }
+  }
+  if (pairs.length) {
+    warn(
+      pairs.length + ' of 15 family pairs have no collision: ' + pairs.slice(0, 6).join(', ') +
+        (pairs.length > 6 ? '…' : ''),
+    )
+  }
+
   console.log(
     ROOTS.length + ' roots · ' + FAMILIES.length + ' families · ' +
-      Object.keys(PIECES).length + ' pieces · ' + COLLISIONS.length + ' collisions',
+      Object.keys(PIECES).length + ' pieces · ' + COLLISIONS.length + ' collisions · ' +
+      (15 - pairs.length) + '/15 family pairs collide',
   )
 }
 

@@ -131,7 +131,15 @@ interface JourneyState {
 
 type Action =
   | { type: 'choose-family'; family: CultureFamily }
-  | { type: 'append'; steps: Step[]; rootId?: string; rootIds?: string[]; collisionId?: string }
+  | {
+      type: 'append'
+      steps: Step[]
+      rootId?: string
+      rootIds?: string[]
+      collisionId?: string
+      /** Jump to the first appended step rather than nudging the index forward. */
+      jump?: boolean
+    }
   | { type: 'next' }
   | { type: 'back' }
   | { type: 'goto'; index: number }
@@ -168,6 +176,11 @@ function reducer(state: JourneyState, action: Action): JourneyState {
     case 'append':
       return {
         ...state,
+        // Appending and then incrementing only works when you happen to be standing on
+        // the last step. Coming back from the areas screen you are not, and the nudge
+        // lands you on whatever followed the picker the first time round — which is why
+        // every section was opening on "Talk to me, Goose".
+        index: action.jump ? state.steps.length : state.index,
         steps: [...state.steps, ...action.steps],
         rootsPlayed: action.rootIds
           ? [...state.rootsPlayed, ...action.rootIds]
@@ -342,16 +355,30 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
       // A section is played whole. Offering "where next?" between every root turned the
       // choice into a tax; the learner picks an area, works through it, and then decides.
       const roots = ROOTS_BY_FAMILY[family].filter((r) => !state.rootsPlayed.includes(r.root_id))
-      const steps: Step[] = roots.flatMap((r) => rootSteps(r))
+      const steps: Step[] = []
+
+      /**
+       * Arriving in a second world is exactly the moment to show that the first one is
+       * still working. Holding every collision back until the end meant a learner who
+       * took two areas saw the compounding claim once, at the finish, if at all.
+       */
+      const bridging =
+        state.rootsPlayed.length > 0
+          ? availableCollision(state.rootsPlayed, state.collisionsPlayed)
+          : null
+      if (bridging) steps.push({ kind: 'collision', collisionId: bridging.id })
+
+      steps.push(...roots.flatMap((r) => rootSteps(r)))
       steps.push({ kind: 'section-complete' })
       dispatch({
         type: 'append',
         steps,
         rootIds: roots.map((r) => r.root_id),
+        collisionId: bridging?.id,
+        jump: true,
       })
-      dispatch({ type: 'next' })
     },
-    [],
+    [state.collisionsPlayed, state.rootsPlayed],
   )
 
   /** Finish here, or go back to the areas and pick another. */
@@ -369,8 +396,7 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
       if (collision) steps.push({ kind: 'collision', collisionId: collision.id })
       steps.push({ kind: 'nocue', i: 0 }, { kind: 'nocue', i: 1 }, { kind: 'nocue', i: 2 })
       steps.push({ kind: 'cansay' }, { kind: 'close' })
-      dispatch({ type: 'append', steps, collisionId: collision?.id })
-      dispatch({ type: 'next' })
+      dispatch({ type: 'append', steps, collisionId: collision?.id, jump: true })
     },
     [state.collisionsPlayed, state.rootsPlayed, state.steps],
   )

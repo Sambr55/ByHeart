@@ -139,6 +139,7 @@ export const TOP_GUN: Root[] = [
       'Vem': 'come',
       'Fica': 'stay',
       'vir': 'to come',
+
     },
     transfer_prompt: { context: 'Your friend is walking away.', ask: 'Come with me.', answer: 'Vem comigo.' },
     freebie_flag: true,
@@ -172,6 +173,7 @@ export const TOP_GUN: Root[] = [
     helpers: {
       'vir': 'to come',
       'dizer': 'to say',
+
     },
     transfer_prompt: { context: 'A friend asks when they can call you.', ask: 'Whenever you want.', answer: 'Quando quiseres.' },
     starter_tags: ['iconic', 'permission'],
@@ -196,12 +198,14 @@ export const TOP_GUN: Root[] = [
       { pt: 'Em que estás a pensar?', en: 'What are you thinking about?' },
       { pt: 'Estava a pensar…', en: 'I was thinking…' },
       { pt: 'Estava a pensar em ti.', en: 'I was thinking about you.' },
+      { pt: 'Em que estavas a pensar?', en: 'What were you thinking about?' },
     ],
     helpers: {
       'estás': 'you are',
       'pensar': 'to think',
       'Estava': 'I was',
       'ti': 'you',
+
     },
     transfer_prompt: { context: 'Someone goes quiet.', ask: 'What are you thinking about?', answer: 'Em que estás a pensar?' },
     starter_tags: ['question', 'intimate'],
@@ -227,6 +231,7 @@ export const TOP_GUN: Root[] = [
       'ajuda': 'help',
       'um': 'a',
       'táxi': 'taxi',
+
     },
     transfer_prompt: { context: 'You are at a hotel reception.', ask: 'I need a taxi.', answer: 'Preciso de um táxi.' },
     starter_tags: ['survival', 'travel'],
@@ -250,15 +255,19 @@ export const TOP_GUN: Root[] = [
       { pt: 'Não vou sair.', en: 'I’m not going out.' },
       { pt: 'Não vou amanhã.', en: 'I’m not going tomorrow.' },
       { pt: 'Não vou fazer isso.', en: 'I’m not going to do that.' },
+      { pt: 'Vou deixar isso.', en: 'I’m going to leave that.' },
     ],
     voice_options: [
       { pt: 'Não vou.', en: 'I’m not going.', signal: 'direct' },
       { pt: 'Acho que não vou.', en: 'I don’t think I’ll go.', signal: 'softened' },
     ],
     helpers: {
+      'Vou': 'I’m going to',
+      'deixar': 'to leave',
       'sair': 'to go out',
       'fazer': 'to do',
       'isso': 'that',
+
     },
     transfer_prompt: { context: 'Someone asks if you are going out tonight.', ask: 'I’m not going.', answer: 'Não vou.' },
     starter_tags: ['intention', 'refusal'],
@@ -296,6 +305,7 @@ export const JAMES_BOND: Root[] = [
       'tu': 'you',
       'E': 'and',
       'se': 'themselves',
+
     },
     transfer_prompt: { context: 'You meet someone new.', ask: 'My name is Sam.', answer: 'Chamo-me Sam.' },
     freebie_flag: true,
@@ -330,7 +340,12 @@ export const JAMES_BOND: Root[] = [
       'não': 'not',
       'posso': 'I can',
       'mais': 'more / again',
+
     },
+    voice_options: [
+      { pt: 'Amanhã.', en: 'Tomorrow.', signal: 'direct' },
+      { pt: 'Até amanhã!', en: 'See you tomorrow!', signal: 'warm' },
+    ],
     transfer_prompt: { context: 'Someone asks whether today works.', ask: 'Tomorrow.', answer: 'Amanhã.' },
     rights_status: 'title-reference',
     starter_tags: ['time', 'compact'],
@@ -356,12 +371,15 @@ export const JAMES_BOND: Root[] = [
       { pt: 'Café com leite.', en: 'Coffee with milk.' },
       { pt: 'Com açúcar?', en: 'With sugar?' },
       { pt: 'Comigo.', en: 'With me.' },
+      { pt: 'Com amor.', en: 'With love.' },
     ],
     reinforces: ['comigo'],
     helpers: {
+      'amor': 'love',
       'Café': 'coffee',
       'leite': 'milk',
       'açúcar': 'sugar',
+
     },
     transfer_prompt: { context: 'You are ordering coffee.', ask: 'Coffee with milk.', answer: 'Café com leite.' },
     rights_status: 'title-reference',
@@ -388,6 +406,7 @@ export const JAMES_BOND: Root[] = [
       { pt: 'Diz outra vez.', en: 'Say it again.' },
       { pt: 'Podes dizer outra vez?', en: 'Can you say it again?' },
       { pt: 'Nunca mais.', en: 'Never again.' },
+      { pt: 'Não digas isso.', en: 'Don’t say that.' },
     ],
     reinforces: ['podes', 'nunca'],
     voice_options: [
@@ -395,9 +414,11 @@ export const JAMES_BOND: Root[] = [
       { pt: 'Podes dizer outra vez, por favor?', en: 'Can you say it again, please?', signal: 'polite' },
     ],
     helpers: {
+      'isso': 'that',
       'Diz': 'say',
       'dizer': 'to say',
       'mais': 'more / again',
+
     },
     transfer_prompt: { context: 'You did not hear the waiter.', ask: 'Can you say it again?', answer: 'Podes dizer outra vez?' },
     rights_status: 'title-reference',
@@ -431,6 +452,7 @@ export const JAMES_BOND: Root[] = [
       'gelo': 'ice',
       'Não': 'not',
       'tenho': 'I have',
+
     },
     transfer_prompt: { context: 'At the bar.', ask: 'Without ice.', answer: 'Sem gelo.' },
     rights_status: 'title-reference',
@@ -470,6 +492,7 @@ export const BRIDGET_JONES: Root[] = [
       'Desculpa,': 'sorry,',
       'Comi': 'I ate',
       'Bebi': 'I drank',
+
     },
     transfer_prompt: { context: 'You look down at an empty plate that was not small.', ask: 'I ate too much.', answer: 'Comi demais.' },
     freebie_flag: true,
@@ -504,7 +527,9 @@ export const BRIDGET_JONES: Root[] = [
     ],
     helpers: {
       'Peço': 'I ask for',
+      'sempre': 'always',
       'o': 'the',
+
     },
     transfer_prompt: { context: 'You bump into someone in a doorway.', ask: 'Sorry.', answer: 'Desculpa.' },
     rights_status: 'dub-authored',
@@ -534,6 +559,7 @@ export const BRIDGET_JONES: Root[] = [
       'Ana': 'a name',
       'se': 'themselves',
       'Chamo-me': 'my name is',
+
     },
     transfer_prompt: { context: 'You meet someone and want their name.', ask: 'What’s your name?', answer: 'Como te chamas?' },
     rights_status: 'dub-authored',
@@ -567,6 +593,7 @@ export const BRIDGET_JONES: Root[] = [
       'outra': 'another',
       'coisa': 'thing',
       'dizer': 'to say',
+
     },
     transfer_prompt: { context: 'You point at the wrong thing on the menu.', ask: 'That wasn’t it.', answer: 'Não era isso.' },
     rights_status: 'dub-authored',
@@ -603,6 +630,7 @@ export const BRIDGET_JONES: Root[] = [
       'Estou': 'I am',
       'brincar': 'joking',
       'É': 'is',
+
     },
     transfer_prompt: { context: 'Your friend takes you seriously.', ask: 'I’m joking.', answer: 'Estou a brincar.' },
     rights_status: 'dub-authored',
@@ -639,6 +667,7 @@ export const PULP_FICTION: Root[] = [
       'gelo': 'ice',
       'queijo': 'cheese',
       'Com': 'with',
+
     },
     transfer_prompt: { context: 'You are ordering.', ask: 'With cheese.', answer: 'Com queijo.' },
     freebie_flag: true,
@@ -673,6 +702,7 @@ export const PULP_FICTION: Root[] = [
       'Diz': 'say',
       'dizer': 'to say',
       'Podes': 'can you',
+
     },
     transfer_prompt: { context: 'You miss what someone said.', ask: 'Can you say it again?', answer: 'Podes dizer outra vez?' },
     starter_tags: ['survival', 'repair'],
@@ -703,6 +733,7 @@ export const PULP_FICTION: Root[] = [
       'é': 'is',
       'Muito': 'very',
       'Esse': 'that one',
+
     },
     transfer_prompt: { context: 'You taste something excellent.', ask: 'That’s really good.', answer: 'Isso é mesmo bom.' },
     starter_tags: ['reaction', 'food'],
@@ -729,10 +760,14 @@ export const PULP_FICTION: Root[] = [
       { pt: 'Está tudo bem.', en: 'It’s all right.', signal: 'warm' },
     ],
     helpers: {
+      'Era': 'it was',
+      'uma': 'a',
+      'piada': 'a joke',
       'Tem': 'have',
       'Está': 'is',
       'tudo': 'all',
       'bem': 'well',
+
     },
     transfer_prompt: { context: 'A friend is panicking.', ask: 'Easy.', answer: 'Calma.' },
     starter_tags: ['reaction', 'social'],
@@ -763,6 +798,7 @@ export const PULP_FICTION: Root[] = [
       'te': 'you',
       'Chama-se': 'it’s called',
       'Como': 'how',
+
     },
     transfer_prompt: { context: 'You point at an unfamiliar food.', ask: 'What is this called?', answer: 'Como se chama isto?' },
     starter_tags: ['survival', 'question'],
@@ -801,7 +837,12 @@ export const AUDREY_HEPBURN: Root[] = [
       'uma': 'a',
       'Acho': 'I think',
       'que': 'that',
+
     },
+    voice_options: [
+      { pt: 'Boa ideia.', en: 'Good idea.', signal: 'casual' },
+      { pt: 'Acho que é uma boa ideia.', en: 'I think it’s a good idea.', signal: 'softened' },
+    ],
     transfer_prompt: { context: 'A friend suggests lunch outside.', ask: 'Good idea.', answer: 'Boa ideia.' },
     freebie_flag: true,
     starter_tags: ['warm', 'agreement'],
@@ -827,12 +868,16 @@ export const AUDREY_HEPBURN: Root[] = [
       { pt: 'Aproveita o dia.', en: 'Enjoy the day.' },
       { pt: 'Aproveita!', en: 'Enjoy it!' },
       { pt: 'Quero aproveitar.', en: 'I want to make the most of it.' },
+      { pt: 'É a vida.', en: 'That’s life.' },
     ],
     helpers: {
+      'a': 'the',
+      'vida': 'life',
       'o': 'the',
       'dia': 'day',
       'Quero': 'I want',
       'aproveitar': 'to make the most of it',
+
     },
     transfer_prompt: { context: 'Your friend leaves for a holiday.', ask: 'Enjoy!', answer: 'Aproveita!' },
     rights_status: 'dub-authored',
@@ -865,6 +910,7 @@ export const AUDREY_HEPBURN: Root[] = [
       'importas': 'you matter',
       'isso': 'that',
       'Isto': 'this',
+
     },
     transfer_prompt: { context: 'Someone is doubting themselves.', ask: 'You matter.', answer: 'Tu importas.' },
     rights_status: 'dub-authored',
@@ -900,6 +946,7 @@ export const AUDREY_HEPBURN: Root[] = [
       'boa': 'good',
       'pessoa': 'person',
       'O': 'the',
+
     },
     transfer_prompt: { context: 'Someone asks what you like about a situation.', ask: 'The good side.', answer: 'O lado bom.' },
     rights_status: 'dub-authored',
@@ -926,9 +973,11 @@ export const AUDREY_HEPBURN: Root[] = [
       { pt: 'É importante.', en: 'It’s important.' },
       { pt: 'O que é mais importante?', en: 'What is most important?' },
       { pt: 'Quero ser feliz.', en: 'I want to be happy.' },
+      { pt: 'O mais importante é isto.', en: 'The most important thing is this.' },
     ],
     reinforces: ['mais_do_que'],
     helpers: {
+      'isto': 'this',
       'É': 'it is',
       'importante': 'important',
       'O': 'the',
@@ -936,7 +985,12 @@ export const AUDREY_HEPBURN: Root[] = [
       'é': 'is',
       'Quero': 'I want',
       'ser': 'to be',
+
     },
+    voice_options: [
+      { pt: 'É importante.', en: 'It’s important.', signal: 'direct' },
+      { pt: 'Para mim é importante.', en: 'It matters to me.', signal: 'warm' },
+    ],
     transfer_prompt: { context: 'You are explaining a decision.', ask: 'It’s important.', answer: 'É importante.' },
     rights_status: 'dub-authored',
     starter_tags: ['warm', 'identity'],
@@ -981,6 +1035,7 @@ export const MARCUS_AURELIUS: Root[] = [
       'controlar': 'to control',
       'isso': 'that',
       'isto': 'this',
+
     },
     transfer_prompt: { context: 'You are stuck on something.', ask: 'What can I do?', answer: 'O que posso fazer?' },
     freebie_flag: true,
@@ -1019,6 +1074,7 @@ export const MARCUS_AURELIUS: Root[] = [
       'isso': 'that',
       'O': 'what',
       'Como': 'how',
+
     },
     transfer_prompt: { context: 'You walk in on something.', ask: 'What happened?', answer: 'O que aconteceu?' },
     rights_status: 'dub-authored',
@@ -1055,6 +1111,7 @@ export const MARCUS_AURELIUS: Root[] = [
       'não': 'not',
       'E': 'and',
       'tempo': 'time',
+
     },
     transfer_prompt: { context: 'Someone asks if you can talk.', ask: 'Not now.', answer: 'Agora não.' },
     rights_status: 'dub-authored',
@@ -1090,6 +1147,7 @@ export const MARCUS_AURELIUS: Root[] = [
       'digas': 'say',
       'isso': 'that',
       'Se': 'if',
+
     },
     transfer_prompt: { context: 'Someone tells you something surprising.', ask: 'Is it true?', answer: 'É verdade?' },
     rights_status: 'dub-authored',
@@ -1116,9 +1174,11 @@ export const MARCUS_AURELIUS: Root[] = [
       { pt: 'Posso mudar isto?', en: 'Can I change this?' },
       { pt: 'Não posso mudar isso.', en: 'I can’t change that.' },
       { pt: 'Quero mudar.', en: 'I want to change.' },
+      { pt: 'Não podes mudar isso.', en: 'You can’t change that.' },
     ],
     reinforces: ['podes'],
     helpers: {
+      'podes': 'you can',
       'Posso': 'can I',
       'mudar': 'to change',
       'isto': 'this',
@@ -1126,7 +1186,12 @@ export const MARCUS_AURELIUS: Root[] = [
       'posso': 'I can',
       'isso': 'that',
       'Quero': 'I want',
+
     },
+    voice_options: [
+      { pt: 'Não posso.', en: 'I can’t.', signal: 'direct' },
+      { pt: 'Acho que não posso.', en: 'I don’t think I can.', signal: 'softened' },
+    ],
     transfer_prompt: { context: 'You need to alter a booking.', ask: 'Can I change this?', answer: 'Posso mudar isto?' },
     rights_status: 'dub-authored',
     starter_tags: ['reflective', 'practical'],
@@ -1235,6 +1300,86 @@ export const COLLISIONS: Collision[] = [
     ask: 'My name is Sam. What is this called?',
     answer: 'Chamo-me Sam. Como se chama isto?',
     provenance: 'The same Portuguese verb, learned twice from two unrelated films.',
+  },
+  {
+    id: 'desculpa_preciso',
+    requires: ['desculpa', 'preciso_de'],
+    context: 'You need help, and you are interrupting someone to ask for it.',
+    ask: 'Sorry, I need help.',
+    answer: 'Desculpa, preciso de ajuda.',
+    provenance: 'An apology from one world, a need from another. Most real sentences are made this way.',
+  },
+  {
+    id: 'agora_desculpa',
+    requires: ['agora', 'desculpa'],
+    context: 'Someone wants you, and you cannot right this second.',
+    ask: 'Sorry, not now.',
+    answer: 'Desculpa, agora não.',
+    provenance: 'Stoic philosophy supplied the timing. A romantic comedy supplied the manners.',
+  },
+  {
+    id: 'calma_nao_vou',
+    requires: ['calma', 'nao_vou'],
+    context: 'Someone is pushing, and you have already decided.',
+    ask: 'Easy. I’m not going.',
+    answer: 'Calma. Não vou.',
+    provenance: 'Two very different films, one very ordinary refusal.',
+  },
+  {
+    id: 'boa_ideia_amanha',
+    requires: ['boa_ideia', 'amanha'],
+    context: 'They suggest a day and you like it.',
+    ask: 'Tomorrow? Good idea.',
+    answer: 'Amanhã? Boa ideia.',
+    provenance: 'A film title gave you the day. Somewhere else entirely gave you the enthusiasm.',
+  },
+  {
+    id: 'mesmo_podes',
+    requires: ['mesmo', 'podes'],
+    context: 'Someone offers something you did not expect.',
+    ask: 'Can you really?',
+    answer: 'Podes mesmo?',
+    provenance: 'One word of attitude, one of permission, from opposite ends of cinema.',
+  },
+  {
+    id: 'podes_sempre',
+    requires: ['podes', 'sempre'],
+    context: 'You are telling someone the door is open.',
+    ask: 'You can always come.',
+    answer: 'Podes vir sempre.',
+    provenance: 'Permission from one world, warmth from another.',
+  },
+  {
+    id: 'calma_piada',
+    requires: ['calma', 'piada'],
+    context: 'It did not land, and they have taken it badly.',
+    ask: 'Easy. It was a joke.',
+    answer: 'Calma. Era uma piada.',
+    provenance: 'A crime film supplied the calm. A romantic comedy supplied the excuse.',
+  },
+  {
+    id: 'sempre_desculpa',
+    requires: ['sempre', 'desculpa'],
+    context: 'You are owning up to a habit.',
+    ask: 'I always apologise.',
+    answer: 'Peço sempre desculpa.',
+    provenance: 'One word of grace, one of embarrassment. They get on well.',
+  },
+  {
+    id: 'mesmo_verdade',
+    requires: ['mesmo', 'e_verdade'],
+    context: 'Someone tells you something you were not expecting.',
+    ask: 'Is it really true?',
+    answer: 'É mesmo verdade?',
+    provenance: 'Ancient philosophy asked the question. A diner conversation sharpened it.',
+  },
+  {
+    id: 'aproveita_agora',
+    requires: ['aproveita', 'agora'],
+    context: 'Something good is happening and it will not wait.',
+    ask: 'Make the most of now.',
+    answer: 'Aproveita agora.',
+    provenance: 'Two thousand years apart, and they finish each other’s sentence.',
   },
   {
     id: 'tens_tempo',

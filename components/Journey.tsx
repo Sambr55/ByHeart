@@ -248,28 +248,45 @@ function Picker() {
   // Remember what they chose. Stepping back onto this screen and finding the choice
   // wiped is the kind of small betrayal that makes a product feel unreliable.
   const [picked, setPicked] = useState<CultureFamily | null>(state.family)
+  const done = useMemo(() => {
+    const played = new Set(state.rootsPlayed.map((id) => rootById(id)?.culture_family))
+    return played
+  }, [state.rootsPlayed])
   return (
     <Shell stage="CHOICE">
       <h1 className="display text-balance text-2xl">{PICKER.headline}</h1>
       <p className="mt-2 text-sm text-muted">{PICKER.sub}</p>
       <div className="mt-5 space-y-2">
-        {FAMILIES.map((f) => (
-          <button
-            key={f.id}
-            type="button"
-            aria-pressed={picked === f.id}
-            onClick={() => setPicked(f.id)}
-            className={
-              'tap-target w-full rounded-xl border px-4 py-4 text-left transition ' +
-              (picked === f.id
-                ? 'border-accent bg-accent/10'
-                : 'border-line bg-surface hover:border-accent/50')
-            }
-          >
-            <span className="display block text-base">{f.title}</span>
-            <span className="mt-0.5 block text-xs text-muted">{f.blurb}</span>
-          </button>
-        ))}
+        {FAMILIES.map((f) => {
+          const finished = done.has(f.id)
+          return (
+            <button
+              key={f.id}
+              type="button"
+              aria-pressed={picked === f.id}
+              disabled={finished}
+              onClick={() => setPicked(f.id)}
+              className={
+                'tap-target flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-4 text-left transition ' +
+                (finished
+                  ? 'border-line/50 bg-surface/40 opacity-45'
+                  : picked === f.id
+                    ? 'border-accent bg-accent/10'
+                    : 'border-line bg-surface hover:border-accent/50')
+              }
+            >
+              <span>
+                <span className="display block text-base">{f.title}</span>
+                <span className="mt-0.5 block text-xs text-muted">{f.blurb}</span>
+              </span>
+              {finished ? (
+                <span className="shrink-0 rounded-full border border-correct/50 px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-correct">
+                  done
+                </span>
+              ) : null}
+            </button>
+          )
+        })}
       </div>
       <Cta label={PICKER.cta} disabled={!picked} onClick={() => picked && chooseFamily(picked)} />
     </Shell>
