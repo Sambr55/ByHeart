@@ -1,6 +1,6 @@
 # DUB — European Portuguese recording script
 
-**229 lines.** 212 either voice, 12 a man, 5 a woman.
+**320 lines.** 303 either voice, 12 a man, 5 a woman.
 
 European Portuguese only. A Brazilian delivery fails the product: the whole point is
 that a learner arrives in Lisbon and recognises what they hear.
@@ -746,6 +746,282 @@ that a learner arrives in Lisbon and recognises what they hear.
   _You’re a total pain._  
   → EXASPERATED, NOT RUDE — Same structure, same affection, and you can say it to a colleague.
 
+## FLIRTING — HIM TO HER
+
+
+### fl_m_estas_gira
+
+- `estas-muito-gira-hoje` — **Estás muito gira hoje.**  
+  _A remark about this evening, not a verdict on her existence._  
+  → Light, unweighted, easy to say and easy to receive. Nothing rides on it.
+- `estas` — **Estás**  
+  _you are (right now)_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `gira` — **gira**  
+  _lovely — said about a woman_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `estas-linda` — **Estás linda.**  
+  _You look beautiful._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `estas-bem` — **Estás bem?**  
+  _Are you all right?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `hoje-estas-gira` — **Hoje estás gira.**  
+  _You look lovely today._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `estas-gira` — **Estás gira.**  
+  _You look great._  
+  → EVERYDAY, NO WEIGHT — Said in passing, to someone you already know a little. It costs nothing to say or to hear.
+
+### fl_m_posso_oferecer
+
+- `posso-oferecer-te-uma-bebida` — **Posso oferecer-te uma bebida?**  
+  _The oldest opening line there is, in a language that softens it._  
+  → Confident but asking. The question mark is doing real work.
+- `posso` — **Posso**  
+  _may I / can I_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `oferecer-te` — **oferecer-te**  
+  _get you / offer you_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `posso-sentar-me` — **Posso sentar-me?**  
+  _May I sit down?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `posso-ajudar-te` — **Posso ajudar-te?**  
+  _Can I help you?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `posso-oferecer-te-um-cafe` — **Posso oferecer-te um café?**  
+  _Can I get you a coffee?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `posso-sentar-me-aqui` — **Posso sentar-me aqui?**  
+  _May I sit here?_  
+  → Said cold, with no film behind it: the only free seat in the café is at her table.
+
+### fl_m_gostava
+
+- `gostava-de-te-ver-outra-vez` — **Gostava de te ver outra vez.**  
+  _Said at the end of an evening you do not want to be the last one._  
+  → Open, unpressured, and completely clear about what is being asked.
+- `gostava-de` — **Gostava de**  
+  _I’d like to_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `te-ver` — **te ver**  
+  _see you_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `gostava-de-te-conhecer-melhor` — **Gostava de te conhecer melhor.**  
+  _I’d like to get to know you better._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `gostava-de-um-cafe` — **Gostava de um café.**  
+  _I’d like a coffee._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `gostava-de-te-ver-amanha` — **Gostava de te ver amanhã.**  
+  _I’d like to see you tomorrow._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `das-me-o-teu-numero` — **Dás-me o teu número?**  
+  _Will you give me your number?_  
+  → SKIPPING THE SPEECH — It is going well, the taxi is outside, and there is no time for a sentence.
+- `gostava-de-um-cafe-por-favor` — **Gostava de um café, por favor.**  
+  _I’d like a coffee, please._  
+  → Said cold, with no film behind it: you are at the counter, and the same tense turns out to work on coffee.
+
+### fl_m_vim_aqui
+
+- `vim-aqui-para-te-pedir-uma-coisa` — **Vim aqui para te pedir uma coisa.**  
+  _The whole point of learning the language in the first place._  
+  → Earnest, slightly exposed, and entirely deliberate. This one is meant to cost something.
+- `vim-aqui` — **Vim aqui**  
+  _I came here_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `te-pedir` — **te pedir**  
+  _to ask you_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `vim-aqui-para-te-ver` — **Vim aqui para te ver.**  
+  _I came here to see you._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `posso-pedir-te-uma-coisa` — **Posso pedir-te uma coisa?**  
+  _Can I ask you something?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `vim-para-ficar` — **Vim para ficar.**  
+  _I came to stay._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `vim-para-te-pedir-ajuda` — **Vim para te pedir ajuda.**  
+  _I came to ask you for help._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### fl_m_nervoso
+
+- `estou-nervoso-nao-sou-bom-nisto` — **Estou nervoso, não sou bom nisto.**  
+  _Admitting it, which works considerably better than not admitting it._  
+  → Disarming rather than weak. Said lightly it is the most effective line here.
+- `estou-nervoso` — **Estou nervoso**  
+  _I’m nervous — a man saying it_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nao-sou-bom` — **não sou bom**  
+  _I’m not good_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nao-sou-bom-a-dancar` — **Não sou bom a dançar.**  
+  _I’m not a good dancer._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `estou-nervoso-desculpa` — **Estou nervoso, desculpa.**  
+  _I’m nervous, sorry._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-sou-bom-nisto-mas-estou-a-tentar` — **Não sou bom nisto, mas estou a tentar.**  
+  _I’m not good at this, but I’m trying._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### fl_m_numero
+
+- `das-me` — **Dás-me**  
+  _will you give me_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `o-teu` — **o teu**  
+  _your_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `das-me-o-teu-instagram` — **Dás-me o teu Instagram?**  
+  _Will you give me your Instagram?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `das-me-um-minuto` — **Dás-me um minuto?**  
+  _Will you give me a minute?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `este-e-o-meu-numero` — **Este é o meu número.**  
+  _This is my number._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `das-me-o-teu-email` — **Dás-me o teu email?**  
+  _Will you give me your email?_  
+  → Said cold, with no film behind it: she would rather not hand over a phone number yet.
+
+## FLIRTING — HER TO HIM
+
+
+### fl_f_estas_giro
+
+- `estas-muito-giro-hoje` — **Estás muito giro hoje.**  
+  _A remark about this evening, not a verdict on his existence._  
+  → Light and unweighted. Delivered in passing it does far more than delivered solemnly.
+- `giro` — **giro**  
+  _good-looking — said about a man_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `estas-lindo` — **Estás lindo.**  
+  _You look wonderful._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `hoje-estas-giro` — **Hoje estás giro.**  
+  _You look good today._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `estas-giro` — **Estás giro.**  
+  _You look good._  
+  → THROWN AWAY — Said over your shoulder, once, and then changing the subject. This is the effective version.
+
+### fl_f_apetece_te
+
+- `apetece-te-ir-beber-qualquer-coisa` — **Apetece-te ir beber qualquer coisa?**  
+  _An invitation with no weight on it, which is why it works._  
+  → Casual on purpose. The grammar itself removes the pressure.
+- `apetece-te` — **Apetece-te**  
+  _do you fancy_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `qualquer-coisa` — **qualquer coisa**  
+  _something / anything_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `apetece-te-um-cafe` — **Apetece-te um café?**  
+  _Do you fancy a coffee?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `apetece-te-dancar` — **Apetece-te dançar?**  
+  _Do you fancy dancing?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `queres-beber-qualquer-coisa` — **Queres beber qualquer coisa?**  
+  _Do you want a drink?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `vamos-beber-qualquer-coisa` — **Vamos beber qualquer coisa?**  
+  _Shall we go for a drink?_  
+  → ALREADY DECIDED — Said standing up, with your coat already on. Assumes the answer.
+
+### fl_f_queria
+
+- `queria-conhecer-te-melhor` — **Queria conhecer-te melhor.**  
+  _Interest, stated once, without a speech attached._  
+  → Warm and unhurried. Said once and then left alone.
+- `queria` — **Queria**  
+  _I’d like_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `conhecer-te` — **conhecer-te**  
+  _to get to know you_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `queria-ver-te-outra-vez` — **Queria ver-te outra vez.**  
+  _I’d like to see you again._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `queria-um-cafe-por-favor` — **Queria um café, por favor.**  
+  _I’d like a coffee, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### fl_f_engracado
+
+- `es-muito-engracado` — **És muito engraçado.**  
+  _The most effective sentence in this entire crate._  
+  → Sincere, and worth spending. Said about a joke that was not funny it does the opposite.
+- `es` — **És**  
+  _you are (permanently)_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `engracado` — **engraçado**  
+  _funny_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `es-muito-simpatico` — **És muito simpático.**  
+  _You’re really nice._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-es-nada-engracado` — **Não és nada engraçado.**  
+  _You’re not funny at all._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `es-giro-quando-ris` — **És giro quando ris.**  
+  _You’re cute when you laugh._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `e-muito-engracado` — **É muito engraçado.**  
+  _He’s really funny._  
+  → Said cold, with no film behind it: a friend asks what you make of him.
+
+### fl_f_beijinho
+
+- `da-me-um-beijinho` — **Dá-me um beijinho.**  
+  _And also, unremarkably, how the entire country says hello._  
+  → Playful rather than forward. The diminutive is what takes the weight out of it.
+- `beijinho` — **beijinho**  
+  _a little kiss — and how Portugal says hello_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `da-me` — **Dá-me**  
+  _give me_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `dois-beijinhos` — **Dois beijinhos.**  
+  _Two little kisses._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `da-me-um-minuto` — **Dá-me um minuto.**  
+  _Give me a minute._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `apetece-te-um-cafezinho` — **Apetece-te um cafezinho?**  
+  _Fancy a little coffee?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### fl_f_ligas_me
+
+- `ligas-me-logo` — **Ligas-me logo?**  
+  _Handing the next move over, deliberately._  
+  → Confident. Asking him to call is a decision, not a hope.
+- `ligas-me` — **Ligas-me**  
+  _will you call me_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `logo` — **logo**  
+  _later on / in a bit_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `ligo-te-logo` — **Ligo-te logo.**  
+  _I’ll call you later._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `ate-logo` — **Até logo.**  
+  _See you later._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `ligas-me-amanha` — **Ligas-me amanhã?**  
+  _Will you call me tomorrow?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `ligo-te-amanha` — **Ligo-te amanhã.**  
+  _I’ll call you tomorrow._  
+  → Said cold, with no film behind it: you said you would be in touch, and you meant it.
+
 ## Speaking as a man or a woman
 
 - `obrigado` **[MAN]** — **Obrigado.**  
@@ -781,6 +1057,45 @@ that a learner arrives in Lisbon and recognises what they hear.
 
 ## Collisions
 
+- `gostava-de-te-ver-quando-quiseres` — **Gostava de te ver quando quiseres.**  
+  _I’d like to see you whenever you want._  
+  → Neutral. She has said yes but not said when.
+- `desculpa-estou-nervoso` — **Desculpa, estou nervoso.**  
+  _Sorry — I’m nervous._  
+  → Neutral. You have said something clumsy and she heard all of it.
+- `posso-perguntar-como-se-chama` — **Posso perguntar como se chama?**  
+  _May I ask what you are called?_  
+  → Neutral. You have been talking for ten minutes and still do not know.
+- `estas-feliz` — **Estás feliz?**  
+  _Are you happy?_  
+  → Neutral. Something has been on her mind all evening.
+- `gostava-de-te-ver-agora` — **Gostava de te ver agora.**  
+  _I’d like to see you now._  
+  → Neutral. Neither of you wants to wait until tomorrow.
+- `foda-se-estou-nervoso` — **Foda-se, estou nervoso.**  
+  _For f***’s sake, I’m nervous._  
+  → Neutral. Said to yourself, in the toilets, before going back out.
+- `posso-dar-te-um-beijinho` — **Posso dar-te um beijinho?**  
+  _Can I give you a kiss?_  
+  → Neutral. The evening is over and neither of you has moved towards the door.
+- `apetece-te-vir-comigo` — **Apetece-te vir comigo?**  
+  _Do you fancy coming with me?_  
+  → Neutral. You are leaving and would rather he came too.
+- `desculpa-es-engracado` — **Desculpa, és engraçado.**  
+  _Sorry — you’re funny._  
+  → Neutral. He has said something ridiculous and you laughed far too loudly.
+- `es-mesmo-engracado` — **És mesmo engraçado.**  
+  _You really are funny._  
+  → Neutral. He has done it again and you have stopped pretending not to laugh.
+- `es-feliz` — **És feliz?**  
+  _Are you happy?_  
+  → Neutral. It is late, and the conversation has gone somewhere neither of you planned.
+- `apetece-te-ir-agora` — **Apetece-te ir agora?**  
+  _Do you fancy going now?_  
+  → Neutral. The party is dying and the city is still open.
+- `es-um-grande-engracado` — **És um grande engraçado.**  
+  _Aren’t you the comedian._  
+  → Neutral. He is being funny about something he really should not be.
 - `hoje-nao-vou` — **Hoje não vou.**  
   _I’m not going today._  
   → Neutral. A friend asks whether you are coming out later.

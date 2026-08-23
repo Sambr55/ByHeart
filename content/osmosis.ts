@@ -29,6 +29,66 @@ export interface Insight {
 
 export const INSIGHTS: Insight[] = [
   {
+    id: 'conditional-politeness',
+    requires: ['gostava_de'],
+    headline: 'You used a past tense to talk about something that has not happened',
+    body:
+      '“Gostava” and “queria” look like they are about yesterday. Portuguese uses them for “I would like”, because putting a want slightly out of reach is what makes it polite. It is the same word you order coffee with.',
+    evidence: [
+      { pt: 'Gostava de um café.', en: 'I’d like a coffee.' },
+      { pt: 'Queria um café, por favor.', en: 'I’d like a coffee, please.' },
+    ],
+    proper_name: 'the imperfect as a conditional',
+  },
+  {
+    id: 'clitic-moves',
+    requires: ['pedir_te'],
+    headline: 'The little word kept changing sides and you followed it',
+    body:
+      'It is “oferecer-te” but “para te pedir”. The pronoun sits behind the verb normally and jumps in front after words like para, que and não. You have now seen both without either being explained.',
+    evidence: [
+      { pt: 'Posso oferecer-te uma bebida?', en: 'Can I get you a drink?' },
+      { pt: 'Vim aqui para te pedir uma coisa.', en: 'I came here to ask you something.' },
+    ],
+    proper_name: 'clitic placement',
+  },
+  {
+    id: 'ser-estar-compliment',
+    requires: ['engracado'],
+    headline: 'You paid two different kinds of compliment and never mixed them up',
+    body:
+      '“Estás lindo” is about tonight. “És engraçado” is about him. Portuguese keeps the passing and the permanent in two different verbs, and choosing the wrong one turns a compliment into a declaration.',
+    evidence: [
+      { pt: 'Estás lindo.', en: 'You look wonderful.' },
+      { pt: 'És muito engraçado.', en: 'You’re really funny.' },
+    ],
+    proper_name: 'ser and estar',
+  },
+  {
+    id: 'diminutives',
+    requires: ['beijinho'],
+    headline: 'You made a word smaller and it came out friendlier',
+    body:
+      'Beijo becomes beijinho, café becomes cafezinho. The ending does not really mean “small” — it means “and I like you”. Portugal runs on it.',
+    evidence: [
+      { pt: 'Dois beijinhos.', en: 'Two little kisses.' },
+      { pt: 'Apetece-te um cafezinho?', en: 'Fancy a little coffee?' },
+    ],
+    proper_name: 'diminutives',
+  },
+  {
+    id: 'direction-reversal',
+    requires: ['ligas_me'],
+    headline: 'You turned a sentence around by changing two endings',
+    body:
+      '“Ligas-me” is you calling me. “Ligo-te” is me calling you. Same verb. The end of the verb says who acts, and the bit hooked on the back says who it lands on.',
+    evidence: [
+      { pt: 'Ligas-me logo?', en: 'Will you call me later?' },
+      { pt: 'Ligo-te logo.', en: 'I’ll call you later.' },
+    ],
+    proper_name: 'person marking and clitic pronouns',
+  },
+  {
     id: 'clitics',
     requires: ['esqueci_me'],
     headline: 'You have been hooking little words onto the ends of verbs',

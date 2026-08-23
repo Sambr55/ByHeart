@@ -20,6 +20,8 @@ export type CultureFamily =
   | 'audrey_hepburn'
   | 'marcus_aurelius'
   | 'portuguese_swearing'
+  | 'flirting_m2f'
+  | 'flirting_f2m'
 
 export type RootType = 'quote' | 'title' | 'paraphrased_moment' | 'wisdom' | 'other'
 
@@ -111,6 +113,8 @@ export const FAMILIES: {
   { id: 'audrey_hepburn', title: 'AUDREY HEPBURN MUSINGS', blurb: 'Elegance, warmth and things worth saying.', tone: 'warm', built: true },
   { id: 'marcus_aurelius', title: 'MARCUS AURELIUS WISDOM', blurb: 'Ancient ideas. Surprisingly useful modern language.', tone: 'reflective', built: true },
   { id: 'portuguese_swearing', title: 'HOW TO SWEAR IN PORTUGUESE', blurb: 'The subtitles were lying to you. Strong language throughout.', tone: 'blunt', built: true },
+  { id: 'flirting_m2f', title: 'FLIRTING — HIM TO HER', blurb: 'The Love Actually problem. Said properly this time.', tone: 'warm', built: true },
+  { id: 'flirting_f2m', title: 'FLIRTING — HER TO HIM', blurb: 'Warmer, funnier and considerably more effective.', tone: 'warm', built: true },
 ]
 
 const q = (partial: Partial<Root> & Pick<Root, 'root_id' | 'culture_family' | 'root_display' | 'meaning_en' | 'pt_natural' | 'semantic_bridge' | 'subtext' | 'extracts' | 'branches' | 'transfer_prompt'>): Root => ({
@@ -1615,6 +1619,448 @@ export const SWEARING: Root[] = [
   }),
 ]
 
+// ---------------------------------------------------------------------------
+// B10/B11 — Flirting, in both directions.
+//
+// Two crates rather than one because the language genuinely differs. Every
+// adjective agrees with the person being described, so "you look lovely" is a
+// different sentence depending on who is receiving it, and a learner given only one
+// half will get it wrong in the one conversation where being wrong is expensive.
+//
+// The grammar underneath is the best in the product. Flirting is where Portuguese
+// keeps its politeness machinery: the imperfect standing in for the conditional
+// (gostava, queria — the same tense you order coffee with), clitic pronouns moving
+// around the verb, diminutives, and the ser/estar split at its sharpest. "És linda"
+// is a verdict on a person. "Estás linda" is a remark about tonight. One is a
+// declaration; the other is a compliment, and the difference is one letter.
+// ---------------------------------------------------------------------------
+
+export const FLIRTING_M2F: Root[] = [
+  q({
+    root_id: 'fl_m_estas_gira',
+    culture_family: 'flirting_m2f',
+    root_type: 'other',
+    source_label: 'Anywhere in Portugal, most evenings',
+    source_status: 'paraphrased',
+    root_display: 'You look great tonight.',
+    meaning_en: 'A remark about this evening, not a verdict on her existence.',
+    pt_natural: 'Estás muito gira hoje.',
+    literal_note: 'ESTÁS, not és. És linda is a statement about her whole life; estás linda is about tonight.',
+    semantic_bridge:
+      'ESTÁS is the version of “are” that means right now. It is the difference between a compliment and a pronouncement, and it is also how you ask anybody how they are.',
+    subtext: 'Light, unweighted, easy to say and easy to receive. Nothing rides on it.',
+    extracts: [
+      { id: 'estas', pt: 'Estás', gloss: 'you are (right now)' },
+      { id: 'gira', pt: 'gira', gloss: 'lovely — said about a woman' },
+    ],
+    branches: [
+      { pt: 'Estás linda.', en: 'You look beautiful.' },
+      { pt: 'Estás bem?', en: 'Are you all right?' },
+      { pt: 'Hoje estás gira.', en: 'You look lovely today.' },
+    ],
+    helpers: { 'linda': 'beautiful (about a woman)', 'bem': 'well', 'Hoje': 'today', 'muito': 'very' },
+    voice_options: [
+      {
+        pt: 'Estás gira.', en: 'You look great.', signal: 'casual',
+        register: 'EVERYDAY, NO WEIGHT',
+        when: 'Said in passing, to someone you already know a little. It costs nothing to say or to hear.',
+      },
+      {
+        pt: 'Estás linda.', en: 'You look beautiful.', signal: 'warm',
+        register: 'A STEP UP',
+        when: 'Said properly, with eye contact, once. Twice in an evening and it stops meaning anything.',
+      },
+    ],
+    voice_rule:
+      'Gira is “good-looking” the way a friend would say it. Linda is “beautiful” and lands heavier. Both take estás, not és — the moment you say és you have stopped commenting on the evening and started making a claim.',
+    transfer_prompt: { context: 'She has clearly made an effort and you have about three seconds.', ask: 'You look beautiful.', answer: 'Estás linda.' },
+    rights_status: 'dub-authored',
+    freebie_flag: true,
+    starter_tags: ['warm', 'opener'],
+    next_root_hooks: ['fl_m_posso_oferecer'],
+  }),
+  q({
+    root_id: 'fl_m_posso_oferecer',
+    culture_family: 'flirting_m2f',
+    root_type: 'other',
+    source_label: 'Anywhere in Portugal, most evenings',
+    source_status: 'paraphrased',
+    root_display: 'Can I get you a drink?',
+    meaning_en: 'The oldest opening line there is, in a language that softens it.',
+    pt_natural: 'Posso oferecer-te uma bebida?',
+    literal_note: 'OFERECER-TE — offer to you. The little TE hooks onto the end of the verb, exactly as it does in esqueci-me.',
+    semantic_bridge:
+      'POSSO is “may I”, and it is the single most useful word for arriving somewhere polite. The -TE on the end is who you are doing it for.',
+    subtext: 'Confident but asking. The question mark is doing real work.',
+    extracts: [
+      { id: 'posso', pt: 'Posso', gloss: 'may I / can I' },
+      { id: 'oferecer_te', pt: 'oferecer-te', gloss: 'get you / offer you' },
+    ],
+    branches: [
+      { pt: 'Posso sentar-me?', en: 'May I sit down?' },
+      { pt: 'Posso ajudar-te?', en: 'Can I help you?' },
+      { pt: 'Posso oferecer-te um café?', en: 'Can I get you a coffee?' },
+    ],
+    reinforces: ['podes'],
+    helpers: { 'sentar-me': 'sit down', 'ajudar-te': 'help you', 'um': 'a', 'café': 'coffee', 'bebida': 'drink', 'uma': 'a', 'aqui': 'here' },
+    transfer_prompt: { context: 'The only free seat in the café is at her table.', ask: 'May I sit here?', answer: 'Posso sentar-me aqui?' },
+    rights_status: 'dub-authored',
+    starter_tags: ['warm', 'opener'],
+    next_root_hooks: ['fl_m_gostava'],
+  }),
+  q({
+    root_id: 'fl_m_gostava',
+    culture_family: 'flirting_m2f',
+    root_type: 'other',
+    source_label: 'Anywhere in Portugal, most evenings',
+    source_status: 'paraphrased',
+    root_display: 'I would like to see you again.',
+    meaning_en: 'Said at the end of an evening you do not want to be the last one.',
+    pt_natural: 'Gostava de te ver outra vez.',
+    literal_note: 'GOSTAVA is a past tense being used about the future. Portuguese softens a want by putting it slightly out of reach.',
+    semantic_bridge:
+      'GOSTAVA DE is “I would like to”, and it is the politest three syllables in the language. It works on a person, a coffee, or a table by the window.',
+    subtext: 'Open, unpressured, and completely clear about what is being asked.',
+    extracts: [
+      { id: 'gostava_de', pt: 'Gostava de', gloss: 'I’d like to' },
+      { id: 'ver_te', pt: 'te ver', gloss: 'see you' },
+    ],
+    branches: [
+      { pt: 'Gostava de te conhecer melhor.', en: 'I’d like to get to know you better.' },
+      { pt: 'Gostava de um café.', en: 'I’d like a coffee.' },
+      { pt: 'Gostava de te ver amanhã.', en: 'I’d like to see you tomorrow.' },
+    ],
+    reinforces: ['outra_vez', 'amanha'],
+    helpers: { 'conhecer': 'to get to know', 'melhor': 'better', 'um': 'a', 'café': 'coffee', 'amanhã': 'tomorrow', 'por': 'for', 'favor': 'favour', 'por favor': 'please' },
+    voice_options: [
+      {
+        pt: 'Gostava de te ver outra vez.', en: 'I’d like to see you again.', signal: 'warm',
+        register: 'SAYING IT PLAINLY',
+        when: 'You mean it and you would rather not spend a week pretending otherwise.',
+      },
+      {
+        pt: 'Dás-me o teu número?', en: 'Will you give me your number?', signal: 'direct',
+        register: 'SKIPPING THE SPEECH',
+        when: 'It is going well, the taxi is outside, and there is no time for a sentence.',
+        safest: true,
+      },
+    ],
+    voice_rule:
+      'Gostava de puts the want one polite step away from you; dás-me asks for something outright. Portuguese lets you do either, but it notices which one you chose.',
+    transfer_prompt: { context: 'You are at the counter, and the same tense turns out to work on coffee.', ask: 'I’d like a coffee, please.', answer: 'Gostava de um café, por favor.' },
+    rights_status: 'dub-authored',
+    starter_tags: ['warm', 'closing'],
+    next_root_hooks: ['fl_m_vim_aqui'],
+  }),
+  q({
+    root_id: 'fl_m_vim_aqui',
+    culture_family: 'flirting_m2f',
+    root_type: 'paraphrased_moment',
+    source_label: 'Love Actually — the one who learns Portuguese',
+    source_status: 'paraphrased',
+    root_display: 'I came here to ask you something.',
+    meaning_en: 'The whole point of learning the language in the first place.',
+    pt_natural: 'Vim aqui para te pedir uma coisa.',
+    literal_note: 'PARA + a verb is “in order to”. And notice the TE has moved in front of pedir — after para, it goes first.',
+    semantic_bridge:
+      'VIM AQUI PARA is how you explain why you are standing somewhere. The film made it a proposal; the sentence itself is just a reason.',
+    subtext: 'Earnest, slightly exposed, and entirely deliberate. This one is meant to cost something.',
+    extracts: [
+      { id: 'vim_aqui', pt: 'Vim aqui', gloss: 'I came here' },
+      { id: 'pedir_te', pt: 'te pedir', gloss: 'to ask you' },
+    ],
+    branches: [
+      { pt: 'Vim aqui para te ver.', en: 'I came here to see you.' },
+      { pt: 'Posso pedir-te uma coisa?', en: 'Can I ask you something?' },
+      { pt: 'Vim para ficar.', en: 'I came to stay.' },
+      { pt: 'Vim para te pedir ajuda.', en: 'I came to ask you for help.' },
+    ],
+    reinforces: ['posso'],
+    helpers: { 'para': 'in order to', 'uma': 'a', 'coisa': 'thing', 'ficar': 'to stay', 'ver': 'to see', 'ajuda': 'help' },
+    transfer_prompt: { context: 'You have travelled a long way and she has no idea why.', ask: 'I came here to see you.', answer: 'Vim aqui para te ver.' },
+    rights_status: 'title-reference',
+    starter_tags: ['warm', 'iconic'],
+    next_root_hooks: ['fl_m_nervoso'],
+  }),
+  q({
+    root_id: 'fl_m_nervoso',
+    culture_family: 'flirting_m2f',
+    root_type: 'other',
+    source_label: 'Anywhere in Portugal, most evenings',
+    source_status: 'paraphrased',
+    root_display: 'I’m nervous. I’m not good at this.',
+    meaning_en: 'Admitting it, which works considerably better than not admitting it.',
+    pt_natural: 'Estou nervoso, não sou bom nisto.',
+    literal_note: 'NERVOSO with an O because a man is saying it. A woman says nervosa, and the sentence is otherwise identical.',
+    semantic_bridge:
+      'Both halves are ordinary sentences you will reuse constantly: how you feel right now, and what you are not good at. Neither is about romance.',
+    subtext: 'Disarming rather than weak. Said lightly it is the most effective line here.',
+    extracts: [
+      { id: 'estou_nervoso', pt: 'Estou nervoso', gloss: 'I’m nervous — a man saying it' },
+      { id: 'nao_sou_bom', pt: 'não sou bom', gloss: 'I’m not good' },
+    ],
+    branches: [
+      { pt: 'Não sou bom a dançar.', en: 'I’m not a good dancer.' },
+      { pt: 'Estou nervoso, desculpa.', en: 'I’m nervous, sorry.' },
+      { pt: 'Não sou bom nisto, mas estou a tentar.', en: 'I’m not good at this, but I’m trying.' },
+    ],
+    reinforces: ['desculpa'],
+    helpers: { 'a': 'at', 'dançar': 'dancing', 'nisto': 'at this', 'mas': 'but', 'estou': 'I am', 'tentar': 'trying' },
+    transfer_prompt: { context: 'You have said something clumsy and she noticed.', ask: 'I’m nervous, sorry.', answer: 'Estou nervoso, desculpa.' },
+    rights_status: 'dub-authored',
+    starter_tags: ['warm', 'honest'],
+    next_root_hooks: ['fl_m_numero'],
+  }),
+  q({
+    root_id: 'fl_m_numero',
+    culture_family: 'flirting_m2f',
+    root_type: 'other',
+    source_label: 'Anywhere in Portugal, most evenings',
+    source_status: 'paraphrased',
+    root_display: 'Will you give me your number?',
+    meaning_en: 'The only question that matters at the end.',
+    pt_natural: 'Dás-me o teu número?',
+    literal_note: 'O TEU because número is a masculine word. Ask for her morada and it becomes A TUA.',
+    semantic_bridge:
+      'DÁS-ME is “will you give me”, with the ME hooked on the back. O TEU is “your”, and it changes shape to match whatever you are asking for.',
+    subtext: 'Direct and unembarrassed. Hesitating here reads worse than asking.',
+    extracts: [
+      { id: 'das_me', pt: 'Dás-me', gloss: 'will you give me' },
+      { id: 'o_teu', pt: 'o teu', gloss: 'your' },
+    ],
+    branches: [
+      { pt: 'Dás-me o teu Instagram?', en: 'Will you give me your Instagram?' },
+      { pt: 'Dás-me um minuto?', en: 'Will you give me a minute?' },
+      { pt: 'Este é o meu número.', en: 'This is my number.' },
+    ],
+    helpers: { 'um': 'a', 'minuto': 'minute', 'Este': 'this', 'é': 'is', 'meu': 'my', 'o': 'the', 'número': 'number', 'email': 'email' },
+    transfer_prompt: { context: 'She would rather not hand over a phone number yet.', ask: 'Will you give me your email?', answer: 'Dás-me o teu email?' },
+    rights_status: 'dub-authored',
+    starter_tags: ['warm', 'closing'],
+    next_root_hooks: ['fl_m_estas_gira'],
+  }),
+]
+
+export const FLIRTING_F2M: Root[] = [
+  q({
+    root_id: 'fl_f_estas_giro',
+    culture_family: 'flirting_f2m',
+    root_type: 'other',
+    source_label: 'Anywhere in Portugal, most evenings',
+    source_status: 'paraphrased',
+    root_display: 'You look good tonight.',
+    meaning_en: 'A remark about this evening, not a verdict on his existence.',
+    pt_natural: 'Estás muito giro hoje.',
+    literal_note: 'GIRO with an O because you are describing a man. The sentence is otherwise word for word the same.',
+    semantic_bridge:
+      'ESTÁS is “are” in the sense of right now. Say és instead and you have promoted a passing compliment into a permanent one.',
+    subtext: 'Light and unweighted. Delivered in passing it does far more than delivered solemnly.',
+    extracts: [
+      { id: 'giro', pt: 'giro', gloss: 'good-looking — said about a man' },
+      { id: 'hoje_estas', pt: 'Estás', gloss: 'you are (right now)' },
+    ],
+    branches: [
+      { pt: 'Estás lindo.', en: 'You look wonderful.' },
+      { pt: 'Estás bem?', en: 'Are you all right?' },
+      { pt: 'Hoje estás giro.', en: 'You look good today.' },
+    ],
+    helpers: { 'lindo': 'wonderful (about a man)', 'bem': 'well', 'Hoje': 'today', 'muito': 'very' },
+    voice_options: [
+      {
+        pt: 'Estás giro.', en: 'You look good.', signal: 'casual',
+        register: 'THROWN AWAY',
+        when: 'Said over your shoulder, once, and then changing the subject. This is the effective version.',
+      },
+      {
+        pt: 'Estás lindo.', en: 'You look wonderful.', signal: 'warm',
+        register: 'MEANT PROPERLY',
+        when: 'Held eye contact, said slowly. Rare enough that it registers.',
+      },
+    ],
+    voice_rule:
+      'Giro is the everyday word and lindo is the one that stops a conversation. Both take estás — és lindo is a claim about him rather than a remark about tonight, and it is a much larger sentence than people realise.',
+    transfer_prompt: { context: 'He has clearly made an effort, which he does not usually.', ask: 'You look wonderful.', answer: 'Estás lindo.' },
+    rights_status: 'dub-authored',
+    freebie_flag: true,
+    starter_tags: ['warm', 'opener'],
+    next_root_hooks: ['fl_f_apetece_te'],
+  }),
+  q({
+    root_id: 'fl_f_apetece_te',
+    culture_family: 'flirting_f2m',
+    root_type: 'other',
+    source_label: 'Anywhere in Portugal, most evenings',
+    source_status: 'paraphrased',
+    root_display: 'Do you fancy going for a drink?',
+    meaning_en: 'An invitation with no weight on it, which is why it works.',
+    pt_natural: 'Apetece-te ir beber qualquer coisa?',
+    literal_note: 'Literally “does it appeal to you”. Portuguese asks the desire, not the person — so nobody has to be the one who wanted it.',
+    semantic_bridge:
+      'APETECE-TE is the most Portuguese way to invite anyone anywhere. QUALQUER COISA is “anything”, and it keeps the invitation deliberately vague.',
+    subtext: 'Casual on purpose. The grammar itself removes the pressure.',
+    extracts: [
+      { id: 'apetece_te', pt: 'Apetece-te', gloss: 'do you fancy' },
+      { id: 'qualquer_coisa', pt: 'qualquer coisa', gloss: 'something / anything' },
+    ],
+    branches: [
+      { pt: 'Apetece-te um café?', en: 'Do you fancy a coffee?' },
+      { pt: 'Apetece-te dançar?', en: 'Do you fancy dancing?' },
+      { pt: 'Queres beber qualquer coisa?', en: 'Do you want a drink?' },
+    ],
+    helpers: { 'um': 'a', 'café': 'coffee', 'dançar': 'to dance', 'Queres': 'do you want', 'beber': 'to drink', 'ir': 'to go' },
+    voice_options: [
+      {
+        pt: 'Apetece-te ir beber qualquer coisa?', en: 'Do you fancy going for a drink?', signal: 'softened',
+        register: 'NO PRESSURE ON ANYONE',
+        when: 'You would like to, and you would like him to be able to say no without it costing anything.',
+        safest: true,
+      },
+      {
+        pt: 'Vamos beber qualquer coisa?', en: 'Shall we go for a drink?', signal: 'direct',
+        register: 'ALREADY DECIDED',
+        when: 'Said standing up, with your coat already on. Assumes the answer.',
+      },
+    ],
+    voice_rule:
+      'Apetece-te asks whether the idea appeals; vamos assumes it does. Portuguese has a whole politeness system built on asking about the desire instead of the person, and this is the everyday example of it.',
+    transfer_prompt: { context: 'He has been talking to you for an hour and neither of you has moved.', ask: 'Do you fancy a coffee?', answer: 'Apetece-te um café?' },
+    rights_status: 'dub-authored',
+    starter_tags: ['warm', 'opener'],
+    next_root_hooks: ['fl_f_queria'],
+  }),
+  q({
+    root_id: 'fl_f_queria',
+    culture_family: 'flirting_f2m',
+    root_type: 'other',
+    source_label: 'Anywhere in Portugal, most evenings',
+    source_status: 'paraphrased',
+    root_display: 'I’d like to get to know you better.',
+    meaning_en: 'Interest, stated once, without a speech attached.',
+    pt_natural: 'Queria conhecer-te melhor.',
+    literal_note: 'QUERIA is a past tense doing a present job. Queria um café is how you order coffee — the same softening, in a café.',
+    semantic_bridge:
+      'QUERIA is “I would like”. It is the difference between quero — I want — and something a person can comfortably hear. You will use it every day, mostly about food.',
+    subtext: 'Warm and unhurried. Said once and then left alone.',
+    extracts: [
+      { id: 'queria', pt: 'Queria', gloss: 'I’d like' },
+      { id: 'conhecer_te', pt: 'conhecer-te', gloss: 'to get to know you' },
+    ],
+    branches: [
+      { pt: 'Queria ver-te outra vez.', en: 'I’d like to see you again.' },
+      { pt: 'Queria um café, por favor.', en: 'I’d like a coffee, please.' },
+      { pt: 'Queria conhecer-te melhor.', en: 'I’d like to get to know you better.' },
+    ],
+    reinforces: ['outra_vez'],
+    helpers: { 'ver-te': 'to see you', 'um': 'a', 'café': 'coffee', 'por': 'for', 'favor': 'favour', 'melhor': 'better', 'outra': 'another', 'vez': 'time' },
+    transfer_prompt: { context: 'You are ordering, and the same tense turns out to work off the dance floor too.', ask: 'I’d like a coffee, please.', answer: 'Queria um café, por favor.' },
+    rights_status: 'dub-authored',
+    starter_tags: ['warm', 'everyday'],
+    next_root_hooks: ['fl_f_engracado'],
+  }),
+  q({
+    root_id: 'fl_f_engracado',
+    culture_family: 'flirting_f2m',
+    root_type: 'other',
+    source_label: 'Anywhere in Portugal, most evenings',
+    source_status: 'paraphrased',
+    root_display: 'You’re really funny.',
+    meaning_en: 'The most effective sentence in this entire crate.',
+    pt_natural: 'És muito engraçado.',
+    literal_note: 'ÉS this time, not estás. Funny is not something he is being tonight; it is something he is.',
+    semantic_bridge:
+      'ÉS is the permanent “are”. It is exactly the verb you avoided for estás lindo, and here it is the right one — which is what makes the pair worth having.',
+    subtext: 'Sincere, and worth spending. Said about a joke that was not funny it does the opposite.',
+    extracts: [
+      { id: 'es', pt: 'És', gloss: 'you are (permanently)' },
+      { id: 'engracado', pt: 'engraçado', gloss: 'funny' },
+    ],
+    branches: [
+      { pt: 'És muito simpático.', en: 'You’re really nice.' },
+      { pt: 'Não és nada engraçado.', en: 'You’re not funny at all.' },
+      { pt: 'És giro quando ris.', en: 'You’re cute when you laugh.' },
+    ],
+    helpers: { 'muito': 'really', 'simpático': 'nice', 'Não': 'not', 'nada': 'at all', 'quando': 'when', 'ris': 'you laugh', 'É': 'he is', 'giro': 'cute' },
+    voice_options: [
+      {
+        pt: 'És muito engraçado.', en: 'You’re really funny.', signal: 'warm',
+        register: 'MEANT',
+        when: 'He has made you laugh three times and should be told.',
+        safest: true,
+      },
+      {
+        pt: 'Não és nada engraçado.', en: 'You’re not funny at all.', signal: 'dry',
+        register: 'THE TEASE',
+        when: 'Said smiling, immediately after laughing. Everyone understands it as the opposite.',
+        risk: 'Said flat, or to someone who does not know you yet, it is simply an insult.',
+      },
+    ],
+    voice_rule:
+      'Portuguese is comfortable with saying the opposite of what you mean, but it leans entirely on your face to carry it. Não és nada engraçado works only while you are still laughing.',
+    transfer_prompt: { context: 'A friend asks what you make of him.', ask: 'He’s really funny.', answer: 'É muito engraçado.' },
+    rights_status: 'dub-authored',
+    starter_tags: ['warm', 'social'],
+    next_root_hooks: ['fl_f_beijinho'],
+  }),
+  q({
+    root_id: 'fl_f_beijinho',
+    culture_family: 'flirting_f2m',
+    root_type: 'other',
+    source_label: 'Every hello and goodbye in Portugal',
+    source_status: 'paraphrased',
+    root_display: 'Give me a little kiss.',
+    meaning_en: 'And also, unremarkably, how the entire country says hello.',
+    pt_natural: 'Dá-me um beijinho.',
+    literal_note: 'BEIJO is a kiss. BEIJINHO is a small one — and in Portugal the small one is the greeting, given twice, to almost everybody.',
+    semantic_bridge:
+      'The -INHO ending makes a word smaller, and in doing so makes it friendlier. A cafezinho is not a small coffee; it is a coffee offered warmly.',
+    subtext: 'Playful rather than forward. The diminutive is what takes the weight out of it.',
+    extracts: [
+      { id: 'beijinho', pt: 'beijinho', gloss: 'a little kiss — and how Portugal says hello' },
+      { id: 'da_me', pt: 'Dá-me', gloss: 'give me' },
+    ],
+    branches: [
+      { pt: 'Dois beijinhos.', en: 'Two little kisses.' },
+      { pt: 'Dá-me um minuto.', en: 'Give me a minute.' },
+      { pt: 'Apetece-te um cafezinho?', en: 'Fancy a little coffee?' },
+    ],
+    reinforces: ['apetece_te'],
+    helpers: { 'Dois': 'two', 'beijinhos': 'little kisses', 'um': 'a', 'minuto': 'minute', 'cafezinho': 'a friendly little coffee' },
+    transfer_prompt: { context: 'You are saying goodbye to someone you have just met, Portuguese style.', ask: 'Two little kisses.', answer: 'Dois beijinhos.' },
+    rights_status: 'dub-authored',
+    starter_tags: ['warm', 'cultural'],
+    next_root_hooks: ['fl_f_ligas_me'],
+  }),
+  q({
+    root_id: 'fl_f_ligas_me',
+    culture_family: 'flirting_f2m',
+    root_type: 'other',
+    source_label: 'Anywhere in Portugal, most evenings',
+    source_status: 'paraphrased',
+    root_display: 'Will you call me later?',
+    meaning_en: 'Handing the next move over, deliberately.',
+    pt_natural: 'Ligas-me logo?',
+    literal_note: 'LIGAS-ME is you calling me. LIGO-TE is me calling you. Same verb, two endings, opposite directions.',
+    semantic_bridge:
+      'The ending of the verb says who is doing it and the pronoun on the back says who it lands on. Change both and the whole sentence turns around.',
+    subtext: 'Confident. Asking him to call is a decision, not a hope.',
+    extracts: [
+      { id: 'ligas_me', pt: 'Ligas-me', gloss: 'will you call me' },
+      { id: 'logo', pt: 'logo', gloss: 'later on / in a bit' },
+    ],
+    branches: [
+      { pt: 'Ligo-te logo.', en: 'I’ll call you later.' },
+      { pt: 'Até logo.', en: 'See you later.' },
+      { pt: 'Ligas-me amanhã?', en: 'Will you call me tomorrow?' },
+    ],
+    reinforces: ['amanha'],
+    helpers: { 'Ligo-te': 'I’ll call you', 'Até': 'until / see you', 'amanhã': 'tomorrow', 'logo': 'later' },
+    transfer_prompt: { context: 'You said you would be in touch, and you meant it.', ask: 'I’ll call you tomorrow.', answer: 'Ligo-te amanhã.' },
+    rights_status: 'dub-authored',
+    starter_tags: ['warm', 'closing'],
+    next_root_hooks: ['fl_f_estas_giro'],
+  }),
+]
+
 export const ROOTS: Root[] = [
   ...TOP_GUN,
   ...JAMES_BOND,
@@ -1623,6 +2069,8 @@ export const ROOTS: Root[] = [
   ...AUDREY_HEPBURN,
   ...MARCUS_AURELIUS,
   ...SWEARING,
+  ...FLIRTING_M2F,
+  ...FLIRTING_F2M,
 ]
 
 export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
@@ -1633,6 +2081,8 @@ export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
   audrey_hepburn: AUDREY_HEPBURN,
   marcus_aurelius: MARCUS_AURELIUS,
   portuguese_swearing: SWEARING,
+  flirting_m2f: FLIRTING_M2F,
+  flirting_f2m: FLIRTING_F2M,
 }
 
 export function rootById(id: string): Root | undefined {
@@ -1667,6 +2117,126 @@ export interface Collision {
 }
 
 export const COLLISIONS: Collision[] = [
+  {
+    id: 'fl_tg_gostava_quiseres',
+    requires: ['gostava_de', 'quando_quiseres'],
+    context: 'She has said yes but not said when.',
+    ask: 'I’d like to see you whenever you want.',
+    answer: 'Gostava de te ver quando quiseres.',
+    provenance: 'QUANDO QUISERES came out of a fighter jet. It has landed somewhere considerably better.',
+  },
+  {
+    id: 'fl_jb_ver_amanha',
+    requires: ['gostava_de', 'ver_te', 'amanha'],
+    context: 'Tonight is over. Tomorrow is not.',
+    ask: 'I’d like to see you tomorrow.',
+    answer: 'Gostava de te ver amanhã.',
+    provenance: 'A Bond title supplied AMANHÃ. Nothing about it was ever about Bond.',
+  },
+  {
+    id: 'fl_bj_nervoso_desculpa',
+    requires: ['estou_nervoso', 'desculpa'],
+    context: 'You have said something clumsy and she heard all of it.',
+    ask: 'Sorry — I’m nervous.',
+    answer: 'Desculpa, estou nervoso.',
+    provenance: 'Bridget’s apology, doing the job it was built for.',
+  },
+  {
+    id: 'fl_pf_posso_chama',
+    requires: ['posso', 'como_se_chama'],
+    context: 'You have been talking for ten minutes and still do not know.',
+    ask: 'May I ask what you are called?',
+    answer: 'Posso perguntar como se chama?',
+    provenance: 'Pulp Fiction gave you the polite way to ask a name. This is where it earns its keep.',
+  },
+  {
+    id: 'fl_ah_estas_feliz',
+    requires: ['estas', 'feliz'],
+    context: 'Something has been on her mind all evening.',
+    ask: 'Are you happy?',
+    answer: 'Estás feliz?',
+    provenance: 'Audrey’s FELIZ, with the temporary “are”. Ask it with és and you are asking about her whole life.',
+  },
+  {
+    id: 'fl_ma_gostava_agora',
+    requires: ['gostava_de', 'agora'],
+    context: 'Neither of you wants to wait until tomorrow.',
+    ask: 'I’d like to see you now.',
+    answer: 'Gostava de te ver agora.',
+    provenance: 'Marcus Aurelius on the only moment you have, repurposed without apology.',
+  },
+  {
+    id: 'fl_sw_foda_nervoso',
+    requires: ['estou_nervoso', 'foda_se'],
+    context: 'Said to yourself, in the toilets, before going back out.',
+    ask: 'For f***’s sake, I’m nervous.',
+    answer: 'Foda-se, estou nervoso.',
+    provenance: 'Two crates that had no business meeting, meeting.',
+  },
+  {
+    id: 'fl_m2f_f2m_beijinho',
+    requires: ['posso', 'beijinho'],
+    context: 'The evening is over and neither of you has moved towards the door.',
+    ask: 'Can I give you a kiss?',
+    answer: 'Posso dar-te um beijinho?',
+    provenance: 'One crate taught the asking, the other taught the kiss.',
+  },
+  {
+    id: 'fl_f_tg_apetece_comigo',
+    requires: ['apetece_te', 'comigo'],
+    context: 'You are leaving and would rather he came too.',
+    ask: 'Do you fancy coming with me?',
+    answer: 'Apetece-te vir comigo?',
+    provenance: 'COMIGO came from Top Gun. It has never once been needed on a runway.',
+  },
+  {
+    id: 'fl_f_jb_ligas_amanha',
+    requires: ['ligas_me', 'amanha'],
+    context: 'He is going home and you would like a reason to expect a phone call.',
+    ask: 'Will you call me tomorrow?',
+    answer: 'Ligas-me amanhã?',
+    provenance: 'Tomorrow Never Dies. Tomorrow, in this case, had better not.',
+  },
+  {
+    id: 'fl_f_bj_desculpa_engracado',
+    requires: ['engracado', 'desculpa'],
+    context: 'He has said something ridiculous and you laughed far too loudly.',
+    ask: 'Sorry — you’re funny.',
+    answer: 'Desculpa, és engraçado.',
+    provenance: 'Bridget’s apology and a compliment, which is very nearly her entire character.',
+  },
+  {
+    id: 'fl_f_pf_mesmo_engracado',
+    requires: ['engracado', 'mesmo'],
+    context: 'He has done it again and you have stopped pretending not to laugh.',
+    ask: 'You really are funny.',
+    answer: 'És mesmo engraçado.',
+    provenance: 'MESMO came out of Pulp Fiction, where it was doing something considerably less kind.',
+  },
+  {
+    id: 'fl_f_ah_es_feliz',
+    requires: ['es', 'feliz'],
+    context: 'It is late, and the conversation has gone somewhere neither of you planned.',
+    ask: 'Are you happy?',
+    answer: 'És feliz?',
+    provenance: 'The same three words as the other crate, with the permanent “are”. A much bigger question.',
+  },
+  {
+    id: 'fl_f_ma_apetece_agora',
+    requires: ['apetece_te', 'agora'],
+    context: 'The party is dying and the city is still open.',
+    ask: 'Do you fancy going now?',
+    answer: 'Apetece-te ir agora?',
+    provenance: 'AGORA arrived by way of Roman stoicism. It is doing fine.',
+  },
+  {
+    id: 'fl_f_sw_grande_engracado',
+    requires: ['engracado', 'grande'],
+    context: 'He is being funny about something he really should not be.',
+    ask: 'Aren’t you the comedian.',
+    answer: 'És um grande engraçado.',
+    provenance: 'GRANDE was learned as an insult. In front of engraçado it is doing exactly the same job.',
+  },
   {
     id: 'sw_tg_hoje_nao_vou',
     requires: ['hoje', 'nao_vou'],

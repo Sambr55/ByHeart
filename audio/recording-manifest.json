@@ -1,7 +1,7 @@
 {
   "locale": "pt-PT",
   "generated_from": "content/roots.ts",
-  "count": 229,
+  "count": 320,
   "lines": [
     {
       "pt": "Fala comigo, Goose.",
@@ -1994,6 +1994,786 @@
       "speaker": "any"
     },
     {
+      "pt": "Estás muito gira hoje.",
+      "en": "A remark about this evening, not a verdict on her existence.",
+      "direction": "Light, unweighted, easy to say and easy to receive. Nothing rides on it.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_estas_gira",
+      "role": "recognise",
+      "slug": "estas-muito-gira-hoje",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estás",
+      "en": "you are (right now)",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_estas_gira",
+      "role": "piece",
+      "slug": "estas",
+      "speaker": "any"
+    },
+    {
+      "pt": "gira",
+      "en": "lovely — said about a woman",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_estas_gira",
+      "role": "piece",
+      "slug": "gira",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estás linda.",
+      "en": "You look beautiful.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_estas_gira",
+      "role": "branch",
+      "slug": "estas-linda",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estás bem?",
+      "en": "Are you all right?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_estas_gira",
+      "role": "branch",
+      "slug": "estas-bem",
+      "speaker": "any"
+    },
+    {
+      "pt": "Hoje estás gira.",
+      "en": "You look lovely today.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_estas_gira",
+      "role": "branch",
+      "slug": "hoje-estas-gira",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estás gira.",
+      "en": "You look great.",
+      "direction": "EVERYDAY, NO WEIGHT — Said in passing, to someone you already know a little. It costs nothing to say or to hear.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_estas_gira",
+      "role": "voice",
+      "slug": "estas-gira",
+      "speaker": "any"
+    },
+    {
+      "pt": "Posso oferecer-te uma bebida?",
+      "en": "The oldest opening line there is, in a language that softens it.",
+      "direction": "Confident but asking. The question mark is doing real work.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_posso_oferecer",
+      "role": "recognise",
+      "slug": "posso-oferecer-te-uma-bebida",
+      "speaker": "any"
+    },
+    {
+      "pt": "Posso",
+      "en": "may I / can I",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_posso_oferecer",
+      "role": "piece",
+      "slug": "posso",
+      "speaker": "any"
+    },
+    {
+      "pt": "oferecer-te",
+      "en": "get you / offer you",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_posso_oferecer",
+      "role": "piece",
+      "slug": "oferecer-te",
+      "speaker": "any"
+    },
+    {
+      "pt": "Posso sentar-me?",
+      "en": "May I sit down?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_posso_oferecer",
+      "role": "branch",
+      "slug": "posso-sentar-me",
+      "speaker": "any"
+    },
+    {
+      "pt": "Posso ajudar-te?",
+      "en": "Can I help you?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_posso_oferecer",
+      "role": "branch",
+      "slug": "posso-ajudar-te",
+      "speaker": "any"
+    },
+    {
+      "pt": "Posso oferecer-te um café?",
+      "en": "Can I get you a coffee?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_posso_oferecer",
+      "role": "branch",
+      "slug": "posso-oferecer-te-um-cafe",
+      "speaker": "any"
+    },
+    {
+      "pt": "Posso sentar-me aqui?",
+      "en": "May I sit here?",
+      "direction": "Said cold, with no film behind it: the only free seat in the café is at her table.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_posso_oferecer",
+      "role": "release",
+      "slug": "posso-sentar-me-aqui",
+      "speaker": "any"
+    },
+    {
+      "pt": "Gostava de te ver outra vez.",
+      "en": "Said at the end of an evening you do not want to be the last one.",
+      "direction": "Open, unpressured, and completely clear about what is being asked.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_gostava",
+      "role": "recognise",
+      "slug": "gostava-de-te-ver-outra-vez",
+      "speaker": "any"
+    },
+    {
+      "pt": "Gostava de",
+      "en": "I’d like to",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_gostava",
+      "role": "piece",
+      "slug": "gostava-de",
+      "speaker": "any"
+    },
+    {
+      "pt": "te ver",
+      "en": "see you",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_gostava",
+      "role": "piece",
+      "slug": "te-ver",
+      "speaker": "any"
+    },
+    {
+      "pt": "Gostava de te conhecer melhor.",
+      "en": "I’d like to get to know you better.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_gostava",
+      "role": "branch",
+      "slug": "gostava-de-te-conhecer-melhor",
+      "speaker": "any"
+    },
+    {
+      "pt": "Gostava de um café.",
+      "en": "I’d like a coffee.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_gostava",
+      "role": "branch",
+      "slug": "gostava-de-um-cafe",
+      "speaker": "any"
+    },
+    {
+      "pt": "Gostava de te ver amanhã.",
+      "en": "I’d like to see you tomorrow.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_gostava",
+      "role": "branch",
+      "slug": "gostava-de-te-ver-amanha",
+      "speaker": "any"
+    },
+    {
+      "pt": "Dás-me o teu número?",
+      "en": "Will you give me your number?",
+      "direction": "SKIPPING THE SPEECH — It is going well, the taxi is outside, and there is no time for a sentence.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_gostava",
+      "role": "voice",
+      "slug": "das-me-o-teu-numero",
+      "speaker": "any"
+    },
+    {
+      "pt": "Gostava de um café, por favor.",
+      "en": "I’d like a coffee, please.",
+      "direction": "Said cold, with no film behind it: you are at the counter, and the same tense turns out to work on coffee.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_gostava",
+      "role": "release",
+      "slug": "gostava-de-um-cafe-por-favor",
+      "speaker": "any"
+    },
+    {
+      "pt": "Vim aqui para te pedir uma coisa.",
+      "en": "The whole point of learning the language in the first place.",
+      "direction": "Earnest, slightly exposed, and entirely deliberate. This one is meant to cost something.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_vim_aqui",
+      "role": "recognise",
+      "slug": "vim-aqui-para-te-pedir-uma-coisa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Vim aqui",
+      "en": "I came here",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_vim_aqui",
+      "role": "piece",
+      "slug": "vim-aqui",
+      "speaker": "any"
+    },
+    {
+      "pt": "te pedir",
+      "en": "to ask you",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_vim_aqui",
+      "role": "piece",
+      "slug": "te-pedir",
+      "speaker": "any"
+    },
+    {
+      "pt": "Vim aqui para te ver.",
+      "en": "I came here to see you.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_vim_aqui",
+      "role": "branch",
+      "slug": "vim-aqui-para-te-ver",
+      "speaker": "any"
+    },
+    {
+      "pt": "Posso pedir-te uma coisa?",
+      "en": "Can I ask you something?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_vim_aqui",
+      "role": "branch",
+      "slug": "posso-pedir-te-uma-coisa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Vim para ficar.",
+      "en": "I came to stay.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_vim_aqui",
+      "role": "branch",
+      "slug": "vim-para-ficar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Vim para te pedir ajuda.",
+      "en": "I came to ask you for help.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_vim_aqui",
+      "role": "branch",
+      "slug": "vim-para-te-pedir-ajuda",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estou nervoso, não sou bom nisto.",
+      "en": "Admitting it, which works considerably better than not admitting it.",
+      "direction": "Disarming rather than weak. Said lightly it is the most effective line here.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_nervoso",
+      "role": "recognise",
+      "slug": "estou-nervoso-nao-sou-bom-nisto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estou nervoso",
+      "en": "I’m nervous — a man saying it",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_nervoso",
+      "role": "piece",
+      "slug": "estou-nervoso",
+      "speaker": "any"
+    },
+    {
+      "pt": "não sou bom",
+      "en": "I’m not good",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_nervoso",
+      "role": "piece",
+      "slug": "nao-sou-bom",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não sou bom a dançar.",
+      "en": "I’m not a good dancer.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_nervoso",
+      "role": "branch",
+      "slug": "nao-sou-bom-a-dancar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estou nervoso, desculpa.",
+      "en": "I’m nervous, sorry.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_nervoso",
+      "role": "branch",
+      "slug": "estou-nervoso-desculpa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não sou bom nisto, mas estou a tentar.",
+      "en": "I’m not good at this, but I’m trying.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_nervoso",
+      "role": "branch",
+      "slug": "nao-sou-bom-nisto-mas-estou-a-tentar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Dás-me",
+      "en": "will you give me",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_numero",
+      "role": "piece",
+      "slug": "das-me",
+      "speaker": "any"
+    },
+    {
+      "pt": "o teu",
+      "en": "your",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_numero",
+      "role": "piece",
+      "slug": "o-teu",
+      "speaker": "any"
+    },
+    {
+      "pt": "Dás-me o teu Instagram?",
+      "en": "Will you give me your Instagram?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_numero",
+      "role": "branch",
+      "slug": "das-me-o-teu-instagram",
+      "speaker": "any"
+    },
+    {
+      "pt": "Dás-me um minuto?",
+      "en": "Will you give me a minute?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_numero",
+      "role": "branch",
+      "slug": "das-me-um-minuto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Este é o meu número.",
+      "en": "This is my number.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_numero",
+      "role": "branch",
+      "slug": "este-e-o-meu-numero",
+      "speaker": "any"
+    },
+    {
+      "pt": "Dás-me o teu email?",
+      "en": "Will you give me your email?",
+      "direction": "Said cold, with no film behind it: she would rather not hand over a phone number yet.",
+      "crate": "FLIRTING — HIM TO HER",
+      "root": "fl_m_numero",
+      "role": "release",
+      "slug": "das-me-o-teu-email",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estás muito giro hoje.",
+      "en": "A remark about this evening, not a verdict on his existence.",
+      "direction": "Light and unweighted. Delivered in passing it does far more than delivered solemnly.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_estas_giro",
+      "role": "recognise",
+      "slug": "estas-muito-giro-hoje",
+      "speaker": "any"
+    },
+    {
+      "pt": "giro",
+      "en": "good-looking — said about a man",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_estas_giro",
+      "role": "piece",
+      "slug": "giro",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estás lindo.",
+      "en": "You look wonderful.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_estas_giro",
+      "role": "branch",
+      "slug": "estas-lindo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Hoje estás giro.",
+      "en": "You look good today.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_estas_giro",
+      "role": "branch",
+      "slug": "hoje-estas-giro",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estás giro.",
+      "en": "You look good.",
+      "direction": "THROWN AWAY — Said over your shoulder, once, and then changing the subject. This is the effective version.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_estas_giro",
+      "role": "voice",
+      "slug": "estas-giro",
+      "speaker": "any"
+    },
+    {
+      "pt": "Apetece-te ir beber qualquer coisa?",
+      "en": "An invitation with no weight on it, which is why it works.",
+      "direction": "Casual on purpose. The grammar itself removes the pressure.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_apetece_te",
+      "role": "recognise",
+      "slug": "apetece-te-ir-beber-qualquer-coisa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Apetece-te",
+      "en": "do you fancy",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_apetece_te",
+      "role": "piece",
+      "slug": "apetece-te",
+      "speaker": "any"
+    },
+    {
+      "pt": "qualquer coisa",
+      "en": "something / anything",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_apetece_te",
+      "role": "piece",
+      "slug": "qualquer-coisa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Apetece-te um café?",
+      "en": "Do you fancy a coffee?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_apetece_te",
+      "role": "branch",
+      "slug": "apetece-te-um-cafe",
+      "speaker": "any"
+    },
+    {
+      "pt": "Apetece-te dançar?",
+      "en": "Do you fancy dancing?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_apetece_te",
+      "role": "branch",
+      "slug": "apetece-te-dancar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Queres beber qualquer coisa?",
+      "en": "Do you want a drink?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_apetece_te",
+      "role": "branch",
+      "slug": "queres-beber-qualquer-coisa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Vamos beber qualquer coisa?",
+      "en": "Shall we go for a drink?",
+      "direction": "ALREADY DECIDED — Said standing up, with your coat already on. Assumes the answer.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_apetece_te",
+      "role": "voice",
+      "slug": "vamos-beber-qualquer-coisa",
+      "speaker": "any"
+    },
+    {
+      "pt": "Queria conhecer-te melhor.",
+      "en": "Interest, stated once, without a speech attached.",
+      "direction": "Warm and unhurried. Said once and then left alone.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_queria",
+      "role": "recognise",
+      "slug": "queria-conhecer-te-melhor",
+      "speaker": "any"
+    },
+    {
+      "pt": "Queria",
+      "en": "I’d like",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_queria",
+      "role": "piece",
+      "slug": "queria",
+      "speaker": "any"
+    },
+    {
+      "pt": "conhecer-te",
+      "en": "to get to know you",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_queria",
+      "role": "piece",
+      "slug": "conhecer-te",
+      "speaker": "any"
+    },
+    {
+      "pt": "Queria ver-te outra vez.",
+      "en": "I’d like to see you again.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_queria",
+      "role": "branch",
+      "slug": "queria-ver-te-outra-vez",
+      "speaker": "any"
+    },
+    {
+      "pt": "Queria um café, por favor.",
+      "en": "I’d like a coffee, please.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_queria",
+      "role": "branch",
+      "slug": "queria-um-cafe-por-favor",
+      "speaker": "any"
+    },
+    {
+      "pt": "És muito engraçado.",
+      "en": "The most effective sentence in this entire crate.",
+      "direction": "Sincere, and worth spending. Said about a joke that was not funny it does the opposite.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_engracado",
+      "role": "recognise",
+      "slug": "es-muito-engracado",
+      "speaker": "any"
+    },
+    {
+      "pt": "És",
+      "en": "you are (permanently)",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_engracado",
+      "role": "piece",
+      "slug": "es",
+      "speaker": "any"
+    },
+    {
+      "pt": "engraçado",
+      "en": "funny",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_engracado",
+      "role": "piece",
+      "slug": "engracado",
+      "speaker": "any"
+    },
+    {
+      "pt": "És muito simpático.",
+      "en": "You’re really nice.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_engracado",
+      "role": "branch",
+      "slug": "es-muito-simpatico",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não és nada engraçado.",
+      "en": "You’re not funny at all.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_engracado",
+      "role": "branch",
+      "slug": "nao-es-nada-engracado",
+      "speaker": "any"
+    },
+    {
+      "pt": "És giro quando ris.",
+      "en": "You’re cute when you laugh.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_engracado",
+      "role": "branch",
+      "slug": "es-giro-quando-ris",
+      "speaker": "any"
+    },
+    {
+      "pt": "É muito engraçado.",
+      "en": "He’s really funny.",
+      "direction": "Said cold, with no film behind it: a friend asks what you make of him.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_engracado",
+      "role": "release",
+      "slug": "e-muito-engracado",
+      "speaker": "any"
+    },
+    {
+      "pt": "Dá-me um beijinho.",
+      "en": "And also, unremarkably, how the entire country says hello.",
+      "direction": "Playful rather than forward. The diminutive is what takes the weight out of it.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_beijinho",
+      "role": "recognise",
+      "slug": "da-me-um-beijinho",
+      "speaker": "any"
+    },
+    {
+      "pt": "beijinho",
+      "en": "a little kiss — and how Portugal says hello",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_beijinho",
+      "role": "piece",
+      "slug": "beijinho",
+      "speaker": "any"
+    },
+    {
+      "pt": "Dá-me",
+      "en": "give me",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_beijinho",
+      "role": "piece",
+      "slug": "da-me",
+      "speaker": "any"
+    },
+    {
+      "pt": "Dois beijinhos.",
+      "en": "Two little kisses.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_beijinho",
+      "role": "branch",
+      "slug": "dois-beijinhos",
+      "speaker": "any"
+    },
+    {
+      "pt": "Dá-me um minuto.",
+      "en": "Give me a minute.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_beijinho",
+      "role": "branch",
+      "slug": "da-me-um-minuto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Apetece-te um cafezinho?",
+      "en": "Fancy a little coffee?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_beijinho",
+      "role": "branch",
+      "slug": "apetece-te-um-cafezinho",
+      "speaker": "any"
+    },
+    {
+      "pt": "Ligas-me logo?",
+      "en": "Handing the next move over, deliberately.",
+      "direction": "Confident. Asking him to call is a decision, not a hope.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_ligas_me",
+      "role": "recognise",
+      "slug": "ligas-me-logo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Ligas-me",
+      "en": "will you call me",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_ligas_me",
+      "role": "piece",
+      "slug": "ligas-me",
+      "speaker": "any"
+    },
+    {
+      "pt": "logo",
+      "en": "later on / in a bit",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_ligas_me",
+      "role": "piece",
+      "slug": "logo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Ligo-te logo.",
+      "en": "I’ll call you later.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_ligas_me",
+      "role": "branch",
+      "slug": "ligo-te-logo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Até logo.",
+      "en": "See you later.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_ligas_me",
+      "role": "branch",
+      "slug": "ate-logo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Ligas-me amanhã?",
+      "en": "Will you call me tomorrow?",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_ligas_me",
+      "role": "branch",
+      "slug": "ligas-me-amanha",
+      "speaker": "any"
+    },
+    {
+      "pt": "Ligo-te amanhã.",
+      "en": "I’ll call you tomorrow.",
+      "direction": "Said cold, with no film behind it: you said you would be in touch, and you meant it.",
+      "crate": "FLIRTING — HER TO HIM",
+      "root": "fl_f_ligas_me",
+      "role": "release",
+      "slug": "ligo-te-amanha",
+      "speaker": "any"
+    },
+    {
       "pt": "Obrigado.",
       "en": "Thank you.",
       "direction": "Said about yourself, unremarkably. The man’s form of the same sentence.",
@@ -2081,6 +2861,136 @@
       "root": null,
       "role": "profile",
       "slug": "pode-repetir",
+      "speaker": "any"
+    },
+    {
+      "pt": "Gostava de te ver quando quiseres.",
+      "en": "I’d like to see you whenever you want.",
+      "direction": "Neutral. She has said yes but not said when.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "gostava-de-te-ver-quando-quiseres",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa, estou nervoso.",
+      "en": "Sorry — I’m nervous.",
+      "direction": "Neutral. You have said something clumsy and she heard all of it.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "desculpa-estou-nervoso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Posso perguntar como se chama?",
+      "en": "May I ask what you are called?",
+      "direction": "Neutral. You have been talking for ten minutes and still do not know.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "posso-perguntar-como-se-chama",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estás feliz?",
+      "en": "Are you happy?",
+      "direction": "Neutral. Something has been on her mind all evening.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "estas-feliz",
+      "speaker": "any"
+    },
+    {
+      "pt": "Gostava de te ver agora.",
+      "en": "I’d like to see you now.",
+      "direction": "Neutral. Neither of you wants to wait until tomorrow.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "gostava-de-te-ver-agora",
+      "speaker": "any"
+    },
+    {
+      "pt": "Foda-se, estou nervoso.",
+      "en": "For f***’s sake, I’m nervous.",
+      "direction": "Neutral. Said to yourself, in the toilets, before going back out.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "foda-se-estou-nervoso",
+      "speaker": "any"
+    },
+    {
+      "pt": "Posso dar-te um beijinho?",
+      "en": "Can I give you a kiss?",
+      "direction": "Neutral. The evening is over and neither of you has moved towards the door.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "posso-dar-te-um-beijinho",
+      "speaker": "any"
+    },
+    {
+      "pt": "Apetece-te vir comigo?",
+      "en": "Do you fancy coming with me?",
+      "direction": "Neutral. You are leaving and would rather he came too.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "apetece-te-vir-comigo",
+      "speaker": "any"
+    },
+    {
+      "pt": "Desculpa, és engraçado.",
+      "en": "Sorry — you’re funny.",
+      "direction": "Neutral. He has said something ridiculous and you laughed far too loudly.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "desculpa-es-engracado",
+      "speaker": "any"
+    },
+    {
+      "pt": "És mesmo engraçado.",
+      "en": "You really are funny.",
+      "direction": "Neutral. He has done it again and you have stopped pretending not to laugh.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "es-mesmo-engracado",
+      "speaker": "any"
+    },
+    {
+      "pt": "És feliz?",
+      "en": "Are you happy?",
+      "direction": "Neutral. It is late, and the conversation has gone somewhere neither of you planned.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "es-feliz",
+      "speaker": "any"
+    },
+    {
+      "pt": "Apetece-te ir agora?",
+      "en": "Do you fancy going now?",
+      "direction": "Neutral. The party is dying and the city is still open.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "apetece-te-ir-agora",
+      "speaker": "any"
+    },
+    {
+      "pt": "És um grande engraçado.",
+      "en": "Aren’t you the comedian.",
+      "direction": "Neutral. He is being funny about something he really should not be.",
+      "crate": "Collisions",
+      "root": null,
+      "role": "collision",
+      "slug": "es-um-grande-engracado",
       "speaker": "any"
     },
     {
