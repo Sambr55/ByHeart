@@ -29,6 +29,54 @@ export interface Insight {
 
 export const INSIGHTS: Insight[] = [
   {
+    id: 'clitics',
+    requires: ['esqueci_me'],
+    headline: 'You have been hooking little words onto the ends of verbs',
+    body:
+      '“Esqueci-me” is esqueci plus me, joined by a hyphen. Portuguese does this constantly — chamo-me, foda-se, senta-se. Once you can see that hyphen you can take almost any spoken sentence apart.',
+    evidence: [
+      { pt: 'Esqueci-me do telemóvel.', en: 'I forgot my phone.' },
+      { pt: 'Foda-se, esqueci-me.', en: 'For f***’s sake, I forgot.' },
+    ],
+    proper_name: 'enclitic pronouns',
+  },
+  {
+    id: 'ser-estar',
+    requires: ['uma_merda'],
+    headline: 'You used two different words for “is” and never once mixed them up',
+    body:
+      '“O filme é uma merda” — the film simply is. “Hoje estou uma merda” — today you happen to feel like it. Portuguese keeps permanent and temporary in separate verbs, and you picked the right one by ear.',
+    evidence: [
+      { pt: 'O filme é uma merda.', en: 'The film is crap.' },
+      { pt: 'Hoje estou uma merda.', en: 'I feel like crap today.' },
+    ],
+    proper_name: 'ser and estar',
+  },
+  {
+    id: 'gender-cabrao',
+    requires: ['cabrao'],
+    headline: 'You changed the end of a word to match who you were talking to',
+    body:
+      'Cabrão for a man, cabra for a woman — and um turns into uma to keep it company. That is the same rule that decides obrigado and obrigada, arriving from a considerably ruder direction.',
+    evidence: [
+      { pt: 'És um grande cabrão.', en: 'You absolute bastard.' },
+      { pt: 'És uma grande cabra.', en: 'You’re an utter cow.' },
+    ],
+    proper_name: 'gender agreement',
+  },
+  {
+    id: 'adjective-before',
+    requires: ['grande'],
+    headline: 'You moved one word in front of another and it stopped meaning what it meant',
+    body:
+      'Grande after a noun means big. Grande in front of it means utter. “És um grande amigo” is a compliment; “um amigo grande” is a remark about his size.',
+    evidence: [
+      { pt: 'És um grande amigo.', en: 'You’re a great friend.' },
+      { pt: 'Que grande merda.', en: 'What an utter mess.' },
+    ],
+    proper_name: 'adjective position',
+  },
+  {
     id: 'conjugation',
     requires: ['podes'],
     headline: 'Verbs change their ending depending on who is doing it',

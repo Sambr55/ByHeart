@@ -508,9 +508,10 @@ for (const e of EXAMPLES) {
       if (!covered) pairs.push(a + '+' + b)
     }
   }
+  const totalPairs = (FAMILIES.length * (FAMILIES.length - 1)) / 2
   if (pairs.length) {
     warn(
-      pairs.length + ' of 15 family pairs have no collision: ' + pairs.slice(0, 6).join(', ') +
+      pairs.length + ' of ' + totalPairs + ' family pairs have no collision: ' + pairs.slice(0, 6).join(', ') +
         (pairs.length > 6 ? '…' : ''),
     )
   }
@@ -518,7 +519,7 @@ for (const e of EXAMPLES) {
   console.log(
     ROOTS.length + ' roots · ' + FAMILIES.length + ' families · ' +
       Object.keys(PIECES).length + ' pieces · ' + COLLISIONS.length + ' collisions · ' +
-      (15 - pairs.length) + '/15 family pairs collide',
+      (totalPairs - pairs.length) + '/' + totalPairs + ' family pairs collide',
   )
 }
 

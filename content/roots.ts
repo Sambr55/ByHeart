@@ -19,6 +19,7 @@ export type CultureFamily =
   | 'pulp_fiction'
   | 'audrey_hepburn'
   | 'marcus_aurelius'
+  | 'portuguese_swearing'
 
 export type RootType = 'quote' | 'title' | 'paraphrased_moment' | 'wisdom' | 'other'
 
@@ -109,6 +110,7 @@ export const FAMILIES: {
   { id: 'pulp_fiction', title: 'PULP FICTION BANGER QUOTES', blurb: 'Punchy lines. Real conversational leverage.', tone: 'sharp', built: true },
   { id: 'audrey_hepburn', title: 'AUDREY HEPBURN MUSINGS', blurb: 'Elegance, warmth and things worth saying.', tone: 'warm', built: true },
   { id: 'marcus_aurelius', title: 'MARCUS AURELIUS WISDOM', blurb: 'Ancient ideas. Surprisingly useful modern language.', tone: 'reflective', built: true },
+  { id: 'portuguese_swearing', title: 'HOW TO SWEAR IN PORTUGUESE', blurb: 'The subtitles were lying to you. Strong language throughout.', tone: 'blunt', built: true },
 ]
 
 const q = (partial: Partial<Root> & Pick<Root, 'root_id' | 'culture_family' | 'root_display' | 'meaning_en' | 'pt_natural' | 'semantic_bridge' | 'subtext' | 'extracts' | 'branches' | 'transfer_prompt'>): Root => ({
@@ -1339,6 +1341,280 @@ export const MARCUS_AURELIUS: Root[] = [
 // The graph
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// B9 — How To Swear In Portuguese.
+//
+// This family is not a novelty. Swearing is where a language keeps its most
+// irregular and most frequent grammar: the clitic pronouns live here, so does the
+// subjunctive, so does gender agreement, so does the ser/estar split that
+// textbooks spend a chapter failing to explain. A learner who can hear the
+// difference between "o filme É uma merda" and "hoje ESTOU uma merda" has
+// understood something most beginners never get told.
+//
+// The cultural root is the subtitle. You read the polite English; this is what
+// was actually said.
+// ---------------------------------------------------------------------------
+
+export const SWEARING: Root[] = [
+  q({
+    root_id: 'sw_vai_a_merda',
+    culture_family: 'portuguese_swearing',
+    root_type: 'other',
+    source_label: 'Portuguese television, with the subtitles on',
+    source_status: 'paraphrased',
+    root_display: 'Piss off. I have had enough.',
+    meaning_en: 'Go away. I am fed up.',
+    pt_natural: 'Vai à merda, estou farto.',
+    literal_note: 'Literally “go to the shit”. Portuguese sends people to places.',
+    semantic_bridge:
+      'The whole insult is built from two ordinary bricks: VAI, the command “go”, and À, which is just “to the”. Swap the destination and the same frame becomes polite — vai para casa, vai com calma.',
+    subtext: 'Final, not playful. This ends a conversation rather than seasoning one.',
+    extracts: [
+      { id: 'vai', pt: 'Vai', gloss: 'go (an order)' },
+      { id: 'estou_farto', pt: 'estou farto', gloss: 'I’m fed up' },
+    ],
+    branches: [
+      { pt: 'Vai para casa.', en: 'Go home.' },
+      { pt: 'Estou farto disto.', en: 'I’m fed up with this.' },
+      { pt: 'Vai com calma.', en: 'Take it easy.' },
+    ],
+    reinforces: ['calma'],
+    helpers: {
+      'para': 'to',
+      'casa': 'home',
+      'disto': 'with this',
+      'com': 'with',
+      'calma': 'calm',
+    },
+    transfer_prompt: { context: 'You have been in the same queue for forty minutes.', ask: 'I’m fed up.', answer: 'Estou farto.' },
+    rights_status: 'dub-authored',
+    freebie_flag: true,
+    starter_tags: ['blunt', 'iconic'],
+    next_root_hooks: ['sw_foda_se'],
+  }),
+  q({
+    root_id: 'sw_foda_se',
+    culture_family: 'portuguese_swearing',
+    root_type: 'other',
+    source_label: 'Portuguese television, with the subtitles on',
+    source_status: 'paraphrased',
+    root_display: 'Oh for God’s sake — I forgot.',
+    meaning_en: 'The all-purpose explosion, followed by the reason for it.',
+    pt_natural: 'Foda-se, esqueci-me.',
+    literal_note: 'FODA-SE is a verb with a pronoun stuck on the back of it. So is ESQUECI-ME. Same machinery, very different reputations.',
+    semantic_bridge:
+      'The famous half is FODA-SE. The half you will use every day is ESQUECI-ME. They are built identically — verb, hyphen, little pronoun — and once you can see that hyphen you can take apart half of spoken Portuguese.',
+    subtext: 'Frustration at the situation, not at a person. Nobody is being insulted here.',
+    extracts: [
+      { id: 'foda_se', pt: 'Foda-se', gloss: 'for f***’s sake' },
+      { id: 'esqueci_me', pt: 'esqueci-me', gloss: 'I forgot' },
+    ],
+    branches: [
+      { pt: 'Esqueci-me do telemóvel.', en: 'I forgot my phone.' },
+      { pt: 'Desculpa, esqueci-me.', en: 'Sorry, I forgot.' },
+      { pt: 'Foda-se, outra vez!', en: 'For f***’s sake, again!' },
+    ],
+    reinforces: ['desculpa', 'outra_vez'],
+    helpers: {
+      'do': 'of the',
+      'telemóvel': 'mobile phone',
+      'Desculpa': 'sorry',
+      'outra': 'another',
+      'vez': 'time',
+    },
+    voice_options: [
+      {
+        pt: 'Foda-se!', en: 'For f***’s sake!', signal: 'direct',
+        register: 'THE REAL ONE',
+        when: 'Among friends, at the football, alone in the car when something goes wrong.',
+        risk: 'This is as strong as Portuguese gets. Not at work, not with anyone’s parents, not in a shop.',
+      },
+      {
+        pt: 'Fogo!', en: 'For crying out loud!', signal: 'softened',
+        register: 'THE CLEAN TWIN',
+        when: 'The identical moment, in front of absolutely anybody. Literally “fire”, and nobody blinks.',
+        safest: true,
+      },
+    ],
+    voice_rule:
+      'Every language keeps a clean twin for its worst word. Fogo means “fire” and does the same job as foda-se, in the same slot, with none of the fallout. Learn both, and learn which room you are standing in.',
+    transfer_prompt: { context: 'You reach the car. The keys are on the kitchen table.', ask: 'I forgot.', answer: 'Esqueci-me.' },
+    rights_status: 'dub-authored',
+    starter_tags: ['blunt', 'everyday'],
+    next_root_hooks: ['sw_que_se_foda'],
+  }),
+  q({
+    root_id: 'sw_que_se_foda',
+    culture_family: 'portuguese_swearing',
+    root_type: 'other',
+    source_label: 'Portuguese television, with the subtitles on',
+    source_status: 'paraphrased',
+    root_display: 'Sod it. I’m going anyway.',
+    meaning_en: 'Writing something off, and carrying on regardless.',
+    pt_natural: 'Que se foda, vou na mesma.',
+    literal_note: 'Notice the SE has moved. In “foda-se” it sits behind the verb; after QUE it jumps in front. That is a rule, not an accident.',
+    semantic_bridge:
+      'QUE SE FODA is a dismissal, and NA MESMA is the shrug that follows it — “all the same”, “anyway”. NA MESMA survives long after you stop wanting the first half.',
+    subtext: 'Not anger. A decision, made out loud, that something no longer gets a vote.',
+    extracts: [
+      { id: 'que_se_foda', pt: 'Que se foda', gloss: 'sod it' },
+      { id: 'na_mesma', pt: 'na mesma', gloss: 'anyway / all the same' },
+    ],
+    branches: [
+      { pt: 'Vou na mesma.', en: 'I’m going anyway.' },
+      { pt: 'Obrigado na mesma.', en: 'Thanks anyway.' },
+      { pt: 'Que se foda, vamos.', en: 'Sod it, let’s go.' },
+    ],
+    helpers: {
+      'Vou': 'I’m going',
+      'Obrigado': 'thank you',
+      'vamos': 'let’s go',
+    },
+    transfer_prompt: { context: 'The bus never came, but someone has offered you a lift.', ask: 'Thanks anyway.', answer: 'Obrigado na mesma.' },
+    rights_status: 'dub-authored',
+    starter_tags: ['blunt', 'decision'],
+    next_root_hooks: ['sw_caralho'],
+  }),
+  q({
+    root_id: 'sw_caralho',
+    culture_family: 'portuguese_swearing',
+    root_type: 'other',
+    source_label: 'Portuguese television, with the subtitles on',
+    source_status: 'paraphrased',
+    root_display: 'What the hell is this?',
+    meaning_en: 'Genuine confusion, expressed at volume.',
+    pt_natural: 'Que caralho é isto?',
+    literal_note: 'The same word, with DO in front of it, means the exact opposite. Isto é do caralho = this is brilliant.',
+    semantic_bridge:
+      'QUE ___ É ISTO? is a fixed frame with one swappable slot. Drop in caralho and you are furious; drop in raio and you are merely baffled. ISTO — “this” — is the piece you will use hourly.',
+    subtext: 'Aimed at the object, not the person. Pointed at a person it becomes a challenge.',
+    extracts: [
+      { id: 'que_caralho', pt: 'Que caralho', gloss: 'what the f***' },
+      { id: 'isto', pt: 'isto', gloss: 'this' },
+    ],
+    branches: [
+      { pt: 'O que é isto?', en: 'What is this?' },
+      { pt: 'Isto é do caralho!', en: 'This is bloody brilliant!' },
+      { pt: 'Que caralho estás a fazer?', en: 'What the f*** are you doing?' },
+    ],
+    helpers: {
+      'O que': 'what',
+      'é': 'is',
+      'do caralho': 'bloody brilliant',
+      'estás a': 'are you',
+      'fazer': 'doing',
+    },
+    voice_options: [
+      {
+        pt: 'Que caralho é isto?', en: 'What the f*** is this?', signal: 'direct',
+        register: 'ANGRY AND UNFILTERED',
+        when: 'You are genuinely annoyed, among people who swear back at you.',
+        risk: 'Pointed at a stranger this is the opening of a fight, not a question.',
+      },
+      {
+        pt: 'Que raio é isto?', en: 'What on earth is this?', signal: 'softened',
+        register: 'BAFFLED, NOT OBSCENE',
+        when: 'The same confusion, the same frame, safe in front of anyone at all.',
+        safest: true,
+      },
+    ],
+    voice_rule:
+      'Raio means “lightning bolt” and caralho means something a great deal worse, but they occupy the identical slot: Que ___ é isto? Portuguese builds outrage out of a fixed frame and one swappable word, so you only ever learn the frame once.',
+    transfer_prompt: { context: 'A plate arrives that you are certain you did not order.', ask: 'What is this?', answer: 'O que é isto?' },
+    rights_status: 'dub-authored',
+    starter_tags: ['blunt', 'survival'],
+    next_root_hooks: ['sw_merda'],
+  }),
+  q({
+    root_id: 'sw_merda',
+    culture_family: 'portuguese_swearing',
+    root_type: 'other',
+    source_label: 'Portuguese television, with the subtitles on',
+    source_status: 'paraphrased',
+    root_display: 'I feel like crap today.',
+    meaning_en: 'Today, specifically, you are not at your best.',
+    pt_natural: 'Hoje estou uma merda.',
+    literal_note: 'ESTOU, not É. É would mean you are permanently rubbish, which is a different and much sadder sentence.',
+    semantic_bridge:
+      'Portuguese has two words for “is”. ESTOU is how things happen to be right now; É is how things simply are. The same insult swings between them: hoje ESTOU uma merda is a bad day, o filme É uma merda is a review.',
+    subtext: 'Ordinary, unremarkable complaining. This is closer to “rough” than to obscene.',
+    extracts: [
+      { id: 'uma_merda', pt: 'uma merda', gloss: 'crap / rubbish' },
+      { id: 'hoje', pt: 'Hoje', gloss: 'today' },
+    ],
+    branches: [
+      { pt: 'Hoje não.', en: 'Not today.' },
+      { pt: 'O filme é uma merda.', en: 'The film is crap.' },
+      { pt: 'Isto é uma merda.', en: 'This is rubbish.' },
+    ],
+    reinforces: ['isto'],
+    helpers: {
+      'não': 'no / not',
+      'O filme': 'the film',
+      'é': 'is (permanently)',
+      'Isto': 'this',
+    },
+    transfer_prompt: { context: 'Someone asks what you thought of the film.', ask: 'The film is crap.', answer: 'O filme é uma merda.' },
+    rights_status: 'dub-authored',
+    starter_tags: ['blunt', 'everyday'],
+    next_root_hooks: ['sw_cabrao'],
+  }),
+  q({
+    root_id: 'sw_cabrao',
+    culture_family: 'portuguese_swearing',
+    root_type: 'other',
+    source_label: 'Portuguese television, with the subtitles on',
+    source_status: 'paraphrased',
+    root_display: 'You absolute bastard.',
+    meaning_en: 'Said to a close friend, this is nearly affectionate. Said to anyone else, it is not.',
+    pt_natural: 'És um grande cabrão.',
+    literal_note: 'GRANDE means “big”, but in front of the noun it stops meaning size and starts meaning “utter”.',
+    semantic_bridge:
+      'Everything in this sentence agrees with who you are talking to. Um becomes uma, cabrão becomes cabra. The frame É S UM GRANDE ___ is the same one you use for compliments — és um grande amigo.',
+    subtext: 'Register does all the work. Between friends it is warmth; anywhere else it is a genuine insult.',
+    extracts: [
+      { id: 'grande', pt: 'grande', gloss: 'utter / total (in front of the word)' },
+      { id: 'cabrao', pt: 'cabrão', gloss: 'bastard' },
+    ],
+    branches: [
+      { pt: 'És uma grande cabra.', en: 'You’re an utter cow.' },
+      { pt: 'És um grande amigo.', en: 'You’re a great friend.' },
+      { pt: 'Que grande merda.', en: 'What an utter mess.' },
+      { pt: 'Que cabrão!', en: 'What a bastard!' },
+    ],
+    reinforces: ['uma_merda'],
+    helpers: {
+      'És': 'you are',
+      'um': 'a (for a man)',
+      'uma': 'a (for a woman)',
+      'cabra': 'the female version of cabrão',
+      'amigo': 'friend',
+      'Que': 'what a',
+      'merda': 'shit',
+    },
+    voice_options: [
+      {
+        pt: 'És um grande cabrão.', en: 'You absolute bastard.', signal: 'direct',
+        register: 'ONLY WITH PEOPLE WHO LAUGH',
+        when: 'Between close friends, after something outrageous, this is almost a compliment.',
+        risk: 'Misjudge the friendship and this one does not come back. There is no gentle version of it.',
+      },
+      {
+        pt: 'És um grande chato.', en: 'You’re a total pain.', signal: 'warm',
+        register: 'EXASPERATED, NOT RUDE',
+        when: 'Same structure, same affection, and you can say it to a colleague.',
+        safest: true,
+      },
+    ],
+    voice_rule:
+      'Grande in front of the noun means “utter”, not “big”. És um grande amigo is a compliment; um amigo grande is a large man. One word, two positions, two completely different sentences.',
+    transfer_prompt: { context: 'A friend has just gone badly out of their way for you.', ask: 'You’re a great friend.', answer: 'És um grande amigo.' },
+    rights_status: 'dub-authored',
+    starter_tags: ['blunt', 'social'],
+    next_root_hooks: ['sw_foda_se'],
+  }),
+]
+
 export const ROOTS: Root[] = [
   ...TOP_GUN,
   ...JAMES_BOND,
@@ -1346,6 +1622,7 @@ export const ROOTS: Root[] = [
   ...PULP_FICTION,
   ...AUDREY_HEPBURN,
   ...MARCUS_AURELIUS,
+  ...SWEARING,
 ]
 
 export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
@@ -1355,6 +1632,7 @@ export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
   pulp_fiction: PULP_FICTION,
   audrey_hepburn: AUDREY_HEPBURN,
   marcus_aurelius: MARCUS_AURELIUS,
+  portuguese_swearing: SWEARING,
 }
 
 export function rootById(id: string): Root | undefined {
@@ -1389,6 +1667,54 @@ export interface Collision {
 }
 
 export const COLLISIONS: Collision[] = [
+  {
+    id: 'sw_tg_hoje_nao_vou',
+    requires: ['hoje', 'nao_vou'],
+    context: 'A friend asks whether you are coming out later.',
+    ask: 'I’m not going today.',
+    answer: 'Hoje não vou.',
+    provenance: 'HOJE came out of a complaint. NÃO VOU came out of Top Gun. Neither of them noticed.',
+  },
+  {
+    id: 'sw_jb_isto_outra_vez',
+    requires: ['isto', 'outra_vez'],
+    context: 'The same problem has now come back for the third time.',
+    ask: 'This again?',
+    answer: 'Isto outra vez?',
+    provenance: 'A Bond title and a swear word, welded into the most useful two words of your week.',
+  },
+  {
+    id: 'sw_bj_desculpa_farto',
+    requires: ['estou_farto', 'desculpa'],
+    context: 'You need to leave a party that is going nowhere.',
+    ask: 'Sorry, I’m fed up.',
+    answer: 'Desculpa, estou farto.',
+    provenance: 'Bridget supplied the apology. The other place supplied the honesty.',
+  },
+  {
+    id: 'sw_pf_vai_com_calma',
+    requires: ['vai', 'calma'],
+    context: 'Your friend is winding themselves up to do something stupid.',
+    ask: 'Take it easy.',
+    answer: 'Vai com calma.',
+    provenance: 'VAI was learned as an insult. Pointed somewhere kinder it becomes advice.',
+  },
+  {
+    id: 'sw_ah_vida_merda',
+    requires: ['uma_merda', 'vida'],
+    context: 'Your friend has had the worst week you can remember.',
+    ask: 'Life is crap.',
+    answer: 'A vida é uma merda.',
+    provenance: 'Audrey gave you VIDA. Portuguese television gave you UMA MERDA. The sentence does not care.',
+  },
+  {
+    id: 'sw_ma_nao_podes_mudar_isto',
+    requires: ['isto', 'nao_podes', 'mudar'],
+    context: 'Someone is raging about a decision that was made without them.',
+    ask: 'You can’t change this.',
+    answer: 'Não podes mudar isto.',
+    provenance: 'Marcus Aurelius, delivered with a word you learned from swearing at a television.',
+  },
   {
     id: 'comigo_amanha',
     requires: ['comigo', 'amanha', 'podes'],
