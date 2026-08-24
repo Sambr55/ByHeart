@@ -291,7 +291,10 @@ function EntryRow({
   const root = sourceOf(headId)
   const crate = CRATES.find((c) => c.id === head.family)
   const lines = open ? linesFor(headId, 6, ownCrates) : []
-  const note = forms.find((f) => f.piece.note)?.piece.note
+  // Every note the forms carry, not just the first: a lemma card is where ser and estar
+  // finally have one place to be explained, and that explanation is written on the form
+  // that shows it, not on whichever one happens to sort first.
+  const notes = [...new Set(forms.map((f) => f.piece.note).filter(Boolean))] as string[]
 
   return (
     <li>
@@ -346,11 +349,14 @@ function EntryRow({
             Stage {head.rung} · {RUNGS[head.rung - 1].name}
           </p>
 
-          {note ? (
-            <p className="rounded-lg border-l-2 border-accent/50 bg-surface px-3 py-2 text-xs leading-relaxed text-fg/85">
-              {note}
+          {notes.map((n) => (
+            <p
+              key={n}
+              className="rounded-lg border-l-2 border-accent/50 bg-surface px-3 py-2 text-xs leading-relaxed text-fg/85"
+            >
+              {n}
             </p>
-          ) : null}
+          ))}
 
           {isLemma ? (
             <div>

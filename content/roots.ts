@@ -340,7 +340,7 @@ export const TOP_GUN: Root[] = [
       'The aviation metaphor becomes ordinary human Portuguese. The useful pieces are PODES and QUANDO QUISERES — not the military noun.',
     subtext: 'Warm permission rather than formal ability. PODES is one of the highest-leverage pieces in the language.',
     extracts: [
-      { id: 'podes', target: 'podes', gloss: 'you can', rung: 2, shelf: 'doing', lemma: 'poder', form: 'you' },
+      { id: 'podes', target: 'podes', gloss: 'you can', rung: 2, shelf: 'doing', lemma: 'poder', form: 'you', note: 'Podes is allowed to, or could. When you mean physically managed it, Portugal reaches for consegui — não consegui abrir a porta is I could not get it open, not I was not permitted.' },
       { id: 'quando_quiseres', target: 'quando quiseres', gloss: 'whenever you want', shelf: 'when' },
     ],
     branches: [
@@ -496,6 +496,7 @@ export const TOP_GUN: Root[] = [
       'English hides the verb inside \u201cwhere\u2019s\u201d. Portuguese keeps them apart, and the pair ONDE + EST\u00c1 will locate anything you can already name \u2014 which is the entire reason naming came first.',
     subtext: 'The question you will ask on your first afternoon, and every afternoon after it.',
     extracts: [
+      { id: 'parceiro', target: 'parceiro', gloss: 'partner', shelf: 'things', gender: 'm' },
       { id: 'onde', target: 'onde', gloss: 'where', shelf: 'asking' },
       { id: 'esta_', target: 'est\u00e1', gloss: 'is', shelf: 'doing', lemma: 'estar', form: 'he/she/it', note: 'The right-now one. É is the permanent one.' },
     ],
@@ -503,8 +504,11 @@ export const TOP_GUN: Root[] = [
       { target: 'Onde est\u00e1 a casa de banho?', en: 'Where\u2019s the toilet?' },
       { target: 'Onde est\u00e1 o meu caf\u00e9?', en: 'Where\u2019s my coffee?' },
       { target: 'Est\u00e1 aqui.', en: 'It\u2019s here.' },
+      { target: 'Este é o meu parceiro.', en: 'This is my partner.', demonstrates: ['parceiro'] },
     ],
     helpers: {
+      'Este': 'this one',
+      'é': 'is',
       'a': 'the',
       'o': 'the',
       'casa': 'house',
@@ -1070,7 +1074,7 @@ export const BRIDGET_JONES: Root[] = [
     subtext: 'Asked at one in the morning, of a friend who has heard it before.',
     extracts: [
       { id: 'ele', target: 'ele', gloss: 'he', shelf: 'people', lemma: 'ele', form: 'he' },
-      { id: 'gosta_de', target: 'gosta de', gloss: 'likes', shelf: 'doing', lemma: 'gostar', form: 'he/she' },
+      { id: 'gosta_de', target: 'gosta de', gloss: 'likes', shelf: 'doing', lemma: 'gostar', form: 'he/she', note: 'The DE never leaves. Gosto de ti, gosta de vinho — you like OF something. Drop it and it stops being Portuguese. You have said it with the de every time.' },
     ],
     branches: [
       { target: 'Ela gosta de ti.', en: 'She likes you.' },
@@ -1115,7 +1119,10 @@ export const PULP_FICTION: Root[] = [
     semantic_bridge:
       'The joke is entirely cultural. The useful word is the smallest one in the sentence: COM.',
     subtext: 'A fast wink, not a lesson. If you already have COM, this is a nod rather than a discovery.',
-    extracts: [{ id: 'com', target: 'com', gloss: 'with', shelf: 'small_words' }],
+    extracts: [
+      { id: 'com', target: 'com', gloss: 'with', shelf: 'small_words' },
+      { id: 'queijo', target: 'queijo', gloss: 'cheese', shelf: 'things', gender: 'm' },
+    ],
     branches: [
       { target: 'Com açúcar.', en: 'With sugar.' },
       { target: 'Com gelo.', en: 'With ice.' },
@@ -1305,6 +1312,7 @@ export const PULP_FICTION: Root[] = [
       'The gag only works if you hear the price, so the number is the point. Portuguese puts the figure before the currency \u2014 cinco euros \u2014 and joins the thing to its price with the same DE that joined the glass to the wine.',
     subtext: 'Ordinary, transactional language, hiding inside the most quoted diner scene ever filmed.',
     extracts: [
+      { id: 'euro', target: 'euro', gloss: 'euro', shelf: 'things', gender: 'm', plural: 'euros' },
       { id: 'cinco', target: 'cinco', gloss: 'five', shelf: 'how_much' },
       { id: 'batido', target: 'batido', gloss: 'milkshake', shelf: 'things', gender: 'm' },
     ],
@@ -1389,7 +1397,7 @@ export const PULP_FICTION: Root[] = [
     subtext: 'Asked flatly, of somebody who very much does not want to answer.',
     extracts: [
       { id: 'quem', target: 'quem', gloss: 'who', shelf: 'asking' },
-      { id: 'e_is', target: '\u00e9', gloss: 'is', shelf: 'doing', lemma: 'ser', form: 'he/she/it' },
+      { id: 'e_is', target: '\u00e9', gloss: 'is', shelf: 'doing', lemma: 'ser', form: 'he/she/it', note: 'É is what someone IS; está is how they are right now. És engraçado is about him. Estás gira is about tonight. It is the one an English speaker gets wrong most, and you have already used both correctly.' },
     ],
     branches: [
       { target: 'Quem \u00e9 este?', en: 'Who\u2019s this?' },
@@ -1518,6 +1526,7 @@ export const AUDREY_HEPBURN: Root[] = [
       'The thought is a comparison, which makes MAIS DO QUE the engine — and that engine works for any two things you want to weigh against each other.',
     subtext: 'Warm and emotionally useful, rather than phrasebook language.',
     extracts: [
+      { id: 'coisa', target: 'coisa', gloss: 'thing', shelf: 'things', gender: 'f' },
       { id: 'mais_do_que', target: 'mais do que', gloss: 'more than', shelf: 'how_much' },
       { id: 'importa', target: 'importa', gloss: 'it matters', shelf: 'doing', lemma: 'importar', form: 'it' },
     ],
@@ -1525,8 +1534,11 @@ export const AUDREY_HEPBURN: Root[] = [
       { target: 'Tu importas.', en: 'You matter.', demonstrates: ['importa'] },
       { target: 'Mais do que isso.', en: 'More than that.' },
       { target: 'Isto importa.', en: 'This matters.' },
+      { target: 'As coisas mudam.', en: 'Things change.', demonstrates: ['coisa'] },
     ],
     helpers: {
+      'As': 'the',
+      'mudam': 'they change',
       'Tu': 'you',
       'importas': 'you matter',
       'isso': 'that',
@@ -2602,7 +2614,7 @@ export const FLIRTING_F2M: Root[] = [
       'QUERIA is “I would like”. It is the difference between quero — I want — and something a person can comfortably hear. You will use it every day, mostly about food.',
     subtext: 'Warm and unhurried. Said once and then left alone.',
     extracts: [
-      { id: 'queria', target: 'Queria', gloss: 'I’d like', shelf: 'doing', lemma: 'querer', form: 'I, softened' },
+      { id: 'queria', target: 'Queria', gloss: 'I’d like', shelf: 'doing', lemma: 'querer', form: 'I, softened', note: 'Quero is I want. Queria is I would like, and it is a past tense doing politeness — which is exactly why you order with it. Queria um café lands softly; quero um café does not.' },
       { id: 'conhecer_te', target: 'conhecer-te', gloss: 'to get to know you', shelf: 'doing', lemma: 'conhecer', form: 'with you attached' },
     ],
     branches: [
@@ -2677,7 +2689,7 @@ export const FLIRTING_F2M: Root[] = [
       'The -INHO ending makes a word smaller, and in doing so makes it friendlier. A cafezinho is not a small coffee; it is a coffee offered warmly.',
     subtext: 'Playful rather than forward. The diminutive is what takes the weight out of it.',
     extracts: [
-      { id: 'beijinho', target: 'beijinho', gloss: 'a little kiss', shelf: 'things', gender: 'm', note: 'How Portugal says hello — two of them, one on each cheek.' },
+      { id: 'beijinho', target: 'beijinho', gloss: 'a little kiss', shelf: 'things', gender: 'm', note: 'How Portugal says hello — two of them, one on each cheek. And the -inho ending is not really about size: beijo becomes beijinho, café becomes cafezinho, and what it adds is warmth. Portugal runs on it.' },
       { id: 'da_me', target: 'Dá-me', gloss: 'give me', shelf: 'doing', lemma: 'dar', form: 'you, an order' },
     ],
     branches: [
@@ -2754,7 +2766,7 @@ export const DURAN_DURAN: Root[] = [
       'English IS hungry. Portuguese HAS hunger. And “uma fome de lobo” is a real expression in Portugal, not a translation of the song — which is why this title survives the crossing when most do not. That one swap, ter where English uses to be, carries fome, sede, frio, calor and razão with it.',
     subtext: 'Physical and unfussy. It is also the first thing you will say in a restaurant.',
     extracts: [
-      { id: 'tenho', target: 'tenho', gloss: 'I have', shelf: 'doing', lemma: 'ter', form: 'I' },
+      { id: 'tenho', target: 'tenho', gloss: 'I have', shelf: 'doing', lemma: 'ter', form: 'I', note: 'Portuguese HAS hunger, thirst and cold where English is them. Tenho fome, tenho sede, tenho frio — and tenho trinta anos for your age. One verb, and five things you can suddenly say.' },
       { id: 'fome', target: 'fome', gloss: 'hunger', shelf: 'things', gender: 'f', countable: false },
     ],
     branches: [
