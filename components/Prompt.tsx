@@ -15,7 +15,7 @@ import { useCopy } from '@/engine/session'
  */
 export function SourceStrip({ source }: { source: NonNullable<Screen['source']> }) {
   return (
-    <div className="rounded-lg border border-line/70 bg-surface/50 px-3 py-2">
+    <div className="rounded border border-line/70 bg-surface/50 px-3 py-2">
       {source.from ? (
         <p className="text-[0.6rem] uppercase tracking-wider text-muted">{source.from}</p>
       ) : null}

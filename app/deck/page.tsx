@@ -43,7 +43,7 @@ export default function DeckPage() {
           </p>
           <Link
             href="/"
-            className="tap-target eyebrow mt-6 rounded-xl bg-accent px-5 py-4 text-center text-accent-ink"
+            className="tap-target eyebrow mt-6 rounded bg-accent px-5 py-4 text-center text-accent-ink"
           >
             START MISSION 01
           </Link>
@@ -66,7 +66,7 @@ export default function DeckPage() {
         {deck.map((c) => (
           <li
             key={c.card_id}
-            className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+            className="flex items-center justify-between gap-3 rounded border border-line bg-surface px-4 py-3"
           >
             <span className="eyebrow">{c.title}</span>
             <span className="text-[0.6rem] uppercase tracking-wider text-muted">
@@ -79,7 +79,7 @@ export default function DeckPage() {
       <button
         type="button"
         onClick={() => setReviewing(true)}
-        className="tap-target eyebrow mt-auto w-full rounded-xl bg-accent px-5 py-4 text-accent-ink"
+        className="tap-target eyebrow mt-auto w-full rounded bg-accent px-5 py-4 text-accent-ink"
       >
         REVIEW NOW
       </button>
@@ -89,7 +89,7 @@ export default function DeckPage() {
           track('deck_download_click', { format: 'print_sheet', cards: deck.length })
           window.print()
         }}
-        className="tap-target eyebrow mt-3 w-full rounded-xl border border-line px-5 py-4 text-fg"
+        className="tap-target eyebrow mt-3 w-full rounded border border-line px-5 py-4 text-fg"
       >
         DOWNLOAD MY DECK
       </button>
@@ -121,13 +121,13 @@ function Review({ deck, onDone }: { deck: DeckCard[]; onDone: () => void }) {
           <button
             type="button"
             onClick={onDone}
-            className="tap-target eyebrow mt-6 w-full rounded-xl bg-accent px-5 py-4 text-accent-ink"
+            className="tap-target eyebrow mt-6 w-full rounded bg-accent px-5 py-4 text-accent-ink"
           >
             BACK TO MY DECK
           </button>
           <Link
             href="/feedback"
-            className="tap-target eyebrow mt-3 block w-full rounded-xl border border-accent px-5 py-4 text-center text-accent"
+            className="tap-target eyebrow mt-3 block w-full rounded border border-accent px-5 py-4 text-center text-accent"
           >
             TELL US WHAT YOU REALLY THINK
           </Link>
@@ -165,7 +165,7 @@ function Review({ deck, onDone }: { deck: DeckCard[]; onDone: () => void }) {
     <PageShell eyebrow={BRAND.deckName + " · REVIEW"}>
       <p className="text-xs tabular-nums text-muted">{queue.length} left</p>
 
-      <div className="mt-4 rounded-2xl border border-line bg-surface p-5">
+      <div className="mt-4 rounded border border-line bg-surface p-5">
         <p className="eyebrow text-accent">{card.title}</p>
         <p className="mt-3 text-balance text-lg">{card.front}</p>
 
@@ -196,14 +196,14 @@ function Review({ deck, onDone }: { deck: DeckCard[]; onDone: () => void }) {
           <button
             type="button"
             onClick={() => act('again')}
-            className="tap-target eyebrow rounded-xl border border-line px-4 py-4 text-fg"
+            className="tap-target eyebrow rounded border border-line px-4 py-4 text-fg"
           >
             AGAIN
           </button>
           <button
             type="button"
             onClick={() => act('got_it')}
-            className="tap-target eyebrow rounded-xl bg-accent px-4 py-4 text-accent-ink"
+            className="tap-target eyebrow rounded bg-accent px-4 py-4 text-accent-ink"
           >
             GOT IT
           </button>
@@ -212,7 +212,7 @@ function Review({ deck, onDone }: { deck: DeckCard[]; onDone: () => void }) {
         <button
           type="button"
           onClick={() => setRevealed(true)}
-          className="tap-target eyebrow mt-auto w-full rounded-xl border border-accent bg-accent/10 px-5 py-4 text-accent"
+          className="tap-target eyebrow mt-auto w-full rounded border border-accent bg-accent/10 px-5 py-4 text-accent"
         >
           SHOW ME
         </button>

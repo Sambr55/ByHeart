@@ -37,7 +37,7 @@ export function TileBuilder({ screen }: { screen: TilesScreen }) {
       {/* Construction line */}
       <div
         data-testid="tile-line"
-        className="mt-6 min-h-[4.5rem] rounded-xl border border-dashed border-line bg-surface/60 p-3"
+        className="mt-6 min-h-[4.5rem] rounded border border-dashed border-line bg-bg-elev/60 p-3"
         aria-label="Your sentence"
       >
         {shown.length ? (
@@ -51,7 +51,7 @@ export function TileBuilder({ screen }: { screen: TilesScreen }) {
                   disabled={solved}
                   onClick={() => setPlaced((p) => p.filter((x) => x !== id))}
                   className={
-                    'tap-target rounded-lg border px-3 py-2 transition active:scale-95 ' +
+                    'tap-target rounded border px-3 py-2 transition active:scale-95 ' +
                     (solved
                       ? 'border-correct/50 bg-correct/10'
                       : 'border-accent/50 bg-chip')
@@ -77,7 +77,7 @@ export function TileBuilder({ screen }: { screen: TilesScreen }) {
               key={t.id}
               type="button"
               onClick={() => setPlaced((p) => [...p, t.id])}
-              className="tap-target rounded-lg border border-line bg-surface px-3 py-2 transition hover:border-accent/50 active:scale-95"
+              className="tap-target rounded border border-line bg-bg-elev px-3 py-2 transition hover:border-accent/50 active:scale-95"
             >
               <span className="pt text-lg">{t.text}</span>
             </button>
@@ -98,7 +98,7 @@ export function TileBuilder({ screen }: { screen: TilesScreen }) {
       ) : null}
 
       {solved ? (
-        <div className="mt-4 flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+        <div className="mt-4 flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3">
           <AudioButton
             slug={slugFor(built)}
             text={answerText}

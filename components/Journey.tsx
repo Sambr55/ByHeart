@@ -106,8 +106,11 @@ function Shell({
       data-tone={tone}
       className="flex min-h-dvh flex-col bg-bg text-fg transition-colors duration-700"
     >
+      {/* The bar is solid: a coloured header needs neither the translucency nor the
+          blur, and the blur was what forced the menu overlay to be portalled to the
+          body in the first place. */}
       {nav || eyebrow ? (
-        <header className="sticky top-0 z-10 border-b border-line bg-bg/90 px-5 py-2.5 backdrop-blur">
+        <header className="bar sticky top-0 z-10 px-5 py-2.5">
           <div className="mx-auto flex w-full max-w-md items-center gap-3">
             {nav && canGoBack ? (
               <button
@@ -115,16 +118,16 @@ function Shell({
                 data-testid="back"
                 onClick={back}
                 aria-label="Back"
-                className="tap-target -ml-2 flex items-center justify-center rounded-lg px-2 text-muted transition hover:text-fg"
+                className="tap-target -ml-2 flex items-center justify-center rounded px-2 opacity-80 transition hover:opacity-100"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
                   <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             ) : null}
-            <p className="eyebrow flex-1 truncate text-accent">{eyebrow ?? ''}</p>
+            <p className="eyebrow flex-1 truncate">{eyebrow ?? ''}</p>
             {kept > 0 ? (
-              <span className="eyebrow shrink-0 tabular-nums text-muted" title="Pieces you have kept">
+              <span className="eyebrow shrink-0 tabular-nums opacity-80" title="Pieces you have kept">
                 {kept} kept
               </span>
             ) : null}
@@ -133,7 +136,7 @@ function Shell({
                 type="button"
                 data-testid="home"
                 onClick={goHome}
-                className="tap-target text-[0.6rem] uppercase tracking-wider text-muted transition hover:text-fg"
+                className="tap-target text-[0.6rem] uppercase tracking-wider opacity-80 transition hover:opacity-100"
               >
                 Crates
               </button>
@@ -142,8 +145,18 @@ function Shell({
           </div>
         </header>
       ) : null}
-      <main className="azulejo-field flex-1">
-        <div className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col gap-0 px-5 pb-6 pt-6">
+      {/* The field used to run behind the body text of every screen. It is a band under
+          the header now — texture where it frames something, never under a paragraph. */}
+      <div aria-hidden className="azulejo-band h-6 w-full shrink-0" />
+      <main className="flex-1">
+        {/*
+            mt-auto pushes the button to the foot of a short screen and gives nothing at
+            all on a full one, which is how the CTA came to land hard against the
+            paragraph above it. A real gap on the flex parent cannot collapse, and the
+            deeper bottom well stops the last row of a scrolling page finishing flush
+            with the screen edge.
+          */}
+        <div className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
           {children}
         </div>
       </main>
@@ -170,7 +183,7 @@ function Cta({
       // Tailwind emitted last won, so the gap above the button was whatever the build
       // happened to produce. mt-auto keeps it at the foot of a short screen; the padding
       // gives it clearance on a long one, and padding cannot be swallowed by auto.
-      className="tap-target eyebrow mt-auto w-full rounded-xl bg-accent px-5 py-4 text-accent-ink transition active:scale-[0.99] disabled:bg-chip disabled:text-muted"
+      className="tap-target eyebrow mt-auto w-full rounded bg-accent px-5 py-4 text-accent-ink transition active:scale-[0.99] disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
     >
       {label}
     </button>
@@ -267,12 +280,12 @@ function PairStep() {
             disabled={!p.available}
             onClick={() => setPicked(p.target_locale)}
             className={
-              'tap-target flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-4 text-left transition ' +
+              'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-4 text-left transition ' +
               (!p.available
                 ? 'border-line/40 bg-surface/30 opacity-40'
                 : picked === p.target_locale
                   ? 'border-accent bg-accent/10'
-                  : 'border-line bg-surface hover:border-accent/50')
+                  : 'border-line bg-bg-elev hover:border-accent/50')
             }
           >
             <span className="min-w-0">
@@ -305,7 +318,7 @@ function PairStep() {
       </div>
 
       {showSources ? (
-        <div className="mt-3 rounded-xl border border-line bg-surface px-4 py-4">
+        <div className="mt-3 rounded border border-line bg-bg-elev px-4 py-4">
           <p className="text-xs leading-relaxed text-muted">{PAIR_STEP.source_note}</p>
           <ul className="mt-3 flex flex-wrap gap-2">
             {SOURCE_CULTURES.map((c) => (
@@ -438,7 +451,7 @@ function Deal() {
             {DEAL_COPY.collect.examples.map((e) => (
               <span
                 key={e}
-                className="pt rounded-full border border-line bg-chip px-2.5 py-1 text-xs text-accent"
+                className="pt rounded-[3px] border border-line bg-chip px-2.5 py-1 text-xs text-accent"
               >
                 {e}
               </span>
@@ -449,7 +462,7 @@ function Deal() {
         <Block label={DEAL_COPY.ask.label} lines={DEAL_COPY.ask.lines} />
         <Block label={DEAL_COPY.get.label} lines={DEAL_COPY.get.lines} />
 
-        <section className="rounded-xl border border-line bg-surface p-4">
+        <section className="rounded border border-line bg-bg-elev p-4">
           <p className="eyebrow text-muted">{DEAL_COPY.not.label}</p>
           <p className="mt-2 text-sm leading-relaxed">{DEAL_COPY.not.line}</p>
         </section>
@@ -540,7 +553,7 @@ function Demo({ i }: { i: number }) {
             ) : null}
 
             {reveal >= 2 && beat.takeaway ? (
-              <div className="animate-bank mt-7 rounded-xl border border-accent/50 bg-accent/10 p-4">
+              <div className="animate-bank mt-7 rounded border border-accent/50 bg-accent/10 p-4">
                 <p className="pt text-xl font-semibold text-accent">{beat.takeaway.display}</p>
                 <p className="mt-1 text-sm text-muted">{beat.takeaway.gloss}</p>
               </div>
@@ -554,12 +567,12 @@ function Demo({ i }: { i: number }) {
               <li
                 key={b.pt}
                 style={{ animationDelay: n * 110 + 'ms' }}
-                className="animate-bank flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+                className="animate-bank flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3"
               >
                 <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
                 <span>
                   <span className="pt block text-lg text-accent">{b.pt}</span>
-                  <span className="gloss mt-0.5 block text-xs text-muted">{b.en}</span>
+                  <span className="gloss mt-1 block text-sm text-fg/75">{b.en}</span>
                 </span>
               </li>
             ))}
@@ -803,7 +816,7 @@ function Picker() {
                 // The drop's frame lives on the wrapper, not the button, so the ticket
                 // link can sit inside the card without being nested in a button.
                 f.drop
-                  ? 'rounded-xl border transition ' +
+                  ? 'rounded border transition ' +
                     (finished
                       ? 'border-line/50 bg-surface/40 opacity-45'
                       : picked === f.id
@@ -821,14 +834,14 @@ function Picker() {
                   'tap-target flex w-full justify-between gap-3 border-l-[3px] border-l-[color:var(--tone)] px-4 py-4 text-left transition ' +
                   (f.drop
                     ? 'items-start '
-                    : 'items-center rounded-xl border ' +
+                    : 'items-center rounded border ' +
                       (unreached
                         ? 'border-line/40 bg-surface/30 opacity-40'
                         : picked === f.id
                           ? 'border-accent bg-accent/10'
                           : finished || waiting
                             ? 'border-line/60 bg-surface/50 opacity-70 hover:border-accent/40'
-                            : 'border-line bg-surface hover:border-accent/50'))
+                            : 'border-line bg-bg-elev hover:border-accent/50'))
                 }
               >
                 {/* A tile block in the crate's own colour: the cheapest way to turn ten
@@ -836,7 +849,7 @@ function Picker() {
                 {!f.drop ? (
                   <span
                     aria-hidden
-                    className="azulejo-block mr-1 h-10 w-10 shrink-0 self-center rounded-lg"
+                    className="azulejo-block mr-1 h-10 w-10 shrink-0 self-center rounded"
                   />
                 ) : null}
                 <span className="min-w-0 flex-1">
@@ -1031,7 +1044,7 @@ function MiniBuild({
         /* A seam for the walkthrough. The tile pool is shuffled, so without this the
            harness can only brute-force permutations, which is slow and flaky. */
         data-answer={target}
-        className="min-h-[3.5rem] rounded-xl border border-dashed border-line bg-surface/60 p-2"
+        className="min-h-[3.5rem] rounded border border-dashed border-line bg-bg-elev/60 p-2"
       >
         {placed.length ? (
           <div className="flex flex-wrap gap-2">
@@ -1042,7 +1055,7 @@ function MiniBuild({
                 disabled={state === 'done'}
                 onClick={() => setPlaced((cur) => cur.filter((x) => x.id !== p.id))}
                 className={
-                  'tap-target rounded-lg border px-3 py-2 ' +
+                  'tap-target rounded border px-3 py-2 ' +
                   (state === 'done' ? 'border-correct/50 bg-correct/10' : 'border-accent/50 bg-chip')
                 }
               >
@@ -1062,7 +1075,7 @@ function MiniBuild({
               key={t.id}
               type="button"
               onClick={() => setPlaced((cur) => [...cur, t])}
-              className="tap-target rounded-lg border border-line bg-surface px-3 py-2 hover:border-accent/50"
+              className="tap-target rounded border border-line bg-bg-elev px-3 py-2 hover:border-accent/50"
             >
               <span className="pt">{t.text}</span>
             </button>
@@ -1096,7 +1109,7 @@ function MiniBuild({
       ) : null}
 
       {state === 'done' ? (
-        <div className="animate-bank mt-3 flex items-center gap-3 rounded-xl border border-correct/40 bg-correct/10 px-4 py-3">
+        <div className="animate-bank mt-3 flex items-center gap-3 rounded border border-correct/40 bg-correct/10 px-4 py-3">
           <AudioButton slug={slugFor(target)} text={target} size="sm" />
           <span className="pt text-lg">{target}</span>
         </div>
@@ -1105,7 +1118,7 @@ function MiniBuild({
           type="button"
           disabled={!placed.length}
           onClick={check}
-          className="tap-target eyebrow mt-3 w-full rounded-lg border border-accent bg-accent/10 px-4 py-3 text-accent disabled:border-line disabled:bg-transparent disabled:text-muted"
+          className="tap-target eyebrow mt-3 w-full rounded border border-accent bg-accent/10 px-4 py-3 text-accent disabled:border-line disabled:bg-transparent disabled:text-muted"
         >
           CHECK
         </button>
@@ -1206,14 +1219,14 @@ function RootBeatView({
         </div>
         {/* The bridge is mandatory: the learner must be able to trace root -> Portuguese
             before anything is pulled out of it (§10). */}
-        <div className="mt-6 rounded-xl border border-line bg-surface p-4">
+        <div className="mt-6 rounded border border-line bg-bg-elev p-4">
           <p className="eyebrow text-accent">WHY IT LANDS THIS WAY</p>
           <p className="mt-2 text-sm leading-relaxed">{root.semantic_bridge}</p>
         </div>
         {root.literal_note ? (
           <p className="mt-3 text-xs text-muted">{root.literal_note}</p>
         ) : null}
-        <div className="mt-4 rounded-xl border border-line/70 bg-surface/50 p-4">
+        <div className="mt-4 rounded border border-line/70 bg-surface/50 p-4">
           <p className="eyebrow text-muted">HOW IT FEELS</p>
           <p className="mt-2 text-sm leading-relaxed text-muted">{root.subtext}</p>
         </div>
@@ -1303,12 +1316,12 @@ function RootBeatView({
             <li
               key={b.target}
               style={{ animationDelay: i * 110 + 'ms' }}
-              className="animate-bank flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+              className="animate-bank flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3"
             >
               <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
               <span>
                 <span className="pt block text-lg text-accent">{b.target}</span>
-                <span className="gloss mt-0.5 block text-xs text-muted">{b.en}</span>
+                <span className="gloss mt-1 block text-sm text-fg/75">{b.en}</span>
               </span>
             </li>
           ))}
@@ -1345,12 +1358,12 @@ function RootBeatView({
             <li
               key={b.target}
               style={{ animationDelay: i * 90 + 'ms' }}
-              className="animate-bank flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+              className="animate-bank flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3"
             >
               <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
               <span>
                 <span className="pt block text-lg text-accent">{b.target}</span>
-                <span className="gloss mt-0.5 block text-xs text-muted">{b.en}</span>
+                <span className="gloss mt-1 block text-sm text-fg/75">{b.en}</span>
               </span>
             </li>
           ))}
@@ -1393,8 +1406,8 @@ function RootBeatView({
                 recordVoice(o.signal, o.target)
               }}
               className={
-                'tap-target w-full rounded-xl border px-4 py-4 text-left transition ' +
-                (choice === o.target ? 'border-accent bg-accent/10' : 'border-line bg-surface')
+                'tap-target w-full rounded border px-4 py-4 text-left transition ' +
+                (choice === o.target ? 'border-accent bg-accent/10' : 'border-line bg-bg-elev')
               }
             >
               <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -1406,7 +1419,7 @@ function RootBeatView({
                 ) : null}
               </span>
               <span className="pt mt-2 block text-lg text-fg">{o.target}</span>
-              <span className="gloss mt-0.5 block text-xs text-muted">{o.en}</span>
+              <span className="mt-0.5 block text-xs text-muted">{o.en}</span>
               <span className="mt-3 block text-sm text-fg/80">{o.when}</span>
               {o.risk ? (
                 <span className="mt-2 block border-l-2 border-line pl-3 text-xs text-muted">
@@ -1417,7 +1430,7 @@ function RootBeatView({
           ))}
         </div>
         {(picked || ruleShown) && root.voice_rule ? (
-          <div className="animate-bank mt-6 rounded-xl border border-line bg-surface p-4">
+          <div className="animate-bank mt-6 rounded border border-line bg-bg-elev p-4">
             <p className="eyebrow text-muted">THE RULE UNDERNEATH</p>
             <p className="mt-2 text-sm">{root.voice_rule}</p>
           </div>
@@ -1489,7 +1502,7 @@ function VoiceReflection() {
     polite: 'more formal language',
   }
   return (
-    <div className="animate-bank mt-6 rounded-xl border border-accent/40 bg-accent/5 p-4">
+    <div className="animate-bank mt-6 rounded border border-accent/40 bg-accent/5 p-4">
       <p className="eyebrow text-accent">WE ARE BEGINNING TO GET YOU</p>
       <p className="mt-2 text-sm">
         You tend to choose {words[lean.lean] ?? lean.lean}. We will lean that way when
@@ -1548,7 +1561,7 @@ function Osmosis() {
           <section
             key={i.id}
             style={{ animationDelay: n * 120 + 'ms' }}
-            className="animate-bank rounded-xl border border-line bg-surface p-4"
+            className="animate-bank rounded border border-line bg-bg-elev p-4"
           >
             <p className="text-balance text-base font-semibold">{i.headline}</p>
             <p className="mt-2 text-sm leading-relaxed text-muted">{i.body}</p>
@@ -1556,7 +1569,7 @@ function Osmosis() {
               {i.evidence.map((e) => (
                 <li key={e.pt} className="flex flex-wrap items-baseline gap-x-2">
                   <span className="pt text-sm text-accent">{e.pt}</span>
-                  <span className="gloss text-xs text-muted">{e.en}</span>
+                  <span className="text-xs text-muted">{e.en}</span>
                 </li>
               ))}
             </ul>
@@ -1622,7 +1635,7 @@ function ProfileStep({ which }: { which: 'gender' | 'age' | 'goal' }) {
                 type="button"
                 data-testid={'profile-' + o.id}
                 onClick={() => choose(o.id)}
-                className="tap-target flex w-full items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-4 text-left transition hover:border-accent/50"
+                className="tap-target flex w-full items-center justify-between gap-3 rounded border border-line bg-bg-elev px-4 py-4 text-left transition hover:border-accent/50"
               >
                 <span className="eyebrow">{o.label}</span>
                 {o.sub ? <span className="pt text-sm text-accent">{o.sub}</span> : null}
@@ -1672,12 +1685,12 @@ function GenderPayoff({ gender }: { gender: LanguageGender }) {
       <p className="eyebrow text-accent">SO THIS IS HOW YOU SPEAK</p>
       <ul className="mt-4 space-y-3">
         {GENDER_PAYOFF[gender].map((row) => (
-          <li key={row.en} className="rounded-xl border border-line bg-surface px-4 py-3">
+          <li key={row.en} className="rounded border border-line bg-bg-elev px-4 py-3">
             <div className="flex flex-wrap items-baseline gap-x-3">
               <span className="pt text-lg text-fg">{row.yours}</span>
               <span className="pt text-sm text-muted/60 line-through">{row.theirs}</span>
             </div>
-            <span className="gloss mt-0.5 block text-xs text-muted">{row.en}</span>
+            <span className="mt-0.5 block text-xs text-muted">{row.en}</span>
           </li>
         ))}
       </ul>
@@ -1694,11 +1707,11 @@ function AgePayoff({ band }: { band: AgeBand }) {
       <p className="display mt-3 text-balance text-xl">{p.headline}</p>
       <p className="mt-3 text-sm leading-relaxed text-muted">{p.body}</p>
       <div className="mt-5 space-y-2">
-        <div className="flex items-baseline gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+        <div className="flex items-baseline gap-3 rounded border border-line bg-bg-elev px-4 py-3">
           <span className="pt text-base text-fg">{AGE_PAIR.tu}</span>
           <span className="text-[0.6rem] uppercase tracking-wider text-muted">informal</span>
         </div>
-        <div className="flex items-baseline gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+        <div className="flex items-baseline gap-3 rounded border border-line bg-bg-elev px-4 py-3">
           <span className="pt text-base text-fg">{AGE_PAIR.voce}</span>
           <span className="text-[0.6rem] uppercase tracking-wider text-muted">polite</span>
         </div>
@@ -1739,8 +1752,8 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
             <li
               key={n.label}
               className={
-                'flex items-center gap-3 rounded-xl border px-4 py-2.5 text-sm ' +
-                (got ? 'border-correct/40 bg-correct/5' : 'border-line bg-surface/50 text-muted')
+                'flex items-center gap-3 rounded border px-4 py-2.5 text-sm ' +
+                (got ? 'border-correct/40 bg-correct/5' : 'border-line bg-bg-elev/50 text-muted')
               }
             >
               <span aria-hidden="true" className={got ? 'text-correct' : 'text-muted/50'}>
@@ -1805,7 +1818,7 @@ function SectionComplete() {
           type="button"
           data-testid="another-crate"
           onClick={() => finishSection('another')}
-          className="tap-target eyebrow mt-6 w-full rounded-xl bg-accent px-5 py-4 text-accent-ink"
+          className="tap-target eyebrow mt-6 w-full rounded bg-accent px-5 py-4 text-accent-ink"
         >
           PICK ANOTHER AREA
         </button>
@@ -1814,7 +1827,7 @@ function SectionComplete() {
         type="button"
         data-testid="im-done"
         onClick={() => finishSection('done')}
-        className="tap-target eyebrow mt-3 w-full rounded-xl border border-line px-5 py-4 text-fg"
+        className="tap-target eyebrow mt-3 w-full rounded border border-line px-5 py-4 text-fg"
       >
         I’M DONE — SHOW ME WHAT I’VE GOT
       </button>
@@ -1842,7 +1855,7 @@ function CollisionView({ id }: { id: string }) {
       />
       {done ? (
         <>
-          <div className="animate-bank mt-5 rounded-xl border border-line bg-surface p-4">
+          <div className="animate-bank mt-5 rounded border border-line bg-bg-elev p-4">
             <p className="text-sm leading-relaxed text-muted">{collision.provenance}</p>
           </div>
           <Cta label="CONTINUE" onClick={next} />
@@ -1982,7 +1995,7 @@ function Close() {
         href="/feedback"
         data-testid="continue"
         onClick={() => finish()}
-        className="tap-target eyebrow mt-auto block w-full rounded-xl mt-6 bg-accent px-5 py-4 text-center text-accent-ink"
+        className="tap-target eyebrow mt-auto block w-full rounded mt-6 bg-accent px-5 py-4 text-center text-accent-ink"
       >
         {CLOSE.cta}
       </Link>

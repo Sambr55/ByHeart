@@ -45,7 +45,7 @@ export function BlockIntroView({ screen }: { screen: BlockIntroScreen }) {
             <div
               key={b.id}
               className={
-                'flex items-center gap-3 rounded-xl border px-3 py-3 transition ' +
+                'flex items-center gap-3 rounded border px-3 py-3 transition ' +
                 (isTapped ? 'border-accent bg-accent/10' : 'border-line bg-surface')
               }
             >
@@ -123,7 +123,7 @@ export function MatchView({ screen }: { screen: MatchScreen }) {
           <div
             key={p.blockId}
             data-testid={'pair-' + p.blockId}
-            className="rounded-xl border border-line bg-surface p-4"
+            className="rounded border border-line bg-surface p-4"
           >
             <div className="flex items-center gap-3">
               <AudioButton
@@ -146,7 +146,7 @@ export function MatchView({ screen }: { screen: MatchScreen }) {
                     aria-pressed={chosen}
                     onClick={() => choose(p.blockId, en)}
                     className={
-                      'tap-target rounded-lg border px-3 py-3 text-sm transition ' +
+                      'tap-target rounded border px-3 py-3 text-sm transition ' +
                       (right
                         ? 'border-correct bg-correct/10'
                         : chosen

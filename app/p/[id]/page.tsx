@@ -45,7 +45,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
 
       <ul className="flex flex-col gap-4">
         {card.lines.map((l) => (
-          <li key={l.pt} className="rounded-xl border border-line bg-surface px-4 py-4">
+          <li key={l.pt} className="rounded border border-line bg-surface px-4 py-4">
             <p className="pt text-lg text-accent">{l.pt}</p>
             <p className="mt-1 text-sm text-muted">{l.en}</p>
           </li>

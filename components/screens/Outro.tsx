@@ -65,7 +65,7 @@ export function GenerativityView({ screen }: { screen: GenerativityScreen }) {
         {screen.lines.map((l) => (
           <li
             key={l.pt}
-            className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+            className="flex items-center gap-3 rounded border border-line bg-surface px-4 py-3"
           >
             <AudioButton slug={slugFor(l.pt)} text={l.pt} screenId={screen.id} size="sm" />
             <span>
@@ -105,7 +105,7 @@ export function PreferenceView({ screen }: { screen: PreferenceScreen }) {
                 setPicked((p) => (on ? p.filter((x) => x !== o.id) : [...p, o.id]))
               }
               className={
-                'tap-target flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-4 text-left transition ' +
+                'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-4 text-left transition ' +
                 (on
                   ? 'border-accent bg-accent/10'
                   : o.built
@@ -160,7 +160,7 @@ export function ContinuationView({ screen }: { screen: ContinuationScreen }) {
               track('continue_intent', { intent: o.id })
             }}
             className={
-              'tap-target eyebrow w-full rounded-xl border px-4 py-5 text-left transition ' +
+              'tap-target eyebrow w-full rounded border px-4 py-5 text-left transition ' +
               (picked?.id === o.id
                 ? 'border-accent bg-accent/10'
                 : 'border-line bg-surface hover:border-accent/50')
@@ -180,7 +180,7 @@ export function ContinuationView({ screen }: { screen: ContinuationScreen }) {
               rows={3}
               value={String(state.answers.qualitative_feedback ?? '')}
               onChange={(e) => answer('qualitative_feedback', e.target.value)}
-              className="mt-2 w-full rounded-xl border border-line bg-surface p-3 text-sm text-fg outline-none focus:border-accent"
+              className="mt-2 w-full rounded border border-line bg-surface p-3 text-sm text-fg outline-none focus:border-accent"
               placeholder="Optional"
             />
           </label>

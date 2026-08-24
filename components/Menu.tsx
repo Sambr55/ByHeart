@@ -56,7 +56,7 @@ export function Menu() {
         aria-label="Menu"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className="tap-target -mr-2 flex items-center justify-center rounded-lg px-2 text-muted transition hover:text-fg"
+        className="tap-target -mr-2 flex items-center justify-center rounded px-2 opacity-80 transition hover:opacity-100"
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
           <path
@@ -96,7 +96,7 @@ export function Menu() {
                 data-testid="menu-close"
                 onClick={() => setOpen(false)}
                 aria-label="Close menu"
-                className="tap-target -mr-2 flex items-center justify-center rounded-lg px-2 text-muted transition hover:text-fg"
+                className="tap-target -mr-2 flex items-center justify-center rounded px-2 text-muted transition hover:text-fg"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">
                   <path
@@ -119,7 +119,7 @@ export function Menu() {
                     onClick={() => setOpen(false)}
                     aria-current={here ? 'page' : undefined}
                     className={
-                      'tap-target rounded-xl border px-4 py-3 transition ' +
+                      'tap-target rounded border px-4 py-3 transition ' +
                       (here
                         ? 'border-accent bg-accent/10'
                         : 'border-transparent hover:border-line hover:bg-surface')

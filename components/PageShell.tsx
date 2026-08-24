@@ -15,9 +15,9 @@ export function PageShell({
 }) {
   return (
     <div data-stage={stage} className="flex min-h-dvh flex-col bg-bg text-fg">
-      <header className="sticky top-0 z-10 border-b border-line bg-bg/90 px-5 py-3 backdrop-blur">
+      <header className="bar sticky top-0 z-10 px-5 py-3">
         <div className="mx-auto flex w-full max-w-md items-center gap-3">
-          <p className="eyebrow flex-1 truncate text-accent">{eyebrow}</p>
+          <p className="eyebrow flex-1 truncate">{eyebrow}</p>
           <Menu />
         </div>
       </header>

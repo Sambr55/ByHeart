@@ -106,7 +106,7 @@ export default function FacilitatorPage() {
         <div className="grid grid-cols-2 gap-1.5">
           {owned.length ? (
             owned.map((b) => (
-              <div key={b} className="rounded-lg border border-line bg-chip px-2 py-1.5">
+              <div key={b} className="rounded border border-line bg-chip px-2 py-1.5">
                 <span className="pt block text-xs">{TARGETS[b].label}</span>
                 <span className="block text-[0.6rem] text-muted">
                   {learner.inventory[b]?.latest_state}
@@ -125,12 +125,12 @@ export default function FacilitatorPage() {
           rows={3}
           value={origin + '/recall?t=' + encodeLearner(learner)}
           onFocus={(e) => e.currentTarget.select()}
-          className="w-full rounded-lg border border-line bg-bg-elev p-2 font-mono text-[0.6rem] text-muted"
+          className="w-full rounded border border-line bg-bg-elev p-2 font-mono text-[0.6rem] text-muted"
         />
         <button
           type="button"
           onClick={() => downloadSession({ learner: getLearner() })}
-          className="tap-target eyebrow mt-2 w-full rounded-lg border border-line px-3 py-3 text-fg"
+          className="tap-target eyebrow mt-2 w-full rounded border border-line px-3 py-3 text-fg"
         >
           DOWNLOAD SESSION JSON
         </button>
@@ -141,7 +141,7 @@ export default function FacilitatorPage() {
               resetLearner()
             }
           }}
-          className="tap-target eyebrow mt-2 w-full rounded-lg border border-coach/50 px-3 py-3 text-coach"
+          className="tap-target eyebrow mt-2 w-full rounded border border-coach/50 px-3 py-3 text-coach"
         >
           RESET FOR NEXT TESTER
         </button>
@@ -187,12 +187,12 @@ function TesterLinks() {
         value={names}
         onChange={(e) => setNames(e.target.value)}
         placeholder={'Ana\nMiguel\nSofia'}
-        className="mt-2 w-full rounded-lg border border-line bg-bg-elev p-2 text-sm text-fg outline-none focus:border-accent"
+        className="mt-2 w-full rounded border border-line bg-bg-elev p-2 text-sm text-fg outline-none focus:border-accent"
       />
       {links.length ? (
         <ul className="mt-3 space-y-2">
           {links.map((l) => (
-            <li key={l.name} className="rounded-lg border border-line bg-bg-elev p-2">
+            <li key={l.name} className="rounded border border-line bg-bg-elev p-2">
               <p className="text-xs font-semibold">{l.name}</p>
               <p className="mt-1 break-all font-mono text-[0.6rem] text-muted">{l.url}</p>
             </li>
@@ -205,7 +205,7 @@ function TesterLinks() {
           onClick={() =>
             navigator.clipboard?.writeText(links.map((l) => l.name + ': ' + l.url).join('\n'))
           }
-          className="tap-target eyebrow mt-2 w-full rounded-lg border border-line px-3 py-2 text-muted"
+          className="tap-target eyebrow mt-2 w-full rounded border border-line px-3 py-2 text-muted"
         >
           COPY ALL
         </button>
@@ -216,7 +216,7 @@ function TesterLinks() {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="mt-6 rounded-xl border border-line bg-surface p-4">
+    <section className="mt-6 rounded border border-line bg-surface p-4">
       <h2 className="eyebrow text-accent">{title}</h2>
       <div className="mt-3">{children}</div>
     </section>

@@ -35,37 +35,37 @@ function ratio(a: string, b: string): number {
 
 const THEMES: Record<string, { ground: string; pairs: [string, string, number][] }> = {
   light: {
-    ground: '#FAF7F2',
+    ground: '#efe7d9',
     pairs: [
-      ['ink', '#16202B', AA_TEXT],
-      ['muted', '#6E6A63', AA_TEXT],
-      ['azulejo — the Portuguese', '#2F6E9E', AA_TEXT],
-      ['telha', '#B4553C', AA_TEXT],
-      ['right', '#3E7D5A', AA_TEXT],
-      ['coach', '#9A5F28', AA_TEXT],
-      ['line-strong (control edge)', '#8F8474', AA_LARGE],
+      ['ink', '#1a2430', AA_TEXT],
+      ['muted', '#635c50', AA_TEXT],
+      ['azulejo — the Portuguese', '#1f5d8c', AA_TEXT],
+      ['telha', '#a8492f', AA_TEXT],
+      ['right', '#2c6b4a', AA_TEXT],
+      ['coach', '#8a5a12', AA_TEXT],
+      ['line-strong (control edge)', '#8a7c62', AA_LARGE],
     ],
   },
   dark: {
-    ground: '#14161A',
+    ground: '#171a1f',
     pairs: [
-      ['ink', '#F4F0E9', AA_TEXT],
-      ['muted', '#9A948B', AA_TEXT],
+      ['ink', '#f4efe6', AA_TEXT],
+      ['muted', '#a09788', AA_TEXT],
       ['azulejo — the Portuguese', '#7FB3DA', AA_TEXT],
       ['telha', '#E0876C', AA_TEXT],
       ['right', '#74C79A', AA_TEXT],
       ['coach', '#DDA45E', AA_TEXT],
-      ['line-strong (control edge)', '#606771', AA_LARGE],
+      ['line-strong (control edge)', '#6b7482', AA_LARGE],
     ],
   },
 }
 
 const TONES: Record<string, [string, string]> = {
-  kinetic: ['#2F6E9E', '#7FB3DA'],
+  kinetic: ['#1f5d8c', '#7FB3DA'],
   cool: ['#3E5C75', '#9BB3C6'],
   human: ['#A8455E', '#DE8FA2'],
   sharp: ['#8E3A46', '#C97883'],
-  warm: ['#B4553C', '#E0876C'],
+  warm: ['#a8492f', '#E0876C'],
   reflective: ['#5C6B3D', '#A8B87F'],
   blunt: ['#3F4348', '#9AA0A7'],
 }
@@ -83,11 +83,23 @@ for (const [name, t] of Object.entries(THEMES)) {
 
 console.log('\ncrate tones, as text on their own ground')
 for (const [tone, [light, dark]] of Object.entries(TONES)) {
-  const l = ratio(light, '#FAF7F2')
-  const d = ratio(dark, '#14161A')
+  const l = ratio(light, '#efe7d9')
+  const d = ratio(dark, '#171a1f')
   const ok = l >= AA_TEXT && d >= AA_TEXT
   if (!ok) failures++
   console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + tone.padEnd(12) + 'light ' + l.toFixed(2) + '  dark ' + d.toFixed(2))
+}
+
+const HEADERS: Record<string, string> = {
+  azulejo: '#1f5d8c', kinetic: '#1f5d8c', cool: '#33506b', human: '#8f3550',
+  sharp: '#7a2f3a', warm: '#9c4632', reflective: '#4c5a33', blunt: '#343940',
+}
+console.log('\nheader bars, carrying white text')
+for (const [name, hex] of Object.entries(HEADERS)) {
+  const r = ratio('#ffffff', hex)
+  const ok = r >= AA_TEXT
+  if (!ok) failures++
+  console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + name.padEnd(12) + hex + '  ' + r.toFixed(2) + ':1')
 }
 
 console.log('')

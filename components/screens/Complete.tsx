@@ -59,7 +59,7 @@ export function MissionComplete() {
 
       <Link
         href={nextHref}
-        className="tap-target eyebrow mt-6 block w-full rounded-xl bg-accent px-5 py-4 text-center text-accent-ink"
+        className="tap-target eyebrow mt-6 block w-full rounded bg-accent px-5 py-4 text-center text-accent-ink"
       >
         {nextLabel}
       </Link>
@@ -67,7 +67,7 @@ export function MissionComplete() {
       {isFirst ? null : (
         <Link
           href="/feedback"
-          className="tap-target eyebrow mt-3 block w-full rounded-xl border border-accent px-5 py-4 text-center text-accent"
+          className="tap-target eyebrow mt-3 block w-full rounded border border-accent px-5 py-4 text-center text-accent"
         >
           TELL US WHAT YOU REALLY THINK
         </Link>
@@ -84,7 +84,7 @@ export function MissionComplete() {
             scores,
           })
         }
-        className="tap-target eyebrow mt-3 w-full rounded-xl border border-line px-5 py-4 text-muted"
+        className="tap-target eyebrow mt-3 w-full rounded border border-line px-5 py-4 text-muted"
       >
         DOWNLOAD SESSION JSON
       </button>
@@ -107,7 +107,7 @@ function ResumeLink() {
       : window.location.origin + '/recall?t=' + encodeLearner(learner)
 
   return (
-    <details className="mt-6 rounded-xl border border-line bg-surface p-4">
+    <details className="mt-6 rounded border border-line bg-surface p-4">
       <summary className="eyebrow cursor-pointer text-muted">
         FACILITATOR · RESUME LINK
       </summary>
@@ -120,12 +120,12 @@ function ResumeLink() {
         rows={3}
         value={href}
         onFocus={(e) => e.currentTarget.select()}
-        className="mt-2 w-full rounded-lg border border-line bg-bg-elev p-2 font-mono text-[0.6rem] text-muted"
+        className="mt-2 w-full rounded border border-line bg-bg-elev p-2 font-mono text-[0.6rem] text-muted"
       />
       <button
         type="button"
         onClick={() => navigator.clipboard?.writeText(href)}
-        className="tap-target eyebrow mt-2 w-full rounded-lg border border-line px-3 py-2 text-muted"
+        className="tap-target eyebrow mt-2 w-full rounded border border-line px-3 py-2 text-muted"
       >
         COPY
       </button>
@@ -135,7 +135,7 @@ function ResumeLink() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-line bg-surface px-4 py-3">
+    <div className="rounded border border-line bg-surface px-4 py-3">
       <dt className="text-xs text-muted">{label}</dt>
       <dd className="display mt-1 text-2xl tabular-nums">{value}</dd>
     </div>

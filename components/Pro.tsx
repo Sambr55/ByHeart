@@ -47,15 +47,15 @@ export function Pro() {
       data-stage="CHOICE"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
-      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-bg/90 px-5 py-2.5 backdrop-blur">
-        <Link href="/crates" className="eyebrow text-muted transition hover:text-fg">
+      <header className="bar sticky top-0 z-10 flex items-center gap-3 px-5 py-2.5">
+        <Link href="/crates" className="eyebrow opacity-80 transition hover:opacity-100">
           ← Crates
         </Link>
-        <span className="eyebrow flex-1 text-accent">DUB</span>
+        <span className="eyebrow flex-1">DUB</span>
         <Menu />
       </header>
 
-      <div className="flex flex-1 flex-col gap-7 px-5 py-8">
+      <div className="flex flex-1 flex-col gap-7 px-5 pb-12 pt-8">
         {pro ? (
           <div>
             <h1 className="display text-balance text-2xl">You already have it.</h1>
@@ -92,7 +92,7 @@ export function Pro() {
               </p>
             </div>
 
-            <section className="rounded-2xl border border-line bg-surface p-5">
+            <section className="rounded border border-line bg-bg-elev p-5">
               <p className="eyebrow text-accent">{PLANS.pro.name ?? 'DUB'}</p>
               <p className="mt-2 text-sm">{PLANS.pro.line}</p>
               <ul className="mt-4 space-y-1.5">

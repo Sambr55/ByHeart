@@ -50,7 +50,7 @@ export function CultureSelectView({ screen }: { screen: CultureSelectScreen }) {
             aria-pressed={picked === c.id}
             onClick={() => setPicked(c.id)}
             className={
-              'tap-target flex w-full items-center justify-between rounded-xl border px-4 py-5 text-left transition ' +
+              'tap-target flex w-full items-center justify-between rounded border px-4 py-5 text-left transition ' +
               (c.active
                 ? picked === c.id
                   ? 'border-accent bg-accent/10'
@@ -107,7 +107,7 @@ export function FamiliarityView({ screen }: { screen: FamiliarityScreen }) {
               track('top_gun_familiarity', { familiarity: o.id })
             }}
             className={
-              'tap-target eyebrow w-full rounded-xl border px-4 py-5 text-left transition ' +
+              'tap-target eyebrow w-full rounded border px-4 py-5 text-left transition ' +
               (picked === o.id
                 ? 'border-accent bg-accent/10 text-fg'
                 : 'border-line bg-surface text-fg hover:border-accent/50')

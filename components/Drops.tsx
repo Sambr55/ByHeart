@@ -30,15 +30,15 @@ export function Drops() {
       data-stage="CHOICE"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
-      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-bg/90 px-5 py-2.5 backdrop-blur">
-        <Link href="/" className="eyebrow text-muted transition hover:text-fg">
+      <header className="bar sticky top-0 z-10 flex items-center gap-3 px-5 py-2.5">
+        <Link href="/" className="eyebrow opacity-80 transition hover:opacity-100">
           ← DUB
         </Link>
-        <span className="eyebrow flex-1 text-accent">Drops</span>
+        <span className="eyebrow flex-1">Drops</span>
         <Menu />
       </header>
 
-      <div className="flex flex-1 flex-col gap-6 px-5 py-7">
+      <div className="flex flex-1 flex-col gap-6 px-5 pb-12 pt-7">
         <div>
           <h1 className="display text-balance text-2xl">Pegged to something real.</h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
@@ -56,7 +56,7 @@ export function Drops() {
           return (
             <section
               key={c.id}
-              className="rounded-xl border border-accent/45 bg-accent/[0.04] px-5 py-5"
+              className="rounded border border-accent/45 bg-accent/[0.04] px-5 py-5"
             >
               <div className="flex items-start justify-between gap-3">
                 <span className="eyebrow text-accent">
@@ -98,7 +98,7 @@ export function Drops() {
         })}
 
         {!live.length && now ? (
-          <div className="rounded-xl border border-line bg-surface p-5">
+          <div className="rounded border border-line bg-bg-elev p-5">
             <p className="text-sm leading-relaxed text-muted">
               Nothing live right now. Drops arrive when something is actually on — a gig, a
               festival, a match — and go when it does.

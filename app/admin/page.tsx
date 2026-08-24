@@ -117,12 +117,12 @@ export default function AdminPage() {
           onChange={(e) => setKey(e.target.value)}
           placeholder="Admin key"
           type="password"
-          className="flex-1 rounded-lg border border-line bg-surface px-3 py-2 font-mono text-xs text-fg outline-none focus:border-accent"
+          className="flex-1 rounded border border-line bg-surface px-3 py-2 font-mono text-xs text-fg outline-none focus:border-accent"
         />
         <button
           type="button"
           onClick={() => load(key)}
-          className="tap-target eyebrow rounded-lg bg-accent px-4 text-accent-ink"
+          className="tap-target eyebrow rounded bg-accent px-4 text-accent-ink"
         >
           LOAD
         </button>
@@ -137,7 +137,7 @@ export default function AdminPage() {
             setPending(pendingFeedback().length)
             load(key)
           }}
-          className="tap-target eyebrow mt-3 w-full rounded-lg border border-coach/50 px-3 py-3 text-coach"
+          className="tap-target eyebrow mt-3 w-full rounded border border-coach/50 px-3 py-3 text-coach"
         >
           RETRY {pending} UNSENT SUBMISSION{pending === 1 ? '' : 'S'} ON THIS DEVICE
         </button>
@@ -160,7 +160,7 @@ export default function AdminPage() {
           {view === 'testers' ? (
             <div className="mt-4 space-y-3">
               {rows.map((r) => (
-                <details key={r.key} className="rounded-xl border border-line bg-surface p-3">
+                <details key={r.key} className="rounded border border-line bg-surface p-3">
                   <summary className="cursor-pointer text-sm">
                     <span className="font-semibold">{r.tester}</span>
                     <span className="ml-2 text-xs text-muted">
@@ -194,7 +194,7 @@ export default function AdminPage() {
                       .map((r) => (
                         <li
                           key={r.key + q.id}
-                          className="rounded-lg border border-line bg-surface px-3 py-2 text-sm"
+                          className="rounded border border-line bg-surface px-3 py-2 text-sm"
                         >
                           <span className="block text-[0.6rem] uppercase tracking-wider text-muted">
                             {r.tester} · started with {familyLabel(r.session?.affinity?.next_world_pre)}
@@ -211,7 +211,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={csv}
-            className="tap-target eyebrow mt-8 w-full rounded-xl border border-line px-5 py-4 text-fg"
+            className="tap-target eyebrow mt-8 w-full rounded border border-line px-5 py-4 text-fg"
           >
             DOWNLOAD CSV
           </button>

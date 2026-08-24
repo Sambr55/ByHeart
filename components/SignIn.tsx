@@ -52,7 +52,7 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
             want to learn on.
           </p>
           {debugUrl ? (
-            <a href={debugUrl} className="break-all rounded-xl border border-accent/40 bg-accent/5 p-4 text-xs text-accent">
+            <a href={debugUrl} className="break-all rounded border border-accent/40 bg-accent/5 p-4 text-xs text-accent">
               {debugUrl}
             </a>
           ) : null}
@@ -78,7 +78,7 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full rounded-xl border border-line bg-surface px-4 py-4 text-base outline-none focus:border-accent"
+                className="w-full rounded border border-line bg-bg-elev px-4 py-4 text-base outline-none focus:border-accent"
               />
               <button
                 type="submit"
@@ -90,7 +90,7 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
               {message ? <p className="text-xs text-accent">{message}</p> : null}
             </form>
           ) : (
-            <p className="rounded-xl border border-line bg-surface p-4 text-sm text-muted">
+            <p className="rounded border border-line bg-bg-elev p-4 text-sm text-muted">
               Accounts are not switched on yet. Everything still works — what you have learned is
               saved on this device, and it will move across the moment you can sign in.
             </p>

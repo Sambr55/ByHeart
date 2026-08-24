@@ -108,7 +108,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
       </section>
 
       {/* ---------------------------------------------------------------- plan */}
-      <section className="rounded-2xl border border-line bg-surface p-5">
+      <section className="rounded border border-line bg-bg-elev p-5">
         <div className="flex items-baseline justify-between gap-3">
           <p className="eyebrow text-accent">{pro ? 'DUB PRO' : 'DUB'}</p>
           {subscription ? (
@@ -141,7 +141,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
         ) : null}
 
         {comped ? (
-          <p className="mt-5 rounded-xl border border-accent/40 bg-accent/[0.06] px-4 py-3 text-sm text-fg/85">
+          <p className="mt-5 rounded border border-accent/40 bg-accent/[0.06] px-4 py-3 text-sm text-fg/85">
             You are in on the house
             {subscription?.current_period_end ? ', until the date above' : ', permanently'}. Nothing
             to pay and nothing to manage.
@@ -198,7 +198,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
             onChange={(e) => setName(e.target.value)}
             maxLength={60}
             placeholder="Optional"
-            className="mt-2 w-full rounded-xl border border-line bg-surface px-4 py-3 text-base outline-none focus:border-accent"
+            className="mt-2 w-full rounded border border-line bg-bg-elev px-4 py-3 text-base outline-none focus:border-accent"
           />
         </label>
         <label className="flex items-start gap-3">
@@ -255,7 +255,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
             <input
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-base outline-none focus:border-accent"
+              className="w-full rounded border border-line bg-bg-elev px-4 py-3 text-base outline-none focus:border-accent"
             />
             <button
               type="button"
@@ -328,7 +328,7 @@ function RedeemCode() {
           placeholder="ABCD-1234"
           aria-label="Comp code"
           data-testid="comp-code"
-          className="tap-target min-w-0 flex-1 rounded-lg border border-line bg-surface px-3 py-2 text-sm uppercase tracking-widest text-fg placeholder:text-muted focus:border-accent focus:outline-none"
+          className="tap-target min-w-0 flex-1 rounded border border-line bg-surface px-3 py-2 text-sm uppercase tracking-widest text-fg placeholder:text-muted focus:border-accent focus:outline-none"
         />
         <button
           type="button"

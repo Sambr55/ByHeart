@@ -81,7 +81,7 @@ export default function RecallPage() {
           </p>
           <Link
             href="/"
-            className="tap-target eyebrow mt-6 rounded-xl bg-accent px-5 py-4 text-center text-accent-ink"
+            className="tap-target eyebrow mt-6 rounded bg-accent px-5 py-4 text-center text-accent-ink"
           >
             START MISSION 01
           </Link>
@@ -114,13 +114,13 @@ export default function RecallPage() {
                 hours_since_last: hoursSinceLastMission(),
               })
             }
-            className="tap-target eyebrow mt-6 w-full rounded-xl border border-line px-5 py-4 text-muted"
+            className="tap-target eyebrow mt-6 w-full rounded border border-line px-5 py-4 text-muted"
           >
             DOWNLOAD RECALL JSON
           </button>
           <Link
             href="/deck"
-            className="tap-target eyebrow mt-3 block w-full rounded-xl bg-accent px-5 py-4 text-center text-accent-ink"
+            className="tap-target eyebrow mt-3 block w-full rounded bg-accent px-5 py-4 text-center text-accent-ink"
           >
             OPEN MY DECK
           </Link>
@@ -192,7 +192,7 @@ export default function RecallPage() {
               disabled={Boolean(answered)}
               onClick={() => choose(o)}
               className={
-                'tap-target flex w-full items-center justify-between rounded-xl border px-4 py-4 text-left transition ' +
+                'tap-target flex w-full items-center justify-between rounded border px-4 py-4 text-left transition ' +
                 (answered && isAnswer
                   ? 'border-correct bg-correct/10'
                   : answered && answered === o
@@ -214,7 +214,7 @@ export default function RecallPage() {
 
       {answered ? (
         <>
-          <div className="mt-5 flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+          <div className="mt-5 flex items-center gap-3 rounded border border-line bg-surface px-4 py-3">
             <AudioButton slug={slugFor(item.answer)} text={item.answer} size="sm" />
             <span className="pt text-lg">{item.answer}</span>
           </div>
@@ -225,7 +225,7 @@ export default function RecallPage() {
               started.current = performance.now()
               setI((n) => n + 1)
             }}
-            className="tap-target eyebrow mt-auto w-full rounded-xl bg-accent px-5 py-4 text-accent-ink"
+            className="tap-target eyebrow mt-auto w-full rounded bg-accent px-5 py-4 text-accent-ink"
           >
             NEXT
           </button>

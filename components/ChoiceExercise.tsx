@@ -43,10 +43,10 @@ export function ChoiceExercise({ screen }: { screen: ChoiceScreen }) {
                 )
               }}
               className={
-                'tap-target flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-4 text-left transition active:scale-[0.99] ' +
+                'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-4 text-left transition active:scale-[0.99] ' +
                 (state === 'right'
                   ? 'border-correct bg-correct/10'
-                  : 'border-line bg-surface hover:border-accent/50') +
+                  : 'border-line bg-bg-elev hover:border-accent/50') +
                 (solved && !isCorrect ? ' opacity-45' : '')
               }
             >
@@ -74,7 +74,7 @@ export function ChoiceExercise({ screen }: { screen: ChoiceScreen }) {
       ) : null}
 
       {solved ? (
-        <div className="mt-4 flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+        <div className="mt-4 flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3">
           <AudioButton
             slug={slugFor(correct.pt)}
             text={correct.pt}

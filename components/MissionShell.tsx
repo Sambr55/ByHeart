@@ -102,7 +102,7 @@ export function Continue({
       data-testid="continue"
       onClick={onClick}
       disabled={disabled}
-      className="tap-target eyebrow mt-auto w-full rounded-xl mt-6 bg-accent px-5 py-4 text-accent-ink transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-chip disabled:text-muted"
+      className="tap-target eyebrow mt-auto w-full rounded mt-6 bg-accent px-5 py-4 text-accent-ink transition active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-chip disabled:text-muted"
     >
       {label}
     </button>
@@ -125,7 +125,7 @@ export function FeedbackNote({
     <div
       role="status"
       className={
-        'animate-bank mt-5 flex gap-3 rounded-xl border p-4 text-sm leading-relaxed ' +
+        'animate-bank mt-5 flex gap-3 rounded border p-4 text-sm leading-relaxed ' +
         (correct
           ? 'border-correct/40 bg-correct/10 text-fg'
           : 'border-coach/40 bg-coach/10 text-fg')

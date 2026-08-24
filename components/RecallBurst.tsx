@@ -140,10 +140,10 @@ export function RecallBurst({ screen }: { screen: RecallScreen }) {
               disabled={Boolean(locked)}
               onClick={() => choose(o)}
               className={
-                'tap-target flex w-full items-center justify-between rounded-xl border px-4 py-4 text-left transition active:scale-[0.99] ' +
+                'tap-target flex w-full items-center justify-between rounded border px-4 py-4 text-left transition active:scale-[0.99] ' +
                 (chosen && isAnswer
                   ? 'border-correct bg-correct/10'
-                  : 'border-line bg-surface hover:border-accent/50')
+                  : 'border-line bg-bg-elev hover:border-accent/50')
               }
             >
               <span className="pt text-lg">{TARGETS[o].label}</span>

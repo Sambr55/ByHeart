@@ -21,19 +21,35 @@
 */
 
 :root {
-  --bg: #faf7f2;          /* glaze — the finish on a tile, not paper and not grey */
-  --bg-elev: #ffffff;     /* cards, sheets, the sticky header */
-  --surface: #f1ece3;     /* chips, inset panels, tile blocks */
-  --line: #e3dcd1;        /* decorative hairline; see line-strong for control edges */
-  --line-strong: #8f8474; /* where the border is the only thing saying "control" */
-  --fg: #16202b;          /* deep indigo-black; pure black on warm white reads harsh */
-  --muted: #6e6a63;       /* warm grey, biased toward the ground */
-  --accent: #2f6e9e;      /* azulejo. The Portuguese is always this colour */
+  /*
+    Sand, not paper.
+
+    The previous pass moved from a cockpit to a sheet of paper, which fixed the wrong
+    problem: dark was never the issue, flat was. The ground was L*97, cards L*100 and
+    chips L*94 — the whole interface spanned six points of lightness, so nothing could
+    lift off anything and every card read as a hairline drawn on the page rather than
+    an object sitting on it.
+
+    A ground has to be darker than what sits on it. Warm sand under cool blue is also
+    the country's own scheme — terracotta and plaster against azulejo, at every street
+    corner — which the old palette had the ingredients for and never put together.
+
+    The range is 18 points now, and a card sits nearly seven above its ground.
+  */
+  --bg: #efe7d9;          /* sand, L*92. A colour a person would name */
+  --bg-elev: #fdfbf7;     /* lifted, L*99. Cards and sheets finally float */
+  --surface: #e4d9c5;     /* inset, L*87. Below the ground, so a field reads as a hole */
+  --line: #d3c7b1;        /* visible without drawing attention to itself */
+  --line-strong: #8a7c62; /* where the border is the only thing saying "control" */
+  --fg: #1a2430;          /* deep indigo, never pure black */
+  --muted: #635c50;       /* darkened for the warmer ground */
+  --accent: #1f5d8c;      /* azulejo. The header, the CTA, and always the Portuguese */
   --accent-ink: #ffffff;
-  --telha: #b4553c;       /* the second accent, and where the warmth comes from */
-  --correct: #3e7d5a;     /* muted, never a celebration green */
-  --coach: #9a5f28;       /* wrong answers coach in amber, never red. Keep this rule */
-  --chip: #f1ece3;
+  --telha: #a8492f;       /* warmth and urgency — numerals, counters, short headlines.
+                             It clears AA, but it is not a body-text colour */
+  --correct: #2c6b4a;
+  --coach: #8a5a12;       /* wrong answers coach in amber, never red. Keep this rule */
+  --chip: #e4d9c5;
   --grid: rgba(47, 110, 158, 0.05);
   /* The crate's own colour. Set per crate; falls back to the neutral accent. */
   --tone: var(--accent);
@@ -45,37 +61,37 @@
 */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #14161a;
-    --bg-elev: #1c2027;
-    --surface: #222731;
-    --line: #2a2e36;
-    --line-strong: #606771;
-    --fg: #f4f0e9;
-    --muted: #9a948b;
+    --bg: #171a1f;
+    --bg-elev: #1f242c;
+    --surface: #272d37;
+    --line: #333a45;
+    --line-strong: #6b7482;
+    --fg: #f4efe6;
+    --muted: #a09788;
     --accent: #7fb3da;
     --accent-ink: #0d1116;
     --telha: #e0876c;
     --correct: #74c79a;
     --coach: #dda45e;
-    --chip: #222731;
+    --chip: #272d37;
     --grid: rgba(127, 179, 218, 0.06);
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: #14161a;
-  --bg-elev: #1c2027;
-  --surface: #222731;
-  --line: #2a2e36;
-  --line-strong: #606771;
-  --fg: #f4f0e9;
-  --muted: #9a948b;
+  --bg: #171a1f;
+  --bg-elev: #1f242c;
+  --surface: #272d37;
+  --line: #333a45;
+  --line-strong: #6b7482;
+  --fg: #f4efe6;
+  --muted: #a09788;
   --accent: #7fb3da;
   --accent-ink: #0d1116;
   --telha: #e0876c;
   --correct: #74c79a;
   --coach: #dda45e;
-  --chip: #222731;
+  --chip: #272d37;
   --grid: rgba(127, 179, 218, 0.06);
 }
 
@@ -213,13 +229,33 @@ body {
   labelled.
 */
 .azulejo-field {
+  /*
+    Square cells with a visible edge and a corner motif — which is what an azulejo
+    actually is. The previous version was a 45° crosshatch at 44px, which read as graph
+    paper, and texture behind running text always looks cheaper than no texture at all.
+    Bigger cells here, so it reads as tiling rather than as noise.
+  */
   background-image:
-    repeating-linear-gradient(45deg, var(--grid) 0 1px, transparent 1px 22px),
-    repeating-linear-gradient(-45deg, var(--grid) 0 1px, transparent 1px 22px);
-  background-size: 44px 44px;
+    linear-gradient(to right, var(--grid) 0 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px),
+    radial-gradient(circle at 0 0, var(--grid) 0 4px, transparent 4px),
+    radial-gradient(circle at 100% 100%, var(--grid) 0 4px, transparent 4px);
+  background-size: 60px 60px;
 }
 
-/* A denser quatrefoil-ish weave, for blocks rather than whole pages. */
+/*
+  A band, never a wash. Behind a masthead, on an empty state, in the corner of a card —
+  and never behind a paragraph, which is the rule the last version broke.
+*/
+.azulejo-band {
+  background-image:
+    linear-gradient(to right, var(--grid) 0 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px),
+    radial-gradient(circle at 0 0, var(--grid) 0 4px, transparent 4px),
+    radial-gradient(circle at 100% 100%, var(--grid) 0 4px, transparent 4px);
+  background-size: 60px 60px;
+}
+
 .azulejo-block {
   background-color: color-mix(in srgb, var(--tone) 7%, transparent);
   background-image:
@@ -237,6 +273,7 @@ body {
   to take away.
 */
 [data-stage='REAL WORLD'] .azulejo-field,
+[data-stage='REAL WORLD'] .azulejo-band,
 [data-stage='REAL WORLD'] .azulejo-block,
 [data-stage='LISBON'] .azulejo-field {
   background-image: none;
@@ -302,11 +339,11 @@ body {
 
   Every value clears 4.5:1 as text on its own ground. npm run contrast.
 */
-[data-tone='kinetic']    { --tone: #2f6e9e; }
+[data-tone='kinetic']    { --tone: #1f5d8c; }
 [data-tone='cool']       { --tone: #3e5c75; }
 [data-tone='human']      { --tone: #a8455e; }
 [data-tone='sharp']      { --tone: #8e3a46; }
-[data-tone='warm']       { --tone: #b4553c; }
+[data-tone='warm']       { --tone: #a8492f; }
 [data-tone='reflective'] { --tone: #5c6b3d; }
 [data-tone='blunt']      { --tone: #3f4348; }
 
@@ -327,3 +364,44 @@ body {
 :root[data-theme='dark'] [data-tone='warm']       { --tone: #e0876c; }
 :root[data-theme='dark'] [data-tone='reflective'] { --tone: #a8b87f; }
 :root[data-theme='dark'] [data-tone='blunt']      { --tone: #9aa0a7; }
+
+/*
+  Header tones.
+
+  A card tint can be pale; a header bar cannot, because it has to carry white text at
+  4.5:1. So each tone declares a saturated variant, and the header uses that rather than
+  the card colour. Same value in both themes: a solid coloured bar with white on it does
+  not need to change when the ground does.
+*/
+:root { --tone-header: #1f5d8c; }
+[data-tone='kinetic']    { --tone-header: #1f5d8c; }
+[data-tone='cool']       { --tone-header: #33506b; }
+[data-tone='human']      { --tone-header: #8f3550; }
+[data-tone='sharp']      { --tone-header: #7a2f3a; }
+[data-tone='warm']       { --tone-header: #9c4632; }
+[data-tone='reflective'] { --tone-header: #4c5a33; }
+[data-tone='blunt']      { --tone-header: #343940; }
+
+/*
+  The bar itself, and the reason it is worth having.
+
+  It anchors the top of the page, gives the sand something to be lighter than, and puts
+  the accent at both ends of the screen — header above, CTA below — so the blue reads as
+  structure rather than decoration.
+
+  And it costs nothing to make it mean something: the header already sits inside a
+  container carrying data-stage and data-tone, so it becomes the crate's own colour
+  while you are inside a crate, neutral azulejo while you are choosing, and drains to
+  ink in REAL WORLD. The stage mechanism stops being felt and starts being seen — the
+  colour physically leaves the room at the culture-free beat.
+*/
+.bar {
+  background: var(--tone-header);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.16);
+}
+
+[data-stage='REAL WORLD'] .bar {
+  background: var(--fg);
+  color: var(--bg);
+}

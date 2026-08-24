@@ -46,9 +46,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   // Matches the light ground, which is now the default. The dark entry lets the browser
   // chrome follow a learner who prefers dark rather than sitting in the wrong theme.
+  // Follows the header bar, so the phone's own chrome agrees with the app under it.
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#faf7f2' },
-    { media: '(prefers-color-scheme: dark)', color: '#14161a' },
+    { media: '(prefers-color-scheme: light)', color: '#1f5d8c' },
+    { media: '(prefers-color-scheme: dark)', color: '#1f5d8c' },
   ],
   width: 'device-width',
   initialScale: 1,

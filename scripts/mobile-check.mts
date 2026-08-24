@@ -41,6 +41,27 @@ function seedFor(stage: number) {
   }
 }
 
+/**
+ * Nothing may finish flush with the foot of the screen, and no button may be crowded by
+ * the text above it. Both were real: the CTA was positioned with mt-auto alone, which
+ * gives nothing on a full screen, and the scrolling pages had a 24px well.
+ */
+async function clearance(page: Page) {
+  return page.evaluate(() => {
+    const out: string[] = []
+    const foot = document.documentElement.scrollHeight
+    for (const el of Array.from(document.querySelectorAll('button, a[href], input'))) {
+      const r = el.getBoundingClientRect()
+      if (r.width === 0 || r.height === 0) continue
+      const bottom = r.bottom + window.scrollY
+      if (foot - bottom < 8 && foot - bottom >= 0) {
+        out.push('flush with the foot: ' + (el.textContent ?? '').trim().slice(0, 30))
+      }
+    }
+    return out.slice(0, 2)
+  })
+}
+
 async function offenders(page: Page) {
   return page.evaluate(() => {
     const doc = document.documentElement
@@ -85,6 +106,10 @@ for (const width of WIDTHS) {
       // open every disclosure — a bug hiding inside a closed one still ships
       await page.$$eval('summary', (els) => els.forEach((e) => (e.parentElement as HTMLDetailsElement).setAttribute('open', '')))
       await page.waitForTimeout(200)
+      for (const c of await clearance(page)) {
+        problems.push(route + ' @' + width + ' stage ' + stage + ' — ' + c)
+        console.log('  ' + route.padEnd(11) + '✗ ' + c)
+      }
       const bad = await offenders(page)
       if (bad) {
         const first = bad.out[0]

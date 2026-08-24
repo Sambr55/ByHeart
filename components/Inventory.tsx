@@ -79,7 +79,7 @@ export function SourceChip({ block }: { block: BlockId }) {
   return (
     <div
       className={
-        'rounded-xl border px-3 py-2.5 ' +
+        'rounded border px-3 py-2.5 ' +
         (strengthened ? 'border-accent/60 bg-accent/5' : 'border-line bg-chip')
       }
     >

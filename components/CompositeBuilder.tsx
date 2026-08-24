@@ -184,11 +184,11 @@ export function CompositeBuilder({ screen }: { screen: CompositeScreen }) {
               data-testid={'part-' + part.id}
               aria-current={active ? 'step' : undefined}
               className={
-                'rounded-xl border p-4 transition ' +
+                'rounded border p-4 transition ' +
                 (state.solved
                   ? 'border-correct/40 bg-correct/5'
                   : active
-                    ? 'border-line bg-surface'
+                    ? 'border-line bg-bg-elev'
                     : 'border-line/50 bg-surface/40 opacity-55')
               }
             >
@@ -277,7 +277,7 @@ function PartInput({
             key={o.id}
             type="button"
             onClick={() => onSubmit(o.id)}
-            className="tap-target w-full rounded-lg border border-line bg-bg-elev px-3 py-3 text-left transition hover:border-accent/50 active:scale-[0.99]"
+            className="tap-target w-full rounded border border-line bg-bg-elev px-3 py-3 text-left transition hover:border-accent/50 active:scale-[0.99]"
           >
             <span className={part.english ? 'text-lg' : 'pt text-lg'}>{o.pt}</span>
           </button>
@@ -291,7 +291,7 @@ function PartInput({
     <div className="mt-3">
       <div
         data-testid={'line-' + part.id}
-        className="min-h-[3.25rem] rounded-lg border border-dashed border-line bg-bg-elev/60 p-2"
+        className="min-h-[3.25rem] rounded border border-dashed border-line bg-bg-elev/60 p-2"
       >
         {state.placed.length ? (
           <div className="flex flex-wrap gap-2">
@@ -300,7 +300,7 @@ function PartInput({
                 key={id + i}
                 type="button"
                 onClick={() => onPlace(state.placed.filter((x) => x !== id))}
-                className="tap-target rounded-lg border border-accent/50 bg-chip px-3 py-2 active:scale-95"
+                className="tap-target rounded border border-accent/50 bg-chip px-3 py-2 active:scale-95"
               >
                 <span className="pt">{part.tiles.find((t) => t.id === id)!.text}</span>
               </button>
@@ -316,7 +316,7 @@ function PartInput({
             key={t.id}
             type="button"
             onClick={() => onPlace([...state.placed, t.id])}
-            className="tap-target rounded-lg border border-line bg-surface px-3 py-2 transition hover:border-accent/50 active:scale-95"
+            className="tap-target rounded border border-line bg-bg-elev px-3 py-2 transition hover:border-accent/50 active:scale-95"
           >
             <span className="pt">{t.text}</span>
           </button>
@@ -326,7 +326,7 @@ function PartInput({
         type="button"
         disabled={!state.placed.length}
         onClick={() => onSubmit()}
-        className="tap-target eyebrow mt-3 w-full rounded-lg border border-accent bg-accent/10 px-4 py-3 text-accent transition disabled:border-line disabled:bg-transparent disabled:text-muted"
+        className="tap-target eyebrow mt-3 w-full rounded border border-accent bg-accent/10 px-4 py-3 text-accent transition disabled:border-line disabled:bg-transparent disabled:text-muted"
       >
         CHECK
       </button>

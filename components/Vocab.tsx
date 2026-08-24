@@ -170,12 +170,12 @@ export function Vocab() {
       data-stage="CHOICE"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
-      <header className="sticky top-0 z-10 flex flex-col gap-2 border-b border-line bg-bg/90 px-5 py-2.5 backdrop-blur">
+      <header className="bar sticky top-0 z-10 flex flex-col gap-2 px-5 py-2.5">
         <div className="flex items-center gap-3">
-          <Link href="/crates" className="eyebrow text-muted transition hover:text-fg">
+          <Link href="/crates" className="eyebrow opacity-80 transition hover:opacity-100">
             ← DUB
           </Link>
-          <span className="eyebrow flex-1 text-accent">Vocab library</span>
+          <span className="eyebrow flex-1">Vocab library</span>
           <Menu />
         </div>
         <div className="flex items-center gap-2 pb-1">
@@ -186,7 +186,7 @@ export function Vocab() {
             placeholder="Search Portuguese or English…"
             aria-label="Search the library"
             data-testid="vocab-search"
-            className="tap-target min-w-0 flex-1 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-fg placeholder:text-muted focus:border-accent focus:outline-none"
+            className="tap-target min-w-0 flex-1 rounded border border-line bg-surface px-3 py-2 text-sm text-fg placeholder:text-muted focus:border-accent focus:outline-none"
           />
           <button
             type="button"
@@ -194,7 +194,7 @@ export function Vocab() {
             onClick={() => setMineOnly((v) => !v)}
             aria-pressed={mineOnly}
             className={
-              'tap-target shrink-0 rounded-lg border px-3 py-2 text-[0.6rem] uppercase tracking-wider transition ' +
+              'tap-target shrink-0 rounded border px-3 py-2 text-[0.6rem] uppercase tracking-wider transition ' +
               (mineOnly ? 'border-accent bg-accent/10 text-accent' : 'border-line text-muted')
             }
           >
@@ -203,7 +203,7 @@ export function Vocab() {
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col gap-6 px-5 py-7">
+      <div className="flex flex-1 flex-col gap-6 px-5 pb-12 pt-7">
         <div>
           <h1 className="display text-balance text-2xl">{capability}</h1>
           <p className="mt-2 text-xs text-muted">
@@ -260,7 +260,7 @@ export function Vocab() {
                     />
                   ))}
                   {!list.length ? (
-                    <li className="rounded-xl border border-dashed border-line px-4 py-4 text-xs leading-relaxed text-muted">
+                    <li className="rounded border border-dashed border-line px-4 py-4 text-xs leading-relaxed text-muted">
                       Nothing here yet. {shelf.holds}
                     </li>
                   ) : null}
@@ -304,11 +304,11 @@ function EntryRow({
         aria-expanded={open}
         onClick={onToggle}
         className={
-          'tap-target flex w-full items-baseline justify-between gap-3 rounded-xl border px-4 py-3 text-left transition ' +
+          'tap-target flex w-full items-baseline justify-between gap-3 rounded border px-4 py-3 text-left transition ' +
           (open
             ? 'border-accent bg-accent/10'
             : entry.owned
-              ? 'border-line bg-surface hover:border-accent/50'
+              ? 'border-line bg-bg-elev hover:border-accent/50'
               : 'border-line/50 bg-surface/30 hover:border-accent/40')
         }
       >
@@ -333,7 +333,7 @@ function EntryRow({
       </button>
 
       {open ? (
-        <div className="mt-1.5 flex flex-col gap-4 rounded-xl border border-line bg-bg-elev px-4 py-4">
+        <div className="mt-1.5 flex flex-col gap-4 rounded border border-line bg-bg-elev px-4 py-4">
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(head.target)} text={head.target} size="sm" />
             <span className="min-w-0">
@@ -353,7 +353,7 @@ function EntryRow({
           {notes.map((n) => (
             <p
               key={n}
-              className="rounded-lg border-l-2 border-accent/50 bg-surface px-3 py-2 text-xs leading-relaxed text-fg/85"
+              className="rounded border-l-2 border-accent/50 bg-surface px-3 py-2 text-xs leading-relaxed text-fg/85"
             >
               {n}
             </p>
@@ -391,7 +391,7 @@ function EntryRow({
                     <AudioButton slug={slugFor(l.target)} text={l.target} size="sm" />
                     <span className="min-w-0">
                       <span className="pt block text-sm">{l.target}</span>
-                      <span className="gloss block text-xs text-muted">{l.en}</span>
+                      <span className="block text-xs text-muted">{l.en}</span>
                     </span>
                   </li>
                 ))}

@@ -56,7 +56,7 @@ export function Waitlist() {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-line bg-surface p-5">
+      <div className="rounded border border-line bg-bg-elev p-5">
         <p className="eyebrow text-accent">WHAT THE FIRST {PRICING.founding.cap} PAY FOR</p>
         <p className="mt-2 text-sm leading-relaxed">
           Right now every line is spoken by a robot. Founding memberships pay for the
@@ -70,7 +70,7 @@ export function Waitlist() {
       </div>
 
       {state === 'done' ? (
-        <div className="rounded-xl border border-correct/40 bg-correct/10 px-4 py-4">
+        <div className="rounded border border-correct/40 bg-correct/10 px-4 py-4">
           <p className="text-sm">
             You are on the list. You will hear from us when the recordings are booked, and
             not before — no drip, no nurture sequence.
@@ -87,7 +87,7 @@ export function Waitlist() {
               placeholder="you@example.com"
               aria-label="Your email"
               data-testid="waitlist-email"
-              className="tap-target min-w-0 flex-1 rounded-lg border border-line bg-surface px-3 py-3 text-sm text-fg placeholder:text-muted focus:border-accent focus:outline-none"
+              className="tap-target min-w-0 flex-1 rounded border border-line bg-surface px-3 py-3 text-sm text-fg placeholder:text-muted focus:border-accent focus:outline-none"
             />
             <button
               type="button"

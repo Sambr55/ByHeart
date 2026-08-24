@@ -151,7 +151,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
       ) : null}
 
       {/* ---------------------------------------------------------- the card */}
-      <section className="rounded-2xl border border-line bg-surface p-6">
+      <section className="rounded border border-line bg-bg-elev p-6">
         <p className="eyebrow text-accent">WHAT I CAN SAY</p>
 
         {empty ? (
@@ -191,7 +191,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
 
       {/* --------------------------------------------------- how am I doing */}
       {firstTry ? (
-        <section className="rounded-xl border border-line p-4">
+        <section className="rounded border border-line p-4">
           <p className="eyebrow text-muted">HOW IT IS ACTUALLY GOING</p>
           <p className="mt-2 text-sm">
             You said{' '}
@@ -209,7 +209,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
 
       {/* ------------------------------------------------------- the distance */}
       {distance ? (
-        <section className="rounded-xl border border-line p-4">
+        <section className="rounded border border-line p-4">
           <p className="eyebrow text-muted">WHERE YOU SAID YOU WANTED TO GET TO</p>
           {distance.done ? (
             <p className="mt-2 text-sm">

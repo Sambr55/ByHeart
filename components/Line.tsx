@@ -90,7 +90,7 @@ export function Line({ pushReady }: { pushReady: boolean }) {
 
           <p className="text-lg text-muted">{line.en}</p>
 
-          <div className="rounded-xl border border-line bg-surface p-4">
+          <div className="rounded border border-line bg-bg-elev p-4">
             <p className="text-sm leading-relaxed">{line.note}</p>
           </div>
         </div>

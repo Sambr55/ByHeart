@@ -93,7 +93,7 @@ export function MeaningCheckView({ screen }: { screen: MeaningCheckScreen }) {
               )
             }
             className={
-              'tap-target eyebrow flex w-full items-center justify-between rounded-xl border px-4 py-4 text-left transition active:scale-[0.99] ' +
+              'tap-target eyebrow flex w-full items-center justify-between rounded border px-4 py-4 text-left transition active:scale-[0.99] ' +
               (solved && o.correct
                 ? 'border-correct bg-correct/10'
                 : 'border-line bg-surface hover:border-accent/50') +
@@ -117,7 +117,7 @@ export function MeaningCheckView({ screen }: { screen: MeaningCheckScreen }) {
       ) : null}
 
       {solved ? (
-        <div className="mt-4 flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+        <div className="mt-4 flex items-center gap-3 rounded border border-line bg-surface px-4 py-3">
           <AudioButton
             slug={BLOCK_AUDIO[screen.target]}
             text={TARGETS[screen.target].block}
@@ -180,7 +180,7 @@ export function CultureCategoriesView({ screen }: { screen: CultureCategoriesScr
                 setPicked((p) => (on ? p.filter((x) => x !== c.id) : [...p, c.id]))
               }
               className={
-                'tap-target rounded-xl border px-3 py-3 text-left transition ' +
+                'tap-target rounded border px-3 py-3 text-left transition ' +
                 (on
                   ? 'border-accent bg-accent/10'
                   : full
@@ -228,7 +228,7 @@ export function FreeTextView({ screen }: { screen: FreeTextScreen }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder={screen.placeholder}
-        className="pt mt-6 w-full rounded-xl border border-line bg-surface p-4 text-xl text-fg outline-none focus:border-accent"
+        className="pt mt-6 w-full rounded border border-line bg-surface p-4 text-xl text-fg outline-none focus:border-accent"
       />
       <p className="mt-3 text-xs text-muted">This is the important answer.</p>
       <Continue
@@ -263,7 +263,7 @@ export function ForcedChoiceView({ screen }: { screen: ForcedChoiceScreen }) {
             aria-pressed={picked === c.id}
             onClick={() => setPicked(c.id)}
             className={
-              'tap-target eyebrow flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-4 text-left transition ' +
+              'tap-target eyebrow flex w-full items-center justify-between gap-3 rounded border px-4 py-4 text-left transition ' +
               (picked === c.id
                 ? 'border-accent bg-accent/10 text-fg'
                 : c.built
@@ -307,7 +307,7 @@ export function ScaleView({ screen }: { screen: ScaleScreen }) {
             aria-pressed={value === p.value}
             onClick={() => setValue(p.value)}
             className={
-              'tap-target flex w-full items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition ' +
+              'tap-target flex w-full items-center gap-3 rounded border px-4 py-3.5 text-left transition ' +
               (value === p.value
                 ? 'border-accent bg-accent/10'
                 : 'border-line bg-surface hover:border-accent/50')
@@ -439,7 +439,7 @@ export function PostIntentView({ screen }: { screen: PostIntentScreen }) {
             aria-pressed={picked === o.id}
             onClick={() => setPicked(o.id)}
             className={
-              'tap-target eyebrow w-full rounded-xl border px-4 py-4 text-left transition ' +
+              'tap-target eyebrow w-full rounded border px-4 py-4 text-left transition ' +
               (picked === o.id
                 ? 'border-accent bg-accent/10'
                 : 'border-line bg-surface hover:border-accent/50')
@@ -456,7 +456,7 @@ export function PostIntentView({ screen }: { screen: PostIntentScreen }) {
           <input
             value={world}
             onChange={(e) => setWorld(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-line bg-surface p-3 text-sm text-fg outline-none focus:border-accent"
+            className="mt-2 w-full rounded border border-line bg-surface p-3 text-sm text-fg outline-none focus:border-accent"
             placeholder="Your earlier answer is filled in — change it if you have."
           />
         </label>
