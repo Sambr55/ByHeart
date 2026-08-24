@@ -12,7 +12,10 @@ export const LANDING = {
   line: 'Find yourself in another language.',
   lines: [
     'Start with something you already know.',
-    'Learn Portuguese through the films, music, TV, sport and culture already in your head.',
+    // Language-neutral on purpose: the brand layer describes the method, and the
+    // method is not about Portuguese. The personal experience becomes specific the
+    // moment a pair is chosen, one screen later.
+    'Learn a language through the films, music, TV, sport and culture already in your head.',
     'Understand the moment.\nDiscover the language inside it.\nRemix it. Use it. Make it yours.',
     'You already know more than you think.',
   ],
@@ -75,6 +78,31 @@ export const DEMO_BEATS: DemoBeat[] = [
     cta: 'MY TURN',
   },
 ]
+
+/**
+ * Choosing a language, after the demo rather than before it.
+ *
+ * A selector at the front asks for a commitment before the learner has been shown what
+ * they would be committing to. The Goose moment IS the argument, so it goes first —
+ * and having it go first is what earns the transition line, which turns setup admin
+ * into the second beat of the story rather than a form.
+ */
+export const PAIR_STEP = {
+  eyebrow: 'ONE DECISION',
+  headline: 'That was Portuguese. Where do you want DUB to take you?',
+  sub: 'One is built. The others are honest about not being — nothing here will take your email and promise to let you know.',
+  soon: 'COMING SOON',
+  source_label: 'Learning from',
+  source_change: 'Change',
+  /**
+   * Revealed under the source line rather than asked as a screen of its own: a
+   * mandatory second question with exactly one available answer is a tax, not a choice.
+   */
+  source_note:
+    'Which crates you get depends on the culture you already carry, not the language you speak — Top Gun and Bridget Jones work because of shared anglophone media. Other cultures need their own crate libraries, and those are not built yet.',
+  cta: 'LET’S GO',
+  after: 'Let’s find your Portuguese.',
+} as const
 
 export const DEMO_CLOSE =
   'That’s DUB. Start with something you already know. Find the useful language inside it. Make it yours.'

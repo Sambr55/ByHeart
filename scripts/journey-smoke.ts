@@ -52,8 +52,10 @@ async function main() {
   await page.reload({ waitUntil: 'networkidle' })
   await page.waitForTimeout(700)
   const gated = await page.evaluate(() => document.body.innerText)
-  if (/Pick a crate/.test(gated)) problems.push('/crates bypassed the deal with cleared storage')
-  if (!/HOW IT WORKS/.test(gated)) problems.push('/crates with cleared storage did not land on the deal')
+  if (/Pick a crate/.test(gated)) problems.push('/crates bypassed the front door with cleared storage')
+  if (!/Where do you want DUB to take you/.test(gated)) {
+    problems.push('/crates with cleared storage did not land on the language choice')
+  }
 
   await page.goto(BASE + '/?tester=smoke', { waitUntil: 'networkidle' })
 
@@ -91,6 +93,9 @@ async function main() {
   seen.push(await stage())
   const body0 = await page.evaluate(() => document.body.innerText)
   if (!/Find yourself in another language/.test(body0)) problems.push('landing proposition missing')
+  if (/Learn Portuguese through the films/.test(body0)) {
+    problems.push('landing still names the language — the brand layer is pair-neutral')
+  }
   if (!/SHOW ME HOW/.test(body0)) problems.push('SHOW ME HOW missing')
 
   await press(page.getByTestId('continue'), 'landing cta')
@@ -109,7 +114,22 @@ async function main() {
   const d4 = await page.evaluate(() => document.body.innerText)
   if (!/Three things you can say/i.test(d4)) problems.push('branch beat missing')
   if (!/That’s DUB/.test(d4)) problems.push('demo close line missing')
-  await press(page.getByTestId('continue'), 'to picker')
+  await press(page.getByTestId('continue'), 'to the language choice')
+
+  // The language pair is chosen after the demo: the demo is the argument for choosing
+  // at all, and the deal cannot say "your Portuguese" until this is known.
+  const pairScreen = await page.evaluate(() => document.body.innerText)
+  if (!/Where do you want DUB to take you/.test(pairScreen)) problems.push('pair step missing')
+  if (!/Português/.test(pairScreen)) problems.push('pair step does not offer Portuguese')
+  if (!/COMING SOON/.test(pairScreen)) problems.push('pair step hides what is not built')
+  // Not the word — the copy uses it to promise the opposite. What must not exist is a
+  // way to actually hand one over.
+  const capture = await page.evaluate(
+    () => document.querySelectorAll('input, textarea, form').length,
+  )
+  if (capture > 0) problems.push('the pair step has grown a field — coming soon is not a mailing list')
+  await press(page.getByTestId('pair-pt-PT'), 'choose European Portuguese')
+  await press(page.getByTestId('continue'), 'to the deal')
 
   // The deal sits between the demo and the picker and must answer all three questions.
   const deal = await page.evaluate(() => document.body.innerText)

@@ -74,6 +74,7 @@ export type EventName =
   | 'branch_reveal'
   | 'build_attempt'
   | 'build_help'
+  | 'pair_chosen'
   | 'voice_choice'
   | 'voice_reflection'
   | 'collision_attempt'

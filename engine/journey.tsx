@@ -34,6 +34,7 @@ import {
   setTester,
   syncSession,
 } from './learner'
+import { chosenPair } from './pair'
 import { useLearner } from './useLearner'
 
 /**
@@ -48,6 +49,7 @@ import { useLearner } from './useLearner'
 export type Step =
   | { kind: 'landing' }
   | { kind: 'demo'; i: number }
+  | { kind: 'pair' }
   | { kind: 'deal' }
   | { kind: 'picker' }
   | { kind: 'root'; rootId: string; beat: RootBeat; pieceIndex?: number }
@@ -168,6 +170,9 @@ const initial: JourneyState = {
   steps: [
     { kind: 'landing' },
     ...DEMO_BEATS.map((_, i) => ({ kind: 'demo' as const, i })),
+    // After the demo, before the deal. The demo is the argument for choosing at all,
+    // and the deal can only say "your Portuguese" truthfully once the pair is known.
+    { kind: 'pair' },
     { kind: 'deal' },
     { kind: 'picker' },
   ],
@@ -390,9 +395,13 @@ export function JourneyProvider({
     // from one that has never accepted — so deciding off the snapshot sent everybody who
     // HAD accepted back to the deal. Doing it here also makes the order the spec
     // requires literal: pair, then that pair's record, then the step.
+    // No pair chosen is a front-door problem, not a picker one, and it is checked
+    // first: the pair decides which learner record even gets read.
+    if (!chosenPair()) {
+      dispatch({ type: 'jump', kind: 'pair' })
+      return
+    }
     loadLearner()
-    // No pair chosen yet is a front-door problem, not a picker one. Until the selection
-    // step exists this falls through to the deal, which is the same guard.
     dispatch({ type: 'jump', kind: hasAcceptedDeal() ? 'picker' : 'deal' })
   }, [enter])
   /**
