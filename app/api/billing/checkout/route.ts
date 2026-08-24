@@ -15,10 +15,14 @@ export async function POST(request: Request) {
     )
   }
 
-  let interval: 'monthly' | 'annual' = 'monthly'
+  let interval: 'monthly' | 'annual' | 'founding' = 'monthly'
   try {
     const body = (await request.json()) as { interval?: string }
     if (body.interval === 'annual') interval = 'annual'
+    // Founding is a real price id or it is nothing. Falling back to annual would charge
+    // somebody £54 for the thing they were told cost £29, which is the worst possible
+    // failure mode for a launch offer.
+    if (body.interval === 'founding' && process.env.STRIPE_PRICE_FOUNDING) interval = 'founding'
   } catch {
     /* default */
   }

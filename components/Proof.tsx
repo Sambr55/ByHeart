@@ -46,6 +46,24 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
     return { done: false, count: missing.length, goal, next: missing[0].label }
   }, [learner.profile, learner.inventory])
 
+  /**
+   * How well am I doing — answered from evidence, not from counting screens.
+   *
+   * Only the beats with no culture on screen count, because that is the one measure
+   * that cannot be inflated by opening the app. And it reports what they DID: nine of
+   * twelve, first time. It never characterises them — no "fast learner", no percentile,
+   * no comparison to anybody else. A number you can game by turning up is a streak
+   * wearing a different hat.
+   */
+  const firstTry = useMemo(() => {
+    const cold = (learner.evidence ?? [])
+      .filter((e) => e.culture_context === null && e.event_type !== 'acquire')
+      .slice(-12)
+    if (cold.length < 4) return null
+    const hit = cold.filter((e) => e.correct_first_try && !e.revealed).length
+    return { hit, of: cold.length }
+  }, [learner.evidence])
+
   const shareText = useMemo(() => {
     const latest = recent[0]
     return (
@@ -59,8 +77,40 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
     )
   }, [proof.length, recent, worlds])
 
+  /**
+   * Mint a link, then share that.
+   *
+   * Sharing a text blob asks the reader to go and look DUB up; a link does the work for
+   * them and carries the Portuguese in its image. Falls back to the old text-and-origin
+   * share when links are not configured, so an unprovisioned deployment still shares.
+   */
+  const [link, setLink] = useState<string | null>(null)
+
+  const mint = async (): Promise<string | null> => {
+    if (link) return link
+    try {
+      const res = await fetch('/api/share', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          count: proof.length,
+          worlds,
+          lines: recent.map((r) => ({ pt: r.pt, en: r.en })),
+        }),
+      })
+      const body = (await res.json()) as { ok: boolean; path?: string }
+      if (!body.ok || !body.path) return null
+      const full = window.location.origin + body.path
+      setLink(full)
+      return full
+    } catch {
+      return null
+    }
+  }
+
   const share = async () => {
-    const url = typeof window !== 'undefined' ? window.location.origin : ''
+    const minted = await mint()
+    const url = minted ?? (typeof window !== 'undefined' ? window.location.origin : '')
     const data = { title: 'DUB', text: shareText, url }
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
@@ -138,6 +188,24 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
           </>
         )}
       </section>
+
+      {/* --------------------------------------------------- how am I doing */}
+      {firstTry ? (
+        <section className="rounded-xl border border-line p-4">
+          <p className="eyebrow text-muted">HOW IT IS ACTUALLY GOING</p>
+          <p className="mt-2 text-sm">
+            You said{' '}
+            <span className="font-semibold">
+              {firstTry.hit} of your last {firstTry.of}
+            </span>{' '}
+            right first time, with nothing on screen.
+          </p>
+          <p className="mt-2 text-xs leading-relaxed text-muted">
+            Only the beats where the film had been taken away are counted. It is the one
+            number here that cannot be moved by opening the app.
+          </p>
+        </section>
+      ) : null}
 
       {/* ------------------------------------------------------- the distance */}
       {distance ? (

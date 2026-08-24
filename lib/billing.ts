@@ -79,15 +79,17 @@ export async function ensureCustomer(userId: string, email: string): Promise<str
 export async function checkoutUrl(opts: {
   userId: string
   email: string
-  interval: 'monthly' | 'annual'
+  interval: 'monthly' | 'annual' | 'founding'
   returnTo: string
 }): Promise<string | null> {
   const s = stripe()
   if (!s) return null
   const price =
-    opts.interval === 'annual'
-      ? process.env.STRIPE_PRICE_PRO_ANNUAL
-      : process.env.STRIPE_PRICE_PRO_MONTHLY
+    opts.interval === 'founding'
+      ? process.env.STRIPE_PRICE_FOUNDING
+      : opts.interval === 'annual'
+        ? process.env.STRIPE_PRICE_PRO_ANNUAL
+        : process.env.STRIPE_PRICE_PRO_MONTHLY
   if (!price) return null
 
   const customer = await ensureCustomer(opts.userId, opts.email)

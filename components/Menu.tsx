@@ -19,6 +19,7 @@ const ITEMS = [
   { href: '/drops', label: 'Drops', hint: 'Pegged to something really happening, and expiring' },
   { href: '/line', label: 'Today’s line', hint: 'Twenty seconds, once a day' },
   { href: '/proof', label: 'Proof', hint: 'The sentences you can say cold' },
+  { href: '/pro', label: 'DUB membership', hint: 'What it adds, and what the money is for' },
   { href: '/account', label: 'Account', hint: 'Signing in, billing, and your data' },
   { href: '/feedback', label: 'Feedback', hint: 'Tell us what did not land' },
 ]

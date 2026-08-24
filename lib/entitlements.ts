@@ -111,14 +111,39 @@ export const PLANS = {
     id: 'pro' as const,
     name: 'DUB Pro',
     price: null, // filled from Stripe at render time
-    line: 'Every crate, every drop, real voices, and it works on a plane.',
+    line: 'Every crate, real voices, and it works on a plane.',
     includes: [
       'Every crate, no limit',
-      'Every live drop while it lasts',
       'Unlimited capture — any subtitle, any lyric',
       'The Booth: hear real people, and be one of them',
       'Offline audio',
       'Publish your own crates',
     ],
+  },
+} as const
+
+/**
+ * What things cost, and why.
+ *
+ * Priced against specificity, not against Duolingo. Duolingo is free, gamified and
+ * teaches the wrong Portuguese; competing on price puts DUB in a comparison it loses on
+ * features and wins on nothing. Competing on being the European Portuguese one, taught
+ * through culture and counted honestly, is a comparison it wins outright — and cheap is
+ * a position you cannot climb back out of.
+ *
+ * GBP and EUR, never USD. The audience is British, Irish and European, and a dollar
+ * price on a European Portuguese product reads as wrong.
+ */
+export const PRICING = {
+  currencies: ['GBP', 'EUR'] as const,
+  annual: { gbp: 54, eur: 64 },
+  /** Deliberately poor value against annual. It exists for the trip in nine weeks. */
+  monthly: { gbp: 7.99, eur: 8.99 },
+  founding: {
+    gbp: 29,
+    eur: 34,
+    cap: 500,
+    /** The only genuinely scarce thing on offer, and it is scarce for a real reason. */
+    line: 'Locked for as long as you stay, and it pays for the recordings.',
   },
 } as const
