@@ -21,7 +21,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { COLLISIONS, FAMILIES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
+import { COLLISIONS, CRATES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
 import { NO_CUE_PROMPTS } from '../content/front-door'
 import { AGE_PAIR, GENDER_PAYOFF } from '../content/profile'
 import { slugFor } from '../content/audio-manifest'
@@ -75,7 +75,7 @@ function add(l: Omit<Line, 'slug' | 'speaker'> & { speaker?: Speaker }) {
   lines.push({ ...l, slug, speaker: l.speaker ?? genderOf(l.pt) })
 }
 
-for (const family of FAMILIES) {
+for (const family of CRATES) {
   for (const root of ROOTS_BY_FAMILY[family.id] ?? []) {
     add({
       pt: root.pt_natural,

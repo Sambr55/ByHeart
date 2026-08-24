@@ -1,8 +1,19 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { FAMILIES, PIECES, ROOTS_BY_FAMILY, rootById, type CultureFamily, type Root } from '@/content/roots'
+import {
+  CRATES,
+  PIECES,
+  ROOTS_BY_FAMILY,
+  daysLeft,
+  isLive,
+  rootById,
+  type Crate,
+  type CultureFamily,
+  type DropEvent,
+  type Root,
+} from '@/content/roots'
 import { CLOSE, DEAL as DEAL_COPY, DEMO_BEATS, DEMO_CLOSE, LANDING, NO_CUE_PROMPTS, PICKER } from '@/content/front-door'
 import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
@@ -81,7 +92,7 @@ function Shell({
                 onClick={goHome}
                 className="tap-target text-[0.6rem] uppercase tracking-wider text-muted transition hover:text-fg"
               >
-                Areas
+                Crates
               </button>
             ) : null}
           </div>
@@ -346,51 +357,135 @@ function Demo({ i }: { i: number }) {
   )
 }
 
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+
+/**
+ * The day the drop stops existing — the morning after the thing it was pegged to.
+ * Computed from the ISO date in UTC so it renders identically on the server and in the
+ * browser; a date formatted from local time is a hydration mismatch waiting to happen.
+ */
+function goneOn(drop: DropEvent): string {
+  const d = new Date(drop.on + 'T00:00:00Z')
+  d.setUTCDate(d.getUTCDate() + 1)
+  return 'GONE ' + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()]
+}
+
+/**
+ * The clock is read after mount, never during render.
+ *
+ * A countdown is the one piece of state that is guaranteed to differ between a server
+ * render and a browser render, and an expiring crate that vanishes mid-hydration is
+ * worse than one that lingers for a single frame. So: everything is live until the
+ * browser says otherwise.
+ */
+function useNowAfterMount(): Date | null {
+  const [now, setNow] = useState<Date | null>(null)
+  useEffect(() => setNow(new Date()), [])
+  return now
+}
+
+function DropClock({ crate, now }: { crate: Crate; now: Date | null }) {
+  const left = now ? daysLeft(crate, now) : null
+  if (left === null) return null
+  return (
+    <span className="shrink-0 rounded-full border border-accent/60 px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-accent">
+      {left <= 1 ? 'last day' : left + ' days left'}
+    </span>
+  )
+}
+
 function Picker() {
   const { chooseFamily, state } = useJourney()
   // Remember what they chose. Stepping back onto this screen and finding the choice
   // wiped is the kind of small betrayal that makes a product feel unreliable.
   const [picked, setPicked] = useState<CultureFamily | null>(state.family)
+  const now = useNowAfterMount()
   const done = useMemo(() => {
     const played = new Set(state.rootsPlayed.map((id) => rootById(id)?.culture_family))
     return played
   }, [state.rootsPlayed])
+  const shown = CRATES.filter((c) => (now ? isLive(c, now) : true))
   return (
     <Shell stage="CHOICE">
       <h1 className="display text-balance text-2xl">{PICKER.headline}</h1>
       <p className="mt-2 text-sm text-muted">{PICKER.sub}</p>
       <div className="mt-5 space-y-2">
-        {FAMILIES.map((f) => {
+        {shown.map((f) => {
           const finished = done.has(f.id)
           return (
-            <button
+            <div
               key={f.id}
-              type="button"
-              aria-pressed={picked === f.id}
-              disabled={finished}
-              onClick={() => setPicked(f.id)}
               className={
-                'tap-target flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-4 text-left transition ' +
-                (finished
-                  ? 'border-line/50 bg-surface/40 opacity-45'
-                  : picked === f.id
-                    ? 'border-accent bg-accent/10'
-                    : 'border-line bg-surface hover:border-accent/50')
+                // The drop's frame lives on the wrapper, not the button, so the ticket
+                // link can sit inside the card without being nested in a button.
+                f.drop
+                  ? 'rounded-xl border transition ' +
+                    (finished
+                      ? 'border-line/50 bg-surface/40 opacity-45'
+                      : picked === f.id
+                        ? 'border-accent bg-accent/10'
+                        : 'border-accent/45 bg-accent/[0.04]')
+                  : undefined
               }
             >
-              <span>
-                <span className="display block text-base">{f.title}</span>
-                <span className="mt-0.5 block text-xs text-muted">{f.blurb}</span>
-              </span>
-              {finished ? (
-                <span className="shrink-0 rounded-full border border-correct/50 px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-correct">
-                  done
+              <button
+                type="button"
+                aria-pressed={picked === f.id}
+                disabled={finished}
+                onClick={() => setPicked(f.id)}
+                className={
+                  'tap-target flex w-full justify-between gap-3 px-4 py-4 text-left transition ' +
+                  (f.drop
+                    ? 'items-start '
+                    : 'items-center rounded-xl border ' +
+                      (finished
+                        ? 'border-line/50 bg-surface/40 opacity-45'
+                        : picked === f.id
+                          ? 'border-accent bg-accent/10'
+                          : 'border-line bg-surface hover:border-accent/50'))
+                }
+              >
+                <span>
+                  {f.drop ? (
+                    <span className="eyebrow mb-1 block text-[0.55rem] text-accent">
+                      DROP · {goneOn(f.drop)}
+                    </span>
+                  ) : null}
+                  <span className="display block text-base">{f.title}</span>
+                  <span className="mt-0.5 block text-xs text-muted">{f.blurb}</span>
+                  {f.drop ? (
+                    <span className="mt-1.5 block text-xs text-muted">
+                      {f.drop.event} · {f.drop.place}
+                    </span>
+                  ) : null}
                 </span>
+                {finished ? (
+                  <span className="shrink-0 rounded-full border border-correct/50 px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-correct">
+                    done
+                  </span>
+                ) : f.drop ? (
+                  <DropClock crate={f} now={now} />
+                ) : null}
+              </button>
+              {/* Outside the button on purpose — an anchor nested in a button is not a
+                  thing a browser or a screen reader can make sense of. */}
+              {f.drop?.link ? (
+                <a
+                  href={f.drop.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mb-3 ml-4 inline-block text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
+                >
+                  {f.drop.link_label ?? 'TICKETS'} ↗
+                </a>
               ) : null}
-            </button>
+            </div>
           )
         })}
       </div>
+      {shown.some((c) => c.drop) ? (
+        <p className="mt-4 text-xs leading-relaxed text-muted">{PICKER.drop_note}</p>
+      ) : null}
       <Cta label={PICKER.cta} disabled={!picked} onClick={() => picked && chooseFamily(picked)} />
     </Shell>
   )
@@ -598,7 +693,7 @@ function RootBeatView({
 }) {
   const { next, recordVoice } = useJourney()
   const root = rootById(rootId)!
-  const family = FAMILIES.find((f) => f.id === root.culture_family)!
+  const family = CRATES.find((f) => f.id === root.culture_family)!
   const [done, setDone] = useState(false)
   const [choice, setChoice] = useState<string | null>(null)
 
@@ -1161,7 +1256,7 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
         })}
       </ul>
       <p className="mt-4 text-sm text-muted">
-        The rest are in the areas you have not opened yet.
+        The rest are in the crates you have not opened yet.
       </p>
     </div>
   )
@@ -1175,20 +1270,23 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
 function SectionComplete() {
   const { finishSection, owned, state } = useJourney()
   const acts = capabilities(owned)
-  const family = state.family ? FAMILIES.find((f) => f.id === state.family) : null
-  const remaining = FAMILIES.filter(
+  const now = useNowAfterMount()
+  const family = state.family ? CRATES.find((f) => f.id === state.family) : null
+  // An expired drop is not something we can honestly offer them next.
+  const remaining = CRATES.filter(
     (f) =>
+      (now ? isLive(f, now) : true) &&
       !state.rootsPlayed.some((id) => rootById(id)?.culture_family === f.id),
   )
 
   return (
     <Shell stage="CHOICE">
       <div className="flex flex-1 flex-col justify-center">
-        <p className="eyebrow text-accent">{family ? family.title + ' — DONE' : 'AREA COMPLETE'}</p>
+        <p className="eyebrow text-accent">{family ? family.title + ' — DONE' : 'CRATE COMPLETE'}</p>
         <p className="display mt-4 text-balance text-2xl">
           {acts.length
             ? 'You can now ' + acts.slice(0, 3).join(', ') + (acts.length > 3 ? ' — and more.' : '.')
-            : 'That area is done.'}
+            : 'That crate is done.'}
         </p>
         <div className="mt-6 flex flex-wrap gap-2">
           {owned.filter((p) => PIECES[p]).map((p) => (
@@ -1197,8 +1295,8 @@ function SectionComplete() {
         </div>
         {remaining.length ? (
           <p className="mt-7 text-sm text-muted">
-            {remaining.length} more {remaining.length === 1 ? 'area' : 'areas'} to raid, whenever
-            you want them.
+            {remaining.length} more {remaining.length === 1 ? 'crate' : 'crates'} to raid,
+            whenever you want them.
           </p>
         ) : null}
       </div>
@@ -1206,7 +1304,7 @@ function SectionComplete() {
       {remaining.length ? (
         <button
           type="button"
-          data-testid="another-area"
+          data-testid="another-crate"
           onClick={() => finishSection('another')}
           className="tap-target eyebrow mt-6 w-full rounded-xl bg-accent px-5 py-4 text-accent-ink"
         >

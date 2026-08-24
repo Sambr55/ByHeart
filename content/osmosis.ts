@@ -337,6 +337,30 @@ export const INSIGHTS: Insight[] = [
     ],
     proper_name: 'demonstratives',
   },
+  {
+    id: 'adjective-after',
+    requires: ['mundo', 'normal'],
+    headline: 'You put the describing word after the thing, and it sounded right',
+    body:
+      'English says ordinary world. Portuguese says mundo normal — the description goes behind, almost every time. You have been doing it since the first title and nobody mentioned it.',
+    evidence: [
+      { pt: 'Um mundo normal.', en: 'An ordinary world.' },
+      { pt: 'Uma vida nova.', en: 'A new life.' },
+    ],
+    proper_name: 'adjective position',
+  },
+  {
+    id: 'ter-for-states',
+    requires: ['tenho', 'fome'],
+    headline: 'You said you had hunger, and that is genuinely how it works here',
+    body:
+      'English is hungry, is thirsty, is cold. Portuguese has all of them. Once you notice it you have fome, sede, frio, calor and razão in one go, because they all hang off the same verb.',
+    evidence: [
+      { pt: 'Tenho fome.', en: 'I’m hungry.' },
+      { pt: 'Tenho sede.', en: 'I’m thirsty.' },
+    ],
+    proper_name: 'ter for physical states',
+  },
 ]
 
 /** Pick what is honestly true of this learner, newest ideas first, never repeating. */

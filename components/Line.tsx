@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { dayKey, pickLine, rootFor, type DailyLine } from '@/content/daily-line'
-import { FAMILIES } from '@/content/roots'
+import { CRATES } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { play } from '@/engine/audio'
 import { track } from '@/engine/analytics'
@@ -34,7 +34,7 @@ export function Line({ pushReady }: { pushReady: boolean }) {
   }, [line])
 
   const root = line ? rootFor(line) : undefined
-  const family = root ? FAMILIES.find((f) => f.id === root.culture_family) : undefined
+  const family = root ? CRATES.find((f) => f.id === root.culture_family) : undefined
 
   return (
     <main

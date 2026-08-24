@@ -22,6 +22,7 @@ export type CultureFamily =
   | 'portuguese_swearing'
   | 'flirting_m2f'
   | 'flirting_f2m'
+  | 'duran_duran_lisboa'
 
 export type RootType = 'quote' | 'title' | 'paraphrased_moment' | 'wisdom' | 'other'
 
@@ -99,13 +100,38 @@ export interface Root {
   next_root_hooks: string[]
 }
 
-export const FAMILIES: {
+/**
+ * A crate is permanent. A drop expires.
+ *
+ * That is the only difference, and it is the whole difference: a crate sits there
+ * forever and you dig through it, while a drop is pegged to something actually
+ * happening and goes when the thing goes. The urgency in a drop is real, which is
+ * precisely what a streak's urgency is not.
+ *
+ * What was learned inside a drop never expires — it moves into the inventory like
+ * anything else. The drop disappears; the language does not.
+ */
+export interface DropEvent {
+  /** What is happening. */
+  event: string
+  place: string
+  /** ISO date. The drop is gone the morning after. */
+  on: string
+  link?: string
+  link_label?: string
+}
+
+export interface Crate {
   id: CultureFamily
   title: string
   blurb: string
   tone: string
   built: boolean
-}[] = [
+  /** Present on a drop, absent on a crate. */
+  drop?: DropEvent
+}
+
+export const CRATES: Crate[] = [
   { id: 'top_gun', title: 'TOP GUN QUOTES', blurb: 'Iconic lines. Direct language.', tone: 'kinetic', built: true },
   { id: 'james_bond', title: 'JAMES BOND FILM TITLES', blurb: 'Tiny titles. Surprisingly useful Portuguese.', tone: 'cool', built: true },
   { id: 'bridget_jones', title: 'BRIDGET JONES CRINGE MOMENTS', blurb: 'Awkwardness you can actually use.', tone: 'human', built: true },
@@ -115,7 +141,37 @@ export const FAMILIES: {
   { id: 'portuguese_swearing', title: 'HOW TO SWEAR IN PORTUGUESE', blurb: 'The subtitles were lying to you. Strong language throughout.', tone: 'blunt', built: true },
   { id: 'flirting_m2f', title: 'FLIRTING — HIM TO HER', blurb: 'The Love Actually problem. Said properly this time.', tone: 'warm', built: true },
   { id: 'flirting_f2m', title: 'FLIRTING — HER TO HIM', blurb: 'Warmer, funnier and considerably more effective.', tone: 'warm', built: true },
+  {
+    id: 'duran_duran_lisboa',
+    title: 'DURAN DURAN, LISBOA',
+    blurb: 'Six song titles. Gone the morning after the gig.',
+    tone: 'kinetic',
+    built: true,
+    drop: {
+      event: 'Duran Duran',
+      place: 'Altice Arena, Lisboa',
+      on: '2026-11-14',
+      link: 'https://www.altice-arena.com',
+      link_label: 'TICKETS',
+    },
+  },
 ]
+
+/** Live now. A drop is gone the morning after the thing it was pegged to. */
+export function isLive(crate: Crate, now: Date = new Date()): boolean {
+  if (!crate.drop) return true
+  const gone = new Date(crate.drop.on + 'T00:00:00Z')
+  gone.setUTCDate(gone.getUTCDate() + 1)
+  return now < gone
+}
+
+/** Whole days left, for the countdown. Null for a crate, which has no clock. */
+export function daysLeft(crate: Crate, now: Date = new Date()): number | null {
+  if (!crate.drop) return null
+  const gone = new Date(crate.drop.on + 'T00:00:00Z')
+  gone.setUTCDate(gone.getUTCDate() + 1)
+  return Math.max(0, Math.ceil((gone.getTime() - now.getTime()) / 86_400_000))
+}
 
 const q = (partial: Partial<Root> & Pick<Root, 'root_id' | 'culture_family' | 'root_display' | 'meaning_en' | 'pt_natural' | 'semantic_bridge' | 'subtext' | 'extracts' | 'branches' | 'transfer_prompt'>): Root => ({
   root_type: 'quote',
@@ -2061,6 +2117,308 @@ export const FLIRTING_F2M: Root[] = [
   }),
 ]
 
+// ---------------------------------------------------------------------------
+// B12 — Duran Duran, Lisboa. A DROP, not a crate: pegged to the Altice Arena
+// date and gone the morning after it.
+//
+// Held to exactly the standard a permanent crate is held to. An expiry date is
+// not a licence for thin content — it is the reason the content has to be right
+// first time, because there is no second pass at a drop.
+//
+// Two of these titles are deliberately built out of pieces the learner may
+// already own (PRECISO DE from Top Gun, AMANHÃ from Bond). A drop is the best
+// possible place to show compounding, because the learner arrived for the gig
+// and leaves having been shown that they already knew half of it.
+// ---------------------------------------------------------------------------
+
+export const DURAN_DURAN: Root[] = [
+  q({
+    root_id: 'dd_wolf',
+    culture_family: 'duran_duran_lisboa',
+    root_type: 'title',
+    source_label: 'Hungry Like the Wolf',
+    source_status: 'verified',
+    root_display: 'Hungry Like the Wolf',
+    meaning_en: 'Hungry like the wolf.',
+    pt_natural: 'Tenho uma fome de lobo.',
+    literal_note: 'Literally “I have a hunger of wolf”.',
+    semantic_bridge:
+      'English IS hungry. Portuguese HAS hunger. And “uma fome de lobo” is a real expression in Portugal, not a translation of the song — which is why this title survives the crossing when most do not. That one swap, ter where English uses to be, carries fome, sede, frio, calor and razão with it.',
+    subtext: 'Physical and unfussy. It is also the first thing you will say in a restaurant.',
+    extracts: [
+      { id: 'tenho', pt: 'tenho', gloss: 'I have' },
+      { id: 'fome', pt: 'fome', gloss: 'hunger' },
+    ],
+    branches: [
+      { pt: 'Tenho fome.', en: 'I’m hungry.' },
+      { pt: 'Não tenho fome.', en: 'I’m not hungry.' },
+      { pt: 'Tenho sede.', en: 'I’m thirsty.' },
+    ],
+    helpers: {
+      'sede': 'thirst',
+      'Não': 'not',
+      'uma': 'a',
+      'de': 'of',
+      'lobo': 'wolf',
+    },
+    voice_options: [
+      {
+        pt: 'Tenho fome.', en: 'I’m hungry.', signal: 'direct',
+        register: 'DECIDING WHERE TO EAT',
+        when: 'Said to whoever is holding the menu. This is information, and nobody will find it dramatic.',
+        safest: true,
+      },
+      {
+        pt: 'Estou cheio de fome.', en: 'I’m starving.', signal: 'casual',
+        register: 'AMONG FRIENDS',
+        when: 'Louder, funnier, and used constantly between people who know each other well.',
+        risk: 'Cheio agrees with you, not with the hunger — a woman says cheia.',
+      },
+    ],
+    voice_rule:
+      'Because Portuguese has hunger rather than being hungry, everything that intensifies it attaches to the person: cheio de fome, morto de fome. That is why it has to agree with whoever is speaking.',
+    transfer_prompt: {
+      context: 'You have sat down and the waiter is already at the table.',
+      ask: 'I’m hungry.',
+      answer: 'Tenho fome.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['first-day', 'ordering'],
+    next_root_hooks: ['tudo'],
+  }),
+  q({
+    root_id: 'dd_monday',
+    culture_family: 'duran_duran_lisboa',
+    root_type: 'title',
+    source_label: 'New Moon on Monday',
+    source_status: 'verified',
+    root_display: 'New Moon on Monday',
+    meaning_en: 'New moon on Monday.',
+    pt_natural: 'Lua nova na segunda-feira.',
+    semantic_bridge:
+      'Portugal does not name its weekdays after gods or planets — it counts them. Monday is segunda-feira, the second one. Get this single word and terça, quarta, quinta and sexta arrive free, because you are only counting.',
+    subtext: 'Flat, practical admin language — the stuff that decides whether you can make a plan.',
+    extracts: [
+      { id: 'segunda_feira', pt: 'segunda-feira', gloss: 'Monday' },
+      { id: 'nova', pt: 'nova', gloss: 'new' },
+    ],
+    branches: [
+      { pt: 'Até segunda-feira.', en: 'See you Monday.' },
+      { pt: 'Na segunda-feira não posso.', en: 'I can’t on Monday.' },
+      { pt: 'Uma vida nova.', en: 'A new life.' },
+    ],
+    reinforces: ['amanha', 'vida', 'podes'],
+    helpers: {
+      'Até': 'until / see you',
+      'Na': 'on the',
+      'não': 'not',
+      'posso': 'I can',
+      'Lua': 'moon',
+      'Uma': 'a',
+    },
+    transfer_prompt: {
+      context: 'You are leaving and you will next see them at the start of the week.',
+      ask: 'See you Monday.',
+      answer: 'Até segunda-feira.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['time', 'plans'],
+    next_root_hooks: ['amanha'],
+  }),
+  q({
+    root_id: 'dd_know',
+    culture_family: 'duran_duran_lisboa',
+    root_type: 'title',
+    source_label: 'Is There Something I Should Know?',
+    source_status: 'verified',
+    root_display: 'Is There Something I Should Know?',
+    meaning_en: 'Is there something I should know?',
+    pt_natural: 'Há alguma coisa que eu deva saber?',
+    semantic_bridge:
+      'English keeps changing shape — there is, there are, there was. Portuguese has HÁ, and it does not care how many of the thing there are. It is one syllable, it never agrees with anything, and it is also how Portuguese says “ago”.',
+    subtext: 'The question you ask when you can feel something is being left out.',
+    extracts: [
+      { id: 'ha', pt: 'há', gloss: 'there is / there are' },
+      { id: 'alguma_coisa', pt: 'alguma coisa', gloss: 'something' },
+    ],
+    branches: [
+      { pt: 'Há um problema.', en: 'There’s a problem.' },
+      { pt: 'Não há problema.', en: 'No problem.' },
+      { pt: 'Há alguma coisa boa?', en: 'Is there anything good?' },
+    ],
+    reinforces: ['bom', 'qualquer_coisa'],
+    helpers: {
+      'um': 'a',
+      'problema': 'problem',
+      'Não': 'not',
+      'que': 'that',
+      'eu': 'I',
+      'deva': 'should',
+      'saber': 'know',
+      'boa': 'good',
+    },
+    voice_options: [
+      {
+        pt: 'Não há problema.', en: 'No problem.', signal: 'casual',
+        register: 'WAVING IT AWAY',
+        when: 'The everyday answer to an apology, a delay, or someone squeezing past you.',
+        safest: true,
+      },
+      {
+        pt: 'Não faz mal.', en: 'It doesn’t matter.', signal: 'warm',
+        register: 'REASSURING SOMEONE',
+        when: 'Softer, and aimed at the person rather than the problem — use it when they feel bad.',
+      },
+    ],
+    voice_rule:
+      'One answers the problem, the other answers the person. Portuguese lets you choose which of the two you are letting off the hook.',
+    transfer_prompt: {
+      context: 'Someone has just apologised for standing on your foot.',
+      ask: 'No problem.',
+      answer: 'Não há problema.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['questions', 'smoothing-things-over'],
+    next_root_hooks: ['qualquer_coisa'],
+  }),
+  q({
+    root_id: 'dd_prayer',
+    culture_family: 'duran_duran_lisboa',
+    root_type: 'title',
+    source_label: 'Save a Prayer',
+    source_status: 'verified',
+    root_display: 'Save a Prayer (…till the morning after)',
+    meaning_en: 'Save a prayer for the morning after.',
+    pt_natural: 'Guarda uma oração para a manhã seguinte.',
+    semantic_bridge:
+      'Here is the good bit. If you have met AMANHÃ already, you have been carrying this word around without knowing: amanhã is a + manhã, “to the morning”. The song has just pulled your own vocabulary apart in front of you.',
+    subtext: 'The one that quietly proves the whole compounding idea, using a word you already had.',
+    extracts: [
+      { id: 'guarda', pt: 'guarda', gloss: 'keep / save' },
+      { id: 'manha', pt: 'manhã', gloss: 'morning' },
+    ],
+    branches: [
+      { pt: 'Guarda isto.', en: 'Keep this.' },
+      { pt: 'Guarda-me um lugar.', en: 'Save me a seat.' },
+      { pt: 'De manhã.', en: 'In the morning.' },
+    ],
+    reinforces: ['amanha', 'isto'],
+    helpers: {
+      'Guarda-me': 'keep for me',
+      'um': 'a',
+      'lugar': 'seat / place',
+      'De': 'in / of',
+      'uma': 'a',
+      'oração': 'prayer',
+      'para': 'for',
+      'a': 'the',
+      'seguinte': 'next / following',
+    },
+    transfer_prompt: {
+      context: 'The place is filling up and you are still at the bar.',
+      ask: 'Save me a seat.',
+      answer: 'Guarda-me um lugar.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['time', 'asking-a-favour'],
+    next_root_hooks: ['amanha'],
+  }),
+  q({
+    root_id: 'dd_now',
+    culture_family: 'duran_duran_lisboa',
+    root_type: 'title',
+    source_label: 'All You Need Is Now',
+    source_status: 'verified',
+    root_display: 'All You Need Is Now',
+    meaning_en: 'All you need is now.',
+    pt_natural: 'Tudo o que precisas é agora.',
+    semantic_bridge:
+      'Two thirds of this title may already be yours. PRECISO DE came out of Top Gun and AGORA out of Marcus Aurelius — all that has changed is the ending on the verb, which moves the need from you to them: preciso, precisas.',
+    subtext: 'Reads like a slogan, works like a lever: it is the “you” form of a verb you already use.',
+    extracts: [
+      { id: 'tudo', pt: 'tudo', gloss: 'everything / all' },
+      { id: 'precisas', pt: 'precisas', gloss: 'you need' },
+    ],
+    branches: [
+      { pt: 'Tudo bem?', en: 'All good?' },
+      { pt: 'Precisas de ajuda?', en: 'Do you need help?' },
+      { pt: 'É tudo.', en: 'That’s everything.' },
+    ],
+    reinforces: ['preciso_de', 'agora'],
+    helpers: {
+      'bem': 'well',
+      'de': 'of',
+      'ajuda': 'help',
+      'É': 'is',
+      'o': 'the',
+      'que': 'that',
+    },
+    voice_options: [
+      {
+        pt: 'Tudo bem?', en: 'All good?', signal: 'casual',
+        register: 'HELLO, MOSTLY',
+        when: 'Half greeting, half question. You will hear it forty times a day and it rarely wants a real answer.',
+        safest: true,
+      },
+      {
+        pt: 'Está tudo bem?', en: 'Is everything all right?', signal: 'warm',
+        register: 'YOU LOOK ROUGH',
+        when: 'The same words with está in front, and now it is a genuine question about how they are.',
+        risk: 'Ask this one casually and people will think something has happened.',
+      },
+    ],
+    voice_rule:
+      'Adding está turns a greeting into an enquiry. Portuguese does this a lot — the words stay, one small verb decides whether you actually want to know.',
+    transfer_prompt: {
+      context: 'Your friend has gone quiet and you want to check without making a scene.',
+      ask: 'Do you need anything?',
+      answer: 'Precisas de alguma coisa?',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['everyday', 'checking-in'],
+    next_root_hooks: ['agora'],
+  }),
+  q({
+    root_id: 'dd_ordinary',
+    culture_family: 'duran_duran_lisboa',
+    root_type: 'title',
+    source_label: 'Ordinary World',
+    source_status: 'verified',
+    root_display: 'Ordinary World',
+    meaning_en: 'Ordinary world.',
+    pt_natural: 'Um mundo normal.',
+    semantic_bridge:
+      'English stacks the description in front: ordinary world. Portuguese puts it behind, almost always — mundo normal, vida nova, café pequeno. Two words in a song title, and the default word order of the whole language is sitting in them.',
+    subtext: 'Plain, slightly melancholy, and structurally the most useful thing in the drop.',
+    extracts: [
+      { id: 'mundo', pt: 'mundo', gloss: 'world' },
+      { id: 'normal', pt: 'normal', gloss: 'normal / ordinary' },
+    ],
+    branches: [
+      { pt: 'Uma vida normal.', en: 'A normal life.' },
+      { pt: 'Não é normal.', en: 'That’s not normal.' },
+      { pt: 'O mundo é assim.', en: 'That’s the world for you.' },
+    ],
+    reinforces: ['vida', 'nova'],
+    helpers: {
+      'Uma': 'a',
+      'Um': 'a',
+      'Não': 'not',
+      'é': 'is',
+      'O': 'the',
+      'assim': 'like that',
+    },
+    transfer_prompt: {
+      context: 'Something has happened that absolutely should not have happened.',
+      ask: 'That’s not normal.',
+      answer: 'Não é normal.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['describing', 'word-order'],
+    next_root_hooks: ['vida'],
+  }),
+]
+
 export const ROOTS: Root[] = [
   ...TOP_GUN,
   ...JAMES_BOND,
@@ -2071,6 +2429,7 @@ export const ROOTS: Root[] = [
   ...SWEARING,
   ...FLIRTING_M2F,
   ...FLIRTING_F2M,
+  ...DURAN_DURAN,
 ]
 
 export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
@@ -2083,6 +2442,7 @@ export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
   portuguese_swearing: SWEARING,
   flirting_m2f: FLIRTING_M2F,
   flirting_f2m: FLIRTING_F2M,
+  duran_duran_lisboa: DURAN_DURAN,
 }
 
 export function rootById(id: string): Root | undefined {
@@ -2420,5 +2780,81 @@ export const COLLISIONS: Collision[] = [
     ask: 'Do you have time?',
     answer: 'Tens tempo?',
     provenance: 'Ancient philosophy supplied the verb. A spy film supplied the noun.',
+  },
+
+  // --- the drop, colliding with all nine permanent crates --------------------
+  // A drop that touches nothing is a novelty. These are what make the Duran Duran
+  // date leave something behind after it expires.
+  {
+    id: 'dd_tg_precisas_comigo',
+    requires: ['precisas', 'comigo'],
+    context: 'He is standing outside the venue working up to going in alone.',
+    ask: 'Do you need to come with me?',
+    answer: 'Precisas de vir comigo?',
+    provenance: 'PRECISO DE came out of a fighter jet. Move the ending and it stops being about you.',
+  },
+  {
+    id: 'dd_jb_amanha_manha',
+    requires: ['amanha', 'manha'],
+    context: 'You are saying goodnight and fixing the time in the same breath.',
+    ask: 'See you tomorrow morning.',
+    answer: 'Até amanhã de manhã.',
+    provenance: 'A Bond title gave you AMANHÃ. A Duran Duran chorus opened it up: a + manhã.',
+  },
+  {
+    id: 'dd_bj_desculpa_ha',
+    requires: ['desculpa', 'ha'],
+    context: 'You have arrived late again and something is clearly wrong.',
+    ask: 'Sorry — is there a problem?',
+    answer: 'Desculpa, há um problema?',
+    provenance: 'Bridget supplied the apology. The song supplied the one word Portuguese uses for “there is”.',
+  },
+  {
+    id: 'dd_pf_calma_tudo',
+    requires: ['calma', 'tudo'],
+    context: 'He is spiralling and none of it is actually that serious.',
+    ask: 'Calm down — everything’s fine.',
+    answer: 'Calma, está tudo bem.',
+    provenance: 'Pulp Fiction taught you to say CALMA without sounding sarcastic. Now it has something to be calm about.',
+  },
+  {
+    id: 'dd_ah_tudo_sempre',
+    requires: ['tudo', 'sempre'],
+    context: 'The gig is over, and so is the drop it came in.',
+    ask: 'Not everything lasts forever.',
+    answer: 'Nem tudo dura sempre.',
+    provenance: 'Audrey supplied SEMPRE. The drop it landed in did not last, which was rather the point.',
+  },
+  {
+    id: 'dd_ma_tudo_mudar',
+    requires: ['tudo', 'mudar'],
+    context: 'He is annoyed that the drop has gone from his picker.',
+    ask: 'Everything changes.',
+    answer: 'Tudo muda.',
+    provenance: 'Marcus Aurelius on impermanence, arriving via a pop song. He would have been fine with that.',
+  },
+  {
+    id: 'dd_sw_foda_fome',
+    requires: ['foda_se', 'fome'],
+    context: 'Four hours in the queue and not one food stall has opened.',
+    ask: 'For fuck’s sake, I’m starving.',
+    answer: 'Foda-se, tenho uma fome de lobo.',
+    provenance: 'The swearing crate and a Duran Duran chorus, in complete agreement.',
+  },
+  {
+    id: 'dd_fm_oferecer_alguma_coisa',
+    requires: ['oferecer_te', 'alguma_coisa'],
+    context: 'The bar is three deep and you are going anyway.',
+    ask: 'Can I get you something?',
+    answer: 'Posso oferecer-te alguma coisa?',
+    provenance: 'Flirting gave you OFERECER-TE. The drop gave you the thing you are offering.',
+  },
+  {
+    id: 'dd_ff_ligas_segunda',
+    requires: ['ligas_me', 'segunda_feira'],
+    context: 'The gig is on the Saturday. She is not leaving the rest of it to chance.',
+    ask: 'Call me on Monday.',
+    answer: 'Ligas-me na segunda-feira?',
+    provenance: 'LIGAS-ME was hers. SEGUNDA-FEIRA came out of a song about a Monday. Together they are a plan.',
   },
 ]

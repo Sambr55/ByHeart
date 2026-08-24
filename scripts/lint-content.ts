@@ -20,7 +20,7 @@ import {
 } from '../content/targets'
 import { AUDIO_MANIFEST, normalisePhrase, slugFor } from '../content/audio-manifest'
 import { ANCHOR_CARDS, BLOCK_CARDS, COMBINATION_CARDS } from '../content/deck'
-import { COLLISIONS, FAMILIES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
+import { COLLISIONS, CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
 import { INSIGHTS } from '../content/osmosis'
 import { GOAL_NEEDS, QUESTIONS_IN_ORDER } from '../content/profile'
 import { branchesFor, buildTargetFor } from '../engine/journey'
@@ -452,17 +452,17 @@ for (const e of EXAMPLES) {
     }
   }
 
-  for (const family of FAMILIES) {
+  for (const family of CRATES) {
     const roots = ROOTS_BY_FAMILY[family.id] ?? []
     const freebies = roots.filter((r) => r.freebie_flag)
     // §B10 — maximum one freebie per cultural family per session.
     if (freebies.length > 1) {
-      fail('family ' + family.id + ' has ' + freebies.length + ' freebies; the cap is one')
+      fail('crate ' + family.id + ' has ' + freebies.length + ' freebies; the cap is one')
     }
     const strong = roots.filter((r) => !r.freebie_flag)
     if (strong.length < 4) {
       fail(
-        'family ' + family.id + ' has ' + strong.length +
+        'crate ' + family.id + ' has ' + strong.length +
           ' strong roots; §17.4 requires at least 4',
       )
     }
@@ -491,16 +491,16 @@ for (const e of EXAMPLES) {
       inCollisions[f as string] = (inCollisions[f as string] ?? 0) + 1
     }
   }
-  for (const f of FAMILIES) {
+  for (const f of CRATES) {
     const n = inCollisions[f.id] ?? 0
-    if (n === 0) fail('family ' + f.id + ' appears in no collision at all')
-    else if (n < 2) warn('family ' + f.id + ' appears in only one collision')
+    if (n === 0) fail('crate ' + f.id + ' appears in no collision at all')
+    else if (n < 2) warn('crate ' + f.id + ' appears in only one collision')
   }
   const pairs: string[] = []
-  for (let i = 0; i < FAMILIES.length; i++) {
-    for (let j = i + 1; j < FAMILIES.length; j++) {
-      const a = FAMILIES[i].id
-      const b = FAMILIES[j].id
+  for (let i = 0; i < CRATES.length; i++) {
+    for (let j = i + 1; j < CRATES.length; j++) {
+      const a = CRATES[i].id
+      const b = CRATES[j].id
       const covered = COLLISIONS.some((c) => {
         const fams = new Set(c.requires.map((p) => PIECES[p]?.family))
         return fams.has(a) && fams.has(b)
@@ -508,18 +508,18 @@ for (const e of EXAMPLES) {
       if (!covered) pairs.push(a + '+' + b)
     }
   }
-  const totalPairs = (FAMILIES.length * (FAMILIES.length - 1)) / 2
+  const totalPairs = (CRATES.length * (CRATES.length - 1)) / 2
   if (pairs.length) {
     warn(
-      pairs.length + ' of ' + totalPairs + ' family pairs have no collision: ' + pairs.slice(0, 6).join(', ') +
+      pairs.length + ' of ' + totalPairs + ' crate pairs have no collision: ' + pairs.slice(0, 6).join(', ') +
         (pairs.length > 6 ? '…' : ''),
     )
   }
 
   console.log(
-    ROOTS.length + ' roots · ' + FAMILIES.length + ' families · ' +
+    ROOTS.length + ' roots · ' + CRATES.length + ' crates · ' +
       Object.keys(PIECES).length + ' pieces · ' + COLLISIONS.length + ' collisions · ' +
-      (totalPairs - pairs.length) + '/' + totalPairs + ' family pairs collide',
+      (totalPairs - pairs.length) + '/' + totalPairs + ' crate pairs collide',
   )
 }
 
@@ -559,16 +559,16 @@ for (const e of EXAMPLES) {
   }
 
   // A section that ends with nothing to say about itself is a wasted screen.
-  for (const family of FAMILIES) {
+  for (const family of CRATES) {
     const owned = new Set(
       (ROOTS_BY_FAMILY[family.id] ?? []).flatMap((r) => r.extracts.map((e) => e.id)),
     )
     const fires = INSIGHTS.filter((i) => i.requires.every((p) => owned.has(p)))
     if (!fires.length) {
-      fail('family ' + family.id + ' can finish a section with no osmosis insight to show')
+      fail('crate ' + family.id + ' can finish a section with no osmosis insight to show')
     }
   }
-  console.log(INSIGHTS.length + ' osmosis insights, every family covered')
+  console.log(INSIGHTS.length + ' osmosis insights, every crate covered')
 }
 
 

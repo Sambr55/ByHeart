@@ -6,7 +6,7 @@
  *   npm run journey
  */
 import { chromium, type Locator, type Page } from 'playwright'
-import { FAMILIES } from '../content/roots'
+import { CRATES, isLive } from '../content/roots'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const family = process.env.FAMILY ?? 'marcus_aurelius'
@@ -80,13 +80,19 @@ async function main() {
   await press(page.getByTestId('continue'), 'accept the deal')
 
   const b2 = await page.evaluate(() => document.body.innerText)
-  if (!/Select an area to get going with/i.test(b2)) problems.push('picker headline wrong')
+  if (!/Pick a crate to get going with/i.test(b2)) problems.push('picker headline wrong')
   if (/WHAT DO YOU ALREADY KNOW BY HEART/.test(b2)) problems.push('free-text screen still present')
-  for (const f of FAMILIES) {
-    if (!b2.includes(f.title)) problems.push('picker missing family ' + f.title)
+  // An expired drop is meant to be absent from the picker, so the smoke walk only
+  // insists on the ones that should be there today.
+  const live = CRATES.filter((c) => isLive(c))
+  for (const f of live) {
+    if (!b2.includes(f.title)) problems.push('picker missing crate ' + f.title)
+  }
+  for (const f of CRATES.filter((c) => !isLive(c))) {
+    if (b2.includes(f.title)) problems.push('expired drop still in the picker: ' + f.title)
   }
 
-  const chosen = FAMILIES.find((f) => f.id === family)!
+  const chosen = live.find((f) => f.id === family)!
   await press(page.getByRole('button', { name: chosen.title, exact: false }).first(), 'family')
   await press(page.getByTestId('continue'), 'start here')
 
@@ -126,18 +132,18 @@ async function main() {
 
     const done = page.getByTestId('im-done')
     if (await done.isVisible().catch(() => false)) {
-      // Take one more area the first time, then finish — so the test exercises both
+      // Take one more crate the first time, then finish — so the test exercises both
       // exits from a section.
-      const another = page.getByTestId('another-area')
+      const another = page.getByTestId('another-crate')
       const takeAnother = sections === 0 && (await another.isVisible().catch(() => false))
       sections++
       await press(takeAnother ? another : done, 'section exit')
       if (takeAnother) {
         await press(
-          page.getByRole('button', { name: FAMILIES.find((f) => f.id !== family)!.title, exact: false }).first(),
+          page.getByRole('button', { name: live.find((f) => f.id !== family)!.title, exact: false }).first(),
           'second family',
         )
-        await press(page.getByTestId('continue'), 'start second area')
+        await press(page.getByTestId('continue'), 'start second crate')
       }
       continue
     }

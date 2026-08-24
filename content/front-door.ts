@@ -127,8 +127,17 @@ export const DEAL = {
 
 /** §08 / §09 — the first meaningful learner choice, and it comes after the demo. */
 export const PICKER = {
-  headline: 'Select an area to get going with, and start building your useful vocabulary bank.',
-  sub: 'Whichever one you already carry around in your head. There is no wrong answer, and no order.',
+  headline: 'Pick a crate to get going with, and start building your useful vocabulary bank.',
+  // The word has to be taught the first time it is used, or it is just jargon. One
+  // clause does it, and it also says what a crate is *for*.
+  sub: 'A crate is a pile of something you already know by heart. Take whichever one you carry around in your head — there is no wrong answer, and no order.',
+  /**
+   * Shown only when a drop is actually live. The distinction is worth one sentence and
+   * not a paragraph — and the last clause is the promise that stops a drop feeling like
+   * a trick played on people who were busy that week.
+   */
+  drop_note:
+    'The one with a date is a drop. It is pegged to something really happening and it disappears the morning after — but whatever you learn inside it is yours to keep.',
   cta: 'START HERE',
 } as const
 
