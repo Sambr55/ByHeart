@@ -88,6 +88,7 @@ async function main() {
 
   const seen: string[] = []
   let sections = 0
+  let legendOffers = 0
   const stage = async () =>
     (await page.evaluate(() => document.querySelector('[data-stage]')?.getAttribute('data-stage'))) ?? '?'
 
@@ -204,6 +205,25 @@ async function main() {
 
     const done = page.getByTestId('im-done')
     if (await done.isVisible().catch(() => false)) {
+      /*
+        The thread's loud moment, checked where it actually happens.
+
+        A crate that opens Legend cards must say so, once, here — and the first time it
+        must OFFER the Legend rather than referring to one the learner has never seen.
+        This is the only screen where that state is real.
+      */
+      const complete = await page.evaluate(() => document.body.innerText)
+      const offered = /YOUR LEGEND/.test(complete)
+      legendOffers += offered ? 1 : 0
+      if (offered) {
+        if (!/enough Portuguese to start your Legend/i.test(complete)) {
+          problems.push('the Legend was offered without saying what it is')
+        }
+        if (!(await page.getByTestId('legend-decline').isVisible().catch(() => false))) {
+          problems.push('the Legend offer cannot be declined — a goal you did not choose is a nag')
+        }
+      }
+
       // Take one more crate the first time, then finish — so the test exercises both
       // exits from a section.
       const another = page.getByTestId('another-crate')
@@ -255,6 +275,9 @@ async function main() {
     if (!n || Number(n[1]) < 1) problems.push('proof card counted nothing after a full run')
     else console.log('proof card: ' + n[1] + ' sentences produced cold')
   }
+  console.log('legend offered at ' + legendOffers + ' of ' + sections + ' section ends')
+  {
+  }
 
   const end = await page.evaluate(() => document.body.innerText)
   console.log('stages: ' + seen.join(' '))
@@ -281,6 +304,14 @@ async function main() {
     This is the assertion the whole session exists to earn: a learner who has been all
     the way through arrives somewhere that knows it. Landing back on the crate picker is
     what made the product read as one session repeated.
+  */
+  /*
+    The thread's loud moment, asserted where it actually happens.
+
+    A crate that opens Legend cards must say so, once, at section-complete — and it must
+    OFFER the Legend the first time rather than referring to one the learner has never
+    seen. This runs at the end of a real section, which is the only place the state is
+    real.
   */
   await press(page.getByTestId('continue'), 'into Dub Club')
   await page.waitForURL('**/club', { timeout: 20000 }).catch(() => {})

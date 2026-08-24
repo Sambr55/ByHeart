@@ -447,6 +447,39 @@ const q = (partial: Partial<Root> & Pick<Root, 'root_id' | 'culture_family' | 'r
 
 export const TOP_GUN: Root[] = [
   q({
+    root_id: 'tg_school',
+    culture_family: 'top_gun',
+    rung: 2,
+    root_type: 'quote',
+    source_label: 'What Top Gun actually is',
+    source_status: 'paraphrased',
+    root_display: 'Top Gun is a school. You are here to work.',
+    source: 'This is a school. You are here to work.',
+    target: 'Isto é uma escola. Estás aqui para trabalhar.',
+    semantic_bridge:
+      'The whole film is set at a school, which is easy to forget under the jets. Escola covers every kind — the one your children go to, the one you learn Portuguese at, a flight school full of people shouting. And trabalho does double duty: the noun for your work and, with one letter changed, the verb for doing it.',
+    subtext: 'Said flatly, to people who thought they had arrived.',
+    extracts: [
+      { id: 'escola', target: 'a escola', gloss: 'school', shelf: 'things', gender: 'f' },
+      { id: 'trabalho', target: 'trabalho', gloss: 'I work', shelf: 'doing', lemma: 'trabalhar', form: 'I', note: 'Also the noun: o trabalho is the work itself. Same word, and context does the rest.' },
+    ],
+    branches: [
+      { target: 'Trabalho em Lisboa.', en: 'I work in Lisbon.', demonstrates: ['trabalho'] },
+      { target: 'Os meus filhos andam na escola.', en: 'My children are at school.', demonstrates: ['escola'] },
+      { target: 'Trabalho com coisas criativas.', en: 'I work with creative things.', demonstrates: ['trabalho'] },
+    ],
+    reinforces: ['o_meu', 'filhos', 'coisa'],
+    helpers: { 'Isto': 'this', 'é': 'is', 'uma': 'a', 'Estás': 'you are', 'aqui': 'here', 'para': 'to', 'trabalhar': 'to work', 'em': 'in', 'meus': 'my (more than one)', 'andam': 'go', 'na': 'at the', 'com': 'with', 'coisas': 'things', 'criativas': 'creative' },
+    transfer_prompt: {
+      context: 'Somebody has asked what you do, and you would rather keep it short.',
+      ask: 'I work in Lisbon.',
+      answer: 'Trabalho em Lisboa.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['about-me', 'work'],
+    next_root_hooks: ['nao_percebi'],
+  }),
+  q({
     root_id: 'tg_goose',
     culture_family: 'top_gun',
     rung: 2,
@@ -683,6 +716,40 @@ export const TOP_GUN: Root[] = [
 // ---------------------------------------------------------------------------
 
 export const JAMES_BOND: Root[] = [
+  q({
+    root_id: 'jb_english',
+    culture_family: 'james_bond',
+    rung: 1,
+    root_type: 'quote',
+    source_label: 'Bond introducing himself, in every film',
+    source_status: 'paraphrased',
+    root_display: 'Bond. James Bond. English.',
+    source: 'I am English.',
+    target: 'Sou inglês.',
+    semantic_bridge:
+      'The most famous self-introduction in film, and the second half is the sentence you will say most often in Portugal. Sou is the permanent one — what you are and where you are from, the things that do not change by Tuesday — and nationalities take an ending like everything else: inglês if you are a man, inglesa if you are a woman.',
+    subtext: 'Stated, not explained.',
+    extracts: [
+      { id: 'sou', target: 'sou', gloss: 'I am', shelf: 'doing', lemma: 'ser', form: 'I', note: 'The permanent one. Sou for what you are; estou for how you are today.' },
+      { id: 'ingles', target: 'inglês', gloss: 'English', shelf: 'describing', lemma: 'inglês', form: 'said by a man' },
+      { id: 'inglesa', target: 'inglesa', gloss: 'English', shelf: 'describing', lemma: 'inglês', form: 'said by a woman' },
+    ],
+    branches: [
+      { target: 'Sou inglesa, de Londres.', en: 'I am English, from London.', demonstrates: ['inglesa', 'sou'] },
+      { target: 'Não sou português.', en: 'I am not Portuguese.', demonstrates: ['sou'] },
+      { target: 'Sou o Sam. Sou inglês.', en: 'I am Sam. I am English.', demonstrates: ['sou', 'ingles'] },
+    ],
+    reinforces: ['chamo_me', 'nao'],
+    helpers: { 'de': 'from', 'Londres': 'London', 'Não': 'not', 'português': 'Portuguese', 'o': 'the' },
+    transfer_prompt: {
+      context: 'Somebody has heard your accent and asked where you are from.',
+      ask: 'I am English, from London.',
+      answer: 'Sou inglesa, de Londres.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['about-me', 'first-day'],
+    next_root_hooks: ['anos'],
+  }),
   q({
     root_id: 'jb_name',
     culture_family: 'james_bond',
@@ -967,6 +1034,73 @@ export const JAMES_BOND: Root[] = [
 // ---------------------------------------------------------------------------
 
 export const BRIDGET_JONES: Root[] = [
+  q({
+    root_id: 'bj_age',
+    culture_family: 'bridget_jones',
+    rung: 2,
+    root_type: 'other',
+    source_label: 'The diary, which opens on the statistics',
+    source_status: 'paraphrased',
+    root_display: 'Thirty-two years old. Weight: unchanged.',
+    source: 'I am thirty-two years old.',
+    target: 'Tenho trinta e dois anos.',
+    semantic_bridge:
+      'The one every English speaker gets wrong exactly once. Portuguese does not BE an age, it HAS one — tenho trinta e dois anos, "I have thirty-two years" — so the verb you already learned from a song about being hungry is the verb you need to say how old you are. Say sou trinta e dois and you have said "I am thirty-two", which means nothing at all.',
+    subtext: 'Counted, and slightly regretted.',
+    extracts: [
+      { id: 'anos', target: 'anos', gloss: 'years old', shelf: 'how_much', note: 'Always with tenho, never with sou. You have your age in Portuguese.' },
+      { id: 'trinta', target: 'trinta', gloss: 'thirty', shelf: 'how_much' },
+    ],
+    branches: [
+      { target: 'Tenho trinta anos.', en: 'I am thirty.', demonstrates: ['anos', 'trinta'] },
+      { target: 'Quantos anos tens?', en: 'How old are you?', demonstrates: ['anos'] },
+      { target: 'Ele tem trinta e cinco.', en: 'He is thirty-five.', demonstrates: ['trinta'] },
+    ],
+    reinforces: ['tenho', 'cinco'],
+    helpers: { 'e': 'and', 'dois': 'two', 'Quantos': 'how many', 'tens': 'you have', 'Ele': 'he', 'tem': 'has' },
+    transfer_prompt: {
+      context: 'Somebody at a table has just asked, and everyone is listening.',
+      ask: 'How old are you?',
+      answer: 'Quantos anos tens?',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['about-me', 'numbers'],
+    next_root_hooks: ['casado'],
+  }),
+  q({
+    root_id: 'bj_marrieds',
+    culture_family: 'bridget_jones',
+    rung: 2,
+    root_type: 'quote',
+    source_label: 'Smug Marrieds, at a dinner party',
+    source_status: 'paraphrased',
+    root_display: 'So — why are you still single?',
+    source: 'Are you married?',
+    target: 'És casada?',
+    semantic_bridge:
+      'The question every Smug Married asks across a dinner table, and the one you will be asked within a week of arriving. All three answers are adjectives, so all three take an ending: casado or casada, solteiro or solteira, divorciado or divorciada. Nobody in Portugal considers any of the three a difficult subject.',
+    subtext: 'Asked lightly. Received otherwise.',
+    extracts: [
+      { id: 'casado', target: 'casado', gloss: 'married', shelf: 'describing', lemma: 'casado', form: 'said by a man' },
+      { id: 'solteiro', target: 'solteiro', gloss: 'single', shelf: 'describing', lemma: 'solteiro', form: 'said by a man' },
+      { id: 'divorciado', target: 'divorciado', gloss: 'divorced', shelf: 'describing', lemma: 'divorciado', form: 'said by a man' },
+    ],
+    branches: [
+      { target: 'Sou casado.', en: 'I am married.', demonstrates: ['casado'] },
+      { target: 'Sou solteira, e estou bem assim.', en: 'I am single, and I am fine like that.', demonstrates: ['solteiro'] },
+      { target: 'Sou divorciado.', en: 'I am divorced.', demonstrates: ['divorciado'] },
+    ],
+    reinforces: ['sou', 'nao'],
+    helpers: { 'És': 'are you', 'casada': 'married (said by a woman)', 'solteira': 'single (said by a woman)', 'e': 'and', 'estou': 'I am (right now)', 'bem': 'fine', 'assim': 'like that' },
+    transfer_prompt: {
+      context: 'A dinner table, and somebody has decided it is their business.',
+      ask: 'I am divorced.',
+      answer: 'Sou divorciado.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['about-me'],
+    next_root_hooks: ['filhos'],
+  }),
   q({
     root_id: 'bj_sorry',
     culture_family: 'bridget_jones',
@@ -1299,6 +1433,39 @@ export const BRIDGET_JONES: Root[] = [
 
 export const PULP_FICTION: Root[] = [
   q({
+    root_id: 'pf_what',
+    culture_family: 'pulp_fiction',
+    rung: 1,
+    root_type: 'quote',
+    source_label: 'Jules, on being asked to repeat himself',
+    source_status: 'paraphrased',
+    root_display: 'What? — Say “what” again.',
+    source: 'I did not catch that. Slower, please.',
+    target: 'Não percebi. Mais devagar, por favor.',
+    semantic_bridge:
+      'The most famous misunderstanding in film, and the single most useful thing a beginner can own. What ends a conversation is never running out of things to say — it is the moment they answer, you catch nothing, and you switch to English. Não percebi buys you the sentence again; mais devagar buys you all of them.',
+    subtext: 'Calm. Nobody is in trouble.',
+    extracts: [
+      { id: 'nao_percebi', target: 'não percebi', gloss: 'I did not catch that', shelf: 'just_say', note: 'Not "I do not understand" — it says the sentence went past you, which is friendlier and truer.' },
+      { id: 'devagar', target: 'devagar', gloss: 'slowly', shelf: 'how_much' },
+    ],
+    branches: [
+      { target: 'Desculpe, não percebi.', en: 'Sorry, I did not catch that.', demonstrates: ['nao_percebi'] },
+      { target: 'Pode falar mais devagar?', en: 'Could you speak more slowly?', demonstrates: ['devagar'] },
+      { target: 'Mais devagar, por favor.', en: 'More slowly, please.', demonstrates: ['devagar'] },
+    ],
+    reinforces: ['desculpe', 'por_favor'],
+    helpers: { 'Mais': 'more', 'por favor': 'please', 'Desculpe': 'sorry / excuse me', 'Pode': 'can you', 'falar': 'speak' },
+    transfer_prompt: {
+      context: 'They answered fast and you caught none of it. This is the moment.',
+      ask: 'Sorry, I did not catch that.',
+      answer: 'Desculpe, não percebi.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['repair', 'first-day'],
+    next_root_hooks: ['paciencia'],
+  }),
+  q({
     root_id: 'pf_royale',
     culture_family: 'pulp_fiction',
     rung: 1,
@@ -1620,6 +1787,39 @@ export const PULP_FICTION: Root[] = [
 
 export const AUDREY_HEPBURN: Root[] = [
   q({
+    root_id: 'ah_adoro',
+    culture_family: 'audrey_hepburn',
+    rung: 2,
+    root_type: 'quote',
+    source_label: 'Audrey Hepburn, on what she actually liked',
+    source_status: 'paraphrased',
+    root_display: 'I love people who make me laugh.',
+    source: 'I love people who make me laugh.',
+    target: 'Adoro pessoas que me fazem rir.',
+    semantic_bridge:
+      'Portuguese has adorar sitting where English keeps two words apart. Adoro is warmer than gosto and nowhere near as heavy as amo — it is the word for a food, a city, a kind of person, and using it about a person you have just met is friendly rather than alarming. Quero is its blunter cousin: not liking, wanting.',
+    subtext: 'Warm, and specific about it.',
+    extracts: [
+      { id: 'adoro', target: 'adoro', gloss: 'I love', shelf: 'doing', lemma: 'adorar', form: 'I', note: 'Stronger than gosto, lighter than amo. Safe about things, food and cities; friendly about people.' },
+      { id: 'quero', target: 'quero', gloss: 'I want', shelf: 'doing', lemma: 'querer', form: 'I' },
+    ],
+    branches: [
+      { target: 'Adoro Lisboa.', en: 'I love Lisbon.', demonstrates: ['adoro'] },
+      { target: 'Quero fazer as coisas que adoro.', en: 'I want to do the things I love.', demonstrates: ['quero', 'adoro'] },
+      { target: 'Quero um café, por favor.', en: 'I want a coffee, please.', demonstrates: ['quero'] },
+    ],
+    reinforces: ['coisa', 'por_favor'],
+    helpers: { 'pessoas': 'people', 'que': 'who / that', 'me': 'me', 'fazem': 'make', 'rir': 'laugh', 'Lisboa': 'Lisbon', 'fazer': 'to do', 'as': 'the', 'coisas': 'things', 'um': 'a', 'café': 'coffee' },
+    transfer_prompt: {
+      context: 'Somebody has asked why you came, and you have decided to answer honestly.',
+      ask: 'I want to do the things I love.',
+      answer: 'Quero fazer as coisas que adoro.',
+    },
+    rights_status: 'short-quote-review-required',
+    starter_tags: ['about-me'],
+    next_root_hooks: ['trabalho'],
+  }),
+  q({
     root_id: 'ah_paris',
     culture_family: 'audrey_hepburn',
     rung: 4,
@@ -1841,6 +2041,39 @@ export const AUDREY_HEPBURN: Root[] = [
 // ---------------------------------------------------------------------------
 
 export const MARCUS_AURELIUS: Root[] = [
+  q({
+    root_id: 'ma_family',
+    culture_family: 'marcus_aurelius',
+    rung: 2,
+    root_type: 'quote',
+    source_label: 'Meditations, Book One — the debts he owed his family',
+    source_status: 'paraphrased',
+    root_display: 'From my grandfather: character. From my father: modesty.',
+    source: 'My children are what I have.',
+    target: 'Os meus filhos são o que tenho.',
+    semantic_bridge:
+      'He opened a book of philosophy by listing what he owed each member of his family, which is a stranger and warmer thing to do than it sounds. Portuguese keeps the article in front of the possessive — os meus filhos, "the my children" — and that little o or a is the part English speakers drop for years.',
+    subtext: 'Owed, and acknowledged.',
+    extracts: [
+      { id: 'filhos', target: 'filhos', gloss: 'children', shelf: 'things', gender: 'm', note: 'Sons, or sons and daughters together. Filhas only if they are all girls.' },
+      { id: 'o_meu', target: 'o meu', gloss: 'my', shelf: 'people', note: 'The article stays: o meu filho, a minha filha. Dropping it is the giveaway.' },
+    ],
+    branches: [
+      { target: 'Tenho três filhos.', en: 'I have three children.', demonstrates: ['filhos'] },
+      { target: 'O meu filho chama-se Oscar.', en: 'My son is called Oscar.', demonstrates: ['o_meu'] },
+      { target: 'Os meus filhos estão em Inglaterra.', en: 'My children are in England.', demonstrates: ['o_meu', 'filhos'] },
+    ],
+    reinforces: ['tenho', 'tres', 'chamo_me'],
+    helpers: { 'Os': 'the', 'meus': 'my (more than one)', 'são': 'are', 'o que': 'what', 'tenho': 'I have', 'três': 'three', 'filho': 'son', 'chama-se': 'is called', 'estão': 'are (right now)', 'em': 'in', 'Inglaterra': 'England' },
+    transfer_prompt: {
+      context: 'They have asked about your family and are waiting.',
+      ask: 'I have three children.',
+      answer: 'Tenho três filhos.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['about-me', 'family'],
+    next_root_hooks: ['adoro'],
+  }),
   q({
     root_id: 'ma_control',
     culture_family: 'marcus_aurelius',
@@ -3603,6 +3836,72 @@ export const WIZARDRY: Root[] = [
 */
 export const THE_BASICS: Root[] = [
   q({
+    root_id: 'tb_patience',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The sentence that keeps a conversation in Portuguese',
+    source_status: 'paraphrased',
+    root_display: 'Bear with me — I am learning.',
+    source: 'I am learning. Bear with me.',
+    target: 'Estou a aprender. Tenha paciência.',
+    semantic_bridge:
+      'Said early, this changes the whole encounter. The other person slows down, drops to simpler Portuguese, and — the part that matters — stays in Portuguese instead of switching to English to be kind. It is the highest-leverage sentence a beginner owns, and almost nobody is taught it.',
+    subtext: 'Honest, and disarming.',
+    extracts: [
+      { id: 'aprender', target: 'estou a aprender', gloss: 'I am learning', shelf: 'doing', note: 'European Portuguese builds the ongoing sense with estou a + the verb. Brazil says estou aprendendo; here it is estou a aprender.' },
+      { id: 'paciencia', target: 'paciência', gloss: 'patience', shelf: 'just_say' },
+    ],
+    branches: [
+      { target: 'Estou a aprender português.', en: 'I am learning Portuguese.', demonstrates: ['aprender'] },
+      { target: 'Tenha paciência, por favor.', en: 'Bear with me, please.', demonstrates: ['paciencia'] },
+      { target: 'Falo pouco, mas estou a tentar.', en: 'I speak little, but I am trying.', demonstrates: ['aprender'] },
+    ],
+    reinforces: ['por_favor', 'nao_percebi'],
+    helpers: { 'Tenha': 'have', 'português': 'Portuguese', 'Falo': 'I speak', 'pouco': 'little', 'mas': 'but', 'tentar': 'to try' },
+    transfer_prompt: {
+      context: 'They have started speaking at full speed and you want them to keep going anyway.',
+      ask: 'Bear with me, please.',
+      answer: 'Tenha paciência, por favor.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['repair', 'first-day'],
+    next_root_hooks: ['porque'],
+  }),
+  q({
+    root_id: 'tb_why',
+    culture_family: 'the_basics',
+    rung: 2,
+    root_type: 'title',
+    source_label: 'Why Do Fools Fall in Love',
+    source_status: 'verified',
+    root_display: 'Why Do Fools Fall in Love',
+    source: 'Why? Because I want to.',
+    target: 'Porquê? Porque quero.',
+    semantic_bridge:
+      'Two spellings, one word, and the accent is the whole difference: porquê with the accent is the question on its own, porque without it starts the answer. Getting this right is a small thing that makes writing look native, and getting it wrong is the most common slip Portuguese people themselves make.',
+    subtext: 'Asked, and answered flatly.',
+    extracts: [
+      { id: 'porque', target: 'porque', gloss: 'because', shelf: 'small_words', note: 'Porquê? with the accent asks. Porque without it answers. Two words, one sound.' },
+      { id: 'ainda', target: 'ainda', gloss: 'still / yet', shelf: 'when' },
+    ],
+    branches: [
+      { target: 'Porque quero.', en: 'Because I want to.', demonstrates: ['porque'] },
+      { target: 'Ainda estou a aprender.', en: 'I am still learning.', demonstrates: ['ainda'] },
+      { target: 'Porque ainda não percebi.', en: 'Because I still did not catch it.', demonstrates: ['porque', 'ainda'] },
+    ],
+    reinforces: ['quero', 'aprender', 'nao_percebi'],
+    helpers: { 'Porquê': 'why', 'quero': 'I want', 'estou a aprender': 'I am learning', 'não': 'not' },
+    transfer_prompt: {
+      context: 'They have asked why Portugal, and you are not going to explain the whole thing.',
+      ask: 'Because I want to.',
+      answer: 'Porque quero.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['about-me'],
+    next_root_hooks: ['sou'],
+  }),
+  q({
     root_id: 'tb_hello_goodbye',
     culture_family: 'the_basics',
     rung: 1,
@@ -3959,6 +4258,37 @@ export const COLLISIONS: Collision[] = [
     ask: 'Five euros. Thank you.',
     answer: 'Cinco euros. Obrigado.',
     provenance: 'ABBA settling up in a Pulp Fiction diner.',
+  },
+  /*
+    The repair kit collides with everything, and that is not a coincidence.
+
+    "Sorry, I did not catch that" belongs in front of a sentence from any crate, which
+    makes these the bridges a beginner reaches soonest — and the first section of every
+    openable crate now hands over either the apology or the not-catching-it.
+  */
+  {
+    id: 'tb_pf_paciencia',
+    requires: ['paciencia', 'nao_percebi'],
+    context: 'They have said it twice and you still have not got it.',
+    ask: 'I did not catch that. Bear with me.',
+    answer: 'Não percebi. Tenha paciência.',
+    provenance: 'A Beatles-adjacent plea and Jules asking you to say what again.',
+  },
+  {
+    id: 'tb_wz_silencio',
+    requires: ['ola', 'silencio'],
+    context: 'You have walked into somewhere very quiet and everybody looked up.',
+    ask: 'Hello. Quiet, sorry.',
+    answer: 'Olá. Silêncio, desculpe.',
+    provenance: 'A pop single meeting a library in a castle.',
+  },
+  {
+    id: 'tb_dd_adeus',
+    requires: ['adeus', 'fome'],
+    context: 'You are leaving and somebody asks whether you want to stay for food.',
+    ask: 'I am hungry. Goodbye anyway.',
+    answer: 'Tenho fome. Adeus na mesma.',
+    provenance: 'One goodbye from the Beatles, one appetite from Duran Duran.',
   },
   {
     id: 'tb_pf_queijo',

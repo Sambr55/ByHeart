@@ -36,6 +36,7 @@ import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Menu } from '@/components/Menu'
 import { Shelves } from '@/components/Shelves'
+import { LEGEND_COPY, LEGEND_FRAMES, framesUnlockedBy } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
 import { setPair } from '@/engine/pair'
@@ -64,6 +65,7 @@ import {
   recordProof,
   rememberNoCue,
   rememberPlayed,
+  setLegendPrompt,
   resetLearnerCache,
   setAffinity,
   setProfile,
@@ -898,6 +900,11 @@ function Picker() {
   return (
     <Shell stage="CHOICE">
       <h1 className="display text-balance text-2xl">{PICKER.headline}</h1>
+      {/* One line, and only for somebody who has a Legend to feed. It answers "what is
+          any of this for" at the exact moment they are choosing. */}
+      {mounted && learner.legend_prompt === 'accepted' ? (
+        <p className="-mt-3 text-sm text-muted">{PICKER.feeds_legend}</p>
+      ) : null}
       {mounted ? (
         <details className="group mt-3">
           {/*
@@ -1127,7 +1134,7 @@ function Picker() {
  * are exactly the right words in the wrong order. Anything in the line that has not
  * been taught is glossed openly above it rather than quietly examined (§06).
  */
-function MiniBuild({
+export function MiniBuild({
   target,
   helpers,
   onSolved,
@@ -1497,6 +1504,10 @@ function RootBeatView({
             This also strengthens {reinforced.map((r) => PIECES[r].target).join(', ')}.
           </p>
         ) : null}
+
+        {/* The quiet end of the thread. Never a modal, never more than once a section,
+            and never shown to somebody who has not taken the Legend up. */}
+        <LegendNudge piece={e.id} />
 
         <Cta
           label={'WHAT DOES ' + e.target.replace('…', '').trim().toUpperCase() + ' GIVE ME?'}
@@ -2064,6 +2075,20 @@ function SectionComplete() {
         <div className="mt-6">
           <Shelves owned={new Set(owned)} pool={justGained} highlight={justGained} />
         </div>
+
+        {/*
+          The payoff, and the only loud place the thread ever speaks.
+
+          The ladder answers "what opens the next crate?" and nothing answered "what is
+          any of this FOR". This does: a crate just opened cards in a thing the learner
+          can picture themselves using, in a room, with a person. It is the first goal in
+          DUB that exists outside the app.
+
+          The first time it appears it OFFERS the Legend, because saying "this goes in
+          your Legend" to somebody who has never seen one is meaningless. After that it
+          is quiet reinforcement, and if they declined it never appears again.
+        */}
+        <LegendPayoff owned={owned} />
         {remaining.length ? (
           <p className="mt-6 text-sm text-muted">
             {remaining.length} more {remaining.length === 1 ? 'crate' : 'crates'} to raid,
@@ -2191,6 +2216,137 @@ function NoCueView({ i }: { i: number }) {
       />
       {done ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
     </Shell>
+  )
+}
+
+/**
+ * "This one is for your Legend."
+ *
+ * One quiet line under a piece that an unanswered card is waiting on. It is the softest
+ * of the thread's three surfaces and it obeys the honesty rule strictly: nothing at all
+ * unless the learner has already taken the Legend up, because telling somebody a word
+ * "goes in your Legend" when they have never seen one is meaningless.
+ *
+ * Once per section, tracked in a module-level set rather than state — the beat unmounts
+ * between pieces, so component state would forget and it would say it on every screen.
+ */
+let nudgedIn: { family: string | null; piece: string | null } = { family: null, piece: null }
+
+function LegendNudge({ piece }: { piece: string }) {
+  const { state } = useJourney()
+  const learner = useLearner()
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    if (learner.legend_prompt !== 'accepted') return
+    // Once per section, and a section is a crate. Keyed on the family rather than
+    // cleared by a lifecycle hook, so entering a second crate says it again and walking
+    // back and forth inside one does not.
+    if (nudgedIn.family === state.family && nudgedIn.piece !== piece) return
+    const answered = (learner.legend ?? []).map((a) => a.frame_id)
+    const waiting = LEGEND_FRAMES.some(
+      (f) => !answered.includes(f.id) && f.built_from.includes(piece),
+    )
+    if (!waiting) return
+    nudgedIn = { family: state.family, piece }
+    setShow(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [piece, state.family])
+
+  if (!show) return null
+  return (
+    <p data-testid="legend-nudge" className="text-xs text-muted">
+      This one is for your Legend.
+    </p>
+  )
+}
+
+/**
+ * What this crate just opened in the learner's Legend.
+ *
+ * Renders nothing at all in three cases: they declined, nothing new unlocked, or they
+ * have not been offered it and have not yet reached enough cards to make the offer
+ * honest. A goal you did not choose is a nag.
+ */
+function LegendPayoff({ owned }: { owned: string[] }) {
+  const learner = useLearner()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const answered = (learner.legend ?? []).map((a) => a.frame_id)
+  const fresh = useMemo(
+    () => (mounted ? framesUnlockedBy(owned, answered) : []),
+    [owned, answered.join('|'), mounted],
+  )
+
+  useEffect(() => {
+    if (fresh.length) track('legend_unlocked', { cards: fresh.map((f) => f.id) })
+  }, [fresh.length])
+
+  if (!mounted || learner.legend_prompt === 'declined' || !fresh.length) return null
+
+  const offering = learner.legend_prompt === 'unseen'
+
+  return (
+    <div
+      data-testid="legend-payoff"
+      className="mt-6 flex flex-col gap-3 rounded border border-accent bg-accent/10 px-4 py-3"
+    >
+      <p className="eyebrow text-accent">{offering ? 'YOUR LEGEND' : 'LEGEND'}</p>
+      <p className="text-sm font-semibold">
+        {offering
+          ? LEGEND_COPY.offer_head
+          : fresh.length === 1
+            ? 'One Legend card just opened.'
+            : fresh.length + ' Legend cards just opened.'}
+      </p>
+      <p className="flex flex-wrap gap-x-3 gap-y-1">
+        {fresh.slice(0, 3).map((f) => (
+          <span key={f.id} className="pt text-sm text-accent">
+            {f.ask}
+          </span>
+        ))}
+      </p>
+      {/*
+        One card is enough to offer on, because the offer is not only the cards.
+
+        Gating this at two locked out anybody whose first crate was the basics, and it
+        was the wrong measure anyway: what comes with the Legend is the repair kit, which
+        is four lines that keep a conversation alive and are worth more than the ten
+        cards above them. Saying so is what makes a one-card offer honest.
+      */}
+      {offering ? (
+        <>
+          <p className="text-xs leading-relaxed text-muted">{LEGEND_COPY.offer_body}</p>
+          <p className="text-xs leading-relaxed text-muted">{LEGEND_COPY.offer_repair}</p>
+        </>
+      ) : null}
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href="/legend"
+          data-testid="legend-open"
+          onClick={() => {
+            setLegendPrompt('accepted')
+            track('legend_offered', { taken: true, cards: fresh.length })
+          }}
+          className="tap-target eyebrow rounded bg-accent px-4 py-3 text-accent-ink"
+        >
+          {offering ? LEGEND_COPY.offer_cta : 'FILL THEM IN'}
+        </Link>
+        {offering ? (
+          <button
+            type="button"
+            data-testid="legend-decline"
+            onClick={() => {
+              setLegendPrompt('declined')
+              track('legend_declined', {})
+            }}
+            className="tap-target eyebrow rounded border border-line-strong px-4 py-3 text-muted"
+          >
+            {LEGEND_COPY.offer_later}
+          </button>
+        ) : null}
+      </div>
+    </div>
   )
 }
 

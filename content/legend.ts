@@ -1,0 +1,397 @@
+import { PIECES, type Rung } from './roots'
+
+/**
+ * Your Legend — the minute about yourself you can deliver without thinking.
+ *
+ * Not a feature with a tile. It is the answer to "what will this actually do for me",
+ * which DUB has never had: Duolingo promises progress, whose unit of value is the day you
+ * did not break; DUB promises READINESS, and readiness has an obvious test that progress
+ * does not — can you do it, in a room, with a person, right now.
+ *
+ * The sequencing is the real argument. Confidence first, then receptivity. A learner who
+ * has once got through a real exchange without switching to English will try the other
+ * four hundred words they half-know. A learner who never speaks will not, however many
+ * words they have banked.
+ *
+ * WHY IT BELONGS IN DUB SPECIFICALLY. Take one real legend apart word by word and half
+ * of it is already taught, across eight different crates: `tenho` is a Duran Duran song
+ * about being hungry, `chamam` is Pulp Fiction, `mudar` is Marcus Aurelius, and `estou
+ * farto` — the exact phrase for fed up of England — is the swearing crate. That is the
+ * compounding claim, which is the thing DUB exists to prove, demonstrated on the most
+ * personal material a learner has. The Legend is not bolted to the side. It is what the
+ * crates were for.
+ *
+ * Three traps this model exists to avoid:
+ *
+ *   It becomes an essay. Nobody delivers a paragraph at a bar, and a memorised speech
+ *   collapses the moment you are asked something slightly different. So it is a DECK OF
+ *   ANSWERS to questions you will actually be asked. Answers survive contact.
+ *
+ *   It becomes a form. Ten blank fields is a UCAS application. So it is one card at a
+ *   time, each paying out immediately, with the same rhythm as a root.
+ *
+ *   It produces identical robots. So every card is a choice, not a blank.
+ */
+
+export type SlotKind = 'name' | 'number' | 'place' | 'pick'
+
+export interface LegendSlot {
+  key: string
+  kind: SlotKind
+  /** What to show in the empty field. Never a value — a shape. */
+  hint: string
+  /** For `pick`: the closed set. Gendered options carry both endings. */
+  options?: { value: string; en: string; f?: string }[]
+  /** True when the answer's ending depends on profile.gender. */
+  gendered?: boolean
+}
+
+export interface LegendFrame {
+  id: string
+  /** The question this answers. Cards are ordered by the order you get asked. */
+  card: number
+  /** The Portuguese question you will actually hear. */
+  ask: string
+  ask_en: string
+  /** Authored, lint-checked. `{slot}` marks where the learner's own words go. */
+  frame: string
+  en: string
+  slots: LegendSlot[]
+  /**
+   * The piece ids this frame is built from.
+   *
+   * Load-bearing in three places: the provenance line ("TENHO came out of a Duran Duran
+   * song about being hungry"), the unlock thread, and the lint that stops a frame
+   * shipping with a piece that does not exist.
+   */
+  built_from: string[]
+  rung: Rung
+  /**
+   * The scaffolding words, glossed — exactly as a root does it.
+   *
+   * A frame is short by design, but it still needs the small words that hold an answer
+   * together, and the promise of the Legend is that it is made of language the learner
+   * owns. So anything in the frame that no piece teaches is glossed here and shown on
+   * the card, and lint:content fails a frame with an unglossed word in it.
+   */
+  helpers?: Record<string, string>
+}
+
+/**
+ * The ten cards, in roughly the order you get asked them.
+ *
+ * Ten is the cap. A legend longer than a minute is one you will not deliver. And the deck
+ * GROWS rather than arriving whole — you start with the cards your language already
+ * reaches, which after one crate is one or two, and the rest unlock as crates feed them.
+ * That is what makes the thread work, and it means the Legend is never a blank form and
+ * never a finished thing.
+ */
+export const LEGEND_FRAMES: LegendFrame[] = [
+  {
+    id: 'name',
+    card: 1,
+    ask: 'Como te chamas?',
+    ask_en: 'What are you called?',
+    frame: 'Chamo-me {name}.',
+    en: 'My name is {name}.',
+    slots: [{ key: 'name', kind: 'name', hint: 'your name' }],
+    built_from: ['chamo_me'],
+    rung: 1,
+  },
+  {
+    id: 'origin',
+    card: 2,
+    ask: 'De onde és?',
+    ask_en: 'Where are you from?',
+    frame: 'Sou {nationality}. Sou de {place}.',
+    en: 'I am {nationality}. I am from {place}.',
+    slots: [
+      {
+        key: 'nationality',
+        kind: 'pick',
+        hint: 'where you are from',
+        gendered: true,
+        options: [
+          { value: 'inglês', f: 'inglesa', en: 'English' },
+          { value: 'escocês', f: 'escocesa', en: 'Scottish' },
+          { value: 'galês', f: 'galesa', en: 'Welsh' },
+          { value: 'irlandês', f: 'irlandesa', en: 'Irish' },
+          { value: 'americano', f: 'americana', en: 'American' },
+        ],
+      },
+      { key: 'place', kind: 'place', hint: 'your town or city' },
+    ],
+    built_from: ['sou', 'ingles'],
+    rung: 1,
+    helpers: { de: 'from' },
+  },
+  {
+    id: 'age',
+    card: 3,
+    ask: 'Que idade tens?',
+    ask_en: 'How old are you?',
+    frame: 'Tenho {n} anos.',
+    en: 'I am {n} years old.',
+    slots: [{ key: 'n', kind: 'number', hint: 'your age' }],
+    built_from: ['tenho', 'anos'],
+    rung: 2,
+  },
+  {
+    id: 'married',
+    card: 4,
+    ask: 'És casado?',
+    ask_en: 'Are you married?',
+    frame: 'Sou {status}.',
+    en: 'I am {status}.',
+    slots: [
+      {
+        key: 'status',
+        kind: 'pick',
+        hint: 'how things stand',
+        gendered: true,
+        options: [
+          { value: 'casado', f: 'casada', en: 'married' },
+          { value: 'divorciado', f: 'divorciada', en: 'divorced' },
+          { value: 'solteiro', f: 'solteira', en: 'single' },
+          { value: 'separado', f: 'separada', en: 'separated' },
+        ],
+      },
+    ],
+    built_from: ['sou', 'casado'],
+    rung: 2,
+  },
+  {
+    id: 'children',
+    card: 5,
+    ask: 'Tens filhos?',
+    ask_en: 'Do you have children?',
+    frame: 'Tenho {n}. Chamam-se {names}.',
+    en: 'I have {n}. They are called {names}.',
+    slots: [
+      { key: 'n', kind: 'number', hint: 'how many' },
+      { key: 'names', kind: 'name', hint: 'their names' },
+    ],
+    /*
+      The showcase card, and the reason its rung is honest rather than convenient.
+
+      TENHO came out of a Duran Duran song about being hungry and CHAMAM came out of Pulp
+      Fiction — neither was ever about the learner's children. That is the compounding
+      claim on the most personal material there is, and it is worth the card arriving
+      later than the ones around it. Frames unlock on OWNED PIECES, not on rung, so this
+      opens the moment somebody has been through Pulp Fiction.
+    */
+    built_from: ['tenho', 'filhos', 'chamam'],
+    rung: 5,
+    helpers: { 'Chamam-se': 'they are called' },
+  },
+  {
+    id: 'children_doing',
+    card: 6,
+    ask: 'E o que fazem?',
+    ask_en: 'And what do they do?',
+    frame: 'O {name} está na universidade. Os outros ainda andam na {place}.',
+    en: '{name} is at university. The others are still at {place}.',
+    slots: [
+      { key: 'name', kind: 'name', hint: 'one of them' },
+      { key: 'place', kind: 'place', hint: 'school, or work' },
+    ],
+    built_from: ['esta_', 'o_meu', 'ainda', 'escola'],
+    rung: 3,
+    helpers: { universidade: 'university', outros: 'the others', andam: 'go / are' },
+  },
+  {
+    id: 'work',
+    card: 7,
+    ask: 'O que fazes?',
+    ask_en: 'What do you do?',
+    frame: 'Trabalho com {thing}.',
+    en: 'I work with {thing}.',
+    slots: [{ key: 'thing', kind: 'place', hint: 'what your work is' }],
+    built_from: ['trabalho'],
+    rung: 2,
+  },
+  {
+    id: 'how_long',
+    card: 8,
+    ask: 'Há quanto tempo estás cá?',
+    ask_en: 'How long have you been here?',
+    frame: 'Mudei-me há {n} meses.',
+    en: 'I moved here {n} months ago.',
+    slots: [{ key: 'n', kind: 'number', hint: 'how many months' }],
+    built_from: ['mudar'],
+    rung: 6,
+    helpers: { 'Mudei-me': 'I moved', 'há': 'ago', meses: 'months' },
+  },
+  {
+    id: 'why_here',
+    card: 9,
+    ask: 'Porquê Portugal?',
+    ask_en: 'Why Portugal?',
+    /*
+      Shorter than the worked example on purpose. "Porque quero fazer as coisas que
+      adoro" is lovely and needs a rung-5 piece; this says the same thing, arrives three
+      rungs earlier, and is easier to deliver — which is the entire point of a Legend.
+    */
+    frame: 'Porque quero fazer o que adoro.',
+    en: 'Because I want to do what I love.',
+    slots: [],
+    built_from: ['porque', 'quero', 'adoro'],
+    rung: 2,
+    helpers: { fazer: 'to do', 'o que': 'what' },
+  },
+  {
+    id: 'portuguese',
+    card: 10,
+    ask: 'Falas português?',
+    ask_en: 'Do you speak Portuguese?',
+    frame: 'Estou a aprender. Falo pouco, mas estou a tentar.',
+    en: 'I am learning. I speak little, but I am trying.',
+    slots: [],
+    built_from: ['aprender'],
+    rung: 1,
+    helpers: { Falo: 'I speak', pouco: 'little', mas: 'but', tentar: 'to try' },
+  },
+]
+
+/**
+ * The repair kit — the part that actually builds confidence.
+ *
+ * What ends a conversation is not running out of things to say. It is the moment they
+ * answer, you understand nothing, and you switch to English. These four are worth more
+ * than the ten cards above, so they are fixed, non-optional, and present for every
+ * learner whether or not they have built anything else.
+ *
+ * The last one is the most important line in the feature. Said early it changes the whole
+ * encounter: the other person slows down, drops to simpler Portuguese, and stays IN
+ * Portuguese rather than switching to English to be kind.
+ */
+export const REPAIR_KIT: { pt: string; en: string; why: string; built_from: string[] }[] = [
+  {
+    pt: 'Desculpe, pode falar mais devagar?',
+    en: 'Sorry, could you speak more slowly?',
+    why: 'Buys you every sentence after this one, not just the last one.',
+    built_from: ['desculpe', 'devagar'],
+  },
+  {
+    pt: 'Não percebi.',
+    en: 'I did not catch that.',
+    why: 'Says the sentence went past you — friendlier, and truer, than "I do not understand".',
+    built_from: ['nao_percebi'],
+  },
+  {
+    pt: 'Como se diz…?',
+    en: 'How do you say…?',
+    why: 'Turns the person you are talking to into the dictionary. They will always answer.',
+    built_from: ['como_se_chama'],
+  },
+  {
+    pt: 'Estou a aprender. Tenha paciência.',
+    en: 'I am learning. Bear with me.',
+    why: 'The single highest-leverage sentence a beginner owns: it keeps them in Portuguese instead of switching to English to be kind.',
+    built_from: ['aprender', 'paciencia'],
+  },
+]
+
+/**
+ * The thread — "you can use this in your Legend".
+ *
+ * The mechanic that turns a perceived goal into a real one, and it is one pure function
+ * because every frame already declares what it is built from. Given what a learner owns
+ * and what they have already answered, this is the set of cards their language now
+ * reaches and they have not filled in.
+ *
+ * The ladder answers "what opens the next crate?" and nothing answered "what is any of
+ * this FOR". Now crates open Legend cards, and a Legend is a thing a person can picture
+ * themselves using — the first goal in DUB that exists outside the app.
+ */
+export function framesUnlockedBy(owned: string[], answered: string[]): LegendFrame[] {
+  const have = new Set(owned)
+  const done = new Set(answered)
+  return LEGEND_FRAMES.filter(
+    (f) => !done.has(f.id) && f.built_from.every((p) => have.has(p)),
+  )
+}
+
+/** Every card the learner's language reaches, answered or not. Drives the count. */
+export function framesReachable(owned: string[]): LegendFrame[] {
+  const have = new Set(owned)
+  return LEGEND_FRAMES.filter((f) => f.built_from.every((p) => have.has(p)))
+}
+
+/**
+ * Which crates a frame's words came from — the line that makes this DUB.
+ *
+ * "TENHO came out of a Duran Duran song about being hungry. CHAMAM came out of Pulp
+ * Fiction. Neither was ever about you." It writes itself from built_from, and it is the
+ * collision mechanic pointed at the learner's own family.
+ */
+export function provenanceOf(frame: LegendFrame): { piece: string; family: string }[] {
+  const out: { piece: string; family: string }[] = []
+  for (const id of frame.built_from) {
+    const piece = PIECES[id]
+    if (!piece) continue
+    if (out.some((o) => o.family === piece.family)) continue
+    out.push({ piece: piece.target, family: piece.family })
+  }
+  return out
+}
+
+/** The learner's own words in the frame, with the endings agreeing where they must. */
+export function fillFrame(
+  frame: LegendFrame,
+  values: Record<string, string>,
+  gender: 'm' | 'f' | null,
+): string {
+  return frame.frame.replace(/\{(\w+)\}/g, (whole, key: string) => {
+    const raw = values[key]
+    if (!raw) return whole
+    /*
+      The learner's exact word, verbatim.
+
+      The build screen stores the form they actually chose — which is the only way to be
+      right when the profile question was skipped and both endings were offered. This
+      mapping remains only as a fallback for a record written before that, where the
+      masculine was stored and the profile says otherwise. It never overrides a feminine
+      form the learner picked, because that lookup simply does not match.
+    */
+    const slot = frame.slots.find((s) => s.key === key)
+    if (slot?.kind === 'pick' && slot.gendered && gender === 'f') {
+      const option = slot.options?.find((o) => o.value === raw)
+      return option?.f ?? raw
+    }
+    return raw
+  })
+}
+
+/** Has this card been filled in? A slot left empty means the card is not in the run. */
+export function isAnswered(frame: LegendFrame, values: Record<string, string> | undefined): boolean {
+  if (!values) return false
+  return frame.slots.every((s) => Boolean(values[s.key]?.trim()))
+}
+
+export const LEGEND_COPY = {
+  name: 'Your Legend',
+  /*
+    The spy framing earns exactly one line and then gets out of the way. Played straight
+    it is a good idea; played for laughs it is a gimmick, and the learner is doing
+    something genuinely difficult. Dry, not jokey — and it says plainly, once, that yours
+    is true, or the metaphor curdles.
+  */
+  what: 'The minute about yourself you can say without thinking.',
+  spy: 'An operative learns a legend until it comes out without being assembled — because hesitation is what gives you away. Yours is the same idea and all of it is true.',
+  offer_head: 'You have enough Portuguese to start your Legend.',
+  offer_body:
+    'Not a form and not a speech — a handful of answers to the questions you will actually be asked. One at a time, and any of them can stay empty.',
+  offer_repair:
+    'It also comes with the four lines that keep a conversation going when you have not understood a word — those are yours straight away, whether or not you fill anything in.',
+  offer_cta: 'START MY LEGEND',
+  offer_later: 'Not now',
+  repair_head: 'The four that keep a conversation going',
+  repair_body:
+    'What ends a conversation is not running out of things to say. It is the moment they answer, you catch nothing, and you switch to English. These are yours whether or not you build anything else.',
+  cold_head: 'No warning.',
+  cold_body: 'One question, and a beat of silence. That silence is the thing you are practising.',
+  empty_head: 'Nothing here yet.',
+  empty_body:
+    'Your Legend fills up as the crates feed it. Open one and the first cards will be waiting.',
+} as const

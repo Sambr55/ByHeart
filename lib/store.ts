@@ -382,7 +382,35 @@ export async function deleteUser(userId: string): Promise<void> {
     await tx`delete from share_cards where user_id = ${userId}`
     await tx`delete from comp_redemptions where user_id = ${userId}`
     if (email) await tx`delete from waitlist where email = ${email}`
-    await tx`update learners set user_id = null where user_id = ${userId}`
+    /*
+      The learner row is kept and anonymised — which was fine when it held only what was
+      hard to remember, and is not fine now that it holds a Legend.
+
+      A Legend is names of children, ages, marital status and why somebody left a
+      country. Detaching it from a user id does not make it anonymous; it makes it an
+      unattributed file about a real family. So the personal fields are stripped rather
+      than orphaned: the Legend, the display name, the profile, and any proof line said
+      as a Legend answer — those contain the names.
+
+      What survives is genuinely anonymous and genuinely useful: which pieces were hard,
+      where people stopped, how long a section took.
+    */
+    await tx`
+      update learners
+         set user_id = null,
+             state = (state - 'legend' - 'display_name' - 'profile')
+                  || jsonb_build_object(
+                       'legend', '[]'::jsonb,
+                       'display_name', '',
+                       'proof', coalesce(
+                         (select jsonb_agg(line)
+                            from jsonb_array_elements(coalesce(state->'proof', '[]'::jsonb)) line
+                           where line->>'source' is distinct from 'legend'),
+                         '[]'::jsonb
+                       )
+                     )
+       where user_id = ${userId}
+    `
     await tx`update events set user_id = null, device_id = null where user_id = ${userId}`
     await tx`update feedback set user_id = null, device_id = null, tester_label = null where user_id = ${userId}`
     await tx`

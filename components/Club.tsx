@@ -20,10 +20,11 @@ import { CLUB, MOVES } from '@/content/club'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
+import { LEGEND_FRAMES, framesUnlockedBy } from '@/content/legend'
 import { capabilities } from '@/engine/journey'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { track } from '@/engine/analytics'
-import { loadLearner, welcomeToClub } from '@/engine/learner'
+import { loadLearner, welcomeToClub, type LearnerState } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { useNowAfterMount } from '@/engine/useNow'
 
@@ -127,7 +128,19 @@ export function Club() {
       </div>
 
       <Moves
-        learner={{ played, done, rung, owned: owned.length, capped, claimed }}
+        learner={{
+          played,
+          done,
+          rung,
+          owned: owned.length,
+          ownedPieces: owned,
+          legendAnswered: (learner.legend ?? [])
+            .filter((a) => Object.keys(a.values).length > 0)
+            .map((a) => a.frame_id),
+          legendPrompt: learner.legend_prompt ?? 'unseen',
+          capped,
+          claimed,
+        }}
         now={now}
         mounted={mounted}
       />
@@ -201,6 +214,9 @@ function Moves({
     done: Set<string>
     rung: Rung
     owned: number
+    ownedPieces: string[]
+    legendAnswered: string[]
+    legendPrompt: LearnerState['legend_prompt']
     /** The picker's own allowance rule, so the two screens cannot disagree. */
     capped: boolean
     claimed: Set<CultureFamily>
@@ -223,6 +239,45 @@ function Moves({
         urgent: true,
       })
     }
+  }
+
+  /*
+    The Legend sits directly under the drop, above everything else.
+
+    It is the product's proposition rather than one of its pages, and the count is the
+    thread's payoff: "6 of 10 · two new cards opened in Pulp Fiction" is a sentence about
+    what a crate was FOR. It never appears to somebody who declined it.
+  */
+  if (mounted && learner.legendPrompt !== 'declined') {
+    const total = LEGEND_FRAMES.length
+    const fresh = framesUnlockedBy(learner.ownedPieces, learner.legendAnswered)
+    const done = learner.legendAnswered.length
+    if (done || fresh.length) {
+      moves.push({
+        key: 'legend',
+        ...(fresh.length ? MOVES.legend_new : MOVES.legend),
+        verb: fresh.length
+          ? fresh.length === 1
+            ? 'A new Legend card'
+            : fresh.length + ' new Legend cards'
+          : MOVES.legend.verb,
+        detail: done
+          ? done + ' of ' + total + ' answered' + (fresh.length ? ' · ' + fresh.length + ' just opened' : '')
+          : fresh.length + ' ready to fill in',
+        href: '/legend',
+        urgent: false,
+      })
+    }
+  }
+
+  // Two cards is where a cold open stops being one card asked repeatedly.
+  if (mounted && learner.legendAnswered.length >= 2) {
+    moves.push({
+      key: 'cold',
+      ...MOVES.cold,
+      detail: 'One of your ' + learner.legendAnswered.length + ' answers, at random',
+      href: '/legend?cold=1',
+    })
   }
 
   moves.push({ key: 'line', ...MOVES.line, detail: 'One sentence, chosen for what you own', href: '/line' })

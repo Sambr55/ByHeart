@@ -92,6 +92,14 @@ export type EventName =
   /* Dub Club — the home a returning learner actually lands on. */
   | 'club_welcome'
   | 'club_move'
+  /* Your Legend — the proposition, and the one goal that exists outside the app. */
+  | 'legend_offered'
+  | 'legend_declined'
+  | 'legend_card_answered'
+  | 'legend_card_skipped'
+  | 'legend_rehearse'
+  | 'legend_cold_open'
+  | 'legend_unlocked'
 
 export interface AnalyticsEvent {
   seq: number

@@ -213,6 +213,40 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     collisions_played: setUnion(l.collisions_played, r.collisions_played),
     nocue_done: setUnion(l.nocue_done, r.nocue_done),
     lines_seen: setUnion(l.lines_seen, r.lines_seen),
+    /*
+      The Legend.
+
+      A card is a learner's own words about themselves, so an EDIT is a real intention
+      and must win — unlike proof, which is append-only. The later `at` is the later
+      edit. But rehearsal is append-only in spirit: the two devices each counted real
+      cold deliveries, so the counts add rather than one replacing the other, and a card
+      cleared on one device does not resurrect from the other's stale copy.
+    */
+    /*
+      Accepted beats declined beats unseen.
+
+      A learner who built a card on one phone has answered the question, so a stale
+      "declined" from another must not re-open the offer — and a decline must not be
+      undone by a device that simply never saw it.
+    */
+    legend_prompt: ([l.legend_prompt, r.legend_prompt].includes('accepted')
+      ? 'accepted'
+      : [l.legend_prompt, r.legend_prompt].includes('declined')
+        ? 'declined'
+        : 'unseen') as LearnerState['legend_prompt'],
+
+    legend: unionBy(
+      arr<Rec>(l.legend),
+      arr<Rec>(r.legend),
+      (a) => String(a.frame_id),
+      (x, y) => {
+        const newer = String(y.at ?? '') > String(x.at ?? '') ? y : x
+        return {
+          ...newer,
+          said_cold: Number(x.said_cold ?? 0) + Number(y.said_cold ?? 0),
+        }
+      },
+    ),
     // Finishing a section is not undoable, and the Club's welcome fired at whichever
     // moment came first — a learner who signs in on a new phone is not new.
     sections_completed: setUnion(l.sections_completed, r.sections_completed),

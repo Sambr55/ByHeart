@@ -7,16 +7,36 @@
  * is asked to imagine it.
  */
 
+/*
+  The landing opens on the reader's experience, not on a compliment.
+
+  It used to describe the method and never say what you would be able to DO — and it
+  opened by telling somebody they already know more than they think, which is a nice
+  thing to say to a stranger who has not asked. "You will understand far more than you
+  can say" is the line doing the work now: it is true of every learner, it is exactly the
+  Netflix-subtitles experience, and no other language app opens by naming the problem
+  instead of promising the cure.
+
+  The old closing line survives, and is better for having something concrete in front of
+  it.
+
+  THIS COPY DEPENDS ON CONTENT. The moment the landing promises a Legend, the first
+  session has to be able to deliver one — three frames are reachable at rung 1 and
+  lint:content fails if that ever drops below two. Do not restore this promise if that
+  rule is ever relaxed.
+*/
 export const LANDING = {
   wordmark: 'DUB',
   line: 'Find yourself in another language.',
   lines: [
-    'Start with something you connect with.',
+    'You will understand far more than you can say.\nEverybody does. That is the wall.',
+    'DUB starts on the other side of it.',
+    'First you build your Legend — the minute about yourself you can say without thinking. Who you are. Where you are from. Why you are here.',
+    'Then, with that in the bank, everything else has somewhere to go.',
     // Language-neutral on purpose: the brand layer describes the method, and the
     // method is not about Portuguese. The personal experience becomes specific the
     // moment a pair is chosen, one screen later.
-    'Learn a language through the films, music, books, TV, sport and culture already in your head.',
-    'Understand the moment.\nDiscover the language inside it.\nRemix it. Use it. Make it yours.',
+    'All of it learned through the films, music, books, TV, sport and culture already in your head.',
     'You already know more than you think.',
   ],
   cta: 'SHOW ME HOW',
@@ -164,6 +184,8 @@ export const DEAL = {
   get: {
     label: 'WHAT YOU GET',
     lines: [
+      // First, because it is the concrete version of the line under it.
+      'Your Legend — the minute about yourself, ready to go.',
       'Sentences you can say cold, to a real person, without rehearsing first.',
       'Counted honestly — the number only moves when there are no clues on screen.',
       'And the grammar underneath, without ever sitting through a grammar lesson.',
@@ -188,6 +210,8 @@ export const PICKER = {
     place a reader meets the word with something to point at.
   */
   headline: 'Pick a crate you connect with.',
+  /** One line, not a banner, and only once the Legend is a thing they have. */
+  feeds_legend: 'Everything in here feeds your Legend.',
   /*
     The sub is gone.
 

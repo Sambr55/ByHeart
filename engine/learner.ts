@@ -94,10 +94,39 @@ export interface LearningEvidence {
 export interface ProofLine {
   pt: string
   en: string
-  /** release = the film removed. nocue = never had one. collision = two worlds at once. */
-  source: 'release' | 'nocue' | 'collision'
+  /**
+   * Where it was said with nothing on screen.
+   *
+   * release = the cultural cue removed. nocue = never had one. collision = two crates at
+   * once. legend = a question about yourself, answered cold — which counts on exactly
+   * the same terms as the rest, because it is exactly the same thing.
+   */
+  source: 'release' | 'nocue' | 'collision' | 'legend'
   /** Whether it came out right first time, with no hint taken. */
   clean: boolean
+  at: string
+}
+
+/**
+ * One card of somebody's Legend, filled in.
+ *
+ * Kept as a list rather than a map so the order a learner built them in survives.
+ *
+ * CLEARING A CARD LEAVES AN EMPTY ROW, and that is deliberate. Deleting it looked
+ * cleaner and was wrong: the merge cannot tell "I never answered this" from "I cleared
+ * it", and it must never let an empty side erase a full one — so a deleted card would
+ * quietly resurrect from any device that still had it. An empty row is a tombstone with
+ * a timestamp, so a clear made later beats an answer made earlier, and it carries no
+ * personal data of its own.
+ *
+ * `isAnswered` is what everything else asks, so an empty row is invisible: not in the
+ * run-through, not in the count, never rendered as a gap to be filled.
+ */
+export interface LegendAnswer {
+  frame_id: string
+  values: Record<string, string>
+  /** Times said cold, with nothing on screen. A rehearsal count, never a score. */
+  said_cold: number
   at: string
 }
 
@@ -190,6 +219,29 @@ export interface LearnerState {
    */
   lines_seen: string[]
   /**
+   * The Legend — the most personal data in the product.
+   *
+   * Names of children, ages, marital status, why somebody left a country. Three
+   * obligations follow from that and all three are honoured: it is in the export, it is
+   * destroyed by account deletion, and it never reaches a share image unless the learner
+   * puts it there deliberately.
+   *
+   * `said_cold` is a rehearsal count and is never rendered as a score. It exists so the
+   * run-through can offer the cards somebody has practised least, and for nothing else —
+   * the moment a number is attached to being put on the spot, the feature becomes the
+   * anxiety it exists to remove.
+   */
+  legend: LegendAnswer[]
+  /**
+   * Whether the Legend has been offered, taken up, or turned down.
+   *
+   * The honesty rule the whole thread depends on: never say "this goes in your Legend"
+   * to somebody who has never seen one. The first mention OFFERS it; after that the line
+   * is quiet reinforcement. And if a learner declines, it stops entirely — a goal you did
+   * not choose is a nag.
+   */
+  legend_prompt: 'unseen' | 'accepted' | 'declined'
+  /**
    * Crates whose section has been carried all the way to the end.
    *
    * roots_played says what was opened; this says what was FINISHED, and only the second
@@ -242,6 +294,8 @@ export function emptyLearner(): LearnerState {
     collisions_played: [],
     nocue_done: [],
     lines_seen: [],
+    legend: [],
+    legend_prompt: 'unseen',
     sections_completed: [],
     club_welcomed_at: null,
     deal_accepted_at: null,
@@ -329,6 +383,11 @@ export function loadLearner(): LearnerState {
           roots_played: arr(parsed.roots_played, []),
           nocue_done: arr(parsed.nocue_done, []),
           lines_seen: arr(parsed.lines_seen, []),
+          legend: arr(parsed.legend, []),
+          legend_prompt:
+            parsed.legend_prompt === 'accepted' || parsed.legend_prompt === 'declined'
+              ? parsed.legend_prompt
+              : 'unseen',
           sections_completed: arr(parsed.sections_completed, []),
           club_welcomed_at: parsed.club_welcomed_at ?? null,
           deal_accepted_at: parsed.deal_accepted_at ?? null,
@@ -518,6 +577,8 @@ export async function syncSession(reason: string): Promise<boolean> {
         collisions_played: s.collisions_played,
         nocue_done: s.nocue_done,
         lines_seen: s.lines_seen,
+        legend: s.legend,
+        legend_prompt: s.legend_prompt,
         deal_accepted_at: s.deal_accepted_at,
         created_at: s.created_at,
         user_agent: navigator.userAgent,
@@ -878,6 +939,50 @@ export async function restoreLearner(): Promise<'merged' | 'nothing' | 'failed'>
 export function rememberNoCue(id: string) {
   update((s) => {
     if (!s.nocue_done.includes(id)) s.nocue_done = [...s.nocue_done, id]
+  })
+}
+
+/**
+ * A Legend card, answered — or emptied.
+ *
+ * Emptying is a real action, not an oversight: some people have no children and some will
+ * not say why they left. Clearing every slot removes the card from the record entirely,
+ * so it drops out of the run-through without ever appearing as a gap to be filled.
+ */
+export function answerLegend(frameId: string, values: Record<string, string>) {
+  update((s) => {
+    const before = s.legend.find((a) => a.frame_id === frameId)
+    const filled = Object.fromEntries(Object.entries(values).filter(([, v]) => v.trim()))
+    s.legend = [
+      ...s.legend.filter((a) => a.frame_id !== frameId),
+      {
+        frame_id: frameId,
+        values: filled,
+        said_cold: before?.said_cold ?? 0,
+        // Every write restamps, because the merge decides between two edits by which is
+        // later. This is the field that makes clearing a card stick.
+        at: new Date().toISOString(),
+      },
+    ]
+  })
+}
+
+/** Taken up, or turned down. Turned down is a decision and it is respected forever. */
+export function setLegendPrompt(value: 'accepted' | 'declined') {
+  update((s) => {
+    // Accepting is not reversible by a later decline elsewhere: somebody who has built a
+    // card has answered the question, and re-offering would be the product forgetting.
+    if (s.legend_prompt === 'accepted') return
+    s.legend_prompt = value
+  })
+}
+
+/** One clean cold delivery. The count drives rehearsal order and is never shown. */
+export function rehearsedLegend(frameId: string) {
+  update((s) => {
+    s.legend = s.legend.map((a) =>
+      a.frame_id === frameId ? { ...a, said_cold: a.said_cold + 1 } : a,
+    )
   })
 }
 

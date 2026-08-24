@@ -27,6 +27,22 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
   const proof = learner.proof ?? []
   const clean = proof.filter((p) => p.clean).length
   const recent = [...proof].reverse().slice(0, 3)
+  /*
+    The Legend never leaves the device by default.
+
+    Legend answers are proof lines and count on exactly the same terms as everything
+    else — but they are the only proof lines that contain a person's children by name,
+    their age and their marital status. The share card renders recent lines into a public
+    image, so a card made the morning after somebody filled in "Chamam-se Oscar, Tilly e
+    Ted" would have published it.
+
+    Shared lines are the ones from crates. The learner can still share a Legend line
+    deliberately; they cannot do it by accident.
+  */
+  const shareable = useMemo(
+    () => [...proof].reverse().filter((p) => p.source !== 'legend').slice(0, 3),
+    [proof],
+  )
 
   const worlds = useMemo(() => {
     const set = new Set<string>()
@@ -96,7 +112,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
         body: JSON.stringify({
           count: proof.length,
           worlds,
-          lines: recent.map((r) => ({ pt: r.pt, en: r.en })),
+          lines: shareable.map((r) => ({ pt: r.pt, en: r.en })),
         }),
       })
       const body = (await res.json()) as { ok: boolean; path?: string }
@@ -233,7 +249,17 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
       ) : null}
 
       {/* ---------------------------------------------------------- controls */}
-      {!empty ? (
+      {/* Everything they can say is a Legend answer, so there is nothing that can go in a
+          public image without publishing their family. Said plainly rather than silently
+          refused by the route. */}
+      {!empty && !shareable.length ? (
+        <p className="text-center text-xs leading-relaxed text-muted">
+          Everything here is from your Legend, and that stays on this phone — it has your
+          family in it. Say something cold from a crate and there will be a card to share.
+        </p>
+      ) : null}
+
+      {!empty && shareable.length ? (
         <button
           type="button"
           onClick={share}

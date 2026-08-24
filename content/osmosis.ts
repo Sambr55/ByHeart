@@ -29,6 +29,35 @@ export interface Insight {
 
 export const INSIGHTS: Insight[] = [
   /*
+    Two that fall out of a person's own Legend, which is the best possible place for
+    them: shown after the learner has already said the sentence correctly about
+    themselves, and never tested.
+  */
+  {
+    id: 'age-is-had-not-been',
+    requires: ['anos'],
+    headline: 'You have your age in Portuguese. You are not it.',
+    body:
+      'English says I AM fifty-six. Portuguese says tenho cinquenta e seis anos — I HAVE fifty-six years — and it is the same verb you first met in a song about being hungry. Every English speaker says sou fifty-six exactly once, and never again after somebody points at it. You have already used it the other way round.',
+    evidence: [
+      { pt: 'Tenho trinta anos.', en: 'I am thirty.' },
+      { pt: 'Quantos anos tens?', en: 'How old are you?' },
+    ],
+    proper_name: 'ter for age',
+  },
+  {
+    id: 'ser-estar-on-your-own-family',
+    requires: ['sou', 'esta_'],
+    headline: 'You used two different verbs for “is”, and picked the right one both times',
+    body:
+      'Sou divorciado and está na universidade are the same English word doing two jobs. Ser is what something IS — permanent, definitional, the thing that survives next Tuesday. Estar is how it is RIGHT NOW. It is the distinction English speakers get wrong for years, and you have just made it correctly about your own family, which is the one example nobody forgets.',
+    evidence: [
+      { pt: 'Sou divorciado.', en: 'I am divorced.' },
+      { pt: 'Os meus filhos estão em Inglaterra.', en: 'My children are in England.' },
+    ],
+    proper_name: 'ser and estar',
+  },
+  /*
     The basics carry real grammar, which is the argument against calling them a syllabus.
 
     A crate that teaches hello and thank you looks like a word list until you notice that

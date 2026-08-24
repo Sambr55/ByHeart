@@ -93,7 +93,8 @@ export function Pro() {
                 Nothing has been recorded yet. Playback falls back to whatever synthetic
                 European Portuguese voice your phone happens to have, and they vary. That is
                 the honest gap in this product, and it is what a membership pays for: real
-                Lisbon voices, every line, recorded properly.
+                Lisbon voices, every line, recorded properly — including the Legend you
+                have already built, read back by somebody who actually lives there.
               </p>
               <p className="mt-3 text-sm leading-relaxed text-muted">
                 Until that lands, three crates are yours for good and every drop stays open.

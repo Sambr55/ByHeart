@@ -172,6 +172,66 @@ function ev(
   )
 }
 
+/*
+  5c. The Legend.
+
+  Unlike proof, a Legend card is EDITABLE — it is somebody's own words about themselves —
+  so the later edit has to win rather than the first one. But rehearsal is append-only in
+  spirit: two devices each counted real cold deliveries, so the counts add.
+
+  And the case that matters most: a card cleared on one device must not resurrect from
+  the other's stale copy. Clearing is how somebody says "I am not answering that", and a
+  sync that undoes it is the product overruling them about their own family.
+*/
+{
+  const card = (frame_id: string, values: Record<string, string>, said_cold: number, at: string) => ({
+    frame_id,
+    values,
+    said_cold,
+    at,
+  })
+  const older = card('children', { n: '2', names: 'Ana e Rui' }, 3, '2026-08-01T09:00:00.000Z')
+  const newer = card('children', { n: '3', names: 'Oscar, Tilly e Ted' }, 2, '2026-08-20T09:00:00.000Z')
+
+  for (const [label, m] of [
+    ['newer as remote', mergeLearner({ legend: [older] }, { legend: [newer] })],
+    ['newer as local', mergeLearner({ legend: [newer] }, { legend: [older] })],
+  ] as const) {
+    const got = m.legend.find((a) => a.frame_id === 'children')
+    check(label + ': the later edit wins', got?.values.names === 'Oscar, Tilly e Ted', String(got?.values.names))
+    check(label + ': rehearsals add rather than replace', got?.said_cold === 5, String(got?.said_cold))
+  }
+
+  check(
+    'two different cards both survive',
+    mergeLearner(
+      { legend: [card('name', { name: 'Sam' }, 1, '1')] },
+      { legend: [card('age', { n: '56' }, 1, '1')] },
+    ).legend.length === 2,
+  )
+  /*
+    Clearing is a tombstone, not a delete, and this is why.
+
+    A merge may never let an empty side erase a full one — that invariant is the whole of
+    lib/merge.ts — so a DELETED card resurrects from any device that still has it. The
+    merge cannot tell "I never answered this" from "I cleared it". An empty row with a
+    later timestamp can.
+  */
+  const cleared = card('children', {}, 3, '2026-08-25T09:00:00.000Z')
+  const stillThere = mergeLearner({ legend: [cleared] }, { legend: [newer] }).legend.find(
+    (a) => a.frame_id === 'children',
+  )
+  check(
+    'a card cleared later stays cleared',
+    Object.keys(stillThere?.values ?? {}).length === 0,
+    JSON.stringify(stillThere?.values),
+  )
+  check(
+    'and an absent card is not mistaken for a cleared one',
+    mergeLearner({ legend: [] }, { legend: [older] }).legend.length === 1,
+  )
+}
+
 // 6. missing arrays and objects on an older record
 {
   const m = mergeLearner({ proof: [line('a', '1')] }, { proof: [line('b', '2')], inventory: undefined })

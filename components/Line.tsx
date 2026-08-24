@@ -135,6 +135,18 @@ export function Line({ pushReady }: { pushReady: boolean }) {
 
       <PushToggle ready={pushReady} />
 
+      {/* The other twenty-second thing, for somebody who has a Legend. One question with
+          no warning is a different exercise from a sentence to read, and this is where a
+          person already is at the right moment of the morning. */}
+      {(learner.legend ?? []).filter((a) => Object.keys(a.values).length).length >= 2 ? (
+        <Link
+          href="/legend?cold=1"
+          className="tap-target block text-center text-xs text-muted underline underline-offset-4"
+        >
+          Or answer one about yourself, with no warning.
+        </Link>
+      ) : null}
+
       <Link
         href="/"
         className="tap-target block text-center text-xs text-muted underline underline-offset-4"

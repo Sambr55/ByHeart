@@ -51,8 +51,10 @@ export function Waitlist() {
           Every big app teaches you Brazilian Portuguese. You are moving to Lisbon.
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-fg/85">
-          DUB teaches European Portuguese through the films, music, books, TV, sport and culture already in
-          your head — estás rather than você está, telemóvel, a bica, the 28.
+          DUB teaches the European one — estás rather than você está, telemóvel, a bica,
+          the 28 — and it starts by getting you talking about yourself. Your Legend is the
+          minute you can already do: who you are, where you are from, why you came. All of
+          it built out of the films, music and culture already in your head.
         </p>
       </div>
 

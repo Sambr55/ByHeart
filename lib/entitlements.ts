@@ -117,7 +117,7 @@ export const PLANS = {
     id: 'free' as const,
     name: 'DUB',
     price: null,
-    line: 'Three crates, a line every morning, and everything you make is yours to share.',
+    line: 'Your Legend, three crates, a line every morning, and everything you make is yours to share.',
     includes: [
       'Three crates, chosen by you and yours for good',
       'The morning line, every day',

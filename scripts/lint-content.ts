@@ -13,6 +13,7 @@
 import { readFileSync } from 'node:fs'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
 import { DUB, DUB_CLUB, DUB_MARK } from '../content/marks'
+import { LEGEND_FRAMES, REPAIR_KIT } from '../content/legend'
 import {
   BLOCK_ORDER,
   EXAMPLES,
@@ -959,6 +960,135 @@ for (const e of EXAMPLES) {
     }
   }
   console.log(pairs + ' voice pairs, every option situated, every pair teaching a rule')
+}
+
+// --- the Legend ------------------------------------------------------------
+{
+  /*
+    Frames are authored content and pass the same bar as everything else.
+
+    Two rules matter. Every built_from must resolve to a real piece, because it is
+    load-bearing three times over — the provenance line, the unlock thread, and the count
+    on the Club — and a dangling id fails all three silently. And no frame may contain a
+    Portuguese word the learner has not been taught and has not been glossed, because the
+    whole promise of the Legend is that it is made of language they already own.
+  */
+  const seen = new Set<string>()
+  const cards = new Set<number>()
+  const taught = new Set(
+    Object.values(PIECES).flatMap((p) => fold(p.target).split(/[^\p{L}]+/u)).filter(Boolean),
+  )
+  /*
+    The closed-class words a sentence cannot be built without — articles, prepositions,
+    the connective that. They are not vocabulary, they are grammar, and glossing "e" as
+    "and" on every card would be noise. Everything else must be either taught or glossed
+    on the card itself.
+  */
+  const GRAMMAR = new Set(
+    ['e', 'o', 'a', 'os', 'as', 'na', 'no', 'em', 'com', 'que', 'me', 'se'].map(fold),
+  )
+
+  for (const f of LEGEND_FRAMES) {
+    const F = 'legend frame ' + f.id + ': '
+    if (seen.has(f.id)) fail(F + 'duplicate id')
+    seen.add(f.id)
+    if (cards.has(f.card)) fail(F + 'two frames claim card ' + f.card)
+    cards.add(f.card)
+
+    if (!f.built_from.length) fail(F + 'is built from nothing — it can never unlock')
+    for (const id of f.built_from) {
+      if (!PIECES[id]) fail(F + 'built_from names "' + id + '", which is not a piece')
+    }
+    // The rung a frame can first be reached at is the highest of its pieces. Declaring
+    // it lower is a promise the graph cannot keep.
+    const need = Math.max(...f.built_from.map((id) => PIECES[id]?.rung ?? 1))
+    if (f.rung < need) {
+      fail(F + 'declares rung ' + f.rung + ' but needs a rung ' + need + ' piece')
+    }
+
+    // Every slot the frame writes must exist, and every slot declared must be used.
+    const used = [...f.frame.matchAll(/\{(\w+)\}/g)].map((m) => m[1])
+    for (const key of used) {
+      if (!f.slots.some((sl) => sl.key === key)) fail(F + 'writes {' + key + '} with no such slot')
+    }
+    for (const sl of f.slots) {
+      if (!used.includes(sl.key)) fail(F + 'declares a slot "' + sl.key + '" it never writes')
+      if (sl.kind === 'pick' && !sl.options?.length) fail(F + 'slot "' + sl.key + '" picks from nothing')
+      if (sl.gendered && sl.options?.some((o) => !o.f)) {
+        fail(F + 'slot "' + sl.key + '" is gendered but an option has no feminine form')
+      }
+    }
+
+    // And the Portuguese itself.
+    const glossed = new Set(
+      Object.keys(f.helpers ?? {}).flatMap((k) => fold(k).split(/[^\p{L}]+/u)).filter(Boolean),
+    )
+    const words = fold(f.frame.replace(/\{\w+\}/g, ' ')).split(/[^\p{L}]+/u).filter(Boolean)
+    for (const w of words) {
+      if (taught.has(w) || GRAMMAR.has(w) || glossed.has(w)) continue
+      fail(F + 'uses "' + w + '", which no piece teaches and the card does not gloss')
+    }
+    for (const k of Object.keys(f.helpers ?? {})) {
+      if (!fold(f.frame).includes(fold(k))) fail(F + 'glosses "' + k + '", which is not in the frame')
+    }
+  }
+
+  for (const r of REPAIR_KIT) {
+    for (const id of r.built_from) {
+      if (!PIECES[id]) fail('repair kit "' + r.pt + '" names piece "' + id + '", which does not exist')
+    }
+  }
+
+  /*
+    And the promise in §0.1: the landing page says you will build a Legend, so the first
+    session has to be able to deliver one. A frame reachable at rung 1 is the proof.
+  */
+  const atOne = LEGEND_FRAMES.filter((f) => f.rung === 1)
+  if (atOne.length < 2) {
+    fail(
+      'only ' + atOne.length + ' Legend frame(s) reachable at rung 1 — the landing promises ' +
+        'a Legend in the first session and the content cannot deliver it',
+    )
+  }
+  /*
+    The compounding claim, on the learner's own material.
+
+    A Legend that draws on one crate is a vocabulary list with a nice frame round it. The
+    whole argument for building this INSIDE DUB rather than as some other app is that
+    half of it is already taught across crates that have nothing to do with each other,
+    so the provenance line writes itself. Four is the floor stated in the acceptance
+    criteria; there is no reason it should ever be near it.
+  */
+  const families = new Set(
+    LEGEND_FRAMES.flatMap((f) => f.built_from.map((p) => PIECES[p]?.family).filter(Boolean)),
+  )
+  if (families.size < 4) {
+    fail(
+      'a full Legend draws on only ' + families.size + ' crate(s) — the provenance line is ' +
+        'the argument for this feature existing in DUB at all',
+    )
+  }
+
+  /*
+    And nothing in the feature is scored.
+
+    A rehearsal count exists so the run-through can offer the least-practised card, and
+    for nothing else. The moment a number is attached to being put on the spot, the
+    feature becomes the anxiety it exists to remove — so no surface may render it.
+  */
+  for (const file of ['components/Legend.tsx', 'components/Club.tsx']) {
+    const src = readFileSync(file, 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, ' ')
+      .replace(/(^|[^:])\/\/[^\n]*/g, ' ')
+    if (/\{[^}]*said_cold[^}]*\}/.test(src)) {
+      fail(file + ' renders said_cold — the rehearsal count is never shown to a learner')
+    }
+  }
+
+  console.log(
+    LEGEND_FRAMES.length + ' legend frames · ' + atOne.length + ' reachable at rung 1 · ' +
+      families.size + ' crates feed one legend · ' + REPAIR_KIT.length + ' repair lines',
+  )
 }
 
 // --- the marks -------------------------------------------------------------

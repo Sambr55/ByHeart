@@ -42,6 +42,26 @@ export const CLUB = {
  * learner today.
  */
 export const MOVES = {
+  /*
+    The one number in DUB that is allowed to lead.
+
+    Everything else in this product refuses to count — no streak, no XP, no percentage —
+    and this is the exception, deliberately: it counts things you can say ABOUT YOURSELF.
+    It cannot be inflated by opening the app, it goes up only when a crate has fed it, and
+    unlike a streak it never goes down.
+  */
+  legend: { verb: 'Your Legend', why: 'The minute about yourself you can already do.' },
+  legend_new: { verb: 'Two new Legend cards', why: 'Your last crate opened them. Two minutes each.' },
+  /*
+    The rehearsal that actually matters, and the only move here with no preamble.
+
+    One question, no warning, and a beat of silence before the answer is available. That
+    silence is the exact half-second in a bar where you either have it or you do not, and
+    it is the only way to practise the thing that actually goes wrong. Never scored — the
+    moment a number is attached to being put on the spot, it becomes the anxiety it
+    exists to remove.
+  */
+  cold: { verb: 'Cold open', why: 'One question, no warning. The half-second that decides it.' },
   drop: { verb: 'Catch the drop', why: 'It expires. Nothing else here does.' },
   line: { verb: 'Take today’s line', why: 'Twenty seconds, and it is different every morning.' },
   resume: { verb: 'Pick up where you stopped', why: 'There is more in this one your stage now reaches.' },
