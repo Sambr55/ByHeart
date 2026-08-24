@@ -663,13 +663,22 @@ function Picker() {
       <p className="mt-2 text-sm text-muted">{PICKER.sub}</p>
       {mounted ? (
         <details className="group mt-4">
-          <summary className="tap-target flex cursor-pointer list-none items-center gap-3">
-            <span className="eyebrow shrink-0 text-accent">
-              Stage {rung} of 6 · {here.name}
+          {/*
+            Two items that refused to shrink with only a collapsible divider between
+            them, and nothing clipping the result — so at stage 5, where the label reads
+            "Talk about other people", the row needed 459px, got 390, and slid the whole
+            document sideways. It overflowed every phone made, including a 430 Pro Max.
+
+            Wrapping, sentence case, and the capability leading with the number second.
+            Worst case it takes two lines instead of running off the screen.
+          */}
+          <summary className="tap-target flex cursor-pointer list-none flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="display min-w-0 text-sm text-accent">{here.name}</span>
+            <span className="min-w-0 text-xs tabular-nums text-muted">
+              stage {rung} of 6
             </span>
-            <span className="h-px flex-1 bg-line" />
-            <span className="shrink-0 text-[0.6rem] uppercase tracking-wider text-muted">
-              {PICKER.stages_toggle}
+            <span className="ml-auto shrink-0 text-xs text-muted">
+              {PICKER.stages_toggle} ▸
             </span>
           </summary>
           <ol className="mt-3 space-y-1.5 border-l border-line pl-4">

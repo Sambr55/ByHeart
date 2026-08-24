@@ -16,7 +16,9 @@
     "audio:script": "tsx scripts/audio-script.mts",
     "line:test": "tsx scripts/line-test.mts",
     "merge:test": "tsx scripts/merge-test.mts",
-    "comp:issue": "tsx scripts/comp-issue.mts"
+    "comp:issue": "tsx scripts/comp-issue.mts",
+    "mobile": "tsx scripts/mobile-check.mts",
+    "gate": "npm run check && npm run mobile"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

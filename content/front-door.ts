@@ -194,7 +194,7 @@ export const PICKER = {
   locked_note:
     'The dimmed ones are not gone. Each says what opens it — and it opens by saying something cold, with the film taken away, not by turning up.',
   /** The affordance on the stage band, which used to be a number with no explanation. */
-  stages_toggle: 'the six stages',
+  stages_toggle: 'all six',
   /**
    * Said once, quietly, under the list. Not a banner and not a countdown — the three
    * crates are a real product, and somebody a fortnight in has not run out of anything.

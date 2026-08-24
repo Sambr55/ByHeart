@@ -229,7 +229,8 @@ export function Vocab() {
                 onClick={() => setOpenShelf(expanded && !query ? null : shelf.id)}
                 className="tap-target flex w-full items-center gap-3 text-left"
               >
-                <span className="eyebrow shrink-0 text-accent">{shelf.label}</span>
+                {/* Shelf labels are content. shrink-0 belongs on icons and counters. */}
+                <span className="eyebrow min-w-0 text-accent">{shelf.label}</span>
                 <span className="h-px flex-1 bg-line" />
                 <span className="eyebrow shrink-0 tabular-nums text-muted">{list.length}</span>
               </button>

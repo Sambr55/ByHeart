@@ -71,6 +71,26 @@ body {
 /* Reserve the scrollbar gutter so its appearance never changes the layout width. */
 html {
   scrollbar-gutter: stable;
+  /*
+    A backstop, not the fix. `npm run mobile` is the fix — it fails the build when a
+    route slides, naming the element. This stops a future overflow becoming a sideways
+    page while somebody is still finding it.
+
+    clip, not hidden: `hidden` creates a scroll container and would break position:sticky
+    on every header in the app.
+  */
+  overflow-x: clip;
+}
+
+/*
+  Safe areas were declared and never used. viewportFit: 'cover' was set in the layout and
+  env(safe-area-inset-*) appeared nowhere, so on a notched phone in landscape the content
+  ran under the notch.
+*/
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 body {

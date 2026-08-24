@@ -1,0 +1,112 @@
+/**
+ * Does anything slide sideways?
+ *
+ *   npm run mobile
+ *
+ * This codebase already believes that a rule nobody checks is a rule that decays — the
+ * content lint has caught a real fault in every batch. Layout deserves the same, and
+ * more so: every widget in this app is a flex row with text of unknown length in it, and
+ * the content is still growing.
+ *
+ * It seeds a learner at each stage because the bug it was written to catch only appears
+ * at stage 5, where the label is "Talk about other people". A single-state check would
+ * have passed and the phone would still have slid.
+ *
+ * When it fails it names the innermost offending element, its classes and its text,
+ * because a check that tells you WHERE is worth more than a rule you have to re-read.
+ */
+import { chromium, type Page } from 'playwright'
+import { DEFAULT_PAIR, pairId } from '../content/pairs'
+import { ROOTS } from '../content/roots'
+
+const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
+const WIDTHS = [320, 360, 390, 430]
+const ROUTES = ['/crates', '/vocab', '/drops', '/line', '/proof', '/pro', '/account', '/waitlist']
+const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
+
+const problems: string[] = []
+
+/** A learner sitting at a given stage, with the deal accepted so /crates opens. */
+function seedFor(stage: number) {
+  // rungReached is one above the highest cleanly released rung, so release stage-1.
+  const opener = ROOTS.find((r) => r.rung === Math.max(1, stage - 1))
+  return {
+    version: 1,
+    deal_accepted_at: '2026-08-01T00:00:00.000Z',
+    proof: opener
+      ? [{ pt: opener.transfer_prompt.answer, en: opener.transfer_prompt.ask, source: 'release', clean: true, at: '1' }]
+      : [],
+    inventory: Object.fromEntries(ROOTS.flatMap((r) => r.extracts).slice(0, 24).map((e) => [e.id, 'strong'])),
+    roots_played: [],
+  }
+}
+
+async function offenders(page: Page) {
+  return page.evaluate(() => {
+    const doc = document.documentElement
+    if (doc.scrollWidth <= doc.clientWidth) return null
+    const limit = doc.clientWidth
+    const out: { tag: string; cls: string; text: string; w: number; right: number }[] = []
+    for (const el of Array.from(document.querySelectorAll('body *'))) {
+      const r = el.getBoundingClientRect()
+      if (r.width === 0 || r.right <= limit + 1) continue
+      // innermost only: an ancestor is not the culprit, its child is
+      if (Array.from(el.children).some((c) => c.getBoundingClientRect().right > limit + 1)) continue
+      out.push({
+        tag: el.tagName.toLowerCase(),
+        cls: (el.getAttribute('class') ?? '').slice(0, 110),
+        text: (el.textContent ?? '').trim().slice(0, 46),
+        w: Math.round(r.width),
+        right: Math.round(r.right),
+      })
+    }
+    return { over: doc.scrollWidth - limit, scrollWidth: doc.scrollWidth, clientWidth: limit, out: out.slice(0, 3) }
+  })
+}
+
+const browser = await chromium.launch()
+
+for (const width of WIDTHS) {
+  console.log('\n████ ' + width)
+  for (let stage = 1; stage <= 6; stage++) {
+    const page = await browser.newPage({ viewport: { width, height: 780 } })
+    page.setDefaultTimeout(12000)
+    await page.goto(BASE + '/crates', { waitUntil: 'domcontentloaded' })
+    await page.evaluate(
+      ([k, seed]) => {
+        localStorage.setItem('byheart.pair', JSON.stringify({ source_culture: 'en-GB', target_language: 'pt', target_locale: 'pt-PT', day_zone: 'Europe/Lisbon' }))
+        localStorage.setItem(k as string, JSON.stringify(seed))
+      },
+      [KEY, seedFor(stage)] as const,
+    )
+    for (const route of ROUTES) {
+      await page.goto(BASE + route, { waitUntil: 'domcontentloaded' }).catch(() => {})
+      await page.waitForTimeout(450)
+      // open every disclosure — a bug hiding inside a closed one still ships
+      await page.$$eval('summary', (els) => els.forEach((e) => (e.parentElement as HTMLDetailsElement).setAttribute('open', '')))
+      await page.waitForTimeout(200)
+      const bad = await offenders(page)
+      if (bad) {
+        const first = bad.out[0]
+        problems.push(route + ' @' + width + ' stage ' + stage + ' +' + bad.over + 'px' + (first ? ' — <' + first.tag + '> "' + first.text + '"' : ''))
+        console.log('  ' + route.padEnd(11) + '✗ SLIDES +' + bad.over + 'px  (stage ' + stage + ')')
+        for (const o of bad.out) {
+          console.log('      └ <' + o.tag + '> w=' + o.w + ' right=' + o.right + '  "' + o.text + '"')
+          console.log('        ' + o.cls)
+        }
+      }
+    }
+    await page.close()
+    if (stage === 1) console.log('  stages 1–6 checked across ' + ROUTES.length + ' routes')
+  }
+}
+
+await browser.close()
+
+console.log('')
+if (problems.length) {
+  console.log(problems.length + ' overflow(s):')
+  for (const p of problems) console.log('  ' + p)
+  process.exit(1)
+}
+console.log('no route slides sideways at 320 / 360 / 390 / 430, at any stage')

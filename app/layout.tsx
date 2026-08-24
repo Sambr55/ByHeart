@@ -34,8 +34,14 @@ export const viewport: Viewport = {
   themeColor: '#07090c',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  // Standalone on a notched phone: the app paints into the safe areas itself.
+  /**
+   * No maximumScale. Blocking pinch-zoom is a WCAG 1.4.4 failure and it is actively
+   * hostile to the older learners the age question exists to serve — and it is
+   * self-defeating anyway, because it also stops somebody zooming back out after a
+   * stray pan.
+   */
+  // Standalone on a notched phone: the app paints into the safe areas itself, which
+  // it now actually does — the insets are used in globals.css.
   viewportFit: 'cover',
 }
 
