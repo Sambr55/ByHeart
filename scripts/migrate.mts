@@ -31,7 +31,25 @@ for (const file of ['.env.local', '.env']) {
   }
 }
 
+/**
+ * `--optional` is how the build calls this: no database configured is a valid state
+ * for this project, and a local build must not fail because of it. Run by hand
+ * without the flag, "nothing happened" is an error worth an exit code.
+ */
+const optional = process.argv.includes('--optional')
+
 const url = process.env.DATABASE_URL
+if (url === '[SENSITIVE]') {
+  console.error(
+    'DATABASE_URL is the literal string [SENSITIVE].\n\n' +
+      '`vercel env pull` will not reveal values marked sensitive, so the secret never\n' +
+      'reaches this machine. Migrations run inside the deployment instead — they are\n' +
+      'part of `next build`. Push, or run `npx vercel deploy --prod`.\n\n' +
+      'To migrate from here anyway, paste the connection string from the Neon dashboard:\n' +
+      '  DATABASE_URL=postgres://… npm run db:migrate\n',
+  )
+  process.exit(optional ? 0 : 1)
+}
 if (!url) {
   console.error(
     'No DATABASE_URL.\n\n' +
@@ -43,11 +61,27 @@ if (!url) {
       'the same value — this project reads only DATABASE_URL, on purpose, so it is not\n' +
       'tied to one host.\n',
   )
-  process.exit(1)
+  process.exit(optional ? 0 : 1)
 }
 
 const sql = postgres(url, { max: 1, prepare: false, onnotice: () => {} })
 const dir = join(process.cwd(), 'db', 'migrations')
+
+// Neon suspends an idle branch and the first connection after that can time out.
+// Three attempts turns a cold start into a pause rather than a failed deploy.
+for (let attempt = 1; ; attempt++) {
+  try {
+    await sql`select 1`
+    break
+  } catch (err) {
+    if (attempt === 3) {
+      console.error('Could not reach the database after 3 attempts.')
+      throw err
+    }
+    console.log('database not answering, retrying (' + attempt + '/3)…')
+    await new Promise((r) => setTimeout(r, attempt * 2000))
+  }
+}
 
 await sql`
   create table if not exists _migrations (
