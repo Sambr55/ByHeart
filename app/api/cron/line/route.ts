@@ -30,7 +30,13 @@ interface Row {
   time_zone: string
   last_line_at: Date | null
   sent: string[]
-  state: { inventory?: Record<string, unknown> } | null
+  state: {
+    inventory?: Record<string, unknown>
+    /** Salting on this rather than the endpoint keeps one person to one line a day. */
+    learner_id?: string
+    /** What the app has already shown them, so a notification never repeats it. */
+    lines_seen?: string[]
+  } | null
 }
 
 /** The local hour and local date for a subscriber, in their own time zone. */
@@ -81,6 +87,8 @@ export async function GET(request: Request) {
 
   for (const row of rows) {
     const { hour, day } = local(row.time_zone)
+    // The learner's clock says when; the language's clock says which.
+    const languageDay = dayKey()
     if (!force && hour !== SEND_HOUR) {
       skipped++
       continue
@@ -92,7 +100,24 @@ export async function GET(request: Request) {
     }
 
     const owned = Object.keys(row.state?.inventory ?? {})
-    const line = pickLine({ owned, seen: row.sent, day, salt: row.device_id ?? row.endpoint })
+    /*
+      The same three inputs the /line page uses, or the lock screen and the page show
+      different sentences — which they did.
+
+      salt: the learner's own id, not the device or the endpoint. A learner on two
+      phones is two subscription rows and one person; salting on the endpoint gave them
+      two different lines on the same morning.
+
+      day: the language's day, not the subscriber's. Their time zone decides WHEN this
+      fires — eight in the morning where they are — and never WHICH line, because the
+      line belongs to a date in Portugal.
+
+      seen: the union of what this subscription has been sent and what the learner has
+      already been shown in the app. Either alone re-delivers a sentence they have had.
+    */
+    const salt = row.state?.learner_id ?? row.device_id ?? row.endpoint
+    const seen = [...new Set([...(row.sent ?? []), ...(row.state?.lines_seen ?? [])])]
+    const line = pickLine({ owned, seen, day: languageDay, salt })
     if (!line) {
       skipped++
       continue

@@ -1,3 +1,4 @@
+import { THEME_SCRIPT } from '@/components/Theme'
 import type { Metadata, Viewport } from 'next'
 import { Archivo, Inter } from 'next/font/google'
 import { BRAND } from '@/content/brand'
@@ -55,6 +56,16 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} h-full`}>
+      <head>
+        {/*
+          The theme, applied before the first paint.
+
+          Read after hydration instead and a dark-preferring person watches a white page
+          for a frame on every navigation. It only sets a data attribute on the root, so
+          there is nothing for React to disagree with when it hydrates.
+        */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-full">{children}</body>
     </html>
   )

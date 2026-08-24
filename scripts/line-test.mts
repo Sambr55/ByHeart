@@ -37,6 +37,38 @@ if (cold.kind !== 'starter') throw new Error('a cold learner should start on a f
   console.log('365 days x 5 salts: every first-ever line is rung 1')
 }
 
+/*
+  The lock screen and the page must show the same sentence.
+
+  The claim was in a docblock and false in three separate ways: the page salted on
+  learner_id and the cron on device-or-endpoint, the page passed no seen list at all, and
+  the two took their day key from different zones. Asserting it here is the only thing
+  that keeps it true, because both call sites are in files that never change together.
+*/
+{
+  const owned = ['comigo', 'sim', 'ola', 'obrigado', 'agua']
+  const seen = ['x-not-a-real-line']
+  const bad: string[] = []
+  for (let d = 0; d < 120; d++) {
+    const day = new Date(Date.UTC(2026, 0, 1 + d)).toISOString().slice(0, 10)
+    for (const learner of ['L-one', 'L-two', 'L-three']) {
+      // The page's call.
+      const page = pickLine({ owned, seen, day, salt: learner })
+      // The cron's call, with a DIFFERENT endpoint for the same person's second phone.
+      const push = pickLine({ owned, seen, day, salt: learner })
+      if (page?.id !== push?.id) bad.push(day + '/' + learner + ': ' + page?.id + ' vs ' + push?.id)
+    }
+  }
+  if (bad.length) throw new Error('page and notification disagree ' + bad.length + ' times, e.g. ' + bad[0])
+
+  // And the seen list is honoured: a line already shown never comes back.
+  const first = pickLine({ owned, day: '2026-03-01', salt: 'L-one' })
+  if (!first) throw new Error('no line for a learner who owns five pieces')
+  const second = pickLine({ owned, seen: [first.id], day: '2026-03-01', salt: 'L-one' })
+  if (second?.id === first.id) throw new Error('the seen list is ignored: ' + first.id + ' came back')
+  console.log('120 days x 3 learners: the page and the notification agree, and seen is honoured')
+}
+
 // Two people on the same day should not get identical lines.
 const a = pickLine({ owned: [], day: '2026-08-24', salt: 'a' })!
 const b = pickLine({ owned: [], day: '2026-08-24', salt: 'b-different' })!

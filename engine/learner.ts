@@ -180,6 +180,16 @@ export interface LearnerState {
    */
   nocue_done: string[]
   /**
+   * Daily lines already shown, so the same sentence never arrives twice.
+   *
+   * On the LEARNER rather than on the push subscription, because both halves of the
+   * feature have to read it: the cron picks from a `sent` column and the /line page
+   * passed no seen list at all, so the page happily re-showed a sentence the
+   * notification had already delivered — and the docblock claimed the two were always
+   * the same line.
+   */
+  lines_seen: string[]
+  /**
    * Crates whose section has been carried all the way to the end.
    *
    * roots_played says what was opened; this says what was FINISHED, and only the second
@@ -231,6 +241,7 @@ export function emptyLearner(): LearnerState {
     roots_played: [],
     collisions_played: [],
     nocue_done: [],
+    lines_seen: [],
     sections_completed: [],
     club_welcomed_at: null,
     deal_accepted_at: null,
@@ -317,6 +328,7 @@ export function loadLearner(): LearnerState {
           proof: arr(parsed.proof, []),
           roots_played: arr(parsed.roots_played, []),
           nocue_done: arr(parsed.nocue_done, []),
+          lines_seen: arr(parsed.lines_seen, []),
           sections_completed: arr(parsed.sections_completed, []),
           club_welcomed_at: parsed.club_welcomed_at ?? null,
           deal_accepted_at: parsed.deal_accepted_at ?? null,
@@ -505,6 +517,7 @@ export async function syncSession(reason: string): Promise<boolean> {
         club_welcomed_at: s.club_welcomed_at,
         collisions_played: s.collisions_played,
         nocue_done: s.nocue_done,
+        lines_seen: s.lines_seen,
         deal_accepted_at: s.deal_accepted_at,
         created_at: s.created_at,
         user_agent: navigator.userAgent,
@@ -865,6 +878,13 @@ export async function restoreLearner(): Promise<'merged' | 'nothing' | 'failed'>
 export function rememberNoCue(id: string) {
   update((s) => {
     if (!s.nocue_done.includes(id)) s.nocue_done = [...s.nocue_done, id]
+  })
+}
+
+/** A daily line shown. Recorded wherever it was shown — the page or a notification. */
+export function rememberLine(id: string) {
+  update((s) => {
+    if (!s.lines_seen.includes(id)) s.lines_seen = [...s.lines_seen, id]
   })
 }
 

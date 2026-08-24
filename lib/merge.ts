@@ -212,6 +212,7 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     roots_played: setUnion(l.roots_played, r.roots_played),
     collisions_played: setUnion(l.collisions_played, r.collisions_played),
     nocue_done: setUnion(l.nocue_done, r.nocue_done),
+    lines_seen: setUnion(l.lines_seen, r.lines_seen),
     // Finishing a section is not undoable, and the Club's welcome fired at whichever
     // moment came first — a learner who signs in on a new phone is not new.
     sections_completed: setUnion(l.sections_completed, r.sections_completed),

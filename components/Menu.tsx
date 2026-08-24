@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { ThemeChoice } from '@/components/Theme'
 import { useEntitlements } from '@/engine/useEntitlements'
 
 /**
@@ -142,6 +143,14 @@ export function Menu() {
                 )
               })}
             </nav>
+
+            {/* The dark theme was complete, correct and unreachable — data-theme was
+                never set by anything in the product. The menu is where it belongs:
+                every screen has one, and nobody hunts for a settings page to change
+                how something looks. */}
+            <div className="border-t border-line px-3 py-3">
+              <ThemeChoice />
+            </div>
           </div>
         </div>,
         document.body,
