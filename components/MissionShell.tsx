@@ -22,7 +22,7 @@ export function MissionShell({ children }: { children: ReactNode }) {
     >
       <StageRail current={stage} index={state.index} stages={mission.stages} screens={screens} />
 
-      <main className="instrument-field flex-1">
+      <main className="azulejo-field flex-1">
         <div
           key={screen.id}
           className="animate-rise mx-auto flex min-h-[calc(100svh-9.5rem)] w-full max-w-md flex-col px-5 py-6"

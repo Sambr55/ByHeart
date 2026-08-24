@@ -201,16 +201,46 @@ body {
 }
 
 /* Instrument field: altitude rules behind the content, not decoration on top of it. */
-.instrument-field {
+/*
+  The azulejo field.
+  This replaces .instrument-field — the aviation altitude rules, which were the last
+  piece of Top Gun styling left in a ten-crate product.
+
+  Portuguese tile patterns are geometric, tileable, centuries old as forms, and the most
+  photographed thing in the country. Built as CSS gradients rather than image files, so
+  the whole visual system costs no asset, no request and no rights question. Tinted with
+  the crate's own tone at a few per cent, so the world you are in is felt rather than
+  labelled.
+*/
+.azulejo-field {
   background-image:
-    linear-gradient(to bottom, transparent 0 39px, var(--grid) 39px 40px);
-  background-size: 100% 40px;
+    repeating-linear-gradient(45deg, var(--grid) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(-45deg, var(--grid) 0 1px, transparent 1px 22px);
+  background-size: 44px 44px;
 }
 
-[data-stage="REAL WORLD"] .instrument-field,
-[data-stage="LISBON"] .instrument-field {
-  /* No altitude lines in Lisbon — the aviation motif is gone, not restyled. */
+/* A denser quatrefoil-ish weave, for blocks rather than whole pages. */
+.azulejo-block {
+  background-color: color-mix(in srgb, var(--tone) 7%, transparent);
+  background-image:
+    radial-gradient(circle at 0 0, color-mix(in srgb, var(--tone) 22%, transparent) 0 3px, transparent 3px),
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--tone) 22%, transparent) 0 3px, transparent 3px),
+    radial-gradient(circle at 0 100%, color-mix(in srgb, var(--tone) 22%, transparent) 0 3px, transparent 3px),
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--tone) 22%, transparent) 0 3px, transparent 3px),
+    repeating-linear-gradient(45deg, color-mix(in srgb, var(--tone) 12%, transparent) 0 1px, transparent 1px 14px);
+  background-size: 28px 28px;
+}
+
+/*
+  REAL WORLD stays bare. No tile, no tint, no texture — the absence of culture is the
+  entire point of that beat, and it is a far stronger move now that there is something
+  to take away.
+*/
+[data-stage='REAL WORLD'] .azulejo-field,
+[data-stage='REAL WORLD'] .azulejo-block,
+[data-stage='LISBON'] .azulejo-field {
   background-image: none;
+  background-color: transparent;
 }
 
 .tap-target {

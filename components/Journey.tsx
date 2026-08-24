@@ -142,7 +142,7 @@ function Shell({
           </div>
         </header>
       ) : null}
-      <main className="flex-1">
+      <main className="azulejo-field flex-1">
         <div className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col gap-0 px-5 pb-6 pt-6">
           {children}
         </div>
@@ -620,6 +620,82 @@ function DropClock({ crate, now }: { crate: Crate; now: Date | null }) {
   )
 }
 
+/**
+ * The ladder, drawn.
+ *
+ * It is the spine of the product and it was an ordered list inside a disclosure, which
+ * made it look like a footnote. Drawing it makes it a thing you climb with your position
+ * marked on it — and it is a real object rather than a decoration: the rungs you have
+ * passed are solid, the one you are on is filled, and the ones above are drawn but
+ * empty, which is the whole argument of the stage model in one picture.
+ *
+ * Bottom-to-top, because that is what climbing looks like. Inline SVG, so it costs no
+ * asset and takes its colour from the theme it lands in.
+ */
+function Ladder({ here }: { here: Rung }) {
+  const step = 34
+  const height = RUNGS.length * step + 16
+  return (
+    <figure className="mt-3">
+      <svg
+        viewBox={'0 0 260 ' + height}
+        role="img"
+        aria-label={'Stage ' + here + ' of 6: ' + RUNGS[here - 1].name}
+        className="w-full max-w-[260px]"
+        style={{ height: height }}
+      >
+        {/* the two rails */}
+        <line x1="14" y1="8" x2="14" y2={height - 8} stroke="currentColor" strokeOpacity="0.25" strokeWidth="1.5" />
+        <line x1="40" y1="8" x2="40" y2={height - 8} stroke="currentColor" strokeOpacity="0.25" strokeWidth="1.5" />
+        {RUNGS.map((r, i) => {
+          // Drawn from the bottom up: stage 1 is the rung you stand on first.
+          const y = height - 16 - i * step
+          const reached = r.rung <= here
+          const isHere = r.rung === here
+          return (
+            <g key={r.rung}>
+              <line
+                x1="14"
+                y1={y}
+                x2="40"
+                y2={y}
+                stroke={reached ? 'var(--accent)' : 'currentColor'}
+                strokeOpacity={reached ? 1 : 0.3}
+                strokeWidth={isHere ? 3 : 2}
+                strokeLinecap="round"
+              />
+              <circle
+                cx="27"
+                cy={y}
+                r={isHere ? 5 : 3}
+                fill={isHere ? 'var(--accent)' : reached ? 'var(--accent)' : 'none'}
+                fillOpacity={isHere ? 1 : reached ? 0.45 : 0}
+                stroke={reached ? 'var(--accent)' : 'currentColor'}
+                strokeOpacity={reached ? 1 : 0.3}
+                strokeWidth="1.5"
+              />
+              <text
+                x="56"
+                y={y + 4}
+                fontSize="11"
+                fill="currentColor"
+                fillOpacity={isHere ? 1 : reached ? 0.75 : 0.42}
+                fontWeight={isHere ? 600 : 400}
+              >
+                {r.name}
+              </text>
+            </g>
+          )
+        })}
+      </svg>
+      <figcaption className="mt-1 text-xs text-muted">
+        You are on {RUNGS[here - 1].name.toLowerCase()}. Nothing above is locked forever —
+        each one opens by saying something cold.
+      </figcaption>
+    </figure>
+  )
+}
+
 function Picker() {
   const { chooseFamily, state } = useJourney()
   const learner = useLearner()
@@ -688,21 +764,7 @@ function Picker() {
               {PICKER.stages_toggle} ▸
             </span>
           </summary>
-          <ol className="mt-3 space-y-1.5 border-l border-line pl-4">
-            {RUNGS.map((r) => (
-              <li
-                key={r.rung}
-                className={
-                  'flex flex-wrap items-baseline gap-x-2 text-xs ' +
-                  (r.rung === rung ? 'text-accent' : r.rung < rung ? 'text-muted' : 'text-muted/60')
-                }
-              >
-                <span className="tabular-nums">{r.rung}</span>
-                <span className="display">{r.name}</span>
-                {r.rung === rung ? <span className="eyebrow text-[0.5rem]">you are here</span> : null}
-              </li>
-            ))}
-          </ol>
+          <Ladder here={rung} />
         </details>
       ) : null}
       <div className="mt-5 space-y-2">
@@ -769,7 +831,15 @@ function Picker() {
                             : 'border-line bg-surface hover:border-accent/50'))
                 }
               >
-                <span>
+                {/* A tile block in the crate's own colour: the cheapest way to turn ten
+                    identical rectangles into ten distinguishable places. */}
+                {!f.drop ? (
+                  <span
+                    aria-hidden
+                    className="azulejo-block mr-1 h-10 w-10 shrink-0 self-center rounded-lg"
+                  />
+                ) : null}
+                <span className="min-w-0 flex-1">
                   {f.drop ? (
                     <span className="eyebrow mb-1 block text-[0.55rem] text-accent">
                       DROP · {goneOn(f.drop)}
