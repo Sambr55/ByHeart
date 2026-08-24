@@ -1,4 +1,4 @@
-import type { LearnerState } from '@/engine/learner'
+import type { InventoryItem, InventoryState, LearnerState } from '@/engine/learner'
 
 /**
  * Merging two copies of a learner.
@@ -20,14 +20,24 @@ const obj = (v: unknown): Rec =>
   v && typeof v === 'object' && !Array.isArray(v) ? (v as Rec) : {}
 
 /** Append-only records. A merge can only add, so union on a stable identity. */
-function unionBy<T>(a: T[], b: T[], key: (x: T) => string): T[] {
+function unionBy<T>(
+  a: T[],
+  b: T[],
+  key: (x: T) => string,
+  /** How to combine two rows that share an identity. Default: keep the first seen. */
+  combine?: (x: T, y: T) => T,
+): T[] {
   const out: T[] = []
-  const seen = new Set<string>()
+  const at = new Map<string, number>()
   for (const item of [...a, ...b]) {
     const k = key(item)
-    if (seen.has(k)) continue
-    seen.add(k)
-    out.push(item)
+    const found = at.get(k)
+    if (found === undefined) {
+      at.set(k, out.length)
+      out.push(item)
+      continue
+    }
+    if (combine) out[found] = combine(out[found], item)
   }
   return out
 }
@@ -44,35 +54,84 @@ function earliest(a: unknown, b: unknown): string | null {
 }
 
 /**
- * Inventory: union by key, and on conflict keep the stronger state and the earlier
- * acquisition. Strength only ever goes up, so taking the max cannot demote a learner
- * for having opened the app on an older phone.
+ * Inventory: union by key, and on conflict keep everything the stronger copy knew.
+ *
+ * The version this replaces compared against a vocabulary DUB has never had —
+ * ['seen','shaky','known','strong'] — while the real field is `latest_state` and the
+ * real values are NEW / YOURS / STRONGER / SOLID / NEEDS ANOTHER LOOK. indexOf returned
+ * −1 on both sides of every comparison, so the tie-break never fired and a plain object
+ * spread let the remote copy win blindly: a phone that had been in a drawer since July
+ * could demote a SOLID piece to NEW, erase its cross-world reinforcement history, and
+ * inject `state: ""` and `acquired_at: undefined` into the record on the way past.
+ *
+ * Three rules now, and each one is a way a learner could lose something:
+ *
+ *   - state takes the strongest, on the real ladder
+ *   - reinforced_sources UNION, because being reinforced in another world is a fact
+ *     about what happened and cannot be undone by a stale copy
+ *   - latest_recall_at takes the LATEST, because that one is genuinely a "most recent"
+ *
+ * NEEDS ANOTHER LOOK is deliberately not on the ladder. It is not a rung, it is a flag
+ * about the last attempt, so it never wins a merge and never loses one — the copy that
+ * knows more about the piece decides, and the flag rides along with whichever state won.
  */
-const STRENGTH = ['seen', 'shaky', 'known', 'strong']
+const LADDER: InventoryState[] = ['NEW', 'YOURS', 'STRONGER', 'SOLID']
 
-function mergeInventory(a: unknown, b: unknown): Rec {
+/** How much this copy knows. −1 for a value off the ladder, which loses to anything. */
+function strength(state: unknown): number {
+  return LADDER.indexOf(state as InventoryState)
+}
+
+/** The stronger of two states, treating the flag as "no information about rank". */
+function strongerState(a: unknown, b: unknown): InventoryState {
+  const [x, y] = [strength(a), strength(b)]
+  if (x < 0 && y < 0) {
+    // Both off the ladder — both are NEEDS ANOTHER LOOK, or one is junk from an older
+    // build. Prefer a real InventoryState over anything else.
+    const real = [a, b].find((v) => v === 'NEEDS ANOTHER LOOK')
+    return (real as InventoryState) ?? 'NEW'
+  }
+  if (x < 0) return b as InventoryState
+  if (y < 0) return a as InventoryState
+  return (x > y ? a : b) as InventoryState
+}
+
+/** Latest wins — this one really is a "most recent". */
+function latest(a: unknown, b: unknown): string | null {
+  const xs = [a, b].filter((x): x is string => typeof x === 'string' && Boolean(x))
+  if (!xs.length) return null
+  return xs.sort()[xs.length - 1]
+}
+
+function mergeInventory(a: unknown, b: unknown): Record<string, InventoryItem> {
   const left = obj(a)
   const right = obj(b)
-  const out: Rec = { ...left }
-  for (const [k, rv] of Object.entries(right)) {
-    const lv = out[k]
-    if (lv === undefined) {
-      out[k] = rv
+  const out: Record<string, InventoryItem> = {}
+  for (const key of new Set([...Object.keys(left), ...Object.keys(right)])) {
+    const lo = left[key]
+    const ro = right[key]
+    if (lo === undefined) {
+      out[key] = ro as InventoryItem
       continue
     }
-    if (typeof lv === 'string' && typeof rv === 'string') {
-      out[k] = STRENGTH.indexOf(rv) > STRENGTH.indexOf(lv) ? rv : lv
+    if (ro === undefined) {
+      out[key] = lo as InventoryItem
       continue
     }
-    const lo = obj(lv)
-    const ro = obj(rv)
-    const ls = typeof lo.state === 'string' ? lo.state : ''
-    const rs = typeof ro.state === 'string' ? ro.state : ''
-    out[k] = {
-      ...lo,
-      ...ro,
-      state: STRENGTH.indexOf(rs) > STRENGTH.indexOf(ls) ? rs : ls || rs,
-      acquired_at: earliest(lo.acquired_at, ro.acquired_at) ?? ro.acquired_at ?? lo.acquired_at,
+    const l = obj(lo)
+    const r = obj(ro)
+    out[key] = {
+      target_id: (l.target_id ?? r.target_id ?? key) as InventoryItem['target_id'],
+      // An acquisition source is the world it first came from. Whichever copy has one
+      // is the one that was there.
+      acquired_source: (l.acquired_source ??
+        r.acquired_source ??
+        null) as InventoryItem['acquired_source'],
+      reinforced_sources: [
+        ...new Set([...arr<string>(l.reinforced_sources), ...arr<string>(r.reinforced_sources)]),
+      ] as InventoryItem['reinforced_sources'],
+      latest_state: strongerState(l.latest_state, r.latest_state),
+      latest_recall_at: latest(l.latest_recall_at, r.latest_recall_at),
     }
   }
   return out
@@ -102,11 +161,44 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     club_welcomed_at: earliest(l.club_welcomed_at, r.club_welcomed_at),
 
     // Append-only. Union by identity, never replaced.
-    proof: unionBy(arr<Rec>(l.proof), arr<Rec>(r.proof), (p) => String(p.pt) + '|' + String(p.at)),
+    /*
+      One row per sentence-and-moment, and `clean` can only ever turn true.
+
+      recordProof lets a learner upgrade a fumbled release by getting it right later.
+      A plain union would let a stale copy of the same row carry the old false back —
+      and `clean` is what rungReached counts, so that is a lost rung, not a cosmetic
+      flag.
+    */
+    proof: unionBy(
+      arr<Rec>(l.proof),
+      arr<Rec>(r.proof),
+      (p) => String(p.pt) + '|' + String(p.at),
+      (x, y) => ({ ...x, clean: Boolean(x.clean) || Boolean(y.clean) }),
+    ),
+    /*
+      Keyed on `timestamp`, which is the field LearningEvidence actually has.
+
+      It used to key on `e.at` — undefined on every row, because that field belongs to
+      ProofLine and never existed here. So the key degraded to target_id|""|event_type
+      and every row sharing a target and a type collapsed into ONE. Three reinforcements
+      of `água` plus two from another device merged to a single survivor.
+
+      That is not a cosmetic loss. scoreFor, deriveState and weakestBlocks all COUNT
+      evidence rows, so thinning the log silently demotes inventory state and corrupts
+      deck selection — and restoreLearner writes the damaged copy straight back over
+      localStorage, where there is nothing to restore it from.
+    */
     evidence: unionBy(
       arr<Rec>(l.evidence),
       arr<Rec>(r.evidence),
-      (e) => String(e.target_id) + '|' + String(e.at ?? '') + '|' + String(e.event_type ?? ''),
+      (e) =>
+        String(e.target_id) +
+        '|' +
+        String(e.timestamp ?? '') +
+        '|' +
+        String(e.event_type ?? '') +
+        '|' +
+        String(e.latency_ms ?? ''),
     ),
     voice_signals: unionBy(
       arr<Rec>(l.voice_signals),
@@ -144,9 +236,17 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
 /**
  * The invariant, asserted rather than assumed.
  *
- * A merge may never reduce proof.length, and may never drop an inventory key. If it
- * ever does, throwing is the correct behaviour: writing the result back would destroy
- * the only copy of what the learner can say, and there is nowhere to restore it from.
+ * A merge may never reduce what the learner has. If it ever would, throwing is the
+ * correct behaviour: writing the result back destroys the only copy of what they can
+ * say, and there is nowhere to restore it from.
+ *
+ * This checked two things — proof length and inventory key presence — and BOTH of the
+ * defects it was written to catch sailed straight past it. A safety net that certifies
+ * the bug is worse than no safety net, because it is why nineteen fixtures passed while
+ * the merge quietly demoted pieces on every sync.
+ *
+ * So it now checks everything a merge could take away: the proof count, the evidence
+ * count, every inventory key, and — per item — the state and the reinforcement history.
  */
 export function assertCanOnlyGain(
   a: Partial<LearnerState>,
@@ -159,9 +259,60 @@ export function assertCanOnlyGain(
       'merge would lose proof: ' + merged.proof.length + ' < ' + floor + '. Refusing to write.',
     )
   }
-  for (const key of [...Object.keys(obj(a.inventory)), ...Object.keys(obj(b.inventory))]) {
-    if (!(key in merged.inventory)) {
-      throw new Error('merge would drop inventory key "' + key + '". Refusing to write.')
+
+  /*
+    Evidence is append-only and counted, not just read. scoreFor, deriveState and
+    weakestBlocks all measure the number of rows, so one lost row is a demoted piece.
+  */
+  const evidenceFloor = Math.max(arr(a.evidence).length, arr(b.evidence).length)
+  if (merged.evidence.length < evidenceFloor) {
+    throw new Error(
+      'merge would lose evidence: ' +
+        merged.evidence.length +
+        ' < ' +
+        evidenceFloor +
+        '. Refusing to write.',
+    )
+  }
+
+  for (const [side, source] of [
+    ['local', obj(a.inventory)],
+    ['remote', obj(b.inventory)],
+  ] as const) {
+    for (const [key, before] of Object.entries(source)) {
+      const after = merged.inventory[key]
+      if (!after) {
+        throw new Error('merge would drop inventory key "' + key + '". Refusing to write.')
+      }
+      const was = obj(before)
+      // A piece may be promoted by a merge and may never be demoted by one.
+      if (strength(was.latest_state) > strength(after.latest_state)) {
+        throw new Error(
+          'merge would demote "' +
+            key +
+            '" from ' +
+            String(was.latest_state) +
+            ' to ' +
+            String(after.latest_state) +
+            ' (' +
+            side +
+            ' copy). Refusing to write.',
+        )
+      }
+      // Being reinforced in another world is a fact about what happened. A stale copy
+      // that has never heard of it must not be able to erase it.
+      const lost = arr<string>(was.reinforced_sources).filter(
+        (x) => !arr<string>(after.reinforced_sources).includes(x),
+      )
+      if (lost.length) {
+        throw new Error(
+          'merge would erase reinforcement of "' +
+            key +
+            '" in ' +
+            lost.join(', ') +
+            '. Refusing to write.',
+        )
+      }
     }
   }
 }

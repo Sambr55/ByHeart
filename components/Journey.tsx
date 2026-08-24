@@ -63,6 +63,7 @@ import {
   markOsmosisSeen,
   recordProof,
   rememberNoCue,
+  rememberPlayed,
   resetLearnerCache,
   setAffinity,
   setProfile,
@@ -1664,6 +1665,18 @@ function RootBeatView({
             source: 'release',
             clean,
           })
+          /*
+            HERE is where a root counts as played — at its release, not when the section
+            queued it.
+
+            Recording it at queue time meant entering a crate consumed it: tap in, look
+            at one screen, leave, and the picker said "everything here is done" while
+            Dub Club would never offer to resume it. The learner had seen one screen.
+
+            The release is the beat where the cultural cue is taken away and they say the
+            sentence themselves, which is the only moment that means anything.
+          */
+          rememberPlayed([root.root_id], null)
           setDone(true)
         }}
       />

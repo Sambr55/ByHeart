@@ -397,12 +397,38 @@ export function setTester(label: string) {
  * rather than a second capability, and a count that inflates on repetition is exactly
  * the kind of number this product exists to avoid.
  */
+/**
+ * A sentence produced with nothing on screen to copy from.
+ *
+ * Two things this gets right that the first version did not.
+ *
+ * A fumble is not permanent. It used to return early on any sentence already in the
+ * log, so a release got wrong once was stored clean:false FOREVER — replaying the root
+ * could not fix it, and the rung it would have earned was gone. Worst case was live: a
+ * learner who picked Bridget Jones got a section containing exactly one release, the
+ * longest rung-1 build in the graph, and one slip left them still on rung 1 having spent
+ * one of three free crates. The dedupe stays for the COUNT — a sentence said twice is
+ * one sentence — and drops for the flag.
+ *
+ * And it goes through update(). It was the only mutator in this file that mutated the
+ * state object in place, so useSyncExternalStore compared the same reference with
+ * Object.is, decided nothing had changed, and never re-rendered a subscriber. The proof
+ * card and the ladder could both sit a whole session behind.
+ *
+ * `at` is deliberately not restamped on an upgrade: the merge dedupes proof on pt|at,
+ * so moving it would turn one sentence into two the next time a device synced.
+ */
 export function recordProof(line: Omit<ProofLine, 'at'>) {
-  const s = loadLearner()
-  if (s.proof.some((p) => p.pt === line.pt)) return
-  s.proof = [...s.proof, { ...line, at: new Date().toISOString() }]
-  save()
-  emit()
+  update((s) => {
+    const found = s.proof.findIndex((p) => p.pt === line.pt)
+    if (found < 0) {
+      s.proof = [...s.proof, { ...line, at: new Date().toISOString() }]
+      return
+    }
+    if (line.clean && !s.proof[found].clean) {
+      s.proof = s.proof.map((p, i) => (i === found ? { ...p, clean: true } : p))
+    }
+  })
 }
 
 export function recordVoiceSignal(signal: string, pt: string) {

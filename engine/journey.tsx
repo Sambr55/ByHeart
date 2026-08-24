@@ -137,6 +137,14 @@ export function beatsFor(root: Root): { beat: RootBeat; pieceIndex?: number }[] 
   return beats
 }
 
+/**
+ * How many roots one section may contain.
+ *
+ * Declared here since the first draft and never referenced, which is why a section was
+ * whatever the crate happened to hold — 59 screens for world_of_wizardry against a
+ * stated ten-minute promise. It is enforced in chooseFamily now. Four roots is roughly
+ * eight to twelve minutes, and the remainder is what brings somebody back.
+ */
 const ROOTS_PER_SESSION = 4
 
 interface JourneyState {
@@ -501,7 +509,11 @@ export function JourneyProvider({
        *
        * Sorting is stable, so within a stage the authored order still holds.
        */
-      const reached = rungReached(learner.proof)
+      // Read fresh rather than off the closure. `learner` was absent from this
+      // callback's deps, so a section queued after the first release of the session
+      // could gate on a stage the learner had already left behind — the ladder running
+      // a whole session late.
+      const reached = rungReached(loadLearner().proof)
       const all = ROOTS_BY_FAMILY[family]
       const fresh = all.filter(
         (r) => r.rung <= reached && !state.rootsPlayed.includes(r.root_id),
@@ -511,10 +523,27 @@ export function JourneyProvider({
       // cannot be inflated, and the osmosis screen already knows how to say that there
       // is nothing new to point out.
       const replay = all.filter((r) => r.rung <= reached)
-      const roots = (fresh.length ? fresh : replay.length ? replay : all).sort(
+      /*
+        The last fallback used to be `all`, which handed a rung-1 learner every root in
+        the crate including rung 6 — the ladder gating the DOOR and then not gating
+        anything behind it. If nothing at or below their stage exists, the honest answer
+        is the lowest rung the crate has, not the whole crate.
+      */
+      const floor = all.length ? Math.min(...all.map((r) => r.rung)) : 1
+      const lowest = all.filter((r) => r.rung === floor)
+      const eligible = (fresh.length ? fresh : replay.length ? replay : lowest).sort(
         (a, b) => a.rung - b.rung,
       )
-      rememberPlayed(roots.map((r) => r.root_id), null)
+      /*
+        A section is capped.
+
+        ROOTS_PER_SESSION has been declared and never referenced, so sections were
+        unbounded: the world-of-wizardry crate is a 59-screen first session against a
+        stated ten-minute promise — realistically 20 to 30 minutes. The cap is the
+        promise, so it is enforced rather than documented, and what is left over is what
+        "pick up where you stopped" is for.
+      */
+      const roots = eligible.slice(0, ROOTS_PER_SESSION)
       const steps: Step[] = []
 
       /**
