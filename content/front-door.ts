@@ -138,6 +138,9 @@ export const PICKER = {
    */
   drop_note:
     'The one with a date is a drop. It is pegged to something really happening and it disappears the morning after — but whatever you learn inside it is yours to keep.',
+  /** Shown under the list whenever something is still dimmed. */
+  locked_note:
+    'The dimmed ones are not gone. Each says what opens it — and it opens by saying something cold, with the film taken away, not by turning up.',
   cta: 'START HERE',
 } as const
 

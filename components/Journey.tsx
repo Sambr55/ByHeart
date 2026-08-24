@@ -6,13 +6,17 @@ import {
   CRATES,
   PIECES,
   ROOTS_BY_FAMILY,
+  RUNGS,
   daysLeft,
+  entryRung,
   isLive,
   rootById,
+  rungReached,
   type Crate,
   type CultureFamily,
   type DropEvent,
   type Root,
+  type Rung,
 } from '@/content/roots'
 import { CLOSE, DEAL as DEAL_COPY, DEMO_BEATS, DEMO_CLOSE, LANDING, NO_CUE_PROMPTS, PICKER } from '@/content/front-door'
 import { COLLISIONS } from '@/content/roots'
@@ -396,22 +400,41 @@ function DropClock({ crate, now }: { crate: Crate; now: Date | null }) {
 
 function Picker() {
   const { chooseFamily, state } = useJourney()
+  const learner = useLearner()
   // Remember what they chose. Stepping back onto this screen and finding the choice
   // wiped is the kind of small betrayal that makes a product feel unreliable.
   const [picked, setPicked] = useState<CultureFamily | null>(state.family)
   const now = useNowAfterMount()
+  // Nothing is dimmed until the browser has read what this learner has actually done.
+  // A crate that locks itself a frame after hydration is worse than one that never did.
+  const mounted = now !== null
+  const rung: Rung = mounted ? rungReached(learner.proof) : 6
   const done = useMemo(() => {
     const played = new Set(state.rootsPlayed.map((id) => rootById(id)?.culture_family))
     return played
   }, [state.rootsPlayed])
   const shown = CRATES.filter((c) => (now ? isLive(c, now) : true))
+  const anyLocked = shown.some((c) => entryRung(c) > rung)
+  const here = RUNGS[rung - 1]
   return (
     <Shell stage="CHOICE">
       <h1 className="display text-balance text-2xl">{PICKER.headline}</h1>
       <p className="mt-2 text-sm text-muted">{PICKER.sub}</p>
+      {mounted ? (
+        <div className="mt-4 flex items-center gap-3">
+          <span className="eyebrow shrink-0 text-accent">
+            You are at {rung} · {here.name}
+          </span>
+          <span className="h-px flex-1 bg-line" />
+        </div>
+      ) : null}
       <div className="mt-5 space-y-2">
         {shown.map((f) => {
           const finished = done.has(f.id)
+          // A drop never locks. It expires, and something that can be lost forever by
+          // being busy must never also be something you can be shut out of.
+          const opensAt = entryRung(f)
+          const locked = !f.drop && opensAt > rung
           return (
             <div
               key={f.id}
@@ -431,7 +454,7 @@ function Picker() {
               <button
                 type="button"
                 aria-pressed={picked === f.id}
-                disabled={finished}
+                disabled={finished || locked}
                 onClick={() => setPicked(f.id)}
                 className={
                   'tap-target flex w-full justify-between gap-3 px-4 py-4 text-left transition ' +
@@ -440,9 +463,11 @@ function Picker() {
                     : 'items-center rounded-xl border ' +
                       (finished
                         ? 'border-line/50 bg-surface/40 opacity-45'
-                        : picked === f.id
-                          ? 'border-accent bg-accent/10'
-                          : 'border-line bg-surface hover:border-accent/50'))
+                        : locked
+                          ? 'border-line/40 bg-surface/30 opacity-40'
+                          : picked === f.id
+                            ? 'border-accent bg-accent/10'
+                            : 'border-line bg-surface hover:border-accent/50'))
                 }
               >
                 <span>
@@ -452,7 +477,9 @@ function Picker() {
                     </span>
                   ) : null}
                   <span className="display block text-base">{f.title}</span>
-                  <span className="mt-0.5 block text-xs text-muted">{f.blurb}</span>
+                  <span className="mt-0.5 block text-xs text-muted">
+                    {locked ? RUNGS[opensAt - 1].opens : f.blurb}
+                  </span>
                   {f.drop ? (
                     <span className="mt-1.5 block text-xs text-muted">
                       {f.drop.event} · {f.drop.place}
@@ -462,6 +489,10 @@ function Picker() {
                 {finished ? (
                   <span className="shrink-0 rounded-full border border-correct/50 px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-correct">
                     done
+                  </span>
+                ) : locked ? (
+                  <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-muted">
+                    {RUNGS[opensAt - 1].name}
                   </span>
                 ) : f.drop ? (
                   <DropClock crate={f} now={now} />
@@ -485,6 +516,9 @@ function Picker() {
       </div>
       {shown.some((c) => c.drop) ? (
         <p className="mt-4 text-xs leading-relaxed text-muted">{PICKER.drop_note}</p>
+      ) : null}
+      {anyLocked ? (
+        <p className="mt-2 text-xs leading-relaxed text-muted">{PICKER.locked_note}</p>
       ) : null}
       <Cta label={PICKER.cta} disabled={!picked} onClick={() => picked && chooseFamily(picked)} />
     </Shell>

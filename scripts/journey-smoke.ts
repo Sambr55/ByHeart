@@ -6,10 +6,12 @@
  *   npm run journey
  */
 import { chromium, type Locator, type Page } from 'playwright'
-import { CRATES, isLive } from '../content/roots'
+import { CRATES, entryRung, isLive } from '../content/roots'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
-const family = process.env.FAMILY ?? 'marcus_aurelius'
+// Must default to a crate a brand-new learner can actually open: the ladder now
+// dims anything above rung 1 until something has been said cold.
+const family = process.env.FAMILY ?? 'pulp_fiction'
 const problems: string[] = []
 const seenText: string[] = []
 
@@ -92,6 +94,8 @@ async function main() {
     if (b2.includes(f.title)) problems.push('expired drop still in the picker: ' + f.title)
   }
 
+  // Anything at rung 1 is open from the start, whatever the learner has done since.
+  const openable = live.filter((f) => entryRung(f) <= 1)
   const chosen = live.find((f) => f.id === family)!
   await press(page.getByRole('button', { name: chosen.title, exact: false }).first(), 'family')
   await press(page.getByTestId('continue'), 'start here')
@@ -140,7 +144,7 @@ async function main() {
       await press(takeAnother ? another : done, 'section exit')
       if (takeAnother) {
         await press(
-          page.getByRole('button', { name: live.find((f) => f.id !== family)!.title, exact: false }).first(),
+          page.getByRole('button', { name: openable.find((f) => f.id !== family)!.title, exact: false }).first(),
           'second family',
         )
         await press(page.getByTestId('continue'), 'start second crate')

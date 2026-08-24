@@ -39,13 +39,16 @@ export type CultureFamily =
  */
 export type Rung = 1 | 2 | 3 | 4 | 5 | 6
 
-export const RUNGS: { rung: Rung; name: string; what: string }[] = [
-  { rung: 1, name: 'Name it', what: 'The thing in front of you. Objects, food, numbers, prices.' },
-  { rung: 2, name: 'Ask for it', what: 'Get what you want from another person.' },
-  { rung: 3, name: 'Find it', what: 'Questions. Where, how much, who, what time.' },
-  { rung: 4, name: 'Fit it in time', what: 'Plans, and saying when. Arranging to meet.' },
-  { rung: 5, name: 'Talk about other people', what: 'Everyone who is not you or the person opposite.' },
-  { rung: 6, name: 'Mean it', what: 'Register and nuance. The same thing said three ways, and choosing.' },
+export const RUNGS: { rung: Rung; name: string; what: string; opens: string }[] = [
+  // `opens` is the line a dimmed crate shows. It says what you will be able to DO,
+  // never what you have failed to do — a locked thing should read as an appointment,
+  // not a telling-off.
+  { rung: 1, name: 'Name it', what: 'The thing in front of you. Objects, food, numbers, prices.', opens: 'Opens once you can name what is in front of you.' },
+  { rung: 2, name: 'Ask for it', what: 'Get what you want from another person.', opens: 'Opens once you can ask somebody for something.' },
+  { rung: 3, name: 'Find it', what: 'Questions. Where, how much, who, what time.', opens: 'Opens once you can ask where and how much.' },
+  { rung: 4, name: 'Fit it in time', what: 'Plans, and saying when. Arranging to meet.', opens: 'Opens once you can say when.' },
+  { rung: 5, name: 'Talk about other people', what: 'Everyone who is not you or the person opposite.', opens: 'Opens once you can talk about somebody else.' },
+  { rung: 6, name: 'Mean it', what: 'Register and nuance. The same thing said three ways, and choosing.', opens: 'Opens once you can choose how you sound.' },
 ]
 
 export type RootType = 'quote' | 'title' | 'paraphrased_moment' | 'wisdom' | 'other'
@@ -3420,4 +3423,37 @@ export function rootsUpTo(rung: Rung, family?: CultureFamily): Root[] {
 /** How much of a crate is still above the learner. Drives the dimmed state. */
 export function lockedIn(family: CultureFamily, rung: Rung): number {
   return (ROOTS_BY_FAMILY[family] ?? []).filter((r) => r.rung > rung).length
+}
+
+/**
+ * The rung a crate can first be entered at — what it declares, or failing that the
+ * lowest thing actually in it.
+ */
+export function entryRung(crate: Crate): Rung {
+  const rs = ROOTS_BY_FAMILY[crate.id] ?? []
+  if (crate.opens_at) return crate.opens_at
+  return (rs.length ? (Math.min(...rs.map((r) => r.rung)) as Rung) : 1)
+}
+
+/**
+ * How far up the ladder a learner has opened.
+ *
+ * You move by demonstrating, never by attending: the release beat takes the culture
+ * away and asks for the line cold, and doing that cleanly at rung N opens rung N+1
+ * everywhere at once — in every crate, not just the one you were standing in.
+ *
+ * Derived from the proof lines rather than stored, so it cannot drift out of step
+ * with what the learner has actually done, and so it survives anybody arriving with
+ * progress saved before the ladder existed.
+ */
+export function rungReached(
+  proof: { pt: string; source: string; clean: boolean }[],
+): Rung {
+  let top = 0
+  for (const line of proof) {
+    if (line.source !== 'release' || !line.clean) continue
+    const root = ROOTS.find((r) => r.transfer_prompt.answer === line.pt)
+    if (root && root.rung > top) top = root.rung
+  }
+  return Math.min(6, Math.max(1, top + 1)) as Rung
 }
