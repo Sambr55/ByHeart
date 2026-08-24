@@ -202,13 +202,47 @@ export function loadLearner(): LearnerState {
   try {
     const raw = window.localStorage.getItem(KEY)
     if (raw) {
-      const parsed = JSON.parse(raw) as LearnerState
+      const parsed = JSON.parse(raw) as Partial<LearnerState>
       if (parsed.version === VERSION) {
         // Fields added after a tester started are backfilled rather than version-bumped:
         // a bump throws away a session that is still running, which is a worse bug than
         // a missing array.
-        parsed.proof ??= []
-        state = parsed
+        //
+        // Backfilling one field at a time was the bug — every field added since a
+        // record was written came back undefined, and the first component to reach
+        // for .length or spread it died. So a saved record is merged onto a complete
+        // one, and anything that must be an array or an object is checked rather than
+        // trusted: this data has been through a schema change, a JSON round trip and
+        // sometimes a hand edit in devtools.
+        const base = emptyLearner()
+        const arr = <T>(v: unknown, fallback: T[]): T[] => (Array.isArray(v) ? (v as T[]) : fallback)
+        const obj = <T extends object>(v: unknown, fallback: T): T =>
+          v && typeof v === 'object' && !Array.isArray(v) ? { ...fallback, ...(v as T) } : fallback
+        state = {
+          ...base,
+          ...parsed,
+          learner_id: parsed.learner_id || base.learner_id,
+          created_at: parsed.created_at || base.created_at,
+          tester_label: parsed.tester_label ?? base.tester_label,
+          display_name: parsed.display_name ?? base.display_name,
+          voice_signals: arr(parsed.voice_signals, []),
+          osmosis_seen: arr(parsed.osmosis_seen, []),
+          missions_completed: arr(parsed.missions_completed, []),
+          proof: arr(parsed.proof, []),
+          evidence: arr(parsed.evidence, []),
+          inventory: obj(parsed.inventory, {}),
+          mission_completed_at: obj(parsed.mission_completed_at, {}),
+          profile: {
+            ...obj(parsed.profile, base.profile),
+            skipped: arr(parsed.profile?.skipped, []),
+          },
+          affinity: {
+            ...obj(parsed.affinity, base.affinity),
+            categories_ranked: arr(parsed.affinity?.categories_ranked, []),
+            source_familiarities: obj(parsed.affinity?.source_familiarities, {}),
+          },
+          experiment: obj(parsed.experiment, base.experiment),
+        }
         return state
       }
     }

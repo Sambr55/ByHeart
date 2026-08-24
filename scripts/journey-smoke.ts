@@ -6,7 +6,7 @@
  *   npm run journey
  */
 import { chromium, type Locator, type Page } from 'playwright'
-import { CRATES, entryRung, isLive } from '../content/roots'
+import { CRATES, ROOTS, entryRung, isLive } from '../content/roots'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 // Must default to a crate a brand-new learner can actually open: the ladder now
@@ -44,6 +44,28 @@ async function main() {
   })
   page.setDefaultTimeout(20000)
   await page.goto(BASE + '/?tester=smoke', { waitUntil: 'networkidle' })
+
+  // The ladder dims anything above the learner's rung, and this walk is testing the
+  // CONTENT of one crate rather than the gate. So open the ladder just far enough to
+  // reach it, the same way a learner would have: a line already said cold.
+  const needed = entryRung(CRATES.find((c) => c.id === family)!)
+  if (needed > 1) {
+    // Exactly one rung below, because a clean release at rung N opens rung N+1 and
+    // nothing higher — picking any lower root only ever reaches rung 2.
+    const opener = ROOTS.find((r) => r.rung === needed - 1)!
+    await page.evaluate(
+      ([pt, en]) =>
+        localStorage.setItem(
+          'byheart.learner.v1',
+          JSON.stringify({
+            version: 1,
+            proof: [{ pt, en, source: 'release', clean: true, at: '2026-01-01T00:00:00.000Z' }],
+          }),
+        ),
+      [opener.transfer_prompt.answer, opener.transfer_prompt.ask],
+    )
+    await page.reload({ waitUntil: 'networkidle' })
+  }
 
   const seen: string[] = []
   let sections = 0
@@ -95,7 +117,7 @@ async function main() {
   }
 
   // Anything at rung 1 is open from the start, whatever the learner has done since.
-  const openable = live.filter((f) => entryRung(f) <= 1)
+  const openable = live.filter((f) => entryRung(f) <= Math.max(1, needed))
   const chosen = live.find((f) => f.id === family)!
   await press(page.getByRole('button', { name: chosen.title, exact: false }).first(), 'family')
   await press(page.getByTestId('continue'), 'start here')
