@@ -11,7 +11,9 @@ import {
   entryRung,
   isLive,
   rungReached,
+  rootById,
   type Crate,
+  type CultureFamily,
   type Rung,
 } from '@/content/roots'
 import { CLUB, MOVES } from '@/content/club'
@@ -19,6 +21,7 @@ import { CrateIcon } from '@/components/CrateIcon'
 import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
 import { capabilities } from '@/engine/journey'
+import { useEntitlements } from '@/engine/useEntitlements'
 import { track } from '@/engine/analytics'
 import { loadLearner, welcomeToClub } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
@@ -54,6 +57,24 @@ export function Club() {
   const rung: Rung = mounted ? rungReached(learner.proof ?? []) : 1
   const played = useMemo(() => new Set(learner.roots_played ?? []), [learner.roots_played])
   const done = useMemo(() => new Set(learner.sections_completed ?? []), [learner.sections_completed])
+
+  /*
+    The free allowance, computed exactly as the picker computes it.
+
+    A crate counts as claimed by having been opened, and it stays claimed for good. A
+    drop never counts against the allowance, so it can never use one up either.
+  */
+  const access = useEntitlements()
+  const claimed = useMemo(() => {
+    const out = new Set<CultureFamily>()
+    for (const id of learner.roots_played ?? []) {
+      const family = rootById(id)?.culture_family
+      const crate = family ? CRATES.find((c) => c.id === family) : undefined
+      if (crate && !crate.drop) out.add(crate.id)
+    }
+    return out
+  }, [learner.roots_played])
+  const capped = access.known && claimed.size >= access.entitlements.crates
 
   /**
    * The welcome, once.
@@ -106,7 +127,7 @@ export function Club() {
       </div>
 
       <Moves
-        learner={{ played, done, rung, owned: owned.length }}
+        learner={{ played, done, rung, owned: owned.length, capped, claimed }}
         now={now}
         mounted={mounted}
       />
@@ -175,11 +196,19 @@ function Moves({
   now,
   mounted,
 }: {
-  learner: { played: Set<string>; done: Set<string>; rung: Rung; owned: number }
+  learner: {
+    played: Set<string>
+    done: Set<string>
+    rung: Rung
+    owned: number
+    /** The picker's own allowance rule, so the two screens cannot disagree. */
+    capped: boolean
+    claimed: Set<CultureFamily>
+  }
   now: Date | null
   mounted: boolean
 }) {
-  const { played, done, rung } = learner
+  const { played, done, rung, capped, claimed } = learner
   const moves: Move[] = []
 
   if (mounted && now) {
@@ -219,12 +248,20 @@ function Moves({
       })
     }
 
-    /** Never opened, and reachable. */
+    /*
+      Never opened, reachable, AND within the allowance.
+
+      This checked entryRung only, so the Club cheerfully offered "Open a new crate ·
+      Audrey Hepburn" to somebody who had spent all three — they tapped it, the picker's
+      guard refused, and nothing happened with no message. A home screen that offers a
+      move the product will not honour is worse than one that offers nothing.
+    */
     const fresh = CRATES.find(
       (c) =>
         !c.drop &&
         entryRung(c) <= rung &&
-        !(ROOTS_BY_FAMILY[c.id] ?? []).some((r) => played.has(r.root_id)),
+        !(ROOTS_BY_FAMILY[c.id] ?? []).some((r) => played.has(r.root_id)) &&
+        (!capped || claimed.has(c.id)),
     )
     if (fresh) {
       moves.push({

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Journey } from '@/components/Journey'
 import { JourneyProvider } from '@/engine/journey'
 import { chosenPair } from '@/engine/pair'
-import { loadLearner } from '@/engine/learner'
+import { loadLearner, type LearnerState } from '@/engine/learner'
 
 /**
  * The front door — or the Club, for somebody who has already been through it.
@@ -24,6 +24,29 @@ import { loadLearner } from '@/engine/learner'
  * replace(), not push(): a member who taps back should leave DUB, not be dropped at a
  * pitch for the thing they already use.
  */
+/**
+ * Has this person been here before?
+ *
+ * It used to ask only whether a SECTION had been completed, which is written by pressing
+ * "I'm done" and then walking three cold prompts. So quitting mid-crate — the single
+ * most likely way a first session ends — put the learner back through the proposition,
+ * the Goose demo twice, the language pair and the entire deal screen the next time they
+ * opened DUB. The most probable first-to-second-session experience in the product was
+ * being sold to again.
+ *
+ * Any real evidence counts now: a root played, a piece owned, a sentence said. The deal
+ * is still required, because somebody who has not accepted it has not started.
+ */
+function returning(s: LearnerState): boolean {
+  if (!s.deal_accepted_at) return false
+  return (
+    s.sections_completed.length > 0 ||
+    s.roots_played.length > 0 ||
+    Object.keys(s.inventory).length > 0 ||
+    s.proof.length > 0
+  )
+}
+
 export default function Page() {
   const router = useRouter()
   const [leaving, setLeaving] = useState(false)
@@ -32,7 +55,7 @@ export default function Page() {
     // No pair chosen is a front-door problem, and the pair decides which learner record
     // even gets read — so it is checked first, exactly as the deal gate does it.
     if (!chosenPair()) return
-    if (!loadLearner().sections_completed.length) return
+    if (!returning(loadLearner())) return
     setLeaving(true)
     router.replace('/club')
   }, [router])

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
 
@@ -12,6 +12,12 @@ import { Wordmark } from '@/components/Wordmark'
  * it asks for anything.
  */
 export function SignIn({ accountsReady }: { accountsReady: boolean }) {
+  // Read after mount rather than via useSearchParams, so this component needs no
+  // Suspense boundary and the server render stays identical for everybody.
+  const [expired, setExpired] = useState(false)
+  useEffect(() => {
+    setExpired(new URLSearchParams(window.location.search).get('expired') === '1')
+  }, [])
   const [email, setEmail] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [message, setMessage] = useState<string | null>(null)
@@ -45,6 +51,27 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
         </a>
         <Menu />
       </div>
+
+      {/*
+        The one message that has to land, and nothing was reading it.
+
+        /api/auth/verify redirects here with ?expired=1 when a link is stale or already
+        used — and this page ignored it, so somebody who tapped a twenty-minute link
+        after twenty-five minutes was shown a blank sign-in form and no explanation. They
+        would try the same link again, and again.
+      */}
+      {expired && state === 'idle' ? (
+        <div
+          data-testid="signin-expired"
+          className="flex flex-col gap-1 rounded border border-coach/60 bg-coach/[0.08] px-4 py-4"
+        >
+          <p className="text-sm font-semibold">That link has expired.</p>
+          <p className="text-xs leading-relaxed text-muted">
+            They last twenty minutes and only work once — which is what makes them safe to
+            send by email. Put your address in again and we will send another.
+          </p>
+        </div>
+      ) : null}
 
       {state === 'sent' ? (
         <>

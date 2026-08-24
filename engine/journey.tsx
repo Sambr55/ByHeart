@@ -161,6 +161,16 @@ const BEATS_PER_SESSION = 24
 interface JourneyState {
   steps: Step[]
   index: number
+  /**
+   * The step this URL actually started at.
+   *
+   * `canGoBack` was `index > 0`, which is true of every step after the landing — and
+   * arriving at /crates jumps straight to the picker at index 5. So the back arrow
+   * rewound a returning member through the deal, the language pair and the whole Goose
+   * demo: a tour of the onboarding they finished weeks ago, reachable in four taps from
+   * their own home screen. Back means back within this visit, never before it.
+   */
+  entryIndex: number
   family: CultureFamily | null
   rootsPlayed: string[]
   collisionsPlayed: string[]
@@ -198,6 +208,7 @@ const initial: JourneyState = {
     { kind: 'picker' },
   ],
   index: 0,
+  entryIndex: 0,
   family: null,
   rootsPlayed: [],
   collisionsPlayed: [],
@@ -284,8 +295,9 @@ function reducer(state: JourneyState, action: Action): JourneyState {
      * cannot invent a step: if the kind is not in the queue the index does not move.
      */
     case 'jump': {
+      // A jump IS the entry: it is the URL saying where this visit begins.
       const to = state.steps.findIndex((st) => st.kind === action.kind)
-      return to === -1 ? state : { ...state, index: to }
+      return to === -1 ? state : { ...state, index: to, entryIndex: to }
     }
     // What earlier sessions already covered, read back out of the learner record.
     case 'hydrate':
@@ -707,7 +719,7 @@ export function JourneyProvider({
       next: () => dispatch({ type: 'next' }),
       back: () => dispatch({ type: 'back' }),
       goHome,
-      canGoBack: state.index > 0,
+      canGoBack: state.index > state.entryIndex,
       chooseFamily,
       finishSection,
       answer: (key, value) => dispatch({ type: 'answer', key, value }),

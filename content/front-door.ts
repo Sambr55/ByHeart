@@ -221,9 +221,19 @@ export const PICKER = {
     the most honest paywall moment in the product: they are not being blocked from
     starting, they have genuinely used what the free tier offers.
   */
+  /*
+    Two different reasons nothing is open, and only one of them is about money.
+
+    There was one message and it always blamed the plan — so a stage-1 learner who had
+    simply bounced off the four crates their ladder reaches was told they had used up
+    their free tier and should pay. A false paywall, shown to somebody who had not hit
+    any limit at all, at the exact moment they were most likely to leave.
+  */
   nothing_open: 'Nothing new is open right now.',
-  nothing_open_sub:
+  nothing_open_paid:
     'You have used your free crates. Go through one again \u2014 they stay yours \u2014 or open the rest with Pro.',
+  nothing_open_ladder:
+    'Not because of your plan \u2014 the rest open further up the ladder, and you move up by saying something cold. Go through one you have already opened; the second pass is where it sets.',
   join_up: 'Your three free crates are already chosen. This one unlocks once you have started making progress and ',
   join_up_link: 'join up',
   /**

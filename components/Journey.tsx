@@ -933,7 +933,15 @@ function Picker() {
       {mounted && access.known && !grouped.open.length ? (
         <div className="flex flex-col gap-1 rounded border border-line-strong bg-bg-elev px-4 py-4">
           <p className="text-sm font-semibold">{PICKER.nothing_open}</p>
-          <p className="text-xs leading-relaxed text-muted">{PICKER.nothing_open_sub}</p>
+          {/*
+            It has to consult atLimit before it blames the plan. This message always said
+            "you have used your free crates", so a stage-1 learner who had merely run out
+            of ladder was shown a paywall they had not hit — at the moment they were most
+            likely to leave.
+          */}
+          <p className="text-xs leading-relaxed text-muted">
+            {atLimit ? PICKER.nothing_open_paid : PICKER.nothing_open_ladder}
+          </p>
         </div>
       ) : null}
 

@@ -79,9 +79,11 @@ export function Drops() {
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <Link
-                  href="/"
+                  href={"/crates?open=" + c.id}
                   className="eyebrow text-accent underline underline-offset-4"
                 >
+                  {/* Into the drop itself. This was href="/" — the one call to action
+                      on the page was a loop back to the front door. */}
                   Open it
                 </Link>
                 {d.link ? (
