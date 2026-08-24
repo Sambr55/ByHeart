@@ -79,6 +79,52 @@ export const DEMO_BEATS: DemoBeat[] = [
 export const DEMO_CLOSE =
   'That’s DUB. Start with something you already know. Find the useful language inside it. Make it yours.'
 
+/**
+ * The deal — §02B.
+ *
+ * Placed after the demo rather than before it, because showing beats telling: by the
+ * time a person reads this they have already had the trick done to them once and are
+ * asking "what is this, actually?". This screen answers that question and no other.
+ *
+ * The negative block is not a joke. It is the product's whole position, and stating it
+ * out loud on the way in is what stops a learner measuring DUB by the thing DUB has
+ * deliberately refused to build.
+ */
+export const DEAL = {
+  eyebrow: 'BEFORE YOU START',
+  headline: 'Here’s the deal.',
+  how: {
+    label: 'HOW IT WORKS',
+    steps: [
+      'Start with something you already know by heart.',
+      'We pull out the useful language hiding inside it.',
+      'Then we take the film away and find out whether it stuck.',
+    ],
+  },
+  ask: {
+    label: 'WHAT WE ASK OF YOU',
+    lines: [
+      'Ten minutes, on the days you feel like it. Not every day — we won’t ask.',
+      'Say it out loud. Reading it is not the same thing.',
+      'Tell us when something doesn’t land. That is the most useful thing you can do.',
+    ],
+  },
+  get: {
+    label: 'WHAT YOU GET',
+    lines: [
+      'Sentences you can say cold, to a real person, without rehearsing first.',
+      'Counted honestly — the number only moves when there are no clues on screen.',
+      'And the grammar underneath, without ever sitting through a grammar lesson.',
+    ],
+  },
+  not: {
+    label: 'WHAT THIS IS NOT',
+    line:
+      'No streaks. No points. No lives. Nothing here will ever congratulate you for opening the app — a thousand-day streak has never once helped anybody order a coffee.',
+  },
+  cta: 'I’M IN',
+} as const
+
 /** §08 / §09 — the first meaningful learner choice, and it comes after the demo. */
 export const PICKER = {
   headline: 'Select an area to get going with, and start building your useful vocabulary bank.',

@@ -87,8 +87,8 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
             </form>
           ) : (
             <p className="rounded-xl border border-line bg-surface p-4 text-sm text-muted">
-              Accounts are not switched on in this environment yet. Everything still works — your
-              progress is saved on this device.
+              Accounts are not switched on yet. Everything still works — what you have learned is
+              saved on this device, and it will move across the moment you can sign in.
             </p>
           )}
         </>

@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { FAMILIES, PIECES, ROOTS_BY_FAMILY, rootById, type CultureFamily, type Root } from '@/content/roots'
-import { CLOSE, DEMO_BEATS, DEMO_CLOSE, LANDING, NO_CUE_PROMPTS, PICKER } from '@/content/front-door'
+import { CLOSE, DEAL as DEAL_COPY, DEMO_BEATS, DEMO_CLOSE, LANDING, NO_CUE_PROMPTS, PICKER } from '@/content/front-door'
 import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
@@ -141,6 +141,8 @@ export function Journey() {
       return <Landing />
     case 'demo':
       return <Demo i={step.i} />
+    case 'deal':
+      return <Deal />
     case 'picker':
       return <Picker />
     case 'root':
@@ -169,6 +171,68 @@ export function Journey() {
   }
 }
 
+/**
+ * The deal.
+ *
+ * Three questions a person has after the demo — what is this, what do you want from
+ * me, what do I get — answered in that order and then got out of the way. The fourth
+ * block is the one that matters: saying plainly what DUB has refused to build stops
+ * people measuring it against the thing everyone else built.
+ */
+function Deal() {
+  const { next } = useJourney()
+
+  const Block = ({
+    label,
+    lines,
+    numbered = false,
+  }: {
+    label: string
+    lines: readonly string[]
+    numbered?: boolean
+  }) => (
+    <section className="border-t border-line pt-4">
+      <p className="eyebrow text-accent">{label}</p>
+      <ul className="mt-3 space-y-2.5">
+        {lines.map((line, i) => (
+          <li key={line} className="flex gap-3 text-sm leading-relaxed text-fg/85">
+            <span className="shrink-0 pt-0.5 text-xs tabular-nums text-muted">
+              {numbered ? i + 1 : '·'}
+            </span>
+            <span>{line}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+
+  return (
+    <Shell stage="CHOICE">
+      <p className="eyebrow text-muted">{DEAL_COPY.eyebrow}</p>
+      <p className="display mt-2 text-balance text-3xl">{DEAL_COPY.headline}</p>
+
+      <div className="mt-7 space-y-6 pb-7">
+        <Block label={DEAL_COPY.how.label} lines={DEAL_COPY.how.steps} numbered />
+        <Block label={DEAL_COPY.ask.label} lines={DEAL_COPY.ask.lines} />
+        <Block label={DEAL_COPY.get.label} lines={DEAL_COPY.get.lines} />
+
+        <section className="rounded-xl border border-line bg-surface p-4">
+          <p className="eyebrow text-muted">{DEAL_COPY.not.label}</p>
+          <p className="mt-2 text-sm leading-relaxed">{DEAL_COPY.not.line}</p>
+        </section>
+      </div>
+
+      <Cta
+        label={DEAL_COPY.cta}
+        onClick={() => {
+          track('deal_accepted', {})
+          next()
+        }}
+      />
+    </Shell>
+  )
+}
+
 // --------------------------------------------------------------- front door
 
 function Landing() {
@@ -192,6 +256,12 @@ function Landing() {
         </div>
       </div>
       <Cta label={LANDING.cta} onClick={() => { track('landing_cta_tap', {}); next() }} />
+      <Link
+        href="/signin"
+        className="mt-4 block text-center text-xs text-muted underline underline-offset-4"
+      >
+        Been here before? Pick up where you left off.
+      </Link>
     </Shell>
   )
 }
@@ -1285,6 +1355,14 @@ function Close() {
         className="tap-target eyebrow mt-auto block w-full rounded-xl mt-6 bg-accent px-5 py-4 text-center text-accent-ink"
       >
         {CLOSE.cta}
+      </Link>
+      {/* Offered here rather than at the door: there is now something worth keeping,
+          which is the only honest moment to ask anyone for an email address. */}
+      <Link
+        href="/signin"
+        className="mt-4 block text-center text-xs text-muted underline underline-offset-4"
+      >
+        Keep what you have learned — it lives on this phone until you do.
       </Link>
     </Shell>
   )

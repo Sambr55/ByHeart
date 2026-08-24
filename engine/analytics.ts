@@ -11,6 +11,8 @@
 export type EventName =
   | 'session_start'
   | 'landing_cta_tap'
+  /** Read the deal and carried on. The first real commitment in the funnel. */
+  | 'deal_accepted'
   | 'briefing_continue'
   | 'culture_selected'
   | 'top_gun_familiarity'

@@ -44,6 +44,7 @@ import { useLearner } from './useLearner'
 export type Step =
   | { kind: 'landing' }
   | { kind: 'demo'; i: number }
+  | { kind: 'deal' }
   | { kind: 'picker' }
   | { kind: 'root'; rootId: string; beat: RootBeat; pieceIndex?: number }
   | { kind: 'collision'; collisionId: string }
@@ -152,6 +153,7 @@ const initial: JourneyState = {
   steps: [
     { kind: 'landing' },
     ...DEMO_BEATS.map((_, i) => ({ kind: 'demo' as const, i })),
+    { kind: 'deal' },
     { kind: 'picker' },
   ],
   index: 0,

@@ -70,6 +70,14 @@ async function main() {
   if (!/That’s DUB/.test(d4)) problems.push('demo close line missing')
   await press(page.getByTestId('continue'), 'to picker')
 
+  // The deal sits between the demo and the picker and must answer all three questions.
+  const deal = await page.evaluate(() => document.body.innerText)
+  for (const heading of ['HOW IT WORKS', 'WHAT WE ASK OF YOU', 'WHAT YOU GET', 'WHAT THIS IS NOT']) {
+    if (!deal.includes(heading)) problems.push('the deal screen is missing ' + heading)
+  }
+  if (!/streak/i.test(deal)) problems.push('the deal screen no longer says what DUB refuses to do')
+  await press(page.getByTestId('continue'), 'accept the deal')
+
   const b2 = await page.evaluate(() => document.body.innerText)
   if (!/Select an area to get going with/i.test(b2)) problems.push('picker headline wrong')
   if (/WHAT DO YOU ALREADY KNOW BY HEART/.test(b2)) problems.push('free-text screen still present')
