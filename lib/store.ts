@@ -77,6 +77,56 @@ export async function loadLearner(deviceId: string): Promise<unknown | null> {
  * not lose it — that is the single most expensive bug this product could ship, and
  * the reason device identity exists separately from account identity at all.
  */
+/**
+ * Every state that belongs to this person, newest first.
+ *
+ * A user accumulates one `learners` row per device, so restoring means reading all of
+ * them rather than the one the current browser happens to own. Falls back to the device
+ * row when nobody is signed in, which is what makes "clear the browser" recoverable
+ * without an account.
+ */
+export async function loadLearnersFor(
+  deviceId: string,
+  userId: string | null,
+): Promise<unknown[]> {
+  const sql = db()
+  if (sql) {
+    if (userId) {
+      const rows = await sql<{ state: unknown }[]>`
+        select state from learners
+        where user_id = ${userId} or device_id = ${deviceId}
+        order by updated_at desc
+      `
+      return rows.map((r) => r.state).filter(Boolean)
+    }
+    const rows = await sql<{ state: unknown }[]>`
+      select state from learners where device_id = ${deviceId}
+    `
+    return rows.map((r) => r.state).filter(Boolean)
+  }
+  const one = await loadLearner(deviceId)
+  return one ? [one] : []
+}
+
+/**
+ * Collapse a user down to one Portuguese.
+ *
+ * After a merge, every row this person owns is written the same canonical state. A
+ * learner has one Portuguese, not one per phone, and leaving the older rows alone means
+ * the next device to sync would resurrect a stale copy.
+ */
+export async function writeAllFor(
+  userId: string,
+  state: unknown,
+): Promise<void> {
+  const sql = db()
+  if (!sql) return
+  await sql`
+    update learners set state = ${sql.json(state as never)}, updated_at = now()
+    where user_id = ${userId}
+  `
+}
+
 export async function claimDevice(deviceId: string, userId: string): Promise<void> {
   const sql = db()
   if (!sql) return

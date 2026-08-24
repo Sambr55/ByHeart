@@ -17,6 +17,7 @@ import { BLOCK_ORDER, TARGETS } from '@/content/targets'
  * graph mints pieces from content, so this is deliberately open.
  */
 import { DEFAULT_PAIR, pairId, type Pair } from '@/content/pairs'
+import { mergeLearner } from '@/lib/merge'
 import { currentPair } from './pair'
 
 export type PieceId = string
@@ -435,6 +436,20 @@ export async function syncSession(reason: string): Promise<boolean> {
         voice_signals: s.voice_signals,
         evidence: s.evidence.slice(-400),
         missions_completed: s.missions_completed,
+        /**
+         * proof was missing, and it is the only number the product counts — the
+         * sentences said cold, the thing on the share card, and what rungReached is
+         * derived from. Without it the server could not say how many learners had said
+         * anything or what stage anyone had reached, which makes every question you
+         * would ask before pricing unanswerable.
+         */
+        proof: s.proof,
+        display_name: s.display_name,
+        osmosis_seen: s.osmosis_seen,
+        roots_played: s.roots_played,
+        collisions_played: s.collisions_played,
+        deal_accepted_at: s.deal_accepted_at,
+        created_at: s.created_at,
         user_agent: navigator.userAgent,
       }),
     })
@@ -698,4 +713,44 @@ export function acceptDeal() {
 
 export function hasAcceptedDeal(): boolean {
   return Boolean(getLearner().deal_accepted_at)
+}
+
+/**
+ * Pull the server's copy down and merge it into this device's.
+ *
+ * The half of sync that did not exist. Progress uploaded and never came back, so
+ * signing in on a new phone started you at zero and clearing the browser lost work the
+ * server was already holding.
+ *
+ * Merge, never replace — in either direction. Taking the server copy would destroy an
+ * offline session; taking the local one would destroy whatever the other device did.
+ * mergeLearner asserts that neither can happen before this writes anything.
+ *
+ * Silent by design: an unprovisioned deployment, an offline phone and a 401 all mean
+ * the same thing here, which is that the local copy stays authoritative and the learner
+ * notices nothing.
+ */
+export async function restoreLearner(): Promise<'merged' | 'nothing' | 'failed'> {
+  if (typeof window === 'undefined') return 'nothing'
+  try {
+    const res = await fetch('/api/session?mine=1', { headers: { accept: 'application/json' } })
+    if (!res.ok) return 'failed'
+    const body = (await res.json()) as { found?: boolean; state?: Partial<LearnerState> }
+    if (!body?.found || !body.state) return 'nothing'
+    const local = getLearner()
+    const merged = mergeLearner(local, body.state)
+    // Nothing changed is worth knowing about: it means the round trip is working and
+    // the two copies already agreed, which is the steady state.
+    const gained =
+      merged.proof.length !== local.proof.length ||
+      Object.keys(merged.inventory).length !== Object.keys(local.inventory).length
+    state = merged
+    save()
+    emit()
+    if (gained) void syncSession('restore')
+    return 'merged'
+  } catch {
+    // Offline, or no store configured. The local copy is untouched.
+    return 'failed'
+  }
 }

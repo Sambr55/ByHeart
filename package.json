@@ -8,13 +8,15 @@
     "start": "next start",
     "lint:content": "tsx scripts/lint-content.ts",
     "audio:generate": "tsx scripts/generate-audio.ts",
-    "check": "npm run lint:content && npm run line:test && next build",
+    "check": "npm run lint:content && npm run line:test && npm run merge:test && next build",
     "walkthrough": "tsx scripts/walkthrough.ts",
     "shots": "tsx scripts/screenshots.ts",
     "journey": "tsx scripts/journey-smoke.ts",
     "db:migrate": "tsx scripts/migrate.mts",
     "audio:script": "tsx scripts/audio-script.mts",
-    "line:test": "tsx scripts/line-test.mts"
+    "line:test": "tsx scripts/line-test.mts",
+    "merge:test": "tsx scripts/merge-test.mts",
+    "comp:issue": "tsx scripts/comp-issue.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

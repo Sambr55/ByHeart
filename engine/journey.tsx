@@ -29,6 +29,7 @@ import {
   loadLearner,
   recordVoiceSignal,
   rememberPlayed,
+  restoreLearner,
   setAffinity,
   setExperiment,
   setTester,
@@ -433,6 +434,9 @@ export function JourneyProvider({
   useEffect(() => {
     hydrateFromUrl()
     loadLearner()
+    // Ask the server what it is holding for this person and merge it in. Fire and
+    // forget: it can only add, and if it fails the local copy was already correct.
+    void restoreLearner()
     const params = new URLSearchParams(window.location.search)
     const tester = params.get('tester')
     if (tester) setTester(tester)

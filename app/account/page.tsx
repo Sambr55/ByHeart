@@ -25,6 +25,7 @@ export default async function AccountPage() {
           ? {
               plan: subscription.plan,
               status: subscription.status,
+              source: subscription.source,
               current_period_end: subscription.current_period_end?.toISOString() ?? null,
               cancel_at_period_end: subscription.cancel_at_period_end,
             }
