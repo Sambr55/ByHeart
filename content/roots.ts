@@ -2760,6 +2760,47 @@ export const FLIRTING_F2M: Root[] = [
 
 export const DURAN_DURAN: Root[] = [
   q({
+    root_id: 'dd_week',
+    culture_family: 'duran_duran_lisboa',
+    rung: 4,
+    root_type: 'title',
+    source_label: 'New Moon on Monday',
+    source_status: 'verified',
+    root_display: 'And the rest of the week',
+    source: 'Tuesday, Wednesday, Thursday, Friday.',
+    target: 'Terça, quarta, quinta, sexta.',
+    semantic_bridge:
+      'Once you have segunda-feira the rest are free, because Portugal is only counting: terça is the third, quarta the fourth, quinta the fifth, sexta the sixth. Then it stops counting — sábado and domingo kept their old names.',
+    subtext: 'Rattled off, the way you would say the alphabet.',
+    extracts: [
+      { id: 'terca', target: 'terça', gloss: 'Tuesday', shelf: 'when' },
+      { id: 'sexta', target: 'sexta', gloss: 'Friday', shelf: 'when' },
+    ],
+    branches: [
+      { target: 'Até terça.', en: 'See you Tuesday.', demonstrates: ['terca'] },
+      { target: 'Na sexta à noite.', en: 'On Friday night.', demonstrates: ['sexta'] },
+      { target: 'Terça ou sexta?', en: 'Tuesday or Friday?', demonstrates: ['terca', 'sexta'] },
+    ],
+    reinforces: ['segunda_feira', 'noite'],
+    helpers: {
+      'Até': 'until / see you',
+      'Na': 'on the',
+      'à': 'at the',
+      'noite': 'night',
+      'ou': 'or',
+      'quarta': 'Wednesday',
+      'quinta': 'Thursday',
+    },
+    transfer_prompt: {
+      context: 'You are trying to pin somebody down to a day.',
+      ask: 'Tuesday or Friday?',
+      answer: 'Terça ou sexta?',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['time', 'plans'],
+    next_root_hooks: ['segunda_feira'],
+  }),
+  q({
     root_id: 'dd_wolf',
     culture_family: 'duran_duran_lisboa',
     rung: 1,
@@ -3074,6 +3115,46 @@ export const DURAN_DURAN: Root[] = [
 // ---------------------------------------------------------------------------
 
 export const WIZARDRY: Root[] = [
+  q({
+    root_id: 'wiz_nove',
+    culture_family: 'world_of_wizardry',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The platform number everybody knows',
+    source_status: 'paraphrased',
+    root_display: 'Nine and three-quarters.',
+    source: 'Nine and three-quarters.',
+    target: 'Nove e três quartos.',
+    semantic_bridge:
+      'The most famous fraction in fiction, and it hands over two numbers and the word for a quarter in five syllables. Portuguese counts the way you already do — the trick is only that the words are short and you have to say them fast.',
+    subtext: 'Counting out loud, with something to count.',
+    extracts: [
+      { id: 'nove', target: 'nove', gloss: 'nine', shelf: 'how_much' },
+      { id: 'tres', target: 'três', gloss: 'three', shelf: 'how_much' },
+    ],
+    branches: [
+      { target: 'Um, dois, três.', en: 'One, two, three.', demonstrates: ['tres'] },
+      { target: 'Nove euros.', en: 'Nine euros.', demonstrates: ['nove'] },
+      { target: 'Três cafés, por favor.', en: 'Three coffees, please.', demonstrates: ['tres'] },
+    ],
+    reinforces: ['sete', 'cinco', 'por_favor', 'euro'],
+    helpers: {
+      'Um': 'one',
+      'dois': 'two',
+      'e': 'and',
+      'quartos': 'quarters',
+      'euros': 'euros',
+      'cafés': 'coffees',
+    },
+    transfer_prompt: {
+      context: 'Three of you at the counter, and it is your round.',
+      ask: 'Three coffees, please.',
+      answer: 'Três cafés, por favor.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['numbers', 'first-day'],
+    next_root_hooks: ['quanto'],
+  }),
   q({
     root_id: 'wiz_silencio',
     culture_family: 'world_of_wizardry',

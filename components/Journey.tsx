@@ -32,6 +32,8 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Menu } from '@/components/Menu'
+import { Shelves } from '@/components/Shelves'
+import { CrateIcon } from '@/components/CrateIcon'
 import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
 import { setPair } from '@/engine/pair'
 import { track } from '@/engine/analytics'
@@ -877,14 +879,18 @@ function Picker() {
                             : 'border-line bg-bg-elev hover:border-accent/50'))
                 }
               >
-                {/* A tile block in the crate's own colour: the cheapest way to turn ten
-                    identical rectangles into ten distinguishable places. */}
-                {!f.drop ? (
-                  <span
-                    aria-hidden
-                    className="azulejo-block mr-1 h-10 w-10 shrink-0 self-center rounded"
-                  />
-                ) : null}
+                {/* Every card is built the same way, the drop included — it was the only
+                    one in the list without a tile, which is half of why it read as
+                    floating free of everything around it. */}
+                <span
+                  aria-hidden
+                  className={
+                    'azulejo-block mr-1 flex h-10 w-10 shrink-0 items-center justify-center rounded ' +
+                    (f.drop ? 'self-start' : 'self-center')
+                  }
+                >
+                  <CrateIcon crate={f.id} className="h-6 w-6 text-[color:var(--tone)]" />
+                </span>
                 <span className="min-w-0 flex-1">
                   {f.drop ? (
                     <span className="eyebrow mb-1 block text-[0.55rem] text-accent">
@@ -929,12 +935,19 @@ function Picker() {
               </button>
               {/* Outside the button on purpose — an anchor nested in a button is not a
                   thing a browser or a screen reader can make sense of. */}
+              {/* The explanation sits with the thing it explains. It used to render
+                  after the whole list, several screens below the card it describes. */}
+              {f.drop ? (
+                <p className="mt-2 px-4 text-xs leading-relaxed text-muted">
+                  {PICKER.drop_note}
+                </p>
+              ) : null}
               {f.drop?.link ? (
                 <a
                   href={f.drop.link}
                   target="_blank"
                   rel="noreferrer"
-                  className="mb-3 ml-4 inline-block text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
+                  className="mb-3 ml-4 inline-block px-0 text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
                 >
                   {f.drop.link_label ?? 'TICKETS'} ↗
                 </a>
@@ -943,9 +956,6 @@ function Picker() {
           )
         })}
       </div>
-      {shown.some((c) => c.drop) ? (
-        <p className="mt-4 text-xs leading-relaxed text-muted">{PICKER.drop_note}</p>
-      ) : null}
       {anyLocked ? (
         <p className="mt-2 text-xs leading-relaxed text-muted">{PICKER.locked_note}</p>
       ) : null}
@@ -1816,6 +1826,16 @@ function SectionComplete() {
   const family = state.family ? CRATES.find((f) => f.id === state.family) : null
   // An expired drop is not something we can honestly offer them next.
   const reached = rungReached(learner.proof)
+  /** Everything the roots of this section handed over — the answer to "what just happened". */
+  const justGained = useMemo(() => {
+    const out = new Set<string>()
+    for (const id of state.rootsPlayed) {
+      const root = rootById(id)
+      if (!root || (state.family && root.culture_family !== state.family)) continue
+      for (const e of root.extracts) out.add(e.id)
+    }
+    return out
+  }, [state.rootsPlayed, state.family])
   const remaining = CRATES.filter((f) => {
     if (now && !isLive(f, now)) return false
     return (ROOTS_BY_FAMILY[f.id] ?? []).some(
@@ -1832,10 +1852,13 @@ function SectionComplete() {
             ? 'You can now ' + acts.slice(0, 3).join(', ') + (acts.length > 3 ? ' — and more.' : '.')
             : 'That crate is done.'}
         </p>
-        <div className="mt-6 flex flex-wrap gap-2">
-          {owned.filter((p) => PIECES[p]).map((p) => (
-            <Piece key={p} pt={PIECES[p].target} gloss={PIECES[p].gloss} />
-          ))}
+        {/*
+          What you gained in THIS crate, not your whole bank. Showing everything at the
+          end of every crate was the actual mess: it grows each time and says nothing
+          about what just happened.
+        */}
+        <div className="mt-6">
+          <Shelves owned={new Set(owned)} pool={justGained} highlight={justGained} />
         </div>
         {remaining.length ? (
           <p className="mt-7 text-sm text-muted">
@@ -2010,10 +2033,8 @@ function CanSay() {
       ) : null}
 
       <p className="mt-7 text-xs uppercase tracking-wider text-muted">Your Portuguese</p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {owned.filter((p) => PIECES[p]).map((p) => (
-          <Piece key={p} pt={PIECES[p].target} gloss={PIECES[p].gloss} />
-        ))}
+      <div className="mt-3">
+        <Shelves owned={new Set(owned)} />
       </div>
 
       <p className="mt-6 text-sm text-muted">

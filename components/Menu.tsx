@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useEntitlements } from '@/engine/useEntitlements'
 
 /**
  * The way around the product.
@@ -26,6 +27,9 @@ const ITEMS = [
 
 export function Menu() {
   const [open, setOpen] = useState(false)
+  // Signed out, /account redirects to /signin — so a menu saying "Account" lands you on
+  // a pitch headed "keep what you have learned". Say where the tap actually goes.
+  const access = useEntitlements()
   const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
   useEffect(() => setMounted(true), [])
@@ -110,7 +114,11 @@ export function Menu() {
             </div>
 
             <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
-              {ITEMS.map((item) => {
+              {ITEMS.map((raw) => {
+                const item =
+                  raw.href === '/account' && access.known && !access.signedIn
+                    ? { ...raw, label: 'Sign in', hint: 'And keep what you have learned' }
+                    : raw
                 const here = pathname === item.href
                 return (
                   <Link
