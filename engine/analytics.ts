@@ -89,6 +89,9 @@ export type EventName =
   | 'profile_skip'
   /* The library's dead end, which is the best content signal the product collects. */
   | 'vocab_search_miss'
+  /* Dub Club — the home a returning learner actually lands on. */
+  | 'club_welcome'
+  | 'club_move'
 
 export interface AnalyticsEvent {
   seq: number

@@ -179,6 +179,20 @@ export interface LearnerState {
    */
   nocue_done: string[]
   /**
+   * Crates whose section has been carried all the way to the end.
+   *
+   * roots_played says what was opened; this says what was FINISHED, and only the second
+   * one can answer "has this person been through DUB once". It is what unlocks the Club
+   * and what the welcome ceremony fires on, so it has to survive a refresh, a new phone
+   * and a sign-in — hence a learner field rather than journey state.
+   *
+   * A set, not a count. Finishing Bond twice is one section finished, and a number that
+   * can be inflated by repetition is the beginning of a streak.
+   */
+  sections_completed: string[]
+  /** When the Club welcomed them. Fires once, ever. Earliest wins on a merge. */
+  club_welcomed_at: string | null
+  /**
    * When the deal was accepted, or null. Kept per pair rather than globally, because
    * the deal screen speaks about the language being learned — "your Portuguese" — and
    * somebody arriving at a second pair has not been told that deal.
@@ -216,6 +230,8 @@ export function emptyLearner(): LearnerState {
     roots_played: [],
     collisions_played: [],
     nocue_done: [],
+    sections_completed: [],
+    club_welcomed_at: null,
     deal_accepted_at: null,
     evidence: [],
     affinity: {
@@ -300,6 +316,8 @@ export function loadLearner(): LearnerState {
           proof: arr(parsed.proof, []),
           roots_played: arr(parsed.roots_played, []),
           nocue_done: arr(parsed.nocue_done, []),
+          sections_completed: arr(parsed.sections_completed, []),
+          club_welcomed_at: parsed.club_welcomed_at ?? null,
           deal_accepted_at: parsed.deal_accepted_at ?? null,
           collisions_played: arr(parsed.collisions_played, []),
           evidence: arr(parsed.evidence, []),
@@ -455,6 +473,8 @@ export async function syncSession(reason: string): Promise<boolean> {
         display_name: s.display_name,
         osmosis_seen: s.osmosis_seen,
         roots_played: s.roots_played,
+        sections_completed: s.sections_completed,
+        club_welcomed_at: s.club_welcomed_at,
         collisions_played: s.collisions_played,
         nocue_done: s.nocue_done,
         deal_accepted_at: s.deal_accepted_at,
@@ -768,5 +788,21 @@ export async function restoreLearner(): Promise<'merged' | 'nothing' | 'failed'>
 export function rememberNoCue(id: string) {
   update((s) => {
     if (!s.nocue_done.includes(id)) s.nocue_done = [...s.nocue_done, id]
+  })
+}
+
+/** A section carried to the end. The thing that unlocks the Club. */
+export function rememberSection(family: string) {
+  update((s) => {
+    if (!s.sections_completed.includes(family)) {
+      s.sections_completed = [...s.sections_completed, family]
+    }
+  })
+}
+
+/** The welcome fires once, ever, and the first time is the true time. */
+export function welcomeToClub() {
+  update((s) => {
+    s.club_welcomed_at ??= new Date().toISOString()
   })
 }

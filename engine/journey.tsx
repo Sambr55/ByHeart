@@ -34,6 +34,7 @@ import {
   setExperiment,
   setTester,
   syncSession,
+  rememberSection,
 } from './learner'
 import { chosenPair } from './pair'
 import { useLearner } from './useLearner'
@@ -558,6 +559,10 @@ export function JourneyProvider({
         dispatch({ type: 'goto', index: picker < 0 ? 0 : picker })
         return
       }
+      // The Club opens on a section carried all the way to the end, which is the only
+      // membership test there is — so this is the moment it is recorded, and it is
+      // recorded against the learner rather than the tab.
+      if (state.family) rememberSection(state.family)
       const steps: Step[] = []
       const collision = availableCollision(state.rootsPlayed, state.collisionsPlayed)
       if (collision) steps.push({ kind: 'collision', collisionId: collision.id })

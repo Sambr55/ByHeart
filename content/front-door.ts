@@ -306,7 +306,7 @@ export const CLOSE = {
    * worst possible moment to hand somebody a survey — feedback is a standing menu item
    * and one quiet line here, never the only exit.
    */
-  sub: 'That is yours now. Take another crate whenever you want one.',
-  cta: 'BACK TO MY CRATES',
+  sub: 'That is yours now. From here on DUB opens on your own page — no front door, no starting again.',
+  cta: 'INTO DUB CLUB',
   feedback: 'Something not land? Tell us.',
 } as const

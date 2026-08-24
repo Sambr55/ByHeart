@@ -99,6 +99,7 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     learner_id: l.learner_id || r.learner_id,
     created_at: earliest(l.created_at, r.created_at) ?? new Date().toISOString(),
     deal_accepted_at: earliest(l.deal_accepted_at, r.deal_accepted_at),
+    club_welcomed_at: earliest(l.club_welcomed_at, r.club_welcomed_at),
 
     // Append-only. Union by identity, never replaced.
     proof: unionBy(arr<Rec>(l.proof), arr<Rec>(r.proof), (p) => String(p.pt) + '|' + String(p.at)),
@@ -119,6 +120,9 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     roots_played: setUnion(l.roots_played, r.roots_played),
     collisions_played: setUnion(l.collisions_played, r.collisions_played),
     nocue_done: setUnion(l.nocue_done, r.nocue_done),
+    // Finishing a section is not undoable, and the Club's welcome fired at whichever
+    // moment came first — a learner who signs in on a new phone is not new.
+    sections_completed: setUnion(l.sections_completed, r.sections_completed),
     osmosis_seen: setUnion(l.osmosis_seen, r.osmosis_seen),
     missions_completed: setUnion(l.missions_completed, r.missions_completed),
 

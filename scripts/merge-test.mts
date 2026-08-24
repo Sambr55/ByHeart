@@ -111,6 +111,31 @@ function line(pt: string, at: string) {
     )
   } catch { threw2 = true }
   check('the invariant throws when an inventory key would vanish', threw2)
+
+  /*
+    The Club.
+
+    A learner who has finished a section on one phone and signs in on another is not
+    new — so sections union, and the welcome keeps the FIRST time it fired. Getting
+    this backwards would show somebody the welcome ceremony a second time, which is a
+    small thing that makes a product feel like it has forgotten you.
+  */
+  const club = mergeLearner(
+    { sections_completed: ['james_bond'], club_welcomed_at: '2026-08-02T09:00:00.000Z' } as never,
+    { sections_completed: ['top_gun'], club_welcomed_at: '2026-08-20T09:00:00.000Z' } as never,
+  )
+  check(
+    'sections union rather than replace',
+    club.sections_completed.length === 2 &&
+      club.sections_completed.includes('james_bond') &&
+      club.sections_completed.includes('top_gun'),
+  )
+  check('the welcome keeps the first time it fired', club.club_welcomed_at === '2026-08-02T09:00:00.000Z')
+  check(
+    'a never-welcomed copy does not erase a welcome',
+    mergeLearner({ club_welcomed_at: null } as never, { club_welcomed_at: '2026-08-02T09:00:00.000Z' } as never)
+      .club_welcomed_at === '2026-08-02T09:00:00.000Z',
+  )
 }
 
 console.log('')

@@ -39,6 +39,7 @@ import { Shelves } from '@/components/Shelves'
 import { CrateIcon } from '@/components/CrateIcon'
 import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
 import { setPair } from '@/engine/pair'
+import { useNowAfterMount } from '@/engine/useNow'
 import { track } from '@/engine/analytics'
 import { insightsFor } from '@/content/osmosis'
 import {
@@ -629,12 +630,6 @@ function goneOn(drop: DropEvent): string {
  * worse than one that lingers for a single frame. So: everything is live until the
  * browser says otherwise.
  */
-function useNowAfterMount(): Date | null {
-  const [now, setNow] = useState<Date | null>(null)
-  useEffect(() => setNow(new Date()), [])
-  return now
-}
-
 function DropClock({ crate, now }: { crate: Crate; now: Date | null }) {
   const left = now ? daysLeft(crate, now) : null
   if (left === null) return null
@@ -2308,8 +2303,11 @@ function Close() {
         <p className="display text-balance text-3xl">{CLOSE.eyebrow}</p>
         <p className="mt-3 text-sm text-muted">{CLOSE.sub}</p>
       </div>
+      {/* Home, not back to the beginning. The session used to end where it began —
+          the crate picker — which is what made the whole product read as one session
+          repeated with nowhere that knew you had been here before. */}
       <Link
-        href="/crates"
+        href="/club"
         data-testid="continue"
         onClick={() => finish()}
         className="tap-target eyebrow mt-auto block w-full rounded mt-6 bg-accent px-5 py-4 text-center text-accent-ink"

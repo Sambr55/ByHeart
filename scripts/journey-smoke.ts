@@ -8,6 +8,7 @@
 import { chromium, type Locator, type Page } from 'playwright'
 import { CRATES, ROOTS, entryRung, isLive } from '../content/roots'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
+import { PICKER } from '../content/front-door'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 // Must default to a crate a brand-new learner can actually open: the ladder now
@@ -140,7 +141,10 @@ async function main() {
   await press(page.getByTestId('continue'), 'accept the deal')
 
   const b2 = await page.evaluate(() => document.body.innerText)
-  if (!/Pick a crate to get going with/i.test(b2)) problems.push('picker headline wrong')
+  // Read from the copy rather than restated here, so the next rewrite moves both.
+  if (!b2.includes(PICKER.headline)) problems.push('picker headline wrong')
+  // The silent five-tier sort is labelled now, and the labels are the feature.
+  if (!/OPEN NOW/i.test(b2)) problems.push('the crates screen no longer labels its groups')
   if (/WHAT DO YOU ALREADY KNOW BY HEART/.test(b2)) problems.push('free-text screen still present')
   // An expired drop is meant to be absent from the picker, so the smoke walk only
   // insists on the ones that should be there today.
@@ -268,9 +272,32 @@ async function main() {
    * standing menu item and one quiet line on that screen instead.
    */
   if (!/Something not land/i.test(end)) problems.push('the close offers no way to report anything')
-  await press(page.getByTestId('continue'), 'back to the crates')
-  await page.waitForURL('**/crates', { timeout: 20000 }).catch(() => {})
-  if (!/\/crates/.test(page.url())) problems.push('the close did not return to the crates; url=' + page.url())
+  /*
+    And it lands on the Club, not back at the picker.
+
+    This is the assertion the whole session exists to earn: a learner who has been all
+    the way through arrives somewhere that knows it. Landing back on the crate picker is
+    what made the product read as one session repeated.
+  */
+  await press(page.getByTestId('continue'), 'into Dub Club')
+  await page.waitForURL('**/club', { timeout: 20000 }).catch(() => {})
+  if (!/\/club/.test(page.url())) problems.push('the close did not land on the Club; url=' + page.url())
+  await page.waitForTimeout(1200)
+  const club = await page.evaluate(() => document.body.innerText)
+  if (!/DUB CLUB/i.test(club)) problems.push('the Club did not render')
+  // The ceremony or the home — both are correct here, an empty screen is not.
+  if (!/WORTH DOING NEXT|Welcome to Dub Club/i.test(club)) {
+    problems.push('the Club rendered neither its moves nor its welcome')
+  }
+  // Finishing a section is what unlocks the Club, so it has to have been recorded.
+  const sectionsDone = await page.evaluate((k) => {
+    try {
+      return (JSON.parse(localStorage.getItem(k) ?? '{}').sections_completed ?? []).length
+    } catch {
+      return 0
+    }
+  }, 'byheart.learner.v1:' + pairId(DEFAULT_PAIR))
+  if (!sectionsDone) problems.push('finishing a section did not record it against the learner')
 
   // And the research instrument still exists, behind the flag a moderator sends.
   await page.goto(BASE + '/feedback?study=1', { waitUntil: 'networkidle' })
