@@ -18,7 +18,8 @@
     "merge:test": "tsx scripts/merge-test.mts",
     "comp:issue": "tsx scripts/comp-issue.mts",
     "mobile": "tsx scripts/mobile-check.mts",
-    "gate": "npm run check && npm run mobile"
+    "gate": "npm run check && npm run mobile",
+    "contrast": "tsx scripts/contrast-check.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

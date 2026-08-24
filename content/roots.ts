@@ -241,18 +241,18 @@ export interface Crate {
 }
 
 export const CRATES: Crate[] = [
-  { id: 'top_gun', title: 'TOP GUN QUOTES', blurb: 'Iconic lines. Direct language.', tone: 'kinetic', built: true },
-  { id: 'james_bond', title: 'JAMES BOND FILM TITLES', blurb: 'Tiny titles. Surprisingly useful Portuguese.', tone: 'cool', built: true },
-  { id: 'bridget_jones', title: 'BRIDGET JONES CRINGE MOMENTS', blurb: 'Awkwardness you can actually use.', tone: 'human', built: true },
-  { id: 'pulp_fiction', title: 'PULP FICTION BANGER QUOTES', blurb: 'Punchy lines. Real conversational leverage.', tone: 'sharp', built: true },
-  { id: 'audrey_hepburn', title: 'AUDREY HEPBURN MUSINGS', blurb: 'Elegance, warmth and things worth saying.', tone: 'warm', built: true },
-  { id: 'marcus_aurelius', title: 'MARCUS AURELIUS WISDOM', blurb: 'Ancient ideas. Surprisingly useful modern language.', tone: 'reflective', built: true },
-  { id: 'portuguese_swearing', title: 'HOW TO SWEAR IN PORTUGUESE', blurb: 'The subtitles were lying to you. Strong language throughout.', tone: 'blunt', built: true, opens_at: 6 },
-  { id: 'flirting_m2f', title: 'FLIRTING — HIM TO HER', blurb: 'The Love Actually problem. Said properly this time.', tone: 'warm', built: true },
-  { id: 'flirting_f2m', title: 'FLIRTING — HER TO HIM', blurb: 'Warmer, funnier and considerably more effective.', tone: 'warm', built: true },
+  { id: 'top_gun', title: 'Top Gun quotes', blurb: 'Iconic lines. Direct language.', tone: 'kinetic', built: true },
+  { id: 'james_bond', title: 'James Bond film titles', blurb: 'Tiny titles. Surprisingly useful Portuguese.', tone: 'cool', built: true },
+  { id: 'bridget_jones', title: 'Bridget Jones cringe moments', blurb: 'Awkwardness you can actually use.', tone: 'human', built: true },
+  { id: 'pulp_fiction', title: 'Pulp Fiction banger quotes', blurb: 'Punchy lines. Real conversational leverage.', tone: 'sharp', built: true },
+  { id: 'audrey_hepburn', title: 'Audrey Hepburn musings', blurb: 'Elegance, warmth and things worth saying.', tone: 'warm', built: true },
+  { id: 'marcus_aurelius', title: 'Marcus Aurelius wisdom', blurb: 'Ancient ideas. Surprisingly useful modern language.', tone: 'reflective', built: true },
+  { id: 'portuguese_swearing', title: 'How to swear in Portuguese', blurb: 'The subtitles were lying to you. Strong language throughout.', tone: 'blunt', built: true, opens_at: 6 },
+  { id: 'flirting_m2f', title: 'Flirting — him to her', blurb: 'The Love Actually problem. Said properly this time.', tone: 'warm', built: true },
+  { id: 'flirting_f2m', title: 'Flirting — her to him', blurb: 'Warmer, funnier and considerably more effective.', tone: 'warm', built: true },
   {
     id: 'duran_duran_lisboa',
-    title: 'DURAN DURAN, LISBOA',
+    title: 'Duran Duran, Lisboa',
     blurb: 'Six song titles. Gone the morning after the gig.',
     tone: 'kinetic',
     built: true,

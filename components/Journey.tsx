@@ -84,10 +84,13 @@ function Shell({
   stage,
   children,
   eyebrow,
+  tone,
   nav = true,
 }: {
   stage: string
   eyebrow?: string
+  /** The crate's own colour. ROOT and LANDING take it; CHOICE and REAL WORLD do not. */
+  tone?: string
   nav?: boolean
   children: React.ReactNode
 }) {
@@ -98,7 +101,11 @@ function Shell({
   const mountedAt = useNowAfterMount()
   const kept = mountedAt ? owned.length : 0
   return (
-    <div data-stage={stage} className="flex min-h-dvh flex-col bg-bg text-fg transition-colors duration-700">
+    <div
+      data-stage={stage}
+      data-tone={tone}
+      className="flex min-h-dvh flex-col bg-bg text-fg transition-colors duration-700"
+    >
       {nav || eyebrow ? (
         <header className="sticky top-0 z-10 border-b border-line bg-bg/90 px-5 py-2.5 backdrop-blur">
           <div className="mx-auto flex w-full max-w-md items-center gap-3">
@@ -552,7 +559,7 @@ function Demo({ i }: { i: number }) {
                 <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
                 <span>
                   <span className="pt block text-lg text-accent">{b.pt}</span>
-                  <span className="mt-0.5 block text-xs text-muted">{b.en}</span>
+                  <span className="gloss mt-0.5 block text-xs text-muted">{b.en}</span>
                 </span>
               </li>
             ))}
@@ -729,6 +736,7 @@ function Picker() {
           return (
             <div
               key={f.id}
+              data-tone={f.tone}
               className={
                 // The drop's frame lives on the wrapper, not the button, so the ticket
                 // link can sit inside the card without being nested in a button.
@@ -748,7 +756,7 @@ function Picker() {
                 disabled={unreached || planLocked}
                 onClick={() => setPicked(f.id)}
                 className={
-                  'tap-target flex w-full justify-between gap-3 px-4 py-4 text-left transition ' +
+                  'tap-target flex w-full justify-between gap-3 border-l-[3px] border-l-[color:var(--tone)] px-4 py-4 text-left transition ' +
                   (f.drop
                     ? 'items-start '
                     : 'items-center rounded-xl border ' +
@@ -1104,7 +1112,7 @@ function RootBeatView({
 
   if (beat === 'recognise') {
     return (
-      <Shell stage={stage} eyebrow={family.title}>
+      <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         <div className="flex flex-1 flex-col justify-center">
           <p className="display text-balance text-3xl sm:text-4xl">
             {root.root_type === 'quote' ? '“' + root.root_display + '”' : root.root_display}
@@ -1120,7 +1128,7 @@ function RootBeatView({
 
   if (beat === 'translate') {
     return (
-      <Shell stage={stage} eyebrow={family.title}>
+      <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         <p className="text-xs text-muted">“{root.root_display}”</p>
         <p className="pt mt-3 text-balance text-3xl text-accent">{root.target}</p>
         <div className="mt-3">
@@ -1148,7 +1156,7 @@ function RootBeatView({
   if (beat === 'extract') {
     const many = root.extracts.length > 1
     return (
-      <Shell stage={stage} eyebrow={family.title}>
+      <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         <p className="eyebrow text-muted">
           {many ? root.extracts.length + ' USEFUL BITS IN HERE' : 'THE USEFUL BIT'}
         </p>
@@ -1173,7 +1181,7 @@ function RootBeatView({
     const last = pieceIndex === total - 1
     const reinforced = root.reinforces.filter((r) => PIECES[r])
     return (
-      <Shell stage={stage} eyebrow={family.title}>
+      <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         {total > 1 ? (
           <p className="text-xs tabular-nums text-muted">
             {pieceIndex + 1} of {total}
@@ -1213,7 +1221,7 @@ function RootBeatView({
     const own = branchesFor(root, e.id)
     const more = pieceIndex < root.extracts.length - 1
     return (
-      <Shell stage={stage} eyebrow={family.title}>
+      <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         <p className="eyebrow text-accent">{e.target.replace('…', '').trim().toUpperCase()}</p>
         <p className="display mt-3 text-balance text-xl">
           {own.length === 1
@@ -1230,7 +1238,7 @@ function RootBeatView({
               <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
               <span>
                 <span className="pt block text-lg text-accent">{b.target}</span>
-                <span className="mt-0.5 block text-xs text-muted">{b.en}</span>
+                <span className="gloss mt-0.5 block text-xs text-muted">{b.en}</span>
               </span>
             </li>
           ))}
@@ -1250,7 +1258,7 @@ function RootBeatView({
 
   if (beat === 'branch') {
     return (
-      <Shell stage={stage} eyebrow={family.title}>
+      <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         <p className="eyebrow text-muted">BOTH PIECES, BACK IN ONE PLACE</p>
         <p className="display mt-3 text-balance text-2xl">
           One {root.root_type === 'title' ? 'title' : 'line'}. {root.branches.length} things you can say.
@@ -1272,7 +1280,7 @@ function RootBeatView({
               <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
               <span>
                 <span className="pt block text-lg text-accent">{b.target}</span>
-                <span className="mt-0.5 block text-xs text-muted">{b.en}</span>
+                <span className="gloss mt-0.5 block text-xs text-muted">{b.en}</span>
               </span>
             </li>
           ))}
@@ -1285,7 +1293,7 @@ function RootBeatView({
   if (beat === 'build') {
     const target = buildTargetFor(root)
     return (
-      <Shell stage={stage} eyebrow={family.title}>
+      <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         <p className="eyebrow text-muted">YOUR TURN</p>
         <p className="display mt-2 text-balance text-2xl">“{target.en}”</p>
         <MiniBuild target={target.target} helpers={root.helpers} onSolved={() => setDone(true)} />
@@ -1297,7 +1305,7 @@ function RootBeatView({
   if (beat === 'voice' && root.voice_options?.length) {
     const picked = root.voice_options.find((o) => o.target === choice)
     return (
-      <Shell stage={stage} eyebrow={family.title}>
+      <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         <p className="display text-balance text-2xl">Here are two ways to say it.</p>
         <p className="mt-2 text-sm text-muted">
           Same meaning, different room. Nothing here is scored and there is no right
@@ -1328,7 +1336,7 @@ function RootBeatView({
                 ) : null}
               </span>
               <span className="pt mt-2 block text-lg text-fg">{o.target}</span>
-              <span className="mt-0.5 block text-xs text-muted">{o.en}</span>
+              <span className="gloss mt-0.5 block text-xs text-muted">{o.en}</span>
               <span className="mt-3 block text-sm text-fg/80">{o.when}</span>
               {o.risk ? (
                 <span className="mt-2 block border-l-2 border-line pl-3 text-xs text-muted">
@@ -1478,7 +1486,7 @@ function Osmosis() {
               {i.evidence.map((e) => (
                 <li key={e.pt} className="flex flex-wrap items-baseline gap-x-2">
                   <span className="pt text-sm text-accent">{e.pt}</span>
-                  <span className="text-xs text-muted">{e.en}</span>
+                  <span className="gloss text-xs text-muted">{e.en}</span>
                 </li>
               ))}
             </ul>
@@ -1599,7 +1607,7 @@ function GenderPayoff({ gender }: { gender: LanguageGender }) {
               <span className="pt text-lg text-fg">{row.yours}</span>
               <span className="pt text-sm text-muted/60 line-through">{row.theirs}</span>
             </div>
-            <span className="mt-0.5 block text-xs text-muted">{row.en}</span>
+            <span className="gloss mt-0.5 block text-xs text-muted">{row.en}</span>
           </li>
         ))}
       </ul>

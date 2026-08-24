@@ -391,7 +391,7 @@ function EntryRow({
                     <AudioButton slug={slugFor(l.target)} text={l.target} size="sm" />
                     <span className="min-w-0">
                       <span className="pt block text-sm">{l.target}</span>
-                      <span className="block text-xs text-muted">{l.en}</span>
+                      <span className="gloss block text-xs text-muted">{l.en}</span>
                     </span>
                   </li>
                 ))}

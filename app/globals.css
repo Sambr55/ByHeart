@@ -1,49 +1,105 @@
 @import "tailwindcss";
 
 /*
-  DUB — visual system. Spec §7.
-  Letterboxd x Spotify: cinematic and grown-up, not military cosplay.
-  Aviation reads as instrument geometry — ticks, altitude rules, runway markers —
-  never as reproduced film graphics.
+  DUB — visual system.
+
+  The palette this replaces was Top Gun's: instrument amber on cockpit near-black, with
+  a comment about altitude rules and runway markers. That was exactly right when the
+  product was one Top Gun mission. It is now 65 roots across ten crates — Bridget Jones,
+  Audrey Hepburn, Marcus Aurelius, flirting in both directions, swearing, a Duran Duran
+  drop — and a cockpit is the wrong room for nine of them. The old scheme was not merely
+  dark; it was specific, and specific to a franchise that is now one tile in the wall.
+
+  This one comes from Portugal, because Portugal already has a colour language and using
+  it makes DUB look like the place it teaches: azulejo tile, calçada paving, telha roof
+  terracotta, and the pastel facades and Atlantic light of Lisbon.
+
+  Light is the default. A language app opened on a bus in daylight should be light; dark
+  is kept as a designed theme rather than an inversion.
+
+  Every value here clears its contrast threshold on its own ground — npm run contrast.
 */
 
 :root {
-  --bg: #07090c;
-  --bg-elev: #10151b;
-  --surface: #141b23;
-  --line: #1f2932;
-  --fg: #f3f0e9;
-  --muted: #8a96a3;
-  --accent: #e8b04b;      /* instrument amber */
-  --accent-ink: #1a1204;
-  --correct: #74d19a;
-  --coach: #e8b04b;       /* wrong answers coach in amber, never red */
-  --chip: #1a222b;
-  --grid: rgba(232, 176, 75, 0.045);
+  --bg: #faf7f2;          /* glaze — the finish on a tile, not paper and not grey */
+  --bg-elev: #ffffff;     /* cards, sheets, the sticky header */
+  --surface: #f1ece3;     /* chips, inset panels, tile blocks */
+  --line: #e3dcd1;        /* decorative hairline; see line-strong for control edges */
+  --line-strong: #8f8474; /* where the border is the only thing saying "control" */
+  --fg: #16202b;          /* deep indigo-black; pure black on warm white reads harsh */
+  --muted: #6e6a63;       /* warm grey, biased toward the ground */
+  --accent: #2f6e9e;      /* azulejo. The Portuguese is always this colour */
+  --accent-ink: #ffffff;
+  --telha: #b4553c;       /* the second accent, and where the warmth comes from */
+  --correct: #3e7d5a;     /* muted, never a celebration green */
+  --coach: #9a5f28;       /* wrong answers coach in amber, never red. Keep this rule */
+  --chip: #f1ece3;
+  --grid: rgba(47, 110, 158, 0.05);
+  /* The crate's own colour. Set per crate; falls back to the neutral accent. */
+  --tone: var(--accent);
 }
 
 /*
-  Landing in Lisbon strips every aviation cue, including the palette.
-  Warm ground, azulejo blue. The learner should feel the film leave the room.
+  Dark, kept and warmed. The old one was blue-black and cold; this moves the ground
+  toward the ink and keeps the same two-accent structure so nothing is theme-specific.
 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #14161a;
+    --bg-elev: #1c2027;
+    --surface: #222731;
+    --line: #2a2e36;
+    --line-strong: #606771;
+    --fg: #f4f0e9;
+    --muted: #9a948b;
+    --accent: #7fb3da;
+    --accent-ink: #0d1116;
+    --telha: #e0876c;
+    --correct: #74c79a;
+    --coach: #dda45e;
+    --chip: #222731;
+    --grid: rgba(127, 179, 218, 0.06);
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #14161a;
+  --bg-elev: #1c2027;
+  --surface: #222731;
+  --line: #2a2e36;
+  --line-strong: #606771;
+  --fg: #f4f0e9;
+  --muted: #9a948b;
+  --accent: #7fb3da;
+  --accent-ink: #0d1116;
+  --telha: #e0876c;
+  --correct: #74c79a;
+  --coach: #dda45e;
+  --chip: #222731;
+  --grid: rgba(127, 179, 218, 0.06);
+}
+
 /*
-  The cue fading out. LANDING and DEMO carry the brand; ROOT gives the cultural thought
-  space; CHOICE is neutral because the learner is deciding, not being sold to; REAL WORLD
-  strips everything back, because the absence of culture is the point (§16).
+  The stage shift stays. It is one of the best ideas in the product: LANDING and ROOT
+  carry the crate's world, CHOICE is neutral because the learner is deciding rather than
+  being sold to, and REAL WORLD strips everything back because the absence of culture is
+  the whole point of that beat.
+
+  Re-tinted rather than removed. ROOT now takes the crate's own tone; REAL WORLD loses
+  its accent entirely, which is a far stronger move now that there is something to
+  remove.
 */
-[data-stage="REAL WORLD"],
-[data-stage="CHOICE"],
-[data-stage="LISBON"] {
-  --bg: #0c0b09;
-  --bg-elev: #171410;
-  --surface: #1c1814;
-  --line: #2b2620;
-  --fg: #f6f1e7;
-  --muted: #9d948a;
-  --accent: #86b6da;      /* azulejo blue */
-  --accent-ink: #061019;
-  --chip: #241f19;
-  --grid: rgba(134, 182, 218, 0.07);
+[data-stage='ROOT'],
+[data-stage='LANDING'],
+[data-stage='DEMO'] {
+  --accent: var(--tone);
+  --grid: color-mix(in srgb, var(--tone) 6%, transparent);
+}
+
+[data-stage='REAL WORLD'] {
+  --accent: var(--fg);
+  --accent-ink: var(--bg);
+  --grid: transparent;
 }
 
 @theme inline {
@@ -55,6 +111,8 @@
   --color-muted: var(--muted);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
+  --color-telha: var(--telha);
+  --color-line-strong: var(--line-strong);
   --color-correct: var(--correct);
   --color-coach: var(--coach);
   --color-chip: var(--chip);
@@ -107,19 +165,39 @@ body {
   letter-spacing: -0.02em;
 }
 
+/*
+  Loosened. -0.03em at 1.02 is a poster headline: at paragraph length it reads as
+  pressure rather than confidence, and half of "unwelcoming" was never the colour.
+*/
 .display {
   font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.02;
+  letter-spacing: -0.018em;
+  line-height: 1.1;
 }
 
+/*
+  Uppercase at 0.16em and 700 adds roughly a third to the width of any string. That is
+  fine on a fixed system label and a bug waiting to happen on anything whose length comes
+  from content — which is exactly how the crates screen came to slide sideways. Use it on
+  fixed labels of about fourteen characters or fewer, and never on content.
+*/
 .eyebrow {
   font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.16em;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   font-size: 0.7rem;
+}
+
+/*
+  The English meaning, in a serif.
+  The Portuguese is the hero and the English is the whisper underneath, and giving them
+  two different voices makes that hierarchy structural rather than decorative.
+*/
+.gloss {
+  font-family: var(--font-serif), ui-serif, Georgia, 'Times New Roman', serif;
+  font-weight: 400;
 }
 
 /* Instrument field: altitude rules behind the content, not decoration on top of it. */
@@ -180,3 +258,42 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+  Crate tones.
+
+  Every crate already declared one — kinetic, cool, human, sharp, warm, reflective,
+  blunt — and nothing in the product read it. Giving each a hue turns ten identical
+  rectangles into ten distinguishable places with no content work at all.
+
+  Used at low intensity: a tile block, a border, the eyebrow inside that crate's roots.
+  Never a background wash. The two global accents keep their meaning — azulejo is always
+  the Portuguese, telha is always warmth and urgency.
+
+  Every value clears 4.5:1 as text on its own ground. npm run contrast.
+*/
+[data-tone='kinetic']    { --tone: #2f6e9e; }
+[data-tone='cool']       { --tone: #3e5c75; }
+[data-tone='human']      { --tone: #a8455e; }
+[data-tone='sharp']      { --tone: #8e3a46; }
+[data-tone='warm']       { --tone: #b4553c; }
+[data-tone='reflective'] { --tone: #5c6b3d; }
+[data-tone='blunt']      { --tone: #3f4348; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) [data-tone='kinetic']    { --tone: #7fb3da; }
+  :root:not([data-theme='light']) [data-tone='cool']       { --tone: #9bb3c6; }
+  :root:not([data-theme='light']) [data-tone='human']      { --tone: #de8fa2; }
+  :root:not([data-theme='light']) [data-tone='sharp']      { --tone: #c97883; }
+  :root:not([data-theme='light']) [data-tone='warm']       { --tone: #e0876c; }
+  :root:not([data-theme='light']) [data-tone='reflective'] { --tone: #a8b87f; }
+  :root:not([data-theme='light']) [data-tone='blunt']      { --tone: #9aa0a7; }
+}
+
+:root[data-theme='dark'] [data-tone='kinetic']    { --tone: #7fb3da; }
+:root[data-theme='dark'] [data-tone='cool']       { --tone: #9bb3c6; }
+:root[data-theme='dark'] [data-tone='human']      { --tone: #de8fa2; }
+:root[data-theme='dark'] [data-tone='sharp']      { --tone: #c97883; }
+:root[data-theme='dark'] [data-tone='warm']       { --tone: #e0876c; }
+:root[data-theme='dark'] [data-tone='reflective'] { --tone: #a8b87f; }
+:root[data-theme='dark'] [data-tone='blunt']      { --tone: #9aa0a7; }
