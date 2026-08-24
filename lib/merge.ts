@@ -118,6 +118,7 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     // Set union — having played something is not undoable.
     roots_played: setUnion(l.roots_played, r.roots_played),
     collisions_played: setUnion(l.collisions_played, r.collisions_played),
+    nocue_done: setUnion(l.nocue_done, r.nocue_done),
     osmosis_seen: setUnion(l.osmosis_seen, r.osmosis_seen),
     missions_completed: setUnion(l.missions_completed, r.missions_completed),
 

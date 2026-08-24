@@ -206,16 +206,6 @@ body {
   font-size: 0.7rem;
 }
 
-/*
-  The English meaning, in a serif.
-  The Portuguese is the hero and the English is the whisper underneath, and giving them
-  two different voices makes that hierarchy structural rather than decorative.
-*/
-.gloss {
-  font-family: var(--font-serif), ui-serif, Georgia, 'Times New Roman', serif;
-  font-weight: 400;
-}
-
 /* Instrument field: altitude rules behind the content, not decoration on top of it. */
 /*
   The azulejo field.

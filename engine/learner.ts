@@ -173,6 +173,12 @@ export interface LearnerState {
   roots_played: string[]
   collisions_played: string[]
   /**
+   * Cold prompts already answered. Without this, indexing the filtered list by step
+   * number meant every section ended with the same three sentences — which makes the
+   * proof card look like it is measuring the same thing over and over.
+   */
+  nocue_done: string[]
+  /**
    * When the deal was accepted, or null. Kept per pair rather than globally, because
    * the deal screen speaks about the language being learned — "your Portuguese" — and
    * somebody arriving at a second pair has not been told that deal.
@@ -209,6 +215,7 @@ export function emptyLearner(): LearnerState {
     proof: [],
     roots_played: [],
     collisions_played: [],
+    nocue_done: [],
     deal_accepted_at: null,
     evidence: [],
     affinity: {
@@ -292,6 +299,7 @@ export function loadLearner(): LearnerState {
           missions_completed: arr(parsed.missions_completed, []),
           proof: arr(parsed.proof, []),
           roots_played: arr(parsed.roots_played, []),
+          nocue_done: arr(parsed.nocue_done, []),
           deal_accepted_at: parsed.deal_accepted_at ?? null,
           collisions_played: arr(parsed.collisions_played, []),
           evidence: arr(parsed.evidence, []),
@@ -448,6 +456,7 @@ export async function syncSession(reason: string): Promise<boolean> {
         osmosis_seen: s.osmosis_seen,
         roots_played: s.roots_played,
         collisions_played: s.collisions_played,
+        nocue_done: s.nocue_done,
         deal_accepted_at: s.deal_accepted_at,
         created_at: s.created_at,
         user_agent: navigator.userAgent,
@@ -753,4 +762,11 @@ export async function restoreLearner(): Promise<'merged' | 'nothing' | 'failed'>
     // Offline, or no store configured. The local copy is untouched.
     return 'failed'
   }
+}
+
+/** One more cold prompt answered. Union, like everything else that only ever grows. */
+export function rememberNoCue(id: string) {
+  update((s) => {
+    if (!s.nocue_done.includes(id)) s.nocue_done = [...s.nocue_done, id]
+  })
 }

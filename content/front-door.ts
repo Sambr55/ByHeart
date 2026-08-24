@@ -258,5 +258,12 @@ export const NO_CUE_PROMPTS = [
 
 export const CLOSE = {
   eyebrow: 'YOU ALREADY KNOW MORE THAN YOU THINK.',
-  cta: 'FIVE QUESTIONS, THEN YOU’RE DONE',
+  /**
+   * Back into the product, not out to a form about it. The end of a good session is the
+   * worst possible moment to hand somebody a survey — feedback is a standing menu item
+   * and one quiet line here, never the only exit.
+   */
+  sub: 'That is yours now. Take another crate whenever you want one.',
+  cta: 'BACK TO MY CRATES',
+  feedback: 'Something not land? Tell us.',
 } as const

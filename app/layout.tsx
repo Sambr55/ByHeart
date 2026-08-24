@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Archivo, Inter, Newsreader } from 'next/font/google'
+import { Archivo, Inter } from 'next/font/google'
 import { BRAND } from '@/content/brand'
 import './globals.css'
 
@@ -14,18 +14,6 @@ const sans = Inter({
   subsets: ['latin'],
 })
 
-/**
- * The English meaning, and only that. One warm text face used for the whisper under the
- * Portuguese does more for warmth than any colour change, and it makes the hierarchy
- * structural: two voices, not one voice at two sizes.
- */
-const serif = Newsreader({
-  subsets: ['latin'],
-  weight: ['400', '500'],
-  style: ['normal', 'italic'],
-  variable: '--font-serif',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   title: BRAND.title,
@@ -66,7 +54,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${serif.variable} h-full`}>
+    <html lang="en" className={`${display.variable} ${sans.variable} h-full`}>
       <body className="min-h-full">{children}</body>
     </html>
   )

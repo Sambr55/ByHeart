@@ -55,8 +55,9 @@ import {
   acquirePiece,
   markOsmosisSeen,
   recordProof,
-  setAffinity,
+  rememberNoCue,
   resetLearnerCache,
+  setAffinity,
   setProfile,
   voiceLean,
 } from '@/engine/learner'
@@ -572,7 +573,7 @@ function Demo({ i }: { i: number }) {
                 <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
                 <span>
                   <span className="pt block text-lg text-accent">{b.pt}</span>
-                  <span className="gloss mt-1 block text-sm text-fg/75">{b.en}</span>
+                  <span className="mt-1 block text-sm text-fg/75">{b.en}</span>
                 </span>
               </li>
             ))}
@@ -715,7 +716,11 @@ function Picker() {
   const access = useEntitlements()
   // Remember what they chose. Stepping back onto this screen and finding the choice
   // wiped is the kind of small betrayal that makes a product feel unreliable.
-  const [picked, setPicked] = useState<CultureFamily | null>(state.family)
+  // Tap enters. A list of eleven where every row is a destination should behave like a
+  // list of eleven destinations — select-then-confirm is for forms, and it put the only
+  // way in at the very bottom, under eleven cards and three notes. The pressed state is
+  // kept so the tap is acknowledged in the moment before the screen changes.
+  const [entering, setEntering] = useState<CultureFamily | null>(null)
   const now = useNowAfterMount()
   // Nothing is dimmed until the browser has read what this learner has actually done.
   // A crate that locks itself a frame after hydration is worse than one that never did.
@@ -726,6 +731,30 @@ function Picker() {
   // "played one root" and "seen the whole crate" are different things.
   const playedIds = useMemo(() => new Set(state.rootsPlayed), [state.rootsPlayed])
   const shown = CRATES.filter((c) => (now ? isLive(c, now) : true))
+
+  /**
+   * The order of the list is a recommendation, and authoring order is not one.
+   *
+   * Live drops first, because they expire and the code already refuses to lock them.
+   * Then what is open and untouched, then what is in progress, then what is explored as
+   * far as this stage reaches, then finished, then what cannot be opened at all. A
+   * learner scanning from the top meets the most urgent thing first and the unavailable
+   * things last, which is the only ordering that answers "what should I do now".
+   */
+  const rank = (c: (typeof CRATES)[number]): number => {
+    const all = ROOTS_BY_FAMILY[c.id] ?? []
+    const played = all.filter((r) => playedIds.has(r.root_id)).length
+    const done = all.length > 0 && played === all.length
+    const available = all.filter((r) => r.rung <= rung && !playedIds.has(r.root_id)).length
+    const openable = c.drop || entryRung(c) <= rung
+    const capped = !c.drop && atLimit && !claimed.has(c.id)
+    if (c.drop) return 0
+    if (!openable || capped) return 5
+    if (done) return 4
+    if (available === 0) return 3
+    if (played > 0) return 2
+    return 1
+  }
 
   /**
    * The free tier: three crates, chosen and permanent.
@@ -781,7 +810,7 @@ function Picker() {
         </details>
       ) : null}
       <div className="mt-5 space-y-2">
-        {shown.map((f) => {
+        {[...shown].sort((a, b) => rank(a) - rank(b)).map((f) => {
           const all = ROOTS_BY_FAMILY[f.id] ?? []
           const finished = all.length > 0 && all.every((r) => playedIds.has(r.root_id))
           const unplayed = all.filter((r) => !playedIds.has(r.root_id))
@@ -819,7 +848,7 @@ function Picker() {
                   ? 'rounded border transition ' +
                     (finished
                       ? 'border-line/50 bg-surface/40 opacity-45'
-                      : picked === f.id
+                      : entering === f.id
                         ? 'border-accent bg-accent/10'
                         : 'border-accent/45 bg-accent/[0.04]')
                   : undefined
@@ -827,9 +856,13 @@ function Picker() {
             >
               <button
                 type="button"
-                aria-pressed={picked === f.id}
+                aria-disabled={unreached || planLocked}
                 disabled={unreached || planLocked}
-                onClick={() => setPicked(f.id)}
+                onClick={() => {
+                  if (unreached || planLocked) return
+                  setEntering(f.id)
+                  chooseFamily(f.id)
+                }}
                 className={
                   'tap-target flex w-full justify-between gap-3 border-l-[3px] border-l-[color:var(--tone)] px-4 py-4 text-left transition ' +
                   (f.drop
@@ -837,7 +870,7 @@ function Picker() {
                     : 'items-center rounded border ' +
                       (unreached
                         ? 'border-line/40 bg-surface/30 opacity-40'
-                        : picked === f.id
+                        : entering === f.id
                           ? 'border-accent bg-accent/10'
                           : finished || waiting
                             ? 'border-line/60 bg-surface/50 opacity-70 hover:border-accent/40'
@@ -924,7 +957,6 @@ function Picker() {
           </Link>
         </p>
       ) : null}
-      <Cta label={PICKER.cta} disabled={!picked} onClick={() => picked && chooseFamily(picked)} />
     </Shell>
   )
 }
@@ -1321,7 +1353,7 @@ function RootBeatView({
               <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
               <span>
                 <span className="pt block text-lg text-accent">{b.target}</span>
-                <span className="gloss mt-1 block text-sm text-fg/75">{b.en}</span>
+                <span className="mt-1 block text-sm text-fg/75">{b.en}</span>
               </span>
             </li>
           ))}
@@ -1363,7 +1395,7 @@ function RootBeatView({
               <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
               <span>
                 <span className="pt block text-lg text-accent">{b.target}</span>
-                <span className="gloss mt-1 block text-sm text-fg/75">{b.en}</span>
+                <span className="mt-1 block text-sm text-fg/75">{b.en}</span>
               </span>
             </li>
           ))}
@@ -1392,8 +1424,8 @@ function RootBeatView({
         <p className="display text-balance text-2xl">Here are two ways to say it.</p>
         <p className="mt-2 text-sm text-muted">
           Same meaning, different room. Nothing here is scored and there is no right
-          answer — pick whichever you would actually say, and DUB uses it to learn
-          whether you come across direct or soft.
+          answer — pick the one that sounds more like you. If neither does, that is an
+          answer too.
         </p>
         <div className="mt-6 space-y-3">
           {root.voice_options.map((o) => (
@@ -1443,7 +1475,7 @@ function RootBeatView({
             onClick={() => setRuleShown(true)}
             className="tap-target mt-5 self-start text-xs uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-fg"
           >
-            I would say neither — show me the rule
+            Not sure yet — show me which one to use
           </button>
         ) : null}
         {choice || ruleShown ? (
@@ -1823,14 +1855,22 @@ function SectionComplete() {
           PICK ANOTHER AREA
         </button>
       ) : null}
+      {/*
+        The three cold prompts that follow are what GENERATE the number, so promising to
+        show somebody what they have got and then testing them reads as a bait. The order
+        was never the problem; the label was.
+      */}
       <button
         type="button"
         data-testid="im-done"
         onClick={() => finishSection('done')}
         className="tap-target eyebrow mt-3 w-full rounded border border-line px-5 py-4 text-fg"
       >
-        I’M DONE — SHOW ME WHAT I’VE GOT
+        I’M DONE — PROVE IT
       </button>
+      <p className="mt-2 text-center text-xs text-muted">
+        Three sentences, no clues. That is what fills the card.
+      </p>
     </Shell>
   )
 }
@@ -1874,10 +1914,21 @@ function CollisionView({ id }: { id: string }) {
  */
 function NoCueView({ i }: { i: number }) {
   const { next, owned } = useJourney()
-  const prompts = useMemo(
-    () => NO_CUE_PROMPTS.filter((p) => owned.includes(p.requires)),
-    [owned],
-  )
+  const learner = useLearner()
+  /**
+   * Unseen prompts first.
+   *
+   * This used to index the filtered list by step number, so every section ended with
+   * exactly the same three sentences — which makes the number on the proof card look
+   * like it is measuring one thing repeatedly. Falls back to the whole pool once a
+   * learner has been through all of them, because a repeat is better than a blank.
+   */
+  const prompts = useMemo(() => {
+    const able = NO_CUE_PROMPTS.filter((p) => owned.includes(p.requires))
+    const seen = new Set(learner.nocue_done ?? [])
+    const fresh = able.filter((p) => !seen.has(p.answer))
+    return fresh.length ? fresh : able
+  }, [owned, learner.nocue_done])
   const prompt = prompts[i % Math.max(prompts.length, 1)]
   const [done, setDone] = useState(false)
 
@@ -1905,6 +1956,7 @@ function NoCueView({ i }: { i: number }) {
         onSolved={({ clean }) => {
           track('no_cue_attempt', { piece: prompt.requires, correct: true })
           recordProof({ pt: prompt.answer, en: prompt.ask, source: 'nocue', clean })
+          rememberNoCue(prompt.answer)
           setDone(true)
         }}
       />
@@ -1986,13 +2038,10 @@ function Close() {
     <Shell stage="REAL WORLD">
       <div className="flex flex-1 flex-col justify-center">
         <p className="display text-balance text-3xl">{CLOSE.eyebrow}</p>
-        <p className="mt-4 text-sm text-muted">
-          Five questions and you are done. Be as critical as you like — the sharpest thing
-          you say is the most useful.
-        </p>
+        <p className="mt-4 text-sm text-muted">{CLOSE.sub}</p>
       </div>
       <Link
-        href="/feedback"
+        href="/crates"
         data-testid="continue"
         onClick={() => finish()}
         className="tap-target eyebrow mt-auto block w-full rounded mt-6 bg-accent px-5 py-4 text-center text-accent-ink"
@@ -2007,6 +2056,9 @@ function Close() {
         </Link>
         <Link href="/line" className="underline underline-offset-4">
           Or just take one line a morning.
+        </Link>
+        <Link href="/feedback" className="underline underline-offset-4">
+          {CLOSE.feedback}
         </Link>
       </div>
     </Shell>

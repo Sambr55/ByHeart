@@ -155,8 +155,9 @@ async function main() {
   // Anything at rung 1 is open from the start, whatever the learner has done since.
   const openable = live.filter((f) => entryRung(f) <= Math.max(1, needed))
   const chosen = live.find((f) => f.id === family)!
-  await press(page.getByRole('button', { name: chosen.title, exact: false }).first(), 'family')
-  await press(page.getByTestId('continue'), 'start here')
+  // Tapping a crate enters it. There is no confirm step any more: a list where every
+  // row is a destination behaves like one.
+  await press(page.getByRole('button', { name: chosen.title, exact: false }).first(), 'enter the crate')
 
   // The back button has to work from anywhere the tester might be.
   const back = page.getByTestId('back')
@@ -166,7 +167,12 @@ async function main() {
     await press(back, 'back')
     const after = await page.evaluate(() => document.body.innerText)
     if (before === after) problems.push('back button did not move the learner')
-    await press(page.getByTestId('continue'), 'forward again')
+    // Back lands on the picker, which no longer has a confirm button — so going forward
+    // again means tapping the crate again, exactly as a learner would.
+    await press(
+      page.getByRole('button', { name: chosen.title, exact: false }).first(),
+      're-enter the crate',
+    )
   }
 
   // Walk roots until the close.
@@ -203,9 +209,8 @@ async function main() {
       if (takeAnother) {
         await press(
           page.getByRole('button', { name: openable.find((f) => f.id !== family)!.title, exact: false }).first(),
-          'second family',
+          'second crate',
         )
-        await press(page.getByTestId('continue'), 'start second crate')
       }
       continue
     }
@@ -257,28 +262,34 @@ async function main() {
     // capability screen precedes the close; check it was seen
   }
 
-  await press(page.getByTestId('continue'), 'to feedback')
-  await page.waitForURL('**/feedback', { timeout: 20000 }).catch(() => {})
-  await page.waitForLoadState('networkidle').catch(() => {})
-  await page.getByRole('textbox').first().waitFor({ state: 'visible', timeout: 20000 }).catch(() => {})
-  const fb = await page.evaluate(() => document.body.innerText)
-  if (!/take it apart/i.test(fb)) {
-    problems.push('did not land on the feedback form; url=' + page.url())
+  /**
+   * The close returns you to the product, not out to a form about it. The end of a good
+   * session is the worst possible moment to hand somebody a survey — feedback is a
+   * standing menu item and one quiet line on that screen instead.
+   */
+  if (!/Something not land/i.test(end)) problems.push('the close offers no way to report anything')
+  await press(page.getByTestId('continue'), 'back to the crates')
+  await page.waitForURL('**/crates', { timeout: 20000 }).catch(() => {})
+  if (!/\/crates/.test(page.url())) problems.push('the close did not return to the crates; url=' + page.url())
+
+  // And the research instrument still exists, behind the flag a moderator sends.
+  await page.goto(BASE + '/feedback?study=1', { waitUntil: 'networkidle' })
+  await page.waitForTimeout(600)
+  const study = await page.evaluate(() => document.body.innerText)
+  for (const r of ['what do you think this product is', 'biggest reason you would NOT come back']) {
+    if (!study.toLowerCase().includes(r.toLowerCase())) {
+      problems.push('the study instrument lost: ' + r)
+    }
   }
-  const required = [
-    'what do you think this product is',
-    'what Portuguese words or phrases can you remember',
-    'easier to understand and remember',
-    'real conversation',
-    'biggest reason you would NOT come back',
-  ]
-  for (const r of required) {
-    if (!fb.toLowerCase().includes(r.toLowerCase())) problems.push('feedback missing: ' + r)
+
+  // The open feedback page answers before it asks.
+  await page.goto(BASE + '/feedback', { waitUntil: 'networkidle' })
+  await page.waitForTimeout(600)
+  const help = await page.evaluate(() => document.body.innerText)
+  for (const q of ['Why is a crate dimmed', 'Is this Portuguese or Brazilian', 'What actually counts']) {
+    if (!help.includes(q)) problems.push('feedback page does not answer: ' + q)
   }
-  const numbered = (fb.match(/^\s*[1-5]\s*$/gm) ?? []).length
-  if (fb.includes('6')) {
-    // five questions only — a sixth numbered prompt would be a spec breach
-  }
+  if (!/What did not land/i.test(help)) problems.push('feedback page has no open box')
 
   await browser.close()
   if (problems.length) {

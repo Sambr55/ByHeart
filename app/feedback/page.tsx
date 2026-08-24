@@ -1,177 +1,234 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { BRAND } from '@/content/brand'
-import { QUESTIONS, type Question } from '@/content/feedback'
+import { Suspense, useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { PageShell } from '@/components/PageShell'
+import { StudyForm } from '@/components/StudyForm'
+import { FEEDBACK_COPY, FEEDBACK_FEEL, FEEDBACK_WHERE, HELP } from '@/content/help'
 import { track } from '@/engine/analytics'
-import {
-  buildSubmission,
-  downloadFeedback,
-  submitFeedback,
-} from '@/engine/feedback'
+import { buildSubmission, submitFeedback } from '@/engine/feedback'
 import { hydrateFromUrl, loadLearner } from '@/engine/learner'
+import { useLearner } from '@/engine/useLearner'
+import { PIECES, RUNGS, rungReached } from '@/content/roots'
 
 /**
- * The tester's turn to talk, after the product has made its own argument.
+ * Helpful, humble, practical — and answering what it can before it asks for anything.
  *
- * Free text is deliberate here even though the missions ban keyboard entry: this is
- * not a language task, and a menu would supply the answers we are trying to hear.
+ * A feedback form is a product asking for a favour. This one gives something back first,
+ * which is also how you get better feedback: somebody who has just been helped writes
+ * more than somebody who has just been interrogated.
+ *
+ * Three rules it is built on. Answer first, ask second — the top of the page is the six
+ * things people actually get stuck on. One box, always, because a required six-question
+ * survey is a wall and one honest question collects more than six required fields. And
+ * say what happens next, because vague gratitude reads as a black hole.
+ *
+ * The old research questions are not deleted — they are a good instrument for a
+ * facilitated session and the wrong one for somebody reporting a typo, so they live
+ * behind ?study=1 where a moderator sends them deliberately.
  */
 export default function FeedbackPage() {
-  const [ready, setReady] = useState(false)
-  const [answers, setAnswers] = useState<Record<string, string | number>>({})
+  return (
+    <Suspense fallback={null}>
+      <FeedbackRouter />
+    </Suspense>
+  )
+}
+
+function FeedbackRouter() {
+  const params = useSearchParams()
+  if (params.get('study') === '1') return <StudyForm />
+  return <OpenFeedback />
+}
+
+function OpenFeedback() {
+  const learner = useLearner()
+  const [open, setOpen] = useState<string | null>(null)
+  const [text, setText] = useState('')
+  const [where, setWhere] = useState<string | null>(null)
+  const [feel, setFeel] = useState<string | null>(null)
+  const [email, setEmail] = useState('')
   const [state, setState] = useState<'editing' | 'sending' | 'done'>('editing')
-  const [stored, setStored] = useState<boolean | null>(null)
-  const [reason, setReason] = useState<string>('')
 
   useEffect(() => {
     hydrateFromUrl()
     loadLearner()
-    setReady(true)
   }, [])
 
-  if (!ready) return <PageShell eyebrow={BRAND.name}>{null}</PageShell>
-
-  const missing = QUESTIONS.filter(
-    (q) => q.required && !String(answers[q.id] ?? '').trim(),
-  )
+  // Answering from live state beats reciting policy: this learner's actual stage, and
+  // what they actually have, are both knowable right here.
+  const stage = rungReached(learner.proof ?? [])
+  const kept = Object.keys(learner.inventory ?? {}).filter((id) => PIECES[id]).length
 
   async function send() {
     setState('sending')
-    const submission = buildSubmission(answers)
-    track('interview_tag', {
-      feedback_version: submission.feedback_version,
-      answered: Object.keys(answers).length,
-      of: QUESTIONS.length,
-    })
-    const result = await submitFeedback(submission)
-    setStored(result.stored)
-    setReason(result.reason ?? '')
-    if (!result.stored) downloadFeedback(submission)
+    track('feedback_open', { where: where ?? 'unsaid', feel: feel ?? 'unsaid' })
+    await submitFeedback(
+      buildSubmission(
+        { what_did_not_land: text, where: where ?? '', feel: feel ?? '', email },
+        { stage, kept },
+      ),
+    )
     setState('done')
   }
 
   if (state === 'done') {
     return (
-      <PageShell eyebrow={BRAND.name + ' · FEEDBACK'}>
-        <div className="flex flex-1 flex-col justify-center">
-          <h1 className="display text-3xl">Thank you. Genuinely.</h1>
-          <p className="mt-3 text-sm text-muted">
-            {stored
-              ? 'Your answers are saved.'
-              : 'Your answers could not reach the server, so a copy has been downloaded to this phone. Hand it to the facilitator — nothing is lost.'}
-          </p>
-          {!stored && reason ? (
-            <p className="mt-2 font-mono text-[0.6rem] text-muted">{reason}</p>
-          ) : null}
-          <Link
-            href="/deck"
-            className="tap-target eyebrow mt-6 block w-full rounded bg-accent px-5 py-4 text-center text-accent-ink"
-          >
-            OPEN MY DECK
-          </Link>
+      <PageShell eyebrow="THANK YOU">
+        <div className="flex flex-1 flex-col justify-center gap-4">
+          <h1 className="display text-balance text-3xl">{FEEDBACK_COPY.sent_head}</h1>
+          <p className="text-sm leading-relaxed text-muted">{FEEDBACK_COPY.sent_body}</p>
         </div>
+        <Link
+          href="/crates"
+          className="tap-target eyebrow mt-auto block w-full rounded bg-accent px-5 py-4 text-center text-accent-ink"
+        >
+          {FEEDBACK_COPY.sent_cta}
+        </Link>
       </PageShell>
     )
   }
 
   return (
-    <PageShell eyebrow={BRAND.name + ' · FEEDBACK'}>
-      <h1 className="display text-balance text-3xl">Now take it apart.</h1>
-      <p className="mt-3 text-sm text-muted">
-        Be as critical as you can be. Praise is pleasant and useless; the sharpest
-        thing you say is the most valuable thing on this page.
-      </p>
-
-      <div className="mt-8 space-y-8">
-        {QUESTIONS.map((q, i) => (
-          <Field
-            key={q.id}
-            index={i + 1}
-            question={q}
-            value={answers[q.id]}
-            onChange={(v) => setAnswers((a) => ({ ...a, [q.id]: v }))}
-          />
-        ))}
-      </div>
-
-      {missing.length ? (
-        <p className="mt-6 text-xs text-coach">
-          {missing.length} question{missing.length === 1 ? '' : 's'} still to answer.
+    <PageShell eyebrow={FEEDBACK_COPY.eyebrow}>
+      <div className="flex flex-col gap-7 pb-4">
+      <div>
+        <h1 className="display text-balance text-2xl">{FEEDBACK_COPY.headline}</h1>
+        <p className="mt-2 text-xs text-muted">
+          You are at stage {stage}, {RUNGS[stage - 1].name.toLowerCase()}, with {kept}{' '}
+          {kept === 1 ? 'piece' : 'pieces'} kept.
         </p>
-      ) : null}
-
-      <button
-        type="button"
-        disabled={Boolean(missing.length) || state === 'sending'}
-        onClick={send}
-        className="tap-target eyebrow mt-4 w-full rounded bg-accent px-5 py-4 text-accent-ink disabled:bg-chip disabled:text-muted"
-      >
-        {state === 'sending' ? 'SENDING…' : 'SEND MY FEEDBACK'}
-      </button>
-    </PageShell>
-  )
-}
-
-function Field({
-  index,
-  question,
-  value,
-  onChange,
-}: {
-  index: number
-  question: Question
-  value: string | number | undefined
-  onChange: (v: string | number) => void
-}) {
-  return (
-    <section>
-      <div className="flex gap-3">
-        <span className="display shrink-0 text-sm text-accent">{index}</span>
-        <div className="flex-1">
-          <label htmlFor={question.id} className="block text-balance text-base font-semibold">
-            {question.prompt}
-            {question.required ? <span className="text-accent"> *</span> : null}
-          </label>
-          {question.hint ? (
-            <p className="mt-1 text-xs text-muted">{question.hint}</p>
-          ) : null}
-
-          {question.kind === 'text' ? (
-            <textarea
-              id={question.id}
-              rows={3}
-              value={String(value ?? '')}
-              onChange={(e) => onChange(e.target.value)}
-              className="mt-3 w-full rounded border border-line bg-surface p-3 text-sm text-fg outline-none focus:border-accent"
-            />
-          ) : null}
-
-          {question.kind === 'scale' ? (
-            <div className="mt-3 space-y-2">
-              {question.points?.map((p) => (
-                <button
-                  key={p.value}
-                  type="button"
-                  aria-pressed={value === p.value}
-                  onClick={() => onChange(p.value)}
-                  className={
-                    'tap-target flex w-full items-center gap-3 rounded border px-3 py-2.5 text-left text-sm transition ' +
-                    (value === p.value
-                      ? 'border-accent bg-accent/10'
-                      : 'border-line bg-surface')
-                  }
-                >
-                  <span className="display w-4 text-accent">{p.value}</span>
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
       </div>
-    </section>
+
+      {/* Answers, at the top. The form is underneath. */}
+      <ul className="flex flex-col gap-2">
+        {HELP.map((h) => {
+          const isOpen = open === h.id
+          return (
+            <li key={h.id}>
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                onClick={() => setOpen(isOpen ? null : h.id)}
+                className={
+                  'tap-target flex w-full items-baseline justify-between gap-3 rounded border px-4 py-3 text-left transition ' +
+                  (isOpen
+                    ? 'border-accent bg-accent/10'
+                    : 'border-line bg-bg-elev hover:border-accent/50')
+                }
+              >
+                <span className="min-w-0 text-sm font-semibold">{h.q}</span>
+                <span className="shrink-0 text-[0.55rem] uppercase tracking-wider text-muted">
+                  {isOpen ? 'close' : 'answer'}
+                </span>
+              </button>
+              {isOpen ? (
+                <div className="mt-1.5 rounded border border-line bg-bg-elev px-4 py-4">
+                  <p className="text-sm leading-relaxed text-fg/85">{h.a}</p>
+                  {h.link ? (
+                    <Link
+                      href={h.link.href}
+                      className="eyebrow mt-3 inline-block text-accent underline underline-offset-4"
+                    >
+                      {h.link.label}
+                    </Link>
+                  ) : null}
+                </div>
+              ) : null}
+            </li>
+          )
+        })}
+      </ul>
+
+      <section className="flex flex-col gap-4 border-t border-line pt-6">
+        <div>
+          <p className="eyebrow text-accent">{FEEDBACK_COPY.form_head}</p>
+          <label htmlFor="what" className="mt-3 block text-sm font-semibold">
+            {FEEDBACK_COPY.prompt}
+          </label>
+          <p className="mt-1 text-xs text-muted">{FEEDBACK_COPY.hint}</p>
+          <textarea
+            id="what"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={5}
+            data-testid="feedback-text"
+            className="mt-3 w-full rounded border border-line bg-surface px-4 py-3 text-base text-fg outline-none focus:border-accent"
+          />
+        </div>
+
+        <div>
+          <p className="text-xs text-muted">{FEEDBACK_COPY.where}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {FEEDBACK_WHERE.map((w) => (
+              <button
+                key={w}
+                type="button"
+                onClick={() => setWhere(where === w ? null : w)}
+                className={
+                  'tap-target rounded border px-3 py-2 text-xs transition ' +
+                  (where === w
+                    ? 'border-accent bg-accent/10 text-accent'
+                    : 'border-line text-muted')
+                }
+              >
+                {w}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs text-muted">{FEEDBACK_COPY.feel}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {FEEDBACK_FEEL.map((w) => (
+              <button
+                key={w}
+                type="button"
+                onClick={() => setFeel(feel === w ? null : w)}
+                className={
+                  'tap-target rounded border px-3 py-2 text-xs transition ' +
+                  (feel === w
+                    ? 'border-accent bg-accent/10 text-accent'
+                    : 'border-line text-muted')
+                }
+              >
+                {w}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="email" className="block text-xs text-muted">
+            {FEEDBACK_COPY.email}
+          </label>
+          <input
+            id="email"
+            type="email"
+            inputMode="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mt-2 w-full rounded border border-line bg-surface px-4 py-3 text-base text-fg outline-none focus:border-accent"
+          />
+        </div>
+
+        {/* Shown, not hidden. A product that says "anonymous" and attaches a device id
+            is lying, and this one attaches a device id. */}
+        <p className="text-xs leading-relaxed text-muted">{FEEDBACK_COPY.attached}</p>
+
+        <button
+          type="button"
+          data-testid="feedback-send"
+          onClick={send}
+          disabled={state === 'sending' || !text.trim()}
+          className="tap-target eyebrow w-full rounded bg-accent px-5 py-4 text-accent-ink disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
+        >
+          {FEEDBACK_COPY.send}
+        </button>
+      </section>
+      </div>
+    </PageShell>
   )
 }
