@@ -8,6 +8,7 @@ import { slugFor } from '@/content/audio-manifest'
 import { play } from '@/engine/audio'
 import { track } from '@/engine/analytics'
 import { useLearner } from '@/engine/useLearner'
+import { Menu } from '@/components/Menu'
 
 /**
  * The Line — twenty seconds, once a day.
@@ -23,11 +24,18 @@ import { useLearner } from '@/engine/useLearner'
 export function Line({ pushReady }: { pushReady: boolean }) {
   const learner = useLearner()
   const [said, setSaid] = useState(false)
+  // The pick is salted with the learner's id and filtered by what they own, neither of
+  // which the server has — so it chose a different line there and React tore the tree
+  // down on hydration. Chosen after mount instead, which is also the only honest moment
+  // to choose it: before then we do not know whose line it is.
+  const [ready, setReady] = useState(false)
+  useEffect(() => setReady(true), [])
 
   const line = useMemo<DailyLine | null>(() => {
+    if (!ready) return null
     const owned = Object.keys(learner.inventory)
     return pickLine({ owned, day: dayKey(), salt: learner.learner_id })
-  }, [learner.inventory, learner.learner_id])
+  }, [ready, learner.inventory, learner.learner_id])
 
   useEffect(() => {
     if (line) track('line_view', { line: line.id, kind: line.kind })
@@ -41,14 +49,19 @@ export function Line({ pushReady }: { pushReady: boolean }) {
       data-stage="REAL WORLD"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 py-8 text-fg"
     >
-      <div className="flex items-baseline justify-between">
+      <div className="flex items-center justify-between gap-3">
         <Link href="/" className="eyebrow text-muted">
           ← DUB
         </Link>
-        <span className="eyebrow text-muted">TODAY</span>
+        <span className="eyebrow flex-1 text-muted">TODAY</span>
+        <Menu />
       </div>
 
-      {!line ? (
+      {!ready ? (
+        // Deliberately blank rather than a spinner: it is on screen for one frame, and
+        // a spinner on a twenty-second screen reads as something being wrong.
+        <div className="flex-1" aria-hidden />
+      ) : !line ? (
         <div className="flex flex-1 flex-col justify-center gap-3">
           <p className="display text-balance text-3xl">You have had all of them.</p>
           <p className="text-sm text-muted">

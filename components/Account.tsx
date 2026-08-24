@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { Entitlements } from '@/lib/entitlements'
 import { PLANS } from '@/lib/entitlements'
+import { Menu } from '@/components/Menu'
 
 /**
  * Account settings.
@@ -80,13 +81,14 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col gap-8 px-5 py-10">
-      <header className="flex items-baseline justify-between">
+      <header className="flex items-center justify-between gap-3">
         <a href="/" className="eyebrow text-accent">
           ← DUB
         </a>
-        <a href="/api/auth/logout" className="eyebrow text-muted">
+        <a href="/api/auth/logout" className="eyebrow flex-1 text-right text-muted">
           SIGN OUT
         </a>
+        <Menu />
       </header>
 
       <section>

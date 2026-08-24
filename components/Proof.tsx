@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { GOAL_LABEL, GOAL_NEEDS, type Goal } from '@/content/profile'
 import { PIECES } from '@/content/roots'
 import { useLearner } from '@/engine/useLearner'
+import { Menu } from '@/components/Menu'
 
 /**
  * The proof card — what replaces the streak.
@@ -91,9 +92,12 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
       }
     >
       {standalone ? (
-        <Link href="/" className="eyebrow text-muted">
-          ← DUB
-        </Link>
+        <div className="flex items-center justify-between gap-3">
+          <Link href="/" className="eyebrow text-muted">
+            ← DUB
+          </Link>
+          <Menu />
+        </div>
       ) : null}
 
       {/* ---------------------------------------------------------- the card */}

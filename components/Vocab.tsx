@@ -30,6 +30,10 @@ import { useLearner } from '@/engine/useLearner'
 export function Vocab() {
   const learner = useLearner()
   const [openPiece, setOpenPiece] = useState<string | null>(null)
+  // Collapsed by default. With a real bank this page is sixty-odd rows, and the six
+  // headings with their counts are the useful view — they say what you have got and
+  // what you are short of, which is what somebody opens this to find out.
+  const [openStage, setOpenStage] = useState<Rung | null>(null)
 
   const owned = useMemo(
     () => Object.keys(learner.inventory ?? {}).filter((id) => PIECES[id]),
@@ -69,8 +73,8 @@ export function Vocab() {
             {owned.length} {owned.length === 1 ? 'piece' : 'pieces'}, yours to keep.
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Grouped by what each one is for. Tap any of them to see where it came from and
-            what it lets you say.
+            Grouped by what each one is for. Open a stage to see inside it, then tap any
+            piece to be reminded where it came from and what it lets you say.
           </p>
         </div>
 
@@ -92,18 +96,55 @@ export function Vocab() {
         {RUNGS.map((stage) => {
           const ids = byStage.get(stage.rung) ?? []
           if (!ids.length) return null
+          const expanded = openStage === stage.rung
           return (
             <section key={stage.rung} className="flex flex-col gap-3">
-              <div className="flex items-baseline gap-3">
+              <button
+                type="button"
+                aria-expanded={expanded}
+                onClick={() => setOpenStage(expanded ? null : stage.rung)}
+                className="tap-target flex w-full items-center gap-3 text-left"
+              >
                 <span className="eyebrow shrink-0 text-accent">
                   {stage.rung} · {stage.name}
                 </span>
                 <span className="h-px flex-1 bg-line" />
                 <span className="eyebrow shrink-0 tabular-nums text-muted">{ids.length}</span>
-              </div>
-              <p className="-mt-1 text-xs leading-relaxed text-muted">{stage.what}</p>
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className={
+                    'h-4 w-4 shrink-0 text-muted transition-transform ' +
+                    (expanded ? 'rotate-180' : '')
+                  }
+                  fill="none"
+                >
+                  <path
+                    d="M6 9l6 6 6-6"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
 
-              <ul className="flex flex-col gap-2">
+              {!expanded ? (
+                <p className="-mt-1 flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted">
+                  {ids.slice(0, 6).map((id) => (
+                    <span key={id} className="pt text-accent/70">
+                      {PIECES[id].pt}
+                    </span>
+                  ))}
+                  {ids.length > 6 ? <span>+{ids.length - 6} more</span> : null}
+                </p>
+              ) : null}
+
+              {expanded ? (
+                <p className="-mt-1 text-xs leading-relaxed text-muted">{stage.what}</p>
+              ) : null}
+
+              <ul className={'flex-col gap-2 ' + (expanded ? 'flex' : 'hidden')}>
                 {ids.map((id) => {
                   const piece = PIECES[id]
                   const isOpen = openPiece === id

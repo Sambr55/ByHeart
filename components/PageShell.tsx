@@ -1,6 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { Menu } from '@/components/Menu'
 
 /** Chrome for the objects that outlive a mission: the deck and the delayed recall. */
 export function PageShell({
@@ -15,8 +16,9 @@ export function PageShell({
   return (
     <div data-stage={stage} className="flex min-h-dvh flex-col bg-bg text-fg">
       <header className="sticky top-0 z-10 border-b border-line bg-bg/90 px-5 py-3 backdrop-blur">
-        <div className="mx-auto w-full max-w-md">
-          <p className="eyebrow text-accent">{eyebrow}</p>
+        <div className="mx-auto flex w-full max-w-md items-center gap-3">
+          <p className="eyebrow flex-1 truncate text-accent">{eyebrow}</p>
+          <Menu />
         </div>
       </header>
       <main className="flex-1">

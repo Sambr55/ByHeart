@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Menu } from '@/components/Menu'
 
 /**
  * Sign in.
@@ -36,9 +37,12 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col justify-center gap-6 px-5 py-12">
-      <a href="/" className="eyebrow text-accent">
-        ← DUB
-      </a>
+      <div className="flex items-center justify-between gap-3">
+        <a href="/" className="eyebrow text-accent">
+          ← DUB
+        </a>
+        <Menu />
+      </div>
 
       {state === 'sent' ? (
         <>
