@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Wordmark } from '@/components/Wordmark'
 import { useEffect, useState } from 'react'
-import { CRATES, ROOTS_BY_FAMILY, daysLeft, isLive } from '@/content/roots'
+import { CRATES, ROOTS_BY_FAMILY, daysLeft, dropOpens, isLive } from '@/content/roots'
 import { Menu } from '@/components/Menu'
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
@@ -24,7 +24,21 @@ export function Drops() {
 
   const drops = CRATES.filter((c) => c.drop)
   const live = drops.filter((c) => (now ? isLive(c, now) : true))
-  const gone = now ? drops.filter((c) => !isLive(c, now)) : []
+  /*
+    Three states, not two.
+
+    A drop used to be live from the moment it was authored, so "coming" could not exist —
+    the countdown simply started shouting months early. Now that a drop has a window, one
+    authored ahead of time is a real thing with a real date that is not open yet, and
+    this is the page where saying so is worth more than hiding it: somebody who came here
+    to see what is happening in Portugal should be told what is happening in Portugal.
+  */
+  const coming = now
+    ? drops.filter((c) => !isLive(c, now) && now < new Date(c.drop!.on + 'T00:00:00Z'))
+    : []
+  const gone = now
+    ? drops.filter((c) => !isLive(c, now) && now >= new Date(c.drop!.on + 'T00:00:00Z'))
+    : []
 
   return (
     <main
@@ -49,6 +63,42 @@ export function Drops() {
             yours — the drop disappears, the language does not.
           </p>
         </div>
+
+        {now && !live.length ? (
+          <div className="rounded border border-line-strong bg-bg-elev px-4 py-3">
+            <p className="text-sm font-semibold">Nothing live right now.</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted">
+              Drops only open a few weeks before the thing they are about, so that a
+              countdown means something when you see one. Your crates are not going
+              anywhere in the meantime.
+            </p>
+          </div>
+        ) : null}
+
+        {coming.length ? (
+          <section className="flex flex-col gap-3">
+            <div className="flex items-baseline gap-3">
+              <h2 className="eyebrow min-w-0 text-accent">COMING</h2>
+              <span className="h-px flex-1 bg-line" />
+            </div>
+            {coming.map((c) => (
+              <div key={c.id} className="rounded border border-dashed border-line px-4 py-3">
+                <p className="display text-base">{c.title}</p>
+                <p className="mt-1 text-xs text-muted">
+                  {c.drop!.event} · {c.drop!.place}
+                </p>
+                <p className="mt-1 text-xs text-muted">
+                  Opens{' '}
+                  {dropOpens(c.drop!).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'long',
+                  })}
+                  , for {c.drop!.on}.
+                </p>
+              </div>
+            ))}
+          </section>
+        ) : null}
 
         {live.map((c) => {
           const left = now ? daysLeft(c, now) : null

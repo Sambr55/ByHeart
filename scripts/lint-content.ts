@@ -465,6 +465,34 @@ for (const e of EXAMPLES) {
     }
   }
 
+  /*
+    Drops, which had no rule at all.
+
+    Adding one means editing a TypeScript union, the CRATES array, a new exported Root[],
+    the family map and an SVG path table — and if any of the five is missed the tile
+    renders nothing, silently, on the one kind of content that expires. This is the
+    cheapest possible guard on the most fragile authoring path in the product.
+  */
+  for (const crate of CRATES.filter((c) => c.drop)) {
+    const d = crate.drop!
+    const D = 'drop ' + crate.id + ': '
+    const iso = /^\d{4}-\d{2}-\d{2}$/
+    if (!iso.test(d.on)) fail(D + '`on` is not an ISO date: ' + d.on)
+    if (d.from && !iso.test(d.from)) fail(D + '`from` is not an ISO date: ' + d.from)
+    if (d.from && d.from >= d.on) {
+      fail(D + 'opens on or after the event it is about (' + d.from + ' → ' + d.on + ')')
+    }
+    if (!(ROOTS_BY_FAMILY[crate.id] ?? []).length) {
+      fail(D + 'has no roots — the tile renders and the crate is empty')
+    }
+    // A drop expires. Gating it as well would mean it could be lost forever by somebody
+    // being busy AND out of reach, which is the one combination this product refuses.
+    if (crate.opens_at && crate.opens_at > 1) {
+      fail(D + 'declares opens_at ' + crate.opens_at + ' — a drop is never stage-gated')
+    }
+    if (d.link && !/^https?:\/\//.test(d.link)) fail(D + 'link is not absolute: ' + d.link)
+  }
+
   for (const family of CRATES) {
     const roots = ROOTS_BY_FAMILY[family.id] ?? []
     const freebies = roots.filter((r) => r.freebie_flag)

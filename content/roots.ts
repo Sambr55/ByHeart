@@ -316,9 +316,30 @@ export interface DropEvent {
   place: string
   /** ISO date. The drop is gone the morning after. */
   on: string
+  /**
+   * When it starts being a drop, rather than a crate with a date on it.
+   *
+   * There was no such field, so a drop was live from the moment it was authored and the
+   * countdown started shouting the day it was written — 83 days of "GONE 15 NOV" on a
+   * gig nobody could buy a ticket to yet. Urgency spent months before the thing it is
+   * about, which is the one way to make a countdown mean nothing.
+   *
+   * Absent means live now, which keeps every existing drop working, and DROP_WINDOW is
+   * the sensible default for one authored ahead of time.
+   */
+  from?: string
   link?: string
   link_label?: string
 }
+
+/**
+ * How long before an event a drop should appear.
+ *
+ * Long enough to be useful — you can still get a ticket, still make a plan — and short
+ * enough that the countdown means something. Three weeks is roughly the horizon on which
+ * people actually decide to go to a thing.
+ */
+export const DROP_WINDOW_DAYS = 21
 
 export interface Crate {
   id: CultureFamily
@@ -385,7 +406,18 @@ export function isLive(crate: Crate, now: Date = new Date()): boolean {
   if (!crate.drop) return true
   const gone = new Date(crate.drop.on + 'T00:00:00Z')
   gone.setUTCDate(gone.getUTCDate() + 1)
-  return now < gone
+  if (now >= gone) return false
+  // Not yet, either. A drop authored months ahead is not a drop until its window opens.
+  const opens = dropOpens(crate.drop)
+  return now >= opens
+}
+
+/** The moment a drop starts being one: its own `from`, or DROP_WINDOW_DAYS before. */
+export function dropOpens(drop: DropEvent): Date {
+  if (drop.from) return new Date(drop.from + 'T00:00:00Z')
+  const opens = new Date(drop.on + 'T00:00:00Z')
+  opens.setUTCDate(opens.getUTCDate() - DROP_WINDOW_DAYS)
+  return opens
 }
 
 /** Whole days left, for the countdown. Null for a crate, which has no clock. */
