@@ -12,8 +12,14 @@
  *
  * Sharing, the morning line, the feed and taking someone else's crate cost nothing,
  * because a learning product that hides its social loop behind a card has no social
- * loop. Volume — unlimited crates, every live drop, offline audio, unlimited
- * capture — is what Pro buys.
+ * loop. Volume — unlimited crates, offline audio, unlimited capture — is what Pro buys.
+ *
+ * Drops are never gated, at any tier. A drop can be lost forever by being busy, and
+ * charging for the one thing that expires would turn the only real deadline in the
+ * product into a punishment.
+ *
+ * And the free tier gets set once and never tightened. Taking something back from an
+ * early advocate costs more than it ever earns.
  */
 
 export type Plan = 'free' | 'pro'
@@ -33,7 +39,7 @@ export interface Entitlements {
   plan: Plan
   /** How many crates can be open at once. UNLIMITED on Pro. */
   crates: number
-  /** Live, time-limited drops. Free tier sees them but can only run one. */
+  /** Live, time-limited drops. Never gated — see the note above. */
   drops: number
   /** "DUB this" — turning a subtitle or a lyric into a root. Per rolling week. */
   captures: number
@@ -49,10 +55,10 @@ export interface Entitlements {
   feed: true
 }
 
-const FREE: Entitlements = {
+export const FREE_ENTITLEMENTS: Entitlements = {
   plan: 'free',
   crates: 3,
-  drops: 1,
+  drops: UNLIMITED,
   captures: 3,
   booth: false,
   offline: false,
@@ -62,7 +68,7 @@ const FREE: Entitlements = {
   feed: true,
 }
 
-const PRO: Entitlements = {
+export const PRO_ENTITLEMENTS: Entitlements = {
   plan: 'pro',
   crates: UNLIMITED,
   drops: UNLIMITED,
@@ -81,10 +87,10 @@ const GRANTS_PRO: SubStatus[] = ['active', 'trialing', 'past_due']
 export function entitlementsFor(
   sub: { plan?: string | null; status?: string | null } | null | undefined,
 ): Entitlements {
-  if (!sub) return FREE
+  if (!sub) return FREE_ENTITLEMENTS
   const status = (sub.status ?? 'inactive') as SubStatus
-  if (sub.plan === 'pro' && GRANTS_PRO.includes(status)) return PRO
-  return FREE
+  if (sub.plan === 'pro' && GRANTS_PRO.includes(status)) return PRO_ENTITLEMENTS
+  return FREE_ENTITLEMENTS
 }
 
 export const PLANS = {

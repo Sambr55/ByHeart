@@ -95,10 +95,19 @@ export async function checkoutUrl(opts: {
     mode: 'subscription',
     customer: customer ?? undefined,
     line_items: [{ price, quantity: 1 }],
-    // The trial is the product's argument, not a discount: a week is long enough to
-    // find out whether you open it in the morning.
+    /**
+     * No trial, deliberately.
+     *
+     * A trial is a deadline, and the whole thesis of this product is that deadlines and
+     * streaks do not produce speakers — shipping a countdown to a subscription while the
+     * deal screen promises "no streaks, nothing here will ever congratulate you for
+     * opening the app" is the product arguing with itself at the till.
+     *
+     * The generous free tier does the same job better anyway: seven days is not long
+     * enough to feel one crate collide with another, and three free crates over a month
+     * is. It also keeps the conversion rate honest, since trial starts are not customers.
+     */
     subscription_data: {
-      trial_period_days: Number(process.env.STRIPE_TRIAL_DAYS ?? 7),
       metadata: { user_id: opts.userId },
     },
     client_reference_id: opts.userId,

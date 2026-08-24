@@ -68,6 +68,7 @@ import {
   useJourney,
 } from '@/engine/journey'
 import { useLearner } from '@/engine/useLearner'
+import { useEntitlements } from '@/engine/useEntitlements'
 import { AudioButton } from './AudioButton'
 
 /**
@@ -135,7 +136,7 @@ function Shell({
         </header>
       ) : null}
       <main className="flex-1">
-        <div className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col px-5 py-6">
+        <div className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col gap-0 px-5 pb-6 pt-6">
           {children}
         </div>
       </main>
@@ -158,7 +159,11 @@ function Cta({
       data-testid="continue"
       onClick={onClick}
       disabled={disabled}
-      className="tap-target eyebrow mt-auto w-full rounded-xl mt-6 bg-accent px-5 py-4 text-accent-ink transition active:scale-[0.99] disabled:bg-chip disabled:text-muted"
+      // mt-auto and mt-6 were both on this element, which is a cascade collision: whichever
+      // Tailwind emitted last won, so the gap above the button was whatever the build
+      // happened to produce. mt-auto keeps it at the foot of a short screen; the padding
+      // gives it clearance on a long one, and padding cannot be swallowed by auto.
+      className="tap-target eyebrow mt-auto w-full rounded-xl bg-accent px-5 py-4 text-accent-ink transition active:scale-[0.99] disabled:bg-chip disabled:text-muted"
     >
       {label}
     </button>
@@ -611,6 +616,7 @@ function DropClock({ crate, now }: { crate: Crate; now: Date | null }) {
 function Picker() {
   const { chooseFamily, state } = useJourney()
   const learner = useLearner()
+  const access = useEntitlements()
   // Remember what they chose. Stepping back onto this screen and finding the choice
   // wiped is the kind of small betrayal that makes a product feel unreliable.
   const [picked, setPicked] = useState<CultureFamily | null>(state.family)
@@ -624,6 +630,31 @@ function Picker() {
   // "played one root" and "seen the whole crate" are different things.
   const playedIds = useMemo(() => new Set(state.rootsPlayed), [state.rootsPlayed])
   const shown = CRATES.filter((c) => (now ? isLive(c, now) : true))
+
+  /**
+   * The free tier: three crates, chosen and permanent.
+   *
+   * Chosen by opening them, and never taken away — the shape of the free tier is set
+   * once and never tightened, so a crate somebody has already been inside stays theirs
+   * whatever happens to their plan afterwards.
+   *
+   * Nothing locks until the server has actually answered (`known`), because a gate
+   * that fires on the default would shut a paying subscriber out of their own crates
+   * for the first second of every page load.
+   */
+  const claimed = useMemo(() => {
+    const out = new Set<CultureFamily>()
+    for (const id of state.rootsPlayed) {
+      const f = rootById(id)?.culture_family
+      const crate = f ? CRATES.find((c) => c.id === f) : undefined
+      // A drop never counts against the allowance, so it can never use one up either.
+      if (crate && !crate.drop) out.add(crate.id)
+    }
+    return out
+  }, [state.rootsPlayed])
+  const allowance = access.entitlements.crates
+  const spent = claimed.size
+  const atLimit = access.known && spent >= allowance
   const anyLocked = shown.some((c) => entryRung(c) > rung)
   const here = RUNGS[rung - 1]
   return (
@@ -681,7 +712,11 @@ function Picker() {
           // and being told "no, you did that already" is a strange thing for a product
           // built on things you enjoy to say.
           const unreached = !f.drop && !started && opensAt > rung
-          const locked = unreached || waiting
+          // A drop is never plan-locked. It can be lost forever by being busy, and
+          // charging for the one thing that expires would turn the only real deadline
+          // in the product into a punishment.
+          const planLocked = !f.drop && atLimit && !claimed.has(f.id)
+          const locked = unreached || waiting || planLocked
           return (
             <div
               key={f.id}
@@ -701,7 +736,7 @@ function Picker() {
               <button
                 type="button"
                 aria-pressed={picked === f.id}
-                disabled={unreached}
+                disabled={unreached || planLocked}
                 onClick={() => setPicked(f.id)}
                 className={
                   'tap-target flex w-full justify-between gap-3 px-4 py-4 text-left transition ' +
@@ -725,7 +760,9 @@ function Picker() {
                   ) : null}
                   <span className="display block text-base">{f.title}</span>
                   <span className="mt-0.5 block text-xs text-muted">
-                    {finished
+                    {planLocked
+                      ? 'Your ' + allowance + ' crates are chosen, and they stay yours. This one comes with DUB.'
+                      : finished
                       ? 'You have been through all of it. Go again whenever you like.'
                       : waiting
                         ? 'Everything here that your stage reaches is done. ' +
@@ -744,6 +781,10 @@ function Picker() {
                 {finished ? (
                   <span className="shrink-0 rounded-full border border-correct/50 px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-correct">
                     done
+                  </span>
+                ) : planLocked ? (
+                  <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-muted">
+                    DUB
                   </span>
                 ) : locked ? (
                   <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-muted">
@@ -774,6 +815,14 @@ function Picker() {
       ) : null}
       {anyLocked ? (
         <p className="mt-2 text-xs leading-relaxed text-muted">{PICKER.locked_note}</p>
+      ) : null}
+      {atLimit ? (
+        <p className="mt-2 mb-6 text-xs leading-relaxed text-muted">
+          {PICKER.plan_note}{' '}
+          <Link href="/pro" className="text-accent underline underline-offset-4">
+            {PICKER.plan_cta}
+          </Link>
+        </p>
       ) : null}
       <Cta label={PICKER.cta} disabled={!picked} onClick={() => picked && chooseFamily(picked)} />
     </Shell>
