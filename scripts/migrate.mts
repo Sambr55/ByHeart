@@ -9,15 +9,39 @@
  */
 
 import { readdir, readFile } from 'node:fs/promises'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import postgres from 'postgres'
+
+/**
+ * Read .env.local if it is there.
+ *
+ * `vercel env pull` writes the connection string into .env.local, and Next loads that
+ * file automatically — but a standalone script does not, so without this the obvious
+ * two-command setup fails with "No DATABASE_URL" while the URL is sitting right there.
+ */
+for (const file of ['.env.local', '.env']) {
+  const path = join(process.cwd(), file)
+  if (!existsSync(path)) continue
+  for (const line of readFileSync(path, 'utf8').split('\n')) {
+    const m = line.match(/^\s*(?:export\s+)?([A-Z0-9_]+)\s*=\s*(.*)$/)
+    if (!m) continue
+    const value = m[2].trim().replace(/^["']|["']$/g, '')
+    process.env[m[1]] ??= value
+  }
+}
 
 const url = process.env.DATABASE_URL
 if (!url) {
   console.error(
     'No DATABASE_URL.\n\n' +
-      'Provision one (Neon, Supabase, Vercel Postgres — any Postgres works), then:\n' +
-      '  DATABASE_URL=postgres://… npm run db:migrate\n',
+      'Provision one (Neon, Supabase, Vercel Postgres — any Postgres works), connect it\n' +
+      'to the project, then either:\n\n' +
+      '  npx vercel env pull .env.local --scope sambr55s-projects && npm run db:migrate\n' +
+      '  DATABASE_URL=postgres://… npm run db:migrate\n\n' +
+      'If the provider set POSTGRES_URL rather than DATABASE_URL, add DATABASE_URL with\n' +
+      'the same value — this project reads only DATABASE_URL, on purpose, so it is not\n' +
+      'tied to one host.\n',
   )
   process.exit(1)
 }
