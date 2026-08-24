@@ -31,6 +31,7 @@ import {
   setTester,
   syncSession,
 } from './learner'
+import { rememberPlayed } from './learner'
 import { useLearner } from './useLearner'
 
 /**
@@ -158,6 +159,7 @@ type Action =
   | { type: 'goto'; index: number }
   | { type: 'answer'; key: string; value: unknown }
   | { type: 'complete' }
+  | { type: 'hydrate'; rootIds: string[]; collisionIds: string[] }
 
 const initial: JourneyState = {
   steps: [
@@ -194,6 +196,9 @@ function rootSteps(root: Root): Step[] {
 
 function reducer(state: JourneyState, action: Action): JourneyState {
   switch (action.type) {
+    // What earlier sessions already covered, read back out of the learner record.
+    case 'hydrate':
+      return { ...state, rootsPlayed: action.rootIds, collisionsPlayed: action.collisionIds }
     case 'choose-family':
       return { ...state, family: action.family }
     case 'append':
@@ -340,6 +345,31 @@ const Ctx = createContext<JourneyApi | null>(null)
 export function JourneyProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initial)
   const learner = useLearner()
+  /**
+   * Keep the journey's idea of what has been played in step with the learner record.
+   *
+   * Not a one-shot on mount: the stored learner is read in a later effect, so on the
+   * first pass there is nothing to seed from yet — latching a "done" flag there meant
+   * a returning learner was permanently treated as brand new. Syncing on length
+   * converges instead, and covers the store growing mid-session as well as arriving
+   * late.
+   */
+  useEffect(() => {
+    const rootIds = learner.roots_played ?? []
+    const collisionIds = learner.collisions_played ?? []
+    if (
+      rootIds.length === state.rootsPlayed.length &&
+      collisionIds.length === state.collisionsPlayed.length
+    ) {
+      return
+    }
+    dispatch({ type: 'hydrate', rootIds, collisionIds })
+  }, [
+    learner.roots_played,
+    learner.collisions_played,
+    state.rootsPlayed.length,
+    state.collisionsPlayed.length,
+  ])
 
   useEffect(() => {
     hydrateFromUrl()
@@ -388,9 +418,19 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
        * Sorting is stable, so within a stage the authored order still holds.
        */
       const reached = rungReached(learner.proof)
-      const unplayed = ROOTS_BY_FAMILY[family].filter((r) => !state.rootsPlayed.includes(r.root_id))
-      const atOrBelow = unplayed.filter((r) => r.rung <= reached)
-      const roots = (atOrBelow.length ? atOrBelow : unplayed).sort((a, b) => a.rung - b.rung)
+      const all = ROOTS_BY_FAMILY[family]
+      const fresh = all.filter(
+        (r) => r.rung <= reached && !state.rootsPlayed.includes(r.root_id),
+      )
+      // Nothing new at this stage means going through it again, not an empty section.
+      // Replaying costs nothing: recordProof dedupes by sentence so the honest count
+      // cannot be inflated, and the osmosis screen already knows how to say that there
+      // is nothing new to point out.
+      const replay = all.filter((r) => r.rung <= reached)
+      const roots = (fresh.length ? fresh : replay.length ? replay : all).sort(
+        (a, b) => a.rung - b.rung,
+      )
+      rememberPlayed(roots.map((r) => r.root_id), null)
       const steps: Step[] = []
 
       /**
@@ -402,7 +442,10 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
         state.rootsPlayed.length > 0
           ? availableCollision(state.rootsPlayed, state.collisionsPlayed)
           : null
-      if (bridging) steps.push({ kind: 'collision', collisionId: bridging.id })
+      if (bridging) {
+        steps.push({ kind: 'collision', collisionId: bridging.id })
+        rememberPlayed([], bridging.id)
+      }
 
       steps.push(...roots.flatMap((r) => rootSteps(r)))
       steps.push({ kind: 'osmosis' })
@@ -437,6 +480,7 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
       if (collision) steps.push({ kind: 'collision', collisionId: collision.id })
       steps.push({ kind: 'nocue', i: 0 }, { kind: 'nocue', i: 1 }, { kind: 'nocue', i: 2 })
       steps.push({ kind: 'cansay' }, { kind: 'proof' }, { kind: 'close' })
+      rememberPlayed([], collision?.id ?? null)
       dispatch({ type: 'append', steps, collisionId: collision?.id, jump: true })
     },
     [state.collisionsPlayed, state.rootsPlayed, state.steps],

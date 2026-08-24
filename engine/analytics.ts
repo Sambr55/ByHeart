@@ -73,6 +73,7 @@ export type EventName =
   | 'root_familiarity'
   | 'branch_reveal'
   | 'build_attempt'
+  | 'build_help'
   | 'voice_choice'
   | 'voice_reflection'
   | 'collision_attempt'

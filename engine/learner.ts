@@ -134,6 +134,19 @@ export interface LearnerState {
   inventory: Record<string, InventoryItem>
   /** Everything they have said cold. The number on the proof card. */
   proof: ProofLine[]
+  /**
+   * Which roots and collisions have been through a session.
+   *
+   * Kept with the learner rather than in the journey's own state, which lives only as
+   * long as the tab: a crate that reported itself finished and then forgot the moment
+   * somebody refreshed made the picker lie about where they had been.
+   *
+   * It is a record of what has been SEEN, not a lock. Re-entering a crate is allowed —
+   * nothing downstream double-counts, because recordProof dedupes by sentence and the
+   * osmosis screen has a state for having nothing new to say.
+   */
+  roots_played: string[]
+  collisions_played: string[]
   evidence: LearningEvidence[]
   affinity: CultureAffinity
   experiment: Experiment
@@ -163,6 +176,8 @@ export function emptyLearner(): LearnerState {
     mission_completed_at: {},
     inventory: {},
     proof: [],
+    roots_played: [],
+    collisions_played: [],
     evidence: [],
     affinity: {
       categories_ranked: [],
@@ -229,6 +244,8 @@ export function loadLearner(): LearnerState {
           osmosis_seen: arr(parsed.osmosis_seen, []),
           missions_completed: arr(parsed.missions_completed, []),
           proof: arr(parsed.proof, []),
+          roots_played: arr(parsed.roots_played, []),
+          collisions_played: arr(parsed.collisions_played, []),
           evidence: arr(parsed.evidence, []),
           inventory: obj(parsed.inventory, {}),
           mission_completed_at: obj(parsed.mission_completed_at, {}),
@@ -601,4 +618,15 @@ export function resetLearner() {
   state = emptyLearner()
   save()
   emit()
+}
+
+/**
+ * Remember a section that has been played. Unions rather than replaces, so it cannot
+ * be wiped by a caller that happens to hold a stale list.
+ */
+export function rememberPlayed(rootIds: string[], collisionId?: string | null) {
+  update((s) => {
+    if (rootIds.length) s.roots_played = [...new Set([...s.roots_played, ...rootIds])]
+    if (collisionId) s.collisions_played = [...new Set([...s.collisions_played, collisionId])]
+  })
 }

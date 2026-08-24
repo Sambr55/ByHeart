@@ -541,7 +541,12 @@ function Picker() {
           // A drop never locks. It expires, and something that can be lost forever by
           // being busy must never also be something you can be shut out of.
           const opensAt = entryRung(f)
-          const locked = (!f.drop && opensAt > rung) || waiting
+          // Only a crate nobody has ever been able to open is closed. Anything already
+          // visited can be gone through again — there is no reason it should not be,
+          // and being told "no, you did that already" is a strange thing for a product
+          // built on things you enjoy to say.
+          const unreached = !f.drop && !started && opensAt > rung
+          const locked = unreached || waiting
           return (
             <div
               key={f.id}
@@ -561,19 +566,19 @@ function Picker() {
               <button
                 type="button"
                 aria-pressed={picked === f.id}
-                disabled={finished || locked}
+                disabled={unreached}
                 onClick={() => setPicked(f.id)}
                 className={
                   'tap-target flex w-full justify-between gap-3 px-4 py-4 text-left transition ' +
                   (f.drop
                     ? 'items-start '
                     : 'items-center rounded-xl border ' +
-                      (finished
-                        ? 'border-line/50 bg-surface/40 opacity-45'
-                        : locked
-                          ? 'border-line/40 bg-surface/30 opacity-40'
-                          : picked === f.id
-                            ? 'border-accent bg-accent/10'
+                      (unreached
+                        ? 'border-line/40 bg-surface/30 opacity-40'
+                        : picked === f.id
+                          ? 'border-accent bg-accent/10'
+                          : finished || waiting
+                            ? 'border-line/60 bg-surface/50 opacity-70 hover:border-accent/40'
                             : 'border-line bg-surface hover:border-accent/50'))
                 }
               >
@@ -585,12 +590,15 @@ function Picker() {
                   ) : null}
                   <span className="display block text-base">{f.title}</span>
                   <span className="mt-0.5 block text-xs text-muted">
-                    {waiting
-                      ? 'You have taken everything in here that your stage reaches. ' +
-                        RUNGS[nextAt - 1].opens.replace('Opens once', 'The rest opens once')
-                      : locked
-                        ? RUNGS[opensAt - 1].opens
-                        : f.blurb}
+                    {finished
+                      ? 'You have been through all of it. Go again whenever you like.'
+                      : waiting
+                        ? 'Everything here that your stage reaches is done. ' +
+                          RUNGS[nextAt - 1].opens.replace('Opens once', 'The rest opens once') +
+                          ' Go again in the meantime if you like.'
+                        : unreached
+                          ? RUNGS[opensAt - 1].opens
+                          : f.blurb}
                   </span>
                   {f.drop ? (
                     <span className="mt-1.5 block text-xs text-muted">
@@ -690,8 +698,39 @@ function MiniBuild({
   const answer = target.split(' ')
   const [placed, setPlaced] = useState<{ id: string; text: string }[]>([])
   const [state, setState] = useState<'open' | 'wrong' | 'done'>('open')
+  const [helped, setHelped] = useState(false)
   const attempts = useRef(0)
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([])
   const pool = tiles.filter((t) => !placed.some((p) => p.id === t.id))
+
+  useEffect(() => () => timers.current.forEach(clearTimeout), [])
+
+  /**
+   * Lay the answer out, in order, one piece at a time.
+   *
+   * Staggered rather than snapped into place because the point is to be watched: the
+   * learner is meant to see WHERE each word goes, and a line that simply appears
+   * teaches nothing. Tile ids carry their original position, so this is exact even
+   * when a sentence repeats a word.
+   */
+  function showOrder() {
+    if (helped) return
+    setHelped(true)
+    setState('open')
+    setPlaced([])
+    track('build_help', { target })
+    const reduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    const ordered = answer.map((text, i) => ({ id: text + i, text }))
+    if (reduced) {
+      setPlaced(ordered)
+      return
+    }
+    ordered.forEach((t, i) => {
+      timers.current.push(setTimeout(() => setPlaced((cur) => [...cur, t]), 190 * (i + 1)))
+    })
+  }
 
   function check() {
     const built = placed.map((p) => p.text)
@@ -700,7 +739,10 @@ function MiniBuild({
     track('build_attempt', { target, correct: right })
     if (right) {
       setState('done')
-      onSolved({ clean: attempts.current === 1 })
+      // Being shown the order means it was not said cold, and the proof card counts
+      // nothing else. Quietly letting a helped line through would make the one number
+      // the product asks to be judged on a lie.
+      onSolved({ clean: attempts.current === 1 && !helped })
     } else {
       setState('wrong')
     }
@@ -760,6 +802,25 @@ function MiniBuild({
       {state === 'wrong' ? (
         <p className="mt-3 text-sm text-coach">
           Not the order Portuguese wants. Try moving the first piece.
+        </p>
+      ) : null}
+
+      {state !== 'done' && !helped ? (
+        <button
+          type="button"
+          data-testid="build-help"
+          onClick={showOrder}
+          className="tap-target mt-3 text-xs uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-fg"
+        >
+          Need some help?
+        </button>
+      ) : null}
+
+      {helped && state !== 'done' ? (
+        <p className="mt-3 text-sm leading-relaxed text-muted">
+          There it is, in order. Read it out loud, then check it — this one will not
+          count towards the sentences you can say cold, which is the only number here
+          worth anything.
         </p>
       ) : null}
 
