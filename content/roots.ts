@@ -63,11 +63,66 @@ export type RightsStatus = 'short-quote-review-required' | 'title-reference' | '
 
 export type QaStatus = 'pending-native-review' | 'reviewed'
 
+/**
+ * The nine shelves of the library.
+ *
+ * Named for what a person is reaching for, never for a part of speech. Somebody opening
+ * the library wants a thing, a doing word, a way to ask — not a noun, a verb, an
+ * interrogative. The stage a piece was taught at is a sequencing decision and makes a
+ * useless shelf: it answers "when may this be taught", which is not a question anybody
+ * looks a word up to settle.
+ */
+export type Shelf =
+  | 'things'
+  | 'doing'
+  | 'describing'
+  | 'people'
+  | 'asking'
+  | 'when'
+  | 'how_much'
+  | 'small_words'
+  | 'just_say'
+
+export const SHELVES: { id: Shelf; label: string; holds: string }[] = [
+  { id: 'things', label: 'THINGS', holds: 'Nouns, with the gender you need to use them.' },
+  { id: 'doing', label: 'DOING', holds: 'Verbs, gathered by the word they are a form of.' },
+  { id: 'describing', label: 'DESCRIBING', holds: 'Adjectives, with both endings.' },
+  { id: 'people', label: 'PEOPLE & POINTING', holds: 'Pronouns, this and that, yours and mine.' },
+  { id: 'asking', label: 'ASKING', holds: 'Question words, and the frames they sit in.' },
+  { id: 'when', label: 'WHEN', holds: 'Time. Now, today, tomorrow, Monday, never.' },
+  { id: 'how_much', label: 'HOW MUCH', holds: 'Numbers and quantity.' },
+  { id: 'small_words', label: 'THE SMALL WORDS', holds: 'The glue, and the shading.' },
+  { id: 'just_say', label: 'THINGS YOU JUST SAY', holds: 'Set phrases, exclamations, swearing.' },
+]
+
 /** A reusable piece. The learner's inventory is keyed by these ids. */
 export interface Extract {
   id: string
   target: string
+  /**
+   * MEANING ONLY. Short and consistent, and never a sentence — if it would follow a
+   * comma or a dash it is a usage note, and it goes in `note`. The gloss column was
+   * doing three jobs at once, which is most of why the library read as inconsistent.
+   */
   gloss: string
+  /** Where it lives in the library. No default and no inference. */
+  shelf: Shelf
+  /**
+   * The word this is a form of — 'ser', 'ter', 'giro'. Absent means it is its own
+   * lemma. This is the single biggest cause of the library reading as random: tenho
+   * and tens were unrelated rows, stages apart, rather than one word.
+   */
+  lemma?: string
+  /** Which form: 'I', 'you', 'he/she', 'we', 'they', 'feminine', 'past'. */
+  form?: string
+  /** How it behaves. The usage half that was jammed into gloss. */
+  note?: string
+  /** Nouns only, and required by the lint when shelf is 'things'. */
+  gender?: 'm' | 'f'
+  /** Only when it is not the regular +s. */
+  plural?: string
+  /** false for fome, tempo, amor — mass nouns, shown without an article. */
+  countable?: boolean
   /**
    * A piece carries its own rung, which is often lower than the root teaching it:
    * `desculpa` falls out of a rung 6 apology but is week-one language, and `isto`
@@ -80,6 +135,15 @@ export interface Extract {
 export interface Branch {
   target: string
   en: string
+  /**
+   * Which pieces this line actually demonstrates.
+   *
+   * Declared rather than matched, because matching cannot be made correct: a substring
+   * test files "Onde está o meu café?" under é, and tightening it to whole words then
+   * loses "Dois copos de vinho" as a demonstration of copo. Only the author knows.
+   * Absent falls back to a lemma-aware whole-word match, never a bare includes().
+   */
+  demonstrates?: string[]
 }
 
 /** §12 — two natural ways to say the same thing. Neither is scored. */
@@ -247,7 +311,7 @@ export const TOP_GUN: Root[] = [
     semantic_bridge:
       'The urgency survives intact. Portuguese expresses “with me” as one fused word, COMIGO, attached straight onto the command FALA.',
     subtext: 'Direct, close, urgent. You reach for this when you genuinely need someone to engage.',
-    extracts: [{ id: 'comigo', target: 'comigo', gloss: 'with me', rung: 2 }],
+    extracts: [{ id: 'comigo', target: 'comigo', gloss: 'with me', rung: 2, shelf: 'people', note: 'Com and mim, fused. Portuguese does this with me and you: comigo, contigo.' }],
     branches: [
       { target: 'Vem comigo.', en: 'Come with me.' },
       { target: 'Fica comigo.', en: 'Stay with me.' },
@@ -276,8 +340,8 @@ export const TOP_GUN: Root[] = [
       'The aviation metaphor becomes ordinary human Portuguese. The useful pieces are PODES and QUANDO QUISERES — not the military noun.',
     subtext: 'Warm permission rather than formal ability. PODES is one of the highest-leverage pieces in the language.',
     extracts: [
-      { id: 'podes', target: 'podes', gloss: 'you can', rung: 2 },
-      { id: 'quando_quiseres', target: 'quando quiseres', gloss: 'whenever you want' },
+      { id: 'podes', target: 'podes', gloss: 'you can', rung: 2, shelf: 'doing', lemma: 'poder', form: 'you' },
+      { id: 'quando_quiseres', target: 'quando quiseres', gloss: 'whenever you want', shelf: 'when' },
     ],
     branches: [
       { target: 'Podes vir comigo?', en: 'Can you come with me?' },
@@ -322,13 +386,13 @@ export const TOP_GUN: Root[] = [
       'Portuguese asks “in what were you thinking?”, because PENSAR EM means to think about. That EM is the whole difference between sounding translated and sounding Portuguese.',
     subtext: 'Curious, intimate or accusatory depending entirely on how you say it.',
     extracts: [
-      { id: 'estavas_a', target: 'estavas a…', gloss: 'you were …ing' },
-      { id: 'em_que', target: 'em que…?', gloss: 'what … about?' },
+      { id: 'estavas_a', target: 'estavas a…', gloss: 'you were …ing', shelf: 'doing', lemma: 'estar', form: 'you, past' },
+      { id: 'em_que', target: 'em que…?', gloss: 'what … about?', shelf: 'asking' },
     ],
     branches: [
       { target: 'Em que estás a pensar?', en: 'What are you thinking about?' },
-      { target: 'Estava a pensar…', en: 'I was thinking…' },
-      { target: 'Estava a pensar em ti.', en: 'I was thinking about you.' },
+      { target: 'Estava a pensar…', en: 'I was thinking…', demonstrates: ['estavas_a'] },
+      { target: 'Estava a pensar em ti.', en: 'I was thinking about you.', demonstrates: ['estavas_a'] },
       { target: 'Em que estavas a pensar?', en: 'What were you thinking about?' },
     ],
     helpers: {
@@ -353,7 +417,7 @@ export const TOP_GUN: Root[] = [
     semantic_bridge:
       'Rather than carrying the English noun “need” across literally, Portuguese turns the idea into a verb: PRECISAR. “I feel that I need…”',
     subtext: 'Neutral, everyday, endlessly useful. This is the product beating subtitle literalism.',
-    extracts: [{ id: 'preciso_de', target: 'preciso de…', gloss: 'I need…' }],
+    extracts: [{ id: 'preciso_de', target: 'preciso de…', gloss: 'I need…', shelf: 'doing', lemma: 'precisar', form: 'I' }],
     branches: [
       { target: 'Preciso de ajuda.', en: 'I need help.' },
       { target: 'Preciso de um táxi.', en: 'I need a taxi.' },
@@ -381,8 +445,8 @@ export const TOP_GUN: Root[] = [
       'The cultural meaning is loyalty. The reusable Portuguese is the intention frame NÃO VOU + verb, which works for anything you have decided not to do.',
     subtext: 'Firm intention. More conversational than a formal future tense this early.',
     extracts: [
-      { id: 'nao_vou', target: 'não vou…', gloss: 'I’m not going to…' },
-      { id: 'deixar', target: 'deixar', gloss: 'to leave / to let' },
+      { id: 'nao_vou', target: 'não vou…', gloss: 'I’m not going to…', shelf: 'doing', lemma: 'ir', form: 'I, negative' },
+      { id: 'deixar', target: 'deixar', gloss: 'to leave / to let', shelf: 'doing' },
     ],
     branches: [
       { target: 'Não vou sair.', en: 'I’m not going out.' },
@@ -432,8 +496,8 @@ export const TOP_GUN: Root[] = [
       'English hides the verb inside \u201cwhere\u2019s\u201d. Portuguese keeps them apart, and the pair ONDE + EST\u00c1 will locate anything you can already name \u2014 which is the entire reason naming came first.',
     subtext: 'The question you will ask on your first afternoon, and every afternoon after it.',
     extracts: [
-      { id: 'onde', target: 'onde', gloss: 'where' },
-      { id: 'esta_', target: 'est\u00e1', gloss: 'is (right now)' },
+      { id: 'onde', target: 'onde', gloss: 'where', shelf: 'asking' },
+      { id: 'esta_', target: 'est\u00e1', gloss: 'is', shelf: 'doing', lemma: 'estar', form: 'he/she/it', note: 'The right-now one. É is the permanent one.' },
     ],
     branches: [
       { target: 'Onde est\u00e1 a casa de banho?', en: 'Where\u2019s the toilet?' },
@@ -482,11 +546,11 @@ export const JAMES_BOND: Root[] = [
     semantic_bridge:
       'English says “my name is”. European Portuguese introduces you with CHAMO-ME — literally “I call myself” — and that reflexive is what you will actually hear in Portugal.',
     subtext: 'A perfect freebie: culturally unmistakable and useful within an hour of landing.',
-    extracts: [{ id: 'chamo_me', target: 'chamo-me…', gloss: 'my name is…' }],
+    extracts: [{ id: 'chamo_me', target: 'chamo-me…', gloss: 'my name is…', shelf: 'just_say' }],
     branches: [
       { target: 'Chamo-me Sam.', en: 'My name is Sam.' },
-      { target: 'E tu, como te chamas?', en: 'And you, what’s your name?' },
-      { target: 'Como se chama?', en: 'What is it called?' },
+      { target: 'E tu, como te chamas?', en: 'And you, what’s your name?', demonstrates: ['chamo_me', 'como_te_chamas'] },
+      { target: 'Como se chama?', en: 'What is it called?', demonstrates: ['chamo_me', 'como_se_chama'] },
     ],
     helpers: {
       'Sam': 'a name',
@@ -515,8 +579,8 @@ export const JAMES_BOND: Root[] = [
       'The title is compact enough that both useful pieces survive the crossing intact: AMANHÃ and NUNCA are sitting there in plain sight.',
     subtext: 'Time and absolute frequency in one recognisable title — far more productive than a title that is only a place name.',
     extracts: [
-      { id: 'amanha', target: 'amanhã', gloss: 'tomorrow' },
-      { id: 'nunca', target: 'nunca', gloss: 'never' },
+      { id: 'amanha', target: 'amanhã', gloss: 'tomorrow', shelf: 'when', note: 'A and manhã — literally to the morning.' },
+      { id: 'nunca', target: 'nunca', gloss: 'never', shelf: 'when' },
     ],
     branches: [
       { target: 'Até amanhã.', en: 'See you tomorrow.' },
@@ -563,13 +627,13 @@ export const JAMES_BOND: Root[] = [
       'The engine hiding in the title is COM = with. And COM + MIM is exactly where COMIGO came from — the piece you already own is this word wearing a disguise.',
     subtext: 'A compact root that quietly explains a piece you already have while handing you the general form.',
     extracts: [
-      { id: 'com', target: 'com', gloss: 'with' },
-      { id: 'amor', target: 'amor', gloss: 'love' },
+      { id: 'com', target: 'com', gloss: 'with', shelf: 'small_words' },
+      { id: 'amor', target: 'amor', gloss: 'love', shelf: 'things', gender: 'm', countable: false },
     ],
     branches: [
       { target: 'Café com leite.', en: 'Coffee with milk.' },
       { target: 'Com açúcar?', en: 'With sugar?' },
-      { target: 'Comigo.', en: 'With me.' },
+      { target: 'Comigo.', en: 'With me.', demonstrates: ['com', 'comigo'] },
       { target: 'Com amor.', en: 'With love.' },
     ],
     reinforces: ['comigo'],
@@ -599,13 +663,13 @@ export const JAMES_BOND: Root[] = [
       'Natural Portuguese renders the title as “don’t say ‘never’ again”, which hands you a negative command and the single most useful survival phrase in one thought.',
     subtext: 'Playful, and unusually practical: OUTRA VEZ is what rescues you when you did not catch something.',
     extracts: [
-      { id: 'outra_vez', target: 'outra vez', gloss: 'again', rung: 3 },
-      { id: 'nao_digas', target: 'não digas', gloss: 'don’t say' },
+      { id: 'outra_vez', target: 'outra vez', gloss: 'again', rung: 3, shelf: 'when' },
+      { id: 'nao_digas', target: 'não digas', gloss: 'don’t say', shelf: 'doing', lemma: 'dizer', form: 'you, don’t' },
     ],
     branches: [
       { target: 'Diz outra vez.', en: 'Say it again.' },
       { target: 'Podes dizer outra vez?', en: 'Can you say it again?' },
-      { target: 'Nunca mais.', en: 'Never again.' },
+      { target: 'Nunca mais.', en: 'Never again.', demonstrates: ['nunca'] },
       { target: 'Não digas isso.', en: 'Don’t say that.' },
     ],
     reinforces: ['podes', 'nunca'],
@@ -650,8 +714,8 @@ export const JAMES_BOND: Root[] = [
       'SEM and TEMPO are visible in the title without any translation gymnastics, and PARA is the little word that introduces purpose — time for something, time to do something.',
     subtext: 'Genuinely useful travel language pulled out of a very dramatic title. Enjoy the contrast.',
     extracts: [
-      { id: 'sem', target: 'sem', gloss: 'without', rung: 1 },
-      { id: 'tempo', target: 'tempo', gloss: 'time' },
+      { id: 'sem', target: 'sem', gloss: 'without', rung: 1, shelf: 'small_words' },
+      { id: 'tempo', target: 'tempo', gloss: 'time', shelf: 'things', gender: 'm', countable: false },
     ],
     branches: [
       { target: 'Sem açúcar.', en: 'Without sugar.' },
@@ -686,8 +750,8 @@ export const JAMES_BOND: Root[] = [
       'Portugal reads the digits out one at a time, so the most famous number in film is already correct Portuguese. Numbers are a closed set of ten \u2014 the only vocabulary in the language you can finish in an afternoon and never revisit.',
     subtext: 'The least glamorous thing in this crate, and the first thing you will need at a till.',
     extracts: [
-      { id: 'zero', target: 'zero', gloss: 'zero' },
-      { id: 'sete', target: 'sete', gloss: 'seven' },
+      { id: 'zero', target: 'zero', gloss: 'zero', shelf: 'how_much' },
+      { id: 'sete', target: 'sete', gloss: 'seven', shelf: 'how_much' },
     ],
     branches: [
       { target: 'Sete euros.', en: 'Seven euros.' },
@@ -723,8 +787,8 @@ export const JAMES_BOND: Root[] = [
       'Quantum is Latin for \u201chow much\u201d, and Portuguese never stopped using the word: QUANTO. The one Bond title nobody understands turns out to be the question you need in every shop in the country.',
     subtext: 'Asked flatly, without apology. Nobody in Portugal thinks it is rude to ask a price.',
     extracts: [
-      { id: 'quanto', target: 'quanto', gloss: 'how much' },
-      { id: 'custa', target: 'custa', gloss: 'it costs' },
+      { id: 'quanto', target: 'quanto', gloss: 'how much', shelf: 'asking' },
+      { id: 'custa', target: 'custa', gloss: 'it costs', shelf: 'doing', lemma: 'custar', form: 'it' },
     ],
     branches: [
       { target: 'Quanto custa isto?', en: 'How much is this?' },
@@ -767,8 +831,8 @@ export const BRIDGET_JONES: Root[] = [
       'The whole cringe is “I said too much”, and Portuguese compresses that into two words. DEMAIS is the part you keep — it attaches to almost anything you overdid.',
     subtext: 'Self-aware, human, lightly comic. Said with a wince rather than an apology.',
     extracts: [
-      { id: 'demais', target: 'demais', gloss: 'too much' },
-      { id: 'falei', target: 'falei', gloss: 'I spoke / I said' },
+      { id: 'demais', target: 'demais', gloss: 'too much', shelf: 'how_much' },
+      { id: 'falei', target: 'falei', gloss: 'I spoke / I said', shelf: 'doing', lemma: 'falar', form: 'I, past' },
     ],
     branches: [
       { target: 'Desculpa, falei demais.', en: 'Sorry, I said too much.' },
@@ -801,8 +865,8 @@ export const BRIDGET_JONES: Root[] = [
       'The useful move is not a literal description of being late. It is the phrase a Portuguese speaker actually reaches for: “sorry for the delay.”',
     subtext: 'Warm, everyday repair. How formal you go is a real choice, not a rule.',
     extracts: [
-      { id: 'desculpa', target: 'desculpa', gloss: 'sorry', rung: 2 },
-      { id: 'atraso', target: 'o atraso', gloss: 'the delay' },
+      { id: 'desculpa', target: 'desculpa', gloss: 'sorry', rung: 2, shelf: 'just_say' },
+      { id: 'atraso', target: 'o atraso', gloss: 'the delay', shelf: 'things', gender: 'm' },
     ],
     branches: [
       { target: 'Desculpa.', en: 'Sorry.' },
@@ -848,11 +912,11 @@ export const BRIDGET_JONES: Root[] = [
     semantic_bridge:
       'The socially useful move is to apologise lightly and then just ask. And CHAMAS is the same verb as CHAMO-ME, pointed at the other person.',
     subtext: 'Embarrassing but entirely recoverable. Everyone has done it.',
-    extracts: [{ id: 'como_te_chamas', target: 'como te chamas?', gloss: 'what’s your name?' }],
+    extracts: [{ id: 'como_te_chamas', target: 'como te chamas?', gloss: 'what’s your name?', shelf: 'asking', note: 'To somebody your own age. Como se chama? is the polite one.' }],
     branches: [
-      { target: 'Chamo-me Ana.', en: 'My name is Ana.' },
+      { target: 'Chamo-me Ana.', en: 'My name is Ana.', demonstrates: ['chamo_me'] },
       { target: 'Como te chamas?', en: 'What’s your name?' },
-      { target: 'Como se chama?', en: 'What is it called?' },
+      { target: 'Como se chama?', en: 'What is it called?', demonstrates: ['como_se_chama'] },
     ],
     reinforces: ['chamo_me', 'desculpa'],
     helpers: {
@@ -880,8 +944,8 @@ export const BRIDGET_JONES: Root[] = [
       'Portuguese repairs this exactly the way English does — “that wasn’t what I meant to say” — which makes QUERIA DIZER available for every time the wrong word comes out.',
     subtext: 'The most valuable language an imperfect speaker can own: it gives you permission to recover instead of freeze.',
     extracts: [
-      { id: 'queria_dizer', target: 'queria dizer…', gloss: 'I meant…' },
-      { id: 'nao_era_isso', target: 'não era isso', gloss: 'that wasn’t it' },
+      { id: 'queria_dizer', target: 'queria dizer…', gloss: 'I meant…', shelf: 'just_say' },
+      { id: 'nao_era_isso', target: 'não era isso', gloss: 'that wasn’t it', shelf: 'just_say' },
     ],
     branches: [
       { target: 'Queria dizer…', en: 'I meant…' },
@@ -915,12 +979,12 @@ export const BRIDGET_JONES: Root[] = [
       'The rescue is a past frame you can point at anything: ERA UMA… = it was a… The joke is disposable; the frame is not.',
     subtext: '“Era uma piada” can sound sheepish. “Estou a brincar” is lighter and lands better in the moment.',
     extracts: [
-      { id: 'era', target: 'era…', gloss: 'it was…' },
-      { id: 'piada', target: 'uma piada', gloss: 'a joke' },
+      { id: 'era', target: 'era…', gloss: 'it was…', shelf: 'doing', lemma: 'ser', form: 'it, past' },
+      { id: 'piada', target: 'uma piada', gloss: 'a joke', shelf: 'things', gender: 'f' },
     ],
     branches: [
       { target: 'Era uma piada.', en: 'It was a joke.' },
-      { target: 'Estou a brincar.', en: 'I’m joking.' },
+      { target: 'Estou a brincar.', en: 'I’m joking.', demonstrates: ['piada'] },
       { target: 'É uma piada?', en: 'Is it a joke?' },
     ],
     reinforces: ['estavas_a'],
@@ -964,9 +1028,9 @@ export const BRIDGET_JONES: Root[] = [
       'Portuguese orders the container, not the drink \u2014 not \u201ca wine\u201d but a glass OF wine. That small DE does the same job in um copo de \u00e1gua and uma ch\u00e1vena de caf\u00e9, so the shape is worth more than the sentence.',
     subtext: 'The most reliable sentence in the language. Learn the shape once and swap the last word forever.',
     extracts: [
-      { id: 'copo', target: 'copo', gloss: 'glass' },
-      { id: 'vinho', target: 'vinho', gloss: 'wine' },
-      { id: 'por_favor', target: 'por favor', gloss: 'please' },
+      { id: 'copo', target: 'copo', gloss: 'glass', shelf: 'things', gender: 'm' },
+      { id: 'vinho', target: 'vinho', gloss: 'wine', shelf: 'things', gender: 'm', countable: false },
+      { id: 'por_favor', target: 'por favor', gloss: 'please', shelf: 'just_say' },
     ],
     branches: [
       { target: 'Um copo de \u00e1gua, por favor.', en: 'A glass of water, please.' },
@@ -1005,13 +1069,13 @@ export const BRIDGET_JONES: Root[] = [
       'Every sentence so far has been about you or the person in front of you. ELE is the moment somebody else walks into the conversation \u2014 and the verb ending is already telling you it is one other person, which is why Portuguese usually drops the pronoun entirely.',
     subtext: 'Asked at one in the morning, of a friend who has heard it before.',
     extracts: [
-      { id: 'ele', target: 'ele', gloss: 'he' },
-      { id: 'gosta_de', target: 'gosta de', gloss: 'likes' },
+      { id: 'ele', target: 'ele', gloss: 'he', shelf: 'people', lemma: 'ele', form: 'he' },
+      { id: 'gosta_de', target: 'gosta de', gloss: 'likes', shelf: 'doing', lemma: 'gostar', form: 'he/she' },
     ],
     branches: [
       { target: 'Ela gosta de ti.', en: 'She likes you.' },
       { target: 'Ele n\u00e3o gosta de vinho.', en: 'He doesn\u2019t like wine.' },
-      { target: 'Eles gostam de ti.', en: 'They like you.' },
+      { target: 'Eles gostam de ti.', en: 'They like you.', demonstrates: ['eles', 'gosta_de'] },
     ],
     reinforces: ['vinho'],
     helpers: {
@@ -1051,7 +1115,7 @@ export const PULP_FICTION: Root[] = [
     semantic_bridge:
       'The joke is entirely cultural. The useful word is the smallest one in the sentence: COM.',
     subtext: 'A fast wink, not a lesson. If you already have COM, this is a nod rather than a discovery.',
-    extracts: [{ id: 'com', target: 'com', gloss: 'with' }],
+    extracts: [{ id: 'com', target: 'com', gloss: 'with', shelf: 'small_words' }],
     branches: [
       { target: 'Com açúcar.', en: 'With sugar.' },
       { target: 'Com gelo.', en: 'With ice.' },
@@ -1082,12 +1146,12 @@ export const PULP_FICTION: Root[] = [
       'The rhythm carries straight across, and every word in it is worth keeping: DIZ, O QUÊ, OUTRA VEZ.',
     subtext: 'The film gives this line menace. Keep the polite version — that is the one you will actually need.',
     extracts: [
-      { id: 'diz', target: 'diz', gloss: 'say' },
-      { id: 'o_que', target: 'o quê?', gloss: 'what?' },
+      { id: 'diz', target: 'diz', gloss: 'say', shelf: 'doing', lemma: 'dizer', form: 'you, an order' },
+      { id: 'o_que', target: 'o quê?', gloss: 'what?', shelf: 'asking' },
     ],
     branches: [
       { target: 'Diz outra vez.', en: 'Say it again.' },
-      { target: 'Podes dizer outra vez?', en: 'Can you say it again?' },
+      { target: 'Podes dizer outra vez?', en: 'Can you say it again?', demonstrates: ['diz', 'outra_vez', 'podes'] },
       { target: 'O quê?', en: 'What?' },
     ],
     reinforces: ['outra_vez', 'podes'],
@@ -1129,8 +1193,8 @@ export const PULP_FICTION: Root[] = [
       'Everyday European Portuguese reaches for “é mesmo bom” rather than a dictionary word for tasty. MESMO is the intensifier you will hear constantly.',
     subtext: 'A signature moment: natural speech beating dictionary fidelity.',
     extracts: [
-      { id: 'mesmo', target: 'mesmo', gloss: 'really' },
-      { id: 'bom', target: 'bom', gloss: 'good' },
+      { id: 'mesmo', target: 'mesmo', gloss: 'really', shelf: 'small_words' },
+      { id: 'bom', target: 'bom', gloss: 'good', shelf: 'describing', lemma: 'bom', form: 'masculine', note: 'The feminine is boa. Boa ideia, bom dia.' },
     ],
     branches: [
       { target: 'Isso é mesmo bom.', en: 'That is really good.' },
@@ -1159,11 +1223,11 @@ export const PULP_FICTION: Root[] = [
     semantic_bridge:
       'Portuguese does not translate “cool” here. It says “have calm” — and CALMA on its own does most of the work.',
     subtext: 'Register matters enormously. TEM CALMA can soothe or infuriate; CALMA alone is softer.',
-    extracts: [{ id: 'calma', target: 'calma', gloss: 'calm / easy' }],
+    extracts: [{ id: 'calma', target: 'calma', gloss: 'calm / easy', shelf: 'just_say' }],
     branches: [
       { target: 'Calma.', en: 'Easy.' },
       { target: 'Tem calma.', en: 'Calm down.' },
-      { target: 'Está tudo bem.', en: 'It’s all right.' },
+      { target: 'Está tudo bem.', en: 'It’s all right.', demonstrates: ['esta_', 'tudo'] },
     ],
     voice_options: [
       {
@@ -1208,11 +1272,11 @@ export const PULP_FICTION: Root[] = [
     semantic_bridge:
       'The whole scene is about what something is called, and Portuguese packages that as COMO É QUE SE CHAMA — the same CHAMAR you already met introducing yourself.',
     subtext: 'This is where the film unexpectedly turns into survival language.',
-    extracts: [{ id: 'como_se_chama', target: 'como se chama?', gloss: 'what is it called?' }],
+    extracts: [{ id: 'como_se_chama', target: 'como se chama?', gloss: 'what is it called?', shelf: 'asking', note: 'Also how you ask what an object is called.' }],
     branches: [
       { target: 'Como se chama isto?', en: 'What is this called?' },
-      { target: 'Como te chamas?', en: 'What’s your name?' },
-      { target: 'Chama-se…', en: 'It’s called…' },
+      { target: 'Como te chamas?', en: 'What’s your name?', demonstrates: ['como_te_chamas'] },
+      { target: 'Chama-se…', en: 'It’s called…', demonstrates: ['como_se_chama'] },
     ],
     reinforces: ['chamo_me', 'como_te_chamas'],
     helpers: {
@@ -1241,8 +1305,8 @@ export const PULP_FICTION: Root[] = [
       'The gag only works if you hear the price, so the number is the point. Portuguese puts the figure before the currency \u2014 cinco euros \u2014 and joins the thing to its price with the same DE that joined the glass to the wine.',
     subtext: 'Ordinary, transactional language, hiding inside the most quoted diner scene ever filmed.',
     extracts: [
-      { id: 'cinco', target: 'cinco', gloss: 'five' },
-      { id: 'batido', target: 'batido', gloss: 'milkshake' },
+      { id: 'cinco', target: 'cinco', gloss: 'five', shelf: 'how_much' },
+      { id: 'batido', target: 'batido', gloss: 'milkshake', shelf: 'things', gender: 'm' },
     ],
     branches: [
       { target: 'Cinco euros.', en: 'Five euros.' },
@@ -1280,8 +1344,8 @@ export const PULP_FICTION: Root[] = [
       'You have met chamo-me and como se chama. Here is the same verb with a third ending, and the giveaway is the M: a Portuguese verb ending in -M is nearly always about more than one other person. One letter, and the whole language opens up.',
     subtext: 'Said as though it were fascinating, which is exactly how you will use it.',
     extracts: [
-      { id: 'eles', target: 'eles', gloss: 'they' },
-      { id: 'chamam', target: 'chamam', gloss: 'they call' },
+      { id: 'eles', target: 'eles', gloss: 'they', shelf: 'people', lemma: 'ele', form: 'they' },
+      { id: 'chamam', target: 'chamam', gloss: 'they call', shelf: 'doing', lemma: 'chamar', form: 'they' },
     ],
     branches: [
       { target: 'Eles chamam-me Sam.', en: 'They call me Sam.' },
@@ -1324,8 +1388,8 @@ export const PULP_FICTION: Root[] = [
       'Two words and both are load-bearing. QUEM asks about a person where QUANTO asked about an amount and ONDE asked about a place \u2014 the question words are a small set, and you now have most of them.',
     subtext: 'Asked flatly, of somebody who very much does not want to answer.',
     extracts: [
-      { id: 'quem', target: 'quem', gloss: 'who' },
-      { id: 'e_is', target: '\u00e9', gloss: 'is' },
+      { id: 'quem', target: 'quem', gloss: 'who', shelf: 'asking' },
+      { id: 'e_is', target: '\u00e9', gloss: 'is', shelf: 'doing', lemma: 'ser', form: 'he/she/it' },
     ],
     branches: [
       { target: 'Quem \u00e9 este?', en: 'Who\u2019s this?' },
@@ -1370,8 +1434,8 @@ export const AUDREY_HEPBURN: Root[] = [
       'The line maps across word for word, and hands over two pieces you will use constantly without ever mentioning Paris again.',
     subtext: 'Elegant, warm, instantly usable. BOA IDEIA is how you agree to almost anything.',
     extracts: [
-      { id: 'sempre', target: 'sempre', gloss: 'always' },
-      { id: 'boa_ideia', target: 'boa ideia', gloss: 'good idea' },
+      { id: 'sempre', target: 'sempre', gloss: 'always', shelf: 'when' },
+      { id: 'boa_ideia', target: 'boa ideia', gloss: 'good idea', shelf: 'just_say' },
     ],
     branches: [
       { target: 'É uma boa ideia.', en: 'It’s a good idea.' },
@@ -1417,13 +1481,13 @@ export const AUDREY_HEPBURN: Root[] = [
       'The sentiment compresses into a single Portuguese imperative, and APROVEITA turns out to be one of the most-used words in the language — far beyond anything inspirational.',
     subtext: 'Positive without being saccharine. You will hear it shouted across a car park.',
     extracts: [
-      { id: 'aproveita', target: 'aproveita', gloss: 'enjoy / make the most of' },
-      { id: 'vida', target: 'vida', gloss: 'life', rung: 1 },
+      { id: 'aproveita', target: 'aproveita', gloss: 'enjoy / make the most of', shelf: 'doing', lemma: 'aproveitar', form: 'you, an order' },
+      { id: 'vida', target: 'vida', gloss: 'life', rung: 1, shelf: 'things', gender: 'f' },
     ],
     branches: [
       { target: 'Aproveita o dia.', en: 'Enjoy the day.' },
       { target: 'Aproveita!', en: 'Enjoy it!' },
-      { target: 'Quero aproveitar.', en: 'I want to make the most of it.' },
+      { target: 'Quero aproveitar.', en: 'I want to make the most of it.', demonstrates: ['aproveita'] },
       { target: 'É a vida.', en: 'That’s life.' },
     ],
     helpers: {
@@ -1454,11 +1518,11 @@ export const AUDREY_HEPBURN: Root[] = [
       'The thought is a comparison, which makes MAIS DO QUE the engine — and that engine works for any two things you want to weigh against each other.',
     subtext: 'Warm and emotionally useful, rather than phrasebook language.',
     extracts: [
-      { id: 'mais_do_que', target: 'mais do que', gloss: 'more than' },
-      { id: 'importa', target: 'importa', gloss: 'it matters' },
+      { id: 'mais_do_que', target: 'mais do que', gloss: 'more than', shelf: 'how_much' },
+      { id: 'importa', target: 'importa', gloss: 'it matters', shelf: 'doing', lemma: 'importar', form: 'it' },
     ],
     branches: [
-      { target: 'Tu importas.', en: 'You matter.' },
+      { target: 'Tu importas.', en: 'You matter.', demonstrates: ['importa'] },
       { target: 'Mais do que isso.', en: 'More than that.' },
       { target: 'Isto importa.', en: 'This matters.' },
     ],
@@ -1488,13 +1552,13 @@ export const AUDREY_HEPBURN: Root[] = [
       'Portuguese builds this around LADO BOM — the good side — and PROCURA, which is also just the ordinary word for looking for your keys.',
     subtext: 'Gentle but active. Warm language that still does everyday work.',
     extracts: [
-      { id: 'procura', target: 'procura', gloss: 'look for' },
-      { id: 'lado_bom', target: 'o lado bom', gloss: 'the good side' },
+      { id: 'procura', target: 'procura', gloss: 'look for', shelf: 'doing', lemma: 'procurar', form: 'you, an order' },
+      { id: 'lado_bom', target: 'o lado bom', gloss: 'the good side', shelf: 'things', gender: 'm' },
     ],
     branches: [
       { target: 'Procura aqui.', en: 'Look here.' },
       { target: 'O lado bom.', en: 'The good side.' },
-      { target: 'É uma boa pessoa.', en: 'They’re a good person.' },
+      { target: 'É uma boa pessoa.', en: 'They’re a good person.', demonstrates: ['bom'] },
     ],
     reinforces: ['bom'],
     helpers: {
@@ -1525,12 +1589,12 @@ export const AUDREY_HEPBURN: Root[] = [
       'O MAIS IMPORTANTE É… is a frame you can put almost anything into, which makes it far more valuable than the sentiment it arrived in.',
     subtext: 'Aspirational on the surface, structurally very ordinary underneath.',
     extracts: [
-      { id: 'o_mais_importante', target: 'o mais importante', gloss: 'the most important thing' },
-      { id: 'feliz', target: 'feliz', gloss: 'happy' },
+      { id: 'o_mais_importante', target: 'o mais importante', gloss: 'the most important thing', shelf: 'just_say' },
+      { id: 'feliz', target: 'feliz', gloss: 'happy', shelf: 'describing', note: 'Same for a man or a woman. Not every adjective changes.' },
     ],
     branches: [
-      { target: 'É importante.', en: 'It’s important.' },
-      { target: 'O que é mais importante?', en: 'What is most important?' },
+      { target: 'É importante.', en: 'It’s important.', demonstrates: ['o_mais_importante'] },
+      { target: 'O que é mais importante?', en: 'What is most important?', demonstrates: ['o_mais_importante', 'o_que'] },
       { target: 'Quero ser feliz.', en: 'I want to be happy.' },
       { target: 'O mais importante é isto.', en: 'The most important thing is this.' },
     ],
@@ -1589,12 +1653,12 @@ export const MARCUS_AURELIUS: Root[] = [
       'The thought and the Portuguese have nearly the same shape, which puts PODES right in the middle of the sentence where you cannot miss it.',
     subtext: 'Calm and practical. It sounds modern despite being nearly two thousand years old.',
     extracts: [
-      { id: 'podes', target: 'podes', gloss: 'you can' },
-      { id: 'o_que', target: 'o que', gloss: 'what / that which' },
+      { id: 'podes', target: 'podes', gloss: 'you can', shelf: 'doing', lemma: 'poder', form: 'you' },
+      { id: 'o_que', target: 'o que', gloss: 'what / that which', shelf: 'asking' },
     ],
     branches: [
       { target: 'O que posso fazer?', en: 'What can I do?' },
-      { target: 'Não posso controlar isso.', en: 'I can’t control that.' },
+      { target: 'Não posso controlar isso.', en: 'I can’t control that.', demonstrates: ['podes', 'posso'] },
       { target: 'Podes controlar isto.', en: 'You can control this.' },
     ],
     reinforces: ['podes'],
@@ -1628,13 +1692,13 @@ export const MARCUS_AURELIUS: Root[] = [
       'The idea splits cleanly into event and response, and both halves hand over an ordinary question you will use this week.',
     subtext: 'A reflection root that unexpectedly unlocks the most everyday questions there are.',
     extracts: [
-      { id: 'o_que_acontece', target: 'o que acontece', gloss: 'what happens' },
-      { id: 'como', target: 'como', gloss: 'how' },
+      { id: 'o_que_acontece', target: 'o que acontece', gloss: 'what happens', shelf: 'asking' },
+      { id: 'como', target: 'como', gloss: 'how', shelf: 'asking' },
     ],
     branches: [
-      { target: 'O que aconteceu?', en: 'What happened?' },
+      { target: 'O que aconteceu?', en: 'What happened?', demonstrates: ['o_que_acontece'] },
       { target: 'Como reagiste?', en: 'How did you react?' },
-      { target: 'Não posso controlar isso.', en: 'I can’t control that.' },
+      { target: 'Não posso controlar isso.', en: 'I can’t control that.', demonstrates: ['podes', 'posso'] },
     ],
     reinforces: ['o_que'],
     helpers: {
@@ -1667,8 +1731,8 @@ export const MARCUS_AURELIUS: Root[] = [
       'The philosophy makes AGORA impossible to forget, and quietly hands you TENS — the ordinary “you have” you need to ask anyone for anything.',
     subtext: 'The wisdom evaporates fast. AGORA and TENS stay for good.',
     extracts: [
-      { id: 'agora', target: 'agora', gloss: 'now' },
-      { id: 'tens', target: 'tens', gloss: 'you have' },
+      { id: 'agora', target: 'agora', gloss: 'now', shelf: 'when' },
+      { id: 'tens', target: 'tens', gloss: 'you have', shelf: 'doing', lemma: 'ter', form: 'you' },
     ],
     branches: [
       { target: 'Agora não.', en: 'Not now.' },
@@ -1716,13 +1780,13 @@ export const MARCUS_AURELIUS: Root[] = [
       'The maxim is built from three pieces that convert straight into everyday conditionals: SE, É VERDADE and the negative command NÃO DIGAS.',
     subtext: 'Simple moral language that turns into ordinary reactions almost immediately.',
     extracts: [
-      { id: 'se', target: 'se', gloss: 'if' },
-      { id: 'e_verdade', target: 'é verdade', gloss: 'it is true' },
+      { id: 'se', target: 'se', gloss: 'if', shelf: 'small_words' },
+      { id: 'e_verdade', target: 'é verdade', gloss: 'it is true', shelf: 'just_say' },
     ],
     branches: [
       { target: 'É verdade?', en: 'Is it true?' },
       { target: 'Se quiseres.', en: 'If you want.' },
-      { target: 'Não digas isso.', en: 'Don’t say that.' },
+      { target: 'Não digas isso.', en: 'Don’t say that.', demonstrates: ['nao_digas'] },
     ],
     reinforces: ['nao_digas', 'quando_quiseres'],
     helpers: {
@@ -1753,8 +1817,8 @@ export const MARCUS_AURELIUS: Root[] = [
       'Two reusable engines in one short line: NÃO PODES, and MUDAR — which is the verb you need the moment a booking goes wrong.',
     subtext: 'Reflective on the surface, extremely practical underneath.',
     extracts: [
-      { id: 'nao_podes', target: 'não podes', gloss: 'you can’t' },
-      { id: 'mudar', target: 'mudar', gloss: 'to change' },
+      { id: 'nao_podes', target: 'não podes', gloss: 'you can’t', shelf: 'doing', lemma: 'poder', form: 'you, negative' },
+      { id: 'mudar', target: 'mudar', gloss: 'to change', shelf: 'doing' },
     ],
     branches: [
       { target: 'Posso mudar isto?', en: 'Can I change this?' },
@@ -1808,12 +1872,12 @@ export const MARCUS_AURELIUS: Root[] = [
       'Marcus wrote this to a soldier who could not do everything alone, and it is the most useful sentence anybody learning a language has been handed. AJUDA is also one of the few words you can shout on its own and be completely understood.',
     subtext: 'Practical rather than noble. He meant it as an instruction, not a comfort.',
     extracts: [
-      { id: 'ajuda', target: 'ajuda', gloss: 'help' },
-      { id: 'pedir', target: 'pedir', gloss: 'to ask for' },
+      { id: 'ajuda', target: 'ajuda', gloss: 'help', shelf: 'things', gender: 'f', countable: false },
+      { id: 'pedir', target: 'pedir', gloss: 'to ask for', shelf: 'doing', lemma: 'pedir' },
     ],
     branches: [
       { target: 'Preciso de ajuda.', en: 'I need help.' },
-      { target: 'Podes ajudar-me?', en: 'Can you help me?' },
+      { target: 'Podes ajudar-me?', en: 'Can you help me?', demonstrates: ['ajuda', 'podes'] },
       { target: 'Vou pedir ajuda.', en: 'I\u2019m going to ask for help.' },
     ],
     reinforces: ['preciso_de', 'podes', 'pedir_te'],
@@ -1849,8 +1913,8 @@ export const MARCUS_AURELIUS: Root[] = [
       'He wrote it to stop himself being surprised by anybody. It also does the ladder a favour: AS PESSOAS is the first time you have talked about a group rather than a person, and FAZEM carries the same -M that told you ELES were involved.',
     subtext: 'Not forgiveness exactly. More an instruction to stop expecting otherwise.',
     extracts: [
-      { id: 'as_pessoas', target: 'as pessoas', gloss: 'people' },
-      { id: 'fazem', target: 'fazem', gloss: 'they do' },
+      { id: 'as_pessoas', target: 'as pessoas', gloss: 'people', shelf: 'things', gender: 'f', note: 'Already plural. One of them is uma pessoa, and it stays feminine even about a man.' },
+      { id: 'fazem', target: 'fazem', gloss: 'they do', shelf: 'doing', lemma: 'fazer', form: 'they' },
     ],
     branches: [
       { target: 'As pessoas s\u00e3o assim.', en: 'People are like that.' },
@@ -1891,8 +1955,8 @@ export const MARCUS_AURELIUS: Root[] = [
       'He meant it as an argument against sulking. Portuguese barely needs the N\u00d3S at all, because SOMOS has already said who \u2014 and that -MOS ending is the \u201cwe\u201d on very nearly every verb in the language.',
     subtext: 'Less warm than it sounds. He is telling himself to get on with it.',
     extracts: [
-      { id: 'nos_', target: 'n\u00f3s', gloss: 'we' },
-      { id: 'somos', target: 'somos', gloss: 'we are' },
+      { id: 'nos_', target: 'n\u00f3s', gloss: 'we', shelf: 'people' },
+      { id: 'somos', target: 'somos', gloss: 'we are', shelf: 'doing', lemma: 'ser', form: 'we' },
     ],
     branches: [
       { target: 'N\u00f3s somos amigos.', en: 'We\u2019re friends.' },
@@ -1956,8 +2020,8 @@ export const SWEARING: Root[] = [
       'The whole insult is built from two ordinary bricks: VAI, the command “go”, and À, which is just “to the”. Swap the destination and the same frame becomes polite — vai para casa, vai com calma.',
     subtext: 'Final, not playful. This ends a conversation rather than seasoning one.',
     extracts: [
-      { id: 'vai', target: 'Vai', gloss: 'go (an order)' },
-      { id: 'estou_farto', target: 'estou farto', gloss: 'I’m fed up' },
+      { id: 'vai', target: 'Vai', gloss: 'go', shelf: 'doing', lemma: 'ir', form: 'you, an order', note: 'An order. Vai à merda is not a suggestion.' },
+      { id: 'estou_farto', target: 'estou farto', gloss: 'I’m fed up', shelf: 'just_say' },
     ],
     branches: [
       { target: 'Vai para casa.', en: 'Go home.' },
@@ -1993,8 +2057,8 @@ export const SWEARING: Root[] = [
       'The famous half is FODA-SE. The half you will use every day is ESQUECI-ME. They are built identically — verb, hyphen, little pronoun — and once you can see that hyphen you can take apart half of spoken Portuguese.',
     subtext: 'Frustration at the situation, not at a person. Nobody is being insulted here.',
     extracts: [
-      { id: 'foda_se', target: 'Foda-se', gloss: 'for f***’s sake' },
-      { id: 'esqueci_me', target: 'esqueci-me', gloss: 'I forgot' },
+      { id: 'foda_se', target: 'Foda-se', gloss: 'for f***’s sake', shelf: 'just_say' },
+      { id: 'esqueci_me', target: 'esqueci-me', gloss: 'I forgot', shelf: 'doing', lemma: 'esquecer-se', form: 'I, past' },
     ],
     branches: [
       { target: 'Esqueci-me do telemóvel.', en: 'I forgot my phone.' },
@@ -2045,8 +2109,8 @@ export const SWEARING: Root[] = [
       'QUE SE FODA is a dismissal, and NA MESMA is the shrug that follows it — “all the same”, “anyway”. NA MESMA survives long after you stop wanting the first half.',
     subtext: 'Not anger. A decision, made out loud, that something no longer gets a vote.',
     extracts: [
-      { id: 'que_se_foda', target: 'Que se foda', gloss: 'sod it' },
-      { id: 'na_mesma', target: 'na mesma', gloss: 'anyway / all the same' },
+      { id: 'que_se_foda', target: 'Que se foda', gloss: 'sod it', shelf: 'just_say' },
+      { id: 'na_mesma', target: 'na mesma', gloss: 'anyway / all the same', shelf: 'small_words' },
     ],
     branches: [
       { target: 'Vou na mesma.', en: 'I’m going anyway.' },
@@ -2078,8 +2142,8 @@ export const SWEARING: Root[] = [
       'QUE ___ É ISTO? is a fixed frame with one swappable slot. Drop in caralho and you are furious; drop in raio and you are merely baffled. ISTO — “this” — is the piece you will use hourly.',
     subtext: 'Aimed at the object, not the person. Pointed at a person it becomes a challenge.',
     extracts: [
-      { id: 'que_caralho', target: 'Que caralho', gloss: 'what the f***' },
-      { id: 'isto', target: 'isto', gloss: 'this', rung: 1 },
+      { id: 'que_caralho', target: 'Que caralho', gloss: 'what the f***', shelf: 'just_say' },
+      { id: 'isto', target: 'isto', gloss: 'this', rung: 1, shelf: 'people' },
     ],
     branches: [
       { target: 'O que é isto?', en: 'What is this?' },
@@ -2129,8 +2193,8 @@ export const SWEARING: Root[] = [
       'Portuguese has two words for “is”. ESTOU is how things happen to be right now; É is how things simply are. The same insult swings between them: hoje ESTOU uma merda is a bad day, o filme É uma merda is a review.',
     subtext: 'Ordinary, unremarkable complaining. This is closer to “rough” than to obscene.',
     extracts: [
-      { id: 'uma_merda', target: 'uma merda', gloss: 'crap / rubbish' },
-      { id: 'hoje', target: 'Hoje', gloss: 'today' },
+      { id: 'uma_merda', target: 'uma merda', gloss: 'crap / rubbish', shelf: 'just_say' },
+      { id: 'hoje', target: 'Hoje', gloss: 'today', shelf: 'when' },
     ],
     branches: [
       { target: 'Hoje não.', en: 'Not today.' },
@@ -2164,8 +2228,8 @@ export const SWEARING: Root[] = [
       'Everything in this sentence agrees with who you are talking to. Um becomes uma, cabrão becomes cabra. The frame É S UM GRANDE ___ is the same one you use for compliments — és um grande amigo.',
     subtext: 'Register does all the work. Between friends it is warmth; anywhere else it is a genuine insult.',
     extracts: [
-      { id: 'grande', target: 'grande', gloss: 'utter / total (in front of the word)' },
-      { id: 'cabrao', target: 'cabrão', gloss: 'bastard' },
+      { id: 'grande', target: 'grande', gloss: 'utter / total', shelf: 'describing', note: 'Goes in front of the word, not after it — um grande cabrão. Behind it, it just means big.' },
+      { id: 'cabrao', target: 'cabrão', gloss: 'bastard', shelf: 'just_say', note: 'Genuinely strong. Between friends it can be affectionate; to a stranger it is not.' },
     ],
     branches: [
       { target: 'És uma grande cabra.', en: 'You’re an utter cow.' },
@@ -2238,8 +2302,8 @@ export const FLIRTING_M2F: Root[] = [
       'ESTÁS is the version of “are” that means right now. It is the difference between a compliment and a pronouncement, and it is also how you ask anybody how they are.',
     subtext: 'Light, unweighted, easy to say and easy to receive. Nothing rides on it.',
     extracts: [
-      { id: 'estas', target: 'Estás', gloss: 'you are (right now)' },
-      { id: 'gira', target: 'gira', gloss: 'lovely — said about a woman' },
+      { id: 'estas', target: 'Estás', gloss: 'you are', shelf: 'doing', lemma: 'estar', form: 'you' },
+      { id: 'gira', target: 'gira', gloss: 'lovely', shelf: 'describing', lemma: 'giro', form: 'feminine' },
     ],
     branches: [
       { target: 'Estás linda.', en: 'You look beautiful.' },
@@ -2282,8 +2346,8 @@ export const FLIRTING_M2F: Root[] = [
       'POSSO is “may I”, and it is the single most useful word for arriving somewhere polite. The -TE on the end is who you are doing it for.',
     subtext: 'Confident but asking. The question mark is doing real work.',
     extracts: [
-      { id: 'posso', target: 'Posso', gloss: 'may I / can I' },
-      { id: 'oferecer_te', target: 'oferecer-te', gloss: 'get you / offer you' },
+      { id: 'posso', target: 'Posso', gloss: 'may I / can I', shelf: 'doing', lemma: 'poder', form: 'I' },
+      { id: 'oferecer_te', target: 'oferecer-te', gloss: 'get you / offer you', shelf: 'doing', lemma: 'oferecer', form: 'with you attached' },
     ],
     branches: [
       { target: 'Posso sentar-me?', en: 'May I sit down?' },
@@ -2312,8 +2376,8 @@ export const FLIRTING_M2F: Root[] = [
       'GOSTAVA DE is “I would like to”, and it is the politest three syllables in the language. It works on a person, a coffee, or a table by the window.',
     subtext: 'Open, unpressured, and completely clear about what is being asked.',
     extracts: [
-      { id: 'gostava_de', target: 'Gostava de', gloss: 'I’d like to' },
-      { id: 'ver_te', target: 'te ver', gloss: 'see you' },
+      { id: 'gostava_de', target: 'Gostava de', gloss: 'I’d like to', shelf: 'doing', lemma: 'gostar', form: 'I, softened' },
+      { id: 'ver_te', target: 'te ver', gloss: 'see you', shelf: 'doing', lemma: 'ver', form: 'with you attached' },
     ],
     branches: [
       { target: 'Gostava de te conhecer melhor.', en: 'I’d like to get to know you better.' },
@@ -2357,13 +2421,13 @@ export const FLIRTING_M2F: Root[] = [
       'VIM AQUI PARA is how you explain why you are standing somewhere. The film made it a proposal; the sentence itself is just a reason.',
     subtext: 'Earnest, slightly exposed, and entirely deliberate. This one is meant to cost something.',
     extracts: [
-      { id: 'vim_aqui', target: 'Vim aqui', gloss: 'I came here' },
-      { id: 'pedir_te', target: 'te pedir', gloss: 'to ask you' },
+      { id: 'vim_aqui', target: 'Vim aqui', gloss: 'I came here', shelf: 'doing', lemma: 'vir', form: 'I, past' },
+      { id: 'pedir_te', target: 'te pedir', gloss: 'to ask you', shelf: 'doing', lemma: 'pedir', form: 'with you attached' },
     ],
     branches: [
       { target: 'Vim aqui para te ver.', en: 'I came here to see you.' },
-      { target: 'Posso pedir-te uma coisa?', en: 'Can I ask you something?' },
-      { target: 'Vim para ficar.', en: 'I came to stay.' },
+      { target: 'Posso pedir-te uma coisa?', en: 'Can I ask you something?', demonstrates: ['pedir_te', 'posso'] },
+      { target: 'Vim para ficar.', en: 'I came to stay.', demonstrates: ['vim_aqui'] },
       { target: 'Vim para te pedir ajuda.', en: 'I came to ask you for help.' },
     ],
     reinforces: ['posso'],
@@ -2388,8 +2452,8 @@ export const FLIRTING_M2F: Root[] = [
       'Both halves are ordinary sentences you will reuse constantly: how you feel right now, and what you are not good at. Neither is about romance.',
     subtext: 'Disarming rather than weak. Said lightly it is the most effective line here.',
     extracts: [
-      { id: 'estou_nervoso', target: 'Estou nervoso', gloss: 'I’m nervous — a man saying it' },
-      { id: 'nao_sou_bom', target: 'não sou bom', gloss: 'I’m not good' },
+      { id: 'estou_nervoso', target: 'Estou nervoso', gloss: 'I’m nervous', shelf: 'just_say', note: 'A man saying it. A woman says estou nervosa.' },
+      { id: 'nao_sou_bom', target: 'não sou bom', gloss: 'I’m not good', shelf: 'just_say', note: 'A woman says não sou boa.' },
     ],
     branches: [
       { target: 'Não sou bom a dançar.', en: 'I’m not a good dancer.' },
@@ -2418,13 +2482,13 @@ export const FLIRTING_M2F: Root[] = [
       'DÁS-ME is “will you give me”, with the ME hooked on the back. O TEU is “your”, and it changes shape to match whatever you are asking for.',
     subtext: 'Direct and unembarrassed. Hesitating here reads worse than asking.',
     extracts: [
-      { id: 'das_me', target: 'Dás-me', gloss: 'will you give me' },
-      { id: 'o_teu', target: 'o teu', gloss: 'your' },
+      { id: 'das_me', target: 'Dás-me', gloss: 'will you give me', shelf: 'doing', lemma: 'dar', form: 'you' },
+      { id: 'o_teu', target: 'o teu', gloss: 'your', shelf: 'people' },
     ],
     branches: [
       { target: 'Dás-me o teu Instagram?', en: 'Will you give me your Instagram?' },
       { target: 'Dás-me um minuto?', en: 'Will you give me a minute?' },
-      { target: 'Este é o meu número.', en: 'This is my number.' },
+      { target: 'Este é o meu número.', en: 'This is my number.', demonstrates: ['o_teu'] },
     ],
     helpers: { 'um': 'a', 'minuto': 'minute', 'Este': 'this', 'é': 'is', 'meu': 'my', 'o': 'the', 'número': 'number', 'email': 'email' },
     transfer_prompt: { context: 'She would rather not hand over a phone number yet.', ask: 'Will you give me your email?', answer: 'Dás-me o teu email?' },
@@ -2450,8 +2514,8 @@ export const FLIRTING_F2M: Root[] = [
       'ESTÁS is “are” in the sense of right now. Say és instead and you have promoted a passing compliment into a permanent one.',
     subtext: 'Light and unweighted. Delivered in passing it does far more than delivered solemnly.',
     extracts: [
-      { id: 'giro', target: 'giro', gloss: 'good-looking — said about a man' },
-      { id: 'hoje_estas', target: 'Estás', gloss: 'you are (right now)' },
+      { id: 'giro', target: 'giro', gloss: 'good-looking', shelf: 'describing', lemma: 'giro', form: 'masculine' },
+      { id: 'hoje_estas', target: 'Estás', gloss: 'you are', shelf: 'doing', lemma: 'estar', form: 'you' },
     ],
     branches: [
       { target: 'Estás lindo.', en: 'You look wonderful.' },
@@ -2494,8 +2558,8 @@ export const FLIRTING_F2M: Root[] = [
       'APETECE-TE is the most Portuguese way to invite anyone anywhere. QUALQUER COISA is “anything”, and it keeps the invitation deliberately vague.',
     subtext: 'Casual on purpose. The grammar itself removes the pressure.',
     extracts: [
-      { id: 'apetece_te', target: 'Apetece-te', gloss: 'do you fancy' },
-      { id: 'qualquer_coisa', target: 'qualquer coisa', gloss: 'something / anything' },
+      { id: 'apetece_te', target: 'Apetece-te', gloss: 'do you fancy', shelf: 'doing', lemma: 'apetecer', form: 'to you' },
+      { id: 'qualquer_coisa', target: 'qualquer coisa', gloss: 'something / anything', shelf: 'small_words' },
     ],
     branches: [
       { target: 'Apetece-te um café?', en: 'Do you fancy a coffee?' },
@@ -2538,8 +2602,8 @@ export const FLIRTING_F2M: Root[] = [
       'QUERIA is “I would like”. It is the difference between quero — I want — and something a person can comfortably hear. You will use it every day, mostly about food.',
     subtext: 'Warm and unhurried. Said once and then left alone.',
     extracts: [
-      { id: 'queria', target: 'Queria', gloss: 'I’d like' },
-      { id: 'conhecer_te', target: 'conhecer-te', gloss: 'to get to know you' },
+      { id: 'queria', target: 'Queria', gloss: 'I’d like', shelf: 'doing', lemma: 'querer', form: 'I, softened' },
+      { id: 'conhecer_te', target: 'conhecer-te', gloss: 'to get to know you', shelf: 'doing', lemma: 'conhecer', form: 'with you attached' },
     ],
     branches: [
       { target: 'Queria ver-te outra vez.', en: 'I’d like to see you again.' },
@@ -2568,8 +2632,8 @@ export const FLIRTING_F2M: Root[] = [
       'ÉS is the permanent “are”. It is exactly the verb you avoided for estás lindo, and here it is the right one — which is what makes the pair worth having.',
     subtext: 'Sincere, and worth spending. Said about a joke that was not funny it does the opposite.',
     extracts: [
-      { id: 'es', target: 'És', gloss: 'you are (permanently)' },
-      { id: 'engracado', target: 'engraçado', gloss: 'funny' },
+      { id: 'es', target: 'És', gloss: 'you are', shelf: 'doing', lemma: 'ser', form: 'you', note: 'The permanent one. És engraçado is about him; estás is about tonight.' },
+      { id: 'engracado', target: 'engraçado', gloss: 'funny', shelf: 'describing', note: 'A woman is engraçada.' },
     ],
     branches: [
       { target: 'És muito simpático.', en: 'You’re really nice.' },
@@ -2613,13 +2677,13 @@ export const FLIRTING_F2M: Root[] = [
       'The -INHO ending makes a word smaller, and in doing so makes it friendlier. A cafezinho is not a small coffee; it is a coffee offered warmly.',
     subtext: 'Playful rather than forward. The diminutive is what takes the weight out of it.',
     extracts: [
-      { id: 'beijinho', target: 'beijinho', gloss: 'a little kiss — and how Portugal says hello' },
-      { id: 'da_me', target: 'Dá-me', gloss: 'give me' },
+      { id: 'beijinho', target: 'beijinho', gloss: 'a little kiss', shelf: 'things', gender: 'm', note: 'How Portugal says hello — two of them, one on each cheek.' },
+      { id: 'da_me', target: 'Dá-me', gloss: 'give me', shelf: 'doing', lemma: 'dar', form: 'you, an order' },
     ],
     branches: [
       { target: 'Dois beijinhos.', en: 'Two little kisses.' },
       { target: 'Dá-me um minuto.', en: 'Give me a minute.' },
-      { target: 'Apetece-te um cafezinho?', en: 'Fancy a little coffee?' },
+      { target: 'Apetece-te um cafezinho?', en: 'Fancy a little coffee?', demonstrates: ['beijinho'] },
     ],
     reinforces: ['apetece_te'],
     helpers: { 'Dois': 'two', 'beijinhos': 'little kisses', 'um': 'a', 'minuto': 'minute', 'cafezinho': 'a friendly little coffee' },
@@ -2643,8 +2707,8 @@ export const FLIRTING_F2M: Root[] = [
       'The ending of the verb says who is doing it and the pronoun on the back says who it lands on. Change both and the whole sentence turns around.',
     subtext: 'Confident. Asking him to call is a decision, not a hope.',
     extracts: [
-      { id: 'ligas_me', target: 'Ligas-me', gloss: 'will you call me' },
-      { id: 'logo', target: 'logo', gloss: 'later on / in a bit' },
+      { id: 'ligas_me', target: 'Ligas-me', gloss: 'will you call me', shelf: 'doing', lemma: 'ligar', form: 'you' },
+      { id: 'logo', target: 'logo', gloss: 'later on / in a bit', shelf: 'when' },
     ],
     branches: [
       { target: 'Ligo-te logo.', en: 'I’ll call you later.' },
@@ -2690,8 +2754,8 @@ export const DURAN_DURAN: Root[] = [
       'English IS hungry. Portuguese HAS hunger. And “uma fome de lobo” is a real expression in Portugal, not a translation of the song — which is why this title survives the crossing when most do not. That one swap, ter where English uses to be, carries fome, sede, frio, calor and razão with it.',
     subtext: 'Physical and unfussy. It is also the first thing you will say in a restaurant.',
     extracts: [
-      { id: 'tenho', target: 'tenho', gloss: 'I have' },
-      { id: 'fome', target: 'fome', gloss: 'hunger' },
+      { id: 'tenho', target: 'tenho', gloss: 'I have', shelf: 'doing', lemma: 'ter', form: 'I' },
+      { id: 'fome', target: 'fome', gloss: 'hunger', shelf: 'things', gender: 'f', countable: false },
     ],
     branches: [
       { target: 'Tenho fome.', en: 'I’m hungry.' },
@@ -2744,8 +2808,8 @@ export const DURAN_DURAN: Root[] = [
       'Portugal does not name its weekdays after gods or planets — it counts them. Monday is segunda-feira, the second one. Get this single word and terça, quarta, quinta and sexta arrive free, because you are only counting.',
     subtext: 'Flat, practical admin language — the stuff that decides whether you can make a plan.',
     extracts: [
-      { id: 'segunda_feira', target: 'segunda-feira', gloss: 'Monday' },
-      { id: 'nova', target: 'nova', gloss: 'new', rung: 1 },
+      { id: 'segunda_feira', target: 'segunda-feira', gloss: 'Monday', shelf: 'when', note: 'The second one. Portugal counts its weekdays rather than naming them.' },
+      { id: 'nova', target: 'nova', gloss: 'new', rung: 1, shelf: 'describing', lemma: 'novo', form: 'feminine' },
     ],
     branches: [
       { target: 'Até segunda-feira.', en: 'See you Monday.' },
@@ -2784,8 +2848,8 @@ export const DURAN_DURAN: Root[] = [
       'English keeps changing shape — there is, there are, there was. Portuguese has HÁ, and it does not care how many of the thing there are. It is one syllable, it never agrees with anything, and it is also how Portuguese says “ago”.',
     subtext: 'The question you ask when you can feel something is being left out.',
     extracts: [
-      { id: 'ha', target: 'há', gloss: 'there is / there are' },
-      { id: 'alguma_coisa', target: 'alguma coisa', gloss: 'something' },
+      { id: 'ha', target: 'há', gloss: 'there is / there are', shelf: 'doing', lemma: 'haver', form: 'there is', note: 'Never changes for plural. Há uma, há dois — same word.' },
+      { id: 'alguma_coisa', target: 'alguma coisa', gloss: 'something', shelf: 'small_words' },
     ],
     branches: [
       { target: 'Há um problema.', en: 'There’s a problem.' },
@@ -2841,8 +2905,8 @@ export const DURAN_DURAN: Root[] = [
       'Here is the good bit. If you have met AMANHÃ already, you have been carrying this word around without knowing: amanhã is a + manhã, “to the morning”. The song has just pulled your own vocabulary apart in front of you.',
     subtext: 'The one that quietly proves the whole compounding idea, using a word you already had.',
     extracts: [
-      { id: 'guarda', target: 'guarda', gloss: 'keep / save' },
-      { id: 'manha', target: 'manhã', gloss: 'morning' },
+      { id: 'guarda', target: 'guarda', gloss: 'keep / save', shelf: 'doing', lemma: 'guardar', form: 'you, an order' },
+      { id: 'manha', target: 'manhã', gloss: 'morning', shelf: 'things', gender: 'f' },
     ],
     branches: [
       { target: 'Guarda isto.', en: 'Keep this.' },
@@ -2884,8 +2948,8 @@ export const DURAN_DURAN: Root[] = [
       'Two thirds of this title may already be yours. PRECISO DE came out of Top Gun and AGORA out of Marcus Aurelius — all that has changed is the ending on the verb, which moves the need from you to them: preciso, precisas.',
     subtext: 'Reads like a slogan, works like a lever: it is the “you” form of a verb you already use.',
     extracts: [
-      { id: 'tudo', target: 'tudo', gloss: 'everything / all' },
-      { id: 'precisas', target: 'precisas', gloss: 'you need' },
+      { id: 'tudo', target: 'tudo', gloss: 'everything / all', shelf: 'how_much' },
+      { id: 'precisas', target: 'precisas', gloss: 'you need', shelf: 'doing', lemma: 'precisar', form: 'you' },
     ],
     branches: [
       { target: 'Tudo bem?', en: 'All good?' },
@@ -2940,8 +3004,8 @@ export const DURAN_DURAN: Root[] = [
       'English stacks the description in front: ordinary world. Portuguese puts it behind, almost always — mundo normal, vida nova, café pequeno. Two words in a song title, and the default word order of the whole language is sitting in them.',
     subtext: 'Plain, slightly melancholy, and structurally the most useful thing in the drop.',
     extracts: [
-      { id: 'mundo', target: 'mundo', gloss: 'world' },
-      { id: 'normal', target: 'normal', gloss: 'normal / ordinary' },
+      { id: 'mundo', target: 'mundo', gloss: 'world', shelf: 'things', gender: 'm' },
+      { id: 'normal', target: 'normal', gloss: 'normal / ordinary', shelf: 'describing' },
     ],
     branches: [
       { target: 'Uma vida normal.', en: 'A normal life.' },
@@ -2999,11 +3063,13 @@ export function rootById(id: string): Root | undefined {
 }
 
 /** Every distinct piece the graph can teach, and where it first comes from. */
-export const PIECES: Record<
-  string,
-  { target: string; gloss: string; family: CultureFamily; rung: Rung }
-> = (() => {
-  const out: Record<string, { target: string; gloss: string; family: CultureFamily; rung: Rung }> = {}
+export interface Piece extends Omit<Extract, 'id'> {
+  family: CultureFamily
+  rung: Rung
+}
+
+export const PIECES: Record<string, Piece> = (() => {
+  const out: Record<string, Piece> = {}
   // Lowest rung wins: a piece belongs to the earliest point a learner could have met
   // it, otherwise a rung 2 root would look as though it needed rung 6 knowledge.
   for (const root of ROOTS) {
@@ -3011,7 +3077,8 @@ export const PIECES: Record<
       const rung = e.rung ?? root.rung
       const seen = out[e.id]
       if (!seen || rung < seen.rung) {
-        out[e.id] = { target: e.target, gloss: e.gloss, family: seen?.family ?? root.culture_family, rung }
+        const { id: _id, ...rest } = e
+        out[e.id] = { ...rest, family: seen?.family ?? root.culture_family, rung }
       }
     }
   }
@@ -3467,22 +3534,84 @@ export function sourceOf(pieceId: string): Root | undefined {
   return ROOTS.find((r) => r.extracts.some((e) => e.id === pieceId))
 }
 
+/** Accent-folded and lowercased, so procura matches Procurá and PROCURA alike. */
+export const fold = (s: string): string =>
+  s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/**
+ * Does this line actually show this piece?
+ *
+ * A declared `demonstrates` is the answer and no matching happens. Otherwise it is a
+ * whole-word match against the piece's own surface form and its declared plural —
+ * never a bare includes(), which is what filed "Onde está o meu café?" under é, and
+ * never a lemma-wide match, which would let ele claim "Eles gostam de ti". `copos` is
+ * a declared form of copo; `eles` is a different piece with an id of its own.
+ */
+export function branchShows(branch: Branch, pieceId: string): boolean {
+  if (branch.demonstrates) return branch.demonstrates.includes(pieceId)
+  const piece = PIECES[pieceId]
+  if (!piece) return false
+  const hay = fold(branch.target)
+  // The declared plural wins; otherwise a noun gets the regular +s, so `copos` is
+  // caught without every regular plural in the graph having to be authored by hand.
+  const regular =
+    piece.shelf === 'things' && !piece.plural && !/s$/i.test(piece.target)
+      ? piece.target + 's'
+      : undefined
+  const forms = [piece.target, piece.plural ?? regular]
+    .filter((f): f is string => Boolean(f))
+    .map((f) => fold(f.replace(/[…?]/g, '').trim()))
+    .filter(Boolean)
+  return forms.some((f) =>
+    new RegExp('(^|[^\\p{L}])' + escapeRe(f) + '($|[^\\p{L}])', 'u').test(hay),
+  )
+}
+
 /**
  * Everything a piece lets you say, gathered from every root that demonstrates it.
  *
  * Deliberately drawn across the whole graph rather than the one root it came from:
  * the point of the library is that COMIGO stopped belonging to Top Gun the moment it
- * turned up somewhere else.
+ * turned up somewhere else. Lines from crates the learner has actually opened come
+ * first, because a demonstration you recognise is worth more than one you do not.
  */
-export function linesFor(pieceId: string, limit = 4): Branch[] {
-  const piece = PIECES[pieceId]
-  if (!piece) return []
-  const stem = piece.target.replace(/[…?]/g, '').trim().toLowerCase()
-  const out: Branch[] = []
+export function linesFor(pieceId: string, limit = 6, ownCrates: CultureFamily[] = []): Branch[] {
+  if (!PIECES[pieceId]) return []
+  const own = new Set(ownCrates)
+  const hits: { branch: Branch; mine: boolean }[] = []
   for (const r of ROOTS) {
     for (const b of r.branches) {
-      if (b.target.toLowerCase().includes(stem) && !out.some((o) => o.target === b.target)) out.push(b)
+      if (!branchShows(b, pieceId)) continue
+      if (hits.some((h) => h.branch.target === b.target)) continue
+      hits.push({ branch: b, mine: own.has(r.culture_family) })
     }
   }
-  return out.slice(0, limit)
+  return hits
+    .sort((a, b) => Number(b.mine) - Number(a.mine))
+    .slice(0, limit)
+    .map((h) => h.branch)
+}
+
+/** Every piece that is a form of the same word, the lemma's own entry included. */
+export function formsOf(lemma: string): { id: string; piece: Piece }[] {
+  return Object.entries(PIECES)
+    .filter(([, p]) => p.lemma === lemma)
+    .map(([id, piece]) => ({ id, piece }))
+}
+
+/**
+ * How a noun should be shown: with its article, never as a bare stem, because the
+ * article is the gender and the gender is what makes the word usable.
+ *
+ * Some are taught with an article already attached — "o atraso", "as pessoas" — and
+ * those keep the one they were taught with rather than collecting a second.
+ */
+const ARTICLE = /^(o|a|os|as|um|uma|uns|umas)\s/i
+
+export function displayForm(piece: Piece): string {
+  if (piece.shelf !== 'things' || !piece.gender) return piece.target
+  if (piece.countable === false || ARTICLE.test(piece.target)) return piece.target
+  return (piece.gender === 'f' ? 'uma ' : 'um ') + piece.target
 }

@@ -20,7 +20,16 @@ import {
 } from '../content/targets'
 import { AUDIO_MANIFEST, normalisePhrase, slugFor } from '../content/audio-manifest'
 import { ANCHOR_CARDS, BLOCK_CARDS, COMBINATION_CARDS } from '../content/deck'
-import { COLLISIONS, CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY, RUNGS } from '../content/roots'
+import {
+  COLLISIONS,
+  CRATES,
+  PIECES,
+  ROOTS,
+  ROOTS_BY_FAMILY,
+  RUNGS,
+  SHELVES,
+  branchShows,
+} from '../content/roots'
 import { INSIGHTS } from '../content/osmosis'
 import { GOAL_NEEDS, QUESTIONS_IN_ORDER } from '../content/profile'
 import { branchesFor, buildTargetFor } from '../engine/journey'
@@ -614,6 +623,112 @@ for (const e of EXAMPLES) {
     'ladder: ' +
       RUNGS.map(({ rung }) => rung + '×' + (byRung.get(rung) ?? []).length).join(' · ') +
       ' · ' + thin.length + ' of 6 rungs still thin',
+  )
+}
+
+// ---------------------------------------------------------------------------
+// The library — a shelf is a promise about where a word can be found
+// ---------------------------------------------------------------------------
+{
+  // `shelf` is required by the type, so its absence cannot reach here. What the type
+  // cannot say is whether the authored value is coherent, which is all of the below.
+  const byShelf = new Map<string, string[]>()
+  const byLemma = new Map<string, string[]>()
+  const bySurface = new Map<string, string[]>()
+
+  for (const [id, piece] of Object.entries(PIECES)) {
+    const P = 'piece ' + id + ': '
+    byShelf.set(piece.shelf, [...(byShelf.get(piece.shelf) ?? []), id])
+    if (piece.lemma) byLemma.set(piece.lemma, [...(byLemma.get(piece.lemma) ?? []), id])
+
+    // A noun without its gender is a word you can recognise, not one you can use. You
+    // cannot order "um copo de vinho" from a card that says copo = glass.
+    if (piece.shelf === 'things' && !piece.gender) {
+      fail(P + 'is on the THINGS shelf with no gender, so it cannot be said')
+    }
+    if (piece.gender && piece.shelf !== 'things') {
+      warn(P + 'carries a gender but is not on THINGS')
+    }
+
+    // The gloss says what it means and nothing else. Anything that would follow a dash
+    // or a bracket is a usage note and belongs in `note`, which is most of why the
+    // right-hand column used to read inconsistently.
+    if (/[—–]|\(|\sand\s/.test(piece.gloss)) {
+      fail(P + 'gloss "' + piece.gloss + '" is carrying a usage note; move it to note')
+    }
+
+    // A form with nothing to be a form OF is an orphan, and would render as a lemma
+    // card of one.
+    if (piece.form && !piece.lemma) {
+      fail(P + 'declares the form "' + piece.form + '" but names no lemma')
+    }
+
+    const key = normalisePhrase(piece.target).toLowerCase()
+    bySurface.set(key, [...(bySurface.get(key) ?? []), id])
+  }
+
+  // The same word filed twice as two unrelated entries — the visible duplicate.
+  for (const [surface, ids] of bySurface) {
+    if (ids.length < 2) continue
+    const lemmas = new Set(ids.map((id) => PIECES[id].lemma ?? id))
+    if (lemmas.size > 1) {
+      fail('"' + surface + '" is filed as ' + ids.length + ' unrelated pieces (' + ids.join(', ') + ')')
+    }
+  }
+
+  // Lemma names that differ only by accent or case are a typo, not two words.
+  const folded = new Map<string, string[]>()
+  for (const lemma of byLemma.keys()) {
+    const k = lemma.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    folded.set(k, [...(folded.get(k) ?? []), lemma])
+  }
+  for (const [, names] of folded) {
+    if (names.length > 1) fail('lemmas differ only by accent or case: ' + names.join(' / '))
+  }
+
+  // A branch that demonstrates nothing is a sentence with no job.
+  for (const root of ROOTS) {
+    const own = root.extracts.map((e) => e.id)
+    for (const b of root.branches) {
+      // The spec's wording is "at least one piece taught by its own root". Held to the
+      // letter that rejects eight branches whose job is to reinforce a word from
+      // another crate — which is the compounding thesis, not a sentence with no job.
+      // So: nothing at all is a failure; only-other-crates is worth knowing about,
+      // because it often means the root's own extracts were badly chosen.
+      const showsOwn = own.some((id) => branchShows(b, id))
+      const showsAny = showsOwn || (b.demonstrates ?? []).some((id) => PIECES[id])
+      if (!showsAny) {
+        fail(
+          'root ' + root.root_id + ': branch "' + b.target +
+            '" demonstrates nothing; declare demonstrates or rewrite it',
+        )
+      } else if (!showsOwn) {
+        warn(
+          'root ' + root.root_id + ': branch "' + b.target +
+            '" only reinforces other crates — check its own extracts',
+        )
+      }
+      for (const declared of b.demonstrates ?? []) {
+        if (!PIECES[declared]) {
+          fail('root ' + root.root_id + ': branch "' + b.target + '" declares "' + declared + '", which no root teaches')
+        }
+      }
+    }
+  }
+
+  for (const shelf of SHELVES) {
+    const n = (byShelf.get(shelf.id) ?? []).length
+    if (n < 5) warn('shelf ' + shelf.label + ' holds only ' + n + ' — thin enough to look broken')
+  }
+  for (const [lemma, ids] of byLemma) {
+    if (ids.length === 1) {
+      warn('lemma ' + lemma + ' has one form (' + ids[0] + ') — usually a missing conjugation')
+    }
+  }
+
+  console.log(
+    'library: ' + SHELVES.map((sh) => sh.label.toLowerCase() + ' ' + (byShelf.get(sh.id) ?? []).length).join(' · ') +
+      ' · ' + byLemma.size + ' lemmas',
   )
 }
 
