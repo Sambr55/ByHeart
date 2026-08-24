@@ -117,7 +117,7 @@ export default function AdminPage() {
           onChange={(e) => setKey(e.target.value)}
           placeholder="Admin key"
           type="password"
-          className="flex-1 rounded border border-line bg-surface px-3 py-2 font-mono text-xs text-fg outline-none focus:border-accent"
+          className="flex-1 rounded border border-line bg-surface px-3 py-3 font-mono text-xs text-fg outline-none focus:border-accent"
         />
         <button
           type="button"
@@ -194,7 +194,7 @@ export default function AdminPage() {
                       .map((r) => (
                         <li
                           key={r.key + q.id}
-                          className="rounded border border-line bg-surface px-3 py-2 text-sm"
+                          className="rounded border border-line bg-surface px-3 py-3 text-sm"
                         >
                           <span className="block text-[0.6rem] uppercase tracking-wider text-muted">
                             {r.tester} · started with {familyLabel(r.session?.affinity?.next_world_pre)}
@@ -211,7 +211,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={csv}
-            className="tap-target eyebrow mt-6 w-full rounded border border-line px-5 py-4 text-fg"
+            className="tap-target eyebrow mt-6 w-full rounded border border-line px-5 py-3 text-fg"
           >
             DOWNLOAD CSV
           </button>
@@ -228,7 +228,7 @@ function familyLabel(id?: string) {
 
 function Line({ k, v }: { k: string; v: string }) {
   return (
-    <div className="border-b border-line/50 pb-2 last:border-0">
+    <div className="border-b border-line/50 pb-3 last:border-0">
       <dt className="text-xs text-muted">{k}</dt>
       <dd className="mt-1">{v}</dd>
     </div>

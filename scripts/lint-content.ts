@@ -21,7 +21,6 @@ import {
   TARGETS,
 } from '../content/targets'
 import { AUDIO_MANIFEST, normalisePhrase, slugFor } from '../content/audio-manifest'
-import { ANCHOR_CARDS, BLOCK_CARDS, COMBINATION_CARDS } from '../content/deck'
 import {
   COLLISIONS,
   CRATES,
@@ -351,25 +350,18 @@ for (const b of NOT_REINFORCED_IN_BOND) {
   }
 }
 
-// --- deck ------------------------------------------------------------------
-for (const b of BLOCK_ORDER) {
-  if (!BLOCK_CARDS[b]) fail('No deck card for block ' + b)
-}
-for (const card of [...ANCHOR_CARDS, ...COMBINATION_CARDS, ...Object.values(BLOCK_CARDS)]) {
-  if (!card.block_ids.length) fail('Deck card ' + card.card_id + ' references no block')
-  for (const b of card.block_ids) {
-    if (!TARGETS[b]) fail('Deck card ' + card.card_id + ' references unknown block ' + b)
-  }
-  // The front is the cue, so it must not leak any word from its own answer.
-  const answerWords = new Set(
-    card.reveal.flatMap((r) => normalisePhrase(r.pt).split(/[^\p{L}]+/u)).filter(Boolean),
-  )
-  const frontWords = normalisePhrase(card.front).split(/[^\p{L}]+/u).filter(Boolean)
-  const leaked = frontWords.filter((w) => answerWords.has(w) && w.length > 2)
-  if (leaked.length) {
-    fail('Deck card ' + card.card_id + ' front leaks its answer: ' + leaked.join(', '))
-  }
-}
+/*
+  The deck is gone, and so are the four routes that rendered it.
+
+  /tg, /m2, /deck and /recall ran on the two-mission content model this product left
+  behind. They had no way out — no menu, no back link — and /deck and /recall both still
+  said "START MISSION 01" on a full-width button. Nineteen components and modules were
+  reachable only from them.
+
+  content/missions and content/targets stay, because the rules below still assert things
+  worth asserting about the ten building blocks and the audio manifest is built from
+  them. The UI that consumed them does not.
+*/
 
 // --- audio -----------------------------------------------------------------
 const slugs = new Set(AUDIO_MANIFEST.map((a) => a.slug))
@@ -385,9 +377,6 @@ for (const a of AUDIO_MANIFEST) {
 const spoken = new Set<string>()
 for (const m of MISSION_ORDER) {
   for (const s of MISSIONS[m].screens) sentencesOf(s).forEach((x) => spoken.add(x))
-}
-for (const card of [...ANCHOR_CARDS, ...COMBINATION_CARDS, ...Object.values(BLOCK_CARDS)]) {
-  card.reveal.forEach((r) => spoken.add(r.pt))
 }
 for (const phrase of spoken) {
   if (!slugs.has(slugFor(phrase))) {

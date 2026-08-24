@@ -26,6 +26,47 @@ const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
 
 const problems: string[] = []
 
+/**
+ * Anything you can tap that is smaller than a thumb.
+ *
+ * Nothing measured this, so 33 of 135 interactive elements sat under 44px — almost all
+ * of them the back link in the header, which is the control a person reaches for most
+ * and the one hardest to hit while walking.
+ *
+ * Zero-sized and hidden elements are skipped: a control that is not on screen is not a
+ * tap target, and a menu that has not been opened would otherwise report every row.
+ */
+async function tinyTargets(page: Page): Promise<string[]> {
+  return page.$$eval(
+    'a[href], button, input, select, textarea, summary, [role="button"]',
+    (els) =>
+      els
+        .map((e) => {
+          const r = e.getBoundingClientRect()
+          const s = getComputedStyle(e)
+          if (s.display === 'none' || s.visibility === 'hidden' || !r.width || !r.height) return null
+          // The Next.js dev-tools launcher is not part of the product, and this suite
+          // runs against the dev server. Excluded by its own attributes rather than by
+          // size, so a real 32px control is never mistaken for it.
+          if (e.closest('nextjs-portal') || e.hasAttribute('data-next-mark') || e.id.startsWith('next-')) {
+            return null
+          }
+          if (r.width >= 44 && r.height >= 44) return null
+          // An inline link inside a paragraph is text, not a control, and giving it a
+          // 44px box would break the line it sits in.
+          const inProse = e.tagName === 'A' && getComputedStyle(e).display === 'inline'
+          if (inProse) return null
+          const text = (e.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 28)
+          return (
+            '<' + e.tagName.toLowerCase() + '> ' +
+            Math.round(r.width) + 'x' + Math.round(r.height) +
+            ' "' + text + '" needs .tap-target'
+          )
+        })
+        .filter(Boolean) as string[],
+  )
+}
+
 /** A learner sitting at a given stage, with the deal accepted so /crates opens. */
 function seedFor(stage: number) {
   // rungReached is one above the highest cleanly released rung, so release stage-1.
@@ -110,6 +151,21 @@ for (const width of WIDTHS) {
         problems.push(route + ' @' + width + ' stage ' + stage + ' — ' + c)
         console.log('  ' + route.padEnd(11) + '✗ ' + c)
       }
+      /*
+        And can a thumb hit it?
+
+        Measured only at the narrowest width, once — a control's size does not change
+        with the viewport, and reporting the same button four times per stage would bury
+        the result. 44px is the figure both Apple and WCAG land on, and .tap-target
+        already enforces it; the ones that fail are the ones that never got the class.
+      */
+      if (width === WIDTHS[0] && stage === 1) {
+        for (const t of await tinyTargets(page)) {
+          problems.push(route + ' — ' + t)
+          console.log('  ' + route.padEnd(11) + '✗ ' + t)
+        }
+      }
+
       const bad = await offenders(page)
       if (bad) {
         const first = bad.out[0]

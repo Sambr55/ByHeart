@@ -139,7 +139,7 @@ export function Shelves({
                     key={e.key}
                     className={
                       'pt ' +
-                      (isNew ? 'text-telha' : e.owned ? 'text-accent/80' : 'text-muted/50')
+                      (isNew ? 'text-telha' : e.owned ? 'text-accent' : 'text-muted')
                     }
                   >
                     {e.head.lemma ?? displayForm(e.head)}

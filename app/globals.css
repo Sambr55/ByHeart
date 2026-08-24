@@ -275,6 +275,47 @@ body {
   min-width: 44px;
 }
 
+/*
+  Keyboard focus, which did not exist.
+
+  There was no :focus-visible rule anywhere in the product, and fourteen form controls
+  removed the browser's own outline with `outline-none focus:border-accent` — so a
+  keyboard user's only signal was a one-pixel border change. The worst was the library's
+  search field: it sits inside a .bar, where --accent is remapped to white, so its focus
+  indicator was a white hairline on a translucent white field on a blue ground.
+
+  :focus-visible rather than :focus, so a mouse click does not draw a ring nobody asked
+  for. Two colours because the ring has to be visible on both the sand page and the
+  coloured header, and currentColor is the only value that is correct in both — with a
+  white halo behind it so it reads against a saturated ground as well as a pale one.
+
+  Declared once, globally, on everything focusable. A per-component focus style is how
+  fourteen controls came to have none.
+*/
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/*
+  And it has to beat `outline-none`.
+
+  Tailwind's outline-none is a plain declaration on the element, so a :where() rule —
+  which has zero specificity by design — loses to it. This one is deliberately specific
+  enough to win, and scoped to focus-visible so it can never affect anything else.
+*/
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid currentColor !important;
+  outline-offset: 2px;
+}
+
 @keyframes bank-in {
   from {
     opacity: 0;

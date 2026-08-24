@@ -34,10 +34,10 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
   return (
     <main
       data-stage="REAL WORLD"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 bg-bg px-5 py-12 text-fg"
+      className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 bg-bg px-5 py-10 text-fg"
     >
       <div>
-        <p className="eyebrow text-muted">SAID COLD, WITH NOTHING ON SCREEN</p>
+        <p className="eyebrow text-muted">SAID COLD</p>
         <h1 className="display mt-3 text-balance text-3xl">
           {card.count} {card.count === 1 ? 'thing' : 'things'} they can say in Portuguese.
         </h1>
@@ -45,7 +45,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
 
       <ul className="flex flex-col gap-3">
         {card.lines.map((l) => (
-          <li key={l.pt} className="rounded border border-line bg-surface px-4 py-4">
+          <li key={l.pt} className="rounded border border-line bg-surface px-4 py-3">
             <p className="pt text-lg text-accent">{l.pt}</p>
             <p className="mt-1 text-sm text-muted">{l.en}</p>
           </li>
@@ -55,7 +55,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
       <p className="text-sm leading-relaxed text-muted">
         Learned off{' '}
         {card.worlds === 1 ? 'one thing they already knew' : card.worlds + ' completely unrelated things'} —
-        films, songs, whatever was already in their head. No streak involved.
+        whatever was already in their head. No streak involved.
       </p>
 
       <div className="border-t border-line pt-6">

@@ -35,15 +35,15 @@ export default function NotFound() {
       <div className="flex flex-col gap-3">
         <Link
           href="/club"
-          className="tap-target eyebrow block w-full rounded bg-accent px-5 py-4 text-center text-accent-ink"
+          className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >
           GO TO DUB CLUB
         </Link>
         <Link
           href="/"
-          className="tap-target eyebrow block w-full rounded border border-line-strong px-5 py-4 text-center text-muted"
+          className="tap-target eyebrow block w-full rounded border border-line-strong px-5 py-3 text-center text-muted"
         >
-          NEW HERE? START AT THE BEGINNING
+          FROM THE TOP
         </Link>
       </div>
     </main>

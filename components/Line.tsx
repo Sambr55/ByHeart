@@ -50,10 +50,10 @@ export function Line({ pushReady }: { pushReady: boolean }) {
   return (
     <main
       data-stage="REAL WORLD"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 py-8 text-fg"
+      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 py-6 text-fg"
     >
       <div className="flex items-center justify-between gap-3">
-        <Link href="/" className="flex shrink-0 items-center gap-1 eyebrow text-muted">
+        <Link href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-muted">
           <span aria-hidden>←</span>
           <Wordmark className="h-3" title="DUB — back to your crates" />
         </Link>
@@ -76,7 +76,7 @@ export function Line({ pushReady }: { pushReady: boolean }) {
       ) : (
         <div className="flex flex-1 flex-col justify-center gap-6">
           {line.kind === 'reach' ? (
-            <p className="eyebrow text-accent">SLIGHTLY BEYOND YOU, ON PURPOSE</p>
+            <p className="eyebrow text-accent">ONE STEP PAST</p>
           ) : family ? (
             <p className="eyebrow text-accent">{family.title}</p>
           ) : null}
@@ -106,7 +106,7 @@ export function Line({ pushReady }: { pushReady: boolean }) {
             setSaid(true)
           }}
           className={
-            'tap-target w-full rounded-full px-5 py-4 text-xs tracking-widest transition ' +
+            'tap-target w-full rounded-full px-5 py-3 text-xs tracking-widest transition ' +
             (said ? 'border border-line text-muted' : 'bg-accent text-accent-ink')
           }
         >
@@ -118,7 +118,7 @@ export function Line({ pushReady }: { pushReady: boolean }) {
 
       <Link
         href="/"
-        className="block text-center text-xs text-muted underline underline-offset-4"
+        className="tap-target block text-center text-xs text-muted underline underline-offset-4"
       >
         Got ten minutes? Open a crate.
       </Link>
@@ -193,7 +193,7 @@ function PushToggle({ ready }: { ready: boolean }) {
       type="button"
       onClick={enable}
       disabled={state === 'busy'}
-      className="tap-target w-full rounded-full border border-line px-5 py-4 text-xs tracking-widest text-muted"
+      className="tap-target w-full rounded-full border border-line px-5 py-3 text-xs tracking-widest text-muted"
     >
       {state === 'busy' ? 'ONE MOMENT…' : 'SEND ME ONE EVERY MORNING'}
     </button>

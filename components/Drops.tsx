@@ -31,8 +31,8 @@ export function Drops() {
       data-stage="CHOICE"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
-      <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-2.5">
-        <Link href="/" className="flex shrink-0 items-center gap-1 eyebrow opacity-80 transition hover:opacity-100">
+      <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-3">
+        <Link href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow opacity-80 transition hover:opacity-100">
           <span aria-hidden>←</span>
           <Wordmark className="h-3" title="DUB — back to your crates" />
         </Link>
@@ -40,7 +40,7 @@ export function Drops() {
         <Menu />
       </header>
 
-      <div className="flex flex-1 flex-col gap-6 px-5 pb-12 pt-7">
+      <div className="flex flex-1 flex-col gap-6 px-5 pb-10 pt-6">
         <div>
           <h1 className="display text-balance text-2xl">Pegged to something real.</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted">
@@ -58,14 +58,14 @@ export function Drops() {
           return (
             <section
               key={c.id}
-              className="rounded border border-accent/45 bg-accent/[0.04] px-5 py-5"
+              className="rounded border border-accent/45 bg-accent/[0.04] px-5 py-6"
             >
               <div className="flex items-start justify-between gap-3">
                 <span className="eyebrow text-accent">
                   GONE {gone_on.getUTCDate()} {MONTHS[gone_on.getUTCMonth()]}
                 </span>
                 {left !== null ? (
-                  <span className="shrink-0 rounded-full border border-accent/60 px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-accent">
+                  <span className="shrink-0 rounded-full border border-accent/60 px-2 py-1 text-[0.55rem] uppercase tracking-wider text-accent">
                     {left <= 1 ? 'last day' : left + ' days left'}
                   </span>
                 ) : null}
@@ -80,7 +80,7 @@ export function Drops() {
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <Link
                   href={"/crates?open=" + c.id}
-                  className="eyebrow text-accent underline underline-offset-4"
+                  className="tap-target eyebrow text-accent underline underline-offset-4"
                 >
                   {/* Into the drop itself. This was href="/" — the one call to action
                       on the page was a loop back to the front door. */}
@@ -91,7 +91,7 @@ export function Drops() {
                     href={d.link}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
+                    className="tap-target text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
                   >
                     {d.link_label ?? 'TICKETS'} ↗
                   </a>
@@ -114,7 +114,7 @@ export function Drops() {
           <section className="flex flex-col gap-3">
             <span className="eyebrow text-muted">Gone</span>
             {gone.map((c) => (
-              <p key={c.id} className="text-xs text-muted/70">
+              <p key={c.id} className="text-xs text-muted">
                 {c.title} — {c.drop!.event}, {c.drop!.place}
               </p>
             ))}

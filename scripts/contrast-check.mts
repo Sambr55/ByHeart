@@ -7,6 +7,9 @@
  * hard to read — so it is held to the text threshold wherever it appears as text, not the
  * softer one for borders.
  */
+import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { join } from 'node:path'
+
 const AA_TEXT = 4.5
 const AA_LARGE = 3.0
 
@@ -33,29 +36,58 @@ function ratio(a: string, b: string): number {
   return (x + 0.05) / (y + 0.05)
 }
 
+/**
+ * The palette, read out of the stylesheet.
+ *
+ * These were hand-copied hex literals, which means this script could pass while the app
+ * rendered something else entirely — the one failure mode a contrast checker must not
+ * have. It parses app/globals.css now: the bare :root block for light, and the
+ * [data-theme='dark'] block for dark.
+ */
+function palette(block: RegExp): Record<string, string> {
+  const css = readFileSync('app/globals.css', 'utf8')
+  const body = block.exec(css)?.[1] ?? ''
+  const out: Record<string, string> = {}
+  for (const m of body.matchAll(/--([a-z-]+):\s*(#[0-9a-fA-F]{3,8})\s*;/g)) out[m[1]] = m[2]
+  return out
+}
+
+const LIGHT = palette(/:root\s*\{([\s\S]*?)\n\}/)
+const DARK = palette(/:root\[data-theme='dark'\]\s*\{([\s\S]*?)\n\}/)
+
+/** Fail loudly rather than silently checking nothing if the stylesheet moves. */
+for (const [name, p] of [['light', LIGHT], ['dark', DARK]] as const) {
+  for (const token of ['bg', 'fg', 'muted', 'accent', 'telha', 'correct', 'coach', 'line-strong']) {
+    if (!p[token]) {
+      console.log('FAIL could not read --' + token + ' from globals.css (' + name + ')')
+      process.exit(1)
+    }
+  }
+}
+
 const THEMES: Record<string, { ground: string; pairs: [string, string, number][] }> = {
   light: {
-    ground: '#efe7d9',
+    ground: LIGHT.bg,
     pairs: [
-      ['ink', '#1a2430', AA_TEXT],
-      ['muted', '#635c50', AA_TEXT],
-      ['azulejo — the Portuguese', '#1f5d8c', AA_TEXT],
-      ['telha', '#a8492f', AA_TEXT],
-      ['right', '#2c6b4a', AA_TEXT],
-      ['coach', '#8a5a12', AA_TEXT],
-      ['line-strong (control edge)', '#8a7c62', AA_LARGE],
+      ['ink', LIGHT.fg, AA_TEXT],
+      ['muted', LIGHT.muted, AA_TEXT],
+      ['azulejo — the Portuguese', LIGHT.accent, AA_TEXT],
+      ['telha', LIGHT.telha, AA_TEXT],
+      ['right', LIGHT.correct, AA_TEXT],
+      ['coach', LIGHT.coach, AA_TEXT],
+      ['line-strong (control edge)', LIGHT['line-strong'], AA_LARGE],
     ],
   },
   dark: {
-    ground: '#171a1f',
+    ground: DARK.bg,
     pairs: [
-      ['ink', '#f4efe6', AA_TEXT],
-      ['muted', '#a09788', AA_TEXT],
-      ['azulejo — the Portuguese', '#7FB3DA', AA_TEXT],
-      ['telha', '#E0876C', AA_TEXT],
-      ['right', '#74C79A', AA_TEXT],
-      ['coach', '#DDA45E', AA_TEXT],
-      ['line-strong (control edge)', '#6b7482', AA_LARGE],
+      ['ink', DARK.fg, AA_TEXT],
+      ['muted', DARK.muted, AA_TEXT],
+      ['azulejo — the Portuguese', DARK.accent, AA_TEXT],
+      ['telha', DARK.telha, AA_TEXT],
+      ['right', DARK.correct, AA_TEXT],
+      ['coach', DARK.coach, AA_TEXT],
+      ['line-strong (control edge)', DARK['line-strong'], AA_LARGE],
     ],
   },
 }
@@ -142,6 +174,61 @@ for (const [name, bg, ink] of BARS) {
     '  ' + (bad.length ? 'FAIL' : 'ok  ') + ' ' + name.padEnd(18) +
       worst.map((w) => w.label.split(' ')[0] + ' ' + w.r.toFixed(2)).join('  ') +
       (bad.length ? '   <- ' + bad.map((w) => w.label + ' needs ' + w.need).join(', ') : ''),
+  )
+}
+
+/**
+ * The alpha variants, which is where the real failure was.
+ *
+ * Tokens were checked at full strength only, and the app uses twenty-one translucent
+ * variants of them — text-fg/75, text-accent/45, text-muted/40. The script reported a
+ * clean sheet while the Portuguese rendered at 2.00:1 on two screens, which is not
+ * "slightly low", it is illegible.
+ *
+ * Only TEXT is checked. A translucent border or background is decoration, and holding
+ * bg-accent/10 to a text threshold would mean deleting every tint in the product.
+ */
+function walk(dir: string, out: string[] = []): string[] {
+  for (const n of readdirSync(dir)) {
+    if (n === 'node_modules' || n === '.next' || n.startsWith('.')) continue
+    const p = join(dir, n)
+    if (statSync(p).isDirectory()) walk(p, out)
+    else if (/\.tsx?$/.test(n)) out.push(p)
+  }
+  return out
+}
+
+const TOKEN: Record<string, keyof typeof LIGHT> = {
+  fg: 'fg',
+  muted: 'muted',
+  accent: 'accent',
+  telha: 'telha',
+  correct: 'correct',
+  coach: 'coach',
+}
+
+const found = new Map<string, string[]>()
+for (const file of [...walk('components'), ...walk('app')]) {
+  const src = readFileSync(file, 'utf8')
+  for (const m of src.matchAll(/\btext-(fg|muted|accent|telha|correct|coach)\/(\d{1,3})\b/g)) {
+    const key = m[1] + '/' + m[2]
+    found.set(key, [...(found.get(key) ?? []), file.split('/').pop() ?? file])
+  }
+}
+
+console.log('\ntranslucent text, composited over its own ground')
+for (const [key, where] of [...found].sort()) {
+  const [name, pct] = key.split('/')
+  const alpha = Number(pct) / 100
+  const l = ratio(over(LIGHT[TOKEN[name]], alpha, LIGHT.bg), LIGHT.bg)
+  const d = ratio(over(DARK[TOKEN[name]], alpha, DARK.bg), DARK.bg)
+  const worst = Math.min(l, d)
+  const ok = worst >= AA_TEXT
+  if (!ok) failures++
+  console.log(
+    '  ' + (ok ? 'ok  ' : 'FAIL') + ' text-' + key.padEnd(12) +
+      'light ' + l.toFixed(2) + '  dark ' + d.toFixed(2) +
+      (ok ? '' : '   <- ' + [...new Set(where)].slice(0, 3).join(', ')),
   )
 }
 

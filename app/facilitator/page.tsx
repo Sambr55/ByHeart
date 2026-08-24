@@ -74,7 +74,7 @@ export default function FacilitatorPage() {
       <TesterLinks />
 
       <Section title="Start a run">
-        <div className="flex items-center justify-between gap-3 py-1.5">
+        <div className="flex items-center justify-between gap-3 py-1">
           <span className="text-sm font-semibold">DUB journey (v0.6)</span>
           <span className="flex gap-3">
             <Pill href="/">open</Pill>
@@ -82,18 +82,15 @@ export default function FacilitatorPage() {
           </span>
         </div>
         {MISSION_ORDER.map((id) => (
-          <div key={id} className="flex items-center justify-between gap-3 py-1.5">
+          <div key={id} className="flex items-center justify-between gap-3 py-1">
             <span className="text-sm">{MISSIONS[id].property_label}</span>
             <span className="flex gap-3">
-              <Pill href={id === 'mission_01' ? '/tg' : '/m2'}>legacy</Pill>
             </span>
           </div>
         ))}
-        <div className="flex items-center justify-between gap-3 py-1.5">
+        <div className="flex items-center justify-between gap-3 py-1">
           <span className="text-sm">Deck / delayed recall</span>
           <span className="flex gap-3">
-            <Pill href="/deck">deck</Pill>
-            <Pill href="/recall">recall</Pill>
           </span>
         </div>
         <p className="mt-3 text-xs text-muted">
@@ -106,7 +103,7 @@ export default function FacilitatorPage() {
         <div className="grid grid-cols-2 gap-1">
           {owned.length ? (
             owned.map((b) => (
-              <div key={b} className="rounded border border-line bg-chip px-2 py-1.5">
+              <div key={b} className="rounded border border-line bg-chip px-2 py-1">
                 <span className="pt block text-xs">{TARGETS[b].label}</span>
                 <span className="block text-[0.6rem] text-muted">
                   {learner.inventory[b]?.latest_state}
@@ -132,7 +129,7 @@ export default function FacilitatorPage() {
           onClick={() => downloadSession({ learner: getLearner() })}
           className="tap-target eyebrow mt-3 w-full rounded border border-line px-3 py-3 text-fg"
         >
-          DOWNLOAD SESSION JSON
+          SESSION JSON
         </button>
         <button
           type="button"
@@ -143,7 +140,7 @@ export default function FacilitatorPage() {
           }}
           className="tap-target eyebrow mt-3 w-full rounded border border-coach/50 px-3 py-3 text-coach"
         >
-          RESET FOR NEXT TESTER
+          RESET TESTER
         </button>
       </Section>
 
@@ -205,7 +202,7 @@ function TesterLinks() {
           onClick={() =>
             navigator.clipboard?.writeText(links.map((l) => l.name + ': ' + l.url).join('\n'))
           }
-          className="tap-target eyebrow mt-3 w-full rounded border border-line px-3 py-2 text-muted"
+          className="tap-target eyebrow mt-3 w-full rounded border border-line px-3 py-3 text-muted"
         >
           COPY ALL
         </button>
@@ -225,7 +222,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex justify-between gap-3 border-b border-line/50 py-1.5 text-sm last:border-0">
+    <div className="flex justify-between gap-3 border-b border-line/50 py-1 text-sm last:border-0">
       <span className="text-muted">{k}</span>
       <span className="font-mono text-xs">{v}</span>
     </div>

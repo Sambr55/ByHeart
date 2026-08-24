@@ -43,7 +43,7 @@ export function Waitlist() {
   return (
     <main
       data-stage="LANDING"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 bg-bg px-5 py-12 text-fg"
+      className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 bg-bg px-5 py-10 text-fg"
     >
       <div>
         <p className="eyebrow text-muted">DUB</p>
@@ -51,7 +51,7 @@ export function Waitlist() {
           Every big app teaches you Brazilian Portuguese. You are moving to Lisbon.
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-fg/85">
-          DUB teaches European Portuguese through the films, music and culture already in
+          DUB teaches European Portuguese through the films, music, books, TV, sport and culture already in
           your head — estás rather than você está, telemóvel, a bica, the 28.
         </p>
       </div>
@@ -70,7 +70,7 @@ export function Waitlist() {
       </div>
 
       {state === 'done' ? (
-        <div className="rounded border border-correct/40 bg-correct/10 px-4 py-4">
+        <div className="rounded border border-correct/40 bg-correct/10 px-4 py-3">
           <p className="text-sm">
             You are on the list. You will hear from us when the recordings are booked, and
             not before — no drip, no nurture sequence.

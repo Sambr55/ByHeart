@@ -27,8 +27,24 @@ export function stripe(): Stripe | null {
   return stripeClient
 }
 
+/**
+ * Is billing safe to switch on?
+ *
+ * This checked the monthly price id alone, so `billingReady` could be true with the
+ * annual id unset — the buttons render, somebody picks annual, and the route 500s at the
+ * one moment a customer is handing over money. A configuration check that does not cover
+ * everything the code can select is not a check.
+ *
+ * Founding is deliberately not required: it is a launch offer that may not be running,
+ * and the checkout route refuses it explicitly rather than substituting another price.
+ */
 export function billingConfigured(): boolean {
-  return Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PRICE_PRO_MONTHLY)
+  return Boolean(
+    process.env.STRIPE_SECRET_KEY &&
+      process.env.STRIPE_WEBHOOK_SECRET &&
+      process.env.STRIPE_PRICE_PRO_MONTHLY &&
+      process.env.STRIPE_PRICE_PRO_ANNUAL,
+  )
 }
 
 export interface Subscription {

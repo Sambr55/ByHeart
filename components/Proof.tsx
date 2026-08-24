@@ -139,12 +139,12 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
         'mx-auto flex w-full max-w-md flex-col gap-6 bg-bg px-5 text-fg ' +
         // Standalone it is the page; inside the journey the step below owns the
         // remaining height, and forcing full height here strands the CTA off-screen.
-        (standalone ? 'min-h-svh py-8' : 'pt-8 pb-2')
+        (standalone ? 'min-h-svh py-6' : 'pt-6 pb-3')
       }
     >
       {standalone ? (
         <div className="flex items-center justify-between gap-3">
-          <Link href="/" className="flex shrink-0 items-center gap-1 eyebrow text-muted">
+          <Link href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-muted">
             <span aria-hidden>←</span>
             <Wordmark className="h-3" title="DUB — back to your crates" />
           </Link>
@@ -173,7 +173,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
               {clean ? ', ' + clean + ' of them right first time' : ''}.
             </p>
 
-            <ul className="mt-6 space-y-3 border-t border-line pt-5">
+            <ul className="mt-6 space-y-3 border-t border-line pt-6">
               {recent.map((p) => (
                 <li key={p.pt}>
                   <p className="pt text-lg font-semibold text-accent">{p.pt}</p>
@@ -191,13 +191,13 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
         )}
         {/* Small, quiet, in the corner. This card is the thing people show somebody, so
             it should say whose it is — without competing with the sentences. */}
-        <Wordmark className="mt-6 h-3 text-muted/50" />
+        <Wordmark className="mt-6 h-3 text-muted" />
       </section>
 
       {/* --------------------------------------------------- how am I doing */}
       {firstTry ? (
         <section className="rounded border border-line p-4">
-          <p className="eyebrow text-muted">HOW IT IS ACTUALLY GOING</p>
+          <p className="eyebrow text-muted">HOW IT GOES</p>
           <p className="mt-3 text-sm">
             You said{' '}
             <span className="font-semibold">
@@ -215,11 +215,11 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
       {/* ------------------------------------------------------- the distance */}
       {distance ? (
         <section className="rounded border border-line p-4">
-          <p className="eyebrow text-muted">WHERE YOU SAID YOU WANTED TO GET TO</p>
+          <p className="eyebrow text-muted">YOUR GOAL</p>
           {distance.done ? (
             <p className="mt-3 text-sm">
               You have everything the graph can give you for {GOAL_LABEL[distance.goal]}. Pick
-              another area and it starts compounding.
+              another crate and it starts compounding.
             </p>
           ) : (
             <p className="mt-3 text-sm">
@@ -237,7 +237,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
         <button
           type="button"
           onClick={share}
-          className="tap-target w-full rounded-full bg-accent px-5 py-4 text-xs tracking-widest text-accent-ink"
+          className="tap-target w-full rounded-full bg-accent px-5 py-3 text-xs tracking-widest text-accent-ink"
         >
           {copied ? 'COPIED' : 'SHARE THIS'}
         </button>
@@ -252,13 +252,13 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
         <div className="mt-auto flex flex-col gap-3">
           <Link
             href="/line"
-            className="tap-target block w-full rounded-full border border-line px-5 py-4 text-center text-xs tracking-widest"
+            className="tap-target block w-full rounded-full border border-line px-5 py-3 text-center text-xs tracking-widest"
           >
             TODAY’S LINE
           </Link>
           <Link
             href="/"
-            className="tap-target block w-full rounded-full border border-line px-5 py-4 text-center text-xs tracking-widest"
+            className="tap-target block w-full rounded-full border border-line px-5 py-3 text-center text-xs tracking-widest"
           >
             KEEP GOING
           </Link>

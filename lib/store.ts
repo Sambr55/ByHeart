@@ -340,20 +340,48 @@ export async function exportUser(userId: string): Promise<Record<string, unknown
 }
 
 /**
- * Anonymise rather than cascade-delete.
+ * Anonymise the learning, delete the person.
  *
- * The learning data — which lines are hard, where people drop out — is what makes
- * the next version better, and it stops being personal the moment it stops being
- * attached to a person. Everything that identifies someone goes; the shape of what
- * they found difficult stays. Voice recordings are the exception: those are their
- * actual voice, so they are removed outright.
+ * The learning data — which lines are hard, where people drop out — is what makes the
+ * next version better, and it stops being personal the moment it stops being attached to
+ * a person. Everything that identifies somebody goes; the shape of what they found
+ * difficult stays.
+ *
+ * WHY THIS LIST IS LONGER THAN IT WAS. This function anonymised the users row rather
+ * than deleting it, which meant every `on delete cascade` in the schema was pointed at a
+ * row that never gets deleted — so not one of them ever fired. Four tables survived a
+ * "delete me" from a file headed "GDPR — one place, so 'delete me' is provably
+ * complete":
+ *
+ *   push_subscriptions — so the notifications kept arriving after the account was gone
+ *   share_cards        — a frozen snapshot of their own sentences, still publicly served
+ *   waitlist           — their raw email, keyed by email, never touched by any cascade
+ *   comp_redemptions   — which code they used, joined straight back to them
+ *
+ * Every one is now deleted explicitly, in the same transaction, rather than trusted to a
+ * cascade that cannot fire. Voice takes are their actual voice and go outright.
+ *
+ * The users row is still kept-and-anonymised deliberately: the anonymised learners,
+ * events and feedback rows are FK-joined to it, and hard-deleting it would either
+ * cascade them away or orphan them. What is left is a uuid, a dead email and a
+ * deleted_at — nothing that identifies anybody.
  */
 export async function deleteUser(userId: string): Promise<void> {
   const sql = db()
   if (!sql) return
   await sql.begin(async (tx) => {
+    // Read the email first: the waitlist is keyed on it and has no user_id at all, so
+    // nothing else in this transaction can find it once the users row is anonymised.
+    const rows = await tx<{ email: string }[]>`select email from users where id = ${userId}`
+    const email = rows[0]?.email ?? null
+
     await tx`delete from voice_takes where user_id = ${userId}`
     await tx`delete from sessions where user_id = ${userId}`
+    // The cascades that never fired, because the row they hang off is never deleted.
+    await tx`delete from push_subscriptions where user_id = ${userId}`
+    await tx`delete from share_cards where user_id = ${userId}`
+    await tx`delete from comp_redemptions where user_id = ${userId}`
+    if (email) await tx`delete from waitlist where email = ${email}`
     await tx`update learners set user_id = null where user_id = ${userId}`
     await tx`update events set user_id = null, device_id = null where user_id = ${userId}`
     await tx`update feedback set user_id = null, device_id = null, tester_label = null where user_id = ${userId}`

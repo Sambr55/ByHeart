@@ -19,10 +19,11 @@
     "comp:issue": "tsx scripts/comp-issue.mts",
     "spacing": "tsx scripts/spacing-check.mts",
     "mobile": "npm run spacing && tsx scripts/mobile-check.mts",
-    "gate": "npm run check && npm run first && npm run mobile && npm run contrast",
+    "gate": "npm run check && npm run words && npm run mobile && npm run contrast",
     "contrast": "tsx scripts/contrast-check.mts",
     "brand": "tsx scripts/brand.mts",
-    "first": "tsx scripts/first-session.mts"
+    "first": "tsx scripts/first-session.mts",
+    "words": "tsx scripts/vocabulary-check.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

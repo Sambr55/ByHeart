@@ -773,6 +773,38 @@ export function rememberPlayed(rootIds: string[], collisionId?: string | null) {
  * Called when somebody switches pair. Kept here rather than inside setPair so that
  * engine/pair.ts stays pure storage and the two modules do not import each other.
  */
+/**
+ * Everything this device holds about a learner, gone.
+ *
+ * Only for account deletion, and it is what the deletion flow was missing entirely: the
+ * server wiped the account and the client kept every byte, so somebody who closed their
+ * account landed on their own Club page with their whole history intact and the redirect
+ * to it working perfectly. It looked exactly like the deletion had failed, on the one
+ * flow where trust IS the product.
+ *
+ * Every namespaced key, not just the current pair's — a learner may have started more
+ * than one — plus the legacy unnamespaced record, the analytics buffer, the chosen pair
+ * and the remembered library scope. Deliberately enumerated by prefix rather than by
+ * calling localStorage.clear(), so a future key that belongs to something else on the
+ * same origin is not swept up by accident.
+ */
+export function wipeLearner() {
+  if (typeof window === 'undefined') return
+  try {
+    const doomed: string[] = []
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i)
+      if (key && key.startsWith('byheart.')) doomed.push(key)
+    }
+    doomed.forEach((k) => window.localStorage.removeItem(k))
+    window.sessionStorage.removeItem('byheart.events.v1')
+    window.sessionStorage.removeItem('byheart.session.v1')
+  } catch {
+    /* private mode, or storage blocked. Nothing to clear. */
+  }
+  resetLearnerCache()
+}
+
 export function resetLearnerCache() {
   state = null
   emit()

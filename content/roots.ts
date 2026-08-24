@@ -3878,6 +3878,14 @@ export interface Collision {
   provenance: string
 }
 
+/**
+ * The cold prompts, re-exported from the graph's own file.
+ *
+ * They live in content/front-door.ts because that is where the front-door copy lives,
+ * and the QA sheet needs them beside everything else a learner can be asked to say.
+ */
+export { NO_CUE_PROMPTS as NO_CUE_LINES } from './front-door'
+
 export const COLLISIONS: Collision[] = [
   /*
     The basics collide with everything, which is the point of them.

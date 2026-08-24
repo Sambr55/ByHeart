@@ -41,44 +41,49 @@ export interface Entitlements {
   crates: number
   /** Live, time-limited drops. Never gated — see the note above. */
   drops: number
-  /** "DUB this" — turning a subtitle or a lyric into a root. Per rolling week. */
-  captures: number
-  /** Recording into the Booth, and hearing community takes rather than one voice. */
+  /**
+   * Recording into the Booth, and hearing a real take rather than a synthetic one.
+   *
+   * The one non-crate flag that survives, because /api/booth actually enforces it. The
+   * feature is a server route with no UI in front of it yet — but the flag is not a lie,
+   * it is a gate on something real and incomplete.
+   */
   booth: boolean
-  /** Download audio and run a session with no signal. */
-  offline: boolean
-  /** Publish a crate under your own name for other people to take. */
-  publish: boolean
   /** Everything social. Never gated. */
   share: true
   morningLine: true
-  feed: true
 }
+
+/*
+  What was here, and why it is gone.
+
+  `captures`, `offline`, `publish` and `feed` were four booleans and a number that no
+  code anywhere read, naming four features that do not exist — and /pro rendered all
+  four to a live page as things a subscription buys. There is no capture feature, no
+  audio file to take offline, no way to publish a crate and no feed.
+
+  A flag that lies about what a plan buys is how a paywall loses trust, and it loses it
+  at the exact moment somebody is deciding whether to believe the rest of the page. So
+  they are deleted rather than left as intentions: when one of them is built, it comes
+  back with the code that honours it.
+*/
 
 export const FREE_ENTITLEMENTS: Entitlements = {
   plan: 'free',
   crates: 3,
   drops: UNLIMITED,
-  captures: 3,
   booth: false,
-  offline: false,
-  publish: false,
   share: true,
   morningLine: true,
-  feed: true,
 }
 
 export const PRO_ENTITLEMENTS: Entitlements = {
   plan: 'pro',
   crates: UNLIMITED,
   drops: UNLIMITED,
-  captures: UNLIMITED,
   booth: true,
-  offline: true,
-  publish: true,
   share: true,
   morningLine: true,
-  feed: true,
 }
 
 /** past_due keeps access: dunning is Stripe's job, and yanking a lesson mid-week is not. */
@@ -93,6 +98,20 @@ export function entitlementsFor(
   return FREE_ENTITLEMENTS
 }
 
+/*
+  What each plan buys, and separately what the money is FOR.
+
+  Four of the five Pro bullets sold features that do not exist — capture, the Booth,
+  offline audio and publishing — rendered verbatim on a live page. The free tier
+  contradicted its own flag too, promising "one live drop at a time" while drops are
+  unlimited and always have been, because charging for the one thing that can be lost by
+  being busy would turn the only real deadline in the product into a punishment.
+
+  `includes` is now only what is true today, and it is short — deliberately. `funding` is
+  what a founding membership pays to build, labelled as exactly that. The distinction is
+  the whole of the founding-member pitch: nobody is being told they are buying real
+  Portuguese voices today, they are being told their money is what records them.
+*/
 export const PLANS = {
   free: {
     id: 'free' as const,
@@ -100,10 +119,9 @@ export const PLANS = {
     price: null,
     line: 'Three crates, a line every morning, and everything you make is yours to share.',
     includes: [
-      'Three crates open at once',
+      'Three crates, chosen by you and yours for good',
       'The morning line, every day',
-      'One live drop at a time',
-      'Three captures a week',
+      'Every live drop, always — those are never gated',
       'Share anything you can say',
     ],
   },
@@ -111,13 +129,18 @@ export const PLANS = {
     id: 'pro' as const,
     name: 'DUB Pro',
     price: null, // filled from Stripe at render time
-    line: 'Every crate, real voices, and it works on a plane.',
+    line: 'Every crate, and it pays for the voices.',
     includes: [
       'Every crate, no limit',
-      'Unlimited capture — any subtitle, any lyric',
-      'The Booth: hear real people, and be one of them',
-      'Offline audio',
-      'Publish your own crates',
+      'Every crate DUB writes from now on',
+      'The morning line and every live drop, same as free',
+      'Share anything you can say',
+    ],
+    /** Not owned today. Said plainly, because a bullet that lies costs more than it sells. */
+    funding: [
+      'Real Lisbon voices, recorded — every line is synthetic today',
+      'The Booth: hear a native take under a sentence, and record your own',
+      'Audio that works with no signal',
     ],
   },
 } as const

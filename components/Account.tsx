@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import type { Entitlements } from '@/lib/entitlements'
 import { PLANS } from '@/lib/entitlements'
+import { wipeLearner } from '@/engine/learner'
 import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
 
@@ -90,7 +91,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col gap-6 px-5 py-10">
       <header className="flex items-center justify-between gap-3">
-        <a href="/" className="flex shrink-0 items-center gap-1 eyebrow text-accent">
+        <a href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-accent">
           <span aria-hidden>←</span>
           <Wordmark className="h-3" title="DUB — back to your crates" />
         </a>
@@ -247,7 +248,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
           </button>
         ) : (
           <>
-            <p className="eyebrow text-accent">CLOSE YOUR ACCOUNT</p>
+            <p className="eyebrow text-accent">CLOSE ACCOUNT</p>
             <p className="text-sm text-fg/80">
               Your recordings are deleted outright and your name and email are wiped. What we keep is
               which lines people find hard, with nothing attached to say it was you — that is what
@@ -268,8 +269,24 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
                   headers: { 'content-type': 'application/json' },
                   body: JSON.stringify({ confirm }),
                 })
-                if (res.ok) window.location.href = '/'
-                else setError('Could not close the account.')
+                if (!res.ok) {
+                  setError('Could not close the account.')
+                  return
+                }
+                /*
+                  Clear the device too, and land on the front door.
+
+                  The server deleted everything and the client kept every byte of it —
+                  so closing an account dropped somebody on /club with their whole
+                  history intact and the redirect back to it working perfectly. It
+                  looked exactly like the deletion had failed, which is the worst
+                  possible outcome for the one flow where trust is the entire product.
+
+                  wipeLearner clears the namespaced record for every language pair, not
+                  just the current one, because a learner may have started more than one.
+                */
+                wipeLearner()
+                window.location.href = '/'
               }}
               className="tap-target rounded-full border border-accent px-5 py-3 text-xs tracking-widest text-accent disabled:opacity-40"
             >
@@ -330,7 +347,7 @@ function RedeemCode() {
           placeholder="ABCD-1234"
           aria-label="Comp code"
           data-testid="comp-code"
-          className="tap-target min-w-0 flex-1 rounded border border-line bg-surface px-3 py-2 text-sm uppercase tracking-widest text-fg placeholder:text-muted focus:border-accent focus:outline-none"
+          className="tap-target min-w-0 flex-1 rounded border border-line bg-surface px-3 py-3 text-sm uppercase tracking-widest text-fg placeholder:text-muted focus:border-accent focus:outline-none"
         />
         <button
           type="button"

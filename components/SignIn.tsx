@@ -43,9 +43,9 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
   }
 
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col justify-center gap-6 px-5 py-12">
+    <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col justify-center gap-6 px-5 py-10">
       <div className="flex items-center justify-between gap-3">
-        <a href="/" className="flex shrink-0 items-center gap-1 eyebrow text-accent">
+        <a href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-accent">
           <span aria-hidden>←</span>
           <Wordmark className="h-3" title="DUB — back to your crates" />
         </a>
@@ -63,7 +63,7 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
       {expired && state === 'idle' ? (
         <div
           data-testid="signin-expired"
-          className="flex flex-col gap-1 rounded border border-coach/60 bg-coach/[0.08] px-4 py-4"
+          className="flex flex-col gap-1 rounded border border-coach/60 bg-coach/[0.08] px-4 py-3"
         >
           <p className="text-sm font-semibold">That link has expired.</p>
           <p className="text-xs leading-relaxed text-muted">
@@ -107,12 +107,12 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full rounded border border-line bg-bg-elev px-4 py-4 text-base outline-none focus:border-accent"
+                className="w-full rounded border border-line bg-bg-elev px-4 py-3 text-base outline-none focus:border-accent"
               />
               <button
                 type="submit"
                 disabled={state === 'sending'}
-                className="tap-target w-full rounded-full bg-accent px-5 py-4 text-xs tracking-widest text-accent-ink disabled:opacity-50"
+                className="tap-target w-full rounded-full bg-accent px-5 py-3 text-xs tracking-widest text-accent-ink disabled:opacity-50"
               >
                 {state === 'sending' ? 'SENDING…' : 'SEND ME A LINK'}
               </button>

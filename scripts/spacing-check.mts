@@ -26,7 +26,19 @@ export const STEPS = {
 } as const
 
 const ALLOWED = new Set(['1', '3', '6', '10', 'auto'])
-const SPACING = /\b(mt|space-y|gap|gap-x|gap-y)-(auto|[0-9]+(?:\.[0-9]+)?)\b/g
+/*
+  Vertical rhythm, wherever it comes from.
+
+  The first version of this rule grepped margin and gap and stopped there, so padding —
+  which is the same decision made on the inside of a box — kept fifteen distinct values
+  across 242 uses while the gate reported zero violations. A scale that covers half the
+  ways to make a gap is not a scale.
+
+  Horizontal padding is deliberately excluded: px is a different problem (it is about the
+  width of a control, not the rhythm of a page) and forcing it onto a four-step vertical
+  scale would make every button the wrong shape.
+*/
+const SPACING = /\b(mt|mb|my|pt|pb|py|space-y|gap|gap-x|gap-y)-(auto|[0-9]+(?:\.[0-9]+)?)\b/g
 /** The three layers, by name. A fourth number is the bug this catches. */
 const Z = /\bz-\[?([0-9]+)\]?\b/g
 const Z_ALLOWED = new Set(['1', '30', '50'])

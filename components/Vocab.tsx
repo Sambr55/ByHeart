@@ -324,9 +324,9 @@ function Library() {
       data-stage="CHOICE"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
-      <header className="bar sticky top-0 z-30 flex flex-col gap-3 px-5 py-2.5">
+      <header className="bar sticky top-0 z-30 flex flex-col gap-3 px-5 py-3">
         <div className="flex items-center gap-3">
-          <Link href="/crates" className="flex shrink-0 items-center gap-1 eyebrow opacity-80 transition hover:opacity-100">
+          <Link href="/crates" className="tap-target flex shrink-0 items-center gap-1 eyebrow opacity-80 transition hover:opacity-100">
             <span aria-hidden>←</span>
             <Wordmark className="h-3" title="DUB — back to your crates" />
           </Link>
@@ -341,7 +341,7 @@ function Library() {
             placeholder="Search Portuguese or English…"
             aria-label="Search the library"
             data-testid="vocab-search"
-            className="tap-target min-w-0 flex-1 rounded border border-line bg-surface px-3 py-2 text-sm text-fg placeholder:text-muted focus:border-accent focus:outline-none"
+            className="tap-target min-w-0 flex-1 rounded border border-line bg-surface px-3 py-3 text-sm text-fg placeholder:text-muted focus:border-accent focus:outline-none"
           />
           {/*
             A segmented control, not a toggle.
@@ -368,7 +368,7 @@ function Library() {
                 aria-pressed={scope === s}
                 onClick={() => chooseScope(s)}
                 className={
-                  'tap-target rounded px-3 py-1.5 text-[0.6rem] uppercase tracking-wider transition ' +
+                  'tap-target rounded px-3 py-1 text-[0.6rem] uppercase tracking-wider transition ' +
                   (scope === s ? 'bg-accent font-semibold text-accent-ink' : 'text-muted')
                 }
               >
@@ -379,7 +379,7 @@ function Library() {
         </div>
       </header>
 
-      <div className="flex flex-1 flex-col gap-6 px-5 pb-12 pt-7">
+      <div className="flex flex-1 flex-col gap-6 px-5 pb-10 pt-6">
         <div>
           <h1 className="display text-balance text-2xl" data-testid="vocab-headline">
             {q
@@ -440,12 +440,12 @@ function Library() {
                     </span>
                   ))}
                   {list.slice(0, 3).map((e) => (
-                    <span key={e.key} className={'pt ' + (e.owned ? 'text-accent/70' : 'text-muted/50')}>
+                    <span key={e.key} className={'pt ' + (e.owned ? 'text-accent' : 'text-muted')}>
                       {e.head.lemma ?? displayForm(e.head)}
                     </span>
                   ))}
                   {list.length > 3 ? <span>+{list.length - 3} more</span> : null}
-                  {!count ? <span className="text-muted/60">{shelf.holds}</span> : null}
+                  {!count ? <span className="text-muted">{shelf.holds}</span> : null}
                 </p>
               ) : null}
 
@@ -478,7 +478,7 @@ function Library() {
                       />
                     ))}
                     {!count ? (
-                      <li className="rounded border border-dashed border-line px-4 py-4 text-xs leading-relaxed text-muted">
+                      <li className="rounded border border-dashed border-line px-4 py-3 text-xs leading-relaxed text-muted">
                         {scope === 'mine'
                           ? 'Nothing of yours here yet. ' + shelf.holds
                           : 'Nothing here yet. ' + shelf.holds}
@@ -569,7 +569,7 @@ function DeadEnd({ term }: { term: string }) {
   return (
     <div
       data-testid="vocab-deadend"
-      className="rounded border border-dashed border-line-strong bg-bg-elev px-4 py-4"
+      className="rounded border border-dashed border-line-strong bg-bg-elev px-4 py-3"
     >
       <p className="text-sm leading-relaxed">
         DUB does not teach <span className="pt text-accent">{term}</span> yet.
@@ -584,10 +584,10 @@ function DeadEnd({ term }: { term: string }) {
 
 function EmptyMine({ onScope }: { onScope: () => void }) {
   return (
-    <div className="rounded border border-line bg-bg-elev px-4 py-5">
+    <div className="rounded border border-line bg-bg-elev px-4 py-6">
       <p className="text-sm leading-relaxed">
         Nothing has landed here yet. A piece becomes yours the first time you use it
-        without the film on screen to copy from.
+        with nothing on screen to copy from.
       </p>
       <div className="mt-3 flex flex-wrap gap-3">
         <Link
@@ -601,7 +601,7 @@ function EmptyMine({ onScope }: { onScope: () => void }) {
           onClick={onScope}
           className="tap-target eyebrow rounded border border-line-strong px-4 py-3 text-muted"
         >
-          SEE EVERYTHING DUB TEACHES
+          SEE EVERYTHING
         </button>
       </div>
     </div>
@@ -720,7 +720,7 @@ function SetRow({
                       ? 'text-accent'
                       : id
                         ? 'text-muted'
-                        : 'text-muted/40 line-through decoration-line')
+                        : 'text-muted line-through decoration-line')
                 }
               >
                 {m}
@@ -851,19 +851,19 @@ function EntryRow({
               one more look
             </span>
           ) : entry.owned ? (
-            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted/70">
+            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
               from {crate?.title ?? 'a crate'}
             </span>
           ) : entry.opensAt ? (
-            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted/70">
+            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
               opens at stage {entry.opensAt}
             </span>
           ) : entry.nearly ? (
-            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-accent/80">
+            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-accent">
               nearly yours
             </span>
           ) : (
-            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted/70">
+            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
               in {crate?.title ?? 'a crate'}
             </span>
           )}
@@ -871,7 +871,7 @@ function EntryRow({
       </button>
 
       {open ? (
-        <div className="mt-1 flex flex-col gap-3 rounded border border-line bg-bg-elev px-4 py-4">
+        <div className="mt-1 flex flex-col gap-3 rounded border border-line bg-bg-elev px-4 py-3">
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(head.target)} text={head.target} size="sm" />
             <span className="min-w-0">
@@ -889,7 +889,7 @@ function EntryRow({
           </p>
 
           {entry.needsLook ? (
-            <p className="rounded border-l-2 border-coach bg-surface px-3 py-2 text-xs leading-relaxed text-fg/85">
+            <p className="rounded border-l-2 border-coach bg-surface px-3 py-3 text-xs leading-relaxed text-fg/85">
               This one did not come back cleanly last time. It is not a mark against you —
               it is the reason the library is worth reopening.
             </p>
@@ -898,7 +898,7 @@ function EntryRow({
           {notes.map((n) => (
             <p
               key={n}
-              className="rounded border-l-2 border-accent/50 bg-surface px-3 py-2 text-xs leading-relaxed text-fg/85"
+              className="rounded border-l-2 border-accent/50 bg-surface px-3 py-3 text-xs leading-relaxed text-fg/85"
             >
               {n}
             </p>
@@ -906,16 +906,16 @@ function EntryRow({
 
           {isLemma ? (
             <div>
-              <p className="eyebrow text-muted">The forms DUB has taught you</p>
+              <p className="eyebrow text-muted">FORMS TAUGHT</p>
               <ul className="mt-3 flex flex-col gap-1">
                 {forms.map((f) => (
                   <li key={f.id} className="flex flex-wrap items-baseline gap-x-3 text-sm">
-                    <span className={'pt ' + (owned.has(f.id) ? 'text-accent' : 'text-muted/60')}>
+                    <span className={'pt ' + (owned.has(f.id) ? 'text-accent' : 'text-muted')}>
                       {f.piece.target}
                     </span>
                     <span className="text-xs text-muted">{f.piece.form ?? f.piece.gloss}</span>
                     {!owned.has(f.id) ? (
-                      <span className="text-[0.55rem] uppercase tracking-wider text-muted/60">
+                      <span className="text-[0.55rem] uppercase tracking-wider text-muted">
                         in {CRATES.find((c) => c.id === f.piece.family)?.title}
                       </span>
                     ) : null}

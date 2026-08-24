@@ -230,7 +230,10 @@ async function main() {
       await press(voice.first(), 'voice')
       // The rule the pair teaches is the reason the screen exists — it must appear.
       const after = await page.evaluate(() => document.body.innerText)
-      if (!/THE RULE UNDERNEATH/.test(after)) {
+      // Matched loosely on purpose: the label is an eyebrow and eyebrows are capped at
+      // fourteen characters, so restating one here verbatim makes this test fail the
+      // next time the copy is tightened. What matters is that the rule appeared.
+      if (!/THE RULE/i.test(after)) {
         problems.push('a voice pair taught no rule at step ' + guard)
       }
     }

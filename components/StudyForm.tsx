@@ -73,8 +73,8 @@ export function StudyForm() {
             <p className="mt-3 font-mono text-[0.6rem] text-muted">{reason}</p>
           ) : null}
           <Link
-            href="/deck"
-            className="tap-target eyebrow mt-6 block w-full rounded bg-accent px-5 py-4 text-center text-accent-ink"
+            href="/proof"
+            className="tap-target eyebrow mt-6 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
             OPEN MY DECK
           </Link>
@@ -113,7 +113,7 @@ export function StudyForm() {
         type="button"
         disabled={Boolean(missing.length) || state === 'sending'}
         onClick={send}
-        className="tap-target eyebrow mt-3 w-full rounded bg-accent px-5 py-4 text-accent-ink disabled:bg-chip disabled:text-muted"
+        className="tap-target eyebrow mt-3 w-full rounded bg-accent px-5 py-3 text-accent-ink disabled:bg-chip disabled:text-muted"
       >
         {state === 'sending' ? 'SENDING…' : 'SEND MY FEEDBACK'}
       </button>
@@ -164,7 +164,7 @@ function Field({
                   aria-pressed={value === p.value}
                   onClick={() => onChange(p.value)}
                   className={
-                    'tap-target flex w-full items-center gap-3 rounded border px-3 py-2.5 text-left text-sm transition ' +
+                    'tap-target flex w-full items-center gap-3 rounded border px-3 py-3 text-left text-sm transition ' +
                     (value === p.value
                       ? 'border-accent bg-accent/10'
                       : 'border-line bg-surface')

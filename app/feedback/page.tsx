@@ -82,7 +82,7 @@ function OpenFeedback() {
         </div>
         <Link
           href="/crates"
-          className="tap-target eyebrow mt-auto block w-full rounded bg-accent px-5 py-4 text-center text-accent-ink"
+          className="tap-target eyebrow mt-auto block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >
           {FEEDBACK_COPY.sent_cta}
         </Link>
@@ -92,7 +92,7 @@ function OpenFeedback() {
 
   return (
     <PageShell eyebrow={FEEDBACK_COPY.eyebrow}>
-      <div className="flex flex-col gap-6 pb-4">
+      <div className="flex flex-col gap-6 pb-3">
       <div>
         <h1 className="display text-balance text-2xl">{FEEDBACK_COPY.headline}</h1>
         <p className="mt-3 text-xs text-muted">
@@ -124,7 +124,7 @@ function OpenFeedback() {
                 </span>
               </button>
               {isOpen ? (
-                <div className="mt-1 rounded border border-line bg-bg-elev px-4 py-4">
+                <div className="mt-1 rounded border border-line bg-bg-elev px-4 py-3">
                   <p className="text-sm leading-relaxed text-fg/85">{h.a}</p>
                   {h.link ? (
                     <Link
@@ -167,7 +167,7 @@ function OpenFeedback() {
                 type="button"
                 onClick={() => setWhere(where === w ? null : w)}
                 className={
-                  'tap-target rounded border px-3 py-2 text-xs transition ' +
+                  'tap-target rounded border px-3 py-3 text-xs transition ' +
                   (where === w
                     ? 'border-accent bg-accent/10 text-accent'
                     : 'border-line text-muted')
@@ -188,7 +188,7 @@ function OpenFeedback() {
                 type="button"
                 onClick={() => setFeel(feel === w ? null : w)}
                 className={
-                  'tap-target rounded border px-3 py-2 text-xs transition ' +
+                  'tap-target rounded border px-3 py-3 text-xs transition ' +
                   (feel === w
                     ? 'border-accent bg-accent/10 text-accent'
                     : 'border-line text-muted')
@@ -223,7 +223,7 @@ function OpenFeedback() {
           data-testid="feedback-send"
           onClick={send}
           disabled={state === 'sending' || !text.trim()}
-          className="tap-target eyebrow w-full rounded bg-accent px-5 py-4 text-accent-ink disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
+          className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
         >
           {FEEDBACK_COPY.send}
         </button>

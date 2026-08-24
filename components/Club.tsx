@@ -166,7 +166,7 @@ function Welcome({ onDone }: { onDone: () => void }) {
         type="button"
         data-testid="club-welcome-cta"
         onClick={onDone}
-        className="tap-target eyebrow w-full rounded bg-accent px-5 py-4 text-accent-ink"
+        className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
       >
         {CLUB.welcome.cta}
       </button>
@@ -314,7 +314,7 @@ function Moves({
             data-tone={m.crate?.tone}
             onClick={() => track('club_move', { move: m.key })}
             className={
-              'tap-target flex items-center gap-3 rounded border px-4 py-4 transition ' +
+              'tap-target flex items-center gap-3 rounded border px-4 py-3 transition ' +
               (m.urgent
                 ? 'border-accent/45 bg-accent/[0.04] hover:border-accent'
                 : 'border-line bg-bg-elev hover:border-accent/50')
@@ -331,7 +331,7 @@ function Moves({
             <span className="min-w-0 flex-1">
               <span className="display block text-base">{m.verb}</span>
               <span className="mt-1 block text-xs text-muted">{m.detail}</span>
-              <span className="mt-1 block text-xs text-muted/80">{m.why}</span>
+              <span className="mt-1 block text-xs text-muted">{m.why}</span>
             </span>
           </Link>
         ))}

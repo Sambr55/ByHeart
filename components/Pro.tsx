@@ -24,16 +24,27 @@ export function Pro() {
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  async function go(path: string, params?: Record<string, string>) {
+  /**
+   * A JSON body, because that is what the route reads.
+   *
+   * This sent the interval as a QUERY STRING on a body-less POST. The route does
+   * `await request.json()`, which throws on an empty body, catches, and falls back to
+   * 'monthly' — so the ANNUAL button charged monthly. Account.tsx had always sent a
+   * body; two components, two wire formats, one route. It was masked only because the
+   * buttons are gated behind billing being configured, which it is not yet.
+   */
+  async function go(path: string, body?: Record<string, string>) {
     setBusy(path)
     setError(null)
     try {
-      const res = await fetch(path + (params ? '?' + new URLSearchParams(params) : ''), {
+      const res = await fetch(path, {
         method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body ?? {}),
       })
-      const body = (await res.json()) as { url?: string; error?: string }
-      if (body.url) window.location.href = body.url
-      else setError(body.error ?? 'That did not work.')
+      const reply = (await res.json()) as { url?: string; error?: string }
+      if (reply.url) window.location.href = reply.url
+      else setError(reply.error ?? 'That did not work.')
     } catch {
       setError('That did not work.')
     }
@@ -47,15 +58,15 @@ export function Pro() {
       data-stage="CHOICE"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
-      <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-2.5">
-        <Link href="/crates" className="eyebrow opacity-80 transition hover:opacity-100">
+      <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-3">
+        <Link href="/crates" className="tap-target eyebrow opacity-80 transition hover:opacity-100">
           ← Crates
         </Link>
         <span className="eyebrow flex-1">DUB</span>
         <Menu />
       </header>
 
-      <div className="flex flex-1 flex-col gap-6 px-5 pb-12 pt-8">
+      <div className="flex flex-1 flex-col gap-6 px-5 pb-10 pt-6">
         {pro ? (
           <div>
             <h1 className="display text-balance text-2xl">You already have it.</h1>
@@ -68,13 +79,13 @@ export function Pro() {
               href="/crates"
               className="eyebrow mt-6 inline-block text-accent underline underline-offset-4"
             >
-              Back to your crates
+              YOUR CRATES
             </Link>
           </div>
         ) : (
           <>
             <div>
-              <p className="eyebrow text-muted">WHAT THE MONEY IS FOR</p>
+              <p className="eyebrow text-muted">THE MONEY</p>
               <h1 className="display mt-3 text-balance text-2xl">
                 Right now, every line in DUB is spoken by a robot.
               </h1>
@@ -103,6 +114,27 @@ export function Pro() {
                   </li>
                 ))}
               </ul>
+
+              {/*
+                What the money builds, kept visibly separate from what it buys.
+
+                Four of the five bullets above used to sell capture, the Booth, offline
+                audio and publishing — none of which exist. They are not deleted from the
+                pitch, they are moved to the half of it that is honest: a founding
+                membership is funding these, and saying so is a better argument than
+                pretending they are already here.
+              */}
+              <div className="mt-6 rounded border border-dashed border-line-strong px-4 py-3">
+                <p className="eyebrow text-muted">NOT BUILT YET</p>
+                <ul className="mt-3 space-y-1">
+                  {PLANS.pro.funding.map((i) => (
+                    <li key={i} className="flex gap-3 text-sm text-muted">
+                      <span aria-hidden>·</span>
+                      {i}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
               {!access.known ? null : access.billingReady ? (
                 <div className="mt-6 flex flex-wrap gap-3">
@@ -134,7 +166,7 @@ export function Pro() {
             </section>
 
             <section>
-              <p className="eyebrow text-muted">WHAT STAYS FREE, ALWAYS</p>
+              <p className="eyebrow text-muted">ALWAYS FREE</p>
               <ul className="mt-3 space-y-1">
                 {PLANS.free.includes.map((i) => (
                   <li key={i} className="flex gap-3 text-sm text-muted">

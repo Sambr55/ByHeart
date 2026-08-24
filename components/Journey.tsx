@@ -120,7 +120,7 @@ function Shell({
           blur, and the blur was what forced the menu overlay to be portalled to the
           body in the first place. */}
       {nav || eyebrow ? (
-        <header className="bar sticky top-0 z-30 px-5 py-2.5">
+        <header className="bar sticky top-0 z-30 px-5 py-3">
           <div className="mx-auto flex w-full max-w-md items-center gap-3">
             {nav && canGoBack ? (
               <button
@@ -193,7 +193,7 @@ function Cta({
       // Tailwind emitted last won, so the gap above the button was whatever the build
       // happened to produce. mt-auto keeps it at the foot of a short screen; the padding
       // gives it clearance on a long one, and padding cannot be swallowed by auto.
-      className="tap-target eyebrow mt-auto w-full rounded bg-accent px-5 py-4 text-accent-ink transition active:scale-[0.99] disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
+      className="tap-target eyebrow mt-auto w-full rounded bg-accent px-5 py-3 text-accent-ink transition active:scale-[0.99] disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
     >
       {label}
     </button>
@@ -203,7 +203,7 @@ function Cta({
 /** A piece, rendered the same way in every cultural world (§16 extraction). */
 function Piece({ pt, gloss }: { pt: string; gloss: string }) {
   return (
-    <span className="inline-flex items-center gap-3 rounded-full border border-accent/60 bg-accent/10 px-3 py-1.5">
+    <span className="inline-flex items-center gap-3 rounded-full border border-accent/60 bg-accent/10 px-3 py-1">
       <span className="pt text-sm font-semibold text-accent">{pt}</span>
       <span className="text-xs text-muted">{gloss}</span>
     </span>
@@ -295,7 +295,7 @@ function PairStep() {
             disabled={!p.available}
             onClick={() => setPicked(p.target_locale)}
             className={
-              'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-4 text-left transition ' +
+              'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-3 text-left transition ' +
               (!p.available
                 ? 'border-line/40 bg-surface/30 opacity-40'
                 : picked === p.target_locale
@@ -310,7 +310,7 @@ function PairStep() {
               <span className="mt-1 block text-xs text-muted">{p.label}</span>
             </span>
             {!p.available ? (
-              <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-muted">
+              <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider text-muted">
                 {PAIR_STEP.soon}
               </span>
             ) : null}
@@ -333,7 +333,7 @@ function PairStep() {
       </div>
 
       {showSources ? (
-        <div className="mt-3 rounded border border-line bg-bg-elev px-4 py-4">
+        <div className="mt-3 rounded border border-line bg-bg-elev px-4 py-3">
           <p className="text-xs leading-relaxed text-muted">{PAIR_STEP.source_note}</p>
           <ul className="mt-3 flex flex-wrap gap-3">
             {SOURCE_CULTURES.map((c) => (
@@ -343,7 +343,7 @@ function PairStep() {
                   'rounded-full border px-2.5 py-1 text-xs ' +
                   (c.available
                     ? 'border-accent/50 text-accent'
-                    : 'border-line text-muted/60')
+                    : 'border-line text-muted')
                 }
               >
                 {c.label} {c.flag}
@@ -389,12 +389,12 @@ function Deal() {
     lines: readonly string[]
     numbered?: boolean
   }) => (
-    <section className="border-t border-line pt-4">
+    <section className="border-t border-line pt-3">
       <p className="eyebrow text-accent">{label}</p>
       <ul className="mt-3 space-y-3">
         {lines.map((line, i) => (
           <li key={line} className="flex gap-3 text-sm leading-relaxed text-fg/85">
-            <span className="shrink-0 pt-0.5 text-xs tabular-nums text-muted">
+            <span className="shrink-0 pt-1 text-xs tabular-nums text-muted">
               {numbered ? i + 1 : '·'}
             </span>
             <span>{line}</span>
@@ -409,16 +409,16 @@ function Deal() {
       <p className="eyebrow text-muted">{DEAL_COPY.eyebrow}</p>
       <p className="display mt-3 text-balance text-3xl">{DEAL_COPY.headline}</p>
 
-      <div className="mt-6 space-y-6 pb-7">
+      <div className="mt-6 space-y-6 pb-6">
         <Block label={DEAL_COPY.how.label} lines={DEAL_COPY.how.steps} numbered />
 
         {/* The ladder, drawn rather than described. */}
-        <section className="border-t border-line pt-4">
+        <section className="border-t border-line pt-3">
           <p className="eyebrow text-accent">{DEAL_COPY.stages.label}</p>
           <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.stages.intro}</p>
           <ol className="mt-6">
             {RUNGS.map((r, i) => (
-              <li key={r.rung} className="relative grid grid-cols-[28px_1fr] gap-x-3 pb-5 last:pb-0">
+              <li key={r.rung} className="relative grid grid-cols-[28px_1fr] gap-x-3 pb-6 last:pb-1">
                 {/* the rail, stopping at the last dot rather than running past it */}
                 {i < RUNGS.length - 1 ? (
                   <span aria-hidden className="absolute left-[13.5px] top-7 bottom-0 w-px bg-line" />
@@ -441,7 +441,7 @@ function Deal() {
                     ) : null}
                   </span>
                   <span className="mt-1 block text-xs leading-relaxed text-muted">{r.what}</span>
-                  <span className="pt mt-1 block text-xs text-accent/80">{r.example}</span>
+                  <span className="pt mt-1 block text-xs text-accent">{r.example}</span>
                 </span>
               </li>
             ))}
@@ -452,12 +452,12 @@ function Deal() {
         </section>
 
         {/* What accumulates — the thing the picker calls a vocabulary bank. */}
-        <section className="border-t border-line pt-4">
+        <section className="border-t border-line pt-3">
           <p className="eyebrow text-accent">{DEAL_COPY.collect.label}</p>
           <ul className="mt-3 space-y-3">
             {DEAL_COPY.collect.lines.map((line) => (
               <li key={line} className="flex gap-3 text-sm leading-relaxed text-fg/85">
-                <span className="shrink-0 pt-0.5 text-xs text-muted">·</span>
+                <span className="shrink-0 pt-1 text-xs text-muted">·</span>
                 <span>{line}</span>
               </li>
             ))}
@@ -637,7 +637,7 @@ function DropClock({ crate, now }: { crate: Crate; now: Date | null }) {
   const left = now ? daysLeft(crate, now) : null
   if (left === null) return null
   return (
-    <span className="shrink-0 rounded-full border border-accent/60 px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-accent">
+    <span className="shrink-0 rounded-full border border-accent/60 px-2 py-1 text-[0.55rem] uppercase tracking-wider text-accent">
       {left <= 1 ? 'last day' : left + ' days left'}
     </span>
   )
@@ -931,7 +931,7 @@ function Picker() {
         genuinely used what the free tier offers.
       */}
       {mounted && access.known && !grouped.open.length ? (
-        <div className="flex flex-col gap-1 rounded border border-line-strong bg-bg-elev px-4 py-4">
+        <div className="flex flex-col gap-1 rounded border border-line-strong bg-bg-elev px-4 py-3">
           <p className="text-sm font-semibold">{PICKER.nothing_open}</p>
           {/*
             It has to consult atLimit before it blames the plan. This message always said
@@ -989,7 +989,7 @@ function Picker() {
                       chooseFamily(f.id)
                     }}
                     className={
-                      'tap-target flex w-full justify-between gap-3 border-l-[3px] border-l-[color:var(--tone)] px-4 py-4 text-left transition ' +
+                      'tap-target flex w-full justify-between gap-3 border-l-[3px] border-l-[color:var(--tone)] px-4 py-3 text-left transition ' +
                       (f.drop
                         ? 'items-start '
                         : 'items-center rounded border ' +
@@ -1049,15 +1049,15 @@ function Picker() {
                       a name and reads as an instruction, where "STAGE 6" is a distance.
                     */}
                     {finished ? (
-                      <span className="shrink-0 rounded-full border border-correct/50 px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-correct">
+                      <span className="shrink-0 rounded-full border border-correct/50 px-2 py-1 text-[0.55rem] uppercase tracking-wider text-correct">
                         done
                       </span>
                     ) : planLocked ? (
-                      <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-muted">
+                      <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider text-muted">
                         PRO
                       </span>
                     ) : unreached || waiting ? (
-                      <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider tabular-nums text-muted">
+                      <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider tabular-nums text-muted">
                         stage {at}
                       </span>
                     ) : f.drop ? (
@@ -1087,7 +1087,7 @@ function Picker() {
                       href={f.drop.link}
                       target="_blank"
                       rel="noreferrer"
-                      className="mb-3 ml-4 inline-block px-0 text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
+                      className="tap-target mb-3 ml-4 inline-block px-0 text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
                     >
                       {f.drop.link_label ?? 'TICKETS'} ↗
                     </a>
@@ -1111,7 +1111,7 @@ function Picker() {
       ) : null}
       {/* One quiet mark at the foot of the list, not one per card — eleven cards would
           be eleven logos and no design. */}
-      <Wordmark className="mx-auto mt-auto h-3 text-muted/40" />
+      <Wordmark className="mx-auto mt-auto h-3 text-muted" />
     </Shell>
   )
 }
@@ -1222,7 +1222,7 @@ function MiniBuild({
   return (
     <div className="mt-6">
       {glosses.length ? (
-        <p className="pt mb-3 text-sm text-accent/80">
+        <p className="pt mb-3 text-sm text-accent">
           {glosses.map(([w, g]) => w.replace(/[.,]/g, '') + ' = ' + g).join('   ·   ')}
         </p>
       ) : null}
@@ -1242,7 +1242,7 @@ function MiniBuild({
                 disabled={state === 'done'}
                 onClick={() => setPlaced((cur) => cur.filter((x) => x.id !== p.id))}
                 className={
-                  'tap-target rounded border px-3 py-2 ' +
+                  'tap-target rounded border px-3 py-3 ' +
                   (state === 'done' ? 'border-correct/50 bg-correct/10' : 'border-accent/50 bg-chip')
                 }
               >
@@ -1251,7 +1251,7 @@ function MiniBuild({
             ))}
           </div>
         ) : (
-          <p className="px-1 py-2 text-xs text-muted">Tap the pieces in order.</p>
+          <p className="px-1 py-3 text-xs text-muted">Tap the pieces in order.</p>
         )}
       </div>
 
@@ -1262,7 +1262,7 @@ function MiniBuild({
               key={t.id}
               type="button"
               onClick={() => setPlaced((cur) => [...cur, t])}
-              className="tap-target rounded border border-line bg-bg-elev px-3 py-2 hover:border-accent/50"
+              className="tap-target rounded border border-line bg-bg-elev px-3 py-3 hover:border-accent/50"
             >
               <span className="pt">{t.text}</span>
             </button>
@@ -1315,10 +1315,23 @@ function MiniBuild({
 }
 
 /** Highlight the extracted pieces where they sit inside the natural Portuguese. */
+/**
+ * The line, with the useful bit standing out of it.
+ *
+ * The contrast between the two used to be made by fading the REST of the line —
+ * text-accent, which measures 2.00:1 on sand. That is not "de-emphasised", it is
+ * unreadable, and it was the Portuguese: the one thing on screen that must never be hard
+ * to read. Twenty-one translucent text variants existed and the contrast script had
+ * never seen one of them.
+ *
+ * The hierarchy is made the other way round now. The rest of the line is muted at full
+ * strength and the piece is accent, bold, and slightly larger — so the difference is
+ * carried by colour and weight rather than by making half the sentence disappear.
+ */
 function Highlighted({
   line,
   pieces,
-  dim = 'text-accent/70',
+  dim = 'text-muted',
 }: {
   line: string
   pieces: string[]
@@ -1350,7 +1363,7 @@ function Highlighted({
     // The useful bit is the bright thing on the screen; the sentence it came out of
     // steps back. It was the wrong way round.
     out.push(
-      <span key={'h' + i} className="font-semibold text-fg">
+      <span key={'h' + i} className="font-semibold text-accent">
         {line.slice(s.at, s.at + s.len)}
       </span>,
     )
@@ -1412,7 +1425,7 @@ function RootBeatView({
           {/* The bridge is mandatory: the learner must be able to trace root -> Portuguese
               before anything is pulled out of it (§10). */}
           <div className="flex flex-col gap-1 rounded border border-line bg-bg-elev p-4">
-            <p className="eyebrow text-accent">WHY IT LANDS THIS WAY</p>
+            <p className="eyebrow text-accent">WHY IT LANDS</p>
             <p className="text-sm leading-relaxed">{root.semantic_bridge}</p>
           </div>
           {root.literal_note ? (
@@ -1468,7 +1481,7 @@ function RootBeatView({
           </p>
         ) : null}
         <p className="pt mt-3 text-balance text-lg">
-          <Highlighted line={root.target} pieces={[e.target]} dim="text-accent/45" />
+          <Highlighted line={root.target} pieces={[e.target]} />
         </p>
 
         <div className="mt-6 flex items-center gap-3">
@@ -1539,7 +1552,7 @@ function RootBeatView({
   if (beat === 'branch') {
     return (
       <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
-        <p className="eyebrow text-muted">BOTH PIECES, BACK IN ONE PLACE</p>
+        <p className="eyebrow text-muted">BOTH PIECES</p>
         <p className="display mt-3 text-balance text-2xl">
           One {root.root_type === 'title' ? 'title' : 'line'}. {root.branches.length} things you can say.
         </p>
@@ -1547,7 +1560,6 @@ function RootBeatView({
           <Highlighted
             line={root.target}
             pieces={root.extracts.map((x) => x.target)}
-            dim="text-accent/45"
           />
         </p>
         <ul className="mt-6 space-y-3">
@@ -1608,14 +1620,14 @@ function RootBeatView({
                 recordVoice(o.signal, o.target)
               }}
               className={
-                'tap-target w-full rounded border px-4 py-4 text-left transition ' +
+                'tap-target w-full rounded border px-4 py-3 text-left transition ' +
                 (choice === o.target ? 'border-accent bg-accent/10' : 'border-line bg-bg-elev')
               }
             >
               <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="eyebrow text-accent">{o.register}</span>
                 {o.safest ? (
-                  <span className="eyebrow rounded-full border border-line px-2 py-0.5 text-muted">
+                  <span className="eyebrow rounded-full border border-line px-2 py-1 text-muted">
                     IF IN DOUBT
                   </span>
                 ) : null}
@@ -1633,7 +1645,7 @@ function RootBeatView({
         </div>
         {(picked || ruleShown) && root.voice_rule ? (
           <div className="animate-bank mt-6 rounded border border-line bg-bg-elev p-4">
-            <p className="eyebrow text-muted">THE RULE UNDERNEATH</p>
+            <p className="eyebrow text-muted">THE RULE</p>
             <p className="mt-3 text-sm">{root.voice_rule}</p>
           </div>
         ) : null}
@@ -1660,7 +1672,10 @@ function RootBeatView({
   // release — the cue is gone
   return (
     <Shell stage="REAL WORLD">
-      <p className="eyebrow text-muted">NO FILM. NO CLUES.</p>
+      {/* This is the release beat and it runs for every crate — swearing, a gig, a book of
+    Stoic advice. It said NO FILM, hard-coded, in the one beat that is never about a
+    film. The proof card already had the medium-agnostic version of this line. */}
+        <p className="eyebrow text-muted">NO CLUES</p>
       <p className="mt-3 text-sm font-semibold">{root.transfer_prompt.context}</p>
       <p className="display mt-3 text-balance text-2xl">“{root.transfer_prompt.ask}”</p>
       <MiniBuild
@@ -1717,7 +1732,7 @@ function VoiceReflection() {
   }
   return (
     <div className="animate-bank mt-6 rounded border border-accent/40 bg-accent/5 p-4">
-      <p className="eyebrow text-accent">WE ARE BEGINNING TO GET YOU</p>
+      <p className="eyebrow text-accent">GETTING YOU</p>
       <p className="mt-3 text-sm">
         You tend to choose {words[lean.lean] ?? lean.lean}. We will lean that way when
         there is a choice.
@@ -1780,7 +1795,7 @@ function Osmosis() {
 
   return (
     <Shell stage="CHOICE">
-      <p className="eyebrow text-accent">YOU WEREN’T TAUGHT THIS. YOU JUST DID IT.</p>
+      <p className="eyebrow text-accent">YOU DID THIS</p>
       <p className="display mt-3 text-balance text-2xl">
         {insights.length === 1
           ? 'One thing you absorbed on the way past.'
@@ -1804,14 +1819,14 @@ function Osmosis() {
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-[0.6rem] uppercase tracking-wider text-muted/70">
+            <p className="mt-3 text-[0.6rem] uppercase tracking-wider text-muted">
               Linguists call this {i.proper_name}. You do not have to.
             </p>
           </section>
         ))}
       </div>
 
-      <p className="mb-2 mt-6 text-sm text-muted">
+      <p className="mb-3 mt-6 text-sm text-muted">
         None of this gets tested. It is already in there.
       </p>
 
@@ -1866,7 +1881,7 @@ function ProfileStep({ which }: { which: 'gender' | 'age' | 'goal' }) {
                 type="button"
                 data-testid={'profile-' + o.id}
                 onClick={() => choose(o.id)}
-                className="tap-target flex w-full items-center justify-between gap-3 rounded border border-line bg-bg-elev px-4 py-4 text-left transition hover:border-accent/50"
+                className="tap-target flex w-full items-center justify-between gap-3 rounded border border-line bg-bg-elev px-4 py-3 text-left transition hover:border-accent/50"
               >
                 <span className="eyebrow">{o.label}</span>
                 {o.sub ? <span className="pt text-sm text-accent">{o.sub}</span> : null}
@@ -1913,13 +1928,13 @@ function ProfileStep({ which }: { which: 'gender' | 'age' | 'goal' }) {
 function GenderPayoff({ gender }: { gender: LanguageGender }) {
   return (
     <div>
-      <p className="eyebrow text-accent">SO THIS IS HOW YOU SPEAK</p>
+      <p className="eyebrow text-accent">HOW YOU SPEAK</p>
       <ul className="mt-3 space-y-3">
         {GENDER_PAYOFF[gender].map((row) => (
           <li key={row.en} className="rounded border border-line bg-bg-elev px-4 py-3">
             <div className="flex flex-wrap items-baseline gap-x-3">
               <span className="pt text-lg text-fg">{row.yours}</span>
-              <span className="pt text-sm text-muted/60 line-through">{row.theirs}</span>
+              <span className="pt text-sm text-muted line-through">{row.theirs}</span>
             </div>
             <span className="mt-1 block text-xs text-muted">{row.en}</span>
           </li>
@@ -1934,7 +1949,7 @@ function AgePayoff({ band }: { band: AgeBand }) {
   const p = AGE_PAYOFF[band]
   return (
     <div>
-      <p className="eyebrow text-accent">SO THIS IS HOW PEOPLE WILL SPEAK TO YOU</p>
+      <p className="eyebrow text-accent">HOW THEY SPEAK</p>
       <p className="display mt-3 text-balance text-xl">{p.headline}</p>
       <p className="mt-3 text-sm leading-relaxed text-muted">{p.body}</p>
       <div className="mt-6 space-y-3">
@@ -1958,7 +1973,7 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
   if (!needs.length) {
     return (
       <div>
-        <p className="eyebrow text-accent">NO DESTINATION, THEN</p>
+        <p className="eyebrow text-accent">NO DESTINATION</p>
         <p className="display mt-3 text-balance text-xl">
           We will keep giving you the things people actually say.
         </p>
@@ -1983,11 +1998,11 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
             <li
               key={n.label}
               className={
-                'flex items-center gap-3 rounded border px-4 py-2.5 text-sm ' +
+                'flex items-center gap-3 rounded border px-4 py-3 text-sm ' +
                 (got ? 'border-correct/40 bg-correct/5' : 'border-line bg-bg-elev/50 text-muted')
               }
             >
-              <span aria-hidden="true" className={got ? 'text-correct' : 'text-muted/50'}>
+              <span aria-hidden="true" className={got ? 'text-correct' : 'text-muted'}>
                 {got ? '✓' : '○'}
               </span>
               {n.label}
@@ -2062,9 +2077,9 @@ function SectionComplete() {
           type="button"
           data-testid="another-crate"
           onClick={() => finishSection('another')}
-          className="tap-target eyebrow mt-6 w-full rounded bg-accent px-5 py-4 text-accent-ink"
+          className="tap-target eyebrow mt-6 w-full rounded bg-accent px-5 py-3 text-accent-ink"
         >
-          PICK ANOTHER AREA
+          ANOTHER CRATE
         </button>
       ) : null}
       {/*
@@ -2076,9 +2091,9 @@ function SectionComplete() {
         type="button"
         data-testid="im-done"
         onClick={() => finishSection('done')}
-        className="tap-target eyebrow mt-3 w-full rounded border border-line px-5 py-4 text-fg"
+        className="tap-target eyebrow mt-3 w-full rounded border border-line px-5 py-3 text-fg"
       >
-        I’M DONE — PROVE IT
+        PROVE IT
       </button>
       <p className="mt-3 text-center text-xs text-muted">
         Three sentences, no clues. That is what fills the card.
@@ -2094,7 +2109,7 @@ function CollisionView({ id }: { id: string }) {
   const [done, setDone] = useState(false)
   return (
     <Shell stage="REAL WORLD">
-      <p className="eyebrow text-accent">TWO WORLDS, ONE SENTENCE</p>
+      <p className="eyebrow text-accent">ONE SENTENCE</p>
       <p className="mt-3 text-sm font-semibold">{collision.context}</p>
       <p className="display mt-3 text-balance text-2xl">“{collision.ask}”</p>
       <MiniBuild
@@ -2190,7 +2205,7 @@ function ProofBeat() {
   return (
     <div className="flex min-h-dvh flex-col bg-bg">
       <Proof />
-      <div className="mx-auto w-full max-w-md px-5 pb-8">
+      <div className="mx-auto w-full max-w-md px-5 pb-6">
         <Cta label="CONTINUE" onClick={next} />
       </div>
     </div>
@@ -2210,7 +2225,7 @@ function CanSay() {
   return (
     <Shell stage="REAL WORLD">
       <div className="flex flex-col gap-3">
-        <p className="eyebrow text-accent">THINGS YOU CAN SAY</p>
+        <p className="eyebrow text-accent">YOU CAN SAY</p>
         {/*
           Guarded, like the other two.
 
@@ -2316,7 +2331,7 @@ function CapabilityRow({
         </span>
       </button>
       {open ? (
-        <div className="mt-1 flex flex-col gap-3 rounded border border-line bg-bg-elev px-4 py-4">
+        <div className="mt-1 flex flex-col gap-3 rounded border border-line bg-bg-elev px-4 py-3">
           <ul className="flex flex-col gap-3">
             {lines.map((l) => (
               <li key={l.target} className="flex items-center gap-3">
@@ -2339,7 +2354,7 @@ function CapabilityRow({
           </div>
           {root ? (
             <div className="flex flex-col gap-1">
-              <p className="eyebrow text-muted">Where it came from</p>
+              <p className="eyebrow text-muted">WHERE FROM</p>
               <p className="text-xs text-muted">{crate?.title}</p>
               <p className="pt text-sm">{root.target}</p>
               <p className="text-xs text-muted">{root.source}</p>
@@ -2366,7 +2381,7 @@ function Close() {
         href="/club"
         data-testid="continue"
         onClick={() => finish()}
-        className="tap-target eyebrow mt-auto block w-full rounded mt-6 bg-accent px-5 py-4 text-center text-accent-ink"
+        className="tap-target eyebrow mt-auto block w-full rounded mt-6 bg-accent px-5 py-3 text-center text-accent-ink"
       >
         {CLOSE.cta}
       </Link>
