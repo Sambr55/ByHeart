@@ -11,6 +11,7 @@ import { FAMILIES } from '../content/roots'
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const family = process.env.FAMILY ?? 'marcus_aurelius'
 const problems: string[] = []
+const seenText: string[] = []
 
 async function press(l: Locator, what: string) {
   await l.waitFor({ state: 'visible', timeout: 20000 })
@@ -103,6 +104,7 @@ async function main() {
   // Walk roots until the close.
   for (let guard = 0; guard < 260; guard++) {
     const body = await page.evaluate(() => document.body.innerText)
+    seenText.push(body)
     seen.push(await stage())
 
     if (/YOU ALREADY KNOW MORE THAN YOU THINK/.test(body)) break
@@ -162,6 +164,16 @@ async function main() {
       problems.push('no way forward at step ' + guard + ': ' + body.slice(0, 120).replace(/\n/g, ' | '))
       break
     }
+  }
+
+  // The proof card is the anti-streak, and its number must be earned rather than
+  // counted from taps — an empty card at the end of a full run means nothing recorded.
+  const proofSeen = seenText.find((s) => /WHAT I CAN SAY/.test(s))
+  if (!proofSeen) problems.push('never saw the proof card')
+  else {
+    const n = proofSeen.match(/WHAT I CAN SAY\s+(\d+)/)
+    if (!n || Number(n[1]) < 1) problems.push('proof card counted nothing after a full run')
+    else console.log('proof card: ' + n[1] + ' sentences produced cold')
   }
 
   const end = await page.evaluate(() => document.body.innerText)

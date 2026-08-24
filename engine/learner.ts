@@ -57,6 +57,24 @@ export interface LearningEvidence {
   timestamp: string
 }
 
+/**
+ * A sentence the learner produced with nothing on screen to copy from.
+ *
+ * This is the honest count, and it is deliberately narrow. Tapping through a lesson
+ * does not qualify; recognising a line does not qualify. Only the beats where the
+ * cultural source has been taken away — release, no-cue and collisions — put anything
+ * in here, which is what makes the number worth showing to another person.
+ */
+export interface ProofLine {
+  pt: string
+  en: string
+  /** release = the film removed. nocue = never had one. collision = two worlds at once. */
+  source: 'release' | 'nocue' | 'collision'
+  /** Whether it came out right first time, with no hint taken. */
+  clean: boolean
+  at: string
+}
+
 export interface InventoryItem {
   target_id: PieceId
   acquired_source: PropertyId | null
@@ -114,6 +132,8 @@ export interface LearnerState {
   /** ISO timestamp each mission finished, for previous_session_age_hours. */
   mission_completed_at: Partial<Record<MissionId, string>>
   inventory: Record<string, InventoryItem>
+  /** Everything they have said cold. The number on the proof card. */
+  proof: ProofLine[]
   evidence: LearningEvidence[]
   affinity: CultureAffinity
   experiment: Experiment
@@ -142,6 +162,7 @@ export function emptyLearner(): LearnerState {
     missions_completed: [],
     mission_completed_at: {},
     inventory: {},
+    proof: [],
     evidence: [],
     affinity: {
       categories_ranked: [],
@@ -183,6 +204,10 @@ export function loadLearner(): LearnerState {
     if (raw) {
       const parsed = JSON.parse(raw) as LearnerState
       if (parsed.version === VERSION) {
+        // Fields added after a tester started are backfilled rather than version-bumped:
+        // a bump throws away a session that is still running, which is a worse bug than
+        // a missing array.
+        parsed.proof ??= []
         state = parsed
         return state
       }
@@ -240,6 +265,21 @@ export function setTester(label: string) {
 }
 
 /** §12 — after three to five signals the product may reflect something back. */
+/**
+ * Record a sentence produced cold.
+ *
+ * Deduplicated on the Portuguese, because saying the same line twice is revision
+ * rather than a second capability, and a count that inflates on repetition is exactly
+ * the kind of number this product exists to avoid.
+ */
+export function recordProof(line: Omit<ProofLine, 'at'>) {
+  const s = loadLearner()
+  if (s.proof.some((p) => p.pt === line.pt)) return
+  s.proof = [...s.proof, { ...line, at: new Date().toISOString() }]
+  save()
+  emit()
+}
+
 export function recordVoiceSignal(signal: string, pt: string) {
   update((s) => {
     s.voice_signals = [...s.voice_signals, { signal, pt, at: new Date().toISOString() }]

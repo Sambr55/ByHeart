@@ -1,11 +1,12 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { FAMILIES, PIECES, ROOTS_BY_FAMILY, rootById, type CultureFamily, type Root } from '@/content/roots'
 import { CLOSE, DEAL as DEAL_COPY, DEMO_BEATS, DEMO_CLOSE, LANDING, NO_CUE_PROMPTS, PICKER } from '@/content/front-door'
 import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
+import { Proof } from '@/components/Proof'
 import { track } from '@/engine/analytics'
 import { insightsFor } from '@/content/osmosis'
 import {
@@ -22,13 +23,7 @@ import {
   type Goal,
   type LanguageGender,
 } from '@/content/profile'
-import {
-  acquirePiece,
-  markOsmosisSeen,
-  setAffinity,
-  setProfile,
-  voiceLean,
-} from '@/engine/learner'
+import { acquirePiece, markOsmosisSeen, recordProof, setAffinity, setProfile, voiceLean } from '@/engine/learner'
 import {
   branchesFor,
   buildTargetFor,
@@ -166,6 +161,8 @@ export function Journey() {
       return <NoCueView key={step.i} i={step.i} />
     case 'cansay':
       return <CanSay />
+    case 'proof':
+      return <ProofBeat />
     case 'close':
       return <Close />
   }
@@ -412,7 +409,8 @@ function MiniBuild({
 }: {
   target: string
   helpers?: Record<string, string>
-  onSolved: () => void
+  /** `clean` means right on the first submission, which is what the proof card counts. */
+  onSolved: (result: { clean: boolean }) => void
 }) {
   const tiles = useMemo(() => {
     const words = target.split(' ')
@@ -446,15 +444,17 @@ function MiniBuild({
   const answer = target.split(' ')
   const [placed, setPlaced] = useState<{ id: string; text: string }[]>([])
   const [state, setState] = useState<'open' | 'wrong' | 'done'>('open')
+  const attempts = useRef(0)
   const pool = tiles.filter((t) => !placed.some((p) => p.id === t.id))
 
   function check() {
     const built = placed.map((p) => p.text)
     const right = built.length === answer.length && built.every((w, i) => w === answer[i])
+    attempts.current += 1
     track('build_attempt', { target, correct: right })
     if (right) {
       setState('done')
-      onSolved()
+      onSolved({ clean: attempts.current === 1 })
     } else {
       setState('wrong')
     }
@@ -855,7 +855,15 @@ function RootBeatView({
       <MiniBuild
         target={root.transfer_prompt.answer}
         helpers={root.helpers}
-        onSolved={() => setDone(true)}
+        onSolved={({ clean }) => {
+          recordProof({
+            pt: root.transfer_prompt.answer,
+            en: root.transfer_prompt.ask,
+            source: 'release',
+            clean,
+          })
+          setDone(true)
+        }}
       />
       {done ? (
         <>
@@ -1224,8 +1232,9 @@ function CollisionView({ id }: { id: string }) {
       <p className="display mt-2 text-balance text-2xl">“{collision.ask}”</p>
       <MiniBuild
         target={collision.answer}
-        onSolved={() => {
+        onSolved={({ clean }) => {
           track('collision_attempt', { collision: collision.id, correct: true })
+          recordProof({ pt: collision.answer, en: collision.ask, source: 'collision', clean })
           setDone(true)
         }}
       />
@@ -1278,13 +1287,32 @@ function NoCueView({ i }: { i: number }) {
       <p className="display mt-2 text-balance text-2xl">“{prompt.ask}”</p>
       <MiniBuild
         target={prompt.answer}
-        onSolved={() => {
+        onSolved={({ clean }) => {
           track('no_cue_attempt', { piece: prompt.requires, correct: true })
+          recordProof({ pt: prompt.answer, en: prompt.ask, source: 'nocue', clean })
           setDone(true)
         }}
       />
       {done ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
     </Shell>
+  )
+}
+
+/**
+ * The proof card, inside the journey.
+ *
+ * Placed after the capability screen rather than instead of it: one says what you can
+ * now do, the other says what you actually produced. The second is the shareable one.
+ */
+function ProofBeat() {
+  const { next } = useJourney()
+  return (
+    <div className="flex min-h-dvh flex-col bg-bg">
+      <Proof />
+      <div className="mx-auto w-full max-w-md px-5 pb-8">
+        <Cta label="CONTINUE" onClick={next} />
+      </div>
+    </div>
   )
 }
 

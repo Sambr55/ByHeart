@@ -53,6 +53,7 @@ export type Step =
   | { kind: 'section-complete' }
   | { kind: 'nocue'; i: number }
   | { kind: 'cansay' }
+  | { kind: 'proof' }
   | { kind: 'close' }
 
 export type RootBeat =
@@ -413,7 +414,7 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
       const collision = availableCollision(state.rootsPlayed, state.collisionsPlayed)
       if (collision) steps.push({ kind: 'collision', collisionId: collision.id })
       steps.push({ kind: 'nocue', i: 0 }, { kind: 'nocue', i: 1 }, { kind: 'nocue', i: 2 })
-      steps.push({ kind: 'cansay' }, { kind: 'close' })
+      steps.push({ kind: 'cansay' }, { kind: 'proof' }, { kind: 'close' })
       dispatch({ type: 'append', steps, collisionId: collision?.id, jump: true })
     },
     [state.collisionsPlayed, state.rootsPlayed, state.steps],
