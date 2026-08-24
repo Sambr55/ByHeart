@@ -32,6 +32,8 @@ import {
 } from '../content/roots'
 import { INSIGHTS } from '../content/osmosis'
 import { GOAL_NEEDS, QUESTIONS_IN_ORDER } from '../content/profile'
+import * as FRONT_DOOR_COPY from '../content/front-door'
+import * as PROFILE_COPY from '../content/profile'
 import { branchesFor, buildTargetFor } from '../engine/journey'
 import { CULTURE_FREE_STAGES, isExercise, type BlockId, type Mission, type Screen } from '../content/types'
 
@@ -730,6 +732,60 @@ for (const e of EXAMPLES) {
     'library: ' + SHELVES.map((sh) => sh.label.toLowerCase() + ' ' + (byShelf.get(sh.id) ?? []).length).join(' · ') +
       ' · ' + byLemma.size + ' lemmas',
   )
+}
+
+// ---------------------------------------------------------------------------
+// Shared copy may not name a medium
+// ---------------------------------------------------------------------------
+{
+  /**
+   * The product described itself as a film product because it WAS one, once — a single
+   * Top Gun mission — and the copy never caught up. Exactly the same way the palette
+   * did not. It will happen again unless something checks.
+   *
+   * The crates are films, titles, books, wisdom, swearing, flirting and a gig, and there
+   * will be more. So: no copy outside a root's own fields may name a medium. Inside a
+   * root it is legitimate and often the point — "o filme é uma merda" teaches the word
+   * for film — which is why only the shared files are scanned.
+   *
+   * The replacement was never new copy. The proof card already said it well: "with
+   * nothing on screen to copy from". Medium-agnostic, concrete, and already the
+   * product's own voice.
+   */
+  const MEDIUM = /\b(films?|movies?|songs?|books?|quotes?|scenes?)\b/gi
+  const SHARED: [string, Record<string, unknown>][] = [
+    ['front-door', FRONT_DOOR_COPY as unknown as Record<string, unknown>],
+    ['profile', PROFILE_COPY as unknown as Record<string, unknown>],
+  ]
+
+  /** Every string in a nested copy object, with a path to it. */
+  function strings(value: unknown, path: string): [string, string][] {
+    if (typeof value === 'string') return [[path, value]]
+    if (Array.isArray(value)) return value.flatMap((v, i) => strings(v, path + '[' + i + ']'))
+    if (value && typeof value === 'object') {
+      return Object.entries(value).flatMap(([k, v]) => strings(v, path ? path + '.' + k : k))
+    }
+    return []
+  }
+
+  // The landing list is a list of what a crate can be, not a narrowing to one of them.
+  const ALLOWED = /films, music, books, TV, sport and culture/
+
+  let named = 0
+  for (const [file, obj] of SHARED) {
+    for (const [path, text] of strings(obj, '')) {
+      if (ALLOWED.test(text)) continue
+      const hits = text.match(MEDIUM)
+      if (!hits) continue
+      named++
+      fail(
+        file + '.' + path + ' names a medium (' + [...new Set(hits)].join(', ') +
+          '): "' + text.slice(0, 72) + '…" — say "with nothing on screen to copy from"',
+      )
+    }
+  }
+  console.log('shared copy names no medium (' + SHARED.length + ' files scanned)')
+  if (named) console.log('  ' + named + ' line(s) to fix')
 }
 
 // ---------------------------------------------------------------------------

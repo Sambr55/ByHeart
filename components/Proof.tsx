@@ -72,7 +72,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
       ' I can say in Portuguese without looking.' +
       (latest ? '\n\n“' + latest.pt + '” — ' + latest.en : '') +
       '\n\nLearned off ' +
-      (worlds === 1 ? 'a film' : worlds + ' completely unrelated things') +
+      (worlds === 1 ? 'one thing I already knew' : worlds + ' completely unrelated things') +
       '. No streak involved.'
     )
   }, [proof.length, recent, worlds])
@@ -158,7 +158,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
           <>
             <p className="display mt-4 text-balance text-3xl">Nothing yet.</p>
             <p className="mt-3 text-sm text-muted">
-              This fills up when you say something with the film taken away. Not when you
+              This fills up when you say something with nothing on screen to copy from. Not when you
               finish a lesson — when you produce it cold.
             </p>
           </>
@@ -201,7 +201,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
             right first time, with nothing on screen.
           </p>
           <p className="mt-2 text-xs leading-relaxed text-muted">
-            Only the beats where the film had been taken away are counted. It is the one
+            Only the beats with nothing on screen to copy from are counted. It is the one
             number here that cannot be moved by opening the app.
           </p>
         </section>

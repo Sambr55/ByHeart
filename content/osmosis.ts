@@ -361,6 +361,18 @@ export const INSIGHTS: Insight[] = [
     ],
     proper_name: 'ter for physical states',
   },
+  {
+    id: 'latin-stress',
+    requires: ['agua', 'ridiculo'],
+    headline: 'You have been saying these words for years, in the wrong place',
+    body:
+      'Água is ÁH-gwa and ridículo is ri-DÍ-culo. The words came to Portuguese and to English from the same Latin, and Portuguese kept the beat where Latin put it while English moved it. Nobody taught you that — you have just been hearing it and copying it.',
+    evidence: [
+      { pt: 'Água sem gás.', en: 'Still water.' },
+      { pt: 'Que ridículo!', en: 'How ridiculous!' },
+    ],
+    proper_name: 'Latin stress in Portuguese',
+  },
 ]
 
 /** Pick what is honestly true of this learner, newest ideas first, never repeating. */

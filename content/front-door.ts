@@ -15,7 +15,7 @@ export const LANDING = {
     // Language-neutral on purpose: the brand layer describes the method, and the
     // method is not about Portuguese. The personal experience becomes specific the
     // moment a pair is chosen, one screen later.
-    'Learn a language through the films, music, TV, sport and culture already in your head.',
+    'Learn a language through the films, music, books, TV, sport and culture already in your head.',
     'Understand the moment.\nDiscover the language inside it.\nRemix it. Use it. Make it yours.',
     'You already know more than you think.',
   ],
@@ -124,9 +124,9 @@ export const DEAL = {
   how: {
     label: 'HOW IT WORKS',
     steps: [
-      'Start with something you already know by heart.',
+      'Start with something already in your head.',
       'We pull out the useful language hiding inside it, and you keep it.',
-      'Then we take the film away and find out whether it stuck.',
+      'Then we take it all away and find out whether it stuck.',
     ],
   },
   /**
@@ -141,7 +141,7 @@ export const DEAL = {
       'Not levels, and nothing to grind. Each stage is a thing you can walk into a café and actually do, and they are in this order because language is — you cannot ask where the water is before you have the word for water.',
     start: 'YOU START HERE',
     move:
-      'You move up by saying something cold, with the film taken away — never by turning up. It cannot go down, and nothing expires if you disappear for a month.',
+      'You move up by saying something cold, with nothing on screen to copy from — never by turning up. It cannot go down, and nothing expires if you disappear for a month.',
   },
   collect: {
     label: 'WHAT YOU COLLECT',
@@ -182,7 +182,7 @@ export const PICKER = {
   headline: 'Pick a crate to get going with, and start building your useful vocabulary bank.',
   // The word has to be taught the first time it is used, or it is just jargon. One
   // clause does it, and it also says what a crate is *for*.
-  sub: 'A crate is a pile of something you already know by heart. Take whichever one you carry around in your head — there is no wrong answer, and no order.',
+  sub: 'A crate is a pile of something already in your head. Take whichever one you carry around with you — there is no wrong answer, and no order.',
   /**
    * Shown only when a drop is actually live. The distinction is worth one sentence and
    * not a paragraph — and the last clause is the promise that stops a drop feeling like
@@ -192,7 +192,7 @@ export const PICKER = {
     'The one with a date is a drop. It is pegged to something really happening and it disappears the morning after — but whatever you learn inside it is yours to keep.',
   /** Shown under the list whenever something is still dimmed. */
   locked_note:
-    'The dimmed ones are not gone. Each says what opens it — and it opens by saying something cold, with the film taken away, not by turning up.',
+    'The dimmed ones are not gone. Each says what opens it — and it opens by saying something cold, with nothing on screen to copy from, not by turning up.',
   /** The affordance on the stage band, which used to be a number with no explanation. */
   stages_toggle: 'all six',
   /**

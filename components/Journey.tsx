@@ -1874,7 +1874,7 @@ function NoCueView({ i }: { i: number }) {
         <div className="flex flex-1 flex-col justify-center">
           <p className="display text-balance text-2xl">Out in the world.</p>
           <p className="mt-3 text-sm text-muted">
-            Nothing here needs a film any more.
+            Nothing here needs where it came from any more.
           </p>
         </div>
         <Cta label="CONTINUE" onClick={next} />

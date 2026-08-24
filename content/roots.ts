@@ -23,6 +23,7 @@ export type CultureFamily =
   | 'flirting_m2f'
   | 'flirting_f2m'
   | 'duran_duran_lisboa'
+  | 'world_of_wizardry'
 
 /**
  * The ladder — six rungs, named for what you can do in a room.
@@ -250,6 +251,13 @@ export const CRATES: Crate[] = [
   { id: 'portuguese_swearing', title: 'How to swear in Portuguese', blurb: 'The subtitles were lying to you. Strong language throughout.', tone: 'blunt', built: true, opens_at: 6 },
   { id: 'flirting_m2f', title: 'Flirting — him to her', blurb: 'The Love Actually problem. Said properly this time.', tone: 'warm', built: true },
   { id: 'flirting_f2m', title: 'Flirting — her to him', blurb: 'Warmer, funnier and considerably more effective.', tone: 'warm', built: true },
+  {
+    id: 'world_of_wizardry',
+    title: 'The world of wizardry',
+    blurb: 'Every magic word is Latin. So is Portuguese.',
+    tone: 'reflective',
+    built: true,
+  },
   {
     id: 'duran_duran_lisboa',
     title: 'Duran Duran, Lisboa',
@@ -3044,6 +3052,274 @@ export const DURAN_DURAN: Root[] = [
   }),
 ]
 
+// ---------------------------------------------------------------------------
+// B13 — The World of Wizardry.
+//
+// The one crate with a mechanic none of the others have. Every other crate says
+// "you recognise this line, here is the language inside it". This one says "you
+// have been saying Portuguese roots out loud since you were eleven and nobody
+// told you" — which is a better version of the same trick, and a genuinely
+// different feeling: recognition of something the learner did not know they had.
+//
+// Built on the Latin, never the story. Latin is nobody's property, and it is
+// also the actual mechanic, so the rights position and the best version of the
+// product turn out to be the same thing. No character names, no place names, no
+// houses, no creatures, no plot, no quoted dialogue. Two of the seven name no
+// spell at all — they run off universal situations, which are tropes rather than
+// property, and which happen to carry the most useful Portuguese here.
+//
+// It is also where the noun gap gets fixed. Seven of these pieces are nouns the
+// graph did not have — água, luz, noite, porta, comboio, plataforma, silêncio —
+// and every one is arrival-critical.
+// ---------------------------------------------------------------------------
+
+export const WIZARDRY: Root[] = [
+  q({
+    root_id: 'wiz_silencio',
+    culture_family: 'world_of_wizardry',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The silencing word, in every wizarding story',
+    source_status: 'paraphrased',
+    root_display: 'Silencio.',
+    source: 'Silence.',
+    target: 'Silêncio.',
+    semantic_bridge:
+      'This one is not merely similar. It IS the Portuguese word, with an accent added and nothing else changed. Every spell in every wizarding story is Latin, and Portuguese is what Latin actually grew into — so you have been half-speaking it for years without being told.',
+    subtext: 'A ten-second wink. The shortest distance between something you know and something you can say.',
+    extracts: [
+      { id: 'silencio', target: 'silêncio', gloss: 'silence', shelf: 'things', gender: 'm', countable: false },
+    ],
+    branches: [
+      { target: 'Silêncio, por favor.', en: 'Quiet, please.', demonstrates: ['silencio'] },
+      { target: 'Em silêncio.', en: 'In silence.', demonstrates: ['silencio'] },
+      { target: 'Faz silêncio.', en: 'Be quiet.', demonstrates: ['silencio'] },
+    ],
+    reinforces: ['por_favor'],
+    helpers: { 'Em': 'in', 'Faz': 'make' },
+    transfer_prompt: {
+      context: 'A waiting room, and somebody is on speakerphone.',
+      ask: 'Quiet, please.',
+      answer: 'Silêncio, por favor.',
+    },
+    freebie_flag: true,
+    rights_status: 'dub-authored',
+    starter_tags: ['first-day', 'latin'],
+    next_root_hooks: ['agua'],
+  }),
+  q({
+    root_id: 'wiz_lumos_nox',
+    culture_family: 'world_of_wizardry',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The wand-light word, and the one that puts it out',
+    source_status: 'paraphrased',
+    root_display: 'Lumos. Nox.',
+    source: 'Light. Night.',
+    target: 'Luz. Noite.',
+    semantic_bridge:
+      'On and off, in Latin: lumen and nox. Portuguese kept both and barely touched them. One is written on every light switch in the country; the other is the second half of boa noite, which you will say every single day you are there.',
+    subtext: 'Two words, opposite ends of a day, and you already knew both.',
+    extracts: [
+      { id: 'luz', target: 'luz', gloss: 'light', shelf: 'things', gender: 'f' },
+      { id: 'noite', target: 'noite', gloss: 'night', shelf: 'things', gender: 'f' },
+    ],
+    branches: [
+      { target: 'Não há luz.', en: 'There is no light.', demonstrates: ['luz'] },
+      { target: 'Boa noite.', en: 'Good night.', demonstrates: ['noite'] },
+      { target: 'Toda a noite.', en: 'All night.', demonstrates: ['noite'] },
+    ],
+    reinforces: ['ha', 'bom'],
+    helpers: { 'Não': 'not', 'Boa': 'good', 'Toda': 'all', 'a': 'the' },
+    transfer_prompt: {
+      context: 'You let yourself in and the switch does nothing.',
+      ask: 'There is no light.',
+      answer: 'Não há luz.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['first-day', 'latin'],
+    next_root_hooks: ['agua'],
+  }),
+  q({
+    root_id: 'wiz_aguamenti',
+    culture_family: 'world_of_wizardry',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The water-conjuring word',
+    source_status: 'paraphrased',
+    root_display: 'Aguamenti.',
+    source: 'Water.',
+    target: 'Um copo de água, por favor.',
+    semantic_bridge:
+      'Latin aqua, and the most useful noun anybody can carry off a plane. Portuguese put an accent on it and moved the stress to the front — ÁH-gwa, not a-GWA — and that stress is the only part an English speaker reliably gets wrong.',
+    subtext: 'The first thing you will ask for, and you already have the word.',
+    extracts: [
+      { id: 'agua', target: 'água', gloss: 'water', shelf: 'things', gender: 'f', countable: false },
+    ],
+    branches: [
+      { target: 'Água sem gás.', en: 'Still water.', demonstrates: ['agua'] },
+      { target: 'Preciso de água.', en: 'I need water.', demonstrates: ['agua'] },
+      { target: 'Mais água, por favor.', en: 'More water, please.', demonstrates: ['agua'] },
+    ],
+    reinforces: ['copo', 'por_favor', 'preciso_de', 'sem'],
+    helpers: { 'Um': 'a', 'copo': 'glass', 'de': 'of', 'gás': 'gas', 'Mais': 'more' },
+    transfer_prompt: {
+      context: 'A café, and it is thirty degrees outside.',
+      ask: 'Still water.',
+      answer: 'Água sem gás.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['first-day', 'ordering'],
+    next_root_hooks: ['porta'],
+  }),
+  q({
+    root_id: 'wiz_colloportus',
+    culture_family: 'world_of_wizardry',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The door-locking word',
+    source_status: 'paraphrased',
+    root_display: 'Colloportus.',
+    source: 'The door is locked.',
+    target: 'A porta está fechada.',
+    semantic_bridge:
+      'The locking word is built on porta, Latin for door, which Portuguese kept exactly as it was. The same root named Portugal’s second city: a porto is a door cut into a coastline.',
+    subtext: 'Said at a shop at eight in the evening, with resignation.',
+    extracts: [
+      { id: 'porta', target: 'porta', gloss: 'door', shelf: 'things', gender: 'f' },
+      { id: 'fechado', target: 'fechada', gloss: 'closed', shelf: 'describing', lemma: 'fechado', form: 'feminine', note: 'A shop is fechado; a door is fechada. It agrees with the thing, not with you.' },
+    ],
+    branches: [
+      { target: 'Onde é a porta?', en: 'Where is the door?', demonstrates: ['porta'] },
+      { target: 'Fecha a porta, por favor.', en: 'Close the door, please.', demonstrates: ['porta'] },
+      { target: 'Está fechado.', en: 'It’s closed.', demonstrates: ['fechado'] },
+      { target: 'A loja está fechada.', en: 'The shop is closed.', demonstrates: ['fechado', 'porta'] },
+    ],
+    reinforces: ['onde', 'esta_', 'por_favor'],
+    helpers: { 'A': 'the', 'a': 'the', 'é': 'is', 'Fecha': 'close', 'Está': 'is', 'loja': 'shop', 'está': 'is', 'fechada': 'closed (of a feminine thing)' },
+    transfer_prompt: {
+      context: 'You walk up to the shop at eight in the evening.',
+      ask: 'It’s closed.',
+      answer: 'Está fechado.',
+    },
+    voice_options: [
+      {
+        target: 'Está fechado.', en: 'It’s closed.', signal: 'direct',
+        register: 'THE STATE OF IT',
+        when: 'It is shut right now. Says nothing about when it happened, and it is the one you will want nine times out of ten.',
+        safest: true,
+      },
+      {
+        target: 'Já fechou.', en: 'It’s already shut.', signal: 'dry',
+        register: 'THE MOMENT IT HAPPENED',
+        when: 'You got here too late and somebody has just locked it — there is a hint of you missed it in this one.',
+      },
+    ],
+    voice_rule:
+      'One is a state and one is an event, which is ser and estar arriving through the back door: Portuguese cares whether you mean how a thing IS right now or what happened to it.',
+    rights_status: 'dub-authored',
+    starter_tags: ['first-day', 'signs'],
+    next_root_hooks: ['comboio'],
+  }),
+  q({
+    root_id: 'wiz_plataforma',
+    culture_family: 'world_of_wizardry',
+    rung: 3,
+    root_type: 'other',
+    source_label: 'The platform that is not quite there',
+    source_status: 'paraphrased',
+    root_display: 'A platform between two others.',
+    source: 'Where is the platform?',
+    target: 'Onde é a plataforma do comboio?',
+    semantic_bridge:
+      'PLATAFORMA is Latin the whole way through and needs no translating at all. The word beside it does: Portugal says COMBOIO for train, not trem — trem is Brazil, and it is the single fastest way to give away that you learned the wrong Portuguese. Say comboio in Lisbon and you sound like you learned it there.',
+    subtext: 'Asked in a station, slightly too late, with a bag in each hand.',
+    extracts: [
+      { id: 'plataforma', target: 'plataforma', gloss: 'platform', shelf: 'things', gender: 'f' },
+      { id: 'comboio', target: 'comboio', gloss: 'train', shelf: 'things', gender: 'm' },
+    ],
+    branches: [
+      { target: 'O comboio para Lisboa.', en: 'The train to Lisbon.', demonstrates: ['comboio'] },
+      { target: 'A que horas é o comboio?', en: 'What time is the train?', demonstrates: ['comboio'] },
+      { target: 'Que plataforma?', en: 'Which platform?', demonstrates: ['plataforma'] },
+    ],
+    reinforces: ['onde', 'e_is', 'quanto'],
+    helpers: { 'Onde': 'where', 'é': 'is', 'a': 'the', 'do': 'of the', 'O': 'the', 'para': 'to', 'Lisboa': 'Lisbon', 'A que horas': 'at what time', 'horas': 'hours', 'Que': 'which' },
+    transfer_prompt: {
+      context: 'A station, and the board is not helping.',
+      ask: 'What time is the train?',
+      answer: 'A que horas é o comboio?',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['travel', 'questions'],
+    next_root_hooks: ['proibido'],
+  }),
+  q({
+    root_id: 'wiz_proibido',
+    culture_family: 'world_of_wizardry',
+    rung: 3,
+    root_type: 'paraphrased_moment',
+    source_label: 'The wood you are told to stay out of',
+    source_status: 'paraphrased',
+    root_display: 'The forest you are forbidden to enter.',
+    source: 'It is forbidden.',
+    target: 'É proibido.',
+    semantic_bridge:
+      'A wood you are told to stay out of, in a language where the sign reads PROIBIDO — Latin prohibere, the same root that gave English prohibited, which is why you can read this one before you can say it. It is on more doors, gates and beaches in Portugal than any other word.',
+    subtext: 'Flat and final. Portuguese signs do not soften this one.',
+    extracts: [
+      { id: 'proibido', target: 'proibido', gloss: 'forbidden', shelf: 'describing', note: 'On a sign it is usually proibido; after entrada it becomes proibida, agreeing with the thing being forbidden.' },
+    ],
+    branches: [
+      { target: 'É proibido fumar.', en: 'No smoking.', demonstrates: ['proibido'] },
+      { target: 'Entrada proibida.', en: 'No entry.', demonstrates: ['proibido'] },
+      { target: 'Não é proibido.', en: 'It’s not forbidden.', demonstrates: ['proibido'] },
+    ],
+    reinforces: ['e_is', 'nao_podes'],
+    helpers: { 'É': 'is', 'fumar': 'to smoke', 'Entrada': 'entry', 'proibida': 'forbidden (of a feminine thing)', 'Não': 'not', 'é': 'is' },
+    transfer_prompt: {
+      context: 'A sign on a gate, and you want to check you have read it right.',
+      ask: 'No smoking.',
+      answer: 'É proibido fumar.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['signs', 'first-day'],
+    next_root_hooks: ['ridiculo'],
+  }),
+  q({
+    root_id: 'wiz_ridiculus',
+    culture_family: 'world_of_wizardry',
+    rung: 6,
+    root_type: 'other',
+    source_label: 'The word that turns a fear into a joke',
+    source_status: 'paraphrased',
+    root_display: 'Riddikulus.',
+    source: 'This is ridiculous.',
+    target: 'Isto é ridículo.',
+    semantic_bridge:
+      'The word that turns a fear into something laughable is just Latin for laughable, and Portuguese spells it almost identically. It is also load-bearing in any Portuguese complaint — about a queue, a price, or a bus that has not come.',
+    subtext: 'Muttered, not shouted. Said to whoever is standing next to you.',
+    extracts: [
+      { id: 'ridiculo', target: 'ridículo', gloss: 'ridiculous', shelf: 'describing', note: 'The stress is on the DI — ri-DI-culo. English puts it in a different place entirely.' },
+    ],
+    branches: [
+      { target: 'Que ridículo!', en: 'How ridiculous!', demonstrates: ['ridiculo'] },
+      { target: 'Não sejas ridículo.', en: 'Don’t be ridiculous.', demonstrates: ['ridiculo'] },
+      { target: 'Isto é mesmo ridículo.', en: 'This is really ridiculous.', demonstrates: ['ridiculo'] },
+    ],
+    reinforces: ['isto', 'e_is', 'estou_farto', 'mesmo'],
+    helpers: { 'Que': 'how', 'Não': 'not', 'sejas': 'be', 'Isto': 'this', 'é': 'is' },
+    transfer_prompt: {
+      context: 'Forty minutes in the same queue and it has not moved.',
+      ask: 'How ridiculous!',
+      answer: 'Que ridículo!',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['complaining', 'register'],
+    next_root_hooks: ['estou_farto'],
+  }),
+]
+
 export const ROOTS: Root[] = [
   ...TOP_GUN,
   ...JAMES_BOND,
@@ -3055,6 +3331,7 @@ export const ROOTS: Root[] = [
   ...FLIRTING_M2F,
   ...FLIRTING_F2M,
   ...DURAN_DURAN,
+  ...WIZARDRY,
 ]
 
 export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
@@ -3068,6 +3345,7 @@ export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
   flirting_m2f: FLIRTING_M2F,
   flirting_f2m: FLIRTING_F2M,
   duran_duran_lisboa: DURAN_DURAN,
+  world_of_wizardry: WIZARDRY,
 }
 
 export function rootById(id: string): Root | undefined {
@@ -3492,6 +3770,89 @@ export const COLLISIONS: Collision[] = [
     ask: 'Call me on Monday.',
     answer: 'Ligas-me na segunda-feira?',
     provenance: 'LIGAS-ME was hers. SEGUNDA-FEIRA came out of a song about a Monday. Together they are a plan.',
+  },
+  // --- the eleventh crate, against all ten of the others ----------------------
+  // The easiest ten collisions anybody will ever write, because basic nouns combine
+  // with everything. Written alongside the roots rather than afterwards.
+  {
+    id: 'wiz_tg_agua_comigo',
+    requires: ['agua', 'comigo'],
+    context: 'He is going to the counter and you are not moving.',
+    ask: 'Bring water back with you.',
+    answer: 'Traz água contigo.',
+    provenance: 'COMIGO came out of a fighter jet and ÁGUA out of a spell. Neither of them knows that.',
+  },
+  {
+    id: 'wiz_jb_comboio_amanha',
+    requires: ['comboio', 'amanha'],
+    context: 'You are working out whether to go tonight or in the morning.',
+    ask: 'The train tomorrow.',
+    answer: 'O comboio amanhã.',
+    provenance: 'A Bond title supplied AMANHÃ. A platform between two others supplied the train.',
+  },
+  {
+    id: 'wiz_bj_porta_desculpa',
+    requires: ['porta', 'desculpa'],
+    context: 'You have walked into the wrong room and somebody is looking up.',
+    ask: 'Sorry — wrong door.',
+    answer: 'Desculpa, porta errada.',
+    provenance: 'Bridget’s apology, attached to a door that came out of a locking charm.',
+  },
+  {
+    id: 'wiz_pf_agua_bom',
+    requires: ['agua', 'bom'],
+    context: 'Somebody asks whether the tap water is drinkable.',
+    ask: 'The water is good.',
+    answer: 'A água é boa.',
+    provenance: 'A diner conversation gave you BOM. Latin gave you the water.',
+  },
+  {
+    id: 'wiz_ah_luz_vida',
+    requires: ['luz', 'vida'],
+    context: 'Somebody is describing why they moved.',
+    ask: 'The light here is life.',
+    answer: 'A luz aqui é vida.',
+    provenance: 'Audrey on living, and a wand-light word — and the Atlantic light is why half of them came.',
+  },
+  {
+    id: 'wiz_ma_noite_agora',
+    requires: ['noite', 'agora'],
+    context: 'It is late and somebody is still deciding.',
+    ask: 'It is night now.',
+    answer: 'É noite agora.',
+    provenance: 'Marcus Aurelius on the only moment you have. It happens to be this one.',
+  },
+  {
+    id: 'wiz_sw_ridiculo_farto',
+    requires: ['ridiculo', 'estou_farto'],
+    context: 'The queue has not moved and it is the second hour.',
+    ask: 'This is ridiculous. I have had enough.',
+    answer: 'Isto é ridículo. Estou farto.',
+    provenance: 'The swearing crate and a shape-shifting spell, agreeing entirely about a queue.',
+  },
+  {
+    id: 'wiz_fm_agua_oferecer',
+    requires: ['agua', 'oferecer_te'],
+    context: 'It is thirty degrees and she has been standing in it.',
+    ask: 'Can I get you a water?',
+    answer: 'Posso oferecer-te uma água?',
+    provenance: 'Flirting supplied the offer. A spell supplied the only thing anybody wants at that temperature.',
+  },
+  {
+    id: 'wiz_ff_noite_ligas',
+    requires: ['noite', 'ligas_me'],
+    context: 'The evening is ending and neither of you has said anything.',
+    ask: 'Will you call me tonight?',
+    answer: 'Ligas-me à noite?',
+    provenance: 'LIGAS-ME was hers. NOITE came from a word that puts a light out.',
+  },
+  {
+    id: 'wiz_dd_luz_fome',
+    requires: ['luz', 'fome'],
+    context: 'The gig is over, the venue is emptying and nothing is open.',
+    ask: 'There is no light and I am starving.',
+    answer: 'Não há luz e tenho fome.',
+    provenance: 'A Duran Duran chorus and a wand-light word, both of them out of luck at one in the morning.',
   },
 ]
 
