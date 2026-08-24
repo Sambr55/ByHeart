@@ -10,7 +10,9 @@
  *   npm run lint:content
  */
 
+import { readFileSync } from 'node:fs'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
+import { DUB, DUB_CLUB, DUB_MARK } from '../content/marks'
 import {
   BLOCK_ORDER,
   EXAMPLES,
@@ -940,6 +942,46 @@ for (const e of EXAMPLES) {
     }
   }
   console.log(pairs + ' voice pairs, every option situated, every pair teaching a rule')
+}
+
+// --- the marks -------------------------------------------------------------
+{
+  /*
+    The wordmark exists twice, and it has to.
+
+    public/brand/*.svg is what a designer edits and what next/og can fetch; content/marks.ts
+    is what the app inlines so the mark can be white on a blue header, which an <img> can
+    never be. Two copies of anything drift, so this is the rule that stops them becoming
+    two marks: edit the SVG, run npm run brand, or this fails.
+  */
+  const pairs: [string, { viewBox: string; d: string }][] = [
+    ['dub.svg', DUB],
+    ['dub-club.svg', DUB_CLUB],
+    ['dub-mark.svg', DUB_MARK],
+  ]
+  for (const [file, mark] of pairs) {
+    let svg = ''
+    try {
+      svg = readFileSync('public/brand/' + file, 'utf8')
+    } catch {
+      fail('public/brand/' + file + ' is missing — the wordmark has no source of truth')
+      continue
+    }
+    const viewBox = /viewBox="([^"]+)"/.exec(svg)?.[1]
+    const d = /\bd="([^"]+)"/.exec(svg)?.[1]
+    if (d !== mark.d || viewBox !== mark.viewBox) {
+      fail(
+        'public/brand/' + file + ' and content/marks.ts have drifted. Run npm run brand.',
+      )
+    }
+    if (!/fill="currentColor"/.test(svg)) {
+      fail(
+        'public/brand/' + file + ' hard-codes a fill. The header is blue and needs a white ' +
+          'mark, which only currentColor gives.',
+      )
+    }
+  }
+  console.log('3 marks, and the files and the code agree')
 }
 
 // --- report ----------------------------------------------------------------

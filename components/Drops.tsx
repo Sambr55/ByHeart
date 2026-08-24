@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Wordmark } from '@/components/Wordmark'
 import { useEffect, useState } from 'react'
 import { CRATES, ROOTS_BY_FAMILY, daysLeft, isLive } from '@/content/roots'
 import { Menu } from '@/components/Menu'
@@ -31,8 +32,9 @@ export function Drops() {
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
       <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-2.5">
-        <Link href="/" className="eyebrow opacity-80 transition hover:opacity-100">
-          ← DUB
+        <Link href="/" className="flex shrink-0 items-center gap-1 eyebrow opacity-80 transition hover:opacity-100">
+          <span aria-hidden>←</span>
+          <Wordmark className="h-3" title="DUB — back to your crates" />
         </Link>
         <span className="eyebrow flex-1">Drops</span>
         <Menu />

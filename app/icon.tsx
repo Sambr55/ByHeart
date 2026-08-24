@@ -1,24 +1,40 @@
 import { ImageResponse } from 'next/og'
+import { DUB_MARK } from '@/content/marks'
 
-export const size = { width: 512, height: 512 }
 export const contentType = 'image/png'
 
 /**
- * The mark: one azulejo tile with DUB in it.
+ * The mark: the U and its speech-bubble tail.
  *
- * There was a wordmark and no logo, and the icon was still cockpit black on instrument
- * amber — the one piece of DUB a person sees every day, left behind by the repaint.
+ * It drew the word DUB until now, which is the one thing an icon must not do — three
+ * letters at 16px are three grey smudges. The U is the glyph carrying the tail, the tail
+ * is the idea in the mark, and a single bold letterform is what survives a browser tab.
  *
- * A tile is the right form because it is what DUB is made of everywhere else: the band
- * under the header, the block on a crate card, the strip down the share card. At
- * home-screen size the only things that survive are the ground colour, the frame and the
- * shape of the letters, so it is those three and nothing else.
+ * TWO SIZES, because they have different jobs and a downscale cannot serve both. At 512
+ * this is an azulejo tile — the frame and the four corner motifs, the same thing that
+ * appears as the band under every header and the block on every crate card. At 32 all of
+ * that turns to mud, so the frame goes and the letterform gets the whole square. Checked
+ * at 16px rather than assumed.
  *
- * Written for Satori, which renders these: explicit top/right/bottom/left rather than
- * the `inset` shorthand, which it ignores — that is what turned the tile into a
- * rectangle with the letters hanging off its edge.
+ * Written for Satori: explicit top/right/bottom/left rather than the `inset` shorthand,
+ * which it ignores — that is what once turned the tile into a rectangle with the letters
+ * hanging off its edge. It renders <svg> and <path>, so this is the real mark rather
+ * than a redrawing of it, and lint:content fails if it stops matching the file.
  */
-export default function Icon() {
+export function generateImageMetadata() {
+  return [
+    { id: 'small', size: { width: 32, height: 32 }, contentType: 'image/png' },
+    { id: 'tile', size: { width: 512, height: 512 }, contentType: 'image/png' },
+  ]
+}
+
+// `id` arrives as a Promise in Next 16 — awaited, not read. Read directly it is an
+// object, `id === 'tile'` is quietly false, and both sizes render the small variant
+// with no error anywhere. Caught by rendering them and looking.
+export default async function Icon({ id }: { id: Promise<string> }) {
+  const tile = (await id) === 'tile'
+  const size = tile ? { width: 512, height: 512 } : { width: 32, height: 32 }
+
   const motif = (style: Record<string, number>) => ({
     position: 'absolute' as const,
     width: 22,
@@ -28,6 +44,12 @@ export default function Icon() {
     display: 'flex',
     ...style,
   })
+
+  const glyph = (w: number, h: number) => (
+    <svg viewBox={DUB_MARK.viewBox} width={w} height={h} fill="#efe7d9" fillRule="evenodd">
+      <path d={DUB_MARK.d} />
+    </svg>
+  )
 
   return new ImageResponse(
     (
@@ -41,35 +63,29 @@ export default function Icon() {
           background: '#1f5d8c',
         }}
       >
-        <div
-          style={{
-            position: 'absolute',
-            top: 46,
-            right: 46,
-            bottom: 46,
-            left: 46,
-            border: '9px solid #efe7d9',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <div style={motif({ top: 14, left: 14 })} />
-          <div style={motif({ top: 14, right: 14 })} />
-          <div style={motif({ bottom: 14, left: 14 })} />
-          <div style={motif({ bottom: 14, right: 14 })} />
+        {tile ? (
           <div
             style={{
+              position: 'absolute',
+              top: 46,
+              right: 46,
+              bottom: 46,
+              left: 46,
+              border: '9px solid #efe7d9',
               display: 'flex',
-              color: '#efe7d9',
-              fontSize: 116,
-              fontWeight: 800,
-              letterSpacing: '-0.03em',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            DUB
+            <div style={motif({ top: 14, left: 14 })} />
+            <div style={motif({ top: 14, right: 14 })} />
+            <div style={motif({ bottom: 14, left: 14 })} />
+            <div style={motif({ bottom: 14, right: 14 })} />
+            {glyph(196, 230)}
           </div>
-        </div>
+        ) : (
+          glyph(22, 26)
+        )}
       </div>
     ),
     size,

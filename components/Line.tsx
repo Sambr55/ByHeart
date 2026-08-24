@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Wordmark } from '@/components/Wordmark'
 import { useEffect, useMemo, useState } from 'react'
 import { dayKey, pickLine, rootFor, type DailyLine } from '@/content/daily-line'
 import { CRATES } from '@/content/roots'
@@ -52,8 +53,9 @@ export function Line({ pushReady }: { pushReady: boolean }) {
       className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 py-8 text-fg"
     >
       <div className="flex items-center justify-between gap-3">
-        <Link href="/" className="eyebrow text-muted">
-          ← DUB
+        <Link href="/" className="flex shrink-0 items-center gap-1 eyebrow text-muted">
+          <span aria-hidden>←</span>
+          <Wordmark className="h-3" title="DUB — back to your crates" />
         </Link>
         <span className="eyebrow flex-1 text-muted">TODAY</span>
         <Menu />

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Wordmark } from '@/components/Wordmark'
 import { useMemo, useState } from 'react'
 import { GOAL_LABEL, GOAL_NEEDS, type Goal } from '@/content/profile'
 import { PIECES } from '@/content/roots'
@@ -143,8 +144,9 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
     >
       {standalone ? (
         <div className="flex items-center justify-between gap-3">
-          <Link href="/" className="eyebrow text-muted">
-            ← DUB
+          <Link href="/" className="flex shrink-0 items-center gap-1 eyebrow text-muted">
+            <span aria-hidden>←</span>
+            <Wordmark className="h-3" title="DUB — back to your crates" />
           </Link>
           <Menu />
         </div>
@@ -187,6 +189,9 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
             ) : null}
           </>
         )}
+        {/* Small, quiet, in the corner. This card is the thing people show somebody, so
+            it should say whose it is — without competing with the sentences. */}
+        <Wordmark className="mt-6 h-3 text-muted/50" />
       </section>
 
       {/* --------------------------------------------------- how am I doing */}

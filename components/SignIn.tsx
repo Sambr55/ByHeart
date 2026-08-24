@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Menu } from '@/components/Menu'
+import { Wordmark } from '@/components/Wordmark'
 
 /**
  * Sign in.
@@ -38,8 +39,9 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col justify-center gap-6 px-5 py-12">
       <div className="flex items-center justify-between gap-3">
-        <a href="/" className="eyebrow text-accent">
-          ← DUB
+        <a href="/" className="flex shrink-0 items-center gap-1 eyebrow text-accent">
+          <span aria-hidden>←</span>
+          <Wordmark className="h-3" title="DUB — back to your crates" />
         </a>
         <Menu />
       </div>

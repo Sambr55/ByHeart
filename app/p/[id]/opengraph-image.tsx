@@ -1,4 +1,5 @@
 import { ImageResponse } from 'next/og'
+import { DUB_CLUB } from '@/content/marks'
 import { getShareCard } from '@/lib/share'
 
 export const runtime = 'nodejs'
@@ -75,23 +76,19 @@ export default async function Image({ params }: { params: Promise<{ id: string }
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: 12, borderTop: '1px solid #d3c7b1' }}>
           <div style={{ fontSize: 26, color: '#a8492f' }}>No streak involved.</div>
-          {/* The tile mark and the name, because a recipient who has never heard of DUB
-              is being invited into something and should be able to see what. */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div
-              style={{
-                display: 'flex',
-                width: 34,
-                height: 34,
-                border: '3px solid #1f5d8c',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            />
-            <div style={{ fontSize: 26, fontWeight: 700, letterSpacing: 6, color: '#1a2430' }}>
-              DUB CLUB
-            </div>
-          </div>
+          {/*
+            The real lock-up, because a recipient who has never heard of DUB is being
+            invited into something and should be able to see what.
+
+            Drawn from the same path data the app inlines rather than set in a typeface:
+            next/og resolves no CSS and cannot load a font it has not been handed, so a
+            hand-set wordmark here would drift from the real one the moment either moved.
+            Satori renders <svg> and <path>, and lint:content fails if this stops matching
+            public/brand/dub-club.svg.
+          */}
+          <svg viewBox={DUB_CLUB.viewBox} width={168} height={82} fill="#1a2430" fillRule="evenodd">
+            <path d={DUB_CLUB.d} />
+          </svg>
         </div>
       </div>
     ),

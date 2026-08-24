@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Wordmark } from '@/components/Wordmark'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -325,8 +326,9 @@ function Library() {
     >
       <header className="bar sticky top-0 z-30 flex flex-col gap-3 px-5 py-2.5">
         <div className="flex items-center gap-3">
-          <Link href="/crates" className="eyebrow opacity-80 transition hover:opacity-100">
-            ← DUB
+          <Link href="/crates" className="flex shrink-0 items-center gap-1 eyebrow opacity-80 transition hover:opacity-100">
+            <span aria-hidden>←</span>
+            <Wordmark className="h-3" title="DUB — back to your crates" />
           </Link>
           <span className="eyebrow flex-1">Vocab library</span>
           <Menu />

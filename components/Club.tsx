@@ -83,7 +83,7 @@ export function Club() {
       className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
     >
       <div className="flex items-center gap-3">
-        <Wordmark mark="club" className="h-5" />
+        <Wordmark mark="club" className="h-8" />
         <span className="flex-1" />
         <Menu />
       </div>
@@ -134,7 +134,7 @@ function Welcome({ onDone }: { onDone: () => void }) {
       data-stage="REAL WORLD"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
     >
-      <Wordmark mark="club" className="h-5" />
+      <Wordmark mark="club" className="h-8" />
       <div className="flex flex-1 flex-col justify-center gap-3">
         <p className="eyebrow text-accent">{CLUB.welcome.eyebrow}</p>
         <h1 className="display text-balance text-3xl">{CLUB.welcome.headline}</h1>

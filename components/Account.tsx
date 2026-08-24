@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { Entitlements } from '@/lib/entitlements'
 import { PLANS } from '@/lib/entitlements'
 import { Menu } from '@/components/Menu'
+import { Wordmark } from '@/components/Wordmark'
 
 /**
  * Account settings.
@@ -89,8 +90,9 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col gap-6 px-5 py-10">
       <header className="flex items-center justify-between gap-3">
-        <a href="/" className="eyebrow text-accent">
-          ← DUB
+        <a href="/" className="flex shrink-0 items-center gap-1 eyebrow text-accent">
+          <span aria-hidden>←</span>
+          <Wordmark className="h-3" title="DUB — back to your crates" />
         </a>
         <a href="/api/auth/logout" className="eyebrow flex-1 text-right text-muted">
           SIGN OUT

@@ -39,6 +39,7 @@ import { Shelves } from '@/components/Shelves'
 import { CrateIcon } from '@/components/CrateIcon'
 import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
 import { setPair } from '@/engine/pair'
+import { Wordmark } from '@/components/Wordmark'
 import { useNowAfterMount } from '@/engine/useNow'
 import { track } from '@/engine/analytics'
 import { insightsFor } from '@/content/osmosis'
@@ -500,7 +501,8 @@ function Landing() {
   return (
     <Shell stage="LANDING">
       <div className="flex flex-1 flex-col justify-center">
-        <p className="display text-5xl tracking-tight">{LANDING.wordmark}</p>
+        {/* The real mark, at last. It was live Archivo text until the SVGs arrived. */}
+        <Wordmark className="h-12 text-fg" />
         <p className="mt-3 text-balance text-xl text-accent">{LANDING.line}</p>
         <div className="mt-10 space-y-6">
           <p className="display text-balance text-2xl">{LANDING.lines[0]}</p>
@@ -1098,6 +1100,9 @@ function Picker() {
       {anyLocked ? (
         <p className="text-xs leading-relaxed text-muted">{PICKER.locked_note}</p>
       ) : null}
+      {/* One quiet mark at the foot of the list, not one per card — eleven cards would
+          be eleven logos and no design. */}
+      <Wordmark className="mx-auto mt-auto h-3 text-muted/40" />
     </Shell>
   )
 }

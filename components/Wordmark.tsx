@@ -1,42 +1,46 @@
-import { CLUB } from '@/content/club'
+import { DUB, DUB_CLUB, DUB_MARK, type Mark } from '@/content/marks'
+
+const MARKS: Record<string, Mark> = { dub: DUB, club: DUB_CLUB, mark: DUB_MARK }
 
 /**
  * The wordmark, in one place.
  *
- * Every screen has been hand-rolling the name as live Archivo text, which is why there
- * was nowhere to put a logo when one arrived. This is that seam: swap the branch below
- * for the SVG and all six placements change at once.
+ * Every screen was hand-rolling the name as live Archivo text, which is why there was
+ * nowhere to put a logo when one arrived. Six placements, one component.
  *
- * BLOCKED ON ASSETS. public/ holds a service worker and an audio manifest and nothing
- * else — the two logo files do not exist in the repo, so the text lock-up below is still
- * what renders. When public/brand/dub.svg and public/brand/dub-club.svg land, this
- * component is the only file that needs editing.
+ * Inline SVG rather than <img src="/brand/dub.svg">, and that is the whole reason this
+ * is a component at all: the header is blue and needs a white mark, and an <img> cannot
+ * inherit `currentColor`. Inline, the mark takes the colour of whatever it sits in — ink
+ * on sand, white on the bar, the crate's own tone if it ever wants it — from one file.
  *
- * Two things whoever supplies them should know. SVG rather than PNG, because a 200px
- * PNG is too small for the app icon at 512, the Apple icon at 180 or the share image at
- * 1200, and it cannot be recoloured — the header is blue and needs a white mark, which
- * one SVG handles through currentColor and two PNGs do not. And the browser tab wants
- * the U's speech-bubble tail on its own rather than the wordmark: three letters do not
- * survive 16px, and the tail is the distinctive part.
+ * `mark="mark"` is the U on its own, carrying the speech-bubble tail. That is the icon
+ * everywhere something is too small for words: three letters do not survive 16px, and
+ * the tail is the part of this mark that means anything.
  *
- * next/og cannot read any of this. The share image resolves no CSS variables and no
- * component tree, so it will need the mark inlined as a data URI or fetched by absolute
- * URL — worth expecting rather than discovering.
+ * Sizing is by height. A wordmark has one correct dimension and it is not width.
  */
 export function Wordmark({
   mark = 'dub',
   className = '',
+  title,
 }: {
-  mark?: 'dub' | 'club'
+  mark?: 'dub' | 'club' | 'mark'
   className?: string
+  /** Overrides the accessible name. Use when the mark sits inside a link that says more. */
+  title?: string
 }) {
-  const text = mark === 'club' ? CLUB.name : 'DUB'
+  const m = MARKS[mark]
   return (
-    <span
-      className={'display inline-flex items-center text-sm font-bold tracking-[0.35em] ' + className}
-      aria-label={text}
+    <svg
+      viewBox={m.viewBox}
+      className={'w-auto ' + className}
+      role="img"
+      aria-label={title ?? m.label}
+      // The mark is one path with a subpath per glyph, so the counters are holes.
+      fill="currentColor"
+      fillRule="evenodd"
     >
-      {text}
-    </span>
+      <path d={m.d} />
+    </svg>
   )
 }
