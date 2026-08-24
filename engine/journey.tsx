@@ -696,8 +696,22 @@ export function JourneyProvider({
       */
       const owned = ownedPieces()
       const answerable = NO_CUE_PROMPTS.filter((p) => owned.includes(p.requires)).length
+      /*
+        The capability screen comes BEFORE the cold prompts, and that is a reordering
+        rather than a tidy-up.
+
+        rungReached counts clean releases and nothing else. The release is the sole beat
+        that moves the ladder, in every crate at once, and the only beat in a crate that
+        produces a proof line. The three no-cue screens sitting at the tail of a section
+        FELT like the summit and moved nothing at all — so the emotional peak and the
+        meaningful peak were in different places, four times a session.
+
+        Putting "here is what you can now do" first makes the cold prompts what they
+        actually are: three more goes, after the point has been made.
+      */
+      steps.push({ kind: 'cansay' })
       for (let i = 0; i < Math.min(3, answerable); i++) steps.push({ kind: 'nocue', i })
-      steps.push({ kind: 'cansay' }, { kind: 'proof' }, { kind: 'close' })
+      steps.push({ kind: 'proof' }, { kind: 'close' })
       rememberPlayed([], collision?.id ?? null)
       dispatch({ type: 'append', steps, collisionId: collision?.id, jump: true })
     },

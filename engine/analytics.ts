@@ -100,6 +100,8 @@ export type EventName =
   | 'legend_rehearse'
   | 'legend_cold_open'
   | 'legend_unlocked'
+  /* The truth about what happens when you get it wrong. Once per learner, ever. */
+  | 'switch_shown'
 
 export interface AnalyticsEvent {
   seq: number

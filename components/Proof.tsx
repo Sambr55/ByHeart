@@ -182,21 +182,37 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
           </>
         ) : (
           <>
-            <p className="display mt-3 text-6xl tabular-nums leading-none">{proof.length}</p>
-            <p className="mt-3 text-sm text-fg/80">
+            {/*
+              Inverted, and it is the whole argument of the card.
+
+              The number was 60px and the sentence was 18px, so the biggest thing on the
+              screen was a count — which is the shape of every app this product exists to
+              be the opposite of. The thing you can SAY is the hero now, at the one size
+              reserved for produced language, and the count is a footnote underneath it.
+
+              Nothing animates. The number does not count up: its only possible referent
+              is a score, and a number that moves is a number asking to be watched.
+            */}
+            <p className="pt t-said mt-3">{recent[0].pt}</p>
+            <p className="mt-3 text-sm text-muted">{recent[0].en}</p>
+
+            <p className="mt-6 border-t border-line pt-6 text-base text-fg/80">
+              <span className="tabular-nums font-semibold">{proof.length}</span>{' '}
               {proof.length === 1 ? 'sentence' : 'sentences'} said with nothing on screen to
               copy from
               {clean ? ', ' + clean + ' of them right first time' : ''}.
             </p>
 
-            <ul className="mt-6 space-y-3 border-t border-line pt-6">
-              {recent.map((p) => (
-                <li key={p.pt}>
-                  <p className="pt text-lg font-semibold text-accent">{p.pt}</p>
-                  <p className="mt-1 text-xs text-muted">{p.en}</p>
-                </li>
-              ))}
-            </ul>
+            {recent.length > 1 ? (
+              <ul className="mt-6 space-y-3">
+                {recent.slice(1).map((p) => (
+                  <li key={p.pt}>
+                    <p className="pt text-lg font-semibold text-accent">{p.pt}</p>
+                    <p className="mt-1 text-xs text-muted">{p.en}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
 
             {worlds > 1 ? (
               <p className="mt-6 text-xs text-muted">

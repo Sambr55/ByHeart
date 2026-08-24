@@ -49,7 +49,22 @@ export const AGE_QUESTION: ProfileQuestion = {
   askerLine: 'How long have you been at this business of being alive?',
   headline: 'Roughly where are you?',
   why:
-    'Portugal changes how it speaks to you depending on your age, and expects you to change back. This decides which version you are taught.',
+    /*
+      What this question actually does, said accurately.
+
+      It promised "this decides which version you are taught" and decided nothing:
+      age_band is read in exactly one place, to work out whether to ask the question
+      again, and it never touches content selection. The graph is overwhelmingly tu —
+      podes outnumbers pode 28 to 1 and o senhor does not occur once — so a
+      sixty-year-old was told he would be given the formal register and then taught
+      "Podes repetir?" for the next ninety roots.
+
+      The rule this establishes is bigger than the bug: no screen may promise a
+      behaviour the code does not have. Where the two disagree the copy changes today
+      and the code changes when it can — the alternative is teaching one register and
+      calling it the language, which is the thing this question exists to avoid.
+    */
+    'Portugal speaks to you differently depending on your age. This tells you which version is coming at you, and what it means when it changes.',
   options: [
     { id: 'under25', label: 'UNDER 25' },
     { id: '25to39', label: '25 TO 39' },

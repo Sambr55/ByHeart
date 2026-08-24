@@ -282,6 +282,28 @@ export const PICKER = {
 } as const
 
 /** §09 (7:30–8:35) — no cue, no styling, no culture. The absence is the point. */
+/*
+  What actually happens when a beginner gets it wrong in Portugal.
+
+  The premise most language apps encode is that the consequence of broken Portuguese is
+  being corrected. It is not. Correction is rare, and it is a sign of warmth. The
+  overwhelmingly common response is the switch to English — done kindly, done to be
+  helpful — and it ends the conversation as a Portuguese conversation.
+
+  Told once, at a release beat, after a third failed check. It is the single most
+  respectful screen in the product because it tells the learner the truth about the
+  country instead of letting them think the difficulty is theirs.
+*/
+export const THE_SWITCH = {
+  eyebrow: 'NOBODY WARNS YOU',
+  line: '“Sorry — do you speak English?”',
+  body: 'That is what happens. Not because you were bad at it — because they are being kind, and switching is the kindest thing they can think of.',
+  answer: 'This is the sentence that answers it. Say it early and they stay in Portuguese.',
+  repair: 'Estou a aprender. Tenha paciência.',
+  repair_en: 'I am learning. Bear with me.',
+  cta: 'GOT IT',
+} as const
+
 export const NO_CUE_PROMPTS = [
   /*
     Rung-1 prompts, and the reason they had to be written.

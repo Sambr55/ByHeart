@@ -242,6 +242,13 @@ export interface LearnerState {
    */
   legend_prompt: 'unseen' | 'accepted' | 'declined'
   /**
+   * Whether the learner has been told what actually happens when they get it wrong.
+   *
+   * Once per learner, ever. It is a truth about Portugal rather than a feature, and a
+   * truth told twice is a lesson being repeated at somebody.
+   */
+  switch_seen_at: string | null
+  /**
    * Crates whose section has been carried all the way to the end.
    *
    * roots_played says what was opened; this says what was FINISHED, and only the second
@@ -296,6 +303,7 @@ export function emptyLearner(): LearnerState {
     lines_seen: [],
     legend: [],
     legend_prompt: 'unseen',
+    switch_seen_at: null,
     sections_completed: [],
     club_welcomed_at: null,
     deal_accepted_at: null,
@@ -388,6 +396,7 @@ export function loadLearner(): LearnerState {
             parsed.legend_prompt === 'accepted' || parsed.legend_prompt === 'declined'
               ? parsed.legend_prompt
               : 'unseen',
+          switch_seen_at: parsed.switch_seen_at ?? null,
           sections_completed: arr(parsed.sections_completed, []),
           club_welcomed_at: parsed.club_welcomed_at ?? null,
           deal_accepted_at: parsed.deal_accepted_at ?? null,
@@ -579,6 +588,7 @@ export async function syncSession(reason: string): Promise<boolean> {
         lines_seen: s.lines_seen,
         legend: s.legend,
         legend_prompt: s.legend_prompt,
+        switch_seen_at: s.switch_seen_at,
         deal_accepted_at: s.deal_accepted_at,
         created_at: s.created_at,
         user_agent: navigator.userAgent,
@@ -964,6 +974,13 @@ export function answerLegend(frameId: string, values: Record<string, string>) {
         at: new Date().toISOString(),
       },
     ]
+  })
+}
+
+/** Shown once, ever. The earliest time is the true one, exactly like the Club welcome. */
+export function markSwitchSeen() {
+  update((s) => {
+    s.switch_seen_at ??= new Date().toISOString()
   })
 }
 

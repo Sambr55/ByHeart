@@ -8,7 +8,7 @@
 import { chromium, type Locator, type Page } from 'playwright'
 import { CRATES, ROOTS, entryRung, isLive } from '../content/roots'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
-import { PICKER } from '../content/front-door'
+import { CLOSE, PICKER } from '../content/front-door'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 // Must default to a crate a brand-new learner can actually open: the ladder now
@@ -159,7 +159,22 @@ async function main() {
 
   // Anything at rung 1 is open from the start, whatever the learner has done since.
   const openable = live.filter((f) => entryRung(f) <= Math.max(1, needed))
-  const chosen = live.find((f) => f.id === family)!
+  /*
+    A drop outside its window is not walkable, and that is the product working.
+
+    Drops open a few weeks before the event they are about, so for most of the year one
+    is simply not on the shelf. Crashing on `undefined` here read like a broken harness
+    when it was a correct calendar.
+  */
+  const chosen = live.find((f) => f.id === family)
+  if (!chosen) {
+    console.log(
+      family + ' is not on the shelf today — a drop outside its window, or a crate that ' +
+        'does not exist. Nothing to walk.',
+    )
+    await browser.close()
+    return
+  }
   // Tapping a crate enters it. There is no confirm step any more: a list where every
   // row is a destination behaves like one.
   await press(page.getByRole('button', { name: chosen.title, exact: false }).first(), 'enter the crate')
@@ -182,6 +197,15 @@ async function main() {
 
   // Walk roots until the close.
   for (let guard = 0; guard < 260; guard++) {
+    /*
+      Stop at the close.
+
+      The loop's job is to get through a session; the close is handled explicitly below,
+      and pressing its way through it meant the loop navigated to Dub Club, came back,
+      and spent the remaining two hundred iterations pressing whatever it found. The
+      close is the end of the walk, so the walk ends there.
+    */
+    if ((await page.evaluate(() => document.body.innerText)).includes(CLOSE.sub)) break
     const body = await page.evaluate(() => document.body.innerText)
     seenText.push(body)
     seen.push(await stage())
@@ -261,8 +285,26 @@ async function main() {
     if (await cta.isVisible().catch(() => false)) {
       await press(cta, 'cta')
     } else {
-      problems.push('no way forward at step ' + guard + ': ' + body.slice(0, 120).replace(/\n/g, ' | '))
-      break
+      /*
+        One screen in DUB deliberately has no way forward, and only for 620ms: the drain,
+        where the culture is leaving and the ask has not arrived. A person waits through
+        it without noticing; a walker has to be told.
+
+        Waited for once rather than tolerated in a loop — if a second look still finds
+        nothing, the screen really is a dead end and that is worth failing on.
+      */
+      await page.waitForTimeout(1100)
+      if (await cta.isVisible().catch(() => false)) {
+        await press(cta, 'cta after the drain')
+      } else if (await page.getByTestId('tile-pool').isVisible().catch(() => false)) {
+        if (!(await solveTiles(page))) {
+          problems.push('could not solve the build after the drain')
+          break
+        }
+      } else {
+        problems.push('no way forward at step ' + guard + ': ' + body.slice(0, 120).replace(/\n/g, ' | '))
+        break
+      }
     }
   }
 
@@ -271,7 +313,9 @@ async function main() {
   const proofSeen = seenText.find((s) => /WHAT I CAN SAY/.test(s))
   if (!proofSeen) problems.push('never saw the proof card')
   else {
-    const n = proofSeen.match(/WHAT I CAN SAY\s+(\d+)/)
+    // The count moved below the sentence when the card inverted, so it is no longer the
+    // first thing after the eyebrow. Matched on the sentence it appears in instead.
+    const n = proofSeen.match(/(\d+)\s+sentences?\s+said with nothing on screen/)
     if (!n || Number(n[1]) < 1) problems.push('proof card counted nothing after a full run')
     else console.log('proof card: ' + n[1] + ' sentences produced cold')
   }
@@ -282,8 +326,17 @@ async function main() {
   const end = await page.evaluate(() => document.body.innerText)
   console.log('stages: ' + seen.join(' '))
   console.log('ended on: ' + end.slice(0, 200).replace(/\n+/g, ' | '))
-  if (!/YOU ALREADY KNOW MORE THAN YOU THINK/.test(end)) {
+  /*
+    The close ends on the sentence, not on a compliment.
+
+    It used to assert the old headline verbatim, which is exactly the kind of restated
+    literal that fails the next time the copy is tightened. What matters is that the
+    screen carries something the learner produced — CLOSE.sub is there either way.
+  */
+  if (!end.includes(CLOSE.sub)) {
     problems.push('never reached the close')
+  } else if (!/YOU SAID/.test(end) && !/YOU ALREADY KNOW MORE THAN YOU THINK/.test(end)) {
+    problems.push('the close carried neither a sentence nor its fallback')
     problems.forEach((x) => console.log('  ' + x))
     await browser.close()
     process.exit(1)

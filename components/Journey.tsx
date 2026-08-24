@@ -24,6 +24,7 @@ import {
 import {
   CLOSE,
   DEAL as DEAL_COPY,
+  THE_SWITCH,
   DEMO_BEATS,
   DEMO_CLOSE,
   LANDING,
@@ -64,6 +65,8 @@ import {
   markOsmosisSeen,
   recordProof,
   rememberNoCue,
+  loadLearner,
+  markSwitchSeen,
   rememberPlayed,
   setLegendPrompt,
   resetLearnerCache,
@@ -98,12 +101,21 @@ function Shell({
   eyebrow,
   tone,
   nav = true,
+  drain = false,
 }: {
   stage: string
   eyebrow?: string
   /** The crate's own colour. ROOT and LANDING take it; CHOICE and REAL WORLD do not. */
   tone?: string
   nav?: boolean
+  /**
+   * The culture is leaving, right now, on this screen.
+   *
+   * Set by the release beat when the learner taps TAKE IT AWAY — never by a timer and
+   * never on mount. Same CSS either way, opposite meaning: on a timer the app confiscates
+   * the scaffolding, and on the tap the learner hands it over.
+   */
+  drain?: boolean
   children: React.ReactNode
 }) {
   const { back, goHome, canGoBack, owned } = useJourney()
@@ -116,7 +128,8 @@ function Shell({
     <div
       data-stage={stage}
       data-tone={tone}
-      className="flex min-h-dvh flex-col bg-bg text-fg transition-colors duration-700"
+      data-drain={drain ? 'on' : undefined}
+      className="flex min-h-dvh flex-col bg-bg text-fg"
     >
       {/* The bar is solid: a coloured header needs neither the translucency nor the
           blur, and the blur was what forced the menu overlay to be portalled to the
@@ -1138,11 +1151,20 @@ export function MiniBuild({
   target,
   helpers,
   onSolved,
+  onStuck,
 }: {
   target: string
   helpers?: Record<string, string>
   /** `clean` means right on the first submission, which is what the proof card counts. */
   onSolved: (result: { clean: boolean }) => void
+  /**
+   * Three failed checks on one sentence.
+   *
+   * Reported rather than handled here, because what to do about it is a decision the
+   * beat owns — and only the release beat does anything at all. Nothing here scolds,
+   * clears the tiles or counts attempts on screen.
+   */
+  onStuck?: () => void
 }) {
   const tiles = useMemo(() => {
     const words = target.split(' ')
@@ -1223,6 +1245,7 @@ export function MiniBuild({
       onSolved({ clean: attempts.current === 1 && !helped })
     } else {
       setState('wrong')
+      if (attempts.current >= 3) onStuck?.()
     }
   }
 
@@ -1393,6 +1416,40 @@ function RootBeatView({
   const root = rootById(rootId)!
   const family = CRATES.find((f) => f.id === root.culture_family)!
   const [done, setDone] = useState(false)
+  /**
+   * The release beat's three states, and 'draining' is not padding.
+   *
+   * The line has to still BE there while it goes, or it does not go — it just stops
+   * existing, which is the opposite of watching the culture leave. So the tap moves to
+   * 'draining' with the line still on screen fading out under the header, and the ask
+   * arrives when the transition itself says it has finished.
+   *
+   * Ended by transitionend rather than a timer, so it cannot drift out of step with the
+   * CSS and it collapses correctly under prefers-reduced-motion, where the duration is
+   * 0.001ms and the event fires almost immediately.
+   */
+  const [released, setReleased] = useState<'before' | 'draining' | 'building'>('before')
+  const [switched, setSwitched] = useState(false)
+
+  /*
+    A safety net, and it is not belt-and-braces.
+
+    'draining' is the one state in the product with no way forward — that is the point,
+    it lasts 620ms and then the ask arrives. But it ends on a transitionend event, and a
+    transitionend that never fires leaves a learner on a dead screen with no button, no
+    back and nothing to tap. That is a worse failure than any animation glitch, and the
+    event genuinely can be missed: a backgrounded tab, a browser that drops it, an
+    element removed mid-transition.
+
+    So the state also ends on a timer set slightly past the duration. Whichever happens
+    first wins, and the timer is a floor rather than the mechanism — the drain is still
+    fired by the learner's tap, and still ends when the CSS says it has.
+  */
+  useEffect(() => {
+    if (released !== 'draining') return
+    const t = setTimeout(() => setReleased('building'), 900)
+    return () => clearTimeout(t)
+  }, [released])
   const [choice, setChoice] = useState<string | null>(null)
   // Lets the rule be reached without a pick. The screen says nothing here is scored,
   // so blocking the way forward until something is chosen contradicts it.
@@ -1680,49 +1737,131 @@ function RootBeatView({
     )
   }
 
-  // release — the cue is gone
+  /*
+    THE RELEASE — the most important thirty seconds in the product, and the flattest.
+
+    It mounted with `stage="REAL WORLD"` and no tone at all, which meant the culture was
+    already gone before the screen existed. The learner never saw it leave. The signature
+    move of the entire visual system fired on a screen nobody watched, and the payoff was
+    a small grey line reading "That one no longer needs the original cue."
+
+    It outranks everything else because rungReached counts clean releases and nothing
+    else: this is the sole beat that moves the ladder — in every crate at once — and the
+    only beat in a crate that produces a proof line.
+
+    Three states, one mount. The Shell is the same element throughout, so the drain
+    happens under the learner rather than across a screen transition.
+
+      A  before the tap. Still ROOT, still the crate's colour, the line on screen one
+         last time. The learner decides.
+      B  the tap. data-drain runs the 620ms: header to ink, band out, line gone.
+      C  solved. The demotion — the English ask was 40px ink at the top of the screen
+         and becomes 12px muted underneath the Portuguese.
+
+    And nothing says the cue has gone. They watched it go.
+  */
   return (
-    <Shell stage="REAL WORLD">
-      {/* This is the release beat and it runs for every crate — swearing, a gig, a book of
-    Stoic advice. It said NO FILM, hard-coded, in the one beat that is never about a
-    film. The proof card already had the medium-agnostic version of this line. */}
-        <p className="eyebrow text-muted">NO CLUES</p>
-      <p className="mt-3 text-sm font-semibold">{root.transfer_prompt.context}</p>
-      <p className="display mt-3 text-balance text-2xl">“{root.transfer_prompt.ask}”</p>
-      <MiniBuild
-        target={root.transfer_prompt.answer}
-        helpers={root.helpers}
-        onSolved={({ clean }) => {
-          recordProof({
-            pt: root.transfer_prompt.answer,
-            en: root.transfer_prompt.ask,
-            source: 'release',
-            clean,
-          })
-          /*
-            HERE is where a root counts as played — at its release, not when the section
-            queued it.
+    <Shell
+      stage="ROOT"
+      eyebrow={released === 'before' ? family.title : undefined}
+      tone={released === 'before' ? family.tone : undefined}
+      drain={released !== 'before'}
+    >
+      {/*
+        THE SWITCH — what actually happens when you get it wrong in Portugal.
 
-            Recording it at queue time meant entering a crate consumed it: tap in, look
-            at one screen, leave, and the picker said "everything here is done" while
-            Dub Club would never offer to resume it. The learner had seen one screen.
+        Not a correction. The overwhelmingly common response is the switch to English,
+        done kindly, and it ends the conversation as a Portuguese one. Shown once ever,
+        at a release beat, after a third failed check — and it does the thing it is
+        describing: the ask, the tiles and the azulejo all go, and there is ink on sand.
 
-            The release is the beat where the cultural cue is taken away and they say the
-            sentence themselves, which is the only moment that means anything.
-          */
-          rememberPlayed([root.root_id], null)
-          setDone(true)
-        }}
-      />
-      {done ? (
+        It does not clear the learner's work. Dismissing it puts them back exactly where
+        they were, with the tiles as they left them.
+      */}
+      {switched ? (
+        <div className="flex flex-1 flex-col justify-center gap-3">
+          <p className="eyebrow text-muted">{THE_SWITCH.eyebrow}</p>
+          <p className="t-line">{THE_SWITCH.line}</p>
+          <p className="text-base leading-relaxed text-fg/85">{THE_SWITCH.body}</p>
+          <div className="mt-6 flex flex-col gap-1 rounded border-l-2 border-accent bg-surface px-3 py-3">
+            <p className="text-xs text-muted">{THE_SWITCH.answer}</p>
+            <p className="pt text-lg text-accent">{THE_SWITCH.repair}</p>
+            <p className="text-xs text-muted">{THE_SWITCH.repair_en}</p>
+          </div>
+          <Cta label={THE_SWITCH.cta} onClick={() => setSwitched(false)} />
+        </div>
+      ) : released !== 'building' ? (
         <>
-          <p className="mt-6 text-sm text-muted">
-            That one no longer needs the original cue.
-          </p>
-          <Cta label="CONTINUE" onClick={next} />
+          <div className="flex flex-1 flex-col justify-center gap-3">
+            <p className="eyebrow drains text-muted">LAST TIME</p>
+            <p
+              className="t-line drains"
+              onTransitionEnd={() => setReleased('building')}
+            >
+              {root.root_type === 'quote' ? '“' + root.root_display + '”' : root.root_display}
+            </p>
+          </div>
+          {released === 'before' ? (
+            <Cta label="TAKE IT AWAY" onClick={() => setReleased('draining')} />
+          ) : (
+            <div className="mt-auto" />
+          )}
         </>
       ) : (
-        <div className="mt-auto" />
+        <>
+          <div className="flex flex-col gap-3">
+            <p className="eyebrow text-muted">NO CLUES</p>
+            {/*
+              THE DEMOTION — the mechanic that replaces every animation we are not
+              building. One conditional className: face, size, colour and position all
+              change the instant the sentence exists, inside a single mount.
+            */}
+            {done ? (
+              <>
+                <p className="pt t-said">{root.transfer_prompt.answer}</p>
+                <p className="text-xs text-muted">{root.transfer_prompt.ask}</p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-semibold">{root.transfer_prompt.context}</p>
+                <p className="t-ask">“{root.transfer_prompt.ask}”</p>
+              </>
+            )}
+          </div>
+
+          {done ? null : (
+            <MiniBuild
+              target={root.transfer_prompt.answer}
+              helpers={root.helpers}
+              onStuck={() => {
+                // Once per learner, ever, and only here. Read fresh rather than off the
+                // snapshot, because the store may not have loaded when this beat mounted.
+                if (loadLearner().switch_seen_at) return
+                markSwitchSeen()
+                track('switch_shown', { root: root.root_id })
+                setSwitched(true)
+              }}
+              onSolved={({ clean }) => {
+                recordProof({
+                  pt: root.transfer_prompt.answer,
+                  en: root.transfer_prompt.ask,
+                  source: 'release',
+                  clean,
+                })
+                /*
+                  HERE is where a root counts as played — at its release, not when the
+                  section queued it. Recording it at queue time meant entering a crate
+                  consumed it: tap in, see one screen, leave, and the picker said
+                  "everything here is done" while the Club would never offer to resume it.
+                */
+                rememberPlayed([root.root_id], null)
+                setDone(true)
+              }}
+            />
+          )}
+
+          {done ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
+        </>
       )}
     </Shell>
   )
@@ -2062,10 +2201,16 @@ function SectionComplete() {
     <Shell stage="CHOICE">
       <div className="flex flex-1 flex-col justify-center">
         <p className="eyebrow text-accent">{family ? family.title + ' — DONE' : 'CRATE COMPLETE'}</p>
+        {/*
+          The capability sentence is not here any more.
+
+          It was written in three places and the capability screen is now the very next
+          beat, so this said the same thing twice in a row — and the weaker of the two
+          came first. What belongs on this screen is what came out of THIS crate, which
+          is the shelf underneath.
+        */}
         <p className="display mt-3 text-balance text-2xl">
-          {acts.length
-            ? 'You can now ' + acts.slice(0, 3).join(', ') + (acts.length > 3 ? ' — and more.' : '.')
-            : 'That crate is done.'}
+          {family ? 'That is ' + family.title + ' emptied out.' : 'That crate is done.'}
         </p>
         {/*
           What you gained in THIS crate, not your whole bank. Showing everything at the
@@ -2524,11 +2669,42 @@ function CapabilityRow({
 
 function Close() {
   const { finish } = useJourney()
+  const learner = useLearner()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  /*
+    The session ends on the sentence, not on a compliment.
+
+    It closed with "YOU ALREADY KNOW MORE THAN YOU THINK" — a nice thing to say, and the
+    app saying it. What the learner actually did is sitting right there in the proof log:
+    the last thing they produced with nothing on screen to copy from. Showing that is the
+    same move as the proof card's inversion, and it is the most confident thing a product
+    can end on, because it is a person doing the thing rather than the app describing it.
+
+    Legend lines are excluded. They are the learner's own family and belong on a screen
+    they chose to open, not on the one that ends a session about a film.
+  */
+  const carried = mounted
+    ? [...(learner.proof ?? [])].reverse().find((p) => p.source !== 'legend')
+    : undefined
+
   return (
     <Shell stage="REAL WORLD">
-      <div className="flex flex-1 flex-col justify-center">
-        <p className="display text-balance text-3xl">{CLOSE.eyebrow}</p>
-        <p className="mt-3 text-sm text-muted">{CLOSE.sub}</p>
+      <div className="flex flex-1 flex-col justify-center gap-3">
+        {carried ? (
+          <>
+            <p className="eyebrow text-muted">YOU SAID</p>
+            <p className="pt t-said">{carried.pt}</p>
+            <p className="text-xs text-muted">{carried.en}</p>
+            <p className="mt-6 text-sm text-muted">{CLOSE.sub}</p>
+          </>
+        ) : (
+          <>
+            <p className="display text-balance text-3xl">{CLOSE.eyebrow}</p>
+            <p className="text-sm text-muted">{CLOSE.sub}</p>
+          </>
+        )}
       </div>
       {/* Home, not back to the beginning. The session used to end where it began —
           the crate picker — which is what made the whole product read as one session

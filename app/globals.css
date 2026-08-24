@@ -270,6 +270,68 @@ body {
   background-color: transparent;
 }
 
+/*
+  THE DRAIN — the one signature gesture in the product, and it has never once run.
+
+  The whole argument of DUB executed in 620ms: the header travels from the crate's own
+  colour to ink, the azulejo band goes out like a light, and the cultural line goes with
+  them. What is left is a Portuguese sentence and a person who did not need the film.
+
+  It was inert for two verified reasons, and both are here. `.bar` declared no transition
+  property at all, so it changed colour instantly. And the band was killed with
+  `background-image: none`, which is a DISCRETE property — it cannot interpolate under
+  any circumstances, however long a duration you give it. Opacity can.
+
+  Two phases on one element. The drain happens inside a single screen, under the
+  learner, on their tap — so the React remount problem never touches it. `data-drain`
+  goes on the same node that carries `data-stage`, exactly as the REAL WORLD rules do,
+  which means `--bar-bg` and `--bar-ink` are computed on an ancestor against the page
+  palette and inherit in as plain colours that interpolate normally.
+
+  Deliberately NOT registered with @property. :root declares --tone: var(--accent) while
+  [data-stage='ROOT'] declares --accent: var(--tone) — a cycle that is benign only while
+  both are unregistered. Register them and it silently resolves to the hard-coded
+  light-theme azulejo, which is a dark-mode bug no gate in this repo would catch. It buys
+  nothing: a computed colour already interpolates.
+*/
+[data-drain='on'] {
+  --bar-bg: var(--fg);
+  --bar-ink: var(--bg);
+  --accent: var(--fg);
+  --accent-ink: var(--bg);
+}
+
+.bar {
+  transition:
+    background-color var(--t-drain) var(--ease-drain),
+    color var(--t-drain) var(--ease-drain),
+    border-color var(--t-drain) var(--ease-drain);
+}
+
+.azulejo-band,
+.azulejo-field,
+.azulejo-block {
+  transition: opacity var(--t-drain) var(--ease-drain);
+}
+
+[data-drain='on'] .azulejo-band,
+[data-drain='on'] .azulejo-field,
+[data-drain='on'] .azulejo-block {
+  opacity: 0;
+}
+
+/* The cultural line leaves with the colour, over the same 620ms. */
+.drains {
+  transition:
+    opacity var(--t-drain) var(--ease-drain),
+    transform var(--t-drain) var(--ease-drain);
+}
+
+[data-drain='on'] .drains {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
 .tap-target {
   min-height: 44px;
   min-width: 44px;
@@ -316,10 +378,41 @@ summary:focus-visible,
   outline-offset: 2px;
 }
 
+/*
+  Time, as a closed scale — the same treatment spacing and layers already have.
+
+  There were four different cascade values doing one job, and a duration-700 on the
+  journey Shell that has never once done anything, because --bg and --fg are identical
+  in ROOT and REAL WORLD. Four durations, two curves, and npm run motion fails a fifth.
+
+  The three laws underneath them:
+
+    No cubic-bezier may have a y control point outside [0,1]. Overshoot is the mechanical
+    signature of bounce, and bounce is the signature of a toy.
+
+    Weight comes from a short distance travelled slowly, never a long distance travelled
+    fast. Every entrance moves 4–10px; a bigger gesture gets longer, not further.
+
+    Scale is not an entrance property. A thing that grows into place reads as inflating,
+    and inflating is one derivative from bouncing. It survives in exactly one role —
+    downward, on press — because a depressed control is physical, not celebratory.
+*/
+:root {
+  --t-ack: 120ms;    /* a control confirming it heard you. Below conscious notice. */
+  --t-arrive: 260ms; /* a thing becomes present: a row, a chip, a gloss */
+  --t-land: 420ms;   /* present WITH WEIGHT. Once per screen, maximum. */
+  --t-drain: 620ms;  /* the culture leaves. Four times a session. Nowhere else. */
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* Departures: reluctant start, clean stop. */
+  --ease-drain: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @keyframes bank-in {
   from {
     opacity: 0;
-    transform: translateY(6px) scale(0.96);
+    /* scale(0.96) was here and is deliberately gone. See the third law above. */
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -339,11 +432,47 @@ summary:focus-visible,
 }
 
 .animate-bank {
-  animation: bank-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: bank-in var(--t-arrive) var(--ease-out) both;
 }
 
 .animate-rise {
-  animation: rise 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: rise var(--t-arrive) var(--ease-out) both;
+}
+
+/*
+  The display scale — three steps, and a fourth is not coming.
+
+  A step reserved for "someday" is how a scale becomes thirty values. These are the only
+  three sizes a moment is allowed to be.
+*/
+.t-line {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+
+/* The produced thing. Portuguese the learner made, and nothing else is ever this size. */
+.t-said {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  color: var(--accent);
+  text-wrap: balance;
+}
+
+/* The English ask, before it is demoted. */
+.t-ask {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.024em;
+  line-height: 1.08;
+  text-wrap: balance;
 }
 
 @media (prefers-reduced-motion: reduce) {

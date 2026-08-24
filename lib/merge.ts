@@ -159,6 +159,8 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     created_at: earliest(l.created_at, r.created_at) ?? new Date().toISOString(),
     deal_accepted_at: earliest(l.deal_accepted_at, r.deal_accepted_at),
     club_welcomed_at: earliest(l.club_welcomed_at, r.club_welcomed_at),
+    // Seen once is seen. A second phone must not decide it has not happened yet.
+    switch_seen_at: earliest(l.switch_seen_at, r.switch_seen_at),
 
     // Append-only. Union by identity, never replaced.
     /*
