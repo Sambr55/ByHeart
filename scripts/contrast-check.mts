@@ -102,6 +102,49 @@ for (const [name, hex] of Object.entries(HEADERS)) {
   console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + name.padEnd(12) + hex + '  ' + r.toFixed(2) + ':1')
 }
 
+/**
+ * On-bar pairs.
+ *
+ * A header is a second palette, and until now nothing tested it — which is how a toggle
+ * came to render sand-on-blue. Every derived token is alpha-white (or alpha-ink, in REAL
+ * WORLD) over the bar, so it is composited first and then measured, because a translucent
+ * colour has no contrast ratio of its own.
+ */
+function over(ink: string, pct: number, ground: string): string {
+  const px = (h: string) => [0, 2, 4].map((i) => parseInt(h.replace('#', '').slice(i, i + 2), 16))
+  const [a, b] = [px(ink), px(ground)]
+  const mix = a.map((c, i) => Math.round(c * pct + b[i] * (1 - pct)))
+  return '#' + mix.map((c) => c.toString(16).padStart(2, '0')).join('')
+}
+
+/** Ink, and the alpha it is used at. --line is decorative; --line-strong carries meaning. */
+const ON_BAR: [string, number, number][] = [
+  ['--fg  (bar text)', 1, AA_TEXT],
+  ['--muted', 0.8, AA_TEXT],
+  ['--accent (selected)', 1, AA_TEXT],
+  ['--line-strong (control edge)', 0.6, AA_LARGE],
+]
+
+console.log('\non-bar tokens, composited over the bar they sit on')
+const BARS: [string, string, string][] = [
+  ...Object.entries(HEADERS).map(([n, hex]) => [n, hex, '#ffffff'] as [string, string, string]),
+  ['REAL WORLD light', '#1a2430', '#efe7d9'],
+  ['REAL WORLD dark', '#f4efe6', '#171a1f'],
+]
+for (const [name, bg, ink] of BARS) {
+  const worst = ON_BAR.map(([label, pct, need]) => {
+    const r = ratio(over(ink, pct, bg), bg)
+    return { label, r, need, ok: r >= need }
+  })
+  const bad = worst.filter((w) => !w.ok)
+  if (bad.length) failures++
+  console.log(
+    '  ' + (bad.length ? 'FAIL' : 'ok  ') + ' ' + name.padEnd(18) +
+      worst.map((w) => w.label.split(' ')[0] + ' ' + w.r.toFixed(2)).join('  ') +
+      (bad.length ? '   <- ' + bad.map((w) => w.label + ' needs ' + w.need).join(', ') : ''),
+  )
+}
+
 console.log('')
 if (failures) { console.log(failures + ' contrast failure(s)'); process.exit(1) }
 console.log('every colour clears its threshold on its own ground')

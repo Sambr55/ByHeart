@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import {
   CRATES,
   PIECES,
@@ -714,6 +715,7 @@ function Ladder({ here }: { here: Rung }) {
 
 function Picker() {
   const { chooseFamily, state } = useJourney()
+  const params = useSearchParams()
   const learner = useLearner()
   const access = useEntitlements()
   // Remember what they chose. Stepping back onto this screen and finding the choice
@@ -783,6 +785,33 @@ function Picker() {
   const spent = claimed.size
   const atLimit = access.known && spent >= allowance
   const anyLocked = shown.some((c) => entryRung(c) > rung)
+
+  /**
+   * /crates?open=world_of_wizardry — the library linking into the crate that teaches a
+   * word, which is the only way "taught in the world of wizardry" is worth reading.
+   *
+   * It runs through the same guard a tap does rather than around it. A URL must not be
+   * able to open a crate the learner has not reached or has no allowance for — so a
+   * link at a locked crate lands on the picker with that crate visible and saying why,
+   * which is the honest outcome and needs no extra copy.
+   *
+   * Waits for `mounted` and for `access.known`, because before either the answer is
+   * "assume open", and acting on that would spend one of three free crates on a guess.
+   */
+  const opened = useRef(false)
+  const wanted = params.get('open')
+  useEffect(() => {
+    if (opened.current || !wanted || !mounted || !access.known) return
+    opened.current = true
+    const crate = shown.find((c) => c.id === wanted)
+    if (!crate) return
+    const openable = crate.drop || entryRung(crate) <= rung
+    const capped = !crate.drop && atLimit && !claimed.has(crate.id)
+    if (!openable || capped) return
+    setEntering(crate.id)
+    chooseFamily(crate.id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wanted, mounted, access.known, atLimit, rung])
   const here = RUNGS[rung - 1]
   return (
     <Shell stage="CHOICE">

@@ -27,8 +27,11 @@ import {
   ROOTS,
   ROOTS_BY_FAMILY,
   RUNGS,
+  SETS,
   SHELVES,
   branchShows,
+  fold,
+  setPieces,
 } from '../content/roots'
 import { INSIGHTS } from '../content/osmosis'
 import { GOAL_NEEDS, QUESTIONS_IN_ORDER } from '../content/profile'
@@ -675,6 +678,50 @@ for (const e of EXAMPLES) {
     const lemmas = new Set(ids.map((id) => PIECES[id].lemma ?? id))
     if (lemmas.size > 1) {
       fail('"' + surface + '" is filed as ' + ids.length + ' unrelated pieces (' + ids.join(', ') + ')')
+    }
+  }
+
+  /*
+    Sets.
+
+    A set is a promise that the group is closed and that you can see the whole of it —
+    so the two ways it can lie are worth failing over: a set that is short without
+    saying so, and a piece tagged into a set it does not appear in, which is a typo
+    that renders as nothing at all and would never be noticed.
+  */
+  for (const set of SETS) {
+    const S = 'set ' + set.id + ': '
+    if (new Set(set.members.map(fold)).size !== set.members.length) {
+      fail(S + 'lists the same member twice')
+    }
+    const covered = setPieces(set)
+    if (covered.size < set.members.length && !set.partial) {
+      fail(
+        S + 'covers ' + covered.size + ' of ' + set.members.length +
+          ' members. Either teach the rest or mark it partial — a set shown as closed ' +
+          'when it is not is the thing this rule exists to stop.',
+      )
+    }
+    if (covered.size === set.members.length && set.partial) {
+      fail(S + 'is complete but still marked partial. Drop the flag.')
+    }
+    if (!SHELVES.some((sh) => sh.id === set.shelf)) fail(S + 'names no real shelf')
+  }
+  for (const [id, piece] of Object.entries(PIECES)) {
+    if (!piece.set) continue
+    const set = SETS.find((x) => x.id === piece.set)
+    if (!set) {
+      fail('piece ' + id + ' is tagged into the unknown set "' + piece.set + '"')
+      continue
+    }
+    if (!set.members.some((m) => fold(m) === fold(piece.target))) {
+      fail(
+        'piece ' + id + ' ("' + piece.target + '") is tagged ' + set.id +
+          ' but is not one of its members, so it would vanish from the group',
+      )
+    }
+    if (piece.shelf !== set.shelf) {
+      fail('piece ' + id + ' is tagged ' + set.id + ' but sits on the ' + piece.shelf + ' shelf')
     }
   }
 

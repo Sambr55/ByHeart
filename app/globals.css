@@ -385,13 +385,56 @@ body {
   ink in REAL WORLD. The stage mechanism stops being felt and starts being seen — the
   colour physically leaves the room at the culture-free beat.
 */
-.bar {
-  background: var(--tone-header);
-  color: #ffffff;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.16);
+/*
+  The two colours a bar is made of, declared on the ANCESTOR rather than on .bar itself.
+
+  This is not fussiness. The block below redefines --fg inside a bar, and a custom
+  property redefined on an element also applies to that element's own declarations — so
+  `background: var(--fg)` on the bar would resolve to the bar's white, not the page's
+  ink, and REAL WORLD would render a white header. Declared a level up, both values are
+  computed against the page palette and inherit in as plain colours.
+*/
+:root {
+  --bar-bg: var(--tone-header);
+  --bar-ink: #ffffff;
+}
+[data-stage='REAL WORLD'] {
+  --bar-bg: var(--fg);
+  --bar-ink: var(--bg);
 }
 
-[data-stage='REAL WORLD'] .bar {
-  background: var(--fg);
-  color: var(--bg);
+/*
+  The bar carries its own token scope.
+
+  The bug this fixes is a class, not a button. .bar used to set background and color and
+  nothing else, so every control inside it still resolved text-muted, border-line and
+  text-accent against the PAGE palette — warm grey and sand — on a saturated blue ground.
+  The scope toggle was simply the first place it showed, and every control anybody drops
+  into a header from now on would have inherited the same fault.
+
+  The inversion of --accent is the important line: on a coloured bar, white IS the
+  accent. A selected control becomes white-on-blue instead of blue-on-blue, which was the
+  failure exactly.
+
+  Derived from --bar-ink rather than hard-coded white because REAL WORLD flips the bar —
+  and in the dark theme that flip makes it a LIGHT bar carrying dark text, where white
+  tokens would be invisible. One block, correct in all four combinations.
+
+  npm run contrast checks these composited over their bar, so it cannot rot.
+*/
+.bar {
+  background: var(--bar-bg);
+  color: var(--bar-ink);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.16);
+
+  --fg: var(--bar-ink);
+  /* 80, not the 72 the spec asked for: at 72 the warm bar's muted text measures 4.08
+     and fails. Measured, not guessed — npm run contrast solves for the whole set. */
+  --muted: color-mix(in srgb, var(--bar-ink) 80%, transparent);
+  --line: color-mix(in srgb, var(--bar-ink) 34%, transparent);
+  --line-strong: color-mix(in srgb, var(--bar-ink) 60%, transparent);
+  --surface: color-mix(in srgb, var(--bar-ink) 16%, transparent);
+  --bg-elev: color-mix(in srgb, var(--bar-ink) 16%, transparent);
+  --accent: var(--bar-ink);
+  --accent-ink: var(--bar-bg);
 }

@@ -131,6 +131,83 @@ export interface Extract {
    * the piece inherits the root's rung, which is right most of the time.
    */
   rung?: Rung
+  /**
+   * A closed group this piece belongs to — 'numbers_1_10', 'weekdays'.
+   *
+   * Authored, never inferred, because the surface form lies: `um` is the number one
+   * AND the indefinite article, and inferring set membership from the string would
+   * file "a coffee" under counting.
+   *
+   * A set changes nothing about how the piece is taught. It is a display grouping in
+   * the library, and its whole value is that four scattered numbers stop looking like
+   * arbitrary vocabulary and start looking like something with six to go.
+   */
+  set?: SetId
+}
+
+export type SetId = 'numbers_1_10' | 'weekdays'
+
+export interface WordSet {
+  id: SetId
+  label: string
+  shelf: Shelf
+  /**
+   * The complete group, in its own order — not the part DUB teaches.
+   *
+   * This is the point. The members with no piece behind them are the gaps, they are
+   * visible to the learner as the shape of the thing, and they are the content brief.
+   */
+  members: string[]
+  /** Declared short on purpose. The lint fails a set that is silently incomplete. */
+  partial?: boolean
+}
+
+/**
+ * Sets.
+ *
+ * "You never teach me to count" was the sharpest piece of feedback DUB has had, and it
+ * was true in a way the piece count hid: of one to ten the product taught cinco and
+ * sete, alphabetised among unrelated words, where they read as noise. Nothing about the
+ * teaching was wrong — pieces still fall out of roots, and always will — but the
+ * LIBRARY was filing a closed set as loose vocabulary.
+ *
+ * Shown as a group, the same four pieces read as four of ten with six to come, and the
+ * six become a brief rather than an absence.
+ */
+export const SETS: WordSet[] = [
+  {
+    id: 'numbers_1_10',
+    label: 'Counting to ten',
+    shelf: 'how_much',
+    members: ['um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez'],
+    partial: true,
+  },
+  {
+    id: 'weekdays',
+    label: 'The days of the week',
+    shelf: 'when',
+    members: [
+      'segunda-feira',
+      'terça',
+      'quarta',
+      'quinta',
+      'sexta',
+      'sábado',
+      'domingo',
+    ],
+    partial: true,
+  },
+]
+
+/** The pieces DUB actually teaches for a set, keyed by the member string they cover. */
+export function setPieces(set: WordSet): Map<string, string> {
+  const out = new Map<string, string>()
+  for (const [id, piece] of Object.entries(PIECES)) {
+    if (piece.set !== set.id) continue
+    const member = set.members.find((m) => fold(m) === fold(piece.target))
+    if (member) out.set(member, id)
+  }
+  return out
 }
 
 export interface Branch {
@@ -763,7 +840,7 @@ export const JAMES_BOND: Root[] = [
     subtext: 'The least glamorous thing in this crate, and the first thing you will need at a till.',
     extracts: [
       { id: 'zero', target: 'zero', gloss: 'zero', shelf: 'how_much' },
-      { id: 'sete', target: 'sete', gloss: 'seven', shelf: 'how_much' },
+      { id: 'sete', target: 'sete', gloss: 'seven', shelf: 'how_much', set: 'numbers_1_10' },
     ],
     branches: [
       { target: 'Sete euros.', en: 'Seven euros.' },
@@ -1321,7 +1398,7 @@ export const PULP_FICTION: Root[] = [
     subtext: 'Ordinary, transactional language, hiding inside the most quoted diner scene ever filmed.',
     extracts: [
       { id: 'euro', target: 'euro', gloss: 'euro', shelf: 'things', gender: 'm', plural: 'euros' },
-      { id: 'cinco', target: 'cinco', gloss: 'five', shelf: 'how_much' },
+      { id: 'cinco', target: 'cinco', gloss: 'five', shelf: 'how_much', set: 'numbers_1_10' },
       { id: 'batido', target: 'batido', gloss: 'milkshake', shelf: 'things', gender: 'm' },
     ],
     branches: [
@@ -2773,8 +2850,8 @@ export const DURAN_DURAN: Root[] = [
       'Once you have segunda-feira the rest are free, because Portugal is only counting: terça is the third, quarta the fourth, quinta the fifth, sexta the sixth. Then it stops counting — sábado and domingo kept their old names.',
     subtext: 'Rattled off, the way you would say the alphabet.',
     extracts: [
-      { id: 'terca', target: 'terça', gloss: 'Tuesday', shelf: 'when' },
-      { id: 'sexta', target: 'sexta', gloss: 'Friday', shelf: 'when' },
+      { id: 'terca', target: 'terça', gloss: 'Tuesday', shelf: 'when', set: 'weekdays' },
+      { id: 'sexta', target: 'sexta', gloss: 'Friday', shelf: 'when', set: 'weekdays' },
     ],
     branches: [
       { target: 'Até terça.', en: 'See you Tuesday.', demonstrates: ['terca'] },
@@ -2869,7 +2946,7 @@ export const DURAN_DURAN: Root[] = [
       'Portugal does not name its weekdays after gods or planets — it counts them. Monday is segunda-feira, the second one. Get this single word and terça, quarta, quinta and sexta arrive free, because you are only counting.',
     subtext: 'Flat, practical admin language — the stuff that decides whether you can make a plan.',
     extracts: [
-      { id: 'segunda_feira', target: 'segunda-feira', gloss: 'Monday', shelf: 'when', note: 'The second one. Portugal counts its weekdays rather than naming them.' },
+      { id: 'segunda_feira', target: 'segunda-feira', gloss: 'Monday', shelf: 'when', note: 'The second one. Portugal counts its weekdays rather than naming them.', set: 'weekdays' },
       { id: 'nova', target: 'nova', gloss: 'new', rung: 1, shelf: 'describing', lemma: 'novo', form: 'feminine' },
     ],
     branches: [
@@ -3129,8 +3206,8 @@ export const WIZARDRY: Root[] = [
       'The most famous fraction in fiction, and it hands over two numbers and the word for a quarter in five syllables. Portuguese counts the way you already do — the trick is only that the words are short and you have to say them fast.',
     subtext: 'Counting out loud, with something to count.',
     extracts: [
-      { id: 'nove', target: 'nove', gloss: 'nine', shelf: 'how_much' },
-      { id: 'tres', target: 'três', gloss: 'three', shelf: 'how_much' },
+      { id: 'nove', target: 'nove', gloss: 'nine', shelf: 'how_much', set: 'numbers_1_10' },
+      { id: 'tres', target: 'três', gloss: 'three', shelf: 'how_much', set: 'numbers_1_10' },
     ],
     branches: [
       { target: 'Um, dois, três.', en: 'One, two, three.', demonstrates: ['tres'] },

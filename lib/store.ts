@@ -233,6 +233,48 @@ export async function saveFeedback(
   return 'blob'
 }
 
+/**
+ * A search that found nothing.
+ *
+ * Written to whatever store exists and dropped on the floor when none does, exactly
+ * like feedback — a learner must never see a search fail because the backlog table is
+ * not provisioned. Best-effort by design: this is telemetry, not the learner's record.
+ */
+export async function saveVocabMiss(
+  deviceId: string | null,
+  userId: string | null,
+  body: { query: string; scope: string },
+): Promise<Layer> {
+  const sql = db()
+  if (sql) {
+    await sql`
+      insert into vocab_miss (device_id, user_id, query, scope)
+      values (${deviceId}, ${userId}, ${body.query}, ${body.scope})
+    `
+    return 'postgres'
+  }
+  const store = await blobStore()
+  if (!store) return 'none'
+  const at = new Date().toISOString()
+  await store.put(
+    'vocab-miss/' + at.slice(0, 10) + '/' + encodeURIComponent(body.query) + '.json',
+    JSON.stringify({ ...body, device_id: deviceId, user_id: userId, at }, null, 2),
+    { access: 'private', contentType: 'application/json', addRandomSuffix: true },
+  )
+  return 'blob'
+}
+
+/** The backlog, most-wanted first. Read by the same admin key as feedback. */
+export async function listVocabMisses(): Promise<{ query: string; n: number; last: string }[]> {
+  const sql = db()
+  if (!sql) return []
+  const rows = await sql<{ query: string; n: string; last: string }[]>`
+    select query, count(*)::text as n, max(at)::text as last
+    from vocab_miss group by query order by count(*) desc, max(at) desc limit 200
+  `
+  return rows.map((r) => ({ query: r.query, n: Number(r.n), last: r.last }))
+}
+
 async function listBlobs(prefix: string): Promise<Record<string, unknown>[]> {
   const store = await blobStore()
   if (!store) return []

@@ -87,6 +87,8 @@ export type EventName =
   | 'osmosis_view'
   | 'profile_answer'
   | 'profile_skip'
+  /* The library's dead end, which is the best content signal the product collects. */
+  | 'vocab_search_miss'
 
 export interface AnalyticsEvent {
   seq: number
