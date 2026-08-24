@@ -44,6 +44,17 @@ async function main() {
       problems.push('console: ' + m.text().slice(0, 160))
   })
   page.setDefaultTimeout(20000)
+  // The no-bypass rule: /crates with nothing stored must land on the deal, never the
+  // picker. Checked before the walk so a regression here fails loudly rather than
+  // showing up as a confusing step count later.
+  await page.goto(BASE + '/crates', { waitUntil: 'networkidle' })
+  await page.evaluate(() => localStorage.clear())
+  await page.reload({ waitUntil: 'networkidle' })
+  await page.waitForTimeout(700)
+  const gated = await page.evaluate(() => document.body.innerText)
+  if (/Pick a crate/.test(gated)) problems.push('/crates bypassed the deal with cleared storage')
+  if (!/HOW IT WORKS/.test(gated)) problems.push('/crates with cleared storage did not land on the deal')
+
   await page.goto(BASE + '/?tester=smoke', { waitUntil: 'networkidle' })
 
   // The ladder dims anything above the learner's rung, and this walk is testing the

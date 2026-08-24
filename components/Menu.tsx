@@ -14,7 +14,7 @@ import { createPortal } from 'react-dom'
  * hints matter as much as the labels: a menu of bare nouns makes somebody guess.
  */
 const ITEMS = [
-  { href: '/', label: 'Crates', hint: 'Everything you can open, and what is still dimmed' },
+  { href: '/crates', label: 'Crates', hint: 'Everything you can open, and what is still dimmed' },
   { href: '/vocab', label: 'Vocab library', hint: 'Every piece you have kept, by stage' },
   { href: '/drops', label: 'Drops', hint: 'Pegged to something really happening, and expiring' },
   { href: '/line', label: 'Today’s line', hint: 'Twenty seconds, once a day' },

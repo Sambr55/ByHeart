@@ -39,7 +39,15 @@ import {
   type Goal,
   type LanguageGender,
 } from '@/content/profile'
-import { acquirePiece, markOsmosisSeen, recordProof, setAffinity, setProfile, voiceLean } from '@/engine/learner'
+import {
+  acceptDeal,
+  acquirePiece,
+  markOsmosisSeen,
+  recordProof,
+  setAffinity,
+  setProfile,
+  voiceLean,
+} from '@/engine/learner'
 import {
   branchesFor,
   buildTargetFor,
@@ -312,6 +320,7 @@ function Deal() {
       <Cta
         label={DEAL_COPY.cta}
         onClick={() => {
+          acceptDeal()
           track('deal_accepted', {})
           next()
         }}

@@ -171,6 +171,12 @@ export interface LearnerState {
    */
   roots_played: string[]
   collisions_played: string[]
+  /**
+   * When the deal was accepted, or null. Kept per pair rather than globally, because
+   * the deal screen speaks about the language being learned — "your Portuguese" — and
+   * somebody arriving at a second pair has not been told that deal.
+   */
+  deal_accepted_at: string | null
   evidence: LearningEvidence[]
   affinity: CultureAffinity
   experiment: Experiment
@@ -202,6 +208,7 @@ export function emptyLearner(): LearnerState {
     proof: [],
     roots_played: [],
     collisions_played: [],
+    deal_accepted_at: null,
     evidence: [],
     affinity: {
       categories_ranked: [],
@@ -284,6 +291,7 @@ export function loadLearner(): LearnerState {
           missions_completed: arr(parsed.missions_completed, []),
           proof: arr(parsed.proof, []),
           roots_played: arr(parsed.roots_played, []),
+          deal_accepted_at: parsed.deal_accepted_at ?? null,
           collisions_played: arr(parsed.collisions_played, []),
           evidence: arr(parsed.evidence, []),
           inventory: obj(parsed.inventory, {}),
@@ -679,4 +687,15 @@ export function rememberPlayed(rootIds: string[], collisionId?: string | null) {
 export function resetLearnerCache() {
   state = null
   emit()
+}
+
+/** Recorded once. Re-accepting does not move the date. */
+export function acceptDeal() {
+  update((s) => {
+    if (!s.deal_accepted_at) s.deal_accepted_at = new Date().toISOString()
+  })
+}
+
+export function hasAcceptedDeal(): boolean {
+  return Boolean(getLearner().deal_accepted_at)
 }

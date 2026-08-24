@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
 } from 'react'
 import {
   COLLISIONS,
@@ -23,15 +24,16 @@ import { DEMO_BEATS } from '@/content/front-door'
 import { initAnalytics, track } from './analytics'
 import {
   getLearner,
+  hasAcceptedDeal,
   hydrateFromUrl,
   loadLearner,
   recordVoiceSignal,
+  rememberPlayed,
   setAffinity,
   setExperiment,
   setTester,
   syncSession,
 } from './learner'
-import { rememberPlayed } from './learner'
 import { useLearner } from './useLearner'
 
 /**
@@ -160,6 +162,7 @@ type Action =
   | { type: 'answer'; key: string; value: unknown }
   | { type: 'complete' }
   | { type: 'hydrate'; rootIds: string[]; collisionIds: string[] }
+  | { type: 'jump'; kind: Step['kind'] }
 
 const initial: JourneyState = {
   steps: [
@@ -196,6 +199,16 @@ function rootSteps(root: Root): Step[] {
 
 function reducer(state: JourneyState, action: Action): JourneyState {
   switch (action.type) {
+    /**
+     * Land straight on a step rather than walking to it.
+     *
+     * Only ever used to skip front-door beats somebody has already been through. It
+     * cannot invent a step: if the kind is not in the queue the index does not move.
+     */
+    case 'jump': {
+      const to = state.steps.findIndex((st) => st.kind === action.kind)
+      return to === -1 ? state : { ...state, index: to }
+    }
     // What earlier sessions already covered, read back out of the learner record.
     case 'hydrate':
       return { ...state, rootsPlayed: action.rootIds, collisionsPlayed: action.collisionIds }
@@ -342,9 +355,46 @@ interface JourneyApi {
 
 const Ctx = createContext<JourneyApi | null>(null)
 
-export function JourneyProvider({ children }: { children: React.ReactNode }) {
+export function JourneyProvider({
+  children,
+  /**
+   * Where this URL is trying to start. 'crates' means the learner asked for the picker
+   * directly — from the menu, or a bookmark — rather than arriving at the front door.
+   */
+  enter = 'front-door',
+}: {
+  children: React.ReactNode
+  enter?: 'front-door' | 'crates'
+}) {
   const [state, dispatch] = useReducer(reducer, initial)
   const learner = useLearner()
+
+  /**
+   * The no-bypass rule, and the reason it runs in an effect rather than during render.
+   *
+   * Whether the deal has been accepted comes out of localStorage, which the server does
+   * not have. Branching on it while rendering reproduces exactly the /line hydration
+   * mismatch fixed in 4683827 — the server renders one step and the browser another.
+   * So the landing step renders server-side every time and the jump happens after
+   * mount, once there is something true to read.
+   *
+   * Order matters: the pair decides which learner record to load, and that record is
+   * what says whether the deal has been accepted.
+   */
+  const jumped = useRef(false)
+  useEffect(() => {
+    if (jumped.current || enter !== 'crates') return
+    jumped.current = true
+    // Load explicitly rather than reading the reactive snapshot. The store returns an
+    // empty learner until it has read storage, and an empty learner is indistinguishable
+    // from one that has never accepted — so deciding off the snapshot sent everybody who
+    // HAD accepted back to the deal. Doing it here also makes the order the spec
+    // requires literal: pair, then that pair's record, then the step.
+    loadLearner()
+    // No pair chosen yet is a front-door problem, not a picker one. Until the selection
+    // step exists this falls through to the deal, which is the same guard.
+    dispatch({ type: 'jump', kind: hasAcceptedDeal() ? 'picker' : 'deal' })
+  }, [enter])
   /**
    * Keep the journey's idea of what has been played in step with the learner record.
    *
