@@ -13,6 +13,10 @@ export type EventName =
   | 'landing_cta_tap'
   /** Read the deal and carried on. The first real commitment in the funnel. */
   | 'deal_accepted'
+  /* The Line — the daily habit, measured separately from the ten-minute session. */
+  | 'line_view'
+  | 'line_said'
+  | 'line_subscribed'
   | 'briefing_continue'
   | 'culture_selected'
   | 'top_gun_familiarity'

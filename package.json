@@ -8,12 +8,13 @@
     "start": "next start",
     "lint:content": "tsx scripts/lint-content.ts",
     "audio:generate": "tsx scripts/generate-audio.ts",
-    "check": "npm run lint:content && next build",
+    "check": "npm run lint:content && npm run line:test && next build",
     "walkthrough": "tsx scripts/walkthrough.ts",
     "shots": "tsx scripts/screenshots.ts",
     "journey": "tsx scripts/journey-smoke.ts",
     "db:migrate": "tsx scripts/migrate.mts",
-    "audio:script": "tsx scripts/audio-script.mts"
+    "audio:script": "tsx scripts/audio-script.mts",
+    "line:test": "tsx scripts/line-test.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",
@@ -22,13 +23,15 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
-    "stripe": "^22.5.0"
+    "stripe": "^22.5.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "playwright": "^1.62.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",

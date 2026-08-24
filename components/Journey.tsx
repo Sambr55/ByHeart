@@ -253,12 +253,17 @@ function Landing() {
         </div>
       </div>
       <Cta label={LANDING.cta} onClick={() => { track('landing_cta_tap', {}); next() }} />
-      <Link
-        href="/signin"
-        className="mt-4 block text-center text-xs text-muted underline underline-offset-4"
-      >
-        Been here before? Pick up where you left off.
-      </Link>
+      {/* Two ways back in for a returning person: today's line if they have ninety
+          seconds, their account if they are on a new phone. */}
+      <div className="mt-4 flex items-center justify-center gap-5 text-xs text-muted">
+        <Link href="/line" className="underline underline-offset-4">
+          Today’s line
+        </Link>
+        <span aria-hidden="true">·</span>
+        <Link href="/signin" className="underline underline-offset-4">
+          Been here before?
+        </Link>
+      </div>
     </Shell>
   )
 }
@@ -1386,12 +1391,14 @@ function Close() {
       </Link>
       {/* Offered here rather than at the door: there is now something worth keeping,
           which is the only honest moment to ask anyone for an email address. */}
-      <Link
-        href="/signin"
-        className="mt-4 block text-center text-xs text-muted underline underline-offset-4"
-      >
-        Keep what you have learned — it lives on this phone until you do.
-      </Link>
+      <div className="mt-4 flex flex-col items-center gap-2 text-xs text-muted">
+        <Link href="/signin" className="underline underline-offset-4">
+          Keep what you have learned — it lives on this phone until you do.
+        </Link>
+        <Link href="/line" className="underline underline-offset-4">
+          Or just take one line a morning.
+        </Link>
+      </div>
     </Shell>
   )
 }

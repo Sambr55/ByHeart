@@ -172,12 +172,20 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
       </p>
 
       {standalone ? (
-        <Link
-          href="/"
-          className="tap-target mt-auto block w-full rounded-full border border-line px-5 py-4 text-center text-xs tracking-widest"
-        >
-          KEEP GOING
-        </Link>
+        <div className="mt-auto flex flex-col gap-3">
+          <Link
+            href="/line"
+            className="tap-target block w-full rounded-full border border-line px-5 py-4 text-center text-xs tracking-widest"
+          >
+            TODAY’S LINE
+          </Link>
+          <Link
+            href="/"
+            className="tap-target block w-full rounded-full border border-line px-5 py-4 text-center text-xs tracking-widest"
+          >
+            KEEP GOING
+          </Link>
+        </div>
       ) : null}
     </main>
   )

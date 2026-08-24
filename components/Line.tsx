@@ -1,0 +1,195 @@
+'use client'
+
+import Link from 'next/link'
+import { useEffect, useMemo, useState } from 'react'
+import { dayKey, pickLine, rootFor, type DailyLine } from '@/content/daily-line'
+import { FAMILIES } from '@/content/roots'
+import { slugFor } from '@/content/audio-manifest'
+import { play } from '@/engine/audio'
+import { track } from '@/engine/analytics'
+import { useLearner } from '@/engine/useLearner'
+
+/**
+ * The Line — twenty seconds, once a day.
+ *
+ * Deliberately the smallest screen in the product. There is no lesson here, no build,
+ * no score: one sentence, what it means, one thing worth knowing about it, and a way
+ * out. Anything more turns a daily habit into a daily commitment, which is the thing
+ * that makes people stop.
+ *
+ * It picks with the same function the cron uses, on the same day key, so the sentence
+ * on the lock screen and the sentence on this page are always the same one.
+ */
+export function Line({ pushReady }: { pushReady: boolean }) {
+  const learner = useLearner()
+  const [said, setSaid] = useState(false)
+
+  const line = useMemo<DailyLine | null>(() => {
+    const owned = Object.keys(learner.inventory)
+    return pickLine({ owned, day: dayKey(), salt: learner.learner_id })
+  }, [learner.inventory, learner.learner_id])
+
+  useEffect(() => {
+    if (line) track('line_view', { line: line.id, kind: line.kind })
+  }, [line])
+
+  const root = line ? rootFor(line) : undefined
+  const family = root ? FAMILIES.find((f) => f.id === root.culture_family) : undefined
+
+  return (
+    <main
+      data-stage="REAL WORLD"
+      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 py-8 text-fg"
+    >
+      <div className="flex items-baseline justify-between">
+        <Link href="/" className="eyebrow text-muted">
+          ← DUB
+        </Link>
+        <span className="eyebrow text-muted">TODAY</span>
+      </div>
+
+      {!line ? (
+        <div className="flex flex-1 flex-col justify-center gap-3">
+          <p className="display text-balance text-3xl">You have had all of them.</p>
+          <p className="text-sm text-muted">
+            Every sentence DUB knows has been through here. Open a new crate and this
+            starts again.
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col justify-center gap-6">
+          {line.kind === 'reach' ? (
+            <p className="eyebrow text-accent">SLIGHTLY BEYOND YOU, ON PURPOSE</p>
+          ) : family ? (
+            <p className="eyebrow text-accent">{family.title}</p>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={() => play({ slug: slugFor(line.pt), text: line.pt })}
+            className="tap-target text-left"
+            aria-label={'Hear ' + line.pt}
+          >
+            <p className="pt display text-balance text-4xl leading-tight">{line.pt}</p>
+          </button>
+
+          <p className="text-lg text-muted">{line.en}</p>
+
+          <div className="rounded-xl border border-line bg-surface p-4">
+            <p className="text-sm leading-relaxed">{line.note}</p>
+          </div>
+        </div>
+      )}
+
+      {line ? (
+        <button
+          type="button"
+          onClick={() => {
+            track('line_said', { line: line.id })
+            setSaid(true)
+          }}
+          className={
+            'tap-target w-full rounded-full px-5 py-4 text-xs tracking-widest transition ' +
+            (said ? 'border border-line text-muted' : 'bg-accent text-accent-ink')
+          }
+        >
+          {said ? 'SEE YOU TOMORROW' : 'SAID IT OUT LOUD'}
+        </button>
+      ) : null}
+
+      <PushToggle ready={pushReady} />
+
+      <Link
+        href="/"
+        className="block text-center text-xs text-muted underline underline-offset-4"
+      >
+        Got ten minutes? Open a crate.
+      </Link>
+    </main>
+  )
+}
+
+/**
+ * Switching The Line on.
+ *
+ * The permission prompt is asked for once, from a tap, and never on page load — a
+ * browser that gets an unprompted permission request blocks the site from asking
+ * again, which would cost the feature permanently.
+ */
+function PushToggle({ ready }: { ready: boolean }) {
+  const [state, setState] = useState<'unknown' | 'off' | 'on' | 'denied' | 'busy'>('unknown')
+
+  useEffect(() => {
+    if (!ready || typeof window === 'undefined' || !('Notification' in window)) {
+      setState('denied')
+      return
+    }
+    if (Notification.permission === 'denied') return setState('denied')
+    navigator.serviceWorker?.ready
+      .then((reg) => reg.pushManager.getSubscription())
+      .then((sub) => setState(sub ? 'on' : 'off'))
+      .catch(() => setState('off'))
+  }, [ready])
+
+  const enable = async () => {
+    setState('busy')
+    try {
+      const permission = await Notification.requestPermission()
+      if (permission !== 'granted') return setState('denied')
+
+      const reg = await navigator.serviceWorker.register('/sw.js')
+      await navigator.serviceWorker.ready
+      const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      if (!key) return setState('denied')
+
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(key) as BufferSource,
+      })
+      const res = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          ...sub.toJSON(),
+          time_zone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }),
+      })
+      setState(res.ok ? 'on' : 'off')
+      if (res.ok) track('line_subscribed', {})
+    } catch {
+      setState('off')
+    }
+  }
+
+  if (!ready || state === 'denied' || state === 'unknown') return null
+
+  if (state === 'on') {
+    return (
+      <p className="text-center text-xs text-muted">
+        One line every morning. Nothing else, ever.
+      </p>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={enable}
+      disabled={state === 'busy'}
+      className="tap-target w-full rounded-full border border-line px-5 py-4 text-xs tracking-widest text-muted"
+    >
+      {state === 'busy' ? 'ONE MOMENT…' : 'SEND ME ONE EVERY MORNING'}
+    </button>
+  )
+}
+
+/** VAPID keys travel as base64url; PushManager wants raw bytes. */
+function urlBase64ToUint8Array(base64: string): Uint8Array {
+  const padded = (base64 + '='.repeat((4 - (base64.length % 4)) % 4))
+    .replace(/-/g, '+')
+    .replace(/_/g, '/')
+  const raw = atob(padded)
+  const out = new Uint8Array(raw.length)
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i)
+  return out
+}
