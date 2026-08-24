@@ -20,7 +20,7 @@ import {
 } from '../content/targets'
 import { AUDIO_MANIFEST, normalisePhrase, slugFor } from '../content/audio-manifest'
 import { ANCHOR_CARDS, BLOCK_CARDS, COMBINATION_CARDS } from '../content/deck'
-import { COLLISIONS, CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
+import { COLLISIONS, CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY, RUNGS } from '../content/roots'
 import { INSIGHTS } from '../content/osmosis'
 import { GOAL_NEEDS, QUESTIONS_IN_ORDER } from '../content/profile'
 import { branchesFor, buildTargetFor } from '../engine/journey'
@@ -524,6 +524,90 @@ for (const e of EXAMPLES) {
 }
 
 
+
+// ---------------------------------------------------------------------------
+// The ladder — a rung is a promise that nothing above it is needed yet
+// ---------------------------------------------------------------------------
+{
+  const byRung = new Map<number, typeof ROOTS>()
+  for (const r of ROOTS) byRung.set(r.rung, [...(byRung.get(r.rung) ?? []), r])
+
+  for (const root of ROOTS) {
+    const R = 'root ' + root.root_id + ' (rung ' + root.rung + '): '
+    // Reinforcement is opportunistic — it is filtered by what the learner actually
+    // owns before it is ever shown, so reaching up costs nothing at runtime. It is
+    // still worth reporting: a root that mostly nods at pieces above its own rung is
+    // usually a root that has been tagged too low.
+    const reaching = root.reinforces.filter((p) => (PIECES[p]?.rung ?? 0) > root.rung)
+    if (reaching.length && reaching.length === root.reinforces.length && reaching.length > 1) {
+      warn(R + 'every piece it reinforces sits above it (' + reaching.join(', ') + ') — check the rung')
+    }
+    // Same rule for the build: the words it asks the learner to place must be ones
+    // this rung can honestly assume.
+    const target = buildTargetFor(root)
+    if (target) {
+      const ownWords = new Set(
+        root.extracts.flatMap((e) => e.pt.replace(/[…?.,]/g, '').toLowerCase().split(' ')),
+      )
+      const glossed = new Set(
+        Object.keys(root.helpers ?? {}).map((w) => w.replace(/[…?.,]/g, '').toLowerCase()),
+      )
+      const belowOrAt = new Set(
+        Object.values(PIECES)
+          .filter((pc) => pc.rung <= root.rung)
+          .flatMap((pc) => pc.pt.replace(/[…?.,]/g, '').toLowerCase().split(' ')),
+      )
+      for (const word of target.pt.replace(/[.?,]/g, '').split(' ')) {
+        const w = word.toLowerCase()
+        if (!w || ownWords.has(w) || glossed.has(w) || belowOrAt.has(w)) continue
+        if (/^[A-Z]/.test(word)) continue
+        warn(R + 'build "' + target.pt + '" uses "' + word + '", which no rung ≤ ' + root.rung + ' teaches')
+      }
+    }
+  }
+
+  // A crate a beginner cannot enter will sit dimmed forever — unless it says so.
+  for (const c of CRATES) {
+    const rs = ROOTS_BY_FAMILY[c.id] ?? []
+    const lowest = Math.min(...rs.map((r) => r.rung))
+    if (!c.opens_at && lowest > 2) {
+      warn(
+        'crate ' + c.id + ' starts at rung ' + lowest +
+          ' — nothing in it can open early, and it does not declare opens_at',
+      )
+    }
+    // The other way round: a crate that promises to open late and then does not.
+    if (c.opens_at && lowest > c.opens_at) {
+      warn('crate ' + c.id + ' declares opens_at ' + c.opens_at + ' but its lowest root is rung ' + lowest)
+    }
+  }
+
+  // Coverage, and this one is a gate rather than a note.
+  //
+  // A rung that lives in a single crate is not a rung, it is a quirk of that crate —
+  // a learner who picked a different world would climb past it without ever meeting
+  // it, and the rung above would then be standing on nothing. Three crates is the
+  // minimum that makes a rung true regardless of which door somebody came in through.
+  const thin: string[] = []
+  for (const { rung, name } of RUNGS) {
+    const rs = byRung.get(rung) ?? []
+    const crates = new Set(rs.map((r) => r.culture_family))
+    if (rs.length === 0) fail('rung ' + rung + ' (' + name + ') has no roots at all')
+    else if (crates.size < 3) {
+      thin.push(rung + '/' + name)
+      fail(
+        'rung ' + rung + ' (' + name + ') lives in ' + crates.size +
+          ' crate' + (crates.size === 1 ? '' : 's') + '; three is the minimum for it to be reachable',
+      )
+    }
+  }
+
+  console.log(
+    'ladder: ' +
+      RUNGS.map(({ rung }) => rung + '×' + (byRung.get(rung) ?? []).length).join(' · ') +
+      ' · ' + thin.length + ' of 6 rungs still thin',
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Osmosis interstitials — the claims made about what a learner absorbed

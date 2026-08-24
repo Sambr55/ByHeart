@@ -24,6 +24,30 @@ export type CultureFamily =
   | 'flirting_f2m'
   | 'duran_duran_lisboa'
 
+/**
+ * The ladder — six rungs, named for what you can do in a room.
+ *
+ * Not levels and not XP. A rung is a capability, and they are ordered because
+ * language is ordered: you cannot ask where the water is before you have the word
+ * for water. A root's rung is its DOMINANT capability, not every capability it
+ * touches — a line that names a thing and also happens to sit in the past is a
+ * rung 1 root.
+ *
+ * Read as arrival readiness rather than grammar, the ladder is a trip: the menu,
+ * the counter, the street, making a plan, standing in a group, sounding like
+ * yourself.
+ */
+export type Rung = 1 | 2 | 3 | 4 | 5 | 6
+
+export const RUNGS: { rung: Rung; name: string; what: string }[] = [
+  { rung: 1, name: 'Name it', what: 'The thing in front of you. Objects, food, numbers, prices.' },
+  { rung: 2, name: 'Ask for it', what: 'Get what you want from another person.' },
+  { rung: 3, name: 'Find it', what: 'Questions. Where, how much, who, what time.' },
+  { rung: 4, name: 'Fit it in time', what: 'Plans, and saying when. Arranging to meet.' },
+  { rung: 5, name: 'Talk about other people', what: 'Everyone who is not you or the person opposite.' },
+  { rung: 6, name: 'Mean it', what: 'Register and nuance. The same thing said three ways, and choosing.' },
+]
+
 export type RootType = 'quote' | 'title' | 'paraphrased_moment' | 'wisdom' | 'other'
 
 export type SourceStatus =
@@ -41,6 +65,13 @@ export interface Extract {
   id: string
   pt: string
   gloss: string
+  /**
+   * A piece carries its own rung, which is often lower than the root teaching it:
+   * `desculpa` falls out of a rung 6 apology but is week-one language, and `isto`
+   * arrives inside swearing while being about as basic as a word gets. Omit it and
+   * the piece inherits the root's rung, which is right most of the time.
+   */
+  rung?: Rung
 }
 
 export interface Branch {
@@ -66,6 +97,8 @@ export interface VoiceOption {
 export interface Root {
   root_id: string
   culture_family: CultureFamily
+  /** Which rung of the ladder this root's dominant capability sits on. */
+  rung: Rung
   root_type: RootType
   source_label: string
   source_status: SourceStatus
@@ -129,6 +162,15 @@ export interface Crate {
   built: boolean
   /** Present on a drop, absent on a crate. */
   drop?: DropEvent
+  /**
+   * The rung at which this crate is meant to become available.
+   *
+   * Most crates open at the bottom and are expected to hold something a beginner can
+   * use. A few are deliberately late — you should not be learning to swear before you
+   * can order — and declaring that is how a crate says "I am dimmed on purpose"
+   * rather than "I am missing my early content".
+   */
+  opens_at?: Rung
 }
 
 export const CRATES: Crate[] = [
@@ -138,7 +180,7 @@ export const CRATES: Crate[] = [
   { id: 'pulp_fiction', title: 'PULP FICTION BANGER QUOTES', blurb: 'Punchy lines. Real conversational leverage.', tone: 'sharp', built: true },
   { id: 'audrey_hepburn', title: 'AUDREY HEPBURN MUSINGS', blurb: 'Elegance, warmth and things worth saying.', tone: 'warm', built: true },
   { id: 'marcus_aurelius', title: 'MARCUS AURELIUS WISDOM', blurb: 'Ancient ideas. Surprisingly useful modern language.', tone: 'reflective', built: true },
-  { id: 'portuguese_swearing', title: 'HOW TO SWEAR IN PORTUGUESE', blurb: 'The subtitles were lying to you. Strong language throughout.', tone: 'blunt', built: true },
+  { id: 'portuguese_swearing', title: 'HOW TO SWEAR IN PORTUGUESE', blurb: 'The subtitles were lying to you. Strong language throughout.', tone: 'blunt', built: true, opens_at: 6 },
   { id: 'flirting_m2f', title: 'FLIRTING — HIM TO HER', blurb: 'The Love Actually problem. Said properly this time.', tone: 'warm', built: true },
   { id: 'flirting_f2m', title: 'FLIRTING — HER TO HIM', blurb: 'Warmer, funnier and considerably more effective.', tone: 'warm', built: true },
   {
@@ -173,7 +215,7 @@ export function daysLeft(crate: Crate, now: Date = new Date()): number | null {
   return Math.max(0, Math.ceil((gone.getTime() - now.getTime()) / 86_400_000))
 }
 
-const q = (partial: Partial<Root> & Pick<Root, 'root_id' | 'culture_family' | 'root_display' | 'meaning_en' | 'pt_natural' | 'semantic_bridge' | 'subtext' | 'extracts' | 'branches' | 'transfer_prompt'>): Root => ({
+const q = (partial: Partial<Root> & Pick<Root, 'root_id' | 'culture_family' | 'rung' | 'root_display' | 'meaning_en' | 'pt_natural' | 'semantic_bridge' | 'subtext' | 'extracts' | 'branches' | 'transfer_prompt'>): Root => ({
   root_type: 'quote',
   source_label: '',
   source_status: 'needs-review',
@@ -194,6 +236,7 @@ export const TOP_GUN: Root[] = [
   q({
     root_id: 'tg_goose',
     culture_family: 'top_gun',
+    rung: 2,
     source_label: 'Top Gun',
     root_display: 'Talk to me, Goose.',
     meaning_en: 'Say something. I need you with me.',
@@ -201,7 +244,7 @@ export const TOP_GUN: Root[] = [
     semantic_bridge:
       'The urgency survives intact. Portuguese expresses “with me” as one fused word, COMIGO, attached straight onto the command FALA.',
     subtext: 'Direct, close, urgent. You reach for this when you genuinely need someone to engage.',
-    extracts: [{ id: 'comigo', pt: 'comigo', gloss: 'with me' }],
+    extracts: [{ id: 'comigo', pt: 'comigo', gloss: 'with me', rung: 2 }],
     branches: [
       { pt: 'Vem comigo.', en: 'Come with me.' },
       { pt: 'Fica comigo.', en: 'Stay with me.' },
@@ -221,6 +264,7 @@ export const TOP_GUN: Root[] = [
   q({
     root_id: 'tg_wingman',
     culture_family: 'top_gun',
+    rung: 4,
     source_label: 'Top Gun',
     root_display: 'You can be my wingman anytime.',
     meaning_en: 'You can be my partner whenever you want.',
@@ -229,7 +273,7 @@ export const TOP_GUN: Root[] = [
       'The aviation metaphor becomes ordinary human Portuguese. The useful pieces are PODES and QUANDO QUISERES — not the military noun.',
     subtext: 'Warm permission rather than formal ability. PODES is one of the highest-leverage pieces in the language.',
     extracts: [
-      { id: 'podes', pt: 'podes', gloss: 'you can' },
+      { id: 'podes', pt: 'podes', gloss: 'you can', rung: 2 },
       { id: 'quando_quiseres', pt: 'quando quiseres', gloss: 'whenever you want' },
     ],
     branches: [
@@ -265,6 +309,7 @@ export const TOP_GUN: Root[] = [
   q({
     root_id: 'tg_thinking',
     culture_family: 'top_gun',
+    rung: 3,
     source_label: 'Top Gun',
     root_display: 'What were you thinking?',
     meaning_en: 'What was going through your head?',
@@ -297,6 +342,7 @@ export const TOP_GUN: Root[] = [
   q({
     root_id: 'tg_need',
     culture_family: 'top_gun',
+    rung: 2,
     source_label: 'Top Gun',
     root_display: 'I feel the need…',
     meaning_en: 'I need something, badly.',
@@ -323,6 +369,7 @@ export const TOP_GUN: Root[] = [
   q({
     root_id: 'tg_wingman_leave',
     culture_family: 'top_gun',
+    rung: 4,
     source_label: 'Top Gun',
     root_display: 'I will not leave my wingman.',
     meaning_en: 'I am not going to abandon my partner.',
@@ -367,6 +414,49 @@ export const TOP_GUN: Root[] = [
     starter_tags: ['intention', 'refusal'],
     next_root_hooks: ['amanha', 'agora'],
   }),
+  // Rung 3. The crate had no question in it that locates anything.
+  q({
+    root_id: 'tg_where',
+    culture_family: 'top_gun',
+    rung: 3,
+    root_type: 'paraphrased_moment',
+    source_label: 'Top Gun — looking for your wingman',
+    source_status: 'paraphrased',
+    root_display: 'Where\u2019s my wingman?',
+    meaning_en: 'Where is my wingman?',
+    pt_natural: 'Onde est\u00e1 o meu parceiro?',
+    semantic_bridge:
+      'English hides the verb inside \u201cwhere\u2019s\u201d. Portuguese keeps them apart, and the pair ONDE + EST\u00c1 will locate anything you can already name \u2014 which is the entire reason naming came first.',
+    subtext: 'The question you will ask on your first afternoon, and every afternoon after it.',
+    extracts: [
+      { id: 'onde', pt: 'onde', gloss: 'where' },
+      { id: 'esta_', pt: 'est\u00e1', gloss: 'is (right now)' },
+    ],
+    branches: [
+      { pt: 'Onde est\u00e1 a casa de banho?', en: 'Where\u2019s the toilet?' },
+      { pt: 'Onde est\u00e1 o meu caf\u00e9?', en: 'Where\u2019s my coffee?' },
+      { pt: 'Est\u00e1 aqui.', en: 'It\u2019s here.' },
+    ],
+    helpers: {
+      'a': 'the',
+      'o': 'the',
+      'casa': 'house',
+      'de': 'of',
+      'banho': 'bath',
+      'meu': 'my',
+      'caf\u00e9': 'coffee',
+      'aqui': 'here',
+      'parceiro': 'partner / wingman',
+    },
+    transfer_prompt: {
+      context: 'You have put your coffee down somewhere and it is gone.',
+      ask: 'Where\u2019s my coffee?',
+      answer: 'Onde est\u00e1 o meu caf\u00e9?',
+    },
+    rights_status: 'short-quote-review-required',
+    starter_tags: ['first-day', 'questions'],
+    next_root_hooks: ['quanto'],
+  }),
 ]
 
 // ---------------------------------------------------------------------------
@@ -379,6 +469,7 @@ export const JAMES_BOND: Root[] = [
   q({
     root_id: 'jb_name',
     culture_family: 'james_bond',
+    rung: 1,
     root_type: 'quote',
     source_label: 'James Bond',
     root_display: 'My name is… James Bond.',
@@ -410,6 +501,7 @@ export const JAMES_BOND: Root[] = [
   q({
     root_id: 'jb_tomorrow',
     culture_family: 'james_bond',
+    rung: 4,
     root_type: 'title',
     source_label: 'Tomorrow Never Dies',
     source_status: 'verified',
@@ -457,6 +549,7 @@ export const JAMES_BOND: Root[] = [
   q({
     root_id: 'jb_russia',
     culture_family: 'james_bond',
+    rung: 1,
     root_type: 'title',
     source_label: 'From Russia with Love',
     source_status: 'verified',
@@ -492,6 +585,7 @@ export const JAMES_BOND: Root[] = [
   q({
     root_id: 'jb_never_again',
     culture_family: 'james_bond',
+    rung: 4,
     root_type: 'title',
     source_label: 'Never Say Never Again',
     source_status: 'verified',
@@ -502,7 +596,7 @@ export const JAMES_BOND: Root[] = [
       'Natural Portuguese renders the title as “don’t say ‘never’ again”, which hands you a negative command and the single most useful survival phrase in one thought.',
     subtext: 'Playful, and unusually practical: OUTRA VEZ is what rescues you when you did not catch something.',
     extracts: [
-      { id: 'outra_vez', pt: 'outra vez', gloss: 'again' },
+      { id: 'outra_vez', pt: 'outra vez', gloss: 'again', rung: 3 },
       { id: 'nao_digas', pt: 'não digas', gloss: 'don’t say' },
     ],
     branches: [
@@ -542,6 +636,7 @@ export const JAMES_BOND: Root[] = [
   q({
     root_id: 'jb_no_time',
     culture_family: 'james_bond',
+    rung: 4,
     root_type: 'title',
     source_label: 'No Time to Die',
     source_status: 'verified',
@@ -552,7 +647,7 @@ export const JAMES_BOND: Root[] = [
       'SEM and TEMPO are visible in the title without any translation gymnastics, and PARA is the little word that introduces purpose — time for something, time to do something.',
     subtext: 'Genuinely useful travel language pulled out of a very dramatic title. Enjoy the contrast.',
     extracts: [
-      { id: 'sem', pt: 'sem', gloss: 'without' },
+      { id: 'sem', pt: 'sem', gloss: 'without', rung: 1 },
       { id: 'tempo', pt: 'tempo', gloss: 'time' },
     ],
     branches: [
@@ -573,6 +668,80 @@ export const JAMES_BOND: Root[] = [
     starter_tags: ['ordering', 'travel'],
     next_root_hooks: ['agora', 'tens'],
   }),
+  // Rung 1. The most famous number in film, doing an unglamorous job.
+  q({
+    root_id: 'jb_007',
+    culture_family: 'james_bond',
+    rung: 1,
+    root_type: 'title',
+    source_label: '007',
+    source_status: 'verified',
+    root_display: 'Bond. 007.',
+    meaning_en: 'Double-oh-seven.',
+    pt_natural: 'Zero zero sete.',
+    semantic_bridge:
+      'Portugal reads the digits out one at a time, so the most famous number in film is already correct Portuguese. Numbers are a closed set of ten \u2014 the only vocabulary in the language you can finish in an afternoon and never revisit.',
+    subtext: 'The least glamorous thing in this crate, and the first thing you will need at a till.',
+    extracts: [
+      { id: 'zero', pt: 'zero', gloss: 'zero' },
+      { id: 'sete', pt: 'sete', gloss: 'seven' },
+    ],
+    branches: [
+      { pt: 'Sete euros.', en: 'Seven euros.' },
+      { pt: 'Mesa sete.', en: 'Table seven.' },
+      { pt: 'Zero problemas.', en: 'No problems at all.' },
+    ],
+    helpers: {
+      'euros': 'euros',
+      'Mesa': 'table',
+      'problemas': 'problems',
+    },
+    transfer_prompt: {
+      context: 'The waiter has just told you the total.',
+      ask: 'Seven euros.',
+      answer: 'Sete euros.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers', 'first-day'],
+    next_root_hooks: ['quanto'],
+  }),
+  // Rung 3. Latin for \u201chow much\u201d, and Portuguese never stopped using it.
+  q({
+    root_id: 'jb_quantum',
+    culture_family: 'james_bond',
+    rung: 3,
+    root_type: 'title',
+    source_label: 'Quantum of Solace',
+    source_status: 'verified',
+    root_display: 'Quantum of Solace',
+    meaning_en: 'A quantum is an amount \u2014 a measure of how much.',
+    pt_natural: 'Quanto custa?',
+    semantic_bridge:
+      'Quantum is Latin for \u201chow much\u201d, and Portuguese never stopped using the word: QUANTO. The one Bond title nobody understands turns out to be the question you need in every shop in the country.',
+    subtext: 'Asked flatly, without apology. Nobody in Portugal thinks it is rude to ask a price.',
+    extracts: [
+      { id: 'quanto', pt: 'quanto', gloss: 'how much' },
+      { id: 'custa', pt: 'custa', gloss: 'it costs' },
+    ],
+    branches: [
+      { pt: 'Quanto custa isto?', en: 'How much is this?' },
+      { pt: 'Quanto \u00e9?', en: 'How much is it?' },
+      { pt: 'Custa sete euros.', en: 'It costs seven euros.' },
+    ],
+    reinforces: ['isto', 'sete'],
+    helpers: {
+      '\u00e9': 'is',
+      'euros': 'euros',
+    },
+    transfer_prompt: {
+      context: 'A market stall with no price on anything.',
+      ask: 'How much is it?',
+      answer: 'Quanto \u00e9?',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['questions', 'shopping'],
+    next_root_hooks: ['onde'],
+  }),
 ]
 
 // ---------------------------------------------------------------------------
@@ -584,6 +753,7 @@ export const BRIDGET_JONES: Root[] = [
   q({
     root_id: 'bj_overshare',
     culture_family: 'bridget_jones',
+    rung: 6,
     root_type: 'paraphrased_moment',
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
@@ -617,6 +787,7 @@ export const BRIDGET_JONES: Root[] = [
   q({
     root_id: 'bj_late',
     culture_family: 'bridget_jones',
+    rung: 6,
     root_type: 'paraphrased_moment',
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
@@ -627,7 +798,7 @@ export const BRIDGET_JONES: Root[] = [
       'The useful move is not a literal description of being late. It is the phrase a Portuguese speaker actually reaches for: “sorry for the delay.”',
     subtext: 'Warm, everyday repair. How formal you go is a real choice, not a rule.',
     extracts: [
-      { id: 'desculpa', pt: 'desculpa', gloss: 'sorry' },
+      { id: 'desculpa', pt: 'desculpa', gloss: 'sorry', rung: 2 },
       { id: 'atraso', pt: 'o atraso', gloss: 'the delay' },
     ],
     branches: [
@@ -664,6 +835,7 @@ export const BRIDGET_JONES: Root[] = [
   q({
     root_id: 'bj_forgot_name',
     culture_family: 'bridget_jones',
+    rung: 3,
     root_type: 'paraphrased_moment',
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
@@ -694,6 +866,7 @@ export const BRIDGET_JONES: Root[] = [
   q({
     root_id: 'bj_wrong_thing',
     culture_family: 'bridget_jones',
+    rung: 6,
     root_type: 'paraphrased_moment',
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
@@ -728,6 +901,7 @@ export const BRIDGET_JONES: Root[] = [
   q({
     root_id: 'bj_joke',
     culture_family: 'bridget_jones',
+    rung: 6,
     root_type: 'paraphrased_moment',
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
@@ -772,6 +946,88 @@ export const BRIDGET_JONES: Root[] = [
     starter_tags: ['humour', 'recovery'],
     next_root_hooks: ['calma'],
   }),
+  // Rung 1. This crate had nothing a beginner could open.
+  q({
+    root_id: 'bj_wine',
+    culture_family: 'bridget_jones',
+    rung: 1,
+    root_type: 'paraphrased_moment',
+    source_label: 'Bridget Jones\u2019s Diary \u2014 alone, with a very large glass',
+    source_status: 'paraphrased',
+    root_display: 'Bridget, alone, with an extremely large glass of wine',
+    meaning_en: 'A glass of wine, please.',
+    pt_natural: 'Um copo de vinho, por favor.',
+    semantic_bridge:
+      'Portuguese orders the container, not the drink \u2014 not \u201ca wine\u201d but a glass OF wine. That small DE does the same job in um copo de \u00e1gua and uma ch\u00e1vena de caf\u00e9, so the shape is worth more than the sentence.',
+    subtext: 'The most reliable sentence in the language. Learn the shape once and swap the last word forever.',
+    extracts: [
+      { id: 'copo', pt: 'copo', gloss: 'glass' },
+      { id: 'vinho', pt: 'vinho', gloss: 'wine' },
+      { id: 'por_favor', pt: 'por favor', gloss: 'please' },
+    ],
+    branches: [
+      { pt: 'Um copo de \u00e1gua, por favor.', en: 'A glass of water, please.' },
+      { pt: 'Dois copos de vinho.', en: 'Two glasses of wine.' },
+      { pt: 'Vinho tinto, por favor.', en: 'Red wine, please.' },
+    ],
+    helpers: {
+      'Um': 'a',
+      'de': 'of',
+      '\u00e1gua': 'water',
+      'Dois': 'two',
+      'tinto': 'red (of wine)',
+    },
+    transfer_prompt: {
+      context: 'You have found a table and the waiter has appeared.',
+      ask: 'A glass of water, please.',
+      answer: 'Um copo de \u00e1gua, por favor.',
+    },
+    rights_status: 'short-quote-review-required',
+    starter_tags: ['ordering', 'first-day'],
+    next_root_hooks: ['cinco'],
+  }),
+  // Rung 5. The diary is entirely about a third person, so this is where he arrives.
+  q({
+    root_id: 'bj_does_he',
+    culture_family: 'bridget_jones',
+    rung: 5,
+    root_type: 'paraphrased_moment',
+    source_label: 'Bridget Jones\u2019s Diary \u2014 the whole diary, really',
+    source_status: 'paraphrased',
+    root_display: 'The entire diary, in one question',
+    meaning_en: 'Does he like me?',
+    pt_natural: 'Ele gosta de mim?',
+    semantic_bridge:
+      'Every sentence so far has been about you or the person in front of you. ELE is the moment somebody else walks into the conversation \u2014 and the verb ending is already telling you it is one other person, which is why Portuguese usually drops the pronoun entirely.',
+    subtext: 'Asked at one in the morning, of a friend who has heard it before.',
+    extracts: [
+      { id: 'ele', pt: 'ele', gloss: 'he' },
+      { id: 'gosta_de', pt: 'gosta de', gloss: 'likes' },
+    ],
+    branches: [
+      { pt: 'Ela gosta de ti.', en: 'She likes you.' },
+      { pt: 'Ele n\u00e3o gosta de vinho.', en: 'He doesn\u2019t like wine.' },
+      { pt: 'Eles gostam de ti.', en: 'They like you.' },
+    ],
+    reinforces: ['vinho'],
+    helpers: {
+      'Ela': 'she',
+      'Eles': 'they',
+      'gostam': 'they like',
+      'ti': 'you',
+      'mim': 'me',
+      'n\u00e3o': 'not',
+      'de': 'of',
+    },
+    transfer_prompt: {
+      context: 'Your friend has been staring at the same person all evening.',
+      ask: 'He likes you.',
+      answer: 'Ele gosta de ti.',
+    },
+    rights_status: 'short-quote-review-required',
+    starter_tags: ['other-people', 'gossip'],
+    next_root_hooks: ['eles'],
+  }),
 ]
 
 // ---------------------------------------------------------------------------
@@ -783,6 +1039,7 @@ export const PULP_FICTION: Root[] = [
   q({
     root_id: 'pf_royale',
     culture_family: 'pulp_fiction',
+    rung: 1,
     source_label: 'Pulp Fiction',
     root_display: 'Royale with Cheese.',
     meaning_en: 'A Royale with cheese.',
@@ -812,6 +1069,7 @@ export const PULP_FICTION: Root[] = [
   q({
     root_id: 'pf_say_what',
     culture_family: 'pulp_fiction',
+    rung: 3,
     source_label: 'Pulp Fiction',
     root_display: 'Say “what” again!',
     meaning_en: 'Say “what” one more time.',
@@ -857,6 +1115,7 @@ export const PULP_FICTION: Root[] = [
   q({
     root_id: 'pf_burger',
     culture_family: 'pulp_fiction',
+    rung: 1,
     source_label: 'Pulp Fiction',
     root_display: 'That’s a tasty burger.',
     meaning_en: 'That burger is really good.',
@@ -888,6 +1147,7 @@ export const PULP_FICTION: Root[] = [
   q({
     root_id: 'pf_be_cool',
     culture_family: 'pulp_fiction',
+    rung: 2,
     source_label: 'Pulp Fiction',
     root_display: 'Be cool.',
     meaning_en: 'Calm down.',
@@ -933,6 +1193,7 @@ export const PULP_FICTION: Root[] = [
   q({
     root_id: 'pf_what_do_they_call_it',
     culture_family: 'pulp_fiction',
+    rung: 3,
     root_type: 'paraphrased_moment',
     source_label: 'Pulp Fiction — paraphrased scene reference',
     source_status: 'paraphrased',
@@ -961,6 +1222,129 @@ export const PULP_FICTION: Root[] = [
     starter_tags: ['survival', 'question'],
     next_root_hooks: ['chamo_me'],
   }),
+  // Rung 1. The joke is the price, which makes the number the lesson.
+  q({
+    root_id: 'pf_shake',
+    culture_family: 'pulp_fiction',
+    rung: 1,
+    root_type: 'quote',
+    source_label: 'Pulp Fiction',
+    source_status: 'verified',
+    root_display: 'A five-dollar shake',
+    meaning_en: 'A five-euro milkshake.',
+    pt_natural: 'Um batido de cinco euros.',
+    semantic_bridge:
+      'The gag only works if you hear the price, so the number is the point. Portuguese puts the figure before the currency \u2014 cinco euros \u2014 and joins the thing to its price with the same DE that joined the glass to the wine.',
+    subtext: 'Ordinary, transactional language, hiding inside the most quoted diner scene ever filmed.',
+    extracts: [
+      { id: 'cinco', pt: 'cinco', gloss: 'five' },
+      { id: 'batido', pt: 'batido', gloss: 'milkshake' },
+    ],
+    branches: [
+      { pt: 'Cinco euros.', en: 'Five euros.' },
+      { pt: 'Um batido, por favor.', en: 'A milkshake, please.' },
+      { pt: 'Dois batidos.', en: 'Two milkshakes.' },
+    ],
+    reinforces: ['por_favor'],
+    helpers: {
+      'euros': 'euros',
+      'Um': 'a',
+      'Dois': 'two',
+      'de': 'of',
+    },
+    transfer_prompt: {
+      context: 'The bill arrives for two coffees.',
+      ask: 'Five euros.',
+      answer: 'Cinco euros.',
+    },
+    rights_status: 'short-quote-review-required',
+    starter_tags: ['numbers', 'ordering'],
+    next_root_hooks: ['quanto'],
+  }),
+  // Rung 5. \u201cThey call it\u201d \u2014 the line is already in the third person plural.
+  q({
+    root_id: 'pf_they_call_it',
+    culture_family: 'pulp_fiction',
+    rung: 5,
+    root_type: 'quote',
+    source_label: 'Pulp Fiction',
+    source_status: 'verified',
+    root_display: 'They call it a Royale with Cheese',
+    meaning_en: 'They call it a Royale with cheese.',
+    pt_natural: 'Eles chamam-lhe Royale com queijo.',
+    semantic_bridge:
+      'You have met chamo-me and como se chama. Here is the same verb with a third ending, and the giveaway is the M: a Portuguese verb ending in -M is nearly always about more than one other person. One letter, and the whole language opens up.',
+    subtext: 'Said as though it were fascinating, which is exactly how you will use it.',
+    extracts: [
+      { id: 'eles', pt: 'eles', gloss: 'they' },
+      { id: 'chamam', pt: 'chamam', gloss: 'they call' },
+    ],
+    branches: [
+      { pt: 'Eles chamam-me Sam.', en: 'They call me Sam.' },
+      { pt: 'Eles est\u00e3o aqui.', en: 'They\u2019re here.' },
+      { pt: 'Como \u00e9 que eles chamam isto?', en: 'What do they call this?' },
+    ],
+    reinforces: ['chamo_me', 'como_se_chama', 'isto'],
+    helpers: {
+      'chamam-me': 'they call me',
+      'chamam-lhe': 'they call it',
+      'est\u00e3o': 'they are',
+      'aqui': 'here',
+      'Como': 'how',
+      '\u00e9': 'is',
+      'que': 'that',
+      'queijo': 'cheese',
+      'com': 'with',
+    },
+    transfer_prompt: {
+      context: 'Somebody asks what your friends call you.',
+      ask: 'They call me Sam.',
+      answer: 'Eles chamam-me Sam.',
+    },
+    rights_status: 'short-quote-review-required',
+    starter_tags: ['other-people', 'verb-endings'],
+    next_root_hooks: ['fazem'],
+  }),
+  // Rung 3. The question the whole Zed sequence turns on.
+  q({
+    root_id: 'pf_zed',
+    culture_family: 'pulp_fiction',
+    rung: 3,
+    root_type: 'quote',
+    source_label: 'Pulp Fiction',
+    source_status: 'verified',
+    root_display: 'Who\u2019s Zed?',
+    meaning_en: 'Who is Zed?',
+    pt_natural: 'Quem \u00e9 o Zed?',
+    semantic_bridge:
+      'Two words and both are load-bearing. QUEM asks about a person where QUANTO asked about an amount and ONDE asked about a place \u2014 the question words are a small set, and you now have most of them.',
+    subtext: 'Asked flatly, of somebody who very much does not want to answer.',
+    extracts: [
+      { id: 'quem', pt: 'quem', gloss: 'who' },
+      { id: 'e_is', pt: '\u00e9', gloss: 'is' },
+    ],
+    branches: [
+      { pt: 'Quem \u00e9 este?', en: 'Who\u2019s this?' },
+      { pt: 'Quem \u00e9 ele?', en: 'Who is he?' },
+      { pt: '\u00c9 o meu parceiro.', en: 'He\u2019s my wingman.' },
+    ],
+    reinforces: ['como_se_chama', 'onde', 'quanto'],
+    helpers: {
+      'este': 'this one',
+      'o': 'the',
+      'meu': 'my',
+      'parceiro': 'partner / wingman',
+      'ele': 'he',
+    },
+    transfer_prompt: {
+      context: 'Somebody you do not recognise has just walked in.',
+      ask: 'Who\u2019s this?',
+      answer: 'Quem \u00e9 este?',
+    },
+    rights_status: 'short-quote-review-required',
+    starter_tags: ['questions', 'other-people'],
+    next_root_hooks: ['eles'],
+  }),
 ]
 
 // ---------------------------------------------------------------------------
@@ -972,6 +1356,7 @@ export const AUDREY_HEPBURN: Root[] = [
   q({
     root_id: 'ah_paris',
     culture_family: 'audrey_hepburn',
+    rung: 4,
     source_label: 'Audrey Hepburn — attribution requires review',
     source_status: 'needs-review',
     root_display: 'Paris is always a good idea.',
@@ -1017,6 +1402,7 @@ export const AUDREY_HEPBURN: Root[] = [
   q({
     root_id: 'ah_enjoy',
     culture_family: 'audrey_hepburn',
+    rung: 2,
     root_type: 'wisdom',
     source_label: 'DUB paraphrase of a documented Audrey theme',
     source_status: 'paraphrased',
@@ -1028,7 +1414,7 @@ export const AUDREY_HEPBURN: Root[] = [
     subtext: 'Positive without being saccharine. You will hear it shouted across a car park.',
     extracts: [
       { id: 'aproveita', pt: 'aproveita', gloss: 'enjoy / make the most of' },
-      { id: 'vida', pt: 'vida', gloss: 'life' },
+      { id: 'vida', pt: 'vida', gloss: 'life', rung: 1 },
     ],
     branches: [
       { pt: 'Aproveita o dia.', en: 'Enjoy the day.' },
@@ -1053,6 +1439,7 @@ export const AUDREY_HEPBURN: Root[] = [
   q({
     root_id: 'ah_people',
     culture_family: 'audrey_hepburn',
+    rung: 5,
     root_type: 'wisdom',
     source_label: 'DUB paraphrase of documented human-connection themes',
     source_status: 'paraphrased',
@@ -1086,6 +1473,7 @@ export const AUDREY_HEPBURN: Root[] = [
   q({
     root_id: 'ah_good_side',
     culture_family: 'audrey_hepburn',
+    rung: 5,
     root_type: 'wisdom',
     source_label: 'DUB paraphrase of a documented Audrey sentiment',
     source_status: 'paraphrased',
@@ -1122,6 +1510,7 @@ export const AUDREY_HEPBURN: Root[] = [
   q({
     root_id: 'ah_happy',
     culture_family: 'audrey_hepburn',
+    rung: 6,
     root_type: 'wisdom',
     source_label: 'DUB paraphrase of a documented Audrey sentiment',
     source_status: 'paraphrased',
@@ -1185,6 +1574,7 @@ export const MARCUS_AURELIUS: Root[] = [
   q({
     root_id: 'ma_control',
     culture_family: 'marcus_aurelius',
+    rung: 6,
     root_type: 'wisdom',
     source_label: 'DUB distillation of a recurring Meditations theme',
     source_status: 'public-domain-derived',
@@ -1223,6 +1613,7 @@ export const MARCUS_AURELIUS: Root[] = [
   q({
     root_id: 'ma_react',
     culture_family: 'marcus_aurelius',
+    rung: 6,
     root_type: 'wisdom',
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
@@ -1261,6 +1652,7 @@ export const MARCUS_AURELIUS: Root[] = [
   q({
     root_id: 'ma_now',
     culture_family: 'marcus_aurelius',
+    rung: 4,
     root_type: 'wisdom',
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
@@ -1309,6 +1701,7 @@ export const MARCUS_AURELIUS: Root[] = [
   q({
     root_id: 'ma_true',
     culture_family: 'marcus_aurelius',
+    rung: 6,
     root_type: 'wisdom',
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
@@ -1345,6 +1738,7 @@ export const MARCUS_AURELIUS: Root[] = [
   q({
     root_id: 'ma_accept',
     culture_family: 'marcus_aurelius',
+    rung: 6,
     root_type: 'wisdom',
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
@@ -1395,6 +1789,133 @@ export const MARCUS_AURELIUS: Root[] = [
     starter_tags: ['reflective', 'practical'],
     next_root_hooks: ['agora'],
   }),
+  // Rung 2. This crate opened at rung 4, so a beginner could never enter it.
+  q({
+    root_id: 'ma_ask_help',
+    culture_family: 'marcus_aurelius',
+    rung: 2,
+    root_type: 'wisdom',
+    source_label: 'Meditations, Book VII',
+    source_status: 'public-domain-derived',
+    root_display: 'Do not be ashamed to need help',
+    meaning_en: 'Don\u2019t be ashamed to ask for help.',
+    pt_natural: 'N\u00e3o tenhas vergonha de pedir ajuda.',
+    semantic_bridge:
+      'Marcus wrote this to a soldier who could not do everything alone, and it is the most useful sentence anybody learning a language has been handed. AJUDA is also one of the few words you can shout on its own and be completely understood.',
+    subtext: 'Practical rather than noble. He meant it as an instruction, not a comfort.',
+    extracts: [
+      { id: 'ajuda', pt: 'ajuda', gloss: 'help' },
+      { id: 'pedir', pt: 'pedir', gloss: 'to ask for' },
+    ],
+    branches: [
+      { pt: 'Preciso de ajuda.', en: 'I need help.' },
+      { pt: 'Podes ajudar-me?', en: 'Can you help me?' },
+      { pt: 'Vou pedir ajuda.', en: 'I\u2019m going to ask for help.' },
+    ],
+    reinforces: ['preciso_de', 'podes', 'pedir_te'],
+    helpers: {
+      'N\u00e3o': 'not',
+      'tenhas': 'you have',
+      'vergonha': 'shame',
+      'de': 'of / to',
+      'ajudar-me': 'help me',
+      'Vou': 'I\u2019m going to',
+    },
+    transfer_prompt: {
+      context: 'You are lost and the map has stopped being any use.',
+      ask: 'I need help.',
+      answer: 'Preciso de ajuda.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['first-day', 'asking'],
+    next_root_hooks: ['onde'],
+  }),
+  // Rung 5. Book II opens by telling you who you are about to meet.
+  q({
+    root_id: 'ma_people',
+    culture_family: 'marcus_aurelius',
+    rung: 5,
+    root_type: 'wisdom',
+    source_label: 'Meditations, Book II',
+    source_status: 'public-domain-derived',
+    root_display: 'When you wake, remember who you are about to meet',
+    meaning_en: 'People do what they know how to do.',
+    pt_natural: 'As pessoas fazem o que sabem.',
+    semantic_bridge:
+      'He wrote it to stop himself being surprised by anybody. It also does the ladder a favour: AS PESSOAS is the first time you have talked about a group rather than a person, and FAZEM carries the same -M that told you ELES were involved.',
+    subtext: 'Not forgiveness exactly. More an instruction to stop expecting otherwise.',
+    extracts: [
+      { id: 'as_pessoas', pt: 'as pessoas', gloss: 'people' },
+      { id: 'fazem', pt: 'fazem', gloss: 'they do' },
+    ],
+    branches: [
+      { pt: 'As pessoas s\u00e3o assim.', en: 'People are like that.' },
+      { pt: 'Eles fazem o mesmo.', en: 'They do the same.' },
+      { pt: 'As pessoas aqui s\u00e3o boas.', en: 'People here are good.' },
+    ],
+    reinforces: ['eles', 'mesmo', 'bom'],
+    helpers: {
+      's\u00e3o': 'they are',
+      'assim': 'like that',
+      'o': 'the',
+      'que': 'what',
+      'sabem': 'they know',
+      'aqui': 'here',
+      'boas': 'good',
+    },
+    transfer_prompt: {
+      context: 'Somebody has let you down in exactly the way they always do.',
+      ask: 'They do the same.',
+      answer: 'Eles fazem o mesmo.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['other-people', 'verb-endings'],
+    next_root_hooks: ['eles'],
+  }),
+  // Rung 5. The \u201cwe\u201d ending, from the man who argued for cooperation.
+  q({
+    root_id: 'ma_together',
+    culture_family: 'marcus_aurelius',
+    rung: 5,
+    root_type: 'wisdom',
+    source_label: 'Meditations, Book II',
+    source_status: 'public-domain-derived',
+    root_display: 'We were born to work with one another',
+    meaning_en: 'We are made for one another.',
+    pt_natural: 'N\u00f3s somos feitos uns para os outros.',
+    semantic_bridge:
+      'He meant it as an argument against sulking. Portuguese barely needs the N\u00d3S at all, because SOMOS has already said who \u2014 and that -MOS ending is the \u201cwe\u201d on very nearly every verb in the language.',
+    subtext: 'Less warm than it sounds. He is telling himself to get on with it.',
+    extracts: [
+      { id: 'nos_', pt: 'n\u00f3s', gloss: 'we' },
+      { id: 'somos', pt: 'somos', gloss: 'we are' },
+    ],
+    branches: [
+      { pt: 'N\u00f3s somos amigos.', en: 'We\u2019re friends.' },
+      { pt: 'Somos dois.', en: 'There are two of us.' },
+      { pt: 'N\u00e3o somos iguais.', en: 'We\u2019re not the same.' },
+    ],
+    reinforces: ['as_pessoas', 'eles'],
+    helpers: {
+      'amigos': 'friends',
+      'dois': 'two',
+      'iguais': 'the same',
+      'N\u00e3o': 'not',
+      'feitos': 'made',
+      'uns': 'ones',
+      'para': 'for',
+      'os': 'the',
+      'outros': 'others',
+    },
+    transfer_prompt: {
+      context: 'Introducing the person standing next to you.',
+      ask: 'We\u2019re friends.',
+      answer: 'Somos amigos.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['other-people', 'verb-endings'],
+    next_root_hooks: ['as_pessoas'],
+  }),
 ]
 
 // ---------------------------------------------------------------------------
@@ -1419,6 +1940,7 @@ export const SWEARING: Root[] = [
   q({
     root_id: 'sw_vai_a_merda',
     culture_family: 'portuguese_swearing',
+    rung: 6,
     root_type: 'other',
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
@@ -1455,6 +1977,7 @@ export const SWEARING: Root[] = [
   q({
     root_id: 'sw_foda_se',
     culture_family: 'portuguese_swearing',
+    rung: 6,
     root_type: 'other',
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
@@ -1506,6 +2029,7 @@ export const SWEARING: Root[] = [
   q({
     root_id: 'sw_que_se_foda',
     culture_family: 'portuguese_swearing',
+    rung: 6,
     root_type: 'other',
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
@@ -1538,6 +2062,7 @@ export const SWEARING: Root[] = [
   q({
     root_id: 'sw_caralho',
     culture_family: 'portuguese_swearing',
+    rung: 6,
     root_type: 'other',
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
@@ -1550,7 +2075,7 @@ export const SWEARING: Root[] = [
     subtext: 'Aimed at the object, not the person. Pointed at a person it becomes a challenge.',
     extracts: [
       { id: 'que_caralho', pt: 'Que caralho', gloss: 'what the f***' },
-      { id: 'isto', pt: 'isto', gloss: 'this' },
+      { id: 'isto', pt: 'isto', gloss: 'this', rung: 1 },
     ],
     branches: [
       { pt: 'O que é isto?', en: 'What is this?' },
@@ -1588,6 +2113,7 @@ export const SWEARING: Root[] = [
   q({
     root_id: 'sw_merda',
     culture_family: 'portuguese_swearing',
+    rung: 6,
     root_type: 'other',
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
@@ -1622,6 +2148,7 @@ export const SWEARING: Root[] = [
   q({
     root_id: 'sw_cabrao',
     culture_family: 'portuguese_swearing',
+    rung: 6,
     root_type: 'other',
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
@@ -1695,6 +2222,7 @@ export const FLIRTING_M2F: Root[] = [
   q({
     root_id: 'fl_m_estas_gira',
     culture_family: 'flirting_m2f',
+    rung: 6,
     root_type: 'other',
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
@@ -1738,6 +2266,7 @@ export const FLIRTING_M2F: Root[] = [
   q({
     root_id: 'fl_m_posso_oferecer',
     culture_family: 'flirting_m2f',
+    rung: 2,
     root_type: 'other',
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
@@ -1767,6 +2296,7 @@ export const FLIRTING_M2F: Root[] = [
   q({
     root_id: 'fl_m_gostava',
     culture_family: 'flirting_m2f',
+    rung: 2,
     root_type: 'other',
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
@@ -1811,6 +2341,7 @@ export const FLIRTING_M2F: Root[] = [
   q({
     root_id: 'fl_m_vim_aqui',
     culture_family: 'flirting_m2f',
+    rung: 2,
     root_type: 'paraphrased_moment',
     source_label: 'Love Actually — the one who learns Portuguese',
     source_status: 'paraphrased',
@@ -1841,6 +2372,7 @@ export const FLIRTING_M2F: Root[] = [
   q({
     root_id: 'fl_m_nervoso',
     culture_family: 'flirting_m2f',
+    rung: 6,
     root_type: 'other',
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
@@ -1870,6 +2402,7 @@ export const FLIRTING_M2F: Root[] = [
   q({
     root_id: 'fl_m_numero',
     culture_family: 'flirting_m2f',
+    rung: 2,
     root_type: 'other',
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
@@ -1901,6 +2434,7 @@ export const FLIRTING_F2M: Root[] = [
   q({
     root_id: 'fl_f_estas_giro',
     culture_family: 'flirting_f2m',
+    rung: 6,
     root_type: 'other',
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
@@ -1944,6 +2478,7 @@ export const FLIRTING_F2M: Root[] = [
   q({
     root_id: 'fl_f_apetece_te',
     culture_family: 'flirting_f2m',
+    rung: 2,
     root_type: 'other',
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
@@ -1987,6 +2522,7 @@ export const FLIRTING_F2M: Root[] = [
   q({
     root_id: 'fl_f_queria',
     culture_family: 'flirting_f2m',
+    rung: 2,
     root_type: 'other',
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
@@ -2016,6 +2552,7 @@ export const FLIRTING_F2M: Root[] = [
   q({
     root_id: 'fl_f_engracado',
     culture_family: 'flirting_f2m',
+    rung: 6,
     root_type: 'other',
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
@@ -2060,6 +2597,7 @@ export const FLIRTING_F2M: Root[] = [
   q({
     root_id: 'fl_f_beijinho',
     culture_family: 'flirting_f2m',
+    rung: 2,
     root_type: 'other',
     source_label: 'Every hello and goodbye in Portugal',
     source_status: 'paraphrased',
@@ -2089,6 +2627,7 @@ export const FLIRTING_F2M: Root[] = [
   q({
     root_id: 'fl_f_ligas_me',
     culture_family: 'flirting_f2m',
+    rung: 4,
     root_type: 'other',
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
@@ -2135,6 +2674,7 @@ export const DURAN_DURAN: Root[] = [
   q({
     root_id: 'dd_wolf',
     culture_family: 'duran_duran_lisboa',
+    rung: 1,
     root_type: 'title',
     source_label: 'Hungry Like the Wolf',
     source_status: 'verified',
@@ -2189,6 +2729,7 @@ export const DURAN_DURAN: Root[] = [
   q({
     root_id: 'dd_monday',
     culture_family: 'duran_duran_lisboa',
+    rung: 4,
     root_type: 'title',
     source_label: 'New Moon on Monday',
     source_status: 'verified',
@@ -2200,7 +2741,7 @@ export const DURAN_DURAN: Root[] = [
     subtext: 'Flat, practical admin language — the stuff that decides whether you can make a plan.',
     extracts: [
       { id: 'segunda_feira', pt: 'segunda-feira', gloss: 'Monday' },
-      { id: 'nova', pt: 'nova', gloss: 'new' },
+      { id: 'nova', pt: 'nova', gloss: 'new', rung: 1 },
     ],
     branches: [
       { pt: 'Até segunda-feira.', en: 'See you Monday.' },
@@ -2228,6 +2769,7 @@ export const DURAN_DURAN: Root[] = [
   q({
     root_id: 'dd_know',
     culture_family: 'duran_duran_lisboa',
+    rung: 3,
     root_type: 'title',
     source_label: 'Is There Something I Should Know?',
     source_status: 'verified',
@@ -2284,6 +2826,7 @@ export const DURAN_DURAN: Root[] = [
   q({
     root_id: 'dd_prayer',
     culture_family: 'duran_duran_lisboa',
+    rung: 2,
     root_type: 'title',
     source_label: 'Save a Prayer',
     source_status: 'verified',
@@ -2326,6 +2869,7 @@ export const DURAN_DURAN: Root[] = [
   q({
     root_id: 'dd_now',
     culture_family: 'duran_duran_lisboa',
+    rung: 2,
     root_type: 'title',
     source_label: 'All You Need Is Now',
     source_status: 'verified',
@@ -2381,6 +2925,7 @@ export const DURAN_DURAN: Root[] = [
   q({
     root_id: 'dd_ordinary',
     culture_family: 'duran_duran_lisboa',
+    rung: 1,
     root_type: 'title',
     source_label: 'Ordinary World',
     source_status: 'verified',
@@ -2450,16 +2995,24 @@ export function rootById(id: string): Root | undefined {
 }
 
 /** Every distinct piece the graph can teach, and where it first comes from. */
-export const PIECES: Record<string, { pt: string; gloss: string; family: CultureFamily }> =
-  (() => {
-    const out: Record<string, { pt: string; gloss: string; family: CultureFamily }> = {}
-    for (const root of ROOTS) {
-      for (const e of root.extracts) {
-        out[e.id] ??= { pt: e.pt, gloss: e.gloss, family: root.culture_family }
+export const PIECES: Record<
+  string,
+  { pt: string; gloss: string; family: CultureFamily; rung: Rung }
+> = (() => {
+  const out: Record<string, { pt: string; gloss: string; family: CultureFamily; rung: Rung }> = {}
+  // Lowest rung wins: a piece belongs to the earliest point a learner could have met
+  // it, otherwise a rung 2 root would look as though it needed rung 6 knowledge.
+  for (const root of ROOTS) {
+    for (const e of root.extracts) {
+      const rung = e.rung ?? root.rung
+      const seen = out[e.id]
+      if (!seen || rung < seen.rung) {
+        out[e.id] = { pt: e.pt, gloss: e.gloss, family: seen?.family ?? root.culture_family, rung }
       }
     }
-    return out
-  })()
+  }
+  return out
+})()
 
 /**
  * §11 — collisions. Each one must use pieces the learner has actually met, from at
@@ -2858,3 +3411,13 @@ export const COLLISIONS: Collision[] = [
     provenance: 'LIGAS-ME was hers. SEGUNDA-FEIRA came out of a song about a Monday. Together they are a plan.',
   },
 ]
+
+/** Every root at or below a rung — what a crate may serve at that point. */
+export function rootsUpTo(rung: Rung, family?: CultureFamily): Root[] {
+  return ROOTS.filter((r) => r.rung <= rung && (!family || r.culture_family === family))
+}
+
+/** How much of a crate is still above the learner. Drives the dimmed state. */
+export function lockedIn(family: CultureFamily, rung: Rung): number {
+  return (ROOTS_BY_FAMILY[family] ?? []).filter((r) => r.rung > rung).length
+}
