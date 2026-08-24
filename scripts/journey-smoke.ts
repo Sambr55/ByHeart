@@ -7,6 +7,7 @@
  */
 import { chromium, type Locator, type Page } from 'playwright'
 import { CRATES, ROOTS, entryRung, isLive } from '../content/roots'
+import { DEFAULT_PAIR, pairId } from '../content/pairs'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 // Must default to a crate a brand-new learner can actually open: the ladder now
@@ -53,16 +54,20 @@ async function main() {
     // Exactly one rung below, because a clean release at rung N opens rung N+1 and
     // nothing higher — picking any lower root only ever reaches rung 2.
     const opener = ROOTS.find((r) => r.rung === needed - 1)!
+    // The namespaced key, not the legacy one: by the time this runs the app has already
+    // written an empty record for this pair, so the legacy migration will correctly
+    // decline to overwrite it and the seed would be silently ignored.
+    const key = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
     await page.evaluate(
-      ([pt, en]) =>
+      ([pt, en, k]) =>
         localStorage.setItem(
-          'byheart.learner.v1',
+          k,
           JSON.stringify({
             version: 1,
             proof: [{ pt, en, source: 'release', clean: true, at: '2026-01-01T00:00:00.000Z' }],
           }),
         ),
-      [opener.transfer_prompt.answer, opener.transfer_prompt.ask],
+      [opener.transfer_prompt.answer, opener.transfer_prompt.ask, key],
     )
     await page.reload({ waitUntil: 'networkidle' })
   }

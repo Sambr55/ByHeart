@@ -16,9 +16,33 @@ import { BLOCK_ORDER, TARGETS } from '@/content/targets'
  * A piece id. The two original missions used a closed PieceId union; the v0.6 root
  * graph mints pieces from content, so this is deliberately open.
  */
+import { DEFAULT_PAIR, pairId, type Pair } from '@/content/pairs'
+import { currentPair } from './pair'
+
 export type PieceId = string
 
-const KEY = 'byheart.learner.v1'
+/**
+ * One record per pair, namespaced: byheart.learner.v1:en-GB:pt-PT.
+ *
+ * This single change buys the multiple-identities model — EN→PT, EN→FR, PT→ES, each
+ * with its own inventory, proof, stage and played history — without restructuring
+ * LearnerState at all. Nesting progress under a pairs map inside one record would cost
+ * far more and buy nothing extra.
+ */
+const LEGACY_KEY = 'byheart.learner.v1'
+
+function keyFor(pair: Pair): string {
+  return LEGACY_KEY + ':' + pairId(pair)
+}
+
+function currentKey(): string {
+  return keyFor(currentPair())
+}
+
+/** The key this pair's record actually lives under. Exported for tooling and tests. */
+export function learnerStorageKey(pair: Pair = currentPair()): string {
+  return keyFor(pair)
+}
 const VERSION = 1
 
 // ---------------------------------------------------------------------------
@@ -205,7 +229,7 @@ function emit() {
 function save() {
   if (typeof window === 'undefined' || !state) return
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(state))
+    window.localStorage.setItem(currentKey(), JSON.stringify(state))
   } catch {
     // Private mode or a full quota. The in-memory copy still drives the session.
   }
@@ -215,7 +239,22 @@ export function loadLearner(): LearnerState {
   if (state) return state
   if (typeof window === 'undefined') return emptyLearner()
   try {
-    const raw = window.localStorage.getItem(KEY)
+    // A record written before pairs existed belongs to the default pair. Read it
+    // across rather than abandoning it — and leave the original in place, because a
+    // migration that deletes its own source has no way back if it turns out to be wrong.
+    const key = currentKey()
+    let raw = window.localStorage.getItem(key)
+    if (!raw && pairId(currentPair()) === pairId(DEFAULT_PAIR)) {
+      const legacy = window.localStorage.getItem(LEGACY_KEY)
+      if (legacy) {
+        raw = legacy
+        try {
+          window.localStorage.setItem(key, legacy)
+        } catch {
+          // Out of room. The record still loads for this session.
+        }
+      }
+    }
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<LearnerState>
       if (parsed.version === VERSION) {
@@ -629,4 +668,15 @@ export function rememberPlayed(rootIds: string[], collisionId?: string | null) {
     if (rootIds.length) s.roots_played = [...new Set([...s.roots_played, ...rootIds])]
     if (collisionId) s.collisions_played = [...new Set([...s.collisions_played, collisionId])]
   })
+}
+
+/**
+ * Drop the in-memory record so the next read loads the pair that is now current.
+ *
+ * Called when somebody switches pair. Kept here rather than inside setPair so that
+ * engine/pair.ts stays pure storage and the two modules do not import each other.
+ */
+export function resetLearnerCache() {
+  state = null
+  emit()
 }

@@ -7,6 +7,7 @@ import { CRATES } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { play } from '@/engine/audio'
 import { track } from '@/engine/analytics'
+import { currentPair } from '@/engine/pair'
 import { useLearner } from '@/engine/useLearner'
 import { Menu } from '@/components/Menu'
 
@@ -34,7 +35,8 @@ export function Line({ pushReady }: { pushReady: boolean }) {
   const line = useMemo<DailyLine | null>(() => {
     if (!ready) return null
     const owned = Object.keys(learner.inventory)
-    return pickLine({ owned, day: dayKey(), salt: learner.learner_id })
+    // Today where the language is spoken, which the pair decides.
+    return pickLine({ owned, day: dayKey(new Date(), currentPair().day_zone), salt: learner.learner_id })
   }, [ready, learner.inventory, learner.learner_id])
 
   useEffect(() => {

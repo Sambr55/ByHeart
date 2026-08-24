@@ -1,3 +1,4 @@
+import { DEFAULT_PAIR } from './pairs'
 import { PIECES, ROOTS, rootById, type Root } from './roots'
 
 /**
@@ -41,9 +42,17 @@ function hash(s: string): number {
 }
 
 /** Today in Lisbon, as a YYYY-MM-DD key. The product's language lives on that clock. */
-export function dayKey(now: Date = new Date()): string {
+/**
+ * Which day it is where the language is spoken.
+ *
+ * The zone comes off the pair rather than being hard-coded, because whose morning
+ * "today" means is a property of the target locale — a learner of French should get
+ * their line on Paris time, not Lisbon's. Defaulted rather than required so the cron,
+ * which has no browser and no chosen pair, keeps working unchanged.
+ */
+export function dayKey(now: Date = new Date(), zone: string = DEFAULT_PAIR.day_zone): string {
   return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Lisbon',
+    timeZone: zone,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

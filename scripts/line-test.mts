@@ -1,3 +1,4 @@
+import { DEFAULT_PAIR } from '../content/pairs'
 import { dayKey, notificationFor, pickLine } from '../content/daily-line'
 import { ROOTS } from '../content/roots'
 
@@ -58,5 +59,5 @@ console.log(
   '60 days: ' + seen.size + ' distinct lines, ' + reach + ' of them a reach, none repeated',
 )
 console.log(checked + ' notes checked, every one about the line it is attached to')
-console.log('today in Lisbon: ' + dayKey())
+console.log('today in ' + DEFAULT_PAIR.day_zone + ': ' + dayKey())
 console.log('example: ' + JSON.stringify(notificationFor(pickLine({ owned, salt: 'sam' })!), null, 1))
