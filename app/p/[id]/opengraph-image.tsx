@@ -32,7 +32,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           justifyContent: 'space-between',
           background: '#07090c',
           color: '#f3f0e9',
-          padding: '64px 72px',
+          padding: '56px 72px',
           fontFamily: 'sans-serif',
         }}
       >
@@ -40,21 +40,21 @@ export default async function Image({ params }: { params: Promise<{ id: string }
           <div style={{ fontSize: 22, letterSpacing: 4, color: '#8a96a3' }}>
             SAID COLD, WITH NOTHING ON SCREEN
           </div>
-          <div style={{ fontSize: 62, fontWeight: 700, marginTop: 18, lineHeight: 1.1 }}>
+          <div style={{ fontSize: 52, fontWeight: 700, marginTop: 14, lineHeight: 1.08 }}>
             {(card?.count ?? 0) + ' things they can say in Portuguese.'}
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, flexGrow: 1, justifyContent: 'center' }}>
           {lines.map((l) => (
             <div key={l.pt} style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontSize: 40, color: '#e8b04b', fontWeight: 600 }}>{l.pt}</div>
-              <div style={{ fontSize: 24, color: '#8a96a3', marginTop: 4 }}>{l.en}</div>
+              <div style={{ fontSize: 34, color: '#e8b04b', fontWeight: 600 }}>{l.pt}</div>
+              <div style={{ fontSize: 21, color: '#8a96a3', marginTop: 2 }}>{l.en}</div>
             </div>
           ))}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: 12, borderTop: '1px solid #1f2932' }}>
           <div style={{ fontSize: 26, color: '#8a96a3' }}>No streak involved.</div>
           <div style={{ fontSize: 30, fontWeight: 700, letterSpacing: 8 }}>DUB</div>
         </div>
