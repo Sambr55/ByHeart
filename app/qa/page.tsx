@@ -36,7 +36,7 @@ export default function QaPage() {
       </p>
 
       <h2 className="display mt-10 text-xl">The ten building blocks</h2>
-      <div className="mt-4 overflow-x-auto">
+      <div className="mt-3 overflow-x-auto">
         <table className="w-full min-w-[42rem] border-collapse text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-muted">
@@ -65,8 +65,8 @@ export default function QaPage() {
         </table>
       </div>
 
-      <h2 className="display mt-12 text-xl">Every utterance</h2>
-      <div className="mt-4 overflow-x-auto">
+      <h2 className="display mt-10 text-xl">Every utterance</h2>
+      <div className="mt-3 overflow-x-auto">
         <table className="w-full min-w-[42rem] border-collapse text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-muted">
@@ -91,14 +91,14 @@ export default function QaPage() {
         </table>
       </div>
 
-      <h2 className="display mt-12 text-xl">Audio build</h2>
-      <p className="mt-2 text-sm text-muted">
+      <h2 className="display mt-10 text-xl">Audio build</h2>
+      <p className="mt-3 text-sm text-muted">
         {AUDIO_MANIFEST.length} assets, all pt-PT. A bare block and its booster example
         share a recording where they are the same utterance.
       </p>
 
-      <h2 className="display mt-12 text-xl">Source lines and their translations</h2>
-      <p className="mt-2 max-w-prose text-sm text-muted">
+      <h2 className="display mt-10 text-xl">Source lines and their translations</h2>
+      <p className="mt-3 max-w-prose text-sm text-muted">
         Each cultural moment is shown with the whole line in Portuguese underneath, and
         that line stays in view while the block is being taught. These renderings are
         the bridge between the moment and the language, so they need checking twice:
@@ -107,7 +107,7 @@ export default function QaPage() {
         as I can establish them — please correct any that are wrong, or that differ in
         Portugal from what is listed.
       </p>
-      <div className="mt-4 overflow-x-auto">
+      <div className="mt-3 overflow-x-auto">
         <table className="w-full min-w-[42rem] border-collapse text-sm">
           <thead>
             <tr className="border-b border-line text-left text-xs uppercase tracking-wider text-muted">
@@ -144,8 +144,8 @@ export default function QaPage() {
         </table>
       </div>
 
-      <h2 className="display mt-12 text-xl">Cultural hooks in use</h2>
-      <ul className="mt-4 space-y-2 text-sm">
+      <h2 className="display mt-10 text-xl">Cultural hooks in use</h2>
+      <ul className="mt-3 space-y-3 text-sm">
         {SCREENS.filter((s) => s.hook).map((s) => (
           <li key={s.id} className="border-b border-line/60 pb-2">
             <span className="font-mono text-xs text-muted">{s.id}</span>{' '}
@@ -153,7 +153,7 @@ export default function QaPage() {
           </li>
         ))}
       </ul>
-      <p className="mt-4 max-w-prose text-xs text-muted">
+      <p className="mt-3 max-w-prose text-xs text-muted">
         Brief reference only — no dialogue sequences, subtitle tracks, lyrics, footage,
         stills or likenesses. Aviation styling is original geometry, never film key art.
       </p>

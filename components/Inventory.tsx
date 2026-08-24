@@ -24,7 +24,7 @@ export function InventoryChip({
   return (
     <span
       className={
-        'inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 transition ' +
+        'inline-flex items-center gap-3 whitespace-nowrap rounded-full border px-3 py-1.5 transition ' +
         (size === 'lg' ? 'text-base' : 'text-xs') +
         (lit
           ? ' border-accent bg-accent text-accent-ink shadow-[0_0_0_4px_rgba(232,176,75,0.18)]'
@@ -42,7 +42,7 @@ export function InventoryRail({ blocks }: { blocks: BlockId[] }) {
   if (!blocks.length) return null
   return (
     <div className="-mx-5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         {blocks.map((b) => (
           <InventoryChip key={b} block={b} />
         ))}
@@ -53,7 +53,7 @@ export function InventoryRail({ blocks }: { blocks: BlockId[] }) {
 
 export function InventoryDrawer({ blocks }: { blocks: BlockId[] }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-3">
       {blocks.map((b) => (
         <InventoryChip key={b} block={b} size="lg" />
       ))}
@@ -83,11 +83,11 @@ export function SourceChip({ block }: { block: BlockId }) {
         (strengthened ? 'border-accent/60 bg-accent/5' : 'border-line bg-chip')
       }
     >
-      <div className="flex items-baseline justify-between gap-2">
+      <div className="flex items-baseline justify-between gap-3">
         <span className="pt text-sm font-semibold">{target.label}</span>
         <span className="text-[0.6rem] uppercase tracking-wider text-muted">{state}</span>
       </div>
-      <p className="mt-0.5 text-xs text-muted">{target.gloss}</p>
+      <p className="mt-1 text-xs text-muted">{target.gloss}</p>
       <p className="mt-1 text-[0.6rem] uppercase tracking-wider text-accent/80">
         {(sources as PropertyId[]).map((s) => PROPERTY_LABEL[s]).join(' → ')}
       </p>

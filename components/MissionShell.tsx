@@ -54,10 +54,10 @@ function StageRail({
 }) {
   const currentPos = stages.indexOf(current)
   return (
-    <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-line bg-bg/90 backdrop-blur">
       <div className="mx-auto w-full max-w-md px-5 pb-2 pt-3">
         <p className="eyebrow text-accent">{current}</p>
-        <div className="mt-2 flex gap-1" aria-hidden="true">
+        <div className="mt-3 flex gap-1" aria-hidden="true">
           {stages.map((s, i) => {
             const screensInStage = screens.filter((sc) => sc.stage === s)
             const doneInStage = screens.slice(0, index + 1).filter(
@@ -125,7 +125,7 @@ export function FeedbackNote({
     <div
       role="status"
       className={
-        'animate-bank mt-5 flex gap-3 rounded border p-4 text-sm leading-relaxed ' +
+        'animate-bank mt-6 flex gap-3 rounded border p-4 text-sm leading-relaxed ' +
         (correct
           ? 'border-correct/40 bg-correct/10 text-fg'
           : 'border-coach/40 bg-coach/10 text-fg')
@@ -134,7 +134,7 @@ export function FeedbackNote({
       <span
         aria-hidden="true"
         className={
-          'mt-0.5 shrink-0 font-bold ' + (correct ? 'text-correct' : 'text-coach')
+          'mt-1 shrink-0 font-bold ' + (correct ? 'text-correct' : 'text-coach')
         }
       >
         {correct ? '✓' : '→'}

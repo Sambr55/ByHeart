@@ -108,14 +108,14 @@ export function Shelves({
   }, [entries])
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3">
       {SHELVES.map((shelf) => {
         const list = byShelf.get(shelf.id) ?? []
         if (!list.length) return null
         const expanded = open === shelf.id
         const fresh = highlight ? list.filter((e) => e.forms.some((f) => highlight.has(f.id))) : []
         return (
-          <section key={shelf.id} className="flex flex-col gap-2">
+          <section key={shelf.id} className="flex flex-col gap-3">
             <button
               type="button"
               aria-expanded={expanded}
@@ -129,7 +129,7 @@ export function Shelves({
               ) : null}
               <span className="eyebrow shrink-0 tabular-nums text-muted">{list.length}</span>
             </button>
-            <p className="flex flex-wrap gap-x-2 gap-y-1 text-xs">
+            <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
               {(expanded ? list : list.slice(0, 6)).map((e) => {
                 const isNew = highlight
                   ? e.forms.some((f) => highlight.has(f.id))

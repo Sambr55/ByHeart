@@ -118,7 +118,7 @@ export function MatchView({ screen }: { screen: MatchScreen }) {
     <>
       <Prompt screen={screen} />
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-6 space-y-3">
         {screen.pairs.map((p) => (
           <div
             key={p.blockId}
@@ -134,7 +134,7 @@ export function MatchView({ screen }: { screen: MatchScreen }) {
               />
               <span className="pt text-2xl text-accent">{p.pt}</span>
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-3 grid grid-cols-2 gap-3">
               {englishes.map((en) => {
                 const chosen = choices[p.blockId] === en
                 const right = solved && en === p.en
@@ -184,7 +184,7 @@ export function InventoryView({ screen }: { screen: InventoryScreen }) {
         <InventoryDrawer blocks={inventory} />
       </div>
       {screen.caption ? (
-        <p className="mt-5 text-sm text-muted">{screen.caption}</p>
+        <p className="mt-6 text-sm text-muted">{screen.caption}</p>
       ) : null}
       {screen.reveal ? <FeedbackNote tone="correct">{screen.reveal}</FeedbackNote> : null}
       <Continue

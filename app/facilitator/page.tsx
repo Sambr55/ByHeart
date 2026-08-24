@@ -45,7 +45,7 @@ export default function FacilitatorPage() {
   return (
     <PageShell eyebrow="FACILITATOR" stage="PRE-FLIGHT">
       <h1 className="display text-3xl">Session console</h1>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-3 text-sm text-muted">
         Nothing here is shown to a tester. Say only: “Use this as you would if someone
         sent you the link. I will not help unless the product breaks.”
       </p>
@@ -76,7 +76,7 @@ export default function FacilitatorPage() {
       <Section title="Start a run">
         <div className="flex items-center justify-between gap-3 py-1.5">
           <span className="text-sm font-semibold">DUB journey (v0.6)</span>
-          <span className="flex gap-2">
+          <span className="flex gap-3">
             <Pill href="/">open</Pill>
             <Pill href="/?tester=demo">as “demo”</Pill>
           </span>
@@ -84,14 +84,14 @@ export default function FacilitatorPage() {
         {MISSION_ORDER.map((id) => (
           <div key={id} className="flex items-center justify-between gap-3 py-1.5">
             <span className="text-sm">{MISSIONS[id].property_label}</span>
-            <span className="flex gap-2">
+            <span className="flex gap-3">
               <Pill href={id === 'mission_01' ? '/tg' : '/m2'}>legacy</Pill>
             </span>
           </div>
         ))}
         <div className="flex items-center justify-between gap-3 py-1.5">
           <span className="text-sm">Deck / delayed recall</span>
-          <span className="flex gap-2">
+          <span className="flex gap-3">
             <Pill href="/deck">deck</Pill>
             <Pill href="/recall">recall</Pill>
           </span>
@@ -103,7 +103,7 @@ export default function FacilitatorPage() {
       </Section>
 
       <Section title="Inventory">
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-2 gap-1">
           {owned.length ? (
             owned.map((b) => (
               <div key={b} className="rounded border border-line bg-chip px-2 py-1.5">
@@ -130,7 +130,7 @@ export default function FacilitatorPage() {
         <button
           type="button"
           onClick={() => downloadSession({ learner: getLearner() })}
-          className="tap-target eyebrow mt-2 w-full rounded border border-line px-3 py-3 text-fg"
+          className="tap-target eyebrow mt-3 w-full rounded border border-line px-3 py-3 text-fg"
         >
           DOWNLOAD SESSION JSON
         </button>
@@ -141,13 +141,13 @@ export default function FacilitatorPage() {
               resetLearner()
             }
           }}
-          className="tap-target eyebrow mt-2 w-full rounded border border-coach/50 px-3 py-3 text-coach"
+          className="tap-target eyebrow mt-3 w-full rounded border border-coach/50 px-3 py-3 text-coach"
         >
           RESET FOR NEXT TESTER
         </button>
       </Section>
 
-      <div className="mt-6 flex flex-col gap-2 text-center text-xs text-muted">
+      <div className="mt-6 flex flex-col gap-3 text-center text-xs text-muted">
         <Link href="/admin" className="underline">
           Collated tester feedback
         </Link>
@@ -187,10 +187,10 @@ function TesterLinks() {
         value={names}
         onChange={(e) => setNames(e.target.value)}
         placeholder={'Ana\nMiguel\nSofia'}
-        className="mt-2 w-full rounded border border-line bg-bg-elev p-2 text-sm text-fg outline-none focus:border-accent"
+        className="mt-3 w-full rounded border border-line bg-bg-elev p-2 text-sm text-fg outline-none focus:border-accent"
       />
       {links.length ? (
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-3 space-y-3">
           {links.map((l) => (
             <li key={l.name} className="rounded border border-line bg-bg-elev p-2">
               <p className="text-xs font-semibold">{l.name}</p>
@@ -205,7 +205,7 @@ function TesterLinks() {
           onClick={() =>
             navigator.clipboard?.writeText(links.map((l) => l.name + ': ' + l.url).join('\n'))
           }
-          className="tap-target eyebrow mt-2 w-full rounded border border-line px-3 py-2 text-muted"
+          className="tap-target eyebrow mt-3 w-full rounded border border-line px-3 py-2 text-muted"
         >
           COPY ALL
         </button>

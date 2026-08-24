@@ -173,7 +173,7 @@ export function CompositeBuilder({ screen }: { screen: CompositeScreen }) {
     <>
       <Prompt screen={screen} />
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-6 space-y-3">
         {screen.parts.map((part, i) => {
           const state = states[part.id]
           const active = i === activeIndex
@@ -271,7 +271,7 @@ function PartInput({
 }) {
   if (part.kind === 'choice') {
     return (
-      <div className="mt-3 space-y-2">
+      <div className="mt-3 space-y-3">
         {part.options.map((o) => (
           <button
             key={o.id}
@@ -294,7 +294,7 @@ function PartInput({
         className="min-h-[3.25rem] rounded border border-dashed border-line bg-bg-elev/60 p-2"
       >
         {state.placed.length ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {state.placed.map((id, i) => (
               <button
                 key={id + i}
@@ -310,7 +310,7 @@ function PartInput({
           <p className="px-1 py-2 text-xs text-muted">Tap the pieces in order.</p>
         )}
       </div>
-      <div data-testid={'pool-' + part.id} className="mt-2 flex flex-wrap gap-2">
+      <div data-testid={'pool-' + part.id} className="mt-3 flex flex-wrap gap-3">
         {pool.map((t) => (
           <button
             key={t.id}

@@ -31,7 +31,7 @@ export function ResultView({ screen }: { screen: ResultScreen }) {
         You transferred {scores.transferred}/{scores.total} phrases into ordinary Lisbon
         situations.
       </p>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-3 text-sm text-muted">
         {scores.firstTry}/{scores.total} came back first time. {scores.assisted} needed a
         hint.
       </p>
@@ -70,7 +70,7 @@ export function GenerativityView({ screen }: { screen: GenerativityScreen }) {
             <AudioButton slug={slugFor(l.pt)} text={l.pt} screenId={screen.id} size="sm" />
             <span>
               <span className="pt block text-lg text-accent">{l.pt}</span>
-              <span className="mt-0.5 block text-xs text-muted">{l.en}</span>
+              <span className="mt-1 block text-xs text-muted">{l.en}</span>
             </span>
           </li>
         ))}
@@ -121,7 +121,7 @@ export function PreferenceView({ screen }: { screen: PreferenceScreen }) {
                 >
                   {o.title}
                 </span>
-                <span className="mt-0.5 block text-xs text-muted">{o.desc}</span>
+                <span className="mt-1 block text-xs text-muted">{o.desc}</span>
               </span>
               <BuiltTag built={o.built} />
             </button>
@@ -174,13 +174,13 @@ export function ContinuationView({ screen }: { screen: ContinuationScreen }) {
       {picked ? (
         <>
           <FeedbackNote tone="correct">{picked.reply}</FeedbackNote>
-          <label className="mt-5 block">
+          <label className="mt-6 block">
             <span className="text-sm text-muted">{screen.followUp}</span>
             <textarea
               rows={3}
               value={String(state.answers.qualitative_feedback ?? '')}
               onChange={(e) => answer('qualitative_feedback', e.target.value)}
-              className="mt-2 w-full rounded border border-line bg-surface p-3 text-sm text-fg outline-none focus:border-accent"
+              className="mt-3 w-full rounded border border-line bg-surface p-3 text-sm text-fg outline-none focus:border-accent"
               placeholder="Optional"
             />
           </label>

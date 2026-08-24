@@ -11,8 +11,10 @@ import {
   daysLeft,
   entryRung,
   isLive,
+  linesFor,
   rootById,
   rungReached,
+  sourceOf,
   type Crate,
   type CultureFamily,
   type DropEvent,
@@ -68,6 +70,7 @@ import {
   branchesFor,
   buildTargetFor,
   capabilities,
+  capabilityEntries,
   nextProfileQuestion,
   useJourney,
 } from '@/engine/journey'
@@ -114,7 +117,7 @@ function Shell({
           blur, and the blur was what forced the menu overlay to be portalled to the
           body in the first place. */}
       {nav || eyebrow ? (
-        <header className="bar sticky top-0 z-10 px-5 py-2.5">
+        <header className="bar sticky top-0 z-30 px-5 py-2.5">
           <div className="mx-auto flex w-full max-w-md items-center gap-3">
             {nav && canGoBack ? (
               <button
@@ -197,7 +200,7 @@ function Cta({
 /** A piece, rendered the same way in every cultural world (§16 extraction). */
 function Piece({ pt, gloss }: { pt: string; gloss: string }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-accent/60 bg-accent/10 px-3 py-1.5">
+    <span className="inline-flex items-center gap-3 rounded-full border border-accent/60 bg-accent/10 px-3 py-1.5">
       <span className="pt text-sm font-semibold text-accent">{pt}</span>
       <span className="text-xs text-muted">{gloss}</span>
     </span>
@@ -270,11 +273,16 @@ function PairStep() {
 
   return (
     <Shell stage="CHOICE">
-      <p className="eyebrow text-muted">{PAIR_STEP.eyebrow}</p>
-      <h1 className="display mt-2 text-balance text-2xl">{PAIR_STEP.headline}</h1>
-      <p className="mt-2 text-sm leading-relaxed text-muted">{PAIR_STEP.sub}</p>
+      {/* Rhythm on the parent. The children carry no vertical margin at all, so
+          nothing can collapse, nothing can double, and the whole screen's spacing is
+          readable in one line rather than scattered through forty. */}
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-muted">{PAIR_STEP.eyebrow}</p>
+        <h1 className="display text-balance text-2xl">{PAIR_STEP.headline}</h1>
+        <p className="text-sm leading-relaxed text-muted">{PAIR_STEP.sub}</p>
+      </div>
 
-      <div className="mt-6 space-y-2">
+      <div className="flex flex-col gap-3">
         {PAIRS.map((p) => (
           <button
             key={p.target_locale}
@@ -296,7 +304,7 @@ function PairStep() {
               <span className="display block text-base">
                 {p.native} {p.flag}
               </span>
-              <span className="mt-0.5 block text-xs text-muted">{p.label}</span>
+              <span className="mt-1 block text-xs text-muted">{p.label}</span>
             </span>
             {!p.available ? (
               <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-muted">
@@ -307,7 +315,7 @@ function PairStep() {
         ))}
       </div>
 
-      <div className="mt-5 flex flex-wrap items-baseline gap-x-2 text-xs text-muted">
+      <div className="mt-6 flex flex-wrap items-baseline gap-x-3 text-xs text-muted">
         <span>
           {PAIR_STEP.source_label}: {source.label} {source.flag}
         </span>
@@ -324,7 +332,7 @@ function PairStep() {
       {showSources ? (
         <div className="mt-3 rounded border border-line bg-bg-elev px-4 py-4">
           <p className="text-xs leading-relaxed text-muted">{PAIR_STEP.source_note}</p>
-          <ul className="mt-3 flex flex-wrap gap-2">
+          <ul className="mt-3 flex flex-wrap gap-3">
             {SOURCE_CULTURES.map((c) => (
               <li
                 key={c.id}
@@ -380,7 +388,7 @@ function Deal() {
   }) => (
     <section className="border-t border-line pt-4">
       <p className="eyebrow text-accent">{label}</p>
-      <ul className="mt-3 space-y-2.5">
+      <ul className="mt-3 space-y-3">
         {lines.map((line, i) => (
           <li key={line} className="flex gap-3 text-sm leading-relaxed text-fg/85">
             <span className="shrink-0 pt-0.5 text-xs tabular-nums text-muted">
@@ -396,16 +404,16 @@ function Deal() {
   return (
     <Shell stage="CHOICE">
       <p className="eyebrow text-muted">{DEAL_COPY.eyebrow}</p>
-      <p className="display mt-2 text-balance text-3xl">{DEAL_COPY.headline}</p>
+      <p className="display mt-3 text-balance text-3xl">{DEAL_COPY.headline}</p>
 
-      <div className="mt-7 space-y-6 pb-7">
+      <div className="mt-6 space-y-6 pb-7">
         <Block label={DEAL_COPY.how.label} lines={DEAL_COPY.how.steps} numbered />
 
         {/* The ladder, drawn rather than described. */}
         <section className="border-t border-line pt-4">
           <p className="eyebrow text-accent">{DEAL_COPY.stages.label}</p>
           <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.stages.intro}</p>
-          <ol className="mt-5">
+          <ol className="mt-6">
             {RUNGS.map((r, i) => (
               <li key={r.rung} className="relative grid grid-cols-[28px_1fr] gap-x-3 pb-5 last:pb-0">
                 {/* the rail, stopping at the last dot rather than running past it */}
@@ -414,7 +422,7 @@ function Deal() {
                 ) : null}
                 <span
                   className={
-                    'relative z-10 flex h-7 w-7 items-center justify-center rounded-full border text-[0.65rem] font-semibold tabular-nums ' +
+                    'relative z-[1] flex h-7 w-7 items-center justify-center rounded-full border text-[0.65rem] font-semibold tabular-nums ' +
                     (r.rung === 1
                       ? 'border-accent bg-accent text-accent-ink'
                       : 'border-line bg-bg text-muted')
@@ -423,19 +431,19 @@ function Deal() {
                   {r.rung}
                 </span>
                 <span className="min-w-0">
-                  <span className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="flex flex-wrap items-baseline gap-x-3">
                     <span className="display text-sm">{r.name}</span>
                     {r.rung === 1 ? (
                       <span className="eyebrow text-[0.5rem] text-accent">{DEAL_COPY.stages.start}</span>
                     ) : null}
                   </span>
                   <span className="mt-1 block text-xs leading-relaxed text-muted">{r.what}</span>
-                  <span className="pt mt-1.5 block text-xs text-accent/80">{r.example}</span>
+                  <span className="pt mt-1 block text-xs text-accent/80">{r.example}</span>
                 </span>
               </li>
             ))}
           </ol>
-          <p className="mt-5 border-t border-line/60 pt-3 text-xs leading-relaxed text-muted">
+          <p className="mt-6 border-t border-line/60 pt-3 text-xs leading-relaxed text-muted">
             {DEAL_COPY.stages.move}
           </p>
         </section>
@@ -443,7 +451,7 @@ function Deal() {
         {/* What accumulates — the thing the picker calls a vocabulary bank. */}
         <section className="border-t border-line pt-4">
           <p className="eyebrow text-accent">{DEAL_COPY.collect.label}</p>
-          <ul className="mt-3 space-y-2.5">
+          <ul className="mt-3 space-y-3">
             {DEAL_COPY.collect.lines.map((line) => (
               <li key={line} className="flex gap-3 text-sm leading-relaxed text-fg/85">
                 <span className="shrink-0 pt-0.5 text-xs text-muted">·</span>
@@ -451,7 +459,7 @@ function Deal() {
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-3">
             {DEAL_COPY.collect.examples.map((e) => (
               <span
                 key={e}
@@ -468,7 +476,7 @@ function Deal() {
 
         <section className="rounded border border-line bg-bg-elev p-4">
           <p className="eyebrow text-muted">{DEAL_COPY.not.label}</p>
-          <p className="mt-2 text-sm leading-relaxed">{DEAL_COPY.not.line}</p>
+          <p className="mt-3 text-sm leading-relaxed">{DEAL_COPY.not.line}</p>
         </section>
       </div>
 
@@ -492,11 +500,11 @@ function Landing() {
     <Shell stage="LANDING">
       <div className="flex flex-1 flex-col justify-center">
         <p className="display text-5xl tracking-tight">{LANDING.wordmark}</p>
-        <p className="mt-2 text-balance text-xl text-accent">{LANDING.line}</p>
-        <div className="mt-10 space-y-7">
+        <p className="mt-3 text-balance text-xl text-accent">{LANDING.line}</p>
+        <div className="mt-10 space-y-6">
           <p className="display text-balance text-2xl">{LANDING.lines[0]}</p>
           <p className="text-pretty text-sm text-muted">{LANDING.lines[1]}</p>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {LANDING.lines[2].split('\n').map((l) => (
               <p key={l} className="display text-balance text-xl leading-snug">
                 {l}
@@ -509,7 +517,7 @@ function Landing() {
       <Cta label={LANDING.cta} onClick={() => { track('landing_cta_tap', {}); next() }} />
       {/* Two ways back in for a returning person: today's line if they have ninety
           seconds, their account if they are on a new phone. */}
-      <div className="mt-4 flex items-center justify-center gap-5 text-xs text-muted">
+      <div className="mt-3 flex items-center justify-center gap-6 text-xs text-muted">
         <Link href="/line" className="underline underline-offset-4">
           Today’s line
         </Link>
@@ -552,12 +560,12 @@ function Demo({ i }: { i: number }) {
                     {beat.translation!.pt}
                   </p>
                 </div>
-                <p className="mt-2 text-sm text-muted">{beat.translation!.en}</p>
+                <p className="mt-3 text-sm text-muted">{beat.translation!.en}</p>
               </div>
             ) : null}
 
             {reveal >= 2 && beat.takeaway ? (
-              <div className="animate-bank mt-7 rounded border border-accent/50 bg-accent/10 p-4">
+              <div className="animate-bank mt-6 rounded border border-accent/50 bg-accent/10 p-4">
                 <p className="pt text-xl font-semibold text-accent">{beat.takeaway.display}</p>
                 <p className="mt-1 text-sm text-muted">{beat.takeaway.gloss}</p>
               </div>
@@ -584,7 +592,7 @@ function Demo({ i }: { i: number }) {
         ) : null}
 
         {beat.close ? (
-          <p className="mt-8 text-balance text-sm font-semibold leading-relaxed">{beat.close}</p>
+          <p className="mt-6 text-balance text-sm font-semibold leading-relaxed">{beat.close}</p>
         ) : null}
       </div>
 
@@ -713,6 +721,36 @@ function Ladder({ here }: { here: Rung }) {
   )
 }
 
+type GroupKey = 'open' | 'later' | 'done' | 'pro' | 'drops'
+
+/**
+ * Drops last.
+ *
+ * The ship-to-test pass pinned live drops to the top because they expire. Reversed here
+ * on instruction: the countdown stays, so the urgency is still legible where it sits,
+ * and the top of the screen belongs to what a learner can act on right now.
+ */
+const GROUP_ORDER: GroupKey[] = ['open', 'later', 'done', 'pro', 'drops']
+
+/**
+ * What opens it, and how far off that is.
+ *
+ * A stage NAME is not a distance. "MEAN IT" reads as an instruction, and a learner
+ * sitting on stage 5 has no way to tell whether that is next or four away. Every
+ * stage-gated card gets both halves: RUNGS supplies what opens it, and the subtraction
+ * supplies the rest.
+ */
+function distanceTo(at: Rung, rung: Rung): string {
+  const away = at - rung
+  const how =
+    away <= 0
+      ? ''
+      : away === 1
+        ? ' You are on stage ' + rung + ' — one to go.'
+        : ' You are on stage ' + rung + ' — ' + away + ' to go.'
+  return 'Opens at stage ' + at + ', ' + RUNGS[at - 1].opens.replace(/^Opens once /, 'when ') + how
+}
+
 function Picker() {
   const { chooseFamily, state } = useJourney()
   const params = useSearchParams()
@@ -735,30 +773,6 @@ function Picker() {
   // "played one root" and "seen the whole crate" are different things.
   const playedIds = useMemo(() => new Set(state.rootsPlayed), [state.rootsPlayed])
   const shown = CRATES.filter((c) => (now ? isLive(c, now) : true))
-
-  /**
-   * The order of the list is a recommendation, and authoring order is not one.
-   *
-   * Live drops first, because they expire and the code already refuses to lock them.
-   * Then what is open and untouched, then what is in progress, then what is explored as
-   * far as this stage reaches, then finished, then what cannot be opened at all. A
-   * learner scanning from the top meets the most urgent thing first and the unavailable
-   * things last, which is the only ordering that answers "what should I do now".
-   */
-  const rank = (c: (typeof CRATES)[number]): number => {
-    const all = ROOTS_BY_FAMILY[c.id] ?? []
-    const played = all.filter((r) => playedIds.has(r.root_id)).length
-    const done = all.length > 0 && played === all.length
-    const available = all.filter((r) => r.rung <= rung && !playedIds.has(r.root_id)).length
-    const openable = c.drop || entryRung(c) <= rung
-    const capped = !c.drop && atLimit && !claimed.has(c.id)
-    if (c.drop) return 0
-    if (!openable || capped) return 5
-    if (done) return 4
-    if (available === 0) return 3
-    if (played > 0) return 2
-    return 1
-  }
 
   /**
    * The free tier: three crates, chosen and permanent.
@@ -813,12 +827,81 @@ function Picker() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wanted, mounted, access.known, atLimit, rung])
   const here = RUNGS[rung - 1]
+
+  /**
+   * What is true about one crate, computed once.
+   *
+   * These used to live inside the map, which was fine while the list was a flat sort and
+   * impossible once it needed grouping — you cannot group by facts you only work out
+   * while rendering.
+   */
+  interface Facts {
+    crate: Crate
+    finished: boolean
+    waiting: boolean
+    unreached: boolean
+    planLocked: boolean
+    /** The stage that opens what is still inside it. */
+    at: Rung
+    group: GroupKey
+  }
+
+  const facts = (f: Crate): Facts => {
+    const all = ROOTS_BY_FAMILY[f.id] ?? []
+    const finished = all.length > 0 && all.every((r) => playedIds.has(r.root_id))
+    const unplayed = all.filter((r) => !playedIds.has(r.root_id))
+    const available = unplayed.filter((r) => r.rung <= rung).length
+    // Explored as far as this learner can go, with more still inside. Not the same as
+    // locked, and it would be a lie to show it as either finished or open. It also has
+    // to have been started: a crate whose every root sits above this stage has nothing
+    // "taken" in it, and saying so would be nonsense.
+    const started = all.some((r) => playedIds.has(r.root_id))
+    const waiting = !finished && started && available === 0
+    const nextAt = (unplayed.length ? Math.min(...unplayed.map((r) => r.rung)) : 6) as Rung
+    const opensAt = entryRung(f)
+    // Only a crate nobody has ever been able to open is closed. Anything already visited
+    // can be gone through again — being told "no, you did that already" is a strange
+    // thing for a product built on things you enjoy to say.
+    const unreached = !f.drop && !started && opensAt > rung
+    // A drop is never plan-locked, and never stage-locked. It can be lost forever by
+    // being busy, and charging for the one thing that expires would turn the only real
+    // deadline in the product into a punishment.
+    const planLocked = !f.drop && atLimit && !claimed.has(f.id)
+    const group: GroupKey = f.drop
+      ? 'drops'
+      : planLocked
+        ? 'pro'
+        : unreached || waiting
+          ? 'later'
+          : finished
+            ? 'done'
+            : 'open'
+    return { crate: f, finished, waiting, unreached, planLocked, at: waiting ? nextAt : opensAt, group }
+  }
+
+  /**
+   * The same ranking as before, made visible.
+   *
+   * Within "Opens as you go", the furthest-off crate is deliberately FIRST: swearing is
+   * the most enticing crate in the product and being last is the point. That tension is
+   * worth showing rather than burying at the bottom of a group.
+   */
+  const grouped = useMemo(() => {
+    const out: Record<GroupKey, Facts[]> = { open: [], later: [], done: [], pro: [], drops: [] }
+    for (const f of shown) {
+      const fact = facts(f)
+      out[fact.group].push(fact)
+    }
+    out.later.sort((a, b) => b.at - a.at)
+    return out
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shown, playedIds, rung, atLimit, claimed])
+
   return (
     <Shell stage="CHOICE">
       <h1 className="display text-balance text-2xl">{PICKER.headline}</h1>
-      <p className="mt-2 text-sm text-muted">{PICKER.sub}</p>
       {mounted ? (
-        <details className="group mt-4">
+        <details className="group mt-3">
           {/*
             Two items that refused to shrink with only a collapsible divider between
             them, and nothing clipping the result — so at stage 5, where the label reads
@@ -840,161 +923,185 @@ function Picker() {
           <Ladder here={rung} />
         </details>
       ) : null}
-      <div className="mt-5 space-y-2">
-        {[...shown].sort((a, b) => rank(a) - rank(b)).map((f) => {
-          const all = ROOTS_BY_FAMILY[f.id] ?? []
-          const finished = all.length > 0 && all.every((r) => playedIds.has(r.root_id))
-          const unplayed = all.filter((r) => !playedIds.has(r.root_id))
-          const available = unplayed.filter((r) => r.rung <= rung).length
-          // Explored as far as this learner can go, with more still inside. Not the
-          // same as locked, and it would be a lie to show it as either finished or open.
-          // It also has to have been started: a crate whose every root sits above this
-          // stage has nothing "taken" in it, and saying so would be nonsense.
-          const started = all.some((r) => playedIds.has(r.root_id))
-          const waiting = !finished && started && available === 0
-          const nextAt = (unplayed.length
-            ? (Math.min(...unplayed.map((r) => r.rung)) as Rung)
-            : 6) as Rung
-          // A drop never locks. It expires, and something that can be lost forever by
-          // being busy must never also be something you can be shut out of.
-          const opensAt = entryRung(f)
-          // Only a crate nobody has ever been able to open is closed. Anything already
-          // visited can be gone through again — there is no reason it should not be,
-          // and being told "no, you did that already" is a strange thing for a product
-          // built on things you enjoy to say.
-          const unreached = !f.drop && !started && opensAt > rung
-          // A drop is never plan-locked. It can be lost forever by being busy, and
-          // charging for the one thing that expires would turn the only real deadline
-          // in the product into a punishment.
-          const planLocked = !f.drop && atLimit && !claimed.has(f.id)
-          const locked = unreached || waiting || planLocked
-          return (
-            <div
-              key={f.id}
-              data-tone={f.tone}
-              className={
-                // The drop's frame lives on the wrapper, not the button, so the ticket
-                // link can sit inside the card without being nested in a button.
-                f.drop
-                  ? 'rounded border transition ' +
-                    (finished
-                      ? 'border-line/50 bg-surface/40 opacity-45'
-                      : entering === f.id
-                        ? 'border-accent bg-accent/10'
-                        : 'border-accent/45 bg-accent/[0.04]')
-                  : undefined
-              }
-            >
-              <button
-                type="button"
-                aria-disabled={unreached || planLocked}
-                disabled={unreached || planLocked}
-                onClick={() => {
-                  if (unreached || planLocked) return
-                  setEntering(f.id)
-                  chooseFamily(f.id)
-                }}
-                className={
-                  'tap-target flex w-full justify-between gap-3 border-l-[3px] border-l-[color:var(--tone)] px-4 py-4 text-left transition ' +
-                  (f.drop
-                    ? 'items-start '
-                    : 'items-center rounded border ' +
-                      (unreached
-                        ? 'border-line/40 bg-surface/30 opacity-40'
-                        : entering === f.id
-                          ? 'border-accent bg-accent/10'
-                          : finished || waiting
-                            ? 'border-line/60 bg-surface/50 opacity-70 hover:border-accent/40'
-                            : 'border-line bg-bg-elev hover:border-accent/50'))
-                }
-              >
-                {/* Every card is built the same way, the drop included — it was the only
-                    one in the list without a tile, which is half of why it read as
-                    floating free of everything around it. */}
-                <span
-                  aria-hidden
+      {/*
+        Nothing open is worth a sentence, not a scroll.
+
+        Three crates claimed against an allowance of three, two of them finished, and
+        every card on the screen a dead end — no ordering rescues that. It has to be said
+        at the top rather than discovered eleven cards down. It is also the most honest
+        paywall moment in the product: nobody is being blocked from starting, they have
+        genuinely used what the free tier offers.
+      */}
+      {mounted && access.known && !grouped.open.length ? (
+        <div className="flex flex-col gap-1 rounded border border-line-strong bg-bg-elev px-4 py-4">
+          <p className="text-sm font-semibold">{PICKER.nothing_open}</p>
+          <p className="text-xs leading-relaxed text-muted">{PICKER.nothing_open_sub}</p>
+        </div>
+      ) : null}
+
+      {GROUP_ORDER.map((key) => {
+        const list = grouped[key]
+        // A group with nothing in it does not render. An empty heading is worse than no
+        // heading, because it implies something has been taken away.
+        if (!list.length) return null
+        return (
+          <section key={key} className="flex flex-col gap-3">
+            <div className="flex items-baseline gap-3">
+              <h2 className="eyebrow min-w-0 text-accent">{PICKER.groups[key]}</h2>
+              <span className="h-px flex-1 bg-line" />
+              <span className="eyebrow shrink-0 tabular-nums text-muted">
+                {key === 'open' && access.known && allowance - spent > 0
+                  ? allowance - spent + ' left'
+                  : list.length}
+              </span>
+            </div>
+            <div className="flex flex-col gap-3">
+              {list.map(({ crate: f, finished, waiting, unreached, planLocked, at }) => (
+                <div
+                  key={f.id}
+                  data-tone={f.tone}
                   className={
-                    'azulejo-block mr-1 flex h-10 w-10 shrink-0 items-center justify-center rounded ' +
-                    (f.drop ? 'self-start' : 'self-center')
+                    // The drop's frame lives on the wrapper, not the button, so the ticket
+                    // link can sit inside the card without being nested in a button.
+                    f.drop
+                      ? 'rounded border transition ' +
+                        (finished
+                          ? 'border-line/50 bg-surface/40 opacity-45'
+                          : entering === f.id
+                            ? 'border-accent bg-accent/10'
+                            : 'border-accent/45 bg-accent/[0.04]')
+                      : undefined
                   }
                 >
-                  <CrateIcon crate={f.id} className="h-6 w-6 text-[color:var(--tone)]" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  {f.drop ? (
-                    <span className="eyebrow mb-1 block text-[0.55rem] text-accent">
-                      DROP · {goneOn(f.drop)}
+                  <button
+                    type="button"
+                    aria-disabled={unreached || planLocked}
+                    disabled={unreached || planLocked}
+                    onClick={() => {
+                      if (unreached || planLocked) return
+                      setEntering(f.id)
+                      chooseFamily(f.id)
+                    }}
+                    className={
+                      'tap-target flex w-full justify-between gap-3 border-l-[3px] border-l-[color:var(--tone)] px-4 py-4 text-left transition ' +
+                      (f.drop
+                        ? 'items-start '
+                        : 'items-center rounded border ' +
+                          (unreached
+                            ? 'border-line/40 bg-surface/30 opacity-40'
+                            : entering === f.id
+                              ? 'border-accent bg-accent/10'
+                              : finished || waiting
+                                ? 'border-line/60 bg-surface/50 opacity-70 hover:border-accent/40'
+                                : 'border-line bg-bg-elev hover:border-accent/50'))
+                    }
+                  >
+                    {/* Every card is built the same way, the drop included — it was the
+                        only one in the list without a tile, which is half of why it read
+                        as floating free of everything around it. */}
+                    <span
+                      aria-hidden
+                      className={
+                        'azulejo-block mr-1 flex h-10 w-10 shrink-0 items-center justify-center rounded ' +
+                        (f.drop ? 'self-start' : 'self-center')
+                      }
+                    >
+                      <CrateIcon crate={f.id} className="h-6 w-6 text-[color:var(--tone)]" />
                     </span>
-                  ) : null}
-                  <span className="display block text-base">{f.title}</span>
-                  <span className="mt-0.5 block text-xs text-muted">
-                    {planLocked
-                      ? 'Your ' + allowance + ' crates are chosen, and they stay yours. This one comes with DUB.'
-                      : finished
-                      ? 'You have been through all of it. Go again whenever you like.'
-                      : waiting
-                        ? 'Everything here that your stage reaches is done. ' +
-                          RUNGS[nextAt - 1].opens.replace('Opens once', 'The rest opens once') +
-                          ' Go again in the meantime if you like.'
-                        : unreached
-                          ? RUNGS[opensAt - 1].opens
-                          : f.blurb}
-                  </span>
-                  {f.drop ? (
-                    <span className="mt-1.5 block text-xs text-muted">
-                      {f.drop.event} · {f.drop.place}
+                    <span className="min-w-0 flex-1">
+                      {f.drop ? (
+                        <span className="eyebrow mb-1 block text-[0.55rem] text-accent">
+                          DROP · {goneOn(f.drop)}
+                        </span>
+                      ) : null}
+                      <span className="display block text-base">{f.title}</span>
+                      <span className="mt-1 block text-xs text-muted">
+                        {planLocked
+                          ? PICKER.join_up
+                          : finished
+                            ? 'You have been through all of it. Go again whenever you like.'
+                            : waiting
+                              ? 'Everything here that your stage reaches is done. ' +
+                                RUNGS[at - 1].opens.replace('Opens once', 'The rest opens once') +
+                                ' Go again in the meantime if you like.'
+                              : unreached
+                                ? distanceTo(at, rung)
+                                : f.blurb}
+                      </span>
+                      {f.drop ? (
+                        <span className="mt-1 block text-xs text-muted">
+                          {f.drop.event} · {f.drop.place}
+                        </span>
+                      ) : null}
                     </span>
+                    {/*
+                      One vocabulary per badge slot, and it names the plan you need rather
+                      than the plan you have. A locked card badged DUB was labelled with
+                      the name of the free plan — so it read as included.
+
+                      A stage badge says the NUMBER, never the stage's name: "MEAN IT" is
+                      a name and reads as an instruction, where "STAGE 6" is a distance.
+                    */}
+                    {finished ? (
+                      <span className="shrink-0 rounded-full border border-correct/50 px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-correct">
+                        done
+                      </span>
+                    ) : planLocked ? (
+                      <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-muted">
+                        PRO
+                      </span>
+                    ) : unreached || waiting ? (
+                      <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider tabular-nums text-muted">
+                        stage {at}
+                      </span>
+                    ) : f.drop ? (
+                      <DropClock crate={f} now={now} />
+                    ) : null}
+                  </button>
+                  {/* Outside the button on purpose — an anchor nested in a button is not
+                      a thing a browser or a screen reader can make sense of. And "join
+                      up" is a call to action, so the phrase has to BE the link: as plain
+                      text it named an action with no way to take it. */}
+                  {planLocked ? (
+                    <p className="mt-1 px-4 text-xs text-muted">
+                      <Link href="/pro" className="text-accent underline underline-offset-4">
+                        {PICKER.join_up_link}
+                      </Link>
+                    </p>
                   ) : null}
-                </span>
-                {finished ? (
-                  <span className="shrink-0 rounded-full border border-correct/50 px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-correct">
-                    done
-                  </span>
-                ) : planLocked ? (
-                  <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-muted">
-                    DUB
-                  </span>
-                ) : locked ? (
-                  <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-muted">
-                    {RUNGS[(waiting ? nextAt : opensAt) - 1].name}
-                  </span>
-                ) : f.drop ? (
-                  <DropClock crate={f} now={now} />
-                ) : null}
-              </button>
-              {/* Outside the button on purpose — an anchor nested in a button is not a
-                  thing a browser or a screen reader can make sense of. */}
-              {/* The explanation sits with the thing it explains. It used to render
-                  after the whole list, several screens below the card it describes. */}
-              {f.drop ? (
-                <p className="mt-2 px-4 text-xs leading-relaxed text-muted">
-                  {PICKER.drop_note}
-                </p>
-              ) : null}
-              {f.drop?.link ? (
-                <a
-                  href={f.drop.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mb-3 ml-4 inline-block px-0 text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
-                >
-                  {f.drop.link_label ?? 'TICKETS'} ↗
-                </a>
-              ) : null}
+                  {/* The explanation sits with the thing it explains. It used to render
+                      after the whole list, several screens below the card it describes. */}
+                  {f.drop ? (
+                    <p className="mt-3 px-4 text-xs leading-relaxed text-muted">
+                      {PICKER.drop_note}
+                    </p>
+                  ) : null}
+                  {f.drop?.link ? (
+                    <a
+                      href={f.drop.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mb-3 ml-4 inline-block px-0 text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
+                    >
+                      {f.drop.link_label ?? 'TICKETS'} ↗
+                    </a>
+                  ) : null}
+                </div>
+              ))}
             </div>
-          )
-        })}
-      </div>
+          </section>
+        )
+      })}
+      {/*
+        The two footers are gone.
+
+        They explained in small grey text at the bottom what the group headings now say
+        in place — that dimmed crates are appointments rather than refusals, and that
+        three are yours for good. A note under eleven cards explaining the order of the
+        eleven cards is a symptom of the order being invisible, and it is not any more.
+      */}
       {anyLocked ? (
-        <p className="mt-2 text-xs leading-relaxed text-muted">{PICKER.locked_note}</p>
-      ) : null}
-      {atLimit ? (
-        <p className="mt-2 mb-6 text-xs leading-relaxed text-muted">
-          {PICKER.plan_note}{' '}
-          <Link href="/pro" className="text-accent underline underline-offset-4">
-            {PICKER.plan_cta}
-          </Link>
-        </p>
+        <p className="text-xs leading-relaxed text-muted">{PICKER.locked_note}</p>
       ) : null}
     </Shell>
   )
@@ -1104,7 +1211,7 @@ function MiniBuild({
   }
 
   return (
-    <div className="mt-5">
+    <div className="mt-6">
       {glosses.length ? (
         <p className="pt mb-3 text-sm text-accent/80">
           {glosses.map(([w, g]) => w.replace(/[.,]/g, '') + ' = ' + g).join('   ·   ')}
@@ -1118,7 +1225,7 @@ function MiniBuild({
         className="min-h-[3.5rem] rounded border border-dashed border-line bg-bg-elev/60 p-2"
       >
         {placed.length ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {placed.map((p) => (
               <button
                 key={p.id}
@@ -1140,7 +1247,7 @@ function MiniBuild({
       </div>
 
       {state === 'done' ? null : (
-        <div data-testid="tile-pool" className="mt-3 flex flex-wrap gap-2">
+        <div data-testid="tile-pool" className="mt-3 flex flex-wrap gap-3">
           {pool.map((t) => (
             <button
               key={t.id}
@@ -1272,7 +1379,7 @@ function RootBeatView({
             {root.root_type === 'quote' ? '“' + root.root_display + '”' : root.root_display}
           </p>
           {root.freebie_flag ? (
-            <p className="mt-4 text-xs uppercase tracking-wider text-muted">A freebie. No puzzle.</p>
+            <p className="mt-3 text-xs uppercase tracking-wider text-muted">A freebie. No puzzle.</p>
           ) : null}
         </div>
         <Cta label="WHAT IS THAT IN PORTUGUESE?" onClick={next} />
@@ -1283,23 +1390,29 @@ function RootBeatView({
   if (beat === 'translate') {
     return (
       <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
-        <p className="text-xs text-muted">“{root.root_display}”</p>
-        <p className="pt mt-3 text-balance text-3xl text-accent">{root.target}</p>
-        <div className="mt-3">
-          <AudioButton slug={slugFor(root.target)} text={root.target} />
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <p className="text-xs text-muted">“{root.root_display}”</p>
+            <p className="pt text-balance text-3xl text-accent">{root.target}</p>
+          </div>
+          <div>
+            <AudioButton slug={slugFor(root.target)} text={root.target} />
+          </div>
         </div>
-        {/* The bridge is mandatory: the learner must be able to trace root -> Portuguese
-            before anything is pulled out of it (§10). */}
-        <div className="mt-6 rounded border border-line bg-bg-elev p-4">
-          <p className="eyebrow text-accent">WHY IT LANDS THIS WAY</p>
-          <p className="mt-2 text-sm leading-relaxed">{root.semantic_bridge}</p>
-        </div>
-        {root.literal_note ? (
-          <p className="mt-3 text-xs text-muted">{root.literal_note}</p>
-        ) : null}
-        <div className="mt-4 rounded border border-line/70 bg-surface/50 p-4">
-          <p className="eyebrow text-muted">HOW IT FEELS</p>
-          <p className="mt-2 text-sm leading-relaxed text-muted">{root.subtext}</p>
+        <div className="flex flex-col gap-3">
+          {/* The bridge is mandatory: the learner must be able to trace root -> Portuguese
+              before anything is pulled out of it (§10). */}
+          <div className="flex flex-col gap-1 rounded border border-line bg-bg-elev p-4">
+            <p className="eyebrow text-accent">WHY IT LANDS THIS WAY</p>
+            <p className="text-sm leading-relaxed">{root.semantic_bridge}</p>
+          </div>
+          {root.literal_note ? (
+            <p className="text-xs text-muted">{root.literal_note}</p>
+          ) : null}
+          <div className="flex flex-col gap-1 rounded border border-line/70 bg-surface/50 p-4">
+            <p className="eyebrow text-muted">HOW IT FEELS</p>
+            <p className="text-sm leading-relaxed text-muted">{root.subtext}</p>
+          </div>
         </div>
         <Cta label="TAKE THE USEFUL BIT" onClick={next} />
       </Shell>
@@ -1311,17 +1424,21 @@ function RootBeatView({
     const many = root.extracts.length > 1
     return (
       <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
-        <p className="eyebrow text-muted">
-          {many ? root.extracts.length + ' USEFUL BITS IN HERE' : 'THE USEFUL BIT'}
-        </p>
-        <p className="pt mt-4 text-balance text-2xl leading-relaxed">
-          <Highlighted line={root.target} pieces={root.extracts.map((e) => e.target)} />
-        </p>
-        <p className="mt-6 text-sm text-muted">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <p className="eyebrow text-muted">
+              {many ? root.extracts.length + ' USEFUL BITS IN HERE' : 'THE USEFUL BIT'}
+            </p>
+            <p className="pt text-balance text-2xl leading-relaxed">
+              <Highlighted line={root.target} pieces={root.extracts.map((e) => e.target)} />
+            </p>
+          </div>
+          <p className="text-sm text-muted">
           {many
             ? 'Two things worth keeping. One at a time.'
             : 'One thing worth keeping.'}
-        </p>
+          </p>
+        </div>
         <Cta label={many ? 'TAKE THE FIRST' : 'TAKE IT'} onClick={next} />
       </Shell>
     )
@@ -1345,7 +1462,7 @@ function RootBeatView({
           <Highlighted line={root.target} pieces={[e.target]} dim="text-accent/45" />
         </p>
 
-        <div className="mt-8 flex items-center gap-3">
+        <div className="mt-6 flex items-center gap-3">
           <AudioButton slug={slugFor(e.target.replace('…', '').trim())} text={e.target} />
           <div>
             <p className="pt text-3xl text-accent">{e.target}</p>
@@ -1354,7 +1471,7 @@ function RootBeatView({
         </div>
 
         {pieceIndex === 0 && reinforced.length ? (
-          <p className="mt-8 text-xs text-muted">
+          <p className="mt-6 text-xs text-muted">
             This also strengthens {reinforced.map((r) => PIECES[r].target).join(', ')}.
           </p>
         ) : null}
@@ -1417,7 +1534,7 @@ function RootBeatView({
         <p className="display mt-3 text-balance text-2xl">
           One {root.root_type === 'title' ? 'title' : 'line'}. {root.branches.length} things you can say.
         </p>
-        <p className="pt mt-4 text-sm">
+        <p className="pt mt-3 text-sm">
           <Highlighted
             line={root.target}
             pieces={root.extracts.map((x) => x.target)}
@@ -1449,7 +1566,7 @@ function RootBeatView({
     return (
       <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         <p className="eyebrow text-muted">YOUR TURN</p>
-        <p className="display mt-2 text-balance text-2xl">“{target.en}”</p>
+        <p className="display mt-3 text-balance text-2xl">“{target.en}”</p>
         <MiniBuild target={target.target} helpers={root.helpers} onSolved={() => setDone(true)} />
         {done ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
       </Shell>
@@ -1460,13 +1577,18 @@ function RootBeatView({
     const picked = root.voice_options.find((o) => o.target === choice)
     return (
       <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
-        <p className="display text-balance text-2xl">Here are two ways to say it.</p>
-        <p className="mt-2 text-sm text-muted">
-          Same meaning, different room. Nothing here is scored and there is no right
-          answer — pick the one that sounds more like you. If neither does, that is an
-          answer too.
-        </p>
-        <div className="mt-6 space-y-3">
+        <div className="flex flex-col gap-3">
+          <p className="display text-balance text-2xl">Here are two ways to say it.</p>
+          <p className="text-sm text-muted">
+            Same meaning, different room. Nothing here is scored and there is no right
+            answer — pick the one that sounds more like you. If neither does, that is an
+            answer too.
+          </p>
+        </div>
+        {/* The two options arrived with no instruction, so it was not obvious they were
+            a choice rather than two things to read. */}
+        <div className="flex flex-col gap-3">
+          <p className="eyebrow text-muted">SELECT ONE</p>
           {root.voice_options.map((o) => (
             <button
               key={o.target}
@@ -1481,7 +1603,7 @@ function RootBeatView({
                 (choice === o.target ? 'border-accent bg-accent/10' : 'border-line bg-bg-elev')
               }
             >
-              <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="eyebrow text-accent">{o.register}</span>
                 {o.safest ? (
                   <span className="eyebrow rounded-full border border-line px-2 py-0.5 text-muted">
@@ -1489,11 +1611,11 @@ function RootBeatView({
                   </span>
                 ) : null}
               </span>
-              <span className="pt mt-2 block text-lg text-fg">{o.target}</span>
-              <span className="mt-0.5 block text-xs text-muted">{o.en}</span>
+              <span className="pt mt-3 block text-lg text-fg">{o.target}</span>
+              <span className="mt-1 block text-xs text-muted">{o.en}</span>
               <span className="mt-3 block text-sm text-fg/80">{o.when}</span>
               {o.risk ? (
-                <span className="mt-2 block border-l-2 border-line pl-3 text-xs text-muted">
+                <span className="mt-3 block border-l-2 border-line pl-3 text-xs text-muted">
                   Careful: {o.risk}
                 </span>
               ) : null}
@@ -1503,7 +1625,7 @@ function RootBeatView({
         {(picked || ruleShown) && root.voice_rule ? (
           <div className="animate-bank mt-6 rounded border border-line bg-bg-elev p-4">
             <p className="eyebrow text-muted">THE RULE UNDERNEATH</p>
-            <p className="mt-2 text-sm">{root.voice_rule}</p>
+            <p className="mt-3 text-sm">{root.voice_rule}</p>
           </div>
         ) : null}
         {picked ? <VoiceReflection /> : null}
@@ -1512,7 +1634,7 @@ function RootBeatView({
             type="button"
             data-testid="voice-skip"
             onClick={() => setRuleShown(true)}
-            className="tap-target mt-5 self-start text-xs uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-fg"
+            className="tap-target mt-6 self-start text-xs uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-fg"
           >
             Not sure yet — show me which one to use
           </button>
@@ -1531,7 +1653,7 @@ function RootBeatView({
     <Shell stage="REAL WORLD">
       <p className="eyebrow text-muted">NO FILM. NO CLUES.</p>
       <p className="mt-3 text-sm font-semibold">{root.transfer_prompt.context}</p>
-      <p className="display mt-2 text-balance text-2xl">“{root.transfer_prompt.ask}”</p>
+      <p className="display mt-3 text-balance text-2xl">“{root.transfer_prompt.ask}”</p>
       <MiniBuild
         target={root.transfer_prompt.answer}
         helpers={root.helpers}
@@ -1547,7 +1669,7 @@ function RootBeatView({
       />
       {done ? (
         <>
-          <p className="mt-5 text-sm text-muted">
+          <p className="mt-6 text-sm text-muted">
             That one no longer needs the original cue.
           </p>
           <Cta label="CONTINUE" onClick={next} />
@@ -1575,7 +1697,7 @@ function VoiceReflection() {
   return (
     <div className="animate-bank mt-6 rounded border border-accent/40 bg-accent/5 p-4">
       <p className="eyebrow text-accent">WE ARE BEGINNING TO GET YOU</p>
-      <p className="mt-2 text-sm">
+      <p className="mt-3 text-sm">
         You tend to choose {words[lean.lean] ?? lean.lean}. We will lean that way when
         there is a choice.
       </p>
@@ -1609,7 +1731,7 @@ function Osmosis() {
       <Shell stage="CHOICE">
         <div className="flex flex-1 flex-col justify-center">
           <p className="eyebrow text-accent">STILL IN THERE</p>
-          <p className="display mt-4 text-balance text-2xl">
+          <p className="display mt-3 text-balance text-2xl">
             Everything you picked up last time is still holding.
           </p>
         </div>
@@ -1627,7 +1749,7 @@ function Osmosis() {
           : insights.length + ' things you absorbed on the way past.'}
       </p>
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-6 space-y-3">
         {insights.map((i, n) => (
           <section
             key={i.id}
@@ -1635,10 +1757,10 @@ function Osmosis() {
             className="animate-bank rounded border border-line bg-bg-elev p-4"
           >
             <p className="text-balance text-base font-semibold">{i.headline}</p>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{i.body}</p>
-            <ul className="mt-3 space-y-1.5 border-t border-line/60 pt-3">
+            <p className="mt-3 text-sm leading-relaxed text-muted">{i.body}</p>
+            <ul className="mt-3 space-y-1 border-t border-line/60 pt-3">
               {i.evidence.map((e) => (
-                <li key={e.pt} className="flex flex-wrap items-baseline gap-x-2">
+                <li key={e.pt} className="flex flex-wrap items-baseline gap-x-3">
                   <span className="pt text-sm text-accent">{e.pt}</span>
                   <span className="text-xs text-muted">{e.en}</span>
                 </li>
@@ -1693,13 +1815,13 @@ function ProfileStep({ which }: { which: 'gender' | 'age' | 'goal' }) {
   return (
     <Shell stage="CHOICE">
       <p className="eyebrow text-accent">{q.asker.toUpperCase()} ASKS</p>
-      <p className="mt-2 text-sm italic text-muted">“{q.askerLine}”</p>
-      <h1 className="display mt-5 text-balance text-2xl">{q.headline}</h1>
+      <p className="mt-3 text-sm italic text-muted">“{q.askerLine}”</p>
+      <h1 className="display mt-6 text-balance text-2xl">{q.headline}</h1>
       <p className="mt-3 text-sm leading-relaxed text-muted">{q.why}</p>
 
       {!answer && !skipped ? (
         <>
-          <div className="mt-6 space-y-2">
+          <div className="mt-6 space-y-3">
             {q.options.map((o) => (
               <button
                 key={o.id}
@@ -1721,7 +1843,7 @@ function ProfileStep({ which }: { which: 'gender' | 'age' | 'goal' }) {
               setProfile(field, null)
               track('profile_skip', { question: which })
             }}
-            className="tap-target mt-5 w-full text-center text-xs uppercase tracking-wider text-muted underline underline-offset-4"
+            className="tap-target mt-6 w-full text-center text-xs uppercase tracking-wider text-muted underline underline-offset-4"
           >
             {q.skip}
           </button>
@@ -1730,14 +1852,14 @@ function ProfileStep({ which }: { which: 'gender' | 'age' | 'goal' }) {
 
       {skipped ? (
         <>
-          <p className="animate-bank mt-8 text-sm text-muted">{q.skipNote}</p>
+          <p className="animate-bank mt-6 text-sm text-muted">{q.skipNote}</p>
           <Cta label="CONTINUE" onClick={next} />
         </>
       ) : null}
 
       {answer ? (
         <>
-          <div className="animate-bank mt-7">
+          <div className="animate-bank mt-6">
             {which === 'gender' ? <GenderPayoff gender={answer as LanguageGender} /> : null}
             {which === 'age' ? <AgePayoff band={answer as AgeBand} /> : null}
             {which === 'goal' ? <GoalPayoff goal={answer as Goal} owned={owned} /> : null}
@@ -1754,18 +1876,18 @@ function GenderPayoff({ gender }: { gender: LanguageGender }) {
   return (
     <div>
       <p className="eyebrow text-accent">SO THIS IS HOW YOU SPEAK</p>
-      <ul className="mt-4 space-y-3">
+      <ul className="mt-3 space-y-3">
         {GENDER_PAYOFF[gender].map((row) => (
           <li key={row.en} className="rounded border border-line bg-bg-elev px-4 py-3">
             <div className="flex flex-wrap items-baseline gap-x-3">
               <span className="pt text-lg text-fg">{row.yours}</span>
               <span className="pt text-sm text-muted/60 line-through">{row.theirs}</span>
             </div>
-            <span className="mt-0.5 block text-xs text-muted">{row.en}</span>
+            <span className="mt-1 block text-xs text-muted">{row.en}</span>
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-sm leading-relaxed">{GENDER_RULE[gender]}</p>
+      <p className="mt-3 text-sm leading-relaxed">{GENDER_RULE[gender]}</p>
     </div>
   )
 }
@@ -1777,7 +1899,7 @@ function AgePayoff({ band }: { band: AgeBand }) {
       <p className="eyebrow text-accent">SO THIS IS HOW PEOPLE WILL SPEAK TO YOU</p>
       <p className="display mt-3 text-balance text-xl">{p.headline}</p>
       <p className="mt-3 text-sm leading-relaxed text-muted">{p.body}</p>
-      <div className="mt-5 space-y-2">
+      <div className="mt-6 space-y-3">
         <div className="flex items-baseline gap-3 rounded border border-line bg-bg-elev px-4 py-3">
           <span className="pt text-base text-fg">{AGE_PAIR.tu}</span>
           <span className="text-[0.6rem] uppercase tracking-wider text-muted">informal</span>
@@ -1816,7 +1938,7 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
       <p className="display mt-3 text-balance text-xl">
         {done.length} of {needs.length} already yours.
       </p>
-      <ul className="mt-4 space-y-2">
+      <ul className="mt-3 space-y-3">
         {needs.map((n) => {
           const got = n.pieces.every((p) => has.has(p))
           return (
@@ -1835,7 +1957,7 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
           )
         })}
       </ul>
-      <p className="mt-4 text-sm text-muted">
+      <p className="mt-3 text-sm text-muted">
         The rest are in the crates you have not opened yet.
       </p>
     </div>
@@ -1876,7 +1998,7 @@ function SectionComplete() {
     <Shell stage="CHOICE">
       <div className="flex flex-1 flex-col justify-center">
         <p className="eyebrow text-accent">{family ? family.title + ' — DONE' : 'CRATE COMPLETE'}</p>
-        <p className="display mt-4 text-balance text-2xl">
+        <p className="display mt-3 text-balance text-2xl">
           {acts.length
             ? 'You can now ' + acts.slice(0, 3).join(', ') + (acts.length > 3 ? ' — and more.' : '.')
             : 'That crate is done.'}
@@ -1890,7 +2012,7 @@ function SectionComplete() {
           <Shelves owned={new Set(owned)} pool={justGained} highlight={justGained} />
         </div>
         {remaining.length ? (
-          <p className="mt-7 text-sm text-muted">
+          <p className="mt-6 text-sm text-muted">
             {remaining.length} more {remaining.length === 1 ? 'crate' : 'crates'} to raid,
             whenever you want them.
           </p>
@@ -1920,7 +2042,7 @@ function SectionComplete() {
       >
         I’M DONE — PROVE IT
       </button>
-      <p className="mt-2 text-center text-xs text-muted">
+      <p className="mt-3 text-center text-xs text-muted">
         Three sentences, no clues. That is what fills the card.
       </p>
     </Shell>
@@ -1936,7 +2058,7 @@ function CollisionView({ id }: { id: string }) {
     <Shell stage="REAL WORLD">
       <p className="eyebrow text-accent">TWO WORLDS, ONE SENTENCE</p>
       <p className="mt-3 text-sm font-semibold">{collision.context}</p>
-      <p className="display mt-2 text-balance text-2xl">“{collision.ask}”</p>
+      <p className="display mt-3 text-balance text-2xl">“{collision.ask}”</p>
       <MiniBuild
         target={collision.answer}
         onSolved={({ clean }) => {
@@ -1947,7 +2069,7 @@ function CollisionView({ id }: { id: string }) {
       />
       {done ? (
         <>
-          <div className="animate-bank mt-5 rounded border border-line bg-bg-elev p-4">
+          <div className="animate-bank mt-6 rounded border border-line bg-bg-elev p-4">
             <p className="text-sm leading-relaxed text-muted">{collision.provenance}</p>
           </div>
           <Cta label="CONTINUE" onClick={next} />
@@ -2000,9 +2122,11 @@ function NoCueView({ i }: { i: number }) {
 
   return (
     <Shell stage="REAL WORLD">
-      <p className="eyebrow text-muted">{i + 1} OF {Math.min(3, prompts.length)}</p>
-      <p className="mt-4 text-sm font-semibold">{prompt.context}</p>
-      <p className="display mt-2 text-balance text-2xl">“{prompt.ask}”</p>
+      <div className="flex flex-col gap-1">
+        <p className="eyebrow text-muted">{i + 1} OF {Math.min(3, prompts.length)}</p>
+        <p className="text-sm font-semibold">{prompt.context}</p>
+        <p className="display text-balance text-2xl">“{prompt.ask}”</p>
+      </div>
       <MiniBuild
         target={prompt.answer}
         onSolved={({ clean }) => {
@@ -2039,34 +2163,52 @@ function ProofBeat() {
 function CanSay() {
   const { next, owned, state } = useJourney()
   const acts = capabilities(owned)
+  const entries = capabilityEntries(owned)
+  const [open, setOpen] = useState<string | null>(null)
   const families = useMemo(
     () => new Set(state.rootsPlayed.map((id) => rootById(id)?.culture_family).filter(Boolean)),
     [state.rootsPlayed],
   )
   return (
     <Shell stage="REAL WORLD">
-      <p className="eyebrow text-accent">THINGS YOU CAN SAY</p>
-      <p className="display mt-3 text-balance text-2xl">
-        You can now {acts.slice(0, 3).join(', ')}
-        {acts.length > 3 ? ' — and more.' : '.'}
-      </p>
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-accent">THINGS YOU CAN SAY</p>
+        <p className="display text-balance text-2xl">
+          You can now {acts.slice(0, 3).join(', ')}
+          {acts.length > 3 ? ' — and more.' : '.'}
+        </p>
+      </div>
 
-      {acts.length > 3 ? (
-        <ul className="mt-5 space-y-1.5">
-          {acts.slice(3).map((a) => (
-            <li key={a} className="text-sm text-muted">
-              · {a}
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      {/*
+        The best list in the product, and it was inert.
 
-      <p className="mt-7 text-xs uppercase tracking-wider text-muted">Your Portuguese</p>
-      <div className="mt-3">
+        Fourteen flat bullets — refuse without being rude · agree warmly · wish someone
+        well — where a learner reads "ask what happened" and cannot see what they would
+        actually say. Every line opens now, and no new content was needed: SPEECH_ACTS
+        already maps act to piece, linesFor gives the phrases and sourceOf gives the root.
+
+        The quote comes back AFTER the capability, never before, so it rewards
+        recognition instead of prompting it.
+      */}
+      <ul className="flex flex-col gap-1">
+        {entries.map((e) => (
+          <CapabilityRow
+            key={e.act}
+            act={e.act}
+            pieces={e.pieces}
+            owned={owned}
+            open={open === e.act}
+            onToggle={() => setOpen(open === e.act ? null : e.act)}
+          />
+        ))}
+      </ul>
+
+      <div className="flex flex-col gap-3">
+        <p className="text-xs uppercase tracking-wider text-muted">Your Portuguese</p>
         <Shelves owned={new Set(owned)} />
       </div>
 
-      <p className="mt-6 text-sm text-muted">
+      <p className="text-sm text-muted">
         Gathered from {families.size} different {families.size === 1 ? 'world' : 'worlds'}.
         None of it needs them any more.
       </p>
@@ -2082,13 +2224,89 @@ function CanSay() {
   )
 }
 
+/**
+ * One capability, opened.
+ *
+ * Shows the phrase first — the thing you would actually say — then the piece it hangs
+ * on, then where it came from. One open at a time, the same as the library.
+ */
+function CapabilityRow({
+  act,
+  pieces,
+  owned,
+  open,
+  onToggle,
+}: {
+  act: string
+  pieces: string[]
+  owned: string[]
+  open: boolean
+  onToggle: () => void
+}) {
+  const lines = open ? pieces.flatMap((p) => linesFor(p, 2, undefined)).slice(0, 3) : []
+  const root = open ? sourceOf(pieces[0]) : null
+  const crate = root ? CRATES.find((c) => c.id === root.culture_family) : undefined
+
+  return (
+    <li>
+      <button
+        type="button"
+        aria-expanded={open}
+        data-testid={'act-' + pieces[0]}
+        onClick={onToggle}
+        className={
+          'tap-target flex w-full items-baseline justify-between gap-3 rounded border px-4 py-3 text-left transition ' +
+          (open ? 'border-accent bg-accent/10' : 'border-line bg-bg-elev hover:border-accent/50')
+        }
+      >
+        <span className="min-w-0 text-sm">{act}</span>
+        <span className="shrink-0 text-[0.55rem] uppercase tracking-wider text-muted">
+          {open ? 'close' : 'say it'}
+        </span>
+      </button>
+      {open ? (
+        <div className="mt-1 flex flex-col gap-3 rounded border border-line bg-bg-elev px-4 py-4">
+          <ul className="flex flex-col gap-3">
+            {lines.map((l) => (
+              <li key={l.target} className="flex items-center gap-3">
+                <AudioButton slug={slugFor(l.target)} text={l.target} size="sm" />
+                <span className="min-w-0">
+                  <span className="pt block text-sm text-accent">{l.target}</span>
+                  <span className="block text-xs text-muted">{l.en}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex flex-col gap-1">
+            <p className="eyebrow text-muted">It hangs on</p>
+            <p className="text-xs">
+              {pieces
+                .filter((p) => owned.includes(p) && PIECES[p])
+                .map((p) => PIECES[p].target)
+                .join(' · ')}
+            </p>
+          </div>
+          {root ? (
+            <div className="flex flex-col gap-1">
+              <p className="eyebrow text-muted">Where it came from</p>
+              <p className="text-xs text-muted">{crate?.title}</p>
+              <p className="pt text-sm">{root.target}</p>
+              <p className="text-xs text-muted">{root.source}</p>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </li>
+  )
+}
+
 function Close() {
   const { finish } = useJourney()
   return (
     <Shell stage="REAL WORLD">
       <div className="flex flex-1 flex-col justify-center">
         <p className="display text-balance text-3xl">{CLOSE.eyebrow}</p>
-        <p className="mt-4 text-sm text-muted">{CLOSE.sub}</p>
+        <p className="mt-3 text-sm text-muted">{CLOSE.sub}</p>
       </div>
       <Link
         href="/crates"
@@ -2100,7 +2318,7 @@ function Close() {
       </Link>
       {/* Offered here rather than at the door: there is now something worth keeping,
           which is the only honest moment to ask anyone for an email address. */}
-      <div className="mt-4 flex flex-col items-center gap-2 text-xs text-muted">
+      <div className="mt-3 flex flex-col items-center gap-3 text-xs text-muted">
         <Link href="/signin" className="underline underline-offset-4">
           Keep what you have learned — it lives on this phone until you do.
         </Link>

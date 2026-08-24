@@ -156,7 +156,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
 
         {empty ? (
           <>
-            <p className="display mt-4 text-balance text-3xl">Nothing yet.</p>
+            <p className="display mt-3 text-balance text-3xl">Nothing yet.</p>
             <p className="mt-3 text-sm text-muted">
               This fills up when you say something with nothing on screen to copy from. Not when you
               finish a lesson — when you produce it cold.
@@ -171,17 +171,17 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
               {clean ? ', ' + clean + ' of them right first time' : ''}.
             </p>
 
-            <ul className="mt-6 space-y-4 border-t border-line pt-5">
+            <ul className="mt-6 space-y-3 border-t border-line pt-5">
               {recent.map((p) => (
                 <li key={p.pt}>
                   <p className="pt text-lg font-semibold text-accent">{p.pt}</p>
-                  <p className="mt-0.5 text-xs text-muted">{p.en}</p>
+                  <p className="mt-1 text-xs text-muted">{p.en}</p>
                 </li>
               ))}
             </ul>
 
             {worlds > 1 ? (
-              <p className="mt-5 text-xs text-muted">
+              <p className="mt-6 text-xs text-muted">
                 Gathered from {worlds} unrelated worlds. None of it needs them any more.
               </p>
             ) : null}
@@ -193,14 +193,14 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
       {firstTry ? (
         <section className="rounded border border-line p-4">
           <p className="eyebrow text-muted">HOW IT IS ACTUALLY GOING</p>
-          <p className="mt-2 text-sm">
+          <p className="mt-3 text-sm">
             You said{' '}
             <span className="font-semibold">
               {firstTry.hit} of your last {firstTry.of}
             </span>{' '}
             right first time, with nothing on screen.
           </p>
-          <p className="mt-2 text-xs leading-relaxed text-muted">
+          <p className="mt-3 text-xs leading-relaxed text-muted">
             Only the beats with nothing on screen to copy from are counted. It is the one
             number here that cannot be moved by opening the app.
           </p>
@@ -212,12 +212,12 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
         <section className="rounded border border-line p-4">
           <p className="eyebrow text-muted">WHERE YOU SAID YOU WANTED TO GET TO</p>
           {distance.done ? (
-            <p className="mt-2 text-sm">
+            <p className="mt-3 text-sm">
               You have everything the graph can give you for {GOAL_LABEL[distance.goal]}. Pick
               another area and it starts compounding.
             </p>
           ) : (
-            <p className="mt-2 text-sm">
+            <p className="mt-3 text-sm">
               <span className="font-semibold">
                 {distance.count} {distance.count === 1 ? 'thing' : 'things'} to go
               </span>{' '}

@@ -76,7 +76,7 @@ function OpenFeedback() {
   if (state === 'done') {
     return (
       <PageShell eyebrow="THANK YOU">
-        <div className="flex flex-1 flex-col justify-center gap-4">
+        <div className="flex flex-1 flex-col justify-center gap-3">
           <h1 className="display text-balance text-3xl">{FEEDBACK_COPY.sent_head}</h1>
           <p className="text-sm leading-relaxed text-muted">{FEEDBACK_COPY.sent_body}</p>
         </div>
@@ -92,17 +92,17 @@ function OpenFeedback() {
 
   return (
     <PageShell eyebrow={FEEDBACK_COPY.eyebrow}>
-      <div className="flex flex-col gap-7 pb-4">
+      <div className="flex flex-col gap-6 pb-4">
       <div>
         <h1 className="display text-balance text-2xl">{FEEDBACK_COPY.headline}</h1>
-        <p className="mt-2 text-xs text-muted">
+        <p className="mt-3 text-xs text-muted">
           You are at stage {stage}, {RUNGS[stage - 1].name.toLowerCase()}, with {kept}{' '}
           {kept === 1 ? 'piece' : 'pieces'} kept.
         </p>
       </div>
 
       {/* Answers, at the top. The form is underneath. */}
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-3">
         {HELP.map((h) => {
           const isOpen = open === h.id
           return (
@@ -124,7 +124,7 @@ function OpenFeedback() {
                 </span>
               </button>
               {isOpen ? (
-                <div className="mt-1.5 rounded border border-line bg-bg-elev px-4 py-4">
+                <div className="mt-1 rounded border border-line bg-bg-elev px-4 py-4">
                   <p className="text-sm leading-relaxed text-fg/85">{h.a}</p>
                   {h.link ? (
                     <Link
@@ -141,7 +141,7 @@ function OpenFeedback() {
         })}
       </ul>
 
-      <section className="flex flex-col gap-4 border-t border-line pt-6">
+      <section className="flex flex-col gap-3 border-t border-line pt-6">
         <div>
           <p className="eyebrow text-accent">{FEEDBACK_COPY.form_head}</p>
           <label htmlFor="what" className="mt-3 block text-sm font-semibold">
@@ -160,7 +160,7 @@ function OpenFeedback() {
 
         <div>
           <p className="text-xs text-muted">{FEEDBACK_COPY.where}</p>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-3">
             {FEEDBACK_WHERE.map((w) => (
               <button
                 key={w}
@@ -181,7 +181,7 @@ function OpenFeedback() {
 
         <div>
           <p className="text-xs text-muted">{FEEDBACK_COPY.feel}</p>
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-3">
             {FEEDBACK_FEEL.map((w) => (
               <button
                 key={w}
@@ -210,7 +210,7 @@ function OpenFeedback() {
             inputMode="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-2 w-full rounded border border-line bg-surface px-4 py-3 text-base text-fg outline-none focus:border-accent"
+            className="mt-3 w-full rounded border border-line bg-surface px-4 py-3 text-base text-fg outline-none focus:border-accent"
           />
         </div>
 

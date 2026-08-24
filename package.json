@@ -17,7 +17,8 @@
     "line:test": "tsx scripts/line-test.mts",
     "merge:test": "tsx scripts/merge-test.mts",
     "comp:issue": "tsx scripts/comp-issue.mts",
-    "mobile": "tsx scripts/mobile-check.mts",
+    "spacing": "tsx scripts/spacing-check.mts",
+    "mobile": "npm run spacing && tsx scripts/mobile-check.mts",
     "gate": "npm run check && npm run mobile",
     "contrast": "tsx scripts/contrast-check.mts"
   },

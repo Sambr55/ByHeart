@@ -47,7 +47,7 @@ export function Pro() {
       data-stage="CHOICE"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
-      <header className="bar sticky top-0 z-10 flex items-center gap-3 px-5 py-2.5">
+      <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-2.5">
         <Link href="/crates" className="eyebrow opacity-80 transition hover:opacity-100">
           ← Crates
         </Link>
@@ -55,18 +55,18 @@ export function Pro() {
         <Menu />
       </header>
 
-      <div className="flex flex-1 flex-col gap-7 px-5 pb-12 pt-8">
+      <div className="flex flex-1 flex-col gap-6 px-5 pb-12 pt-8">
         {pro ? (
           <div>
             <h1 className="display text-balance text-2xl">You already have it.</h1>
-            <p className="mt-2 text-sm leading-relaxed text-muted">
+            <p className="mt-3 text-sm leading-relaxed text-muted">
               {access.comped
                 ? 'On the house. Nothing to pay and nothing to manage.'
                 : 'Every crate, every drop, and whatever comes next.'}
             </p>
             <Link
               href="/crates"
-              className="eyebrow mt-5 inline-block text-accent underline underline-offset-4"
+              className="eyebrow mt-6 inline-block text-accent underline underline-offset-4"
             >
               Back to your crates
             </Link>
@@ -75,7 +75,7 @@ export function Pro() {
           <>
             <div>
               <p className="eyebrow text-muted">WHAT THE MONEY IS FOR</p>
-              <h1 className="display mt-2 text-balance text-2xl">
+              <h1 className="display mt-3 text-balance text-2xl">
                 Right now, every line in DUB is spoken by a robot.
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-fg/85">
@@ -94,10 +94,10 @@ export function Pro() {
 
             <section className="rounded border border-line bg-bg-elev p-5">
               <p className="eyebrow text-accent">{PLANS.pro.name ?? 'DUB'}</p>
-              <p className="mt-2 text-sm">{PLANS.pro.line}</p>
-              <ul className="mt-4 space-y-1.5">
+              <p className="mt-3 text-sm">{PLANS.pro.line}</p>
+              <ul className="mt-3 space-y-1">
                 {PLANS.pro.includes.map((i) => (
-                  <li key={i} className="flex gap-2 text-sm text-fg/80">
+                  <li key={i} className="flex gap-3 text-sm text-fg/80">
                     <span className="text-accent">·</span>
                     {i}
                   </li>
@@ -105,7 +105,7 @@ export function Pro() {
               </ul>
 
               {!access.known ? null : access.billingReady ? (
-                <div className="mt-5 flex flex-wrap gap-2">
+                <div className="mt-6 flex flex-wrap gap-3">
                   <button
                     type="button"
                     data-testid="pro-annual"
@@ -125,7 +125,7 @@ export function Pro() {
                   </button>
                 </div>
               ) : (
-                <p className="mt-5 text-xs leading-relaxed text-muted">
+                <p className="mt-6 text-xs leading-relaxed text-muted">
                   Memberships are not open yet. Nothing here is for sale today — this page
                   exists so you know what is coming and what it pays for.
                 </p>
@@ -135,15 +135,15 @@ export function Pro() {
 
             <section>
               <p className="eyebrow text-muted">WHAT STAYS FREE, ALWAYS</p>
-              <ul className="mt-3 space-y-1.5">
+              <ul className="mt-3 space-y-1">
                 {PLANS.free.includes.map((i) => (
-                  <li key={i} className="flex gap-2 text-sm text-muted">
+                  <li key={i} className="flex gap-3 text-sm text-muted">
                     <span className="text-muted">·</span>
                     {i}
                   </li>
                 ))}
               </ul>
-              <p className="mt-4 text-xs leading-relaxed text-muted">
+              <p className="mt-3 text-xs leading-relaxed text-muted">
                 And everything you have already learned stays yours whatever you decide. We
                 are never going to charge you to look at your own Portuguese.
               </p>

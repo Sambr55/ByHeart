@@ -62,7 +62,7 @@ export default function DeckPage() {
         need one more encounter.
       </p>
 
-      <ul className="mt-6 space-y-2">
+      <ul className="mt-6 space-y-3">
         {deck.map((c) => (
           <li
             key={c.card_id}
@@ -165,18 +165,18 @@ function Review({ deck, onDone }: { deck: DeckCard[]; onDone: () => void }) {
     <PageShell eyebrow={BRAND.deckName + " · REVIEW"}>
       <p className="text-xs tabular-nums text-muted">{queue.length} left</p>
 
-      <div className="mt-4 rounded border border-line bg-surface p-5">
+      <div className="mt-3 rounded border border-line bg-surface p-5">
         <p className="eyebrow text-accent">{card.title}</p>
         <p className="mt-3 text-balance text-lg">{card.front}</p>
 
         {revealed ? (
-          <div className="mt-5 space-y-3 border-t border-line pt-5">
+          <div className="mt-6 space-y-3 border-t border-line pt-5">
             {card.reveal.map((r) => (
               <div key={r.pt} className="flex items-center gap-3">
                 <AudioButton slug={slugFor(r.pt)} text={r.pt} size="sm" />
                 <span>
                   <span className="pt block text-xl text-accent">{r.pt}</span>
-                  <span className="mt-0.5 block text-xs text-muted">{r.en}</span>
+                  <span className="mt-1 block text-xs text-muted">{r.en}</span>
                 </span>
               </div>
             ))}

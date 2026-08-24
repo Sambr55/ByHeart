@@ -70,7 +70,7 @@ export function StudyForm() {
               : 'Your answers could not reach the server, so a copy has been downloaded to this phone. Hand it to the facilitator — nothing is lost.'}
           </p>
           {!stored && reason ? (
-            <p className="mt-2 font-mono text-[0.6rem] text-muted">{reason}</p>
+            <p className="mt-3 font-mono text-[0.6rem] text-muted">{reason}</p>
           ) : null}
           <Link
             href="/deck"
@@ -91,7 +91,7 @@ export function StudyForm() {
         thing you say is the most valuable thing on this page.
       </p>
 
-      <div className="mt-8 space-y-8">
+      <div className="mt-6 space-y-6">
         {QUESTIONS.map((q, i) => (
           <Field
             key={q.id}
@@ -113,7 +113,7 @@ export function StudyForm() {
         type="button"
         disabled={Boolean(missing.length) || state === 'sending'}
         onClick={send}
-        className="tap-target eyebrow mt-4 w-full rounded bg-accent px-5 py-4 text-accent-ink disabled:bg-chip disabled:text-muted"
+        className="tap-target eyebrow mt-3 w-full rounded bg-accent px-5 py-4 text-accent-ink disabled:bg-chip disabled:text-muted"
       >
         {state === 'sending' ? 'SENDING…' : 'SEND MY FEEDBACK'}
       </button>
@@ -156,7 +156,7 @@ function Field({
           ) : null}
 
           {question.kind === 'scale' ? (
-            <div className="mt-3 space-y-2">
+            <div className="mt-3 space-y-3">
               {question.points?.map((p) => (
                 <button
                   key={p.value}

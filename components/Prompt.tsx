@@ -19,7 +19,7 @@ export function SourceStrip({ source }: { source: NonNullable<Screen['source']> 
       {source.from ? (
         <p className="text-[0.6rem] uppercase tracking-wider text-muted">{source.from}</p>
       ) : null}
-      <p className="mt-0.5 text-xs text-muted">“{source.line}”</p>
+      <p className="mt-1 text-xs text-muted">“{source.line}”</p>
       <p className="pt mt-1 text-sm text-accent/70">
         <KeyedLine pt={source.pt} keyWord={source.key} />
       </p>
@@ -59,7 +59,7 @@ export function Prompt({ screen: raw }: { screen: Screen }) {
             <span className="text-muted">”</span>
           </p>
           {screen.source?.pt ? (
-            <p className="pt mt-2 text-base text-accent/75">
+            <p className="pt mt-3 text-base text-accent/75">
               <KeyedLine pt={screen.source.pt} keyWord={screen.source.key} />
             </p>
           ) : null}

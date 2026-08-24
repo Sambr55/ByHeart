@@ -22,8 +22,8 @@ export function MissionComplete() {
   return (
     <div className="flex flex-1 flex-col justify-center">
       <p className="eyebrow text-accent">{BRAND.name} · SESSION COMPLETE</p>
-      <h1 className="display mt-4 text-balance text-3xl">Obrigado.</h1>
-      <p className="mt-4 text-sm text-muted">
+      <h1 className="display mt-3 text-balance text-3xl">Obrigado.</h1>
+      <p className="mt-3 text-sm text-muted">
         Hand the phone back to the observer. Nothing here is shown to the next tester.
       </p>
 
@@ -120,12 +120,12 @@ function ResumeLink() {
         rows={3}
         value={href}
         onFocus={(e) => e.currentTarget.select()}
-        className="mt-2 w-full rounded border border-line bg-bg-elev p-2 font-mono text-[0.6rem] text-muted"
+        className="mt-3 w-full rounded border border-line bg-bg-elev p-2 font-mono text-[0.6rem] text-muted"
       />
       <button
         type="button"
         onClick={() => navigator.clipboard?.writeText(href)}
-        className="tap-target eyebrow mt-2 w-full rounded border border-line px-3 py-2 text-muted"
+        className="tap-target eyebrow mt-3 w-full rounded border border-line px-3 py-2 text-muted"
       >
         COPY
       </button>

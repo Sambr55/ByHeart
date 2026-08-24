@@ -111,7 +111,7 @@ export default function AdminPage() {
     <PageShell eyebrow="DUB · TESTERS" stage="CHOICE">
       <h1 className="display text-3xl">Who tested, and what they said</h1>
 
-      <div className="mt-4 flex gap-2">
+      <div className="mt-3 flex gap-3">
         <input
           value={key}
           onChange={(e) => setKey(e.target.value)}
@@ -127,7 +127,7 @@ export default function AdminPage() {
           LOAD
         </button>
       </div>
-      {error ? <p className="mt-2 text-xs text-coach">{error}</p> : null}
+      {error ? <p className="mt-3 text-xs text-coach">{error}</p> : null}
 
       {pending ? (
         <button
@@ -147,7 +147,7 @@ export default function AdminPage() {
         <>
           <div className="mt-6 flex items-center justify-between">
             <p className="text-sm text-muted">{rows.length} testers</p>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Toggle on={view === 'testers'} onClick={() => setView('testers')}>
                 by tester
               </Toggle>
@@ -158,7 +158,7 @@ export default function AdminPage() {
           </div>
 
           {view === 'testers' ? (
-            <div className="mt-4 space-y-3">
+            <div className="mt-3 space-y-3">
               {rows.map((r) => (
                 <details key={r.key} className="rounded border border-line bg-surface p-3">
                   <summary className="cursor-pointer text-sm">
@@ -167,7 +167,7 @@ export default function AdminPage() {
                       {r.session ? '· session' : ''} {r.feedback ? '· feedback' : '· no feedback yet'}
                     </span>
                   </summary>
-                  <dl className="mt-3 space-y-2 text-sm">
+                  <dl className="mt-3 space-y-3 text-sm">
                     <Line k="Started with" v={familyLabel(r.session?.affinity?.next_world_pre)} />
                     <Line k="Typed" v={r.session?.affinity?.free_text_favourite || '—'} />
                     <Line k="Pieces owned" v={String(Object.keys(r.session?.inventory ?? {}).length)} />
@@ -181,14 +181,14 @@ export default function AdminPage() {
               ))}
             </div>
           ) : (
-            <div className="mt-4 space-y-8">
+            <div className="mt-3 space-y-6">
               {QUESTIONS.map((q) => (
                 <section key={q.id}>
                   <h2 className="text-balance text-sm font-semibold">{q.prompt}</h2>
-                  <p className="mt-0.5 text-[0.65rem] uppercase tracking-wider text-muted">
+                  <p className="mt-1 text-[0.65rem] uppercase tracking-wider text-muted">
                     closes: {q.closes}
                   </p>
-                  <ul className="mt-2 space-y-2">
+                  <ul className="mt-3 space-y-3">
                     {rows
                       .filter((r) => String(r.feedback?.answers[q.id] ?? '').trim())
                       .map((r) => (
@@ -211,7 +211,7 @@ export default function AdminPage() {
           <button
             type="button"
             onClick={csv}
-            className="tap-target eyebrow mt-8 w-full rounded border border-line px-5 py-4 text-fg"
+            className="tap-target eyebrow mt-6 w-full rounded border border-line px-5 py-4 text-fg"
           >
             DOWNLOAD CSV
           </button>
@@ -230,7 +230,7 @@ function Line({ k, v }: { k: string; v: string }) {
   return (
     <div className="border-b border-line/50 pb-2 last:border-0">
       <dt className="text-xs text-muted">{k}</dt>
-      <dd className="mt-0.5">{v}</dd>
+      <dd className="mt-1">{v}</dd>
     </div>
   )
 }

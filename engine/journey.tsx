@@ -341,6 +341,26 @@ export function capabilities(pieces: string[]): string[] {
   return out
 }
 
+/**
+ * The same list, keeping what it hangs on.
+ *
+ * capabilities() throws the piece away, which is why the best list in the product was
+ * inert: a learner reads "ask what happened" and cannot see what they would actually
+ * say. Two pieces can share one act — com and sem both make "order something the way
+ * you like it" — so an act carries a list, not a piece.
+ */
+export function capabilityEntries(pieces: string[]): { act: string; pieces: string[] }[] {
+  const out: { act: string; pieces: string[] }[] = []
+  for (const p of pieces) {
+    const act = SPEECH_ACTS[p]
+    if (!act) continue
+    const found = out.find((e) => e.act === act)
+    if (found) found.pieces.push(p)
+    else out.push({ act, pieces: [p] })
+  }
+  return out
+}
+
 // ---------------------------------------------------------------------------
 
 interface JourneyApi {

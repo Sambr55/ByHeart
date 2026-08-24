@@ -386,6 +386,29 @@ body {
   colour physically leaves the room at the culture-free beat.
 */
 /*
+  Three layers, and only three.
+
+  The stage circle in the deal screen carried `relative z-10` and an opaque background;
+  the sticky header carried `sticky top-0 z-10`. Same number, same stacking context — so
+  the one later in the DOM wins, and the circles are later. They painted straight over
+  the blue bar as it scrolled under.
+
+  The circle never needed to beat the header. It needed to sit above the rail line
+  beside it. z-10 was reaching for a number rather than for a layer, which is the third
+  bug this month of exactly that shape.
+
+  The rule: a number above 1 is only ever used by something that must cover the page. If
+  a new element needs to beat the header it is an overlay and belongs at 50 — never at
+  10 for a second time. `npm run mobile` counts the distinct values and fails on a
+  fourth.
+*/
+:root {
+  --z-content: 1;  /* anything lifting off its own siblings */
+  --z-sticky: 30;  /* every .bar, every sticky footer */
+  --z-overlay: 50; /* the menu, sheets, dialogs */
+}
+
+/*
   The two colours a bar is made of, declared on the ANCESTOR rather than on .bar itself.
 
   This is not fussiness. The block below redefines --fg inside a bar, and a custom

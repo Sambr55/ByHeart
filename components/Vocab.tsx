@@ -323,7 +323,7 @@ function Library() {
       data-stage="CHOICE"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
-      <header className="bar sticky top-0 z-10 flex flex-col gap-2 px-5 py-2.5">
+      <header className="bar sticky top-0 z-30 flex flex-col gap-3 px-5 py-2.5">
         <div className="flex items-center gap-3">
           <Link href="/crates" className="eyebrow opacity-80 transition hover:opacity-100">
             ← DUB
@@ -331,7 +331,7 @@ function Library() {
           <span className="eyebrow flex-1">Vocab library</span>
           <Menu />
         </div>
-        <div className="flex items-center gap-2 pb-1">
+        <div className="flex items-center gap-3 pb-1">
           <input
             type="search"
             value={query}
@@ -388,7 +388,7 @@ function Library() {
                 ? 'Nothing yours yet.'
                 : capability}
           </h1>
-          <p className="mt-2 text-xs leading-relaxed text-muted" data-testid="vocab-subhead">
+          <p className="mt-3 text-xs leading-relaxed text-muted" data-testid="vocab-subhead">
             <Subhead
               q={query.trim()}
               scope={scope}
@@ -431,7 +431,7 @@ function Library() {
               </button>
 
               {!expanded ? (
-                <p className="-mt-1 flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted">
+                <p className="-mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
                   {sets.map((s) => (
                     <span key={s.id} className="text-muted">
                       {s.label.toLowerCase()}
@@ -463,7 +463,7 @@ function Library() {
                       shakyPieces={shakyPieces}
                     />
                   ))}
-                  <ul className="flex flex-col gap-2">
+                  <ul className="flex flex-col gap-3">
                     {list.map((e) => (
                       <EntryRow
                         key={e.key}
@@ -572,7 +572,7 @@ function DeadEnd({ term }: { term: string }) {
       <p className="text-sm leading-relaxed">
         DUB does not teach <span className="pt text-accent">{term}</span> yet.
       </p>
-      <p className="mt-2 text-xs leading-relaxed text-muted">
+      <p className="mt-3 text-xs leading-relaxed text-muted">
         Noted, and that is not a polite noise — the words people look for and cannot find
         are what the next crate gets written from.
       </p>
@@ -587,7 +587,7 @@ function EmptyMine({ onScope }: { onScope: () => void }) {
         Nothing has landed here yet. A piece becomes yours the first time you use it
         without the film on screen to copy from.
       </p>
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap gap-3">
         <Link
           href="/crates"
           className="tap-target eyebrow rounded bg-accent px-4 py-3 text-accent-ink"
@@ -685,7 +685,7 @@ function SetRow({
         aria-expanded={open}
         data-testid={'set-' + set.id}
         onClick={() => setOpen((v) => !v)}
-        className="tap-target flex w-full flex-col gap-2 px-4 py-3 text-left"
+        className="tap-target flex w-full flex-col gap-3 px-4 py-3 text-left"
       >
         <span className="flex items-baseline justify-between gap-3">
           <span className="text-sm font-semibold">{set.label}</span>
@@ -694,7 +694,7 @@ function SetRow({
               {yours} of {set.members.length}
             </span>
             {shakyIds.size ? (
-              <span className="mt-0.5 block text-[0.55rem] uppercase tracking-wider text-coach">
+              <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-coach">
                 one more look
               </span>
             ) : null}
@@ -702,7 +702,7 @@ function SetRow({
         </span>
         {/* The whole group, in its own order. The dim ones are the shape of what is
             missing, which is the entire reason to show a set rather than a list. */}
-        <span className="flex flex-wrap gap-x-2 gap-y-1">
+        <span className="flex flex-wrap gap-x-3 gap-y-1">
           {set.members.map((m) => {
             const id = taught.get(m)
             const mine = id ? owned.has(id) : false
@@ -737,7 +737,7 @@ function SetRow({
       </button>
 
       {open ? (
-        <ul className="flex flex-col gap-2 border-t border-line px-3 py-3">
+        <ul className="flex flex-col gap-3 border-t border-line px-3 py-3">
           {rows.map((e) => (
             <EntryRow
               key={e.key}
@@ -821,7 +821,7 @@ function EntryRow({
           <span className={'pt block text-base ' + (entry.owned ? 'text-accent' : 'text-muted')}>
             {isLemma ? head.lemma : displayForm(head)}
           </span>
-          <span className="mt-0.5 block text-xs text-muted">{head.gloss}</span>
+          <span className="mt-1 block text-xs text-muted">{head.gloss}</span>
           {viaForm ? (
             <span className="mt-1 block text-[0.65rem] text-muted">
               <span className="pt">{viaForm.piece.target}</span> — a form of{' '}
@@ -845,23 +845,23 @@ function EntryRow({
             rows you do NOT have read as an inconsistency.
           */}
           {entry.needsLook ? (
-            <span className="mt-0.5 block text-[0.55rem] uppercase tracking-wider text-coach">
+            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-coach">
               one more look
             </span>
           ) : entry.owned ? (
-            <span className="mt-0.5 block text-[0.55rem] uppercase tracking-wider text-muted/70">
+            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted/70">
               from {crate?.title ?? 'a crate'}
             </span>
           ) : entry.opensAt ? (
-            <span className="mt-0.5 block text-[0.55rem] uppercase tracking-wider text-muted/70">
+            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted/70">
               opens at stage {entry.opensAt}
             </span>
           ) : entry.nearly ? (
-            <span className="mt-0.5 block text-[0.55rem] uppercase tracking-wider text-accent/80">
+            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-accent/80">
               nearly yours
             </span>
           ) : (
-            <span className="mt-0.5 block text-[0.55rem] uppercase tracking-wider text-muted/70">
+            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted/70">
               in {crate?.title ?? 'a crate'}
             </span>
           )}
@@ -869,7 +869,7 @@ function EntryRow({
       </button>
 
       {open ? (
-        <div className="mt-1.5 flex flex-col gap-4 rounded border border-line bg-bg-elev px-4 py-4">
+        <div className="mt-1 flex flex-col gap-3 rounded border border-line bg-bg-elev px-4 py-4">
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(head.target)} text={head.target} size="sm" />
             <span className="min-w-0">
@@ -905,9 +905,9 @@ function EntryRow({
           {isLemma ? (
             <div>
               <p className="eyebrow text-muted">The forms DUB has taught you</p>
-              <ul className="mt-2 flex flex-col gap-1.5">
+              <ul className="mt-3 flex flex-col gap-1">
                 {forms.map((f) => (
-                  <li key={f.id} className="flex flex-wrap items-baseline gap-x-2 text-sm">
+                  <li key={f.id} className="flex flex-wrap items-baseline gap-x-3 text-sm">
                     <span className={'pt ' + (owned.has(f.id) ? 'text-accent' : 'text-muted/60')}>
                       {f.piece.target}
                     </span>
@@ -928,7 +928,7 @@ function EntryRow({
               <p className="eyebrow text-muted">
                 {lines.length} {lines.length === 1 ? 'thing' : 'things'} you can say with it
               </p>
-              <ul className="mt-2 flex flex-col gap-2">
+              <ul className="mt-3 flex flex-col gap-3">
                 {lines.map((l) => (
                   <li key={l.target} className="flex items-center gap-3">
                     <AudioButton slug={slugFor(l.target)} text={l.target} size="sm" />
@@ -947,7 +947,7 @@ function EntryRow({
               <p className="eyebrow text-muted">{entry.owned ? 'Where you met it' : 'Where it is taught'}</p>
               <p className="mt-1 text-xs text-muted">{crate?.title}</p>
               <p className="pt mt-1 text-sm">{root.target}</p>
-              <p className="mt-0.5 text-xs text-muted">{root.source}</p>
+              <p className="mt-1 text-xs text-muted">{root.source}</p>
             </div>
           ) : null}
 

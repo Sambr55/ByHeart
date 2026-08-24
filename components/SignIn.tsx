@@ -69,7 +69,7 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
           </p>
 
           {accountsReady ? (
-            <form onSubmit={submit} className="mt-2 space-y-3">
+            <form onSubmit={submit} className="mt-3 space-y-3">
               <input
                 type="email"
                 required

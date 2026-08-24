@@ -11,7 +11,7 @@ export const LANDING = {
   wordmark: 'DUB',
   line: 'Find yourself in another language.',
   lines: [
-    'Start with something you already know.',
+    'Start with something you connect with.',
     // Language-neutral on purpose: the brand layer describes the method, and the
     // method is not about Portuguese. The personal experience becomes specific the
     // moment a pair is chosen, one screen later.
@@ -74,7 +74,7 @@ export const DEMO_BEATS: DemoBeat[] = [
       { pt: 'Podes vir comigo?', en: 'Can you come with me?' },
     ],
     close:
-      'That’s DUB. Start with something you already know. Find the useful language inside it. Make it yours.',
+      'That’s DUB. Start with something you connect with. Find the useful language inside it. Make it yours.',
     cta: 'MY TURN',
   },
 ]
@@ -105,7 +105,7 @@ export const PAIR_STEP = {
 } as const
 
 export const DEMO_CLOSE =
-  'That’s DUB. Start with something you already know. Find the useful language inside it. Make it yours.'
+  'That’s DUB. Start with something you connect with. Find the useful language inside it. Make it yours.'
 
 /**
  * The deal — §02B.
@@ -124,7 +124,7 @@ export const DEAL = {
   how: {
     label: 'HOW IT WORKS',
     steps: [
-      'Start with something already in your head.',
+      'Start with something you connect with.',
       'We pull out the useful language hiding inside it, and you keep it.',
       'Then we take it all away and find out whether it stuck.',
     ],
@@ -179,10 +179,53 @@ export const DEAL = {
 
 /** §08 / §09 — the first meaningful learner choice, and it comes after the demo. */
 export const PICKER = {
-  headline: 'Pick a crate to get going with, and start building your useful vocabulary bank.',
-  // The word has to be taught the first time it is used, or it is just jargon. One
-  // clause does it, and it also says what a crate is *for*.
-  sub: 'A crate is a pile of something already in your head. Take whichever one you carry around with you — there is no wrong answer, and no order.',
+  /*
+    "Crate", not "area".
+
+    The spec offered either and asked for the call. Every other surface in the product
+    already says crate — the menu, the header, the route, the badges — so introducing a
+    second noun for the same object here would be a split, and the headline is the one
+    place a reader meets the word with something to point at.
+  */
+  headline: 'Pick a crate you connect with.',
+  /*
+    The sub is gone.
+
+    It was the only place the word crate was defined, which would normally make deleting
+    it risky — except the deal screen already introduces it, and the deal always comes
+    first: "Pieces from different crates combine — a word out of a Bond title finishing a
+    sentence that started in Bridget Jones." The word arrives with an example attached,
+    which beats the definition it replaces.
+  */
+  sub: '',
+  /*
+    The list is sorted, and nobody can see it.
+
+    The picker has ranked crates for months — live drops, open, in progress, explored as
+    far as your stage reaches, finished, unreachable — and a silent sort of eleven
+    near-identical cards is invisible. Nobody infers a five-tier ranking from card order.
+    So the groups are labelled and the ranking becomes readable rather than felt.
+  */
+  groups: {
+    open: 'Open now',
+    later: 'Opens as you go',
+    done: 'You have been through these',
+    pro: 'Comes with DUB Pro',
+    drops: 'Drops',
+  },
+  /*
+    The most useful sentence on the screen, and it only appears when it is true.
+
+    When nothing is open, no ordering rescues the list — every card is a dead end and the
+    learner has to scroll eleven of them to work that out. This says it first. It is also
+    the most honest paywall moment in the product: they are not being blocked from
+    starting, they have genuinely used what the free tier offers.
+  */
+  nothing_open: 'Nothing new is open right now.',
+  nothing_open_sub:
+    'You have used your free crates. Go through one again \u2014 they stay yours \u2014 or open the rest with Pro.',
+  join_up: 'Your three free crates are already chosen. This one unlocks once you have started making progress and ',
+  join_up_link: 'join up',
   /**
    * Shown only when a drop is actually live. The distinction is worth one sentence and
    * not a paragraph — and the last clause is the promise that stops a drop feeling like

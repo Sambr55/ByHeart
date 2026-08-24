@@ -30,7 +30,7 @@ export function Drops() {
       data-stage="CHOICE"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
-      <header className="bar sticky top-0 z-10 flex items-center gap-3 px-5 py-2.5">
+      <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-2.5">
         <Link href="/" className="eyebrow opacity-80 transition hover:opacity-100">
           ← DUB
         </Link>
@@ -41,7 +41,7 @@ export function Drops() {
       <div className="flex flex-1 flex-col gap-6 px-5 pb-12 pt-7">
         <div>
           <h1 className="display text-balance text-2xl">Pegged to something real.</h1>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
+          <p className="mt-3 text-sm leading-relaxed text-muted">
             A crate sits there forever. A drop is tied to something actually happening in
             Portugal and goes the morning after it. Whatever you learn inside one stays
             yours — the drop disappears, the language does not.
@@ -68,14 +68,14 @@ export function Drops() {
                   </span>
                 ) : null}
               </div>
-              <h2 className="display mt-2 text-lg">{c.title}</h2>
+              <h2 className="display mt-3 text-lg">{c.title}</h2>
               <p className="mt-1 text-sm text-muted">
                 {d.event} · {d.place}
               </p>
               <p className="mt-3 text-xs leading-relaxed text-muted">
                 {(ROOTS_BY_FAMILY[c.id] ?? []).length} lines. {c.blurb}
               </p>
-              <div className="mt-4 flex flex-wrap items-center gap-4">
+              <div className="mt-3 flex flex-wrap items-center gap-3">
                 <Link
                   href="/"
                   className="eyebrow text-accent underline underline-offset-4"
@@ -107,7 +107,7 @@ export function Drops() {
         ) : null}
 
         {gone.length ? (
-          <section className="flex flex-col gap-2">
+          <section className="flex flex-col gap-3">
             <span className="eyebrow text-muted">Gone</span>
             {gone.map((c) => (
               <p key={c.id} className="text-xs text-muted/70">

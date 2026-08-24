@@ -98,8 +98,8 @@ export default function RecallPage() {
           <p className="display text-4xl">
             {correct}/{results.length}
           </p>
-          <p className="mt-2 text-lg">came back with no film, and no lesson.</p>
-          <p className="mt-4 text-sm text-muted">
+          <p className="mt-3 text-lg">came back with no film, and no lesson.</p>
+          <p className="mt-3 text-sm text-muted">
             {correct >= Math.ceil(results.length * 0.55)
               ? 'That is the number that matters. Thank you.'
               : 'Some held, some faded. Both readings are useful. Thank you.'}
@@ -180,7 +180,7 @@ export default function RecallPage() {
       <p className="text-xs tabular-nums text-muted">
         {i + 1} of {items.length}
       </p>
-      <p className="mt-4 text-balance text-lg font-semibold">{item.front}</p>
+      <p className="mt-3 text-balance text-lg font-semibold">{item.front}</p>
 
       <div className="mt-6 space-y-3">
         {item.options.map((o) => {
@@ -214,7 +214,7 @@ export default function RecallPage() {
 
       {answered ? (
         <>
-          <div className="mt-5 flex items-center gap-3 rounded border border-line bg-surface px-4 py-3">
+          <div className="mt-6 flex items-center gap-3 rounded border border-line bg-surface px-4 py-3">
             <AudioButton slug={slugFor(item.answer)} text={item.answer} size="sm" />
             <span className="pt text-lg">{item.answer}</span>
           </div>

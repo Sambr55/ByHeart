@@ -87,7 +87,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
   const comped = subscription?.source === 'comp'
 
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col gap-8 px-5 py-10">
+    <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col gap-6 px-5 py-10">
       <header className="flex items-center justify-between gap-3">
         <a href="/" className="eyebrow text-accent">
           ← DUB
@@ -100,8 +100,8 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
 
       <section>
         <p className="eyebrow text-muted">SIGNED IN AS</p>
-        <p className="display mt-2 break-all text-2xl">{user.email}</p>
-        <p className="mt-2 text-sm text-muted">
+        <p className="display mt-3 break-all text-2xl">{user.email}</p>
+        <p className="mt-3 text-sm text-muted">
           Learning {user.target_language === 'pt-PT' ? 'European Portuguese' : user.target_language}{' '}
           since {new Date(user.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}.
         </p>
@@ -115,7 +115,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
             <p className="text-xs text-muted">{STATUS_LINE[subscription.status] ?? subscription.status}</p>
           ) : null}
         </div>
-        <p className="mt-2 text-sm">{pro ? PLANS.pro.line : PLANS.free.line}</p>
+        <p className="mt-3 text-sm">{pro ? PLANS.pro.line : PLANS.free.line}</p>
 
         {subscription?.current_period_end ? (
           <p className="mt-3 text-xs text-muted">
@@ -130,9 +130,9 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
         ) : null}
 
         {!pro ? (
-          <ul className="mt-4 space-y-1.5">
+          <ul className="mt-3 space-y-1">
             {PLANS.pro.includes.map((i) => (
-              <li key={i} className="flex gap-2 text-sm text-fg/80">
+              <li key={i} className="flex gap-3 text-sm text-fg/80">
                 <span className="text-accent">·</span>
                 {i}
               </li>
@@ -141,13 +141,13 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
         ) : null}
 
         {comped ? (
-          <p className="mt-5 rounded border border-accent/40 bg-accent/[0.06] px-4 py-3 text-sm text-fg/85">
+          <p className="mt-6 rounded border border-accent/40 bg-accent/[0.06] px-4 py-3 text-sm text-fg/85">
             You are in on the house
             {subscription?.current_period_end ? ', until the date above' : ', permanently'}. Nothing
             to pay and nothing to manage.
           </p>
         ) : billingReady ? (
-          <div className="mt-5 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap gap-3">
             {pro ? (
               <button
                 type="button"
@@ -179,7 +179,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
             )}
           </div>
         ) : (
-          <p className="mt-4 text-xs text-muted">
+          <p className="mt-3 text-xs text-muted">
             Billing is not switched on in this environment yet.
           </p>
         )}
@@ -189,7 +189,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
       {!comped ? <RedeemCode /> : null}
 
       {/* -------------------------------------------------------------- details */}
-      <section className="space-y-4">
+      <section className="space-y-3">
         <p className="eyebrow text-muted">DETAILS</p>
         <label className="block">
           <span className="text-sm text-muted">What should we call you?</span>
@@ -198,7 +198,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
             onChange={(e) => setName(e.target.value)}
             maxLength={60}
             placeholder="Optional"
-            className="mt-2 w-full rounded border border-line bg-bg-elev px-4 py-3 text-base outline-none focus:border-accent"
+            className="mt-3 w-full rounded border border-line bg-bg-elev px-4 py-3 text-base outline-none focus:border-accent"
           />
         </label>
         <label className="flex items-start gap-3">
@@ -321,7 +321,7 @@ function RedeemCode() {
   return (
     <section>
       <p className="eyebrow text-muted">GOT A CODE?</p>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-3 flex flex-wrap gap-3">
         <input
           value={code}
           onChange={(e) => setCode(e.target.value)}

@@ -22,7 +22,7 @@ export function PromiseView({ screen }: { screen: PromiseScreen }) {
       <h1 className="display mt-6 text-balance text-4xl sm:text-5xl">
         {screen.headline}
       </h1>
-      <p className="mt-4 text-sm text-muted">{screen.sub}</p>
+      <p className="mt-3 text-sm text-muted">{screen.sub}</p>
       <Continue
         label={screen.cta}
         onClick={() => {

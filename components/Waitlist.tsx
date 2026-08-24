@@ -43,14 +43,14 @@ export function Waitlist() {
   return (
     <main
       data-stage="LANDING"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-7 bg-bg px-5 py-12 text-fg"
+      className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 bg-bg px-5 py-12 text-fg"
     >
       <div>
         <p className="eyebrow text-muted">DUB</p>
         <h1 className="display mt-3 text-balance text-3xl">
           Every big app teaches you Brazilian Portuguese. You are moving to Lisbon.
         </h1>
-        <p className="mt-4 text-sm leading-relaxed text-fg/85">
+        <p className="mt-3 text-sm leading-relaxed text-fg/85">
           DUB teaches European Portuguese through the films, music and culture already in
           your head — estás rather than você está, telemóvel, a bica, the 28.
         </p>
@@ -58,7 +58,7 @@ export function Waitlist() {
 
       <div className="rounded border border-line bg-bg-elev p-5">
         <p className="eyebrow text-accent">WHAT THE FIRST {PRICING.founding.cap} PAY FOR</p>
-        <p className="mt-2 text-sm leading-relaxed">
+        <p className="mt-3 text-sm leading-relaxed">
           Right now every line is spoken by a robot. Founding memberships pay for the
           recording sessions — real Lisbon voices, every line in the product. £
           {PRICING.founding.gbp} a year, locked for as long as you stay.
@@ -78,7 +78,7 @@ export function Waitlist() {
         </div>
       ) : (
         <div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             <input
               type="email"
               inputMode="email"

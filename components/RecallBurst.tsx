@@ -122,9 +122,9 @@ export function RecallBurst({ screen }: { screen: RecallScreen }) {
         {i + 1} of {cards.length}
       </p>
 
-      <p className="display mt-2 text-3xl text-fg sm:text-4xl">{card.cue}</p>
+      <p className="display mt-3 text-3xl text-fg sm:text-4xl">{card.cue}</p>
       {hint ? (
-        <p className="pt mt-2 text-lg text-accent">
+        <p className="pt mt-3 text-lg text-accent">
           Starts with “{TARGETS[card.answer].block.charAt(0).toUpperCase()}”
         </p>
       ) : null}

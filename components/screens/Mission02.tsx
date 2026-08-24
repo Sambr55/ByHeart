@@ -71,13 +71,13 @@ export function MeaningCheckView({ screen }: { screen: MeaningCheckScreen }) {
     <>
       <Prompt screen={screen} />
 
-      <div className="mt-8">
+      <div className="mt-6">
         <p className="pt text-4xl text-accent sm:text-5xl">{screen.block}</p>
-        <p className="mt-2 text-lg text-muted">{screen.lead}</p>
+        <p className="mt-3 text-lg text-muted">{screen.lead}</p>
       </div>
 
       {hintLevel >= 1 && !solved ? (
-        <p className="mt-4 text-sm text-coach">{screen.hint}</p>
+        <p className="mt-3 text-sm text-coach">{screen.hint}</p>
       ) : null}
 
       <div className="mt-6 space-y-3">
@@ -117,7 +117,7 @@ export function MeaningCheckView({ screen }: { screen: MeaningCheckScreen }) {
       ) : null}
 
       {solved ? (
-        <div className="mt-4 flex items-center gap-3 rounded border border-line bg-surface px-4 py-3">
+        <div className="mt-3 flex items-center gap-3 rounded border border-line bg-surface px-4 py-3">
           <AudioButton
             slug={BLOCK_AUDIO[screen.target]}
             text={TARGETS[screen.target].block}
@@ -138,11 +138,11 @@ export function RetentionResultView({ screen }: { screen: RetentionResultScreen 
   return (
     <div className="flex flex-1 flex-col justify-center">
       <p className="eyebrow text-accent">{screen.eyebrow}</p>
-      <p className="display mt-4 text-4xl">
+      <p className="display mt-3 text-4xl">
         {scores.coldRecallCorrect}/{scores.coldRecallTotal}
       </p>
-      <p className="mt-2 text-lg">came back without the film.</p>
-      <p className="mt-4 text-sm text-muted">{screen.sub}</p>
+      <p className="mt-3 text-lg">came back without the film.</p>
+      <p className="mt-3 text-sm text-muted">{screen.sub}</p>
       {weak ? <FeedbackNote tone="correct">{screen.lowScoreCopy}</FeedbackNote> : null}
       <Continue
         label={screen.cta}
@@ -166,7 +166,7 @@ export function CultureCategoriesView({ screen }: { screen: CultureCategoriesScr
   return (
     <>
       <Prompt screen={screen} />
-      <div className="mt-6 grid grid-cols-2 gap-2">
+      <div className="mt-6 grid grid-cols-2 gap-3">
         {cards.map((c) => {
           const on = picked.includes(c.id)
           const full = picked.length >= screen.max && !on
@@ -189,7 +189,7 @@ export function CultureCategoriesView({ screen }: { screen: CultureCategoriesScr
               }
             >
               <span className="display block text-sm">{c.title}</span>
-              <span className="mt-0.5 block text-[0.65rem] leading-snug text-muted">
+              <span className="mt-1 block text-[0.65rem] leading-snug text-muted">
                 {c.examples}
               </span>
             </button>
@@ -255,7 +255,7 @@ export function ForcedChoiceView({ screen }: { screen: ForcedChoiceScreen }) {
   return (
     <>
       <Prompt screen={screen} />
-      <div className="mt-6 space-y-2">
+      <div className="mt-6 space-y-3">
         {cards.map((c) => (
           <button
             key={c.id}
@@ -299,7 +299,7 @@ export function ScaleView({ screen }: { screen: ScaleScreen }) {
   return (
     <div className="flex flex-1 flex-col justify-center">
       <Prompt screen={screen} />
-      <div className="mt-6 space-y-2">
+      <div className="mt-6 space-y-3">
         {screen.points.map((p) => (
           <button
             key={p.value}
@@ -356,19 +356,19 @@ export function CompoundInventoryView({ screen }: { screen: CompoundInventoryScr
       </p>
 
       {reinforced.length ? (
-        <p className="pt mt-4 text-lg text-accent">
+        <p className="pt mt-3 text-lg text-accent">
           {reinforced.map((b) => TARGETS[b].label).join('  ·  ')}
         </p>
       ) : null}
 
-      <div className="mt-6 grid grid-cols-2 gap-2">
+      <div className="mt-6 grid grid-cols-2 gap-3">
         {inventory.map((b) => (
           <SourceChip key={b} block={b} />
         ))}
       </div>
 
       <p className="mt-6 text-sm font-semibold">{screen.closing}</p>
-      <p className="mt-2 text-xs text-muted">{screen.sub}</p>
+      <p className="mt-3 text-xs text-muted">{screen.sub}</p>
 
       <Continue
         label={screen.cta}
@@ -397,10 +397,10 @@ export function CrossoverResultView({ screen }: { screen: CrossoverResultScreen 
   return (
     <div className="flex flex-1 flex-col justify-center">
       <p className="eyebrow text-accent">{screen.eyebrow}</p>
-      <p className="display mt-4 text-balance text-2xl">
+      <p className="display mt-3 text-balance text-2xl">
         {scores.crossoverCorrect}/{scores.crossoverTotal} cross-world tasks completed.
       </p>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-3 text-sm text-muted">
         {scores.crossoverUnassisted} without a hint. {inventory.length} building blocks
         available. {reinforced} strengthened across two worlds.
       </p>
@@ -431,7 +431,7 @@ export function PostIntentView({ screen }: { screen: PostIntentScreen }) {
   return (
     <div className="flex flex-1 flex-col justify-center">
       <Prompt screen={screen} />
-      <div className="mt-6 space-y-2">
+      <div className="mt-6 space-y-3">
         {screen.options.map((o) => (
           <button
             key={o.id}
@@ -451,12 +451,12 @@ export function PostIntentView({ screen }: { screen: PostIntentScreen }) {
       </div>
 
       {picked ? (
-        <label className="mt-5 block">
+        <label className="mt-6 block">
           <span className="text-sm text-muted">{screen.followUp}</span>
           <input
             value={world}
             onChange={(e) => setWorld(e.target.value)}
-            className="mt-2 w-full rounded border border-line bg-surface p-3 text-sm text-fg outline-none focus:border-accent"
+            className="mt-3 w-full rounded border border-line bg-surface p-3 text-sm text-fg outline-none focus:border-accent"
             placeholder="Your earlier answer is filled in — change it if you have."
           />
         </label>

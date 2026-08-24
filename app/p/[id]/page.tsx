@@ -34,7 +34,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
   return (
     <main
       data-stage="REAL WORLD"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-7 bg-bg px-5 py-12 text-fg"
+      className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 bg-bg px-5 py-12 text-fg"
     >
       <div>
         <p className="eyebrow text-muted">SAID COLD, WITH NOTHING ON SCREEN</p>
@@ -43,7 +43,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
         </h1>
       </div>
 
-      <ul className="flex flex-col gap-4">
+      <ul className="flex flex-col gap-3">
         {card.lines.map((l) => (
           <li key={l.pt} className="rounded border border-line bg-surface px-4 py-4">
             <p className="pt text-lg text-accent">{l.pt}</p>
@@ -62,13 +62,13 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
         <p className="display text-balance text-lg">
           DUB teaches European Portuguese through culture you already know.
         </p>
-        <p className="mt-2 text-sm leading-relaxed text-muted">
+        <p className="mt-3 text-sm leading-relaxed text-muted">
           It counts only the sentences you can say with nothing on screen to copy from,
           which is why that number is hard to inflate and worth showing.
         </p>
         <Link
           href="/"
-          className="eyebrow mt-5 inline-block rounded-full bg-accent px-5 py-3 text-accent-ink"
+          className="eyebrow mt-6 inline-block rounded-full bg-accent px-5 py-3 text-accent-ink"
         >
           TRY IT
         </Link>

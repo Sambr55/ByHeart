@@ -74,7 +74,7 @@ export function ChoiceExercise({ screen }: { screen: ChoiceScreen }) {
       ) : null}
 
       {solved ? (
-        <div className="mt-4 flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3">
+        <div className="mt-3 flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3">
           <AudioButton
             slug={slugFor(correct.pt)}
             text={correct.pt}

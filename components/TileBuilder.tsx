@@ -41,7 +41,7 @@ export function TileBuilder({ screen }: { screen: TilesScreen }) {
         aria-label="Your sentence"
       >
         {shown.length ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {shown.map((id, i) => {
               const tile = screen.tiles.find((t) => t.id === id)!
               return (
@@ -71,7 +71,7 @@ export function TileBuilder({ screen }: { screen: TilesScreen }) {
 
       {/* Pool */}
       {solved ? null : (
-        <div data-testid="tile-pool" className="mt-4 flex flex-wrap gap-2">
+        <div data-testid="tile-pool" className="mt-3 flex flex-wrap gap-3">
           {pool.map((t) => (
             <button
               key={t.id}
@@ -98,7 +98,7 @@ export function TileBuilder({ screen }: { screen: TilesScreen }) {
       ) : null}
 
       {solved ? (
-        <div className="mt-4 flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3">
+        <div className="mt-3 flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3">
           <AudioButton
             slug={slugFor(built)}
             text={answerText}

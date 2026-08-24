@@ -134,7 +134,7 @@ export function Menu() {
                     }
                   >
                     <span className="display block text-sm">{item.label}</span>
-                    <span className="mt-0.5 block text-xs leading-relaxed text-muted">
+                    <span className="mt-1 block text-xs leading-relaxed text-muted">
                       {item.hint}
                     </span>
                   </Link>
