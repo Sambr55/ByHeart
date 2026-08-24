@@ -484,10 +484,10 @@ function Picker() {
   // A crate that locks itself a frame after hydration is worse than one that never did.
   const mounted = now !== null
   const rung: Rung = mounted ? rungReached(learner.proof) : 6
-  const done = useMemo(() => {
-    const played = new Set(state.rootsPlayed.map((id) => rootById(id)?.culture_family))
-    return played
-  }, [state.rootsPlayed])
+  // A crate is finished when every root in it has been played — not, as before, when
+  // any single one has. Now that a section only serves the stages you have reached,
+  // "played one root" and "seen the whole crate" are different things.
+  const playedIds = useMemo(() => new Set(state.rootsPlayed), [state.rootsPlayed])
   const shown = CRATES.filter((c) => (now ? isLive(c, now) : true))
   const anyLocked = shown.some((c) => entryRung(c) > rung)
   const here = RUNGS[rung - 1]
@@ -525,11 +525,23 @@ function Picker() {
       ) : null}
       <div className="mt-5 space-y-2">
         {shown.map((f) => {
-          const finished = done.has(f.id)
+          const all = ROOTS_BY_FAMILY[f.id] ?? []
+          const finished = all.length > 0 && all.every((r) => playedIds.has(r.root_id))
+          const unplayed = all.filter((r) => !playedIds.has(r.root_id))
+          const available = unplayed.filter((r) => r.rung <= rung).length
+          // Explored as far as this learner can go, with more still inside. Not the
+          // same as locked, and it would be a lie to show it as either finished or open.
+          // It also has to have been started: a crate whose every root sits above this
+          // stage has nothing "taken" in it, and saying so would be nonsense.
+          const started = all.some((r) => playedIds.has(r.root_id))
+          const waiting = !finished && started && available === 0
+          const nextAt = (unplayed.length
+            ? (Math.min(...unplayed.map((r) => r.rung)) as Rung)
+            : 6) as Rung
           // A drop never locks. It expires, and something that can be lost forever by
           // being busy must never also be something you can be shut out of.
           const opensAt = entryRung(f)
-          const locked = !f.drop && opensAt > rung
+          const locked = (!f.drop && opensAt > rung) || waiting
           return (
             <div
               key={f.id}
@@ -573,7 +585,12 @@ function Picker() {
                   ) : null}
                   <span className="display block text-base">{f.title}</span>
                   <span className="mt-0.5 block text-xs text-muted">
-                    {locked ? RUNGS[opensAt - 1].opens : f.blurb}
+                    {waiting
+                      ? 'You have taken everything in here that your stage reaches. ' +
+                        RUNGS[nextAt - 1].opens.replace('Opens once', 'The rest opens once')
+                      : locked
+                        ? RUNGS[opensAt - 1].opens
+                        : f.blurb}
                   </span>
                   {f.drop ? (
                     <span className="mt-1.5 block text-xs text-muted">
@@ -587,7 +604,7 @@ function Picker() {
                   </span>
                 ) : locked ? (
                   <span className="shrink-0 rounded-full border border-line px-2 py-0.5 text-[0.55rem] uppercase tracking-wider text-muted">
-                    {RUNGS[opensAt - 1].name}
+                    {RUNGS[(waiting ? nextAt : opensAt) - 1].name}
                   </span>
                 ) : f.drop ? (
                   <DropClock crate={f} now={now} />
@@ -825,6 +842,9 @@ function RootBeatView({
   const family = CRATES.find((f) => f.id === root.culture_family)!
   const [done, setDone] = useState(false)
   const [choice, setChoice] = useState<string | null>(null)
+  // Lets the rule be reached without a pick. The screen says nothing here is scored,
+  // so blocking the way forward until something is chosen contradicts it.
+  const [ruleShown, setRuleShown] = useState(false)
 
   const stage = beat === 'release' ? 'REAL WORLD' : 'ROOT'
 
@@ -1026,8 +1046,9 @@ function RootBeatView({
       <Shell stage={stage} eyebrow={family.title}>
         <p className="display text-balance text-2xl">Here are two ways to say it.</p>
         <p className="mt-2 text-sm text-muted">
-          Same meaning. Different room. Neither one is scored — but knowing which is
-          which is the difference between polite and blunt.
+          Same meaning, different room. Nothing here is scored and there is no right
+          answer — pick whichever you would actually say, and DUB uses it to learn
+          whether you come across direct or soft.
         </p>
         <div className="mt-6 space-y-3">
           {root.voice_options.map((o) => (
@@ -1063,14 +1084,28 @@ function RootBeatView({
             </button>
           ))}
         </div>
-        {picked && root.voice_rule ? (
+        {(picked || ruleShown) && root.voice_rule ? (
           <div className="animate-bank mt-6 rounded-xl border border-line bg-surface p-4">
             <p className="eyebrow text-muted">THE RULE UNDERNEATH</p>
             <p className="mt-2 text-sm">{root.voice_rule}</p>
           </div>
         ) : null}
-        <VoiceReflection />
-        {choice ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
+        {picked ? <VoiceReflection /> : null}
+        {!choice && !ruleShown ? (
+          <button
+            type="button"
+            data-testid="voice-skip"
+            onClick={() => setRuleShown(true)}
+            className="tap-target mt-5 self-start text-xs uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-fg"
+          >
+            I would say neither — show me the rule
+          </button>
+        ) : null}
+        {choice || ruleShown ? (
+          <Cta label="CONTINUE" onClick={next} />
+        ) : (
+          <div className="mt-auto" />
+        )}
       </Shell>
     )
   }
@@ -1398,15 +1433,18 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
  */
 function SectionComplete() {
   const { finishSection, owned, state } = useJourney()
+  const learner = useLearner()
   const acts = capabilities(owned)
   const now = useNowAfterMount()
   const family = state.family ? CRATES.find((f) => f.id === state.family) : null
   // An expired drop is not something we can honestly offer them next.
-  const remaining = CRATES.filter(
-    (f) =>
-      (now ? isLive(f, now) : true) &&
-      !state.rootsPlayed.some((id) => rootById(id)?.culture_family === f.id),
-  )
+  const reached = rungReached(learner.proof)
+  const remaining = CRATES.filter((f) => {
+    if (now && !isLive(f, now)) return false
+    return (ROOTS_BY_FAMILY[f.id] ?? []).some(
+      (r) => r.rung <= reached && !state.rootsPlayed.includes(r.root_id),
+    )
+  })
 
   return (
     <Shell stage="CHOICE">

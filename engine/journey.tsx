@@ -13,6 +13,7 @@ import {
   PIECES,
   ROOTS,
   ROOTS_BY_FAMILY,
+  rungReached,
   rootById,
   type Collision,
   type CultureFamily,
@@ -376,7 +377,20 @@ export function JourneyProvider({ children }: { children: React.ReactNode }) {
       void syncSession('culture_chosen')
       // A section is played whole. Offering "where next?" between every root turned the
       // choice into a tax; the learner picks an area, works through it, and then decides.
-      const roots = ROOTS_BY_FAMILY[family].filter((r) => !state.rootsPlayed.includes(r.root_id))
+      /**
+       * Lowest stage first, and never above the one they have reached.
+       *
+       * Without this the ladder only gated which crates could be opened, and inside
+       * one the learner got the whole thing in authoring order — which put counting
+       * and the everyday nouns sixth, behind register and nuance. The fundamentals
+       * were in the product and effectively unreachable.
+       *
+       * Sorting is stable, so within a stage the authored order still holds.
+       */
+      const reached = rungReached(learner.proof)
+      const unplayed = ROOTS_BY_FAMILY[family].filter((r) => !state.rootsPlayed.includes(r.root_id))
+      const atOrBelow = unplayed.filter((r) => r.rung <= reached)
+      const roots = (atOrBelow.length ? atOrBelow : unplayed).sort((a, b) => a.rung - b.rung)
       const steps: Step[] = []
 
       /**
