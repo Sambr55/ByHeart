@@ -22,6 +22,7 @@ import { CLOSE, DEAL as DEAL_COPY, DEMO_BEATS, DEMO_CLOSE, LANDING, NO_CUE_PROMP
 import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
+import { Menu } from '@/components/Menu'
 import { track } from '@/engine/analytics'
 import { insightsFor } from '@/content/osmosis'
 import {
@@ -69,7 +70,12 @@ function Shell({
   nav?: boolean
   children: React.ReactNode
 }) {
-  const { back, goHome, canGoBack } = useJourney()
+  const { back, goHome, canGoBack, owned } = useJourney()
+  // The pieces were taught one at a time and then vanished, so a learner could finish a
+  // whole crate without ever seeing the "vocabulary bank" the picker promised them.
+  // Read after mount, like everything else that comes out of saved state.
+  const mountedAt = useNowAfterMount()
+  const kept = mountedAt ? owned.length : 0
   return (
     <div data-stage={stage} className="flex min-h-dvh flex-col bg-bg text-fg transition-colors duration-700">
       {nav || eyebrow ? (
@@ -89,6 +95,11 @@ function Shell({
               </button>
             ) : null}
             <p className="eyebrow flex-1 truncate text-accent">{eyebrow ?? ''}</p>
+            {kept > 0 ? (
+              <span className="eyebrow shrink-0 tabular-nums text-muted" title="Pieces you have kept">
+                {kept} kept
+              </span>
+            ) : null}
             {nav && canGoBack ? (
               <button
                 type="button"
@@ -99,6 +110,7 @@ function Shell({
                 Crates
               </button>
             ) : null}
+            <Menu />
           </div>
         </header>
       ) : null}
@@ -225,6 +237,69 @@ function Deal() {
 
       <div className="mt-7 space-y-6 pb-7">
         <Block label={DEAL_COPY.how.label} lines={DEAL_COPY.how.steps} numbered />
+
+        {/* The ladder, drawn rather than described. */}
+        <section className="border-t border-line pt-4">
+          <p className="eyebrow text-accent">{DEAL_COPY.stages.label}</p>
+          <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.stages.intro}</p>
+          <ol className="mt-5">
+            {RUNGS.map((r, i) => (
+              <li key={r.rung} className="relative grid grid-cols-[28px_1fr] gap-x-3 pb-5 last:pb-0">
+                {/* the rail, stopping at the last dot rather than running past it */}
+                {i < RUNGS.length - 1 ? (
+                  <span aria-hidden className="absolute left-[13.5px] top-7 bottom-0 w-px bg-line" />
+                ) : null}
+                <span
+                  className={
+                    'relative z-10 flex h-7 w-7 items-center justify-center rounded-full border text-[0.65rem] font-semibold tabular-nums ' +
+                    (r.rung === 1
+                      ? 'border-accent bg-accent text-accent-ink'
+                      : 'border-line bg-bg text-muted')
+                  }
+                >
+                  {r.rung}
+                </span>
+                <span className="min-w-0">
+                  <span className="flex flex-wrap items-baseline gap-x-2">
+                    <span className="display text-sm">{r.name}</span>
+                    {r.rung === 1 ? (
+                      <span className="eyebrow text-[0.5rem] text-accent">{DEAL_COPY.stages.start}</span>
+                    ) : null}
+                  </span>
+                  <span className="mt-1 block text-xs leading-relaxed text-muted">{r.what}</span>
+                  <span className="pt mt-1.5 block text-xs text-accent/80">{r.example}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-5 border-t border-line/60 pt-3 text-xs leading-relaxed text-muted">
+            {DEAL_COPY.stages.move}
+          </p>
+        </section>
+
+        {/* What accumulates — the thing the picker calls a vocabulary bank. */}
+        <section className="border-t border-line pt-4">
+          <p className="eyebrow text-accent">{DEAL_COPY.collect.label}</p>
+          <ul className="mt-3 space-y-2.5">
+            {DEAL_COPY.collect.lines.map((line) => (
+              <li key={line} className="flex gap-3 text-sm leading-relaxed text-fg/85">
+                <span className="shrink-0 pt-0.5 text-xs text-muted">·</span>
+                <span>{line}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {DEAL_COPY.collect.examples.map((e) => (
+              <span
+                key={e}
+                className="pt rounded-full border border-line bg-chip px-2.5 py-1 text-xs text-accent"
+              >
+                {e}
+              </span>
+            ))}
+          </div>
+        </section>
+
         <Block label={DEAL_COPY.ask.label} lines={DEAL_COPY.ask.lines} />
         <Block label={DEAL_COPY.get.label} lines={DEAL_COPY.get.lines} />
 
@@ -421,12 +496,32 @@ function Picker() {
       <h1 className="display text-balance text-2xl">{PICKER.headline}</h1>
       <p className="mt-2 text-sm text-muted">{PICKER.sub}</p>
       {mounted ? (
-        <div className="mt-4 flex items-center gap-3">
-          <span className="eyebrow shrink-0 text-accent">
-            You are at {rung} · {here.name}
-          </span>
-          <span className="h-px flex-1 bg-line" />
-        </div>
+        <details className="group mt-4">
+          <summary className="tap-target flex cursor-pointer list-none items-center gap-3">
+            <span className="eyebrow shrink-0 text-accent">
+              Stage {rung} of 6 · {here.name}
+            </span>
+            <span className="h-px flex-1 bg-line" />
+            <span className="shrink-0 text-[0.6rem] uppercase tracking-wider text-muted">
+              {PICKER.stages_toggle}
+            </span>
+          </summary>
+          <ol className="mt-3 space-y-1.5 border-l border-line pl-4">
+            {RUNGS.map((r) => (
+              <li
+                key={r.rung}
+                className={
+                  'flex flex-wrap items-baseline gap-x-2 text-xs ' +
+                  (r.rung === rung ? 'text-accent' : r.rung < rung ? 'text-muted' : 'text-muted/60')
+                }
+              >
+                <span className="tabular-nums">{r.rung}</span>
+                <span className="display">{r.name}</span>
+                {r.rung === rung ? <span className="eyebrow text-[0.5rem]">you are here</span> : null}
+              </li>
+            ))}
+          </ol>
+        </details>
       ) : null}
       <div className="mt-5 space-y-2">
         {shown.map((f) => {

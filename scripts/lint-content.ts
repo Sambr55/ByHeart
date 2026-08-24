@@ -408,6 +408,14 @@ for (const e of EXAMPLES) {
     if (root.transfer_prompt?.answer === root.pt_natural) {
       fail(R + 'release repeats the root line, so it proves nothing')
     }
+    // Nor may it repeat the build. Being asked to assemble the same sentence twice
+    // running reads as a fault, and proves recall of the last screen rather than
+    // transfer. buildTargetFor avoids it wherever a root has another usable branch;
+    // this catches the roots where it cannot.
+    const bt = buildTargetFor(root)
+    if (!root.freebie_flag && bt && bt.pt === root.transfer_prompt?.answer) {
+      fail(R + 'build and release are both "' + bt.pt + '"; give it another branch')
+    }
     for (const p of root.reinforces) {
       if (!PIECES[p]) fail(R + 'claims to reinforce "' + p + '", which no root teaches')
     }
@@ -418,13 +426,13 @@ for (const e of EXAMPLES) {
     if (target) {
       const taught = new Set(
         [...root.extracts.map((e) => e.pt), ...Object.keys(PIECES).map((k) => PIECES[k].pt)]
-          .flatMap((s) => s.replace(/[…?.,]/g, '').toLowerCase().split(' '))
+          .flatMap((s) => s.replace(/[…?.,!;:]/g, '').toLowerCase().split(' '))
           .filter(Boolean),
       )
       const glossed = new Set(
-        Object.keys(root.helpers ?? {}).map((w) => w.replace(/[…?.,]/g, '').toLowerCase()),
+        Object.keys(root.helpers ?? {}).map((w) => w.replace(/[…?.,!;:]/g, '').toLowerCase()),
       )
-      for (const word of target.pt.replace(/[.?,]/g, '').split(' ')) {
+      for (const word of target.pt.replace(/[.?,!;:…]/g, '').split(' ')) {
         const w = word.toLowerCase()
         if (!w || taught.has(w) || glossed.has(w)) continue
         if (/^[A-Z]/.test(word)) continue // a name
@@ -544,20 +552,20 @@ for (const e of EXAMPLES) {
     }
     // Same rule for the build: the words it asks the learner to place must be ones
     // this rung can honestly assume.
-    const target = buildTargetFor(root)
+    const target = root.freebie_flag ? null : buildTargetFor(root)
     if (target) {
       const ownWords = new Set(
-        root.extracts.flatMap((e) => e.pt.replace(/[…?.,]/g, '').toLowerCase().split(' ')),
+        root.extracts.flatMap((e) => e.pt.replace(/[…?.,!;:]/g, '').toLowerCase().split(' ')),
       )
       const glossed = new Set(
-        Object.keys(root.helpers ?? {}).map((w) => w.replace(/[…?.,]/g, '').toLowerCase()),
+        Object.keys(root.helpers ?? {}).map((w) => w.replace(/[…?.,!;:]/g, '').toLowerCase()),
       )
       const belowOrAt = new Set(
         Object.values(PIECES)
           .filter((pc) => pc.rung <= root.rung)
-          .flatMap((pc) => pc.pt.replace(/[…?.,]/g, '').toLowerCase().split(' ')),
+          .flatMap((pc) => pc.pt.replace(/[…?.,!;:]/g, '').toLowerCase().split(' ')),
       )
-      for (const word of target.pt.replace(/[.?,]/g, '').split(' ')) {
+      for (const word of target.pt.replace(/[.?,!;:…]/g, '').split(' ')) {
         const w = word.toLowerCase()
         if (!w || ownWords.has(w) || glossed.has(w) || belowOrAt.has(w)) continue
         if (/^[A-Z]/.test(word)) continue

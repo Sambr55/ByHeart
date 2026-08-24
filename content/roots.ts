@@ -39,16 +39,16 @@ export type CultureFamily =
  */
 export type Rung = 1 | 2 | 3 | 4 | 5 | 6
 
-export const RUNGS: { rung: Rung; name: string; what: string; opens: string }[] = [
+export const RUNGS: { rung: Rung; name: string; what: string; opens: string; example: string }[] = [
   // `opens` is the line a dimmed crate shows. It says what you will be able to DO,
   // never what you have failed to do — a locked thing should read as an appointment,
   // not a telling-off.
-  { rung: 1, name: 'Name it', what: 'The thing in front of you. Objects, food, numbers, prices.', opens: 'Opens once you can name what is in front of you.' },
-  { rung: 2, name: 'Ask for it', what: 'Get what you want from another person.', opens: 'Opens once you can ask somebody for something.' },
-  { rung: 3, name: 'Find it', what: 'Questions. Where, how much, who, what time.', opens: 'Opens once you can ask where and how much.' },
-  { rung: 4, name: 'Fit it in time', what: 'Plans, and saying when. Arranging to meet.', opens: 'Opens once you can say when.' },
-  { rung: 5, name: 'Talk about other people', what: 'Everyone who is not you or the person opposite.', opens: 'Opens once you can talk about somebody else.' },
-  { rung: 6, name: 'Mean it', what: 'Register and nuance. The same thing said three ways, and choosing.', opens: 'Opens once you can choose how you sound.' },
+  { rung: 1, name: 'Name it', what: 'The thing in front of you. Objects, food, numbers, prices.', opens: 'Opens once you can name what is in front of you.' , example: 'Um copo de água. · Sete euros.' },
+  { rung: 2, name: 'Ask for it', what: 'Get what you want from another person.', opens: 'Opens once you can ask somebody for something.' , example: 'Preciso de ajuda.' },
+  { rung: 3, name: 'Find it', what: 'Questions. Where, how much, who, what time.', opens: 'Opens once you can ask where and how much.' , example: 'Onde está a casa de banho?' },
+  { rung: 4, name: 'Fit it in time', what: 'Plans, and saying when. Arranging to meet.', opens: 'Opens once you can say when.' , example: 'Até segunda-feira.' },
+  { rung: 5, name: 'Talk about other people', what: 'Everyone who is not you or the person opposite.', opens: 'Opens once you can talk about somebody else.' , example: 'Ele gosta de ti.' },
+  { rung: 6, name: 'Mean it', what: 'Register and nuance. The same thing said three ways, and choosing.', opens: 'Opens once you can choose how you sound.' , example: 'Tudo bem? · Está tudo bem?' },
 ]
 
 export type RootType = 'quote' | 'title' | 'paraphrased_moment' | 'wisdom' | 'other'
@@ -978,6 +978,7 @@ export const BRIDGET_JONES: Root[] = [
       'de': 'of',
       '\u00e1gua': 'water',
       'Dois': 'two',
+      'copos': 'glasses',
       'tinto': 'red (of wine)',
     },
     transfer_prompt: {
@@ -2366,7 +2367,7 @@ export const FLIRTING_M2F: Root[] = [
       { pt: 'Vim para te pedir ajuda.', en: 'I came to ask you for help.' },
     ],
     reinforces: ['posso'],
-    helpers: { 'para': 'in order to', 'uma': 'a', 'coisa': 'thing', 'ficar': 'to stay', 'ver': 'to see', 'ajuda': 'help' },
+    helpers: { 'para': 'in order to', 'uma': 'a', 'coisa': 'thing', 'ficar': 'to stay', 'ver': 'to see', 'ajuda': 'help', 'pedir-te': 'ask you for' },
     transfer_prompt: { context: 'You have travelled a long way and she has no idea why.', ask: 'I came here to see you.', answer: 'Vim aqui para te ver.' },
     rights_status: 'title-reference',
     starter_tags: ['warm', 'iconic'],
@@ -3456,4 +3457,29 @@ export function rungReached(
     if (root && root.rung > top) top = root.rung
   }
   return Math.min(6, Math.max(1, top + 1)) as Rung
+}
+
+/** The root that first taught a piece — where the learner met it. */
+export function sourceOf(pieceId: string): Root | undefined {
+  return ROOTS.find((r) => r.extracts.some((e) => e.id === pieceId))
+}
+
+/**
+ * Everything a piece lets you say, gathered from every root that demonstrates it.
+ *
+ * Deliberately drawn across the whole graph rather than the one root it came from:
+ * the point of the library is that COMIGO stopped belonging to Top Gun the moment it
+ * turned up somewhere else.
+ */
+export function linesFor(pieceId: string, limit = 4): Branch[] {
+  const piece = PIECES[pieceId]
+  if (!piece) return []
+  const stem = piece.pt.replace(/[…?]/g, '').trim().toLowerCase()
+  const out: Branch[] = []
+  for (const r of ROOTS) {
+    for (const b of r.branches) {
+      if (b.pt.toLowerCase().includes(stem) && !out.some((o) => o.pt === b.pt)) out.push(b)
+    }
+  }
+  return out.slice(0, limit)
 }

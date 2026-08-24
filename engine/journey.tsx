@@ -86,10 +86,18 @@ export function branchesFor(root: Root, extractId: string) {
 /**
  * The build should never be the place a learner meets a word for the first time as a
  * puzzle. Prefer a branch of two or more words with no trailing ellipsis.
+ *
+ * And never the same sentence as the release. The release exists to show that the line
+ * survives without the film attached to it; if it is the sentence they tiled together
+ * ninety seconds earlier it demonstrates that they remember the previous screen, which
+ * is not the claim. It also simply reads as a bug — you are asked the same question
+ * twice in a row.
  */
 export function buildTargetFor(root: Root) {
+  const usable = (b: { pt: string }) => !b.pt.includes('…') && b.pt.split(' ').length > 1
   return (
-    root.branches.find((b) => !b.pt.includes('…') && b.pt.split(' ').length > 1) ??
+    root.branches.find((b) => usable(b) && b.pt !== root.transfer_prompt.answer) ??
+    root.branches.find(usable) ??
     root.branches[0]
   )
 }

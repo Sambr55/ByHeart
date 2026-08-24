@@ -97,9 +97,33 @@ export const DEAL = {
     label: 'HOW IT WORKS',
     steps: [
       'Start with something you already know by heart.',
-      'We pull out the useful language hiding inside it.',
+      'We pull out the useful language hiding inside it, and you keep it.',
       'Then we take the film away and find out whether it stuck.',
     ],
+  },
+  /**
+   * The stages were being shown as a number on a screen before anything had explained
+   * what they were — "you are at 5" means nothing to somebody who has never been told
+   * there are six of them or what they lead to. This block is that explanation, and it
+   * is deliberately the most visual thing on the page.
+   */
+  stages: {
+    label: 'THE SIX STAGES',
+    intro:
+      'Not levels, and nothing to grind. Each stage is a thing you can walk into a café and actually do, and they are in this order because language is — you cannot ask where the water is before you have the word for water.',
+    start: 'YOU START HERE',
+    move:
+      'You move up by saying something cold, with the film taken away — never by turning up. It cannot go down, and nothing expires if you disappear for a month.',
+  },
+  collect: {
+    label: 'WHAT YOU COLLECT',
+    lines: [
+      'Every line hands you a piece or two, and they are yours from then on.',
+      'Pieces from different crates combine — a word out of a Bond title finishing a sentence that started in Bridget Jones.',
+      'That bank is the whole score. Not days attended.',
+    ],
+    /** Real pieces the graph teaches, shown as the chips they appear as in the app. */
+    examples: ['comigo', 'onde', 'quanto', 'ajuda', 'ele', 'segunda-feira'],
   },
   ask: {
     label: 'WHAT WE ASK OF YOU',
@@ -141,6 +165,8 @@ export const PICKER = {
   /** Shown under the list whenever something is still dimmed. */
   locked_note:
     'The dimmed ones are not gone. Each says what opens it — and it opens by saying something cold, with the film taken away, not by turning up.',
+  /** The affordance on the stage band, which used to be a number with no explanation. */
+  stages_toggle: 'the six stages',
   cta: 'START HERE',
 } as const
 
