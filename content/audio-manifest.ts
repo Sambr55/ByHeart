@@ -73,10 +73,10 @@ export const AUDIO_MANIFEST: AudioEntry[] = (() => {
     if (!bySlug.has(slug)) bySlug.set(slug, { slug, text, kind: 'example' })
   }
   for (const root of ROOTS) {
-    add(root.pt_natural)
-    root.branches.forEach((b) => add(b.pt))
-    root.extracts.forEach((e) => add(e.pt.replace('…', '').trim()))
-    root.voice_options?.forEach((v) => add(v.pt))
+    add(root.target)
+    root.branches.forEach((b) => add(b.target))
+    root.extracts.forEach((e) => add(e.target.replace('…', '').trim()))
+    root.voice_options?.forEach((v) => add(v.target))
     add(root.transfer_prompt.answer)
   }
   COLLISIONS.forEach((c) => add(c.answer))

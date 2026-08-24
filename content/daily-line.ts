@@ -92,13 +92,13 @@ function noteFor(root: Root, pt: string): string {
   }
 
   // The piece itself, when it is visibly in the line.
-  const extract = root.extracts.find((e) => mentions(e.pt))
-  if (extract) return '“' + extract.pt + '” is ' + extract.gloss + ' — the piece this is built on.'
+  const extract = root.extracts.find((e) => mentions(e.target))
+  if (extract) return '“' + extract.target + '” is ' + extract.gloss + ' — the piece this is built on.'
 
   // Nothing in the line matches by spelling, which is usually the most interesting
   // case: ligo-te and ligas-me are the same verb with the ending moved. Give the
   // sentence it came out of rather than a note about a word that is not there.
-  return 'From “' + root.pt_natural + '” — ' + root.meaning_en
+  return 'From “' + root.target + '” — ' + root.source
 }
 
 interface Candidate {
@@ -116,7 +116,7 @@ function candidates(): Candidate[] {
   for (const root of ROOTS) {
     const needs = root.extracts.map((e) => e.id)
     root.branches.forEach((b, i) => {
-      out.push({ id: root.root_id + ':b' + i, pt: b.pt, en: b.en, root, needs })
+      out.push({ id: root.root_id + ':b' + i, pt: b.target, en: b.en, root, needs })
     })
     out.push({
       id: root.root_id + ':t',

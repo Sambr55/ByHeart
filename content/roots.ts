@@ -61,12 +61,12 @@ export type SourceStatus =
 
 export type RightsStatus = 'short-quote-review-required' | 'title-reference' | 'dub-authored'
 
-export type QaStatus = 'pending-pt-pt-review' | 'reviewed'
+export type QaStatus = 'pending-native-review' | 'reviewed'
 
 /** A reusable piece. The learner's inventory is keyed by these ids. */
 export interface Extract {
   id: string
-  pt: string
+  target: string
   gloss: string
   /**
    * A piece carries its own rung, which is often lower than the root teaching it:
@@ -78,13 +78,13 @@ export interface Extract {
 }
 
 export interface Branch {
-  pt: string
+  target: string
   en: string
 }
 
 /** §12 — two natural ways to say the same thing. Neither is scored. */
 export interface VoiceOption {
-  pt: string
+  target: string
   en: string
   signal: 'direct' | 'softened' | 'dry' | 'warm' | 'casual' | 'polite'
   /** The chip: which room this one belongs in. */
@@ -107,8 +107,8 @@ export interface Root {
   source_status: SourceStatus
   /** What the learner sees as the cultural trigger. */
   root_display: string
-  meaning_en: string
-  pt_natural: string
+  source: string
+  target: string
   literal_note?: string
   /** Why this Portuguese is a natural expression of the root. Mandatory (§10). */
   semantic_bridge: string
@@ -218,13 +218,13 @@ export function daysLeft(crate: Crate, now: Date = new Date()): number | null {
   return Math.max(0, Math.ceil((gone.getTime() - now.getTime()) / 86_400_000))
 }
 
-const q = (partial: Partial<Root> & Pick<Root, 'root_id' | 'culture_family' | 'rung' | 'root_display' | 'meaning_en' | 'pt_natural' | 'semantic_bridge' | 'subtext' | 'extracts' | 'branches' | 'transfer_prompt'>): Root => ({
+const q = (partial: Partial<Root> & Pick<Root, 'root_id' | 'culture_family' | 'rung' | 'root_display' | 'source' | 'target' | 'semantic_bridge' | 'subtext' | 'extracts' | 'branches' | 'transfer_prompt'>): Root => ({
   root_type: 'quote',
   source_label: '',
   source_status: 'needs-review',
   reinforces: [],
   rights_status: 'short-quote-review-required',
-  qa_status: 'pending-pt-pt-review',
+  qa_status: 'pending-native-review',
   freebie_flag: false,
   starter_tags: [],
   next_root_hooks: [],
@@ -242,16 +242,16 @@ export const TOP_GUN: Root[] = [
     rung: 2,
     source_label: 'Top Gun',
     root_display: 'Talk to me, Goose.',
-    meaning_en: 'Say something. I need you with me.',
-    pt_natural: 'Fala comigo, Goose.',
+    source: 'Say something. I need you with me.',
+    target: 'Fala comigo, Goose.',
     semantic_bridge:
       'The urgency survives intact. Portuguese expresses “with me” as one fused word, COMIGO, attached straight onto the command FALA.',
     subtext: 'Direct, close, urgent. You reach for this when you genuinely need someone to engage.',
-    extracts: [{ id: 'comigo', pt: 'comigo', gloss: 'with me', rung: 2 }],
+    extracts: [{ id: 'comigo', target: 'comigo', gloss: 'with me', rung: 2 }],
     branches: [
-      { pt: 'Vem comigo.', en: 'Come with me.' },
-      { pt: 'Fica comigo.', en: 'Stay with me.' },
-      { pt: 'Podes vir comigo?', en: 'Can you come with me?' },
+      { target: 'Vem comigo.', en: 'Come with me.' },
+      { target: 'Fica comigo.', en: 'Stay with me.' },
+      { target: 'Podes vir comigo?', en: 'Can you come with me?' },
     ],
     helpers: {
       'Vem': 'come',
@@ -270,30 +270,30 @@ export const TOP_GUN: Root[] = [
     rung: 4,
     source_label: 'Top Gun',
     root_display: 'You can be my wingman anytime.',
-    meaning_en: 'You can be my partner whenever you want.',
-    pt_natural: 'Podes ser o meu parceiro quando quiseres.',
+    source: 'You can be my partner whenever you want.',
+    target: 'Podes ser o meu parceiro quando quiseres.',
     semantic_bridge:
       'The aviation metaphor becomes ordinary human Portuguese. The useful pieces are PODES and QUANDO QUISERES — not the military noun.',
     subtext: 'Warm permission rather than formal ability. PODES is one of the highest-leverage pieces in the language.',
     extracts: [
-      { id: 'podes', pt: 'podes', gloss: 'you can', rung: 2 },
-      { id: 'quando_quiseres', pt: 'quando quiseres', gloss: 'whenever you want' },
+      { id: 'podes', target: 'podes', gloss: 'you can', rung: 2 },
+      { id: 'quando_quiseres', target: 'quando quiseres', gloss: 'whenever you want' },
     ],
     branches: [
-      { pt: 'Podes vir comigo?', en: 'Can you come with me?' },
-      { pt: 'Podes dizer outra vez?', en: 'Can you say it again?' },
-      { pt: 'Quando quiseres.', en: 'Whenever you want.' },
+      { target: 'Podes vir comigo?', en: 'Can you come with me?' },
+      { target: 'Podes dizer outra vez?', en: 'Can you say it again?' },
+      { target: 'Quando quiseres.', en: 'Whenever you want.' },
     ],
     reinforces: ['comigo'],
     voice_options: [
       {
-        pt: 'Podes repetir?', en: 'Can you repeat?', signal: 'direct',
+        target: 'Podes repetir?', en: 'Can you repeat?', signal: 'direct',
         register: 'QUICK, BETWEEN FRIENDS',
         when: 'Someone you already call tu — a friend, a colleague you know, someone your own age.',
         risk: 'Fine with friends. To a stranger or anyone older, podes is the wrong word.',
       },
       {
-        pt: 'Podes repetir, por favor?', en: 'Can you repeat, please?', signal: 'polite',
+        target: 'Podes repetir, por favor?', en: 'Can you repeat, please?', signal: 'polite',
         register: 'THE POLITE VERSION',
         when: 'Same friend, but you are interrupting, or you have already asked once.',
         safest: true,
@@ -315,21 +315,21 @@ export const TOP_GUN: Root[] = [
     rung: 3,
     source_label: 'Top Gun',
     root_display: 'What were you thinking?',
-    meaning_en: 'What was going through your head?',
-    pt_natural: 'Em que estavas a pensar?',
+    source: 'What was going through your head?',
+    target: 'Em que estavas a pensar?',
     literal_note: 'Literally “in what were you thinking?”',
     semantic_bridge:
       'Portuguese asks “in what were you thinking?”, because PENSAR EM means to think about. That EM is the whole difference between sounding translated and sounding Portuguese.',
     subtext: 'Curious, intimate or accusatory depending entirely on how you say it.',
     extracts: [
-      { id: 'estavas_a', pt: 'estavas a…', gloss: 'you were …ing' },
-      { id: 'em_que', pt: 'em que…?', gloss: 'what … about?' },
+      { id: 'estavas_a', target: 'estavas a…', gloss: 'you were …ing' },
+      { id: 'em_que', target: 'em que…?', gloss: 'what … about?' },
     ],
     branches: [
-      { pt: 'Em que estás a pensar?', en: 'What are you thinking about?' },
-      { pt: 'Estava a pensar…', en: 'I was thinking…' },
-      { pt: 'Estava a pensar em ti.', en: 'I was thinking about you.' },
-      { pt: 'Em que estavas a pensar?', en: 'What were you thinking about?' },
+      { target: 'Em que estás a pensar?', en: 'What are you thinking about?' },
+      { target: 'Estava a pensar…', en: 'I was thinking…' },
+      { target: 'Estava a pensar em ti.', en: 'I was thinking about you.' },
+      { target: 'Em que estavas a pensar?', en: 'What were you thinking about?' },
     ],
     helpers: {
       'estás': 'you are',
@@ -348,16 +348,16 @@ export const TOP_GUN: Root[] = [
     rung: 2,
     source_label: 'Top Gun',
     root_display: 'I feel the need…',
-    meaning_en: 'I need something, badly.',
-    pt_natural: 'Sinto que preciso…',
+    source: 'I need something, badly.',
+    target: 'Sinto que preciso…',
     semantic_bridge:
       'Rather than carrying the English noun “need” across literally, Portuguese turns the idea into a verb: PRECISAR. “I feel that I need…”',
     subtext: 'Neutral, everyday, endlessly useful. This is the product beating subtitle literalism.',
-    extracts: [{ id: 'preciso_de', pt: 'preciso de…', gloss: 'I need…' }],
+    extracts: [{ id: 'preciso_de', target: 'preciso de…', gloss: 'I need…' }],
     branches: [
-      { pt: 'Preciso de ajuda.', en: 'I need help.' },
-      { pt: 'Preciso de um táxi.', en: 'I need a taxi.' },
-      { pt: 'Preciso de tempo.', en: 'I need time.' },
+      { target: 'Preciso de ajuda.', en: 'I need help.' },
+      { target: 'Preciso de um táxi.', en: 'I need a taxi.' },
+      { target: 'Preciso de tempo.', en: 'I need time.' },
     ],
     helpers: {
       'ajuda': 'help',
@@ -375,30 +375,30 @@ export const TOP_GUN: Root[] = [
     rung: 4,
     source_label: 'Top Gun',
     root_display: 'I will not leave my wingman.',
-    meaning_en: 'I am not going to abandon my partner.',
-    pt_natural: 'Não vou deixar o meu parceiro.',
+    source: 'I am not going to abandon my partner.',
+    target: 'Não vou deixar o meu parceiro.',
     semantic_bridge:
       'The cultural meaning is loyalty. The reusable Portuguese is the intention frame NÃO VOU + verb, which works for anything you have decided not to do.',
     subtext: 'Firm intention. More conversational than a formal future tense this early.',
     extracts: [
-      { id: 'nao_vou', pt: 'não vou…', gloss: 'I’m not going to…' },
-      { id: 'deixar', pt: 'deixar', gloss: 'to leave / to let' },
+      { id: 'nao_vou', target: 'não vou…', gloss: 'I’m not going to…' },
+      { id: 'deixar', target: 'deixar', gloss: 'to leave / to let' },
     ],
     branches: [
-      { pt: 'Não vou sair.', en: 'I’m not going out.' },
-      { pt: 'Não vou amanhã.', en: 'I’m not going tomorrow.' },
-      { pt: 'Não vou fazer isso.', en: 'I’m not going to do that.' },
-      { pt: 'Vou deixar isso.', en: 'I’m going to leave that.' },
+      { target: 'Não vou sair.', en: 'I’m not going out.' },
+      { target: 'Não vou amanhã.', en: 'I’m not going tomorrow.' },
+      { target: 'Não vou fazer isso.', en: 'I’m not going to do that.' },
+      { target: 'Vou deixar isso.', en: 'I’m going to leave that.' },
     ],
     voice_options: [
       {
-        pt: 'Não vou.', en: 'I’m not going.', signal: 'direct',
+        target: 'Não vou.', en: 'I’m not going.', signal: 'direct',
         register: 'A FLAT NO',
         when: 'When the answer really is no and you would rather not be talked round.',
         risk: 'A bare no lands colder in Portugal than it does in English.',
       },
       {
-        pt: 'Acho que não vou.', en: 'I don’t think I’ll go.', signal: 'softened',
+        target: 'Acho que não vou.', en: 'I don’t think I’ll go.', signal: 'softened',
         register: 'THE SOFT NO',
         when: 'Turning down an invitation without closing the door. Literally “I think I’m not going” — everyone hears it as no.',
         safest: true,
@@ -426,19 +426,19 @@ export const TOP_GUN: Root[] = [
     source_label: 'Top Gun — looking for your wingman',
     source_status: 'paraphrased',
     root_display: 'Where\u2019s my wingman?',
-    meaning_en: 'Where is my wingman?',
-    pt_natural: 'Onde est\u00e1 o meu parceiro?',
+    source: 'Where is my wingman?',
+    target: 'Onde est\u00e1 o meu parceiro?',
     semantic_bridge:
       'English hides the verb inside \u201cwhere\u2019s\u201d. Portuguese keeps them apart, and the pair ONDE + EST\u00c1 will locate anything you can already name \u2014 which is the entire reason naming came first.',
     subtext: 'The question you will ask on your first afternoon, and every afternoon after it.',
     extracts: [
-      { id: 'onde', pt: 'onde', gloss: 'where' },
-      { id: 'esta_', pt: 'est\u00e1', gloss: 'is (right now)' },
+      { id: 'onde', target: 'onde', gloss: 'where' },
+      { id: 'esta_', target: 'est\u00e1', gloss: 'is (right now)' },
     ],
     branches: [
-      { pt: 'Onde est\u00e1 a casa de banho?', en: 'Where\u2019s the toilet?' },
-      { pt: 'Onde est\u00e1 o meu caf\u00e9?', en: 'Where\u2019s my coffee?' },
-      { pt: 'Est\u00e1 aqui.', en: 'It\u2019s here.' },
+      { target: 'Onde est\u00e1 a casa de banho?', en: 'Where\u2019s the toilet?' },
+      { target: 'Onde est\u00e1 o meu caf\u00e9?', en: 'Where\u2019s my coffee?' },
+      { target: 'Est\u00e1 aqui.', en: 'It\u2019s here.' },
     ],
     helpers: {
       'a': 'the',
@@ -476,17 +476,17 @@ export const JAMES_BOND: Root[] = [
     root_type: 'quote',
     source_label: 'James Bond',
     root_display: 'My name is… James Bond.',
-    meaning_en: 'The most famous introduction in film.',
-    pt_natural: 'Chamo-me… James Bond.',
+    source: 'The most famous introduction in film.',
+    target: 'Chamo-me… James Bond.',
     literal_note: 'Literally “I call myself”.',
     semantic_bridge:
       'English says “my name is”. European Portuguese introduces you with CHAMO-ME — literally “I call myself” — and that reflexive is what you will actually hear in Portugal.',
     subtext: 'A perfect freebie: culturally unmistakable and useful within an hour of landing.',
-    extracts: [{ id: 'chamo_me', pt: 'chamo-me…', gloss: 'my name is…' }],
+    extracts: [{ id: 'chamo_me', target: 'chamo-me…', gloss: 'my name is…' }],
     branches: [
-      { pt: 'Chamo-me Sam.', en: 'My name is Sam.' },
-      { pt: 'E tu, como te chamas?', en: 'And you, what’s your name?' },
-      { pt: 'Como se chama?', en: 'What is it called?' },
+      { target: 'Chamo-me Sam.', en: 'My name is Sam.' },
+      { target: 'E tu, como te chamas?', en: 'And you, what’s your name?' },
+      { target: 'Como se chama?', en: 'What is it called?' },
     ],
     helpers: {
       'Sam': 'a name',
@@ -509,19 +509,19 @@ export const JAMES_BOND: Root[] = [
     source_label: 'Tomorrow Never Dies',
     source_status: 'verified',
     root_display: 'Tomorrow Never Dies',
-    meaning_en: 'Tomorrow never dies.',
-    pt_natural: 'Amanhã nunca morre.',
+    source: 'Tomorrow never dies.',
+    target: 'Amanhã nunca morre.',
     semantic_bridge:
       'The title is compact enough that both useful pieces survive the crossing intact: AMANHÃ and NUNCA are sitting there in plain sight.',
     subtext: 'Time and absolute frequency in one recognisable title — far more productive than a title that is only a place name.',
     extracts: [
-      { id: 'amanha', pt: 'amanhã', gloss: 'tomorrow' },
-      { id: 'nunca', pt: 'nunca', gloss: 'never' },
+      { id: 'amanha', target: 'amanhã', gloss: 'tomorrow' },
+      { id: 'nunca', target: 'nunca', gloss: 'never' },
     ],
     branches: [
-      { pt: 'Até amanhã.', en: 'See you tomorrow.' },
-      { pt: 'Amanhã não posso.', en: 'I can’t tomorrow.' },
-      { pt: 'Nunca mais.', en: 'Never again.' },
+      { target: 'Até amanhã.', en: 'See you tomorrow.' },
+      { target: 'Amanhã não posso.', en: 'I can’t tomorrow.' },
+      { target: 'Nunca mais.', en: 'Never again.' },
     ],
     reinforces: ['podes'],
     helpers: {
@@ -533,12 +533,12 @@ export const JAMES_BOND: Root[] = [
     },
     voice_options: [
       {
-        pt: 'Amanhã.', en: 'Tomorrow.', signal: 'direct',
+        target: 'Amanhã.', en: 'Tomorrow.', signal: 'direct',
         register: 'ANSWERING “WHEN?”',
         when: '“When?” — “Tomorrow.” This is information, not a goodbye.',
       },
       {
-        pt: 'Até amanhã!', en: 'See you tomorrow!', signal: 'warm',
+        target: 'Até amanhã!', en: 'See you tomorrow!', signal: 'warm',
         register: 'LEAVING',
         when: 'Said on the way out the door. You will use this one most days.',
       },
@@ -557,20 +557,20 @@ export const JAMES_BOND: Root[] = [
     source_label: 'From Russia with Love',
     source_status: 'verified',
     root_display: 'From Russia with Love',
-    meaning_en: 'From Russia, with love.',
-    pt_natural: 'Da Rússia com amor.',
+    source: 'From Russia, with love.',
+    target: 'Da Rússia com amor.',
     semantic_bridge:
       'The engine hiding in the title is COM = with. And COM + MIM is exactly where COMIGO came from — the piece you already own is this word wearing a disguise.',
     subtext: 'A compact root that quietly explains a piece you already have while handing you the general form.',
     extracts: [
-      { id: 'com', pt: 'com', gloss: 'with' },
-      { id: 'amor', pt: 'amor', gloss: 'love' },
+      { id: 'com', target: 'com', gloss: 'with' },
+      { id: 'amor', target: 'amor', gloss: 'love' },
     ],
     branches: [
-      { pt: 'Café com leite.', en: 'Coffee with milk.' },
-      { pt: 'Com açúcar?', en: 'With sugar?' },
-      { pt: 'Comigo.', en: 'With me.' },
-      { pt: 'Com amor.', en: 'With love.' },
+      { target: 'Café com leite.', en: 'Coffee with milk.' },
+      { target: 'Com açúcar?', en: 'With sugar?' },
+      { target: 'Comigo.', en: 'With me.' },
+      { target: 'Com amor.', en: 'With love.' },
     ],
     reinforces: ['comigo'],
     helpers: {
@@ -593,31 +593,31 @@ export const JAMES_BOND: Root[] = [
     source_label: 'Never Say Never Again',
     source_status: 'verified',
     root_display: 'Never Say Never Again',
-    meaning_en: 'Don’t say “never” again.',
-    pt_natural: 'Não digas “nunca” outra vez.',
+    source: 'Don’t say “never” again.',
+    target: 'Não digas “nunca” outra vez.',
     semantic_bridge:
       'Natural Portuguese renders the title as “don’t say ‘never’ again”, which hands you a negative command and the single most useful survival phrase in one thought.',
     subtext: 'Playful, and unusually practical: OUTRA VEZ is what rescues you when you did not catch something.',
     extracts: [
-      { id: 'outra_vez', pt: 'outra vez', gloss: 'again', rung: 3 },
-      { id: 'nao_digas', pt: 'não digas', gloss: 'don’t say' },
+      { id: 'outra_vez', target: 'outra vez', gloss: 'again', rung: 3 },
+      { id: 'nao_digas', target: 'não digas', gloss: 'don’t say' },
     ],
     branches: [
-      { pt: 'Diz outra vez.', en: 'Say it again.' },
-      { pt: 'Podes dizer outra vez?', en: 'Can you say it again?' },
-      { pt: 'Nunca mais.', en: 'Never again.' },
-      { pt: 'Não digas isso.', en: 'Don’t say that.' },
+      { target: 'Diz outra vez.', en: 'Say it again.' },
+      { target: 'Podes dizer outra vez?', en: 'Can you say it again?' },
+      { target: 'Nunca mais.', en: 'Never again.' },
+      { target: 'Não digas isso.', en: 'Don’t say that.' },
     ],
     reinforces: ['podes', 'nunca'],
     voice_options: [
       {
-        pt: 'Outra vez?', en: 'Again?', signal: 'casual',
+        target: 'Outra vez?', en: 'Again?', signal: 'casual',
         register: 'TWO WORDS, ANYWHERE',
         when: 'You missed it. Two words and a raised eyebrow does the whole job.',
         risk: 'Said flatly to a stranger it can read as impatient — your face is doing half the work.',
       },
       {
-        pt: 'Podes dizer outra vez, por favor?', en: 'Can you say it again, please?', signal: 'polite',
+        target: 'Podes dizer outra vez, por favor?', en: 'Can you say it again, please?', signal: 'polite',
         register: 'THE FULL ASK',
         when: 'When you want to be unmistakably polite, or you are already asking a second time.',
         safest: true,
@@ -644,19 +644,19 @@ export const JAMES_BOND: Root[] = [
     source_label: 'No Time to Die',
     source_status: 'verified',
     root_display: 'No Time to Die',
-    meaning_en: 'There is no time to die.',
-    pt_natural: 'Sem tempo para morrer.',
+    source: 'There is no time to die.',
+    target: 'Sem tempo para morrer.',
     semantic_bridge:
       'SEM and TEMPO are visible in the title without any translation gymnastics, and PARA is the little word that introduces purpose — time for something, time to do something.',
     subtext: 'Genuinely useful travel language pulled out of a very dramatic title. Enjoy the contrast.',
     extracts: [
-      { id: 'sem', pt: 'sem', gloss: 'without', rung: 1 },
-      { id: 'tempo', pt: 'tempo', gloss: 'time' },
+      { id: 'sem', target: 'sem', gloss: 'without', rung: 1 },
+      { id: 'tempo', target: 'tempo', gloss: 'time' },
     ],
     branches: [
-      { pt: 'Sem açúcar.', en: 'Without sugar.' },
-      { pt: 'Sem gelo.', en: 'Without ice.' },
-      { pt: 'Não tenho tempo.', en: 'I don’t have time.' },
+      { target: 'Sem açúcar.', en: 'Without sugar.' },
+      { target: 'Sem gelo.', en: 'Without ice.' },
+      { target: 'Não tenho tempo.', en: 'I don’t have time.' },
     ],
     reinforces: ['com'],
     helpers: {
@@ -680,19 +680,19 @@ export const JAMES_BOND: Root[] = [
     source_label: '007',
     source_status: 'verified',
     root_display: 'Bond. 007.',
-    meaning_en: 'Double-oh-seven.',
-    pt_natural: 'Zero zero sete.',
+    source: 'Double-oh-seven.',
+    target: 'Zero zero sete.',
     semantic_bridge:
       'Portugal reads the digits out one at a time, so the most famous number in film is already correct Portuguese. Numbers are a closed set of ten \u2014 the only vocabulary in the language you can finish in an afternoon and never revisit.',
     subtext: 'The least glamorous thing in this crate, and the first thing you will need at a till.',
     extracts: [
-      { id: 'zero', pt: 'zero', gloss: 'zero' },
-      { id: 'sete', pt: 'sete', gloss: 'seven' },
+      { id: 'zero', target: 'zero', gloss: 'zero' },
+      { id: 'sete', target: 'sete', gloss: 'seven' },
     ],
     branches: [
-      { pt: 'Sete euros.', en: 'Seven euros.' },
-      { pt: 'Mesa sete.', en: 'Table seven.' },
-      { pt: 'Zero problemas.', en: 'No problems at all.' },
+      { target: 'Sete euros.', en: 'Seven euros.' },
+      { target: 'Mesa sete.', en: 'Table seven.' },
+      { target: 'Zero problemas.', en: 'No problems at all.' },
     ],
     helpers: {
       'euros': 'euros',
@@ -717,19 +717,19 @@ export const JAMES_BOND: Root[] = [
     source_label: 'Quantum of Solace',
     source_status: 'verified',
     root_display: 'Quantum of Solace',
-    meaning_en: 'A quantum is an amount \u2014 a measure of how much.',
-    pt_natural: 'Quanto custa?',
+    source: 'A quantum is an amount \u2014 a measure of how much.',
+    target: 'Quanto custa?',
     semantic_bridge:
       'Quantum is Latin for \u201chow much\u201d, and Portuguese never stopped using the word: QUANTO. The one Bond title nobody understands turns out to be the question you need in every shop in the country.',
     subtext: 'Asked flatly, without apology. Nobody in Portugal thinks it is rude to ask a price.',
     extracts: [
-      { id: 'quanto', pt: 'quanto', gloss: 'how much' },
-      { id: 'custa', pt: 'custa', gloss: 'it costs' },
+      { id: 'quanto', target: 'quanto', gloss: 'how much' },
+      { id: 'custa', target: 'custa', gloss: 'it costs' },
     ],
     branches: [
-      { pt: 'Quanto custa isto?', en: 'How much is this?' },
-      { pt: 'Quanto \u00e9?', en: 'How much is it?' },
-      { pt: 'Custa sete euros.', en: 'It costs seven euros.' },
+      { target: 'Quanto custa isto?', en: 'How much is this?' },
+      { target: 'Quanto \u00e9?', en: 'How much is it?' },
+      { target: 'Custa sete euros.', en: 'It costs seven euros.' },
     ],
     reinforces: ['isto', 'sete'],
     helpers: {
@@ -761,19 +761,19 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
     root_display: 'You overshare. There is now a silence.',
-    meaning_en: 'I said too much.',
-    pt_natural: 'Falei demais.',
+    source: 'I said too much.',
+    target: 'Falei demais.',
     semantic_bridge:
       'The whole cringe is “I said too much”, and Portuguese compresses that into two words. DEMAIS is the part you keep — it attaches to almost anything you overdid.',
     subtext: 'Self-aware, human, lightly comic. Said with a wince rather than an apology.',
     extracts: [
-      { id: 'demais', pt: 'demais', gloss: 'too much' },
-      { id: 'falei', pt: 'falei', gloss: 'I spoke / I said' },
+      { id: 'demais', target: 'demais', gloss: 'too much' },
+      { id: 'falei', target: 'falei', gloss: 'I spoke / I said' },
     ],
     branches: [
-      { pt: 'Desculpa, falei demais.', en: 'Sorry, I said too much.' },
-      { pt: 'Comi demais.', en: 'I ate too much.' },
-      { pt: 'Bebi demais.', en: 'I drank too much.' },
+      { target: 'Desculpa, falei demais.', en: 'Sorry, I said too much.' },
+      { target: 'Comi demais.', en: 'I ate too much.' },
+      { target: 'Bebi demais.', en: 'I drank too much.' },
     ],
     helpers: {
       'Desculpa,': 'sorry,',
@@ -795,29 +795,29 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
     root_display: 'You arrive late. Everyone is already there.',
-    meaning_en: 'Sorry I’m late.',
-    pt_natural: 'Desculpa o atraso.',
+    source: 'Sorry I’m late.',
+    target: 'Desculpa o atraso.',
     semantic_bridge:
       'The useful move is not a literal description of being late. It is the phrase a Portuguese speaker actually reaches for: “sorry for the delay.”',
     subtext: 'Warm, everyday repair. How formal you go is a real choice, not a rule.',
     extracts: [
-      { id: 'desculpa', pt: 'desculpa', gloss: 'sorry', rung: 2 },
-      { id: 'atraso', pt: 'o atraso', gloss: 'the delay' },
+      { id: 'desculpa', target: 'desculpa', gloss: 'sorry', rung: 2 },
+      { id: 'atraso', target: 'o atraso', gloss: 'the delay' },
     ],
     branches: [
-      { pt: 'Desculpa.', en: 'Sorry.' },
-      { pt: 'Desculpa o atraso.', en: 'Sorry I’m late.' },
-      { pt: 'Peço desculpa.', en: 'I apologise.' },
+      { target: 'Desculpa.', en: 'Sorry.' },
+      { target: 'Desculpa o atraso.', en: 'Sorry I’m late.' },
+      { target: 'Peço desculpa.', en: 'I apologise.' },
     ],
     voice_options: [
       {
-        pt: 'Desculpa.', en: 'Sorry.', signal: 'casual',
+        target: 'Desculpa.', en: 'Sorry.', signal: 'casual',
         register: 'EVERYDAY SORRY',
         when: 'Bumping into someone, being two minutes late, squeezing past on a bus.',
         risk: 'This is the tu form. To someone older or official you want desculpe, with an e.',
       },
       {
-        pt: 'Peço desculpa.', en: 'I do apologise.', signal: 'polite',
+        target: 'Peço desculpa.', en: 'I do apologise.', signal: 'polite',
         register: 'WHEN YOU MEAN IT',
         when: 'A real apology — properly late, genuinely wrong, or talking to a stranger or a boss.',
         safest: true,
@@ -843,16 +843,16 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
     root_display: 'You forget the name of the person you are talking to.',
-    meaning_en: 'Sorry… what’s your name?',
-    pt_natural: 'Desculpa… como te chamas?',
+    source: 'Sorry… what’s your name?',
+    target: 'Desculpa… como te chamas?',
     semantic_bridge:
       'The socially useful move is to apologise lightly and then just ask. And CHAMAS is the same verb as CHAMO-ME, pointed at the other person.',
     subtext: 'Embarrassing but entirely recoverable. Everyone has done it.',
-    extracts: [{ id: 'como_te_chamas', pt: 'como te chamas?', gloss: 'what’s your name?' }],
+    extracts: [{ id: 'como_te_chamas', target: 'como te chamas?', gloss: 'what’s your name?' }],
     branches: [
-      { pt: 'Chamo-me Ana.', en: 'My name is Ana.' },
-      { pt: 'Como te chamas?', en: 'What’s your name?' },
-      { pt: 'Como se chama?', en: 'What is it called?' },
+      { target: 'Chamo-me Ana.', en: 'My name is Ana.' },
+      { target: 'Como te chamas?', en: 'What’s your name?' },
+      { target: 'Como se chama?', en: 'What is it called?' },
     ],
     reinforces: ['chamo_me', 'desculpa'],
     helpers: {
@@ -874,19 +874,19 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
     root_display: 'You say the wrong thing while trying to impress someone.',
-    meaning_en: 'Sorry. That’s not what I meant.',
-    pt_natural: 'Desculpa. Não era isso que queria dizer.',
+    source: 'Sorry. That’s not what I meant.',
+    target: 'Desculpa. Não era isso que queria dizer.',
     semantic_bridge:
       'Portuguese repairs this exactly the way English does — “that wasn’t what I meant to say” — which makes QUERIA DIZER available for every time the wrong word comes out.',
     subtext: 'The most valuable language an imperfect speaker can own: it gives you permission to recover instead of freeze.',
     extracts: [
-      { id: 'queria_dizer', pt: 'queria dizer…', gloss: 'I meant…' },
-      { id: 'nao_era_isso', pt: 'não era isso', gloss: 'that wasn’t it' },
+      { id: 'queria_dizer', target: 'queria dizer…', gloss: 'I meant…' },
+      { id: 'nao_era_isso', target: 'não era isso', gloss: 'that wasn’t it' },
     ],
     branches: [
-      { pt: 'Queria dizer…', en: 'I meant…' },
-      { pt: 'Não era isso.', en: 'That wasn’t it.' },
-      { pt: 'Desculpa, queria dizer outra coisa.', en: 'Sorry, I meant something else.' },
+      { target: 'Queria dizer…', en: 'I meant…' },
+      { target: 'Não era isso.', en: 'That wasn’t it.' },
+      { target: 'Desculpa, queria dizer outra coisa.', en: 'Sorry, I meant something else.' },
     ],
     reinforces: ['desculpa'],
     helpers: {
@@ -909,29 +909,29 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
     root_display: 'The joke does not land.',
-    meaning_en: 'It was a joke.',
-    pt_natural: 'Era uma piada.',
+    source: 'It was a joke.',
+    target: 'Era uma piada.',
     semantic_bridge:
       'The rescue is a past frame you can point at anything: ERA UMA… = it was a… The joke is disposable; the frame is not.',
     subtext: '“Era uma piada” can sound sheepish. “Estou a brincar” is lighter and lands better in the moment.',
     extracts: [
-      { id: 'era', pt: 'era…', gloss: 'it was…' },
-      { id: 'piada', pt: 'uma piada', gloss: 'a joke' },
+      { id: 'era', target: 'era…', gloss: 'it was…' },
+      { id: 'piada', target: 'uma piada', gloss: 'a joke' },
     ],
     branches: [
-      { pt: 'Era uma piada.', en: 'It was a joke.' },
-      { pt: 'Estou a brincar.', en: 'I’m joking.' },
-      { pt: 'É uma piada?', en: 'Is it a joke?' },
+      { target: 'Era uma piada.', en: 'It was a joke.' },
+      { target: 'Estou a brincar.', en: 'I’m joking.' },
+      { target: 'É uma piada?', en: 'Is it a joke?' },
     ],
     reinforces: ['estavas_a'],
     voice_options: [
       {
-        pt: 'Era uma piada.', en: 'It was a joke.', signal: 'dry',
+        target: 'Era uma piada.', en: 'It was a joke.', signal: 'dry',
         register: 'RESCUING A JOKE THAT DIED',
         when: 'Past tense. The joke has already landed badly and you are explaining it. Slightly wry.',
       },
       {
-        pt: 'Estou a brincar!', en: 'I’m only joking!', signal: 'warm',
+        target: 'Estou a brincar!', en: 'I’m only joking!', signal: 'warm',
         register: 'BEFORE IT LANDS BADLY',
         when: 'Said immediately, while their face is still changing. Warmer, and it gets there first.',
         safest: true,
@@ -958,20 +958,20 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'Bridget Jones\u2019s Diary \u2014 alone, with a very large glass',
     source_status: 'paraphrased',
     root_display: 'Bridget, alone, with an extremely large glass of wine',
-    meaning_en: 'A glass of wine, please.',
-    pt_natural: 'Um copo de vinho, por favor.',
+    source: 'A glass of wine, please.',
+    target: 'Um copo de vinho, por favor.',
     semantic_bridge:
       'Portuguese orders the container, not the drink \u2014 not \u201ca wine\u201d but a glass OF wine. That small DE does the same job in um copo de \u00e1gua and uma ch\u00e1vena de caf\u00e9, so the shape is worth more than the sentence.',
     subtext: 'The most reliable sentence in the language. Learn the shape once and swap the last word forever.',
     extracts: [
-      { id: 'copo', pt: 'copo', gloss: 'glass' },
-      { id: 'vinho', pt: 'vinho', gloss: 'wine' },
-      { id: 'por_favor', pt: 'por favor', gloss: 'please' },
+      { id: 'copo', target: 'copo', gloss: 'glass' },
+      { id: 'vinho', target: 'vinho', gloss: 'wine' },
+      { id: 'por_favor', target: 'por favor', gloss: 'please' },
     ],
     branches: [
-      { pt: 'Um copo de \u00e1gua, por favor.', en: 'A glass of water, please.' },
-      { pt: 'Dois copos de vinho.', en: 'Two glasses of wine.' },
-      { pt: 'Vinho tinto, por favor.', en: 'Red wine, please.' },
+      { target: 'Um copo de \u00e1gua, por favor.', en: 'A glass of water, please.' },
+      { target: 'Dois copos de vinho.', en: 'Two glasses of wine.' },
+      { target: 'Vinho tinto, por favor.', en: 'Red wine, please.' },
     ],
     helpers: {
       'Um': 'a',
@@ -999,19 +999,19 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'Bridget Jones\u2019s Diary \u2014 the whole diary, really',
     source_status: 'paraphrased',
     root_display: 'The entire diary, in one question',
-    meaning_en: 'Does he like me?',
-    pt_natural: 'Ele gosta de mim?',
+    source: 'Does he like me?',
+    target: 'Ele gosta de mim?',
     semantic_bridge:
       'Every sentence so far has been about you or the person in front of you. ELE is the moment somebody else walks into the conversation \u2014 and the verb ending is already telling you it is one other person, which is why Portuguese usually drops the pronoun entirely.',
     subtext: 'Asked at one in the morning, of a friend who has heard it before.',
     extracts: [
-      { id: 'ele', pt: 'ele', gloss: 'he' },
-      { id: 'gosta_de', pt: 'gosta de', gloss: 'likes' },
+      { id: 'ele', target: 'ele', gloss: 'he' },
+      { id: 'gosta_de', target: 'gosta de', gloss: 'likes' },
     ],
     branches: [
-      { pt: 'Ela gosta de ti.', en: 'She likes you.' },
-      { pt: 'Ele n\u00e3o gosta de vinho.', en: 'He doesn\u2019t like wine.' },
-      { pt: 'Eles gostam de ti.', en: 'They like you.' },
+      { target: 'Ela gosta de ti.', en: 'She likes you.' },
+      { target: 'Ele n\u00e3o gosta de vinho.', en: 'He doesn\u2019t like wine.' },
+      { target: 'Eles gostam de ti.', en: 'They like you.' },
     ],
     reinforces: ['vinho'],
     helpers: {
@@ -1046,16 +1046,16 @@ export const PULP_FICTION: Root[] = [
     rung: 1,
     source_label: 'Pulp Fiction',
     root_display: 'Royale with Cheese.',
-    meaning_en: 'A Royale with cheese.',
-    pt_natural: 'Royale com queijo.',
+    source: 'A Royale with cheese.',
+    target: 'Royale com queijo.',
     semantic_bridge:
       'The joke is entirely cultural. The useful word is the smallest one in the sentence: COM.',
     subtext: 'A fast wink, not a lesson. If you already have COM, this is a nod rather than a discovery.',
-    extracts: [{ id: 'com', pt: 'com', gloss: 'with' }],
+    extracts: [{ id: 'com', target: 'com', gloss: 'with' }],
     branches: [
-      { pt: 'Com açúcar.', en: 'With sugar.' },
-      { pt: 'Com gelo.', en: 'With ice.' },
-      { pt: 'Com queijo.', en: 'With cheese.' },
+      { target: 'Com açúcar.', en: 'With sugar.' },
+      { target: 'Com gelo.', en: 'With ice.' },
+      { target: 'Com queijo.', en: 'With cheese.' },
     ],
     reinforces: ['com', 'sem'],
     helpers: {
@@ -1076,30 +1076,30 @@ export const PULP_FICTION: Root[] = [
     rung: 3,
     source_label: 'Pulp Fiction',
     root_display: 'Say “what” again!',
-    meaning_en: 'Say “what” one more time.',
-    pt_natural: 'Diz “o quê” outra vez!',
+    source: 'Say “what” one more time.',
+    target: 'Diz “o quê” outra vez!',
     semantic_bridge:
       'The rhythm carries straight across, and every word in it is worth keeping: DIZ, O QUÊ, OUTRA VEZ.',
     subtext: 'The film gives this line menace. Keep the polite version — that is the one you will actually need.',
     extracts: [
-      { id: 'diz', pt: 'diz', gloss: 'say' },
-      { id: 'o_que', pt: 'o quê?', gloss: 'what?' },
+      { id: 'diz', target: 'diz', gloss: 'say' },
+      { id: 'o_que', target: 'o quê?', gloss: 'what?' },
     ],
     branches: [
-      { pt: 'Diz outra vez.', en: 'Say it again.' },
-      { pt: 'Podes dizer outra vez?', en: 'Can you say it again?' },
-      { pt: 'O quê?', en: 'What?' },
+      { target: 'Diz outra vez.', en: 'Say it again.' },
+      { target: 'Podes dizer outra vez?', en: 'Can you say it again?' },
+      { target: 'O quê?', en: 'What?' },
     ],
     reinforces: ['outra_vez', 'podes'],
     voice_options: [
       {
-        pt: 'O quê?', en: 'What?', signal: 'direct',
+        target: 'O quê?', en: 'What?', signal: 'direct',
         register: 'WITH PEOPLE YOU KNOW',
         when: 'A friend says something surprising, or you simply did not hear it.',
         risk: 'On its own, to a stranger, this is close to “what?!” in English. It can sound aggressive.',
       },
       {
-        pt: 'Desculpa, o quê?', en: 'Sorry, what?', signal: 'softened',
+        target: 'Desculpa, o quê?', en: 'Sorry, what?', signal: 'softened',
         register: 'WITH ANYONE',
         when: 'One word in front and the same question turns polite. Reach for this one by default.',
         safest: true,
@@ -1122,20 +1122,20 @@ export const PULP_FICTION: Root[] = [
     rung: 1,
     source_label: 'Pulp Fiction',
     root_display: 'That’s a tasty burger.',
-    meaning_en: 'That burger is really good.',
-    pt_natural: 'Esse hambúrguer é mesmo bom.',
+    source: 'That burger is really good.',
+    target: 'Esse hambúrguer é mesmo bom.',
     literal_note: 'A literal “saboroso” is possible but sounds written, not spoken.',
     semantic_bridge:
       'Everyday European Portuguese reaches for “é mesmo bom” rather than a dictionary word for tasty. MESMO is the intensifier you will hear constantly.',
     subtext: 'A signature moment: natural speech beating dictionary fidelity.',
     extracts: [
-      { id: 'mesmo', pt: 'mesmo', gloss: 'really' },
-      { id: 'bom', pt: 'bom', gloss: 'good' },
+      { id: 'mesmo', target: 'mesmo', gloss: 'really' },
+      { id: 'bom', target: 'bom', gloss: 'good' },
     ],
     branches: [
-      { pt: 'Isso é mesmo bom.', en: 'That is really good.' },
-      { pt: 'Muito bom.', en: 'Very good.' },
-      { pt: 'Esse é bom.', en: 'That one is good.' },
+      { target: 'Isso é mesmo bom.', en: 'That is really good.' },
+      { target: 'Muito bom.', en: 'Very good.' },
+      { target: 'Esse é bom.', en: 'That one is good.' },
     ],
     helpers: {
       'Isso': 'that',
@@ -1154,26 +1154,26 @@ export const PULP_FICTION: Root[] = [
     rung: 2,
     source_label: 'Pulp Fiction',
     root_display: 'Be cool.',
-    meaning_en: 'Calm down.',
-    pt_natural: 'Tem calma.',
+    source: 'Calm down.',
+    target: 'Tem calma.',
     semantic_bridge:
       'Portuguese does not translate “cool” here. It says “have calm” — and CALMA on its own does most of the work.',
     subtext: 'Register matters enormously. TEM CALMA can soothe or infuriate; CALMA alone is softer.',
-    extracts: [{ id: 'calma', pt: 'calma', gloss: 'calm / easy' }],
+    extracts: [{ id: 'calma', target: 'calma', gloss: 'calm / easy' }],
     branches: [
-      { pt: 'Calma.', en: 'Easy.' },
-      { pt: 'Tem calma.', en: 'Calm down.' },
-      { pt: 'Está tudo bem.', en: 'It’s all right.' },
+      { target: 'Calma.', en: 'Easy.' },
+      { target: 'Tem calma.', en: 'Calm down.' },
+      { target: 'Está tudo bem.', en: 'It’s all right.' },
     ],
     voice_options: [
       {
-        pt: 'Calma.', en: 'Easy.', signal: 'dry',
+        target: 'Calma.', en: 'Easy.', signal: 'dry',
         register: 'TAKING THE HEAT OUT',
         when: 'Someone is getting wound up. One word, said gently, is completely normal here.',
         risk: 'Said sharply it becomes a telling-off. Tone is doing all the work.',
       },
       {
-        pt: 'Está tudo bem.', en: 'It’s all right.', signal: 'warm',
+        target: 'Está tudo bem.', en: 'It’s all right.', signal: 'warm',
         register: 'REASSURING',
         when: '“It’s all fine.” You are not asking them to calm down, you are saying there is nothing to fix.',
         safest: true,
@@ -1202,17 +1202,17 @@ export const PULP_FICTION: Root[] = [
     source_label: 'Pulp Fiction — paraphrased scene reference',
     source_status: 'paraphrased',
     root_display: 'The famous conversation about what they call it over there.',
-    meaning_en: 'What is it called?',
-    pt_natural: 'Como é que se chama?',
+    source: 'What is it called?',
+    target: 'Como é que se chama?',
     literal_note: 'Literally “how is it called?”',
     semantic_bridge:
       'The whole scene is about what something is called, and Portuguese packages that as COMO É QUE SE CHAMA — the same CHAMAR you already met introducing yourself.',
     subtext: 'This is where the film unexpectedly turns into survival language.',
-    extracts: [{ id: 'como_se_chama', pt: 'como se chama?', gloss: 'what is it called?' }],
+    extracts: [{ id: 'como_se_chama', target: 'como se chama?', gloss: 'what is it called?' }],
     branches: [
-      { pt: 'Como se chama isto?', en: 'What is this called?' },
-      { pt: 'Como te chamas?', en: 'What’s your name?' },
-      { pt: 'Chama-se…', en: 'It’s called…' },
+      { target: 'Como se chama isto?', en: 'What is this called?' },
+      { target: 'Como te chamas?', en: 'What’s your name?' },
+      { target: 'Chama-se…', en: 'It’s called…' },
     ],
     reinforces: ['chamo_me', 'como_te_chamas'],
     helpers: {
@@ -1235,19 +1235,19 @@ export const PULP_FICTION: Root[] = [
     source_label: 'Pulp Fiction',
     source_status: 'verified',
     root_display: 'A five-dollar shake',
-    meaning_en: 'A five-euro milkshake.',
-    pt_natural: 'Um batido de cinco euros.',
+    source: 'A five-euro milkshake.',
+    target: 'Um batido de cinco euros.',
     semantic_bridge:
       'The gag only works if you hear the price, so the number is the point. Portuguese puts the figure before the currency \u2014 cinco euros \u2014 and joins the thing to its price with the same DE that joined the glass to the wine.',
     subtext: 'Ordinary, transactional language, hiding inside the most quoted diner scene ever filmed.',
     extracts: [
-      { id: 'cinco', pt: 'cinco', gloss: 'five' },
-      { id: 'batido', pt: 'batido', gloss: 'milkshake' },
+      { id: 'cinco', target: 'cinco', gloss: 'five' },
+      { id: 'batido', target: 'batido', gloss: 'milkshake' },
     ],
     branches: [
-      { pt: 'Cinco euros.', en: 'Five euros.' },
-      { pt: 'Um batido, por favor.', en: 'A milkshake, please.' },
-      { pt: 'Dois batidos.', en: 'Two milkshakes.' },
+      { target: 'Cinco euros.', en: 'Five euros.' },
+      { target: 'Um batido, por favor.', en: 'A milkshake, please.' },
+      { target: 'Dois batidos.', en: 'Two milkshakes.' },
     ],
     reinforces: ['por_favor'],
     helpers: {
@@ -1274,19 +1274,19 @@ export const PULP_FICTION: Root[] = [
     source_label: 'Pulp Fiction',
     source_status: 'verified',
     root_display: 'They call it a Royale with Cheese',
-    meaning_en: 'They call it a Royale with cheese.',
-    pt_natural: 'Eles chamam-lhe Royale com queijo.',
+    source: 'They call it a Royale with cheese.',
+    target: 'Eles chamam-lhe Royale com queijo.',
     semantic_bridge:
       'You have met chamo-me and como se chama. Here is the same verb with a third ending, and the giveaway is the M: a Portuguese verb ending in -M is nearly always about more than one other person. One letter, and the whole language opens up.',
     subtext: 'Said as though it were fascinating, which is exactly how you will use it.',
     extracts: [
-      { id: 'eles', pt: 'eles', gloss: 'they' },
-      { id: 'chamam', pt: 'chamam', gloss: 'they call' },
+      { id: 'eles', target: 'eles', gloss: 'they' },
+      { id: 'chamam', target: 'chamam', gloss: 'they call' },
     ],
     branches: [
-      { pt: 'Eles chamam-me Sam.', en: 'They call me Sam.' },
-      { pt: 'Eles est\u00e3o aqui.', en: 'They\u2019re here.' },
-      { pt: 'Como \u00e9 que eles chamam isto?', en: 'What do they call this?' },
+      { target: 'Eles chamam-me Sam.', en: 'They call me Sam.' },
+      { target: 'Eles est\u00e3o aqui.', en: 'They\u2019re here.' },
+      { target: 'Como \u00e9 que eles chamam isto?', en: 'What do they call this?' },
     ],
     reinforces: ['chamo_me', 'como_se_chama', 'isto'],
     helpers: {
@@ -1318,19 +1318,19 @@ export const PULP_FICTION: Root[] = [
     source_label: 'Pulp Fiction',
     source_status: 'verified',
     root_display: 'Who\u2019s Zed?',
-    meaning_en: 'Who is Zed?',
-    pt_natural: 'Quem \u00e9 o Zed?',
+    source: 'Who is Zed?',
+    target: 'Quem \u00e9 o Zed?',
     semantic_bridge:
       'Two words and both are load-bearing. QUEM asks about a person where QUANTO asked about an amount and ONDE asked about a place \u2014 the question words are a small set, and you now have most of them.',
     subtext: 'Asked flatly, of somebody who very much does not want to answer.',
     extracts: [
-      { id: 'quem', pt: 'quem', gloss: 'who' },
-      { id: 'e_is', pt: '\u00e9', gloss: 'is' },
+      { id: 'quem', target: 'quem', gloss: 'who' },
+      { id: 'e_is', target: '\u00e9', gloss: 'is' },
     ],
     branches: [
-      { pt: 'Quem \u00e9 este?', en: 'Who\u2019s this?' },
-      { pt: 'Quem \u00e9 ele?', en: 'Who is he?' },
-      { pt: '\u00c9 o meu parceiro.', en: 'He\u2019s my wingman.' },
+      { target: 'Quem \u00e9 este?', en: 'Who\u2019s this?' },
+      { target: 'Quem \u00e9 ele?', en: 'Who is he?' },
+      { target: '\u00c9 o meu parceiro.', en: 'He\u2019s my wingman.' },
     ],
     reinforces: ['como_se_chama', 'onde', 'quanto'],
     helpers: {
@@ -1364,19 +1364,19 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'Audrey Hepburn — attribution requires review',
     source_status: 'needs-review',
     root_display: 'Paris is always a good idea.',
-    meaning_en: 'Paris is always a good idea.',
-    pt_natural: 'Paris é sempre uma boa ideia.',
+    source: 'Paris is always a good idea.',
+    target: 'Paris é sempre uma boa ideia.',
     semantic_bridge:
       'The line maps across word for word, and hands over two pieces you will use constantly without ever mentioning Paris again.',
     subtext: 'Elegant, warm, instantly usable. BOA IDEIA is how you agree to almost anything.',
     extracts: [
-      { id: 'sempre', pt: 'sempre', gloss: 'always' },
-      { id: 'boa_ideia', pt: 'boa ideia', gloss: 'good idea' },
+      { id: 'sempre', target: 'sempre', gloss: 'always' },
+      { id: 'boa_ideia', target: 'boa ideia', gloss: 'good idea' },
     ],
     branches: [
-      { pt: 'É uma boa ideia.', en: 'It’s a good idea.' },
-      { pt: 'Sempre.', en: 'Always.' },
-      { pt: 'Acho que é uma boa ideia.', en: 'I think it’s a good idea.' },
+      { target: 'É uma boa ideia.', en: 'It’s a good idea.' },
+      { target: 'Sempre.', en: 'Always.' },
+      { target: 'Acho que é uma boa ideia.', en: 'I think it’s a good idea.' },
     ],
     helpers: {
       'É': 'it is',
@@ -1387,12 +1387,12 @@ export const AUDREY_HEPBURN: Root[] = [
     },
     voice_options: [
       {
-        pt: 'Boa ideia.', en: 'Good idea.', signal: 'casual',
+        target: 'Boa ideia.', en: 'Good idea.', signal: 'casual',
         register: 'QUICK AGREEMENT',
         when: 'Someone suggests something and you are in. Two words is entirely natural.',
       },
       {
-        pt: 'Acho que é uma boa ideia.', en: 'I think it’s a good idea.', signal: 'softened',
+        target: 'Acho que é uma boa ideia.', en: 'I think it’s a good idea.', signal: 'softened',
         register: 'WEIGHING IN',
         when: 'A meeting, a decision, anywhere you would rather sound considered than eager.',
       },
@@ -1411,20 +1411,20 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'DUB paraphrase of a documented Audrey theme',
     source_status: 'paraphrased',
     root_display: 'Enjoy your life.',
-    meaning_en: 'Make the most of your life.',
-    pt_natural: 'Aproveita a vida.',
+    source: 'Make the most of your life.',
+    target: 'Aproveita a vida.',
     semantic_bridge:
       'The sentiment compresses into a single Portuguese imperative, and APROVEITA turns out to be one of the most-used words in the language — far beyond anything inspirational.',
     subtext: 'Positive without being saccharine. You will hear it shouted across a car park.',
     extracts: [
-      { id: 'aproveita', pt: 'aproveita', gloss: 'enjoy / make the most of' },
-      { id: 'vida', pt: 'vida', gloss: 'life', rung: 1 },
+      { id: 'aproveita', target: 'aproveita', gloss: 'enjoy / make the most of' },
+      { id: 'vida', target: 'vida', gloss: 'life', rung: 1 },
     ],
     branches: [
-      { pt: 'Aproveita o dia.', en: 'Enjoy the day.' },
-      { pt: 'Aproveita!', en: 'Enjoy it!' },
-      { pt: 'Quero aproveitar.', en: 'I want to make the most of it.' },
-      { pt: 'É a vida.', en: 'That’s life.' },
+      { target: 'Aproveita o dia.', en: 'Enjoy the day.' },
+      { target: 'Aproveita!', en: 'Enjoy it!' },
+      { target: 'Quero aproveitar.', en: 'I want to make the most of it.' },
+      { target: 'É a vida.', en: 'That’s life.' },
     ],
     helpers: {
       'a': 'the',
@@ -1448,19 +1448,19 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'DUB paraphrase of documented human-connection themes',
     source_status: 'paraphrased',
     root_display: 'People matter more than things.',
-    meaning_en: 'People matter more than things.',
-    pt_natural: 'As pessoas importam mais do que as coisas.',
+    source: 'People matter more than things.',
+    target: 'As pessoas importam mais do que as coisas.',
     semantic_bridge:
       'The thought is a comparison, which makes MAIS DO QUE the engine — and that engine works for any two things you want to weigh against each other.',
     subtext: 'Warm and emotionally useful, rather than phrasebook language.',
     extracts: [
-      { id: 'mais_do_que', pt: 'mais do que', gloss: 'more than' },
-      { id: 'importa', pt: 'importa', gloss: 'it matters' },
+      { id: 'mais_do_que', target: 'mais do que', gloss: 'more than' },
+      { id: 'importa', target: 'importa', gloss: 'it matters' },
     ],
     branches: [
-      { pt: 'Tu importas.', en: 'You matter.' },
-      { pt: 'Mais do que isso.', en: 'More than that.' },
-      { pt: 'Isto importa.', en: 'This matters.' },
+      { target: 'Tu importas.', en: 'You matter.' },
+      { target: 'Mais do que isso.', en: 'More than that.' },
+      { target: 'Isto importa.', en: 'This matters.' },
     ],
     helpers: {
       'Tu': 'you',
@@ -1482,19 +1482,19 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'DUB paraphrase of a documented Audrey sentiment',
     source_status: 'paraphrased',
     root_display: 'Look for the good in people.',
-    meaning_en: 'Look for the good side of people.',
-    pt_natural: 'Procura o lado bom das pessoas.',
+    source: 'Look for the good side of people.',
+    target: 'Procura o lado bom das pessoas.',
     semantic_bridge:
       'Portuguese builds this around LADO BOM — the good side — and PROCURA, which is also just the ordinary word for looking for your keys.',
     subtext: 'Gentle but active. Warm language that still does everyday work.',
     extracts: [
-      { id: 'procura', pt: 'procura', gloss: 'look for' },
-      { id: 'lado_bom', pt: 'o lado bom', gloss: 'the good side' },
+      { id: 'procura', target: 'procura', gloss: 'look for' },
+      { id: 'lado_bom', target: 'o lado bom', gloss: 'the good side' },
     ],
     branches: [
-      { pt: 'Procura aqui.', en: 'Look here.' },
-      { pt: 'O lado bom.', en: 'The good side.' },
-      { pt: 'É uma boa pessoa.', en: 'They’re a good person.' },
+      { target: 'Procura aqui.', en: 'Look here.' },
+      { target: 'O lado bom.', en: 'The good side.' },
+      { target: 'É uma boa pessoa.', en: 'They’re a good person.' },
     ],
     reinforces: ['bom'],
     helpers: {
@@ -1519,20 +1519,20 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'DUB paraphrase of a documented Audrey sentiment',
     source_status: 'paraphrased',
     root_display: 'The most important thing is to be happy.',
-    meaning_en: 'The most important thing is to be happy.',
-    pt_natural: 'O mais importante é ser feliz.',
+    source: 'The most important thing is to be happy.',
+    target: 'O mais importante é ser feliz.',
     semantic_bridge:
       'O MAIS IMPORTANTE É… is a frame you can put almost anything into, which makes it far more valuable than the sentiment it arrived in.',
     subtext: 'Aspirational on the surface, structurally very ordinary underneath.',
     extracts: [
-      { id: 'o_mais_importante', pt: 'o mais importante', gloss: 'the most important thing' },
-      { id: 'feliz', pt: 'feliz', gloss: 'happy' },
+      { id: 'o_mais_importante', target: 'o mais importante', gloss: 'the most important thing' },
+      { id: 'feliz', target: 'feliz', gloss: 'happy' },
     ],
     branches: [
-      { pt: 'É importante.', en: 'It’s important.' },
-      { pt: 'O que é mais importante?', en: 'What is most important?' },
-      { pt: 'Quero ser feliz.', en: 'I want to be happy.' },
-      { pt: 'O mais importante é isto.', en: 'The most important thing is this.' },
+      { target: 'É importante.', en: 'It’s important.' },
+      { target: 'O que é mais importante?', en: 'What is most important?' },
+      { target: 'Quero ser feliz.', en: 'I want to be happy.' },
+      { target: 'O mais importante é isto.', en: 'The most important thing is this.' },
     ],
     reinforces: ['mais_do_que'],
     helpers: {
@@ -1548,13 +1548,13 @@ export const AUDREY_HEPBURN: Root[] = [
     },
     voice_options: [
       {
-        pt: 'É importante.', en: 'It’s important.', signal: 'direct',
+        target: 'É importante.', en: 'It’s important.', signal: 'direct',
         register: 'STATING A FACT',
         when: 'You are saying this matters, full stop, as though everyone already agrees.',
         risk: 'Stated flatly about someone else’s choices it can sound like a verdict.',
       },
       {
-        pt: 'Para mim é importante.', en: 'It matters to me.', signal: 'warm',
+        target: 'Para mim é importante.', en: 'It matters to me.', signal: 'warm',
         register: 'MAKING IT YOURS',
         when: '“For me, it matters.” Same point, without telling anyone else what to think.',
         safest: true,
@@ -1583,19 +1583,19 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'DUB distillation of a recurring Meditations theme',
     source_status: 'public-domain-derived',
     root_display: 'Control what you can control.',
-    meaning_en: 'Control what you can control.',
-    pt_natural: 'Controla o que podes controlar.',
+    source: 'Control what you can control.',
+    target: 'Controla o que podes controlar.',
     semantic_bridge:
       'The thought and the Portuguese have nearly the same shape, which puts PODES right in the middle of the sentence where you cannot miss it.',
     subtext: 'Calm and practical. It sounds modern despite being nearly two thousand years old.',
     extracts: [
-      { id: 'podes', pt: 'podes', gloss: 'you can' },
-      { id: 'o_que', pt: 'o que', gloss: 'what / that which' },
+      { id: 'podes', target: 'podes', gloss: 'you can' },
+      { id: 'o_que', target: 'o que', gloss: 'what / that which' },
     ],
     branches: [
-      { pt: 'O que posso fazer?', en: 'What can I do?' },
-      { pt: 'Não posso controlar isso.', en: 'I can’t control that.' },
-      { pt: 'Podes controlar isto.', en: 'You can control this.' },
+      { target: 'O que posso fazer?', en: 'What can I do?' },
+      { target: 'Não posso controlar isso.', en: 'I can’t control that.' },
+      { target: 'Podes controlar isto.', en: 'You can control this.' },
     ],
     reinforces: ['podes'],
     helpers: {
@@ -1622,19 +1622,19 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
     root_display: 'You do not control what happens. You control how you react.',
-    meaning_en: 'You control your response, not the event.',
-    pt_natural: 'Não controlas o que acontece. Controlas como reages.',
+    source: 'You control your response, not the event.',
+    target: 'Não controlas o que acontece. Controlas como reages.',
     semantic_bridge:
       'The idea splits cleanly into event and response, and both halves hand over an ordinary question you will use this week.',
     subtext: 'A reflection root that unexpectedly unlocks the most everyday questions there are.',
     extracts: [
-      { id: 'o_que_acontece', pt: 'o que acontece', gloss: 'what happens' },
-      { id: 'como', pt: 'como', gloss: 'how' },
+      { id: 'o_que_acontece', target: 'o que acontece', gloss: 'what happens' },
+      { id: 'como', target: 'como', gloss: 'how' },
     ],
     branches: [
-      { pt: 'O que aconteceu?', en: 'What happened?' },
-      { pt: 'Como reagiste?', en: 'How did you react?' },
-      { pt: 'Não posso controlar isso.', en: 'I can’t control that.' },
+      { target: 'O que aconteceu?', en: 'What happened?' },
+      { target: 'Como reagiste?', en: 'How did you react?' },
+      { target: 'Não posso controlar isso.', en: 'I can’t control that.' },
     ],
     reinforces: ['o_que'],
     helpers: {
@@ -1661,30 +1661,30 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
     root_display: 'The only moment you have is now.',
-    meaning_en: 'Now is all you have.',
-    pt_natural: 'O único momento que tens é agora.',
+    source: 'Now is all you have.',
+    target: 'O único momento que tens é agora.',
     semantic_bridge:
       'The philosophy makes AGORA impossible to forget, and quietly hands you TENS — the ordinary “you have” you need to ask anyone for anything.',
     subtext: 'The wisdom evaporates fast. AGORA and TENS stay for good.',
     extracts: [
-      { id: 'agora', pt: 'agora', gloss: 'now' },
-      { id: 'tens', pt: 'tens', gloss: 'you have' },
+      { id: 'agora', target: 'agora', gloss: 'now' },
+      { id: 'tens', target: 'tens', gloss: 'you have' },
     ],
     branches: [
-      { pt: 'Agora não.', en: 'Not now.' },
-      { pt: 'E agora?', en: 'And now?' },
-      { pt: 'Tens tempo?', en: 'Do you have time?' },
+      { target: 'Agora não.', en: 'Not now.' },
+      { target: 'E agora?', en: 'And now?' },
+      { target: 'Tens tempo?', en: 'Do you have time?' },
     ],
     reinforces: ['tempo'],
     voice_options: [
       {
-        pt: 'Agora não.', en: 'Not now.', signal: 'direct',
+        target: 'Agora não.', en: 'Not now.', signal: 'direct',
         register: 'SHORT AND CLEAR',
         when: 'A shop, a street seller, anyone you owe no explanation to.',
         risk: 'To a friend or a colleague this can sound like you are annoyed with them.',
       },
       {
-        pt: 'Agora não posso, desculpa.', en: 'I can’t right now, sorry.', signal: 'softened',
+        target: 'Agora não posso, desculpa.', en: 'I can’t right now, sorry.', signal: 'softened',
         register: 'WITH A REASON ATTACHED',
         when: '“I can’t right now, sorry.” A reason and an apology in four words.',
         safest: true,
@@ -1710,19 +1710,19 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
     root_display: 'If it is not true, do not say it.',
-    meaning_en: 'Don’t say it if it isn’t true.',
-    pt_natural: 'Se não é verdade, não digas.',
+    source: 'Don’t say it if it isn’t true.',
+    target: 'Se não é verdade, não digas.',
     semantic_bridge:
       'The maxim is built from three pieces that convert straight into everyday conditionals: SE, É VERDADE and the negative command NÃO DIGAS.',
     subtext: 'Simple moral language that turns into ordinary reactions almost immediately.',
     extracts: [
-      { id: 'se', pt: 'se', gloss: 'if' },
-      { id: 'e_verdade', pt: 'é verdade', gloss: 'it is true' },
+      { id: 'se', target: 'se', gloss: 'if' },
+      { id: 'e_verdade', target: 'é verdade', gloss: 'it is true' },
     ],
     branches: [
-      { pt: 'É verdade?', en: 'Is it true?' },
-      { pt: 'Se quiseres.', en: 'If you want.' },
-      { pt: 'Não digas isso.', en: 'Don’t say that.' },
+      { target: 'É verdade?', en: 'Is it true?' },
+      { target: 'Se quiseres.', en: 'If you want.' },
+      { target: 'Não digas isso.', en: 'Don’t say that.' },
     ],
     reinforces: ['nao_digas', 'quando_quiseres'],
     helpers: {
@@ -1747,20 +1747,20 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
     root_display: 'Accept what you cannot change.',
-    meaning_en: 'Accept what you cannot change.',
-    pt_natural: 'Aceita o que não podes mudar.',
+    source: 'Accept what you cannot change.',
+    target: 'Aceita o que não podes mudar.',
     semantic_bridge:
       'Two reusable engines in one short line: NÃO PODES, and MUDAR — which is the verb you need the moment a booking goes wrong.',
     subtext: 'Reflective on the surface, extremely practical underneath.',
     extracts: [
-      { id: 'nao_podes', pt: 'não podes', gloss: 'you can’t' },
-      { id: 'mudar', pt: 'mudar', gloss: 'to change' },
+      { id: 'nao_podes', target: 'não podes', gloss: 'you can’t' },
+      { id: 'mudar', target: 'mudar', gloss: 'to change' },
     ],
     branches: [
-      { pt: 'Posso mudar isto?', en: 'Can I change this?' },
-      { pt: 'Não posso mudar isso.', en: 'I can’t change that.' },
-      { pt: 'Quero mudar.', en: 'I want to change.' },
-      { pt: 'Não podes mudar isso.', en: 'You can’t change that.' },
+      { target: 'Posso mudar isto?', en: 'Can I change this?' },
+      { target: 'Não posso mudar isso.', en: 'I can’t change that.' },
+      { target: 'Quero mudar.', en: 'I want to change.' },
+      { target: 'Não podes mudar isso.', en: 'You can’t change that.' },
     ],
     reinforces: ['podes'],
     helpers: {
@@ -1776,13 +1776,13 @@ export const MARCUS_AURELIUS: Root[] = [
     },
     voice_options: [
       {
-        pt: 'Não posso.', en: 'I can’t.', signal: 'direct',
+        target: 'Não posso.', en: 'I can’t.', signal: 'direct',
         register: 'FINAL',
         when: 'It genuinely is not possible and you would rather not be asked twice.',
         risk: 'With no softener attached, expect the conversation to stop dead.',
       },
       {
-        pt: 'Acho que não posso.', en: 'I don’t think I can.', signal: 'softened',
+        target: 'Acho que não posso.', en: 'I don’t think I can.', signal: 'softened',
         register: 'LEAVING THE DOOR OPEN',
         when: 'Probably no, but you would rather not be blunt about it. Very common in Portugal.',
       },
@@ -1802,19 +1802,19 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'Meditations, Book VII',
     source_status: 'public-domain-derived',
     root_display: 'Do not be ashamed to need help',
-    meaning_en: 'Don\u2019t be ashamed to ask for help.',
-    pt_natural: 'N\u00e3o tenhas vergonha de pedir ajuda.',
+    source: 'Don\u2019t be ashamed to ask for help.',
+    target: 'N\u00e3o tenhas vergonha de pedir ajuda.',
     semantic_bridge:
       'Marcus wrote this to a soldier who could not do everything alone, and it is the most useful sentence anybody learning a language has been handed. AJUDA is also one of the few words you can shout on its own and be completely understood.',
     subtext: 'Practical rather than noble. He meant it as an instruction, not a comfort.',
     extracts: [
-      { id: 'ajuda', pt: 'ajuda', gloss: 'help' },
-      { id: 'pedir', pt: 'pedir', gloss: 'to ask for' },
+      { id: 'ajuda', target: 'ajuda', gloss: 'help' },
+      { id: 'pedir', target: 'pedir', gloss: 'to ask for' },
     ],
     branches: [
-      { pt: 'Preciso de ajuda.', en: 'I need help.' },
-      { pt: 'Podes ajudar-me?', en: 'Can you help me?' },
-      { pt: 'Vou pedir ajuda.', en: 'I\u2019m going to ask for help.' },
+      { target: 'Preciso de ajuda.', en: 'I need help.' },
+      { target: 'Podes ajudar-me?', en: 'Can you help me?' },
+      { target: 'Vou pedir ajuda.', en: 'I\u2019m going to ask for help.' },
     ],
     reinforces: ['preciso_de', 'podes', 'pedir_te'],
     helpers: {
@@ -1843,19 +1843,19 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'Meditations, Book II',
     source_status: 'public-domain-derived',
     root_display: 'When you wake, remember who you are about to meet',
-    meaning_en: 'People do what they know how to do.',
-    pt_natural: 'As pessoas fazem o que sabem.',
+    source: 'People do what they know how to do.',
+    target: 'As pessoas fazem o que sabem.',
     semantic_bridge:
       'He wrote it to stop himself being surprised by anybody. It also does the ladder a favour: AS PESSOAS is the first time you have talked about a group rather than a person, and FAZEM carries the same -M that told you ELES were involved.',
     subtext: 'Not forgiveness exactly. More an instruction to stop expecting otherwise.',
     extracts: [
-      { id: 'as_pessoas', pt: 'as pessoas', gloss: 'people' },
-      { id: 'fazem', pt: 'fazem', gloss: 'they do' },
+      { id: 'as_pessoas', target: 'as pessoas', gloss: 'people' },
+      { id: 'fazem', target: 'fazem', gloss: 'they do' },
     ],
     branches: [
-      { pt: 'As pessoas s\u00e3o assim.', en: 'People are like that.' },
-      { pt: 'Eles fazem o mesmo.', en: 'They do the same.' },
-      { pt: 'As pessoas aqui s\u00e3o boas.', en: 'People here are good.' },
+      { target: 'As pessoas s\u00e3o assim.', en: 'People are like that.' },
+      { target: 'Eles fazem o mesmo.', en: 'They do the same.' },
+      { target: 'As pessoas aqui s\u00e3o boas.', en: 'People here are good.' },
     ],
     reinforces: ['eles', 'mesmo', 'bom'],
     helpers: {
@@ -1885,19 +1885,19 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'Meditations, Book II',
     source_status: 'public-domain-derived',
     root_display: 'We were born to work with one another',
-    meaning_en: 'We are made for one another.',
-    pt_natural: 'N\u00f3s somos feitos uns para os outros.',
+    source: 'We are made for one another.',
+    target: 'N\u00f3s somos feitos uns para os outros.',
     semantic_bridge:
       'He meant it as an argument against sulking. Portuguese barely needs the N\u00d3S at all, because SOMOS has already said who \u2014 and that -MOS ending is the \u201cwe\u201d on very nearly every verb in the language.',
     subtext: 'Less warm than it sounds. He is telling himself to get on with it.',
     extracts: [
-      { id: 'nos_', pt: 'n\u00f3s', gloss: 'we' },
-      { id: 'somos', pt: 'somos', gloss: 'we are' },
+      { id: 'nos_', target: 'n\u00f3s', gloss: 'we' },
+      { id: 'somos', target: 'somos', gloss: 'we are' },
     ],
     branches: [
-      { pt: 'N\u00f3s somos amigos.', en: 'We\u2019re friends.' },
-      { pt: 'Somos dois.', en: 'There are two of us.' },
-      { pt: 'N\u00e3o somos iguais.', en: 'We\u2019re not the same.' },
+      { target: 'N\u00f3s somos amigos.', en: 'We\u2019re friends.' },
+      { target: 'Somos dois.', en: 'There are two of us.' },
+      { target: 'N\u00e3o somos iguais.', en: 'We\u2019re not the same.' },
     ],
     reinforces: ['as_pessoas', 'eles'],
     helpers: {
@@ -1949,20 +1949,20 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'Piss off. I have had enough.',
-    meaning_en: 'Go away. I am fed up.',
-    pt_natural: 'Vai à merda, estou farto.',
+    source: 'Go away. I am fed up.',
+    target: 'Vai à merda, estou farto.',
     literal_note: 'Literally “go to the shit”. Portuguese sends people to places.',
     semantic_bridge:
       'The whole insult is built from two ordinary bricks: VAI, the command “go”, and À, which is just “to the”. Swap the destination and the same frame becomes polite — vai para casa, vai com calma.',
     subtext: 'Final, not playful. This ends a conversation rather than seasoning one.',
     extracts: [
-      { id: 'vai', pt: 'Vai', gloss: 'go (an order)' },
-      { id: 'estou_farto', pt: 'estou farto', gloss: 'I’m fed up' },
+      { id: 'vai', target: 'Vai', gloss: 'go (an order)' },
+      { id: 'estou_farto', target: 'estou farto', gloss: 'I’m fed up' },
     ],
     branches: [
-      { pt: 'Vai para casa.', en: 'Go home.' },
-      { pt: 'Estou farto disto.', en: 'I’m fed up with this.' },
-      { pt: 'Vai com calma.', en: 'Take it easy.' },
+      { target: 'Vai para casa.', en: 'Go home.' },
+      { target: 'Estou farto disto.', en: 'I’m fed up with this.' },
+      { target: 'Vai com calma.', en: 'Take it easy.' },
     ],
     reinforces: ['calma'],
     helpers: {
@@ -1986,20 +1986,20 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'Oh for God’s sake — I forgot.',
-    meaning_en: 'The all-purpose explosion, followed by the reason for it.',
-    pt_natural: 'Foda-se, esqueci-me.',
+    source: 'The all-purpose explosion, followed by the reason for it.',
+    target: 'Foda-se, esqueci-me.',
     literal_note: 'FODA-SE is a verb with a pronoun stuck on the back of it. So is ESQUECI-ME. Same machinery, very different reputations.',
     semantic_bridge:
       'The famous half is FODA-SE. The half you will use every day is ESQUECI-ME. They are built identically — verb, hyphen, little pronoun — and once you can see that hyphen you can take apart half of spoken Portuguese.',
     subtext: 'Frustration at the situation, not at a person. Nobody is being insulted here.',
     extracts: [
-      { id: 'foda_se', pt: 'Foda-se', gloss: 'for f***’s sake' },
-      { id: 'esqueci_me', pt: 'esqueci-me', gloss: 'I forgot' },
+      { id: 'foda_se', target: 'Foda-se', gloss: 'for f***’s sake' },
+      { id: 'esqueci_me', target: 'esqueci-me', gloss: 'I forgot' },
     ],
     branches: [
-      { pt: 'Esqueci-me do telemóvel.', en: 'I forgot my phone.' },
-      { pt: 'Desculpa, esqueci-me.', en: 'Sorry, I forgot.' },
-      { pt: 'Foda-se, outra vez!', en: 'For f***’s sake, again!' },
+      { target: 'Esqueci-me do telemóvel.', en: 'I forgot my phone.' },
+      { target: 'Desculpa, esqueci-me.', en: 'Sorry, I forgot.' },
+      { target: 'Foda-se, outra vez!', en: 'For f***’s sake, again!' },
     ],
     reinforces: ['desculpa', 'outra_vez'],
     helpers: {
@@ -2011,13 +2011,13 @@ export const SWEARING: Root[] = [
     },
     voice_options: [
       {
-        pt: 'Foda-se!', en: 'For f***’s sake!', signal: 'direct',
+        target: 'Foda-se!', en: 'For f***’s sake!', signal: 'direct',
         register: 'THE REAL ONE',
         when: 'Among friends, at the football, alone in the car when something goes wrong.',
         risk: 'This is as strong as Portuguese gets. Not at work, not with anyone’s parents, not in a shop.',
       },
       {
-        pt: 'Fogo!', en: 'For crying out loud!', signal: 'softened',
+        target: 'Fogo!', en: 'For crying out loud!', signal: 'softened',
         register: 'THE CLEAN TWIN',
         when: 'The identical moment, in front of absolutely anybody. Literally “fire”, and nobody blinks.',
         safest: true,
@@ -2038,20 +2038,20 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'Sod it. I’m going anyway.',
-    meaning_en: 'Writing something off, and carrying on regardless.',
-    pt_natural: 'Que se foda, vou na mesma.',
+    source: 'Writing something off, and carrying on regardless.',
+    target: 'Que se foda, vou na mesma.',
     literal_note: 'Notice the SE has moved. In “foda-se” it sits behind the verb; after QUE it jumps in front. That is a rule, not an accident.',
     semantic_bridge:
       'QUE SE FODA is a dismissal, and NA MESMA is the shrug that follows it — “all the same”, “anyway”. NA MESMA survives long after you stop wanting the first half.',
     subtext: 'Not anger. A decision, made out loud, that something no longer gets a vote.',
     extracts: [
-      { id: 'que_se_foda', pt: 'Que se foda', gloss: 'sod it' },
-      { id: 'na_mesma', pt: 'na mesma', gloss: 'anyway / all the same' },
+      { id: 'que_se_foda', target: 'Que se foda', gloss: 'sod it' },
+      { id: 'na_mesma', target: 'na mesma', gloss: 'anyway / all the same' },
     ],
     branches: [
-      { pt: 'Vou na mesma.', en: 'I’m going anyway.' },
-      { pt: 'Obrigado na mesma.', en: 'Thanks anyway.' },
-      { pt: 'Que se foda, vamos.', en: 'Sod it, let’s go.' },
+      { target: 'Vou na mesma.', en: 'I’m going anyway.' },
+      { target: 'Obrigado na mesma.', en: 'Thanks anyway.' },
+      { target: 'Que se foda, vamos.', en: 'Sod it, let’s go.' },
     ],
     helpers: {
       'Vou': 'I’m going',
@@ -2071,20 +2071,20 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'What the hell is this?',
-    meaning_en: 'Genuine confusion, expressed at volume.',
-    pt_natural: 'Que caralho é isto?',
+    source: 'Genuine confusion, expressed at volume.',
+    target: 'Que caralho é isto?',
     literal_note: 'The same word, with DO in front of it, means the exact opposite. Isto é do caralho = this is brilliant.',
     semantic_bridge:
       'QUE ___ É ISTO? is a fixed frame with one swappable slot. Drop in caralho and you are furious; drop in raio and you are merely baffled. ISTO — “this” — is the piece you will use hourly.',
     subtext: 'Aimed at the object, not the person. Pointed at a person it becomes a challenge.',
     extracts: [
-      { id: 'que_caralho', pt: 'Que caralho', gloss: 'what the f***' },
-      { id: 'isto', pt: 'isto', gloss: 'this', rung: 1 },
+      { id: 'que_caralho', target: 'Que caralho', gloss: 'what the f***' },
+      { id: 'isto', target: 'isto', gloss: 'this', rung: 1 },
     ],
     branches: [
-      { pt: 'O que é isto?', en: 'What is this?' },
-      { pt: 'Isto é do caralho!', en: 'This is bloody brilliant!' },
-      { pt: 'Que caralho estás a fazer?', en: 'What the f*** are you doing?' },
+      { target: 'O que é isto?', en: 'What is this?' },
+      { target: 'Isto é do caralho!', en: 'This is bloody brilliant!' },
+      { target: 'Que caralho estás a fazer?', en: 'What the f*** are you doing?' },
     ],
     helpers: {
       'O que': 'what',
@@ -2095,13 +2095,13 @@ export const SWEARING: Root[] = [
     },
     voice_options: [
       {
-        pt: 'Que caralho é isto?', en: 'What the f*** is this?', signal: 'direct',
+        target: 'Que caralho é isto?', en: 'What the f*** is this?', signal: 'direct',
         register: 'ANGRY AND UNFILTERED',
         when: 'You are genuinely annoyed, among people who swear back at you.',
         risk: 'Pointed at a stranger this is the opening of a fight, not a question.',
       },
       {
-        pt: 'Que raio é isto?', en: 'What on earth is this?', signal: 'softened',
+        target: 'Que raio é isto?', en: 'What on earth is this?', signal: 'softened',
         register: 'BAFFLED, NOT OBSCENE',
         when: 'The same confusion, the same frame, safe in front of anyone at all.',
         safest: true,
@@ -2122,20 +2122,20 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'I feel like crap today.',
-    meaning_en: 'Today, specifically, you are not at your best.',
-    pt_natural: 'Hoje estou uma merda.',
+    source: 'Today, specifically, you are not at your best.',
+    target: 'Hoje estou uma merda.',
     literal_note: 'ESTOU, not É. É would mean you are permanently rubbish, which is a different and much sadder sentence.',
     semantic_bridge:
       'Portuguese has two words for “is”. ESTOU is how things happen to be right now; É is how things simply are. The same insult swings between them: hoje ESTOU uma merda is a bad day, o filme É uma merda is a review.',
     subtext: 'Ordinary, unremarkable complaining. This is closer to “rough” than to obscene.',
     extracts: [
-      { id: 'uma_merda', pt: 'uma merda', gloss: 'crap / rubbish' },
-      { id: 'hoje', pt: 'Hoje', gloss: 'today' },
+      { id: 'uma_merda', target: 'uma merda', gloss: 'crap / rubbish' },
+      { id: 'hoje', target: 'Hoje', gloss: 'today' },
     ],
     branches: [
-      { pt: 'Hoje não.', en: 'Not today.' },
-      { pt: 'O filme é uma merda.', en: 'The film is crap.' },
-      { pt: 'Isto é uma merda.', en: 'This is rubbish.' },
+      { target: 'Hoje não.', en: 'Not today.' },
+      { target: 'O filme é uma merda.', en: 'The film is crap.' },
+      { target: 'Isto é uma merda.', en: 'This is rubbish.' },
     ],
     reinforces: ['isto'],
     helpers: {
@@ -2157,21 +2157,21 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'You absolute bastard.',
-    meaning_en: 'Said to a close friend, this is nearly affectionate. Said to anyone else, it is not.',
-    pt_natural: 'És um grande cabrão.',
+    source: 'Said to a close friend, this is nearly affectionate. Said to anyone else, it is not.',
+    target: 'És um grande cabrão.',
     literal_note: 'GRANDE means “big”, but in front of the noun it stops meaning size and starts meaning “utter”.',
     semantic_bridge:
       'Everything in this sentence agrees with who you are talking to. Um becomes uma, cabrão becomes cabra. The frame É S UM GRANDE ___ is the same one you use for compliments — és um grande amigo.',
     subtext: 'Register does all the work. Between friends it is warmth; anywhere else it is a genuine insult.',
     extracts: [
-      { id: 'grande', pt: 'grande', gloss: 'utter / total (in front of the word)' },
-      { id: 'cabrao', pt: 'cabrão', gloss: 'bastard' },
+      { id: 'grande', target: 'grande', gloss: 'utter / total (in front of the word)' },
+      { id: 'cabrao', target: 'cabrão', gloss: 'bastard' },
     ],
     branches: [
-      { pt: 'És uma grande cabra.', en: 'You’re an utter cow.' },
-      { pt: 'És um grande amigo.', en: 'You’re a great friend.' },
-      { pt: 'Que grande merda.', en: 'What an utter mess.' },
-      { pt: 'Que cabrão!', en: 'What a bastard!' },
+      { target: 'És uma grande cabra.', en: 'You’re an utter cow.' },
+      { target: 'És um grande amigo.', en: 'You’re a great friend.' },
+      { target: 'Que grande merda.', en: 'What an utter mess.' },
+      { target: 'Que cabrão!', en: 'What a bastard!' },
     ],
     reinforces: ['uma_merda'],
     helpers: {
@@ -2185,13 +2185,13 @@ export const SWEARING: Root[] = [
     },
     voice_options: [
       {
-        pt: 'És um grande cabrão.', en: 'You absolute bastard.', signal: 'direct',
+        target: 'És um grande cabrão.', en: 'You absolute bastard.', signal: 'direct',
         register: 'ONLY WITH PEOPLE WHO LAUGH',
         when: 'Between close friends, after something outrageous, this is almost a compliment.',
         risk: 'Misjudge the friendship and this one does not come back. There is no gentle version of it.',
       },
       {
-        pt: 'És um grande chato.', en: 'You’re a total pain.', signal: 'warm',
+        target: 'És um grande chato.', en: 'You’re a total pain.', signal: 'warm',
         register: 'EXASPERATED, NOT RUDE',
         when: 'Same structure, same affection, and you can say it to a colleague.',
         safest: true,
@@ -2231,30 +2231,30 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'You look great tonight.',
-    meaning_en: 'A remark about this evening, not a verdict on her existence.',
-    pt_natural: 'Estás muito gira hoje.',
+    source: 'A remark about this evening, not a verdict on her existence.',
+    target: 'Estás muito gira hoje.',
     literal_note: 'ESTÁS, not és. És linda is a statement about her whole life; estás linda is about tonight.',
     semantic_bridge:
       'ESTÁS is the version of “are” that means right now. It is the difference between a compliment and a pronouncement, and it is also how you ask anybody how they are.',
     subtext: 'Light, unweighted, easy to say and easy to receive. Nothing rides on it.',
     extracts: [
-      { id: 'estas', pt: 'Estás', gloss: 'you are (right now)' },
-      { id: 'gira', pt: 'gira', gloss: 'lovely — said about a woman' },
+      { id: 'estas', target: 'Estás', gloss: 'you are (right now)' },
+      { id: 'gira', target: 'gira', gloss: 'lovely — said about a woman' },
     ],
     branches: [
-      { pt: 'Estás linda.', en: 'You look beautiful.' },
-      { pt: 'Estás bem?', en: 'Are you all right?' },
-      { pt: 'Hoje estás gira.', en: 'You look lovely today.' },
+      { target: 'Estás linda.', en: 'You look beautiful.' },
+      { target: 'Estás bem?', en: 'Are you all right?' },
+      { target: 'Hoje estás gira.', en: 'You look lovely today.' },
     ],
     helpers: { 'linda': 'beautiful (about a woman)', 'bem': 'well', 'Hoje': 'today', 'muito': 'very' },
     voice_options: [
       {
-        pt: 'Estás gira.', en: 'You look great.', signal: 'casual',
+        target: 'Estás gira.', en: 'You look great.', signal: 'casual',
         register: 'EVERYDAY, NO WEIGHT',
         when: 'Said in passing, to someone you already know a little. It costs nothing to say or to hear.',
       },
       {
-        pt: 'Estás linda.', en: 'You look beautiful.', signal: 'warm',
+        target: 'Estás linda.', en: 'You look beautiful.', signal: 'warm',
         register: 'A STEP UP',
         when: 'Said properly, with eye contact, once. Twice in an evening and it stops meaning anything.',
       },
@@ -2275,20 +2275,20 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'Can I get you a drink?',
-    meaning_en: 'The oldest opening line there is, in a language that softens it.',
-    pt_natural: 'Posso oferecer-te uma bebida?',
+    source: 'The oldest opening line there is, in a language that softens it.',
+    target: 'Posso oferecer-te uma bebida?',
     literal_note: 'OFERECER-TE — offer to you. The little TE hooks onto the end of the verb, exactly as it does in esqueci-me.',
     semantic_bridge:
       'POSSO is “may I”, and it is the single most useful word for arriving somewhere polite. The -TE on the end is who you are doing it for.',
     subtext: 'Confident but asking. The question mark is doing real work.',
     extracts: [
-      { id: 'posso', pt: 'Posso', gloss: 'may I / can I' },
-      { id: 'oferecer_te', pt: 'oferecer-te', gloss: 'get you / offer you' },
+      { id: 'posso', target: 'Posso', gloss: 'may I / can I' },
+      { id: 'oferecer_te', target: 'oferecer-te', gloss: 'get you / offer you' },
     ],
     branches: [
-      { pt: 'Posso sentar-me?', en: 'May I sit down?' },
-      { pt: 'Posso ajudar-te?', en: 'Can I help you?' },
-      { pt: 'Posso oferecer-te um café?', en: 'Can I get you a coffee?' },
+      { target: 'Posso sentar-me?', en: 'May I sit down?' },
+      { target: 'Posso ajudar-te?', en: 'Can I help you?' },
+      { target: 'Posso oferecer-te um café?', en: 'Can I get you a coffee?' },
     ],
     reinforces: ['podes'],
     helpers: { 'sentar-me': 'sit down', 'ajudar-te': 'help you', 'um': 'a', 'café': 'coffee', 'bebida': 'drink', 'uma': 'a', 'aqui': 'here' },
@@ -2305,31 +2305,31 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'I would like to see you again.',
-    meaning_en: 'Said at the end of an evening you do not want to be the last one.',
-    pt_natural: 'Gostava de te ver outra vez.',
+    source: 'Said at the end of an evening you do not want to be the last one.',
+    target: 'Gostava de te ver outra vez.',
     literal_note: 'GOSTAVA is a past tense being used about the future. Portuguese softens a want by putting it slightly out of reach.',
     semantic_bridge:
       'GOSTAVA DE is “I would like to”, and it is the politest three syllables in the language. It works on a person, a coffee, or a table by the window.',
     subtext: 'Open, unpressured, and completely clear about what is being asked.',
     extracts: [
-      { id: 'gostava_de', pt: 'Gostava de', gloss: 'I’d like to' },
-      { id: 'ver_te', pt: 'te ver', gloss: 'see you' },
+      { id: 'gostava_de', target: 'Gostava de', gloss: 'I’d like to' },
+      { id: 'ver_te', target: 'te ver', gloss: 'see you' },
     ],
     branches: [
-      { pt: 'Gostava de te conhecer melhor.', en: 'I’d like to get to know you better.' },
-      { pt: 'Gostava de um café.', en: 'I’d like a coffee.' },
-      { pt: 'Gostava de te ver amanhã.', en: 'I’d like to see you tomorrow.' },
+      { target: 'Gostava de te conhecer melhor.', en: 'I’d like to get to know you better.' },
+      { target: 'Gostava de um café.', en: 'I’d like a coffee.' },
+      { target: 'Gostava de te ver amanhã.', en: 'I’d like to see you tomorrow.' },
     ],
     reinforces: ['outra_vez', 'amanha'],
     helpers: { 'conhecer': 'to get to know', 'melhor': 'better', 'um': 'a', 'café': 'coffee', 'amanhã': 'tomorrow', 'por': 'for', 'favor': 'favour', 'por favor': 'please' },
     voice_options: [
       {
-        pt: 'Gostava de te ver outra vez.', en: 'I’d like to see you again.', signal: 'warm',
+        target: 'Gostava de te ver outra vez.', en: 'I’d like to see you again.', signal: 'warm',
         register: 'SAYING IT PLAINLY',
         when: 'You mean it and you would rather not spend a week pretending otherwise.',
       },
       {
-        pt: 'Dás-me o teu número?', en: 'Will you give me your number?', signal: 'direct',
+        target: 'Dás-me o teu número?', en: 'Will you give me your number?', signal: 'direct',
         register: 'SKIPPING THE SPEECH',
         when: 'It is going well, the taxi is outside, and there is no time for a sentence.',
         safest: true,
@@ -2350,21 +2350,21 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Love Actually — the one who learns Portuguese',
     source_status: 'paraphrased',
     root_display: 'I came here to ask you something.',
-    meaning_en: 'The whole point of learning the language in the first place.',
-    pt_natural: 'Vim aqui para te pedir uma coisa.',
+    source: 'The whole point of learning the language in the first place.',
+    target: 'Vim aqui para te pedir uma coisa.',
     literal_note: 'PARA + a verb is “in order to”. And notice the TE has moved in front of pedir — after para, it goes first.',
     semantic_bridge:
       'VIM AQUI PARA is how you explain why you are standing somewhere. The film made it a proposal; the sentence itself is just a reason.',
     subtext: 'Earnest, slightly exposed, and entirely deliberate. This one is meant to cost something.',
     extracts: [
-      { id: 'vim_aqui', pt: 'Vim aqui', gloss: 'I came here' },
-      { id: 'pedir_te', pt: 'te pedir', gloss: 'to ask you' },
+      { id: 'vim_aqui', target: 'Vim aqui', gloss: 'I came here' },
+      { id: 'pedir_te', target: 'te pedir', gloss: 'to ask you' },
     ],
     branches: [
-      { pt: 'Vim aqui para te ver.', en: 'I came here to see you.' },
-      { pt: 'Posso pedir-te uma coisa?', en: 'Can I ask you something?' },
-      { pt: 'Vim para ficar.', en: 'I came to stay.' },
-      { pt: 'Vim para te pedir ajuda.', en: 'I came to ask you for help.' },
+      { target: 'Vim aqui para te ver.', en: 'I came here to see you.' },
+      { target: 'Posso pedir-te uma coisa?', en: 'Can I ask you something?' },
+      { target: 'Vim para ficar.', en: 'I came to stay.' },
+      { target: 'Vim para te pedir ajuda.', en: 'I came to ask you for help.' },
     ],
     reinforces: ['posso'],
     helpers: { 'para': 'in order to', 'uma': 'a', 'coisa': 'thing', 'ficar': 'to stay', 'ver': 'to see', 'ajuda': 'help', 'pedir-te': 'ask you for' },
@@ -2381,20 +2381,20 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'I’m nervous. I’m not good at this.',
-    meaning_en: 'Admitting it, which works considerably better than not admitting it.',
-    pt_natural: 'Estou nervoso, não sou bom nisto.',
+    source: 'Admitting it, which works considerably better than not admitting it.',
+    target: 'Estou nervoso, não sou bom nisto.',
     literal_note: 'NERVOSO with an O because a man is saying it. A woman says nervosa, and the sentence is otherwise identical.',
     semantic_bridge:
       'Both halves are ordinary sentences you will reuse constantly: how you feel right now, and what you are not good at. Neither is about romance.',
     subtext: 'Disarming rather than weak. Said lightly it is the most effective line here.',
     extracts: [
-      { id: 'estou_nervoso', pt: 'Estou nervoso', gloss: 'I’m nervous — a man saying it' },
-      { id: 'nao_sou_bom', pt: 'não sou bom', gloss: 'I’m not good' },
+      { id: 'estou_nervoso', target: 'Estou nervoso', gloss: 'I’m nervous — a man saying it' },
+      { id: 'nao_sou_bom', target: 'não sou bom', gloss: 'I’m not good' },
     ],
     branches: [
-      { pt: 'Não sou bom a dançar.', en: 'I’m not a good dancer.' },
-      { pt: 'Estou nervoso, desculpa.', en: 'I’m nervous, sorry.' },
-      { pt: 'Não sou bom nisto, mas estou a tentar.', en: 'I’m not good at this, but I’m trying.' },
+      { target: 'Não sou bom a dançar.', en: 'I’m not a good dancer.' },
+      { target: 'Estou nervoso, desculpa.', en: 'I’m nervous, sorry.' },
+      { target: 'Não sou bom nisto, mas estou a tentar.', en: 'I’m not good at this, but I’m trying.' },
     ],
     reinforces: ['desculpa'],
     helpers: { 'a': 'at', 'dançar': 'dancing', 'nisto': 'at this', 'mas': 'but', 'estou': 'I am', 'tentar': 'trying' },
@@ -2411,20 +2411,20 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'Will you give me your number?',
-    meaning_en: 'The only question that matters at the end.',
-    pt_natural: 'Dás-me o teu número?',
+    source: 'The only question that matters at the end.',
+    target: 'Dás-me o teu número?',
     literal_note: 'O TEU because número is a masculine word. Ask for her morada and it becomes A TUA.',
     semantic_bridge:
       'DÁS-ME is “will you give me”, with the ME hooked on the back. O TEU is “your”, and it changes shape to match whatever you are asking for.',
     subtext: 'Direct and unembarrassed. Hesitating here reads worse than asking.',
     extracts: [
-      { id: 'das_me', pt: 'Dás-me', gloss: 'will you give me' },
-      { id: 'o_teu', pt: 'o teu', gloss: 'your' },
+      { id: 'das_me', target: 'Dás-me', gloss: 'will you give me' },
+      { id: 'o_teu', target: 'o teu', gloss: 'your' },
     ],
     branches: [
-      { pt: 'Dás-me o teu Instagram?', en: 'Will you give me your Instagram?' },
-      { pt: 'Dás-me um minuto?', en: 'Will you give me a minute?' },
-      { pt: 'Este é o meu número.', en: 'This is my number.' },
+      { target: 'Dás-me o teu Instagram?', en: 'Will you give me your Instagram?' },
+      { target: 'Dás-me um minuto?', en: 'Will you give me a minute?' },
+      { target: 'Este é o meu número.', en: 'This is my number.' },
     ],
     helpers: { 'um': 'a', 'minuto': 'minute', 'Este': 'this', 'é': 'is', 'meu': 'my', 'o': 'the', 'número': 'number', 'email': 'email' },
     transfer_prompt: { context: 'She would rather not hand over a phone number yet.', ask: 'Will you give me your email?', answer: 'Dás-me o teu email?' },
@@ -2443,30 +2443,30 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'You look good tonight.',
-    meaning_en: 'A remark about this evening, not a verdict on his existence.',
-    pt_natural: 'Estás muito giro hoje.',
+    source: 'A remark about this evening, not a verdict on his existence.',
+    target: 'Estás muito giro hoje.',
     literal_note: 'GIRO with an O because you are describing a man. The sentence is otherwise word for word the same.',
     semantic_bridge:
       'ESTÁS is “are” in the sense of right now. Say és instead and you have promoted a passing compliment into a permanent one.',
     subtext: 'Light and unweighted. Delivered in passing it does far more than delivered solemnly.',
     extracts: [
-      { id: 'giro', pt: 'giro', gloss: 'good-looking — said about a man' },
-      { id: 'hoje_estas', pt: 'Estás', gloss: 'you are (right now)' },
+      { id: 'giro', target: 'giro', gloss: 'good-looking — said about a man' },
+      { id: 'hoje_estas', target: 'Estás', gloss: 'you are (right now)' },
     ],
     branches: [
-      { pt: 'Estás lindo.', en: 'You look wonderful.' },
-      { pt: 'Estás bem?', en: 'Are you all right?' },
-      { pt: 'Hoje estás giro.', en: 'You look good today.' },
+      { target: 'Estás lindo.', en: 'You look wonderful.' },
+      { target: 'Estás bem?', en: 'Are you all right?' },
+      { target: 'Hoje estás giro.', en: 'You look good today.' },
     ],
     helpers: { 'lindo': 'wonderful (about a man)', 'bem': 'well', 'Hoje': 'today', 'muito': 'very' },
     voice_options: [
       {
-        pt: 'Estás giro.', en: 'You look good.', signal: 'casual',
+        target: 'Estás giro.', en: 'You look good.', signal: 'casual',
         register: 'THROWN AWAY',
         when: 'Said over your shoulder, once, and then changing the subject. This is the effective version.',
       },
       {
-        pt: 'Estás lindo.', en: 'You look wonderful.', signal: 'warm',
+        target: 'Estás lindo.', en: 'You look wonderful.', signal: 'warm',
         register: 'MEANT PROPERLY',
         when: 'Held eye contact, said slowly. Rare enough that it registers.',
       },
@@ -2487,31 +2487,31 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'Do you fancy going for a drink?',
-    meaning_en: 'An invitation with no weight on it, which is why it works.',
-    pt_natural: 'Apetece-te ir beber qualquer coisa?',
+    source: 'An invitation with no weight on it, which is why it works.',
+    target: 'Apetece-te ir beber qualquer coisa?',
     literal_note: 'Literally “does it appeal to you”. Portuguese asks the desire, not the person — so nobody has to be the one who wanted it.',
     semantic_bridge:
       'APETECE-TE is the most Portuguese way to invite anyone anywhere. QUALQUER COISA is “anything”, and it keeps the invitation deliberately vague.',
     subtext: 'Casual on purpose. The grammar itself removes the pressure.',
     extracts: [
-      { id: 'apetece_te', pt: 'Apetece-te', gloss: 'do you fancy' },
-      { id: 'qualquer_coisa', pt: 'qualquer coisa', gloss: 'something / anything' },
+      { id: 'apetece_te', target: 'Apetece-te', gloss: 'do you fancy' },
+      { id: 'qualquer_coisa', target: 'qualquer coisa', gloss: 'something / anything' },
     ],
     branches: [
-      { pt: 'Apetece-te um café?', en: 'Do you fancy a coffee?' },
-      { pt: 'Apetece-te dançar?', en: 'Do you fancy dancing?' },
-      { pt: 'Queres beber qualquer coisa?', en: 'Do you want a drink?' },
+      { target: 'Apetece-te um café?', en: 'Do you fancy a coffee?' },
+      { target: 'Apetece-te dançar?', en: 'Do you fancy dancing?' },
+      { target: 'Queres beber qualquer coisa?', en: 'Do you want a drink?' },
     ],
     helpers: { 'um': 'a', 'café': 'coffee', 'dançar': 'to dance', 'Queres': 'do you want', 'beber': 'to drink', 'ir': 'to go' },
     voice_options: [
       {
-        pt: 'Apetece-te ir beber qualquer coisa?', en: 'Do you fancy going for a drink?', signal: 'softened',
+        target: 'Apetece-te ir beber qualquer coisa?', en: 'Do you fancy going for a drink?', signal: 'softened',
         register: 'NO PRESSURE ON ANYONE',
         when: 'You would like to, and you would like him to be able to say no without it costing anything.',
         safest: true,
       },
       {
-        pt: 'Vamos beber qualquer coisa?', en: 'Shall we go for a drink?', signal: 'direct',
+        target: 'Vamos beber qualquer coisa?', en: 'Shall we go for a drink?', signal: 'direct',
         register: 'ALREADY DECIDED',
         when: 'Said standing up, with your coat already on. Assumes the answer.',
       },
@@ -2531,20 +2531,20 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'I’d like to get to know you better.',
-    meaning_en: 'Interest, stated once, without a speech attached.',
-    pt_natural: 'Queria conhecer-te melhor.',
+    source: 'Interest, stated once, without a speech attached.',
+    target: 'Queria conhecer-te melhor.',
     literal_note: 'QUERIA is a past tense doing a present job. Queria um café is how you order coffee — the same softening, in a café.',
     semantic_bridge:
       'QUERIA is “I would like”. It is the difference between quero — I want — and something a person can comfortably hear. You will use it every day, mostly about food.',
     subtext: 'Warm and unhurried. Said once and then left alone.',
     extracts: [
-      { id: 'queria', pt: 'Queria', gloss: 'I’d like' },
-      { id: 'conhecer_te', pt: 'conhecer-te', gloss: 'to get to know you' },
+      { id: 'queria', target: 'Queria', gloss: 'I’d like' },
+      { id: 'conhecer_te', target: 'conhecer-te', gloss: 'to get to know you' },
     ],
     branches: [
-      { pt: 'Queria ver-te outra vez.', en: 'I’d like to see you again.' },
-      { pt: 'Queria um café, por favor.', en: 'I’d like a coffee, please.' },
-      { pt: 'Queria conhecer-te melhor.', en: 'I’d like to get to know you better.' },
+      { target: 'Queria ver-te outra vez.', en: 'I’d like to see you again.' },
+      { target: 'Queria um café, por favor.', en: 'I’d like a coffee, please.' },
+      { target: 'Queria conhecer-te melhor.', en: 'I’d like to get to know you better.' },
     ],
     reinforces: ['outra_vez'],
     helpers: { 'ver-te': 'to see you', 'um': 'a', 'café': 'coffee', 'por': 'for', 'favor': 'favour', 'melhor': 'better', 'outra': 'another', 'vez': 'time' },
@@ -2561,31 +2561,31 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'You’re really funny.',
-    meaning_en: 'The most effective sentence in this entire crate.',
-    pt_natural: 'És muito engraçado.',
+    source: 'The most effective sentence in this entire crate.',
+    target: 'És muito engraçado.',
     literal_note: 'ÉS this time, not estás. Funny is not something he is being tonight; it is something he is.',
     semantic_bridge:
       'ÉS is the permanent “are”. It is exactly the verb you avoided for estás lindo, and here it is the right one — which is what makes the pair worth having.',
     subtext: 'Sincere, and worth spending. Said about a joke that was not funny it does the opposite.',
     extracts: [
-      { id: 'es', pt: 'És', gloss: 'you are (permanently)' },
-      { id: 'engracado', pt: 'engraçado', gloss: 'funny' },
+      { id: 'es', target: 'És', gloss: 'you are (permanently)' },
+      { id: 'engracado', target: 'engraçado', gloss: 'funny' },
     ],
     branches: [
-      { pt: 'És muito simpático.', en: 'You’re really nice.' },
-      { pt: 'Não és nada engraçado.', en: 'You’re not funny at all.' },
-      { pt: 'És giro quando ris.', en: 'You’re cute when you laugh.' },
+      { target: 'És muito simpático.', en: 'You’re really nice.' },
+      { target: 'Não és nada engraçado.', en: 'You’re not funny at all.' },
+      { target: 'És giro quando ris.', en: 'You’re cute when you laugh.' },
     ],
     helpers: { 'muito': 'really', 'simpático': 'nice', 'Não': 'not', 'nada': 'at all', 'quando': 'when', 'ris': 'you laugh', 'É': 'he is', 'giro': 'cute' },
     voice_options: [
       {
-        pt: 'És muito engraçado.', en: 'You’re really funny.', signal: 'warm',
+        target: 'És muito engraçado.', en: 'You’re really funny.', signal: 'warm',
         register: 'MEANT',
         when: 'He has made you laugh three times and should be told.',
         safest: true,
       },
       {
-        pt: 'Não és nada engraçado.', en: 'You’re not funny at all.', signal: 'dry',
+        target: 'Não és nada engraçado.', en: 'You’re not funny at all.', signal: 'dry',
         register: 'THE TEASE',
         when: 'Said smiling, immediately after laughing. Everyone understands it as the opposite.',
         risk: 'Said flat, or to someone who does not know you yet, it is simply an insult.',
@@ -2606,20 +2606,20 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Every hello and goodbye in Portugal',
     source_status: 'paraphrased',
     root_display: 'Give me a little kiss.',
-    meaning_en: 'And also, unremarkably, how the entire country says hello.',
-    pt_natural: 'Dá-me um beijinho.',
+    source: 'And also, unremarkably, how the entire country says hello.',
+    target: 'Dá-me um beijinho.',
     literal_note: 'BEIJO is a kiss. BEIJINHO is a small one — and in Portugal the small one is the greeting, given twice, to almost everybody.',
     semantic_bridge:
       'The -INHO ending makes a word smaller, and in doing so makes it friendlier. A cafezinho is not a small coffee; it is a coffee offered warmly.',
     subtext: 'Playful rather than forward. The diminutive is what takes the weight out of it.',
     extracts: [
-      { id: 'beijinho', pt: 'beijinho', gloss: 'a little kiss — and how Portugal says hello' },
-      { id: 'da_me', pt: 'Dá-me', gloss: 'give me' },
+      { id: 'beijinho', target: 'beijinho', gloss: 'a little kiss — and how Portugal says hello' },
+      { id: 'da_me', target: 'Dá-me', gloss: 'give me' },
     ],
     branches: [
-      { pt: 'Dois beijinhos.', en: 'Two little kisses.' },
-      { pt: 'Dá-me um minuto.', en: 'Give me a minute.' },
-      { pt: 'Apetece-te um cafezinho?', en: 'Fancy a little coffee?' },
+      { target: 'Dois beijinhos.', en: 'Two little kisses.' },
+      { target: 'Dá-me um minuto.', en: 'Give me a minute.' },
+      { target: 'Apetece-te um cafezinho?', en: 'Fancy a little coffee?' },
     ],
     reinforces: ['apetece_te'],
     helpers: { 'Dois': 'two', 'beijinhos': 'little kisses', 'um': 'a', 'minuto': 'minute', 'cafezinho': 'a friendly little coffee' },
@@ -2636,20 +2636,20 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'Will you call me later?',
-    meaning_en: 'Handing the next move over, deliberately.',
-    pt_natural: 'Ligas-me logo?',
+    source: 'Handing the next move over, deliberately.',
+    target: 'Ligas-me logo?',
     literal_note: 'LIGAS-ME is you calling me. LIGO-TE is me calling you. Same verb, two endings, opposite directions.',
     semantic_bridge:
       'The ending of the verb says who is doing it and the pronoun on the back says who it lands on. Change both and the whole sentence turns around.',
     subtext: 'Confident. Asking him to call is a decision, not a hope.',
     extracts: [
-      { id: 'ligas_me', pt: 'Ligas-me', gloss: 'will you call me' },
-      { id: 'logo', pt: 'logo', gloss: 'later on / in a bit' },
+      { id: 'ligas_me', target: 'Ligas-me', gloss: 'will you call me' },
+      { id: 'logo', target: 'logo', gloss: 'later on / in a bit' },
     ],
     branches: [
-      { pt: 'Ligo-te logo.', en: 'I’ll call you later.' },
-      { pt: 'Até logo.', en: 'See you later.' },
-      { pt: 'Ligas-me amanhã?', en: 'Will you call me tomorrow?' },
+      { target: 'Ligo-te logo.', en: 'I’ll call you later.' },
+      { target: 'Até logo.', en: 'See you later.' },
+      { target: 'Ligas-me amanhã?', en: 'Will you call me tomorrow?' },
     ],
     reinforces: ['amanha'],
     helpers: { 'Ligo-te': 'I’ll call you', 'Até': 'until / see you', 'amanhã': 'tomorrow', 'logo': 'later' },
@@ -2683,20 +2683,20 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Hungry Like the Wolf',
     source_status: 'verified',
     root_display: 'Hungry Like the Wolf',
-    meaning_en: 'Hungry like the wolf.',
-    pt_natural: 'Tenho uma fome de lobo.',
+    source: 'Hungry like the wolf.',
+    target: 'Tenho uma fome de lobo.',
     literal_note: 'Literally “I have a hunger of wolf”.',
     semantic_bridge:
       'English IS hungry. Portuguese HAS hunger. And “uma fome de lobo” is a real expression in Portugal, not a translation of the song — which is why this title survives the crossing when most do not. That one swap, ter where English uses to be, carries fome, sede, frio, calor and razão with it.',
     subtext: 'Physical and unfussy. It is also the first thing you will say in a restaurant.',
     extracts: [
-      { id: 'tenho', pt: 'tenho', gloss: 'I have' },
-      { id: 'fome', pt: 'fome', gloss: 'hunger' },
+      { id: 'tenho', target: 'tenho', gloss: 'I have' },
+      { id: 'fome', target: 'fome', gloss: 'hunger' },
     ],
     branches: [
-      { pt: 'Tenho fome.', en: 'I’m hungry.' },
-      { pt: 'Não tenho fome.', en: 'I’m not hungry.' },
-      { pt: 'Tenho sede.', en: 'I’m thirsty.' },
+      { target: 'Tenho fome.', en: 'I’m hungry.' },
+      { target: 'Não tenho fome.', en: 'I’m not hungry.' },
+      { target: 'Tenho sede.', en: 'I’m thirsty.' },
     ],
     helpers: {
       'sede': 'thirst',
@@ -2707,13 +2707,13 @@ export const DURAN_DURAN: Root[] = [
     },
     voice_options: [
       {
-        pt: 'Tenho fome.', en: 'I’m hungry.', signal: 'direct',
+        target: 'Tenho fome.', en: 'I’m hungry.', signal: 'direct',
         register: 'DECIDING WHERE TO EAT',
         when: 'Said to whoever is holding the menu. This is information, and nobody will find it dramatic.',
         safest: true,
       },
       {
-        pt: 'Estou cheio de fome.', en: 'I’m starving.', signal: 'casual',
+        target: 'Estou cheio de fome.', en: 'I’m starving.', signal: 'casual',
         register: 'AMONG FRIENDS',
         when: 'Louder, funnier, and used constantly between people who know each other well.',
         risk: 'Cheio agrees with you, not with the hunger — a woman says cheia.',
@@ -2738,19 +2738,19 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'New Moon on Monday',
     source_status: 'verified',
     root_display: 'New Moon on Monday',
-    meaning_en: 'New moon on Monday.',
-    pt_natural: 'Lua nova na segunda-feira.',
+    source: 'New moon on Monday.',
+    target: 'Lua nova na segunda-feira.',
     semantic_bridge:
       'Portugal does not name its weekdays after gods or planets — it counts them. Monday is segunda-feira, the second one. Get this single word and terça, quarta, quinta and sexta arrive free, because you are only counting.',
     subtext: 'Flat, practical admin language — the stuff that decides whether you can make a plan.',
     extracts: [
-      { id: 'segunda_feira', pt: 'segunda-feira', gloss: 'Monday' },
-      { id: 'nova', pt: 'nova', gloss: 'new', rung: 1 },
+      { id: 'segunda_feira', target: 'segunda-feira', gloss: 'Monday' },
+      { id: 'nova', target: 'nova', gloss: 'new', rung: 1 },
     ],
     branches: [
-      { pt: 'Até segunda-feira.', en: 'See you Monday.' },
-      { pt: 'Na segunda-feira não posso.', en: 'I can’t on Monday.' },
-      { pt: 'Uma vida nova.', en: 'A new life.' },
+      { target: 'Até segunda-feira.', en: 'See you Monday.' },
+      { target: 'Na segunda-feira não posso.', en: 'I can’t on Monday.' },
+      { target: 'Uma vida nova.', en: 'A new life.' },
     ],
     reinforces: ['amanha', 'vida', 'podes'],
     helpers: {
@@ -2778,19 +2778,19 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Is There Something I Should Know?',
     source_status: 'verified',
     root_display: 'Is There Something I Should Know?',
-    meaning_en: 'Is there something I should know?',
-    pt_natural: 'Há alguma coisa que eu deva saber?',
+    source: 'Is there something I should know?',
+    target: 'Há alguma coisa que eu deva saber?',
     semantic_bridge:
       'English keeps changing shape — there is, there are, there was. Portuguese has HÁ, and it does not care how many of the thing there are. It is one syllable, it never agrees with anything, and it is also how Portuguese says “ago”.',
     subtext: 'The question you ask when you can feel something is being left out.',
     extracts: [
-      { id: 'ha', pt: 'há', gloss: 'there is / there are' },
-      { id: 'alguma_coisa', pt: 'alguma coisa', gloss: 'something' },
+      { id: 'ha', target: 'há', gloss: 'there is / there are' },
+      { id: 'alguma_coisa', target: 'alguma coisa', gloss: 'something' },
     ],
     branches: [
-      { pt: 'Há um problema.', en: 'There’s a problem.' },
-      { pt: 'Não há problema.', en: 'No problem.' },
-      { pt: 'Há alguma coisa boa?', en: 'Is there anything good?' },
+      { target: 'Há um problema.', en: 'There’s a problem.' },
+      { target: 'Não há problema.', en: 'No problem.' },
+      { target: 'Há alguma coisa boa?', en: 'Is there anything good?' },
     ],
     reinforces: ['bom', 'qualquer_coisa'],
     helpers: {
@@ -2805,13 +2805,13 @@ export const DURAN_DURAN: Root[] = [
     },
     voice_options: [
       {
-        pt: 'Não há problema.', en: 'No problem.', signal: 'casual',
+        target: 'Não há problema.', en: 'No problem.', signal: 'casual',
         register: 'WAVING IT AWAY',
         when: 'The everyday answer to an apology, a delay, or someone squeezing past you.',
         safest: true,
       },
       {
-        pt: 'Não faz mal.', en: 'It doesn’t matter.', signal: 'warm',
+        target: 'Não faz mal.', en: 'It doesn’t matter.', signal: 'warm',
         register: 'REASSURING SOMEONE',
         when: 'Softer, and aimed at the person rather than the problem — use it when they feel bad.',
       },
@@ -2835,19 +2835,19 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Save a Prayer',
     source_status: 'verified',
     root_display: 'Save a Prayer (…till the morning after)',
-    meaning_en: 'Save a prayer for the morning after.',
-    pt_natural: 'Guarda uma oração para a manhã seguinte.',
+    source: 'Save a prayer for the morning after.',
+    target: 'Guarda uma oração para a manhã seguinte.',
     semantic_bridge:
       'Here is the good bit. If you have met AMANHÃ already, you have been carrying this word around without knowing: amanhã is a + manhã, “to the morning”. The song has just pulled your own vocabulary apart in front of you.',
     subtext: 'The one that quietly proves the whole compounding idea, using a word you already had.',
     extracts: [
-      { id: 'guarda', pt: 'guarda', gloss: 'keep / save' },
-      { id: 'manha', pt: 'manhã', gloss: 'morning' },
+      { id: 'guarda', target: 'guarda', gloss: 'keep / save' },
+      { id: 'manha', target: 'manhã', gloss: 'morning' },
     ],
     branches: [
-      { pt: 'Guarda isto.', en: 'Keep this.' },
-      { pt: 'Guarda-me um lugar.', en: 'Save me a seat.' },
-      { pt: 'De manhã.', en: 'In the morning.' },
+      { target: 'Guarda isto.', en: 'Keep this.' },
+      { target: 'Guarda-me um lugar.', en: 'Save me a seat.' },
+      { target: 'De manhã.', en: 'In the morning.' },
     ],
     reinforces: ['amanha', 'isto'],
     helpers: {
@@ -2878,19 +2878,19 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'All You Need Is Now',
     source_status: 'verified',
     root_display: 'All You Need Is Now',
-    meaning_en: 'All you need is now.',
-    pt_natural: 'Tudo o que precisas é agora.',
+    source: 'All you need is now.',
+    target: 'Tudo o que precisas é agora.',
     semantic_bridge:
       'Two thirds of this title may already be yours. PRECISO DE came out of Top Gun and AGORA out of Marcus Aurelius — all that has changed is the ending on the verb, which moves the need from you to them: preciso, precisas.',
     subtext: 'Reads like a slogan, works like a lever: it is the “you” form of a verb you already use.',
     extracts: [
-      { id: 'tudo', pt: 'tudo', gloss: 'everything / all' },
-      { id: 'precisas', pt: 'precisas', gloss: 'you need' },
+      { id: 'tudo', target: 'tudo', gloss: 'everything / all' },
+      { id: 'precisas', target: 'precisas', gloss: 'you need' },
     ],
     branches: [
-      { pt: 'Tudo bem?', en: 'All good?' },
-      { pt: 'Precisas de ajuda?', en: 'Do you need help?' },
-      { pt: 'É tudo.', en: 'That’s everything.' },
+      { target: 'Tudo bem?', en: 'All good?' },
+      { target: 'Precisas de ajuda?', en: 'Do you need help?' },
+      { target: 'É tudo.', en: 'That’s everything.' },
     ],
     reinforces: ['preciso_de', 'agora'],
     helpers: {
@@ -2903,13 +2903,13 @@ export const DURAN_DURAN: Root[] = [
     },
     voice_options: [
       {
-        pt: 'Tudo bem?', en: 'All good?', signal: 'casual',
+        target: 'Tudo bem?', en: 'All good?', signal: 'casual',
         register: 'HELLO, MOSTLY',
         when: 'Half greeting, half question. You will hear it forty times a day and it rarely wants a real answer.',
         safest: true,
       },
       {
-        pt: 'Está tudo bem?', en: 'Is everything all right?', signal: 'warm',
+        target: 'Está tudo bem?', en: 'Is everything all right?', signal: 'warm',
         register: 'YOU LOOK ROUGH',
         when: 'The same words with está in front, and now it is a genuine question about how they are.',
         risk: 'Ask this one casually and people will think something has happened.',
@@ -2934,19 +2934,19 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Ordinary World',
     source_status: 'verified',
     root_display: 'Ordinary World',
-    meaning_en: 'Ordinary world.',
-    pt_natural: 'Um mundo normal.',
+    source: 'Ordinary world.',
+    target: 'Um mundo normal.',
     semantic_bridge:
       'English stacks the description in front: ordinary world. Portuguese puts it behind, almost always — mundo normal, vida nova, café pequeno. Two words in a song title, and the default word order of the whole language is sitting in them.',
     subtext: 'Plain, slightly melancholy, and structurally the most useful thing in the drop.',
     extracts: [
-      { id: 'mundo', pt: 'mundo', gloss: 'world' },
-      { id: 'normal', pt: 'normal', gloss: 'normal / ordinary' },
+      { id: 'mundo', target: 'mundo', gloss: 'world' },
+      { id: 'normal', target: 'normal', gloss: 'normal / ordinary' },
     ],
     branches: [
-      { pt: 'Uma vida normal.', en: 'A normal life.' },
-      { pt: 'Não é normal.', en: 'That’s not normal.' },
-      { pt: 'O mundo é assim.', en: 'That’s the world for you.' },
+      { target: 'Uma vida normal.', en: 'A normal life.' },
+      { target: 'Não é normal.', en: 'That’s not normal.' },
+      { target: 'O mundo é assim.', en: 'That’s the world for you.' },
     ],
     reinforces: ['vida', 'nova'],
     helpers: {
@@ -3001,9 +3001,9 @@ export function rootById(id: string): Root | undefined {
 /** Every distinct piece the graph can teach, and where it first comes from. */
 export const PIECES: Record<
   string,
-  { pt: string; gloss: string; family: CultureFamily; rung: Rung }
+  { target: string; gloss: string; family: CultureFamily; rung: Rung }
 > = (() => {
-  const out: Record<string, { pt: string; gloss: string; family: CultureFamily; rung: Rung }> = {}
+  const out: Record<string, { target: string; gloss: string; family: CultureFamily; rung: Rung }> = {}
   // Lowest rung wins: a piece belongs to the earliest point a learner could have met
   // it, otherwise a rung 2 root would look as though it needed rung 6 knowledge.
   for (const root of ROOTS) {
@@ -3011,7 +3011,7 @@ export const PIECES: Record<
       const rung = e.rung ?? root.rung
       const seen = out[e.id]
       if (!seen || rung < seen.rung) {
-        out[e.id] = { pt: e.pt, gloss: e.gloss, family: seen?.family ?? root.culture_family, rung }
+        out[e.id] = { target: e.target, gloss: e.gloss, family: seen?.family ?? root.culture_family, rung }
       }
     }
   }
@@ -3448,6 +3448,9 @@ export function entryRung(crate: Crate): Rung {
  * progress saved before the ladder existed.
  */
 export function rungReached(
+  // ProofLine keeps its own `pt`: it is a record of what the learner said, not a field
+  // of the content graph, and renaming it here would have been the rename escaping its
+  // own scope.
   proof: { pt: string; source: string; clean: boolean }[],
 ): Rung {
   let top = 0
@@ -3474,11 +3477,11 @@ export function sourceOf(pieceId: string): Root | undefined {
 export function linesFor(pieceId: string, limit = 4): Branch[] {
   const piece = PIECES[pieceId]
   if (!piece) return []
-  const stem = piece.pt.replace(/[…?]/g, '').trim().toLowerCase()
+  const stem = piece.target.replace(/[…?]/g, '').trim().toLowerCase()
   const out: Branch[] = []
   for (const r of ROOTS) {
     for (const b of r.branches) {
-      if (b.pt.toLowerCase().includes(stem) && !out.some((o) => o.pt === b.pt)) out.push(b)
+      if (b.target.toLowerCase().includes(stem) && !out.some((o) => o.target === b.target)) out.push(b)
     }
   }
   return out.slice(0, limit)

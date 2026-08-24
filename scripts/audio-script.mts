@@ -78,8 +78,8 @@ function add(l: Omit<Line, 'slug' | 'speaker'> & { speaker?: Speaker }) {
 for (const family of CRATES) {
   for (const root of ROOTS_BY_FAMILY[family.id] ?? []) {
     add({
-      pt: root.pt_natural,
-      en: root.meaning_en,
+      pt: root.target,
+      en: root.source,
       direction: root.subtext,
       crate: family.title,
       root: root.root_id,
@@ -87,7 +87,7 @@ for (const family of CRATES) {
     })
     for (const e of root.extracts) {
       add({
-        pt: e.pt,
+        pt: e.target,
         en: e.gloss,
         direction: 'Isolated, unhurried. This is the piece being handed over — clear enough to copy.',
         crate: family.title,
@@ -97,7 +97,7 @@ for (const family of CRATES) {
     }
     for (const b of root.branches) {
       add({
-        pt: b.pt,
+        pt: b.target,
         en: b.en,
         direction: 'Ordinary conversational pace. This is the learner hearing what they are about to say.',
         crate: family.title,
@@ -107,7 +107,7 @@ for (const family of CRATES) {
     }
     for (const v of root.voice_options ?? []) {
       add({
-        pt: v.pt,
+        pt: v.target,
         en: v.en,
         direction: v.register + ' — ' + v.when,
         crate: family.title,

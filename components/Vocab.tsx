@@ -133,7 +133,7 @@ export function Vocab() {
                 <p className="-mt-1 flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted">
                   {ids.slice(0, 6).map((id) => (
                     <span key={id} className="pt text-accent/70">
-                      {PIECES[id].pt}
+                      {PIECES[id].target}
                     </span>
                   ))}
                   {ids.length > 6 ? <span>+{ids.length - 6} more</span> : null}
@@ -164,7 +164,7 @@ export function Vocab() {
                         }
                       >
                         <span className="min-w-0">
-                          <span className="pt block text-base text-accent">{piece.pt}</span>
+                          <span className="pt block text-base text-accent">{piece.target}</span>
                           <span className="mt-0.5 block text-xs text-muted">{piece.gloss}</span>
                         </span>
                         <span className="shrink-0 text-[0.55rem] uppercase tracking-wider text-muted">
@@ -180,8 +180,8 @@ export function Vocab() {
                               <p className="mt-1.5 text-xs leading-relaxed text-muted">
                                 {crateTitle(root.culture_family)}
                               </p>
-                              <p className="pt mt-1 text-sm">{root.pt_natural}</p>
-                              <p className="mt-0.5 text-xs text-muted">{root.meaning_en}</p>
+                              <p className="pt mt-1 text-sm">{root.target}</p>
+                              <p className="mt-0.5 text-xs text-muted">{root.source}</p>
                             </>
                           ) : null}
 
@@ -193,8 +193,8 @@ export function Vocab() {
                               </p>
                               <ul className="mt-2 flex flex-col gap-2">
                                 {lines.map((l) => (
-                                  <li key={l.pt}>
-                                    <p className="pt text-sm">{l.pt}</p>
+                                  <li key={l.target}>
+                                    <p className="pt text-sm">{l.target}</p>
                                     <p className="text-xs text-muted">{l.en}</p>
                                   </li>
                                 ))}

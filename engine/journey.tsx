@@ -85,8 +85,8 @@ export type RootBeat =
 export function branchesFor(root: Root, extractId: string) {
   const extract = root.extracts.find((e) => e.id === extractId)
   if (!extract) return []
-  const stem = extract.pt.replace(/[…?]/g, '').trim().toLowerCase()
-  return root.branches.filter((b) => b.pt.toLowerCase().includes(stem))
+  const stem = extract.target.replace(/[…?]/g, '').trim().toLowerCase()
+  return root.branches.filter((b) => b.target.toLowerCase().includes(stem))
 }
 
 /**
@@ -100,9 +100,9 @@ export function branchesFor(root: Root, extractId: string) {
  * twice in a row.
  */
 export function buildTargetFor(root: Root) {
-  const usable = (b: { pt: string }) => !b.pt.includes('…') && b.pt.split(' ').length > 1
+  const usable = (b: { target: string }) => !b.target.includes('…') && b.target.split(' ').length > 1
   return (
-    root.branches.find((b) => usable(b) && b.pt !== root.transfer_prompt.answer) ??
+    root.branches.find((b) => usable(b) && b.target !== root.transfer_prompt.answer) ??
     root.branches.find(usable) ??
     root.branches[0]
   )

@@ -405,7 +405,7 @@ for (const e of EXAMPLES) {
       fail(R + 'branches into ' + root.branches.length + '; §05 requires at least 3')
     }
     if (!root.transfer_prompt?.answer) fail(R + 'has no culture-free release')
-    if (root.transfer_prompt?.answer === root.pt_natural) {
+    if (root.transfer_prompt?.answer === root.target) {
       fail(R + 'release repeats the root line, so it proves nothing')
     }
     // Nor may it repeat the build. Being asked to assemble the same sentence twice
@@ -413,8 +413,8 @@ for (const e of EXAMPLES) {
     // transfer. buildTargetFor avoids it wherever a root has another usable branch;
     // this catches the roots where it cannot.
     const bt = buildTargetFor(root)
-    if (!root.freebie_flag && bt && bt.pt === root.transfer_prompt?.answer) {
-      fail(R + 'build and release are both "' + bt.pt + '"; give it another branch')
+    if (!root.freebie_flag && bt && bt.target === root.transfer_prompt?.answer) {
+      fail(R + 'build and release are both "' + bt.target + '"; give it another branch')
     }
     for (const p of root.reinforces) {
       if (!PIECES[p]) fail(R + 'claims to reinforce "' + p + '", which no root teaches')
@@ -425,18 +425,18 @@ for (const e of EXAMPLES) {
     const target = buildTargetFor(root)
     if (target) {
       const taught = new Set(
-        [...root.extracts.map((e) => e.pt), ...Object.keys(PIECES).map((k) => PIECES[k].pt)]
+        [...root.extracts.map((e) => e.target), ...Object.keys(PIECES).map((k) => PIECES[k].target)]
           .flatMap((s) => s.replace(/[…?.,!;:]/g, '').toLowerCase().split(' '))
           .filter(Boolean),
       )
       const glossed = new Set(
         Object.keys(root.helpers ?? {}).map((w) => w.replace(/[…?.,!;:]/g, '').toLowerCase()),
       )
-      for (const word of target.pt.replace(/[.?,!;:…]/g, '').split(' ')) {
+      for (const word of target.target.replace(/[.?,!;:…]/g, '').split(' ')) {
         const w = word.toLowerCase()
         if (!w || taught.has(w) || glossed.has(w)) continue
         if (/^[A-Z]/.test(word)) continue // a name
-        fail(R + 'build "' + target.pt + '" uses untaught, unglossed word "' + word + '"')
+        fail(R + 'build "' + target.target + '" uses untaught, unglossed word "' + word + '"')
       }
     }
 
@@ -444,18 +444,18 @@ for (const e of EXAMPLES) {
     if (root.extracts.length > 1) {
       for (const e of root.extracts) {
         if (!branchesFor(root, e.id).length) {
-          warn(R + 'extract "' + e.pt + '" has no branch of its own to unpack')
+          warn(R + 'extract "' + e.target + '" has no branch of its own to unpack')
         }
       }
     }
 
     // §14: extract from pieces genuinely contained in, or immediately implied by, the
     // natural Portuguese — not from anything that happens to be useful.
-    const line = root.pt_natural.toLowerCase()
+    const line = root.target.toLowerCase()
     for (const e of root.extracts) {
-      const stem = e.pt.replace(/[…?]/g, '').trim().toLowerCase().split(' ')[0]
+      const stem = e.target.replace(/[…?]/g, '').trim().toLowerCase().split(' ')[0]
       if (stem.length > 2 && !line.includes(stem)) {
-        warn(R + 'extract "' + e.pt + '" is not visible in "' + root.pt_natural + '"')
+        warn(R + 'extract "' + e.target + '" is not visible in "' + root.target + '"')
       }
     }
   }
@@ -555,7 +555,7 @@ for (const e of EXAMPLES) {
     const target = root.freebie_flag ? null : buildTargetFor(root)
     if (target) {
       const ownWords = new Set(
-        root.extracts.flatMap((e) => e.pt.replace(/[…?.,!;:]/g, '').toLowerCase().split(' ')),
+        root.extracts.flatMap((e) => e.target.replace(/[…?.,!;:]/g, '').toLowerCase().split(' ')),
       )
       const glossed = new Set(
         Object.keys(root.helpers ?? {}).map((w) => w.replace(/[…?.,!;:]/g, '').toLowerCase()),
@@ -563,13 +563,13 @@ for (const e of EXAMPLES) {
       const belowOrAt = new Set(
         Object.values(PIECES)
           .filter((pc) => pc.rung <= root.rung)
-          .flatMap((pc) => pc.pt.replace(/[…?.,!;:]/g, '').toLowerCase().split(' ')),
+          .flatMap((pc) => pc.target.replace(/[…?.,!;:]/g, '').toLowerCase().split(' ')),
       )
-      for (const word of target.pt.replace(/[.?,!;:…]/g, '').split(' ')) {
+      for (const word of target.target.replace(/[.?,!;:…]/g, '').split(' ')) {
         const w = word.toLowerCase()
         if (!w || ownWords.has(w) || glossed.has(w) || belowOrAt.has(w)) continue
         if (/^[A-Z]/.test(word)) continue
-        warn(R + 'build "' + target.pt + '" uses "' + word + '", which no rung ≤ ' + root.rung + ' teaches')
+        warn(R + 'build "' + target.target + '" uses "' + word + '", which no rung ≤ ' + root.rung + ' teaches')
       }
     }
   }
@@ -622,11 +622,11 @@ for (const e of EXAMPLES) {
 // ---------------------------------------------------------------------------
 {
   const all = ROOTS.flatMap((r) => [
-    r.pt_natural,
+    r.target,
     r.transfer_prompt.answer,
-    ...r.branches.map((b) => b.pt),
-    ...r.extracts.map((e) => e.pt),
-    ...(r.voice_options ?? []).map((v) => v.pt),
+    ...r.branches.map((b) => b.target),
+    ...r.extracts.map((e) => e.target),
+    ...(r.voice_options ?? []).map((v) => v.target),
   ])
     .join(' | ')
     .toLowerCase()
@@ -708,16 +708,16 @@ for (const e of EXAMPLES) {
       fail(r.root_id + ' marks more than one option as the safe one')
     }
     for (const o of r.voice_options) {
-      if (!o.register?.trim()) fail(r.root_id + ' / ' + o.pt + ' has no register chip')
-      if (!o.when?.trim()) fail(r.root_id + ' / ' + o.pt + ' does not say when to use it')
+      if (!o.register?.trim()) fail(r.root_id + ' / ' + o.target + ' has no register chip')
+      if (!o.when?.trim()) fail(r.root_id + ' / ' + o.target + ' does not say when to use it')
       if (o.safest && o.register && o.register.length > 22) {
-        warn(r.root_id + ' / ' + o.pt + ' chip is too long to sit beside the IF IN DOUBT badge')
+        warn(r.root_id + ' / ' + o.target + ' chip is too long to sit beside the IF IN DOUBT badge')
       }
       if (o.register && o.register.length > 34) {
-        warn(r.root_id + ' / ' + o.pt + ' chip is ' + o.register.length + ' chars, it will wrap')
+        warn(r.root_id + ' / ' + o.target + ' chip is ' + o.register.length + ' chars, it will wrap')
       }
       if (o.when && o.when.split(' ').length < 6) {
-        warn(r.root_id + ' / ' + o.pt + ' when-line is too thin to be useful')
+        warn(r.root_id + ' / ' + o.target + ' when-line is too thin to be useful')
       }
     }
   }

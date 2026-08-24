@@ -36,7 +36,7 @@ import { PIECES } from '../content/roots'
 const strip = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 let checked = 0
 for (const root of ROOTS) {
-  for (const line of [...root.branches.map((b) => b.pt), root.transfer_prompt.answer]) {
+  for (const line of [...root.branches.map((b) => b.target), root.transfer_prompt.answer]) {
     const l = pickLine({ owned: root.extracts.map((e) => e.id), day: '2026-01-01', salt: line })
     void l
   }
@@ -47,7 +47,7 @@ for (let d = 0; d < 400; d++) {
   const words = new Set(strip(line.pt).replace(/[^a-z\s-]/g, ' ').split(/\s+/).filter((w) => w.length >= 3))
   const noteWords = strip(line.note).replace(/[^a-z\s-]/g, ' ').split(/\s+/)
   const root = ROOTS.find((r) => r.root_id === line.root_id)!
-  const rootWords = new Set(strip(root.pt_natural).replace(/[^a-z\s-]/g, ' ').split(/\s+/).filter((w) => w.length >= 3))
+  const rootWords = new Set(strip(root.target).replace(/[^a-z\s-]/g, ' ').split(/\s+/).filter((w) => w.length >= 3))
   const relevant = noteWords.some((w) => words.has(w) || rootWords.has(w))
   if (!relevant) {
     throw new Error('note for "' + line.pt + '" is about neither it nor its root: ' + line.note)

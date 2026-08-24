@@ -1064,9 +1064,9 @@ function RootBeatView({
     return (
       <Shell stage={stage} eyebrow={family.title}>
         <p className="text-xs text-muted">“{root.root_display}”</p>
-        <p className="pt mt-3 text-balance text-3xl text-accent">{root.pt_natural}</p>
+        <p className="pt mt-3 text-balance text-3xl text-accent">{root.target}</p>
         <div className="mt-3">
-          <AudioButton slug={slugFor(root.pt_natural)} text={root.pt_natural} />
+          <AudioButton slug={slugFor(root.target)} text={root.target} />
         </div>
         {/* The bridge is mandatory: the learner must be able to trace root -> Portuguese
             before anything is pulled out of it (§10). */}
@@ -1095,7 +1095,7 @@ function RootBeatView({
           {many ? root.extracts.length + ' USEFUL BITS IN HERE' : 'THE USEFUL BIT'}
         </p>
         <p className="pt mt-4 text-balance text-2xl leading-relaxed">
-          <Highlighted line={root.pt_natural} pieces={root.extracts.map((e) => e.pt)} />
+          <Highlighted line={root.target} pieces={root.extracts.map((e) => e.target)} />
         </p>
         <p className="mt-6 text-sm text-muted">
           {many
@@ -1122,25 +1122,25 @@ function RootBeatView({
           </p>
         ) : null}
         <p className="pt mt-3 text-balance text-lg">
-          <Highlighted line={root.pt_natural} pieces={[e.pt]} dim="text-accent/45" />
+          <Highlighted line={root.target} pieces={[e.target]} dim="text-accent/45" />
         </p>
 
         <div className="mt-8 flex items-center gap-3">
-          <AudioButton slug={slugFor(e.pt.replace('…', '').trim())} text={e.pt} />
+          <AudioButton slug={slugFor(e.target.replace('…', '').trim())} text={e.target} />
           <div>
-            <p className="pt text-3xl text-accent">{e.pt}</p>
+            <p className="pt text-3xl text-accent">{e.target}</p>
             <p className="mt-1 text-sm text-muted">{e.gloss}</p>
           </div>
         </div>
 
         {pieceIndex === 0 && reinforced.length ? (
           <p className="mt-8 text-xs text-muted">
-            This also strengthens {reinforced.map((r) => PIECES[r].pt).join(', ')}.
+            This also strengthens {reinforced.map((r) => PIECES[r].target).join(', ')}.
           </p>
         ) : null}
 
         <Cta
-          label={'WHAT DOES ' + e.pt.replace('…', '').trim().toUpperCase() + ' GIVE ME?'}
+          label={'WHAT DOES ' + e.target.replace('…', '').trim().toUpperCase() + ' GIVE ME?'}
           onClick={() => {
             acquirePiece(e.id, root.culture_family)
             next()
@@ -1156,7 +1156,7 @@ function RootBeatView({
     const more = pieceIndex < root.extracts.length - 1
     return (
       <Shell stage={stage} eyebrow={family.title}>
-        <p className="eyebrow text-accent">{e.pt.replace('…', '').trim().toUpperCase()}</p>
+        <p className="eyebrow text-accent">{e.target.replace('…', '').trim().toUpperCase()}</p>
         <p className="display mt-3 text-balance text-xl">
           {own.length === 1
             ? 'One thing you can say with it.'
@@ -1165,13 +1165,13 @@ function RootBeatView({
         <ul className="mt-6 space-y-3">
           {own.map((b, i) => (
             <li
-              key={b.pt}
+              key={b.target}
               style={{ animationDelay: i * 110 + 'ms' }}
               className="animate-bank flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
             >
-              <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
+              <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
               <span>
-                <span className="pt block text-lg text-accent">{b.pt}</span>
+                <span className="pt block text-lg text-accent">{b.target}</span>
                 <span className="mt-0.5 block text-xs text-muted">{b.en}</span>
               </span>
             </li>
@@ -1181,7 +1181,7 @@ function RootBeatView({
           label={
             more
               ? 'NOW THE OTHER ONE: ' +
-                root.extracts[pieceIndex + 1].pt.replace('…', '').trim().toUpperCase()
+                root.extracts[pieceIndex + 1].target.replace('…', '').trim().toUpperCase()
               : 'PUT THEM BACK TOGETHER'
           }
           onClick={next}
@@ -1199,21 +1199,21 @@ function RootBeatView({
         </p>
         <p className="pt mt-4 text-sm">
           <Highlighted
-            line={root.pt_natural}
-            pieces={root.extracts.map((x) => x.pt)}
+            line={root.target}
+            pieces={root.extracts.map((x) => x.target)}
             dim="text-accent/45"
           />
         </p>
         <ul className="mt-6 space-y-3">
           {root.branches.map((b, i) => (
             <li
-              key={b.pt}
+              key={b.target}
               style={{ animationDelay: i * 90 + 'ms' }}
               className="animate-bank flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
             >
-              <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
+              <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
               <span>
-                <span className="pt block text-lg text-accent">{b.pt}</span>
+                <span className="pt block text-lg text-accent">{b.target}</span>
                 <span className="mt-0.5 block text-xs text-muted">{b.en}</span>
               </span>
             </li>
@@ -1230,14 +1230,14 @@ function RootBeatView({
       <Shell stage={stage} eyebrow={family.title}>
         <p className="eyebrow text-muted">YOUR TURN</p>
         <p className="display mt-2 text-balance text-2xl">“{target.en}”</p>
-        <MiniBuild target={target.pt} helpers={root.helpers} onSolved={() => setDone(true)} />
+        <MiniBuild target={target.target} helpers={root.helpers} onSolved={() => setDone(true)} />
         {done ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
       </Shell>
     )
   }
 
   if (beat === 'voice' && root.voice_options?.length) {
-    const picked = root.voice_options.find((o) => o.pt === choice)
+    const picked = root.voice_options.find((o) => o.target === choice)
     return (
       <Shell stage={stage} eyebrow={family.title}>
         <p className="display text-balance text-2xl">Here are two ways to say it.</p>
@@ -1249,16 +1249,16 @@ function RootBeatView({
         <div className="mt-6 space-y-3">
           {root.voice_options.map((o) => (
             <button
-              key={o.pt}
+              key={o.target}
               type="button"
-              aria-pressed={choice === o.pt}
+              aria-pressed={choice === o.target}
               onClick={() => {
-                setChoice(o.pt)
-                recordVoice(o.signal, o.pt)
+                setChoice(o.target)
+                recordVoice(o.signal, o.target)
               }}
               className={
                 'tap-target w-full rounded-xl border px-4 py-4 text-left transition ' +
-                (choice === o.pt ? 'border-accent bg-accent/10' : 'border-line bg-surface')
+                (choice === o.target ? 'border-accent bg-accent/10' : 'border-line bg-surface')
               }
             >
               <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -1269,7 +1269,7 @@ function RootBeatView({
                   </span>
                 ) : null}
               </span>
-              <span className="pt mt-2 block text-lg text-fg">{o.pt}</span>
+              <span className="pt mt-2 block text-lg text-fg">{o.target}</span>
               <span className="mt-0.5 block text-xs text-muted">{o.en}</span>
               <span className="mt-3 block text-sm text-fg/80">{o.when}</span>
               {o.risk ? (
@@ -1653,7 +1653,7 @@ function SectionComplete() {
         </p>
         <div className="mt-6 flex flex-wrap gap-2">
           {owned.filter((p) => PIECES[p]).map((p) => (
-            <Piece key={p} pt={PIECES[p].pt} gloss={PIECES[p].gloss} />
+            <Piece key={p} pt={PIECES[p].target} gloss={PIECES[p].gloss} />
           ))}
         </div>
         {remaining.length ? (
@@ -1811,7 +1811,7 @@ function CanSay() {
       <p className="mt-7 text-xs uppercase tracking-wider text-muted">Your Portuguese</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {owned.filter((p) => PIECES[p]).map((p) => (
-          <Piece key={p} pt={PIECES[p].pt} gloss={PIECES[p].gloss} />
+          <Piece key={p} pt={PIECES[p].target} gloss={PIECES[p].gloss} />
         ))}
       </div>
 
