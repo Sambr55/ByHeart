@@ -1740,13 +1740,30 @@ function Osmosis() {
   )
 
   if (!insights.length) {
+    /*
+      There is no "last time" on somebody's first time.
+
+      This fallback greeted a brand-new learner — the majority of the people who will
+      ever see it — by referring to a session they have not had. The empty case has two
+      genuinely different meanings and now says both: nothing new to point out yet, or
+      nothing new since the last one.
+    */
+    const returning = (learner.osmosis_seen ?? []).length > 0
     return (
       <Shell stage="CHOICE">
-        <div className="flex flex-1 flex-col justify-center">
-          <p className="eyebrow text-accent">STILL IN THERE</p>
-          <p className="display mt-3 text-balance text-2xl">
-            Everything you picked up last time is still holding.
+        <div className="flex flex-1 flex-col justify-center gap-3">
+          <p className="eyebrow text-accent">{returning ? 'STILL IN THERE' : 'NOTHING TO EXPLAIN'}</p>
+          <p className="display text-balance text-2xl">
+            {returning
+              ? 'Everything you picked up last time is still holding.'
+              : 'You have picked up the words. The patterns come next.'}
           </p>
+          {!returning ? (
+            <p className="text-sm leading-relaxed text-muted">
+              This screen shows you the grammar you absorbed without being taught it — and
+              it waits until there is something real to point at rather than inventing one.
+            </p>
+          ) : null}
         </div>
         <Cta label="CONTINUE" onClick={next} />
       </Shell>
@@ -2186,9 +2203,22 @@ function CanSay() {
     <Shell stage="REAL WORLD">
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-accent">THINGS YOU CAN SAY</p>
+        {/*
+          Guarded, like the other two.
+
+          This sentence is written in three places — here, SectionComplete and the Club —
+          and the other two both handled the empty case. This one did not, so with no
+          mapped act it rendered the string "You can now ." That shipped for three of the
+          five crates a beginner could open. SPEECH_ACTS is much fuller now, but a screen
+          whose correctness depends on a lookup table staying complete needs the guard
+          whatever the table currently holds.
+        */}
         <p className="display text-balance text-2xl">
-          You can now {acts.slice(0, 3).join(', ')}
-          {acts.length > 3 ? ' — and more.' : '.'}
+          {acts.length
+            ? 'You can now ' +
+              acts.slice(0, 3).join(', ') +
+              (acts.length > 3 ? ' — and more.' : '.')
+            : 'Here is everything you have taken out of it.'}
         </p>
       </div>
 

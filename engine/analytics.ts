@@ -131,6 +131,7 @@ export function initAnalytics(): string {
   t0 = performance.now()
   buffer = []
   seq = 0
+  sent = 0
   return sessionId
 }
 
@@ -156,6 +157,32 @@ export function track(name: EventName, props: Record<string, unknown> = {}) {
 
 export function getEvents(): AnalyticsEvent[] {
   return buffer
+}
+
+/**
+ * Everything not yet sent, handed over and marked as gone.
+ *
+ * Until this existed there was no analytics egress in DUB at all. Seventy-seven event
+ * names were declared, sixty-four of them fired, `addSink` had never once been called,
+ * and every event a tester generated lived in sessionStorage until they closed the tab.
+ * The server route to receive them had been written and was reachable — nothing ever
+ * posted to it.
+ *
+ * Drained rather than copied, so a sync that succeeds does not send the same rows again
+ * on the next one. If the post fails the caller hands them back with `returnEvents`,
+ * because losing telemetry is cheap and double-counting it is not.
+ */
+let sent = 0
+
+export function drainEvents(): AnalyticsEvent[] {
+  const out = buffer.slice(sent)
+  sent = buffer.length
+  return out
+}
+
+/** A failed send, put back. The next sync will try again. */
+export function returnEvents(n: number) {
+  sent = Math.max(0, sent - n)
 }
 
 export function getSessionId(): string {

@@ -249,6 +249,89 @@ export const PICKER = {
 
 /** §09 (7:30–8:35) — no cue, no styling, no culture. The absence is the point. */
 export const NO_CUE_PROMPTS = [
+  /*
+    Rung-1 prompts, and the reason they had to be written.
+
+    All eight original prompts needed a rung 2–4 piece except one, so a beginner reached
+    the three cold screens — the emotional high point of a section, where the culture is
+    gone and they say something themselves — owning nothing any of them asked for. Four
+    of five openable crates produced three consecutive identical filler screens.
+
+    These require only pieces a first section actually hands over. NoCueView also gates on
+    how many are answerable now, so it can never again render a prompt nobody can meet.
+  */
+  {
+    context: 'You walk into a bakery. Somebody looks up from behind the counter.',
+    ask: 'Hello, good morning.',
+    answer: 'Olá, bom dia.',
+    requires: 'ola',
+  },
+  {
+    context: 'They are offering you another coffee and you have had three.',
+    ask: 'No, thank you.',
+    answer: 'Não, obrigado.',
+    requires: 'nao',
+  },
+  {
+    context: 'They have carried your bag up two flights of stairs.',
+    ask: 'Thank you very much.',
+    answer: 'Muito obrigado.',
+    requires: 'obrigado',
+  },
+  {
+    context: 'Somebody wants an answer about Saturday and you genuinely do not know.',
+    ask: 'Maybe yes, maybe no.',
+    answer: 'Talvez sim, talvez não.',
+    requires: 'talvez',
+  },
+  {
+    context: 'The row is full and your seat is in the middle of it.',
+    ask: 'Excuse me, may I get past.',
+    answer: 'Desculpe, com licença.',
+    requires: 'desculpe',
+  },
+  {
+    context: 'You have found a table outside and somebody comes over.',
+    ask: 'A glass of wine, please.',
+    answer: 'Um copo de vinho, por favor.',
+    requires: 'vinho',
+  },
+  {
+    context: 'They are holding the lid open and waiting.',
+    ask: 'With cheese, please.',
+    answer: 'Com queijo, por favor.',
+    requires: 'queijo',
+  },
+  {
+    context: 'Three of you at the counter, and it is your round.',
+    ask: 'Three coffees, please.',
+    answer: 'Três cafés, por favor.',
+    requires: 'tres',
+  },
+  {
+    context: 'It is late, you have been walking all day, and somebody asks how you are.',
+    ask: 'I am hungry.',
+    answer: 'Tenho fome.',
+    requires: 'fome',
+  },
+  {
+    context: 'You are leaving a shop and they have been kind to you.',
+    ask: 'Goodbye, see you later.',
+    answer: 'Adeus, até logo.',
+    requires: 'adeus',
+  },
+  {
+    context: 'Somebody has put out a hand and you have half a second.',
+    ask: 'Hello, my name is Sam.',
+    answer: 'Olá, chamo-me Sam.',
+    requires: 'chamo_me',
+  },
+  {
+    context: 'You are trying to pin somebody down to a night out.',
+    ask: 'Maybe on Saturday.',
+    answer: 'Talvez no sábado.',
+    requires: 'sabado',
+  },
   {
     context: 'A café. Someone is about to walk out.',
     ask: 'Come with me.',

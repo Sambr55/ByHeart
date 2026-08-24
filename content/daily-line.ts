@@ -160,10 +160,20 @@ export function pickLine(opts: {
     (c) => !c.needs.every((n) => owned.has(n)) && families.has(c.root.culture_family),
   )
 
-  // No inventory yet: a freebie root, which is what those exist for.
+  /*
+    No inventory yet, so this is somebody's first ever sentence from DUB.
+
+    It drew from freebie_flag roots at ANY rung, and seven of the ten freebies sit at rung
+    4 to 6 — so a brand-new learner's first daily line could be, and sometimes was,
+    "Vai à merda, estou farto." A first impression delivered to a lock screen.
+
+    Rung 1 only, and freebie only, with the rung filter taking precedence: a beginner
+    line that is merely flagged as free is not the same thing as a beginner line.
+  */
   if (!owned.size) {
-    const starters = fresh.filter((c) => c.root.freebie_flag)
-    const pool = starters.length ? starters : fresh
+    const beginner = fresh.filter((c) => c.root.rung === 1)
+    const starters = beginner.filter((c) => c.root.freebie_flag)
+    const pool = starters.length ? starters : beginner.length ? beginner : fresh
     const c = pool[seed % pool.length]
     return { id: c.id, pt: c.pt, en: c.en, note: noteFor(c.root, c.pt), root_id: c.root.root_id, kind: 'starter' }
   }

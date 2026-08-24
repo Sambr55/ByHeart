@@ -28,6 +28,38 @@ export interface Insight {
 }
 
 export const INSIGHTS: Insight[] = [
+  /*
+    The basics carry real grammar, which is the argument against calling them a syllabus.
+
+    A crate that teaches hello and thank you looks like a word list until you notice that
+    obrigado is an adjective agreeing with the speaker, and that Portuguese negates by
+    putting não in front and then, very often, on the end as well. Both are absorbed
+    before they are ever explained — which is exactly what this screen is for.
+  */
+  {
+    id: 'obrigado-agrees-with-you',
+    requires: ['obrigado'],
+    headline: 'You have been describing yourself, not thanking them',
+    body:
+      '“Obrigado” is not a word for thanks — it is the word “obliged”, and it agrees with whoever is saying it. A man is obrigado, a woman is obrigada, whoever they are talking to. It is the first place Portuguese asks you to notice that adjectives have a gender, and you have already done it.',
+    evidence: [
+      { pt: 'Muito obrigado.', en: 'Thank you very much. — said by a man' },
+      { pt: 'Obrigada, é muito simpático.', en: 'Thank you, that is very kind. — said by a woman' },
+    ],
+    proper_name: 'adjective agreement',
+  },
+  {
+    id: 'nao-goes-in-front',
+    requires: ['nao'],
+    headline: 'You said no twice in one sentence, and it was right',
+    body:
+      'Portuguese negates by putting não immediately in front and leaving everything else exactly where it was — no do, does or did, and no rearranging. Then, in speech, it very often lands a second não on the end as well. It is not emphasis and it is not a mistake; it is how the sentence closes, and you have already done it without being told.',
+    evidence: [
+      { pt: 'Não, obrigado.', en: 'No, thank you.' },
+      { pt: 'Não, no domingo não.', en: 'No, not on Sunday.' },
+    ],
+    proper_name: 'preverbal negation, and the tail',
+  },
   {
     id: 'conditional-politeness',
     requires: ['gostava_de'],

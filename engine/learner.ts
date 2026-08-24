@@ -9,6 +9,7 @@
  * tester's own phone plus a resume link that carries the whole state in the URL.
  */
 
+import { drainEvents, returnEvents } from './analytics'
 import type { MissionId, PropertyId } from '@/content/types'
 import { BLOCK_ORDER, TARGETS } from '@/content/targets'
 
@@ -472,6 +473,7 @@ export function voiceLean(): { lean: string; count: number } | null {
 export async function syncSession(reason: string): Promise<boolean> {
   if (typeof window === 'undefined') return false
   const s = getLearner()
+  const pending = drainEvents()
   try {
     const res = await fetch('/api/session', {
       method: 'POST',
@@ -506,11 +508,28 @@ export async function syncSession(reason: string): Promise<boolean> {
         deal_accepted_at: s.deal_accepted_at,
         created_at: s.created_at,
         user_agent: navigator.userAgent,
+        /*
+          The events, at last.
+
+          /api/session has accepted an `events` array and written it to the events table
+          since it was built, and nothing had ever sent one — so DUB had no analytics
+          egress whatsoever. Every event a tester generated lived in sessionStorage until
+          they closed the tab, which means every question you would ask before pricing
+          was unanswerable from data that was being collected the whole time.
+
+          Piggy-backed on the sync rather than given its own beacon: the sync already
+          runs at every meaningful moment, already carries the device identity, and a
+          second endpoint is a second thing to fail.
+        */
+        events: pending.map((e) => ({ name: e.name, payload: e.props, at: new Date(Date.now() - 0).toISOString() })),
       }),
     })
     const body = await res.json()
+    if (!body?.stored) returnEvents(pending.length)
     return Boolean(body?.stored)
   } catch {
+    // Handed back rather than dropped. Losing telemetry is cheap; double-counting is not.
+    returnEvents(pending.length)
     return false
   }
 }

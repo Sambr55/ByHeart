@@ -24,6 +24,7 @@ export type CultureFamily =
   | 'flirting_f2m'
   | 'duran_duran_lisboa'
   | 'world_of_wizardry'
+  | 'the_basics'
 
 /**
  * The ladder — six rungs, named for what you can do in a room.
@@ -145,7 +146,7 @@ export interface Extract {
   set?: SetId
 }
 
-export type SetId = 'numbers_1_10' | 'weekdays'
+export type SetId = 'numbers_1_10' | 'weekdays' | 'greetings' | 'yes_no' | 'courtesy'
 
 export interface WordSet {
   id: SetId
@@ -180,6 +181,26 @@ export const SETS: WordSet[] = [
     label: 'Counting to ten',
     shelf: 'how_much',
     members: ['um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez'],
+    partial: true,
+  },
+  {
+    id: 'greetings',
+    label: 'Saying hello and goodbye',
+    shelf: 'just_say',
+    members: ['olá', 'bom dia', 'boa tarde', 'boa noite', 'adeus', 'até logo'],
+    partial: true,
+  },
+  {
+    id: 'yes_no',
+    label: 'Yes, no, maybe',
+    shelf: 'just_say',
+    members: ['sim', 'não', 'talvez'],
+  },
+  {
+    id: 'courtesy',
+    label: 'The polite words',
+    shelf: 'just_say',
+    members: ['por favor', 'obrigado', 'obrigada', 'desculpe', 'de nada'],
     partial: true,
   },
   {
@@ -319,6 +340,14 @@ export interface Crate {
 }
 
 export const CRATES: Crate[] = [
+  {
+    id: 'the_basics',
+    title: 'The basics, properly',
+    blurb: 'Hello, please, thank you, yes, no — out of songs you already know.',
+    tone: 'reflective',
+    built: true,
+    opens_at: 1,
+  },
   { id: 'top_gun', title: 'Top Gun quotes', blurb: 'Iconic lines. Direct language.', tone: 'kinetic', built: true },
   { id: 'james_bond', title: 'James Bond film titles', blurb: 'Tiny titles. Surprisingly useful Portuguese.', tone: 'cool', built: true },
   { id: 'bridget_jones', title: 'Bridget Jones cringe moments', blurb: 'Awkwardness you can actually use.', tone: 'human', built: true },
@@ -906,6 +935,50 @@ export const JAMES_BOND: Root[] = [
 // ---------------------------------------------------------------------------
 
 export const BRIDGET_JONES: Root[] = [
+  q({
+    root_id: 'bj_sorry',
+    culture_family: 'bridget_jones',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'Every Bridget Jones entrance, ever',
+    source_status: 'paraphrased',
+    root_display: 'Sorry. Sorry. Sorry.',
+    source: 'Sorry, sorry — sorry.',
+    target: 'Desculpe, desculpe — desculpe.',
+    semantic_bridge:
+      'Arriving late, apologising to three people on the way to the chair. Desculpe is the formal one you say to a stranger and it does double duty: it is "sorry" when you have done something, and "excuse me" when you are about to. That second job is the one you will use most.',
+    subtext: 'Mortified, and moving.',
+    extracts: [
+      {
+        id: 'desculpe',
+        target: 'desculpe',
+        gloss: 'sorry / excuse me',
+        shelf: 'just_say',
+        set: 'courtesy',
+        note: 'The formal one, for strangers and for getting past somebody. With a friend it softens to desculpa.',
+      },
+    ],
+    branches: [
+      { target: 'Desculpe, com licença.', en: 'Excuse me, may I get past.', demonstrates: ['desculpe'] },
+      { target: 'Desculpe o atraso.', en: 'Sorry I am late.', demonstrates: ['desculpe'] },
+      { target: 'Desculpe, obrigada.', en: 'Sorry — thank you.', demonstrates: ['desculpe'] },
+    ],
+    reinforces: ['obrigada', 'por_favor'],
+    helpers: {
+      'com licença': 'with permission — the polite way past somebody',
+      'o': 'the',
+      'atraso': 'lateness / delay',
+      'obrigada': 'thank you (said by a woman)',
+    },
+    transfer_prompt: {
+      context: 'The row is full and your seat is in the middle of it.',
+      ask: 'Excuse me, may I get past.',
+      answer: 'Desculpe, com licença.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['courtesy', 'first-day'],
+    next_root_hooks: ['por_favor'],
+  }),
   q({
     root_id: 'bj_overshare',
     culture_family: 'bridget_jones',
@@ -3478,6 +3551,261 @@ export const WIZARDRY: Root[] = [
   }),
 ]
 
+/*
+  The basics.
+
+  Not a syllabus — a door. Until this crate existed a person could not use DUB to learn
+  to say hello, yes, or thank you: not buried at a high rung, absent from the graph
+  entirely. Every one of the nine menu items and every one of the Club's moves routed to
+  "pick a crate", and chooseFamily takes a CultureFamily, so there was no
+  curriculum-first, set-first or rung-first way in anywhere in the product.
+
+  The fix is a crate rather than a new system, because a crate reuses chooseFamily,
+  beatsFor and the whole journey engine unchanged — and because the thesis survives it.
+  Every root below is still a real cultural hook: a Beatles single, an ABBA title, a
+  bolero everybody's grandmother knows, the Portuguese title of Saturday Night Fever.
+  DUB does not teach a word list here. It teaches greetings out of a song about
+  greetings, which is the same thing it does everywhere else.
+
+  Everything is rung 1, and it opens first.
+*/
+export const THE_BASICS: Root[] = [
+  q({
+    root_id: 'tb_hello_goodbye',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Hello, Goodbye — The Beatles',
+    source_status: 'verified',
+    root_display: 'Hello, Goodbye',
+    source: 'Hello, goodbye.',
+    target: 'Olá, adeus.',
+    semantic_bridge:
+      'Two words, and between them the whole of every conversation you will have in Portugal. Olá is the one you say to anybody, at any hour, in any shop. Adeus is the heavier goodbye — the one with some finality in it — which is why the everyday parting is usually até logo instead.',
+    subtext: 'A doorway, in both directions.',
+    freebie_flag: true,
+    extracts: [
+      { id: 'ola', target: 'olá', gloss: 'hello', shelf: 'just_say', set: 'greetings' },
+      { id: 'adeus', target: 'adeus', gloss: 'goodbye', shelf: 'just_say', set: 'greetings' },
+    ],
+    branches: [
+      { target: 'Olá, bom dia.', en: 'Hello, good morning.', demonstrates: ['ola'] },
+      { target: 'Olá, tudo bem?', en: 'Hello, all good?', demonstrates: ['ola'] },
+      { target: 'Adeus, até logo.', en: 'Goodbye, see you later.', demonstrates: ['adeus'] },
+    ],
+    helpers: {
+      'bom dia': 'good morning',
+      'tudo': 'all / everything',
+      'bem': 'well',
+      'até': 'until',
+      'logo': 'later',
+    },
+    transfer_prompt: {
+      context: 'You walk into a bakery. Somebody looks up.',
+      ask: 'Hello, good morning.',
+      answer: 'Olá, bom dia.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['greetings', 'first-day'],
+    next_root_hooks: ['sim'],
+  }),
+  q({
+    root_id: 'tb_yes_no',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'quote',
+    source_label: 'Hello, Goodbye — The Beatles',
+    source_status: 'verified',
+    root_display: 'You say yes, I say no.',
+    source: 'You say yes, I say no.',
+    target: 'Tu dizes sim, eu digo não.',
+    semantic_bridge:
+      'The most useful line in the song is the one nobody thinks of as vocabulary. Sim and não were both missing from DUB entirely — não only ever appeared welded to something else — and they are the two words you will say most in your first week.',
+    subtext: 'Disagreeing, cheerfully.',
+    extracts: [
+      { id: 'sim', target: 'sim', gloss: 'yes', shelf: 'just_say', set: 'yes_no' },
+      { id: 'nao', target: 'não', gloss: 'no / not', shelf: 'just_say', set: 'yes_no' },
+    ],
+    branches: [
+      { target: 'Sim, por favor.', en: 'Yes, please.', demonstrates: ['sim'] },
+      { target: 'Não, obrigado.', en: 'No, thank you.', demonstrates: ['nao'] },
+      { target: 'Sim ou não?', en: 'Yes or no?', demonstrates: ['sim', 'nao'] },
+    ],
+    reinforces: ['por_favor'],
+    helpers: {
+      'Tu': 'you',
+      'dizes': 'say',
+      'eu': 'I',
+      'digo': 'I say',
+      'ou': 'or',
+      'por favor': 'please',
+      'obrigado': 'thank you (said by a man)',
+    },
+    transfer_prompt: {
+      context: 'They are offering you another coffee and you have had three.',
+      ask: 'No, thank you.',
+      answer: 'Não, obrigado.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['yes-no', 'first-day'],
+    next_root_hooks: ['obrigado'],
+  }),
+  q({
+    root_id: 'tb_thank_you',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Thank You for the Music — ABBA',
+    source_status: 'verified',
+    root_display: 'Thank You for the Music',
+    source: 'Thank you for the music.',
+    target: 'Obrigado pela música.',
+    semantic_bridge:
+      'The one word in Portuguese that changes depending on who is holding it. Obrigado literally means "obliged", so you are describing yourself — a man says obrigado, a woman says obrigada, and it has nothing to do with who you are thanking. Getting this right is the fastest way to sound like you have been paying attention.',
+    subtext: 'Meant, not muttered.',
+    extracts: [
+      {
+        id: 'obrigado',
+        target: 'obrigado',
+        gloss: 'thank you',
+        shelf: 'just_say',
+        set: 'courtesy',
+        lemma: 'obrigado',
+        form: 'said by a man',
+        note: 'You are literally saying "I am obliged", so it agrees with YOU, not with the person you are thanking. A man says obrigado all his life; a woman says obrigada all hers.',
+      },
+      {
+        id: 'obrigada',
+        target: 'obrigada',
+        gloss: 'thank you',
+        shelf: 'just_say',
+        set: 'courtesy',
+        lemma: 'obrigado',
+        form: 'said by a woman',
+      },
+    ],
+    branches: [
+      { target: 'Muito obrigado.', en: 'Thank you very much.', demonstrates: ['obrigado'] },
+      { target: 'Obrigada, é muito simpático.', en: 'Thank you, that is very kind.', demonstrates: ['obrigada'] },
+      { target: 'Obrigado pelo café.', en: 'Thanks for the coffee.', demonstrates: ['obrigado'] },
+    ],
+    helpers: {
+      'pela': 'for the',
+      'pelo': 'for the',
+      'música': 'music',
+      'Muito': 'very / a lot',
+      'é': 'is',
+      'simpático': 'kind / nice',
+      'café': 'coffee',
+    },
+    transfer_prompt: {
+      context: 'They have carried your bag up two flights of stairs.',
+      ask: 'Thank you very much.',
+      answer: 'Muito obrigado.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['courtesy', 'first-day'],
+    next_root_hooks: ['ola'],
+  }),
+  q({
+    root_id: 'tb_perhaps',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Quizás, Quizás, Quizás',
+    source_status: 'verified',
+    root_display: 'Perhaps, perhaps, perhaps',
+    source: 'Perhaps, perhaps, perhaps.',
+    target: 'Talvez, talvez, talvez.',
+    semantic_bridge:
+      'The bolero everybody has heard in some language, and it hands over the one answer that is neither yes nor no. Talvez is what you say when you are not committing, and in a country that asks you to commit to plans constantly it does an enormous amount of work.',
+    subtext: 'Non-committal, and charming about it.',
+    extracts: [
+      { id: 'talvez', target: 'talvez', gloss: 'maybe', shelf: 'just_say', set: 'yes_no' },
+    ],
+    branches: [
+      { target: 'Talvez amanhã.', en: 'Maybe tomorrow.', demonstrates: ['talvez'] },
+      { target: 'Talvez sim, talvez não.', en: 'Maybe yes, maybe no.', demonstrates: ['talvez'] },
+      { target: 'Talvez um café?', en: 'Maybe a coffee?', demonstrates: ['talvez'] },
+    ],
+    reinforces: ['sim', 'nao', 'amanha'],
+    helpers: { 'amanhã': 'tomorrow', 'um': 'a / one', 'café': 'coffee' },
+    transfer_prompt: {
+      context: 'They want an answer about Saturday and you genuinely do not know.',
+      ask: 'Maybe yes, maybe no.',
+      answer: 'Talvez sim, talvez não.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['yes-no', 'plans'],
+    next_root_hooks: ['sabado'],
+  }),
+  q({
+    root_id: 'tb_saturday',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Saturday Night Fever',
+    source_status: 'verified',
+    root_display: 'Saturday Night Fever',
+    source: 'Saturday Night Fever',
+    target: 'Febre de Sábado à Noite.',
+    semantic_bridge:
+      'The Portuguese title is the literal one, which makes it free — and it hands over the two days that break the pattern. Portugal counts its weekdays (segunda, terça, quarta) and then stops: sábado and domingo kept their old names, so the two days you actually make plans for are the two you have to learn separately.',
+    subtext: 'The weekend, named.',
+    extracts: [
+      { id: 'sabado', target: 'sábado', gloss: 'Saturday', shelf: 'when', set: 'weekdays' },
+      { id: 'noite', target: 'a noite', gloss: 'night', shelf: 'things', gender: 'f' },
+    ],
+    branches: [
+      { target: 'Sábado à noite.', en: 'Saturday night.', demonstrates: ['sabado', 'noite'] },
+      { target: 'Talvez no sábado.', en: 'Maybe on Saturday.', demonstrates: ['sabado'] },
+      { target: 'Boa noite.', en: 'Good night.', demonstrates: ['noite'] },
+    ],
+    reinforces: ['talvez', 'domingo'],
+    helpers: { 'Febre': 'fever', 'de': 'of', 'à': 'at the', 'no': 'on the', 'Boa': 'good' },
+    transfer_prompt: {
+      context: 'You are trying to pin somebody down to a night out.',
+      ask: 'Maybe on Saturday.',
+      answer: 'Talvez no sábado.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['time', 'plans'],
+    next_root_hooks: ['domingo'],
+  }),
+  q({
+    root_id: 'tb_sunday',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Sunday Bloody Sunday — U2',
+    source_status: 'verified',
+    root_display: 'Sunday, Bloody Sunday',
+    source: 'Sunday, bloody Sunday.',
+    target: 'Domingo, maldito domingo.',
+    semantic_bridge:
+      'Domingo is the other day that refused to be numbered — it is the Lord\'s day, dominus, and it is the day everything in Portugal closes and the whole family eats together. Learning it is less about the calendar than about knowing which day you will not be able to buy anything.',
+    subtext: 'Heavy, and hard to miss.',
+    extracts: [
+      { id: 'domingo', target: 'domingo', gloss: 'Sunday', shelf: 'when', set: 'weekdays' },
+    ],
+    branches: [
+      { target: 'Domingo à tarde.', en: 'Sunday afternoon.', demonstrates: ['domingo'] },
+      { target: 'Sábado ou domingo?', en: 'Saturday or Sunday?', demonstrates: ['domingo'] },
+      { target: 'Não, no domingo não.', en: 'No, not on Sunday.', demonstrates: ['domingo'] },
+    ],
+    reinforces: ['sabado', 'nao'],
+    helpers: { 'maldito': 'cursed', 'à': 'at the', 'tarde': 'afternoon', 'ou': 'or', 'no': 'on the' },
+    transfer_prompt: {
+      context: 'Two days on the table and you want the other one.',
+      ask: 'Saturday or Sunday?',
+      answer: 'Sábado ou domingo?',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['time', 'plans'],
+    next_root_hooks: ['ola'],
+  }),
+]
+
 export const ROOTS: Root[] = [
   ...TOP_GUN,
   ...JAMES_BOND,
@@ -3490,9 +3818,11 @@ export const ROOTS: Root[] = [
   ...FLIRTING_F2M,
   ...DURAN_DURAN,
   ...WIZARDRY,
+  ...THE_BASICS,
 ]
 
 export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
+  the_basics: THE_BASICS,
   top_gun: TOP_GUN,
   james_bond: JAMES_BOND,
   bridget_jones: BRIDGET_JONES,
@@ -3549,6 +3879,79 @@ export interface Collision {
 }
 
 export const COLLISIONS: Collision[] = [
+  /*
+    The basics collide with everything, which is the point of them.
+
+    A crate of greetings and courtesy is the one crate whose pieces belong in front of a
+    sentence from any other world — so these five are what make the compounding claim
+    fire in a learner's SECOND section rather than somewhere much later. Before them, the
+    basics crate appeared in no collision at all, which the content lint says is a crate
+    that does not really join the graph.
+  */
+  {
+    id: 'tb_bj_vinho',
+    requires: ['ola', 'vinho'],
+    context: 'You have found a table outside and somebody comes over.',
+    ask: 'Hello, a glass of wine, please.',
+    answer: 'Olá, um copo de vinho, por favor.',
+    provenance: 'A Beatles single and a Bridget Jones disaster, in one order.',
+  },
+  {
+    id: 'tb_jb_chamo',
+    requires: ['ola', 'chamo_me'],
+    context: 'Somebody has put out a hand and you have half a second.',
+    ask: 'Hello, my name is Sam.',
+    answer: 'Olá, chamo-me Sam.',
+    provenance: 'Hello, Goodbye handling the introduction Bond taught you.',
+  },
+  {
+    id: 'tb_wz_agua',
+    requires: ['sim', 'agua'],
+    context: 'They have asked whether you want anything with that.',
+    ask: 'Yes, a water, please.',
+    answer: 'Sim, uma água, por favor.',
+    provenance: 'One word from a song, one from a platform at King\'s Cross.',
+  },
+  {
+    id: 'tb_pf_obrigado',
+    requires: ['obrigado', 'euro'],
+    context: 'The change is in your hand and they are already looking past you.',
+    ask: 'Five euros. Thank you.',
+    answer: 'Cinco euros. Obrigado.',
+    provenance: 'ABBA settling up in a Pulp Fiction diner.',
+  },
+  {
+    id: 'tb_pf_queijo',
+    requires: ['sim', 'queijo'],
+    context: 'They are holding the lid open and waiting.',
+    ask: 'Yes, with cheese.',
+    answer: 'Sim, com queijo.',
+    provenance: 'One word from a Beatles single, one from a Royale with Cheese.',
+  },
+  {
+    id: 'tb_wz_tres',
+    requires: ['sim', 'tres'],
+    context: 'They have asked how many and are already reaching for them.',
+    ask: 'Yes, three.',
+    answer: 'Sim, três.',
+    provenance: 'A pop single and a platform number, doing arithmetic.',
+  },
+  {
+    id: 'tb_dd_nao_fome',
+    requires: ['nao', 'fome'],
+    context: 'Somebody is trying to feed you and you have just eaten.',
+    ask: 'No, I am not hungry.',
+    answer: 'Não, não tenho fome.',
+    provenance: 'Saying no in two languages at once, on a night out in Lisboa.',
+  },
+  {
+    id: 'tb_dd_fome',
+    requires: ['talvez', 'fome'],
+    context: 'Nobody has decided anything and it is getting late.',
+    ask: 'Maybe. I am hungry.',
+    answer: 'Talvez. Tenho fome.',
+    provenance: 'A bolero and a Duran Duran night out, refusing to commit.',
+  },
   {
     id: 'fl_tg_gostava_quiseres',
     requires: ['gostava_de', 'quando_quiseres'],

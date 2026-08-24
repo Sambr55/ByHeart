@@ -18,9 +18,10 @@ import {
   rootById,
   type Collision,
   type CultureFamily,
+  type Rung,
   type Root,
 } from '@/content/roots'
-import { DEMO_BEATS } from '@/content/front-door'
+import { DEMO_BEATS, NO_CUE_PROMPTS } from '@/content/front-door'
 import { initAnalytics, track } from './analytics'
 import {
   getLearner,
@@ -147,6 +148,16 @@ export function beatsFor(root: Root): { beat: RootBeat; pieceIndex?: number }[] 
  */
 const ROOTS_PER_SESSION = 4
 
+/**
+ * And the cap that actually matters.
+ *
+ * Roots are not the same size — the shortest is five beats and the longest is twelve —
+ * so counting roots caps nothing. Twenty-four root beats plus the eight-screen tail
+ * (osmosis, section-complete, three cold prompts, capability, proof, close) is around
+ * thirty screens, which is the ten minutes the product promises.
+ */
+const BEATS_PER_SESSION = 24
+
 interface JourneyState {
   steps: Step[]
   index: number
@@ -201,6 +212,58 @@ export function nextProfileQuestion(): 'gender' | 'age' | 'goal' | null {
   if (!p.age_band && !p.skipped.includes('age_band')) return 'age'
   if (!p.goal && !p.skipped.includes('goal')) return 'goal'
   return null
+}
+
+/**
+ * What is actually in one section.
+ *
+ * Exported, and the only implementation, because `npm run first` simulates a beginner's
+ * first session and a simulator that reimplements this would eventually be simulating a
+ * different product. Pure: no dispatch, no learner reads, so it can run in a script.
+ *
+ * Three rules, in order.
+ *
+ * Nothing above the stage they have reached. The ladder used to gate the DOOR and then
+ * nothing behind it — the final fallback was the whole crate, so a rung-1 learner could
+ * be handed rung-6 roots the moment their stage had nothing in this crate. It falls back
+ * to the crate's LOWEST rung instead.
+ *
+ * Nothing new at this stage means going through it again, not an empty section.
+ * Replaying costs nothing: recordProof dedupes by sentence so the honest count cannot be
+ * inflated, and the osmosis screen already knows how to say there is nothing new.
+ *
+ * And it is capped by SCREENS, not by roots. ROOTS_PER_SESSION was declared and never
+ * referenced, so sections were unbounded — world_of_wizardry was a 59-screen first
+ * session against a stated ten-minute promise. Roots are not the same size, so counting
+ * them is the wrong cap: four short roots and four long ones differ by twenty screens.
+ * Whatever is left over is what brings somebody back.
+ */
+export function sectionRoots(
+  family: CultureFamily,
+  reached: Rung,
+  alreadyPlayed: string[],
+): Root[] {
+  const all = ROOTS_BY_FAMILY[family] ?? []
+  if (!all.length) return []
+  const fresh = all.filter((r) => r.rung <= reached && !alreadyPlayed.includes(r.root_id))
+  const replay = all.filter((r) => r.rung <= reached)
+  const floor = Math.min(...all.map((r) => r.rung))
+  const lowest = all.filter((r) => r.rung === floor)
+  const eligible = (fresh.length ? fresh : replay.length ? replay : lowest).sort(
+    (a, b) => a.rung - b.rung,
+  )
+
+  const out: Root[] = []
+  let screens = 0
+  for (const root of eligible) {
+    const cost = beatsFor(root).length
+    // Always take the first, however long it is — a section of nothing is worse than a
+    // section that runs a little over.
+    if (out.length && (out.length >= ROOTS_PER_SESSION || screens + cost > BEATS_PER_SESSION)) break
+    out.push(root)
+    screens += cost
+  }
+  return out
 }
 
 function rootSteps(root: Root): Step[] {
@@ -313,7 +376,49 @@ export function availableCollision(played: string[], done: string[]): Collision 
 }
 
 /** §13 — what the learner can now do, in speech acts rather than counts. */
+/*
+  What owning a piece lets somebody DO.
+
+  This mapped 25 of 149 pieces and covered almost no rung-1 piece, which is why the
+  capability screen — the best screen in the product — rendered the sentence "You can
+  now ." for three of the five crates a beginner could open. A map this thin is not a
+  design decision, it is an unfinished one.
+
+  Written as verbs a person would use about themselves, never as grammar.
+*/
 const SPEECH_ACTS: Record<string, string> = {
+  // The basics, and the everyday pieces a first section actually hands over.
+  ola: 'say hello to anybody',
+  adeus: 'say goodbye',
+  sim: 'say yes and mean it',
+  nao: 'turn something down',
+  talvez: 'keep your options open',
+  obrigado: 'thank somebody properly',
+  obrigada: 'thank somebody properly',
+  desculpe: 'apologise, and get past people',
+  por_favor: 'ask for things politely',
+  sabado: 'make plans for the weekend',
+  domingo: 'make plans for the weekend',
+  noite: 'talk about the time of day',
+  copo: 'order a drink',
+  vinho: 'order a drink',
+  queijo: 'order food the way you like it',
+  agua: 'ask for water',
+  euro: 'handle money',
+  cinco: 'count out loud',
+  sete: 'count out loud',
+  nove: 'count out loud',
+  tres: 'count out loud',
+  silencio: 'ask for quiet',
+  fome: 'say what you need',
+  amor: 'be affectionate',
+  luz: 'talk about what is around you',
+  porta: 'talk about what is around you',
+  normal: 'say how things are going',
+  mundo: 'say how things are going',
+  bom: 'say something is good',
+  batido: 'order food the way you like it',
+
   comigo: 'invite someone along',
   podes: 'ask someone for something',
   preciso_de: 'explain what you need',
@@ -514,36 +619,7 @@ export function JourneyProvider({
       // could gate on a stage the learner had already left behind — the ladder running
       // a whole session late.
       const reached = rungReached(loadLearner().proof)
-      const all = ROOTS_BY_FAMILY[family]
-      const fresh = all.filter(
-        (r) => r.rung <= reached && !state.rootsPlayed.includes(r.root_id),
-      )
-      // Nothing new at this stage means going through it again, not an empty section.
-      // Replaying costs nothing: recordProof dedupes by sentence so the honest count
-      // cannot be inflated, and the osmosis screen already knows how to say that there
-      // is nothing new to point out.
-      const replay = all.filter((r) => r.rung <= reached)
-      /*
-        The last fallback used to be `all`, which handed a rung-1 learner every root in
-        the crate including rung 6 — the ladder gating the DOOR and then not gating
-        anything behind it. If nothing at or below their stage exists, the honest answer
-        is the lowest rung the crate has, not the whole crate.
-      */
-      const floor = all.length ? Math.min(...all.map((r) => r.rung)) : 1
-      const lowest = all.filter((r) => r.rung === floor)
-      const eligible = (fresh.length ? fresh : replay.length ? replay : lowest).sort(
-        (a, b) => a.rung - b.rung,
-      )
-      /*
-        A section is capped.
-
-        ROOTS_PER_SESSION has been declared and never referenced, so sections were
-        unbounded: the world-of-wizardry crate is a 59-screen first session against a
-        stated ten-minute promise — realistically 20 to 30 minutes. The cap is the
-        promise, so it is enforced rather than documented, and what is left over is what
-        "pick up where you stopped" is for.
-      */
-      const roots = eligible.slice(0, ROOTS_PER_SESSION)
+      const roots = sectionRoots(family, reached, state.rootsPlayed)
       const steps: Step[] = []
 
       /**
@@ -595,7 +671,20 @@ export function JourneyProvider({
       const steps: Step[] = []
       const collision = availableCollision(state.rootsPlayed, state.collisionsPlayed)
       if (collision) steps.push({ kind: 'collision', collisionId: collision.id })
-      steps.push({ kind: 'nocue', i: 0 }, { kind: 'nocue', i: 1 }, { kind: 'nocue', i: 2 })
+      /*
+        Three cold prompts, or as many as the learner can actually answer.
+
+        This pushed three unconditionally, and NO_CUE_PROMPTS filters by what they own —
+        so a learner owning nothing any prompt asked for met three consecutive identical
+        filler screens at the emotional high point of the section. It was the state for
+        four of the five crates a beginner could open.
+
+        The prompts are rung-1 now, so this rarely bites; it stays because a screen that
+        can render empty must not be queued on the assumption that it will not.
+      */
+      const owned = ownedPieces()
+      const answerable = NO_CUE_PROMPTS.filter((p) => owned.includes(p.requires)).length
+      for (let i = 0; i < Math.min(3, answerable); i++) steps.push({ kind: 'nocue', i })
       steps.push({ kind: 'cansay' }, { kind: 'proof' }, { kind: 'close' })
       rememberPlayed([], collision?.id ?? null)
       dispatch({ type: 'append', steps, collisionId: collision?.id, jump: true })
