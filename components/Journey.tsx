@@ -28,6 +28,7 @@ import {
 import {
   CLOSE,
   DEAL as DEAL_COPY,
+  RELEASE,
   THE_SWITCH,
   DEMO_BEATS,
   DEMO_CLOSE,
@@ -520,21 +521,52 @@ function Landing() {
   const { next } = useJourney()
   return (
     <Shell stage="LANDING">
+      {/*
+        Four lines, each with a typographic job, and the copy is written to exactly this
+        shape — lint:content fails a fifth. It had six for a while and this component
+        renders indices 0 to 3, so two of them were written and silently never shown.
+
+        The cascade is 70ms a step, which is the list rhythm rather than a reveal: a hand
+        fanning cards, under the threshold where the items read as separate arrivals.
+        Mount-fired, which the rules allow for a list — it is the loud beats that must be
+        fired by a tap, and a front door is not a peak.
+      */}
       <div className="flex flex-1 flex-col justify-center">
-        {/* The real mark, at last. It was live Archivo text until the SVGs arrived. */}
-        <Wordmark className="h-12 text-fg" />
-        <p className="mt-3 text-balance text-xl text-accent">{LANDING.line}</p>
+        <div className="animate-bank">
+          {/* The real mark, at last. It was live Archivo text until the SVGs arrived. */}
+          <Wordmark className="h-12 text-fg" />
+          <p className="mt-3 text-balance text-xl text-accent">{LANDING.line}</p>
+        </div>
         <div className="mt-10 space-y-6">
-          <p className="display text-balance text-2xl">{LANDING.lines[0]}</p>
-          <p className="text-pretty text-sm text-muted">{LANDING.lines[1]}</p>
+          <p
+            className="animate-bank display text-balance text-2xl"
+            style={{ animationDelay: '70ms' }}
+          >
+            {LANDING.lines[0]}
+          </p>
+          <p
+            className="animate-bank text-pretty text-sm text-muted"
+            style={{ animationDelay: '140ms' }}
+          >
+            {LANDING.lines[1]}
+          </p>
           <div className="space-y-3">
-            {LANDING.lines[2].split('\n').map((l) => (
-              <p key={l} className="display text-balance text-xl leading-snug">
+            {LANDING.lines[2].split('\n').map((l, i) => (
+              <p
+                key={l}
+                style={{ animationDelay: 210 + i * 70 + 'ms' }}
+                className="animate-bank display text-balance text-xl leading-snug"
+              >
                 {l}
               </p>
             ))}
           </div>
-          <p className="text-balance text-base font-semibold">{LANDING.lines[3]}</p>
+          <p
+            className="animate-bank text-balance text-base font-semibold"
+            style={{ animationDelay: '420ms' }}
+          >
+            {LANDING.lines[3]}
+          </p>
         </div>
       </div>
       <Cta label={LANDING.cta} onClick={() => { track('landing_cta_tap', {}); next() }} />
@@ -1840,16 +1872,25 @@ function RootBeatView({
       ) : released !== 'building' ? (
         <>
           <div className="flex flex-1 flex-col justify-center gap-3">
-            <p className="eyebrow drains text-muted">LAST TIME</p>
+            <p className="eyebrow drains text-muted">{RELEASE.eyebrow}</p>
             <p
               className="t-line drains"
               onTransitionEnd={() => setReleased('building')}
             >
               {root.root_type === 'quote' ? '“' + root.root_display + '”' : root.root_display}
             </p>
+            {/*
+              The sentence that makes the tap mean something.
+
+              Without it this screen showed the cultural cue a second time and stopped —
+              so it read as the title repeated, on the one beat that moves the ladder and
+              produces a line for the card. Nothing about what was leaving, or why anybody
+              should want it to.
+            */}
+            <p className="drains text-base leading-relaxed text-muted">{RELEASE.why}</p>
           </div>
           {released === 'before' ? (
-            <Cta label="TAKE IT AWAY" onClick={() => setReleased('draining')} />
+            <Cta label={RELEASE.cta} onClick={() => setReleased('draining')} />
           ) : (
             <div className="mt-auto" />
           )}
@@ -1857,7 +1898,7 @@ function RootBeatView({
       ) : (
         <>
           <div className="flex flex-col gap-3">
-            <p className="eyebrow text-muted">NO CLUES</p>
+            <p className="eyebrow text-muted">{RELEASE.ask_eyebrow}</p>
             {/*
               THE DEMOTION — the mechanic that replaces every animation we are not
               building. One conditional className: face, size, colour and position all

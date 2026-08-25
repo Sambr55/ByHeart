@@ -38,6 +38,7 @@ import {
 import { INSIGHTS } from '../content/osmosis'
 import { GOAL_NEEDS, QUESTIONS_IN_ORDER } from '../content/profile'
 import * as FRONT_DOOR_COPY from '../content/front-door'
+import { LANDING } from '../content/front-door'
 import * as PROFILE_COPY from '../content/profile'
 import { branchesFor, buildTargetFor } from '../engine/journey'
 import { CULTURE_FREE_STAGES, isExercise, type BlockId, type Mission, type Screen } from '../content/types'
@@ -960,6 +961,81 @@ for (const e of EXAMPLES) {
     }
   }
   console.log(pairs + ' voice pairs, every option situated, every pair teaching a rule')
+}
+
+// --- the landing, which has a shape ----------------------------------------
+{
+  /*
+    Four lines, and the Landing component gives each one a different size and weight.
+    That is a design rather than a list, so the copy has to be written to it — and when
+    the copy grew to six, indices 4 and 5 were written, reviewed and never rendered.
+
+    Nothing about that was visible: no error, no warning, just two paragraphs that
+    existed in the file and not on the screen.
+  */
+  if (LANDING.lines.length !== 4) {
+    fail(
+      'LANDING.lines has ' + LANDING.lines.length + ' entries and the front door renders ' +
+        'exactly 4 — anything past the fourth is written and never shown',
+    )
+  }
+  const beats = (LANDING.lines[2] ?? '').split('\n')
+  if (beats.length !== 3) {
+    fail('LANDING.lines[2] is the three-beat block and has ' + beats.length + ' beat(s)')
+  }
+  /*
+    And no product words on the first screen a stranger sees. "You earn it a crate at a
+    time" put jargon two beats before anything defines it, and it was read as "crate
+    time". The deal introduces the word later, with an example attached.
+  */
+  for (const [i, line] of LANDING.lines.entries()) {
+    const jargon = /\b(crates?|rungs?|drops?|pieces?)\b/i.exec(line)
+    if (jargon) {
+      fail(
+        'LANDING.lines[' + i + '] says "' + jargon[0] + '" — the front door is the one ' +
+          'screen where nothing has been defined yet',
+      )
+    }
+  }
+  console.log('the front door: 4 lines, 3 beats, no jargon')
+}
+
+// --- who the copy is talking to ---------------------------------------------
+{
+  /*
+    A root speaks to the learner about Portuguese. Never about DUB.
+
+    This shipped: "Sim and não were both missing from DUB entirely" — a note about the
+    product's own content gaps, on a screen whose whole job is to explain a Portuguese
+    sentence to somebody who has never heard of our content gaps. It is a note to the
+    person building the product, left in the room with the person using it.
+
+    It is an easy mistake to make while working from a review, which is exactly why it
+    needs a grep. The learner does not know what a graph is, has not read the audit, and
+    did not ask what used to be missing.
+  */
+  const INWARD = /\b(DUB|the product|the graph|this crate|the crate|the review|the audit|the app)\b/i
+  let checked = 0
+  for (const root of ROOTS) {
+    const fields: [string, string][] = [
+      ['semantic_bridge', root.semantic_bridge],
+      ['subtext', root.subtext],
+      ...root.extracts.map((e) => ['note on ' + e.id, e.note ?? ''] as [string, string]),
+    ]
+    for (const [field, text] of fields) {
+      if (!text) continue
+      checked++
+      const hit = INWARD.exec(text)
+      if (hit) {
+        fail(
+          'root ' + root.root_id + ' / ' + field + ' talks about "' + hit[0] +
+            '" — this is read by a learner, and it should be about Portuguese: "' +
+            text.slice(0, 60) + '…"',
+        )
+      }
+    }
+  }
+  console.log(checked + ' root copy fields, all addressed to the learner')
 }
 
 // --- register ---------------------------------------------------------------

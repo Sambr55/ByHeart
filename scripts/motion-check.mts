@@ -52,6 +52,14 @@ for (const file of [...files, 'app/globals.css']) {
   lines.forEach((line, i) => {
     // A duration is a duration in a transition, an animation or a Tailwind class.
     if (!/transition|animation|duration|--t-/.test(line)) return
+    /*
+      A cascade DELAY is not a duration and is checked by its own rule below.
+
+      70ms a step produces 70, 140, 210, 280, 350, 420 — none of which is on the duration
+      scale, and all of which are correct. Judging them by it made the gate demand that a
+      staggered list arrive all at once.
+    */
+    if (/animationDelay/.test(line)) return
     for (const m of line.matchAll(DURATION)) {
       const ms = Math.round(Number(m[1]))
       if (!ALLOWED_MS.has(ms)) {
@@ -91,10 +99,24 @@ const TEACH_MS = 190
 for (const file of files) {
   const src = strip(readFileSync(file, 'utf8'))
   src.split('\n').forEach((line, i) => {
+    // The multiplied form: `animationDelay: i * 70 + 'ms'`.
     for (const m of line.matchAll(/animationDelay[^\n]*?\*\s*(\d+)/g)) {
       const ms = Number(m[1])
       if (ms !== CASCADE_MS) {
         fail(file + ':' + (i + 1) + ' staggers at ' + ms + 'ms — a cascade is ' + CASCADE_MS + 'ms')
+      }
+    }
+    /*
+      And the written-out form: `animationDelay: '140ms'`. Every step must land on the
+      70ms grid, and the whole list inside 420ms — six items, which is the point at which
+      a fan of cards stops reading as one gesture and starts reading as a queue.
+    */
+    for (const m of line.matchAll(/animationDelay:\s*'(\d+)ms'/g)) {
+      const ms = Number(m[1])
+      if (ms % CASCADE_MS !== 0) {
+        fail(file + ':' + (i + 1) + ' delays ' + ms + 'ms — off the ' + CASCADE_MS + 'ms cascade grid')
+      } else if (ms > CASCADE_MS * 6) {
+        fail(file + ':' + (i + 1) + ' delays ' + ms + 'ms — a cascade ends by ' + CASCADE_MS * 6 + 'ms')
       }
     }
     // The teaching stagger, by its own name, so it cannot drift either.

@@ -649,7 +649,7 @@ export const TOP_GUN: Root[] = [
     target: 'Sinto que preciso…',
     semantic_bridge:
       'Rather than carrying the English noun “need” across literally, Portuguese turns the idea into a verb: PRECISAR. “I feel that I need…”',
-    subtext: 'Neutral, everyday, endlessly useful. This is the product beating subtitle literalism.',
+    subtext: 'Neutral, everyday, endlessly useful.',
     extracts: [{ id: 'preciso_de', target: 'preciso de…', gloss: 'I need…', shelf: 'doing', lemma: 'precisar', form: 'I' }],
     branches: [
       { target: 'Preciso de ajuda.', en: 'I need help.' },
@@ -1019,7 +1019,7 @@ export const JAMES_BOND: Root[] = [
     target: 'Zero zero sete.',
     semantic_bridge:
       'Portugal reads the digits out one at a time, so the most famous number in film is already correct Portuguese. Numbers are a closed set of ten \u2014 the only vocabulary in the language you can finish in an afternoon and never revisit.',
-    subtext: 'The least glamorous thing in this crate, and the first thing you will need at a till.',
+    subtext: 'The least glamorous line here, and the first one you will need at a till.',
     extracts: [
       { id: 'zero', target: 'zero', gloss: 'zero', shelf: 'how_much' },
       { id: 'sete', target: 'sete', gloss: 'seven', shelf: 'how_much', set: 'numbers_1_10' },
@@ -3939,7 +3939,7 @@ export const THE_BASICS: Root[] = [
     source: 'You say yes, I say no.',
     target: 'Tu dizes sim, eu digo não.',
     semantic_bridge:
-      'The most useful line in the song is the one nobody thinks of as vocabulary. Sim and não were both missing from DUB entirely — não only ever appeared welded to something else — and they are the two words you will say most in your first week.',
+      'The most useful line in the song is the one nobody thinks of as vocabulary. Sim and não are the two words you will say most in your first week, and não travels alone — it goes straight in front of whatever you are refusing, and nothing else has to move.',
     subtext: 'Disagreeing, cheerfully.',
     extracts: [
       { id: 'sim', target: 'sim', gloss: 'yes', shelf: 'just_say', set: 'yes_no' },

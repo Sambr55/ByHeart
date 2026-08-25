@@ -28,15 +28,30 @@
 export const LANDING = {
   wordmark: 'DUB',
   line: 'Find yourself in another language.',
+  /*
+    EXACTLY FOUR, and each one has a typographic job the Landing component gives it.
+    lint:content fails a fifth, because that is how two lines came to be written and
+    silently never rendered:
+
+      0  the wall, large            — the reader's own experience, named
+      1  one quiet line under it
+      2  three beats, one per line  — the method, in order
+      3  the closer
+
+    Present tense throughout. It said "You WILL understand far more than you can say.
+    Everybody does" — a future promise answered by a present fact, which is a tense clash
+    on the first eight words a stranger reads. It is not a prediction. It is already true
+    of them, which is the whole point.
+
+    And no product words. "You earn it a crate at a time" put jargon on the first screen,
+    two beats before anything defines it — and it was read as "crate time", which is what
+    undefined jargon always gets you. The deal introduces the word later, with an example
+    attached.
+  */
   lines: [
-    'You will understand far more than you can say.\nEverybody does. That is the wall.',
-    'DUB starts on the other side of it.',
-    'What you are working towards is your Legend — the minute about yourself you can say without thinking. Who you are. Where you are from. Why you are here.',
-    'You earn it a crate at a time, and then you build it, and then everything else has somewhere to go.',
-    // Language-neutral on purpose: the brand layer describes the method, and the
-    // method is not about Portuguese. The personal experience becomes specific the
-    // moment a pair is chosen, one screen later.
-    'All of it learned through the films, music, books, TV, sport and culture already in your head.',
+    'You understand far more than you can say.',
+    'Everybody does. It is the wall every learner hits, and most apps carry on as if it were not there.',
+    'Learn the language out of things you already love.\nSay it out loud with nothing on screen to copy from.\nThen build your Legend — the minute about yourself.',
     'You already know more than you think.',
   ],
   cta: 'SHOW ME HOW',
@@ -308,6 +323,26 @@ export const PICKER = {
   respectful screen in the product because it tells the learner the truth about the
   country instead of letting them think the difficulty is theirs.
 */
+/*
+  The release, in the learner's words.
+
+  The screen before the drain showed the cultural cue a second time and said nothing
+  else — so it read as the title repeated, and the tap that follows had no meaning. It is
+  the most important beat in the product: the only one that moves the ladder, and the only
+  one that produces a sentence for the card.
+
+  What was missing was not decoration. It was the sentence explaining what is about to
+  happen and why the learner should want it.
+*/
+export const RELEASE = {
+  eyebrow: 'LAST TIME',
+  /** Said once, plainly, on the screen where the scaffolding is still standing. */
+  why: 'This is the part you were leaning on. You have taken what you need out of it, so now it goes — and the next sentence is yours, with nothing on screen to copy from.',
+  cta: 'TAKE IT AWAY',
+  /** After the drain, above the build. */
+  ask_eyebrow: 'NO CLUES',
+} as const
+
 export const THE_SWITCH = {
   eyebrow: 'NOBODY WARNS YOU',
   line: '“Sorry — do you speak English?”',
