@@ -1570,8 +1570,6 @@ function RootBeatView({
    */
   const [released, setReleased] = useState<'before' | 'draining' | 'building'>('before')
   const [switched, setSwitched] = useState(false)
-  /** The recognition pause: this screen is the prompt until it is tapped. */
-  const [revealed, setRevealed] = useState(false)
   /*
     The first time age_band has ever decided anything.
 
@@ -1609,40 +1607,32 @@ function RootBeatView({
 
   if (beat === 'translate') {
     /*
-      Before the tap this screen IS the old recognition beat, and after it the reveal.
-      One screen, because the old first screen's entire payload — the title and the
-      credit — reappeared as a caption on this one the moment you left it.
+      One screen, and everything on it.
+
+      This was two screens, then it was one screen with a tap-to-reveal — and the
+      tap-to-reveal was still a title, a credit and a button with half the phone empty
+      underneath. Removing the navigation did not remove the dead space; it just stopped
+      the dead space from having its own URL.
+
+      So the recognition is carried by ORDER instead of by a tap: what you already know
+      sits on top, the Portuguese directly under it, and the bridge under that. Same
+      sequence, one screen, nothing to press to get to the point.
     */
-    if (!revealed) {
-      return (
-        <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
-          <div className="flex flex-1 flex-col justify-center">
-            <p className="display text-balance text-3xl sm:text-4xl">
-              {root.root_type === 'quote' ? '“' + root.root_display + '”' : root.root_display}
-            </p>
-            {root.credit ? <p className="mt-3 text-sm text-muted">{root.credit}</p> : null}
-            {root.freebie_flag ? (
-              <p className="mt-3 text-xs uppercase tracking-wider text-muted">
-                A freebie. No puzzle.
-              </p>
-            ) : null}
-          </div>
-          <Cta label="WHAT IS THAT IN PORTUGUESE?" onClick={() => setRevealed(true)} />
-        </Shell>
-      )
-    }
     return (
       <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-6">
+          {/* What you already know, first and biggest. It is the argument. */}
           <div className="flex flex-col gap-1">
-            <p className="text-xs text-muted">
+            <p className="display text-balance text-2xl">
               {root.root_type === 'quote' ? '“' + root.root_display + '”' : root.root_display}
-              {root.credit ? ' · ' + root.credit : ''}
             </p>
-            <p className="animate-bank pt text-balance text-3xl text-accent">{root.target}</p>
+            {root.credit ? <p className="text-sm text-muted">{root.credit}</p> : null}
           </div>
-          <div>
-            <AudioButton slug={slugFor(root.target)} text={root.target} />
+          <div className="flex flex-col gap-3">
+            <p className="pt text-balance text-3xl text-accent">{root.target}</p>
+            <div>
+              <AudioButton slug={slugFor(root.target)} text={root.target} />
+            </div>
           </div>
         </div>
         <div className="flex flex-col gap-3">
