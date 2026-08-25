@@ -158,6 +158,26 @@ const ROOTS_PER_SESSION = 4
  */
 const BEATS_PER_SESSION = 24
 
+/**
+ * Except for the doorway, which has a promise written on it.
+ *
+ * The basics tile says "Hello, thank you, yes, no and counting to ten". At 24 beats the
+ * section served exactly two roots — olá and não, obrigado — and stopped, so every
+ * number in the crate sat behind a wall the learner had no way to know was there. The
+ * tile was making a promise the session could not keep.
+ *
+ * 30 fits hello, yes/no and the first numbers in one sitting, which is about twelve
+ * minutes rather than ten. That is a deliberate trade and it is made once: this is the
+ * one crate everybody is required to do, and a doorway that lies about its contents
+ * costs more than two minutes does.
+ *
+ * The REST of counting still arrives across later sessions — the cap is per session,
+ * not per crate, and what is left over is what brings somebody back.
+ */
+const BEATS_BY_FAMILY: Partial<Record<CultureFamily, number>> = {
+  the_basics: 30,
+}
+
 interface JourneyState {
   steps: Step[]
   index: number
@@ -270,7 +290,8 @@ export function sectionRoots(
     const cost = beatsFor(root).length
     // Always take the first, however long it is — a section of nothing is worse than a
     // section that runs a little over.
-    if (out.length && (out.length >= ROOTS_PER_SESSION || screens + cost > BEATS_PER_SESSION)) break
+    const budget = BEATS_BY_FAMILY[family] ?? BEATS_PER_SESSION
+    if (out.length && (out.length >= ROOTS_PER_SESSION || screens + cost > budget)) break
     out.push(root)
     screens += cost
   }

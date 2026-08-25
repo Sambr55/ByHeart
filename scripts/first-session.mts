@@ -161,6 +161,57 @@ for (const c of openable) {
   }
 }
 
+/**
+ * The doorway keeps the promise printed on it.
+ *
+ * The basics tile says "Hello, thank you, yes, no and counting to ten". The session cap
+ * served two roots — olá and não, obrigado — and stopped, so every number in the crate
+ * sat behind a wall the learner had no way to know was there, in the one crate everybody
+ * is forced to do. Nothing caught it: the content was present, correct and unreachable,
+ * which no content lint can see and no layout gate can either.
+ *
+ * So the promise is checked where it is made. A number must be taught in the FIRST
+ * session, and the crate is measured against the whole of one-to-ten.
+ */
+const NUMBERS = ['um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez']
+const basics = CRATES.find((c) => c.id === 'the_basics')
+if (basics) {
+  const numbersIn = (roots: Root[]) => {
+    const found = new Set<string>()
+    for (const r of roots) {
+      for (const e of r.extracts) {
+        const form = String(e.lemma ?? e.id ?? '').toLowerCase()
+        if (NUMBERS.includes(form)) found.add(form)
+      }
+    }
+    return found
+  }
+
+  const firstSession = sectionFor('the_basics' as CultureFamily)
+  const early = numbersIn(firstSession)
+  console.log(
+    '\n  the basics, first session: ' +
+      firstSession.map((r) => r.root_id).join(', ') +
+      '\n  numbers in it: ' +
+      ([...early].join(', ') || 'NONE'),
+  )
+  if (!early.size) {
+    fail(
+      'the basics teaches no number in its first session, and its tile promises counting ' +
+        'to ten — the session cap stops before the counting roots',
+    )
+  }
+
+  const whole = numbersIn(ROOTS_BY_FAMILY['the_basics' as CultureFamily] ?? [])
+  const missing = NUMBERS.filter((n) => !whole.has(n))
+  console.log('  the crate covers ' + whole.size + ' of 10: missing ' + (missing.join(', ') || 'none'))
+  if (missing.length) {
+    console.log(
+      '  warn  the basics promises counting to ten and never teaches ' + missing.join(', '),
+    )
+  }
+}
+
 console.log('')
 if (problems.length) {
   console.log(problems.length + ' problem(s) in a first session:')

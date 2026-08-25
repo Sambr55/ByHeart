@@ -59,6 +59,14 @@ export const LANDING = {
 
 export interface DemoBeat {
   key: 'recognise' | 'build'
+  /**
+   * The quiet line ABOVE the big one, setting it up.
+   *
+   * Without it the first thing a stranger meets is four words shouted in caps with no
+   * frame around them. The line tells them what they are looking at before they have to
+   * work it out, which is the difference between a demonstration and a non sequitur.
+   */
+  lead?: string
   /** The big thing on screen. */
   display: string
   /** The quiet line under it. */
@@ -91,6 +99,7 @@ export interface DemoBeat {
 export const DEMO_BEATS: DemoBeat[] = [
   {
     key: 'recognise',
+    lead: 'Here’s a line you might recognise:',
     display: 'TALK TO ME, GOOSE.',
     gloss: 'You already know what Maverick means.',
     translation: { pt: 'FALA COMIGO, GOOSE.', en: 'Talk to me, Goose.' },

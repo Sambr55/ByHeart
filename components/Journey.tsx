@@ -578,6 +578,9 @@ function Demo({ i }: { i: number }) {
   return (
     <Shell stage="DEMO" nav>
       <div className="flex flex-1 flex-col justify-center">
+        {/* Sentence case and quiet on purpose: it is somebody speaking to you, not a
+            label for the screen, so it must not read as an eyebrow. */}
+        {beat.lead ? <p className="mb-3 text-sm text-muted">{beat.lead}</p> : null}
         <p className="display text-balance text-3xl sm:text-4xl">{beat.display}</p>
         {beat.gloss ? <p className="mt-3 text-sm text-muted">{beat.gloss}</p> : null}
 
