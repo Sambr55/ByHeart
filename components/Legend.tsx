@@ -176,7 +176,7 @@ export function Legend() {
               </p>
               <Link
                 href="/crates"
-                className="eyebrow mt-3 inline-block text-accent underline underline-offset-4"
+                className="tap-target eyebrow mt-3 inline-flex items-center text-accent underline underline-offset-4"
               >
                 PICK A CRATE
               </Link>
@@ -197,7 +197,7 @@ export function Legend() {
           <div className="rounded border border-line bg-bg-elev px-4 py-3">
             <p className="text-sm font-semibold">{LEGEND_COPY.empty_head}</p>
             <p className="mt-1 text-xs leading-relaxed text-muted">{LEGEND_COPY.empty_body}</p>
-            <Link href="/crates" className="eyebrow mt-3 inline-block text-accent underline underline-offset-4">
+            <Link href="/crates" className="tap-target eyebrow mt-3 inline-flex items-center text-accent underline underline-offset-4">
               OPEN A CRATE
             </Link>
           </div>
