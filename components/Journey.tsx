@@ -171,7 +171,7 @@ function Shell({
                 onClick={goHome}
                 className="tap-target text-[0.6rem] uppercase tracking-wider opacity-80 transition hover:opacity-100"
               >
-                Crates
+                Vibes
               </button>
             ) : null}
             <Menu />
@@ -1612,6 +1612,17 @@ function RootBeatView({
           <p className="display text-balance text-3xl sm:text-4xl">
             {root.root_type === 'quote' ? '“' + root.root_display + '”' : root.root_display}
           </p>
+          {/*
+            Who made it, where the title alone does not say.
+
+            This beat asks "do you recognise this?", and it was asking it of four digits.
+            "1, 2, 3, 4" is nothing until somebody says Feist; "Six Days, Seven Nights"
+            needs no help and gets none. The credit only exists on the roots where the
+            thing on screen cannot identify itself.
+          */}
+          {root.credit ? (
+            <p className="mt-3 text-sm text-muted">{root.credit}</p>
+          ) : null}
           {root.freebie_flag ? (
             <p className="mt-3 text-xs uppercase tracking-wider text-muted">A freebie. No puzzle.</p>
           ) : null}

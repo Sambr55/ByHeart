@@ -411,6 +411,27 @@ for (const e of EXAMPLES) {
       warn(R + 'semantic bridge is very short — check it actually explains the crossing')
     }
     if (!root.subtext.trim()) fail(R + 'has no subtext (§07.2 requires how it feels in use)')
+
+    /*
+      The first beat asks "do you recognise this?" and shows root_display and nothing
+      else. That works for "Six Days, Seven Nights" and fails completely for "1, 2, 3, 4",
+      which is four digits until somebody says Feist.
+
+      source_label already knows the answer — it is two fields wearing one name, and the
+      attribution half is written "Work — Artist". So when the work IS the thing on
+      screen, the artist belongs in `credit` where it can actually be rendered. This
+      keeps the two in step: add a song root and forget the credit, and the lint says so
+      rather than the learner meeting a bare title.
+    */
+    const dash = root.source_label.split(' — ')
+    if (dash.length === 2) {
+      const [work, who] = dash
+      const flat = (t: string) => t.toLowerCase().replace(/[^a-z0-9]/g, '')
+      const worksOut = flat(work) === flat(root.root_display) || flat(root.root_display).includes(flat(work))
+      if (worksOut && !root.credit) {
+        warn(R + 'source_label credits "' + who + '" and nothing shows it — set credit')
+      }
+    }
     if (!root.extracts.length || root.extracts.length > 3) {
       fail(R + 'has ' + root.extracts.length + ' extracts; the spec allows 1–3')
     }

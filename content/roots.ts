@@ -312,6 +312,19 @@ export interface Root {
   /** Which rung of the ladder this root's dominant capability sits on. */
   rung: Rung
   root_type: RootType
+  /**
+   * Who made it, when the thing on screen does not say so itself.
+   *
+   * `source_label` cannot do this job: it is two fields wearing one name. Sometimes it
+   * is attribution ("1234 — Feist") and sometimes it is an editorial note to ourselves
+   * ("DUB-authored cringe moment", "What Top Gun actually is") — so rendering it would
+   * put our production notes on a teaching screen.
+   *
+   * This is the showable half, and it only exists where it earns its place. "Six Days,
+   * Seven Nights" needs nothing under it. "1, 2, 3, 4" is four digits until somebody
+   * says Feist, and then it is a song you have heard five hundred times.
+   */
+  credit?: string
   source_label: string
   source_status: SourceStatus
   /** What the learner sees as the cultural trigger. */
@@ -3894,6 +3907,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
+    credit: 'The Beatles',
     source_label: 'Hello, Goodbye — The Beatles',
     source_status: 'verified',
     root_display: 'Hello, Goodbye',
@@ -3974,6 +3988,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
+    credit: 'Feist',
     source_label: '1234 — Feist',
     source_status: 'verified',
     root_display: '1, 2, 3, 4',
@@ -4008,6 +4023,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
+    credit: 'ABBA',
     source_label: 'Thank You for the Music — ABBA',
     source_status: 'verified',
     root_display: 'Thank You for the Music',
@@ -4164,6 +4180,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
+    credit: 'The Beatles',
     source_label: 'Eight Days a Week — The Beatles',
     source_status: 'verified',
     root_display: 'Eight Days a Week',
@@ -4229,6 +4246,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
+    credit: 'Dolly Parton',
     source_label: '9 to 5 — Dolly Parton',
     source_status: 'verified',
     root_display: '9 to 5',
@@ -4327,6 +4345,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
+    credit: 'U2',
     source_label: 'Sunday Bloody Sunday — U2',
     source_status: 'verified',
     root_display: 'Sunday, Bloody Sunday',
