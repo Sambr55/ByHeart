@@ -1,13 +1,18 @@
 /**
- * The six things people actually get stuck on, answered.
+ * The things people actually get stuck on, answered.
  *
  * A feedback form is a product asking for a favour. This one gives something back
  * before it asks — which is also how you get better feedback, because somebody who has
  * just been helped writes more than somebody who has just been interrogated.
  *
- * Answered in DUB's voice, which means honestly: the voice IS a robot, progress DOES
- * only live on this device until you sign in, and saying so is worth more than a
- * reassuring evasion that the next screen contradicts.
+ * Answered in DUB's voice, which means honestly: progress DOES only live on this device
+ * until you sign in, and saying so is worth more than a reassuring evasion that the next
+ * screen contradicts.
+ *
+ * There is no entry about the synthetic voice. Recorded Portuguese is contracted and
+ * lands before launch, so an answer explaining a robot would be answering a question
+ * about a version of the product nobody outside this test will ever meet — and a support
+ * page is not the place to keep a gap alive after it has been closed.
  */
 
 export interface HelpItem {
@@ -38,11 +43,6 @@ export const HELP: HelpItem[] = [
     a: 'European Portuguese, always. It says comboio rather than trem, telemóvel rather than celular, and estás rather than você está. That is the whole reason DUB exists: every big app teaches the Brazilian one, and you are going to Lisbon.',
   },
   {
-    id: 'robot',
-    q: 'Why does the voice sound robotic?',
-    a: 'Because it is a robot, for now. Nothing has been recorded yet, so playback falls back to whatever synthetic Portuguese voice your phone has. Real Lisbon voices are what memberships pay for, and we would rather say that than pretend you cannot hear it.',
-  },
-  {
     id: 'progress',
     q: 'Where has my progress gone?',
     a: 'Everything you learn lives on this device until you sign in. Clear your browser, or pick up a different phone, and it is not there — because it was never anywhere else. Signing in fixes it in one tap and moves everything across.',
@@ -58,7 +58,9 @@ export const HELP: HelpItem[] = [
 
 export const FEEDBACK_COPY = {
   eyebrow: 'TELL US WHAT DID NOT LAND',
-  headline: 'Most things have an answer. Here are the six people ask for.',
+  // Deliberately not a number: the list changes, and copy that counts its own
+  // contents goes stale silently the first time it does.
+  headline: 'Most things have an answer. Here are the ones people ask for.',
   form_head: 'Still stuck, or something is wrong?',
   /** One box. A required six-question survey is a wall. */
   prompt: 'What did not land?',

@@ -60,9 +60,18 @@ export function Waitlist() {
 
       <div className="rounded border border-line bg-bg-elev p-5">
         <p className="eyebrow text-accent">WHAT THE FIRST {PRICING.founding.cap} PAY FOR</p>
+        {/*
+          What the money BUILDS, not what the product lacks.
+
+          This opened "Right now every line is spoken by a robot", which is the same
+          mistake the membership page made: on a page where somebody is deciding, an
+          inventory of gaps does not read as candour, it reads as a warning. Founding
+          memberships genuinely do pay for the recording sessions, and that is the whole
+          pitch — it just does not need an apology in front of it.
+        */}
         <p className="mt-3 text-sm leading-relaxed">
-          Right now every line is spoken by a robot. Founding memberships pay for the
-          recording sessions — real Lisbon voices, every line in the product. £
+          Founding memberships pay for the recording sessions — real Lisbon voices,
+          every line in the product, read by people who actually live there. £
           {PRICING.founding.gbp} a year, locked for as long as you stay.
         </p>
         <p className="mt-3 text-xs leading-relaxed text-muted">
