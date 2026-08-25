@@ -353,6 +353,60 @@ export const REPAIR_KIT: { pt: string; en: string; why: string; built_from: stri
  * pedagogy anyway, because the moment you need to say how old you are is the moment to
  * learn that Portuguese has an age rather than being one.
  */
+/**
+ * The Legend Card — the seven questions that are just "who are you".
+ *
+ * The ten frames were never one thing. Seven sit at rung 1–2 (your name, where you are
+ * from, your age, married, what you do, why Portugal, whether you speak it) and three
+ * need rung 3, 5 and 6. So "complete your Legend" meant "reach the top of the ladder",
+ * which is finishing the entire product — far too high a bar for a door, and the reason
+ * the Legend read as a destination that never arrived.
+ *
+ * The seven are the card you hand somebody. The other three are what you build once you
+ * are inside.
+ */
+export const CARD_RUNG = 2
+export const LEGEND_CARD = LEGEND_FRAMES.filter((f) => f.rung <= CARD_RUNG)
+
+/**
+ * Is the card finished?
+ *
+ * Deliberately NOT measured with said_cold. That counter is documented as a rehearsal
+ * count that is never rendered as a score, because the moment a number is attached to
+ * being put on the spot the feature becomes the anxiety it exists to remove — and a gate
+ * is the strongest kind of score there is.
+ *
+ * Cold speech is still what opens the door; it is just measured where it is already
+ * measured honestly. The rung only moves on a clean release with nothing on screen, so
+ * "reached the rung these cards are written at" IS "has said this kind of thing cold".
+ */
+export function cardDone(answeredFrameIds: string[]): boolean {
+  const done = new Set(answeredFrameIds)
+  return LEGEND_CARD.every((f) => done.has(f.id))
+}
+
+export function cardToGo(answeredFrameIds: string[]): number {
+  const done = new Set(answeredFrameIds)
+  return LEGEND_CARD.filter((f) => !done.has(f.id)).length
+}
+
+/**
+ * The door.
+ *
+ * `welcomedAt` grandfathers anybody already inside. The rule was attendance before this
+ * and some people are in on it; taking membership back off an early member costs more
+ * than it can ever earn, and it is the same rule the entitlements take — never remove
+ * access somebody already has.
+ */
+export function clubOpen(opts: {
+  answeredFrameIds: string[]
+  rung: number
+  welcomedAt?: string | null
+}): boolean {
+  if (opts.welcomedAt) return true
+  return cardDone(opts.answeredFrameIds) && opts.rung >= CARD_RUNG
+}
+
 export const CRATES_TO_UNLOCK_LEGEND = 5
 
 export function legendUnlocked(sectionsCompleted: string[]): boolean {

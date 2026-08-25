@@ -17,6 +17,7 @@ import {
   type Rung,
 } from '@/content/roots'
 import { CLUB, MOVES } from '@/content/club'
+import { cardDone, cardToGo, clubOpen } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
@@ -90,14 +91,39 @@ export function Club() {
   useEffect(() => {
     const state = loadLearner()
     if (state.club_welcomed_at) return
-    if (!state.sections_completed.length) return
-    if (rungReached(state.proof) < 2) return
+    const answered = (state.legend ?? [])
+      .filter((a) => Object.keys(a.values).length > 0)
+      .map((a) => a.frame_id)
+    if (!clubOpen({ answeredFrameIds: answered, rung: rungReached(state.proof) })) return
     setWelcome(true)
     welcomeToClub()
     track('club_welcome', { sections: state.sections_completed.length })
   }, [])
 
+  const answeredIds = useMemo(
+    () =>
+      (learner.legend ?? [])
+        .filter((a) => Object.keys(a.values).length > 0)
+        .map((a) => a.frame_id),
+    [learner.legend],
+  )
+  /*
+    The door, which did not exist.
+
+    /club rendered for anybody who typed the address — the welcome CEREMONY was gated and
+    the room behind it was not, so the most important threshold in the product was a
+    formality you could walk straight past. Membership is now the thing you can be
+    outside of.
+
+    `mounted` matters: the answer is unknowable before the browser has read localStorage,
+    and flashing the door at a member is worse than a moment of nothing.
+  */
+  const inside =
+    !mounted ||
+    clubOpen({ answeredFrameIds: answeredIds, rung, welcomedAt: learner.club_welcomed_at })
+
   if (welcome) return <Welcome onDone={() => setWelcome(false)} />
+  if (!inside) return <Door answered={answeredIds} />
 
   return (
     <main
@@ -394,5 +420,55 @@ function Moves({
         ))}
       </div>
     </section>
+  )
+}
+
+
+/**
+ * What somebody outside the Club sees.
+ *
+ * It has to say the same thing the deal screen says, because this is the goal the whole
+ * product is pointed at: the way in is being able to introduce yourself in Portuguese.
+ * Two different reasons for being outside, and they are not the same problem — the card
+ * is not written yet, or it is written and has never been said cold.
+ */
+function Door({ answered }: { answered: string[] }) {
+  const left = cardToGo(answered)
+  const written = cardDone(answered)
+  return (
+    <main
+      data-stage="REAL WORLD"
+      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
+    >
+      <div className="flex items-center gap-3">
+        <Wordmark mark="club" className="h-8" />
+        <span className="flex-1" />
+        <Menu />
+      </div>
+
+      <div className="flex flex-1 flex-col gap-3">
+        <p className="eyebrow text-muted">{CLUB.door.eyebrow}</p>
+        <h1 className="display text-balance text-3xl">{CLUB.door.headline}</h1>
+        <p className="text-sm leading-relaxed text-muted">{CLUB.door.body}</p>
+
+        {/* Where they actually are, said as a distance rather than a failure. */}
+        <p className="mt-3 text-sm font-semibold">
+          {written
+            ? CLUB.door.speak
+            : left === 1
+              ? 'One question left on your card.'
+              : left + ' questions left on your card.'}
+        </p>
+
+        <p className="mt-6 text-xs leading-relaxed text-muted">{CLUB.door.inside}</p>
+      </div>
+
+      <Link
+        href="/legend"
+        className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+      >
+        {CLUB.door.cta}
+      </Link>
+    </main>
   )
 }

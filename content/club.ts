@@ -17,12 +17,43 @@
  */
 
 export const CLUB = {
-  name: 'DUB CLUB',
+  /**
+   * A chapter is a CITY, not a language.
+   *
+   * Lisbon and Faro both speak pt-PT, so the pair cannot be the chapter — and a city is
+   * the right size for the thing the Club is actually for: the people, places and
+   * references that make you belong somewhere. Those are Lisbon-specific. "Portugal" is
+   * an abstraction; Lisbon is a street you can picture yourself on.
+   *
+   * And like the Hard Rock shirt it is named after, nobody buys the Tokyo one because
+   * they live in Tokyo. This is for people who are GOING.
+   */
+  name: 'DUB CLUB — LISBON',
+  city: 'Lisbon',
   /** Shown once, ever, the first time somebody arrives having finished a section. */
+  /**
+   * The door, for somebody still outside it.
+   *
+   * There was no door: /club rendered for anybody who typed the address, and the welcome
+   * copy said the membership test was having "been all the way through once" — which is
+   * attendance, in a product whose whole argument is that nothing is earned by turning
+   * up. The code was stricter than the copy, which is its own kind of wrong.
+   */
+  door: {
+    eyebrow: 'NOT YET',
+    headline: 'Dub Club — Lisbon.',
+    body: 'The way in is your Legend Card: seven questions a stranger will ask you, answered in Portuguese, out of language you own. It is the one thing you genuinely need on your first day there.',
+    /** Said plainly, because a door you cannot see the far side of is just a wall. */
+    inside: 'Inside is the part that is about Lisbon rather than about Portuguese — the people, the places, and what to say when a conversation goes wrong.',
+    cta: 'BUILD MY CARD',
+    /** When the card is done but the ladder is not. Different problem, different sentence. */
+    speak: 'Your card is written. Now say some of it cold, with nothing on screen — that is the whole test, and it is the only thing DUB has ever counted.',
+  },
+
   welcome: {
     eyebrow: 'YOU ARE IN',
-    headline: 'Welcome to Dub Club.',
-    body: 'You have been all the way through once, which is the only membership test there is. This is your way in from now on — no front door, no pitch, no starting again.',
+    headline: 'Welcome to Dub Club — Lisbon.',
+    body: 'You can introduce yourself in Portuguese without reading it off a screen. That is the whole membership test, and it is the thing most people never get to. This is your way in from now on — no front door, no pitch, no starting again.',
     body_two: 'Nothing here counts days or asks where you have been. It just shows you what you can say and what is worth doing next.',
     cta: 'GOOD',
   },
