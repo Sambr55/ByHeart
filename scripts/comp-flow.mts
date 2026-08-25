@@ -124,6 +124,19 @@ ok('redeeming twice on the same device is a yes, not a scolding', again.body.ok 
 const bogus = await call(second, '/api/comp', { method: 'POST', body: JSON.stringify({ code: 'ZZZZ-9999' }) })
 ok('a made-up code is refused', bogus.body.ok === false, String(bogus.body.reason ?? ''))
 
+console.log('\nhow people actually type it\n')
+// A tester was handed QNCL-D3XW, typed QNCLD3XW, and was told the code did not exist.
+// The hyphen is a reading aid; nobody thinks it is part of the code.
+const forms = [CODE.replace('-', ''), CODE.toLowerCase(), ' ' + CODE + ' ', CODE.replace('-', ' ')]
+for (const f of forms) {
+  const j = jar()
+  await call(j, '/api/entitlements')
+  const r = await call(j, '/api/comp', { method: 'POST', body: JSON.stringify({ code: f }) })
+  // Uses may be spent by now — "used up" still proves it FOUND the code, which is the point.
+  const found = r.body.ok === true || String(r.body.reason ?? '').includes('used up')
+  ok('"' + f + '" finds the code', found, String(r.body.reason ?? ''))
+}
+
 console.log('\nthe way in\n')
 const page = await fetch(BASE + '/account', { headers: { cookie: jar().header() }, redirect: 'manual' })
 ok('/account does not bounce a signed-out tester to /signin',

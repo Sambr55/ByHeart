@@ -45,7 +45,19 @@ interface CompCode {
 async function usable(code: string): Promise<{ found?: CompCode; reason?: string }> {
   const sql = db()
   if (!sql) return { reason: 'No database configured.' }
-  const rows = await sql<CompCode[]>`select * from comp_codes where lower(code) = lower(${code})`
+  // Matched on letters and digits alone.
+  //
+  // Codes are printed QNCL-D3XW and typed QNCLD3XW, because the hyphen is a reading aid
+  // and nobody thinks it is part of the code. An exact match answered "that code does
+  // not exist" — which is not just unhelpful, it is untrue, and it is the first thing a
+  // tester sees after being handed something that was supposed to work. Spaces and case
+  // go the same way for the same reason.
+  const norm = code.replace(/[^a-z0-9]/gi, '').toLowerCase()
+  if (!norm) return { reason: 'That code does not exist.' }
+  const rows = await sql<CompCode[]>`
+    select * from comp_codes
+     where lower(regexp_replace(code, '[^A-Za-z0-9]', '', 'g')) = ${norm}
+  `
   const found = rows[0]
   if (!found) return { reason: 'That code does not exist.' }
   if (found.expires_at && new Date(found.expires_at) < new Date()) {
