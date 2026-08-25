@@ -18,7 +18,7 @@ export type Goal = 'trip' | 'someone' | 'moving' | 'work' | 'curious'
 export interface ProfileQuestion {
   id: 'gender' | 'age' | 'goal'
   /** Who asks. The product's own questions get the same treatment as its lessons. */
-  asker: string
+  eyebrow: string
   askerLine: string
   headline: string
   /** Why we are asking, in terms of what they get. Never in terms of what we get. */
@@ -30,8 +30,18 @@ export interface ProfileQuestion {
 
 export const GENDER_QUESTION: ProfileQuestion = {
   id: 'gender',
-  asker: 'Bridget',
-  askerLine: 'Sorry — slightly personal, but Portuguese is going to insist.',
+  /*
+    No character asks these any more.
+
+    Bridget asked about gender, Marcus about age and Maverick about your reason — each
+    hard-coded to the crate that happened to author the question. So a learner halfway
+    through Bridget Jones was interrupted by Maverick, from a different crate entirely,
+    which is incoherent in a way no amount of good copy rescues. Giving every crate its
+    own asker would mean thirty-six lines of character voice, and the basics has no
+    character at all. It is DUB asking. It always was.
+  */
+  eyebrow: 'ONE QUESTION',
+  askerLine: 'Slightly personal, but Portuguese is going to insist.',
   headline: 'Are you speaking as a man or a woman?',
   why:
     'Not about who you are. About which ending comes out of your mouth. Portuguese will not let you say thank you until it knows.',
@@ -45,9 +55,9 @@ export const GENDER_QUESTION: ProfileQuestion = {
 
 export const AGE_QUESTION: ProfileQuestion = {
   id: 'age',
-  asker: 'Marcus',
-  askerLine: 'How long have you been at this business of being alive?',
-  headline: 'Roughly where are you?',
+  eyebrow: 'ONE QUESTION',
+  askerLine: 'Nobody will ask you this out loud. Portugal decides on sight.',
+  headline: 'Roughly how old are you?',
   why:
     /*
       What this question actually does, said accurately.
@@ -85,11 +95,19 @@ export const AGE_QUESTION: ProfileQuestion = {
 
 export const GOAL_QUESTION: ProfileQuestion = {
   id: 'goal',
-  asker: 'Maverick',
-  askerLine: 'What is this actually for?',
+  eyebrow: 'LAST ONE',
+  askerLine: 'There is no wrong answer, and the last one is a real one.',
   headline: 'Why are you here?',
   why:
-    'So the next things you learn are the ones standing between you and that, rather than whatever came next in a list.',
+    /*
+      What answering this actually does, said accurately.
+
+      It claimed to change what you are taught next, and it does not: `goal` is read on
+      the proof card and nowhere else. What it genuinely buys is a marker — how much of
+      the language for this you already have, and which piece is next — which is a more
+      useful thing to be told than a percentage.
+    */
+    'Your card will tell you how close you are to it, and which piece is next. It does not change the order of anything — it just stops the number being abstract.',
   options: [
     { id: 'trip', label: 'I’VE GOT A TRIP COMING', sub: 'days or weeks, not years' },
     { id: 'someone', label: 'SOMEONE IN MY LIFE SPEAKS IT', sub: 'and I would like to keep up' },

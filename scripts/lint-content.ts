@@ -36,7 +36,13 @@ import {
   setPieces,
 } from '../content/roots'
 import { INSIGHTS } from '../content/osmosis'
-import { GOAL_NEEDS, QUESTIONS_IN_ORDER } from '../content/profile'
+import {
+  AGE_QUESTION,
+  GENDER_QUESTION,
+  GOAL_NEEDS,
+  GOAL_QUESTION,
+  QUESTIONS_IN_ORDER,
+} from '../content/profile'
 import * as FRONT_DOOR_COPY from '../content/front-door'
 import { LANDING } from '../content/front-door'
 import * as PROFILE_COPY from '../content/profile'
@@ -961,6 +967,27 @@ for (const e of EXAMPLES) {
     }
   }
   console.log(pairs + ' voice pairs, every option situated, every pair teaching a rule')
+}
+
+// --- the three profile questions -------------------------------------------
+{
+  /*
+    These are the only screens in the product that ask the learner for something, so the
+    bar on them is higher than anywhere else: an eyebrow that is a label, a headline that
+    is unambiguous on its own, and no character attribution — a question asked by
+    Maverick while somebody is inside Bridget Jones is incoherent whatever it says.
+  */
+  for (const q of [GENDER_QUESTION, AGE_QUESTION, GOAL_QUESTION]) {
+    const Q = 'profile question ' + q.id + ': '
+    if (q.eyebrow.length > 14) fail(Q + 'eyebrow is ' + q.eyebrow.length + ' chars (max 14)')
+    if (q.eyebrow !== q.eyebrow.toUpperCase()) fail(Q + 'eyebrow is not a label')
+    if (!q.headline.trim().endsWith('?')) fail(Q + 'headline is not a question')
+    for (const o of q.options) {
+      if (o.label !== o.label.toUpperCase()) fail(Q + 'option "' + o.label + '" is not a label')
+    }
+    if (!q.options.length) fail(Q + 'has nothing to answer with')
+  }
+  console.log('3 profile questions, asked by nobody in particular')
 }
 
 // --- the landing, which has a shape ----------------------------------------

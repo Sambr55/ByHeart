@@ -2105,24 +2105,36 @@ function ProfileStep({ which }: { which: 'gender' | 'age' | 'goal' }) {
 
   return (
     <Shell stage="CHOICE">
-      <p className="eyebrow text-accent">{q.asker.toUpperCase()} ASKS</p>
-      <p className="mt-3 text-sm italic text-muted">“{q.askerLine}”</p>
-      <h1 className="display mt-6 text-balance text-2xl">{q.headline}</h1>
-      <p className="mt-3 text-sm leading-relaxed text-muted">{q.why}</p>
+      {/* Rhythm on the parent: the question is one thought, so its three parts sit at
+          close and the options are a group away. It was four stacked margins. */}
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-accent">{q.eyebrow}</p>
+        <h1 className="display text-balance text-2xl">{q.headline}</h1>
+        <p className="text-sm italic text-muted">{q.askerLine}</p>
+        <p className="text-sm leading-relaxed text-muted">{q.why}</p>
+      </div>
 
       {!answer && !skipped ? (
         <>
-          <div className="mt-6 space-y-3">
+          <div className="flex flex-col gap-3">
             {q.options.map((o) => (
+              /*
+                Stacked, not justified apart.
+
+                A long label on the left and a long hint on the right both wrapped, so
+                the two collided into a ragged block that looked like a layout accident.
+                And the hint was accent-coloured, which is the link colour — it read as
+                the tappable part when the whole card is the button.
+              */
               <button
                 key={o.id}
                 type="button"
                 data-testid={'profile-' + o.id}
                 onClick={() => choose(o.id)}
-                className="tap-target flex w-full items-center justify-between gap-3 rounded border border-line bg-bg-elev px-4 py-3 text-left transition hover:border-accent/50"
+                className="tap-target flex w-full flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3 text-left transition hover:border-accent/50"
               >
-                <span className="eyebrow">{o.label}</span>
-                {o.sub ? <span className="pt text-sm text-accent">{o.sub}</span> : null}
+                <span className="eyebrow text-fg">{o.label}</span>
+                {o.sub ? <span className="text-sm text-muted">{o.sub}</span> : null}
               </button>
             ))}
           </div>
@@ -2134,7 +2146,7 @@ function ProfileStep({ which }: { which: 'gender' | 'age' | 'goal' }) {
               setProfile(field, null)
               track('profile_skip', { question: which })
             }}
-            className="tap-target mt-6 w-full text-center text-xs uppercase tracking-wider text-muted underline underline-offset-4"
+            className="tap-target w-full text-center text-xs uppercase tracking-wider text-muted underline underline-offset-4"
           >
             {q.skip}
           </button>
