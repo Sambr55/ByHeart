@@ -180,6 +180,37 @@ export const DEAL = {
    * is deliberately the most visual thing on the page.
    */
   /**
+   * The Legend, explained where it is sold.
+   *
+   * It is the biggest thing DUB offers and the deal screen mentioned it in prose exactly
+   * never — one line inside a diagram, naming it without saying what it is. Somebody
+   * deciding whether to start was being asked to want a thing they had not been told
+   * about. (The single line that did mention it was cut in a pass that made the screen
+   * shorter, which is how a trim quietly removes the argument.)
+   *
+   * It is carried by the QUESTIONS rather than by adjectives. Ten real questions in
+   * Portuguese, four of which anybody can recognise on sight, does the persuading that
+   * "personalised profile" never would — and it is the honest shape of the thing: not a
+   * speech, a handful of answers.
+   */
+  legend: {
+    label: 'THE LEGEND',
+    head: 'The minute about yourself you can say without thinking.',
+    /** The name is doing real work, so the reason for it is worth ten words. */
+    why: 'An operative learns a legend until it comes out without being assembled, because hesitation is what gives you away. Yours is the same idea, except all of it is true.',
+    intro: 'Every conversation in Portugal opens with the same handful of questions:',
+    questions: [
+      { pt: 'Como te chamas?', en: 'What are you called?' },
+      { pt: 'De onde és?', en: 'Where are you from?' },
+      { pt: 'Que idade tens?', en: 'How old are you?' },
+      { pt: 'Tens filhos?', en: 'Do you have children?' },
+      { pt: 'Porquê Portugal?', en: 'Why Portugal?' },
+    ],
+    more: 'Ten in all.',
+    close: 'You build it a piece at a time, out of language you already own — so the answers come out in your own Portuguese rather than a phrase you memorised. It opens five crates in.',
+  },
+
+  /**
    * Where it goes. Drawn by <Path>, not described here.
    *
    * This block used to be THE SIX STAGES — a hundred-word briefing on a ladder the
@@ -194,7 +225,9 @@ export const DEAL = {
   },
   collect: {
     label: 'WHAT YOU KEEP',
-    note: 'Every line hands you a piece or two, yours from then on — and they combine, a word out of a Bond title finishing a sentence that started in Bridget Jones.',
+    // HOW IT WORKS already says you keep them, so this only has to say the part that
+    // is surprising: that they combine across crates.
+    note: 'And they combine — a word out of a Bond title finishing a sentence that started in Bridget Jones.',
     examples: ['comigo', 'onde', 'quanto', 'ajuda', 'ele', 'segunda-feira'],
   },
   ask: {
@@ -292,8 +325,10 @@ export const PICKER = {
     'Or go through one you have already opened — the second pass is where it sets.',
   nothing_open_ladder:
     'Not because of your plan \u2014 the rest open further up the ladder, and you move up by saying something cold. Go through one you have already opened; the second pass is where it sets.',
-  join_up: 'Your three free crates are already chosen. This one unlocks once you have started making progress and ',
-  join_up_link: 'join up',
+  // A whole sentence now. It used to stop mid-clause — "...making progress and " — and
+  // be finished by a link underneath the card, so anybody who did not notice the link
+  // read a truncated sentence and nothing else.
+  join_up: 'Your three free crates are already chosen. Tap to see what membership opens.',
   /**
    * Shown only when a drop is actually live. The distinction is worth one sentence and
    * not a paragraph — and the last clause is the promise that stops a drop feeling like

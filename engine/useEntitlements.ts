@@ -8,6 +8,15 @@ export interface Access {
   signedIn: boolean
   comped: boolean
   billingReady: boolean
+  /**
+   * Whether a sign-in link can actually be delivered.
+   *
+   * Sign-in is a magic link, so with no mail sender configured every "sign in" control
+   * in the product led to a page explaining that accounts do not work. A control that
+   * cannot do the thing it names is worse than no control — it costs a tap and teaches
+   * somebody the product is broken. Three places consult this.
+   */
+  signInReady: boolean
   /** False until the server has answered. Nothing may lock before this is true. */
   known: boolean
 }
@@ -17,6 +26,8 @@ const ASSUME: Access = {
   signedIn: false,
   comped: false,
   billingReady: false,
+  // Assumed FALSE, so a dead sign-in link never flashes up before the server answers.
+  signInReady: false,
   known: false,
 }
 
@@ -34,6 +45,7 @@ async function fetchAccess(): Promise<Access> {
       signedIn: Boolean(body.signedIn),
       comped: Boolean(body.comped),
       billingReady: Boolean(body.billingReady),
+      signInReady: Boolean(body.signInReady),
       known: true,
     }
   } catch {

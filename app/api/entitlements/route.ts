@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { currentUser, deviceId } from '@/lib/auth'
 import { billingConfigured, entitlementsForUser, subscriptionFor } from '@/lib/billing'
 import { entitlementsForDevice } from '@/lib/comp'
+import { sendable } from '@/lib/email'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -37,5 +38,6 @@ export async function GET() {
     signedIn: Boolean(user),
     comped: sub?.source === 'comp' || Boolean(comped),
     billingReady: billingConfigured(),
+    signInReady: sendable(),
   })
 }

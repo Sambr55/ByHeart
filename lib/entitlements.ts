@@ -99,18 +99,20 @@ export function entitlementsFor(
 }
 
 /*
-  What each plan buys, and separately what the money is FOR.
+  What each plan buys.
 
-  Four of the five Pro bullets sold features that do not exist — capture, the Booth,
-  offline audio and publishing — rendered verbatim on a live page. The free tier
-  contradicted its own flag too, promising "one live drop at a time" while drops are
-  unlimited and always have been, because charging for the one thing that can be lost by
-  being busy would turn the only real deadline in the product into a punishment.
+  This list was once four bullets long and every one of them sold something that did not
+  exist — capture, the Booth, offline audio, publishing — rendered verbatim on a live
+  page. That is how a paywall loses trust, and it loses it at the exact moment somebody
+  is deciding whether to believe the rest of the product. So the rule stands: a bullet
+  here is a thing the membership actually gets.
 
-  `includes` is now only what is true today, and it is short — deliberately. `funding` is
-  what a founding membership pays to build, labelled as exactly that. The distinction is
-  the whole of the founding-member pitch: nobody is being told they are buying real
-  Portuguese voices today, they are being told their money is what records them.
+  Recorded voices are on the list because the recording is contracted before launch, not
+  because it is aspirational — and nothing is purchasable until it is (`billingConfigured`
+  gates the buttons, and the page says so in plain words when it is false). What is gone
+  is the separate NOT BUILT YET panel: a sales page that leads with an inventory of its
+  own gaps is not being honest, it is arguing against itself, and the visitor cannot tell
+  the difference between candour and a warning.
 */
 export const PLANS = {
   free: {
@@ -129,18 +131,13 @@ export const PLANS = {
     id: 'pro' as const,
     name: 'DUB Pro',
     price: null, // filled from Stripe at render time
-    line: 'Every crate, and it pays for the voices.',
+    line: 'The whole shelf, your whole Legend, and the voices to go with them.',
     includes: [
-      'Every crate, no limit',
-      'Every crate DUB writes from now on',
+      'Every crate, no limit — and every crate DUB writes from now on',
+      'Your Legend all the way to ten, and the Club where it keeps growing',
+      'Real Lisbon voices, recorded properly — including your own Legend, read back',
       'The morning line and every live drop, same as free',
       'Share anything you can say',
-    ],
-    /** Not owned today. Said plainly, because a bullet that lies costs more than it sells. */
-    funding: [
-      'Real Lisbon voices, recorded — every line is synthetic today',
-      'The Booth: hear a native take under a sentence, and record your own',
-      'Audio that works with no signal',
     ],
   },
 } as const

@@ -7,6 +7,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { currentUser, deviceId } from '@/lib/auth'
 import { billingConfigured, entitlementsForUser, subscriptionFor } from '@/lib/billing'
 import { entitlementsForDevice } from '@/lib/comp'
+import { sendable } from '@/lib/email'
 import { hasDb } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
@@ -54,6 +55,7 @@ export default async function AccountPage() {
  */
 async function SignedOut() {
   const comped = await entitlementsForDevice(await deviceId())
+  const canSignIn = sendable()
 
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col gap-6 px-5 py-10">
@@ -81,18 +83,32 @@ async function SignedOut() {
 
       {!comped ? <RedeemCode /> : null}
 
+      {/*
+        The button only exists when it can work.
+
+        Sign-in is a magic link, and without a mail sender the link cannot be delivered —
+        so SIGN IN led to a page that says accounts are not switched on. A control that
+        cannot do the thing it names is worse than no control: it costs a tap, and the
+        tap teaches somebody that the product is broken.
+
+        The sentence stays either way, because "everything lives on this device" is
+        something a tester genuinely needs to know before they clear their browser.
+      */}
       <section className="border-t border-line pt-6">
-        <p className="eyebrow text-muted">AN ACCOUNT</p>
+        <p className="eyebrow text-muted">THIS PHONE</p>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          Everything you learn lives on this device until you sign in. An account moves it
-          across to another phone.
+          {canSignIn
+            ? 'Everything you learn lives on this device until you sign in. An account moves it across to another phone.'
+            : 'Everything you learn lives on this device. Keep using the same browser and it will be here — accounts, for moving it to another phone, are coming.'}
         </p>
-        <Link
-          href="/signin"
-          className="tap-target eyebrow mt-3 inline-block rounded-full border border-line px-5 py-3"
-        >
-          SIGN IN
-        </Link>
+        {canSignIn ? (
+          <Link
+            href="/signin"
+            className="tap-target eyebrow mt-3 inline-block rounded-full border border-line px-5 py-3"
+          >
+            SIGN IN
+          </Link>
+        ) : null}
       </section>
     </main>
   )

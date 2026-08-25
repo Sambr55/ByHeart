@@ -13,6 +13,12 @@ export type EventName =
   | 'landing_cta_tap'
   /** Read the deal and carried on. The first real commitment in the funnel. */
   | 'deal_accepted'
+  /**
+   * A non-member tapped a crate they cannot open. The clearest statement of intent in
+   * the product — they named the crate they want — and worth measuring on its own,
+   * because which crate it is says more than the count does.
+   */
+  | 'crate_locked_tapped'
   /* The Line — the daily habit, measured separately from the ten-minute session. */
   | 'line_view'
   | 'line_said'

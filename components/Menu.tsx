@@ -118,9 +118,18 @@ export function Menu() {
 
             <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
               {ITEMS.map((raw) => {
+                /*
+                  Account is only renamed to "Sign in" when signing in can actually
+                  happen. Without a mail sender the link cannot be delivered, so the row
+                  advertised an action the product could not perform — and it also hid
+                  the word "Account" from the one menu somebody goes looking for it in,
+                  on the page where they redeem a code.
+                */
                 const item =
                   raw.href === '/account' && access.known && !access.signedIn
-                    ? { ...raw, label: 'Sign in', hint: 'And keep what you have learned' }
+                    ? access.signInReady
+                      ? { ...raw, label: 'Sign in', hint: 'And keep what you have learned' }
+                      : { ...raw, label: 'Account', hint: 'Redeem a code, and what this device has' }
                     : raw
                 const here = pathname === item.href
                 return (

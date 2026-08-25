@@ -9,10 +9,16 @@ import { useEntitlements } from '@/engine/useEntitlements'
 /**
  * The page you land on when a crate is beyond the free three.
  *
- * Written to be read rather than to convert. The honest gap in DUB today is audio —
- * every line is a synthetic voice — and that gap is also the offer, so the page says so
- * in the first paragraph instead of burying it. It makes the buyer a participant rather
- * than a customer, and it turns the biggest weakness into the reason to buy now.
+ * Written to be read rather than to convert — but it does have to make the case.
+ *
+ * It used to open "Right now, every line in DUB is spoken by a robot", and carry a panel
+ * headed NOT BUILT YET listing three things the membership does not include. The theory
+ * was that candour sells. It does not read as candour on a sales page: a visitor cannot
+ * tell an honest disclosure from a warning, and the first thing the page did was argue
+ * against itself. So it leads with what the membership is, and the one thing it must not
+ * do — claim something untrue — is handled where it belongs, by not selling anything
+ * until it is true. `billingConfigured` gates the buttons and the page says so plainly
+ * when it is false.
  *
  * What it must never do: hurry anybody. No countdown, no "limited time", no strike-
  * through price theatre. The product's whole argument is that manufactured deadlines do
@@ -87,17 +93,15 @@ export function Pro() {
             <div>
               <p className="eyebrow text-muted">THE MONEY</p>
               <h1 className="display mt-3 text-balance text-2xl">
-                Right now, every line in DUB is spoken by a robot.
+                The whole shelf, and your Legend finished.
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-fg/85">
-                Nothing has been recorded yet. Playback falls back to whatever synthetic
-                European Portuguese voice your phone happens to have, and they vary. That is
-                the honest gap in this product, and it is what a membership pays for: real
-                Lisbon voices, every line, recorded properly — including the Legend you
-                have already built, read back by somebody who actually lives there.
+                Membership opens every crate DUB has written and every one it writes next —
+                and it carries your Legend the rest of the way, all ten answers, into the
+                Club where it keeps growing. Real Lisbon voices read it back to you.
               </p>
               <p className="mt-3 text-sm leading-relaxed text-muted">
-                Until that lands, three crates are yours for good and every drop stays open.
+                Your three free crates stay yours either way, and every drop stays open.
                 There is no hurry here and there is no countdown — a product built on the
                 argument that deadlines do not produce speakers would look ridiculous
                 inventing one at the till.
@@ -115,27 +119,6 @@ export function Pro() {
                   </li>
                 ))}
               </ul>
-
-              {/*
-                What the money builds, kept visibly separate from what it buys.
-
-                Four of the five bullets above used to sell capture, the Booth, offline
-                audio and publishing — none of which exist. They are not deleted from the
-                pitch, they are moved to the half of it that is honest: a founding
-                membership is funding these, and saying so is a better argument than
-                pretending they are already here.
-              */}
-              <div className="mt-6 rounded border border-dashed border-line-strong px-4 py-3">
-                <p className="eyebrow text-muted">NOT BUILT YET</p>
-                <ul className="mt-3 space-y-1">
-                  {PLANS.pro.funding.map((i) => (
-                    <li key={i} className="flex gap-3 text-sm text-muted">
-                      <span aria-hidden>·</span>
-                      {i}
-                    </li>
-                  ))}
-                </ul>
-              </div>
 
               {!access.known ? null : access.billingReady ? (
                 <div className="mt-6 flex flex-wrap gap-3">

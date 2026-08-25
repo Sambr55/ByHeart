@@ -445,6 +445,23 @@ export const LEGEND_COPY = {
   offer_repair:
     'It also comes with the four lines that keep a conversation going when you have not understood a word — those are yours straight away, whether or not you fill anything in.',
   offer_cta: 'START MY LEGEND',
+  /**
+   * Before the Legend can be built, cards are BANKED, not opened.
+   *
+   * Two different things were both called unlocked: having the vocabulary for a card,
+   * and having done the five crates that make the Legend usable. The session screen used
+   * the first and said "2 Legend cards just opened", with a button reading FILL THEM IN
+   * — and the Legend itself then said "one more crate and these open". The product
+   * contradicted itself one tap apart, and the tap was the reward moment.
+   *
+   * Banking is the honest word and it is also the better hook: you can see what you have
+   * earned without being told you can spend it.
+   */
+  banked_one: 'One more Legend card banked.',
+  banked_many: 'Legend cards banked.',
+  banked_note_one: 'They open after one more crate.',
+  banked_note_many: 'They open once you have done five crates.',
+  banked_cta: 'SEE WHAT IS WAITING',
   offer_later: 'Not now',
   repair_head: 'The four that keep a conversation going',
   repair_body:

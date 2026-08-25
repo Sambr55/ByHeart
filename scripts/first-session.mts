@@ -173,18 +173,25 @@ for (const c of openable) {
  * So the promise is checked where it is made. A number must be taught in the FIRST
  * session, and the crate is measured against the whole of one-to-ten.
  */
-const NUMBERS = ['um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez']
+const NUMBERS = ['um', 'dois', 'três', 'tres', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez']
+/** 'tres' and 'três' are the same number, counted once. */
+const canon = (n: string) => (n === 'tres' ? 'três' : n)
 const basics = CRATES.find((c) => c.id === 'the_basics')
 if (basics) {
   const numbersIn = (roots: Root[]) => {
     const found = new Set<string>()
     for (const r of roots) {
       for (const e of r.extracts) {
-        const form = String(e.lemma ?? e.id ?? '').toLowerCase()
-        if (NUMBERS.includes(form)) found.add(form)
+        // Both, because the piece id is unaccented ('tres') while the word the learner
+        // actually meets is not ('três') — matching on one alone reports a number as
+        // missing while it is being taught two lines away.
+        for (const form of [e.id, e.target, e.lemma]) {
+          const f = String(form ?? '').toLowerCase()
+          if (NUMBERS.includes(f)) found.add(f)
+        }
       }
     }
-    return found
+    return new Set([...found].map(canon))
   }
 
   const firstSession = sectionFor('the_basics' as CultureFamily)
@@ -203,7 +210,7 @@ if (basics) {
   }
 
   const whole = numbersIn(ROOTS_BY_FAMILY['the_basics' as CultureFamily] ?? [])
-  const missing = NUMBERS.filter((n) => !whole.has(n))
+  const missing = [...new Set(NUMBERS.map(canon))].filter((n) => !whole.has(n))
   console.log('  the crate covers ' + whole.size + ' of 10: missing ' + (missing.join(', ') || 'none'))
   if (missing.length) {
     console.log(

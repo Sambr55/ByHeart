@@ -166,10 +166,13 @@ const BEATS_PER_SESSION = 24
  * number in the crate sat behind a wall the learner had no way to know was there. The
  * tile was making a promise the session could not keep.
  *
- * 30 fits hello, yes/no and the first numbers in one sitting, which is about twelve
- * minutes rather than ten. That is a deliberate trade and it is made once: this is the
- * one crate everybody is required to do, and a doorway that lies about its contents
- * costs more than two minutes does.
+ * The number is derived, not chosen: hello (8) + yes/no (10) + the first numbers (12)
+ * is 30, and that is exactly the promise on the tile. About twelve minutes rather than
+ * ten. A deliberate trade, made once, for the one crate everybody is required to do —
+ * a doorway that lies about its contents costs more than two minutes does.
+ *
+ * If a root here grows, this has to grow with it or the promise silently breaks again.
+ * first-session fails when it does, which is the only reason it is safe to hard-code.
  *
  * The REST of counting still arrives across later sessions — the cap is per session,
  * not per crate, and what is left over is what brings somebody back.

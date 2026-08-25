@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   CRATES,
   PIECES,
@@ -44,7 +44,7 @@ import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Menu } from '@/components/Menu'
 import { Shelves } from '@/components/Shelves'
-import { LEGEND_COPY, LEGEND_FRAMES, framesUnlockedBy } from '@/content/legend'
+import { LEGEND_COPY, LEGEND_FRAMES, cratesToGo, framesUnlockedBy } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
 import { setPair } from '@/engine/pair'
@@ -435,6 +435,30 @@ function Deal() {
         <Block label={DEAL_COPY.how.label} lines={DEAL_COPY.how.steps} numbered />
 
         {/*
+          The Legend, argued for by its own questions.
+
+          Four of these are recognisable on sight to somebody who has never learned a
+          word of Portuguese, which is the entire persuasion. A paragraph of adjectives
+          about a "personalised profile" would do none of it.
+        */}
+        <section className="border-t border-line pt-3">
+          <p className="eyebrow text-accent">{DEAL_COPY.legend.label}</p>
+          <p className="display mt-3 text-balance text-xl">{DEAL_COPY.legend.head}</p>
+          <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.legend.why}</p>
+          <p className="mt-6 text-sm leading-relaxed text-muted">{DEAL_COPY.legend.intro}</p>
+          <ul className="mt-3 flex flex-col gap-3">
+            {DEAL_COPY.legend.questions.map((q) => (
+              <li key={q.pt} className="flex flex-col rounded border border-line bg-bg-elev px-4 py-3">
+                <span className="pt text-base text-accent">{q.pt}</span>
+                <span className="mt-1 text-xs text-muted">{q.en}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-muted">{DEAL_COPY.legend.more}</p>
+          <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.legend.close}</p>
+        </section>
+
+        {/*
           Where it goes, drawn.
 
           This was a six-rung ladder with a name, a description and an example on every
@@ -495,6 +519,7 @@ function Deal() {
 
 function Landing() {
   const { next } = useJourney()
+  const access = useEntitlements()
   return (
     <Shell stage="LANDING">
       {/*
@@ -552,10 +577,14 @@ function Landing() {
         <Link href="/line" className="underline underline-offset-4">
           Today’s line
         </Link>
-        <span aria-hidden="true">·</span>
-        <Link href="/signin" className="underline underline-offset-4">
-          Been here before?
-        </Link>
+        {access.signInReady ? (
+          <>
+            <span aria-hidden="true">·</span>
+            <Link href="/signin" className="underline underline-offset-4">
+              Been here before?
+            </Link>
+          </>
+        ) : null}
       </div>
     </Shell>
   )
@@ -780,6 +809,7 @@ function distanceTo(at: Rung, rung: Rung): string {
 }
 
 function Picker() {
+  const router = useRouter()
   const { chooseFamily, state } = useJourney()
   const params = useSearchParams()
   const learner = useLearner()
@@ -1048,10 +1078,26 @@ function Picker() {
                 >
                   <button
                     type="button"
-                    aria-disabled={unreached || planLocked}
-                    disabled={unreached || planLocked}
+                    /*
+                      A plan-locked card is NOT disabled.
+
+                      It used to be, with a small "join up" link dangling underneath it —
+                      so the one card a non-member most wants to press was the one thing
+                      on the screen that did nothing, and the way through was a five-pixel
+                      afterthought below it. Tapping the crate you want is the clearest
+                      statement of intent a person can make; it opens the membership
+                      screen. Only the LADDER still disables a card, because that is a
+                      thing you fix by learning, not by paying.
+                    */
+                    aria-disabled={unreached}
+                    disabled={unreached}
                     onClick={() => {
-                      if (unreached || planLocked) return
+                      if (unreached) return
+                      if (planLocked) {
+                        track('crate_locked_tapped', { crate: f.id })
+                        router.push('/pro')
+                        return
+                      }
                       setEntering(f.id)
                       chooseFamily(f.id)
                     }}
@@ -1137,17 +1183,6 @@ function Picker() {
                       <DropClock crate={f} now={now} />
                     ) : null}
                   </button>
-                  {/* Outside the button on purpose — an anchor nested in a button is not
-                      a thing a browser or a screen reader can make sense of. And "join
-                      up" is a call to action, so the phrase has to BE the link: as plain
-                      text it named an action with no way to take it. */}
-                  {planLocked ? (
-                    <p className="mt-1 px-4 text-xs text-muted">
-                      <Link href="/pro" className="text-accent underline underline-offset-4">
-                        {PICKER.join_up_link}
-                      </Link>
-                    </p>
-                  ) : null}
                   {/* The explanation sits with the thing it explains. It used to render
                       after the whole list, several screens below the card it describes. */}
                   {f.drop ? (
@@ -2529,7 +2564,18 @@ function LegendPayoff({ owned }: { owned: string[] }) {
 
   if (!mounted || learner.legend_prompt === 'declined' || !fresh.length) return null
 
-  const offering = learner.legend_prompt === 'unseen'
+  /*
+    Banked, or actually open?
+
+    framesUnlockedBy answers "do you have the words for this card". It does NOT answer
+    "can you build your Legend yet", which is the five-crate gate — and this screen used
+    the first to make a promise about the second: "2 Legend cards just opened", button
+    reading FILL THEM IN, and the Legend one tap later saying "one more crate and these
+    open". Both screens were right; the words were wrong.
+  */
+  const toGo = cratesToGo(learner.sections_completed ?? [])
+  const usable = toGo === 0
+  const offering = usable && learner.legend_prompt === 'unseen'
 
   return (
     <div
@@ -2540,10 +2586,19 @@ function LegendPayoff({ owned }: { owned: string[] }) {
       <p className="text-sm font-semibold">
         {offering
           ? LEGEND_COPY.offer_head
-          : fresh.length === 1
-            ? 'One Legend card just opened.'
-            : fresh.length + ' Legend cards just opened.'}
+          : usable
+            ? fresh.length === 1
+              ? 'One Legend card just opened.'
+              : fresh.length + ' Legend cards just opened.'
+            : fresh.length === 1
+              ? LEGEND_COPY.banked_one
+              : fresh.length + ' ' + LEGEND_COPY.banked_many}
       </p>
+      {!usable ? (
+        <p className="text-xs leading-relaxed text-muted">
+          {toGo === 1 ? LEGEND_COPY.banked_note_one : LEGEND_COPY.banked_note_many}
+        </p>
+      ) : null}
       <p className="flex flex-wrap gap-x-3 gap-y-1">
         {fresh.slice(0, 3).map((f) => (
           <span key={f.id} className="pt text-sm text-accent">
@@ -2575,7 +2630,7 @@ function LegendPayoff({ owned }: { owned: string[] }) {
           }}
           className="tap-target eyebrow rounded bg-accent px-4 py-3 text-accent-ink"
         >
-          {offering ? LEGEND_COPY.offer_cta : 'FILL THEM IN'}
+          {offering ? LEGEND_COPY.offer_cta : usable ? 'FILL THEM IN' : LEGEND_COPY.banked_cta}
         </Link>
         {offering ? (
           <button
@@ -2769,6 +2824,7 @@ function CapabilityRow({
 
 function Close() {
   const { finish } = useJourney()
+  const access = useEntitlements()
   const learner = useLearner()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -2820,9 +2876,11 @@ function Close() {
       {/* Offered here rather than at the door: there is now something worth keeping,
           which is the only honest moment to ask anyone for an email address. */}
       <div className="mt-3 flex flex-col items-center gap-3 text-xs text-muted">
-        <Link href="/signin" className="underline underline-offset-4">
-          Keep what you have learned — it lives on this phone until you do.
-        </Link>
+        {access.signInReady ? (
+          <Link href="/signin" className="underline underline-offset-4">
+            Keep what you have learned — it lives on this phone until you do.
+          </Link>
+        ) : null}
         <Link href="/line" className="underline underline-offset-4">
           Or just take one line a morning.
         </Link>
