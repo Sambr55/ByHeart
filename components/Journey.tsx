@@ -38,6 +38,7 @@ import {
   PAIR_STEP,
   PICKER,
 } from '@/content/front-door'
+import { primeAudio } from '@/engine/audio'
 import { Path } from '@/components/Path'
 import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
@@ -570,7 +571,20 @@ function Landing() {
           </p>
         </div>
       </div>
-      <Cta label={LANDING.cta} onClick={() => { track('landing_cta_tap', {}); next() }} />
+      {/*
+        The first tap of the session is where iOS decides whether this page is allowed to
+        make a sound at all — so the unlock rides on it. primeAudio existed for exactly
+        this and was never called from anywhere, which is half of why every phone was
+        silent.
+      */}
+      <Cta
+        label={LANDING.cta}
+        onClick={() => {
+          primeAudio()
+          track('landing_cta_tap', {})
+          next()
+        }}
+      />
       {/* Two ways back in for a returning person: today's line if they have ninety
           seconds, their account if they are on a new phone. */}
       <div className="mt-3 flex items-center justify-center gap-6 text-xs text-muted">
