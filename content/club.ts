@@ -58,6 +58,10 @@ export const CLUB = {
     cta: 'GOOD',
   },
   /** The masthead line when a learner has a capability. The fallback is never empty. */
+  /** The city half of the Club, which is the half that is not about Portuguese. */
+  city_label: 'IN LISBON',
+  city_note: 'Things you actually have to do, and what to say while you do them.',
+
   greeting: 'Here is where you are.',
   nothing_new:
     'Nothing new is waiting. That is allowed — going through something again is how most of this sticks.',

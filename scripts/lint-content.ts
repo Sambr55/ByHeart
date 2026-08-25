@@ -36,6 +36,8 @@ import {
   setPieces,
 } from '../content/roots'
 import { INSIGHTS } from '../content/osmosis'
+import { CHAPTERS } from '../content/chapters'
+import { SITUATIONS } from '../content/situations'
 import {
   AGE_QUESTION,
   GENDER_QUESTION,
@@ -1322,6 +1324,57 @@ for (const e of EXAMPLES) {
     }
   }
   console.log('3 marks, and the files and the code agree')
+}
+
+/*
+  City Clubs.
+
+  The spec's non-negotiables, enforced rather than stated — each one is a rule the roots
+  already live under, applied to a new kind of content while there is little enough of it
+  that retrofitting is free.
+*/
+{
+  const now = new Date()
+  for (const sit of SITUATIONS) {
+    const S = 'situation ' + sit.id + ': '
+    if (!CHAPTERS.some((c) => c.id === sit.chapter)) fail(S + 'belongs to no chapter')
+
+    // A Situation that leaves somebody informed but unable to say anything has failed,
+    // however useful it reads. This is the line between a Club and a directory.
+    if (!sit.release?.answer?.trim() || !sit.release?.ask?.trim()) {
+      fail(S + 'has no release — it must end in something you can say cold')
+    }
+    if (!sit.lines.length) fail(S + 'teaches no lines')
+    for (const l of sit.lines) {
+      if (!l.when.trim()) fail(S + 'line "' + l.pt + '" does not say when it is for')
+    }
+
+    // A photograph of a real place is somebody's property, and a real place is a factual
+    // claim. Same rule the roots take, for the same reason.
+    if (sit.image) {
+      if (!sit.image.alt.trim()) fail(S + 'has an image with no alt text')
+      if (!sit.image.rights_status) fail(S + 'has an image with no rights status')
+    }
+
+    // Places rot. A Club full of things that are no longer true is worse than a smaller
+    // one, so anything with an address carries a review date.
+    if ((sit.kind === 'place' || sit.kind === 'errand') && !sit.review_by) {
+      fail(S + 'is a ' + sit.kind + ' with no review_by — places and procedures go stale')
+    }
+    if (sit.review_by && new Date(sit.review_by) < now) {
+      warn(S + 'is past its review date and is being hidden — check it or retire it')
+    }
+  }
+  const openChapters = CHAPTERS.filter((c) => c.open)
+  if (!openChapters.length) fail('no chapter is open, so the Club has nowhere to be')
+  for (const c of openChapters) {
+    if (!SITUATIONS.some((x) => x.chapter === c.id)) {
+      warn('chapter ' + c.id + ' is open with nothing in it')
+    }
+  }
+  console.log(
+    SITUATIONS.length + ' situation(s) across ' + openChapters.length + ' open chapter(s)',
+  )
 }
 
 // --- report ----------------------------------------------------------------

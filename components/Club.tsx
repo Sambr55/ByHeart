@@ -18,6 +18,8 @@ import {
 } from '@/content/roots'
 import { CLUB, MOVES } from '@/content/club'
 import { cardDone, cardToGo, clubOpen } from '@/content/legend'
+import { DEFAULT_CHAPTER } from '@/content/chapters'
+import { isCurrent, situationsFor } from '@/content/situations'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
@@ -171,6 +173,15 @@ export function Club() {
         now={now}
         mounted={mounted}
       />
+
+      {/*
+        The city half of the Club, and the half that is not about Portuguese.
+
+        Pull, not push: nobody is sent this. It is here for the person who has a thing to
+        do tomorrow and would rather not do the whole exchange in English — which is the
+        only reason a tool like this gets opened at all.
+      */}
+      <Situations />
 
       <p className="mt-auto text-center text-xs text-muted">{CLUB.footer}</p>
     </main>
@@ -470,5 +481,34 @@ function Door({ answered }: { answered: string[] }) {
         {CLUB.door.cta}
       </Link>
     </main>
+  )
+}
+
+
+/** What is worth doing in the city, as opposed to what is worth doing in the language. */
+function Situations() {
+  const list = situationsFor(DEFAULT_CHAPTER).filter((x) => isCurrent(x))
+  if (!list.length) return null
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-baseline gap-3">
+        <h2 className="eyebrow min-w-0 text-accent">{CLUB.city_label}</h2>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+      <p className="text-xs leading-relaxed text-muted">{CLUB.city_note}</p>
+      <div className="flex flex-col gap-3">
+        {list.map((s) => (
+          <Link
+            key={s.id}
+            href={'/errand/' + s.id}
+            data-testid={'situation-' + s.id}
+            className="tap-target flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3 transition hover:border-accent/50"
+          >
+            <span className="display text-base">{s.title}</span>
+            <span className="text-xs leading-relaxed text-muted">{s.why}</span>
+          </Link>
+        ))}
+      </div>
+    </section>
   )
 }

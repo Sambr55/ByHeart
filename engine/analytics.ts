@@ -19,6 +19,11 @@ export type EventName =
    * because which crate it is says more than the count does.
    */
   | 'crate_locked_tapped'
+  /* City Clubs. A Situation is pulled, not pushed, so opening one is a statement of
+     intent about a real errand somebody has to do — the most useful signal in the
+     product about what to write next. */
+  | 'errand_cold'
+  | 'errand_done'
   /* The Line — the daily habit, measured separately from the ten-minute session. */
   | 'line_view'
   | 'line_said'
