@@ -32,11 +32,13 @@ import {
   THE_SWITCH,
   DEMO_BEATS,
   DEMO_CLOSE,
+  GATEWAY,
   LANDING,
   NO_CUE_PROMPTS,
   PAIR_STEP,
   PICKER,
 } from '@/content/front-door'
+import { Path } from '@/components/Path'
 import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
@@ -432,56 +434,30 @@ function Deal() {
       <div className="mt-6 space-y-6 pb-6">
         <Block label={DEAL_COPY.how.label} lines={DEAL_COPY.how.steps} numbered />
 
-        {/* The ladder, drawn rather than described. */}
+        {/*
+          Where it goes, drawn.
+
+          This was a six-rung ladder with a name, a description and an example on every
+          rung — a hundred words of briefing on a system the product no longer shows,
+          delivered before the learner had met one word of Portuguese. It was the longest
+          thing on the screen and the least useful.
+
+          The same component draws the same five steps on the shelf when the free three
+          run out, so the picture somebody is shown at the start is the picture they are
+          standing inside later. One shape, learned once.
+        */}
         <section className="border-t border-line pt-3">
-          <p className="eyebrow text-accent">{DEAL_COPY.stages.label}</p>
-          <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.stages.intro}</p>
-          <ol className="mt-6">
-            {RUNGS.map((r, i) => (
-              <li key={r.rung} className="relative grid grid-cols-[28px_1fr] gap-x-3 pb-6 last:pb-1">
-                {/* the rail, stopping at the last dot rather than running past it */}
-                {i < RUNGS.length - 1 ? (
-                  <span aria-hidden className="absolute left-[13.5px] top-7 bottom-0 w-px bg-line" />
-                ) : null}
-                <span
-                  className={
-                    'relative z-[1] flex h-7 w-7 items-center justify-center rounded-full border text-[0.65rem] font-semibold tabular-nums ' +
-                    (r.rung === 1
-                      ? 'border-accent bg-accent text-accent-ink'
-                      : 'border-line bg-bg text-muted')
-                  }
-                >
-                  {r.rung}
-                </span>
-                <span className="min-w-0">
-                  <span className="flex flex-wrap items-baseline gap-x-3">
-                    <span className="display text-sm">{r.name}</span>
-                    {r.rung === 1 ? (
-                      <span className="eyebrow text-[0.5rem] text-accent">{DEAL_COPY.stages.start}</span>
-                    ) : null}
-                  </span>
-                  <span className="mt-1 block text-xs leading-relaxed text-muted">{r.what}</span>
-                  <span className="pt mt-1 block text-xs text-accent">{r.example}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-6 border-t border-line/60 pt-3 text-xs leading-relaxed text-muted">
-            {DEAL_COPY.stages.move}
+          <p className="eyebrow text-accent">{DEAL_COPY.path.label}</p>
+          <Path at={0} className="mt-6" />
+          <p className="border-t border-line/60 pt-3 text-xs leading-relaxed text-muted">
+            {DEAL_COPY.path.note}
           </p>
         </section>
 
-        {/* What accumulates — the thing the picker calls a vocabulary bank. */}
+        {/* What accumulates, shown rather than claimed — the chips are the argument. */}
         <section className="border-t border-line pt-3">
           <p className="eyebrow text-accent">{DEAL_COPY.collect.label}</p>
-          <ul className="mt-3 space-y-3">
-            {DEAL_COPY.collect.lines.map((line) => (
-              <li key={line} className="flex gap-3 text-sm leading-relaxed text-fg/85">
-                <span className="shrink-0 pt-1 text-xs text-muted">·</span>
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
+          <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.collect.note}</p>
           <div className="mt-3 flex flex-wrap gap-3">
             {DEAL_COPY.collect.examples.map((e) => (
               <span
@@ -997,18 +973,39 @@ function Picker() {
         </div>
       ) : null}
 
-      {mounted && access.known && !grouped.open.length ? (
+      {/*
+        The gateway. A learner who finished the basics and picked two crates used to land
+        on a small grey box that said "nothing new is open right now" and named Pro in
+        prose with no link on it — the moment the whole free tier had been building
+        towards, delivered as a dead end.
+
+        The first fix only rendered it when NOTHING was open, which is never true at the
+        cap: the three crates you have already claimed stay open forever, so the shelf
+        looks full while being finished. It renders on the cap itself. When the LADDER is
+        the reason instead it stays a quiet note, because that is not a paywall and must
+        not be dressed as one.
+      */}
+      {mounted && access.known && atLimit ? (
+        <div
+          data-testid="gateway"
+          className="flex flex-col gap-3 rounded border border-accent bg-accent/5 px-4 py-6"
+        >
+          <p className="eyebrow text-accent">{GATEWAY.eyebrow}</p>
+          <h2 className="display text-balance text-xl">{GATEWAY.headline}</h2>
+          <Path at={2} className="mt-3" />
+          <p className="text-xs leading-relaxed text-muted">{GATEWAY.body}</p>
+          <Link
+            href="/pro"
+            className="tap-target eyebrow mt-1 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            {GATEWAY.cta}
+          </Link>
+          <p className="text-xs leading-relaxed text-muted">{PICKER.nothing_open_paid}</p>
+        </div>
+      ) : mounted && access.known && !grouped.open.length ? (
         <div className="flex flex-col gap-1 rounded border border-line-strong bg-bg-elev px-4 py-3">
           <p className="text-sm font-semibold">{PICKER.nothing_open}</p>
-          {/*
-            It has to consult atLimit before it blames the plan. This message always said
-            "you have used your free crates", so a stage-1 learner who had merely run out
-            of ladder was shown a paywall they had not hit — at the moment they were most
-            likely to leave.
-          */}
-          <p className="text-xs leading-relaxed text-muted">
-            {atLimit ? PICKER.nothing_open_paid : PICKER.nothing_open_ladder}
-          </p>
+          <p className="text-xs leading-relaxed text-muted">{PICKER.nothing_open_ladder}</p>
         </div>
       ) : null}
 

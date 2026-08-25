@@ -170,46 +170,42 @@ export const DEAL = {
    * there are six of them or what they lead to. This block is that explanation, and it
    * is deliberately the most visual thing on the page.
    */
-  stages: {
-    label: 'THE SIX STAGES',
-    intro:
-      'Not levels, and nothing to grind. Each stage is a thing you can walk into a café and actually do, and they are in this order because language is — you cannot ask where the water is before you have the word for water.',
-    start: 'YOU START HERE',
-    move:
-      'You move up by saying something cold, with nothing on screen to copy from — never by turning up. It cannot go down, and nothing expires if you disappear for a month.',
+  /**
+   * Where it goes. Drawn by <Path>, not described here.
+   *
+   * This block used to be THE SIX STAGES — a hundred-word briefing on a ladder the
+   * product no longer surfaces anywhere, delivered before the learner had seen a single
+   * word of Portuguese. It was the longest thing on the screen and the least useful. The
+   * question somebody actually has at this point is "where does this end up", and the
+   * answer is a picture.
+   */
+  path: {
+    label: 'WHERE IT GOES',
+    note: 'You never lose a crate, and nothing expires if you disappear for a month.',
   },
   collect: {
-    label: 'WHAT YOU COLLECT',
-    lines: [
-      'Every line hands you a piece or two, and they are yours from then on.',
-      'Pieces from different crates combine — a word out of a Bond title finishing a sentence that started in Bridget Jones.',
-      'That bank is the whole score. Not days attended.',
-    ],
-    /** Real pieces the graph teaches, shown as the chips they appear as in the app. */
+    label: 'WHAT YOU KEEP',
+    note: 'Every line hands you a piece or two, yours from then on — and they combine, a word out of a Bond title finishing a sentence that started in Bridget Jones.',
     examples: ['comigo', 'onde', 'quanto', 'ajuda', 'ele', 'segunda-feira'],
   },
   ask: {
-    label: 'WHAT WE ASK OF YOU',
+    label: 'WHAT WE ASK',
     lines: [
-      'Ten minutes, on the days you feel like it. Not every day — we won’t ask.',
+      'Ten minutes on the days you feel like it — not every day, we will not ask.',
       'Say it out loud. Reading it is not the same thing.',
-      'Tell us when something doesn’t land. That is the most useful thing you can do.',
     ],
   },
   get: {
     label: 'WHAT YOU GET',
     lines: [
-      // First, because it is the concrete version of the line under it.
-      'Your Legend — the minute about yourself, earned a crate at a time.',
       'Sentences you can say cold, to a real person, without rehearsing first.',
-      'Counted honestly — the number only moves when there are no clues on screen.',
-      'And the grammar underneath, without ever sitting through a grammar lesson.',
+      'Counted honestly — the number only moves when there is nothing on screen to copy from.',
     ],
   },
   not: {
     label: 'WHAT THIS IS NOT',
     line:
-      'No streaks. No points. No lives. Nothing here will ever congratulate you for opening the app — a thousand-day streak has never once helped anybody order a coffee.',
+      'No streaks, no points, no lives. A thousand-day streak has never once helped anybody order a coffee.',
   },
   cta: 'I’M IN',
 } as const
@@ -284,7 +280,7 @@ export const PICKER = {
   */
   nothing_open: 'Nothing new is open right now.',
   nothing_open_paid:
-    'You have used your free crates. Go through one again \u2014 they stay yours \u2014 or open the rest with Pro.',
+    'Or go through one you have already opened — the second pass is where it sets.',
   nothing_open_ladder:
     'Not because of your plan \u2014 the rest open further up the ladder, and you move up by saying something cold. Go through one you have already opened; the second pass is where it sets.',
   join_up: 'Your three free crates are already chosen. This one unlocks once you have started making progress and ',
@@ -497,4 +493,22 @@ export const CLOSE = {
   sub: 'That is yours now. From here on DUB opens on your own page — no front door, no starting again.',
   cta: 'INTO DUB CLUB',
   feedback: 'Something not land? Tell us.',
+} as const
+
+/**
+ * The gateway. What happens when the free three are gone.
+ *
+ * There was nothing here. A learner who did the basics and picked two crates reached a
+ * small grey box reading "nothing new is open right now", which named Pro in prose with
+ * no link on it and never mentioned the Legend — so the moment the product had spent
+ * three crates building towards arrived as a dead end. This is the ask, and it is the
+ * only place in the app that makes one.
+ */
+export const GATEWAY = {
+  eyebrow: 'THAT IS THE FREE THREE',
+  headline: 'Basics and two crates. That is the free part done.',
+  // The picture above it already says where this goes. Repeating it in prose was the
+  // longest sentence on the screen and taught nobody anything.
+  body: 'Everything you kept stays yours, whatever you decide.',
+  cta: 'WHAT MEMBERSHIP OPENS',
 } as const
