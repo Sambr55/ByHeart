@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { currentUser } from '@/lib/auth'
+import { currentUser, deviceId } from '@/lib/auth'
 import { billingConfigured, entitlementsForUser, subscriptionFor } from '@/lib/billing'
+import { entitlementsForDevice } from '@/lib/comp'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -15,15 +16,26 @@ export const dynamic = 'force-dynamic'
  *
  * Anonymous learners get the free tier rather than an error: DUB works with no account
  * at all, and that must keep being true.
+ *
+ * A DEVICE grant is consulted alongside the account, and the better of the two wins.
+ * Order matters and it is not obvious: a tester who redeems a code and later signs in
+ * has an account with no subscription, so reading the account alone would take Pro back
+ * off them at the moment they did the thing we asked. Never take access away.
  */
 export async function GET() {
   const user = await currentUser()
-  const entitlements = await entitlementsForUser(user?.id ?? null)
+  const accountEntitlements = await entitlementsForUser(user?.id ?? null)
+  const deviceEntitlements = await entitlementsForDevice(await deviceId())
+
+  const comped = deviceEntitlements ?? null
+  const entitlements =
+    comped && comped.crates > accountEntitlements.crates ? comped : accountEntitlements
+
   const sub = user ? await subscriptionFor(user.id) : null
   return NextResponse.json({
     entitlements,
     signedIn: Boolean(user),
-    comped: sub?.source === 'comp',
+    comped: sub?.source === 'comp' || Boolean(comped),
     billingReady: billingConfigured(),
   })
 }

@@ -1,7 +1,12 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Account } from '@/components/Account'
-import { currentUser } from '@/lib/auth'
+import { Menu } from '@/components/Menu'
+import { RedeemCode } from '@/components/RedeemCode'
+import { Wordmark } from '@/components/Wordmark'
+import { currentUser, deviceId } from '@/lib/auth'
 import { billingConfigured, entitlementsForUser, subscriptionFor } from '@/lib/billing'
+import { entitlementsForDevice } from '@/lib/comp'
 import { hasDb } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
@@ -9,7 +14,10 @@ export const dynamic = 'force-dynamic'
 export default async function AccountPage() {
   if (!hasDb()) redirect('/signin')
   const user = await currentUser()
-  if (!user) redirect('/signin')
+  // A signed-out visitor used to be redirected to /signin, which put the redeem box
+  // behind the exact wall it exists to get a tester past — and sign-in cannot deliver
+  // a link without a mail sender. So they get a page of their own instead.
+  if (!user) return <SignedOut />
 
   const [subscription, entitlements] = await Promise.all([
     subscriptionFor(user.id),
@@ -33,5 +41,59 @@ export default async function AccountPage() {
       }
       billingReady={billingConfigured()}
     />
+  )
+}
+
+/**
+ * The account page for somebody with no account.
+ *
+ * Two things belong here and nothing else: the code box, because a tester was handed a
+ * code and this is where they were told to type it; and the way to make a real account,
+ * for anybody who came looking for one. It says what a code does before asking for one,
+ * because "GOT A CODE?" alone does not tell you what happens if you have.
+ */
+async function SignedOut() {
+  const comped = await entitlementsForDevice(await deviceId())
+
+  return (
+    <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col gap-6 px-5 py-10">
+      {/* The same header the signed-in page has. A wordmark is sized by height, and
+          leaving the class off renders it at its intrinsic size — enormous. */}
+      <header className="flex items-center justify-between gap-3">
+        <a href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-accent">
+          <span aria-hidden>←</span>
+          <Wordmark className="h-3" title="DUB — back to your crates" />
+        </a>
+        <Menu />
+      </header>
+
+      <section>
+        <p className="eyebrow text-muted">THIS DEVICE</p>
+        <h1 className="display mt-3 text-balance text-2xl">
+          {comped ? 'Every crate is open on this device.' : 'You are on the free three.'}
+        </h1>
+        <p className="mt-3 text-sm leading-relaxed text-muted">
+          {comped
+            ? 'A code has been redeemed here. It stays with this device — including if you start again from /reset.'
+            : 'The basics and two crates you pick. If somebody gave you a code, this is where it goes — you do not need an account.'}
+        </p>
+      </section>
+
+      {!comped ? <RedeemCode /> : null}
+
+      <section className="border-t border-line pt-6">
+        <p className="eyebrow text-muted">AN ACCOUNT</p>
+        <p className="mt-3 text-sm leading-relaxed text-muted">
+          Everything you learn lives on this device until you sign in. An account moves it
+          across to another phone.
+        </p>
+        <Link
+          href="/signin"
+          className="tap-target eyebrow mt-3 inline-block rounded-full border border-line px-5 py-3"
+        >
+          SIGN IN
+        </Link>
+      </section>
+    </main>
   )
 }
