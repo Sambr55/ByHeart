@@ -51,7 +51,7 @@ export const MOVES = {
     unlike a streak it never goes down.
   */
   legend: { verb: 'Your Legend', why: 'The minute about yourself you can already do.' },
-  legend_new: { verb: 'Two new Legend cards', why: 'Your last crate opened them. Two minutes each.' },
+  legend_new: { verb: 'Two new Legend cards', why: 'Your last vibe opened them. Two minutes each.' },
   /*
     The rehearsal that actually matters, and the only move here with no preamble.
 
@@ -65,7 +65,7 @@ export const MOVES = {
   drop: { verb: 'Catch the drop', why: 'It expires. Nothing else here does.' },
   line: { verb: 'Take today’s line', why: 'Twenty seconds, and it is different every morning.' },
   resume: { verb: 'Pick up where you stopped', why: 'There is more in this one your stage now reaches.' },
-  open: { verb: 'Open a new crate', why: 'Something else you already carry around with you.' },
+  open: { verb: 'Open a new vibe', why: 'Something else you already carry around with you.' },
   again: { verb: 'Go through one again', why: 'It stays yours, and the second pass is where it sets.' },
   proof: { verb: 'See what you can say', why: 'Only the sentences you produced with nothing to copy from.' },
   library: { verb: 'Look something up', why: 'Every word DUB teaches, and which of them are yours.' },

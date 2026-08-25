@@ -65,8 +65,8 @@ export function Pro() {
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
       <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-3">
-        <Link href="/crates" className="tap-target eyebrow opacity-80 transition hover:opacity-100">
-          ← Crates
+        <Link href="/vibes" className="tap-target eyebrow opacity-80 transition hover:opacity-100">
+          ← Vibes
         </Link>
         <span className="eyebrow flex-1">DUB</span>
         <Menu />
@@ -79,13 +79,13 @@ export function Pro() {
             <p className="mt-3 text-sm leading-relaxed text-muted">
               {access.comped
                 ? 'On the house. Nothing to pay and nothing to manage.'
-                : 'Every crate, every drop, and whatever comes next.'}
+                : 'Every vibe, every drop, and whatever comes next.'}
             </p>
             <Link
-              href="/crates"
+              href="/vibes"
               className="eyebrow mt-6 inline-block text-accent underline underline-offset-4"
             >
-              YOUR CRATES
+              YOUR VIBES
             </Link>
           </div>
         ) : (
@@ -93,15 +93,15 @@ export function Pro() {
             <div>
               <p className="eyebrow text-muted">THE MONEY</p>
               <h1 className="display mt-3 text-balance text-2xl">
-                The whole shelf, and your Legend finished.
+                Every vibe, and your Legend finished.
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-fg/85">
-                Membership opens every crate DUB has written and every one it writes next —
+                Membership opens every vibe DUB has written and every one it writes next —
                 and it carries your Legend the rest of the way, all ten answers, into the
                 Club where it keeps growing. Real Lisbon voices read it back to you.
               </p>
               <p className="mt-3 text-sm leading-relaxed text-muted">
-                Your three free crates stay yours either way, and every drop stays open.
+                Your three free vibes stay yours either way, and every drop stays open.
                 There is no hurry here and there is no countdown — a product built on the
                 argument that deadlines do not produce speakers would look ridiculous
                 inventing one at the till.

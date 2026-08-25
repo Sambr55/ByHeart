@@ -22,14 +22,14 @@ export interface HelpItem {
 export const HELP: HelpItem[] = [
   {
     id: 'dimmed',
-    q: 'Why is a crate dimmed?',
-    a: 'It opens at a stage you have not reached yet. You move up by saying something cold — with nothing on screen to copy from — never by turning up or by waiting. Every dimmed crate says which stage opens it, and nothing is ever locked forever.',
-    link: { href: '/crates', label: 'See where you are' },
+    q: 'Why is a vibe dimmed?',
+    a: 'It opens at a stage you have not reached yet. You move up by saying something cold — with nothing on screen to copy from — never by turning up or by waiting. Every dimmed vibe says which stage opens it, and nothing is ever locked forever.',
+    link: { href: '/vibes', label: 'See where you are' },
   },
   {
     id: 'three',
-    q: 'Why can I only open three crates?',
-    a: 'Three crates is the free tier, and the three you choose stay yours for good — we are never going to take one back. Every live drop is always open on top of that, whatever you are paying, because a drop can be lost by being busy and charging for it would be mean.',
+    q: 'Why can I only open three vibes?',
+    a: 'Three vibes is the free tier, and the three you choose stay yours for good — we are never going to take one back. Every live drop is always open on top of that, whatever you are paying, because a drop can be lost by being busy and charging for it would be mean.',
     link: { href: '/pro', label: 'What DUB adds' },
   },
   {
@@ -70,17 +70,17 @@ export const FEEDBACK_COPY = {
    * A product that says "anonymous" and attaches a device id is lying. So this says
    * exactly what travels with the message, and it is shown rather than buried.
    */
-  attached: 'Sent with this: your stage, the crate you were in, how many pieces you have, and your device — so we can work out what happened without asking you to describe it.',
+  attached: 'Sent with this: your stage, the vibe you were in, how many pieces you have, and your device — so we can work out what happened without asking you to describe it.',
   send: 'SEND IT',
   /** Not "thanks for your feedback", which reads as a black hole. */
   sent_head: 'Got it.',
   sent_body: 'Sam reads all of these, usually the same day. If you left an email you will hear back.',
-  sent_cta: 'BACK TO MY CRATES',
+  sent_cta: 'BACK TO MY VIBES',
 } as const
 
 export const FEEDBACK_WHERE = [
-  'The crates screen',
-  'Inside a crate',
+  'The vibes screen',
+  'Inside a vibe',
   'The word puzzles',
   'The vocab library',
   'The proof card',

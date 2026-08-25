@@ -25,11 +25,11 @@ interface Step {
 
 export const PATH: Step[] = [
   { id: 'basics', label: 'The basics', note: 'Hello, thank you, yes, no, one to ten.' },
-  { id: 'picking', label: 'Two crates you pick', note: 'Anything on the shelf. That is the free three.' },
+  { id: 'picking', label: 'Two vibes you pick', note: 'Any two you like. That is the free three.' },
   { id: 'gate', label: 'Membership', note: 'If you want to carry on.', gate: true },
   // The deal explains the Legend in full just above this, so the map only has to place
   // it. On the shelf, where there is no such block, the label still carries the idea.
-  { id: 'legend', label: 'Your Legend opens', note: CRATES_TO_UNLOCK_LEGEND + ' crates in.' },
+  { id: 'legend', label: 'Your Legend opens', note: CRATES_TO_UNLOCK_LEGEND + ' vibes in.' },
   { id: 'club', label: 'Dub Club', note: 'Where your Legend grows.' },
 ]
 

@@ -61,7 +61,7 @@ export function Legend() {
     The Legend opens on crates done, not on owning specific words.
 
     Every one of the eighteen words it used to depend on was taught in exactly one crate,
-    so "unlock your Legend" quietly meant "play these eight particular crates" — and two
+    so "unlock your Legend" quietly meant "play these eight particular vibes" — and two
     cards hung on a word that only exists inside a drop, and is therefore unobtainable
     for most of the year. Counting crates deletes that whole class of problem instead of
     patching it, and five is more than the free tier allows, so arriving here means
@@ -170,15 +170,15 @@ export function Legend() {
               <p className="text-sm font-semibold">{LEGEND_COPY.locked_head}</p>
               <p className="mt-1 text-xs leading-relaxed text-muted">
                 {toGo === 1
-                  ? 'One more crate and these open.'
-                  : toGo + ' more crates and these open.'}{' '}
+                  ? 'One more vibe and these open.'
+                  : toGo + ' more vibes and these open.'}{' '}
                 {LEGEND_COPY.locked_body}
               </p>
               <Link
-                href="/crates"
+                href="/vibes"
                 className="tap-target eyebrow mt-3 inline-flex items-center text-accent underline underline-offset-4"
               >
-                PICK A CRATE
+                PICK A VIBE
               </Link>
             </div>
             <ul className="flex flex-col gap-1">
@@ -197,8 +197,8 @@ export function Legend() {
           <div className="rounded border border-line bg-bg-elev px-4 py-3">
             <p className="text-sm font-semibold">{LEGEND_COPY.empty_head}</p>
             <p className="mt-1 text-xs leading-relaxed text-muted">{LEGEND_COPY.empty_body}</p>
-            <Link href="/crates" className="tap-target eyebrow mt-3 inline-flex items-center text-accent underline underline-offset-4">
-              OPEN A CRATE
+            <Link href="/vibes" className="tap-target eyebrow mt-3 inline-flex items-center text-accent underline underline-offset-4">
+              OPEN A VIBE
             </Link>
           </div>
         ) : (
@@ -396,7 +396,7 @@ function BuildCard({
               {provenance.map((p) => (
                 <p key={p.piece} className="text-xs leading-relaxed text-fg/85">
                   <span className="pt text-accent">{p.piece}</span> came out of{' '}
-                  {CRATES.find((c) => c.id === p.family)?.title ?? 'another crate'}.
+                  {CRATES.find((c) => c.id === p.family)?.title ?? 'another vibe'}.
                 </p>
               ))}
               <p className="mt-1 text-xs text-muted">

@@ -331,7 +331,7 @@ export const REPAIR_KIT: { pt: string; en: string; why: string; built_from: stri
  * and what they have already answered, this is the set of cards their language now
  * reaches and they have not filled in.
  *
- * The ladder answers "what opens the next crate?" and nothing answered "what is any of
+ * The ladder answers "what opens the next vibe?" and nothing answered "what is any of
  * this FOR". Now crates open Legend cards, and a Legend is a thing a person can picture
  * themselves using — the first goal in DUB that exists outside the app.
  */
@@ -451,7 +451,7 @@ export const LEGEND_COPY = {
    * Two different things were both called unlocked: having the vocabulary for a card,
    * and having done the five crates that make the Legend usable. The session screen used
    * the first and said "2 Legend cards just opened", with a button reading FILL THEM IN
-   * — and the Legend itself then said "one more crate and these open". The product
+   * — and the Legend itself then said "one more vibe and these open". The product
    * contradicted itself one tap apart, and the tap was the reward moment.
    *
    * Banking is the honest word and it is also the better hook: you can see what you have
@@ -459,8 +459,8 @@ export const LEGEND_COPY = {
    */
   banked_one: 'One more Legend card banked.',
   banked_many: 'Legend cards banked.',
-  banked_note_one: 'They open after one more crate.',
-  banked_note_many: 'They open once you have done five crates.',
+  banked_note_one: 'They open after one more vibe.',
+  banked_note_many: 'They open once you have done five vibes.',
   banked_cta: 'SEE WHAT IS WAITING',
   offer_later: 'Not now',
   repair_head: 'The four that keep a conversation going',
@@ -470,8 +470,8 @@ export const LEGEND_COPY = {
   cold_body: 'One question, and a beat of silence. That silence is the thing you are practising.',
   locked_head: 'Ten questions a stranger will ask you.',
   locked_body:
-    'They are not a form — each one is a short lesson built round your own answer, and you keep what it teaches. The crates are where you get the language to build them.',
+    'They are not a form — each one is a short lesson built round your own answer, and you keep what it teaches. The vibes are where you get the language to build them.',
   empty_head: 'Nothing here yet.',
   empty_body:
-    'Your Legend fills up as the crates feed it. Open one and the first cards will be waiting.',
+    'Your Legend fills up as the vibes feed it. Open one and the first cards will be waiting.',
 } as const

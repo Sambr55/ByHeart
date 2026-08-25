@@ -326,9 +326,9 @@ function Library() {
     >
       <header className="bar sticky top-0 z-30 flex flex-col gap-3 px-5 py-3">
         <div className="flex items-center gap-3">
-          <Link href="/crates" className="tap-target flex shrink-0 items-center gap-1 eyebrow opacity-80 transition hover:opacity-100">
+          <Link href="/vibes" className="tap-target flex shrink-0 items-center gap-1 eyebrow opacity-80 transition hover:opacity-100">
             <span aria-hidden>←</span>
-            <Wordmark className="h-3" title="DUB — back to your crates" />
+            <Wordmark className="h-3" title="DUB — back to your vibes" />
           </Link>
           <span className="eyebrow flex-1">Vocab library</span>
           <Menu />
@@ -534,7 +534,7 @@ function Subhead({
     </button>
   )
 
-  if (q && notTaught) return <>Not in the library, in any crate.</>
+  if (q && notTaught) return <>Not in the library, in any vibe.</>
   if (q && taughtElsewhere) return <>Not one of yours yet — {flip} to see where it is taught.</>
   if (q) {
     return (
@@ -544,7 +544,7 @@ function Subhead({
     )
   }
   if (scope === 'mine') {
-    if (!owned) return <>Open a crate and the pieces start arriving · {flip}</>
+    if (!owned) return <>Open a vibe and the pieces start arriving · {flip}</>
     return (
       <>
         <span className="tabular-nums">Your {owned} pieces</span> ·{' '}
@@ -591,7 +591,7 @@ function EmptyMine({ onScope }: { onScope: () => void }) {
       </p>
       <div className="mt-3 flex flex-wrap gap-3">
         <Link
-          href="/crates"
+          href="/vibes"
           className="tap-target eyebrow rounded bg-accent px-4 py-3 text-accent-ink"
         >
           OPEN A CRATE
@@ -852,7 +852,7 @@ function EntryRow({
             </span>
           ) : entry.owned ? (
             <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
-              from {crate?.title ?? 'a crate'}
+              from {crate?.title ?? 'a vibe'}
             </span>
           ) : entry.opensAt ? (
             <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
@@ -864,7 +864,7 @@ function EntryRow({
             </span>
           ) : (
             <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
-              in {crate?.title ?? 'a crate'}
+              in {crate?.title ?? 'a vibe'}
             </span>
           )}
         </span>
@@ -955,13 +955,13 @@ function EntryRow({
 
           {/*
             A dimmed row that names a crate and cannot be acted on is a dead end. The
-            picker's own guard runs on arrival, so a link at a crate above this learner's
+            picker's own guard runs on arrival, so a link at a vibe above this learner's
             stage lands on the picker with that crate saying why — which is honest, and
             needs no extra copy here.
           */}
           {!entry.owned && crate ? (
             <Link
-              href={'/crates?open=' + crate.id}
+              href={'/vibes?open=' + crate.id}
               className="tap-target eyebrow rounded bg-accent px-4 py-3 text-center text-accent-ink"
             >
               {entry.nearly ? 'BACK INTO ' + crate.title.toUpperCase() : 'OPEN ' + crate.title.toUpperCase()}

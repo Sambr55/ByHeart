@@ -842,7 +842,7 @@ function Picker() {
   const rung: Rung = mounted ? rungReached(learner.proof) : 6
   // A crate is finished when every root in it has been played — not, as before, when
   // any single one has. Now that a section only serves the stages you have reached,
-  // "played one root" and "seen the whole crate" are different things.
+  // "played one root" and "seen the whole vibe" are different things.
   const playedIds = useMemo(() => new Set(state.rootsPlayed), [state.rootsPlayed])
   const shown = CRATES.filter((c) => (now ? isLive(c, now) : true))
 
@@ -985,7 +985,7 @@ function Picker() {
 
   return (
     <Shell stage="CHOICE">
-      {/* "Pick a crate you connect with" is a promise about choice, and on the first
+      {/* "Pick a vibe you connect with" is a promise about choice, and on the first
           visit there is exactly one card on the screen. Say the true thing instead. */}
       <h1 className="display text-balance text-2xl">
         {mounted && !basicsStarted ? PICKER.basics_first_headline : PICKER.headline}
@@ -2349,7 +2349,7 @@ function SectionComplete() {
   return (
     <Shell stage="CHOICE">
       <div className="flex flex-1 flex-col justify-center">
-        <p className="eyebrow text-accent">{family ? family.title + ' — DONE' : 'CRATE COMPLETE'}</p>
+        <p className="eyebrow text-accent">{family ? family.title + ' — DONE' : 'VIBE COMPLETE'}</p>
         {/*
           The capability sentence is not here any more.
 
@@ -2359,7 +2359,7 @@ function SectionComplete() {
           is the shelf underneath.
         */}
         <p className="display mt-3 text-balance text-2xl">
-          {family ? 'That is ' + family.title + ' emptied out.' : 'That crate is done.'}
+          {family ? 'That is ' + family.title + ' emptied out.' : 'That vibe is done.'}
         </p>
         {/*
           What you gained in THIS crate, not your whole bank. Showing everything at the
@@ -2373,7 +2373,7 @@ function SectionComplete() {
         {/*
           The payoff, and the only loud place the thread ever speaks.
 
-          The ladder answers "what opens the next crate?" and nothing answered "what is
+          The ladder answers "what opens the next vibe?" and nothing answered "what is
           any of this FOR". This does: a crate just opened cards in a thing the learner
           can picture themselves using, in a room, with a person. It is the first goal in
           DUB that exists outside the app.
@@ -2385,7 +2385,7 @@ function SectionComplete() {
         <LegendPayoff owned={owned} />
         {remaining.length ? (
           <p className="mt-6 text-sm text-muted">
-            {remaining.length} more {remaining.length === 1 ? 'crate' : 'crates'} to raid,
+            {remaining.length} more {remaining.length === 1 ? 'vibe' : 'vibes'} to raid,
             whenever you want them.
           </p>
         ) : null}
@@ -2394,7 +2394,7 @@ function SectionComplete() {
       {remaining.length ? (
         <button
           type="button"
-          data-testid="another-crate"
+          data-testid="another-vibe"
           onClick={() => finishSection('another')}
           className="tap-target eyebrow mt-6 w-full rounded bg-accent px-5 py-3 text-accent-ink"
         >

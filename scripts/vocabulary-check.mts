@@ -73,11 +73,16 @@ const MEDIUM_OK = [
 ]
 
 /*
-  2. One noun for the thing, and it is "crate".
+  2. One noun for the thing, and it is "vibe".
 
-  Every surface says crate — the menu, the header, the route, the badges, the copy. A
-  second noun for one object is a split, and there were two: "area" on a full-width
-  button, and "world" on five screens.
+  It was "crate" for a long time, and crate was a metaphor that had to be explained
+  before it meant anything — a container nobody had seen, carrying an idea nobody had
+  asked for. "Pick your next vibe" needs no gloss at all: it names what the thing
+  actually is, which is a mood you want to be able to speak in.
+
+  The rule itself is unchanged and it is the reason a rename this wide is safe: one noun
+  for one object, checked on every surface. Crate is now a banned synonym exactly as
+  area and world were, so the old word cannot creep back one screen at a time.
 */
 /*
   Copy, not code. `card.worlds`, `worlds:` and `next_world_post` are identifiers — the
@@ -86,10 +91,11 @@ const MEDIUM_OK = [
   followed by a colon or an equals, is a name rather than a sentence.
 */
 const NOUNS: [RegExp, string][] = [
-  [/(?<![\w.])areas?(?![\w]|\s*[:=])/gi, 'crate'],
-  [/(?<![\w.])worlds?(?![\w]|\s*[:=])/gi, 'crate'],
+  [/(?<![\w.])areas?(?![\w]|\s*[:=])/gi, 'vibe'],
+  [/(?<![\w.])worlds?(?![\w]|\s*[:=])/gi, 'vibe'],
+  [/(?<![\w.])crates?(?![\w]|\s*[:=])/gi, 'vibe'],
 ]
-/** "World of wizardry" is a crate's name; "two unrelated worlds" is the collision copy. */
+/** "World of wizardry" is a vibe's name; "two unrelated worlds" is the collision copy. */
 const NOUN_OK = [
   /world of wizardry/i,
   // The compounding claim is genuinely about cultures, not about crates.

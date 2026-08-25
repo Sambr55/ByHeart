@@ -162,7 +162,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
         <div className="flex items-center justify-between gap-3">
           <Link href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-muted">
             <span aria-hidden>←</span>
-            <Wordmark className="h-3" title="DUB — back to your crates" />
+            <Wordmark className="h-3" title="DUB — back to your vibes" />
           </Link>
           <Menu />
         </div>

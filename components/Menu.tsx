@@ -18,7 +18,7 @@ import { useEntitlements } from '@/engine/useEntitlements'
 const ITEMS = [
   { href: '/club', label: 'Dub Club', hint: 'Home, and what is worth doing next' },
   { href: '/legend', label: 'Your Legend', hint: 'The minute about yourself you can already do' },
-  { href: '/crates', label: 'Crates', hint: 'Everything you can open, and what is still dimmed' },
+  { href: '/vibes', label: 'Vibes', hint: 'Everything you can open, and what is still dimmed' },
   { href: '/vocab', label: 'Vocab library', hint: 'Every piece you have kept, by stage' },
   { href: '/drops', label: 'Drops', hint: 'Pegged to something really happening, and expiring' },
   { href: '/line', label: 'Today’s line', hint: 'Twenty seconds, once a day' },

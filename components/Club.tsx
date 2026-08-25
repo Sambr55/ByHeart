@@ -153,8 +153,8 @@ export function Club() {
 
 /** Crates finished, said as a fact about them rather than as a score. */
 function throughLine(n: number): string {
-  if (n === 1) return 'One crate all the way through.'
-  return n + ' crates all the way through.'
+  if (n === 1) return 'One vibe all the way through.'
+  return n + ' vibes all the way through.'
 }
 
 /**
@@ -236,7 +236,7 @@ function Moves({
         key: 'drop',
         ...MOVES.drop,
         detail: drop.title + ' · ' + daysLeft(drop, now) + ' days left',
-        href: '/crates?open=' + drop.id,
+        href: '/vibes?open=' + drop.id,
         crate: drop,
         urgent: true,
       })
@@ -300,7 +300,7 @@ function Moves({
         key: 'resume',
         ...MOVES.resume,
         detail: resume.title + ' · ' + left + (left === 1 ? ' left' : ' left'),
-        href: '/crates?open=' + resume.id,
+        href: '/vibes?open=' + resume.id,
         crate: resume,
       })
     }
@@ -325,7 +325,7 @@ function Moves({
         key: 'open',
         ...MOVES.open,
         detail: fresh.title,
-        href: '/crates?open=' + fresh.id,
+        href: '/vibes?open=' + fresh.id,
         crate: fresh,
       })
     }
@@ -339,7 +339,7 @@ function Moves({
           key: 'again',
           ...MOVES.again,
           detail: first.title,
-          href: '/crates?open=' + first.id,
+          href: '/vibes?open=' + first.id,
           crate: first,
         })
       }

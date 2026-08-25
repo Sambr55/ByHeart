@@ -94,7 +94,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
       <header className="flex items-center justify-between gap-3">
         <a href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-accent">
           <span aria-hidden>←</span>
-          <Wordmark className="h-3" title="DUB — back to your crates" />
+          <Wordmark className="h-3" title="DUB — back to your vibes" />
         </a>
         <a href="/api/auth/logout" className="eyebrow flex-1 text-right text-muted">
           SIGN OUT

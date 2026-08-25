@@ -21,7 +21,7 @@ import { ROOTS } from '../content/roots'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const WIDTHS = [320, 360, 390, 430]
-const ROUTES = ['/club', '/legend', '/reset', '/crates', '/vocab', '/drops', '/line', '/proof', '/pro', '/account', '/waitlist']
+const ROUTES = ['/club', '/legend', '/reset', '/vibes', '/vocab', '/drops', '/line', '/proof', '/pro', '/account', '/waitlist']
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
 
 const problems: string[] = []
@@ -133,7 +133,7 @@ for (const width of WIDTHS) {
   for (let stage = 1; stage <= 6; stage++) {
     const page = await browser.newPage({ viewport: { width, height: 780 } })
     page.setDefaultTimeout(12000)
-    await page.goto(BASE + '/crates', { waitUntil: 'domcontentloaded' })
+    await page.goto(BASE + '/vibes', { waitUntil: 'domcontentloaded' })
     await page.evaluate(
       ([k, seed]) => {
         localStorage.setItem('byheart.pair', JSON.stringify({ source_culture: 'en-GB', target_language: 'pt', target_locale: 'pt-PT', day_zone: 'Europe/Lisbon' }))
@@ -147,6 +147,22 @@ for (const width of WIDTHS) {
       // open every disclosure — a bug hiding inside a closed one still ships
       await page.$$eval('summary', (els) => els.forEach((e) => (e.parentElement as HTMLDetailsElement).setAttribute('open', '')))
       await page.waitForTimeout(200)
+      /*
+        The renamed word, checked where it is actually read.
+
+        vocabulary-check scans quoted strings, so five pieces of JSX TEXT — "PICK A
+        CRATE", "Open a new crate and this…" — survived a rename it reported as complete.
+        Source-shape is the wrong thing to measure when the question is "what does a
+        person see", so this asks the rendered page instead and cannot be fooled by how
+        the string was written.
+      */
+      const stale = await page.evaluate(() => {
+        const t = (document.querySelector('main') ?? document.body).innerText
+        const m = t.match(/[^.!?\n]*\bcrates?\b[^.!?\n]*/i)
+        return m ? m[0].trim().slice(0, 70) : null
+      })
+      if (stale) problems.push(width + ' stage ' + stage + ' ' + route + ' still says crate: "' + stale + '"')
+
       for (const c of await clearance(page)) {
         problems.push(route + ' @' + width + ' stage ' + stage + ' — ' + c)
         console.log('  ' + route.padEnd(11) + '✗ ' + c)

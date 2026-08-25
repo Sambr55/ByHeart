@@ -48,7 +48,7 @@ export function Drops() {
       <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-3">
         <Link href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow opacity-80 transition hover:opacity-100">
           <span aria-hidden>←</span>
-          <Wordmark className="h-3" title="DUB — back to your crates" />
+          <Wordmark className="h-3" title="DUB — back to your vibes" />
         </Link>
         <span className="eyebrow flex-1">Drops</span>
         <Menu />
@@ -58,7 +58,7 @@ export function Drops() {
         <div>
           <h1 className="display text-balance text-2xl">Pegged to something real.</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted">
-            A crate sits there forever. A drop is tied to something actually happening in
+            A vibe sits there forever. A drop is tied to something actually happening in
             Portugal and goes the morning after it. Whatever you learn inside one stays
             yours — the drop disappears, the language does not.
           </p>
@@ -69,7 +69,7 @@ export function Drops() {
             <p className="text-sm font-semibold">Nothing live right now.</p>
             <p className="mt-1 text-xs leading-relaxed text-muted">
               Drops only open a few weeks before the thing they are about, so that a
-              countdown means something when you see one. Your crates are not going
+              countdown means something when you see one. Your vibes are not going
               anywhere in the meantime.
             </p>
           </div>
@@ -129,7 +129,7 @@ export function Drops() {
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <Link
-                  href={"/crates?open=" + c.id}
+                  href={"/vibes?open=" + c.id}
                   className="tap-target eyebrow text-accent underline underline-offset-4"
                 >
                   {/* Into the drop itself. This was href="/" — the one call to action

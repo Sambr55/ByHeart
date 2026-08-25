@@ -67,7 +67,7 @@ async function waysForward(page: Page) {
       if ((el as HTMLButtonElement).disabled) continue
       if (el.getAttribute('aria-disabled') === 'true') continue
       const href = el.getAttribute('href') ?? 'button'
-      if (href === '/crates' || href === '#') continue
+      if (href === '/vibes' || href === '#') continue
       out.push({ href, text: (el.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 40) })
     }
     return out
@@ -88,7 +88,7 @@ console.log('routes out of the shelf, per state\n')
 for (const st of STATES) {
   const page = await browser.newPage({ viewport: { width: 390, height: 780 } })
   page.setDefaultTimeout(12000)
-  await page.goto(BASE + '/crates', { waitUntil: 'domcontentloaded' })
+  await page.goto(BASE + '/vibes', { waitUntil: 'domcontentloaded' })
   await page.evaluate(
     ([k, pair, s]) => {
       localStorage.setItem('byheart.pair', JSON.stringify(pair))
@@ -96,7 +96,7 @@ for (const st of STATES) {
     },
     [KEY, DEFAULT_PAIR, seed(st.crates)] as const,
   )
-  await page.goto(BASE + '/crates', { waitUntil: 'domcontentloaded' })
+  await page.goto(BASE + '/vibes', { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(900)
 
   const ways = await waysForward(page)

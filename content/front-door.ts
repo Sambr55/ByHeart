@@ -43,8 +43,8 @@ export const LANDING = {
     on the first eight words a stranger reads. It is not a prediction. It is already true
     of them, which is the whole point.
 
-    And no product words. "You earn it a crate at a time" put jargon on the first screen,
-    two beats before anything defines it — and it was read as "crate time", which is what
+    And no product words. "You earn it a vibe at a time" put jargon on the first screen,
+    two beats before anything defines it — and it was read as "vibe time", which is what
     undefined jargon always gets you. The deal introduces the word later, with an example
     attached.
   */
@@ -143,7 +143,7 @@ export const PAIR_STEP = {
    * mandatory second question with exactly one available answer is a tax, not a choice.
    */
   source_note:
-    'Which crates you get depends on the culture you already carry, not the language you speak — Top Gun and Bridget Jones work because of shared anglophone media. Other cultures need their own crate libraries, and those are not built yet.',
+    'Which vibes you get depends on the culture you already carry, not the language you speak — Top Gun and Bridget Jones work because of shared anglophone media. Other cultures need their own vibe libraries, and those are not built yet.',
   cta: 'LET’S GO',
   after: 'Let’s find your Portuguese.',
 } as const
@@ -207,7 +207,7 @@ export const DEAL = {
       { pt: 'Porquê Portugal?', en: 'Why Portugal?' },
     ],
     more: 'Ten in all.',
-    close: 'You build it a piece at a time, out of language you already own — so the answers come out in your own Portuguese rather than a phrase you memorised. It opens five crates in.',
+    close: 'You build it a piece at a time, out of language you already own — so the answers come out in your own Portuguese rather than a phrase you memorised. It opens five vibes in.',
   },
 
   /**
@@ -221,7 +221,7 @@ export const DEAL = {
    */
   path: {
     label: 'WHERE IT GOES',
-    note: 'You never lose a crate, and nothing expires if you disappear for a month.',
+    note: 'You never lose a vibe, and nothing expires if you disappear for a month.',
   },
   collect: {
     label: 'WHAT YOU KEEP',
@@ -255,14 +255,14 @@ export const DEAL = {
 /** §08 / §09 — the first meaningful learner choice, and it comes after the demo. */
 export const PICKER = {
   /*
-    "Crate", not "area".
+    "Vibe", not "area".
 
     The spec offered either and asked for the call. Every other surface in the product
     already says crate — the menu, the header, the route, the badges — so introducing a
     second noun for the same object here would be a split, and the headline is the one
     place a reader meets the word with something to point at.
   */
-  headline: 'Pick a crate you connect with.',
+  headline: 'Pick a vibe you connect with.',
   /** One line, not a banner, and only once the Legend is a thing they have. */
   feeds_legend: 'Everything in here feeds your Legend.',
   /*
@@ -278,7 +278,7 @@ export const PICKER = {
   basics_first_headline: 'Start here.',
   basics_first_head: 'The basics come first.',
   basics_first_sub:
-    'One session, built out of things you have heard a hundred times: hello, please, thank you, yes, no, and counting to ten. Then the whole shelf is yours to pick from.',
+    'One session, built out of things you have heard a hundred times: hello, please, thank you, yes, no, and counting to ten. Then every vibe is yours to pick from.',
   /*
     The sub is gone.
 
@@ -328,7 +328,7 @@ export const PICKER = {
   // A whole sentence now. It used to stop mid-clause — "...making progress and " — and
   // be finished by a link underneath the card, so anybody who did not notice the link
   // read a truncated sentence and nothing else.
-  join_up: 'Your three free crates are already chosen. Tap to see what membership opens.',
+  join_up: 'Your three free vibes are already chosen. Tap to see what membership opens.',
   /**
    * Shown only when a drop is actually live. The distinction is worth one sentence and
    * not a paragraph — and the last clause is the promise that stops a drop feeling like
@@ -345,7 +345,7 @@ export const PICKER = {
    * Said once, quietly, under the list. Not a banner and not a countdown — the three
    * crates are a real product, and somebody a fortnight in has not run out of anything.
    */
-  plan_note: 'Three crates are yours for good, and every drop is always open.',
+  plan_note: 'Three vibes are yours for good, and every drop is always open.',
   plan_cta: 'What DUB adds',
   cta: 'START HERE',
 } as const
@@ -550,7 +550,7 @@ export const CLOSE = {
  */
 export const GATEWAY = {
   eyebrow: 'THAT IS THE FREE THREE',
-  headline: 'Basics and two crates. That is the free part done.',
+  headline: 'Basics and two vibes. That is the free part done.',
   // The picture above it already says where this goes. Repeating it in prose was the
   // longest sentence on the screen and taught nobody anything.
   body: 'Everything you kept stays yours, whatever you decide.',

@@ -37,16 +37,16 @@ export function RedeemCode() {
         ok: body.ok,
         message: body.ok
           ? body.until
-            ? 'Done — every crate is open until ' +
+            ? 'Done — every vibe is open until ' +
               new Date(body.until).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) +
               '.'
-            : 'Done — every crate is open.'
+            : 'Done — every vibe is open.'
           : body.reason ?? 'That did not work.',
       })
       // The picker asks for entitlements once, on mount, so a redeemed code changes
       // nothing on screen until something reloads. Telling somebody to reload is a
       // worse product than reloading.
-      if (body.ok) setTimeout(() => window.location.assign('/crates'), 1400)
+      if (body.ok) setTimeout(() => window.location.assign('/vibes'), 1400)
     } catch {
       setState({ ok: false, message: 'That did not work.' })
     }

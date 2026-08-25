@@ -74,7 +74,7 @@ export function Line({ pushReady }: { pushReady: boolean }) {
       <div className="flex items-center justify-between gap-3">
         <Link href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-muted">
           <span aria-hidden>←</span>
-          <Wordmark className="h-3" title="DUB — back to your crates" />
+          <Wordmark className="h-3" title="DUB — back to your vibes" />
         </Link>
         <span className="eyebrow flex-1 text-muted">TODAY</span>
         <Menu />
@@ -88,7 +88,7 @@ export function Line({ pushReady }: { pushReady: boolean }) {
         <div className="flex flex-1 flex-col justify-center gap-3">
           <p className="display text-balance text-3xl">You have had all of them.</p>
           <p className="text-sm text-muted">
-            Every sentence DUB knows has been through here. Open a new crate and this
+            Every sentence DUB knows has been through here. Open a new vibe and this
             starts again.
           </p>
         </div>
@@ -151,7 +151,7 @@ export function Line({ pushReady }: { pushReady: boolean }) {
         href="/"
         className="tap-target block text-center text-xs text-muted underline underline-offset-4"
       >
-        Got ten minutes? Open a crate.
+        Got ten minutes? Open a vibe.
       </Link>
     </main>
   )

@@ -119,9 +119,9 @@ export const PLANS = {
     id: 'free' as const,
     name: 'DUB',
     price: null,
-    line: 'Your Legend, three crates, a line every morning, and everything you make is yours to share.',
+    line: 'Your Legend, three vibes, a line every morning, and everything you make is yours to share.',
     includes: [
-      'Three crates, chosen by you and yours for good',
+      'Three vibes, chosen by you and yours for good',
       'The morning line, every day',
       'Every live drop, always — those are never gated',
       'Share anything you can say',
@@ -131,9 +131,9 @@ export const PLANS = {
     id: 'pro' as const,
     name: 'DUB Pro',
     price: null, // filled from Stripe at render time
-    line: 'The whole shelf, your whole Legend, and the voices to go with them.',
+    line: 'Every vibe, your whole Legend, and the voices to go with them.',
     includes: [
-      'Every crate, no limit — and every crate DUB writes from now on',
+      'Every vibe, no limit — and every vibe DUB writes from now on',
       'Your Legend all the way to ten, and the Club where it keeps growing',
       'Real Lisbon voices, recorded properly — including your own Legend, read back',
       'The morning line and every live drop, same as free',

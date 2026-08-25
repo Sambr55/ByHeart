@@ -48,12 +48,12 @@ async function main() {
   // The no-bypass rule: /crates with nothing stored must land on the deal, never the
   // picker. Checked before the walk so a regression here fails loudly rather than
   // showing up as a confusing step count later.
-  await page.goto(BASE + '/crates', { waitUntil: 'networkidle' })
+  await page.goto(BASE + '/vibes', { waitUntil: 'networkidle' })
   await page.evaluate(() => localStorage.clear())
   await page.reload({ waitUntil: 'networkidle' })
   await page.waitForTimeout(700)
   const gated = await page.evaluate(() => document.body.innerText)
-  if (/Pick a crate/.test(gated)) problems.push('/crates bypassed the front door with cleared storage')
+  if (/Pick a vibe/.test(gated)) problems.push('/crates bypassed the front door with cleared storage')
   if (!/Where do you want DUB to take you/.test(gated)) {
     problems.push('/crates with cleared storage did not land on the language choice')
   }

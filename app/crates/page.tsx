@@ -1,25 +1,13 @@
-'use client'
-
-import { Suspense } from 'react'
-import { Journey } from '@/components/Journey'
-import { JourneyProvider } from '@/engine/journey'
+import { redirect } from 'next/navigation'
 
 /**
- * The picker, addressable.
+ * The old address for the shelf.
  *
- * The menu, a bookmark and the back button all want somewhere to point that means
- * "my crates" rather than "start DUB from the beginning". Guarded rather than open:
- * arriving here without having accepted the deal lands on the deal, not the picker.
- *
- * Suspended because the picker reads ?open= — the library links straight at a crate,
- * and useSearchParams needs a boundary or the whole route opts out of static rendering.
+ * "Crate" was the product's word for a long time, so it is in testers' open tabs, in
+ * bookmarks, and in every link that has already been sent to somebody. Renaming the
+ * route without this would have broken all of them at once, for a change that is only
+ * about a word — and a 404 is a much worse thing to hand a tester than an old noun.
  */
-export default function CratesPage() {
-  return (
-    <Suspense fallback={null}>
-      <JourneyProvider enter="crates">
-        <Journey />
-      </JourneyProvider>
-    </Suspense>
-  )
+export default function CratesRedirect() {
+  redirect('/vibes')
 }
