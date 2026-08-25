@@ -4,12 +4,14 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES } from '@/content/roots'
 import {
+  CRATES_TO_UNLOCK_LEGEND,
   LEGEND_COPY,
   LEGEND_FRAMES,
   REPAIR_KIT,
+  cratesToGo,
   fillFrame,
-  framesReachable,
   isAnswered,
+  legendUnlocked,
   provenanceOf,
   type LegendFrame,
 } from '@/content/legend'
@@ -55,7 +57,23 @@ export function Legend() {
   )
   const answers = learner.legend ?? []
   const valuesFor = (id: string) => answers.find((a) => a.frame_id === id)?.values
-  const reachable = useMemo(() => (mounted ? framesReachable(owned) : []), [owned, mounted])
+  /*
+    The Legend opens on crates done, not on owning specific words.
+
+    Every one of the eighteen words it used to depend on was taught in exactly one crate,
+    so "unlock your Legend" quietly meant "play these eight particular crates" — and two
+    cards hung on a word that only exists inside a drop, and is therefore unobtainable
+    for most of the year. Counting crates deletes that whole class of problem instead of
+    patching it, and five is more than the free tier allows, so arriving here means
+    somebody decided DUB was worth paying for.
+
+    Every card is then open at once. The words are not a precondition any more; building
+    a card teaches them.
+  */
+  const done = learner.sections_completed ?? []
+  const unlocked = mounted && legendUnlocked(done)
+  const toGo = cratesToGo(done)
+  const reachable = useMemo(() => (mounted && unlocked ? LEGEND_FRAMES : []), [mounted, unlocked])
   const answered = useMemo(
     () => LEGEND_FRAMES.filter((f) => isAnswered(f, valuesFor(f.id))),
     [answers],
@@ -69,6 +87,7 @@ export function Legend() {
           frame={frame}
           values={valuesFor(frame.id) ?? {}}
           gender={learner.profile?.gender ?? null}
+          owned={owned}
           onDone={() => setMode('deck')}
         />
       </Shell>
@@ -138,7 +157,43 @@ export function Legend() {
           <h2 className="eyebrow min-w-0 text-accent">THE CARDS</h2>
           <span className="h-px flex-1 bg-line" />
         </div>
-        {!mounted ? null : !reachable.length && !answered.length ? (
+        {!mounted ? null : !unlocked ? (
+          /*
+            Locked, and showing exactly what is behind it.
+
+            The questions are real and a stranger will ask them. Seeing "Tens filhos?"
+            and knowing you cannot yet answer it is the hook — a count of banked blocks
+            would be an abstraction of the same thing and a weaker one.
+          */
+          <div className="flex flex-col gap-3">
+            <div className="rounded border border-line-strong bg-bg-elev px-4 py-3">
+              <p className="text-sm font-semibold">{LEGEND_COPY.locked_head}</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted">
+                {toGo === 1
+                  ? 'One more crate and these open.'
+                  : toGo + ' more crates and these open.'}{' '}
+                {LEGEND_COPY.locked_body}
+              </p>
+              <Link
+                href="/crates"
+                className="eyebrow mt-3 inline-block text-accent underline underline-offset-4"
+              >
+                PICK A CRATE
+              </Link>
+            </div>
+            <ul className="flex flex-col gap-1">
+              {LEGEND_FRAMES.map((f) => (
+                <li
+                  key={f.id}
+                  className="flex flex-col gap-1 rounded border border-dashed border-line px-4 py-3"
+                >
+                  <span className="pt text-sm text-muted">{f.ask}</span>
+                  <span className="text-xs text-muted">{f.ask_en}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : !reachable.length && !answered.length ? (
           <div className="rounded border border-line bg-bg-elev px-4 py-3">
             <p className="text-sm font-semibold">{LEGEND_COPY.empty_head}</p>
             <p className="mt-1 text-xs leading-relaxed text-muted">{LEGEND_COPY.empty_body}</p>
@@ -275,11 +330,13 @@ function BuildCard({
   frame,
   values,
   gender,
+  owned,
   onDone,
 }: {
   frame: LegendFrame
   values: Record<string, string>
   gender: 'm' | 'f' | null
+  owned: string[]
   onDone: () => void
 }) {
   const [draft, setDraft] = useState<Record<string, string>>(values)
@@ -287,6 +344,13 @@ function BuildCard({
   const filled = frame.slots.every((s) => draft[s.key]?.trim())
   const sentence = fillFrame(frame, draft, gender)
   const provenance = provenanceOf(frame)
+  /*
+    Did they already have these words, or is this card handing them over?
+
+    Both are fine and the line says which. Requiring the first was the old gate, and it
+    is what made two cards permanently unreachable.
+  */
+  const allOwned = frame.built_from.every((p) => owned.includes(p))
 
   return (
     <div className="flex flex-1 flex-col gap-6">
@@ -304,11 +368,25 @@ function BuildCard({
       {beat === 'ask' ? (
         <>
           <div className="flex flex-col gap-3">
-            <p className="eyebrow text-muted">YOU HAVE</p>
+            <p className="eyebrow text-muted">THE PATTERN</p>
             <p className="pt text-balance text-lg">
               {frame.frame.replace(/\{(\w+)\}/g, '___')}
             </p>
             <p className="text-xs text-muted">{frame.en.replace(/\{(\w+)\}/g, '___')}</p>
+          </div>
+
+          {/*
+            THE LESSON, and it is why this is not a form.
+
+            The card used to require you to own the words before it would open, which
+            made it two text inputs and a set of chips. Now it teaches — and the moment
+            you need to say how old you are is exactly the right moment to learn that
+            Portuguese HAS an age rather than being one. Written like a semantic bridge,
+            because that is what it is.
+          */}
+          <div className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+            <p className="eyebrow text-accent">WHY IT LANDS</p>
+            <p className="text-sm leading-relaxed">{frame.teaches}</p>
           </div>
 
           {/* The delightful beat, and it costs nothing to generate. */}
@@ -321,7 +399,11 @@ function BuildCard({
                   {CRATES.find((c) => c.id === p.family)?.title ?? 'another crate'}.
                 </p>
               ))}
-              <p className="mt-1 text-xs text-muted">None of it was ever about you.</p>
+              <p className="mt-1 text-xs text-muted">
+                {allOwned
+                  ? 'None of it was ever about you.'
+                  : 'Some of that is new — it is yours now either way.'}
+              </p>
             </div>
           ) : null}
 

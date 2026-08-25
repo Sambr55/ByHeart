@@ -47,6 +47,18 @@ function returning(s: LearnerState): boolean {
   )
 }
 
+/**
+ * Has the Legend actually been built?
+ *
+ * Not "unlocked" — built. Dub Club is where a Legend GROWS, so arriving there with an
+ * empty one would be arriving at a room with nothing in it. Half the cards is the test:
+ * enough that the thing exists and is worth returning to, short of demanding all ten
+ * before anybody sees the room.
+ */
+function legendBuilt(s: LearnerState): boolean {
+  return (s.legend ?? []).filter((a) => Object.keys(a.values).length > 0).length >= 5
+}
+
 export default function Page() {
   const router = useRouter()
   const [leaving, setLeaving] = useState(false)
@@ -55,9 +67,18 @@ export default function Page() {
     // No pair chosen is a front-door problem, and the pair decides which learner record
     // even gets read — so it is checked first, exactly as the deal gate does it.
     if (!chosenPair()) return
-    if (!returning(loadLearner())) return
+    const learner = loadLearner()
+    if (!returning(learner)) return
     setLeaving(true)
-    router.replace('/club')
+    /*
+      Two homes, and which one you get says where you are in the game.
+
+      Dub Club is the graduation — it opens when the Legend is built, and it is where the
+      Legend grows. Before that the picker is home, because the picker is where the work
+      is: crates are how you earn the Legend. Sending a mid-game learner to a Club they
+      have not reached would be the same mistake as sending them to the front door.
+    */
+    router.replace(legendBuilt(learner) ? '/club' : '/crates')
   }, [router])
 
   // Deliberately blank for the one frame between deciding and arriving. A returning

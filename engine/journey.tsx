@@ -671,15 +671,22 @@ export function JourneyProvider({
     (decision: 'another' | 'done') => {
       track('section_decision', { decision, roots: state.rootsPlayed.length })
       void syncSession('section_' + decision)
+      /*
+        The section is finished either way. The decision is only about what happens next.
+
+        This used to record it on the "I'm done" path alone, which was harmless while
+        nothing depended on it — and became a deadlock the moment the shelf opened on a
+        completed basics section. A learner who finished the basics and tapped ANOTHER
+        CRATE had, as far as the record was concerned, finished nothing, so every other
+        crate stayed shut and the only button that could free them was the one they had
+        not pressed.
+      */
+      if (state.family) rememberSection(state.family)
       if (decision === 'another') {
         const picker = state.steps.findIndex((s) => s.kind === 'picker')
         dispatch({ type: 'goto', index: picker < 0 ? 0 : picker })
         return
       }
-      // The Club opens on a section carried all the way to the end, which is the only
-      // membership test there is — so this is the moment it is recorded, and it is
-      // recorded against the learner rather than the tab.
-      if (state.family) rememberSection(state.family)
       const steps: Step[] = []
       const collision = availableCollision(state.rootsPlayed, state.collisionsPlayed)
       if (collision) steps.push({ kind: 'collision', collisionId: collision.id })

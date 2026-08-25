@@ -142,8 +142,14 @@ async function main() {
   await press(page.getByTestId('continue'), 'accept the deal')
 
   const b2 = await page.evaluate(() => document.body.innerText)
-  // Read from the copy rather than restated here, so the next rewrite moves both.
-  if (!b2.includes(PICKER.headline)) problems.push('picker headline wrong')
+  /*
+    Read from the copy rather than restated here, and BOTH headlines are legitimate: the
+    picker says "start here" while the basics doorway is shut and "pick a crate you
+    connect with" once there is something to pick between.
+  */
+  if (!b2.includes(PICKER.headline) && !b2.includes(PICKER.basics_first_headline)) {
+    problems.push('picker headline wrong')
+  }
   // The silent five-tier sort is labelled now, and the labels are the feature.
   if (!/OPEN NOW/i.test(b2)) problems.push('the crates screen no longer labels its groups')
   if (/WHAT DO YOU ALREADY KNOW BY HEART/.test(b2)) problems.push('free-text screen still present')
@@ -155,6 +161,40 @@ async function main() {
   }
   for (const f of CRATES.filter((c) => !isLive(c))) {
     if (b2.includes(f.title)) problems.push('expired drop still in the picker: ' + f.title)
+  }
+
+  /*
+    THE DOORWAY, asserted before the smoke walks past it.
+
+    A brand-new learner can open exactly one crate: the basics. Five of the eleven have
+    nothing at rung 1 at all, so picking Marcus Aurelius first meant meeting rung-2 Stoic
+    philosophy before you could say hello.
+
+    Checked here rather than assumed, and then stepped over — recording one finished
+    basics section, which is what the doorway actually asks for — so the rest of this
+    walk can exercise whichever crate it was told to.
+  */
+  {
+    const basics = CRATES.find((c) => c.id === 'the_basics')!
+    const others = live.filter((c) => c.id !== 'the_basics' && !c.drop)
+    const openNow = b2.split('OPENS AS YOU GO')[0] ?? ''
+    if (!openNow.includes(basics.title)) {
+      problems.push('a new learner cannot open the basics, which is the only thing they can open')
+    }
+    for (const c of others) {
+      if (openNow.includes(c.title)) {
+        problems.push(c.title + ' is open to a brand-new learner — the basics doorway is not holding')
+      }
+    }
+    if (family !== 'the_basics') {
+      await page.evaluate((k) => {
+        const raw = JSON.parse(localStorage.getItem(k) ?? '{}')
+        raw.sections_completed = [...new Set([...(raw.sections_completed ?? []), 'the_basics'])]
+        localStorage.setItem(k, JSON.stringify(raw))
+      }, 'byheart.learner.v1:' + pairId(DEFAULT_PAIR))
+      await page.reload({ waitUntil: 'domcontentloaded' })
+      await page.waitForTimeout(600)
+    }
   }
 
   // Anything at rung 1 is open from the start, whatever the learner has done since.

@@ -20,7 +20,7 @@ import { CLUB, MOVES } from '@/content/club'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
-import { LEGEND_FRAMES, framesUnlockedBy } from '@/content/legend'
+import { LEGEND_FRAMES, framesUnlockedBy, legendUnlocked } from '@/content/legend'
 import { capabilities } from '@/engine/journey'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { track } from '@/engine/analytics'
@@ -138,6 +138,7 @@ export function Club() {
             .filter((a) => Object.keys(a.values).length > 0)
             .map((a) => a.frame_id),
           legendPrompt: learner.legend_prompt ?? 'unseen',
+          legendUnlocked: legendUnlocked(learner.sections_completed ?? []),
           capped,
           claimed,
         }}
@@ -217,6 +218,7 @@ function Moves({
     ownedPieces: string[]
     legendAnswered: string[]
     legendPrompt: LearnerState['legend_prompt']
+    legendUnlocked: boolean
     /** The picker's own allowance rule, so the two screens cannot disagree. */
     capped: boolean
     claimed: Set<CultureFamily>
@@ -248,7 +250,7 @@ function Moves({
     thread's payoff: "6 of 10 · two new cards opened in Pulp Fiction" is a sentence about
     what a crate was FOR. It never appears to somebody who declined it.
   */
-  if (mounted && learner.legendPrompt !== 'declined') {
+  if (mounted && learner.legendPrompt !== 'declined' && learner.legendUnlocked) {
     const total = LEGEND_FRAMES.length
     const fresh = framesUnlockedBy(learner.ownedPieces, learner.legendAnswered)
     const done = learner.legendAnswered.length

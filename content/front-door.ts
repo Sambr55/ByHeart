@@ -31,8 +31,8 @@ export const LANDING = {
   lines: [
     'You will understand far more than you can say.\nEverybody does. That is the wall.',
     'DUB starts on the other side of it.',
-    'First you build your Legend — the minute about yourself you can say without thinking. Who you are. Where you are from. Why you are here.',
-    'Then, with that in the bank, everything else has somewhere to go.',
+    'What you are working towards is your Legend — the minute about yourself you can say without thinking. Who you are. Where you are from. Why you are here.',
+    'You earn it a crate at a time, and then you build it, and then everything else has somewhere to go.',
     // Language-neutral on purpose: the brand layer describes the method, and the
     // method is not about Portuguese. The personal experience becomes specific the
     // moment a pair is chosen, one screen later.
@@ -185,7 +185,7 @@ export const DEAL = {
     label: 'WHAT YOU GET',
     lines: [
       // First, because it is the concrete version of the line under it.
-      'Your Legend — the minute about yourself, ready to go.',
+      'Your Legend — the minute about yourself, earned a crate at a time.',
       'Sentences you can say cold, to a real person, without rehearsing first.',
       'Counted honestly — the number only moves when there are no clues on screen.',
       'And the grammar underneath, without ever sitting through a grammar lesson.',
@@ -212,6 +212,20 @@ export const PICKER = {
   headline: 'Pick a crate you connect with.',
   /** One line, not a banner, and only once the Legend is a thing they have. */
   feeds_legend: 'Everything in here feeds your Legend.',
+  /*
+    Why the rest of the shelf is dimmed on somebody's first visit.
+
+    Five of the eleven crates have nothing at rung 1, so picking one of those first hands
+    a beginner rung-2 or rung-6 content before they can say hello. The basics is the
+    doorway rather than a tax: one section, then everything opens.
+  */
+  basics_first: 'Opens once you have been through a section of the basics — everything here assumes you can already say hello.',
+  /** Shown above the list while that is still true. */
+  /** The headline before there is anything to pick between. */
+  basics_first_headline: 'Start here.',
+  basics_first_head: 'The basics come first.',
+  basics_first_sub:
+    'One session, built out of things you have heard a hundred times: hello, please, thank you, yes, no, and counting to ten. Then the whole shelf is yours to pick from.',
   /*
     The sub is gone.
 

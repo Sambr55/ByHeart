@@ -181,7 +181,6 @@ export const SETS: WordSet[] = [
     label: 'Counting to ten',
     shelf: 'how_much',
     members: ['um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez'],
-    partial: true,
   },
   {
     id: 'greetings',
@@ -410,8 +409,16 @@ export interface Crate {
 export const CRATES: Crate[] = [
   {
     id: 'the_basics',
-    title: 'The basics, properly',
-    blurb: 'Hello, please, thank you, yes, no — out of songs you already know.',
+    /*
+      Named for what it teaches, not for where it comes from.
+
+      "Song and Movie Titles" was the other candidate and it describes half the shelf —
+      Top Gun, Bond, Pulp Fiction and Bridget Jones are all film titles, Duran Duran is
+      songs. What actually distinguishes this crate is that it is the fundamentals, so
+      that is what the name says, with the source as the reassurance underneath.
+    */
+    title: 'The basics, in songs you know',
+    blurb: 'Hello, thank you, yes, no and counting to ten — out of records you have heard a hundred times.',
     tone: 'reflective',
     built: true,
     opens_at: 1,
@@ -3883,72 +3890,6 @@ export const WIZARDRY: Root[] = [
 */
 export const THE_BASICS: Root[] = [
   q({
-    root_id: 'tb_patience',
-    culture_family: 'the_basics',
-    rung: 1,
-    root_type: 'other',
-    source_label: 'The sentence that keeps a conversation in Portuguese',
-    source_status: 'paraphrased',
-    root_display: 'Bear with me — I am learning.',
-    source: 'I am learning. Bear with me.',
-    target: 'Estou a aprender. Tenha paciência.',
-    semantic_bridge:
-      'Said early, this changes the whole encounter. The other person slows down, drops to simpler Portuguese, and — the part that matters — stays in Portuguese instead of switching to English to be kind. It is the highest-leverage sentence a beginner owns, and almost nobody is taught it.',
-    subtext: 'Honest, and disarming.',
-    extracts: [
-      { id: 'aprender', target: 'estou a aprender', gloss: 'I am learning', shelf: 'doing', note: 'European Portuguese builds the ongoing sense with estou a + the verb. Brazil says estou aprendendo; here it is estou a aprender.' },
-      { id: 'paciencia', target: 'paciência', gloss: 'patience', shelf: 'just_say' },
-    ],
-    branches: [
-      { target: 'Estou a aprender português.', en: 'I am learning Portuguese.', demonstrates: ['aprender'] },
-      { target: 'Tenha paciência, por favor.', en: 'Bear with me, please.', demonstrates: ['paciencia'] },
-      { target: 'Falo pouco, mas estou a tentar.', en: 'I speak little, but I am trying.', demonstrates: ['aprender'] },
-    ],
-    reinforces: ['por_favor', 'nao_percebi'],
-    helpers: { 'Tenha': 'have', 'português': 'Portuguese', 'Falo': 'I speak', 'pouco': 'little', 'mas': 'but', 'tentar': 'to try' },
-    transfer_prompt: {
-      context: 'They have started speaking at full speed and you want them to keep going anyway.',
-      ask: 'Bear with me, please.',
-      answer: 'Tenha paciência, por favor.',
-    },
-    rights_status: 'dub-authored',
-    starter_tags: ['repair', 'first-day'],
-    next_root_hooks: ['porque'],
-  }),
-  q({
-    root_id: 'tb_why',
-    culture_family: 'the_basics',
-    rung: 2,
-    root_type: 'title',
-    source_label: 'Why Do Fools Fall in Love',
-    source_status: 'verified',
-    root_display: 'Why Do Fools Fall in Love',
-    source: 'Why? Because I want to.',
-    target: 'Porquê? Porque quero.',
-    semantic_bridge:
-      'Two spellings, one word, and the accent is the whole difference: porquê with the accent is the question on its own, porque without it starts the answer. Getting this right is a small thing that makes writing look native, and getting it wrong is the most common slip Portuguese people themselves make.',
-    subtext: 'Asked, and answered flatly.',
-    extracts: [
-      { id: 'porque', target: 'porque', gloss: 'because', shelf: 'small_words', note: 'Porquê? with the accent asks. Porque without it answers. Two words, one sound.' },
-      { id: 'ainda', target: 'ainda', gloss: 'still / yet', shelf: 'when' },
-    ],
-    branches: [
-      { target: 'Porque quero.', en: 'Because I want to.', demonstrates: ['porque'] },
-      { target: 'Ainda estou a aprender.', en: 'I am still learning.', demonstrates: ['ainda'] },
-      { target: 'Porque ainda não percebi.', en: 'Because I still did not catch it.', demonstrates: ['porque', 'ainda'] },
-    ],
-    reinforces: ['quero', 'aprender', 'nao_percebi'],
-    helpers: { 'Porquê': 'why', 'quero': 'I want', 'estou a aprender': 'I am learning', 'não': 'not' },
-    transfer_prompt: {
-      context: 'They have asked why Portugal, and you are not going to explain the whole thing.',
-      ask: 'Because I want to.',
-      answer: 'Porque quero.',
-    },
-    rights_status: 'title-reference',
-    starter_tags: ['about-me'],
-    next_root_hooks: ['sou'],
-  }),
-  q({
     root_id: 'tb_hello_goodbye',
     culture_family: 'the_basics',
     rung: 1,
@@ -4086,6 +4027,171 @@ export const THE_BASICS: Root[] = [
     next_root_hooks: ['ola'],
   }),
   q({
+    root_id: 'tb_patience',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The sentence that keeps a conversation in Portuguese',
+    source_status: 'paraphrased',
+    root_display: 'Bear with me — I am learning.',
+    source: 'I am learning. Bear with me.',
+    target: 'Estou a aprender. Tenha paciência.',
+    semantic_bridge:
+      'Said early, this changes the whole encounter. The other person slows down, drops to simpler Portuguese, and — the part that matters — stays in Portuguese instead of switching to English to be kind. It is the highest-leverage sentence a beginner owns, and almost nobody is taught it.',
+    subtext: 'Honest, and disarming.',
+    extracts: [
+      { id: 'aprender', target: 'estou a aprender', gloss: 'I am learning', shelf: 'doing', note: 'European Portuguese builds the ongoing sense with estou a + the verb. Brazil says estou aprendendo; here it is estou a aprender.' },
+      { id: 'paciencia', target: 'paciência', gloss: 'patience', shelf: 'just_say' },
+    ],
+    branches: [
+      { target: 'Estou a aprender português.', en: 'I am learning Portuguese.', demonstrates: ['aprender'] },
+      { target: 'Tenha paciência, por favor.', en: 'Bear with me, please.', demonstrates: ['paciencia'] },
+      { target: 'Falo pouco, mas estou a tentar.', en: 'I speak little, but I am trying.', demonstrates: ['aprender'] },
+    ],
+    reinforces: ['por_favor', 'nao_percebi'],
+    helpers: { 'Tenha': 'have', 'português': 'Portuguese', 'Falo': 'I speak', 'pouco': 'little', 'mas': 'but', 'tentar': 'to try' },
+    transfer_prompt: {
+      context: 'They have started speaking at full speed and you want them to keep going anyway.',
+      ask: 'Bear with me, please.',
+      answer: 'Tenha paciência, por favor.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['repair', 'first-day'],
+    next_root_hooks: ['porque'],
+  }),
+  q({
+    root_id: 'tb_1234',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: '1234 — Feist',
+    source_status: 'verified',
+    root_display: '1, 2, 3, 4',
+    source: 'One, two, three, four.',
+    target: 'Um, dois, três, quatro.',
+    semantic_bridge:
+      'A song whose whole hook is counting, which makes it the cheapest four words you will ever learn. Um does double duty — it is the number one AND the word for "a", so um café is both a coffee and one coffee, and Portuguese never bothers to separate them.',
+    subtext: 'Counted out, cheerfully.',
+    extracts: [
+      { id: 'um', target: 'um', gloss: 'one / a', shelf: 'how_much', set: 'numbers_1_10', note: 'Also the word for "a". Um café is one coffee and a coffee at the same time.' },
+      { id: 'dois', target: 'dois', gloss: 'two', shelf: 'how_much', set: 'numbers_1_10' },
+      { id: 'quatro', target: 'quatro', gloss: 'four', shelf: 'how_much', set: 'numbers_1_10' },
+    ],
+    branches: [
+      { target: 'Um café, por favor.', en: 'One coffee, please.', demonstrates: ['um'] },
+      { target: 'Dois cafés, por favor.', en: 'Two coffees, please.', demonstrates: ['dois'] },
+      { target: 'Quatro dias.', en: 'Four days.', demonstrates: ['quatro'] },
+    ],
+    reinforces: ['tres', 'por_favor'],
+    helpers: { 'três': 'three', 'café': 'coffee', 'cafés': 'coffees', 'por favor': 'please', 'dias': 'days' },
+    transfer_prompt: {
+      context: 'Two of you at the counter and it is your round.',
+      ask: 'Two coffees, please.',
+      answer: 'Dois cafés, por favor.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers', 'first-day'],
+    next_root_hooks: ['seis'],
+  }),
+  q({
+    root_id: 'tb_six_seven',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Six Days, Seven Nights',
+    source_status: 'verified',
+    root_display: 'Six Days, Seven Nights',
+    source: 'Six days, seven nights.',
+    target: 'Seis dias, sete noites.',
+    semantic_bridge:
+      'The Portuguese title is the literal one, so the whole phrase arrives free — and it hands over the two numbers in the middle of the run, which are the ones people skip. It also gives you dia, which you will use every single day you are there.',
+    subtext: 'A length of time, stated plainly.',
+    extracts: [
+      { id: 'seis', target: 'seis', gloss: 'six', shelf: 'how_much', set: 'numbers_1_10' },
+      { id: 'dia', target: 'o dia', gloss: 'day', shelf: 'things', gender: 'm' },
+    ],
+    branches: [
+      { target: 'Seis dias em Lisboa.', en: 'Six days in Lisbon.', demonstrates: ['seis', 'dia'] },
+      { target: 'Bom dia!', en: 'Good morning!', demonstrates: ['dia'] },
+      { target: 'Seis ou sete?', en: 'Six or seven?', demonstrates: ['seis'] },
+    ],
+    reinforces: ['sete', 'noite'],
+    helpers: { 'dias': 'days', 'sete': 'seven', 'noites': 'nights', 'em': 'in', 'Lisboa': 'Lisbon', 'Bom': 'good', 'ou': 'or' },
+    transfer_prompt: {
+      context: 'They have asked how long you are staying.',
+      ask: 'Six days in Lisbon.',
+      answer: 'Seis dias em Lisboa.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers', 'time'],
+    next_root_hooks: ['oito'],
+  }),
+  q({
+    root_id: 'tb_eight_days',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Eight Days a Week — The Beatles',
+    source_status: 'verified',
+    root_display: 'Eight Days a Week',
+    source: 'Eight days a week.',
+    target: 'Oito dias por semana.',
+    semantic_bridge:
+      'A week with eight days in it is the joke, and the Portuguese keeps it. Por is the small word doing the work — por semana, por dia, por pessoa — and once you have it you can price anything, book anything and split any bill.',
+    subtext: 'More than there is time for.',
+    extracts: [
+      { id: 'oito', target: 'oito', gloss: 'eight', shelf: 'how_much', set: 'numbers_1_10' },
+      { id: 'semana', target: 'a semana', gloss: 'week', shelf: 'things', gender: 'f' },
+    ],
+    branches: [
+      { target: 'Duas vezes por semana.', en: 'Twice a week.', demonstrates: ['semana'] },
+      { target: 'Oito euros.', en: 'Eight euros.', demonstrates: ['oito'] },
+      { target: 'Uma semana em Lisboa.', en: 'A week in Lisbon.', demonstrates: ['semana'] },
+    ],
+    reinforces: ['euro', 'dia', 'um'],
+    helpers: { 'dias': 'days', 'por': 'per / a', 'Duas': 'two', 'vezes': 'times', 'euros': 'euros', 'Uma': 'a', 'em': 'in', 'Lisboa': 'Lisbon' },
+    transfer_prompt: {
+      context: 'The price is on a board and you want to be sure.',
+      ask: 'Eight euros.',
+      answer: 'Oito euros.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers', 'money'],
+    next_root_hooks: ['dez'],
+  }),
+  q({
+    root_id: 'tb_ten_things',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: '10 Things I Hate About You',
+    source_status: 'verified',
+    root_display: '10 Things I Hate About You',
+    source: 'Ten things.',
+    target: 'Dez coisas.',
+    semantic_bridge:
+      'The last number in the run, and it arrives attached to coisa — the most useful vague noun in the language. When you do not know the word for something, it is a coisa, and everybody will know exactly what you mean.',
+    subtext: 'Enumerated, at length.',
+    extracts: [
+      { id: 'dez', target: 'dez', gloss: 'ten', shelf: 'how_much', set: 'numbers_1_10' },
+    ],
+    branches: [
+      { target: 'Dez euros.', en: 'Ten euros.', demonstrates: ['dez'] },
+      { target: 'Dez minutos.', en: 'Ten minutes.', demonstrates: ['dez'] },
+      { target: 'Nove ou dez?', en: 'Nine or ten?', demonstrates: ['dez'] },
+    ],
+    reinforces: ['nove', 'euro', 'coisa'],
+    helpers: { 'coisas': 'things', 'euros': 'euros', 'minutos': 'minutes', 'Nove': 'nine', 'ou': 'or' },
+    transfer_prompt: {
+      context: 'They have asked how long you will be.',
+      ask: 'Ten minutes.',
+      answer: 'Dez minutos.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['ola'],
+  }),
+  q({
     root_id: 'tb_perhaps',
     culture_family: 'the_basics',
     rung: 1,
@@ -4181,6 +4287,39 @@ export const THE_BASICS: Root[] = [
     rights_status: 'title-reference',
     starter_tags: ['time', 'plans'],
     next_root_hooks: ['ola'],
+  }),
+  q({
+    root_id: 'tb_why',
+    culture_family: 'the_basics',
+    rung: 2,
+    root_type: 'title',
+    source_label: 'Why Do Fools Fall in Love',
+    source_status: 'verified',
+    root_display: 'Why Do Fools Fall in Love',
+    source: 'Why? Because I want to.',
+    target: 'Porquê? Porque quero.',
+    semantic_bridge:
+      'Two spellings, one word, and the accent is the whole difference: porquê with the accent is the question on its own, porque without it starts the answer. Getting this right is a small thing that makes writing look native, and getting it wrong is the most common slip Portuguese people themselves make.',
+    subtext: 'Asked, and answered flatly.',
+    extracts: [
+      { id: 'porque', target: 'porque', gloss: 'because', shelf: 'small_words', note: 'Porquê? with the accent asks. Porque without it answers. Two words, one sound.' },
+      { id: 'ainda', target: 'ainda', gloss: 'still / yet', shelf: 'when' },
+    ],
+    branches: [
+      { target: 'Porque quero.', en: 'Because I want to.', demonstrates: ['porque'] },
+      { target: 'Ainda estou a aprender.', en: 'I am still learning.', demonstrates: ['ainda'] },
+      { target: 'Porque ainda não percebi.', en: 'Because I still did not catch it.', demonstrates: ['porque', 'ainda'] },
+    ],
+    reinforces: ['quero', 'aprender', 'nao_percebi'],
+    helpers: { 'Porquê': 'why', 'quero': 'I want', 'estou a aprender': 'I am learning', 'não': 'not' },
+    transfer_prompt: {
+      context: 'They have asked why Portugal, and you are not going to explain the whole thing.',
+      ask: 'Because I want to.',
+      answer: 'Porque quero.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['about-me'],
+    next_root_hooks: ['sou'],
   }),
 ]
 

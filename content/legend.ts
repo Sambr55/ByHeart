@@ -75,6 +75,17 @@ export interface LegendFrame {
    * the card, and lint:content fails a frame with an unglossed word in it.
    */
   helpers?: Record<string, string>
+  /**
+   * The lesson this card teaches, before it asks for anything.
+   *
+   * The builder used to require you to own the words before the card would open, which
+   * made it a form: two text inputs and a set of chips. Now the card is a small root of
+   * its own — here is the pattern, here is why Portuguese does it this way — and the
+   * words arrive at the moment you need them rather than months earlier in a crate.
+   *
+   * Written like a semantic bridge, because that is what it is.
+   */
+  teaches: string
 }
 
 /**
@@ -97,6 +108,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     slots: [{ key: 'name', kind: 'name', hint: 'your name' }],
     built_from: ['chamo_me'],
     rung: 1,
+    teaches:
+      'Chamo-me is literally “I call myself”, which is how Portuguese introduces people — the verb hangs on you rather than on your name. It works everywhere, from a doorstep to a dinner table.'
   },
   {
     id: 'origin',
@@ -124,6 +137,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     built_from: ['sou', 'ingles'],
     rung: 1,
     helpers: { de: 'from' },
+    teaches:
+      'Sou is the permanent one: what you are and where you are from, the things that do not change by Tuesday. Nationalities take an ending like every other description — inglês if you are a man, inglesa if you are a woman.'
   },
   {
     id: 'age',
@@ -135,6 +150,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     slots: [{ key: 'n', kind: 'number', hint: 'your age' }],
     built_from: ['tenho', 'anos'],
     rung: 2,
+    teaches:
+      'The one every English speaker gets wrong exactly once. Portuguese does not BE an age, it HAS one — tenho cinquenta e seis anos, “I have fifty-six years”. Say sou and you have said “I am fifty-six”, which means nothing at all.'
   },
   {
     id: 'married',
@@ -159,6 +176,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     ],
     built_from: ['sou', 'casado'],
     rung: 2,
+    teaches:
+      'All three answers are descriptions, so all three take an ending: casado or casada, solteiro or solteira, divorciado or divorciada. And they go with sou rather than estou — Portuguese files this under what you are, not how you are today.'
   },
   {
     id: 'children',
@@ -183,6 +202,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     built_from: ['tenho', 'filhos', 'chamam'],
     rung: 5,
     helpers: { 'Chamam-se': 'they are called' },
+    teaches:
+      'Tenho again, doing exactly what it did with your age: you HAVE children, you do not be them. Chamam-se is chamo-me turned round to point at other people — the same verb, aimed outwards.'
   },
   {
     id: 'children_doing',
@@ -198,6 +219,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     built_from: ['esta_', 'o_meu', 'ainda', 'escola'],
     rung: 3,
     helpers: { universidade: 'university', outros: 'the others', andam: 'go / are' },
+    teaches:
+      'Ser and estar side by side on your own family, which is the one example nobody forgets. Está na universidade is where somebody is RIGHT NOW; it would be é if it were what they are forever.'
   },
   {
     id: 'work',
@@ -209,6 +232,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     slots: [{ key: 'thing', kind: 'place', hint: 'what your work is' }],
     built_from: ['trabalho'],
     rung: 2,
+    teaches:
+      'Trabalho is both the verb and the noun — I work, and the work. Portuguese leaves context to sort it out and context always does. Trabalho com is the natural way in: I work WITH, rather than I work as.'
   },
   {
     id: 'how_long',
@@ -221,6 +246,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     built_from: ['mudar'],
     rung: 6,
     helpers: { 'Mudei-me': 'I moved', 'há': 'ago', meses: 'months' },
+    teaches:
+      'Há is what Portuguese uses for time gone by: há dois meses is “two months ago”. It looks like the verb to have, and historically it is — the language treats elapsed time as something the world is holding.'
   },
   {
     id: 'why_here',
@@ -238,6 +265,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     built_from: ['porque', 'quero', 'adoro'],
     rung: 2,
     helpers: { fazer: 'to do', 'o que': 'what' },
+    teaches:
+      'Porque without an accent starts an answer; porquê with one asks the question. Two spellings, one sound, and getting it right is the small thing that makes writing look native.'
   },
   {
     id: 'portuguese',
@@ -250,6 +279,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     built_from: ['aprender'],
     rung: 1,
     helpers: { Falo: 'I speak', pouco: 'little', mas: 'but', tentar: 'to try' },
+    teaches:
+      'Estou a aprender is how European Portuguese builds an ongoing action — estou a plus the verb. Brazil says estou aprendendo; here it is estou a aprender, and using the Portuguese one is itself a signal you are learning the right language.'
   },
 ]
 
@@ -304,6 +335,35 @@ export const REPAIR_KIT: { pt: string; en: string; why: string; built_from: stri
  * this FOR". Now crates open Legend cards, and a Legend is a thing a person can picture
  * themselves using — the first goal in DUB that exists outside the app.
  */
+/**
+ * How many crates you have to have been through before the Legend opens.
+ *
+ * The Legend used to unlock card by card, on owning specific pieces — and every one of
+ * the eighteen words it depended on was taught in exactly one crate. So "complete your
+ * Legend" quietly meant "play these eight specific crates", which is the opposite of
+ * picking freely, and two of the cards depended on a word that only exists inside a drop
+ * and is therefore unobtainable most of the year.
+ *
+ * Counting crates instead deletes that entire class of problem rather than solving it.
+ * And it is not a lower bar, it is a different one: five is more than the free tier
+ * allows, so reaching it means somebody has decided DUB is worth paying for. One rule
+ * does the work of a plan check and a vocabulary audit.
+ *
+ * The words are no longer a precondition. Building a card TEACHES them — which is better
+ * pedagogy anyway, because the moment you need to say how old you are is the moment to
+ * learn that Portuguese has an age rather than being one.
+ */
+export const CRATES_TO_UNLOCK_LEGEND = 5
+
+export function legendUnlocked(sectionsCompleted: string[]): boolean {
+  return new Set(sectionsCompleted).size >= CRATES_TO_UNLOCK_LEGEND
+}
+
+/** How far off it is, for the one line that says so. */
+export function cratesToGo(sectionsCompleted: string[]): number {
+  return Math.max(0, CRATES_TO_UNLOCK_LEGEND - new Set(sectionsCompleted).size)
+}
+
 export function framesUnlockedBy(owned: string[], answered: string[]): LegendFrame[] {
   const have = new Set(owned)
   const done = new Set(answered)
@@ -391,6 +451,9 @@ export const LEGEND_COPY = {
     'What ends a conversation is not running out of things to say. It is the moment they answer, you catch nothing, and you switch to English. These are yours whether or not you build anything else.',
   cold_head: 'No warning.',
   cold_body: 'One question, and a beat of silence. That silence is the thing you are practising.',
+  locked_head: 'Ten questions a stranger will ask you.',
+  locked_body:
+    'They are not a form — each one is a short lesson built round your own answer, and you keep what it teaches. The crates are where you get the language to build them.',
   empty_head: 'Nothing here yet.',
   empty_body:
     'Your Legend fills up as the crates feed it. Open one and the first cards will be waiting.',

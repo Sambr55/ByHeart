@@ -843,7 +843,6 @@ function Picker() {
     chooseFamily(crate.id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wanted, mounted, access.known, atLimit, rung])
-  const here = RUNGS[rung - 1]
 
   /**
    * What is true about one crate, computed once.
@@ -863,6 +862,9 @@ function Picker() {
     group: GroupKey
   }
 
+  /** One section of the basics is the doorway. Read from the learner, not the tab. */
+  const basicsStarted = !mounted || (learner.sections_completed ?? []).includes('the_basics')
+
   const facts = (f: Crate): Facts => {
     const all = ROOTS_BY_FAMILY[f.id] ?? []
     const finished = all.length > 0 && all.every((r) => playedIds.has(r.root_id))
@@ -879,7 +881,19 @@ function Picker() {
     // Only a crate nobody has ever been able to open is closed. Anything already visited
     // can be gone through again — being told "no, you did that already" is a strange
     // thing for a product built on things you enjoy to say.
-    const unreached = !f.drop && !started && opensAt > rung
+    /*
+      The basics come first, and nothing else opens until one section of them is done.
+
+      Not a paywall and not the ladder — a doorway. Five of the eleven crates have
+      nothing at rung 1 at all, so a learner who picks Marcus Aurelius first meets rung-2
+      Stoic philosophy before they can say hello.
+
+      Deliberately ONE SECTION rather than the whole crate: the point is to get somebody
+      standing up before they choose, not to hold them in a tutorial for four sittings.
+      The rest of the basics stays on the shelf like any other crate.
+    */
+    const gatedByBasics = f.id !== 'the_basics' && !f.drop && !basicsStarted
+    const unreached = gatedByBasics || (!f.drop && !started && opensAt > rung)
     // A drop is never plan-locked, and never stage-locked. It can be lost forever by
     // being busy, and charging for the one thing that expires would turn the only real
     // deadline in the product into a punishment.
@@ -916,35 +930,25 @@ function Picker() {
 
   return (
     <Shell stage="CHOICE">
-      <h1 className="display text-balance text-2xl">{PICKER.headline}</h1>
+      {/* "Pick a crate you connect with" is a promise about choice, and on the first
+          visit there is exactly one card on the screen. Say the true thing instead. */}
+      <h1 className="display text-balance text-2xl">
+        {mounted && !basicsStarted ? PICKER.basics_first_headline : PICKER.headline}
+      </h1>
       {/* One line, and only for somebody who has a Legend to feed. It answers "what is
           any of this for" at the exact moment they are choosing. */}
       {mounted && learner.legend_prompt === 'accepted' ? (
         <p className="-mt-3 text-sm text-muted">{PICKER.feeds_legend}</p>
       ) : null}
-      {mounted ? (
-        <details className="group mt-3">
-          {/*
-            Two items that refused to shrink with only a collapsible divider between
-            them, and nothing clipping the result — so at stage 5, where the label reads
-            "Talk about other people", the row needed 459px, got 390, and slid the whole
-            document sideways. It overflowed every phone made, including a 430 Pro Max.
+      {/*
+        The ladder is quiet now.
 
-            Wrapping, sentence case, and the capability leading with the number second.
-            Worst case it takes two lines instead of running off the screen.
-          */}
-          <summary className="tap-target flex cursor-pointer list-none flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="display min-w-0 text-sm text-accent">{here.name}</span>
-            <span className="min-w-0 text-xs tabular-nums text-muted">
-              stage {rung} of 6
-            </span>
-            <span className="ml-auto shrink-0 text-xs text-muted">
-              {PICKER.stages_toggle} ▸
-            </span>
-          </summary>
-          <Ladder here={rung} />
-        </details>
-      ) : null}
+        It used to sit here as "Talk about other people · stage 5 of 6", which is a
+        second progress system on the one screen that already has a goal — and two
+        ladders on one screen is exactly what made the product feel like it was
+        flip-flopping between two games. The rung still sequences roots inside a crate
+        and still gates what a crate can serve; it just stops competing for the spine.
+      */}
       {/*
         Nothing open is worth a sentence, not a scroll.
 
@@ -954,6 +958,13 @@ function Picker() {
         paywall moment in the product: nobody is being blocked from starting, they have
         genuinely used what the free tier offers.
       */}
+      {mounted && !basicsStarted ? (
+        <div className="flex flex-col gap-1 rounded border border-accent bg-accent/10 px-4 py-3">
+          <p className="text-sm font-semibold">{PICKER.basics_first_head}</p>
+          <p className="text-xs leading-relaxed text-muted">{PICKER.basics_first_sub}</p>
+        </div>
+      ) : null}
+
       {mounted && access.known && !grouped.open.length ? (
         <div className="flex flex-col gap-1 rounded border border-line-strong bg-bg-elev px-4 py-3">
           <p className="text-sm font-semibold">{PICKER.nothing_open}</p>
@@ -1055,7 +1066,9 @@ function Picker() {
                                 RUNGS[at - 1].opens.replace('Opens once', 'The rest opens once') +
                                 ' Go again in the meantime if you like.'
                               : unreached
-                                ? distanceTo(at, rung)
+                                ? f.id !== 'the_basics' && !f.drop && !basicsStarted
+                                  ? PICKER.basics_first
+                                  : distanceTo(at, rung)
                                 : f.blurb}
                       </span>
                       {f.drop ? (
@@ -1079,6 +1092,10 @@ function Picker() {
                     ) : planLocked ? (
                       <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider text-muted">
                         PRO
+                      </span>
+                    ) : unreached && f.id !== 'the_basics' && !f.drop && !basicsStarted ? (
+                      <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider text-muted">
+                        after basics
                       </span>
                     ) : unreached || waiting ? (
                       <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider tabular-nums text-muted">
