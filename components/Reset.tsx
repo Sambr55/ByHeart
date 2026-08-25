@@ -30,6 +30,8 @@ export function Reset() {
     'reading',
   )
   const [what, setWhat] = useState({ pieces: 0, proof: 0, sections: 0, legend: 0, key: '' })
+  /** null while unknown; a number once the server has answered for this device. */
+  const [onServer, setOnServer] = useState<number | null>(null)
 
   /**
    * Server first, then this device — and the order is the whole fix.
@@ -62,6 +64,14 @@ export function Reset() {
     setState('done')
   }
 
+  /*
+    Count BOTH copies, because there are two and only one of them is local.
+
+    A first version counted localStorage alone, and it could say "there is nothing here
+    yet" while the server held a full record for this device — which is the exact
+    situation that made a wipe appear to fail. A screen that under-reports what it is
+    about to delete is worse than one that says nothing.
+  */
   useEffect(() => {
     const s = loadLearner()
     setWhat({
@@ -72,6 +82,14 @@ export function Reset() {
       key: learnerStorageKey(),
     })
     setState('ready')
+    fetch('/api/session?mine=1', { headers: { accept: 'application/json' } })
+      .then((r) => r.json())
+      .then((body: { found?: boolean; state?: { proof?: unknown[] } }) => {
+        if (body?.found) setOnServer((body.state?.proof ?? []).length)
+      })
+      .catch(() => {
+        /* offline, or nothing configured. The local counts are still true. */
+      })
   }, [])
 
   if (state === 'signedin') {
@@ -117,7 +135,7 @@ export function Reset() {
     )
   }
 
-  const empty = !what.pieces && !what.proof && !what.sections && !what.legend
+  const empty = !what.pieces && !what.proof && !what.sections && !what.legend && !onServer
 
   return (
     <Frame>
@@ -135,8 +153,8 @@ export function Reset() {
         <div className="rounded border border-line bg-bg-elev px-4 py-3">
           <p className="text-sm font-semibold">There is nothing here yet.</p>
           <p className="mt-1 text-xs leading-relaxed text-muted">
-            This browser has no DUB progress stored, so you are already looking at a clean
-            device.
+            Neither this browser nor the server is holding anything for this device, so you
+            are already looking at a clean one.
           </p>
         </div>
       ) : (
@@ -148,6 +166,20 @@ export function Reset() {
             <Row n={what.sections} one="section finished" many="sections finished" />
             <Row n={what.legend} one="Legend card" many="Legend cards" />
           </ul>
+          {/*
+            The other copy, named. This is the one that made a wipe look like it had
+            failed: the device cookie is httpOnly so nothing in the browser can clear it,
+            the server keeps a record against it, and the next page load merges that
+            record back in. Both go.
+          */}
+          {onServer !== null ? (
+            <p className="mt-3 border-t border-line pt-3 text-xs leading-relaxed text-muted">
+              And the copy the server is holding for this device —{' '}
+              <span className="tabular-nums">{onServer}</span>{' '}
+              {onServer === 1 ? 'sentence' : 'sentences'}. Without that one going too, the
+              next page load would put it all straight back.
+            </p>
+          ) : null}
           <p className="mt-3 break-all text-[0.65rem] leading-relaxed text-muted">{what.key}</p>
         </div>
       )}
