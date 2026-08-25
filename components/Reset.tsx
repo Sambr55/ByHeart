@@ -26,8 +26,41 @@ import { learnerStorageKey, loadLearner, wipeLearner } from '@/engine/learner'
  * without saying "sure about what?" is not a confirmation.
  */
 export function Reset() {
-  const [state, setState] = useState<'reading' | 'ready' | 'done'>('reading')
+  const [state, setState] = useState<'reading' | 'ready' | 'wiping' | 'done' | 'signedin'>(
+    'reading',
+  )
   const [what, setWhat] = useState({ pieces: 0, proof: 0, sections: 0, legend: 0, key: '' })
+
+  /**
+   * Server first, then this device — and the order is the whole fix.
+   *
+   * Clearing localStorage alone did not work, and it failed in the most interesting way:
+   * the device cookie is httpOnly so no script can clear it, the server holds a learner
+   * row keyed to that cookie, and restoreLearner merges it back on the next page load.
+   * mergeLearner may only ever GAIN, so an emptied local copy plus a full remote one
+   * produces the full one again. The wipe was being undone by the invariant that makes
+   * syncing safe.
+   *
+   * Wiping locally first would leave a window where a background sync could write the
+   * emptied copy up, or a restore could pull the full one down. The server forgets
+   * first, and only then is there nothing to come back.
+   */
+  async function wipe() {
+    setState('wiping')
+    try {
+      const res = await fetch('/api/reset', { method: 'POST' })
+      const body = (await res.json()) as { ok?: boolean; signed_in?: boolean }
+      if (!body.ok && body.signed_in) {
+        setState('signedin')
+        return
+      }
+    } catch {
+      // Offline. The local wipe below is still worth doing, and the server copy will be
+      // merged back in — which is the honest outcome and is said on the next screen.
+    }
+    wipeLearner()
+    setState('done')
+  }
 
   useEffect(() => {
     const s = loadLearner()
@@ -41,6 +74,27 @@ export function Reset() {
     setState('ready')
   }, [])
 
+  if (state === 'signedin') {
+    return (
+      <Frame>
+        <div className="flex flex-1 flex-col justify-center gap-3">
+          <p className="eyebrow text-accent">NOT YET</p>
+          <h1 className="display text-balance text-2xl">You are signed in.</h1>
+          <p className="text-sm leading-relaxed text-muted">
+            So this device is not the only copy — your account holds it too, and would
+            put it straight back. Sign out first and the reset will stick.
+          </p>
+        </div>
+        <a
+          href="/api/auth/logout"
+          className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+        >
+          SIGN OUT
+        </a>
+      </Frame>
+    )
+  }
+
   if (state === 'done') {
     return (
       <Frame>
@@ -48,9 +102,9 @@ export function Reset() {
           <p className="eyebrow text-accent">GONE</p>
           <h1 className="display text-balance text-3xl">This device is empty.</h1>
           <p className="text-sm leading-relaxed text-muted">
-            Everything DUB had stored here has been deleted — pieces, sentences, sections,
-            your Legend and the language pair. Nothing was sent anywhere and nothing was
-            kept.
+            Everything DUB had stored here is gone — pieces, sentences, sections, your
+            Legend and the language pair — and so is the copy the server was holding for
+            this device. Nothing will come back.
           </p>
         </div>
         <Link
@@ -102,14 +156,11 @@ export function Reset() {
         <button
           type="button"
           data-testid="reset-confirm"
-          disabled={state === 'reading'}
-          onClick={() => {
-            wipeLearner()
-            setState('done')
-          }}
+          disabled={state === 'reading' || state === 'wiping'}
+          onClick={wipe}
           className="tap-target eyebrow w-full rounded bg-telha px-5 py-3 text-center text-bg disabled:opacity-40"
         >
-          {empty ? 'CLEAR ANYWAY' : 'DELETE ALL OF IT'}
+          {state === 'wiping' ? 'DELETING…' : empty ? 'CLEAR ANYWAY' : 'DELETE ALL OF IT'}
         </button>
         <Link
           href="/club"

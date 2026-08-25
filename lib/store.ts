@@ -275,6 +275,26 @@ export async function listVocabMisses(): Promise<{ query: string; n: number; las
   return rows.map((r) => ({ query: r.query, n: Number(r.n), last: r.last }))
 }
 
+/**
+ * Delete the learner state this device is holding on the server.
+ *
+ * Only the STATE. Events and feedback keyed to the same device stay, because they are
+ * the record of a test run and deleting them would throw away the thing a facilitated
+ * session exists to collect. They become unattached the moment the device gets a new id,
+ * which is the correct outcome: kept, and no longer pointing at anybody.
+ *
+ * Scoped to one device id, and the only caller reads that id from the caller's own
+ * httpOnly cookie — so this can never reach anybody else's row.
+ */
+export async function forgetLearnerFor(deviceId: string): Promise<Layer> {
+  const sql = db()
+  if (sql) {
+    await sql`delete from learners where device_id = ${deviceId} and user_id is null`
+    return 'postgres'
+  }
+  return layer()
+}
+
 async function listBlobs(prefix: string): Promise<Record<string, unknown>[]> {
   const store = await blobStore()
   if (!store) return []

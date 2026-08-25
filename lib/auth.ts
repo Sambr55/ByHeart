@@ -148,6 +148,22 @@ export async function startSession(userId: string): Promise<void> {
   })
 }
 
+/**
+ * Forget this device entirely.
+ *
+ * The device cookie is httpOnly, which is correct — no script should be able to read or
+ * forge it — and it is exactly why clearing localStorage was not enough to reset a
+ * phone. The cookie survived, the server still held a learner row keyed to it, and the
+ * next page load merged it all straight back in.
+ *
+ * Deleting the cookie rather than minting a new one here: the next request that needs
+ * a device will call ensureDevice() and get a fresh id, which keeps the "one place mints
+ * a device" rule intact.
+ */
+export async function forgetDevice(): Promise<void> {
+  ;(await cookies()).delete(DEVICE_COOKIE)
+}
+
 export async function endSession(): Promise<void> {
   const jar = await cookies()
   const token = jar.get(SESSION_COOKIE)?.value
