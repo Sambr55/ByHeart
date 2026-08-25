@@ -1570,6 +1570,8 @@ function RootBeatView({
    */
   const [released, setReleased] = useState<'before' | 'draining' | 'building'>('before')
   const [switched, setSwitched] = useState(false)
+  /** The recognition pause: this screen is the prompt until it is tapped. */
+  const [revealed, setRevealed] = useState(false)
   /*
     The first time age_band has ever decided anything.
 
@@ -1605,40 +1607,39 @@ function RootBeatView({
 
   const stage = beat === 'release' ? 'REAL WORLD' : 'ROOT'
 
-  if (beat === 'recognise') {
-    return (
-      <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
-        <div className="flex flex-1 flex-col justify-center">
-          <p className="display text-balance text-3xl sm:text-4xl">
-            {root.root_type === 'quote' ? '“' + root.root_display + '”' : root.root_display}
-          </p>
-          {/*
-            Who made it, where the title alone does not say.
-
-            This beat asks "do you recognise this?", and it was asking it of four digits.
-            "1, 2, 3, 4" is nothing until somebody says Feist; "Six Days, Seven Nights"
-            needs no help and gets none. The credit only exists on the roots where the
-            thing on screen cannot identify itself.
-          */}
-          {root.credit ? (
-            <p className="mt-3 text-sm text-muted">{root.credit}</p>
-          ) : null}
-          {root.freebie_flag ? (
-            <p className="mt-3 text-xs uppercase tracking-wider text-muted">A freebie. No puzzle.</p>
-          ) : null}
-        </div>
-        <Cta label="WHAT IS THAT IN PORTUGUESE?" onClick={next} />
-      </Shell>
-    )
-  }
-
   if (beat === 'translate') {
+    /*
+      Before the tap this screen IS the old recognition beat, and after it the reveal.
+      One screen, because the old first screen's entire payload — the title and the
+      credit — reappeared as a caption on this one the moment you left it.
+    */
+    if (!revealed) {
+      return (
+        <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
+          <div className="flex flex-1 flex-col justify-center">
+            <p className="display text-balance text-3xl sm:text-4xl">
+              {root.root_type === 'quote' ? '“' + root.root_display + '”' : root.root_display}
+            </p>
+            {root.credit ? <p className="mt-3 text-sm text-muted">{root.credit}</p> : null}
+            {root.freebie_flag ? (
+              <p className="mt-3 text-xs uppercase tracking-wider text-muted">
+                A freebie. No puzzle.
+              </p>
+            ) : null}
+          </div>
+          <Cta label="WHAT IS THAT IN PORTUGUESE?" onClick={() => setRevealed(true)} />
+        </Shell>
+      )
+    }
     return (
       <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
-            <p className="text-xs text-muted">“{root.root_display}”</p>
-            <p className="pt text-balance text-3xl text-accent">{root.target}</p>
+            <p className="text-xs text-muted">
+              {root.root_type === 'quote' ? '“' + root.root_display + '”' : root.root_display}
+              {root.credit ? ' · ' + root.credit : ''}
+            </p>
+            <p className="animate-bank pt text-balance text-3xl text-accent">{root.target}</p>
           </div>
           <div>
             <AudioButton slug={slugFor(root.target)} text={root.target} />

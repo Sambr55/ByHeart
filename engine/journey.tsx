@@ -66,7 +66,6 @@ export type Step =
   | { kind: 'close' }
 
 export type RootBeat =
-  | 'recognise'
   | 'translate'
   | 'extract'
   | 'piece'
@@ -125,11 +124,25 @@ export function beatsFor(root: Root): { beat: RootBeat; pieceIndex?: number }[] 
     return steps
   })
 
+  /*
+    Recognition and the reveal are ONE screen, not two.
+
+    They were two, and the first was a title, a credit and a button — with the whole
+    middle of the phone empty. Worse, the second screen opened by reprinting the first
+    one as a caption, so a learner tapped through a screen to reach a screen that quoted
+    it back to them.
+
+    The demo settled this argument already and it was never applied here: "recognition,
+    translation and extraction are one thought, so they belong on one screen with the
+    translation animating in". The pause before the reveal is the point — that is where
+    somebody tries to remember — so it survives as a tap on the same screen rather than
+    as a screen of its own.
+  */
   if (root.freebie_flag) {
-    // §B10: a freebie is a ten-second wink. Recognition -> Portuguese -> takeaway.
-    return [b('recognise'), b('translate'), b('extract'), ...pieces, b('release')]
+    // §B10: a freebie is a ten-second wink. Portuguese -> takeaway.
+    return [b('translate'), b('extract'), ...pieces, b('release')]
   }
-  const beats = [b('recognise'), b('translate'), b('extract'), ...pieces]
+  const beats = [b('translate'), b('extract'), ...pieces]
   // Bringing them back together only earns its place when there was more than one.
   if (root.extracts.length > 1) beats.push(b('branch'))
   beats.push(b('build'))
@@ -166,10 +179,10 @@ const BEATS_PER_SESSION = 24
  * number in the crate sat behind a wall the learner had no way to know was there. The
  * tile was making a promise the session could not keep.
  *
- * The number is derived, not chosen: hello (8) + yes/no (10) + the first numbers (12)
- * is 30, and that is exactly the promise on the tile. About twelve minutes rather than
- * ten. A deliberate trade, made once, for the one crate everybody is required to do —
- * a doorway that lies about its contents costs more than two minutes does.
+ * The number is derived, not chosen: hello (7) + yes/no (9) + the first numbers (11) is
+ * 27, and that is exactly the promise on the tile. It was 30 until recognition and the
+ * reveal became one screen, and it came down with them — a budget that stays where it
+ * was after the content shrank is just a bigger session wearing an old justification.
  *
  * If a root here grows, this has to grow with it or the promise silently breaks again.
  * first-session fails when it does, which is the only reason it is safe to hard-code.
@@ -178,7 +191,7 @@ const BEATS_PER_SESSION = 24
  * not per crate, and what is left over is what brings somebody back.
  */
 const BEATS_BY_FAMILY: Partial<Record<CultureFamily, number>> = {
-  the_basics: 30,
+  the_basics: 27,
 }
 
 interface JourneyState {
