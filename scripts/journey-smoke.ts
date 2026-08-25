@@ -323,6 +323,17 @@ async function main() {
   {
   }
 
+  /*
+    Register, seen rather than asserted from the data.
+
+    age_band decides which version of an addressed line a learner is taught, and the
+    other version sits underneath it. That was the finding the whole slice exists to fix
+    — a screen promising a behaviour the code did not have — so the walk checks the
+    behaviour is actually on a screen, not merely in the model.
+  */
+  const sawRegister = seenText.some((t) => /\b(tu|formal): /.test(t))
+  console.log('register shown on screen: ' + (sawRegister ? 'yes' : 'not in this walk'))
+
   const end = await page.evaluate(() => document.body.innerText)
   console.log('stages: ' + seen.join(' '))
   console.log('ended on: ' + end.slice(0, 200).replace(/\n+/g, ' | '))

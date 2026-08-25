@@ -73,6 +73,41 @@ for (const file of files) {
 }
 
 /*
+  1b. The cascade, which the duration rule could not see.
+
+  Staggered lists are written as `animationDelay: i * 110 + 'ms'`, and the number never
+  sits next to the letters "ms" — so two of them ran at 110 and 90 while the gate
+  reported a clean scale. A cascade is 70ms per item, capped so the whole list lands
+  inside 420ms: below the threshold where the items read as separate events. A hand
+  fanning cards, not a sequence of arrivals.
+
+  The one exception is named rather than tolerated. MiniBuild.showOrder staggers at
+  190ms, and it is NOT a cascade — it is deliberately watchable, because the learner is
+  meant to see where each word goes. Naming it here is what stops the next person
+  "fixing" it into the scale.
+*/
+const CASCADE_MS = 70
+const TEACH_MS = 190
+for (const file of files) {
+  const src = strip(readFileSync(file, 'utf8'))
+  src.split('\n').forEach((line, i) => {
+    for (const m of line.matchAll(/animationDelay[^\n]*?\*\s*(\d+)/g)) {
+      const ms = Number(m[1])
+      if (ms !== CASCADE_MS) {
+        fail(file + ':' + (i + 1) + ' staggers at ' + ms + 'ms — a cascade is ' + CASCADE_MS + 'ms')
+      }
+    }
+    // The teaching stagger, by its own name, so it cannot drift either.
+    for (const m of line.matchAll(/setTimeout\([^\n]*?(\d{2,4})\s*\*\s*\(i/g)) {
+      const ms = Number(m[1])
+      if (ms !== TEACH_MS) {
+        fail(file + ':' + (i + 1) + ' teaches at ' + ms + 'ms — showOrder is ' + TEACH_MS + 'ms')
+      }
+    }
+  })
+}
+
+/*
   2. No overshoot, ever.
 
   A cubic-bezier with a y control point outside [0,1] goes past its destination and comes

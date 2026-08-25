@@ -243,6 +243,53 @@ export interface Branch {
    * Absent falls back to a lemma-aware whole-word match, never a bare includes().
    */
   demonstrates?: string[]
+  /**
+   * Whether this line addresses somebody, and how.
+   *
+   * AUTHORED, NEVER DERIVED, and the reason is the whole point of the field. Portuguese
+   * morphology is not a string transform: `desculpa` is a verb in "Desculpa o atraso"
+   * and a noun in "Peço desculpa", and the second must not be re-registered. `és` is a
+   * verb on its own and three letters inside `Três`. A regex gets both wrong, and
+   * getting register wrong is the exact failure this field exists to prevent — it is the
+   * one thing on the list that can make a courteous person sound rude.
+   *
+   * 'tu' means the line is said to somebody you are informal with, and `formal` must
+   * carry the same line said to somebody you are not. Absent means the line addresses
+   * nobody — "Tenho fome" has no second person and needs no register.
+   */
+  address?: 'tu'
+  /**
+   * The same line, said to somebody you would use você or o senhor with.
+   *
+   * Not a politer sentence — the SAME sentence, at the other register. Required whenever
+   * address is 'tu', and lint:content fails a formal variant that still contains a
+   * tu-form, which is the mistake that would otherwise ship silently.
+   */
+  formal?: string
+}
+
+/**
+ * Which register a learner is shown.
+ *
+ * DUB asks somebody's age and then, for the first time, does something with the answer.
+ * Under 40, Portugal is informal with you and you may be informal straight back, so tu
+ * is what you will hear and what you should have. Over 60 you will be given o senhor
+ * constantly and answering in tu reads as odd — so the formal version is the useful one.
+ *
+ * The middle band and a skipped question both get tu, and that is not a hedge: tu is
+ * what the graph is written in, it is what a learner will actually hear from anybody
+ * their own age, and the formal line is one tap away on every branch that has one.
+ */
+export type Register = 'tu' | 'formal'
+
+export function registerFor(ageBand: string | null | undefined): Register {
+  return ageBand === '60plus' ? 'formal' : 'tu'
+}
+
+/** The line at the register this learner is being taught. */
+export function branchAt(branch: Branch, register: Register): string {
+  if (register === 'formal' && branch.address === 'tu' && branch.formal) return branch.formal
+  return branch.target
 }
 
 /** §12 — two natural ways to say the same thing. Neither is scored. */
@@ -492,9 +539,9 @@ export const TOP_GUN: Root[] = [
     subtext: 'Direct, close, urgent. You reach for this when you genuinely need someone to engage.',
     extracts: [{ id: 'comigo', target: 'comigo', gloss: 'with me', rung: 2, shelf: 'people', note: 'Com and mim, fused. Portuguese does this with me and you: comigo, contigo.' }],
     branches: [
-      { target: 'Vem comigo.', en: 'Come with me.' },
-      { target: 'Fica comigo.', en: 'Stay with me.' },
-      { target: 'Podes vir comigo?', en: 'Can you come with me?' },
+      { target: 'Vem comigo.', en: 'Come with me.' , address: 'tu', formal: 'Venha comigo.' },
+      { target: 'Fica comigo.', en: 'Stay with me.' , address: 'tu', formal: 'Fique comigo.' },
+      { target: 'Podes vir comigo?', en: 'Can you come with me?' , address: 'tu', formal: 'Pode vir comigo?' },
     ],
     helpers: {
       'Vem': 'come',
@@ -523,8 +570,8 @@ export const TOP_GUN: Root[] = [
       { id: 'quando_quiseres', target: 'quando quiseres', gloss: 'whenever you want', shelf: 'when' },
     ],
     branches: [
-      { target: 'Podes vir comigo?', en: 'Can you come with me?' },
-      { target: 'Podes dizer outra vez?', en: 'Can you say it again?' },
+      { target: 'Podes vir comigo?', en: 'Can you come with me?' , address: 'tu', formal: 'Pode vir comigo?' },
+      { target: 'Podes dizer outra vez?', en: 'Can you say it again?' , address: 'tu', formal: 'Pode dizer outra vez?' },
       { target: 'Quando quiseres.', en: 'Whenever you want.' },
     ],
     reinforces: ['comigo'],
@@ -569,9 +616,9 @@ export const TOP_GUN: Root[] = [
       { id: 'em_que', target: 'em que…?', gloss: 'what … about?', shelf: 'asking' },
     ],
     branches: [
-      { target: 'Em que estás a pensar?', en: 'What are you thinking about?' },
+      { target: 'Em que estás a pensar?', en: 'What are you thinking about?' , address: 'tu', formal: 'Em que está a pensar?' },
       { target: 'Estava a pensar…', en: 'I was thinking…', demonstrates: ['estavas_a'] },
-      { target: 'Estava a pensar em ti.', en: 'I was thinking about you.', demonstrates: ['estavas_a'] },
+      { target: 'Estava a pensar em ti.', en: 'I was thinking about you.', demonstrates: ['estavas_a'] , address: 'tu', formal: 'Estava a pensar em si.' },
       { target: 'Em que estavas a pensar?', en: 'What were you thinking about?' },
     ],
     helpers: {
@@ -766,7 +813,7 @@ export const JAMES_BOND: Root[] = [
     extracts: [{ id: 'chamo_me', target: 'chamo-me…', gloss: 'my name is…', shelf: 'just_say' }],
     branches: [
       { target: 'Chamo-me Sam.', en: 'My name is Sam.' },
-      { target: 'E tu, como te chamas?', en: 'And you, what’s your name?', demonstrates: ['chamo_me', 'como_te_chamas'] },
+      { target: 'E tu, como te chamas?', en: 'And you, what’s your name?', demonstrates: ['chamo_me', 'como_te_chamas'] , address: 'tu', formal: 'E o senhor, como se chama?' },
       { target: 'Como se chama?', en: 'What is it called?', demonstrates: ['chamo_me', 'como_se_chama'] },
     ],
     helpers: {
@@ -884,8 +931,8 @@ export const JAMES_BOND: Root[] = [
       { id: 'nao_digas', target: 'não digas', gloss: 'don’t say', shelf: 'doing', lemma: 'dizer', form: 'you, don’t' },
     ],
     branches: [
-      { target: 'Diz outra vez.', en: 'Say it again.' },
-      { target: 'Podes dizer outra vez?', en: 'Can you say it again?' },
+      { target: 'Diz outra vez.', en: 'Say it again.' , address: 'tu', formal: 'Diga outra vez.' },
+      { target: 'Podes dizer outra vez?', en: 'Can you say it again?' , address: 'tu', formal: 'Pode dizer outra vez?' },
       { target: 'Nunca mais.', en: 'Never again.', demonstrates: ['nunca'] },
       { target: 'Não digas isso.', en: 'Don’t say that.' },
     ],
@@ -1053,7 +1100,7 @@ export const BRIDGET_JONES: Root[] = [
     ],
     branches: [
       { target: 'Tenho trinta anos.', en: 'I am thirty.', demonstrates: ['anos', 'trinta'] },
-      { target: 'Quantos anos tens?', en: 'How old are you?', demonstrates: ['anos'] },
+      { target: 'Quantos anos tens?', en: 'How old are you?', demonstrates: ['anos'] , address: 'tu', formal: 'Quantos anos tem?' },
       { target: 'Ele tem trinta e cinco.', en: 'He is thirty-five.', demonstrates: ['trinta'] },
     ],
     reinforces: ['tenho', 'cinco'],
@@ -1163,7 +1210,7 @@ export const BRIDGET_JONES: Root[] = [
       { id: 'falei', target: 'falei', gloss: 'I spoke / I said', shelf: 'doing', lemma: 'falar', form: 'I, past' },
     ],
     branches: [
-      { target: 'Desculpa, falei demais.', en: 'Sorry, I said too much.' },
+      { target: 'Desculpa, falei demais.', en: 'Sorry, I said too much.' , address: 'tu', formal: 'Desculpe, falei demais.' },
       { target: 'Comi demais.', en: 'I ate too much.' },
       { target: 'Bebi demais.', en: 'I drank too much.' },
     ],
@@ -1197,8 +1244,8 @@ export const BRIDGET_JONES: Root[] = [
       { id: 'atraso', target: 'o atraso', gloss: 'the delay', shelf: 'things', gender: 'm' },
     ],
     branches: [
-      { target: 'Desculpa.', en: 'Sorry.' },
-      { target: 'Desculpa o atraso.', en: 'Sorry I’m late.' },
+      { target: 'Desculpa.', en: 'Sorry.' , address: 'tu', formal: 'Desculpe.' },
+      { target: 'Desculpa o atraso.', en: 'Sorry I’m late.' , address: 'tu', formal: 'Desculpe o atraso.' },
       { target: 'Peço desculpa.', en: 'I apologise.' },
     ],
     voice_options: [
@@ -1243,7 +1290,7 @@ export const BRIDGET_JONES: Root[] = [
     extracts: [{ id: 'como_te_chamas', target: 'como te chamas?', gloss: 'what’s your name?', shelf: 'asking', note: 'To somebody your own age. Como se chama? is the polite one.' }],
     branches: [
       { target: 'Chamo-me Ana.', en: 'My name is Ana.', demonstrates: ['chamo_me'] },
-      { target: 'Como te chamas?', en: 'What’s your name?' },
+      { target: 'Como te chamas?', en: 'What’s your name?' , address: 'tu', formal: 'Como se chama?' },
       { target: 'Como se chama?', en: 'What is it called?', demonstrates: ['como_se_chama'] },
     ],
     reinforces: ['chamo_me', 'desculpa'],
@@ -1278,7 +1325,7 @@ export const BRIDGET_JONES: Root[] = [
     branches: [
       { target: 'Queria dizer…', en: 'I meant…' },
       { target: 'Não era isso.', en: 'That wasn’t it.' },
-      { target: 'Desculpa, queria dizer outra coisa.', en: 'Sorry, I meant something else.' },
+      { target: 'Desculpa, queria dizer outra coisa.', en: 'Sorry, I meant something else.' , address: 'tu', formal: 'Desculpe, queria dizer outra coisa.' },
     ],
     reinforces: ['desculpa'],
     helpers: {
@@ -1401,9 +1448,9 @@ export const BRIDGET_JONES: Root[] = [
       { id: 'gosta_de', target: 'gosta de', gloss: 'likes', shelf: 'doing', lemma: 'gostar', form: 'he/she', note: 'The DE never leaves. Gosto de ti, gosta de vinho — you like OF something. Drop it and it stops being Portuguese. You have said it with the de every time.' },
     ],
     branches: [
-      { target: 'Ela gosta de ti.', en: 'She likes you.' },
+      { target: 'Ela gosta de ti.', en: 'She likes you.' , address: 'tu', formal: 'Ela gosta de si.' },
       { target: 'Ele n\u00e3o gosta de vinho.', en: 'He doesn\u2019t like wine.' },
-      { target: 'Eles gostam de ti.', en: 'They like you.', demonstrates: ['eles', 'gosta_de'] },
+      { target: 'Eles gostam de ti.', en: 'They like you.', demonstrates: ['eles', 'gosta_de'] , address: 'tu', formal: 'Eles gostam de si.' },
     ],
     reinforces: ['vinho'],
     helpers: {
@@ -1514,8 +1561,8 @@ export const PULP_FICTION: Root[] = [
       { id: 'o_que', target: 'o quê?', gloss: 'what?', shelf: 'asking' },
     ],
     branches: [
-      { target: 'Diz outra vez.', en: 'Say it again.' },
-      { target: 'Podes dizer outra vez?', en: 'Can you say it again?', demonstrates: ['diz', 'outra_vez', 'podes'] },
+      { target: 'Diz outra vez.', en: 'Say it again.' , address: 'tu', formal: 'Diga outra vez.' },
+      { target: 'Podes dizer outra vez?', en: 'Can you say it again?', demonstrates: ['diz', 'outra_vez', 'podes'] , address: 'tu', formal: 'Pode dizer outra vez?' },
       { target: 'O quê?', en: 'What?' },
     ],
     reinforces: ['outra_vez', 'podes'],
@@ -1639,7 +1686,7 @@ export const PULP_FICTION: Root[] = [
     extracts: [{ id: 'como_se_chama', target: 'como se chama?', gloss: 'what is it called?', shelf: 'asking', note: 'Also how you ask what an object is called.' }],
     branches: [
       { target: 'Como se chama isto?', en: 'What is this called?' },
-      { target: 'Como te chamas?', en: 'What’s your name?', demonstrates: ['como_te_chamas'] },
+      { target: 'Como te chamas?', en: 'What’s your name?', demonstrates: ['como_te_chamas'] , address: 'tu', formal: 'Como se chama?' },
       { target: 'Chama-se…', en: 'It’s called…', demonstrates: ['como_se_chama'] },
     ],
     reinforces: ['chamo_me', 'como_te_chamas'],
@@ -1921,7 +1968,7 @@ export const AUDREY_HEPBURN: Root[] = [
       { id: 'importa', target: 'importa', gloss: 'it matters', shelf: 'doing', lemma: 'importar', form: 'it' },
     ],
     branches: [
-      { target: 'Tu importas.', en: 'You matter.', demonstrates: ['importa'] },
+      { target: 'Tu importas.', en: 'You matter.', demonstrates: ['importa'] , address: 'tu', formal: 'Você importa.' },
       { target: 'Mais do que isso.', en: 'More than that.' },
       { target: 'Isto importa.', en: 'This matters.' },
       { target: 'As coisas mudam.', en: 'Things change.', demonstrates: ['coisa'] },
@@ -2094,7 +2141,7 @@ export const MARCUS_AURELIUS: Root[] = [
     branches: [
       { target: 'O que posso fazer?', en: 'What can I do?' },
       { target: 'Não posso controlar isso.', en: 'I can’t control that.', demonstrates: ['podes', 'posso'] },
-      { target: 'Podes controlar isto.', en: 'You can control this.' },
+      { target: 'Podes controlar isto.', en: 'You can control this.' , address: 'tu', formal: 'Pode controlar isto.' },
     ],
     reinforces: ['podes'],
     helpers: {
@@ -2172,7 +2219,7 @@ export const MARCUS_AURELIUS: Root[] = [
     branches: [
       { target: 'Agora não.', en: 'Not now.' },
       { target: 'E agora?', en: 'And now?' },
-      { target: 'Tens tempo?', en: 'Do you have time?' },
+      { target: 'Tens tempo?', en: 'Do you have time?' , address: 'tu', formal: 'Tem tempo?' },
     ],
     reinforces: ['tempo'],
     voice_options: [
@@ -2259,7 +2306,7 @@ export const MARCUS_AURELIUS: Root[] = [
       { target: 'Posso mudar isto?', en: 'Can I change this?' },
       { target: 'Não posso mudar isso.', en: 'I can’t change that.' },
       { target: 'Quero mudar.', en: 'I want to change.' },
-      { target: 'Não podes mudar isso.', en: 'You can’t change that.' },
+      { target: 'Não podes mudar isso.', en: 'You can’t change that.' , address: 'tu', formal: 'Não pode mudar isso.' },
     ],
     reinforces: ['podes'],
     helpers: {
@@ -2312,7 +2359,7 @@ export const MARCUS_AURELIUS: Root[] = [
     ],
     branches: [
       { target: 'Preciso de ajuda.', en: 'I need help.' },
-      { target: 'Podes ajudar-me?', en: 'Can you help me?', demonstrates: ['ajuda', 'podes'] },
+      { target: 'Podes ajudar-me?', en: 'Can you help me?', demonstrates: ['ajuda', 'podes'] , address: 'tu', formal: 'Pode ajudar-me?' },
       { target: 'Vou pedir ajuda.', en: 'I\u2019m going to ask for help.' },
     ],
     reinforces: ['preciso_de', 'podes', 'pedir_te'],
@@ -2497,7 +2544,7 @@ export const SWEARING: Root[] = [
     ],
     branches: [
       { target: 'Esqueci-me do telemóvel.', en: 'I forgot my phone.' },
-      { target: 'Desculpa, esqueci-me.', en: 'Sorry, I forgot.' },
+      { target: 'Desculpa, esqueci-me.', en: 'Sorry, I forgot.' , address: 'tu', formal: 'Desculpe, esqueci-me.' },
       { target: 'Foda-se, outra vez!', en: 'For f***’s sake, again!' },
     ],
     reinforces: ['desculpa', 'outra_vez'],
@@ -2583,7 +2630,7 @@ export const SWEARING: Root[] = [
     branches: [
       { target: 'O que é isto?', en: 'What is this?' },
       { target: 'Isto é do caralho!', en: 'This is bloody brilliant!' },
-      { target: 'Que caralho estás a fazer?', en: 'What the f*** are you doing?' },
+      { target: 'Que caralho estás a fazer?', en: 'What the f*** are you doing?' , address: 'tu', formal: 'Que caralho está a fazer?' },
     ],
     helpers: {
       'O que': 'what',
@@ -2667,8 +2714,8 @@ export const SWEARING: Root[] = [
       { id: 'cabrao', target: 'cabrão', gloss: 'bastard', shelf: 'just_say', note: 'Genuinely strong. Between friends it can be affectionate; to a stranger it is not.' },
     ],
     branches: [
-      { target: 'És uma grande cabra.', en: 'You’re an utter cow.' },
-      { target: 'És um grande amigo.', en: 'You’re a great friend.' },
+      { target: 'És uma grande cabra.', en: 'You’re an utter cow.' , address: 'tu', formal: 'É uma grande cabra.' },
+      { target: 'És um grande amigo.', en: 'You’re a great friend.' , address: 'tu', formal: 'É um grande amigo.' },
       { target: 'Que grande merda.', en: 'What an utter mess.' },
       { target: 'Que cabrão!', en: 'What a bastard!' },
     ],
@@ -2741,9 +2788,9 @@ export const FLIRTING_M2F: Root[] = [
       { id: 'gira', target: 'gira', gloss: 'lovely', shelf: 'describing', lemma: 'giro', form: 'feminine' },
     ],
     branches: [
-      { target: 'Estás linda.', en: 'You look beautiful.' },
-      { target: 'Estás bem?', en: 'Are you all right?' },
-      { target: 'Hoje estás gira.', en: 'You look lovely today.' },
+      { target: 'Estás linda.', en: 'You look beautiful.' , address: 'tu', formal: 'Está linda.' },
+      { target: 'Estás bem?', en: 'Are you all right?' , address: 'tu', formal: 'Está bem?' },
+      { target: 'Hoje estás gira.', en: 'You look lovely today.' , address: 'tu', formal: 'Hoje está gira.' },
     ],
     helpers: { 'linda': 'beautiful (about a woman)', 'bem': 'well', 'Hoje': 'today', 'muito': 'very' },
     voice_options: [
@@ -2786,8 +2833,8 @@ export const FLIRTING_M2F: Root[] = [
     ],
     branches: [
       { target: 'Posso sentar-me?', en: 'May I sit down?' },
-      { target: 'Posso ajudar-te?', en: 'Can I help you?' },
-      { target: 'Posso oferecer-te um café?', en: 'Can I get you a coffee?' },
+      { target: 'Posso ajudar-te?', en: 'Can I help you?' , address: 'tu', formal: 'Posso ajudá-lo?' },
+      { target: 'Posso oferecer-te um café?', en: 'Can I get you a coffee?' , address: 'tu', formal: 'Posso oferecer-lhe um café?' },
     ],
     reinforces: ['podes'],
     helpers: { 'sentar-me': 'sit down', 'ajudar-te': 'help you', 'um': 'a', 'café': 'coffee', 'bebida': 'drink', 'uma': 'a', 'aqui': 'here' },
@@ -2815,9 +2862,9 @@ export const FLIRTING_M2F: Root[] = [
       { id: 'ver_te', target: 'te ver', gloss: 'see you', shelf: 'doing', lemma: 'ver', form: 'with you attached' },
     ],
     branches: [
-      { target: 'Gostava de te conhecer melhor.', en: 'I’d like to get to know you better.' },
+      { target: 'Gostava de te conhecer melhor.', en: 'I’d like to get to know you better.' , address: 'tu', formal: 'Gostava de o conhecer melhor.' },
       { target: 'Gostava de um café.', en: 'I’d like a coffee.' },
-      { target: 'Gostava de te ver amanhã.', en: 'I’d like to see you tomorrow.' },
+      { target: 'Gostava de te ver amanhã.', en: 'I’d like to see you tomorrow.' , address: 'tu', formal: 'Gostava de o ver amanhã.' },
     ],
     reinforces: ['outra_vez', 'amanha'],
     helpers: { 'conhecer': 'to get to know', 'melhor': 'better', 'um': 'a', 'café': 'coffee', 'amanhã': 'tomorrow', 'por': 'for', 'favor': 'favour', 'por favor': 'please' },
@@ -2860,10 +2907,10 @@ export const FLIRTING_M2F: Root[] = [
       { id: 'pedir_te', target: 'te pedir', gloss: 'to ask you', shelf: 'doing', lemma: 'pedir', form: 'with you attached' },
     ],
     branches: [
-      { target: 'Vim aqui para te ver.', en: 'I came here to see you.' },
-      { target: 'Posso pedir-te uma coisa?', en: 'Can I ask you something?', demonstrates: ['pedir_te', 'posso'] },
+      { target: 'Vim aqui para te ver.', en: 'I came here to see you.' , address: 'tu', formal: 'Vim aqui para o ver.' },
+      { target: 'Posso pedir-te uma coisa?', en: 'Can I ask you something?', demonstrates: ['pedir_te', 'posso'] , address: 'tu', formal: 'Posso pedir-lhe uma coisa?' },
       { target: 'Vim para ficar.', en: 'I came to stay.', demonstrates: ['vim_aqui'] },
-      { target: 'Vim para te pedir ajuda.', en: 'I came to ask you for help.' },
+      { target: 'Vim para te pedir ajuda.', en: 'I came to ask you for help.' , address: 'tu', formal: 'Vim para lhe pedir ajuda.' },
     ],
     reinforces: ['posso'],
     helpers: { 'para': 'in order to', 'uma': 'a', 'coisa': 'thing', 'ficar': 'to stay', 'ver': 'to see', 'ajuda': 'help', 'pedir-te': 'ask you for' },
@@ -2892,7 +2939,7 @@ export const FLIRTING_M2F: Root[] = [
     ],
     branches: [
       { target: 'Não sou bom a dançar.', en: 'I’m not a good dancer.' },
-      { target: 'Estou nervoso, desculpa.', en: 'I’m nervous, sorry.' },
+      { target: 'Estou nervoso, desculpa.', en: 'I’m nervous, sorry.' , address: 'tu', formal: 'Estou nervoso, desculpe.' },
       { target: 'Não sou bom nisto, mas estou a tentar.', en: 'I’m not good at this, but I’m trying.' },
     ],
     reinforces: ['desculpa'],
@@ -2921,8 +2968,8 @@ export const FLIRTING_M2F: Root[] = [
       { id: 'o_teu', target: 'o teu', gloss: 'your', shelf: 'people' },
     ],
     branches: [
-      { target: 'Dás-me o teu Instagram?', en: 'Will you give me your Instagram?' },
-      { target: 'Dás-me um minuto?', en: 'Will you give me a minute?' },
+      { target: 'Dás-me o teu Instagram?', en: 'Will you give me your Instagram?' , address: 'tu', formal: 'Dá-me o seu Instagram?' },
+      { target: 'Dás-me um minuto?', en: 'Will you give me a minute?' , address: 'tu', formal: 'Dá-me um minuto?' },
       { target: 'Este é o meu número.', en: 'This is my number.', demonstrates: ['o_teu'] },
     ],
     helpers: { 'um': 'a', 'minuto': 'minute', 'Este': 'this', 'é': 'is', 'meu': 'my', 'o': 'the', 'número': 'number', 'email': 'email' },
@@ -2953,9 +3000,9 @@ export const FLIRTING_F2M: Root[] = [
       { id: 'hoje_estas', target: 'Estás', gloss: 'you are', shelf: 'doing', lemma: 'estar', form: 'you' },
     ],
     branches: [
-      { target: 'Estás lindo.', en: 'You look wonderful.' },
-      { target: 'Estás bem?', en: 'Are you all right?' },
-      { target: 'Hoje estás giro.', en: 'You look good today.' },
+      { target: 'Estás lindo.', en: 'You look wonderful.' , address: 'tu', formal: 'Está lindo.' },
+      { target: 'Estás bem?', en: 'Are you all right?' , address: 'tu', formal: 'Está bem?' },
+      { target: 'Hoje estás giro.', en: 'You look good today.' , address: 'tu', formal: 'Hoje está giro.' },
     ],
     helpers: { 'lindo': 'wonderful (about a man)', 'bem': 'well', 'Hoje': 'today', 'muito': 'very' },
     voice_options: [
@@ -2997,9 +3044,9 @@ export const FLIRTING_F2M: Root[] = [
       { id: 'qualquer_coisa', target: 'qualquer coisa', gloss: 'something / anything', shelf: 'small_words' },
     ],
     branches: [
-      { target: 'Apetece-te um café?', en: 'Do you fancy a coffee?' },
-      { target: 'Apetece-te dançar?', en: 'Do you fancy dancing?' },
-      { target: 'Queres beber qualquer coisa?', en: 'Do you want a drink?' },
+      { target: 'Apetece-te um café?', en: 'Do you fancy a coffee?' , address: 'tu', formal: 'Apetece-lhe um café?' },
+      { target: 'Apetece-te dançar?', en: 'Do you fancy dancing?' , address: 'tu', formal: 'Apetece-lhe dançar?' },
+      { target: 'Queres beber qualquer coisa?', en: 'Do you want a drink?' , address: 'tu', formal: 'Quer beber qualquer coisa?' },
     ],
     helpers: { 'um': 'a', 'café': 'coffee', 'dançar': 'to dance', 'Queres': 'do you want', 'beber': 'to drink', 'ir': 'to go' },
     voice_options: [
@@ -3041,9 +3088,9 @@ export const FLIRTING_F2M: Root[] = [
       { id: 'conhecer_te', target: 'conhecer-te', gloss: 'to get to know you', shelf: 'doing', lemma: 'conhecer', form: 'with you attached' },
     ],
     branches: [
-      { target: 'Queria ver-te outra vez.', en: 'I’d like to see you again.' },
+      { target: 'Queria ver-te outra vez.', en: 'I’d like to see you again.' , address: 'tu', formal: 'Queria vê-lo outra vez.' },
       { target: 'Queria um café, por favor.', en: 'I’d like a coffee, please.' },
-      { target: 'Queria conhecer-te melhor.', en: 'I’d like to get to know you better.' },
+      { target: 'Queria conhecer-te melhor.', en: 'I’d like to get to know you better.' , address: 'tu', formal: 'Queria conhecê-lo melhor.' },
     ],
     reinforces: ['outra_vez'],
     helpers: { 'ver-te': 'to see you', 'um': 'a', 'café': 'coffee', 'por': 'for', 'favor': 'favour', 'melhor': 'better', 'outra': 'another', 'vez': 'time' },
@@ -3071,9 +3118,9 @@ export const FLIRTING_F2M: Root[] = [
       { id: 'engracado', target: 'engraçado', gloss: 'funny', shelf: 'describing', note: 'A woman is engraçada.' },
     ],
     branches: [
-      { target: 'És muito simpático.', en: 'You’re really nice.' },
-      { target: 'Não és nada engraçado.', en: 'You’re not funny at all.' },
-      { target: 'És giro quando ris.', en: 'You’re cute when you laugh.' },
+      { target: 'És muito simpático.', en: 'You’re really nice.' , address: 'tu', formal: 'É muito simpático.' },
+      { target: 'Não és nada engraçado.', en: 'You’re not funny at all.' , address: 'tu', formal: 'Não é nada engraçado.' },
+      { target: 'És giro quando ris.', en: 'You’re cute when you laugh.' , address: 'tu', formal: 'É giro quando ri.' },
     ],
     helpers: { 'muito': 'really', 'simpático': 'nice', 'Não': 'not', 'nada': 'at all', 'quando': 'when', 'ris': 'you laugh', 'É': 'he is', 'giro': 'cute' },
     voice_options: [
@@ -3118,7 +3165,7 @@ export const FLIRTING_F2M: Root[] = [
     branches: [
       { target: 'Dois beijinhos.', en: 'Two little kisses.' },
       { target: 'Dá-me um minuto.', en: 'Give me a minute.' },
-      { target: 'Apetece-te um cafezinho?', en: 'Fancy a little coffee?', demonstrates: ['beijinho'] },
+      { target: 'Apetece-te um cafezinho?', en: 'Fancy a little coffee?', demonstrates: ['beijinho'] , address: 'tu', formal: 'Apetece-lhe um cafezinho?' },
     ],
     reinforces: ['apetece_te'],
     helpers: { 'Dois': 'two', 'beijinhos': 'little kisses', 'um': 'a', 'minuto': 'minute', 'cafezinho': 'a friendly little coffee' },
@@ -3146,7 +3193,7 @@ export const FLIRTING_F2M: Root[] = [
       { id: 'logo', target: 'logo', gloss: 'later on / in a bit', shelf: 'when' },
     ],
     branches: [
-      { target: 'Ligo-te logo.', en: 'I’ll call you later.' },
+      { target: 'Ligo-te logo.', en: 'I’ll call you later.' , address: 'tu', formal: 'Ligo-lhe logo.' },
       { target: 'Até logo.', en: 'See you later.' },
       { target: 'Ligas-me amanhã?', en: 'Will you call me tomorrow?' },
     ],
@@ -3429,7 +3476,7 @@ export const DURAN_DURAN: Root[] = [
     ],
     branches: [
       { target: 'Tudo bem?', en: 'All good?' },
-      { target: 'Precisas de ajuda?', en: 'Do you need help?' },
+      { target: 'Precisas de ajuda?', en: 'Do you need help?' , address: 'tu', formal: 'Precisa de ajuda?' },
       { target: 'É tudo.', en: 'That’s everything.' },
     ],
     reinforces: ['preciso_de', 'agora'],

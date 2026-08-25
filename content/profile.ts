@@ -64,7 +64,7 @@ export const AGE_QUESTION: ProfileQuestion = {
       and the code changes when it can — the alternative is teaching one register and
       calling it the language, which is the thing this question exists to avoid.
     */
-    'Portugal speaks to you differently depending on your age. This tells you which version is coming at you, and what it means when it changes.',
+    'Portugal speaks to you differently depending on your age, and expects you to speak back the same way. This decides which version the example sentences come in, and tells you what it means when somebody switches.',
   options: [
     { id: 'under25', label: 'UNDER 25' },
     { id: '25to39', label: '25 TO 39' },
@@ -72,7 +72,15 @@ export const AGE_QUESTION: ProfileQuestion = {
     { id: '60plus', label: '60 OR MORE' },
   ],
   skip: 'SKIP THIS',
-  skipNote: 'Then we will teach you the middle ground, which is safe everywhere.',
+  /*
+    Skipping is a real answer and gets a real behaviour, not a shrug.
+
+    tu is what the graph is written in, it is what anybody under sixty will hear from
+    somebody their own age, and every line that has a formal version shows it underneath.
+    Saying "the middle ground" was the vaguer half of the same promise the headline used
+    to break.
+  */
+  skipNote: 'Then we will use tu, which is what you will hear from anybody near your own age — and every line shows the formal version underneath.',
 }
 
 export const GOAL_QUESTION: ProfileQuestion = {

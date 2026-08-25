@@ -9,15 +9,19 @@ import {
   ROOTS_BY_FAMILY,
   RUNGS,
   daysLeft,
+  branchAt,
   entryRung,
   isLive,
   linesFor,
+  registerFor,
   rootById,
   rungReached,
   sourceOf,
+  type Branch,
   type Crate,
   type CultureFamily,
   type DropEvent,
+  type Register,
   type Root,
   type Rung,
 } from '@/content/roots'
@@ -597,7 +601,7 @@ function Demo({ i }: { i: number }) {
             {beat.branches.map((b, n) => (
               <li
                 key={b.pt}
-                style={{ animationDelay: n * 110 + 'ms' }}
+                style={{ animationDelay: Math.min(n, 5) * 70 + 'ms' }}
                 className="animate-bank flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3"
               >
                 <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
@@ -1358,6 +1362,44 @@ export function MiniBuild({
  * strength and the piece is accent, bold, and slightly larger — so the difference is
  * carried by colour and weight rather than by making half the sentence disappear.
  */
+/**
+ * One branch, at the register this learner is being taught.
+ *
+ * The other version sits underneath whenever there is one, quietly. That is the whole
+ * answer to the finding that DUB asked somebody's age, explained why it mattered, and
+ * then taught everybody tu regardless — and it is also better than picking one and
+ * hiding the other, because the thing a learner most needs to recognise is the SWITCH.
+ * Seeing both is how you learn what it means when somebody changes.
+ *
+ * CASCADE: 70ms per item, capped at six, so the whole list lands inside 420ms — below
+ * the threshold where the items read as separate events. A hand fanning cards, not a
+ * sequence of arrivals.
+ */
+function BranchRow({ branch, i, register }: { branch: Branch; i: number; register: Register }) {
+  const shown = branchAt(branch, register)
+  const other = branch.formal && branch.address === 'tu'
+    ? register === 'formal' ? branch.target : branch.formal
+    : null
+  return (
+    <li
+      style={{ animationDelay: Math.min(i, 5) * 70 + 'ms' }}
+      className="animate-bank flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3"
+    >
+      <AudioButton slug={slugFor(shown)} text={shown} size="sm" />
+      <span className="min-w-0">
+        <span className="pt block text-lg text-accent">{shown}</span>
+        <span className="mt-1 block text-sm text-fg/75">{branch.en}</span>
+        {other ? (
+          <span className="pt mt-1 block text-xs text-muted">
+            {register === 'formal' ? 'tu: ' : 'formal: '}
+            {other}
+          </span>
+        ) : null}
+      </span>
+    </li>
+  )
+}
+
 function Highlighted({
   line,
   pieces,
@@ -1430,6 +1472,14 @@ function RootBeatView({
    */
   const [released, setReleased] = useState<'before' | 'draining' | 'building'>('before')
   const [switched, setSwitched] = useState(false)
+  /*
+    The first time age_band has ever decided anything.
+
+    It was read in exactly one place — to work out whether to ask the question again —
+    while the screen asking it promised it decided which version you were taught.
+  */
+  const learner = useLearner()
+  const register = registerFor(learner.profile?.age_band)
 
   /*
     A safety net, and it is not belt-and-braces.
@@ -1591,17 +1641,7 @@ function RootBeatView({
         </p>
         <ul className="mt-6 space-y-3">
           {own.map((b, i) => (
-            <li
-              key={b.target}
-              style={{ animationDelay: i * 110 + 'ms' }}
-              className="animate-bank flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3"
-            >
-              <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
-              <span>
-                <span className="pt block text-lg text-accent">{b.target}</span>
-                <span className="mt-1 block text-sm text-fg/75">{b.en}</span>
-              </span>
-            </li>
+            <BranchRow key={b.target} branch={b} i={i} register={register} />
           ))}
         </ul>
         <Cta
@@ -1632,17 +1672,7 @@ function RootBeatView({
         </p>
         <ul className="mt-6 space-y-3">
           {root.branches.map((b, i) => (
-            <li
-              key={b.target}
-              style={{ animationDelay: i * 90 + 'ms' }}
-              className="animate-bank flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3"
-            >
-              <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
-              <span>
-                <span className="pt block text-lg text-accent">{b.target}</span>
-                <span className="mt-1 block text-sm text-fg/75">{b.en}</span>
-              </span>
-            </li>
+            <BranchRow key={b.target} branch={b} i={i} register={register} />
           ))}
         </ul>
         <Cta label="YOUR TURN" onClick={() => { track('branch_reveal', { root: root.root_id, n: root.branches.length }); next() }} />
@@ -1956,7 +1986,7 @@ function Osmosis() {
         {insights.map((i, n) => (
           <section
             key={i.id}
-            style={{ animationDelay: n * 120 + 'ms' }}
+            style={{ animationDelay: Math.min(n, 5) * 70 + 'ms' }}
             className="animate-bank rounded border border-line bg-bg-elev p-4"
           >
             <p className="text-balance text-base font-semibold">{i.headline}</p>

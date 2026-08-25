@@ -962,6 +962,75 @@ for (const e of EXAMPLES) {
   console.log(pairs + ' voice pairs, every option situated, every pair teaching a rule')
 }
 
+// --- register ---------------------------------------------------------------
+{
+  /*
+    Register is the one thing on the whole list that can make a courteous person sound
+    rude, and it is the thing DUB asks about, justifies on screen, and used to ignore
+    entirely. The graph is overwhelmingly tu — podes outnumbers pode heavily and o senhor
+    does not occur once — so a learner told they would be taught the formal version was
+    then taught the informal one for the rest of the product.
+
+    AUTHORED, NEVER DERIVED. Two of the strings in the graph prove why: `desculpa` is a
+    verb in "Desculpa o atraso" and a noun in "Peço desculpa", and only the second must
+    be left alone; `és` is a verb on its own and three letters inside `Três`. A string
+    transform gets both wrong, and getting this wrong is the exact failure the field
+    exists to prevent.
+
+    So the rule runs the other way round from most lints here. It does not try to decide
+    which lines address somebody — it checks that where an author SAID a line does, the
+    other register exists and is actually the other register.
+  */
+
+  /**
+   * Verb forms and pronouns that are second-person-singular and nothing else.
+   *
+   * Deliberately excludes every ambiguous one: desculpa, olha, espera, vem, fica, diz,
+   * repete and anda are all imperatives AND third-person indicatives, so requiring a
+   * register on them would fail correct content. Unicode-aware boundaries rather than
+   * \b, which is ASCII-only in JavaScript and finds "és" inside "Três".
+   */
+  const TU_ONLY = [
+    'podes', 'tens', 'és', 'estás', 'queres', 'precisas', 'fazes', 'vais', 'sabes',
+    'dizes', 'gostas', 'falas', 'chamas', 'percebes', 'dás', 'importas',
+    'tu', 'teu', 'tua', 'teus', 'tuas', 'ti', 'contigo',
+  ]
+  const word = (w: string) => new RegExp('(?<![\\p{L}])' + w + '(?![\\p{L}])', 'iu')
+  const hasTu = (line: string) => TU_ONLY.some((w) => word(w).test(line)) || /-te\b/.test(line)
+
+  let registered = 0
+  for (const root of ROOTS) {
+    for (const b of root.branches) {
+      const B = 'root ' + root.root_id + ' / "' + b.target + '": '
+
+      if (b.address === 'tu') {
+        registered++
+        if (!b.formal) {
+          fail(B + 'is addressed with tu and carries no formal version')
+          continue
+        }
+        if (hasTu(b.formal)) {
+          fail(B + 'formal version "' + b.formal + '" is still tu')
+        }
+        if (fold(b.formal) === fold(b.target)) {
+          fail(B + 'formal version is identical to the informal one')
+        }
+      } else if (b.formal) {
+        fail(B + 'carries a formal version but is not marked as addressed')
+      } else if (hasTu(b.target)) {
+        /*
+          An unambiguous tu-form with no register declared. This is the half that catches
+          new content: author a line with `podes` in it and the lint asks for the other
+          version before it ships, which is the only way the promise on the age screen
+          stays true.
+        */
+        fail(B + 'uses an unambiguous tu form and declares no register')
+      }
+    }
+  }
+  console.log(registered + ' branches carry both registers')
+}
+
 // --- the Legend ------------------------------------------------------------
 {
   /*
