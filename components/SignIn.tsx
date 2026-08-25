@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
@@ -19,7 +20,9 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
     setExpired(new URLSearchParams(window.location.search).get('expired') === '1')
   }, [])
   const [email, setEmail] = useState('')
-  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
+  const [state, setState] = useState<
+    'idle' | 'sending' | 'sent' | 'error' | 'undeliverable'
+  >('idle')
   const [message, setMessage] = useState<string | null>(null)
   const [debugUrl, setDebugUrl] = useState<string | null>(null)
 
@@ -39,7 +42,16 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
       return
     }
     setDebugUrl(data.debug_url ?? null)
-    setState('sent')
+    /*
+      Do not say "check your email" when the server has just said it sent nothing.
+
+      Without RESEND_API_KEY the route answers { ok: true, sent: false } — it issued a
+      real token and had nowhere to post it — and this screen showed the same cheerful
+      "Check your email" it shows on success. A person then waits, checks spam, tries a
+      second address, and concludes the product is broken. It is not broken; it is
+      unconfigured, and those are different sentences.
+    */
+    setState(data.sent === false && !data.debug_url ? 'undeliverable' : 'sent')
   }
 
   return (
@@ -73,7 +85,26 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
         </div>
       ) : null}
 
-      {state === 'sent' ? (
+      {state === 'undeliverable' ? (
+        <div className="flex flex-col gap-3">
+          <h1 className="display text-balance text-3xl">No email is going to arrive.</h1>
+          <p className="text-sm leading-relaxed text-fg/85">
+            DUB has no mail sender configured yet, so it made you a sign-in link and had
+            nowhere to send it. That is a missing setting rather than a problem with your
+            address — nothing you do here will fix it.
+          </p>
+          <p className="text-sm leading-relaxed text-muted">
+            Everything you have learned is safe on this device in the meantime. It stays
+            there, and it will still be there when accounts open.
+          </p>
+          <Link
+            href="/club"
+            className="tap-target eyebrow mt-3 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            DUB CLUB
+          </Link>
+        </div>
+      ) : state === 'sent' ? (
         <>
           <h1 className="display text-balance text-3xl">Check your email.</h1>
           <p className="text-sm text-fg/80">

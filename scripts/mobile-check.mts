@@ -21,7 +21,7 @@ import { ROOTS } from '../content/roots'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const WIDTHS = [320, 360, 390, 430]
-const ROUTES = ['/club', '/legend', '/crates', '/vocab', '/drops', '/line', '/proof', '/pro', '/account', '/waitlist']
+const ROUTES = ['/club', '/legend', '/reset', '/crates', '/vocab', '/drops', '/line', '/proof', '/pro', '/account', '/waitlist']
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
 
 const problems: string[] = []
