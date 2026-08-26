@@ -75,7 +75,7 @@ export function Diagnostic() {
 
   return (
     <section className="flex flex-col gap-3">
-      <p className="eyebrow text-accent">WHAT THIS DEVICE HOLDS</p>
+      <p className="eyebrow text-accent">THIS DEVICE</p>
       <dl className="flex flex-col">
         {rows.map(([k, v]) => (
           <div key={k} className="flex items-baseline justify-between gap-3 border-b border-line/60 py-1">
@@ -85,7 +85,7 @@ export function Diagnostic() {
         ))}
       </dl>
 
-      <p className="eyebrow mt-3 text-accent">EVERY VIBE, AND WHY</p>
+      <p className="eyebrow mt-3 text-accent">EVERY VIBE</p>
       <ul className="flex flex-col">
         {CRATES.filter((c) => c.built !== false).map((c) => {
           const verdict = why(c.id)
