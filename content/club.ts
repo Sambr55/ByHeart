@@ -1,3 +1,4 @@
+import { BRAND } from '@/content/brand'
 /**
  * Dub Club — the home for somebody who has already been through DUB once.
  *
@@ -68,7 +69,7 @@ export const CLUB = {
   nothing_new:
     'Nothing new is waiting. That is allowed — going through something again is how most of this sticks.',
   moves_label: 'WORTH DOING NEXT',
-  footer: 'Find yourself in another language.',
+  footer: BRAND.strapline,
 } as const
 
 /**

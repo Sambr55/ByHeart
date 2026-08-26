@@ -1,3 +1,4 @@
+import { BRAND } from '@/content/brand'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getShareCard } from '@/lib/share'
@@ -60,7 +61,7 @@ export default async function SharePage({ params }: { params: Promise<{ id: stri
 
       <div className="border-t border-line pt-6">
         <p className="display text-balance text-lg">
-          DUB teaches European Portuguese through culture you already know.
+          {BRAND.description}
         </p>
         <p className="mt-3 text-sm leading-relaxed text-muted">
           It counts only the sentences you can say with nothing on screen to copy from,

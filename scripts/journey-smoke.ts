@@ -5,6 +5,7 @@
  *
  *   npm run journey
  */
+import { BRAND } from '../content/brand'
 import { chromium, type Locator, type Page } from 'playwright'
 import { CRATES, ROOTS, entryRung, isLive } from '../content/roots'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
@@ -94,7 +95,8 @@ async function main() {
 
   seen.push(await stage())
   const body0 = await page.evaluate(() => document.body.innerText)
-  if (!/Find yourself in another language/.test(body0)) problems.push('landing proposition missing')
+  // The door is a photograph and a strapline now, not four paragraphs of argument.
+  if (!new RegExp(BRAND.strapline, 'i').test(body0)) problems.push('landing strapline missing')
   if (/Learn Portuguese through the films/.test(body0)) {
     problems.push('landing still names the language — the brand layer is pair-neutral')
   }

@@ -13,6 +13,7 @@
  * this measures the scrim rather than trusting it.
  */
 import { chromium } from 'playwright'
+import { BRAND } from '../content/brand'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const problems: string[] = []
@@ -112,7 +113,7 @@ await bare.goto(BASE + '/')
 await bare.waitForTimeout(900)
 console.log('\n████ with the photograph blocked\n')
 const text = await bare.evaluate(() => (document.querySelector('main') ?? document.body).innerText)
-ok('the strapline is still there', /Learn Language You Love/i.test(text))
+ok('the strapline is still there', new RegExp(BRAND.strapline, 'i').test(text))
 ok('the button is still there', Boolean(await bare.$('[data-testid="landing-cta"]')))
 const ground = (await bare.evaluate(
   `getComputedStyle(document.querySelector('main')).backgroundColor`,

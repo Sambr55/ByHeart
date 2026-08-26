@@ -240,6 +240,45 @@ for (const file of files) {
 
 console.log(files.length + ' files read')
 /*
+  One strapline.
+
+  There were five at the same time: "Learn Language You Love" on the door, "Find yourself
+  in another language" in the Club footer, "Learn a language through things you already
+  know" in the metadata, and two more on the share page and the tab title. Each was
+  written on the screen it appeared on, which is exactly how a product ends up unable to
+  say what it is twice running.
+
+  BRAND.strapline is the only one. This fails on any near-miss written by hand, and near
+  misses are the whole risk — nobody would paste a second strapline in deliberately, they
+  would type a slightly different one from memory.
+*/
+{
+  const NEAR = [
+    /find yourself in (?:another |a )?language/i,
+    /learn (?:a )?language you love/i,
+    /through (?:things|culture) you already know/i,
+  ]
+  const OK_FILES = ['content/brand.ts']
+  for (const file of files) {
+    if (OK_FILES.some((f) => file.endsWith(f))) continue
+    const src = stripComments(readFileSync(file, 'utf8'))
+    src.split('\n').forEach((line, i) => {
+      for (const re of NEAR) {
+        const hit = re.exec(line)
+        if (!hit) continue
+        // The description legitimately names what the product teaches; it is not the
+        // strapline and it is allowed to describe.
+        if (/description/.test(line)) continue
+        fail(
+          file + ':' + (i + 1) + ' writes a strapline by hand ("' + hit[0] +
+            '") — there is one, and it is BRAND.strapline',
+        )
+      }
+    })
+  }
+}
+
+/*
   The roots' own product copy.
 
   content/roots.ts is excluded from the file scan and rightly so — it is full of

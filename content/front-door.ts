@@ -1,3 +1,4 @@
+import { BRAND } from '@/content/brand'
 /**
  * The two fixed beats. Everything after these belongs to the learner (§20.13).
  *
@@ -34,11 +35,13 @@ export const LANDING = {
    * it, and a reassurance — delivered before anybody had seen a word of Portuguese. It
    * was a good essay and it was a front door made of prose.
    *
-   * A place does the arguing now. "Learn Language You Love" is the whole proposition in
-   * four words, and everything the four lines used to say is proved two taps later by
-   * the Goose demo, which is a demonstration rather than a claim.
+   * A place does the arguing now. The strapline is the whole proposition in four words,
+   * and everything the four lines used to say is proved two taps later by the Goose
+   * demo, which is a demonstration rather than a claim. It comes from BRAND because
+   * there were five straplines in this product at once and each was written on the
+   * screen it appeared on.
    */
-  strapline: 'Learn Language You Love',
+  strapline: BRAND.strapline,
   /** A door, and the Club is on the other side of it. */
   cta: 'COME IN',
   /**
