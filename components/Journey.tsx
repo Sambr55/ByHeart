@@ -434,44 +434,37 @@ function Deal() {
       <p className="display mt-3 text-balance text-3xl">{DEAL_COPY.headline}</p>
 
       <div className="mt-6 space-y-6 pb-6">
-        <Block label={DEAL_COPY.how.label} lines={DEAL_COPY.how.steps} numbered />
-
         {/*
-          The Legend, argued for by its own questions.
+          The destination first, then the lock on the door, then the method.
 
-          Four of these are recognisable on sight to somebody who has never learned a
-          word of Portuguese, which is the entire persuasion. A paragraph of adjectives
-          about a "personalised profile" would do none of it.
+          This screen used to open with HOW IT WORKS — a mechanism explained to somebody
+          who had not been told what it was for. That was right while finishing your
+          Legend was the point. Joining the Club is the point now, so the order is where
+          you are going, what gets you in, and only then how you get the language for it.
         */}
+        <section>
+          <p className="text-sm leading-relaxed text-fg/85">{DEAL_COPY.intro.body}</p>
+          <p className="mt-3 text-sm font-semibold leading-relaxed">{DEAL_COPY.intro.gate}</p>
+        </section>
+
+        {/* The passport, argued for by its own questions rather than by adjectives. */}
         <section className="border-t border-line pt-3">
-          <p className="eyebrow text-accent">{DEAL_COPY.legend.label}</p>
-          <p className="display mt-3 text-balance text-xl">{DEAL_COPY.legend.head}</p>
-          <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.legend.why}</p>
-          <p className="mt-6 text-sm leading-relaxed text-muted">{DEAL_COPY.legend.intro}</p>
-          <ul className="mt-3 flex flex-col gap-3">
-            {DEAL_COPY.legend.questions.map((q) => (
+          <p className="eyebrow text-accent">{DEAL_COPY.card.label}</p>
+          <p className="display mt-3 text-balance text-xl">{DEAL_COPY.card.head}</p>
+          <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.card.body}</p>
+          <ul className="mt-6 flex flex-col gap-3">
+            {DEAL_COPY.card.questions.map((q) => (
               <li key={q.pt} className="flex flex-col rounded border border-line bg-bg-elev px-4 py-3">
                 <span className="pt text-base text-accent">{q.pt}</span>
                 <span className="mt-1 text-xs text-muted">{q.en}</span>
               </li>
             ))}
           </ul>
-          <p className="mt-3 text-xs text-muted">{DEAL_COPY.legend.more}</p>
-          <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.legend.close}</p>
+          <p className="mt-3 text-xs text-muted">{DEAL_COPY.card.more}</p>
         </section>
 
-        {/*
-          Where it goes, drawn.
+        <Block label={DEAL_COPY.how.label} lines={DEAL_COPY.how.steps} numbered />
 
-          This was a six-rung ladder with a name, a description and an example on every
-          rung — a hundred words of briefing on a system the product no longer shows,
-          delivered before the learner had met one word of Portuguese. It was the longest
-          thing on the screen and the least useful.
-
-          The same component draws the same five steps on the shelf when the free three
-          run out, so the picture somebody is shown at the start is the picture they are
-          standing inside later. One shape, learned once.
-        */}
         <section className="border-t border-line pt-3">
           <p className="eyebrow text-accent">{DEAL_COPY.path.label}</p>
           <Path at={0} className="mt-6" />
@@ -497,7 +490,6 @@ function Deal() {
         </section>
 
         <Block label={DEAL_COPY.ask.label} lines={DEAL_COPY.ask.lines} />
-        <Block label={DEAL_COPY.get.label} lines={DEAL_COPY.get.lines} />
 
         <section className="rounded border border-line bg-bg-elev p-4">
           <p className="eyebrow text-muted">{DEAL_COPY.not.label}</p>
@@ -638,6 +630,17 @@ function Demo({ i }: { i: number }) {
   return (
     <Shell stage="DEMO" nav>
       <div className="flex flex-1 flex-col justify-center">
+        {/*
+          The claim first, then the set-up, then the thing itself.
+
+          The claim is the argument the landing used to carry and no longer does. It has
+          to be ABOVE the line rather than under it, because it is what the line is about
+          to prove — underneath, it would read as a comment on a trick that already
+          happened.
+        */}
+        {beat.claim ? (
+          <p className="display mb-3 text-balance text-xl leading-snug">{beat.claim}</p>
+        ) : null}
         {/* Sentence case and quiet on purpose: it is somebody speaking to you, not a
             label for the screen, so it must not read as an eyebrow. */}
         {beat.lead ? <p className="mb-3 text-sm text-muted">{beat.lead}</p> : null}

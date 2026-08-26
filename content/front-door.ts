@@ -58,6 +58,19 @@ export const LANDING = {
 export interface DemoBeat {
   key: 'recognise' | 'build'
   /**
+   * The claim this beat exists to prove.
+   *
+   * The landing used to make it — "You understand far more than you can say" — and when
+   * the door became a photograph those four paragraphs went, on the argument that the
+   * demo proves it two taps later. Which it does, except a proof with no claim in front
+   * of it is just a trick: somebody is shown a film line in Portuguese and has to work
+   * out for themselves what it is supposed to mean about them.
+   *
+   * So the argument moved here, onto the screen that settles it, where it is one line
+   * instead of four paragraphs and is answered eight seconds later instead of never.
+   */
+  claim?: string
+  /**
    * The quiet line ABOVE the big one, setting it up.
    *
    * Without it the first thing a stranger meets is four words shouted in caps with no
@@ -97,7 +110,8 @@ export interface DemoBeat {
 export const DEMO_BEATS: DemoBeat[] = [
   {
     key: 'recognise',
-    lead: 'Here’s a line you might recognise:',
+    claim: 'You already understand more than you can say.',
+    lead: 'Everybody does. Here is a line you know:',
     display: 'TALK TO ME, GOOSE.',
     gloss: 'You already know what Maverick means.',
     translation: { pt: 'FALA COMIGO, GOOSE.', en: 'Talk to me, Goose.' },
@@ -161,70 +175,55 @@ export const DEMO_CLOSE =
  * deliberately refused to build.
  */
 export const DEAL = {
-  eyebrow: 'BEFORE YOU START',
-  headline: 'Here’s the deal.',
-  how: {
-    label: 'HOW IT WORKS',
-    steps: [
-      'Start with something you connect with.',
-      'We pull out the useful language hiding inside it, and you keep it.',
-      'Then we take it all away and find out whether it stuck.',
-    ],
+  /**
+   * The deal, rebuilt around the goal.
+   *
+   * It used to open "Here's the deal" and lead with HOW IT WORKS — a method, explained
+   * to somebody who had not yet been told what it was for. That was right when finishing
+   * your Legend was the point. It stopped being right the moment joining Dub Club became
+   * the goal and the Legend became the passport, and a screen that explains the mechanism
+   * before the destination is answering a question nobody has asked yet.
+   *
+   * So: where you are going, what gets you in, how you get the language for it, and what
+   * it costs you in effort. In that order, because that is the order somebody deciding
+   * actually wants them.
+   */
+  eyebrow: 'WHERE THIS GOES',
+  headline: 'Dub Club — Lisbon.',
+  /** The destination, before anything about method. */
+  intro: {
+    body: 'A room for people who are going to Lisbon and want to arrive able to speak. Inside it is the part that is about Lisbon rather than about Portuguese — the people, the places, and what to say when a conversation goes wrong.',
+    /** Said plainly, because a door with no visible lock is not a door. */
+    gate: 'You get in by being able to introduce yourself in Portuguese, out loud, with nothing on screen to read from.',
   },
-  /**
-   * The stages were being shown as a number on a screen before anything had explained
-   * what they were — "you are at 5" means nothing to somebody who has never been told
-   * there are six of them or what they lead to. This block is that explanation, and it
-   * is deliberately the most visual thing on the page.
-   */
-  /**
-   * The Legend, explained where it is sold.
-   *
-   * It is the biggest thing DUB offers and the deal screen mentioned it in prose exactly
-   * never — one line inside a diagram, naming it without saying what it is. Somebody
-   * deciding whether to start was being asked to want a thing they had not been told
-   * about. (The single line that did mention it was cut in a pass that made the screen
-   * shorter, which is how a trim quietly removes the argument.)
-   *
-   * It is carried by the QUESTIONS rather than by adjectives. Ten real questions in
-   * Portuguese, four of which anybody can recognise on sight, does the persuading that
-   * "personalised profile" never would — and it is the honest shape of the thing: not a
-   * speech, a handful of answers.
-   */
-  legend: {
-    label: 'THE LEGEND',
-    head: 'The minute about yourself you can say without thinking.',
-    /** The name is doing real work, so the reason for it is worth ten words. */
-    why: 'An operative learns a legend until it comes out without being assembled, because hesitation is what gives you away. Yours is the same idea, except all of it is true.',
-    intro: 'Every conversation in Portugal opens with the same handful of questions:',
+  /** The passport. Carried by the questions, because the questions do the persuading. */
+  card: {
+    label: 'THE WAY IN',
+    head: 'Seven questions a stranger will ask you.',
+    body: 'Answer them in your own Portuguese and you are in. Not a phrase you memorised — your name, your reasons, your life, built out of language you own.',
     questions: [
       { pt: 'Como te chamas?', en: 'What are you called?' },
       { pt: 'De onde és?', en: 'Where are you from?' },
-      { pt: 'Que idade tens?', en: 'How old are you?' },
-      { pt: 'Tens filhos?', en: 'Do you have children?' },
+      { pt: 'O que fazes?', en: 'What do you do?' },
       { pt: 'Porquê Portugal?', en: 'Why Portugal?' },
     ],
-    more: 'Ten in all.',
-    close: 'You build it a piece at a time, out of language you already own — so the answers come out in your own Portuguese rather than a phrase you memorised. It opens five vibes in.',
+    more: 'Seven in all, and three more waiting inside.',
   },
-
-  /**
-   * Where it goes. Drawn by <Path>, not described here.
-   *
-   * This block used to be THE SIX STAGES — a hundred-word briefing on a ladder the
-   * product no longer surfaces anywhere, delivered before the learner had seen a single
-   * word of Portuguese. It was the longest thing on the screen and the least useful. The
-   * question somebody actually has at this point is "where does this end up", and the
-   * answer is a picture.
-   */
+  /** Now the method, which is the answer to "how would I ever be able to do that". */
+  how: {
+    label: 'HOW YOU GET THERE',
+    steps: [
+      'Pick a vibe — something you already love, in English.',
+      'We pull the useful Portuguese out of it, and you keep it.',
+      'Then we take it all away and find out whether it stuck.',
+    ],
+  },
   path: {
-    label: 'WHERE IT GOES',
+    label: 'THE WHOLE THING',
     note: 'You never lose a vibe, and nothing expires if you disappear for a month.',
   },
   collect: {
     label: 'WHAT YOU KEEP',
-    // HOW IT WORKS already says you keep them, so this only has to say the part that
-    // is surprising: that they combine across crates.
     note: 'And they combine — a word out of a Bond title finishing a sentence that started in Bridget Jones.',
     examples: ['comigo', 'onde', 'quanto', 'ajuda', 'ele', 'segunda-feira'],
   },
@@ -235,19 +234,11 @@ export const DEAL = {
       'Say it out loud. Reading it is not the same thing.',
     ],
   },
-  get: {
-    label: 'WHAT YOU GET',
-    lines: [
-      'Sentences you can say cold, to a real person, without rehearsing first.',
-      'Counted honestly — the number only moves when there is nothing on screen to copy from.',
-    ],
-  },
   not: {
     label: 'WHAT THIS IS NOT',
-    line:
-      'No streaks, no points, no lives. A thousand-day streak has never once helped anybody order a coffee.',
+    line: 'No streaks, no points, no lives. A thousand-day streak has never once helped anybody order a coffee.',
   },
-  cta: 'I’M IN',
+  cta: 'START MY CARD',
 } as const
 
 /** §08 / §09 — the first meaningful learner choice, and it comes after the demo. */
