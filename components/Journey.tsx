@@ -45,7 +45,7 @@ import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Menu } from '@/components/Menu'
 import { Shelves } from '@/components/Shelves'
-import { LEGEND_COPY, LEGEND_FRAMES, cratesToGo, framesUnlockedBy } from '@/content/legend'
+import { LEGEND_COPY, LEGEND_FRAMES, legendStatus } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
 import { setPair } from '@/engine/pair'
@@ -2384,7 +2384,7 @@ function SectionComplete() {
           your Legend" to somebody who has never seen one is meaningless. After that it
           is quiet reinforcement, and if they declined it never appears again.
         */}
-        <LegendPayoff owned={owned} />
+        <LegendPayoff family={state.family} />
         {remaining.length ? (
           <p className="mt-6 text-sm text-muted">
             {remaining.length} more {remaining.length === 1 ? 'vibe' : 'vibes'} to raid,
@@ -2564,34 +2564,44 @@ function LegendNudge({ piece }: { piece: string }) {
  * have not been offered it and have not yet reached enough cards to make the offer
  * honest. A goal you did not choose is a nag.
  */
-function LegendPayoff({ owned }: { owned: string[] }) {
+function LegendPayoff({ family }: { family: CultureFamily | null }) {
   const learner = useLearner()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
-  const answered = (learner.legend ?? []).map((a) => a.frame_id)
-  const fresh = useMemo(
-    () => (mounted ? framesUnlockedBy(owned, answered) : []),
-    [owned, answered.join('|'), mounted],
-  )
-
-  useEffect(() => {
-    if (fresh.length) track('legend_unlocked', { cards: fresh.map((f) => f.id) })
-  }, [fresh.length])
-
-  if (!mounted || learner.legend_prompt === 'declined' || !fresh.length) return null
 
   /*
-    Banked, or actually open?
+    One model, asked once.
 
-    framesUnlockedBy answers "do you have the words for this card". It does NOT answer
-    "can you build your Legend yet", which is the five-crate gate — and this screen used
-    the first to make a promise about the second: "2 Legend cards just opened", button
-    reading FILL THEM IN, and the Legend one tap later saying "one more crate and these
-    open". Both screens were right; the words were wrong.
+    This used to compute framesUnlockedBy(owned, answered) — "which cards do you now have
+    the WORDS for" — and announce them: "two Legend cards just opened". The Legend
+    stopped working that way a long time ago; it counts vibes and opens every card at
+    once. So the promise was made in a language the Legend could not honour, and tapping
+    through landed on a wall.
+
+    `family` is the vibe being finished right now. sections_completed does not include it
+    until the learner taps through, so without it this screen tells somebody finishing
+    their fifth vibe that they need one more.
   */
-  const toGo = cratesToGo(learner.sections_completed ?? [])
-  const usable = toGo === 0
+  const status = legendStatus({
+    sectionsCompleted: learner.sections_completed ?? [],
+    currentFamily: family,
+  })
+  const answered = (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0).length
+  const waiting = LEGEND_FRAMES.length - answered
+
+  useEffect(() => {
+    if (status.open) track('legend_unlocked', { cards: [] })
+  }, [status.open])
+
+  // Nothing to say once the whole thing is built, and nothing to say to somebody who
+  // declined it.
+  if (!mounted || learner.legend_prompt === 'declined' || !waiting) return null
+
+  const usable = status.open
+  const toGo = status.toGo
   const offering = usable && learner.legend_prompt === 'unseen'
+  /** The hook is the questions themselves, not a count of them. */
+  const preview = LEGEND_FRAMES.slice(0, 3)
 
   return (
     <div
@@ -2603,12 +2613,10 @@ function LegendPayoff({ owned }: { owned: string[] }) {
         {offering
           ? LEGEND_COPY.offer_head
           : usable
-            ? fresh.length === 1
-              ? 'One Legend card just opened.'
-              : fresh.length + ' Legend cards just opened.'
-            : fresh.length === 1
-              ? LEGEND_COPY.banked_one
-              : fresh.length + ' ' + LEGEND_COPY.banked_many}
+            ? LEGEND_COPY.open_head
+            : toGo === 1
+              ? LEGEND_COPY.one_more
+              : toGo + ' ' + LEGEND_COPY.more_to_go}
       </p>
       {!usable ? (
         <p className="text-xs leading-relaxed text-muted">
@@ -2616,7 +2624,7 @@ function LegendPayoff({ owned }: { owned: string[] }) {
         </p>
       ) : null}
       <p className="flex flex-wrap gap-x-3 gap-y-1">
-        {fresh.slice(0, 3).map((f) => (
+        {preview.map((f) => (
           <span key={f.id} className="pt text-sm text-accent">
             {f.ask}
           </span>
@@ -2642,7 +2650,7 @@ function LegendPayoff({ owned }: { owned: string[] }) {
           data-testid="legend-open"
           onClick={() => {
             setLegendPrompt('accepted')
-            track('legend_offered', { taken: true, cards: fresh.length })
+            track('legend_offered', { taken: true, cards: status.openCards })
           }}
           className="tap-target eyebrow rounded bg-accent px-4 py-3 text-accent-ink"
         >

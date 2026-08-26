@@ -23,7 +23,7 @@ import { isCurrent, situationsFor } from '@/content/situations'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
-import { LEGEND_FRAMES, framesUnlockedBy, legendUnlocked } from '@/content/legend'
+import { LEGEND_FRAMES, legendUnlocked } from '@/content/legend'
 import { capabilities } from '@/engine/journey'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { track } from '@/engine/analytics'
@@ -288,21 +288,22 @@ function Moves({
     what a crate was FOR. It never appears to somebody who declined it.
   */
   if (mounted && learner.legendPrompt !== 'declined' && learner.legendUnlocked) {
+    /*
+      Counted in cards ANSWERED, not in cards "unlocked".
+
+      This asked framesUnlockedBy — which cards you have the words for — and offered "2
+      new Legend cards". The Legend has not worked that way for a long time: it counts
+      vibes and opens all ten at once, so the number here was from a model the page it
+      links to had no concept of. Once it is open, what is left is simply what is left.
+    */
     const total = LEGEND_FRAMES.length
-    const fresh = framesUnlockedBy(learner.ownedPieces, learner.legendAnswered)
     const done = learner.legendAnswered.length
-    if (done || fresh.length) {
+    const left = total - done
+    if (left) {
       moves.push({
         key: 'legend',
-        ...(fresh.length ? MOVES.legend_new : MOVES.legend),
-        verb: fresh.length
-          ? fresh.length === 1
-            ? 'A new Legend card'
-            : fresh.length + ' new Legend cards'
-          : MOVES.legend.verb,
-        detail: done
-          ? done + ' of ' + total + ' answered' + (fresh.length ? ' · ' + fresh.length + ' just opened' : '')
-          : fresh.length + ' ready to fill in',
+        ...MOVES.legend,
+        detail: done ? done + ' of ' + total + ' answered' : 'Ten questions, one at a time',
         href: '/legend',
         urgent: false,
       })

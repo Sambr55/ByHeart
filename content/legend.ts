@@ -418,20 +418,50 @@ export function cratesToGo(sectionsCompleted: string[]): number {
   return Math.max(0, CRATES_TO_UNLOCK_LEGEND - new Set(sectionsCompleted).size)
 }
 
-export function framesUnlockedBy(owned: string[], answered: string[]): LegendFrame[] {
-  const have = new Set(owned)
-  const done = new Set(answered)
-  return LEGEND_FRAMES.filter(
-    (f) => !done.has(f.id) && f.built_from.every((p) => have.has(p)),
-  )
+/**
+ * Where somebody stands with their Legend. The ONLY answer to that question.
+ *
+ * There were two, and they disagreed. The Legend used to open card by card, on owning
+ * the specific words a card is built from — deliberately deleted, because every one of
+ * the eighteen words was taught in exactly one vibe, so "unlock your Legend" quietly
+ * meant "play these eight particular vibes", and two cards hung on a word that only
+ * exists inside a drop. It counts vibes now, and every card opens at once.
+ *
+ * The session screen and the Club were never told. They kept announcing cards unlocked
+ * by WORDS — "two Legend cards just opened" — which the Legend had no concept of, so a
+ * learner tapped through to a wall. Both screens were internally correct and they were
+ * running different products.
+ *
+ * So it is answered in one place, and framesUnlockedBy/framesReachable are deleted
+ * rather than deprecated. A model nobody can call is a model that cannot come back.
+ */
+export interface LegendStatus {
+  open: boolean
+  /** Vibes still needed. Zero when open. */
+  toGo: number
+  /** Cards that can be built right now — all of them, or none. */
+  openCards: number
+}
+
+export function legendStatus(opts: {
+  sectionsCompleted: string[]
+  /**
+   * The vibe being finished right now.
+   *
+   * sections_completed does not include it until the learner taps through, so the screen
+   * that announces the Legend was working a vibe behind — telling somebody finishing
+   * their fifth that they needed one more.
+   */
+  currentFamily?: string | null
+}): LegendStatus {
+  const done = opts.currentFamily
+    ? [...new Set([...opts.sectionsCompleted, opts.currentFamily])]
+    : opts.sectionsCompleted
+  const open = legendUnlocked(done)
+  return { open, toGo: cratesToGo(done), openCards: open ? LEGEND_FRAMES.length : 0 }
 }
 
 /** Every card the learner's language reaches, answered or not. Drives the count. */
-export function framesReachable(owned: string[]): LegendFrame[] {
-  const have = new Set(owned)
-  return LEGEND_FRAMES.filter((f) => f.built_from.every((p) => have.has(p)))
-}
-
 /**
  * Which crates a frame's words came from — the line that makes this DUB.
  *
@@ -511,8 +541,10 @@ export const LEGEND_COPY = {
    * Banking is the honest word and it is also the better hook: you can see what you have
    * earned without being told you can spend it.
    */
-  banked_one: 'One more Legend card banked.',
-  banked_many: 'Legend cards banked.',
+  /** Progress is counted in vibes, because that is what the Legend actually counts. */
+  open_head: 'Your Legend is open.',
+  one_more: 'One more vibe and your Legend opens.',
+  more_to_go: 'more vibes and your Legend opens.',
   banked_note_one: 'They open after one more vibe.',
   banked_note_many: 'They open once you have done five vibes.',
   banked_cta: 'SEE WHAT IS WAITING',
