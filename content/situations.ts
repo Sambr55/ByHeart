@@ -30,7 +30,15 @@ export interface SituationImage {
   /** Required. Describes the evidence, not the mood. */
   alt: string
   credit?: string
-  rights_status: 'owned' | 'licensed' | 'cc-by' | 'permission-given'
+  /**
+   * 'generated' is not a hedge, it is the commonest answer and it needed a name.
+   *
+   * The enum had four values and every one of them assumed a photographer. Every image
+   * in this product so far is generated, so the only honest option was missing — and an
+   * enum that cannot express the truth gets filled in with whichever value is closest,
+   * which is how rights records become fiction.
+   */
+  rights_status: 'generated' | 'owned' | 'licensed' | 'cc-by' | 'permission-given'
   /** Places rot, and a photograph has an age. */
   taken_at?: string
 }
@@ -106,6 +114,13 @@ export const SITUATIONS: Situation[] = [
     release: {
       ask: 'I do not feel well. Do you have anything for this?',
       answer: 'Não me sinto bem. Tem alguma coisa para isto?',
+    },
+    image: {
+      src: '/lisbon/pharmacy.jpg',
+      // The information, not the mood. Somebody who cannot see it should know what kind
+      // of room they are walking into, because that is what the picture is doing here.
+      alt: 'Inside a small Portuguese pharmacy: a marble counter, dark wooden drawers, and shelves of boxes to the ceiling. A pharmacist in a white coat stands at the far end.',
+      rights_status: 'generated',
     },
     rung: 2,
     review_by: '2027-08-01',

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
@@ -42,6 +43,29 @@ export function Errand({ situation }: { situation: Situation }) {
 
       {stage === 'read' ? (
         <>
+          {/*
+            The room, before the language for it.
+
+            This is the evidence register rather than the front door's: an ordinary
+            pharmacy on an ordinary afternoon, not a sunset. It is doing a different job
+            too — the door makes you want to go, and this makes the place recognisable
+            before you are standing in it, which is most of what being nervous is about.
+
+            16:9 and short on purpose. It sets the scene and then gets out of the way,
+            because the lines underneath are what somebody actually came for.
+          */}
+          {situation.image ? (
+            <div className="relative -mx-5 aspect-[16/9] overflow-hidden">
+              <Image
+                src={situation.image.src}
+                alt={situation.image.alt}
+                fill
+                sizes="(max-width: 448px) 100vw, 448px"
+                className="object-cover"
+              />
+            </div>
+          ) : null}
+
           <div className="flex flex-col gap-3">
             <p className="eyebrow text-muted">{chapter.city.toUpperCase()}</p>
             <h1 className="display text-balance text-3xl">{situation.title}</h1>

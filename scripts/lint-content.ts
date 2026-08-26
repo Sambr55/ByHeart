@@ -1363,6 +1363,14 @@ for (const e of EXAMPLES) {
     if (sit.image) {
       if (!sit.image.alt.trim()) fail(S + 'has an image with no alt text')
       if (!sit.image.rights_status) fail(S + 'has an image with no rights status')
+      // An alt that says "a photo of a pharmacy" is not the information the picture
+      // carries. Short ones are almost always that.
+      if (sit.image.alt.trim().length < 40) {
+        fail(S + 'has alt text too short to replace the picture')
+      }
+      if (!sit.image.src.startsWith('/')) {
+        fail(S + 'hotlinks its image — assets are local or they break silently')
+      }
     }
 
     // Places rot. A Club full of things that are no longer true is worse than a smaller
