@@ -70,7 +70,6 @@ for (const width of [320, 390, 430]) {
       var out = []
       var targets = [
         ['strapline', document.querySelector('main p.display')],
-        ['button', document.querySelector('[data-testid="landing-cta"]')],
       ]
       for (var i = 0; i < targets.length; i++) {
         var what = targets[i][0], el = targets[i][1]
@@ -91,6 +90,41 @@ for (const width of [320, 390, 430]) {
       return out
     })()
   `)) as { what: string; alpha: number; contrast: number }[]
+
+  /*
+    The button is measured on its own terms.
+
+    It has a solid fill now, so the scrim behind it is irrelevant — what matters is its
+    label against its own background, which is a real number rather than a worst case.
+  */
+  const btn = (await page.evaluate(`
+    (function () {
+      function lum(c) {
+        var v = c.map(function (x) {
+          var s = x / 255
+          return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4)
+        })
+        return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]
+      }
+      function rgb(str) {
+        var m = str.match(/\\d+/g) || []
+        return [Number(m[0] || 0), Number(m[1] || 0), Number(m[2] || 0)]
+      }
+      var el = document.querySelector('[data-testid="landing-cta"]')
+      if (!el) return null
+      var cs = getComputedStyle(el)
+      var bg = lum(rgb(cs.backgroundColor))
+      var fg = lum(rgb(cs.color))
+      var hi = Math.max(bg, fg), lo = Math.min(bg, fg)
+      return { bg: cs.backgroundColor, fg: cs.color, contrast: Number(((hi + 0.05) / (lo + 0.05)).toFixed(2)) }
+    })()
+  `)) as { bg: string; fg: string; contrast: number } | null
+  if (btn) {
+    console.log('    button      ' + btn.fg + ' on ' + btn.bg + '  ' + btn.contrast + ':1')
+    ok('the button label reads on the button', btn.contrast >= 4.5, btn.contrast + ':1')
+  } else {
+    ok('the button label reads on the button', false, 'no button')
+  }
 
   for (const r of readings) {
     console.log('    ' + r.what.padEnd(12) + 'scrim ' + r.alpha + '  white-on-worst-case ' + r.contrast + ':1')

@@ -597,7 +597,17 @@ function Landing() {
             track('landing_cta_tap', {})
             next()
           }}
-          className="tap-target eyebrow w-full max-w-sm rounded bg-white px-5 py-3 text-[#241f1a] transition active:scale-[0.99]"
+          /*
+            Azulejo blue, pinned rather than tokenised.
+
+            --accent is that blue in light mode and flips to a pale #7fb3da with dark ink
+            in dark mode, because everywhere else in the product it sits on sand or on
+            near-black. The door does neither: it is a photograph and a scrim, always
+            dark, whatever the phone is set to. Using the token here would give a pale
+            button with dark text on half of all devices, and the tiles in the picture
+            are this blue.
+          */
+          className="tap-target eyebrow w-full max-w-sm rounded bg-[#1f5d8c] px-5 py-3 text-white transition active:scale-[0.99]"
         >
           {LANDING.cta}
         </button>
