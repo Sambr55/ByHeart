@@ -28,6 +28,7 @@ import { INSIGHTS } from '../content/osmosis'
 import { beatsFor, capabilities, sectionRoots } from '../engine/journey'
 
 const problems: string[] = []
+const warnings: string[] = []
 const fail = (m: string) => problems.push(m)
 
 /** The picker's own rule, for a learner with nothing. */
@@ -215,6 +216,48 @@ if (basics) {
   if (missing.length) {
     console.log(
       '  warn  the basics promises counting to ten and never teaches ' + missing.join(', '),
+    )
+  }
+}
+
+/*
+  Every vibe opens with its banger, wherever the banger is reachable.
+
+  A vibe opened with whatever happened to be authored first at the lowest rung — Pulp
+  Fiction started on "What? — Say what again", with "Royale with Cheese" sitting unused
+  two roots below. Somebody picks a vibe FOR a line; that line should be the first thing
+  they meet.
+
+  The freebie is that root and always was — one per vibe, a ten-second wink, no puzzle.
+  It was marked and never used for ordering.
+
+  This also prints the vibes whose banger is out of reach, which is a content question
+  rather than a bug: a beginner cannot open Bridget Jones on the best line in it if the
+  best line is written at rung 6.
+*/
+{
+  const outOfReach: string[] = []
+  for (const crate of CRATES.filter((c) => c.built !== false && !c.drop)) {
+    const all = ROOTS_BY_FAMILY[crate.id] ?? []
+    const banger = all.find((r) => r.freebie_flag)
+    if (!banger) {
+      warnings.push(crate.id + ' has no freebie, so it has no designated opener')
+      continue
+    }
+    // At the rung the banger itself sits on, it must be what the vibe opens with.
+    const served = sectionRoots(crate.id, banger.rung, [])
+    if (served[0]?.root_id !== banger.root_id) {
+      fail(
+        crate.id + ' opens on "' + served[0]?.root_display + '" at rung ' + banger.rung +
+          ' — the banger "' + banger.root_display + '" is reachable and should be first',
+      )
+    }
+    if (banger.rung > 2) outOfReach.push(crate.id + ' (rung ' + banger.rung + ')')
+  }
+  if (outOfReach.length) {
+    console.log(
+      '\n  ' + outOfReach.length + ' of 11 vibes keep their banger above rung 2, so a ' +
+        'beginner never opens on it:\n    ' + outOfReach.join('\n    '),
     )
   }
 }

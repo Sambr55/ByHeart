@@ -145,6 +145,23 @@ function newerOf<T>(a: T | null | undefined, b: T | null | undefined, aAt?: stri
   return b
 }
 
+/**
+ * Answered beats unanswered, whichever side it came from.
+ *
+ * `skipped` is a set union rather than a preference: skipping is itself an answer — it
+ * is how the product remembers not to ask again — and losing it re-asks a question
+ * somebody has already declined, which is worse than losing the answer.
+ */
+function mergeProfile(l: Rec, r: Rec): Rec {
+  const out: Rec = { ...l, ...r }
+  for (const key of new Set([...Object.keys(l), ...Object.keys(r)])) {
+    if (key === 'skipped') continue
+    out[key] = r[key] ?? l[key] ?? null
+  }
+  out.skipped = setUnion(l.skipped as unknown[], r.skipped as unknown[])
+  return out
+}
+
 export function mergeLearner(local: Partial<LearnerState>, remote: Partial<LearnerState>): LearnerState {
   const l = local ?? {}
   const r = remote ?? {}
@@ -258,10 +275,20 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     display_name: newerOf(l.display_name, r.display_name) || '',
     tester_label: l.tester_label || r.tester_label || '',
 
-    profile: { ...obj(l.profile), ...obj(r.profile), skipped: setUnion(
-      (obj(l.profile) as Rec).skipped,
-      (obj(r.profile) as Rec).skipped,
-    ) },
+    /*
+      An answered question stays answered.
+
+      This was { ...local, ...remote }, which is last-writer-wins field by field — and a
+      null is a value. A device that synced BEFORE the questions were asked put nulls on
+      the server, and every sync afterwards spread those nulls back over the answers. The
+      learner answered "how old are you", it was quietly unset, and the product asked
+      again. And again.
+
+      Answered beats unanswered on both sides, which is the same rule the rest of this
+      file lives under: a merge may only ever gain. The gain check did not catch it
+      because it counted proof and inventory, and a profile field is neither.
+    */
+    profile: mergeProfile(obj(l.profile) as Rec, obj(r.profile) as Rec),
     affinity: { ...obj(l.affinity), ...obj(r.affinity) },
     experiment: { ...obj(l.experiment), ...obj(r.experiment) },
   } as unknown as LearnerState

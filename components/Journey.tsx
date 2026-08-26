@@ -74,6 +74,7 @@ import {
   acquirePiece,
   markOsmosisSeen,
   recordProof,
+  rememberSection,
   rememberNoCue,
   loadLearner,
   markSwitchSeen,
@@ -2440,6 +2441,24 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
  */
 function SectionComplete() {
   const { finishSection, owned, state } = useJourney()
+  /*
+    The section is finished because this screen exists, not because a button was pressed.
+
+    rememberSection fired inside finishSection — the two buttons at the foot of this
+    screen — so a learner who got here and left by any other route had done the work and
+    banked none of it. That produced two separate reports: a shelf where every vibe said
+    AFTER BASICS above a card reading "3 of 14 taken", and a Legend that said "your
+    Legend is open" one tap before saying it was locked.
+
+    The second was mine. The payoff counted the vibe in progress and the Legend counted
+    only recorded ones, so at exactly four-plus-this-one they disagreed — and the fix for
+    that was a flag passed to one caller, which is a patch over the same split. Recording
+    it here removes the split instead: by the time anything on this screen speaks, the
+    section is real.
+  */
+  useEffect(() => {
+    if (state.family) rememberSection(state.family)
+  }, [state.family])
   const learner = useLearner()
   const acts = capabilities(owned)
   const now = useNowAfterMount()
@@ -2507,7 +2526,7 @@ function SectionComplete() {
           your Legend" to somebody who has never seen one is meaningless. After that it
           is quiet reinforcement, and if they declined it never appears again.
         */}
-        <LegendPayoff family={state.family} />
+        <LegendPayoff />
         {remaining.length ? (
           <p className="mt-6 text-sm text-muted">
             {remaining.length} more {remaining.length === 1 ? 'vibe' : 'vibes'} to raid,
@@ -2687,7 +2706,7 @@ function LegendNudge({ piece }: { piece: string }) {
  * have not been offered it and have not yet reached enough cards to make the offer
  * honest. A goal you did not choose is a nag.
  */
-function LegendPayoff({ family }: { family: CultureFamily | null }) {
+function LegendPayoff() {
   const learner = useLearner()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -2705,10 +2724,9 @@ function LegendPayoff({ family }: { family: CultureFamily | null }) {
     until the learner taps through, so without it this screen tells somebody finishing
     their fifth vibe that they need one more.
   */
-  const status = legendStatus({
-    sectionsCompleted: learner.sections_completed ?? [],
-    currentFamily: family,
-  })
+  // No currentFamily any more: SectionComplete records the section on mount, so this
+  // reads the same truth /legend does rather than a prediction of it.
+  const status = legendStatus({ sectionsCompleted: learner.sections_completed ?? [] })
   const answered = (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0).length
   const waiting = LEGEND_FRAMES.length - answered
 

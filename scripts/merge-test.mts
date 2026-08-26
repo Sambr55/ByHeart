@@ -333,6 +333,48 @@ function ev(
   )
 }
 
+{
+  /*
+    An answered question stays answered.
+
+    The profile merged as { ...local, ...remote }, which is last-writer-wins field by
+    field — and a null is a value. A device that synced BEFORE the questions were asked
+    put nulls on the server, and every sync afterwards spread them back over the answers.
+    The learner answered "how old are you", it was silently unset, and the product asked
+    again. The gain check missed it because it counts proof and inventory, and a profile
+    field is neither.
+  */
+  const answered = { gender: 'f', age_band: '40to59', goal: 'moving', skipped: [] }
+  const blank = { gender: null, age_band: null, goal: null, skipped: [] }
+  const both = mergeLearner(
+    { profile: answered } as never,
+    { profile: blank } as never,
+  ) as unknown as { profile: Record<string, unknown> }
+  check(
+    'an older blank profile cannot unset an answer',
+    both.profile.age_band === '40to59' && both.profile.gender === 'f',
+    JSON.stringify(both.profile),
+  )
+  const other = mergeLearner(
+    { profile: blank } as never,
+    { profile: answered } as never,
+  ) as unknown as { profile: Record<string, unknown> }
+  check(
+    'and it works from the other side too',
+    other.profile.age_band === '40to59',
+    JSON.stringify(other.profile),
+  )
+  const skips = mergeLearner(
+    { profile: { ...blank, skipped: ['gender'] } } as never,
+    { profile: { ...blank, skipped: ['goal'] } } as never,
+  ) as unknown as { profile: { skipped: string[] } }
+  check(
+    'skipping is an answer and both sides keep it',
+    skips.profile.skipped.includes('gender') && skips.profile.skipped.includes('goal'),
+    JSON.stringify(skips.profile.skipped),
+  )
+}
+
 console.log('')
 if (failures) { console.log(failures + ' merge fixture(s) failed'); process.exit(1) }
 console.log('merge fixtures pass: a merge can only ever gain')

@@ -54,28 +54,32 @@ for (let n = 0; n <= 6; n++) {
 }
 
 console.log('\nthe promise\n')
-/**
- * The real thing both screens call. Not a copy of their logic — the same function, so a
- * test passing here means the product agrees with itself rather than with this file.
- */
-const payoffSaysOpen = (sectionsCompleted: string[], currentFamily: string | null) =>
-  legendStatus({ sectionsCompleted, currentFamily }).open
+/*
+  The lag is gone rather than compensated for.
 
-const four = spending.slice(0, 4)
+  This used to pass the vibe in progress, because sections_completed did not include it
+  until the learner tapped through — so the session screen predicted the future while
+  /legend read the present, and they disagreed for exactly one screen. SectionComplete
+  records the section on mount now, so by the time anything on it speaks the section is
+  real and every screen reads the same number.
+*/
+const payoffSaysOpen = (sectionsCompleted: string[]) =>
+  legendStatus({ sectionsCompleted }).open
+
 ok(
-  'finishing the fifth vibe says the Legend is open',
-  payoffSaysOpen(four, spending[4]),
-  'sections_completed lags by one at this screen',
+  'the fifth recorded vibe opens it',
+  payoffSaysOpen(spending.slice(0, 5)),
+  'recorded on mount, so this is the present rather than a prediction',
 )
-ok('finishing the fourth does not', !payoffSaysOpen(spending.slice(0, 3), spending[3]))
+ok('four does not', !payoffSaysOpen(spending.slice(0, 4)))
 ok(
-  'and the Legend agrees once it is recorded',
-  legendOffers([...four, spending[4]]) === LEGEND_FRAMES.length,
+  'and /legend reads the identical number',
+  legendOffers(spending.slice(0, 5)) === LEGEND_FRAMES.length,
 )
 
 for (let n = 0; n <= 6; n++) {
   const done = spending.slice(0, n)
-  const promised = payoffSaysOpen(done, null)
+  const promised = payoffSaysOpen(done)
   const honoured = legendOffers(done) > 0
   ok(
     n + ' vibes: the session screen and the Legend agree',
@@ -108,6 +112,37 @@ for (let n = 0; n <= 6; n++) {
     target === '/legend' && !legendUsable ? 'BUILD MY CARD into a wall' : '',
   )
 }
+
+console.log('\nevery screen asks the same question\n')
+/*
+  The gap this file existed to close, reopened by the fix for it.
+
+  legendStatus took a `currentFamily` so the session screen could count the vibe being
+  finished — and /legend called legendUnlocked directly, without it. At four recorded
+  plus the one in progress, the session screen said "your Legend is open, fill them in"
+  and the Legend, one tap later, showed ten dashed cards.
+
+  Checking that legendStatus agrees with itself proved nothing, because the two screens
+  were not both calling it. So this reads the source: every screen that decides whether
+  the Legend is open must go through the one function, and none may pass an argument
+  that makes its answer differ from anybody else's.
+*/
+import { readFileSync } from 'node:fs'
+const SCREENS = ['components/Legend.tsx', 'components/Journey.tsx', 'components/Club.tsx']
+for (const file of SCREENS) {
+  const src = readFileSync(file, 'utf8')
+  const direct = /legendUnlocked\s*\(/.test(src)
+  ok(
+    file.replace('components/', '') + ' asks through legendStatus',
+    !direct,
+    direct ? 'calls legendUnlocked directly, so it can disagree with the others' : '',
+  )
+}
+ok(
+  'legendStatus takes no argument that could make screens differ',
+  !/currentFamily/.test(readFileSync('content/legend.ts', 'utf8')),
+  'a per-caller flag is how the two disagreed in the first place',
+)
 
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)\n')

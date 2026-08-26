@@ -11,7 +11,7 @@ import {
   cratesToGo,
   fillFrame,
   isAnswered,
-  legendUnlocked,
+  legendStatus,
   provenanceOf,
   type LegendFrame,
 } from '@/content/legend'
@@ -71,7 +71,15 @@ export function Legend() {
     a card teaches them.
   */
   const done = learner.sections_completed ?? []
-  const unlocked = mounted && legendUnlocked(done)
+  /*
+    The same function every other screen uses.
+
+    This called legendUnlocked directly while the session screen called legendStatus, and
+    that screen counted the vibe in progress — so at four recorded plus the one being
+    finished, one said "your Legend is open, fill them in" and this one, a tap later,
+    showed ten dashed cards. Both correct, different questions.
+  */
+  const unlocked = mounted && legendStatus({ sectionsCompleted: done }).open
   const toGo = cratesToGo(done)
   const reachable = useMemo(() => (mounted && unlocked ? LEGEND_FRAMES : []), [mounted, unlocked])
   const answered = useMemo(

@@ -443,22 +443,13 @@ export interface LegendStatus {
   openCards: number
 }
 
-export function legendStatus(opts: {
-  sectionsCompleted: string[]
-  /**
-   * The vibe being finished right now.
-   *
-   * sections_completed does not include it until the learner taps through, so the screen
-   * that announces the Legend was working a vibe behind — telling somebody finishing
-   * their fifth that they needed one more.
-   */
-  currentFamily?: string | null
-}): LegendStatus {
-  const done = opts.currentFamily
-    ? [...new Set([...opts.sectionsCompleted, opts.currentFamily])]
-    : opts.sectionsCompleted
-  const open = legendUnlocked(done)
-  return { open, toGo: cratesToGo(done), openCards: open ? LEGEND_FRAMES.length : 0 }
+export function legendStatus(opts: { sectionsCompleted: string[] }): LegendStatus {
+  const open = legendUnlocked(opts.sectionsCompleted)
+  return {
+    open,
+    toGo: cratesToGo(opts.sectionsCompleted),
+    openCards: open ? LEGEND_FRAMES.length : 0,
+  }
 }
 
 /** Every card the learner's language reaches, answered or not. Drives the count. */

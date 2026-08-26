@@ -24,7 +24,7 @@ import { isCurrent, situationsFor } from '@/content/situations'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
-import { LEGEND_FRAMES, legendUnlocked } from '@/content/legend'
+import { LEGEND_FRAMES } from '@/content/legend'
 import { capabilities } from '@/engine/journey'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { track } from '@/engine/analytics'
@@ -167,7 +167,7 @@ export function Club() {
             .filter((a) => Object.keys(a.values).length > 0)
             .map((a) => a.frame_id),
           legendPrompt: learner.legend_prompt ?? 'unseen',
-          legendUnlocked: legendUnlocked(learner.sections_completed ?? []),
+          legendUnlocked: legendStatus({ sectionsCompleted: learner.sections_completed ?? [] }).open,
           capped,
           claimed,
         }}

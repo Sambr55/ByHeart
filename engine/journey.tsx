@@ -296,8 +296,32 @@ export function sectionRoots(
   const replay = all.filter((r) => r.rung <= reached)
   const floor = Math.min(...all.map((r) => r.rung))
   const lowest = all.filter((r) => r.rung === floor)
+  /*
+    Open with the banger.
+
+    Sorting by rung alone meant a vibe opened with whatever happened to be authored first
+    at the lowest rung — Pulp Fiction started on "What? — Say what again", with "Royale
+    with Cheese" sitting unused two roots below it. The first thing somebody meets in a
+    vibe they chose for the culture should be the line they chose it FOR.
+
+    The freebie is already that root and always was: one per vibe, described in the spec
+    as a ten-second wink, no puzzle. It was marked and never used for ordering.
+
+    The banger goes first outright, not merely first within its rung. Ordering by rung
+    first meant it only ever led when it happened to be the lowest thing in the vibe,
+    which was true for four vibes and false for six — Bridget Jones opened on "Sorry.
+    Sorry. Sorry." even at rung 6, with the best line in it further down the list.
+
+    Safe because of what a freebie IS: no puzzle, ten seconds, a wink. Leading with one
+    cannot serve difficulty out of order, and everything after it goes back to lowest
+    rung first, so the fundamentals still come before register and nuance.
+
+    It is still filtered by the ladder above, so an unreachable banger is simply not in
+    this list and the vibe opens on the next best thing.
+  */
   const eligible = (fresh.length ? fresh : replay.length ? replay : lowest).sort(
-    (a, b) => a.rung - b.rung,
+    (a, b) =>
+      Number(Boolean(b.freebie_flag)) - Number(Boolean(a.freebie_flag)) || a.rung - b.rung,
   )
 
   const out: Root[] = []
