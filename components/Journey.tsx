@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
@@ -522,85 +523,85 @@ function Landing() {
   const { next } = useJourney()
   const access = useEntitlements()
   return (
-    <Shell stage="LANDING">
-      {/*
-        Four lines, each with a typographic job, and the copy is written to exactly this
-        shape — lint:content fails a fifth. It had six for a while and this component
-        renders indices 0 to 3, so two of them were written and silently never shown.
+    /*
+      The door is a place, not an argument.
 
-        The cascade is 70ms a step, which is the list rhythm rather than a reveal: a hand
-        fanning cards, under the threshold where the items read as separate arrivals.
-        Mount-fired, which the rules allow for a list — it is the loud beats that must be
-        fired by a tap, and a front door is not a peak.
-      */}
-      <div className="flex flex-1 flex-col justify-center">
-        <div className="animate-bank">
-          {/* The real mark, at last. It was live Archivo text until the SVGs arrived. */}
-          <Wordmark className="h-12 text-fg" />
-          <p className="mt-3 text-balance text-xl text-accent">{LANDING.line}</p>
-        </div>
-        <div className="mt-10 space-y-6">
-          <p
-            className="animate-bank display text-balance text-2xl"
-            style={{ animationDelay: '70ms' }}
-          >
-            {LANDING.lines[0]}
-          </p>
-          <p
-            className="animate-bank text-pretty text-sm text-muted"
-            style={{ animationDelay: '140ms' }}
-          >
-            {LANDING.lines[1]}
-          </p>
-          <div className="space-y-3">
-            {LANDING.lines[2].split('\n').map((l, i) => (
-              <p
-                key={l}
-                style={{ animationDelay: 210 + i * 70 + 'ms' }}
-                className="animate-bank display text-balance text-xl leading-snug"
-              >
-                {l}
-              </p>
-            ))}
-          </div>
-          <p
-            className="animate-bank text-balance text-base font-semibold"
-            style={{ animationDelay: '420ms' }}
-          >
-            {LANDING.lines[3]}
-          </p>
-        </div>
-      </div>
+      This was four lines of prose — the wall every learner hits, what DUB does about it,
+      a reassurance — delivered before anybody had seen a word of Portuguese. Good essay,
+      poor front door. Everything it argued is proved two taps later by the Goose demo,
+      which is a demonstration rather than a claim, so the door only has to make somebody
+      want to go.
+
+      It is the ONE screen in DUB that gets to be aspirational. The city-content rule is
+      the opposite — the queue outside the pastelaria, not sunset over the Tejo — and it
+      still holds everywhere it applies, because a teaching screen has to be evidence. A
+      front door has a different job. It sells the destination; the rest of the product
+      spends its time being honest about the work.
+    */
+    <main
+      data-stage="LANDING"
+      className="relative flex min-h-svh w-full flex-col justify-end overflow-hidden bg-[#241f1a] text-white"
+    >
       {/*
-        The first tap of the session is where iOS decides whether this page is allowed to
-        make a sound at all — so the unlock rides on it. primeAudio existed for exactly
-        this and was never called from anywhere, which is half of why every phone was
-        silent.
+        The photograph, and the page has to work without it.
+
+        Nothing in the layout depends on it loading: the ground underneath is a dark warm
+        tone taken from the image, so a slow or failed fetch is a dimmer version of the
+        same screen rather than white text on white. `priority` because it is the largest
+        thing on the first screen anybody ever sees, and a hero that arrives late arrives
+        after the tap.
       */}
-      <Cta
-        label={LANDING.cta}
-        onClick={() => {
-          primeAudio()
-          track('landing_cta_tap', {})
-          next()
-        }}
+      <Image
+        src="/hero/lisbon.jpg"
+        alt={LANDING.hero_alt}
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
       />
-      {/* Two ways back in for a returning person: today's line if they have ninety
-          seconds, their account if they are on a new phone. */}
-      <div className="mt-3 flex items-center justify-center gap-6 text-xs text-muted">
-        <Link href="/line" className="underline underline-offset-4">
-          Today’s line
-        </Link>
+
+      {/*
+        The scrim, which is what makes the type legible rather than hopeful.
+
+        Contrast cannot be measured against a photograph — it changes with every pixel —
+        so the text never sits on the image. It sits on this, and at the foot the gradient
+        is opaque enough to clear AA for white on its own, whatever is underneath it.
+      */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/10"
+      />
+
+      <div className="relative flex flex-col items-center gap-6 px-5 pb-10 text-center">
+        <Wordmark className="h-10 text-white" />
+        <p className="display text-balance text-3xl leading-tight sm:text-4xl">
+          {LANDING.strapline}
+        </p>
+        {/*
+          Not the shared Cta: that is built for a sand ground and an accent fill, and on a
+          photograph the thing that reads is white on nothing. The iOS unlock still rides
+          on it — the first tap of a session is where the browser decides whether this
+          page may ever make a sound.
+        */}
+        <button
+          type="button"
+          data-testid="landing-cta"
+          onClick={() => {
+            primeAudio()
+            track('landing_cta_tap', {})
+            next()
+          }}
+          className="tap-target eyebrow w-full max-w-sm rounded bg-white px-5 py-3 text-[#241f1a] transition active:scale-[0.99]"
+        >
+          {LANDING.cta}
+        </button>
         {access.signInReady ? (
-          <>
-            <span aria-hidden="true">·</span>
-            <Link href="/signin" className="underline underline-offset-4">
-              Been here before?
-            </Link>
-          </>
+          <Link href="/signin" className="text-xs text-white/80 underline underline-offset-4">
+            Been here before?
+          </Link>
         ) : null}
       </div>
-    </Shell>
+    </main>
   )
 }
 

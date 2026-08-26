@@ -1016,37 +1016,46 @@ for (const e of EXAMPLES) {
 // --- the landing, which has a shape ----------------------------------------
 {
   /*
-    Four lines, and the Landing component gives each one a different size and weight.
-    That is a design rather than a list, so the copy has to be written to it — and when
-    the copy grew to six, indices 4 and 5 were written, reviewed and never rendered.
+    The front door is a photograph now, and the rules that apply to it changed with it.
 
-    Nothing about that was visible: no error, no warning, just two paragraphs that
-    existed in the file and not on the screen.
+    It used to be four paragraphs with a fixed shape, and the lint existed because the
+    copy grew to six while the component rendered indices 0 to 3 — two paragraphs
+    written, reviewed, and never on screen. There is no list any more: a place does the
+    arguing and everything the prose claimed is demonstrated two taps later.
+
+    What survives is the rule that mattered. No product words on the first screen a
+    stranger sees — "you earn it a crate at a time" put jargon two beats before anything
+    defined it, and it was read as "crate time".
+
+    And the alt text is load-bearing in a way it never was before: the whole screen is
+    now an image, so a screen reader user gets the strapline, the button, and whatever
+    this sentence says. Nothing else.
   */
-  if (LANDING.lines.length !== 4) {
-    fail(
-      'LANDING.lines has ' + LANDING.lines.length + ' entries and the front door renders ' +
-        'exactly 4 — anything past the fourth is written and never shown',
-    )
-  }
-  const beats = (LANDING.lines[2] ?? '').split('\n')
-  if (beats.length !== 3) {
-    fail('LANDING.lines[2] is the three-beat block and has ' + beats.length + ' beat(s)')
-  }
-  /*
-    And no product words on the first screen a stranger sees. "You earn it a crate at a
-    time" put jargon two beats before anything defines it, and it was read as "crate
-    time". The deal introduces the word later, with an example attached.
-  */
-  for (const [i, line] of LANDING.lines.entries()) {
-    const jargon = /\b(crates?|rungs?|drops?|pieces?)\b/i.exec(line)
-    if (jargon) {
-      fail(
-        'LANDING.lines[' + i + '] says "' + jargon[0] + '" — the front door is the one ' +
-          'screen where nothing has been defined yet',
-      )
+  {
+    const doorText: [string, string][] = [
+      ['strapline', LANDING.strapline],
+      ['cta', LANDING.cta],
+      ['hero_alt', LANDING.hero_alt],
+    ]
+    for (const [where, line] of doorText) {
+      const jargon = /\b(crates?|vibes?|rungs?|drops?|pieces?|legend)\b/i.exec(line)
+      if (jargon) {
+        fail(
+          'LANDING.' + where + ' says "' + jargon[0] + '" — the front door is the one ' +
+            'screen where nothing has been defined yet',
+        )
+      }
+    }
+    if (!LANDING.hero_alt.trim()) fail('LANDING.hero_alt is empty and the door is an image')
+    if (LANDING.hero_alt.trim().length < 40) {
+      fail('LANDING.hero_alt is too short to replace a full-screen photograph')
+    }
+    // A door has one button on it. Two is a choice, and a choice is not a door.
+    if (LANDING.cta.split(/\s+/).length > 3) {
+      fail('LANDING.cta is a sentence — the door needs a label')
     }
   }
+
   console.log('the front door: 4 lines, 3 beats, no jargon')
 }
 

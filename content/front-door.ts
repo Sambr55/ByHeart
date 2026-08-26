@@ -27,34 +27,29 @@
 */
 export const LANDING = {
   wordmark: 'DUB',
-  line: 'Find yourself in another language.',
-  /*
-    EXACTLY FOUR, and each one has a typographic job the Landing component gives it.
-    lint:content fails a fifth, because that is how two lines came to be written and
-    silently never rendered:
-
-      0  the wall, large            — the reader's own experience, named
-      1  one quiet line under it
-      2  three beats, one per line  — the method, in order
-      3  the closer
-
-    Present tense throughout. It said "You WILL understand far more than you can say.
-    Everybody does" — a future promise answered by a present fact, which is a tense clash
-    on the first eight words a stranger reads. It is not a prediction. It is already true
-    of them, which is the whole point.
-
-    And no product words. "You earn it a vibe at a time" put jargon on the first screen,
-    two beats before anything defines it — and it was read as "vibe time", which is what
-    undefined jargon always gets you. The deal introduces the word later, with an example
-    attached.
-  */
-  lines: [
-    'You understand far more than you can say.',
-    'Everybody does. It is the wall every learner hits, and most apps carry on as if it were not there.',
-    'Learn the language out of things you already love.\nSay it out loud with nothing on screen to copy from.\nThen build your Legend — the minute about yourself.',
-    'You already know more than you think.',
-  ],
-  cta: 'SHOW ME HOW',
+  /**
+   * The door.
+   *
+   * This was four lines of argument — the wall every learner hits, what DUB does about
+   * it, and a reassurance — delivered before anybody had seen a word of Portuguese. It
+   * was a good essay and it was a front door made of prose.
+   *
+   * A place does the arguing now. "Learn Language You Love" is the whole proposition in
+   * four words, and everything the four lines used to say is proved two taps later by
+   * the Goose demo, which is a demonstration rather than a claim.
+   */
+  strapline: 'Learn Language You Love',
+  /** A door, and the Club is on the other side of it. */
+  cta: 'COME IN',
+  /**
+   * What the picture is, for anybody who cannot see it.
+   *
+   * Not "a beautiful street in Lisbon" — a screen reader user is owed the same
+   * information the image carries, which is where this is and what time of day it feels
+   * like, not an adjective about how nice it looks.
+   */
+  hero_alt:
+    'A steep Lisbon street at golden hour: tiled façades, a yellow tram climbing towards the Tejo, people talking at a café table on the pavement.',
 } as const
 
 export interface DemoBeat {

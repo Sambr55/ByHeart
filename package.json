@@ -19,7 +19,7 @@
     "comp:issue": "tsx scripts/comp-issue.mts",
     "spacing": "tsx scripts/spacing-check.mts",
     "mobile": "npm run spacing && tsx scripts/mobile-check.mts",
-    "gate": "npm run check && npm run words && npm run motion && npm run mobile && npm run contrast && npm run forward && npm run audio:check && npm run shelf",
+    "gate": "npm run check && npm run words && npm run motion && npm run mobile && npm run contrast && npm run forward && npm run audio:check && npm run shelf && npm run door",
     "contrast": "tsx scripts/contrast-check.mts",
     "brand": "tsx scripts/brand.mts",
     "first": "tsx scripts/first-session.mts",
@@ -30,7 +30,8 @@
     "audio:check": "tsx scripts/audio-check.mts",
     "club": "tsx scripts/club-door.mts",
     "legend": "tsx scripts/legend-promise.mts",
-    "shelf": "tsx scripts/shelf-check.mts"
+    "shelf": "tsx scripts/shelf-check.mts",
+    "door": "tsx scripts/door-check.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",
