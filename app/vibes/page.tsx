@@ -17,7 +17,7 @@ import { JourneyProvider } from '@/engine/journey'
 export default function VibesPage() {
   return (
     <Suspense fallback={null}>
-      <JourneyProvider enter="crates">
+      <JourneyProvider enter="vibes">
         <Journey />
       </JourneyProvider>
     </Suspense>

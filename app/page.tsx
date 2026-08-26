@@ -78,7 +78,7 @@ export default function Page() {
       is: crates are how you earn the Legend. Sending a mid-game learner to a Club they
       have not reached would be the same mistake as sending them to the front door.
     */
-    router.replace(legendBuilt(learner) ? '/club' : '/crates')
+    router.replace(legendBuilt(learner) ? '/club' : '/vibes')
   }, [router])
 
   // Deliberately blank for the one frame between deciding and arriving. A returning

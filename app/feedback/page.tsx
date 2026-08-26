@@ -81,7 +81,7 @@ function OpenFeedback() {
           <p className="text-sm leading-relaxed text-muted">{FEEDBACK_COPY.sent_body}</p>
         </div>
         <Link
-          href="/crates"
+          href="/vibes"
           className="tap-target eyebrow mt-auto block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >
           {FEEDBACK_COPY.sent_cta}

@@ -547,13 +547,13 @@ const Ctx = createContext<JourneyApi | null>(null)
 export function JourneyProvider({
   children,
   /**
-   * Where this URL is trying to start. 'crates' means the learner asked for the picker
+   * Where this URL is trying to start. 'vibes' means the learner asked for the picker
    * directly — from the menu, or a bookmark — rather than arriving at the front door.
    */
   enter = 'front-door',
 }: {
   children: React.ReactNode
-  enter?: 'front-door' | 'crates'
+  enter?: 'front-door' | 'vibes'
 }) {
   const [state, dispatch] = useReducer(reducer, initial)
   const learner = useLearner()
@@ -572,7 +572,7 @@ export function JourneyProvider({
    */
   const jumped = useRef(false)
   useEffect(() => {
-    if (jumped.current || enter !== 'crates') return
+    if (jumped.current || enter !== 'vibes') return
     jumped.current = true
     // Load explicitly rather than reading the reactive snapshot. The store returns an
     // empty learner until it has read storage, and an empty learner is indistinguishable

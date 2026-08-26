@@ -13,6 +13,7 @@
  * lints scan.
  */
 import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { COLLISIONS, ROOTS } from '../content/roots'
 import { join } from 'node:path'
 
 const problems: string[] = []
@@ -101,6 +102,9 @@ const NOUN_OK = [
   // The compounding claim is genuinely about cultures, not about crates.
   /unrelated worlds|different worlds?|two worlds|another world|other worlds|one world/i,
   /world's|worldwide/i,
+  // "Ordinary World" is a song title and mundo normal is what it teaches. The rule is
+  // about what we call a VIBE, and a root explaining word order is not doing that.
+  /ordinary world/i,
   // REAL WORLD is a stage name — the beat where the culture is taken away — and "out in
   // the world" is that beat's own copy, meaning the actual world rather than a crate.
   /REAL WORLD/,
@@ -113,6 +117,35 @@ const NOUN_OK = [
 const EYEBROW_MAX = 14
 
 const STRING = /(['"`])((?:(?!\1)[^\\]|\\.)*)\1/g
+
+/**
+ * JSX text nodes across the whole file, not line by line.
+ *
+ * Returns the text with the line it starts on, so a failure still points somewhere.
+ * String literals are blanked first — an interpolation is code, and a node with braces
+ * in it is not a sentence.
+ */
+function jsxNodes(src: string): { line: number; text: string }[] {
+  const blanked = src.replace(new RegExp(STRING.source, "g"), (m) => " ".repeat(m.length))
+  const out: { line: number; text: string }[] = []
+  for (const m of blanked.matchAll(/>([^<>{}]+)</g)) {
+    const text = m[1].replace(/\s+/g, ' ').trim()
+    if (!text || !/\s/.test(text)) continue
+    /*
+      An arrow function supplies a `>` too.
+
+      `=> … <` matches this pattern perfectly and spans whatever code lies between, which
+      is how the first version reported a local variable named `crate` as user-facing
+      copy. It is the same trap that made my own rename script edit live identifiers.
+      Two cheap tests kill it: the bracket must not be the tail of `=>`, and prose does
+      not contain parentheses, semicolons or keywords.
+    */
+    if (blanked[(m.index ?? 0) - 1] === '=') continue
+    if (/[(){};=]/.test(text) || /\b(const|let|return|if|else|import|export)\b/.test(text)) continue
+    out.push({ line: blanked.slice(0, m.index ?? 0).split('\n').length, text })
+  }
+  return out
+}
 
 for (const file of files) {
   const raw = readFileSync(file, 'utf8').split('\n')
@@ -133,6 +166,16 @@ for (const file of files) {
       an interpolation.
     */
     const nodes = [...line.matchAll(/>([^<>{}]+)</g)].map((m) => m[1])
+    /*
+      …and the same text when it is not all on one line.
+
+      A JSX node written across three lines — `>` on one, the words on the next, `</p>`
+      on the third — matched nothing at all, because the pattern above needs both angle
+      brackets on the line it is reading. That is not an edge case, it is how every
+      button label and every paragraph in this codebase is formatted, so the rule was
+      only ever checking single-line JSX and string literals. It missed "ANOTHER CRATE"
+      and "OPEN A CRATE" — two buttons — through an entire rename.
+    */
     /*
       A bare one-word literal is a value, not a sentence: root_type === 'quote' and
       {n === 1 ? 'world' : 'worlds'} are both code that happens to be spelled like copy.
@@ -156,13 +199,28 @@ for (const file of files) {
         const hits = text.match(re)
         if (hits) {
           fail(
-            where + ' calls a crate a "' + hits[0] + '" — the product word is "' + want + '": ' +
+            where + ' calls a vibe a "' + hits[0] + '" — the product word is "' + want + '": ' +
               raw[i].trim().slice(0, 60),
           )
         }
       }
     }
   })
+
+  if (checkNouns) {
+    for (const node of jsxNodes(stripComments(readFileSync(file, 'utf8')))) {
+      if (NOUN_OK.some((ok) => ok.test(node.text))) continue
+      for (const [re, want] of NOUNS) {
+        const hits = node.text.match(re)
+        if (hits) {
+          fail(
+            file + ':' + node.line + ' calls a vibe a "' + hits[0] + '" — the product word is "' +
+              want + '": ' + node.text.slice(0, 60),
+          )
+        }
+      }
+    }
+  }
 
   /*
     Eyebrows. Only literal ones can be measured — an eyebrow bound to a variable is
@@ -181,6 +239,60 @@ for (const file of files) {
 }
 
 console.log(files.length + ' files read')
+/*
+  The roots' own product copy.
+
+  content/roots.ts is excluded from the file scan and rightly so — it is full of
+  Portuguese, and a rule about the product's vocabulary has no business reading teaching
+  material. But a root carries copy in OUR voice too: semantic_bridge and subtext are
+  read by a learner on a teaching screen, and six of them called a vibe a crate straight
+  through a rename that reported itself complete.
+  
+  So the fields are named rather than the file, which keeps the Portuguese out of it.
+*/
+{
+  const FIELDS: [string, (r: (typeof ROOTS)[number]) => string | undefined][] = [
+    ['semantic_bridge', (r) => r.semantic_bridge],
+    ['subtext', (r) => r.subtext],
+    ['literal_note', (r) => r.literal_note],
+    ['transfer_prompt.context', (r) => r.transfer_prompt?.context],
+    // The English side of the line is our sentence too, not the Portuguese.
+    ['source', (r) => r.source],
+  ]
+  // Collisions carry `provenance` — the sentence that names where two pieces came from,
+  // which is the most likely place in the whole graph to say "crate" out loud.
+  for (const c of COLLISIONS) {
+    const text = c.provenance ?? ''
+    if (text && !NOUN_OK.some((ok) => ok.test(text))) {
+      for (const [re, want] of NOUNS) {
+        const hits = text.match(re)
+        if (hits) {
+          fail(
+            'collision ' + c.id + ' provenance calls a vibe a "' + hits[0] +
+              '" — the product word is "' + want + '"',
+          )
+        }
+      }
+    }
+  }
+  for (const root of ROOTS) {
+    for (const [name, get] of FIELDS) {
+      const text = get(root) ?? ''
+      if (!text || NOUN_OK.some((ok) => ok.test(text))) continue
+      for (const [re, want] of NOUNS) {
+        const hits = text.match(re)
+        if (hits) {
+          fail(
+            'root ' + root.root_id + ' ' + name + ' calls a vibe a "' + hits[0] +
+              '" — the product word is "' + want + '"',
+          )
+        }
+      }
+    }
+  }
+}
+
+
 if (problems.length) {
   console.log('\n' + problems.length + ' vocabulary problem(s):')
   problems.forEach((p) => console.log('  ' + p))

@@ -3127,7 +3127,7 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'You’re really funny.',
-    source: 'The most effective sentence in this entire crate.',
+    source: 'The most effective sentence in this entire vibe.',
     target: 'És muito engraçado.',
     literal_note: 'ÉS this time, not estás. Funny is not something he is being tonight; it is something he is.',
     semantic_bridge:
@@ -4647,7 +4647,7 @@ export const COLLISIONS: Collision[] = [
     context: 'Said to yourself, in the toilets, before going back out.',
     ask: 'For f***’s sake, I’m nervous.',
     answer: 'Foda-se, estou nervoso.',
-    provenance: 'Two crates that had no business meeting, meeting.',
+    provenance: 'Two vibes that had no business meeting, meeting.',
   },
   {
     id: 'fl_m2f_f2m_beijinho',
@@ -4655,7 +4655,7 @@ export const COLLISIONS: Collision[] = [
     context: 'The evening is over and neither of you has moved towards the door.',
     ask: 'Can I give you a kiss?',
     answer: 'Posso dar-te um beijinho?',
-    provenance: 'One crate taught the asking, the other taught the kiss.',
+    provenance: 'One vibe taught the asking, the other taught the kiss.',
   },
   {
     id: 'fl_f_tg_apetece_comigo',
@@ -4695,7 +4695,7 @@ export const COLLISIONS: Collision[] = [
     context: 'It is late, and the conversation has gone somewhere neither of you planned.',
     ask: 'Are you happy?',
     answer: 'És feliz?',
-    provenance: 'The same three words as the other crate, with the permanent “are”. A much bigger question.',
+    provenance: 'The same three words as the other vibe, with the permanent “are”. A much bigger question.',
   },
   {
     id: 'fl_f_ma_apetece_agora',
@@ -4955,7 +4955,7 @@ export const COLLISIONS: Collision[] = [
     context: 'Four hours in the queue and not one food stall has opened.',
     ask: 'For fuck’s sake, I’m starving.',
     answer: 'Foda-se, tenho uma fome de lobo.',
-    provenance: 'The swearing crate and a Duran Duran chorus, in complete agreement.',
+    provenance: 'The swearing vibe and a Duran Duran chorus, in complete agreement.',
   },
   {
     id: 'dd_fm_oferecer_alguma_coisa',
@@ -5030,7 +5030,7 @@ export const COLLISIONS: Collision[] = [
     context: 'The queue has not moved and it is the second hour.',
     ask: 'This is ridiculous. I have had enough.',
     answer: 'Isto é ridículo. Estou farto.',
-    provenance: 'The swearing crate and a shape-shifting spell, agreeing entirely about a queue.',
+    provenance: 'The swearing vibe and a shape-shifting spell, agreeing entirely about a queue.',
   },
   {
     id: 'wiz_fm_agua_oferecer',

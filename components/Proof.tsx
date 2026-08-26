@@ -271,7 +271,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
       {!empty && !shareable.length ? (
         <p className="text-center text-xs leading-relaxed text-muted">
           Everything here is from your Legend, and that stays on this phone — it has your
-          family in it. Say something cold from a crate and there will be a card to share.
+          family in it. Say something cold from a vibe and there will be a card to share.
         </p>
       ) : null}
 

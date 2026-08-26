@@ -576,7 +576,7 @@ function DeadEnd({ term }: { term: string }) {
       </p>
       <p className="mt-3 text-xs leading-relaxed text-muted">
         Noted, and that is not a polite noise — the words people look for and cannot find
-        are what the next crate gets written from.
+        are what the next vibe gets written from.
       </p>
     </div>
   )
@@ -594,7 +594,7 @@ function EmptyMine({ onScope }: { onScope: () => void }) {
           href="/vibes"
           className="tap-target eyebrow rounded bg-accent px-4 py-3 text-accent-ink"
         >
-          OPEN A CRATE
+          OPEN A VIBE
         </Link>
         <button
           type="button"

@@ -156,7 +156,7 @@ export default function QaPage() {
       <section className="flex flex-col gap-3 border-t border-line pt-6">
         <h2 className="display text-xl">Combinations</h2>
         <p className="max-w-prose text-xs leading-relaxed text-muted">
-          Pieces from two unrelated crates in one sentence. These are the strings most
+          Pieces from two unrelated vibes in one sentence. These are the strings most
           likely to be grammatical and still sound wrong, so they are worth the most
           attention.
         </p>

@@ -2312,7 +2312,7 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
         })}
       </ul>
       <p className="mt-3 text-sm text-muted">
-        The rest are in the crates you have not opened yet.
+        The rest are in the vibes you have not opened yet.
       </p>
     </div>
   )
@@ -2400,7 +2400,7 @@ function SectionComplete() {
           onClick={() => finishSection('another')}
           className="tap-target eyebrow mt-6 w-full rounded bg-accent px-5 py-3 text-accent-ink"
         >
-          ANOTHER CRATE
+          ANOTHER VIBE
         </button>
       ) : null}
       {/*
