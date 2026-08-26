@@ -133,6 +133,45 @@ ok(
   list.filter((c) => c.badge === 'pro' && c.disabled).map((c) => c.title).join(', '),
 )
 
+/*
+  The doorway, for somebody who played the basics and never tapped the button.
+
+  The state in the report: three basics roots played, sections_completed empty, because
+  the only thing that writes it is the end-of-section screen and there are a dozen ways
+  to leave before it — the header, a bookmark, the back gesture, closing the tab. Every
+  other vibe sat behind "AFTER BASICS" while the basics card said "3 of 14 taken"
+  directly above it.
+*/
+{
+  const page2 = await browser.newPage({ viewport: { width: 390, height: 900 } })
+  const basicsRoots = ((ROOTS_BY_FAMILY['the_basics' as never] ?? []) as { root_id: string }[])
+    .slice(0, 3)
+    .map((r) => r.root_id)
+  await page2.goto(BASE + '/vibes')
+  await page2.evaluate(
+    ([k, pair, s]) => {
+      localStorage.setItem('byheart.pair', JSON.stringify(pair))
+      localStorage.setItem(k as string, JSON.stringify(s))
+    },
+    // Roots played, and NOTHING in sections_completed. Exactly the reported device.
+    [KEY, DEFAULT_PAIR, seed(basicsRoots, [])] as const,
+  )
+  await page2.goto(BASE + '/vibes')
+  await page2.waitForTimeout(1200)
+  const after = await cards(page2)
+  const locked = after.filter((c) => c.disabled)
+  console.log('\nplayed the basics, never tapped through\n')
+  console.log('  ' + after.filter((c) => !c.disabled).length + ' of ' + after.length + ' tappable')
+  ok(
+    'playing the basics opens the shelf, tapped through or not',
+    after.filter((c) => !c.disabled).length > 1,
+    locked.length + ' locked: ' + locked.map((c) => c.title).slice(0, 3).join(', '),
+  )
+  const txt2 = await page2.evaluate(() => (document.querySelector('main') ?? document.body).innerText)
+  ok('and nothing says AFTER BASICS to somebody who has done them', !/AFTER BASICS/.test(txt2))
+  await page2.close()
+}
+
 console.log('\nhow far in you are is on the card\n')
 const text = await page.evaluate(() => (document.querySelector('main') ?? document.body).innerText)
 ok('a part-played vibe says so', /\d+ of \d+ taken/.test(text), (text.match(/\d+ of \d+ taken/) ?? ['none'])[0])

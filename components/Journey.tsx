@@ -40,6 +40,7 @@ import {
   PICKER,
 } from '@/content/front-door'
 import { primeAudio } from '@/engine/audio'
+import { UNLIMITED } from '@/lib/entitlements'
 import { Path } from '@/components/Path'
 import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
@@ -940,8 +941,26 @@ function Picker() {
     total: number
   }
 
-  /** One section of the basics is the doorway. Read from the learner, not the tab. */
-  const basicsStarted = !mounted || (learner.sections_completed ?? []).includes('the_basics')
+  /**
+   * The doorway opens on having BEEN THROUGH some of the basics, not on having tapped
+   * the button at the end of them.
+   *
+   * It read sections_completed alone, and that is only written by finishSection — the
+   * two buttons on the end-of-section screen. A learner who played the basics and then
+   * went to the shelf by any other route (the header, a bookmark, the back gesture, or
+   * simply closing the tab and coming back) had played three roots and finished nothing,
+   * so every other vibe stayed shut behind "AFTER BASICS" while the basics card itself
+   * said "3 of 14 taken" directly above it. The product contradicted itself on one
+   * screen, and the only way out was a button that was no longer on screen.
+   *
+   * Having played a basics root is the honest test, and it is what the copy on those
+   * cards already claims: "opens once you have been through a section of the basics".
+   * It also cannot be lost by navigating, which the old one could.
+   */
+  const basicsStarted =
+    !mounted ||
+    (learner.sections_completed ?? []).includes('the_basics') ||
+    (ROOTS_BY_FAMILY['the_basics' as CultureFamily] ?? []).some((r) => playedIds.has(r.root_id))
 
   const facts = (f: Crate): Facts => {
     const all = ROOTS_BY_FAMILY[f.id] ?? []
@@ -1112,7 +1131,12 @@ function Picker() {
               <h2 className="eyebrow min-w-0 text-accent">{PICKER.groups[key]}</h2>
               <span className="h-px flex-1 bg-line" />
               <span className="eyebrow shrink-0 tabular-nums text-muted">
-                {key === 'open' && access.known && allowance - spent > 0
+                {/*
+                  UNLIMITED is 1,000,000 — a large finite number, because Infinity does
+                  not survive JSON. It is fine to compare against and absurd to print, and
+                  a comped member was told they had "999999 LEFT".
+                */}
+                {key === 'open' && access.known && allowance < UNLIMITED && allowance - spent > 0
                   ? allowance - spent + ' left'
                   : list.length}
               </span>
