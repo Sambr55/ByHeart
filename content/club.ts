@@ -59,6 +59,11 @@ export const CLUB = {
     body: 'You can introduce yourself in Portuguese without reading it off a screen. That is the whole membership test, and it is the thing most people never get to. This is your way in from now on — no front door, no pitch, no starting again.',
     body_two: 'Nothing here counts days or asks where you have been. It just shows you what you can say and what is worth doing next.',
     cta: 'GOOD',
+    /**
+     * What the picture is, for anybody who cannot see it. The information, not the mood:
+     * a conversation in a doorway, because a conversation is what has just been earned.
+     */
+    alt: 'Two people talking in a tiled doorway on a steep Lisbon street at golden hour, a tram climbing behind them and friends at a café table below.',
   },
   /** The masthead line when a learner has a capability. The fallback is never empty. */
   /** The city half of the Club, which is the half that is not about Portuguese. */

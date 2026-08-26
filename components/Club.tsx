@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -202,25 +203,50 @@ function throughLine(n: number): string {
  */
 function Welcome({ onDone }: { onDone: () => void }) {
   return (
+    /*
+      The second image in the product, and the second one that earns it.
+
+      This is the biggest moment DUB has: somebody has just proved they can introduce
+      themselves in Portuguese to a stranger, which is the thing most learners never get
+      to. It was type on sand. The picture is a conversation in a doorway rather than a
+      view, because what was earned is the conversation.
+
+      Same construction as the door — image, scrim over the bottom, type on the scrim and
+      never on the photograph — so there is one way images work in this product rather
+      than two.
+    */
     <main
       data-stage="REAL WORLD"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
+      className="relative mx-auto flex min-h-svh w-full max-w-md flex-col justify-end overflow-hidden bg-[#241f1a] text-white"
     >
-      <Wordmark mark="club" className="h-8" />
-      <div className="flex flex-1 flex-col justify-center gap-3">
-        <p className="eyebrow text-accent">{CLUB.welcome.eyebrow}</p>
+      <Image
+        src="/hero/club-welcome.jpg"
+        alt={CLUB.welcome.alt}
+        fill
+        priority
+        sizes="(max-width: 448px) 100vw, 448px"
+        className="object-cover"
+      />
+      <div
+        aria-hidden
+        data-testid="scrim"
+        className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black/92 via-black/72 to-transparent"
+      />
+      <div className="relative flex flex-col gap-3 px-5 pb-10">
+        <Wordmark mark="club" className="h-8 text-white" />
+        <p className="eyebrow mt-3 text-white/75">{CLUB.welcome.eyebrow}</p>
         <h1 className="display text-balance text-3xl">{CLUB.welcome.headline}</h1>
-        <p className="text-sm leading-relaxed text-muted">{CLUB.welcome.body}</p>
-        <p className="text-sm leading-relaxed text-muted">{CLUB.welcome.body_two}</p>
+        <p className="text-sm leading-relaxed text-white/80">{CLUB.welcome.body}</p>
+        <p className="text-sm leading-relaxed text-white/80">{CLUB.welcome.body_two}</p>
+        <button
+          type="button"
+          data-testid="club-welcome-cta"
+          onClick={onDone}
+          className="tap-target eyebrow mt-3 w-full rounded bg-[#1f5d8c] px-5 py-3 text-white"
+        >
+          {CLUB.welcome.cta}
+        </button>
       </div>
-      <button
-        type="button"
-        data-testid="club-welcome-cta"
-        onClick={onDone}
-        className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
-      >
-        {CLUB.welcome.cta}
-      </button>
     </main>
   )
 }
