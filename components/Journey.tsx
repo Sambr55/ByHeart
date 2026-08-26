@@ -564,12 +564,18 @@ function Landing() {
         The scrim, which is what makes the type legible rather than hopeful.
 
         Contrast cannot be measured against a photograph — it changes with every pixel —
-        so the text never sits on the image. It sits on this, and at the foot the gradient
-        is opaque enough to clear AA for white on its own, whatever is underneath it.
+        so the text never sits on the image. It sits on this.
+
+        Confined to the bottom 58% rather than laid over everything. A full-screen scrim
+        cleared the contrast check and took the warmth out of the picture with it, which
+        is the one thing the picture is there for. Above this line the photograph is
+        untouched; below it, it is dark enough that white clears AA on the scrim alone,
+        whatever is underneath.
       */}
       <div
         aria-hidden
-        className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/10"
+        data-testid="scrim"
+        className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-black/92 via-black/70 to-transparent"
       />
 
       <div className="relative flex flex-col items-center gap-6 px-5 pb-10 text-center">

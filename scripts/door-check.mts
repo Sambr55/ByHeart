@@ -66,7 +66,7 @@ for (const width of [320, 390, 430]) {
         })
         return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]
       }
-      var scrim = document.querySelector('main > div[aria-hidden]')
+      var scrim = document.querySelector('[data-testid="scrim"]')
       var out = []
       var targets = [
         ['strapline', document.querySelector('main p.display')],
@@ -77,8 +77,12 @@ for (const width of [320, 390, 430]) {
         if (!el || !scrim) continue
         var r = el.getBoundingClientRect()
         var s = scrim.getBoundingClientRect()
+        // The scrim is a panel over the bottom 58%, transparent at its top edge and
+        // 92% at its foot. Read its geometry off the page rather than assuming it, so
+        // moving the panel moves the measurement with it.
         var t = Math.min(1, Math.max(0, (r.top + r.height / 2 - s.top) / s.height))
-        var alpha = 0.1 + (0.85 - 0.1) * t
+        var alpha = 0 + 0.92 * t
+        if (r.top + r.height / 2 < s.top) alpha = 0
         var composited = [255, 255, 255].map(function (x) { return x * (1 - alpha) })
         var L = lum(composited)
         var contrast = 1.05 / (L + 0.05)

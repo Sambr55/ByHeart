@@ -1,8 +1,9 @@
 # The hero
 
-Drop the Lisbon photograph here as **`lisbon.jpg`**, replacing the placeholder.
+`lisbon.jpg` is in place: 1200×1600, JPEG at 82, 595KB. `next/image` serves AVIF/WebP
+derivatives off it, so the source only has to be good enough to downsample from.
 
-    public/hero/lisbon.jpg
+To replace it, overwrite that file and run `npm run door`.
 
 What it needs to be:
 
@@ -22,7 +23,15 @@ working with the image blocked outright.
 
 ## Rights
 
-Not recorded yet, and it has to be before this is public. The Situation model already has
-the field for it — `rights_status: 'owned' | 'licensed' | 'cc-by' | 'permission-given'` —
-because a photograph of a real place is somebody's property. If this one is generated,
-that is its own answer and worth writing down too.
+**Generated, not photographed.** The source file was `ChatGPT Image Aug 26, 2026,
+11_23_48 AM.png` — so there is no photographer to credit and no licence to hold, which is
+the cleanest answer available and worth having written down rather than assumed.
+
+Two things that follow from it, neither urgent:
+
+- It is a *composite* of Lisbon rather than a place. The tram, the tiles and the Tejo are
+  all real things arranged into a street that is not one. Fine for a front door, which
+  sells the destination — and exactly why the city content inside the Club must be
+  evidence instead, or the product starts inventing the place it claims to teach.
+- If it is ever replaced with a real photograph, that one needs a licence and a credit,
+  and `SituationImage.rights_status` is where it goes.
