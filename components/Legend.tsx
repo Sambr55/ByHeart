@@ -174,6 +174,26 @@ export function Legend() {
                   : toGo + ' more vibes and these open.'}{' '}
                 {LEGEND_COPY.locked_body}
               </p>
+              {/*
+                Which ones it has actually counted.
+                
+                "One more vibe and these open" is unarguable and useless when a learner
+                believes they have done five. There was no way to see what the product
+                thought — so a mismatch between what somebody did and what was recorded
+                looked exactly like the feature being broken, and could not be told apart
+                from it by anyone, including me. A vibe counts when you reach the end of
+                it; leaving halfway does not, and now that is visible rather than
+                mysterious.
+              */}
+              <p className="mt-3 text-xs leading-relaxed text-muted">
+                {done.length === 0
+                  ? 'None finished yet.'
+                  : 'Finished so far: ' +
+                    done
+                      .map((id) => CRATES.find((c) => c.id === id)?.title ?? id)
+                      .join(', ') +
+                    '.'}
+              </p>
               <Link
                 href="/vibes"
                 className="tap-target eyebrow mt-3 inline-flex items-center text-accent underline underline-offset-4"
