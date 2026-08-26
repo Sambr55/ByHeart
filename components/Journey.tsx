@@ -915,6 +915,9 @@ function Picker() {
     /** The stage that opens what is still inside it. */
     at: Rung
     group: GroupKey
+    /** Roots played, of roots there are. The card shows this whenever it is partway. */
+    taken: number
+    total: number
   }
 
   /** One section of the basics is the doorway. Read from the learner, not the tab. */
@@ -953,16 +956,38 @@ function Picker() {
     // being busy, and charging for the one thing that expires would turn the only real
     // deadline in the product into a punishment.
     const planLocked = !f.drop && atLimit && !claimed.has(f.id)
+    /*
+      The ladder outranks the paywall, because the ladder is the binding constraint.
+
+      Swearing opens at stage 6. A stage-1 learner saw it filed under "Comes with Dub
+      Pro", captioned "tap to see what membership opens" — an invitation to pay for
+      something paying would not unlock. Whichever wall you would hit FIRST is the one
+      worth naming, and money cannot move that one.
+    */
     const group: GroupKey = f.drop
       ? 'drops'
-      : planLocked
-        ? 'pro'
-        : unreached || waiting
-          ? 'later'
+      : unreached || waiting
+        ? 'later'
+        : planLocked
+          ? 'pro'
           : finished
             ? 'done'
             : 'open'
-    return { crate: f, finished, waiting, unreached, planLocked, at: waiting ? nextAt : opensAt, group }
+    return {
+      crate: f,
+      finished,
+      waiting,
+      unreached,
+      planLocked,
+      at: waiting ? nextAt : opensAt,
+      group,
+      // How much of it you have actually had. A vibe is 6–14 roots and a session serves
+      // three or four, so "I did James Bond" and "James Bond is finished" are three to
+      // five sessions apart — and with nothing on the card saying so, a vibe you
+      // remember doing reappears at full brightness looking untouched.
+      taken: all.filter((r) => playedIds.has(r.root_id)).length,
+      total: all.length,
+    }
   }
 
   /**
@@ -1073,7 +1098,7 @@ function Picker() {
               </span>
             </div>
             <div className="flex flex-col gap-3">
-              {list.map(({ crate: f, finished, waiting, unreached, planLocked, at }) => (
+              {list.map(({ crate: f, finished, waiting, unreached, planLocked, at, taken, total }) => (
                 <div
                   key={f.id}
                   data-tone={f.tone}
@@ -1120,13 +1145,25 @@ function Picker() {
                       (f.drop
                         ? 'items-start '
                         : 'items-center rounded border ' +
+                          /*
+                            Brightness means "tapping this opens the vibe".
+
+                            It did not. A plan-locked card took the last branch and came
+                            out pixel-identical to an open one, while a tap on it left
+                            for /pro — and a finished vibe was dimmed to 70% while still
+                            being perfectly tappable. So the shelf had cards that looked
+                            available and were not, next to cards that looked spent and
+                            worked. Appearance now tracks what a tap actually does.
+                          */
                           (unreached
                             ? 'border-line/40 bg-surface/30 opacity-40'
                             : entering === f.id
                               ? 'border-accent bg-accent/10'
-                              : finished || waiting
-                                ? 'border-line/60 bg-surface/50 opacity-70 hover:border-accent/40'
-                                : 'border-line bg-bg-elev hover:border-accent/50'))
+                              : planLocked
+                                ? 'border-line/60 bg-surface/40 opacity-60 hover:border-accent/40'
+                                : finished || waiting
+                                  ? 'border-line/60 bg-surface/50 opacity-70 hover:border-accent/40'
+                                  : 'border-line bg-bg-elev hover:border-accent/50'))
                     }
                   >
                     {/* Every card is built the same way, the drop included — it was the
@@ -1147,9 +1184,36 @@ function Picker() {
                           DROP · {goneOn(f.drop)}
                         </span>
                       ) : null}
-                      <span className="display block text-base">{f.title}</span>
+                      <span className="flex flex-wrap items-baseline gap-x-3">
+                        <span className="display text-base">{f.title}</span>
+                        {/*
+                          How far in you are, on the card.
+
+                          A vibe is six to fourteen roots and a session serves three or
+                          four, so a vibe somebody clearly remembers doing comes back
+                          looking untouched — and the only honest answer to "why is this
+                          open again" is a number. Hidden once nothing has been taken and
+                          once it is empty, because both of those are said elsewhere.
+                        */}
+                        {mounted && taken > 0 && taken < total ? (
+                          <span className="text-[0.6rem] tabular-nums text-muted">
+                            {taken} of {total} taken
+                          </span>
+                        ) : null}
+                      </span>
                       <span className="mt-1 block text-xs text-muted">
-                        {planLocked
+                        {/*
+                          Same precedence as the grouping: the wall you would hit first.
+
+                          This asked planLocked before unreached, so a stage-6 vibe told a
+                          stage-1 learner it comes with membership — money for a door
+                          money does not open.
+                        */}
+                        {unreached
+                          ? f.id !== 'the_basics' && !f.drop && !basicsStarted
+                            ? PICKER.basics_first
+                            : distanceTo(at, rung)
+                          : planLocked
                           ? PICKER.join_up
                           : finished
                             ? 'You have been through all of it. Go again whenever you like.'
@@ -1177,13 +1241,16 @@ function Picker() {
                       A stage badge says the NUMBER, never the stage's name: "MEAN IT" is
                       a name and reads as an instruction, where "STAGE 6" is a distance.
                     */}
+                    {/*
+                      Third place this precedence has to be right, and the third place it
+                      was wrong: the badge said PRO on a stage-6 vibe. The group, the
+                      blurb and the badge all answer "which wall is in the way", and the
+                      answer is whichever one you reach first — the ladder, always,
+                      because money does not move it.
+                    */}
                     {finished ? (
                       <span className="shrink-0 rounded-full border border-correct/50 px-2 py-1 text-[0.55rem] uppercase tracking-wider text-correct">
                         done
-                      </span>
-                    ) : planLocked ? (
-                      <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider text-muted">
-                        PRO
                       </span>
                     ) : unreached && f.id !== 'the_basics' && !f.drop && !basicsStarted ? (
                       <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider text-muted">
@@ -1192,6 +1259,10 @@ function Picker() {
                     ) : unreached || waiting ? (
                       <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider tabular-nums text-muted">
                         stage {at}
+                      </span>
+                    ) : planLocked ? (
+                      <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider text-muted">
+                        PRO
                       </span>
                     ) : f.drop ? (
                       <DropClock crate={f} now={now} />
@@ -2361,7 +2432,15 @@ function SectionComplete() {
           is the shelf underneath.
         */}
         <p className="display mt-3 text-balance text-2xl">
-          {family ? 'That is ' + family.title + ' emptied out.' : 'That vibe is done.'}
+          {/*
+            It said "emptied out" after a single session of a fourteen-root vibe.
+
+            That is the sentence that starts the confusion on the shelf: a learner is
+            told a vibe is finished, sees it open again at full brightness next time, and
+            reasonably concludes the shelf is broken. Say what is true instead — the
+            session is done, and whether there is more in there.
+          */}
+          {family ? 'That is ' + family.title + ', for today.' : 'That vibe is done for today.'}
         </p>
         {/*
           What you gained in THIS crate, not your whole bank. Showing everything at the
