@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { PageShell } from '@/components/PageShell'
+import { Diagnostic } from '@/components/Diagnostic'
 import { MISSIONS, MISSION_ORDER } from '@/content/missions'
 import { BLOCK_ORDER, REINFORCED_IN_BOND, TARGETS } from '@/content/targets'
 import { downloadSession } from '@/engine/analytics'
@@ -44,6 +45,14 @@ export default function FacilitatorPage() {
 
   return (
     <PageShell eyebrow="FACILITATOR" stage="PRE-FLIGHT">
+      {/*
+        First, because it is the only part anybody currently opens this page for.
+
+        Everything below it reports the mission-era model DUB left behind — blocks, arms,
+        cohorts — and is stale in the way journey-smoke was stale: nothing points at it,
+        so nothing noticed.
+      */}
+      <Diagnostic />
       <h1 className="display text-3xl">Session console</h1>
       <p className="mt-3 text-sm text-muted">
         Nothing here is shown to a tester. Say only: “Use this as you would if someone
