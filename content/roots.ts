@@ -5095,9 +5095,27 @@ export function rungReached(
   // own scope.
   proof: { pt: string; source: string; clean: boolean }[],
 ): Rung {
+  /*
+    A release moves the ladder. Being FIRST-TIME perfect is a different question.
+
+    `clean` means right on the first submission with no helper, and that is exactly right
+    for the proof card — the count of sentences somebody can say cold is the one number
+    this product asks to be judged on, and softening it would make it a lie.
+
+    It was also gating content, and those are not the same job. A real run through the
+    basics produces three releases and, quite normally, zero clean ones: get the word
+    order wrong once and it does not count. The cost of that was not small — one tile
+    puzzle decided whether five of eleven vibes were open or ten, and the shelf greyed
+    out six of them saying "opens at stage 2" with nothing connecting that to anything
+    the learner had done.
+
+    So the two signals are separated. A learner who assembles the sentence on the second
+    attempt has demonstrably learned it and the shelf now agrees; the proof card still
+    counts only what was said cold, and still says so.
+  */
   let top = 0
   for (const line of proof) {
-    if (line.source !== 'release' || !line.clean) continue
+    if (line.source !== 'release') continue
     const root = ROOTS.find((r) => r.transfer_prompt.answer === line.pt)
     if (root && root.rung > top) top = root.rung
   }
