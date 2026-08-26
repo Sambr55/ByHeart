@@ -84,6 +84,31 @@ for (let n = 0; n <= 6; n++) {
   )
 }
 
+console.log('\nwhere each screen sends you\n')
+/*
+  The same fault twice: a screen naming an action its destination cannot honour.
+
+  First the session screen announced Legend cards the Legend had no concept of. Then the
+  Club door said BUILD MY CARD and sent everybody to /legend, which is itself locked
+  until five vibes — so a learner three short tapped the way in and hit a wall.
+
+  Both were correct on their own screen. So this checks the join: for every number of
+  vibes, where the door sends somebody must be somewhere they can act.
+*/
+const doorSends = (done: string[]) => (legendStatus({ sectionsCompleted: done }).open ? '/legend' : '/vibes')
+
+for (let n = 0; n <= 6; n++) {
+  const done = spending.slice(0, n)
+  const target = doorSends(done)
+  const legendUsable = legendStatus({ sectionsCompleted: done }).open
+  console.log('  ' + String(n).padStart(2) + ' vibes → the door sends you to ' + target)
+  ok(
+    n + ' vibes: the door does not send you to a locked page',
+    target !== '/legend' || legendUsable,
+    target === '/legend' && !legendUsable ? 'BUILD MY CARD into a wall' : '',
+  )
+}
+
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)\n')
   for (const p of problems) console.log('  ✗ ' + p)

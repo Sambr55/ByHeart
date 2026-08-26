@@ -17,7 +17,7 @@ import {
   type Rung,
 } from '@/content/roots'
 import { CLUB, MOVES } from '@/content/club'
-import { cardDone, cardToGo, clubOpen } from '@/content/legend'
+import { cardDone, cardToGo, clubOpen, legendStatus } from '@/content/legend'
 import { DEFAULT_CHAPTER } from '@/content/chapters'
 import { isCurrent, situationsFor } from '@/content/situations'
 import { CrateIcon } from '@/components/CrateIcon'
@@ -125,7 +125,7 @@ export function Club() {
     clubOpen({ answeredFrameIds: answeredIds, rung, welcomedAt: learner.club_welcomed_at })
 
   if (welcome) return <Welcome onDone={() => setWelcome(false)} />
-  if (!inside) return <Door answered={answeredIds} />
+  if (!inside) return <Door answered={answeredIds} sections={learner.sections_completed ?? []} />
 
   return (
     <main
@@ -444,9 +444,22 @@ function Moves({
  * Two different reasons for being outside, and they are not the same problem — the card
  * is not written yet, or it is written and has never been said cold.
  */
-function Door({ answered }: { answered: string[] }) {
+function Door({ answered, sections }: { answered: string[]; sections: string[] }) {
   const left = cardToGo(answered)
   const written = cardDone(answered)
+  /*
+    Where the way in actually leads.
+
+    This said BUILD MY CARD and sent everybody to /legend — which is itself locked until
+    five vibes are done. So a learner three vibes short was told the way in was their
+    card, tapped the button, and landed on a screen saying the cards do not open yet.
+    A door into a wall.
+
+    It is the same fault as the session screen announcing cards the Legend had no concept
+    of, rebuilt one screen over, which is why it now asks the same single function rather
+    than assuming. A screen may not name an action its destination cannot honour.
+  */
+  const legend = legendStatus({ sectionsCompleted: sections })
   return (
     <main
       data-stage="REAL WORLD"
@@ -465,21 +478,26 @@ function Door({ answered }: { answered: string[] }) {
 
         {/* Where they actually are, said as a distance rather than a failure. */}
         <p className="mt-3 text-sm font-semibold">
-          {written
-            ? CLUB.door.speak
-            : left === 1
-              ? 'One question left on your card.'
-              : left + ' questions left on your card.'}
+          {!legend.open
+            ? legend.toGo === 1
+              ? 'Your card opens after one more vibe.'
+              : 'Your card opens after ' + legend.toGo + ' more vibes.'
+            : written
+              ? CLUB.door.speak
+              : left === 1
+                ? 'One question left on your card.'
+                : left + ' questions left on your card.'}
         </p>
 
         <p className="mt-6 text-xs leading-relaxed text-muted">{CLUB.door.inside}</p>
       </div>
 
+      {/* The button goes where the work actually is. */}
       <Link
-        href="/legend"
+        href={legend.open ? '/legend' : '/vibes'}
         className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
       >
-        {CLUB.door.cta}
+        {legend.open ? CLUB.door.cta : CLUB.door.cta_vibes}
       </Link>
     </main>
   )

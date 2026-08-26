@@ -46,6 +46,8 @@ export const CLUB = {
     /** Said plainly, because a door you cannot see the far side of is just a wall. */
     inside: 'Inside is the part that is about Lisbon rather than about Portuguese — the people, the places, and what to say when a conversation goes wrong.',
     cta: 'BUILD MY CARD',
+    /** When the card itself is not open yet, the work is a vibe, not a question. */
+    cta_vibes: 'PICK A VIBE',
     /** When the card is done but the ladder is not. Different problem, different sentence. */
     speak: 'Your card is written. Now say some of it cold, with nothing on screen — that is the whole test, and it is the only thing DUB has ever counted.',
   },
