@@ -246,7 +246,17 @@ export function Card({
           {/* nav-clear keeps the rail and the title above the bar rather than under it. */}
           <div className="nav-clear absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 text-white">
             <div className="min-w-0 flex-1">
-              {card.kind === 'derived' ? (
+              {card.kind === 'derived' && card.card.kind === 'collision' ? (
+                <>
+                  <p className="eyebrow text-white/70">{face.eyebrow}</p>
+                  <p className="pt mt-1 text-xs text-white/70">{card.card.because}</p>
+                  <div className="mt-3 flex items-start gap-3">
+                    <AudioButton slug={slugFor(card.card.target)} text={card.card.target} />
+                    <p className="pt display text-balance text-2xl">{card.card.target}</p>
+                  </div>
+                  <p className="mt-1 text-sm text-white/80">{card.card.en}</p>
+                </>
+              ) : card.kind === 'derived' ? (
                 <>
                   <p className="eyebrow text-white/70">{face.eyebrow}</p>
                   {/* The evidence, before the new word. It is what makes this feel like the
@@ -364,6 +374,29 @@ function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
  */
 function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
   const d = card.card
+  if (d.kind === 'collision') {
+    return (
+      <div className="flex flex-col gap-6">
+        <div>
+          <p className="eyebrow text-accent">OUT OF</p>
+          <p className="pt mt-3 text-lg">{d.because}</p>
+        </div>
+        <div className="border-t border-line pt-6">
+          <div className="flex items-start gap-3">
+            <AudioButton slug={slugFor(d.target)} text={d.target} />
+            <span className="min-w-0">
+              <span className="pt display block text-2xl text-accent">{d.target}</span>
+              <span className="mt-1 block text-sm text-muted">{d.en}</span>
+            </span>
+          </div>
+          {/* The provenance line, written by hand for all sixty-eight of these. It is the
+              compounding claim made concrete, and it is the reason these are the best
+              cards in the feed. */}
+          <p className="mt-6 text-sm leading-relaxed text-fg/85">{d.note}</p>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="flex flex-col gap-6">
       <div>

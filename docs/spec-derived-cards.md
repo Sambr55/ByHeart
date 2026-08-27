@@ -255,9 +255,17 @@ Written after building it, because the estimate in §06 was optimistic and the h
 is more useful than the hopeful one.
 
 **Built:** the paradigm table (`content/paradigms.ts`), the generator (`engine/derive.ts`)
-for families **3 (next person)** and **4 (near miss)**, and derived cards in the Club feed,
-rationed to three a session, ranked under the authored rooms and carrying the photograph of
-the vibe the piece came from.
+for families **1 (collision)**, **3 (next person)** and **4 (near miss)**, and derived cards
+in the Club feed, rationed to three a session, ranked under the authored rooms and carrying
+the photograph of the vibe the piece came from.
+
+Family 1 turned out not to need generating at all. Sixty-eight collisions are already
+authored, each declaring the two pieces it `requires`, each carrying a provenance line
+somebody wrote by hand — *"A Beatles single and a Bridget Jones disaster, in one order."*
+And the journey serves at most **one per session**, so a learner eight vibes in has unlocked
+thirty and met a handful. That is not a generation problem, it is authored content that was
+never being scheduled, and it is the highest-quality supply available at zero invention
+risk. `requires` was built for exactly this.
 
 **Two gates**, both in `npm run gate`:
 
@@ -271,22 +279,37 @@ the vibe the piece came from.
 
 **The yield, measured:**
 
-| owned | derived cards available |
-|---|---|
-| 1 vibe | 0 |
-| 3 vibes | 3 |
-| every piece in the product | 21 |
+| owned | at first | after the backfill | with collisions |
+|---|---|---|---|
+| 1 vibe | 0 | 0 | **1** |
+| 3 vibes | 3 | 3 | **10** |
+| every piece in the product | 21 | 28 | **96** |
 
-Well short of the hundreds §06 estimated, and the two reasons are both fixable rather than
-structural: only **60 of 177** pieces carry a `lemma`, so two thirds of the vocabulary is
-invisible to the generator; and four of the six families are not built, including collisions,
-which is the one with the combinatorial yield.
+Ninety-six against a demand of roughly 150 a year, and the two families still unbuilt
+(extension of use, the city frame) are the ones that reuse authored Situations. So supply is
+no longer the thing standing in the way — the **native review** is.
 
-So this proves the shape and does not yet solve supply. The order in §08 is unchanged; the
-`lemma` backfill has moved from housekeeping to the thing standing between here and the
-numbers this spec claims.
+### What the `lemma` backfill actually found
 
-**Two bugs the gate caught that were live:** a near-miss card offered `obrigada` to somebody
+Most of the 117 pieces without a lemma correctly have none: numbers, days and fixed phrases
+ARE their own lemma. Eight were real, and one group of them was not a supply problem at all.
+
+`estou farto`, `Estou nervoso` and `não sou bom` already carried the feminine form — as
+prose, in a `note`: *"A man saying it. A woman says estou nervosa."* True, useful, and
+sitting somewhere nothing could generate from. **A woman using DUB was being taught to say
+`estou farto` about herself, with the correction in small print underneath.** Structured as
+an agreement paradigm it becomes a card that arrives when she needs it.
+
+That is the general lesson for the backfill: the content mostly already knows this, in
+sentences. The job is moving it somewhere a machine can act on.
+
+**Bugs the gates caught that were live:** the ration took the top three of a sorted list,
+and near misses sort first — so a learner with three outstanding near misses never saw a
+collision at all. The ordering meant to help was crowding out the best cards in the feed. A
+session is a round-robin across kinds now, and the check asserts that every kind with
+something to offer is heard before any kind gets a second slot.
+
+Also: a near-miss card offered `obrigada` to somebody
 who already owned it, because `the_basics` teaches both genders as separate pieces — being
 handed a word you have been using for a month is the most Duolingo-ish failure available
 here. And the check for "one new thing per card" was matching any note containing a comma,

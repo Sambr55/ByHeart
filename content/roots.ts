@@ -692,7 +692,7 @@ export const TOP_GUN: Root[] = [
     subtext: 'Firm intention. More conversational than a formal future tense this early.',
     extracts: [
       { id: 'nao_vou', target: 'não vou…', gloss: 'I’m not going to…', shelf: 'doing', lemma: 'ir', form: 'I, negative' },
-      { id: 'deixar', target: 'deixar', gloss: 'to leave / to let', shelf: 'doing' },
+      { id: 'deixar', target: 'deixar', gloss: 'to leave / to let', shelf: 'doing', lemma: 'deixar' },
     ],
     branches: [
       { target: 'Não vou sair.', en: 'I’m not going out.' },
@@ -1513,7 +1513,7 @@ export const PULP_FICTION: Root[] = [
       'The most famous misunderstanding in film, and the single most useful thing a beginner can own. What ends a conversation is never running out of things to say — it is the moment they answer, you catch nothing, and you switch to English. Não percebi buys you the sentence again; mais devagar buys you all of them.',
     subtext: 'Calm. Nobody is in trouble.',
     extracts: [
-      { id: 'nao_percebi', target: 'não percebi', gloss: 'I did not catch that', shelf: 'just_say', note: 'Not "I do not understand" — it says the sentence went past you, which is friendlier and truer.' },
+      { id: 'nao_percebi', target: 'não percebi', gloss: 'I did not catch that', shelf: 'just_say', lemma: 'perceber', form: 'I, past', note: 'Not "I do not understand" — it says the sentence went past you, which is friendlier and truer.' },
       { id: 'devagar', target: 'devagar', gloss: 'slowly', shelf: 'how_much' },
     ],
     branches: [
@@ -2320,7 +2320,7 @@ export const MARCUS_AURELIUS: Root[] = [
     subtext: 'Reflective on the surface, extremely practical underneath.',
     extracts: [
       { id: 'nao_podes', target: 'não podes', gloss: 'you can’t', shelf: 'doing', lemma: 'poder', form: 'you, negative' },
-      { id: 'mudar', target: 'mudar', gloss: 'to change', shelf: 'doing' },
+      { id: 'mudar', target: 'mudar', gloss: 'to change', shelf: 'doing', lemma: 'mudar' },
     ],
     branches: [
       { target: 'Posso mudar isto?', en: 'Can I change this?' },
@@ -2523,7 +2523,7 @@ export const SWEARING: Root[] = [
     subtext: 'Final, not playful. This ends a conversation rather than seasoning one.',
     extracts: [
       { id: 'vai', target: 'Vai', gloss: 'go', shelf: 'doing', lemma: 'ir', form: 'you, an order', note: 'An order. Vai à merda is not a suggestion.' },
-      { id: 'estou_farto', target: 'estou farto', gloss: 'I’m fed up', shelf: 'just_say' },
+      { id: 'estou_farto', target: 'estou farto', gloss: 'I’m fed up', shelf: 'just_say', lemma: 'farto', form: 'said by a man' },
     ],
     branches: [
       { target: 'Vai para casa.', en: 'Go home.' },
@@ -2954,8 +2954,8 @@ export const FLIRTING_M2F: Root[] = [
       'Both halves are ordinary sentences you will reuse constantly: how you feel right now, and what you are not good at. Neither is about romance.',
     subtext: 'Disarming rather than weak. Said lightly it is the most effective line here.',
     extracts: [
-      { id: 'estou_nervoso', target: 'Estou nervoso', gloss: 'I’m nervous', shelf: 'just_say', note: 'A man saying it. A woman says estou nervosa.' },
-      { id: 'nao_sou_bom', target: 'não sou bom', gloss: 'I’m not good', shelf: 'just_say', note: 'A woman says não sou boa.' },
+      { id: 'estou_nervoso', target: 'Estou nervoso', gloss: 'I’m nervous', shelf: 'just_say', lemma: 'nervoso', form: 'said by a man', note: 'A man saying it. A woman says estou nervosa.' },
+      { id: 'nao_sou_bom', target: 'não sou bom', gloss: 'I’m not good', shelf: 'just_say', lemma: 'bom', form: 'said by a man', note: 'A woman says não sou boa.' },
     ],
     branches: [
       { target: 'Não sou bom a dançar.', en: 'I’m not a good dancer.' },
@@ -3135,7 +3135,7 @@ export const FLIRTING_F2M: Root[] = [
     subtext: 'Sincere, and worth spending. Said about a joke that was not funny it does the opposite.',
     extracts: [
       { id: 'es', target: 'És', gloss: 'you are', shelf: 'doing', lemma: 'ser', form: 'you', note: 'The permanent one. És engraçado is about him; estás is about tonight.' },
-      { id: 'engracado', target: 'engraçado', gloss: 'funny', shelf: 'describing', note: 'A woman is engraçada.' },
+      { id: 'engracado', target: 'engraçado', gloss: 'funny', shelf: 'describing', lemma: 'engraçado', form: 'masculine', note: 'A woman is engraçada.' },
     ],
     branches: [
       { target: 'És muito simpático.', en: 'You’re really nice.' , address: 'tu', formal: 'É muito simpático.' },
@@ -3863,7 +3863,7 @@ export const WIZARDRY: Root[] = [
       'The word that turns a fear into something laughable is just Latin for laughable, and Portuguese spells it almost identically. It is also load-bearing in any Portuguese complaint — about a queue, a price, or a bus that has not come.',
     subtext: 'Muttered, not shouted. Said to whoever is standing next to you.',
     extracts: [
-      { id: 'ridiculo', target: 'ridículo', gloss: 'ridiculous', shelf: 'describing', note: 'The stress is on the DI — ri-DI-culo. English puts it in a different place entirely.' },
+      { id: 'ridiculo', target: 'ridículo', gloss: 'ridiculous', shelf: 'describing', lemma: 'ridículo', form: 'masculine', note: 'The stress is on the DI — ri-DI-culo. English puts it in a different place entirely.' },
     ],
     branches: [
       { target: 'Que ridículo!', en: 'How ridiculous!', demonstrates: ['ridiculo'] },

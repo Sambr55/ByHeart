@@ -1,4 +1,4 @@
-import { CRATES, PIECES, type CultureFamily, type Piece } from '@/content/roots'
+import { COLLISIONS, CRATES, PIECES, type CultureFamily, type Piece } from '@/content/roots'
 import {
   PARADIGM,
   PERSON_ORDER,
@@ -29,7 +29,7 @@ import {
  * never repeat the card.** A piece can come back twenty times. A card is used once.
  */
 
-export type DerivedKind = 'next_person' | 'near_miss'
+export type DerivedKind = 'next_person' | 'near_miss' | 'collision'
 
 export interface DerivedCard {
   /** Stable, so a card that has been done can never be made again. */
@@ -121,11 +121,20 @@ function nextPerson(
   const p = PARADIGM[lemma]
   if (!p || p.kind !== 'verb' || p.impersonal) return null
 
+  /*
+    A bare infinitive is not a person, and that is a card rather than a dead end.
+
+    `deixar` and `mudar` arrive as the naked verb — somebody who has met "to change" cannot
+    yet say "I change", so the first person is exactly what is missing. Everything else
+    still has to come from a plain present: extending `queria` (softened) or `falei` (past)
+    to a second person would teach two new things at once.
+  */
+  const infinitive = piece.target.trim().toLowerCase() === p.infinitive.toLowerCase()
   const have = personOf(piece.form)
-  if (!have) return null
-  // Only from a plain present form. Extending `queria` (softened) or `falei` (past) to a
-  // second person would be teaching two new things at once.
-  if (!isPresent(p, have, piece.target)) return null
+  if (!infinitive) {
+    if (!have) return null
+    if (!isPresent(p, have, piece.target)) return null
+  }
 
   // Every person of this verb the learner already holds, so the card never offers one back.
   const held = new Set<Person>()
@@ -134,7 +143,7 @@ function nextPerson(
     const who = personOf(other.form)
     if (who && owned.has(keyOf(other))) held.add(who)
   }
-  held.add(have)
+  if (have) held.add(have)
 
   /*
     And never a form they already hold under a different piece.
@@ -190,9 +199,21 @@ function nearMiss(piece: Piece & { id: string }, ownedForms: Set<string>): Deriv
   const p = PARADIGM[lemma]
   if (!p || p.kind !== 'agreement') return null
 
-  const bare = piece.target.trim().toLowerCase()
-  const other = bare === p.m.toLowerCase() ? p.f : bare === p.f.toLowerCase() ? p.m : null
+  /*
+    Substituted into the phrase rather than served bare.
+
+    Half of these live inside something somebody actually says — `estou farto`, `não sou
+    bom` — and a card that answered with the lone word `farta` would be a dictionary entry.
+    Swapping the one word keeps the sentence, which is the thing they will use.
+  */
+  const bare = piece.target.trim()
+  const swap = (from: string, to: string): string | null => {
+    const re = new RegExp('(^|\\s)' + from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?=$|\\s|[.,!?])', 'i')
+    return re.test(bare) ? bare.replace(re, (_m, lead: string) => lead + to) : null
+  }
+  const other = swap(p.m, p.f) ?? swap(p.f, p.m)
   if (!other) return null
+  const newWord = other.toLowerCase().includes(p.f.toLowerCase()) ? p.f : p.m
   // See nextPerson: the pair is frequently taught in one vibe, and telling somebody about
   // a word they already own is the failure this whole family exists to avoid.
   if (ownedForms.has(other.toLowerCase())) return null
@@ -203,7 +224,7 @@ function nearMiss(piece: Piece & { id: string }, ownedForms: Set<string>): Deriv
     noun" is ambiguous on a card whose whole subject IS the other one — so it names which
     way the agreement runs, and for obrigado it names the mistake worth not making.
   */
-  const feminine = other.toLowerCase() === p.f.toLowerCase()
+  const feminine = newWord.toLowerCase() === p.f.toLowerCase()
   const note = saidBy
     ? 'It agrees with whoever is saying it, not with the person you are saying it to. Say ' +
       p.f +
@@ -225,6 +246,52 @@ function nearMiss(piece: Piece & { id: string }, ownedForms: Set<string>): Deriv
   }
 }
 
+/**
+ * Family 1 — collisions, which were already written and were barely being met.
+ *
+ * Sixty-eight of these are authored, each requiring two pieces from different vibes, each
+ * carrying a provenance line somebody wrote by hand: "A Beatles single and a Bridget Jones
+ * disaster, in one order." They are the best evidence in the product that unrelated
+ * memories have started behaving like one language.
+ *
+ * And the journey serves at most ONE per session, so a learner eight vibes in has unlocked
+ * thirty and met a handful. Nothing here is generated — this is authored content being
+ * scheduled by what somebody owns, which is what `requires` was for, and it is the highest
+ * quality supply available with no invention risk whatsoever.
+ */
+function collisions(owned: Set<string>, done: Set<string>): DerivedCard[] {
+  return COLLISIONS.filter(
+    (c) => !done.has('derived_collision_' + c.id) && c.requires.every((p) => owned.has(p)),
+  ).flatMap((c): DerivedCard[] => {
+    const pieces = c.requires.map((id) => ({ id, piece: PIECES[id] })).filter((x) => x.piece)
+    if (!pieces.length) return []
+    /*
+      The picture comes from the vibe that is NOT the basics where there is one. Every
+      collision leans on the basics — that is what the basics are for — so taking the first
+      required piece would put the same photograph on most of them.
+    */
+    const lead = pieces.find((x) => x.piece.family !== 'the_basics') ?? pieces[0]
+    return [
+      {
+        id: 'derived_collision_' + c.id,
+        kind: 'collision',
+        from: {
+          id: lead.id,
+          target: lead.piece.target,
+          gloss: lead.piece.gloss,
+          family: lead.piece.family,
+        },
+        because: pieces
+          .map((x) => x.piece.target.trim() + ' — ' + vibeName(x.piece.family))
+          .join('   ·   '),
+        target: c.answer,
+        en: c.ask,
+        note: c.provenance,
+      },
+    ]
+  })
+}
+
 /** The inventory is keyed by piece id, and Piece drops its own id. Recover it. */
 const KEY = new Map<Piece, string>()
 for (const [id, piece] of Object.entries(PIECES)) KEY.set(piece, id)
@@ -240,7 +307,24 @@ function keyOf(p: Piece): string {
  * rather than shown, because a wrong card is worse than an empty feed.
  */
 export function vouched(card: DerivedCard): boolean {
-  return VOUCHED.has(card.target.toLowerCase())
+  /*
+    An authored collision is vouched by having been authored — its sentence went through
+    `npm run lint:content` and the QA sheet like every other line in the product. The
+    paradigm table is the guarantee for the forms this file ASSEMBLES, and a sentence
+    somebody wrote needs a different one, not a weaker one.
+  */
+  if (card.kind === 'collision') return true
+  /*
+    Per word, because a near-miss card carries a phrase now: `estou farta` is one word out
+    of the table and one word carried through from something the learner already owns. The
+    rule is that nothing NEW appears which the table has not vouched for — carried context
+    was already authored, somewhere else, and vouched for there.
+  */
+  const carried = new Set(card.from.target.toLowerCase().split(/\s+/))
+  return card.target
+    .toLowerCase()
+    .split(/\s+/)
+    .every((w) => VOUCHED.has(w) || carried.has(w))
 }
 
 /**
@@ -262,8 +346,8 @@ export function derivedFor(opts: {
   const ownedForms = new Set(
     [...owned].map((id) => PIECES[id]?.target.trim().toLowerCase()).filter(Boolean) as string[],
   )
-  const out: DerivedCard[] = []
-  const seen = new Set<string>()
+  const out: DerivedCard[] = [...collisions(owned, done)]
+  const seen = new Set<string>(out.map((c) => c.id))
 
   for (const id of owned) {
     const piece = PIECES[id]
@@ -278,9 +362,14 @@ export function derivedFor(opts: {
     }
   }
 
-  // Near misses first: they correct something somebody is doing wrong today, where a next
-  // person adds something they cannot do yet. Being wrong beats being incomplete.
-  return out.sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'near_miss' ? -1 : 1))
+  /*
+    Near misses first — they correct something somebody is doing wrong today, and being
+    wrong beats being incomplete. Then collisions, which are the best cards here and the
+    whole compounding claim made visible. Then the next person, which adds something new
+    rather than joining up what is already there.
+  */
+  const rank: Record<DerivedKind, number> = { near_miss: 0, collision: 1, next_person: 2 }
+  return out.sort((a, b) => rank[a.kind] - rank[b.kind])
 }
 
 export type { Paradigm }

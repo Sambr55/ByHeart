@@ -107,7 +107,31 @@ export function roomsFor(chapter: ChapterId = DEFAULT_CHAPTER): FeedCard[] {
 export const DERIVED_PER_SESSION = 3
 
 export function derivedCards(cards: DerivedCard[]): FeedCard[] {
-  return cards.slice(0, DERIVED_PER_SESSION).flatMap((card): FeedCard[] => {
+  /*
+    One of each kind before a second of any, rather than the top three of a sorted list.
+
+    Sorting put near misses first — correctly, since they fix something somebody is getting
+    wrong today — and then the ration took the first three, so a learner with three
+    outstanding near misses never saw a collision at all. Collisions are the best cards
+    here and the entire compounding claim made visible, and they were being crowded out by
+    the ordering that was meant to be helping.
+
+    Round-robin keeps the ranking's intent — a near miss still comes first — while making
+    sure a session is a mix rather than three of a kind.
+  */
+  const byKind = new Map<string, DerivedCard[]>()
+  for (const c of cards) byKind.set(c.kind, [...(byKind.get(c.kind) ?? []), c])
+  const queues = [...byKind.values()]
+  const picked: DerivedCard[] = []
+  while (picked.length < DERIVED_PER_SESSION && queues.some((q) => q.length)) {
+    for (const q of queues) {
+      if (picked.length >= DERIVED_PER_SESSION) break
+      const next = q.shift()
+      if (next) picked.push(next)
+    }
+  }
+
+  return picked.flatMap((card): FeedCard[] => {
     const image = vibeImage(card.from.family)
     if (!image) return []
     return [{ kind: 'derived', id: card.id, card, image: { src: image.src, alt: image.alt } }]
@@ -173,8 +197,18 @@ export function cardFace(card: FeedCard): {
     }
   }
   if (card.kind === 'derived') {
+    /*
+      Two different claims, so two different eyebrows.
+
+      A collision is not "here is a new form" — it is a sentence the learner can already
+      say, made out of two vibes that have nothing to do with each other, and the whole
+      point is that nobody taught them the combination. "You learned" would undersell it.
+
+      Both inside the fourteen characters an eyebrow gets, which "BECAUSE YOU LEARNED" was
+      not — it slipped through because the vocabulary gate reads JSX and this is a string.
+    */
     return {
-      eyebrow: 'BECAUSE YOU LEARNED',
+      eyebrow: card.card.kind === 'collision' ? 'YOU CAN SAY' : 'YOU LEARNED',
       title: card.card.target,
       blurb: card.card.note,
       image: card.image,

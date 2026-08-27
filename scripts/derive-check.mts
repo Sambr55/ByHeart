@@ -11,8 +11,9 @@
  * produce. So this is not sampling — it is every card any learner could ever be shown.
  */
 import { PIECES, ROOTS_BY_FAMILY, CRATES } from '../content/roots'
-import { PARADIGM, VOUCHED } from '../content/paradigms'
-import { derivedFor, type DerivedCard } from '../engine/derive'
+import { PARADIGM } from '../content/paradigms'
+import { derivedFor, vouched, type DerivedCard } from '../engine/derive'
+import { DERIVED_PER_SESSION, derivedCards } from '../content/feed'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -32,7 +33,9 @@ console.log('nothing is invented\n')
   the paradigm table, authored. An LLM asked for Portuguese produces Brazilian forms
   confidently and at scale, and this is the check that means one never reaches anybody.
 */
-const invented = all.filter((c) => !VOUCHED.has(c.target.toLowerCase()))
+// Through the exported rule rather than a second copy of it: a near-miss card carries a
+// phrase, one word of which is new and the rest carried from something already authored.
+const invented = all.filter((c) => !vouched(c))
 ok(
   'every Portuguese string comes out of the table',
   !invented.length,
@@ -142,6 +145,37 @@ const three = derivedFor({
 const many = derivedFor({ inventory: everything, finished: [] }).length
 console.log('  1 vibe → ' + one + '   3 vibes → ' + three + '   everything → ' + many)
 ok('more learned means more to practise', one <= three && three <= many)
+
+console.log('\na session is a mix, not three of a kind\n')
+/*
+  Sorting put near misses first, correctly, and then the ration took the first three — so a
+  learner with three outstanding near misses never saw a collision, which are the best cards
+  here. The ordering meant to help was crowding out the thing it was ordering for.
+*/
+{
+  const inv: Record<string, string> = {}
+  for (const f of ['the_basics', 'pulp_fiction', 'james_bond', 'bridget_jones', 'audrey_hepburn']) {
+    for (const root of (ROOTS_BY_FAMILY as Record<string, { extracts: { id: string }[] }[]>)[f] ?? []) {
+      for (const e of root.extracts) inv[e.id] = 'strong'
+    }
+  }
+  const available = derivedFor({ inventory: inv, finished: [] })
+  const shown = derivedCards(available)
+  const kinds = new Set(
+    shown.map((c) => (c.kind === 'derived' ? c.card.kind : c.kind)),
+  )
+  console.log(
+    '  ' + available.length + ' available, ' + shown.length + ' shown: ' + [...kinds].join(', '),
+  )
+  ok('at most three a session', shown.length <= DERIVED_PER_SESSION, String(shown.length))
+  // Every kind that has something to offer gets a slot before any kind gets a second.
+  const offered = new Set(available.map((c) => c.kind))
+  ok(
+    'every kind with something to say is heard',
+    [...offered].every((k) => kinds.has(k)),
+    [...offered].filter((k) => !kinds.has(k)).join(' ') || 'all of them',
+  )
+}
 
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)\n')

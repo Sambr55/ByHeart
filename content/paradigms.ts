@@ -376,7 +376,49 @@ export const PARADIGMS: Paradigm[] = [
       impersonal: true,
     }),
 
+  // ------------------------------------------------- the verbs the backfill brought in
+  v('deixar', 'to leave something, to let somebody',
+    { base: 'leave', third: 'leaves' },
+    { eu: 'deixo', tu: 'deixas', ele: 'deixa', nos: 'deixamos', eles: 'deixam' },
+    {
+      past: { eu: 'deixei', tu: 'deixaste', ele: 'deixou', nos: 'deixámos', eles: 'deixaram' },
+      imperfect: { eu: 'deixava', tu: 'deixavas', ele: 'deixava', nos: 'deixávamos', eles: 'deixavam' },
+      imperative: 'deixa',
+      imperative_negative: 'não deixes',
+    }),
+  v('mudar', 'to change',
+    { base: 'change', third: 'changes' },
+    { eu: 'mudo', tu: 'mudas', ele: 'muda', nos: 'mudamos', eles: 'mudam' },
+    {
+      past: { eu: 'mudei', tu: 'mudaste', ele: 'mudou', nos: 'mudámos', eles: 'mudaram' },
+      imperfect: { eu: 'mudava', tu: 'mudavas', ele: 'mudava', nos: 'mudávamos', eles: 'mudavam' },
+      imperative: 'muda',
+      imperative_negative: 'não mudes',
+    }),
+  /* perceber, not entender. "Não percebi" is what Lisbon says, and it means the sentence
+     went past you rather than that you are incapable — friendlier, and truer. */
+  v('perceber', 'to catch, to get what somebody said',
+    { base: 'get', third: 'gets' },
+    { eu: 'percebo', tu: 'percebes', ele: 'percebe', nos: 'percebemos', eles: 'percebem' },
+    {
+      past: { eu: 'percebi', tu: 'percebeste', ele: 'percebeu', nos: 'percebemos', eles: 'perceberam' },
+      imperfect: { eu: 'percebia', tu: 'percebias', ele: 'percebia', nos: 'percebíamos', eles: 'percebiam' },
+      imperative: 'percebe',
+      imperative_negative: 'não percebas',
+    }),
+
   // ------------------------------------------------------------------------- agreement
+  /*
+    These five were already in the content — as prose, in a `note`: "A woman says estou
+    nervosa", "A woman is engraçada". True, useful, and sitting somewhere nothing could
+    generate from, so a woman using DUB was being taught to say `estou farto` about herself
+    and told the correction in small print underneath. Structured, it becomes a card that
+    arrives when she needs it.
+  */
+  a('farto', 'fed up', 'farto', 'farta', 'fartos', 'fartas'),
+  a('nervoso', 'nervous', 'nervoso', 'nervosa', 'nervosos', 'nervosas'),
+  a('engraçado', 'funny', 'engraçado', 'engraçada', 'engraçados', 'engraçadas'),
+  a('ridículo', 'ridiculous', 'ridículo', 'ridícula', 'ridículos', 'ridículas'),
   /*
     Not conjugation, and it needed saying in the model rather than being forced into one.
     `obrigado` agrees with the person SAYING it, which is the single most common mistake an
