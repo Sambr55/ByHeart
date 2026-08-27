@@ -1334,20 +1334,25 @@ function Picker() {
                       version was gated on, carried over unchanged. Only the shape moved.
                     */
                     /*
-                      Dimming still means "not yet", but not to forty per cent.
+                      Not yet is a colour, not an opacity.
 
-                      At 0.4 a photograph is a grey rectangle, which is the exact thing that
-                      got reported twice as the shelf looking locked. The unreached tiles are
-                      the opportunity — that is the whole reason they are on the screen from
-                      the first visit — so they hold their picture and carry the reason as a
-                      badge instead.
+                      This went from 0.4 — where a photograph is a grey rectangle and the
+                      shelf reads as a locked product — to 0.75, which is barely a
+                      difference at all: with the badge gone too, every vibe looked open and
+                      was reported as such. Both mistakes are the same mistake, which is
+                      trying to say "not yet" by turning the volume down.
+
+                      So the tile keeps its full presence and the PICTURE carries the state:
+                      drained of colour and darkened, which reads instantly and from across
+                      the room, and does not make anybody wonder whether the screen is
+                      broken. A dashed border and a chip say which wall it is.
                     */
                     className={
                       'tap-target relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded border p-3 text-left transition ' +
                       (entering === f.id
                         ? 'border-accent'
                         : unreached || planLocked
-                          ? 'border-line/60 opacity-75'
+                          ? 'border-dashed border-line-strong/70'
                           : finished || waiting
                             ? 'border-line/60 opacity-80'
                             : 'border-line hover:border-accent/60')
@@ -1360,7 +1365,10 @@ function Picker() {
                         aria-hidden
                         fill
                         sizes="(max-width: 448px) 50vw, 224px"
-                        className="object-cover"
+                        className={
+                          'object-cover ' +
+                          (unreached || planLocked ? 'grayscale brightness-[0.45]' : '')
+                        }
                       />
                     ) : null}
                     {/*
@@ -1376,8 +1384,9 @@ function Picker() {
                     <span className="absolute inset-x-0 top-0 flex items-start justify-end p-3">
                       {finished ? (
                         <span className={BADGE + ' text-white'}>done</span>
-                      ) : unreached && f.id !== 'the_basics' && !basicsStarted ? null : unreached ||
-                        waiting ? (
+                      ) : unreached && f.id !== 'the_basics' && !basicsStarted ? (
+                        <span className={BADGE + ' text-white'}>basics first</span>
+                      ) : unreached || waiting ? (
                         <span className={BADGE + ' tabular-nums text-white'}>stage {at}</span>
                       ) : planLocked ? (
                         <span className={BADGE + ' text-white'}>PRO</span>

@@ -58,14 +58,32 @@ async function cards(page: Page) {
         const s = getComputedStyle(el)
         const r = el.getBoundingClientRect()
         if (!r.height) return null
+        const img = el.querySelector('img')
         return {
           title,
           opacity: Number(s.opacity),
+          /*
+            Locked is a treatment, not an opacity.
+
+            The shelf used to say "not yet" by turning the tile down — to 0.4, where a
+            photograph is a grey rectangle, and then to 0.75, where nobody can tell. Both
+            are the same mistake. It is a dashed border and a picture drained of colour now,
+            so that is what this reads.
+          */
+          locked: s.borderStyle === 'dashed',
+          drained: img ? getComputedStyle(img).filter !== 'none' : false,
           disabled: (el as HTMLButtonElement).disabled,
           badge: (el.textContent ?? '').includes('PRO') ? 'pro' : '',
         }
       })
-      .filter(Boolean) as { title: string; opacity: number; disabled: boolean; badge: string }[],
+      .filter(Boolean) as {
+      title: string
+      opacity: number
+      locked: boolean
+      drained: boolean
+      disabled: boolean
+      badge: string
+    }[],
   )
 }
 
@@ -97,27 +115,87 @@ const list = await cards(page)
 console.log('\n' + list.length + ' cards on the shelf\n')
 for (const c of list) {
   console.log(
-    '  ' + c.title.padEnd(34) + 'opacity ' + c.opacity.toFixed(2) +
-      (c.disabled ? '  disabled' : '  tappable') + (c.badge ? '  [PRO]' : ''),
+    '  ' + c.title.padEnd(34) + (c.locked ? 'not yet ' : 'open    ') +
+      (c.drained ? 'drained' : 'colour ') + (c.badge ? '  [PRO]' : ''),
   )
 }
 
-console.log('\nbrightness means a tap opens the vibe\n')
-const bright = list.filter((c) => c.opacity > 0.9)
-const dim = list.filter((c) => c.opacity <= 0.9)
+console.log('\nfull colour means a tap opens the vibe\n')
+const bright = list.filter((c) => !c.locked)
+const dim = list.filter((c) => c.locked)
 
-ok('there is something to tap', bright.length > 0, bright.length + ' at full brightness')
+ok('there is something to open', bright.length > 0, bright.length + ' open')
 ok(
-  'nothing at full brightness is disabled',
+  'nothing shown as open is disabled',
   bright.every((c) => !c.disabled),
   bright.filter((c) => c.disabled).map((c) => c.title).join(', '),
 )
 ok(
-  'nothing at full brightness is behind the paywall',
+  'nothing shown as open is behind the paywall',
   bright.every((c) => c.badge !== 'pro'),
   bright.filter((c) => c.badge === 'pro').map((c) => c.title).join(', '),
 )
-ok('the dimmed ones are visibly different', dim.every((c) => c.opacity < 0.85), '')
+// The other half, and the one that was missing: nothing you cannot open looks like you can.
+ok(
+  'and nothing locked looks open',
+  dim.every((c) => c.drained),
+  dim.filter((c) => !c.drained).map((c) => c.title).join(', '),
+)
+/*
+  "Not yet" needs a signal somebody can name.
+
+  This used to be `opacity < 0.85`, which passed at 0.75 — a difference nobody can see,
+  next to a tile with no badge on it, on a shelf that was then reported as having every
+  vibe open. An opacity threshold is not a test of whether a person can tell; it is a test
+  of whether a number is below another number.
+
+  So: a locked tile must differ by something you could point at — a drained picture or a
+  chip saying which wall it is. Both, as it happens, but either would do.
+*/
+const locked = await page.$$eval('[data-testid^="vibe-"]', (els) =>
+  els
+    .map((el) => {
+      const img = el.querySelector('img')
+      const chip = el.querySelector('span[class*="rounded-full"]')
+      return {
+        id: el.getAttribute('data-testid') ?? '',
+        title: (el.querySelector('.display')?.textContent ?? '').trim(),
+        dashed: getComputedStyle(el).borderStyle === 'dashed',
+        filtered: img ? getComputedStyle(img).filter !== 'none' : false,
+        chip: (chip?.textContent ?? '').trim(),
+      }
+    })
+    .filter((c) => c.dashed),
+)
+console.log('  ' + locked.length + ' shown as not yet open')
+ok('something is shown as not yet open', locked.length > 0)
+ok(
+  'and every one of them is drained of colour',
+  locked.every((c) => c.filtered),
+  locked.filter((c) => !c.filtered).map((c) => c.title).join(', '),
+)
+ok(
+  'and says which wall it is',
+  locked.every((c) => c.chip.length > 0),
+  locked.filter((c) => !c.chip).map((c) => c.title).join(', '),
+)
+// And the open one must not be wearing any of that, or the distinction says nothing.
+const openTiles = await page.$$eval('[data-testid^="vibe-"]', (els) =>
+  els
+    .filter((el) => getComputedStyle(el).borderStyle !== 'dashed')
+    .map((el) => {
+      const img = el.querySelector('img')
+      return {
+        title: (el.querySelector('.display')?.textContent ?? '').trim(),
+        filtered: img ? getComputedStyle(img).filter !== 'none' : false,
+      }
+    }),
+)
+ok(
+  'while what IS open keeps its colour',
+  openTiles.every((c) => !c.filtered),
+  openTiles.filter((c) => c.filtered).map((c) => c.title).join(', '),
+)
 
 /*
   The wall you would hit FIRST is the one worth naming.

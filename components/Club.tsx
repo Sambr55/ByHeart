@@ -514,6 +514,19 @@ function Door({
   const left = cardToGo(answered, answers)
   const written = cardDone(answered, answers)
   /*
+    ?preview=drops asked for the feed, and this is the door.
+
+    The preview fills the feed with a drop before its window opens; it does not open the
+    Club, and it should not — a URL that lets anybody past the gate the whole product is
+    built around is not a testing affordance, it is a hole. But arriving here with the
+    param and being shown the ordinary door is a silent dead end, so it says what to do.
+    Only ever seen by somebody who typed it.
+  */
+  const [previewing, setPreviewing] = useState(false)
+  useEffect(() => {
+    setPreviewing(new URLSearchParams(window.location.search).get('preview') === 'drops')
+  }, [])
+  /*
     Where the way in actually leads.
 
     This said BUILD MY CARD and sent everybody to /legend — which is itself locked until
@@ -559,6 +572,20 @@ function Door({
           ) : null,
         )}
       </div>
+
+      {previewing ? (
+        <div className="rounded border border-line-strong bg-bg-elev px-4 py-3">
+          <p className="text-sm font-semibold">The preview fills the feed, not the door.</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted">
+            This device is not in the Club yet, so there is no feed to fill. Redeem a code
+            with a Club pass on it at{' '}
+            <Link href="/account" className="text-accent underline underline-offset-4">
+              your account
+            </Link>{' '}
+            and come back to this link.
+          </p>
+        </div>
+      ) : null}
 
       <div className="flex flex-1 flex-col gap-3">
         <p className="eyebrow text-muted">{CLUB.door.eyebrow}</p>
