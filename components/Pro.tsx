@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { PLANS } from '@/lib/entitlements'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Back } from '@/components/Back'
 import { useEntitlements } from '@/engine/useEntitlements'
 
@@ -174,6 +175,8 @@ export function Pro() {
           </>
         )}
       </div>
+      <BottomNavSpace />
+      <BottomNav />
     </main>
   )
 }

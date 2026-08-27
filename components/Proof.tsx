@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { useMemo, useState } from 'react'
 import { GOAL_LABEL, GOAL_NEEDS, type Goal } from '@/content/profile'
@@ -317,6 +318,15 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
             KEEP GOING
           </Link>
         </div>
+      ) : null}
+
+      {/* Only when this IS the page. Inside the journey the step below owns the screen,
+          and a bar offering three ways out mid-session is an invitation to leave. */}
+      {standalone ? (
+        <>
+          <BottomNavSpace />
+          <BottomNav />
+        </>
       ) : null}
     </main>
   )

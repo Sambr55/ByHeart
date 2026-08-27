@@ -232,7 +232,9 @@ export function Card({
                 type="button"
                 data-testid="card-continue"
                 onClick={reveal}
-                className="tap-target eyebrow mt-6 w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
+                /* mb-3 so the blue button does not sit flush on the blue bar. Two blues
+                   touching read as one shape, and the shape was neither. */
+                className="tap-target eyebrow mb-3 mt-6 w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
               >
                 SWIPE LEFT
               </button>

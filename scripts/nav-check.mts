@@ -90,6 +90,20 @@ async function covered(p: Page) {
   })
 }
 
+console.log('\nthe bar is on every screen\n')
+/*
+  Not just the four tabs. A bar that comes and goes is not a permanent navigation, it is a
+  footer that some pages happen to have — and the pages it was missing from were exactly
+  the ones somebody lands on from the profile and then has to find their way back out of.
+*/
+for (const route of ['/proof', '/vocab', '/drops', '/pro', '/account', '/legend', '/feedback', '/signin']) {
+  await page.goto(BASE + route)
+  await page.waitForTimeout(900)
+  ok(route + ' has the bar', Boolean(await page.$('[data-testid="bottom-nav"]')))
+  const under = await covered(page)
+  ok(route + ' has nothing hiding under it', !under?.length, (under ?? []).slice(0, 2).join(' / '))
+}
+
 console.log('\nthe four tabs\n')
 for (const [route, tab] of [['/vibes', 'vibes'], ['/club', 'lisbon'], ['/line', 'today'], ['/profile', 'yours']] as const) {
   await page.goto(BASE + route)
@@ -107,11 +121,84 @@ for (const [route, tab] of [['/vibes', 'vibes'], ['/club', 'lisbon'], ['/line', 
   ok(route + ' tab is thumb-sized', box.h >= 44 && box.w >= 44, box.w + '×' + box.h)
 }
 
+console.log('\nwhite on blue, and the current tab is the whitest thing on it\n')
+await page.goto(BASE + '/club')
+await page.waitForTimeout(1500)
+/*
+  As a string, not a closure.
+
+  tsx compiles with esbuild, which rewrites nested function declarations to reference a
+  `__name` helper that does not exist inside the page. Any evaluate body with a helper
+  function in it throws on the browser side, and the failure names the helper rather than
+  the cause.
+*/
+const paint = (await page.evaluate(`(() => {
+  const nav = document.querySelector('[data-testid="bottom-nav"]')
+  const here = nav.querySelector('[aria-current="page"]')
+  const other = Array.from(nav.querySelectorAll('a')).find((a) => !a.getAttribute('aria-current'))
+  /*
+    Two computed forms, and reading one as the other is how this check first passed for
+    the wrong reason. A plain colour computes to rgb(31, 93, 140) with 0-255 channels;
+    color-mix() computes to color(srgb 1 1 1 / 0.8) with 0-1 channels — read on the 255
+    scale that white reads as very nearly black, so "the inactive tab is dimmer" was true
+    of a number that had nothing to do with the screen.
+  */
+  const parse = (c) => {
+    const n = (c.match(/[\\d.]+/g) || ['0','0','0']).map(Number)
+    const srgb = c.indexOf('color(') === 0
+    const rgb = srgb ? n.slice(0, 3).map((v) => v * 255) : n.slice(0, 3)
+    const alpha = n.length > 3 ? n[3] : 1
+    const f = (v) => { const x = v / 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4) }
+    return { lum: 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2]), alpha }
+  }
+  const bg = getComputedStyle(nav).backgroundColor
+  const h = parse(getComputedStyle(here).color)
+  const o = parse(getComputedStyle(other).color)
+  return {
+    bg,
+    bgLum: parse(bg).lum,
+    hereLum: h.lum,
+    hereAlpha: h.alpha,
+    otherLum: o.lum,
+    otherAlpha: o.alpha,
+  }
+})()`)) as {
+  bg: string
+  bgLum: number
+  hereLum: number
+  hereAlpha: number
+  otherLum: number
+  otherAlpha: number
+}
+
+// A bar the same colour as the page is a footer. It has to be its own ground.
+ok('the bar is a solid ground, not the page', paint.bgLum < 0.3, paint.bg)
+ok('the current tab is white', paint.hereLum > 0.9, paint.hereLum.toFixed(2))
+ok(
+  'and reads clearly on it',
+  (1.05) / (paint.bgLum + 0.05) >= 4.5,
+  ((1.05) / (paint.bgLum + 0.05)).toFixed(2) + ':1',
+)
+/*
+  Both tabs are white — on a saturated ground, here and not-here separate by opacity and
+  weight rather than by a second hue that would need keeping in step across two themes.
+*/
+ok('the others are white too', paint.otherLum > 0.9, paint.otherLum.toFixed(2))
+ok(
+  'but not as solid',
+  paint.otherAlpha < paint.hereAlpha,
+  paint.otherAlpha.toFixed(2) + ' vs ' + paint.hereAlpha.toFixed(2),
+)
+
 console.log('\nand not on a lesson\n')
 await page.goto(BASE + '/vibes')
-await page.waitForTimeout(1000)
+await page.waitForTimeout(1200)
+// Tapping opens the picture; the swipe is what enters. Two steps now, so the check takes
+// both rather than asserting the first one lands somewhere it no longer does.
 await page.click('[data-testid="vibe-the_basics"]')
-await page.waitForTimeout(1400)
+await page.waitForSelector('[data-testid="vibe-begin"]')
+await page.click('[data-testid="vibe-begin"]')
+await page.waitForTimeout(2200)
 ok(
   'a teaching beat has no bar',
   !(await page.$('[data-testid="bottom-nav"]')),

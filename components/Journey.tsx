@@ -40,6 +40,8 @@ import {
   PICKER,
 } from '@/content/front-door'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { VibeOpen } from '@/components/VibeOpen'
+import { vibeImage } from '@/content/vibe-images'
 import { primeAudio } from '@/engine/audio'
 import { UNLIMITED } from '@/lib/entitlements'
 import { Path } from '@/components/Path'
@@ -859,6 +861,7 @@ function DropRow({
   now: Date | null
   onOpen: () => void
 }) {
+  const dropImage = vibeImage(crate.id)
   return (
     <div data-tone={crate.tone} className="flex flex-col">
       <button
@@ -867,8 +870,17 @@ function DropRow({
         onClick={onOpen}
         className="tap-target flex w-full items-start gap-3 rounded border border-l-[3px] border-line border-l-[color:var(--tone)] bg-bg-elev px-4 py-3 text-left transition hover:border-accent/50"
       >
-        <span className="azulejo-block flex h-10 w-10 shrink-0 items-center justify-center rounded">
-          <CrateIcon crate={crate.id} className="h-6 w-6 text-[color:var(--tone)]" />
+        {/* A drop has a photograph like every other vibe — it just cannot be a tile,
+            because a countdown and a ticket link have nowhere to go on one. */}
+        <span className="relative flex h-14 w-11 shrink-0 items-center justify-center overflow-hidden rounded">
+          {dropImage ? (
+            <Image src={dropImage.src} alt="" aria-hidden fill sizes="44px" className="object-cover" />
+          ) : (
+            <>
+              <span className="azulejo-block absolute inset-0" />
+              <CrateIcon crate={crate.id} className="relative h-6 w-6 text-[color:var(--tone)]" />
+            </>
+          )}
         </span>
         <span className="min-w-0 flex-1">
           <span className="eyebrow mb-1 block text-[0.55rem] text-accent">
@@ -899,6 +911,16 @@ function DropRow({
   )
 }
 
+/*
+  A badge on a photograph needs its own ground.
+
+  These were border-and-muted-text, drawn against the page palette, and over a picture that
+  is a pale outline on whatever happens to be behind it. Black at 55% carries them on all
+  twelve images without having to tune one per photograph.
+*/
+const BADGE =
+  'rounded-full bg-black/55 px-2 py-1 text-[0.5rem] uppercase tracking-wider backdrop-blur-sm'
+
 function Picker() {
   const router = useRouter()
   const { chooseFamily, state } = useJourney()
@@ -912,6 +934,15 @@ function Picker() {
   // way in at the very bottom, under eleven cards and three notes. The pressed state is
   // kept so the tap is acknowledged in the moment before the screen changes.
   const [entering, setEntering] = useState<CultureFamily | null>(null)
+  /*
+    The vibe somebody is looking at, which is not yet the vibe they have chosen.
+
+    Tapping used to enter. That was right when a tile was a line drawing and a title —
+    there was nothing more to see, so there was nothing to look at first. A photograph
+    changes it: the tile identifies the vibe and the full screen is what makes somebody
+    want it, and putting a commitment on the tap means nobody ever sees the picture.
+  */
+  const [looking, setLooking] = useState<CultureFamily | null>(null)
   const now = useNowAfterMount()
   // Nothing is dimmed until the browser has read what this learner has actually done.
   // A crate that locks itself a frame after hydration is worse than one that never did.
@@ -1103,6 +1134,31 @@ function Picker() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shown, playedIds, rung, atLimit, claimed])
 
+  /*
+    The picture, over the shelf.
+
+    Returned before the Shell rather than inside it: it is the whole screen, and rendering
+    it as a child of the picker would leave the shelf scrolling underneath a fixed overlay.
+  */
+  if (looking) {
+    const f = shown.find((c) => c.id === looking)
+    if (f) {
+      const fact = facts(f)
+      return (
+        <VibeOpen
+          crate={f}
+          state={fact.unreached || fact.waiting ? 'stage' : fact.planLocked ? 'pro' : 'open'}
+          at={fact.at}
+          onClose={() => setLooking(null)}
+          onEnter={() => {
+            setEntering(f.id)
+            chooseFamily(f.id)
+          }}
+        />
+      )
+    }
+  }
+
   return (
     <Shell stage="CHOICE">
       {/* "Pick a vibe you connect with" is a promise about choice, and on the first
@@ -1177,24 +1233,18 @@ function Picker() {
       ) : null}
 
       {/*
-        On the first visit, the rest is a sentence rather than ten grey squares.
+        Every vibe is on the shelf from the first visit.
 
-        The doorway lasts about three minutes — one basics root and everything but the
-        swearing opens — but the screen that introduces it was ten dimmed tiles under one
-        bright one, and a wall of grey reads as a locked product rather than a queue. It
-        has now twice been reported as a regression by the person who asked for the
-        doorway, which is as clear a signal as a design gets.
+        This was a sentence — "ten more vibes are waiting behind this one" — because ten
+        dimmed tiles read as a locked product rather than a queue, and it had been reported
+        as a regression twice. That was true of ten grey squares. It is not true of ten
+        photographs: a picture of what you have not got yet is an opportunity, and naming
+        the vibes in prose while refusing to show them was the weaker half of the trade.
 
-        Nothing is hidden that a tap could reach: these are the vibes that need the
-        basics first, and after the basics they are all here.
+        So they are back, undimmed enough to be seen, each one saying what opens it.
       */}
-      {mounted && !basicsStarted ? (
-        <p className="text-xs leading-relaxed text-muted">{PICKER.basics_first_rest}</p>
-      ) : null}
-
       {GROUP_ORDER.map((key) => {
-        const list =
-          mounted && !basicsStarted && key !== 'open' && key !== 'drops' ? [] : grouped[key]
+        const list = grouped[key]
         // A group with nothing in it does not render. An empty heading is worse than no
         // heading, because it implies something has been taken away.
         if (!list.length) return null
@@ -1227,8 +1277,9 @@ function Picker() {
               ticket link, and a tile has nowhere to put either.
             */}
             <div className={key === 'drops' ? 'flex flex-col gap-3' : 'grid grid-cols-2 gap-3'}>
-              {list.map(({ crate: f, finished, waiting, unreached, planLocked, at, taken, total }) =>
-                f.drop ? (
+              {list.map(({ crate: f, finished, waiting, unreached, planLocked, at, taken, total }) => {
+                const image = vibeImage(f.id)
+                return f.drop ? (
                   <DropRow key={f.id} crate={f} now={now} onOpen={() => { setEntering(f.id); chooseFamily(f.id) }} />
                 ) : (
                   <button
@@ -1236,72 +1287,89 @@ function Picker() {
                     type="button"
                     data-tone={f.tone}
                     data-testid={'vibe-' + f.id}
-                    aria-disabled={unreached}
-                    disabled={unreached}
+                    /*
+                      Every tile opens, including the ones you cannot have.
+
+                      A dimmed square that does not respond answers "can I have this?" with
+                      silence. The photograph is the argument for the thing you have not
+                      reached yet, and it belongs at full size where it can make it — with
+                      the reason, and a way to act on it when there is one.
+                    */
                     onClick={() => {
-                      if (unreached) return
-                      if (planLocked) {
-                        track('crate_locked_tapped', { crate: f.id })
-                        router.push('/pro')
-                        return
-                      }
-                      setEntering(f.id)
-                      chooseFamily(f.id)
+                      if (planLocked) track('crate_locked_tapped', { crate: f.id })
+                      setLooking(f.id)
                     }}
                     /*
                       Brightness still means a tap opens the vibe — the rule the stacked
                       version was gated on, carried over unchanged. Only the shape moved.
                     */
+                    /*
+                      Dimming still means "not yet", but not to forty per cent.
+
+                      At 0.4 a photograph is a grey rectangle, which is the exact thing that
+                      got reported twice as the shelf looking locked. The unreached tiles are
+                      the opportunity — that is the whole reason they are on the screen from
+                      the first visit — so they hold their picture and carry the reason as a
+                      badge instead.
+                    */
                     className={
-                      'azulejo-block tap-target relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded border p-3 text-left transition ' +
-                      (unreached
-                        ? 'border-line/40 opacity-40'
-                        : entering === f.id
-                          ? 'border-accent'
-                          : planLocked
-                            ? 'border-line/60 opacity-60'
-                            : finished || waiting
-                              ? 'border-line/60 opacity-70'
-                              : 'border-line hover:border-accent/60')
+                      'tap-target relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded border p-3 text-left transition ' +
+                      (entering === f.id
+                        ? 'border-accent'
+                        : unreached || planLocked
+                          ? 'border-line/60 opacity-75'
+                          : finished || waiting
+                            ? 'border-line/60 opacity-80'
+                            : 'border-line hover:border-accent/60')
                     }
                   >
-                    <span className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
-                      <CrateIcon crate={f.id} className="h-8 w-8 text-[color:var(--tone)]" />
+                    {image ? (
+                      <Image
+                        src={image.src}
+                        alt=""
+                        aria-hidden
+                        fill
+                        sizes="(max-width: 448px) 50vw, 224px"
+                        className="object-cover"
+                      />
+                    ) : null}
+                    {/*
+                      The drawing is gone and the badge only appears when it says something.
+
+                      A line icon over a photograph is two identifications of the same vibe
+                      competing at the same corner, and the photograph is the better one.
+                      The badge went the same way for a different reason: before the basics
+                      are started every tile on the shelf is waiting on the basics, so ten
+                      tiles carried ten identical BASICS chips under a heading that already
+                      said it. A badge that is on everything is not information.
+                    */}
+                    <span className="absolute inset-x-0 top-0 flex items-start justify-end p-3">
                       {finished ? (
-                        <span className="rounded-full border border-correct/50 px-2 py-1 text-[0.5rem] uppercase tracking-wider text-correct">
-                          done
-                        </span>
-                      ) : unreached && f.id !== 'the_basics' && !basicsStarted ? (
-                        <span className="rounded-full border border-line px-2 py-1 text-[0.5rem] uppercase tracking-wider text-muted">
-                          basics
-                        </span>
-                      ) : unreached || waiting ? (
-                        <span className="rounded-full border border-line px-2 py-1 text-[0.5rem] uppercase tracking-wider tabular-nums text-muted">
-                          stage {at}
-                        </span>
+                        <span className={BADGE + ' text-white'}>done</span>
+                      ) : unreached && f.id !== 'the_basics' && !basicsStarted ? null : unreached ||
+                        waiting ? (
+                        <span className={BADGE + ' tabular-nums text-white'}>stage {at}</span>
                       ) : planLocked ? (
-                        <span className="rounded-full border border-line px-2 py-1 text-[0.5rem] uppercase tracking-wider text-muted">
-                          PRO
-                        </span>
+                        <span className={BADGE + ' text-white'}>PRO</span>
                       ) : null}
                     </span>
 
                     {/* The ground under the words, so a title reads over the pattern. */}
                     <span
                       aria-hidden
-                      className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-bg via-bg/90 to-transparent"
+                      className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/45 to-transparent"
                     />
-                    <span className="relative flex flex-col gap-1">
+                    <span className="relative flex flex-col gap-1 text-white">
                       <span className="display text-sm leading-tight">{f.title}</span>
                       {mounted && taken > 0 && taken < total ? (
-                        <span className="text-[0.6rem] tabular-nums text-muted">
+                        <span className="text-[0.6rem] tabular-nums text-white/80">
                           {taken} of {total} taken
                         </span>
                       ) : null}
                     </span>
                   </button>
-                ),
-              )}
+                )
+              })}
             </div>
           </section>
         )
@@ -1330,7 +1398,7 @@ function Picker() {
         On the first visit the dimmed vibes are a sentence rather than ten tiles, so this
         footer was explaining a convention nothing on the page was using.
       */}
-      {anyLocked && mounted && basicsStarted ? (
+      {anyLocked && mounted ? (
         <p className="text-xs leading-relaxed text-muted">{PICKER.locked_note}</p>
       ) : null}
       {/* One quiet mark at the foot of the list, not one per card — eleven cards would

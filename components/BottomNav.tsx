@@ -38,7 +38,7 @@ export function BottomNav() {
         sits under the bar on every modern iPhone, which is the single most common way a
         bottom bar goes wrong.
       */
-      className="nav-bar fixed inset-x-0 bottom-0 z-50 flex border-t border-line bg-bg/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+      className="bar nav-bar fixed inset-x-0 bottom-0 z-50 flex pb-[env(safe-area-inset-bottom)]"
     >
       {TABS.map((t) => {
         const here = path === t.href || (t.href === '/vibes' && path === '/')
@@ -48,11 +48,26 @@ export function BottomNav() {
             href={t.href}
             aria-current={here ? 'page' : undefined}
             data-testid={'tab-' + t.label.toLowerCase()}
+            /*
+              White on blue, and the current tab is the WHITEST thing on it.
+
+              The old bar was the page ground with a blue tint on one label, which read as
+              recessive — a bar you have to look for is not a permanent navigation, it is a
+              footer. On a saturated ground the difference between here and not-here is
+              opacity and weight rather than hue, which survives both themes without a
+              second colour to keep in step.
+            */
             className={
-              'tap-target flex flex-1 flex-col items-center justify-center gap-1 py-3 transition ' +
+              'tap-target relative flex flex-1 flex-col items-center justify-center gap-1 py-3 transition ' +
               (here ? 'text-accent' : 'text-muted')
             }
           >
+            {here ? (
+              <span
+                aria-hidden
+                className="absolute inset-x-0 top-0 mx-auto h-1 w-10 rounded-full bg-[color:var(--accent)]"
+              />
+            ) : null}
             <svg
               viewBox="0 0 24 24"
               aria-hidden

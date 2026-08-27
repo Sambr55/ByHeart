@@ -356,14 +356,23 @@ body {
 /*
   The bar is chrome, not content, so it does not take the palette of the screen behind it.
 
-  REAL WORLD reassigns --accent to the foreground — exactly right for a beat where the
-  culture has been taken away, and wrong for a navigation bar, where it made the tab you
-  are standing on indistinguishable from the three you are not. The blue is the one thing
-  in DUB that always means "here", and a bar that drops it on the Club and keeps it on the
-  shelf is teaching two different things with the same mark.
+  It reuses .bar's whole token scope rather than inventing one: on a coloured bar white IS
+  the accent, and that block already gets --muted, --line and --accent right in all four
+  theme-and-stage combinations, with npm run contrast checking them composited over the
+  bar rather than over the page.
+
+  What it pins is the two colours. .bar takes --bar-bg from the stage, which is correct for
+  a header that belongs to the screen underneath it and wrong for a navigation bar that
+  belongs to the app: REAL WORLD would flip it to ink on the Club and back to blue on the
+  shelf, teaching two different things with the same mark. Blue always, white on it always
+  — the deep azulejo rather than var(--azulejo), which lightens in the dark theme and would
+  take white with it.
 */
 .nav-bar {
-  --accent: var(--azulejo);
+  --bar-bg: #1f5d8c;
+  --bar-ink: #ffffff;
+  border-bottom: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.16);
 }
 
 /*

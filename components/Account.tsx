@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { Entitlements } from '@/lib/entitlements'
 import { PLANS } from '@/lib/entitlements'
 import { wipeLearner } from '@/engine/learner'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Back } from '@/components/Back'
 import { Wordmark } from '@/components/Wordmark'
 import { RedeemCode } from '@/components/RedeemCode'
@@ -292,6 +293,8 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
           </>
         )}
       </section>
+      <BottomNavSpace />
+      <BottomNav />
     </main>
   )
 }

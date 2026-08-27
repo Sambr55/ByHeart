@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { Back } from '@/components/Back'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 
 /** Chrome for the objects that outlive a mission: the deck and the delayed recall. */
 export function PageShell({
@@ -31,6 +32,8 @@ export function PageShell({
           {children}
         </div>
       </main>
+      <BottomNavSpace />
+      <BottomNav />
     </div>
   )
 }

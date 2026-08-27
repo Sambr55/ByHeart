@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
@@ -487,6 +488,8 @@ function Library() {
           )
         })}
       </div>
+      <BottomNavSpace />
+      <BottomNav />
     </main>
   )
 }

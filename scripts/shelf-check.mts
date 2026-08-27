@@ -202,7 +202,78 @@ const across = await page.evaluate(() => {
 })
 ok('two across', across === 2, String(across))
 
+console.log('\nevery vibe has a picture, and every picture loads\n')
+/*
+  A missing photograph does not throw — next/image renders an <img> that never paints, so
+  the tile silently becomes a dark rectangle with a title on it. Checked by asking the
+  browser whether pixels actually arrived.
+*/
+const shots = await page.$$eval('[data-testid^="vibe-"] img', (els) =>
+  els.map((el) => ({
+    src: (el as HTMLImageElement).currentSrc || (el as HTMLImageElement).src,
+    ok: (el as HTMLImageElement).naturalWidth > 0,
+  })),
+)
+ok('every tile carries one', shots.length >= tiles.length - 1, shots.length + ' of ' + tiles.length)
+const broken = shots.filter((s2) => !s2.ok).map((s2) => s2.src.split('/').pop())
+ok('and every one of them painted', !broken.length, broken.join(' '))
+
+console.log('\ntapping opens the picture, swiping goes in\n')
+/*
+  Two steps, deliberately. Tapping used to enter, which was right when a tile was a line
+  drawing — there was nothing more to see. With a photograph, entering on the tap means
+  nobody ever sees the picture at the size that makes them want it.
+*/
+await page.click('[data-testid="vibe-the_basics"]')
+await page.waitForSelector('[data-testid="vibe-open"]')
+ok('the tap opens it full bleed', Boolean(await page.$('[data-testid="vibe-open"]')))
+ok('and has not entered anything yet', Boolean(await page.$('[data-testid="vibe-begin"]')))
+const full = await page.$eval('[data-testid="vibe-open"] img', (el) => {
+  const r = el.getBoundingClientRect()
+  return { w: Math.round(r.width), h: Math.round(r.height), painted: (el as HTMLImageElement).naturalWidth > 0 }
+})
+ok('the picture is the whole screen', full.w >= 380 && full.h >= 800, full.w + '×' + full.h)
+ok('and it painted', full.painted)
+await page.click('[data-testid="vibe-begin"]')
+await page.waitForTimeout(2200)
+ok(
+  'the swipe goes in',
+  !(await page.$('[data-testid="vibe-open"]')) && !(await page.$('[data-testid^="vibe-the_basics"]')),
+  'a lesson, not the shelf',
+)
+
+console.log('\na vibe you cannot have yet still opens\n')
+{
+  const p3 = await browser.newPage({ viewport: { width: 390, height: 900 } })
+  await p3.goto(BASE + '/vibes')
+  await p3.evaluate(
+    ([k, pair, s2]) => {
+      localStorage.setItem('byheart.pair', JSON.stringify(pair))
+      localStorage.setItem(k as string, JSON.stringify(s2))
+    },
+    [KEY, DEFAULT_PAIR, seed([], [])] as const,
+  )
+  await p3.goto(BASE + '/vibes')
+  await p3.waitForTimeout(1800)
+  const locked = await p3.$$eval('[data-testid^="vibe-"]', (els) =>
+    els.map((el) => el.getAttribute('data-testid')).filter(Boolean),
+  )
+  ok('the whole shelf is on screen from the first visit', locked.length >= 10, String(locked.length))
+  // Swearing is the most enticing thing in the product and it opens at stage 6. Showing
+  // the picture is the argument for it; there is nothing to press, because money cannot
+  // move the ladder.
+  await p3.click('[data-testid="vibe-portuguese_swearing"]')
+  await p3.waitForSelector('[data-testid="vibe-open"]')
+  ok('a locked vibe opens its picture', Boolean(await p3.$('[data-testid="vibe-open"]')))
+  ok('and says which wall it is', Boolean(await p3.$('[data-testid="vibe-stage"]')))
+  ok('with nothing to press', !(await p3.$('[data-testid="vibe-begin"]')))
+  await p3.close()
+}
+
 console.log('\nhow far in you are is on the card\n')
+// The swipe above left this page inside a lesson. Back to the shelf before reading it.
+await page.goto(BASE + '/vibes')
+await page.waitForTimeout(1500)
 const text = await page.evaluate(() => (document.querySelector('main') ?? document.body).innerText)
 ok('a part-played vibe says so', /\d+ of \d+ taken/.test(text), (text.match(/\d+ of \d+ taken/) ?? ['none'])[0])
 

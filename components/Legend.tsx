@@ -18,6 +18,7 @@ import {
   provenanceOf,
   type LegendFrame,
 } from '@/content/legend'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
 import { NumberPicker } from '@/components/NumberPicker'
 import { Back } from '@/components/Back'
@@ -363,6 +364,8 @@ function Shell({ children }: { children: React.ReactNode }) {
         <span className="flex-1" />
       </div>
       {children}
+      <BottomNavSpace />
+      <BottomNav />
     </main>
   )
 }

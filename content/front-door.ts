@@ -265,9 +265,20 @@ export const PICKER = {
   /** Shown above the list while that is still true. */
   /** The headline before there is anything to pick between. */
   basics_first_headline: 'Start here.',
-  /* Said once, in a line, instead of drawn ten times as a dimmed tile. */
-  basics_first_rest:
-    'Ten more vibes are waiting behind this one — Bond, Bridget Jones, Pulp Fiction, wizardry, flirting, the swearing. One session of the basics opens all of them.',
+  /*
+    The full-bleed vibe, one swipe from being inside it.
+
+    "Swipe left to begin" rather than "start" or the vibe's name: it teaches the gesture
+    instead of naming a destination, which is what makes the second one need no button at
+    all. Same words as the Club, on purpose — one gesture, learned once.
+  */
+  open_eyebrow: 'A VIBE',
+  open_cta: 'SWIPE LEFT TO BEGIN',
+  open_going: 'HERE WE GO',
+  /* A vibe you cannot have yet still opens, and says which wall it is. Money cannot move
+     the ladder, so the stage note has nothing to press. */
+  open_stage: 'Opens at stage {n}',
+  open_pro_cta: 'WHAT DUB OPENS',
   basics_first_head: 'The basics come first.',
   basics_first_sub:
     'One session, built out of things you have heard a hundred times: hello, please, thank you, yes, no, and counting to ten. Then every vibe is yours to pick from.',

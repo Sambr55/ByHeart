@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Account } from '@/components/Account'
 import { Back } from '@/components/Back'
 import { RedeemCode } from '@/components/RedeemCode'
@@ -106,6 +107,8 @@ async function SignedOut() {
           </Link>
         ) : null}
       </section>
+      <BottomNavSpace />
+      <BottomNav />
     </main>
   )
 }

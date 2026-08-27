@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Back } from '@/components/Back'
 import { Wordmark } from '@/components/Wordmark'
 
@@ -153,6 +154,8 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
           )}
         </>
       )}
+      <BottomNavSpace />
+      <BottomNav />
     </main>
   )
 }

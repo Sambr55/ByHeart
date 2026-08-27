@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { useEffect, useState } from 'react'
 import { CRATES, ROOTS_BY_FAMILY, daysLeft, dropOpens, isLive } from '@/content/roots'
@@ -167,6 +168,8 @@ export function Drops() {
           </section>
         ) : null}
       </div>
+      <BottomNavSpace />
+      <BottomNav />
     </main>
   )
 }
