@@ -1177,8 +1177,25 @@ function Picker() {
         </div>
       ) : null}
 
+      {/*
+        On the first visit, the rest is a sentence rather than ten grey squares.
+
+        The doorway lasts about three minutes — one basics root and everything but the
+        swearing opens — but the screen that introduces it was ten dimmed tiles under one
+        bright one, and a wall of grey reads as a locked product rather than a queue. It
+        has now twice been reported as a regression by the person who asked for the
+        doorway, which is as clear a signal as a design gets.
+
+        Nothing is hidden that a tap could reach: these are the vibes that need the
+        basics first, and after the basics they are all here.
+      */}
+      {mounted && !basicsStarted ? (
+        <p className="text-xs leading-relaxed text-muted">{PICKER.basics_first_rest}</p>
+      ) : null}
+
       {GROUP_ORDER.map((key) => {
-        const list = grouped[key]
+        const list =
+          mounted && !basicsStarted && key !== 'open' && key !== 'drops' ? [] : grouped[key]
         // A group with nothing in it does not render. An empty heading is worse than no
         // heading, because it implies something has been taken away.
         if (!list.length) return null
@@ -1298,7 +1315,13 @@ function Picker() {
         three are yours for good. A note under eleven cards explaining the order of the
         eleven cards is a symptom of the order being invisible, and it is not any more.
       */}
-      {anyLocked ? (
+      {/*
+        Only when something dimmed is actually on screen.
+
+        On the first visit the dimmed vibes are a sentence rather than ten tiles, so this
+        footer was explaining a convention nothing on the page was using.
+      */}
+      {anyLocked && mounted && basicsStarted ? (
         <p className="text-xs leading-relaxed text-muted">{PICKER.locked_note}</p>
       ) : null}
       {/* One quiet mark at the foot of the list, not one per card — eleven cards would

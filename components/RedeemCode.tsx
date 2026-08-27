@@ -48,7 +48,21 @@ export function RedeemCode() {
       // The picker asks for entitlements once, on mount, so a redeemed code changes
       // nothing on screen until something reloads. Telling somebody to reload is a
       // worse product than reloading.
-      if (body.ok) setTimeout(() => window.location.assign('/vibes'), 1400)
+      /*
+        A code can carry the Club with it.
+
+        The door stays exactly as it is for everybody else — five vibes and the seven
+        card questions — because that gate is the product rather than an obstacle in
+        front of it. This only fires when the code was issued to open it, which is a
+        deliberate act by whoever minted it.
+      */
+      if (body.ok && body.club) welcomeToClub()
+      if (body.ok) {
+        // The picker and the Club both read entitlements once, on mount, so a redeemed
+        // code changes nothing on screen until something reloads. Somebody redeeming a
+        // club code is going to the Club.
+        setTimeout(() => window.location.assign(body.club ? '/club' : '/vibes'), 1400)
+      }
     } catch {
       setState({ ok: false, message: 'That did not work.' })
     }
