@@ -87,6 +87,37 @@ function seedFor(stage: number) {
  * the text above it. Both were real: the CTA was positioned with mt-auto alone, which
  * gives nothing on a full screen, and the scrolling pages had a 24px well.
  */
+/**
+ * The button sits under the last thing said, not at the foot of the screen.
+ *
+ * `mt-auto` pushed every CTA to the bottom, which on a short screen put a blue button
+ * directly above the blue bar — two blues with a hairline between them, reading as one
+ * shape — and left a lake of nothing between the sentence and the thing to press.
+ *
+ * Measured as a gap rather than read off a class, because the rule is about where the
+ * button ENDS UP: anything much more than a section step below the last text has been
+ * pushed there by something.
+ */
+async function anchored(p: Page) {
+  return p.evaluate(`(() => {
+    const cta = document.querySelector('[data-testid="continue"]')
+    if (!cta) return null
+    const main = document.querySelector('main')
+    if (!main) return null
+    let last = null
+    for (const el of Array.from(main.querySelectorAll('p, h1, h2, li, section'))) {
+      if (el.contains(cta)) continue
+      const t = (el.textContent || '').trim()
+      if (!t) continue
+      const r = el.getBoundingClientRect()
+      if (r.height === 0) continue
+      if (!last || r.bottom > last) last = r.bottom
+    }
+    if (last === null) return null
+    return Math.round(cta.getBoundingClientRect().top - last)
+  })()`) as Promise<number | null>
+}
+
 async function clearance(page: Page) {
   return page.evaluate(() => {
     const out: string[] = []
@@ -189,6 +220,19 @@ for (const width of WIDTHS) {
       for (const c of await clearance(page)) {
         problems.push(route + ' @' + width + ' stage ' + stage + ' — ' + c)
         console.log('  ' + route.padEnd(11) + '✗ ' + c)
+      }
+
+      /*
+        The gap between the last sentence and the button, measured once per route at the
+        narrowest width. A section step is 40px; anything past about twice that means the
+        button was pushed to the foot rather than placed under the words.
+      */
+      if (width === WIDTHS[0]) {
+        const gap = await anchored(page)
+        if (gap !== null && gap > 96) {
+          problems.push(route + ' @' + width + ' stage ' + stage + ' — CTA floats ' + gap + 'px below the last line')
+          console.log('  ' + route.padEnd(11) + '✗ CTA floats ' + gap + 'px below the last line')
+        }
       }
       /*
         And can a thumb hit it?

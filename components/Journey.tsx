@@ -29,11 +29,11 @@ import {
 import {
   CLOSE,
   HOW_IN,
+  WELCOME,
   THE_WAY,
   RELEASE,
   THE_SWITCH,
   DEMO_BEATS,
-  DEMO_CLOSE,
   GATEWAY,
   LANDING,
   NO_CUE_PROMPTS,
@@ -53,7 +53,6 @@ import { Shelves } from '@/components/Shelves'
 import { LEGEND_COPY, LEGEND_FRAMES, legendStatus } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
-import { CHAPTERS, DEFAULT_CHAPTER } from '@/content/chapters'
 import { setPair } from '@/engine/pair'
 import { Wordmark } from '@/components/Wordmark'
 import { useNowAfterMount } from '@/engine/useNow'
@@ -229,15 +228,19 @@ function Cta({
       data-testid="continue"
       onClick={onClick}
       disabled={disabled}
-      // mt-auto and mt-6 were both on this element, which is a cascade collision: whichever
-      // Tailwind emitted last won, so the gap above the button was whatever the build
-      // happened to produce. mt-auto keeps it at the foot of a short screen; the padding
-      // gives it clearance on a long one, and padding cannot be swallowed by auto.
-      //
-      // mb-6 is for the bar underneath. The CTA and the nav are both the azulejo now, and
-      // with a hairline between them they read as one blue mass with a line through it —
-      // so there is a real band of ground between the thing you press and the furniture.
-      className="tap-target eyebrow mb-6 mt-auto w-full rounded bg-accent px-5 py-3 text-accent-ink transition active:scale-[0.99] disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
+      /*
+        Anchored to the last thing said, not to the bottom of the screen.
+
+        mt-auto pushed it to the foot of every short screen, which put a blue button
+        directly above a blue bar with a hairline between them — two blues reading as one
+        shape — and left a lake of nothing between the text and the thing to press. A
+        button belongs under the sentence that earned it.
+
+        mt-10 is the section step on the 1/3/6/10 scale: enough that it is plainly not part
+        of the paragraph above, close enough to still belong to it. mb-6 keeps the ground
+        between it and the bar for the screens where the content does reach that far.
+      */
+      className="tap-target eyebrow mb-6 mt-10 w-full rounded bg-accent px-5 py-3 text-accent-ink transition active:scale-[0.99] disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
     >
       {label}
     </button>
@@ -260,6 +263,8 @@ export function Journey() {
   switch (step.kind) {
     case 'landing':
       return <Landing />
+    case 'welcome':
+      return <Welcome />
     case 'howin':
       return <HowIn />
     case 'demo':
@@ -424,6 +429,24 @@ function PairStep() {
 }
 
 /**
+ * Welcome — what the room is, before anything about how to reach it.
+ *
+ * The one screen of the intro allowed to be a promise. Everything after it is route and
+ * evidence, and somebody who does not want what this describes should find that out here
+ * rather than four screens in.
+ */
+function Welcome() {
+  const { next } = useJourney()
+  return (
+    <Shell stage="CHOICE">
+      <h1 className="display text-balance text-3xl">{WELCOME.headline}</h1>
+      <p className="text-sm leading-relaxed text-fg/85">{WELCOME.body}</p>
+      <Cta label={WELCOME.cta} onClick={next} />
+    </Shell>
+  )
+}
+
+/**
  * How you get in — the screen before the demo.
  *
  * The deal screen this replaces was seven sections and a scroll, delivered to somebody who
@@ -473,20 +496,17 @@ function HowIn() {
 function TheWay() {
   const { next } = useJourney()
   /*
-    The country and the city, from the chapter rather than from the pair.
+    No place name to fill in any more.
 
-    A Pair is a pair of locale codes; it does not know that pt-PT is spoken in Portugal or
-    that the room is in Lisbon. The chapter does, because a chapter IS a city — and the
-    Club is what this screen is about, so the chapter is the right thing to be asking.
+    This screen used to say "in Portugal" and had to wait for the language pair to be able
+    to. It says "every time you meet somebody new" instead, which is true in Lisbon and
+    true in the next city — so the pair moved after it and the intro stopped interrupting
+    its own story with a form.
   */
-  const chapter = CHAPTERS.find((c) => c.id === DEFAULT_CHAPTER) ?? CHAPTERS[0]
-  const say = (t: string) =>
-    t.replace(/\{language\}/g, chapter.country).replace(/\{place\}/g, chapter.city)
-
   const Block = ({ label, body }: { label: string; body: string }) => (
     <section className="border-t border-line pt-6">
       <p className="eyebrow text-accent">{label}</p>
-      <p className="mt-3 text-sm leading-relaxed text-fg/85">{say(body)}</p>
+      <p className="mt-3 text-sm leading-relaxed text-fg/85">{body}</p>
     </section>
   )
 
@@ -498,9 +518,6 @@ function TheWay() {
       <div className="mt-6 flex flex-col gap-6">
         <Block label={THE_WAY.legend.label} body={THE_WAY.legend.body} />
         <Block label={THE_WAY.club.label} body={THE_WAY.club.body} />
-        <p className="border-t border-line pt-6 text-xs leading-relaxed text-muted">
-          {THE_WAY.ask}
-        </p>
       </div>
 
       <Cta
@@ -699,16 +716,24 @@ function Demo({ i }: { i: number }) {
         {beat.close ? (
           <p className="mt-6 text-balance text-sm font-semibold leading-relaxed">{beat.close}</p>
         ) : null}
-      </div>
 
-      {staged && !ready ? (
-        <Cta
-          label={reveal === 0 ? 'IN PORTUGUESE?' : 'SO WHAT DO I KEEP?'}
-          onClick={() => setReveal((r) => r + 1)}
-        />
-      ) : (
-        <Cta label={beat.cta} onClick={next} />
-      )}
+        {/*
+          Inside the centred block, not under it.
+
+          The demo is deliberately centred — it is the showpiece — and a CTA that followed
+          the BLOCK ended up three hundred pixels below the last card, hard against the
+          bottom bar. Inside, the button moves with the words it belongs to and the drama
+          is untouched.
+        */}
+        {staged && !ready ? (
+          <Cta
+            label={reveal === 0 ? 'IN PORTUGUESE?' : 'SO WHAT DO I KEEP?'}
+            onClick={() => setReveal((r) => r + 1)}
+          />
+        ) : (
+          <Cta label={beat.cta} onClick={next} />
+        )}
+      </div>
     </Shell>
   )
 }

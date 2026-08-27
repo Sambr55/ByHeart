@@ -129,9 +129,15 @@ export const DEMO_BEATS: DemoBeat[] = [
       { pt: 'Fica comigo.', en: 'Stay with me.' },
       { pt: 'Podes vir comigo?', en: 'Can you come with me?' },
     ],
-    close:
-      'That’s DUB. Start with something you connect with. Find the useful language inside it. Make it yours.',
-    cta: 'MY TURN',
+    /*
+      No close.
+
+      It said "That's DUB. Start with something you connect with. Find the useful language
+      inside it. Make it yours." — a summary of the trick, printed under the trick. The
+      three sentences on the screen have just done it; explaining them afterwards is the
+      product taking a bow.
+    */
+    cta: 'ACCESSING THE CLUB',
   },
 ]
 
@@ -160,8 +166,6 @@ export const PAIR_STEP = {
   after: 'Let’s find your Portuguese.',
 } as const
 
-export const DEMO_CLOSE =
-  'That’s DUB. Start with something you connect with. Find the useful language inside it. Make it yours.'
 
 /**
  * The way in, in two short screens instead of one long one.
@@ -180,9 +184,22 @@ export const DEMO_CLOSE =
  * no-streaks block. None of them are wrong and none of them belong on the way in. A person
  * arriving does not need the mechanism, they need the route and one piece of evidence.
  */
+/**
+ * Welcome — the first screen of the intro, and the only one that gets to be a promise.
+ *
+ * It says what the destination IS before anything about how to reach it. Everything after
+ * this is route and evidence; this one is allowed to describe the room, because somebody
+ * who does not want to go there should find that out on screen one rather than five.
+ */
+export const WELCOME = {
+  headline: 'Welcome to the Dub Club.',
+  body: 'The place where you learn to fluently navigate situations and local events with language, while continuously broadening your knowledge, sharing with people doing the same as you, and remaining inspired as you become a native speaker.',
+  cta: 'SHOW ME HOW IT WORKS',
+} as const
+
 export const HOW_IN = {
   eyebrow: 'HOW YOU GET IN',
-  headline: 'Dub Club, and how you get through the door.',
+  headline: 'Here’s how you get through the door of the Dub Club.',
   steps: [
     'Start with the basics — built out of song titles you already know, so there is nothing to memorise.',
     'Then pick a vibe you actually connect with. Top Gun, say. We pull the phrases out of it that are useful the day you land.',
@@ -196,21 +213,19 @@ export const THE_WAY = {
   eyebrow: 'WHERE IT GOES',
   headline: 'Five vibes, then your Legend, then the door.',
   /*
-    Said in the order it happens, and every clause is something the product actually does.
-    The Legend is not a metaphor here — it is seven questions, answered in the learner's
-    own Portuguese, and it is literally what opens the Club.
+    No place name in here any more, which is why the language pair can come after it now.
+    "Every time you meet somebody new" is true in Lisbon and true in the next city, and a
+    screen that does not need the answer should not have to wait for the question.
   */
   legend: {
     label: 'YOUR LEGEND',
-    body: 'While you are going through vibes you are quietly unlocking the Legend questions. With five in the bag we build it together — the minute of conversation you have every single time you meet somebody new in {language}.',
+    body: 'As you build up your confidence through five vibes, you are also unlocking your Legend questions. With the first five in the bag we build it together — the minute of conversation you have every time you meet somebody new.',
   },
   club: {
     label: 'DUB CLUB',
-    body: 'Your Legend, said out loud with nothing on screen to read from, is what opens the door. Inside is the part that is about {place} rather than about the language: handling a real situation, what is on this week, and what other people going through the same thing have found.',
+    body: 'Your Legend, and being able to say it, is what unlocks the door to the Dub Club.',
   },
-  /** The one line about effort, kept because it is a promise rather than a feature. */
-  ask: 'Ten minutes on the days you feel like it. We will not ask on the days you do not.',
-  cta: 'START THE BASICS',
+  cta: 'MY TURN',
 } as const
 
 /** §08 / §09 — the first meaningful learner choice, and it comes after the demo. */

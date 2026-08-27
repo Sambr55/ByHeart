@@ -51,6 +51,8 @@ import { useLearner } from './useLearner'
 
 export type Step =
   | { kind: 'landing' }
+  /** What the room is, before anything about how to reach it. */
+  | { kind: 'welcome' }
   /** How you get in — sets the demo up, so the Goose line arrives as an example. */
   | { kind: 'howin' }
   | { kind: 'demo'; i: number }
@@ -239,13 +241,20 @@ type Action =
 const initial: JourneyState = {
   steps: [
     { kind: 'landing' },
+    { kind: 'welcome' },
     // Before the demo, so the demo is the example rather than the argument.
     { kind: 'howin' },
     ...DEMO_BEATS.map((_, i) => ({ kind: 'demo' as const, i })),
-    // After the demo, before the route. The route can only say "in Portugal" truthfully
-    // once the pair is known.
-    { kind: 'pair' },
+    /*
+      The route, then the language.
+
+      The pair used to sit here because the route said "in Portugal" and could not be
+      written truthfully until the answer was known. It does not any more — "every time you
+      meet somebody new" is true in Lisbon and true in the next city — so the one piece of
+      setup admin in the intro comes after the story rather than interrupting it.
+    */
     { kind: 'theway' },
+    { kind: 'pair' },
     { kind: 'picker' },
   ],
   index: 0,
