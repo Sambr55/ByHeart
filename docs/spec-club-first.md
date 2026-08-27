@@ -310,6 +310,35 @@ flowchart LR
   F --> G[Expires the morning after]
 ```
 
+### Built, and where the seam is
+
+`lib/harvest` is the only part that touches the outside world, and it is one function behind
+an interface — everything either side of it is pure and testable offline, which matters
+because the harvest is the part that will break when a site changes on a Sunday.
+
+**`content/drop-templates.ts` is where the safety lives**, and it is the same architecture as
+the paradigm table for the same reason. A template is authored Portuguese with holes in it
+for the venue, the station and the date; a candidate fills the holes. Nothing a drop says
+was written by a machine or scraped off a page — it was written once, and reviewing a
+template is a half-hour that covers a year of drops, where reviewing every drop is a job
+nobody will do.
+
+The concert template was made by lifting the facts out of the hand-authored Duran Duran
+drop, which makes that drop the test set: `npm run drops` fills the template back in and
+checks that all **20 lines** come back identical. A template that cannot reproduce what
+somebody wrote by hand has lost something in the abstraction, and every drop it ever makes
+would be missing it.
+
+`npm run pipeline` harvests, drafts, and writes `data/pending-drops.json`. It does not
+publish. A drop reaches the Club when a person has read it and moved it into
+`content/drops.ts` — and that is not a temporary arrangement: a drop says where to go on a
+particular night, and the step where somebody looks at it is the product rather than the
+bottleneck.
+
+**No source is switched on.** Each needs its terms read by a person first, and the script
+says so every time it runs rather than exiting quietly. `--fixture` exercises everything
+downstream of the network.
+
 Non-negotiables for this pipeline, in the same spirit as the rest of the product:
 
 - **Every fact carries its source and a `review_by`.** Places rot. `Situation` already has
@@ -320,6 +349,25 @@ Non-negotiables for this pipeline, in the same spirit as the rest of the product
   A plausible-sounding address is the worst possible output.
 - **A drop is a claim with an expiry.** Gone the morning after, no archive, no "past
   events". That is what makes it a drop.
+- **A missing photograph is not a reason to have no drop.** The card falls back to a
+  designed ground and the wanted picture is reported — refusing to draft on a gap in the
+  image brief means no drop on the night, which is much the worse outcome.
+
+### The image solve
+
+Commissioning four photographs per drop scales to about one drop. But the pictures a concert
+drop needs are not about the concert: "finding the venue" is a lit building seen from a
+station exit, "a ticket on the night" is a box-office window, "getting there" is a metro
+platform with a crowd on it. Those are the same four pictures for Duran Duran in November
+and for whoever is on in March — and three of the four work for a football match.
+
+So the images belong to the **template**, not the drop. `content/images.ts` is a bank keyed
+by what a picture IS, with its alt text and rights beside it, and `WANTED` lists the holes
+with a brief for each — so the brief is a list somebody can act on rather than a bug found
+on the night. **Eight pictures cover every drop DUB makes for a year.**
+
+The one worth making first is `two_at_a_bar`: it carries the invitation, which is the last
+card of every drop and the only one that is not about getting somewhere.
 
 ---
 

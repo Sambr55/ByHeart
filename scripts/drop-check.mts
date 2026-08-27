@@ -15,6 +15,10 @@
 import { DROPS } from '../content/drops'
 import { CRATES } from '../content/roots'
 import { dropDaysLeft, dropLive, dropsFor, feedFor } from '../content/feed'
+import { DROP_TEMPLATES } from '../content/drop-templates'
+import { WANTED, bankImage } from '../content/images'
+import { draftDrop, type Candidate } from '../lib/draft'
+import { readFileSync } from 'node:fs'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -97,6 +101,75 @@ for (const card of previewed) {
     card.id + ' carries its event',
     card.kind === 'situation' && card.drop?.event === d.event,
   )
+}
+
+console.log('\nthe template reproduces the drop somebody wrote by hand\n')
+/*
+  The strongest check here, and the same trick as the 68 collisions being the generator's
+  test set. The concert template was made by lifting the facts out of the hand-authored
+  Duran Duran drop; if filling it back in does not give the same Portuguese, the abstraction
+  lost something, and every drop the pipeline ever makes will be missing it too.
+*/
+{
+  const fixture = JSON.parse(readFileSync('data/fixture-candidates.json', 'utf8')) as Candidate[]
+  const c = fixture.find((x) => x.id === 'duran_duran_arena')
+  ok('the fixture has the hand-authored one in it', Boolean(c))
+  if (c) {
+    // Before its own date, or draftDrop rightly refuses to draft something that has been.
+    const result = draftDrop(c, new Date('2026-08-27T12:00:00Z'))
+    ok('and it drafts', result.ok, result.ok ? '' : result.why)
+    if (result.ok) {
+      const hand = DROPS.find((x) => x.id === 'duran_duran_arena')!
+      const say = (d: typeof hand) =>
+        d.situations.flatMap((s2) => [
+          ...s2.lines.map((l) => l.pt + ' | ' + l.en),
+          s2.release.answer,
+          s2.release.ask,
+        ])
+      const a = say(hand)
+      const b = say(result.drop)
+      const differ = a.filter((line, i) => line !== b[i])
+      ok(
+        'every line comes back the same',
+        a.length === b.length && !differ.length,
+        differ.length ? differ.join('  /  ') : a.length + ' lines',
+      )
+      // And the facts moved with them, which is the half the template does NOT own.
+      ok('with the venue', result.drop.place.name === hand.place.name)
+      ok('and the date said as a word', result.drop.situations.some((s2) => s2.release.answer.includes('catorze')))
+    }
+  }
+}
+
+console.log('\nevery template names a picture that exists\n')
+/*
+  A template referring to a slug the bank does not have renders a card with no ground, and
+  the failure is invisible until somebody opens it on the night. Cheap to check, and it is
+  also what keeps the wanted-list honest.
+*/
+for (const t of DROP_TEMPLATES) {
+  for (const room of t.rooms) {
+    ok(
+      t.id + '/' + room.id + ' → ' + room.image,
+      Boolean(bankImage(room.image)) || WANTED.some((w) => w.slug === room.image),
+      bankImage(room.image) ? 'in the bank' : 'still wanted',
+    )
+  }
+}
+// Nothing in the wanted list has quietly arrived, and nothing in the bank is on both lists.
+const both = WANTED.filter((w) => bankImage(w.slug))
+ok('the wanted list has no pictures that already exist', !both.length, both.map((w) => w.slug).join(' '))
+
+console.log('\nand who has read the language\n')
+/*
+  Reported and not failed, exactly as the paradigm table does it. A green tick would be a
+  lie about provenance — but a template is a half-hour of a native speaker's time that
+  covers a year of drops, which is the whole argument for templates.
+*/
+const reviewed = DROP_TEMPLATES.filter((t) => t.review === 'reviewed').length
+console.log('  ' + reviewed + ' of ' + DROP_TEMPLATES.length + ' templates read by a native speaker')
+if (reviewed < DROP_TEMPLATES.length) {
+  console.log('  ⚠ nothing drafted from the rest should reach anybody until they have been')
 }
 
 if (problems.length) {

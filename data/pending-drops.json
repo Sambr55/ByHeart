@@ -1,0 +1,24 @@
+{
+  "generated_at": "2026-08-27T15:04:32.297Z",
+  "templates": [
+    {
+      "id": "concert",
+      "review": "needs-review"
+    }
+  ],
+  "drops": [],
+  "rejected": [
+    {
+      "id": "duran_duran_arena",
+      "why": "already in the Club"
+    },
+    {
+      "id": "fixture_no_station",
+      "why": "no station, so nobody can be told how to get there"
+    },
+    {
+      "id": "fixture_past",
+      "why": "already happened"
+    }
+  ]
+}
