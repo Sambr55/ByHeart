@@ -554,7 +554,17 @@ function Door({
 
 /** What is worth doing in the city, as opposed to what is worth doing in the language. */
 function Situations() {
-  const list = situationsFor(DEFAULT_CHAPTER).filter((x) => isCurrent(x))
+  /*
+    Easiest first, and rung is what "easiest" means here.
+
+    It is NOT a gate. A survival phrase behind a ladder is the opposite of what this half
+    of the product is for — somebody who needs the Junta needs it whatever stage they are
+    at, exactly as the repair kit is free from the first minute. It only decides what to
+    put at the top.
+  */
+  const list = situationsFor(DEFAULT_CHAPTER)
+    .filter((x) => isCurrent(x))
+    .sort((a, b) => a.rung - b.rung)
   if (!list.length) return null
   return (
     <section className="flex flex-col gap-3">
@@ -569,10 +579,31 @@ function Situations() {
             key={s.id}
             href={'/errand/' + s.id}
             data-testid={'situation-' + s.id}
-            className="tap-target flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3 transition hover:border-accent/50"
+            className="tap-target flex items-center gap-3 overflow-hidden rounded border border-line bg-bg-elev pr-4 transition hover:border-accent/50"
           >
-            <span className="display text-base">{s.title}</span>
-            <span className="text-xs leading-relaxed text-muted">{s.why}</span>
+            {/*
+              The room, at thumbnail size.
+
+              Every Situation has one and the list was ignoring them, which wasted the
+              thing that makes this half of the product different: a wall of titles reads
+              like a menu, and a wall of ROOMS reads like a place you are going.
+            */}
+            {s.image ? (
+              <span className="relative block h-16 w-20 shrink-0 overflow-hidden">
+                <Image
+                  src={s.image.src}
+                  alt=""
+                  aria-hidden
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                />
+              </span>
+            ) : null}
+            <span className="flex min-w-0 flex-col gap-1 py-3">
+              <span className="display text-base">{s.title}</span>
+              <span className="text-xs leading-relaxed text-muted">{s.why}</span>
+            </span>
           </Link>
         ))}
       </div>

@@ -6,14 +6,14 @@ being nervous in a foreign shop actually is.
 
 | file | for | orientation |
 |---|---|---|
-| `pharmacy.jpg` | the pharmacy errand — **in use** | portrait |
-| `bakery-queue.jpg` | a queue/ordering situation | portrait |
-| `cafe-counter.jpg` | a café/coffee situation | portrait |
-| `junta-doorway.jpg` | Junta de Freguesia, the NIF errand | portrait |
+| `pharmacy.jpg` | The pharmacy — **in use** | portrait |
+| `cafe-counter.jpg` | A coffee, standing up — **in use** | portrait |
+| `bakery-queue.jpg` | The bread queue — **in use** | portrait |
+| `junta-doorway.jpg` | The Junta de Freguesia — **in use** | portrait |
+| `tram-distant.jpg` | Getting on the 28 — **in use** | landscape |
 | `azulejo.jpg` | texture, quiet ground for type | portrait |
 | `calcada.jpg` | texture, quiet ground for type | portrait |
 | `wall.jpg` | texture, quiet ground for type | landscape |
-| `tram-distant.jpg` | a share card alternate | landscape |
 
 Everything here is **generated**, recorded as `rights_status: 'generated'` on the
 Situation that uses it. Nobody to credit and no licence to hold. If a real photograph ever

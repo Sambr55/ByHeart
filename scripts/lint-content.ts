@@ -10,7 +10,8 @@
  *   npm run lint:content
  */
 
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
 import { DUB, DUB_CLUB, DUB_MARK } from '../content/marks'
 import { LEGEND_FRAMES, REPAIR_KIT } from '../content/legend'
@@ -1400,6 +1401,15 @@ for (const e of EXAMPLES) {
       }
       if (!sit.image.src.startsWith('/')) {
         fail(S + 'hotlinks its image — assets are local or they break silently')
+      } else if (!existsSync(join('public', sit.image.src))) {
+        /*
+          The file, not just the string.
+
+          A src that points at nothing renders an empty box and says nothing about it —
+          no error, no warning, and the teaching screen is simply missing its room. This
+          is the cheapest possible check and it covers a whole class of typo.
+        */
+        fail(S + 'points at ' + sit.image.src + ', which is not in public/')
       }
     }
 

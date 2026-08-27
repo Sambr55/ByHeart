@@ -127,6 +127,189 @@ export const SITUATIONS: Situation[] = [
     // A procedure, not a business — but hours and rules change, so it is still reviewed.
 
   },
+  {
+    id: 'lisbon_cafe',
+    chapter: 'lisbon',
+    kind: 'place',
+    title: 'A coffee, standing up',
+    why: 'You want a coffee the way everybody around you is having one, without pointing at the menu.',
+    where: { name: 'Any café counter', area: 'everywhere' },
+    lines: [
+      {
+        pt: 'Um café, por favor.',
+        en: 'An espresso, please.',
+        when: 'The default. Um café is a small black one — asking for "a coffee" gets you this.',
+      },
+      {
+        pt: 'Uma meia de leite.',
+        en: 'A white coffee, in a cup.',
+        when: 'When you want it milky. Ordering a latte will mark you out for the whole trip.',
+      },
+      {
+        pt: 'E um pastel de nata.',
+        en: 'And a custard tart.',
+        when: 'Said in the same breath as the coffee, not as a second request.',
+      },
+      {
+        pt: 'É para aqui.',
+        en: 'I am having it here.',
+        when: 'At the counter, standing, which is cheaper and how it is done.',
+      },
+      {
+        pt: 'Quanto é?',
+        en: 'How much is it?',
+        when: 'You pay at the end, usually after you have drunk it.',
+      },
+    ],
+    release: {
+      ask: 'An espresso and a custard tart, please.',
+      answer: 'Um café e um pastel de nata, por favor.',
+    },
+    image: {
+      src: '/lisbon/cafe-counter.jpg',
+      alt: 'A zinc café counter in Lisbon with an empty espresso cup on a saucer and a folded newspaper beside it, tiled panels below the bar.',
+      rights_status: 'generated',
+    },
+    rung: 2,
+    review_by: '2027-08-01',
+  },
+  {
+    id: 'lisbon_padaria',
+    chapter: 'lisbon',
+    kind: 'errand',
+    title: 'The bread queue',
+    why: 'There is a queue, it moves fast, and everybody in front of you knows exactly what to say.',
+    lines: [
+      {
+        pt: 'Bom dia. Um pão, por favor.',
+        en: 'Good morning. One loaf, please.',
+        when: 'Open with the greeting. Walking up and naming the thing reads as brusque here.',
+      },
+      {
+        pt: 'Meia dúzia de pastéis de nata.',
+        en: 'Half a dozen custard tarts.',
+        when: 'Half a dozen is the unit people actually use.',
+      },
+      {
+        pt: 'Mais alguma coisa? — Não, é só isso.',
+        en: 'Anything else? — No, that is all.',
+        when: 'They will ask. This is the answer that ends it.',
+      },
+      {
+        pt: 'É para levar.',
+        en: 'It is to take away.',
+        when: 'Say it and they will bag it rather than plate it.',
+      },
+      {
+        pt: 'Obrigado. Bom dia.',
+        en: 'Thank you. Good day.',
+        when: 'You say bom dia on the way out as well as on the way in.',
+      },
+    ],
+    release: {
+      ask: 'Good morning. One loaf, please.',
+      answer: 'Bom dia. Um pão, por favor.',
+    },
+    image: {
+      src: '/lisbon/bakery-queue.jpg',
+      alt: 'People queuing at a Lisbon bakery counter seen from behind, shelves of bread stacked to the ceiling behind the glass.',
+      rights_status: 'generated',
+    },
+    rung: 2,
+    review_by: '2027-08-01',
+  },
+  {
+    id: 'lisbon_junta',
+    chapter: 'lisbon',
+    kind: 'errand',
+    title: 'The Junta de Freguesia',
+    why: 'The parish office, where a lot of living here officially begins — and where nobody is going to switch to English for you.',
+    where: { name: 'Junta de Freguesia', area: 'your parish' },
+    lines: [
+      {
+        pt: 'Bom dia. É a primeira vez que venho aqui.',
+        en: 'Good morning. It is my first time here.',
+        when: 'Buys you patience, and it is true.',
+      },
+      {
+        pt: 'Preciso de um atestado de residência.',
+        en: 'I need a proof of residence.',
+        when: 'The document most people are there for.',
+      },
+      {
+        pt: 'Tenho os documentos aqui.',
+        en: 'I have the documents here.',
+        when: 'Say it while you put them on the counter.',
+      },
+      {
+        pt: 'Desculpe, pode repetir mais devagar?',
+        en: 'Sorry, could you say that again more slowly?',
+        when: 'The one that keeps the conversation in Portuguese instead of ending it.',
+      },
+      {
+        pt: 'Quanto tempo demora?',
+        en: 'How long does it take?',
+        when: 'The question you will otherwise wonder about all week.',
+      },
+    ],
+    release: {
+      ask: 'Good morning. I need a proof of residence.',
+      answer: 'Bom dia. Preciso de um atestado de residência.',
+    },
+    image: {
+      src: '/lisbon/junta-doorway.jpg',
+      alt: 'Three people waiting at the plain stone doorway of a Portuguese municipal office, one stepping inside, calçada pavement underfoot.',
+      rights_status: 'generated',
+    },
+    rung: 3,
+    review_by: '2027-02-01',
+  },
+  {
+    id: 'lisbon_electrico',
+    chapter: 'lisbon',
+    kind: 'place',
+    title: 'Getting on the 28',
+    why: 'It is full, it is moving, and you have about four seconds to say the right thing.',
+    where: { name: 'Eléctrico 28', area: 'Martim Moniz to Campo de Ourique' },
+    lines: [
+      {
+        pt: 'Este vai para o Chiado?',
+        en: 'Does this one go to Chiado?',
+        when: 'Ask before you get on. Swap in wherever you are going.',
+      },
+      {
+        pt: 'Um bilhete, por favor.',
+        en: 'One ticket, please.',
+        when: 'Buying on board costs more than a Viva card, and everybody does it anyway.',
+      },
+      {
+        pt: 'Com licença.',
+        en: 'Excuse me.',
+        when: 'Getting past somebody. Not desculpe — that is for apologising.',
+      },
+      {
+        pt: 'Desço na próxima.',
+        en: 'I am getting off at the next one.',
+        when: 'Said to whoever is between you and the door.',
+      },
+      {
+        pt: 'Obrigado, boa tarde.',
+        en: 'Thank you, good afternoon.',
+        when: 'To the driver on the way off. People do.',
+      },
+    ],
+    release: {
+      ask: 'Does this one go to Chiado?',
+      answer: 'Este vai para o Chiado?',
+    },
+    image: {
+      src: '/lisbon/tram-distant.jpg',
+      alt: 'A yellow Lisbon tram far down a long straight street in flat overcast light, a stone wall and empty road in the foreground.',
+      rights_status: 'generated',
+    },
+    rung: 3,
+    review_by: '2027-08-01',
+  },
 ]
 
 export function situationsFor(chapter: ChapterId): Situation[] {
