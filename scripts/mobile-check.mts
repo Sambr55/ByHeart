@@ -92,6 +92,10 @@ async function clearance(page: Page) {
     const out: string[] = []
     const foot = document.documentElement.scrollHeight
     for (const el of Array.from(document.querySelectorAll('button, a[href], input'))) {
+      // The bottom bar is supposed to be flush with the foot — that is what fixed to the
+      // bottom of the screen means. The rule is about content that ran out of room, and
+      // the bar did not run out of room, it was put there.
+      if (el.closest('[data-testid="bottom-nav"]')) continue
       const r = el.getBoundingClientRect()
       if (r.width === 0 || r.height === 0) continue
       const bottom = r.bottom + window.scrollY

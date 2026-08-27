@@ -18,4 +18,24 @@ export const PROFILE_COPY = {
   saved_empty: 'Nothing saved. The bookmark on any card puts it here.',
   words_label: 'WORTH HAVING',
   words_note: 'Small words that do a lot of work, each pinned to where you will want it.',
+  /*
+    The Legend, rolled up.
+
+    It is the biggest thing somebody makes in DUB and it had its own tab in a menu of
+    eleven, which put it level with the feedback form. Here it is a row with a state on
+    it — how much of the card is written, and whether it is open yet — and the card
+    itself is one tap away.
+  */
+  legend_label: 'YOUR LEGEND',
+  legend_locked: 'Opens {n} vibes from here.',
+  legend_building: '{done} of {all} questions answered.',
+  legend_done: 'All ten answered.',
+  /*
+    Everything the burger was holding.
+
+    Proof, the vocab library, drops, membership, the account — a flat list where Dub Club
+    and the feedback form were peers. They are not peers. Most of them are answers to
+    "what have I got", and that question has a screen now.
+  */
+  more_label: 'EVERYTHING ELSE',
 } as const

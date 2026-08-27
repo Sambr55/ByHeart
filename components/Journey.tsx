@@ -39,13 +39,13 @@ import {
   PAIR_STEP,
   PICKER,
 } from '@/content/front-door'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { primeAudio } from '@/engine/audio'
 import { UNLIMITED } from '@/lib/entitlements'
 import { Path } from '@/components/Path'
 import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
-import { Menu } from '@/components/Menu'
 import { Shelves } from '@/components/Shelves'
 import { LEGEND_COPY, LEGEND_FRAMES, legendStatus } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
@@ -177,7 +177,6 @@ function Shell({
                 Vibes
               </button>
             ) : null}
-            <Menu />
           </div>
         </header>
       ) : null}
@@ -1307,6 +1306,16 @@ function Picker() {
           </section>
         )
       })}
+      {/*
+        The bar, on the picker only.
+
+        A lesson is a held sequence and a persistent bar offering three ways out is an
+        invitation to leave in the middle of the one thing that works. The shelf is the
+        one beat in the journey somebody is meant to be able to leave from.
+      */}
+      <BottomNavSpace />
+      <BottomNav />
+
       {/*
         The two footers are gone.
 

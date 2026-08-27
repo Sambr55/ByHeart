@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Wordmark } from '@/components/Wordmark'
 import { useEffect, useState } from 'react'
 import { CRATES, ROOTS_BY_FAMILY, daysLeft, dropOpens, isLive } from '@/content/roots'
-import { Menu } from '@/components/Menu'
+import { Back } from '@/components/Back'
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 
@@ -46,12 +46,8 @@ export function Drops() {
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
       <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-3">
-        <Link href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow opacity-80 transition hover:opacity-100">
-          <span aria-hidden>←</span>
-          <Wordmark className="h-3" title="DUB — back to your vibes" />
-        </Link>
+        <Back />
         <span className="eyebrow flex-1">Drops</span>
-        <Menu />
       </header>
 
       <div className="flex flex-1 flex-col gap-6 px-5 pb-10 pt-6">

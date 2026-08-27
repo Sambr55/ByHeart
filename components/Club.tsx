@@ -23,7 +23,7 @@ import { cardDone, cardToGo, clubOpen, legendStatus } from '@/content/legend'
 import { DEFAULT_CHAPTER } from '@/content/chapters'
 import { isCurrent, situationsFor } from '@/content/situations'
 import { CrateIcon } from '@/components/CrateIcon'
-import { Menu } from '@/components/Menu'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { LEGEND_FRAMES } from '@/content/legend'
 import { capabilities } from '@/engine/journey'
@@ -165,9 +165,8 @@ export function Club() {
     >
       <div className="flex items-center gap-3">
         <Wordmark mark="club" className="h-8" />
-        <span className="flex-1" />
-        <Menu />
       </div>
+      <BottomNav />
 
       {/*
         The masthead says what they can do, never how often they have done it. The
@@ -215,6 +214,7 @@ export function Club() {
       <Situations />
 
       <p className="mt-auto text-center text-xs text-muted">{CLUB.footer}</p>
+      <BottomNavSpace />
     </main>
   )
 }
@@ -535,9 +535,8 @@ function Door({
     >
       <div className="flex items-center gap-3">
         <Wordmark mark="club" className="h-8" />
-        <span className="flex-1" />
-        <Menu />
       </div>
+      <BottomNav />
 
       {/*
         The rooms, behind the door.
@@ -589,6 +588,7 @@ function Door({
       >
         {legend.open ? CLUB.door.cta : CLUB.door.cta_vibes}
       </Link>
+      <BottomNavSpace />
     </main>
   )
 }

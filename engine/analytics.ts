@@ -25,6 +25,14 @@ export type EventName =
   /* The Club feed. A like is a signal about what to write more of and nothing else — it
      is never counted back to the learner, because a feed with a score on it starts
      asking to be fed. */
+  /* Showing. The three numbers the spec asks for, and no others: whether anybody mints
+     one unprompted, whether the person at the other end shows one back — which is the
+     real question, since it separates an artefact worth sending from a link that gets
+     ignored — and whether anybody does it twice. None of these is ever shown back to a
+     learner as a total. */
+  | 'showing_sent'
+  | 'showing_opened'
+  | 'showing_returned'
   | 'feed_like'
   | 'feed_save'
   | 'feed_share'

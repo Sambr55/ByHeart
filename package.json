@@ -8,7 +8,7 @@
     "start": "next start",
     "lint:content": "tsx scripts/lint-content.ts",
     "audio:generate": "tsx scripts/generate-audio.ts",
-    "check": "npm run lint:content && npm run line:test && npm run merge:test && npm run first && npm run club && npm run legend && npm run ladder && next build",
+    "check": "npm run lint:content && npm run line:test && npm run merge:test && npm run first && npm run club && npm run legend && npm run ladder && npm run showing && next build",
     "walkthrough": "tsx scripts/walkthrough.ts",
     "shots": "tsx scripts/screenshots.ts",
     "journey": "tsx scripts/journey-smoke.ts",
@@ -19,7 +19,7 @@
     "comp:issue": "tsx scripts/comp-issue.mts",
     "spacing": "tsx scripts/spacing-check.mts",
     "mobile": "npm run spacing && tsx scripts/mobile-check.mts",
-    "gate": "npm run check && npm run words && npm run motion && npm run mobile && npm run contrast && npm run forward && npm run audio:check && npm run shelf && npm run door && npm run feed",
+    "gate": "npm run check && npm run words && npm run motion && npm run mobile && npm run contrast && npm run forward && npm run audio:check && npm run shelf && npm run door && npm run feed && npm run nav",
     "contrast": "tsx scripts/contrast-check.mts",
     "brand": "tsx scripts/brand.mts",
     "first": "tsx scripts/first-session.mts",
@@ -33,7 +33,10 @@
     "shelf": "tsx scripts/shelf-check.mts",
     "door": "tsx scripts/door-check.mts",
     "ladder": "tsx scripts/ladder-check.mts",
-    "feed": "tsx scripts/feed-check.mts"
+    "feed": "tsx scripts/feed-check.mts",
+    "nav": "tsx scripts/nav-check.mts",
+    "showing": "tsx scripts/showing-check.mts",
+    "showing:flow": "tsx scripts/showing-flow.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

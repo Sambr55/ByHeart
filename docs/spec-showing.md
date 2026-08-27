@@ -149,3 +149,72 @@ answer, not a social one.
 - The Legend never travels, by accident or on purpose, from this feature
 - Nothing here is counted, ranked, or shown as a total
 - Report and block ship before the feature does, not after it is needed
+
+---
+
+## 11 What the build changed, and why
+
+Written after building it. Three departures from v0.1 above, each because the spec was
+wrong rather than because the code was easier.
+
+### The return flow is at `/s/[id]`, not `/p/[id]`
+
+§04 said the recipient opens the existing public card page. That is wrong, and it took
+building it to see why: `/p/[id]` is the growth loop — a card meant to be posted where
+strangers see it. Putting "show them yours back" on that page turns every card anybody
+posts publicly into a pairing invitation for whoever clicks first.
+
+A showing is addressed to **one person**, and the id is the whole access control. So it
+gets its own route and its own id — twelve characters rather than seven, because a public
+card only needs to be hard to enumerate and a showing needs to be hopeless to guess. The
+page also sets `robots: noindex` and renders no preview metadata, so a link passing
+through a group chat does not unfurl somebody's sentences to the group.
+
+`/p/[id]` is unchanged, and a check enforces that it stays that way.
+
+### A party is an account **or** a device
+
+§03 types both sides as `string` user ids. DUB works signed out by design — the proof card
+is free at every tier and is the thing that brings people in — so requiring an account to
+show one would gate the artefact the whole feature is about.
+
+Every party is therefore "the account if there is one, and the device either way", matched
+account-first with a device fallback. Sign in later and showings made anonymously are
+still yours, because the device half never changed.
+
+### Blocking is checked against the counterparty, not the sender
+
+The obvious implementation asks "is there a block between the sender and whoever is
+looking". For a recipient that is right. For the **sender** it asks whether Alice has
+blocked Alice — so the person who had been blocked carried on seeing the card of the
+person who blocked them. Whoever is looking, the question is always "is there a block
+between me and the person at the other end of this". The flow check covers it.
+
+## 12 What is checked, and where
+
+Two gates, both in `npm run gate`.
+
+`npm run showing` (`scripts/showing-check.mts`) reads the source and needs nothing running.
+It asserts the rules that erode quietly rather than loudly: that every publisher derives
+its lines from `engine/showable` — nobody will ever decide to publish a Legend, it will
+arrive as a second filter written one clause short; that no surface in the feature has a
+free-text field, which is the property holding the moderation obligation down; that no
+showing screen renders a `.length`, because a count of who has shown you something is a
+score with extra steps; and that there is no route anywhere that lifts a block.
+
+`npm run showing:flow` (`scripts/showing-flow.mts`) needs Postgres and drives three real
+browser contexts through it: minting, showing back, a third person finding it already
+answered, reporting, blocking, and — the one that must never fail — that a Legend line on
+the sender's own card does not appear on the recipient's screen.
+
+## 13 Still open
+
+- **Minors.** §06 lists an age gate or a defensible reason there is not one. There is
+  still neither. The Legend asks for an age but nothing gates on it, and this should be
+  settled before the feature is on for anybody outside the test cohort.
+- **Removal.** A sender cannot yet take a showing back. `expires_at` means every
+  invitation dies within a fortnight, which is a floor rather than an answer.
+- ~~**Reports are written and nothing reads them.**~~ Closed during the build:
+  `/admin/reports` reads the queue, renders the reported card so the reader can judge it
+  without opening a showing addressed to somebody else, and marks it read. The gate
+  asserts both the route and the page still exist.

@@ -5,10 +5,12 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '@/components/Feed'
 import { CrateIcon } from '@/components/CrateIcon'
-import { Menu } from '@/components/Menu'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { ThemeChoice } from '@/components/Theme'
 import { Wordmark } from '@/components/Wordmark'
 import { cardById, roomsFor, wordCards, type FeedCard } from '@/content/feed'
 import { CRATES, type CultureFamily } from '@/content/roots'
+import { LEGEND_FRAMES, legendStatus } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { getAvatar, setAvatarFromFile } from '@/engine/avatar'
 import { setDisplayName } from '@/engine/learner'
@@ -92,12 +94,9 @@ export function Profile() {
     */
     <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg">
       <header className="flex items-center gap-3">
-        <Link href="/club" className="tap-target">
-          <Wordmark mark="club" className="h-6" title="Back to the Club" />
-        </Link>
-        <span className="flex-1" />
-        <Menu />
+        <Wordmark mark="club" className="h-6" title="DUB Club" />
       </header>
+      <BottomNav />
 
       <Identity />
 
@@ -124,8 +123,20 @@ export function Profile() {
             tiles={sets.words}
             onOpen={setOpen}
           />
+          <LegendRow />
+          <More />
+          {/*
+            The dark theme was complete, correct, and only reachable from the burger —
+            which no longer exists. It is a thing about your copy of DUB rather than a
+            destination, so it sits at the foot of the screen that holds your things,
+            under the list, where a setting goes.
+          */}
+          <div className="border-t border-line pt-6">
+            <ThemeChoice />
+          </div>
         </>
       )}
+      <BottomNavSpace />
     </main>
   )
 }
@@ -286,6 +297,88 @@ function Identity() {
           data-testid="profile-name"
           className="display mt-1 w-full bg-transparent text-2xl text-fg outline-none placeholder:text-muted"
         />
+      </div>
+    </section>
+  )
+}
+
+
+/**
+ * The Legend, as one row rather than a tab.
+ *
+ * It is the biggest thing somebody makes here and it sat in a menu of eleven, level with
+ * the feedback form. A row with its real state on it says more than a link did.
+ */
+function LegendRow() {
+  const learner = useLearner()
+  const answers = learner.legend ?? []
+  const done = answers.filter((a) => Object.keys(a.values).length > 0).length
+  const status = legendStatus({ sectionsCompleted: learner.sections_completed ?? [] })
+  const line = !status.open
+    ? PROFILE_COPY.legend_locked.replace('{n}', String(status.toGo))
+    : done >= LEGEND_FRAMES.length
+      ? PROFILE_COPY.legend_done
+      : PROFILE_COPY.legend_building
+          .replace('{done}', String(done))
+          .replace('{all}', String(LEGEND_FRAMES.length))
+
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-baseline gap-3">
+        <h2 className="eyebrow min-w-0 text-accent">{PROFILE_COPY.legend_label}</h2>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+      <Link
+        href="/legend"
+        data-testid="profile-legend"
+        className="tap-target flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3 transition hover:border-accent/50"
+      >
+        <span className="min-w-0 flex-1">
+          <span className="display block text-base">The minute about yourself</span>
+          <span className="mt-1 block text-xs text-muted">{line}</span>
+        </span>
+        <span aria-hidden className="shrink-0 text-muted">→</span>
+      </Link>
+    </section>
+  )
+}
+
+/**
+ * What the burger was holding.
+ *
+ * A flat list of eleven where Dub Club and the feedback form were peers. They are not
+ * peers — most of these answer "what have I got", and that question has a screen now.
+ */
+const MORE = [
+  { href: '/proof', label: 'Proof', hint: 'The sentences you can say cold' },
+  { href: '/vocab', label: 'Vocab library', hint: 'Every piece you have kept' },
+  { href: '/drops', label: 'Drops', hint: 'Pegged to something really happening' },
+  { href: '/pro', label: 'Membership', hint: 'What it opens, and what the money is for' },
+  { href: '/account', label: 'Account', hint: 'This device, codes, and your data' },
+  { href: '/feedback', label: 'Feedback', hint: 'Tell us what did not land' },
+]
+
+function More() {
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-baseline gap-3">
+        <h2 className="eyebrow min-w-0 text-accent">{PROFILE_COPY.more_label}</h2>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+      <div className="flex flex-col">
+        {MORE.map((m) => (
+          <Link
+            key={m.href}
+            href={m.href}
+            className="tap-target flex items-baseline justify-between gap-3 border-b border-line/60 py-3 transition hover:text-accent"
+          >
+            <span className="min-w-0">
+              <span className="display block text-sm">{m.label}</span>
+              <span className="mt-1 block text-xs leading-relaxed text-muted">{m.hint}</span>
+            </span>
+            <span aria-hidden className="shrink-0 text-muted">→</span>
+          </Link>
+        ))}
       </div>
     </section>
   )

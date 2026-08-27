@@ -92,7 +92,8 @@ const MEDIUM_OK = [
   followed by a colon or an equals, is a name rather than a sentence.
 */
 const NOUNS: [RegExp, string][] = [
-  [/(?<![\w.])areas?(?![\w]|\s*[:=])/gi, 'vibe'],
+  // Not preceded by a hyphen either: safe-area-inset-bottom is CSS, not a word choice.
+  [/(?<![\w.-])areas?(?![\w-]|\s*[:=])/gi, 'vibe'],
   [/(?<![\w.])worlds?(?![\w]|\s*[:=])/gi, 'vibe'],
   [/(?<![\w.])crates?(?![\w]|\s*[:=])/gi, 'vibe'],
 ]

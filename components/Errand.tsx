@@ -4,7 +4,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
-import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { chapterById } from '@/content/chapters'
@@ -38,7 +37,6 @@ export function Errand({ situation }: { situation: Situation }) {
           <Wordmark mark="club" className="h-5" title="Back to the Club" />
         </Link>
         <span className="flex-1" />
-        <Menu />
       </header>
 
       {stage === 'read' ? (

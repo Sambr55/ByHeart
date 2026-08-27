@@ -20,7 +20,7 @@ import {
 } from '@/content/legend'
 import { AudioButton } from '@/components/AudioButton'
 import { NumberPicker } from '@/components/NumberPicker'
-import { Menu } from '@/components/Menu'
+import { Back } from '@/components/Back'
 import { MiniBuild } from '@/components/Journey'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
@@ -359,12 +359,8 @@ function Shell({ children }: { children: React.ReactNode }) {
       className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
     >
       <div className="flex items-center gap-3">
-        <Link href="/club" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-muted">
-          <span aria-hidden>←</span>
-          <Wordmark className="h-3" title="DUB — back to Dub Club" />
-        </Link>
+        <Back />
         <span className="flex-1" />
-        <Menu />
       </div>
       {children}
     </main>

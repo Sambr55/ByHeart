@@ -1,0 +1,82 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+
+/**
+ * Four places, always there.
+ *
+ * The burger was eleven destinations behind a tap, ordered by nothing in particular, and
+ * it had become the place things went when there was no obvious home for them — Proof,
+ * Drops, the Vocab library, membership, feedback, the account, all peers of Dub Club in
+ * a flat list. A menu that long is a filing cabinet, and a filing cabinet is where a
+ * product hides the fact that it has not decided what matters.
+ *
+ * So: four. Learning, the city, today, and yours. Everything else is reachable from
+ * inside one of them, which is a claim about what those things ARE rather than a way of
+ * saving space — Proof and the Vocab library and your Legend are all answers to "what
+ * have I got", and that question has a screen now.
+ *
+ * Not on a lesson. The teaching beats are a held sequence and a persistent bar offering
+ * three ways out is an invitation to leave in the middle of the one thing that works.
+ */
+const TABS = [
+  { href: '/vibes', label: 'Vibes', d: 'M4 6h7v7H4zM13 6h7v7h-7zM4 15h7v3H4zM13 15h7v3h-7z' },
+  { href: '/club', label: 'Lisbon', d: 'M4 20V9l8-5 8 5v11M9 20v-6h6v6' },
+  { href: '/line', label: 'Today', d: 'M5 4h14v16l-7-4-7 4zM9 9h6' },
+  { href: '/profile', label: 'Yours', d: 'M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0' },
+] as const
+
+export function BottomNav() {
+  const path = usePathname()
+  return (
+    <nav
+      data-testid="bottom-nav"
+      aria-label="Where to go"
+      /*
+        pb accounts for the home indicator. Without it the last row of a scrolling page
+        sits under the bar on every modern iPhone, which is the single most common way a
+        bottom bar goes wrong.
+      */
+      className="nav-bar fixed inset-x-0 bottom-0 z-50 flex border-t border-line bg-bg/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+    >
+      {TABS.map((t) => {
+        const here = path === t.href || (t.href === '/vibes' && path === '/')
+        return (
+          <Link
+            key={t.href}
+            href={t.href}
+            aria-current={here ? 'page' : undefined}
+            data-testid={'tab-' + t.label.toLowerCase()}
+            className={
+              'tap-target flex flex-1 flex-col items-center justify-center gap-1 py-3 transition ' +
+              (here ? 'text-accent' : 'text-muted')
+            }
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={here ? 2 : 1.6}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d={t.d} />
+            </svg>
+            <span className="text-[0.6rem] uppercase tracking-wider">{t.label}</span>
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
+
+/**
+ * The room the bar leaves. Sits at the foot of a scrolling page so its last line is
+ * readable rather than tucked behind the nav.
+ */
+export function BottomNavSpace() {
+  return <div aria-hidden className="nav-clear shrink-0" />
+}

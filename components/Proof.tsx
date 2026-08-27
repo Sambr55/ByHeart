@@ -5,8 +5,10 @@ import { Wordmark } from '@/components/Wordmark'
 import { useMemo, useState } from 'react'
 import { GOAL_LABEL, GOAL_NEEDS, type Goal } from '@/content/profile'
 import { PIECES } from '@/content/roots'
+import { showableLines } from '@/engine/showable'
 import { useLearner } from '@/engine/useLearner'
-import { Menu } from '@/components/Menu'
+import { Back } from '@/components/Back'
+import { ShowThis } from '@/components/ShowThis'
 
 /**
  * The proof card — what replaces the streak.
@@ -36,13 +38,12 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
     image, so a card made the morning after somebody filled in "Chamam-se Oscar, Tilly e
     Ted" would have published it.
 
-    Shared lines are the ones from crates. The learner can still share a Legend line
-    deliberately; they cannot do it by accident.
+    Shared lines are the ones from vibes. The learner can still share a Legend line
+    deliberately; they cannot do it by accident. The filter itself lives in
+    engine/showable now, because Showing publishes through the same rule and a rule
+    written twice is a rule that will be right in one place and wrong in the other.
   */
-  const shareable = useMemo(
-    () => [...proof].reverse().filter((p) => p.source !== 'legend').slice(0, 3),
-    [proof],
-  )
+  const shareable = useMemo(() => showableLines(proof), [proof])
 
   const worlds = useMemo(() => {
     const set = new Set<string>()
@@ -103,8 +104,8 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
    */
   const [link, setLink] = useState<string | null>(null)
 
-  const mint = async (): Promise<string | null> => {
-    if (link) return link
+  /** Mint the artefact. Showing needs the id; the public share needs the path. */
+  const mintCard = async (): Promise<string | null> => {
     try {
       const res = await fetch('/api/share', {
         method: 'POST',
@@ -115,14 +116,20 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
           lines: shareable.map((r) => ({ pt: r.pt, en: r.en })),
         }),
       })
-      const body = (await res.json()) as { ok: boolean; path?: string }
-      if (!body.ok || !body.path) return null
-      const full = window.location.origin + body.path
-      setLink(full)
-      return full
+      const body = (await res.json()) as { ok: boolean; id?: string }
+      return body.ok && body.id ? body.id : null
     } catch {
       return null
     }
+  }
+
+  const mint = async (): Promise<string | null> => {
+    if (link) return link
+    const id = await mintCard()
+    if (!id) return null
+    const full = window.location.origin + '/p/' + id
+    setLink(full)
+    return full
   }
 
   const share = async () => {
@@ -160,11 +167,7 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
     >
       {standalone ? (
         <div className="flex items-center justify-between gap-3">
-          <Link href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-muted">
-            <span aria-hidden>←</span>
-            <Wordmark className="h-3" title="DUB — back to your vibes" />
-          </Link>
-          <Menu />
+          <Back />
         </div>
       ) : null}
 
@@ -284,6 +287,15 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
           {copied ? 'COPIED' : 'SHARE THIS'}
         </button>
       ) : null}
+
+      {/*
+        Two different acts, so two different controls.
+
+        SHARE THIS puts a card somewhere anybody can see it. This one makes a link
+        addressed to a single person — which is the only kind that can be shown back, and
+        the only kind that makes the mutual step mean anything.
+      */}
+      {standalone && !empty && shareable.length ? <ShowThis mint={mintCard} /> : null}
 
       <p className="text-center text-xs leading-relaxed text-muted">
         No streak, no points, no level. This number only moves when you can actually say

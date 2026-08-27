@@ -11,7 +11,7 @@ import { track } from '@/engine/analytics'
 import { currentPair } from '@/engine/pair'
 import { rememberLine } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
-import { Menu } from '@/components/Menu'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 
 /**
  * The Line — twenty seconds, once a day.
@@ -77,7 +77,7 @@ export function Line({ pushReady }: { pushReady: boolean }) {
           <Wordmark className="h-3" title="DUB — back to your vibes" />
         </Link>
         <span className="eyebrow flex-1 text-muted">TODAY</span>
-        <Menu />
+        
       </div>
 
       {!ready ? (
@@ -153,6 +153,8 @@ export function Line({ pushReady }: { pushReady: boolean }) {
       >
         Got ten minutes? Open a vibe.
       </Link>
+      <BottomNavSpace />
+      <BottomNav />
     </main>
   )
 }

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Account } from '@/components/Account'
-import { Menu } from '@/components/Menu'
+import { Back } from '@/components/Back'
 import { RedeemCode } from '@/components/RedeemCode'
 import { Wordmark } from '@/components/Wordmark'
 import { currentUser, deviceId } from '@/lib/auth'
@@ -62,11 +62,7 @@ async function SignedOut() {
       {/* The same header the signed-in page has. A wordmark is sized by height, and
           leaving the class off renders it at its intrinsic size — enormous. */}
       <header className="flex items-center justify-between gap-3">
-        <a href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-accent">
-          <span aria-hidden>←</span>
-          <Wordmark className="h-3" title="DUB — back to your vibes" />
-        </a>
-        <Menu />
+        <Back />
       </header>
 
       <section>

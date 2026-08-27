@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
-import { Menu } from '@/components/Menu'
+import { BottomNav } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { FEED_COPY, chapterName, feedFor, vocabWord, type FeedCard } from '@/content/feed'
@@ -96,9 +96,7 @@ export function Feed() {
           <Wordmark mark="club" className="h-6 text-white" title={chapterName()} />
         </Link>
         <span className="flex-1" />
-        <span className="pointer-events-auto text-white">
-          <Menu />
-        </span>
+
       </header>
 
       <div
@@ -119,6 +117,8 @@ export function Feed() {
       </div>
 
       {toast ? <Toast kind={toast} /> : null}
+      {/* Over the feed, like the header — the cards scroll under it. */}
+      <BottomNav />
     </main>
   )
 }
@@ -209,7 +209,8 @@ export function Card({
             aria-hidden
             className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black/92 via-black/60 to-transparent"
           />
-          <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 pb-10 text-white">
+          {/* nav-clear keeps the rail and the title above the bar rather than under it. */}
+          <div className="nav-clear absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 text-white">
             <div className="min-w-0 flex-1">
               {card.kind === 'vocab' ? (
                 <>
@@ -250,7 +251,7 @@ export function Card({
           </div>
         </div>
 
-        <div className="h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 pb-10 pt-10 text-fg">
+        <div className="nav-clear h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 pt-10 text-fg">
           {/*
             Clearance under the fixed header, composed from the scale rather than picked.
 

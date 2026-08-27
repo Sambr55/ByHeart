@@ -24,7 +24,7 @@ import {
   type Shelf,
   type WordSet,
 } from '@/content/roots'
-import { Menu } from '@/components/Menu'
+import { Back } from '@/components/Back'
 import { AudioButton } from '@/components/AudioButton'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
@@ -326,12 +326,8 @@ function Library() {
     >
       <header className="bar sticky top-0 z-30 flex flex-col gap-3 px-5 py-3">
         <div className="flex items-center gap-3">
-          <Link href="/vibes" className="tap-target flex shrink-0 items-center gap-1 eyebrow opacity-80 transition hover:opacity-100">
-            <span aria-hidden>←</span>
-            <Wordmark className="h-3" title="DUB — back to your vibes" />
-          </Link>
+          <Back />
           <span className="eyebrow flex-1">Vocab library</span>
-          <Menu />
         </div>
         <div className="flex items-center gap-3 pb-1">
           <input
