@@ -108,3 +108,15 @@ export function chapterName(chapter: ChapterId = DEFAULT_CHAPTER): string {
 export function vocabWord(piece: Piece): string {
   return displayForm(piece)
 }
+
+/**
+ * What the feed says out loud.
+ *
+ * A save used to fill in a bookmark and say nothing, so the only way to learn whether it
+ * had worked was to go and look — at a screen most people have not found yet.
+ */
+export const FEED_COPY = {
+  saved: 'Kept. It is on your profile.',
+  saved_cta: 'SEE IT',
+  unsaved: 'Taken off your profile.',
+} as const

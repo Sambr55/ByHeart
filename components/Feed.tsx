@@ -7,7 +7,7 @@ import { AudioButton } from '@/components/AudioButton'
 import { Menu } from '@/components/Menu'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
-import { chapterName, feedFor, vocabWord, type FeedCard } from '@/content/feed'
+import { FEED_COPY, chapterName, feedFor, vocabWord, type FeedCard } from '@/content/feed'
 import { track } from '@/engine/analytics'
 import { toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
@@ -29,6 +29,20 @@ import { useLearner } from '@/engine/useLearner'
  */
 export function Feed() {
   const cards = useMemo(() => feedFor(), [])
+  /*
+    A save that says so.
+
+    The bookmark filled in and nothing else happened, so the only way to find out whether
+    it had worked was to go and look — and the place to look is a screen most people have
+    not found yet. It says where the thing went and offers the way there, then gets out
+    of the way on its own.
+  */
+  const [toast, setToast] = useState<'saved' | 'unsaved' | null>(null)
+  useEffect(() => {
+    if (!toast) return
+    const t = setTimeout(() => setToast(null), 3600)
+    return () => clearTimeout(t)
+  }, [toast])
   const learner = useLearner()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -99,14 +113,56 @@ export function Feed() {
             card={card}
             saved={mounted && (learner.saved ?? []).includes(card.id)}
             liked={mounted && (learner.liked ?? []).includes(card.id)}
+            onSaved={(on) => setToast(on ? 'saved' : 'unsaved')}
           />
         ))}
       </div>
+
+      {toast ? <Toast kind={toast} /> : null}
     </main>
   )
 }
 
-export function Card({ card, saved, liked }: { card: FeedCard; saved: boolean; liked: boolean }) {
+export /**
+ * Said once, at the foot, and gone.
+ *
+ * Above the feed rather than inside a card, because the card it belongs to may well have
+ * been swiped past by the time somebody reads it — and a message that scrolls away with
+ * its subject is a message nobody reads.
+ */
+function Toast({ kind }: { kind: 'saved' | 'unsaved' }) {
+  return (
+    <div
+      role="status"
+      data-testid="feed-toast"
+      className="animate-bank absolute inset-x-0 bottom-0 z-50 flex items-center gap-3 bg-black/85 px-5 py-3 text-white"
+    >
+      <p className="min-w-0 flex-1 text-sm">
+        {kind === 'saved' ? FEED_COPY.saved : FEED_COPY.unsaved}
+      </p>
+      {kind === 'saved' ? (
+        <Link
+          href="/profile"
+          className="tap-target eyebrow shrink-0 rounded bg-white px-4 py-3 text-[#241f1a]"
+        >
+          {FEED_COPY.saved_cta}
+        </Link>
+      ) : null}
+    </div>
+  )
+}
+
+export function Card({
+  card,
+  saved,
+  liked,
+  onSaved,
+}: {
+  card: FeedCard
+  saved: boolean
+  liked: boolean
+  onSaved?: (on: boolean) => void
+}) {
   const pane = useRef<HTMLDivElement>(null)
   /*
     Tapping the call to action does the same thing as the swipe.
@@ -184,7 +240,11 @@ export function Card({ card, saved, liked }: { card: FeedCard; saved: boolean; l
               card={card}
               isSaved={isSaved}
               isLiked={isLiked}
-              onSave={() => setSaved(toggleCard('saved', card.id))}
+              onSave={() => {
+                const on = toggleCard('saved', card.id)
+                setSaved(on)
+                onSaved?.(on)
+              }}
               onLike={() => setLiked(toggleCard('liked', card.id))}
             />
           </div>
@@ -294,7 +354,16 @@ function Rail({
           onLike()
           track('feed_like', { card: card.id })
         }}
-        className={btn + (isLiked ? ' text-accent' : ' text-white/85')}
+        /*
+          Red, and pinned to the hex rather than tokenised.
+
+          It was --accent, which is azulejo blue on sand and a pale #7fb3da in dark mode
+          — and this rail is always over a photograph, so the on state was a pale blue
+          icon on a dark picture and effectively invisible. A liked heart is red
+          everywhere a heart has ever been red, and that is worth more here than
+          consistency with a palette that was designed for type on paper.
+        */
+        className={btn + (isLiked ? ' text-[#e4574f]' : ' text-white/85')}
       >
         <svg viewBox="0 0 24 24" className="h-7 w-7" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7" aria-hidden>
           <path d="M12 20s-7-4.4-7-9.3A4.2 4.2 0 0 1 12 8a4.2 4.2 0 0 1 7 2.7C19 15.6 12 20 12 20Z" />
@@ -321,7 +390,8 @@ function Rail({
           onSave()
           track('feed_save', { card: card.id })
         }}
-        className={btn + (isSaved ? ' text-accent' : ' text-white/85')}
+        /* Filled white rather than tinted: over a photograph, fill reads and hue does not. */
+        className={btn + (isSaved ? ' text-white' : ' text-white/85')}
       >
         <svg viewBox="0 0 24 24" className="h-7 w-7" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7" aria-hidden>
           <path d="M6 4h12v16l-6-4-6 4Z" />

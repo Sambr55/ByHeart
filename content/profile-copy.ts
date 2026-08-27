@@ -8,6 +8,8 @@
 export const PROFILE_COPY = {
   eyebrow: 'YOURS',
   headline: 'Your Lisbon.',
+  name_hint: 'Your name',
+  add_photo: 'ADD A PHOTO',
   done_label: 'BEEN THROUGH',
   done_note: 'Vibes and rooms you have been all the way through. They stay here.',
   done_empty: 'Nothing yet. Anything you finish turns up here on its own.',

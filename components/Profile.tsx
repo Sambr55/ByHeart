@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '@/components/Feed'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Menu } from '@/components/Menu'
@@ -10,6 +10,8 @@ import { Wordmark } from '@/components/Wordmark'
 import { cardById, roomsFor, wordCards, type FeedCard } from '@/content/feed'
 import { CRATES, type CultureFamily } from '@/content/roots'
 import { PROFILE_COPY } from '@/content/profile-copy'
+import { getAvatar, setAvatarFromFile } from '@/engine/avatar'
+import { setDisplayName } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 
 /**
@@ -97,10 +99,7 @@ export function Profile() {
         <Menu />
       </header>
 
-      <div>
-        <p className="eyebrow text-muted">{PROFILE_COPY.eyebrow}</p>
-        <h1 className="display mt-3 text-balance text-3xl">{PROFILE_COPY.headline}</h1>
-      </div>
+      <Identity />
 
       {!mounted ? null : (
         <>
@@ -212,5 +211,82 @@ function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void 
         </span>
       </span>
     </button>
+  )
+}
+
+
+/**
+ * Who this is.
+ *
+ * A name and a face, because a profile with neither is a filing cabinet — and because
+ * the next thing this screen has to be able to do is belong to somebody another person
+ * could recognise.
+ *
+ * The photograph never leaves the phone. It lives in its own storage key rather than on
+ * the learner, which is the thing that syncs; the name does sync, because a name is what
+ * you would be called in a room and the whole point of having one is that somebody else
+ * can read it.
+ */
+function Identity() {
+  const learner = useLearner()
+  const [mounted, setMounted] = useState(false)
+  const [name, setName] = useState('')
+  const [photo, setPhoto] = useState<string | null>(null)
+  const file = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setMounted(true)
+    setPhoto(getAvatar())
+  }, [])
+  useEffect(() => {
+    if (mounted) setName(learner.display_name ?? '')
+  }, [mounted, learner.display_name])
+
+  return (
+    <section className="flex items-center gap-3">
+      <button
+        type="button"
+        data-testid="avatar"
+        onClick={() => file.current?.click()}
+        aria-label={photo ? 'Change your photo' : 'Add a photo'}
+        className="tap-target relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-line bg-bg-elev"
+      >
+        {photo ? (
+          /* Not next/image: this is a data URI from the person's own camera roll, and the
+             optimiser has nothing to do with it. */
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photo} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <span className="eyebrow flex h-full w-full items-center justify-center text-[0.5rem] text-muted">
+            {PROFILE_COPY.add_photo}
+          </span>
+        )}
+      </button>
+      <input
+        ref={file}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={async (e) => {
+          const f = e.target.files?.[0]
+          if (!f) return
+          const next = await setAvatarFromFile(f)
+          if (next) setPhoto(next)
+        }}
+      />
+
+      <div className="min-w-0 flex-1">
+        <p className="eyebrow text-muted">{PROFILE_COPY.eyebrow}</p>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={() => setDisplayName(name.trim())}
+          placeholder={PROFILE_COPY.name_hint}
+          aria-label="Your name"
+          data-testid="profile-name"
+          className="display mt-1 w-full bg-transparent text-2xl text-fg outline-none placeholder:text-muted"
+        />
+      </div>
+    </section>
   )
 }
