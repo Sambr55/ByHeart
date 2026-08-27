@@ -164,81 +164,53 @@ export const DEMO_CLOSE =
   'That’s DUB. Start with something you connect with. Find the useful language inside it. Make it yours.'
 
 /**
- * The deal — §02B.
+ * The way in, in two short screens instead of one long one.
  *
- * Placed after the demo rather than before it, because showing beats telling: by the
- * time a person reads this they have already had the trick done to them once and are
- * asking "what is this, actually?". This screen answers that question and no other.
+ * The deal screen was seven sections and a scroll: the destination, the passport, the
+ * method, the ladder, what accumulates, what we ask, and what this is not. Every part of
+ * it was true and the whole of it was a document, delivered to somebody who has seen one
+ * screen of a language app and is deciding whether to give it ten minutes.
  *
- * The negative block is not a joke. It is the product's whole position, and stating it
- * out loud on the way in is what stops a learner measuring DUB by the thing DUB has
- * deliberately refused to build.
+ * These two say the same thing as a route. HOW_IN comes before the demo and sets it up —
+ * so the Goose line arrives as the EXAMPLE of a claim just made, rather than as a trick
+ * with the explanation trailing after it. THE_WAY comes after, once the language pair is
+ * known, and says where the road goes: five vibes, then your Legend, then the Club.
+ *
+ * What is deliberately gone: the ladder diagram, the chips, "what we ask", and the
+ * no-streaks block. None of them are wrong and none of them belong on the way in. A person
+ * arriving does not need the mechanism, they need the route and one piece of evidence.
  */
-export const DEAL = {
-  /**
-   * The deal, rebuilt around the goal.
-   *
-   * It used to open "Here's the deal" and lead with HOW IT WORKS — a method, explained
-   * to somebody who had not yet been told what it was for. That was right when finishing
-   * your Legend was the point. It stopped being right the moment joining Dub Club became
-   * the goal and the Legend became the passport, and a screen that explains the mechanism
-   * before the destination is answering a question nobody has asked yet.
-   *
-   * So: where you are going, what gets you in, how you get the language for it, and what
-   * it costs you in effort. In that order, because that is the order somebody deciding
-   * actually wants them.
-   */
-  eyebrow: 'WHERE THIS GOES',
-  headline: 'Dub Club — Lisbon.',
-  /** The destination, before anything about method. */
-  intro: {
-    body: 'A room for people who are going to Lisbon and want to arrive able to speak. Inside it is the part that is about Lisbon rather than about Portuguese — the people, the places, and what to say when a conversation goes wrong.',
-    /** Said plainly, because a door with no visible lock is not a door. */
-    gate: 'You get in by being able to introduce yourself in Portuguese, out loud, with nothing on screen to read from.',
+export const HOW_IN = {
+  eyebrow: 'HOW YOU GET IN',
+  headline: 'Dub Club, and how you get through the door.',
+  steps: [
+    'Start with the basics — built out of song titles you already know, so there is nothing to memorise.',
+    'Then pick a vibe you actually connect with. Top Gun, say. We pull the phrases out of it that are useful the day you land.',
+  ],
+  /** The demo is the third step, and it is a demonstration rather than a claim. */
+  example: 'Here is one of them.',
+  cta: 'SHOW ME',
+} as const
+
+export const THE_WAY = {
+  eyebrow: 'WHERE IT GOES',
+  headline: 'Five vibes, then your Legend, then the door.',
+  /*
+    Said in the order it happens, and every clause is something the product actually does.
+    The Legend is not a metaphor here — it is seven questions, answered in the learner's
+    own Portuguese, and it is literally what opens the Club.
+  */
+  legend: {
+    label: 'YOUR LEGEND',
+    body: 'While you are going through vibes you are quietly unlocking the Legend questions. With five in the bag we build it together — the minute of conversation you have every single time you meet somebody new in {language}.',
   },
-  /** The passport. Carried by the questions, because the questions do the persuading. */
-  card: {
-    label: 'THE WAY IN',
-    head: 'Seven questions a stranger will ask you.',
-    body: 'Answer them in your own Portuguese and you are in. Not a phrase you memorised — your name, your reasons, your life, built out of language you own.',
-    questions: [
-      { pt: 'Como te chamas?', en: 'What are you called?' },
-      { pt: 'De onde és?', en: 'Where are you from?' },
-      { pt: 'O que fazes?', en: 'What do you do?' },
-      { pt: 'Porquê Portugal?', en: 'Why Portugal?' },
-    ],
-    more: 'Seven in all, and three more waiting inside.',
+  club: {
+    label: 'DUB CLUB',
+    body: 'Your Legend, said out loud with nothing on screen to read from, is what opens the door. Inside is the part that is about {place} rather than about the language: handling a real situation, what is on this week, and what other people going through the same thing have found.',
   },
-  /** Now the method, which is the answer to "how would I ever be able to do that". */
-  how: {
-    label: 'HOW YOU GET THERE',
-    steps: [
-      'Pick a vibe — something you already love, in English.',
-      'We pull the useful Portuguese out of it, and you keep it.',
-      'Then we take it all away and find out whether it stuck.',
-    ],
-  },
-  path: {
-    label: 'THE WHOLE THING',
-    note: 'You never lose a vibe, and nothing expires if you disappear for a month.',
-  },
-  collect: {
-    label: 'WHAT YOU KEEP',
-    note: 'And they combine — a word out of a Bond title finishing a sentence that started in Bridget Jones.',
-    examples: ['comigo', 'onde', 'quanto', 'ajuda', 'ele', 'segunda-feira'],
-  },
-  ask: {
-    label: 'WHAT WE ASK',
-    lines: [
-      'Ten minutes on the days you feel like it — not every day, we will not ask.',
-      'Say it out loud. Reading it is not the same thing.',
-    ],
-  },
-  not: {
-    label: 'WHAT THIS IS NOT',
-    line: 'No streaks, no points, no lives. A thousand-day streak has never once helped anybody order a coffee.',
-  },
-  cta: 'START MY CARD',
+  /** The one line about effort, kept because it is a promise rather than a feature. */
+  ask: 'Ten minutes on the days you feel like it. We will not ask on the days you do not.',
+  cta: 'START THE BASICS',
 } as const
 
 /** §08 / §09 — the first meaningful learner choice, and it comes after the demo. */

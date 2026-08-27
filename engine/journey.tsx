@@ -51,9 +51,12 @@ import { useLearner } from './useLearner'
 
 export type Step =
   | { kind: 'landing' }
+  /** How you get in — sets the demo up, so the Goose line arrives as an example. */
+  | { kind: 'howin' }
   | { kind: 'demo'; i: number }
   | { kind: 'pair' }
-  | { kind: 'deal' }
+  /** Where it goes, and where the deal is accepted. Named for what it says. */
+  | { kind: 'theway' }
   | { kind: 'picker' }
   | { kind: 'root'; rootId: string; beat: RootBeat; pieceIndex?: number }
   | { kind: 'collision'; collisionId: string }
@@ -236,11 +239,13 @@ type Action =
 const initial: JourneyState = {
   steps: [
     { kind: 'landing' },
+    // Before the demo, so the demo is the example rather than the argument.
+    { kind: 'howin' },
     ...DEMO_BEATS.map((_, i) => ({ kind: 'demo' as const, i })),
-    // After the demo, before the deal. The demo is the argument for choosing at all,
-    // and the deal can only say "your Portuguese" truthfully once the pair is known.
+    // After the demo, before the route. The route can only say "in Portugal" truthfully
+    // once the pair is known.
     { kind: 'pair' },
-    { kind: 'deal' },
+    { kind: 'theway' },
     { kind: 'picker' },
   ],
   index: 0,
@@ -610,7 +615,7 @@ export function JourneyProvider({
       return
     }
     loadLearner()
-    dispatch({ type: 'jump', kind: hasAcceptedDeal() ? 'picker' : 'deal' })
+    dispatch({ type: 'jump', kind: hasAcceptedDeal() ? 'picker' : 'theway' })
   }, [enter])
   /**
    * Keep the journey's idea of what has been played in step with the learner record.

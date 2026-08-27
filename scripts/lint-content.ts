@@ -866,8 +866,18 @@ for (const e of EXAMPLES) {
     return []
   }
 
-  // The landing list is a list of what a crate can be, not a narrowing to one of them.
-  const ALLOWED = /films, music, books, TV, sport and culture/
+  /*
+    Two exceptions, and both are the rule working rather than being bent.
+
+    The landing list is a list of what a vibe can BE, not a narrowing to one of them. And
+    the basics really are built out of song titles — saying so is the same fact the vibe's
+    own title states, and the front door cannot make the proposition without the example:
+    "built out of things you already know" means nothing until you name one.
+
+    What the rule still stops is DUB describing ITSELF as a product about films or songs,
+    which is what it was doing before and is a much smaller thing than it is.
+  */
+  const ALLOWED = /films, music, books, TV, sport and culture|song titles you already know/
 
   let named = 0
   for (const [file, obj] of SHARED) {

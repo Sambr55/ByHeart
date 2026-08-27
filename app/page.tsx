@@ -6,6 +6,8 @@ import { Journey } from '@/components/Journey'
 import { JourneyProvider } from '@/engine/journey'
 import { chosenPair } from '@/engine/pair'
 import { loadLearner, type LearnerState } from '@/engine/learner'
+import { clubOpen } from '@/content/legend'
+import { rungReached } from '@/content/roots'
 
 /**
  * The front door — or the Club, for somebody who has already been through it.
@@ -48,15 +50,25 @@ function returning(s: LearnerState): boolean {
 }
 
 /**
- * Has the Legend actually been built?
+ * Is this person a member? The SAME question the Club's own door asks.
  *
- * Not "unlocked" — built. Dub Club is where a Legend GROWS, so arriving there with an
- * empty one would be arriving at a room with nothing in it. Half the cards is the test:
- * enough that the thing exists and is worth returning to, short of demanding all ten
- * before anybody sees the room.
+ * There used to be two answers here and they disagreed. This file said five or more Legend
+ * answers; `clubOpen()` — which the Club itself uses — says every applicable card on the
+ * card, plus rung 2. So somebody with five or six was sent to the Club by the front door
+ * and shown the closed door by the Club, one tap later. The most likely person to hit that
+ * was somebody in the middle of building their Legend, which is exactly who this fork is
+ * for.
+ *
+ * One function now, and it is the room's, because the room is the thing being opened.
  */
-function legendBuilt(s: LearnerState): boolean {
-  return (s.legend ?? []).filter((a) => Object.keys(a.values).length > 0).length >= 5
+function isMember(s: LearnerState): boolean {
+  const answers = s.legend ?? []
+  return clubOpen({
+    answeredFrameIds: answers.filter((a) => Object.keys(a.values).length > 0).map((a) => a.frame_id),
+    answers,
+    rung: rungReached(s.proof ?? []),
+    welcomedAt: s.club_welcomed_at,
+  })
 }
 
 export default function Page() {
@@ -73,12 +85,12 @@ export default function Page() {
     /*
       Two homes, and which one you get says where you are in the game.
 
-      Dub Club is the graduation — it opens when the Legend is built, and it is where the
-      Legend grows. Before that the picker is home, because the picker is where the work
-      is: crates are how you earn the Legend. Sending a mid-game learner to a Club they
-      have not reached would be the same mistake as sending them to the front door.
+      Dub Club is the graduation — it opens on the Legend being finished AND said, which is
+      what clubOpen asks. Before that the shelf is home, because the shelf is where the work
+      is: vibes are how you earn the Legend. Sending a mid-game learner to a Club they have
+      not reached would be the same mistake as sending them to the front door.
     */
-    router.replace(legendBuilt(learner) ? '/club' : '/vibes')
+    router.replace(isMember(learner) ? '/club' : '/vibes')
   }, [router])
 
   // Deliberately blank for the one frame between deciding and arriving. A returning

@@ -70,7 +70,17 @@ const MEDIUM = /\b(films?|movies?|songs?|books?|quotes?|scenes?)\b/gi
 /** The landing list is a list of what a crate can BE, not a narrowing to one of them. */
 const MEDIUM_OK = [
   /films, music, books, TV, sport and culture/,
-  /film titles|banger quotes|cringe moments/, // crate titles name their own world
+  /film titles|banger quotes|cringe moments/, // vibe titles name their own world
+  /*
+    And the basics, which really are built out of song titles.
+
+    The rule guards against DUB describing ITSELF as a product about films or songs. Saying
+    what a particular vibe is made of is not that — it is the same fact the vibe's own
+    title states ("The basics, in songs you know"), and the front door has to be able to
+    say it, because "built out of things you already know" is the entire proposition and it
+    is meaningless without the example.
+  */
+  /song titles you already know/,
 ]
 
 /*

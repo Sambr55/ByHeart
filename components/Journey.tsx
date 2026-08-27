@@ -28,7 +28,8 @@ import {
 } from '@/content/roots'
 import {
   CLOSE,
-  DEAL as DEAL_COPY,
+  HOW_IN,
+  THE_WAY,
   RELEASE,
   THE_SWITCH,
   DEMO_BEATS,
@@ -52,6 +53,7 @@ import { Shelves } from '@/components/Shelves'
 import { LEGEND_COPY, LEGEND_FRAMES, legendStatus } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
+import { CHAPTERS, DEFAULT_CHAPTER } from '@/content/chapters'
 import { setPair } from '@/engine/pair'
 import { Wordmark } from '@/components/Wordmark'
 import { useNowAfterMount } from '@/engine/useNow'
@@ -258,12 +260,14 @@ export function Journey() {
   switch (step.kind) {
     case 'landing':
       return <Landing />
+    case 'howin':
+      return <HowIn />
     case 'demo':
       return <Demo i={step.i} />
     case 'pair':
       return <PairStep />
-    case 'deal':
-      return <Deal />
+    case 'theway':
+      return <TheWay />
     case 'picker':
       return <Picker />
     case 'root':
@@ -419,104 +423,88 @@ function PairStep() {
   )
 }
 
-function Deal() {
+/**
+ * How you get in — the screen before the demo.
+ *
+ * The deal screen this replaces was seven sections and a scroll, delivered to somebody who
+ * had seen one screen of a language app. Every part of it was true and the whole of it was
+ * a document.
+ *
+ * This one has a job: set the demo up. Two steps and then "here is one of them", so the
+ * Goose line lands as the EXAMPLE of a claim just made rather than as a trick with its
+ * explanation trailing after it.
+ */
+function HowIn() {
   const { next } = useJourney()
+  return (
+    <Shell stage="CHOICE">
+      <p className="eyebrow text-muted">{HOW_IN.eyebrow}</p>
+      <h1 className="display mt-3 text-balance text-3xl">{HOW_IN.headline}</h1>
 
-  const Block = ({
-    label,
-    lines,
-    numbered = false,
-  }: {
-    label: string
-    lines: readonly string[]
-    numbered?: boolean
-  }) => (
-    <section className="border-t border-line pt-3">
-      <p className="eyebrow text-accent">{label}</p>
-      <ul className="mt-3 space-y-3">
-        {lines.map((line, i) => (
-          <li key={line} className="flex gap-3 text-sm leading-relaxed text-fg/85">
-            <span className="shrink-0 pt-1 text-xs tabular-nums text-muted">
-              {numbered ? i + 1 : '·'}
-            </span>
-            <span>{line}</span>
+      <ol className="mt-6 flex flex-col gap-6">
+        {HOW_IN.steps.map((step, i) => (
+          <li key={step} className="flex gap-3">
+            <span className="eyebrow shrink-0 pt-1 tabular-nums text-accent">{i + 1}</span>
+            <span className="text-sm leading-relaxed text-fg/85">{step}</span>
           </li>
         ))}
-      </ul>
+        {/* The third step is the demo itself, numbered with the other two because it is
+            one of them rather than a flourish after them. */}
+        <li className="flex gap-3">
+          <span className="eyebrow shrink-0 pt-1 tabular-nums text-accent">3</span>
+          <span className="text-sm leading-relaxed text-fg/85">{HOW_IN.example}</span>
+        </li>
+      </ol>
+
+      <Cta label={HOW_IN.cta} onClick={next} />
+    </Shell>
+  )
+}
+
+/**
+ * Where it goes — the screen after the demo and the language pair.
+ *
+ * After, because it can only say "in Portugal" once the pair is known, and because the
+ * route is worth reading when somebody has just been shown that the trick works.
+ *
+ * This is where the deal is accepted. It is the last screen before the shelf, and it is
+ * the one that describes what accepting gets you.
+ */
+function TheWay() {
+  const { next } = useJourney()
+  /*
+    The country and the city, from the chapter rather than from the pair.
+
+    A Pair is a pair of locale codes; it does not know that pt-PT is spoken in Portugal or
+    that the room is in Lisbon. The chapter does, because a chapter IS a city — and the
+    Club is what this screen is about, so the chapter is the right thing to be asking.
+  */
+  const chapter = CHAPTERS.find((c) => c.id === DEFAULT_CHAPTER) ?? CHAPTERS[0]
+  const say = (t: string) =>
+    t.replace(/\{language\}/g, chapter.country).replace(/\{place\}/g, chapter.city)
+
+  const Block = ({ label, body }: { label: string; body: string }) => (
+    <section className="border-t border-line pt-6">
+      <p className="eyebrow text-accent">{label}</p>
+      <p className="mt-3 text-sm leading-relaxed text-fg/85">{say(body)}</p>
     </section>
   )
 
   return (
     <Shell stage="CHOICE">
-      <p className="eyebrow text-muted">{DEAL_COPY.eyebrow}</p>
-      <p className="display mt-3 text-balance text-3xl">{DEAL_COPY.headline}</p>
+      <p className="eyebrow text-muted">{THE_WAY.eyebrow}</p>
+      <h1 className="display mt-3 text-balance text-3xl">{THE_WAY.headline}</h1>
 
-      <div className="mt-6 space-y-6 pb-6">
-        {/*
-          The destination first, then the lock on the door, then the method.
-
-          This screen used to open with HOW IT WORKS — a mechanism explained to somebody
-          who had not been told what it was for. That was right while finishing your
-          Legend was the point. Joining the Club is the point now, so the order is where
-          you are going, what gets you in, and only then how you get the language for it.
-        */}
-        <section>
-          <p className="text-sm leading-relaxed text-fg/85">{DEAL_COPY.intro.body}</p>
-          <p className="mt-3 text-sm font-semibold leading-relaxed">{DEAL_COPY.intro.gate}</p>
-        </section>
-
-        {/* The passport, argued for by its own questions rather than by adjectives. */}
-        <section className="border-t border-line pt-3">
-          <p className="eyebrow text-accent">{DEAL_COPY.card.label}</p>
-          <p className="display mt-3 text-balance text-xl">{DEAL_COPY.card.head}</p>
-          <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.card.body}</p>
-          <ul className="mt-6 flex flex-col gap-3">
-            {DEAL_COPY.card.questions.map((q) => (
-              <li key={q.pt} className="flex flex-col rounded border border-line bg-bg-elev px-4 py-3">
-                <span className="pt text-base text-accent">{q.pt}</span>
-                <span className="mt-1 text-xs text-muted">{q.en}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-xs text-muted">{DEAL_COPY.card.more}</p>
-        </section>
-
-        <Block label={DEAL_COPY.how.label} lines={DEAL_COPY.how.steps} numbered />
-
-        <section className="border-t border-line pt-3">
-          <p className="eyebrow text-accent">{DEAL_COPY.path.label}</p>
-          <Path at={0} className="mt-6" />
-          <p className="border-t border-line/60 pt-3 text-xs leading-relaxed text-muted">
-            {DEAL_COPY.path.note}
-          </p>
-        </section>
-
-        {/* What accumulates, shown rather than claimed — the chips are the argument. */}
-        <section className="border-t border-line pt-3">
-          <p className="eyebrow text-accent">{DEAL_COPY.collect.label}</p>
-          <p className="mt-3 text-sm leading-relaxed text-fg/85">{DEAL_COPY.collect.note}</p>
-          <div className="mt-3 flex flex-wrap gap-3">
-            {DEAL_COPY.collect.examples.map((e) => (
-              <span
-                key={e}
-                className="pt rounded-[3px] border border-line bg-chip px-2.5 py-1 text-xs text-accent"
-              >
-                {e}
-              </span>
-            ))}
-          </div>
-        </section>
-
-        <Block label={DEAL_COPY.ask.label} lines={DEAL_COPY.ask.lines} />
-
-        <section className="rounded border border-line bg-bg-elev p-4">
-          <p className="eyebrow text-muted">{DEAL_COPY.not.label}</p>
-          <p className="mt-3 text-sm leading-relaxed">{DEAL_COPY.not.line}</p>
-        </section>
+      <div className="mt-6 flex flex-col gap-6">
+        <Block label={THE_WAY.legend.label} body={THE_WAY.legend.body} />
+        <Block label={THE_WAY.club.label} body={THE_WAY.club.body} />
+        <p className="border-t border-line pt-6 text-xs leading-relaxed text-muted">
+          {THE_WAY.ask}
+        </p>
       </div>
 
       <Cta
-        label={DEAL_COPY.cta}
+        label={THE_WAY.cta}
         onClick={() => {
           acceptDeal()
           track('deal_accepted', {})
@@ -526,6 +514,8 @@ function Deal() {
     </Shell>
   )
 }
+
+
 
 // --------------------------------------------------------------- front door
 
