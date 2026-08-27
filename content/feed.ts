@@ -1,6 +1,8 @@
 import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
 import { SITUATIONS, isCurrent, type Situation } from '@/content/situations'
 import { PIECES, displayForm, type Piece } from '@/content/roots'
+import { vibeImage } from '@/content/vibe-images'
+import type { DerivedCard } from '@/engine/derive'
 
 /**
  * The Club, as a feed.
@@ -17,6 +19,15 @@ import { PIECES, displayForm, type Piece } from '@/content/roots'
  */
 export type FeedCard =
   | { kind: 'situation'; id: string; situation: Situation }
+  /*
+    A card assembled from something they already own.
+
+    It carries the photograph of the vibe the piece came from, which is not decoration:
+    "because you learned quero in Pulp Fiction" over the Pulp Fiction still says the
+    provenance before a word of it is read. A derived card that looked like a flashcard
+    would be a flashcard.
+  */
+  | { kind: 'derived'; id: string; card: DerivedCard; image: { src: string; alt: string } }
   | {
       kind: 'vocab'
       id: string
@@ -85,6 +96,24 @@ export function roomsFor(chapter: ChapterId = DEFAULT_CHAPTER): FeedCard[] {
     .map((s): FeedCard => ({ kind: 'situation', id: s.id, situation: s }))
 }
 
+/**
+ * Derived cards, as feed cards.
+ *
+ * Rationed here rather than in the generator, and deliberately: spec-derived-cards §06 is
+ * clear that a bottomless supply of these is the Duolingo treadmill rebuilt out of better
+ * parts. A few, under the authored material, arriving as the app noticing something about
+ * you — never the bulk of a session.
+ */
+export const DERIVED_PER_SESSION = 3
+
+export function derivedCards(cards: DerivedCard[]): FeedCard[] {
+  return cards.slice(0, DERIVED_PER_SESSION).flatMap((card): FeedCard[] => {
+    const image = vibeImage(card.from.family)
+    if (!image) return []
+    return [{ kind: 'derived', id: card.id, card, image: { src: image.src, alt: image.alt } }]
+  })
+}
+
 /** The words, for the profile. Same card shape, different place to meet it. */
 export function wordCards(): FeedCard[] {
   return VOCAB.flatMap((v): FeedCard[] => {
@@ -120,3 +149,41 @@ export const FEED_COPY = {
   saved_cta: 'SEE IT',
   unsaved: 'Taken off your profile.',
 } as const
+
+
+/**
+ * The front of a card, whatever kind it is.
+ *
+ * Three kinds now, and the alternative is a conditional at every call site that touches a
+ * card — the eyebrow, the share sheet, the profile tile — each of which would have to be
+ * found again the next time a kind is added. This is the one that gets found.
+ */
+export function cardFace(card: FeedCard): {
+  eyebrow: string
+  title: string
+  blurb: string
+  image?: { src: string; alt: string }
+} {
+  if (card.kind === 'situation') {
+    return {
+      eyebrow: 'IN LISBON',
+      title: card.situation.title,
+      blurb: card.situation.why,
+      image: card.situation.image,
+    }
+  }
+  if (card.kind === 'derived') {
+    return {
+      eyebrow: 'BECAUSE YOU LEARNED',
+      title: card.card.target,
+      blurb: card.card.note,
+      image: card.image,
+    }
+  }
+  return {
+    eyebrow: 'WORTH HAVING',
+    title: displayForm(card.piece),
+    blurb: card.because,
+    image: card.image,
+  }
+}

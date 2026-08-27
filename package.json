@@ -8,7 +8,7 @@
     "start": "next start",
     "lint:content": "tsx scripts/lint-content.ts",
     "audio:generate": "tsx scripts/generate-audio.ts",
-    "check": "npm run lint:content && npm run line:test && npm run merge:test && npm run first && npm run club && npm run legend && npm run ladder && npm run showing && next build",
+    "check": "npm run lint:content && npm run line:test && npm run merge:test && npm run first && npm run club && npm run legend && npm run ladder && npm run paradigms && npm run derive && npm run showing && next build",
     "walkthrough": "tsx scripts/walkthrough.ts",
     "shots": "tsx scripts/screenshots.ts",
     "journey": "tsx scripts/journey-smoke.ts",
@@ -36,7 +36,9 @@
     "feed": "tsx scripts/feed-check.mts",
     "nav": "tsx scripts/nav-check.mts",
     "showing": "tsx scripts/showing-check.mts",
-    "showing:flow": "tsx scripts/showing-flow.mts"
+    "showing:flow": "tsx scripts/showing-flow.mts",
+    "paradigms": "tsx scripts/paradigm-check.mts",
+    "derive": "tsx scripts/derive-check.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

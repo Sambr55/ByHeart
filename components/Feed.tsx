@@ -7,7 +7,16 @@ import { AudioButton } from '@/components/AudioButton'
 import { BottomNav } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
-import { FEED_COPY, chapterName, feedFor, vocabWord, type FeedCard } from '@/content/feed'
+import {
+  FEED_COPY,
+  cardFace,
+  chapterName,
+  derivedCards,
+  feedFor,
+  vocabWord,
+  type FeedCard,
+} from '@/content/feed'
+import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
 import { toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
@@ -28,7 +37,35 @@ import { useLearner } from '@/engine/useLearner'
  * up cannot have an infinite scroll on this one.
  */
 export function Feed() {
-  const cards = useMemo(() => feedFor(), [])
+  const learner = useLearner()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  /*
+    Authored rooms first, then a few assembled ones.
+
+    The ranking is one of URGENCY, not of quality. A room is the best card in the product
+    and there are five of them; a derived card is a reminder built out of something this
+    person already owns, and there is an unbounded supply. Putting the unbounded thing
+    second — and rationed, three a session — is what stops the Club becoming a treadmill
+    with a friendly face, which is the exact failure the whole idea is meant to avoid.
+
+    Derived cards are computed after mount for the usual reason: what somebody owns comes
+    out of localStorage, and branching on it during render is the hydration mismatch again.
+  */
+  const cards = useMemo(() => {
+    const rooms = feedFor()
+    if (!mounted) return rooms
+    return [
+      ...rooms,
+      ...derivedCards(
+        derivedFor({
+          inventory: learner.inventory ?? {},
+          finished: learner.finished_cards ?? [],
+        }),
+      ),
+    ]
+  }, [mounted, learner.inventory, learner.finished_cards])
   /*
     A save that says so.
 
@@ -43,10 +80,6 @@ export function Feed() {
     const t = setTimeout(() => setToast(null), 3600)
     return () => clearTimeout(t)
   }, [toast])
-  const learner = useLearner()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-
   const rail = useRef<HTMLDivElement>(null)
   /** [last, ...cards, first] — the two clones are what make the loop seamless. */
   const looped = useMemo(
@@ -182,9 +215,10 @@ export function Card({
   useEffect(() => setSaved(saved), [saved])
   useEffect(() => setLiked(liked), [liked])
 
-  const image = card.kind === 'situation' ? card.situation.image : card.image
-  const title = card.kind === 'situation' ? card.situation.title : vocabWord(card.piece)
-  const blurb = card.kind === 'situation' ? card.situation.why : card.because
+  const face = cardFace(card)
+  const image = face.image
+  const title = face.title
+  const blurb = face.blurb
 
   return (
     <section className="relative h-full w-full snap-start snap-always">
@@ -212,7 +246,20 @@ export function Card({
           {/* nav-clear keeps the rail and the title above the bar rather than under it. */}
           <div className="nav-clear absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 text-white">
             <div className="min-w-0 flex-1">
-              {card.kind === 'vocab' ? (
+              {card.kind === 'derived' ? (
+                <>
+                  <p className="eyebrow text-white/70">{face.eyebrow}</p>
+                  {/* The evidence, before the new word. It is what makes this feel like the
+                      app noticing something rather than serving a flashcard — and it sits
+                      under the eyebrow rather than repeating it. */}
+                  <p className="pt mt-1 text-sm text-white/80">{card.card.because}</p>
+                  <div className="mt-3 flex items-center gap-3">
+                    <AudioButton slug={slugFor(card.card.target)} text={card.card.target} />
+                    <p className="pt display text-balance text-4xl">{card.card.target}</p>
+                  </div>
+                  <p className="mt-1 text-sm text-white/80">{card.card.en}</p>
+                </>
+              ) : card.kind === 'vocab' ? (
                 <>
                   <p className="eyebrow text-white/70">WORTH HAVING</p>
                   <div className="mt-3 flex items-center gap-3">
@@ -262,7 +309,13 @@ export function Card({
             comes to the same place.
           */}
           <div className="mt-6">
-            {card.kind === 'situation' ? <Lines card={card} /> : <Word card={card} />}
+            {card.kind === 'situation' ? (
+              <Lines card={card} />
+            ) : card.kind === 'derived' ? (
+              <Derived card={card} />
+            ) : (
+              <Word card={card} />
+            )}
           </div>
         </div>
       </div>
@@ -295,6 +348,46 @@ function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
       >
         SAY IT COLD
       </Link>
+    </div>
+  )
+}
+
+/**
+ * The other side of a derived card.
+ *
+ * The piece they already have, then the one they do not, then what changed — in that
+ * order, because the whole point is that the new form arrives attached to something they
+ * already own rather than out of nowhere.
+ *
+ * No "correct", no tick, no score. Family three does not write to `proof`: nothing here
+ * was said cold, and the proof card has never counted anything else.
+ */
+function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
+  const d = card.card
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <p className="eyebrow text-muted">YOU HAVE</p>
+        <div className="mt-3 flex items-center gap-3">
+          <AudioButton slug={slugFor(d.from.target)} text={d.from.target} size="sm" />
+          <span className="min-w-0">
+            <span className="pt block text-xl">{d.from.target}</span>
+            <span className="block text-xs text-muted">{d.from.gloss}</span>
+          </span>
+        </div>
+      </div>
+
+      <div className="border-t border-line pt-6">
+        <p className="eyebrow text-accent">AND NOW</p>
+        <div className="mt-3 flex items-center gap-3">
+          <AudioButton slug={slugFor(d.target)} text={d.target} />
+          <span className="min-w-0">
+            <span className="pt display block text-3xl text-accent">{d.target}</span>
+            <span className="mt-1 block text-sm text-muted">{d.en}</span>
+          </span>
+        </div>
+        <p className="mt-6 text-sm leading-relaxed text-fg/85">{d.note}</p>
+      </div>
     </div>
   )
 }
@@ -408,7 +501,7 @@ function Rail({
         onClick={async () => {
           track('feed_share', { card: card.id })
           const url = window.location.origin + '/club'
-          const title = card.kind === 'situation' ? card.situation.title : vocabWord(card.piece)
+          const title = cardFace(card).title
           // The platform sheet where there is one; the clipboard where there is not.
           if (navigator.share) await navigator.share({ title, url }).catch(() => {})
           else await navigator.clipboard?.writeText(url).catch(() => {})

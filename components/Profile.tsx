@@ -8,7 +8,7 @@ import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { ThemeChoice } from '@/components/Theme'
 import { Wordmark } from '@/components/Wordmark'
-import { cardById, roomsFor, wordCards, type FeedCard } from '@/content/feed'
+import { cardById, cardFace, roomsFor, wordCards, type FeedCard } from '@/content/feed'
 import { CRATES, type CultureFamily } from '@/content/roots'
 import { LEGEND_FRAMES, legendStatus } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
@@ -208,8 +208,9 @@ function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void 
   }
 
   const card = tile.card
-  const image = card.kind === 'situation' ? card.situation.image : card.image
-  const title = card.kind === 'situation' ? card.situation.title : card.piece.target
+  const face = cardFace(card)
+  const image = face.image
+  const title = face.title
   return (
     <button type="button" data-testid={'tile-' + tile.id} onClick={() => onOpen(card)} className={shell}>
       {image ? (
