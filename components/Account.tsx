@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Entitlements } from '@/lib/entitlements'
 import { PLANS } from '@/lib/entitlements'
-import { wipeLearner } from '@/engine/learner'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Back } from '@/components/Back'
+import { IDENTITY } from '@/content/identity'
+import { restoreLearner, wipeLearner } from '@/engine/learner'
 import { Wordmark } from '@/components/Wordmark'
 import { RedeemCode } from '@/components/RedeemCode'
 
@@ -54,6 +55,30 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
   const [confirm, setConfirm] = useState('')
   const [danger, setDanger] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  /*
+    Signing in pulls, here, on the screen it lands on.
+
+    restoreLearner already existed and was called once, from JourneyProvider — which the
+    magic link does not go through. It lands on /account?welcome=1. So somebody signing in
+    on a new phone saw nothing of their own until they happened to wander into the journey,
+    which is the exact moment a subscriber is deciding whether the thing they paid for kept
+    its promise.
+
+    Also runs on an ordinary visit, not just after a link: it can only gain, and a device
+    that has been offline for a week is exactly the one worth catching up.
+  */
+  const [pull, setPull] = useState<'idle' | 'pulling' | 'merged' | 'refused'>('idle')
+  useEffect(() => {
+    let live = true
+    setPull('pulling')
+    void restoreLearner().then((outcome) => {
+      if (!live) return
+      setPull(outcome === 'refused' ? 'refused' : outcome === 'merged' ? 'merged' : 'idle')
+    })
+    return () => {
+      live = false
+    }
+  }, [])
 
   const save = async () => {
     setSaved('saving')
@@ -90,6 +115,15 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
   // about their situation.
   const comped = subscription?.source === 'comp'
 
+  /*
+    Somebody else's copy on this device.
+
+    Never silent: the merge refused to write, so nothing is lost — but the person in front of
+    the screen cannot know that, and a silent refusal looks exactly like a product that has
+    forgotten them.
+  */
+  const orphan = pull === 'refused'
+
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col gap-6 px-5 py-10">
       <header className="flex items-center justify-between gap-3">
@@ -98,6 +132,32 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
           SIGN OUT
         </a>
       </header>
+
+      {/*
+        Somebody else's work is on this device.
+
+        The merge refused, so nothing was written and nothing is lost — but the person in
+        front of the screen cannot guess that, and a silent refusal looks exactly like a
+        product that has forgotten them. Said plainly, with the two options that are
+        actually available: neither destroys the account's own record, which is on the
+        server and was never touched.
+      */}
+      {orphan ? (
+        <section className="rounded border border-coach/60 bg-coach/[0.06] px-4 py-6">
+          <p className="eyebrow text-coach">{IDENTITY.orphan_eyebrow}</p>
+          <h2 className="display mt-3 text-balance text-xl">{IDENTITY.orphan_head}</h2>
+          <p className="mt-3 text-sm leading-relaxed text-fg/85">{IDENTITY.orphan_body}</p>
+          <div className="mt-6 flex flex-col gap-3">
+            <a
+              href="/reset"
+              className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
+            >
+              {IDENTITY.orphan_reset}
+            </a>
+            <p className="text-xs leading-relaxed text-muted">{IDENTITY.orphan_note}</p>
+          </div>
+        </section>
+      ) : null}
 
       <section>
         <p className="eyebrow text-muted">SIGNED IN AS</p>

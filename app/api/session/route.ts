@@ -100,6 +100,15 @@ export async function GET(request: Request) {
       found: true,
       layer: layer(),
       rows: states.length,
+      /*
+        Who the server thinks this is, sent alongside the state.
+
+        The device needs it to stamp its own cache. Taken from the session rather than from
+        the state, because the state is what is being restored and a record written before
+        this field existed carries no owner at all — the session is the only thing here that
+        knows for certain.
+      */
+      user_id: user?.id ?? null,
       state: merged,
     })
   }

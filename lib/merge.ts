@@ -166,9 +166,28 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
   const l = local ?? {}
   const r = remote ?? {}
 
+  /*
+    Whose copies these are, decided before anything else is merged.
+
+    The only rule in this file that can say NO. Every other one is chosen so a merge can
+    only gain, and gaining is exactly the wrong behaviour when the two copies are two
+    people — one shared laptop, or one phone handed to a friend to try, and Bob's account
+    ends up holding sentences Alice said.
+
+    Refusing rather than picking a winner, for the same reason assertCanOnlyGain refuses:
+    writing the result destroys the only copy of what somebody can say and there is nowhere
+    to restore it from. A refusal writes nothing, so a refusal loses nothing.
+
+    Absent is anonymous, not an error. Every record already on a phone predates this field,
+    and treating a missing owner as anything else would orphan the whole existing cohort.
+  */
+  const owner = mergeOwner(l.user_id ?? null, r.user_id ?? null)
+
   const merged = {
     ...l,
     ...r,
+
+    user_id: owner,
 
     // Identity: the earliest record is the true one. A learner who signed in on a new
     // phone should not have their history restamped with today's date.
@@ -299,6 +318,32 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
 
   assertCanOnlyGain(l, r, merged)
   return merged
+}
+
+/**
+ * Whose record the result belongs to, or a refusal.
+ *
+ *   null   + null    → null     two anonymous copies of one device
+ *   null   + Alice   → Alice    THE CLAIM — anonymous work becomes theirs at sign-in
+ *   Alice  + null    → Alice    a stale anonymous copy cannot un-claim anything
+ *   Alice  + Alice   → Alice    two devices, one person: the steady state
+ *   Alice  + Bob     → throws
+ *
+ * The claim is what makes anonymous play worth doing: somebody who finishes a vibe and
+ * then makes an account has to find it still there. The refusal is what stops that same
+ * generosity handing one person another person's Portuguese.
+ */
+export function mergeOwner(a: string | null, b: string | null): string | null {
+  if (a && b && a !== b) {
+    throw new Error(
+      'merge would combine two people: this copy belongs to ' +
+        a +
+        ' and the other to ' +
+        b +
+        '. Refusing to write.',
+    )
+  }
+  return a ?? b ?? null
 }
 
 /**

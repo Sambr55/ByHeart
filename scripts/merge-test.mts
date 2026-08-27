@@ -375,6 +375,93 @@ function ev(
   )
 }
 
+/* ------------------------------------------------------------------ whose copy is it */
+/*
+  The one field in the record that can say no.
+
+  Every other rule here is chosen so a merge can only gain. This one is the opposite, and
+  it exists because gaining is exactly the wrong behaviour when the two copies are two
+  people: a shared laptop, or a phone handed to a friend, and the merge does what it was
+  built to do and hands Bob some sentences Alice said.
+
+  Written before the rule, because a refusal is the kind of thing that gets implemented,
+  passes by accident, and is never once exercised.
+*/
+console.log('\nwhose copy is it')
+{
+  const withProof = (owner: string | null, pt: string): Partial_ => ({
+    user_id: owner,
+    proof: [line(pt, '2026-08-01T00:00:00.000Z')],
+  })
+
+  // Two anonymous copies of the same device. The common case, and it stays anonymous:
+  // most of DUB's traffic has never given an email and the product is valuable without one.
+  const anon = mergeLearner(withProof(null, 'a'), withProof(null, 'b'))
+  check('two anonymous copies stay anonymous', anon.user_id === null, String(anon.user_id))
+  check('and neither loses a line', anon.proof.length === 2, String(anon.proof.length))
+
+  /*
+    The claim. Somebody who has just finished a vibe and then makes an account must find it
+    still there — this is the merge that makes anonymous play worth doing.
+  */
+  const claimed = mergeLearner(withProof(null, 'anon work'), withProof('alice', 'alice work'))
+  check('anonymous work is claimed at sign-in', claimed.user_id === 'alice', String(claimed.user_id))
+  check('and the anonymous line survives it', claimed.proof.length === 2, String(claimed.proof.length))
+
+  // The other way round: a stale anonymous copy arriving later cannot un-claim anything.
+  const stale = mergeLearner(withProof('alice', 'alice work'), withProof(null, 'anon work'))
+  check('a stale anonymous copy cannot un-claim', stale.user_id === 'alice', String(stale.user_id))
+  check('and still loses nothing', stale.proof.length === 2, String(stale.proof.length))
+
+  // Two devices, one person. The ordinary steady state.
+  const same = mergeLearner(withProof('alice', 'phone'), withProof('alice', 'laptop'))
+  check('two devices of one person merge', same.user_id === 'alice', String(same.user_id))
+  check('and gain both lines', same.proof.length === 2, String(same.proof.length))
+
+  /*
+    And the refusal, which is the point of all of it.
+
+    It throws rather than picking a winner for the same reason assertCanOnlyGain throws:
+    writing the result destroys the only copy of what somebody can say, and there is
+    nowhere to restore it from. Refusing writes nothing, so nothing is lost.
+  */
+  let threw = false
+  let message = ''
+  try {
+    mergeLearner(withProof('alice', 'alice work'), withProof('bob', 'bob work'))
+  } catch (e) {
+    threw = true
+    message = e instanceof Error ? e.message : String(e)
+  }
+  check('two people cannot merge', threw, threw ? message : 'it returned instead of refusing')
+  check(
+    'and the refusal says whose is whose',
+    /alice/i.test(message) && /bob/i.test(message),
+    message,
+  )
+
+  // A refusal must not depend on which way round the arguments came.
+  let bothWays = false
+  try {
+    mergeLearner(withProof('bob', 'bob work'), withProof('alice', 'alice work'))
+  } catch {
+    bothWays = true
+  }
+  check('either way round', bothWays)
+
+  /*
+    A record written before this field existed. Every learner already on a phone predates
+    it, and an undefined owner is anonymous rather than an error — treating it as anything
+    else would orphan everybody on the day this ships.
+  */
+  const old = mergeLearner(
+    { proof: [line('before the field existed', '2026-07-01T00:00:00.000Z')] },
+    withProof('alice', 'alice work'),
+  )
+  check('a record with no owner field is anonymous', old.user_id === 'alice', String(old.user_id))
+  check('and is claimed rather than dropped', old.proof.length === 2, String(old.proof.length))
+}
+
 console.log('')
 if (failures) { console.log(failures + ' merge fixture(s) failed'); process.exit(1) }
-console.log('merge fixtures pass: a merge can only ever gain')
+console.log('merge fixtures pass: a merge can only ever gain, and two people never merge')

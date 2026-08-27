@@ -1,5 +1,6 @@
 import 'server-only'
 import { db } from './db'
+import { mergeLearner } from './merge'
 
 /**
  * Persistence, in preference order: Postgres, then Blob, then honestly nothing.
@@ -27,16 +28,50 @@ export function layer(): Layer {
 // Learner state
 // ---------------------------------------------------------------------------
 
+/**
+ * Write a learner state, merged with whatever is already there. Never a blind overwrite.
+ *
+ * This used to be `state = excluded.state` — a straight replace — and the careful merge
+ * that protects a learner's record lived two layers up, in the route. Which meant it could
+ * be skipped, and it WAS: saveSession writes the raw incoming body through this function
+ * before the route's merge block ever runs, so the server's copy was destroyed and the
+ * merge then merged the body with itself.
+ *
+ * The effect was not subtle. Sign in on a second phone with less history, sync, and
+ * writeAllFor pushes that shorter state to every row the account owns. Every proof line
+ * the other device had was gone, from the only place it existed.
+ *
+ * So the merge lives at the WRITE now, where it cannot be gone around. Every caller gets
+ * it: the session sync, the restore, writeAllFor. `assertCanOnlyGain` runs on each one,
+ * which is what it was for.
+ *
+ * A refusal — two people's records meeting on one device — writes nothing and says so.
+ * Nothing is lost by not writing; that is the entire argument for refusing.
+ */
 export async function saveLearner(
   deviceId: string,
   state: unknown,
   userId?: string | null,
-): Promise<Layer> {
+): Promise<Layer | 'refused'> {
+  let next = state
+  try {
+    const existing = await loadLearner(deviceId)
+    if (existing) next = mergeLearner(state as never, existing as never)
+  } catch (e) {
+    if (e instanceof Error && /two people/.test(e.message)) return 'refused'
+    /*
+      Any other refusal is the invariant doing its job — a merge that would lose proof.
+      Writing anyway is precisely the thing it exists to prevent, so this writes nothing
+      and the caller keeps whatever it had.
+    */
+    return 'refused'
+  }
+
   const sql = db()
   if (sql) {
     await sql`
       insert into learners (device_id, user_id, state, updated_at)
-      values (${deviceId}, ${userId ?? null}, ${sql.json(state as never)}, now())
+      values (${deviceId}, ${userId ?? null}, ${sql.json(next as never)}, now())
       on conflict (device_id) do update set
         state = excluded.state,
         user_id = coalesce(excluded.user_id, learners.user_id),
@@ -46,7 +81,7 @@ export async function saveLearner(
   }
   const store = await blobStore()
   if (!store) return 'none'
-  await store.put('learners/' + deviceId + '.json', JSON.stringify(state), {
+  await store.put('learners/' + deviceId + '.json', JSON.stringify(next), {
     access: 'private',
     contentType: 'application/json',
     addRandomSuffix: false,

@@ -18,7 +18,7 @@ import { BLOCK_ORDER, TARGETS } from '@/content/targets'
  * graph mints pieces from content, so this is deliberately open.
  */
 import { DEFAULT_PAIR, pairId, type Pair } from '@/content/pairs'
-import { mergeLearner } from '@/lib/merge'
+import { mergeLearner, mergeOwner } from '@/lib/merge'
 import { currentPair } from './pair'
 
 export type PieceId = string
@@ -161,6 +161,20 @@ export interface VoiceSignal {
 export interface LearnerState {
   version: number
   learner_id: string
+  /**
+   * Whose copy this is.
+   *
+   * The account is the record and this is a cache of it. `null` means anonymous — nobody
+   * has claimed this work yet, which is the normal state for most of DUB's traffic and has
+   * to stay first-class: the product is usable, and worth using, before anybody gives an
+   * email.
+   *
+   * A value means this cache belongs to that account, and it is the one field in the record
+   * that can make a merge REFUSE. Every other rule here is chosen so a merge can only gain;
+   * gaining is exactly the wrong behaviour when the two copies are two people, which is one
+   * shared laptop away. See lib/merge.ts and docs/spec-identity.md.
+   */
+  user_id: string | null
   /**
    * Who this is, for multi-user testing. Set from ?tester= on the link the facilitator
    * sends, or typed on the way in. Never used for anything but joining a session to a
@@ -312,6 +326,7 @@ export function emptyLearner(): LearnerState {
     tester_label: '',
     voice_signals: [],
     osmosis_seen: [],
+    user_id: null,
     profile: { gender: null, age_band: null, goal: null, skipped: [] },
     created_at: new Date().toISOString(),
     missions_completed: [],
@@ -420,6 +435,14 @@ export function loadLearner(): LearnerState {
             parsed.legend_prompt === 'accepted' || parsed.legend_prompt === 'declined'
               ? parsed.legend_prompt
               : 'unseen',
+          /*
+            Absent means anonymous, not broken.
+
+            Every record already on a phone predates this field. Treating a missing owner as
+            anything but anonymous would orphan the entire existing cohort on the day this
+            ships, and the merge would then refuse to claim any of them.
+          */
+          user_id: typeof parsed.user_id === 'string' && parsed.user_id ? parsed.user_id : null,
           switch_seen_at: parsed.switch_seen_at ?? null,
           sections_completed: arr(parsed.sections_completed, []),
           club_welcomed_at: parsed.club_welcomed_at ?? null,
@@ -605,6 +628,13 @@ export async function syncSession(reason: string): Promise<boolean> {
          * would ask before pricing unanswerable.
          */
         proof: s.proof,
+        /*
+          Whose copy this is, sent up so the server's merge can refuse for the same reason
+          the device's does. Both sides of the round trip run mergeLearner and both have to
+          be able to say no — a rule enforced on one side only is a rule the other side
+          quietly breaks.
+        */
+        user_id: s.user_id,
         display_name: s.display_name,
         osmosis_seen: s.osmosis_seen,
         roots_played: s.roots_played,
@@ -947,15 +977,43 @@ export function hasAcceptedDeal(): boolean {
  * the same thing here, which is that the local copy stays authoritative and the learner
  * notices nothing.
  */
-export async function restoreLearner(): Promise<'merged' | 'nothing' | 'failed'> {
+export async function restoreLearner(): Promise<'merged' | 'nothing' | 'failed' | 'refused'> {
   if (typeof window === 'undefined') return 'nothing'
   try {
     const res = await fetch('/api/session?mine=1', { headers: { accept: 'application/json' } })
     if (!res.ok) return 'failed'
-    const body = (await res.json()) as { found?: boolean; state?: Partial<LearnerState> }
-    if (!body?.found || !body.state) return 'nothing'
+    const body = (await res.json()) as {
+      found?: boolean
+      state?: Partial<LearnerState>
+      user_id?: string | null
+    }
     const local = getLearner()
-    const merged = mergeLearner(local, body.state)
+
+    /*
+      Stamp first, from the session rather than from the state.
+
+      The server's copy may predate the owner field entirely, so the state cannot be trusted
+      to know whose it is — the session can. Stamping before the merge is also what makes
+      the refusal fire: an unstamped local copy would be claimed silently by whoever signed
+      in next, which is the whole failure this exists to stop.
+    */
+    if (body?.user_id) {
+      try {
+        mergeOwner(local.user_id ?? null, body.user_id)
+      } catch (e) {
+        // Somebody else's cache on this device. Nothing is written — a refusal loses
+        // nothing — and the screen that says so is the caller's job.
+        return 'refused'
+      }
+      if (!local.user_id) {
+        state = { ...local, user_id: body.user_id }
+        save()
+        emit()
+      }
+    }
+
+    if (!body?.found || !body.state) return 'nothing'
+    const merged = mergeLearner(getLearner(), { ...body.state, user_id: body.user_id ?? null })
     // Nothing changed is worth knowing about: it means the round trip is working and
     // the two copies already agreed, which is the steady state.
     const gained =
@@ -966,7 +1024,13 @@ export async function restoreLearner(): Promise<'merged' | 'nothing' | 'failed'>
     emit()
     if (gained) void syncSession('restore')
     return 'merged'
-  } catch {
+  } catch (e) {
+    /*
+      A refusal is not a failure, and telling them apart matters: one means the network is
+      down and the local copy is fine, the other means this device belongs to somebody else
+      and there is a decision to make.
+    */
+    if (e instanceof Error && /two people/.test(e.message)) return 'refused'
     // Offline, or no store configured. The local copy is untouched.
     return 'failed'
   }
