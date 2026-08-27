@@ -373,3 +373,18 @@ export function derivedFor(opts: {
 }
 
 export type { Paradigm }
+
+
+/**
+ * A derived card by id, ignoring whether it has been done.
+ *
+ * `derivedFor` deliberately hides what is finished, because that is what stops it coming
+ * round again. The profile needs the opposite: it is the record of what HAS been done, and
+ * a card it cannot resolve is a card that silently disappears from somebody's history.
+ */
+export function derivedById(
+  id: string,
+  inventory: Record<string, unknown>,
+): DerivedCard | undefined {
+  return derivedFor({ inventory, finished: [] }).find((c) => c.id === id)
+}

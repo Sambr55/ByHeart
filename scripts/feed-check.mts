@@ -191,6 +191,36 @@ const after = await prof.evaluate(() => (document.querySelector('[data-testid="c
 ok('and the button does what the swipe does', after > 0, 'scrolled to ' + after)
 await prof.close()
 
+console.log('\nthe loop comes round under a real swipe\n')
+/*
+  Under a programmatic instant scroll there is no snap animation to fight, which is how the
+  old 90ms debounce passed a check while failing on a phone: it set scrollTop while the
+  browser was still animating to the snap point, and the snap overruled it. Driven with the
+  wheel here so the animation is real.
+*/
+{
+  await page.goto(BASE + '/club')
+  await page.waitForTimeout(2500)
+  const n = await page.evaluate(`document.querySelectorAll('[data-testid="feed"] > section').length`) as number
+  const seen: number[] = []
+  for (let i = 0; i < n + 3; i++) {
+    await page.mouse.move(195, 400)
+    await page.mouse.wheel(0, 900)
+    await page.waitForTimeout(700)
+    seen.push(
+      (await page.evaluate(
+        `(() => { const el = document.querySelector('[data-testid="feed"]'); return Math.round(el.scrollTop / el.clientHeight) })()`,
+      )) as number,
+    )
+  }
+  const stuck = seen.slice(-3).every((v) => v === seen[seen.length - 1])
+  ok(
+    'it wraps rather than stopping at the last card',
+    !stuck,
+    'indices: ' + seen.join(' '),
+  )
+}
+
 await browser.close()
 
 if (problems.length) {

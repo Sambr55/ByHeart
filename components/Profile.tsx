@@ -8,7 +8,8 @@ import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { ThemeChoice } from '@/components/Theme'
 import { Wordmark } from '@/components/Wordmark'
-import { cardById, cardFace, roomsFor, wordCards, type FeedCard } from '@/content/feed'
+import { cardById, cardFace, derivedCards, roomsFor, wordCards, type FeedCard } from '@/content/feed'
+import { derivedById } from '@/engine/derive'
 import { CRATES, type CultureFamily } from '@/content/roots'
 import { LEGEND_FRAMES, legendStatus } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
@@ -52,12 +53,28 @@ export function Profile() {
         ? [{ kind: 'vibe' as const, id: crate.id, family: crate.id, title: crate.title, tone: crate.tone }]
         : []
     })
+    /*
+      A finished derived card, recovered.
+
+      These leave the feed by id, and `cardById` only knows about rooms and words — so
+      without this a collision somebody said cold vanished from their history the moment
+      they said it, which is the exact opposite of what finishing one should do.
+    */
+    const derivedTiles: Tile[] = finished
+      .filter((id) => id.startsWith('derived_'))
+      .flatMap((id) => {
+        const card = derivedById(id, learner.inventory ?? {})
+        if (!card) return []
+        const feedCard = derivedCards([card])[0]
+        return feedCard ? [{ kind: 'card' as const, id, card: feedCard }] : []
+      })
+
     return {
-      done: [...vibes, ...finished.flatMap((id) => asTile(id) ?? [])],
+      done: [...vibes, ...derivedTiles, ...finished.flatMap((id) => asTile(id) ?? [])],
       saved: saved.flatMap((id) => asTile(id) ?? []),
       words: wordCards().map((c): Tile => ({ kind: 'card', id: c.id, card: c })),
     }
-  }, [saved.join('|'), finished.join('|'), sections.join('|')])
+  }, [saved.join('|'), finished.join('|'), sections.join('|'), learner.inventory])
 
   if (open) {
     return (

@@ -1,7 +1,6 @@
 import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
 import { SITUATIONS, isCurrent, type Situation } from '@/content/situations'
 import { PIECES, displayForm, type Piece } from '@/content/roots'
-import { vibeImage } from '@/content/vibe-images'
 import type { DerivedCard } from '@/engine/derive'
 
 /**
@@ -106,6 +105,33 @@ export function roomsFor(chapter: ChapterId = DEFAULT_CHAPTER): FeedCard[] {
  */
 export const DERIVED_PER_SESSION = 3
 
+/**
+ * The texture register — a third one, and neither of the other two.
+ *
+ * These carried the photograph of the vibe the piece came from, which read well as
+ * provenance and badly as a feed: the same eleven stills came round again under a different
+ * eyebrow, so the Club looked like the shelf. A derived card is not about a place, which is
+ * what the Club's photographs are for, and it is not about a vibe, which is what the shelf's
+ * are. It is about language, so it gets the surfaces language is written on here.
+ *
+ * By KIND rather than by vibe, and the pairing is not arbitrary: azulejo is a picture made
+ * of separate tiles, which is what a collision is.
+ */
+const REGISTER: Record<string, { src: string; alt: string }> = {
+  collision: {
+    src: '/lisbon/azulejo.jpg',
+    alt: 'A weathered blue and white azulejo panel, separate tiles making one picture.',
+  },
+  next_person: {
+    src: '/lisbon/calcada.jpg',
+    alt: 'Lisbon calçada pavement in black and white limestone, worn smooth and wet from rain.',
+  },
+  near_miss: {
+    src: '/lisbon/wall.jpg',
+    alt: 'A Lisbon façade in faded ochre, the paint peeling back in layers to pink underneath.',
+  },
+}
+
 export function derivedCards(cards: DerivedCard[]): FeedCard[] {
   /*
     One of each kind before a second of any, rather than the top three of a sorted list.
@@ -132,9 +158,9 @@ export function derivedCards(cards: DerivedCard[]): FeedCard[] {
   }
 
   return picked.flatMap((card): FeedCard[] => {
-    const image = vibeImage(card.from.family)
+    const image = REGISTER[card.kind]
     if (!image) return []
-    return [{ kind: 'derived', id: card.id, card, image: { src: image.src, alt: image.alt } }]
+    return [{ kind: 'derived', id: card.id, card, image }]
   })
 }
 
@@ -169,6 +195,22 @@ export function vocabWord(piece: Piece): string {
  * had worked was to go and look — at a screen most people have not found yet.
  */
 export const FEED_COPY = {
+  /* Said rather than congratulated. It went somewhere, and here is where. */
+  done: 'Done. It is on your profile.',
+  /*
+    An empty Club, said honestly.
+
+    Not "come back tomorrow" — nothing is scheduled to arrive tomorrow, and a product that
+    invents a reason to return is doing the thing this one exists to avoid. It says what is
+    true: you have been through what is here, more comes from learning more, and the two
+    places your work went are one tap away.
+  */
+  empty_eyebrow: 'NOTHING LEFT',
+  empty_head: 'You have been through everything here.',
+  empty_body:
+    'Rooms leave the Club when you have said them cold — they are on your profile, and they come back round in the Line. More opens as you learn more: every vibe you go through gives the Club something new to say to you.',
+  empty_cta: 'OPEN ANOTHER VIBE',
+  empty_alt: 'SEE WHAT IS YOURS',
   saved: 'Kept. It is on your profile.',
   saved_cta: 'SEE IT',
   unsaved: 'Taken off your profile.',

@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
-import { BottomNav } from '@/components/BottomNav'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import {
@@ -18,7 +18,7 @@ import {
 } from '@/content/feed'
 import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
-import { toggleCard } from '@/engine/learner'
+import { recordProof, rememberFinishedCard, toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 
 /**
@@ -56,8 +56,16 @@ export function Feed() {
   const cards = useMemo(() => {
     const rooms = feedFor()
     if (!mounted) return rooms
+    /*
+      Done leaves the feed.
+
+      A card is spent by being PERFORMED — `finished_cards` is written by I SAID IT and by
+      nothing else, so nobody loses a room by swiping past it. What has been done lives on
+      the profile, and comes back through the Line rather than round the loop.
+    */
+    const done = new Set(learner.finished_cards ?? [])
     return [
-      ...rooms,
+      ...rooms.filter((c) => !done.has(c.id)),
       ...derivedCards(
         derivedFor({
           inventory: learner.inventory ?? {},
@@ -74,7 +82,7 @@ export function Feed() {
     not found yet. It says where the thing went and offers the way there, then gets out
     of the way on its own.
   */
-  const [toast, setToast] = useState<'saved' | 'unsaved' | null>(null)
+  const [toast, setToast] = useState<'saved' | 'unsaved' | 'done' | null>(null)
   useEffect(() => {
     if (!toast) return
     const t = setTimeout(() => setToast(null), 3600)
@@ -104,22 +112,90 @@ export function Feed() {
   useEffect(() => {
     const el = rail.current
     if (!el || cards.length < 2) return
+
+    const wrap = () => {
+      const h = el.clientHeight
+      if (!h) return
+      const i = Math.round(el.scrollTop / h)
+      if (i === 0) el.scrollTop = cards.length * h
+      else if (i === looped.length - 1) el.scrollTop = h
+    }
+
+    /*
+      Wrapped on `scrollend`, and only on a settle the browser agrees is a settle.
+
+      The debounce this replaces fired 90ms after the last scroll event — which, with
+      `scroll-snap-type: mandatory`, is usually while the browser is still animating toward
+      the snap point. Setting scrollTop mid-animation is a suggestion the snap then
+      overrules, so the jump was silently cancelled and the feed stopped at the last card
+      instead of coming round. It survived the check because a programmatic instant scroll
+      has no animation to fight.
+
+      The fallback does the same job where scrollend is missing: wait for the position to
+      stop changing across two ticks, rather than for events to stop arriving.
+    */
+    // Feature-detected off the prototype rather than with `in`, which narrows el to never
+    // in the branch below and makes the fallback uncompilable.
+    const hasScrollEnd = typeof (el as { onscrollend?: unknown }).onscrollend !== 'undefined'
+    if (hasScrollEnd) {
+      el.addEventListener('scrollend', wrap)
+      return () => el.removeEventListener('scrollend', wrap)
+    }
+
     let timer: ReturnType<typeof setTimeout>
-    const onScroll = () => {
+    let last = -1
+    const settle = () => {
       clearTimeout(timer)
       timer = setTimeout(() => {
-        const h = el.clientHeight
-        const i = Math.round(el.scrollTop / h)
-        if (i === 0) el.scrollTop = cards.length * h
-        else if (i === looped.length - 1) el.scrollTop = h
-      }, 90)
+        if (el.scrollTop === last) wrap()
+        else {
+          last = el.scrollTop
+          settle()
+        }
+      }, 120)
     }
-    el.addEventListener('scroll', onScroll, { passive: true })
+    el.addEventListener('scroll', settle, { passive: true })
     return () => {
-      el.removeEventListener('scroll', onScroll)
+      el.removeEventListener('scroll', settle)
       clearTimeout(timer)
     }
   }, [cards.length, looped.length])
+
+  /*
+    Nothing left, which is now a state that happens.
+
+    Under the old model the five rooms sat there for ever — stale, but never empty. Now a
+    card is spent by being performed, so an empty Club is reachable in week one and it is a
+    real screen rather than an error: it says what has happened, offers the two places the
+    work went, and does not apologise.
+  */
+  if (mounted && !cards.length) {
+    return (
+      <main className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-6 bg-bg px-5 py-10 text-fg">
+        <div>
+          <p className="eyebrow text-accent">{FEED_COPY.empty_eyebrow}</p>
+          <h1 className="display mt-3 text-balance text-3xl">{FEED_COPY.empty_head}</h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted">{FEED_COPY.empty_body}</p>
+        </div>
+        <div className="flex flex-col gap-3">
+          <Link
+            href="/vibes"
+            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            {FEED_COPY.empty_cta}
+          </Link>
+          <Link
+            href="/profile"
+            className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center"
+          >
+            {FEED_COPY.empty_alt}
+          </Link>
+        </div>
+        <BottomNavSpace />
+        <BottomNav />
+      </main>
+    )
+  }
 
   return (
     <main data-stage="REAL WORLD" className="relative h-svh w-full overflow-hidden bg-[#241f1a]">
@@ -145,6 +221,7 @@ export function Feed() {
             saved={mounted && (learner.saved ?? []).includes(card.id)}
             liked={mounted && (learner.liked ?? []).includes(card.id)}
             onSaved={(on) => setToast(on ? 'saved' : 'unsaved')}
+            onDone={() => setToast('done')}
           />
         ))}
       </div>
@@ -163,7 +240,7 @@ export /**
  * been swiped past by the time somebody reads it — and a message that scrolls away with
  * its subject is a message nobody reads.
  */
-function Toast({ kind }: { kind: 'saved' | 'unsaved' }) {
+function Toast({ kind }: { kind: 'saved' | 'unsaved' | 'done' }) {
   return (
     <div
       role="status"
@@ -171,9 +248,9 @@ function Toast({ kind }: { kind: 'saved' | 'unsaved' }) {
       className="animate-bank absolute inset-x-0 bottom-0 z-50 flex items-center gap-3 bg-black/85 px-5 py-3 text-white"
     >
       <p className="min-w-0 flex-1 text-sm">
-        {kind === 'saved' ? FEED_COPY.saved : FEED_COPY.unsaved}
+        {kind === 'saved' ? FEED_COPY.saved : kind === 'done' ? FEED_COPY.done : FEED_COPY.unsaved}
       </p>
-      {kind === 'saved' ? (
+      {kind === 'saved' || kind === 'done' ? (
         <Link
           href="/profile"
           className="tap-target eyebrow shrink-0 rounded bg-white px-4 py-3 text-[#241f1a]"
@@ -190,11 +267,14 @@ export function Card({
   saved,
   liked,
   onSaved,
+  onDone,
 }: {
   card: FeedCard
   saved: boolean
   liked: boolean
   onSaved?: (on: boolean) => void
+  /** Spent, and on its way to the profile. The feed rebuilds without it. */
+  onDone?: () => void
 }) {
   const pane = useRef<HTMLDivElement>(null)
   /*
@@ -239,22 +319,40 @@ export function Card({
           {image ? (
             <Image src={image.src} alt={image.alt} fill sizes="100vw" className="object-cover" />
           ) : null}
+          {/*
+            A taller, heavier scrim on the texture cards.
+
+            The Club's photographs are dark rooms and the gradient was tuned for them.
+            Azulejo is white tiles in daylight, and white text on it at 62% was unreadable
+            above the fold of the gradient — a contrast failure the gate cannot see, because
+            it measures tokens against grounds rather than text against a photograph.
+          */}
           <div
             aria-hidden
-            className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black/92 via-black/60 to-transparent"
+            className={
+              'absolute inset-x-0 bottom-0 bg-gradient-to-t to-transparent ' +
+              (card.kind === 'derived'
+                ? 'h-[85%] from-black/95 via-black/80'
+                : 'h-[62%] from-black/92 via-black/60')
+            }
           />
           {/* nav-clear keeps the rail and the title above the bar rather than under it. */}
           <div className="nav-clear absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 text-white">
             <div className="min-w-0 flex-1">
               {card.kind === 'derived' && card.card.kind === 'collision' ? (
+                /*
+                  The Portuguese is NOT on this side.
+
+                  A collision is the only derived card that asks for something rather than
+                  telling you something, and the ask has to be cold or it is not an ask.
+                  Say it, or swipe left and be shown — the same fork the Legend and the
+                  release beat use, and the only one that keeps `proof` honest.
+                */
                 <>
                   <p className="eyebrow text-white/70">{face.eyebrow}</p>
                   <p className="pt mt-1 text-xs text-white/70">{card.card.because}</p>
-                  <div className="mt-3 flex items-start gap-3">
-                    <AudioButton slug={slugFor(card.card.target)} text={card.card.target} />
-                    <p className="pt display text-balance text-2xl">{card.card.target}</p>
-                  </div>
-                  <p className="mt-1 text-sm text-white/80">{card.card.en}</p>
+                  <p className="display mt-3 text-balance text-2xl">{card.card.en}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-white/80">{card.card.note}</p>
                 </>
               ) : card.kind === 'derived' ? (
                 <>
@@ -284,17 +382,86 @@ export function Card({
                   <h2 className="display mt-3 text-balance text-3xl">{title}</h2>
                 </>
               )}
-              <p className="mt-3 text-sm leading-relaxed text-white/80">{blurb}</p>
-              <button
-                type="button"
-                data-testid="card-continue"
-                onClick={reveal}
-                /* mb-3 so the blue button does not sit flush on the blue bar. Two blues
-                   touching read as one shape, and the shape was neither. */
-                className="tap-target eyebrow mb-3 mt-6 w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
-              >
-                SWIPE LEFT
-              </button>
+              {/* The kind-specific blocks above already say their own piece — a collision
+                  puts its provenance under the sentence, and a teaching card its note. The
+                  shared blurb is for the rooms, which have nothing else. */}
+              {card.kind === 'derived' ? null : (
+                <p className="mt-3 text-sm leading-relaxed text-white/80">{blurb}</p>
+              )}
+              {/*
+                A collision asks; everything else tells.
+
+                So the collision gets the cold fork — say it now, or be shown — and the two
+                teaching cards get a way to be finished with, which is what they were
+                missing. Without it a derived card could only be swiped past, so it came
+                round the loop for ever and the profile never learned it had happened.
+              */}
+              {card.kind === 'derived' && card.card.kind === 'collision' ? (
+                <div className="mb-3 mt-6 flex flex-col gap-3">
+                  <button
+                    type="button"
+                    data-testid="card-cold"
+                    onClick={() => {
+                      recordProof({
+                        pt: card.card.target,
+                        en: card.card.en,
+                        source: 'collision',
+                        clean: true,
+                      })
+                      rememberFinishedCard(card.id)
+                      track('derived_said', { card: card.id, kind: card.card.kind })
+                      onDone?.()
+                    }}
+                    className="tap-target eyebrow w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
+                  >
+                    I SAID IT
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="card-continue"
+                    onClick={reveal}
+                    className="tap-target eyebrow w-full rounded border border-white/50 px-5 py-3 text-center text-white"
+                  >
+                    SHOW ME
+                  </button>
+                </div>
+              ) : card.kind === 'derived' ? (
+                <div className="mb-3 mt-6 flex flex-col gap-3">
+                  <button
+                    type="button"
+                    data-testid="card-continue"
+                    onClick={reveal}
+                    className="tap-target eyebrow w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
+                  >
+                    SWIPE LEFT
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="card-got"
+                    onClick={() => {
+                      // No proof: the answer is on the screen. It marks the card spent, and
+                      // spent is the only thing being claimed.
+                      rememberFinishedCard(card.id)
+                      track('derived_kept', { card: card.id, kind: card.card.kind })
+                      onDone?.()
+                    }}
+                    className="tap-target eyebrow w-full rounded border border-white/50 px-5 py-3 text-center text-white"
+                  >
+                    GOT IT
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  data-testid="card-continue"
+                  onClick={reveal}
+                  /* mb-3 so the blue button does not sit flush on the blue bar. Two blues
+                     touching read as one shape, and the shape was neither. */
+                  className="tap-target eyebrow mb-3 mt-6 w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
+                >
+                  SWIPE LEFT
+                </button>
+              )}
             </div>
             <Rail
               card={card}

@@ -33,6 +33,11 @@ export type EventName =
   | 'showing_sent'
   | 'showing_opened'
   | 'showing_returned'
+  /* Derived cards. `derived_said` is the one that matters — it is a collision produced
+     cold, with nothing Portuguese on the screen, which is the only thing DUB counts.
+     `derived_kept` is a teaching card being finished with, and it is not the same claim. */
+  | 'derived_said'
+  | 'derived_kept'
   | 'feed_like'
   | 'feed_save'
   | 'feed_share'
