@@ -453,18 +453,23 @@ export const CRATES: Crate[] = [
     built: true,
   },
   {
+    /*
+      A vibe now, not a drop.
+
+      It was six song titles that vanished the morning after the gig — which was a fun idea
+      about a band, and no use whatsoever to somebody who actually wanted to go: what you
+      need that week is where the arena is, whether there are tickets left, which line goes
+      there, and how to ask somebody to come with you. That is a drop, and it lives in the
+      Club now (content/drops.ts).
+
+      The song titles stayed here, where they were always more use. They are about a band,
+      and a band does not expire.
+    */
     id: 'duran_duran_lisboa',
     title: 'Duran Duran, Lisboa',
-    blurb: 'Six song titles. Gone the morning after the gig.',
+    blurb: 'Six song titles, and the words hiding inside them.',
     tone: 'kinetic',
     built: true,
-    drop: {
-      event: 'Duran Duran',
-      place: 'Altice Arena, Lisboa',
-      on: '2026-11-14',
-      link: 'https://www.altice-arena.com',
-      link_label: 'TICKETS',
-    },
   },
 ]
 

@@ -39,6 +39,7 @@ import {
 import { INSIGHTS } from '../content/osmosis'
 import { CHAPTERS } from '../content/chapters'
 import { SITUATIONS } from '../content/situations'
+import { DROPS, DROP_SITUATIONS } from '../content/drops'
 import {
   AGE_QUESTION,
   GENDER_QUESTION,
@@ -1426,7 +1427,16 @@ for (const e of EXAMPLES) {
 */
 {
   const now = new Date()
-  for (const sit of SITUATIONS) {
+  /*
+    Drop rooms are linted exactly like standing ones.
+
+    They live in content/drops.ts rather than in SITUATIONS, which means they would have
+    slipped past every rule here — the release, the `when` on each line, the alt text, the
+    review date. New content escaping the lint by living in a new file is the whole failure
+    mode this rule set exists to prevent, and a drop is the content most likely to be wrong
+    because it is the content pegged to facts about the world.
+  */
+  for (const sit of [...SITUATIONS, ...DROP_SITUATIONS]) {
     const S = 'situation ' + sit.id + ': '
     if (!CHAPTERS.some((c) => c.id === sit.chapter)) fail(S + 'belongs to no chapter')
 
@@ -1473,6 +1483,47 @@ for (const e of EXAMPLES) {
       warn(S + 'is past its review date and is being hidden — check it or retire it')
     }
   }
+  /*
+    A drop is a claim about the world with an expiry on it.
+
+    Everything here is a rule that, broken, sends somebody to the wrong place on the wrong
+    night — which is worse than no drop at all. So: it belongs to a chapter, it ends in an
+    invitation, every fact that is not language says where it came from, and it is reviewed
+    before it can be shown.
+  */
+  for (const d of DROPS) {
+    const D = 'drop ' + d.id + ': '
+    if (!CHAPTERS.some((c) => c.id === d.chapter)) fail(D + 'belongs to no chapter')
+    if (!d.situations.length) fail(D + 'has no rooms in it')
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d.on)) fail(D + 'has no date to be pegged to')
+
+    /*
+      The last room is the invitation, and it is the point of the whole cluster.
+
+      Three rooms about logistics are worth having and none of them is why anybody learns a
+      language. A sentence you say to another person about an evening that has not happened
+      yet is, and a drop that ends on "where is the exit" has lost the thread.
+    */
+    const last = d.situations[d.situations.length - 1]
+    if (last && !/\?$/.test(last.release.answer.trim())) {
+      fail(D + 'does not end on something you ask somebody — the invitation is the point')
+    }
+
+    if (!d.sources.length) fail(D + 'cites nothing — every fact in it is unattributed')
+    for (const src of d.sources) {
+      if (!src.fact.trim()) fail(D + 'has a source that does not say what it vouches for')
+      if (!src.where.trim()) fail(D + 'has a source with no origin')
+      if (new Date(src.checked) > now) fail(D + 'claims a fact was checked in the future')
+    }
+    /*
+      Reviewed until after it is gone. A drop whose review date falls before its own event
+      is one that will be hidden on the night somebody needs it.
+    */
+    if (!d.review_by || new Date(d.review_by) <= new Date(d.on)) {
+      fail(D + 'is reviewed only until before its own event')
+    }
+  }
+
   const openChapters = CHAPTERS.filter((c) => c.open)
   if (!openChapters.length) fail('no chapter is open, so the Club has nowhere to be')
   for (const c of openChapters) {

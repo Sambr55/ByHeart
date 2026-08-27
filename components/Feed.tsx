@@ -10,6 +10,7 @@ import { slugFor } from '@/content/audio-manifest'
 import {
   FEED_COPY,
   cardFace,
+  dropDaysLeft,
   chapterName,
   derivedCards,
   feedFor,
@@ -53,8 +54,20 @@ export function Feed() {
     Derived cards are computed after mount for the usual reason: what somebody owns comes
     out of localStorage, and branching on it during render is the hydration mismatch again.
   */
+  /*
+    ?preview=drops shows a drop before its window opens.
+
+    Read after mount like everything else that comes out of the browser, so the server and
+    the first paint agree. It shows real content early and hides nothing, which is why it
+    can be a URL rather than a build flag.
+  */
+  const preview =
+    mounted && typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('preview') === 'drops'
+      : false
+
   const cards = useMemo(() => {
-    const rooms = feedFor()
+    const rooms = feedFor(undefined, preview)
     if (!mounted) return rooms
     /*
       Done leaves the feed.
@@ -73,7 +86,7 @@ export function Feed() {
         }),
       ),
     ]
-  }, [mounted, learner.inventory, learner.finished_cards])
+  }, [mounted, preview, learner.inventory, learner.finished_cards])
   /*
     A save that says so.
 
@@ -318,7 +331,18 @@ export function Card({
         <div className="relative h-full w-full shrink-0 snap-start">
           {image ? (
             <Image src={image.src} alt={image.alt} fill sizes="100vw" className="object-cover" />
-          ) : null}
+          ) : (
+            /*
+              No photograph, so the pattern rather than a blank.
+
+              A drop is authored the week it matters and its rooms will not always have a
+              picture ready — an arena, a box office, a metro platform. An empty near-black
+              rectangle reads as a broken image; the azulejo does not, it is already the
+              product's own surface, and it is honest in a way a borrowed stock photograph
+              of somewhere else would not be.
+            */
+            <span aria-hidden className="card-ground absolute inset-0" />
+          )}
           {/*
             A taller, heavier scrim on the texture cards.
 
@@ -378,7 +402,25 @@ export function Card({
                 </>
               ) : (
                 <>
-                  <p className="eyebrow text-white/70">IN LISBON</p>
+                  <p className="eyebrow text-white/70">{face.eyebrow}</p>
+                  {/*
+                    The event and the clock, on the card that expires.
+
+                    A drop and a standing room look identical otherwise, and they are not
+                    the same offer: the pharmacy will be there next month and the gig will
+                    not. The countdown is the only number in the Club, and it counts down
+                    to something real rather than up from nothing.
+                  */}
+                  {card.kind === 'situation' && card.drop ? (
+                    <p className="mt-1 text-sm text-white/80">
+                      {card.drop.event} · {card.drop.place.name} ·{' '}
+                      <span className="tabular-nums">
+                        {dropDaysLeft(card.drop) <= 1
+                          ? 'gone tomorrow'
+                          : dropDaysLeft(card.drop) + ' days left'}
+                      </span>
+                    </p>
+                  ) : null}
                   <h2 className="display mt-3 text-balance text-3xl">{title}</h2>
                 </>
               )}

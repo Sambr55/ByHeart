@@ -221,6 +221,35 @@ console.log('\nthe loop comes round under a real swipe\n')
   )
 }
 
+console.log('\na card with no photograph still has a ground\n')
+/*
+  Drop rooms are authored the week they matter and will not always have a picture ready.
+  An empty near-black rectangle reads as a broken image, which is worse than no image.
+*/
+{
+  await page.goto(BASE + '/club?preview=drops')
+  await page.waitForTimeout(2500)
+  const painted = await page.evaluate(`(() => {
+    /*
+      Index 1, not 0. The loop renders [last, ...cards, first] so the two clones make the
+      wrap seamless — which means the first element in the DOM is the LAST card.
+    */
+    const first = document.querySelectorAll('[data-testid="feed"] > section')[1]
+    if (!first) return null
+    return {
+      photo: Boolean(first.querySelector('img')),
+      pattern: Boolean(first.querySelector('.card-ground')),
+      says: (first.textContent || '').trim().slice(0, 24),
+    }
+  })()`) as { photo: boolean; pattern: boolean; says: string } | null
+  ok('the drop is first in the feed', painted?.says.startsWith('A DROP') === true, painted?.says ?? '')
+  ok(
+    'and it has something behind it',
+    Boolean(painted && (painted.photo || painted.pattern)),
+    painted?.photo ? 'a photograph' : 'the pattern',
+  )
+}
+
 await browser.close()
 
 if (problems.length) {

@@ -1,5 +1,7 @@
 import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
+import { DROP_WINDOW_DAYS } from '@/content/roots'
 import { SITUATIONS, isCurrent, type Situation } from '@/content/situations'
+import { DROPS, type Drop } from '@/content/drops'
 import { PIECES, displayForm, type Piece } from '@/content/roots'
 import type { DerivedCard } from '@/engine/derive'
 
@@ -17,7 +19,14 @@ import type { DerivedCard } from '@/engine/derive'
  * other screen saying so. A loop cannot reward turning up any more than the ladder can.
  */
 export type FeedCard =
-  | { kind: 'situation'; id: string; situation: Situation }
+  /*
+    A room, standing or dropped.
+
+    `drop` is present when this situation belongs to something happening on a date — the
+    card then carries the event and the countdown, because a room that expires and a room
+    that does not are different offers and must not look the same.
+  */
+  | { kind: 'situation'; id: string; situation: Situation; drop?: Drop }
   /*
     A card assembled from something they already own.
 
@@ -77,7 +86,7 @@ const TEXTURE: Record<string, { src: string; alt: string }> = {
  * vocabulary. The mix is the point: it is what stops the feed feeling like a menu with a
  * glossary bolted on the end.
  */
-export function feedFor(chapter: ChapterId = DEFAULT_CHAPTER): FeedCard[] {
+export function feedFor(chapter: ChapterId = DEFAULT_CHAPTER, preview = false): FeedCard[] {
   /*
     Rooms only.
 
@@ -86,7 +95,57 @@ export function feedFor(chapter: ChapterId = DEFAULT_CHAPTER): FeedCard[] {
     card competing to be understood. They are not lost: they live on the profile, which
     is where somebody goes looking for what is theirs rather than what is next.
   */
-  return roomsFor(chapter)
+  // Drops first: they expire and nothing else on the screen does.
+  return [...dropsFor(chapter, new Date(), preview), ...roomsFor(chapter)]
+}
+
+/**
+ * Live drops, soonest first.
+ *
+ * They come before the standing rooms in the feed and the ranking is one of URGENCY rather
+ * than quality: the pharmacy will still be there next month and the gig will not. Nothing
+ * about engagement, nothing learned about the viewer — just what expires.
+ */
+export function dropsFor(
+  chapter: ChapterId = DEFAULT_CHAPTER,
+  now: Date = new Date(),
+  /*
+    Ignore the window.
+
+    A drop opens three weeks before the thing it is about, which is right — urgency spent
+    months early is urgency spent — and it means the person building DUB cannot look at a
+    drop unless one happens to be within three weeks. Turned on by ?preview=drops, which
+    shows real content early and hides nothing, so it is safe to leave in.
+  */
+  preview = false,
+): FeedCard[] {
+  return DROPS.filter((d) => d.chapter === chapter && (preview || dropLive(d, now)))
+    .sort((a, b) => a.on.localeCompare(b.on))
+    .flatMap((d): FeedCard[] =>
+      d.situations.map((s) => ({ kind: 'situation', id: s.id, situation: s, drop: d })),
+    )
+}
+
+/** Open once its window has, gone the morning after the thing it is pegged to. */
+export function dropLive(d: Drop, now: Date = new Date()): boolean {
+  const gone = new Date(d.on + 'T00:00:00Z')
+  gone.setUTCDate(gone.getUTCDate() + 1)
+  if (now >= gone) return false
+  const opens = d.from
+    ? new Date(d.from + 'T00:00:00Z')
+    : (() => {
+        const o = new Date(d.on + 'T00:00:00Z')
+        o.setUTCDate(o.getUTCDate() - DROP_WINDOW_DAYS)
+        return o
+      })()
+  return now >= opens
+}
+
+/** Whole days left, for the countdown. */
+export function dropDaysLeft(d: Drop, now: Date = new Date()): number {
+  const gone = new Date(d.on + 'T00:00:00Z')
+  gone.setUTCDate(gone.getUTCDate() + 1)
+  return Math.max(0, Math.ceil((gone.getTime() - now.getTime()) / 86_400_000))
 }
 
 export function roomsFor(chapter: ChapterId = DEFAULT_CHAPTER): FeedCard[] {
@@ -176,7 +235,7 @@ export function wordCards(): FeedCard[] {
 
 /** Every card that exists, so a saved id can be looked up wherever it came from. */
 export function cardById(id: string): FeedCard | undefined {
-  return [...roomsFor(), ...wordCards()].find((c) => c.id === id)
+  return [...dropsFor(), ...roomsFor(), ...wordCards()].find((c) => c.id === id)
 }
 
 export function chapterName(chapter: ChapterId = DEFAULT_CHAPTER): string {
@@ -232,7 +291,8 @@ export function cardFace(card: FeedCard): {
 } {
   if (card.kind === 'situation') {
     return {
-      eyebrow: 'IN LISBON',
+      // A drop says so, because a room that expires is a different offer.
+      eyebrow: card.drop ? 'A DROP' : 'IN LISBON',
       title: card.situation.title,
       blurb: card.situation.why,
       image: card.situation.image,

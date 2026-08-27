@@ -4,7 +4,9 @@ import Link from 'next/link'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { useEffect, useState } from 'react'
-import { CRATES, ROOTS_BY_FAMILY, daysLeft, dropOpens, isLive } from '@/content/roots'
+import { DROPS, type Drop } from '@/content/drops'
+import { dropDaysLeft, dropLive } from '@/content/feed'
+import { DROP_WINDOW_DAYS } from '@/content/roots'
 import { Back } from '@/components/Back'
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
@@ -23,8 +25,23 @@ export function Drops() {
   const [now, setNow] = useState<Date | null>(null)
   useEffect(() => setNow(new Date()), [])
 
-  const drops = CRATES.filter((c) => c.drop)
-  const live = drops.filter((c) => (now ? isLive(c, now) : true))
+  /*
+    Reading the real drops now, not vibes with a date on them.
+
+    A drop used to be a crate that expired — six song titles, gone the morning after the
+    gig — which was a fun idea about a band and no use to somebody who wants to go. It is a
+    cluster of rooms pegged to the event now: where it is, whether there are tickets, how to
+    get there, and how to ask somebody to come. The song titles stayed on the shelf, where
+    they were always more use, because a band does not expire.
+  */
+  const opensOn = (d: Drop) => {
+    if (d.from) return new Date(d.from + 'T00:00:00Z')
+    const o = new Date(d.on + 'T00:00:00Z')
+    o.setUTCDate(o.getUTCDate() - DROP_WINDOW_DAYS)
+    return o
+  }
+  const drops = DROPS
+  const live = drops.filter((d) => (now ? dropLive(d, now) : true))
   /*
     Three states, not two.
 
@@ -35,10 +52,10 @@ export function Drops() {
     to see what is happening in Portugal should be told what is happening in Portugal.
   */
   const coming = now
-    ? drops.filter((c) => !isLive(c, now) && now < new Date(c.drop!.on + 'T00:00:00Z'))
+    ? drops.filter((d) => !dropLive(d, now) && now < new Date(d.on + 'T00:00:00Z'))
     : []
   const gone = now
-    ? drops.filter((c) => !isLive(c, now) && now >= new Date(c.drop!.on + 'T00:00:00Z'))
+    ? drops.filter((d) => !dropLive(d, now) && now >= new Date(d.on + 'T00:00:00Z'))
     : []
 
   return (
@@ -78,33 +95,38 @@ export function Drops() {
               <h2 className="eyebrow min-w-0 text-accent">COMING</h2>
               <span className="h-px flex-1 bg-line" />
             </div>
-            {coming.map((c) => (
-              <div key={c.id} className="rounded border border-dashed border-line px-4 py-3">
-                <p className="display text-base">{c.title}</p>
+            {coming.map((d) => (
+              <div key={d.id} className="rounded border border-dashed border-line px-4 py-3">
+                <p className="display text-base">{d.event}</p>
                 <p className="mt-1 text-xs text-muted">
-                  {c.drop!.event} · {c.drop!.place}
+                  {d.place.name} · {d.place.area}
                 </p>
                 <p className="mt-1 text-xs text-muted">
                   Opens{' '}
-                  {dropOpens(c.drop!).toLocaleDateString('en-GB', {
+                  {opensOn(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}, for{' '}
+                  {new Date(d.on + 'T00:00:00Z').toLocaleDateString('en-GB', {
                     day: 'numeric',
                     month: 'long',
                   })}
-                  , for {c.drop!.on}.
+                  .
+                </p>
+                {/* What is in it, before it opens. Somebody deciding whether to care is
+                    owed the shape of the thing rather than a name and a date. */}
+                <p className="mt-3 text-xs leading-relaxed text-muted">
+                  {d.situations.map((x) => x.title).join(' · ')}
                 </p>
               </div>
             ))}
           </section>
         ) : null}
 
-        {live.map((c) => {
-          const left = now ? daysLeft(c, now) : null
-          const d = c.drop!
+        {live.map((d) => {
+          const left = now ? dropDaysLeft(d, now) : null
           const gone_on = new Date(d.on + 'T00:00:00Z')
           gone_on.setUTCDate(gone_on.getUTCDate() + 1)
           return (
             <section
-              key={c.id}
+              key={d.id}
               className="rounded border border-accent/45 bg-accent/[0.04] px-5 py-6"
             >
               <div className="flex items-start justify-between gap-3">
@@ -117,33 +139,43 @@ export function Drops() {
                   </span>
                 ) : null}
               </div>
-              <h2 className="display mt-3 text-lg">{c.title}</h2>
+              <h2 className="display mt-3 text-lg">{d.event}</h2>
               <p className="mt-1 text-sm text-muted">
-                {d.event} · {d.place}
+                {d.place.name} · {d.place.area}
               </p>
-              <p className="mt-3 text-xs leading-relaxed text-muted">
-                {(ROOTS_BY_FAMILY[c.id] ?? []).length} lines. {c.blurb}
-              </p>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
+              {/* The rooms, named. This is the whole change: a drop is not a set of song
+                  titles any more, it is where it is, how to get in, how to get there, and
+                  how to ask somebody to come with you. */}
+              <ul className="mt-3 flex flex-col gap-1">
+                {d.situations.map((x) => (
+                  <li key={x.id} className="text-xs leading-relaxed text-muted">
+                    · {x.title}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
                 <Link
-                  href={"/vibes?open=" + c.id}
+                  href="/club"
                   className="tap-target eyebrow text-accent underline underline-offset-4"
                 >
-                  {/* Into the drop itself. This was href="/" — the one call to action
-                      on the page was a loop back to the front door. */}
-                  Open it
+                  In the Club
                 </Link>
                 {d.link ? (
                   <a
-                    href={d.link}
+                    href={d.link.href}
                     target="_blank"
                     rel="noreferrer"
                     className="tap-target text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
                   >
-                    {d.link_label ?? 'TICKETS'} ↗
+                    {d.link.label} ↗
                   </a>
                 ) : null}
               </div>
+              {/* Where the facts came from. A drop that gives the wrong metro line is
+                  somebody standing in the wrong place, so it says who told us. */}
+              <p className="mt-6 border-t border-line/60 pt-3 text-[0.6rem] leading-relaxed text-muted">
+                {d.sources.map((x) => x.where).join(' · ')}
+              </p>
             </section>
           )
         })}
@@ -160,9 +192,9 @@ export function Drops() {
         {gone.length ? (
           <section className="flex flex-col gap-3">
             <span className="eyebrow text-muted">Gone</span>
-            {gone.map((c) => (
-              <p key={c.id} className="text-xs text-muted">
-                {c.title} — {c.drop!.event}, {c.drop!.place}
+            {gone.map((d) => (
+              <p key={d.id} className="text-xs text-muted">
+                {d.event} — {d.place.name}
               </p>
             ))}
           </section>

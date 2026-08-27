@@ -279,6 +279,27 @@ body {
 }
 
 /*
+  A ground for a card with no photograph.
+
+  The Club's cards are full-bleed pictures, and a drop is authored the week it matters —
+  an arena, a box office, a metro platform will not always have one ready. An empty
+  near-black rectangle reads as a broken image, which is worse than no image.
+
+  Deliberately not `.azulejo-block`. The Club runs at data-stage="REAL WORLD", which
+  switches every azulejo surface off on purpose — the absence of culture IS that beat — so
+  the pattern was inert there and the card stayed black. This carries its own texture and
+  says why it ignores the stage: it is not culture behind a lesson, it is the ground under
+  a photograph that has not been taken yet.
+*/
+.card-ground {
+  background-color: #241f1a;
+  background-image:
+    radial-gradient(circle at 30% 20%, rgba(31, 93, 140, 0.5) 0, transparent 55%),
+    radial-gradient(circle at 80% 70%, rgba(168, 73, 47, 0.28) 0, transparent 50%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 16px);
+}
+
+/*
   THE DRAIN — the one signature gesture in the product, and it has never once run.
 
   The whole argument of DUB executed in 620ms: the header travels from the crate's own
