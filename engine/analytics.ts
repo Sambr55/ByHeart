@@ -22,6 +22,12 @@ export type EventName =
   /* City Clubs. A Situation is pulled, not pushed, so opening one is a statement of
      intent about a real errand somebody has to do — the most useful signal in the
      product about what to write next. */
+  /* The Club feed. A like is a signal about what to write more of and nothing else — it
+     is never counted back to the learner, because a feed with a score on it starts
+     asking to be fed. */
+  | 'feed_like'
+  | 'feed_save'
+  | 'feed_share'
   | 'errand_cold'
   | 'errand_done'
   /* The Line — the daily habit, measured separately from the ten-minute session. */

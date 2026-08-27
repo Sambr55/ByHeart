@@ -1,0 +1,328 @@
+'use client'
+
+import Image from 'next/image'
+import Link from 'next/link'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { AudioButton } from '@/components/AudioButton'
+import { Menu } from '@/components/Menu'
+import { Wordmark } from '@/components/Wordmark'
+import { slugFor } from '@/content/audio-manifest'
+import { chapterName, feedFor, vocabWord, type FeedCard } from '@/content/feed'
+import { track } from '@/engine/analytics'
+import { toggleCard } from '@/engine/learner'
+import { useLearner } from '@/engine/useLearner'
+
+/**
+ * The Club as a feed.
+ *
+ * Vertical for the next card, horizontal for the language, and both are native CSS
+ * scroll-snap rather than a gesture library. That is not laziness — a hand-rolled swipe
+ * on iOS fights momentum scrolling, rubber-banding and the back-swipe, and loses to all
+ * three. The browser already knows how to do this.
+ *
+ * IT LOOPS RATHER THAN SCROLLING FOREVER. The list is rendered with the last card
+ * before the first and the first after the last, and when you land on one of those
+ * copies the scroll position is moved silently to its twin. So it never ends, and it
+ * never grows: there is no bottom because it comes back round, not because we keep
+ * fetching more. A product that has spent every other screen refusing to reward turning
+ * up cannot have an infinite scroll on this one.
+ */
+export function Feed() {
+  const cards = useMemo(() => feedFor(), [])
+  const learner = useLearner()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  const rail = useRef<HTMLDivElement>(null)
+  /** [last, ...cards, first] — the two clones are what make the loop seamless. */
+  const looped = useMemo(
+    () => (cards.length > 1 ? [cards[cards.length - 1], ...cards, cards[0]] : cards),
+    [cards],
+  )
+
+  // Start on the real first card, which is index 1 once the clone is in front of it.
+  useEffect(() => {
+    const el = rail.current
+    if (!el || cards.length < 2) return
+    el.scrollTop = el.clientHeight
+  }, [cards.length])
+
+  /*
+    The jump, on settle rather than on every scroll event.
+
+    Moving scrollTop mid-gesture fights the momentum the browser is still applying, so
+    this waits for the scroll to stop and only then swaps a clone for its twin — which is
+    invisible because the two are the same card.
+  */
+  useEffect(() => {
+    const el = rail.current
+    if (!el || cards.length < 2) return
+    let timer: ReturnType<typeof setTimeout>
+    const onScroll = () => {
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        const h = el.clientHeight
+        const i = Math.round(el.scrollTop / h)
+        if (i === 0) el.scrollTop = cards.length * h
+        else if (i === looped.length - 1) el.scrollTop = h
+      }, 90)
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      el.removeEventListener('scroll', onScroll)
+      clearTimeout(timer)
+    }
+  }, [cards.length, looped.length])
+
+  return (
+    <main data-stage="REAL WORLD" className="relative h-svh w-full overflow-hidden bg-[#241f1a]">
+      {/* Over the feed, not in it. The chrome does not scroll away. */}
+      <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6">
+        <Link href="/vibes" className="pointer-events-auto tap-target">
+          <Wordmark mark="club" className="h-6 text-white" title={chapterName()} />
+        </Link>
+        <span className="flex-1" />
+        <span className="pointer-events-auto text-white">
+          <Menu />
+        </span>
+      </header>
+
+      <div
+        ref={rail}
+        data-testid="feed"
+        className="h-full snap-y snap-mandatory overflow-y-auto overscroll-y-contain"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {looped.map((card, i) => (
+          <Card
+            key={card.id + '_' + i}
+            card={card}
+            saved={mounted && (learner.saved ?? []).includes(card.id)}
+            liked={mounted && (learner.liked ?? []).includes(card.id)}
+          />
+        ))}
+      </div>
+    </main>
+  )
+}
+
+function Card({ card, saved, liked }: { card: FeedCard; saved: boolean; liked: boolean }) {
+  const [isSaved, setSaved] = useState(saved)
+  const [isLiked, setLiked] = useState(liked)
+  useEffect(() => setSaved(saved), [saved])
+  useEffect(() => setLiked(liked), [liked])
+
+  const image = card.kind === 'situation' ? card.situation.image : card.image
+  const title = card.kind === 'situation' ? card.situation.title : vocabWord(card.piece)
+  const blurb = card.kind === 'situation' ? card.situation.why : card.because
+
+  return (
+    <section className="relative h-full w-full snap-start snap-always">
+      {/*
+        Two panes side by side, snapped horizontally: the room, then the language.
+
+        Swiping left is a reveal rather than a navigation — the card does not go
+        anywhere, and swiping back is the same gesture in reverse. That matters on a
+        screen somebody opens while standing outside the place it is about.
+      */}
+      <div
+        className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        <div className="relative h-full w-full shrink-0 snap-start">
+          {image ? (
+            <Image src={image.src} alt={image.alt} fill sizes="100vw" className="object-cover" />
+          ) : null}
+          <div
+            aria-hidden
+            className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black/92 via-black/60 to-transparent"
+          />
+          <div className="absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 pb-10 text-white">
+            <div className="min-w-0 flex-1">
+              {card.kind === 'vocab' ? (
+                <>
+                  <p className="eyebrow text-white/70">WORTH HAVING</p>
+                  <div className="mt-3 flex items-center gap-3">
+                    <AudioButton slug={slugFor(card.piece.target)} text={card.piece.target} />
+                    <p className="pt display text-balance text-4xl">{title}</p>
+                  </div>
+                  <p className="mt-1 text-sm text-white/80">{card.piece.gloss}</p>
+                </>
+              ) : (
+                <>
+                  <p className="eyebrow text-white/70">IN LISBON</p>
+                  <h2 className="display mt-3 text-balance text-3xl">{title}</h2>
+                </>
+              )}
+              <p className="mt-3 text-sm leading-relaxed text-white/80">{blurb}</p>
+              <p className="mt-6 text-xs text-white/60">← swipe for the words</p>
+            </div>
+            <Rail
+              card={card}
+              isSaved={isSaved}
+              isLiked={isLiked}
+              onSave={() => setSaved(toggleCard('saved', card.id))}
+              onLike={() => setLiked(toggleCard('liked', card.id))}
+            />
+          </div>
+        </div>
+
+        <div className="h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 pb-10 pt-10 text-fg">
+          {/*
+            Clearance under the fixed header, composed from the scale rather than picked.
+
+            The header floats over the feed and does not scroll, so this pane has to start
+            below it — and 80px is not a step on the spacing scale. Ten plus six is, and it
+            comes to the same place.
+          */}
+          <div className="mt-6">
+            {card.kind === 'situation' ? <Lines card={card} /> : <Word card={card} />}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/** The learning, one swipe left. */
+function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
+  const s = card.situation
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="eyebrow text-muted">WHAT TO SAY</p>
+      <h2 className="display text-balance text-2xl">{s.title}</h2>
+      <ul className="mt-3 flex flex-col gap-3">
+        {s.lines.map((l) => (
+          <li key={l.pt} className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+            <div className="flex items-center gap-3">
+              <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
+              <p className="pt min-w-0 text-lg text-accent">{l.pt}</p>
+            </div>
+            <p className="text-sm text-fg/80">{l.en}</p>
+            <p className="text-xs leading-relaxed text-muted">{l.when}</p>
+          </li>
+        ))}
+      </ul>
+      <Link
+        href={'/errand/' + s.id}
+        className="tap-target eyebrow mt-3 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+      >
+        SAY IT COLD
+      </Link>
+    </div>
+  )
+}
+
+function Word({ card }: { card: Extract<FeedCard, { kind: 'vocab' }> }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="eyebrow text-muted">THE WORD</p>
+      <div className="flex items-center gap-3">
+        <AudioButton slug={slugFor(card.piece.target)} text={card.piece.target} />
+        <p className="pt display text-balance text-3xl text-accent">{vocabWord(card.piece)}</p>
+      </div>
+      <p className="text-sm text-fg/85">{card.piece.gloss}</p>
+      {card.piece.note ? (
+        <p className="mt-3 text-sm leading-relaxed text-muted">{card.piece.note}</p>
+      ) : null}
+      <Link
+        href="/vocab"
+        className="tap-target eyebrow mt-6 block w-full rounded border border-line-strong px-5 py-3 text-center"
+      >
+        ALL YOUR WORDS
+      </Link>
+    </div>
+  )
+}
+
+/**
+ * Like, comment, save, share — down the right, where a thumb already is.
+ *
+ * Three of the four are real and do what they say. COMMENT is not: a comment implies
+ * other people, and whether the Club has other people in it is a product decision nobody
+ * has made yet — it is moderation, safety and a different company. So it goes where the
+ * honest version of it already exists, which is telling us what did not land.
+ *
+ * No counts on any of them. The moment a number is attached to how much a card has been
+ * liked, the feed starts asking to be fed, and this one is not allowed to want anything.
+ */
+function Rail({
+  card,
+  isSaved,
+  isLiked,
+  onSave,
+  onLike,
+}: {
+  card: FeedCard
+  isSaved: boolean
+  isLiked: boolean
+  onSave: () => void
+  onLike: () => void
+}) {
+  const btn = 'tap-target flex h-11 w-11 items-center justify-center rounded-full transition'
+  return (
+    <div className="flex shrink-0 flex-col items-center gap-3">
+      <button
+        type="button"
+        aria-label={isLiked ? 'Unlike' : 'Like'}
+        aria-pressed={isLiked}
+        data-testid="feed-like"
+        onClick={() => {
+          onLike()
+          track('feed_like', { card: card.id })
+        }}
+        className={btn + (isLiked ? ' text-accent' : ' text-white/85')}
+      >
+        <svg viewBox="0 0 24 24" className="h-7 w-7" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7" aria-hidden>
+          <path d="M12 20s-7-4.4-7-9.3A4.2 4.2 0 0 1 12 8a4.2 4.2 0 0 1 7 2.7C19 15.6 12 20 12 20Z" />
+        </svg>
+      </button>
+
+      <Link
+        href={'/feedback?about=' + card.id}
+        aria-label="Tell us about this card"
+        data-testid="feed-comment"
+        className={btn + ' text-white/85'}
+      >
+        <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+          <path d="M20 15a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z" />
+        </svg>
+      </Link>
+
+      <button
+        type="button"
+        aria-label={isSaved ? 'Remove from saved' : 'Save'}
+        aria-pressed={isSaved}
+        data-testid="feed-save"
+        onClick={() => {
+          onSave()
+          track('feed_save', { card: card.id })
+        }}
+        className={btn + (isSaved ? ' text-accent' : ' text-white/85')}
+      >
+        <svg viewBox="0 0 24 24" className="h-7 w-7" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7" aria-hidden>
+          <path d="M6 4h12v16l-6-4-6 4Z" />
+        </svg>
+      </button>
+
+      <button
+        type="button"
+        aria-label="Share"
+        data-testid="feed-share"
+        onClick={async () => {
+          track('feed_share', { card: card.id })
+          const url = window.location.origin + '/club'
+          const title = card.kind === 'situation' ? card.situation.title : vocabWord(card.piece)
+          // The platform sheet where there is one; the clipboard where there is not.
+          if (navigator.share) await navigator.share({ title, url }).catch(() => {})
+          else await navigator.clipboard?.writeText(url).catch(() => {})
+        }}
+        className={btn + ' text-white/85'}
+      >
+        <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+          <path d="M12 16V4m0 0L8 8m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
+        </svg>
+      </button>
+    </div>
+  )
+}

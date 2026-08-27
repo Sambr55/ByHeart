@@ -270,6 +270,9 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     // moment came first — a learner who signs in on a new phone is not new.
     sections_completed: setUnion(l.sections_completed, r.sections_completed),
     osmosis_seen: setUnion(l.osmosis_seen, r.osmosis_seen),
+    // A save is for the learner and has to survive a sync like anything else they made.
+    saved: setUnion(l.saved, r.saved),
+    liked: setUnion(l.liked, r.liked),
     missions_completed: setUnion(l.missions_completed, r.missions_completed),
 
     display_name: newerOf(l.display_name, r.display_name) || '',

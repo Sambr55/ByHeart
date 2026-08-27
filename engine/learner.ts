@@ -263,6 +263,19 @@ export interface LearnerState {
   /** When the Club welcomed them. Fires once, ever. Earliest wins on a merge. */
   club_welcomed_at: string | null
   /**
+   * Cards kept, and cards liked.
+   *
+   * Two different gestures and they are not the same thing. A save is FOR the learner —
+   * the pharmacy card the night before an appointment — and has to survive everything,
+   * so it merges as a union like every other set here. A like is a signal to us about
+   * what is worth writing more of, and it costs nothing to give.
+   *
+   * Neither is a score, and neither is ever shown as a total. The moment a number is
+   * attached to how much somebody has liked, the feed starts asking to be fed.
+   */
+  saved: string[]
+  liked: string[]
+  /**
    * When the deal was accepted, or null. Kept per pair rather than globally, because
    * the deal screen speaks about the language being learned — "your Portuguese" — and
    * somebody arriving at a second pair has not been told that deal.
@@ -306,6 +319,8 @@ export function emptyLearner(): LearnerState {
     switch_seen_at: null,
     sections_completed: [],
     club_welcomed_at: null,
+    saved: [],
+    liked: [],
     deal_accepted_at: null,
     evidence: [],
     affinity: {
@@ -399,6 +414,8 @@ export function loadLearner(): LearnerState {
           switch_seen_at: parsed.switch_seen_at ?? null,
           sections_completed: arr(parsed.sections_completed, []),
           club_welcomed_at: parsed.club_welcomed_at ?? null,
+          saved: arr(parsed.saved, []),
+          liked: arr(parsed.liked, []),
           deal_accepted_at: parsed.deal_accepted_at ?? null,
           collisions_played: arr(parsed.collisions_played, []),
           evidence: arr(parsed.evidence, []),
@@ -1011,6 +1028,19 @@ export function rememberLine(id: string) {
 }
 
 /** A section carried to the end. The thing that unlocks the Club. */
+/** Toggle a save or a like. Returns the new state so the caller need not re-read. */
+export function toggleCard(list: 'saved' | 'liked', id: string): boolean {
+  let on = false
+  update((s) => {
+    const set = new Set(s[list])
+    if (set.has(id)) set.delete(id)
+    else set.add(id)
+    on = set.has(id)
+    s[list] = [...set]
+  })
+  return on
+}
+
 export function rememberSection(family: string) {
   update((s) => {
     if (!s.sections_completed.includes(family)) {

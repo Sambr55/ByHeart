@@ -18,6 +18,7 @@ import {
   type Rung,
 } from '@/content/roots'
 import { CLUB, MOVES } from '@/content/club'
+import { Feed } from '@/components/Feed'
 import { cardDone, cardToGo, clubOpen, legendStatus } from '@/content/legend'
 import { DEFAULT_CHAPTER } from '@/content/chapters'
 import { isCurrent, situationsFor } from '@/content/situations'
@@ -138,7 +139,24 @@ export function Club() {
     })
 
   if (welcome) return <Welcome onDone={() => setWelcome(false)} />
+  /*
+    Inside the Club is the feed.
+
+    Everything that used to be on this page — where you are, what is worth doing next —
+    is a list of links, and a list of links is what somebody arrives at the Club already
+    tired of. The moves are still reachable from the feed's own cards; what changes is
+    that the room comes first.
+  */
   if (!inside) return <Door answered={answeredIds} answers={learner.legend ?? []} sections={learner.sections_completed ?? []} />
+  /*
+    Inside the Club is the feed.
+
+    What was here — where you are, what is worth doing next — is a list of links, and a
+    list of links is exactly what somebody arrives at the Club already tired of. The
+    moves it offered are all reachable from the feed's own cards; what changes is that
+    the room comes first and the menu does not come at all.
+  */
+  return <Feed />
 
   return (
     <main
