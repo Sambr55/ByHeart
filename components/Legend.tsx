@@ -9,13 +9,17 @@ import {
   LEGEND_FRAMES,
   REPAIR_KIT,
   cratesToGo,
+  cardDone,
   fillFrame,
+  frameApplies,
+  frameFor,
   isAnswered,
   legendStatus,
   provenanceOf,
   type LegendFrame,
 } from '@/content/legend'
 import { AudioButton } from '@/components/AudioButton'
+import { NumberPicker } from '@/components/NumberPicker'
 import { Menu } from '@/components/Menu'
 import { MiniBuild } from '@/components/Journey'
 import { Wordmark } from '@/components/Wordmark'
@@ -221,7 +225,27 @@ export function Legend() {
               ))}
             </ul>
           </div>
-        ) : !reachable.length && !answered.length ? (
+        ) : cardDone(answered.map((f) => f.id), answers) && !learner.club_welcomed_at ? (
+          /*
+            The card is finished and the Club is the point of finishing it.
+
+            There was no route: somebody completed the seven questions and the Legend
+            said nothing, while the Club sat behind a door it would now open. The goal of
+            the product had no last step.
+          */
+          <div className="flex flex-col gap-3 rounded border border-accent bg-accent/10 px-4 py-6">
+            <p className="eyebrow text-accent">{LEGEND_COPY.card_done_eyebrow}</p>
+            <p className="display text-balance text-xl">{LEGEND_COPY.card_done_head}</p>
+            <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.card_done_body}</p>
+            <Link
+              href="/club"
+              className="tap-target eyebrow mt-3 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+            >
+              {LEGEND_COPY.card_done_cta}
+            </Link>
+          </div>
+        ) : null}
+        {!mounted || !unlocked ? null : !reachable.length && !answered.length ? (
           <div className="rounded border border-line bg-bg-elev px-4 py-3">
             <p className="text-sm font-semibold">{LEGEND_COPY.empty_head}</p>
             <p className="mt-1 text-xs leading-relaxed text-muted">{LEGEND_COPY.empty_body}</p>
@@ -231,7 +255,14 @@ export function Legend() {
           </div>
         ) : (
           <ul className="flex flex-col gap-3">
-            {LEGEND_FRAMES.map((f) => {
+            {/*
+              A card that does not apply is not a card.
+
+              "And what do they do?" is a question about children and it was dealt to
+              everybody, so somebody childless was handed a sentence about theirs and
+              then counted as having one question outstanding for ever.
+            */}
+            {LEGEND_FRAMES.filter((f) => frameApplies(f, answers)).map((f) => {
               const values = valuesFor(f.id)
               const done = isAnswered(f, values)
               const open = reachable.some((r) => r.id === f.id)
@@ -369,7 +400,16 @@ function BuildCard({
 }) {
   const [draft, setDraft] = useState<Record<string, string>>(values)
   const [beat, setBeat] = useState<'ask' | 'build' | 'cold'>('ask')
-  const filled = frame.slots.every((s) => draft[s.key]?.trim())
+  /*
+    The shape follows the answer.
+
+    A variant is a different sentence, not the same one with a word swapped — "I have one
+    son. He is called…" has a different verb ending from "I have three." So the slots on
+    screen change the moment the count is picked, and `filled` judges the sentence they
+    are actually building rather than the one this card started as.
+  */
+  const shape = frameFor(frame, draft)
+  const filled = shape.slots.every((s) => draft[s.key]?.trim())
   const sentence = fillFrame(frame, draft, gender)
   const provenance = provenanceOf(frame)
   /*
@@ -449,12 +489,23 @@ function BuildCard({
       {beat === 'build' ? (
         <>
           <div className="flex flex-col gap-3">
-            {frame.slots.map((slot) => (
+            {shape.slots.map((slot) => (
               <div key={slot.key} className="flex flex-col gap-1">
                 <label htmlFor={slot.key} className="text-xs text-muted">
                   {slot.hint}
                 </label>
-                {slot.kind === 'pick' ? (
+                {slot.kind === 'number' ? (
+                  /*
+                    A number you can say. It was a text box with inputMode="numeric", so
+                    the card came out "Tenho 56 anos" — readable, unpronounceable, and
+                    useless on the one question it exists to answer.
+                  */
+                  <NumberPicker
+                    value={draft[slot.key] ?? ''}
+                    max={frame.id === 'how_long' ? 60 : 100}
+                    onChange={(n) => setDraft((d) => ({ ...d, [slot.key]: n }))}
+                  />
+                ) : slot.kind === 'pick' ? (
                   <div className="flex flex-wrap gap-1">
                     {/*
                       Both endings when the profile question was skipped.
@@ -498,7 +549,7 @@ function BuildCard({
                   <input
                     id={slot.key}
                     value={draft[slot.key] ?? ''}
-                    inputMode={slot.kind === 'number' ? 'numeric' : 'text'}
+
                     onChange={(e) => setDraft({ ...draft, [slot.key]: e.target.value })}
                     className="tap-target rounded border border-line bg-surface px-4 py-3 text-base text-fg"
                   />

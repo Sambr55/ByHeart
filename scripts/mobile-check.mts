@@ -144,6 +144,25 @@ for (const width of WIDTHS) {
     for (const route of ROUTES) {
       await page.goto(BASE + route, { waitUntil: 'domcontentloaded' }).catch(() => {})
       await page.waitForTimeout(450)
+      /*
+        And the screens that are two taps in.
+
+        Everything measured here is a ROUTE, so anything behind an interaction is
+        invisible to it — which is how the number picker shipped with "quarenta",
+        "cinquenta" and "sessenta" overlapping each other, and how the journey header
+        kept saying Crates through an entire rename. Opening the Legend's first card
+        costs one line and covers the widest thing in the product.
+      */
+      if (route === '/legend') {
+        const card = await page.$('[data-testid^="legend-card-"]:not([disabled])')
+        if (card) {
+          await card.click().catch(() => {})
+          await page.waitForTimeout(400)
+          const mine = await page.$('text=MAKE IT MINE')
+          if (mine) { await mine.click().catch(() => {}); await page.waitForTimeout(500) }
+        }
+      }
+
       // open every disclosure — a bug hiding inside a closed one still ships
       await page.$$eval('summary', (els) => els.forEach((e) => (e.parentElement as HTMLDetailsElement).setAttribute('open', '')))
       await page.waitForTimeout(200)

@@ -97,7 +97,14 @@ export function Club() {
     const answered = (state.legend ?? [])
       .filter((a) => Object.keys(a.values).length > 0)
       .map((a) => a.frame_id)
-    if (!clubOpen({ answeredFrameIds: answered, rung: rungReached(state.proof) })) return
+    if (
+      !clubOpen({
+        answeredFrameIds: answered,
+        answers: state.legend ?? [],
+        rung: rungReached(state.proof),
+      })
+    )
+      return
     setWelcome(true)
     welcomeToClub()
     track('club_welcome', { sections: state.sections_completed.length })
@@ -123,10 +130,15 @@ export function Club() {
   */
   const inside =
     !mounted ||
-    clubOpen({ answeredFrameIds: answeredIds, rung, welcomedAt: learner.club_welcomed_at })
+    clubOpen({
+      answeredFrameIds: answeredIds,
+      answers: learner.legend ?? [],
+      rung,
+      welcomedAt: learner.club_welcomed_at,
+    })
 
   if (welcome) return <Welcome onDone={() => setWelcome(false)} />
-  if (!inside) return <Door answered={answeredIds} sections={learner.sections_completed ?? []} />
+  if (!inside) return <Door answered={answeredIds} answers={learner.legend ?? []} sections={learner.sections_completed ?? []} />
 
   return (
     <main
@@ -470,9 +482,19 @@ function Moves({
  * Two different reasons for being outside, and they are not the same problem — the card
  * is not written yet, or it is written and has never been said cold.
  */
-function Door({ answered, sections }: { answered: string[]; sections: string[] }) {
-  const left = cardToGo(answered)
-  const written = cardDone(answered)
+function Door({
+  answered,
+  answers,
+  sections,
+}: {
+  answered: string[]
+  /* The values too, not just which ids are done: a card whose condition is unmet is not
+     outstanding, and the condition lives in another card's answer. */
+  answers: { frame_id: string; values: Record<string, string> }[]
+  sections: string[]
+}) {
+  const left = cardToGo(answered, answers)
+  const written = cardDone(answered, answers)
   /*
     Where the way in actually leads.
 

@@ -1227,13 +1227,43 @@ for (const e of EXAMPLES) {
     const glossed = new Set(
       Object.keys(f.helpers ?? {}).flatMap((k) => fold(k).split(/[^\p{L}]+/u)).filter(Boolean),
     )
-    const words = fold(f.frame.replace(/\{\w+\}/g, ' ')).split(/[^\p{L}]+/u).filter(Boolean)
+    /*
+      Everything the learner can actually meet on this card, not just the base frame.
+
+      A frame has variants now — "Não tenho filhos" instead of "Tenho três filhos" — and
+      pick options carry whole clauses. Those are Portuguese the learner reads and says,
+      so they need teaching or glossing exactly as the frame does, and a gloss for a word
+      that only appears in a variant is not a stray gloss.
+    */
+    /*
+      Two surfaces, because they answer different questions.
+
+      SCAFFOLDING is the frame and its variants — the words DUB puts around the learner's
+      answer. Every one of those must be taught by a piece or glossed on the card, which
+      is the promise that a Legend is made of language they own.
+
+      OPTIONS are the answer itself: a closed list, each with its English beside it on
+      screen. "escocesa — Scottish" needs no gloss, it is already glossed by being a
+      choice. Requiring pieces for them would mean nobody could say they were Welsh until
+      a vibe happened to teach it.
+    */
+    const scaffolding = [f.frame, ...Object.values(f.variants ?? {}).map((v) => v.frame)].join(' ')
+    const optionText = [
+      ...f.slots.flatMap((sl) => (sl.options ?? []).flatMap((o) => [o.value, o.f ?? ''])),
+      ...Object.values(f.variants ?? {}).flatMap((v) =>
+        (v.slots ?? []).flatMap((sl) => (sl.options ?? []).flatMap((o) => [o.value, o.f ?? ''])),
+      ),
+    ].join(' ')
+    const surfaces = scaffolding + ' ' + optionText
+    const words = fold(scaffolding.replace(/\{\w+\}/g, ' ')).split(/[^\p{L}]+/u).filter(Boolean)
     for (const w of words) {
       if (taught.has(w) || GRAMMAR.has(w) || glossed.has(w)) continue
       fail(F + 'uses "' + w + '", which no piece teaches and the card does not gloss')
     }
     for (const k of Object.keys(f.helpers ?? {})) {
-      if (!fold(f.frame).includes(fold(k))) fail(F + 'glosses "' + k + '", which is not in the frame')
+      if (!fold(surfaces).includes(fold(k))) {
+        fail(F + 'glosses "' + k + '", which is nowhere on the card')
+      }
     }
   }
 

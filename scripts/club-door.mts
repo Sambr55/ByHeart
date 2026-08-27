@@ -13,7 +13,17 @@
  * wrongly granted or wrongly refused. Both are checked here, against the predicate the
  * app itself uses rather than a copy of its logic.
  */
-import { LEGEND_CARD, LEGEND_FRAMES, cardDone, cardToGo, clubOpen } from '../content/legend'
+import {
+  LEGEND_CARD,
+  LEGEND_FRAMES,
+  cardDone,
+  cardToGo,
+  clubOpen,
+  fillFrame,
+  frameApplies,
+  isAnswered,
+} from '../content/legend'
+import { say } from '../content/numbers'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -55,6 +65,54 @@ console.log('\ncounting down\n')
 ok('an empty card has seven to go', cardToGo([]) === 7, String(cardToGo([])))
 ok('a full card has none to go', cardToGo(all) === 0)
 ok('cardDone agrees with cardToGo', cardDone(all) && !cardDone(all.slice(0, 6)))
+
+console.log('\nthe card fits a life that is not mine\n')
+/*
+  Four faults, one cause: somebody else's life written into the frames.
+
+  "E o que fazem?" assumed children, and more than one, and one of them at university.
+  "Tenho {n}. Chamam-se {names}." assumed you had them at all. And two cards had no
+  slots — a fixed sentence put in the learner's mouth — which also made them impossible
+  to answer, so the Club told somebody who had finished everything that two questions
+  were left.
+*/
+const F = (id: string) => LEGEND_FRAMES.find((f) => f.id === id)!
+const ans = (id: string, values: Record<string, string>) => ({ frame_id: id, values })
+
+ok('no card is a fixed sentence with nothing to choose', LEGEND_FRAMES.every((f) => f.slots.length))
+ok(
+  'childless is an answer, not an empty field',
+  isAnswered(F('children'), { count: 'nenhum' }),
+  fillFrame(F('children'), { count: 'nenhum' }, 'm'),
+)
+ok(
+  'one child is a different sentence from three',
+  fillFrame(F('children'), { count: 'um filho', name: 'Tom' }, 'm') !==
+    fillFrame(F('children'), { count: 'três filhos' }, 'm'),
+  fillFrame(F('children'), { count: 'um filho', name: 'Tom' }, 'm'),
+)
+ok(
+  'nobody childless is asked what their children do',
+  !frameApplies(F('children_doing'), [ans('children', { count: 'nenhum' })]),
+)
+ok(
+  'and somebody with children is',
+  frameApplies(F('children_doing'), [ans('children', { count: 'três filhos' })]),
+)
+
+console.log('\nthe count the Club shows\n')
+const cardIds = LEGEND_CARD.map((f) => f.id)
+ok(
+  'answering every card leaves nothing outstanding',
+  cardToGo(cardIds, cardIds.map((id) => ans(id, {}))) === 0,
+  String(cardToGo(cardIds, cardIds.map((id) => ans(id, {})))),
+)
+
+console.log('\nnumbers are words\n')
+ok('an age reads as Portuguese, not digits', fillFrame(F('age'), { n: '56' }, 'm').includes('cinquenta e seis'),
+  fillFrame(F('age'), { n: '56' }, 'm'))
+ok('and it is the European sixteen', say(16) === 'dezasseis', say(16))
+ok('twenty-one composes with e', say(21) === 'vinte e um', say(21))
 
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)\n')

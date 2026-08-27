@@ -1,3 +1,4 @@
+import { say } from './numbers'
 import { PIECES, type Rung } from './roots'
 
 /**
@@ -57,6 +58,21 @@ export interface LegendFrame {
   frame: string
   en: string
   slots: LegendSlot[]
+  /**
+   * Only ask this if another card was answered a particular way.
+   *
+   * "E o que fazem?" — and what do they do — is a question about children, and it was
+   * asked of everybody. Somebody with no children was handed a sentence about theirs.
+   */
+  requires?: { frame: string; slot: string; notOneOf: string[] }
+  /**
+   * The frame changes with the answer.
+   *
+   * "Tenho {n}. Chamam-se {names}." assumed you had children, and more than one of them.
+   * A frame that only fits one shape of life is not a Legend, it is somebody else's.
+   * When a slot's chosen value has its own `frame`, it replaces this one.
+   */
+  variants?: Record<string, { frame: string; en: string; slots?: LegendSlot[] }>
   /**
    * The piece ids this frame is built from.
    *
@@ -184,12 +200,44 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     card: 5,
     ask: 'Tens filhos?',
     ask_en: 'Do you have children?',
-    frame: 'Tenho {n}. Chamam-se {names}.',
-    en: 'I have {n}. They are called {names}.',
+    /*
+      The count chooses the sentence, and none is a real answer.
+
+      This was "Tenho {n}. Chamam-se {names}." — which assumes you have children, and
+      more than one of them. Somebody childless was handed a sentence about their
+      children; somebody with one was taught a plural. A frame that only fits one shape
+      of life is not a Legend, it is somebody else's.
+    */
+    frame: 'Tenho {count}.',
+    en: 'I have {count}.',
     slots: [
-      { key: 'n', kind: 'number', hint: 'how many' },
-      { key: 'names', kind: 'name', hint: 'their names' },
+      {
+        key: 'count',
+        kind: 'pick',
+        hint: 'how many',
+        options: [
+          { value: 'nenhum', en: 'none' },
+          { value: 'um filho', en: 'one son' },
+          { value: 'uma filha', en: 'one daughter' },
+          { value: 'dois filhos', en: 'two children' },
+          { value: 'três filhos', en: 'three children' },
+          { value: 'quatro filhos', en: 'four or more' },
+        ],
+      },
     ],
+    variants: {
+      nenhum: { frame: 'Não tenho filhos.', en: 'I do not have children.', slots: [] },
+      'um filho': {
+        frame: 'Tenho um filho. Chama-se {name}.',
+        en: 'I have one son. He is called {name}.',
+        slots: [{ key: 'name', kind: 'name', hint: 'his name' }],
+      },
+      'uma filha': {
+        frame: 'Tenho uma filha. Chama-se {name}.',
+        en: 'I have one daughter. She is called {name}.',
+        slots: [{ key: 'name', kind: 'name', hint: 'her name' }],
+      },
+    },
     /*
       The showcase card, and the reason its rung is honest rather than convenient.
 
@@ -201,7 +249,14 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     */
     built_from: ['tenho', 'filhos', 'chamam'],
     rung: 5,
-    helpers: { 'Chamam-se': 'they are called' },
+    // The variants introduce their own scaffolding, and a Legend is only made of language
+    // the learner owns if every word around their answer is either taught or glossed here.
+    helpers: {
+      'Chama-se': 'he is / she is called',
+      filho: 'son',
+      filha: 'daughter',
+      filhos: 'children',
+    },
     teaches:
       'Tenho again, doing exactly what it did with your age: you HAVE children, you do not be them. Chamam-se is chamo-me turned round to point at other people — the same verb, aimed outwards.'
   },
@@ -210,15 +265,42 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     card: 6,
     ask: 'E o que fazem?',
     ask_en: 'And what do they do?',
-    frame: 'O {name} está na universidade. Os outros ainda andam na {place}.',
-    en: '{name} is at university. The others are still at {place}.',
+    /*
+      Asked only of somebody who said they have children, and it no longer describes
+      mine.
+
+      It was "O {name} está na universidade. Os outros ainda andam na {place}." — one at
+      university, the others at school, more than one of them. That is one particular
+      family, written into a card handed to everybody.
+    */
+    requires: { frame: 'children', slot: 'count', notOneOf: ['nenhum'] },
+    frame: 'Ainda andam na {place}.',
+    en: 'They are still at {place}.',
     slots: [
-      { key: 'name', kind: 'name', hint: 'one of them' },
-      { key: 'place', kind: 'place', hint: 'school, or work' },
+      {
+        key: 'place',
+        kind: 'pick',
+        hint: 'where they are',
+        options: [
+          { value: 'escola', en: 'school' },
+          { value: 'universidade', en: 'university' },
+          { value: 'creche', en: 'nursery' },
+        ],
+      },
     ],
+    variants: {
+      universidade: { frame: 'Já estão na universidade.', en: 'They are at university now.', slots: [] },
+    },
     built_from: ['esta_', 'o_meu', 'ainda', 'escola'],
     rung: 3,
-    helpers: { universidade: 'university', outros: 'the others', andam: 'go / are' },
+    helpers: {
+      andam: 'go / are',
+      ainda: 'still',
+      'Já': 'already',
+      'estão': 'they are',
+      // In the variant sentence rather than the base one, and still a word on the card.
+      universidade: 'university',
+    },
     teaches:
       'Ser and estar side by side on your own family, which is the one example nobody forgets. Está na universidade is where somebody is RIGHT NOW; it would be é if it were what they are forever.'
   },
@@ -259,12 +341,33 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       adoro" is lovely and needs a rung-5 piece; this says the same thing, arrives three
       rungs earlier, and is easier to deliver — which is the entire point of a Legend.
     */
-    frame: 'Porque quero fazer o que adoro.',
-    en: 'Because I want to do what I love.',
-    slots: [],
+    /*
+      A reason you pick, not a reason we picked.
+
+      This was a fixed sentence with no slots — "because I want to do what I love" — put
+      in the learner's mouth on the card that is meant to be most theirs. It also could
+      never be answered, because isAnswered wants every slot filled and a frame with no
+      slots never gets a values entry: the Club counted it as outstanding forever.
+    */
+    frame: 'Porque {reason}.',
+    en: 'Because {reason}.',
+    slots: [
+      {
+        key: 'reason',
+        kind: 'pick',
+        hint: 'your reason',
+        options: [
+          { value: 'quero fazer o que adoro', en: 'I want to do what I love' },
+          { value: 'o trabalho trouxe-me cá', en: 'work brought me here' },
+          { value: 'quero uma vida mais calma', en: 'I want a calmer life' },
+          { value: 'alguém que amo está cá', en: 'someone I love is here' },
+          { value: 'quero recomeçar', en: 'I want to start again' },
+        ],
+      },
+    ],
     built_from: ['porque', 'quero', 'adoro'],
     rung: 2,
-    helpers: { fazer: 'to do', 'o que': 'what' },
+    helpers: { Porque: 'because' },
     teaches:
       'Porque without an accent starts an answer; porquê with one asks the question. Two spellings, one sound, and getting it right is the small thing that makes writing look native.'
   },
@@ -273,9 +376,21 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     card: 10,
     ask: 'Falas português?',
     ask_en: 'Do you speak Portuguese?',
-    frame: 'Estou a aprender. Falo pouco, mas estou a tentar.',
-    en: 'I am learning. I speak little, but I am trying.',
-    slots: [],
+    /* Slotless for the same reason and with the same consequence: never answerable. */
+    frame: 'Estou a aprender. {much}',
+    en: 'I am learning. {much}',
+    slots: [
+      {
+        key: 'much',
+        kind: 'pick',
+        hint: 'how it is going',
+        options: [
+          { value: 'Falo pouco, mas estou a tentar.', en: 'I speak little, but I am trying.' },
+          { value: 'Ainda não falo muito.', en: 'I do not speak much yet.' },
+          { value: 'Percebo mais do que falo.', en: 'I understand more than I speak.' },
+        ],
+      },
+    ],
     built_from: ['aprender'],
     rung: 1,
     helpers: { Falo: 'I speak', pouco: 'little', mas: 'but', tentar: 'to try' },
@@ -380,14 +495,28 @@ export const LEGEND_CARD = LEGEND_FRAMES.filter((f) => f.rung <= CARD_RUNG)
  * measured honestly. The rung only moves on a clean release with nothing on screen, so
  * "reached the rung these cards are written at" IS "has said this kind of thing cold".
  */
-export function cardDone(answeredFrameIds: string[]): boolean {
-  const done = new Set(answeredFrameIds)
-  return LEGEND_CARD.every((f) => done.has(f.id))
+/*
+  Cards that do not apply are not outstanding.
+
+  The Club said "two questions left" to somebody who had answered everything, because
+  two frames had no slots at all — isAnswered wants every slot filled and a slotless
+  frame never gets a values entry, so they could never be completed by anybody. Both have
+  real choices now, and this skips any card whose condition is unmet so the same thing
+  cannot happen again through a different door.
+*/
+export function cardDone(
+  answeredFrameIds: string[],
+  answers: { frame_id: string; values: Record<string, string> }[] = [],
+): boolean {
+  return cardToGo(answeredFrameIds, answers) === 0
 }
 
-export function cardToGo(answeredFrameIds: string[]): number {
+export function cardToGo(
+  answeredFrameIds: string[],
+  answers: { frame_id: string; values: Record<string, string> }[] = [],
+): number {
   const done = new Set(answeredFrameIds)
-  return LEGEND_CARD.filter((f) => !done.has(f.id)).length
+  return LEGEND_CARD.filter((f) => frameApplies(f, answers) && !done.has(f.id)).length
 }
 
 /**
@@ -400,11 +529,13 @@ export function cardToGo(answeredFrameIds: string[]): number {
  */
 export function clubOpen(opts: {
   answeredFrameIds: string[]
+  /** The answers themselves, because a card can be conditional on another card's. */
+  answers?: { frame_id: string; values: Record<string, string> }[]
   rung: number
   welcomedAt?: string | null
 }): boolean {
   if (opts.welcomedAt) return true
-  return cardDone(opts.answeredFrameIds) && opts.rung >= CARD_RUNG
+  return cardDone(opts.answeredFrameIds, opts.answers ?? []) && opts.rung >= CARD_RUNG
 }
 
 export const CRATES_TO_UNLOCK_LEGEND = 5
@@ -477,9 +608,20 @@ export function fillFrame(
   values: Record<string, string>,
   gender: 'm' | 'f' | null,
 ): string {
-  return frame.frame.replace(/\{(\w+)\}/g, (whole, key: string) => {
+  const shape = frameFor(frame, values)
+  return shape.frame.replace(/\{(\w+)\}/g, (whole, key: string) => {
     const raw = values[key]
     if (!raw) return whole
+    /*
+      A number is stored as digits and said as a word.
+
+      The slot keeps "56" because that is unambiguous to store and to compare; every
+      sentence it appears in reads "cinquenta e seis", because the point of the card is
+      that somebody can SAY it. A Legend with a numeral in it is a Legend nobody can
+      read out.
+    */
+    const numeric = shape.slots.find((s) => s.key === key)
+    if (numeric?.kind === 'number' && /^\d+$/.test(raw)) return say(Number(raw))
     /*
       The learner's exact word, verbatim.
 
@@ -489,7 +631,7 @@ export function fillFrame(
       masculine was stored and the profile says otherwise. It never overrides a feminine
       form the learner picked, because that lookup simply does not match.
     */
-    const slot = frame.slots.find((s) => s.key === key)
+    const slot = shape.slots.find((s) => s.key === key)
     if (slot?.kind === 'pick' && slot.gendered && gender === 'f') {
       const option = slot.options?.find((o) => o.value === raw)
       return option?.f ?? raw
@@ -499,9 +641,50 @@ export function fillFrame(
 }
 
 /** Has this card been filled in? A slot left empty means the card is not in the run. */
+/**
+ * The frame as it actually reads for this learner, after their own pick.
+ *
+ * A variant replaces the frame outright rather than patching it: "I have one son. He is
+ * called…" is not "I have {n}. They are called…" with a number swapped in, it is a
+ * different sentence with a different verb ending. Trying to express both as one string
+ * is how the original ended up assuming three children.
+ */
+export function frameFor(
+  frame: LegendFrame,
+  values: Record<string, string> | undefined,
+): { frame: string; en: string; slots: LegendSlot[] } {
+  const chosen = frame.slots.map((s) => values?.[s.key]).find((v) => v && frame.variants?.[v])
+  const variant = chosen ? frame.variants?.[chosen] : undefined
+  if (!variant) return { frame: frame.frame, en: frame.en, slots: frame.slots }
+  // The slot that chose the variant stays — it is the answer — and the variant's own
+  // slots follow it.
+  const chooser = frame.slots.filter((s) => values?.[s.key] === chosen)
+  return { frame: variant.frame, en: variant.en, slots: [...chooser, ...(variant.slots ?? [])] }
+}
+
+/**
+ * Is this card even for this learner?
+ *
+ * "And what do they do?" is a question about children and it was asked of everybody.
+ * A card whose condition is unmet is not locked or skipped — it is not a card.
+ */
+export function frameApplies(
+  frame: LegendFrame,
+  answers: { frame_id: string; values: Record<string, string> }[],
+): boolean {
+  if (!frame.requires) return true
+  const on = answers.find((a) => a.frame_id === frame.requires!.frame)
+  if (!on) return false
+  const value = on.values[frame.requires.slot]
+  return Boolean(value) && !frame.requires.notOneOf.includes(value)
+}
+
 export function isAnswered(frame: LegendFrame, values: Record<string, string> | undefined): boolean {
   if (!values) return false
-  return frame.slots.every((s) => Boolean(values[s.key]?.trim()))
+  // The variant's slots, not the base frame's: "none" answers the children card
+  // completely, and asking it for the names of children somebody does not have would
+  // leave the card permanently outstanding.
+  return frameFor(frame, values).slots.every((s) => Boolean(values[s.key]?.trim()))
 }
 
 export const LEGEND_COPY = {
@@ -539,6 +722,17 @@ export const LEGEND_COPY = {
   banked_note_one: 'They open after one more vibe.',
   banked_note_many: 'They open once you have done five vibes.',
   banked_cta: 'SEE WHAT IS WAITING',
+  /**
+   * The last step, which did not exist.
+   *
+   * Somebody finished the seven questions and the Legend said nothing about it, while
+   * the Club sat behind a door those seven answers had just opened. The goal of the
+   * product had no final move.
+   */
+  card_done_eyebrow: 'THAT IS YOUR CARD',
+  card_done_head: 'You can introduce yourself in Portuguese.',
+  card_done_body: 'Which is the whole membership test, and the thing most people never get to. Dub Club — Lisbon is open.',
+  card_done_cta: 'GO IN',
   offer_later: 'Not now',
   repair_head: 'The four that keep a conversation going',
   repair_body:
