@@ -106,7 +106,21 @@ export function Feed() {
   )
 }
 
-function Card({ card, saved, liked }: { card: FeedCard; saved: boolean; liked: boolean }) {
+export function Card({ card, saved, liked }: { card: FeedCard; saved: boolean; liked: boolean }) {
+  const pane = useRef<HTMLDivElement>(null)
+  /*
+    Tapping the call to action does the same thing as the swipe.
+
+    Two ways to reach one place, and the button says which gesture it stands in for
+    rather than naming a destination — "swipe left to continue" is a instruction somebody
+    can follow the next time without looking for a button at all. It scrolls rather than
+    navigates, so going back is the same gesture in reverse.
+  */
+  const reveal = () =>
+    pane.current?.scrollTo({
+      left: pane.current.clientWidth,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    })
   const [isSaved, setSaved] = useState(saved)
   const [isLiked, setLiked] = useState(liked)
   useEffect(() => setSaved(saved), [saved])
@@ -126,6 +140,8 @@ function Card({ card, saved, liked }: { card: FeedCard; saved: boolean; liked: b
         screen somebody opens while standing outside the place it is about.
       */}
       <div
+        ref={pane}
+        data-testid="card-panes"
         className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain"
         style={{ scrollbarWidth: 'none' }}
       >
@@ -155,7 +171,14 @@ function Card({ card, saved, liked }: { card: FeedCard; saved: boolean; liked: b
                 </>
               )}
               <p className="mt-3 text-sm leading-relaxed text-white/80">{blurb}</p>
-              <p className="mt-6 text-xs text-white/60">← swipe for the words</p>
+              <button
+                type="button"
+                data-testid="card-continue"
+                onClick={reveal}
+                className="tap-target eyebrow mt-6 w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
+              >
+                SWIPE LEFT
+              </button>
             </div>
             <Rail
               card={card}

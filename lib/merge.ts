@@ -273,6 +273,7 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     // A save is for the learner and has to survive a sync like anything else they made.
     saved: setUnion(l.saved, r.saved),
     liked: setUnion(l.liked, r.liked),
+    finished_cards: setUnion(l.finished_cards, r.finished_cards),
     missions_completed: setUnion(l.missions_completed, r.missions_completed),
 
     display_name: newerOf(l.display_name, r.display_name) || '',

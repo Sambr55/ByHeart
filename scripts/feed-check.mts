@@ -130,6 +130,67 @@ const liked = await page.evaluate((k) => {
 }, KEY)
 ok('a like is written down', liked === 1, String(liked))
 
+console.log('\nyours, on the profile\n')
+/*
+  The words came out of the feed because they read as the same kind of thing as a room —
+  same shape, same rail, same full-bleed photograph — so the feed was two sorts of card
+  competing to be understood. They are not lost; this is where they went.
+*/
+const prof = await browser.newPage({ viewport: { width: 390, height: 1200 } })
+await prof.goto(BASE + '/profile')
+await prof.evaluate(
+  ([k, pair]) => {
+    localStorage.setItem('byheart.pair', JSON.stringify(pair))
+    localStorage.setItem(k as string, JSON.stringify({
+      version: 1, deal_accepted_at: '2026-08-01T00:00:00.000Z', proof: [], inventory: {},
+      roots_played: [], sections_completed: ['the_basics'],
+      finished_cards: ['lisbon_farmacia'], saved: ['lisbon_cafe'], liked: [],
+    }))
+  },
+  [KEY, DEFAULT_PAIR] as const,
+)
+await prof.goto(BASE + '/profile')
+await prof.waitForTimeout(1200)
+
+const feedText = await page.evaluate(() => (document.querySelector('main') as HTMLElement).innerText)
+ok('no word cards in the feed', !/WORTH HAVING/.test(feedText))
+
+const tiles = await prof.$$eval('[data-testid^="tile-"]', (els) =>
+  els.map((el) => {
+    const r = el.getBoundingClientRect()
+    return { id: el.getAttribute('data-testid'), ratio: Number((r.width / r.height).toFixed(2)) }
+  }),
+)
+console.log('  ' + tiles.length + ' tiles')
+ok('the words are here instead', tiles.some((t) => t.id?.includes('vocab')))
+ok('what you finished is here', tiles.some((t) => t.id === 'tile-lisbon_farmacia'))
+ok('and what you saved', tiles.some((t) => t.id === 'tile-lisbon_cafe'))
+ok('and the vibes you have been through', tiles.some((t) => t.id === 'tile-the_basics'))
+ok(
+  'every tile is three by four',
+  tiles.every((t) => Math.abs(t.ratio - 0.75) < 0.02),
+  [...new Set(tiles.map((t) => t.ratio))].join(', '),
+)
+/* Two across is the whole point of a grid: one across is a list wearing a grid's clothes. */
+const cols = await prof.evaluate(() => {
+  const g = document.querySelector('[data-testid^="tile-"]')?.parentElement as HTMLElement
+  return getComputedStyle(g).gridTemplateColumns.split(' ').length
+})
+ok('two across', cols === 2, String(cols))
+
+await prof.click('[data-testid="tile-lisbon_farmacia"]')
+await prof.waitForTimeout(900)
+const panes = await prof.evaluate(() => {
+  const el = document.querySelector('[data-testid="card-panes"]') as HTMLElement
+  return el ? { w: el.clientWidth, all: el.scrollWidth, at: el.scrollLeft } : null
+})
+ok('tapping a tile opens it full-bleed with two panes', Boolean(panes && panes.all === panes.w * 2))
+await prof.click('[data-testid="card-continue"]')
+await prof.waitForTimeout(800)
+const after = await prof.evaluate(() => (document.querySelector('[data-testid="card-panes"]') as HTMLElement).scrollLeft)
+ok('and the button does what the swipe does', after > 0, 'scrolled to ' + after)
+await prof.close()
+
 await browser.close()
 
 if (problems.length) {

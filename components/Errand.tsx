@@ -9,7 +9,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { chapterById } from '@/content/chapters'
 import type { Situation } from '@/content/situations'
-import { recordProof } from '@/engine/learner'
+import { recordProof, rememberFinishedCard } from '@/engine/learner'
 import { track } from '@/engine/analytics'
 
 /**
@@ -142,6 +142,7 @@ export function Errand({ situation }: { situation: Situation }) {
                   source: 'release',
                   clean: true,
                 })
+                rememberFinishedCard(situation.id)
                 track('errand_done', { id: situation.id, clean: true })
                 window.location.assign('/club')
               }}

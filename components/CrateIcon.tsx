@@ -12,6 +12,18 @@
  * tone from the tile it sits on.
  */
 const PATHS: Record<string, string> = {
+  /*
+    A beamed pair of notes — "the basics, in songs you know".
+
+    The basics had no icon at all: the one vibe everybody is required to do, rendering as
+    an empty tile everywhere an icon was expected. Nobody noticed because the shelf puts
+    it in a 40px square beside a title that says what it is, and an absence only shows on
+    a grid where the icon is the whole tile.
+
+    A note rather than a waving hand, which is what I drew first: these are stroked, not
+    filled, and a hand in one stroked path comes out as a blob.
+  */
+  the_basics: 'M9 18a2 2 0 100-4 2 2 0 000 4zM19 16a2 2 0 100-4 2 2 0 000 4zM11 16V6l10-2v10M11 8l10-2',
   // A jet, banking
   top_gun: 'M3 14l8-3 2-7 2 7 8 3-8 2-2 6-2-6z',
   // A car in three-quarter silhouette

@@ -68,25 +68,36 @@ const TEXTURE: Record<string, { src: string; alt: string }> = {
  * glossary bolted on the end.
  */
 export function feedFor(chapter: ChapterId = DEFAULT_CHAPTER): FeedCard[] {
-  const rooms = SITUATIONS.filter((s) => s.chapter === chapter && isCurrent(s))
+  /*
+    Rooms only.
+
+    The words were interleaved here and they read as the same kind of thing as a room —
+    same shape, same rail, same full-bleed photograph — so the feed became two sorts of
+    card competing to be understood. They are not lost: they live on the profile, which
+    is where somebody goes looking for what is theirs rather than what is next.
+  */
+  return roomsFor(chapter)
+}
+
+export function roomsFor(chapter: ChapterId = DEFAULT_CHAPTER): FeedCard[] {
+  return SITUATIONS.filter((s) => s.chapter === chapter && isCurrent(s))
     .sort((a, b) => a.rung - b.rung)
     .map((s): FeedCard => ({ kind: 'situation', id: s.id, situation: s }))
+}
 
-  const words = VOCAB.flatMap((v): FeedCard[] => {
+/** The words, for the profile. Same card shape, different place to meet it. */
+export function wordCards(): FeedCard[] {
+  return VOCAB.flatMap((v): FeedCard[] => {
     const piece = PIECES[v.piece]
     const image = TEXTURE[v.from]
     if (!piece || !image) return []
     return [{ kind: 'vocab', id: 'vocab_' + v.piece, piece, because: v.because, image }]
   })
+}
 
-  const out: FeedCard[] = []
-  let w = 0
-  rooms.forEach((room, i) => {
-    out.push(room)
-    if (i % 2 === 1 && w < words.length) out.push(words[w++])
-  })
-  while (w < words.length) out.push(words[w++])
-  return out
+/** Every card that exists, so a saved id can be looked up wherever it came from. */
+export function cardById(id: string): FeedCard | undefined {
+  return [...roomsFor(), ...wordCards()].find((c) => c.id === id)
 }
 
 export function chapterName(chapter: ChapterId = DEFAULT_CHAPTER): string {

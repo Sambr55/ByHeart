@@ -276,6 +276,14 @@ export interface LearnerState {
   saved: string[]
   liked: string[]
   /**
+   * Cards and vibes you have been all the way through.
+   *
+   * Kept apart from `saved` on purpose: a save is a decision and this is a record. They
+   * end up in the same place — the profile — and they answer different questions there.
+   * "What did I keep for later" is not "what have I done".
+   */
+  finished_cards: string[]
+  /**
    * When the deal was accepted, or null. Kept per pair rather than globally, because
    * the deal screen speaks about the language being learned — "your Portuguese" — and
    * somebody arriving at a second pair has not been told that deal.
@@ -321,6 +329,7 @@ export function emptyLearner(): LearnerState {
     club_welcomed_at: null,
     saved: [],
     liked: [],
+    finished_cards: [],
     deal_accepted_at: null,
     evidence: [],
     affinity: {
@@ -416,6 +425,7 @@ export function loadLearner(): LearnerState {
           club_welcomed_at: parsed.club_welcomed_at ?? null,
           saved: arr(parsed.saved, []),
           liked: arr(parsed.liked, []),
+          finished_cards: arr(parsed.finished_cards, []),
           deal_accepted_at: parsed.deal_accepted_at ?? null,
           collisions_played: arr(parsed.collisions_played, []),
           evidence: arr(parsed.evidence, []),
@@ -1029,6 +1039,13 @@ export function rememberLine(id: string) {
 
 /** A section carried to the end. The thing that unlocks the Club. */
 /** Toggle a save or a like. Returns the new state so the caller need not re-read. */
+/** Been all the way through it. Idempotent, and it never comes back off. */
+export function rememberFinishedCard(id: string) {
+  update((s) => {
+    if (!s.finished_cards.includes(id)) s.finished_cards = [...s.finished_cards, id]
+  })
+}
+
 export function toggleCard(list: 'saved' | 'liked', id: string): boolean {
   let on = false
   update((s) => {
