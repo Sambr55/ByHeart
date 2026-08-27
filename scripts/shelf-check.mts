@@ -172,6 +172,36 @@ ok(
   await page2.close()
 }
 
+console.log('\nthe shape of it\n')
+/*
+  Two across, three by four.
+
+  It was a stack of wide rows, which is a list of options — read top to bottom, each one
+  arguing for itself in a paragraph. A vibe is not read, it is chosen, and choosing is
+  what a grid is for.
+*/
+const tiles = await page.$$eval('[data-testid^="vibe-"]', (els) =>
+  els.map((el) => {
+    const r = el.getBoundingClientRect()
+    return { id: el.getAttribute('data-testid'), ratio: Number((r.width / r.height).toFixed(2)), w: Math.round(r.width) }
+  }),
+)
+const grid = tiles.filter((t) => t.ratio < 1)
+console.log('  ' + tiles.length + ' vibes, ' + grid.length + ' as tiles')
+ok('the vibes are tiles, not rows', grid.length >= tiles.length - 1, grid.length + ' of ' + tiles.length)
+ok(
+  'every tile is three by four',
+  grid.every((t) => Math.abs(t.ratio - 0.75) < 0.03),
+  [...new Set(grid.map((t) => t.ratio))].join(', '),
+)
+/* Two across: one is a list wearing a grid's clothes, three is unreadable at 320px. */
+const across = await page.evaluate(() => {
+  const tile = document.querySelector('[data-testid^="vibe-"]')
+  const g = tile?.parentElement as HTMLElement
+  return getComputedStyle(g).gridTemplateColumns.split(' ').filter(Boolean).length
+})
+ok('two across', across === 2, String(across))
+
 console.log('\nhow far in you are is on the card\n')
 const text = await page.evaluate(() => (document.querySelector('main') ?? document.body).innerText)
 ok('a part-played vibe says so', /\d+ of \d+ taken/.test(text), (text.match(/\d+ of \d+ taken/) ?? ['none'])[0])

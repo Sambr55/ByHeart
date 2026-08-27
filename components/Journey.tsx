@@ -844,6 +844,62 @@ function distanceTo(at: Rung, rung: Rung): string {
   return 'Opens at stage ' + at + ', ' + RUNGS[at - 1].opens.replace(/^Opens once /, 'when ') + how
 }
 
+/**
+ * The drop keeps its row.
+ *
+ * It is the one card with a countdown and a ticket link on it, and a three-by-four tile
+ * has nowhere to put either. It is also the only thing on the shelf that can be lost by
+ * being busy, so it is worth it looking different from everything around it.
+ */
+function DropRow({
+  crate,
+  now,
+  onOpen,
+}: {
+  crate: Crate
+  now: Date | null
+  onOpen: () => void
+}) {
+  return (
+    <div data-tone={crate.tone} className="flex flex-col">
+      <button
+        type="button"
+        data-testid={'vibe-' + crate.id}
+        onClick={onOpen}
+        className="tap-target flex w-full items-start gap-3 rounded border border-l-[3px] border-line border-l-[color:var(--tone)] bg-bg-elev px-4 py-3 text-left transition hover:border-accent/50"
+      >
+        <span className="azulejo-block flex h-10 w-10 shrink-0 items-center justify-center rounded">
+          <CrateIcon crate={crate.id} className="h-6 w-6 text-[color:var(--tone)]" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="eyebrow mb-1 block text-[0.55rem] text-accent">
+            DROP · {crate.drop ? goneOn(crate.drop) : ''}
+          </span>
+          <span className="display block text-base">{crate.title}</span>
+          <span className="mt-1 block text-xs text-muted">{crate.blurb}</span>
+          {crate.drop ? (
+            <span className="mt-1 block text-xs text-muted">
+              {crate.drop.event} · {crate.drop.place}
+            </span>
+          ) : null}
+        </span>
+        {crate.drop ? <DropClock crate={crate} now={now} /> : null}
+      </button>
+      <p className="mt-3 px-4 text-xs leading-relaxed text-muted">{PICKER.drop_note}</p>
+      {crate.drop?.link ? (
+        <a
+          href={crate.drop.link}
+          target="_blank"
+          rel="noreferrer"
+          className="tap-target mb-3 ml-4 inline-block text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
+        >
+          {crate.drop.link_label ?? 'TICKETS'} ↗
+        </a>
+      ) : null}
+    </div>
+  )
+}
+
 function Picker() {
   const router = useRouter()
   const { chooseFamily, state } = useJourney()
@@ -1142,37 +1198,28 @@ function Picker() {
                   : list.length}
               </span>
             </div>
-            <div className="flex flex-col gap-3">
-              {list.map(({ crate: f, finished, waiting, unreached, planLocked, at, taken, total }) => (
-                <div
-                  key={f.id}
-                  data-tone={f.tone}
-                  className={
-                    // The drop's frame lives on the wrapper, not the button, so the ticket
-                    // link can sit inside the card without being nested in a button.
-                    f.drop
-                      ? 'rounded border transition ' +
-                        (finished
-                          ? 'border-line/50 bg-surface/40 opacity-45'
-                          : entering === f.id
-                            ? 'border-accent bg-accent/10'
-                            : 'border-accent/45 bg-accent/[0.04]')
-                      : undefined
-                  }
-                >
-                  <button
-                    type="button"
-                    /*
-                      A plan-locked card is NOT disabled.
+            {/*
+              A grid, two across, three by four.
 
-                      It used to be, with a small "join up" link dangling underneath it —
-                      so the one card a non-member most wants to press was the one thing
-                      on the screen that did nothing, and the way through was a five-pixel
-                      afterthought below it. Tapping the crate you want is the clearest
-                      statement of intent a person can make; it opens the membership
-                      screen. Only the LADDER still disables a card, because that is a
-                      thing you fix by learning, not by paying.
-                    */
+              It was a stack of wide rows, which is a list of options — you read it top to
+              bottom and each one argues for itself in a paragraph. A vibe is not read, it
+              is CHOSEN, and choosing is what a grid is for: everything at once, the tone
+              and the drawing doing the identifying, the words underneath only confirming
+              what the tile already said.
+
+              The drop keeps its own row. It is time-pegged and carries a countdown and a
+              ticket link, and a tile has nowhere to put either.
+            */}
+            <div className={key === 'drops' ? 'flex flex-col gap-3' : 'grid grid-cols-2 gap-3'}>
+              {list.map(({ crate: f, finished, waiting, unreached, planLocked, at, taken, total }) =>
+                f.drop ? (
+                  <DropRow key={f.id} crate={f} now={now} onOpen={() => { setEntering(f.id); chooseFamily(f.id) }} />
+                ) : (
+                  <button
+                    key={f.id}
+                    type="button"
+                    data-tone={f.tone}
+                    data-testid={'vibe-' + f.id}
                     aria-disabled={unreached}
                     disabled={unreached}
                     onClick={() => {
@@ -1185,153 +1232,60 @@ function Picker() {
                       setEntering(f.id)
                       chooseFamily(f.id)
                     }}
+                    /*
+                      Brightness still means a tap opens the vibe — the rule the stacked
+                      version was gated on, carried over unchanged. Only the shape moved.
+                    */
                     className={
-                      'tap-target flex w-full justify-between gap-3 border-l-[3px] border-l-[color:var(--tone)] px-4 py-3 text-left transition ' +
-                      (f.drop
-                        ? 'items-start '
-                        : 'items-center rounded border ' +
-                          /*
-                            Brightness means "tapping this opens the vibe".
-
-                            It did not. A plan-locked card took the last branch and came
-                            out pixel-identical to an open one, while a tap on it left
-                            for /pro — and a finished vibe was dimmed to 70% while still
-                            being perfectly tappable. So the shelf had cards that looked
-                            available and were not, next to cards that looked spent and
-                            worked. Appearance now tracks what a tap actually does.
-                          */
-                          (unreached
-                            ? 'border-line/40 bg-surface/30 opacity-40'
-                            : entering === f.id
-                              ? 'border-accent bg-accent/10'
-                              : planLocked
-                                ? 'border-line/60 bg-surface/40 opacity-60 hover:border-accent/40'
-                                : finished || waiting
-                                  ? 'border-line/60 bg-surface/50 opacity-70 hover:border-accent/40'
-                                  : 'border-line bg-bg-elev hover:border-accent/50'))
+                      'azulejo-block tap-target relative flex aspect-[3/4] w-full flex-col justify-end overflow-hidden rounded border p-3 text-left transition ' +
+                      (unreached
+                        ? 'border-line/40 opacity-40'
+                        : entering === f.id
+                          ? 'border-accent'
+                          : planLocked
+                            ? 'border-line/60 opacity-60'
+                            : finished || waiting
+                              ? 'border-line/60 opacity-70'
+                              : 'border-line hover:border-accent/60')
                     }
                   >
-                    {/* Every card is built the same way, the drop included — it was the
-                        only one in the list without a tile, which is half of why it read
-                        as floating free of everything around it. */}
+                    <span className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
+                      <CrateIcon crate={f.id} className="h-8 w-8 text-[color:var(--tone)]" />
+                      {finished ? (
+                        <span className="rounded-full border border-correct/50 px-2 py-1 text-[0.5rem] uppercase tracking-wider text-correct">
+                          done
+                        </span>
+                      ) : unreached && f.id !== 'the_basics' && !basicsStarted ? (
+                        <span className="rounded-full border border-line px-2 py-1 text-[0.5rem] uppercase tracking-wider text-muted">
+                          basics
+                        </span>
+                      ) : unreached || waiting ? (
+                        <span className="rounded-full border border-line px-2 py-1 text-[0.5rem] uppercase tracking-wider tabular-nums text-muted">
+                          stage {at}
+                        </span>
+                      ) : planLocked ? (
+                        <span className="rounded-full border border-line px-2 py-1 text-[0.5rem] uppercase tracking-wider text-muted">
+                          PRO
+                        </span>
+                      ) : null}
+                    </span>
+
+                    {/* The ground under the words, so a title reads over the pattern. */}
                     <span
                       aria-hidden
-                      className={
-                        'azulejo-block mr-1 flex h-10 w-10 shrink-0 items-center justify-center rounded ' +
-                        (f.drop ? 'self-start' : 'self-center')
-                      }
-                    >
-                      <CrateIcon crate={f.id} className="h-6 w-6 text-[color:var(--tone)]" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      {f.drop ? (
-                        <span className="eyebrow mb-1 block text-[0.55rem] text-accent">
-                          DROP · {goneOn(f.drop)}
-                        </span>
-                      ) : null}
-                      <span className="flex flex-wrap items-baseline gap-x-3">
-                        <span className="display text-base">{f.title}</span>
-                        {/*
-                          How far in you are, on the card.
-
-                          A vibe is six to fourteen roots and a session serves three or
-                          four, so a vibe somebody clearly remembers doing comes back
-                          looking untouched — and the only honest answer to "why is this
-                          open again" is a number. Hidden once nothing has been taken and
-                          once it is empty, because both of those are said elsewhere.
-                        */}
-                        {mounted && taken > 0 && taken < total ? (
-                          <span className="text-[0.6rem] tabular-nums text-muted">
-                            {taken} of {total} taken
-                          </span>
-                        ) : null}
-                      </span>
-                      <span className="mt-1 block text-xs text-muted">
-                        {/*
-                          Same precedence as the grouping: the wall you would hit first.
-
-                          This asked planLocked before unreached, so a stage-6 vibe told a
-                          stage-1 learner it comes with membership — money for a door
-                          money does not open.
-                        */}
-                        {unreached
-                          ? f.id !== 'the_basics' && !f.drop && !basicsStarted
-                            ? PICKER.basics_first
-                            : distanceTo(at, rung)
-                          : planLocked
-                          ? PICKER.join_up
-                          : finished
-                            ? 'You have been through all of it. Go again whenever you like.'
-                            : waiting
-                              ? 'Everything here that your stage reaches is done. ' +
-                                RUNGS[at - 1].opens.replace('Opens once', 'The rest opens once') +
-                                ' Go again in the meantime if you like.'
-                              : unreached
-                                ? f.id !== 'the_basics' && !f.drop && !basicsStarted
-                                  ? PICKER.basics_first
-                                  : distanceTo(at, rung)
-                                : f.blurb}
-                      </span>
-                      {f.drop ? (
-                        <span className="mt-1 block text-xs text-muted">
-                          {f.drop.event} · {f.drop.place}
+                      className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-bg via-bg/90 to-transparent"
+                    />
+                    <span className="relative flex flex-col gap-1">
+                      <span className="display text-sm leading-tight">{f.title}</span>
+                      {mounted && taken > 0 && taken < total ? (
+                        <span className="text-[0.6rem] tabular-nums text-muted">
+                          {taken} of {total} taken
                         </span>
                       ) : null}
                     </span>
-                    {/*
-                      One vocabulary per badge slot, and it names the plan you need rather
-                      than the plan you have. A locked card badged DUB was labelled with
-                      the name of the free plan — so it read as included.
-
-                      A stage badge says the NUMBER, never the stage's name: "MEAN IT" is
-                      a name and reads as an instruction, where "STAGE 6" is a distance.
-                    */}
-                    {/*
-                      Third place this precedence has to be right, and the third place it
-                      was wrong: the badge said PRO on a stage-6 vibe. The group, the
-                      blurb and the badge all answer "which wall is in the way", and the
-                      answer is whichever one you reach first — the ladder, always,
-                      because money does not move it.
-                    */}
-                    {finished ? (
-                      <span className="shrink-0 rounded-full border border-correct/50 px-2 py-1 text-[0.55rem] uppercase tracking-wider text-correct">
-                        done
-                      </span>
-                    ) : unreached && f.id !== 'the_basics' && !f.drop && !basicsStarted ? (
-                      <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider text-muted">
-                        after basics
-                      </span>
-                    ) : unreached || waiting ? (
-                      <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider tabular-nums text-muted">
-                        stage {at}
-                      </span>
-                    ) : planLocked ? (
-                      <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider text-muted">
-                        PRO
-                      </span>
-                    ) : f.drop ? (
-                      <DropClock crate={f} now={now} />
-                    ) : null}
                   </button>
-                  {/* The explanation sits with the thing it explains. It used to render
-                      after the whole list, several screens below the card it describes. */}
-                  {f.drop ? (
-                    <p className="mt-3 px-4 text-xs leading-relaxed text-muted">
-                      {PICKER.drop_note}
-                    </p>
-                  ) : null}
-                  {f.drop?.link ? (
-                    <a
-                      href={f.drop.link}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="tap-target mb-3 ml-4 inline-block px-0 text-[0.6rem] uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-accent"
-                    >
-                      {f.drop.link_label ?? 'TICKETS'} ↗
-                    </a>
-                  ) : null}
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </section>
         )
