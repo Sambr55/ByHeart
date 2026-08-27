@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { welcomeToClub } from '@/engine/learner'
 
 /**
  * Redeeming a code.
@@ -32,6 +33,7 @@ export function RedeemCode() {
         reason?: string
         until?: string | null
         bound?: 'account' | 'device'
+        club?: boolean
       }
       setState({
         ok: body.ok,

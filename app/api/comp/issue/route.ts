@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, reason: 'No database configured.' }, { status: 503 })
   }
 
-  let body: { note?: string; uses?: number; until?: string | null; count?: number }
+  let body: { note?: string; uses?: number; until?: string | null; count?: number; club?: boolean }
   try {
     body = (await request.json()) as typeof body
   } catch {
@@ -42,6 +42,8 @@ export async function POST(request: Request) {
   const count = Math.min(Math.max(Number(body.count ?? 1) || 1, 1), 50)
   const until = body.until ? String(body.until) : null
 
-  const codes = await issueCodes({ note, uses, until, count })
-  return NextResponse.json({ ok: true, codes, note, uses, until, redeem_at: '/account' })
+  // Opt-in per code, never a default: a code that opens the Club has to be asked for.
+  const club = body.club === true
+  const codes = await issueCodes({ note, uses, until, count, club })
+  return NextResponse.json({ ok: true, codes, note, uses, until, club, redeem_at: '/account' })
 }

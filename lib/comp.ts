@@ -24,6 +24,14 @@ export interface CompResult {
   note?: string | null
   /** What the grant was attached to, so the UI can say so plainly. */
   bound?: 'account' | 'device'
+  /**
+   * The Club came with it.
+   *
+   * The door stays real — five vibes and the seven card questions — because that gate is
+   * the product rather than an obstacle in front of it. This is a property of the CODE,
+   * issued deliberately, so that somebody can look at the room in order to build it.
+   */
+  club?: boolean
 }
 
 interface CompCode {
@@ -34,6 +42,8 @@ interface CompCode {
   uses: number
   expires_at: string | null
   grants_until: string | null
+  /** Whether this code also opens Dub Club. Off unless it was issued with it on. */
+  grants_club: boolean
 }
 
 /**
@@ -77,7 +87,9 @@ export async function redeemComp(code: string, userId: string): Promise<CompResu
   const already = await sql<{ code: string }[]>`
     select code from comp_redemptions where code = ${found.code} and user_id = ${userId}
   `
-  if (already.length) return { ok: true, until: found.grants_until, note: found.note, bound: 'account' }
+  if (already.length) {
+    return { ok: true, until: found.grants_until, note: found.note, bound: 'account', club: found.grants_club }
+  }
 
   if (found.uses >= found.max_uses) return { ok: false, reason: 'That code has been used up.' }
 
@@ -93,7 +105,7 @@ export async function redeemComp(code: string, userId: string): Promise<CompResu
   await sql`insert into comp_redemptions (code, user_id) values (${found.code}, ${userId})`
   await sql`update comp_codes set uses = uses + 1 where code = ${found.code}`
 
-  return { ok: true, until: found.grants_until, note: found.note, bound: 'account' }
+  return { ok: true, until: found.grants_until, note: found.note, bound: 'account', club: found.grants_club }
 }
 
 /**
@@ -112,7 +124,9 @@ export async function redeemCompForDevice(code: string, device: string): Promise
   const already = await sql<{ code: string }[]>`
     select code from device_comps where device_id = ${device} and code = ${found.code}
   `
-  if (already.length) return { ok: true, until: found.grants_until, note: found.note, bound: 'device' }
+  if (already.length) {
+    return { ok: true, until: found.grants_until, note: found.note, bound: 'device', club: found.grants_club }
+  }
 
   if (found.uses >= found.max_uses) return { ok: false, reason: 'That code has been used up.' }
 
@@ -126,7 +140,7 @@ export async function redeemCompForDevice(code: string, device: string): Promise
   `
   await sql`update comp_codes set uses = uses + 1 where code = ${found.code}`
 
-  return { ok: true, until: found.grants_until, note: found.note, bound: 'device' }
+  return { ok: true, until: found.grants_until, note: found.note, bound: 'device', club: found.grants_club }
 }
 
 /**
@@ -177,6 +191,8 @@ export async function issueCodes(opts: {
   uses: number
   until: string | null
   count: number
+  /** Also opens the Club. Deliberate, per code, and off by default. */
+  club?: boolean
 }): Promise<string[]> {
   const sql = db()
   if (!sql) return []
@@ -188,8 +204,8 @@ export async function issueCodes(opts: {
     for (let j = 0; j < 8; j++) raw += ALPHABET[Math.floor(Math.random() * ALPHABET.length)]
     const code = raw.slice(0, 4) + '-' + raw.slice(4)
     await sql`
-      insert into comp_codes (code, plan, note, max_uses, grants_until)
-      values (${code}, 'pro', ${opts.note}, ${opts.uses}, ${opts.until})
+      insert into comp_codes (code, plan, note, max_uses, grants_until, grants_club)
+      values (${code}, 'pro', ${opts.note}, ${opts.uses}, ${opts.until}, ${Boolean(opts.club)})
     `
     out.push(code)
   }
