@@ -190,20 +190,66 @@ ok(
   paint.otherAlpha.toFixed(2) + ' vs ' + paint.hereAlpha.toFixed(2),
 )
 
-console.log('\nand not on a lesson\n')
+console.log('\non the lesson beats too, anchored\n')
+/*
+  This used to assert the opposite, on the reasoning that a held sequence with three ways
+  out is an invitation to leave. That argument is about a bar that comes and goes. Anchored
+  and always present it is part of the device rather than an offer, and a bar that vanishes
+  on the lesson tells somebody the app is holding them there.
+*/
 await page.goto(BASE + '/vibes')
 await page.waitForTimeout(1200)
-// Tapping opens the picture; the swipe is what enters. Two steps now, so the check takes
-// both rather than asserting the first one lands somewhere it no longer does.
+// Tapping opens the picture; the swipe is what enters. Two steps now.
 await page.click('[data-testid="vibe-the_basics"]')
 await page.waitForSelector('[data-testid="vibe-begin"]')
 await page.click('[data-testid="vibe-begin"]')
-await page.waitForTimeout(2200)
+await page.waitForTimeout(2400)
+ok('a teaching beat has the bar', Boolean(await page.$('[data-testid="bottom-nav"]')))
+const anchored = await page.evaluate(`(() => {
+  const nav = document.querySelector('[data-testid="bottom-nav"]')
+  const r = nav.getBoundingClientRect()
+  return { fixed: getComputedStyle(nav).position, gap: Math.round(window.innerHeight - r.bottom) }
+})()`) as { fixed: string; gap: number }
+ok('and it is anchored, not at the end of the page', anchored.fixed === 'fixed', anchored.fixed)
+ok('flush with the bottom of the screen', Math.abs(anchored.gap) <= 1, String(anchored.gap))
+const beatUnder = await covered(page)
+ok('with the beat clear of it', !beatUnder?.length, (beatUnder ?? []).slice(0, 2).join(' / '))
+/*
+  And a real gap, not a hairline. The CTA and the bar are both the azulejo, so a button
+  finishing two pixels above it reads as one blue mass with a line through the middle.
+*/
+const clearance = await page.evaluate(`(() => {
+  const nav = document.querySelector('[data-testid="bottom-nav"]')
+  const cta = document.querySelector('[data-testid="continue"]')
+  if (!cta) return null
+  return Math.round(nav.getBoundingClientRect().top - cta.getBoundingClientRect().bottom)
+})()`) as number | null
 ok(
-  'a teaching beat has no bar',
-  !(await page.$('[data-testid="bottom-nav"]')),
-  'a held sequence must not offer three ways out',
+  'and a real band of ground under the CTA',
+  clearance === null || clearance >= 16,
+  clearance + 'px',
 )
+
+console.log('\nand the thing you press is the same colour everywhere\n')
+/*
+  The accent used to move with the stage: olive inside the basics, wine-red inside Bridget
+  Jones, near-black on the release beat. Nobody learns "blue means go on" from a control
+  that is a different colour on every screen.
+*/
+const AZULEJO = 'rgb(31, 93, 140)'
+const beatCta = await page.evaluate(`(() => {
+  const cta = document.querySelector('[data-testid="continue"]')
+  const bar = document.querySelector('.bar')
+  return {
+    cta: cta ? getComputedStyle(cta).backgroundColor : null,
+    bar: bar ? getComputedStyle(bar).backgroundColor : null,
+    stage: (document.querySelector('[data-stage]') || {}).getAttribute
+      ? document.querySelector('[data-stage]').getAttribute('data-stage')
+      : null,
+  }
+})()`) as { cta: string | null; bar: string | null; stage: string | null }
+ok('the lesson CTA is the azulejo', beatCta.cta === AZULEJO, beatCta.stage + ' → ' + beatCta.cta)
+ok('and so is the header', beatCta.bar === AZULEJO, String(beatCta.bar))
 
 console.log('\neverything the burger held is still reachable\n')
 await page.goto(BASE + '/profile')

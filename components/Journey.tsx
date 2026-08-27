@@ -39,7 +39,7 @@ import {
   PAIR_STEP,
   PICKER,
 } from '@/content/front-door'
-import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { BottomNav } from '@/components/BottomNav'
 import { VibeOpen } from '@/components/VibeOpen'
 import { vibeImage } from '@/content/vibe-images'
 import { primeAudio } from '@/engine/audio'
@@ -193,10 +193,21 @@ function Shell({
             deeper bottom well stops the last row of a scrolling page finishing flush
             with the screen edge.
           */}
-        <div className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
+        <div className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col gap-6 px-5 pt-6 nav-clear">
           {children}
         </div>
       </main>
+      {/*
+        The bar is on the lesson beats too.
+
+        The argument against it was that a held sequence with three ways out is an
+        invitation to leave in the middle of the one thing that works. That argument is
+        about a bar that comes and goes — and in an app the bar is simply part of the
+        device, anchored, always there, no more an invitation than the home indicator is.
+        Somewhere is not the same as everywhere-except-here, and a learner who notices the
+        bar disappearing has been told the app is holding them.
+      */}
+      <BottomNav />
     </div>
   )
 }
@@ -220,7 +231,11 @@ function Cta({
       // Tailwind emitted last won, so the gap above the button was whatever the build
       // happened to produce. mt-auto keeps it at the foot of a short screen; the padding
       // gives it clearance on a long one, and padding cannot be swallowed by auto.
-      className="tap-target eyebrow mt-auto w-full rounded bg-accent px-5 py-3 text-accent-ink transition active:scale-[0.99] disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
+      //
+      // mb-6 is for the bar underneath. The CTA and the nav are both the azulejo now, and
+      // with a hairline between them they read as one blue mass with a line through it —
+      // so there is a real band of ground between the thing you press and the furniture.
+      className="tap-target eyebrow mb-6 mt-auto w-full rounded bg-accent px-5 py-3 text-accent-ink transition active:scale-[0.99] disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
     >
       {label}
     </button>
@@ -1374,15 +1389,6 @@ function Picker() {
           </section>
         )
       })}
-      {/*
-        The bar, on the picker only.
-
-        A lesson is a held sequence and a persistent bar offering three ways out is an
-        invitation to leave in the middle of the one thing that works. The shelf is the
-        one beat in the journey somebody is meant to be able to leave from.
-      */}
-      <BottomNavSpace />
-      <BottomNav />
 
       {/*
         The two footers are gone.

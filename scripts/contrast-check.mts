@@ -122,10 +122,14 @@ for (const [tone, [light, dark]] of Object.entries(TONES)) {
   console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + tone.padEnd(12) + 'light ' + l.toFixed(2) + '  dark ' + d.toFixed(2))
 }
 
-const HEADERS: Record<string, string> = {
-  azulejo: '#1f5d8c', kinetic: '#1f5d8c', cool: '#33506b', human: '#8f3550',
-  sharp: '#7a2f3a', warm: '#9c4632', reflective: '#4c5a33', blunt: '#343940',
-}
+/*
+  One bar, not eight.
+
+  This measured a saturated header per tone. The bar never used them — --bar-bg is declared
+  on :root, so var(--tone-header) resolved there and stayed azulejo whatever tone was on the
+  screen — so seven of these eight rows were passing a colour nothing rendered.
+*/
+const HEADERS: Record<string, string> = { azulejo: '#1f5d8c' }
 console.log('\nheader bars, carrying white text')
 for (const [name, hex] of Object.entries(HEADERS)) {
   const r = ratio('#ffffff', hex)
@@ -158,10 +162,19 @@ const ON_BAR: [string, number, number][] = [
 ]
 
 console.log('\non-bar tokens, composited over the bar they sit on')
+/*
+  REAL WORLD is not a bar of its own any more.
+
+  It used to flip the header to near-black and back, so this list carried both directions
+  and checked ink-on-page and page-on-ink. The bar is the azulejo on every stage now — the
+  bottom nav pins it there too — so the pairs it was measuring do not occur, and leaving
+  them in would report a fiction as passing.
+*/
 const BARS: [string, string, string][] = [
   ...Object.entries(HEADERS).map(([n, hex]) => [n, hex, '#ffffff'] as [string, string, string]),
-  ['REAL WORLD light', '#1a2430', '#efe7d9'],
-  ['REAL WORLD dark', '#f4efe6', '#171a1f'],
+  // The bottom nav, which pins the deep azulejo in both themes rather than following the
+  // tone. Same scope, so it has to clear the same set.
+  ['bottom nav', '#1f5d8c', '#ffffff'],
 ]
 for (const [name, bg, ink] of BARS) {
   const worst = ON_BAR.map(([label, pct, need]) => {
@@ -232,6 +245,41 @@ for (const [key, where] of [...found].sort()) {
   )
 }
 
+/*
+  One accent, and nothing may move it.
+
+  The stage used to reassign --accent — olive inside the basics, wine-red inside Bridget
+  Jones, near-black on the release beat and while the culture drained away. Every one of
+  those cleared contrast on its own ground, so no gate here objected, and the product still
+  taught the wrong thing: nobody learns "blue means go on" from a control that is a
+  different colour on every screen.
+
+  So the rule is structural rather than perceptual. --accent and --bar-bg are declared by
+  the palette and by nothing else; a stage, a tone or a state may change any other token it
+  likes. This is the check that would have caught it, and the one that keeps it caught.
+*/
+console.log('\none accent, declared in one place')
+{
+  const css = readFileSync('app/globals.css', 'utf8').split('\n')
+  // Where a palette is legitimately declared: :root, the two dark-theme blocks, and the
+  // .bar scope, which inverts inside itself so white is the accent on a coloured ground.
+  const PALETTE = /^(:root|\s*:root|@media|\.bar|\.nav-bar)/
+  let open: string[] = []
+  const strays: string[] = []
+  for (let i = 0; i < css.length; i++) {
+    const line = css[i]
+    const selector = line.match(/^([^\s/{][^{]*)\{\s*$/)
+    if (selector) open = [selector[1].trim()]
+    if (/^\s*--(accent|bar-bg)\s*:/.test(line)) {
+      const owner = open[0] ?? '?'
+      if (!PALETTE.test(owner)) strays.push('globals.css:' + (i + 1) + '  ' + owner + ' → ' + line.trim())
+    }
+  }
+  for (const stray of strays) console.log('  FAIL ' + stray)
+  if (strays.length) failures += strays.length
+  else console.log('  ok   nothing reassigns --accent or --bar-bg outside the palette')
+}
+
 console.log('')
 if (failures) { console.log(failures + ' contrast failure(s)'); process.exit(1) }
-console.log('every colour clears its threshold on its own ground')
+console.log('every colour clears its threshold, and the accent never moves')

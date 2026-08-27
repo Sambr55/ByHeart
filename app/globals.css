@@ -45,7 +45,10 @@
   --muted: #635c50;       /* darkened for the warmer ground */
   --accent: #1f5d8c;      /* azulejo. The header, the CTA, and always the Portuguese */
   --accent-ink: #ffffff;
-  --azulejo: #1f5d8c;     /* the blue itself. --accent is a ROLE and stages reassign it */
+  --azulejo: #1f5d8c;     /* the blue itself, for anything that must not follow a role */
+  /* The bar's ground, in both themes. A solid coloured bar carrying white does not change
+     when the page ground does, which is why this one value serves light and dark alike. */
+  --azulejo-bar: #1f5d8c;
   --telha: #a8492f;       /* warmth and urgency — numerals, counters, short headlines.
                              It clears AA, but it is not a body-text colour */
   --correct: #2c6b4a;
@@ -99,25 +102,27 @@
 }
 
 /*
-  The stage shift stays. It is one of the best ideas in the product: LANDING and ROOT
-  carry the crate's world, CHOICE is neutral because the learner is deciding rather than
-  being sold to, and REAL WORLD strips everything back because the absence of culture is
-  the whole point of that beat.
+  The stage shift stays. The ACCENT does not move with it any more.
 
-  Re-tinted rather than removed. ROOT now takes the crate's own tone; REAL WORLD loses
-  its accent entirely, which is a far stronger move now that there is something to
-  remove.
+  The idea was good and the execution taught the wrong thing. Every stage reassigned
+  --accent, so the button that means "go on" was a different colour on almost every
+  screen: olive inside the basics, dark slate inside the swearing, wine-red inside Bridget
+  Jones, and near-black on the release beat, which read as a disabled control rather than
+  the most important tap in the session. A learner cannot learn "blue is the way forward"
+  from a control that is blue on the shelf, olive in a lesson and black at the end of one.
+
+  So the azulejo is the accent everywhere, full stop, and the stage keeps everything else
+  it was doing: the grid tint, the azulejo pattern going away in REAL WORLD, the tone on
+  eyebrows and borders and tiles. A vibe is still recognisably its own place. The one
+  thing that never changes is the thing you press.
 */
 [data-stage='ROOT'],
 [data-stage='LANDING'],
 [data-stage='DEMO'] {
-  --accent: var(--tone);
   --grid: color-mix(in srgb, var(--tone) 6%, transparent);
 }
 
 [data-stage='REAL WORLD'] {
-  --accent: var(--fg);
-  --accent-ink: var(--bg);
   --grid: transparent;
 }
 
@@ -291,18 +296,23 @@ body {
   which means `--bar-bg` and `--bar-ink` are computed on an ancestor against the page
   palette and inherit in as plain colours that interpolate normally.
 
-  Deliberately NOT registered with @property. :root declares --tone: var(--accent) while
-  [data-stage='ROOT'] declares --accent: var(--tone) — a cycle that is benign only while
-  both are unregistered. Register them and it silently resolves to the hard-coded
+  Deliberately NOT registered with @property. :root declares --tone: var(--accent), and
+  while ROOT also declared --accent: var(--tone) that was a cycle, benign only as long as
+  both stayed unregistered. The cycle is gone now that the accent no longer moves with the
+  stage, but the reasoning holds: registering it silently resolves to the hard-coded
   light-theme azulejo, which is a dark-mode bug no gate in this repo would catch. It buys
-  nothing: a computed colour already interpolates.
+  nothing either — a computed colour already interpolates.
 */
-[data-drain='on'] {
-  --bar-bg: var(--fg);
-  --bar-ink: var(--bg);
-  --accent: var(--fg);
-  --accent-ink: var(--bg);
-}
+/*
+  The drain keeps its mechanic and loses its colour.
+
+  Tapping TAKE IT AWAY makes the culture leave — that is the `.drains` rule above, the
+  scaffolding fading up and out, and it is the best moment in the product. This block was
+  decoration on top of it: the header and every accent flipping to near-black for the whole
+  of the beat that follows, which is why the release screen was a black bar sitting above a
+  blue one on the same phone. The learner does the hardest thing in the session there, and
+  it was dressed as the screen where nothing is available.
+*/
 
 .bar {
   transition:
@@ -564,21 +574,19 @@ summary:focus-visible,
 :root[data-theme='dark'] [data-tone='blunt']      { --tone: #9aa0a7; }
 
 /*
-  Header tones.
+  The header tones are gone, and they were never doing anything.
 
-  A card tint can be pale; a header bar cannot, because it has to carry white text at
-  4.5:1. So each tone declares a saturated variant, and the header uses that rather than
-  the card colour. Same value in both themes: a solid coloured bar with white on it does
-  not need to change when the ground does.
+  Each tone declared a saturated header variant — dark wine for sharp, near-black for
+  blunt — and the bar never saw one of them. --bar-bg is declared on :root, and a custom
+  property is substituted at the element where it is DECLARED, so var(--tone-header)
+  resolved once, at :root, to the azulejo, and stayed there whatever tone was on the
+  screen below. Measured on five vibes across five tones: every header, rgb(31, 93, 140).
+
+  So this was seven dead colours sitting in the stylesheet looking live, and the contrast
+  gate dutifully measuring them. Left in, they are how a near-black header comes back —
+  one plausible refactor of that :root declaration and the bar starts following the tone
+  for real. The blue is the header now, said once.
 */
-:root { --tone-header: #1f5d8c; }
-[data-tone='kinetic']    { --tone-header: #1f5d8c; }
-[data-tone='cool']       { --tone-header: #33506b; }
-[data-tone='human']      { --tone-header: #8f3550; }
-[data-tone='sharp']      { --tone-header: #7a2f3a; }
-[data-tone='warm']       { --tone-header: #9c4632; }
-[data-tone='reflective'] { --tone-header: #4c5a33; }
-[data-tone='blunt']      { --tone-header: #343940; }
 
 /*
   The bar itself, and the reason it is worth having.
@@ -626,13 +634,16 @@ summary:focus-visible,
   computed against the page palette and inherit in as plain colours.
 */
 :root {
-  --bar-bg: var(--tone-header);
+  --bar-bg: var(--azulejo-bar);
   --bar-ink: #ffffff;
 }
-[data-stage='REAL WORLD'] {
-  --bar-bg: var(--fg);
-  --bar-ink: var(--bg);
-}
+/*
+  The bar is blue on every stage too.
+
+  REAL WORLD used to flip it to ink, which made the release beat a black screen with a
+  black button — the moment the learner does the hardest thing in the session, dressed as
+  the moment nothing is available.
+*/
 
 /*
   The bar carries its own token scope.
