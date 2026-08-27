@@ -15,7 +15,9 @@ import {
   frameFor,
   isAnswered,
   legendStatus,
+  parseChildren,
   provenanceOf,
+  type Child,
   type LegendFrame,
 } from '@/content/legend'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
@@ -92,16 +94,52 @@ export function Legend() {
     [answers],
   )
 
+  /*
+    The next question, rather than the deck.
+
+    Answering one card sent you back to a list of ten to choose the next from, which turned
+    seven questions into seven decisions about which question to answer — and building your
+    Legend into an errand. Nobody choosing between "Do you have children?" and "What do you
+    do?" is making a meaningful choice; they are being asked to do the app's filing.
+
+    So it runs on. Finish a card and the next unanswered one that applies opens itself, in
+    the order the questions come in a real conversation. The deck is still there, still
+    reachable, still how you go back and change one — it stops being the thing you have to
+    pass through between every answer.
+  */
+  const nextAfter = (id: string): string | null => {
+    const queue = LEGEND_FRAMES.filter(
+      (f) => frameApplies(f, answers) && reachable.some((r) => r.id === f.id),
+    )
+    const from = queue.findIndex((f) => f.id === id)
+    return (
+      queue.slice(from + 1).find((f) => !isAnswered(f, valuesFor(f.id)))?.id ??
+      // Nothing after it, so pick up anything skipped earlier before giving up.
+      queue.slice(0, Math.max(from, 0)).find((f) => !isAnswered(f, valuesFor(f.id)))?.id ??
+      null
+    )
+  }
+
   if (typeof mode === 'object') {
     const frame = LEGEND_FRAMES.find((f) => f.id === mode.build)!
     return (
       <Shell>
         <BuildCard
+          key={frame.id}
           frame={frame}
           values={valuesFor(frame.id) ?? {}}
           gender={learner.profile?.gender ?? null}
           owned={owned}
-          onDone={() => setMode('deck')}
+          onDone={() => {
+            const next = nextAfter(frame.id)
+            setMode(next ? { build: next } : 'deck')
+          }}
+          onStop={() => setMode('deck')}
+          remaining={
+            LEGEND_FRAMES.filter(
+              (f) => frameApplies(f, answers) && reachable.some((r) => r.id === f.id),
+            ).filter((f) => !isAnswered(f, valuesFor(f.id))).length
+          }
         />
       </Shell>
     )
@@ -390,12 +428,19 @@ function BuildCard({
   gender,
   owned,
   onDone,
+  onStop,
+  remaining,
 }: {
   frame: LegendFrame
   values: Record<string, string>
   gender: 'm' | 'f' | null
   owned: string[]
+  /** Finished with this one — the next question opens itself. */
   onDone: () => void
+  /** Enough for now. Back to the deck, with what has been answered kept. */
+  onStop: () => void
+  /** How many still unanswered, including this one. Said as a sentence, never a score. */
+  remaining: number
 }) {
   const [draft, setDraft] = useState<Record<string, string>>(values)
   const [beat, setBeat] = useState<'ask' | 'build' | 'cold'>('ask')
@@ -426,7 +471,9 @@ function BuildCard({
         <div className="flex items-center gap-3">
           <AudioButton slug={slugFor(frame.ask)} text={frame.ask} size="sm" />
           <span className="min-w-0">
-            <span className="pt block text-xl text-accent">{frame.ask}</span>
+            <span data-testid="legend-ask" className="pt block text-xl text-accent">
+              {frame.ask}
+            </span>
             <span className="block text-xs text-muted">{frame.ask_en}</span>
           </span>
         </div>
@@ -493,7 +540,12 @@ function BuildCard({
                 <label htmlFor={slot.key} className="text-xs text-muted">
                   {slot.hint}
                 </label>
-                {slot.kind === 'number' ? (
+                {slot.kind === 'children' ? (
+                  <ChildRows
+                    value={draft[slot.key] ?? ''}
+                    onChange={(next) => setDraft((d) => ({ ...d, [slot.key]: next }))}
+                  />
+                ) : slot.kind === 'number' ? (
                   /*
                     A number you can say. It was a text box with inputMode="numeric", so
                     the card came out "Tenho 56 anos" — readable, unpronounceable, and
@@ -602,6 +654,20 @@ function BuildCard({
             >
               Leave this one empty
             </button>
+            {/*
+              Running on needs a way to stop, or it is a form with the exits removed.
+
+              Said as a sentence rather than a counter: "two more after this" is a shape,
+              and "2/7" is a score with a progress bar implied behind it.
+            */}
+            <button
+              type="button"
+              data-testid="legend-stop"
+              onClick={onStop}
+              className="tap-target text-center text-xs text-muted underline underline-offset-4"
+            >
+              {remaining > 1 ? 'Stop here — ' + (remaining - 1) + ' more when you want them' : 'Back to your deck'}
+            </button>
           </div>
         </>
       ) : null}
@@ -629,6 +695,98 @@ function BuildCard({
  * proof card on exactly the same terms as everything else — because it is exactly the
  * same thing: a sentence produced with no cue.
  */
+/**
+ * Your children, one row each.
+ *
+ * The card asked "how many" from a fixed list and then only knew names for one son or one
+ * daughter — so anybody with two got a sentence with no names in it, and anybody with two
+ * girls got the masculine plural. A count is not who they are.
+ *
+ * A name, a boy or a girl, and an age if they want to give one. Age is optional and stays
+ * optional: a child with no age is somebody who did not want to say, not an incomplete
+ * record, and the sentence simply leaves that clause out.
+ */
+function ChildRows({ value, onChange }: { value: string; onChange: (next: string) => void }) {
+  const kids = parseChildren(value)
+  const write = (next: Child[]) => onChange(JSON.stringify(next))
+  const set = (i: number, patch: Partial<Child>) =>
+    write(kids.map((k, j) => (i === j ? { ...k, ...patch } : k)))
+
+  return (
+    <div className="flex flex-col gap-3">
+      {kids.map((k, i) => (
+        <div key={i} className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+          <div className="flex items-center gap-3">
+            <input
+              value={k.name}
+              onChange={(e) => set(i, { name: e.target.value })}
+              placeholder="name"
+              aria-label={'Child ' + (i + 1) + ' name'}
+              data-testid={'kid-name-' + i}
+              className="min-w-0 flex-1 border-b border-line bg-transparent py-1 text-base text-fg outline-none focus:border-accent"
+            />
+            <button
+              type="button"
+              onClick={() => write(kids.filter((_, j) => j !== i))}
+              aria-label={'Remove ' + (k.name || 'this child')}
+              className="tap-target shrink-0 px-2 text-muted transition hover:text-fg"
+            >
+              ×
+            </button>
+          </div>
+          <div className="mt-1 flex flex-wrap items-center gap-3">
+            {/* Boy or girl, because the Portuguese needs it: filho or filha, and duas
+                filhas rather than dois filhos when they are all girls. */}
+            {(['m', 'f'] as const).map((g) => (
+              <button
+                key={g}
+                type="button"
+                aria-pressed={k.g === g}
+                data-testid={'kid-' + g + '-' + i}
+                onClick={() => set(i, { g })}
+                className={
+                  'tap-target rounded border px-3 py-1 text-sm transition ' +
+                  (k.g === g ? 'border-accent bg-accent/10 text-accent' : 'border-line text-muted')
+                }
+              >
+                {g === 'm' ? 'boy' : 'girl'}
+              </button>
+            ))}
+            <span className="flex-1" />
+            <label className="flex items-center gap-1 text-xs text-muted">
+              age
+              <input
+                value={k.age ?? ''}
+                onChange={(e) => set(i, { age: e.target.value.replace(/\D/g, '').slice(0, 2) })}
+                inputMode="numeric"
+                placeholder="—"
+                aria-label={'Age of ' + (k.name || 'child ' + (i + 1))}
+                data-testid={'kid-age-' + i}
+                className="w-10 border-b border-line bg-transparent py-1 text-center text-base tabular-nums text-fg outline-none focus:border-accent"
+              />
+            </label>
+          </div>
+        </div>
+      ))}
+
+      <button
+        type="button"
+        data-testid="kid-add"
+        onClick={() => write([...kids, { name: '', g: 'm' }])}
+        className="tap-target rounded border border-dashed border-line-strong px-4 py-3 text-sm text-muted transition hover:border-accent hover:text-accent"
+      >
+        {kids.length ? 'Add another' : 'Add a child'}
+      </button>
+      {/* Nobody has to have any, and saying so beats an empty list that looks unfinished. */}
+      {!kids.length ? (
+        <p className="text-xs leading-relaxed text-muted">
+          Leave it empty and the card says you have none, which is a real answer.
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
 function ColdSay({
   ask,
   answer,

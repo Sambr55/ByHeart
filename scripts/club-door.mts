@@ -16,6 +16,7 @@
 import {
   LEGEND_CARD,
   LEGEND_FRAMES,
+  type Child,
   cardDone,
   cardToGo,
   clubOpen,
@@ -37,7 +38,9 @@ const harder = LEGEND_FRAMES.filter((f) => f.rung > 2).map((f) => f.id)
 console.log('\nthe card\n')
 ok('is the seven questions a stranger asks', LEGEND_CARD.length === 7, String(LEGEND_CARD.length))
 ok('is entirely rung 1–2', LEGEND_CARD.every((f) => f.rung <= 2))
-ok('leaves the harder three for inside', harder.length === 3, harder.join(', '))
+// Two now, not three. "And what do they do?" is gone: it was a second question about
+// children, asked of everybody who had any, describing one particular family.
+ok('leaves the harder two for inside', harder.length === 2, harder.join(', '))
 
 console.log('\nthe door\n')
 ok('a brand new learner is outside', !clubOpen({ answeredFrameIds: [], rung: 1 }))
@@ -80,24 +83,72 @@ const F = (id: string) => LEGEND_FRAMES.find((f) => f.id === id)!
 const ans = (id: string, values: Record<string, string>) => ({ frame_id: id, values })
 
 ok('no card is a fixed sentence with nothing to choose', LEGEND_FRAMES.every((f) => f.slots.length))
+/*
+  Your children, not a count of them.
+
+  The card asked "how many" from a fixed list and only had names for one son or one
+  daughter — so two children got a sentence with nobody's name in it, and two girls got the
+  masculine plural. These check the composed sentence instead, and they check the thing the
+  old model could not do at all.
+*/
+const kids = (...list: Child[]) => JSON.stringify(list)
+const said = (...list: Child[]) => fillFrame(F('children'), { kids: kids(...list) }, 'm')
+
 ok(
   'childless is an answer, not an empty field',
-  isAnswered(F('children'), { count: 'nenhum' }),
-  fillFrame(F('children'), { count: 'nenhum' }, 'm'),
+  isAnswered(F('children'), { kids: kids() }) || isAnswered(F('children'), {}),
+  said(),
+)
+ok('and it says so', said() === 'Não tenho filhos.', said())
+ok(
+  'one child is named',
+  said({ name: 'Tom', g: 'm', age: '8' }).includes('Tom'),
+  said({ name: 'Tom', g: 'm', age: '8' }),
 )
 ok(
-  'one child is a different sentence from three',
-  fillFrame(F('children'), { count: 'um filho', name: 'Tom' }, 'm') !==
-    fillFrame(F('children'), { count: 'três filhos' }, 'm'),
-  fillFrame(F('children'), { count: 'um filho', name: 'Tom' }, 'm'),
+  'and so is every one of three',
+  ['Oscar', 'Tilly', 'Ted'].every((n) =>
+    said(
+      { name: 'Oscar', g: 'm' },
+      { name: 'Tilly', g: 'f' },
+      { name: 'Ted', g: 'm' },
+    ).includes(n),
+  ),
+  said({ name: 'Oscar', g: 'm' }, { name: 'Tilly', g: 'f' }, { name: 'Ted', g: 'm' }),
+)
+/*
+  The one the old model got wrong every time. Portuguese bends the NUMBER as well as the
+  noun: two daughters is duas filhas. A fixed list of counts cannot know who they are.
+*/
+ok(
+  'two girls are duas filhas, not dois filhos',
+  said({ name: 'A', g: 'f' }, { name: 'B', g: 'f' }).includes('duas filhas'),
+  said({ name: 'A', g: 'f' }, { name: 'B', g: 'f' }),
 )
 ok(
-  'nobody childless is asked what their children do',
-  !frameApplies(F('children_doing'), [ans('children', { count: 'nenhum' })]),
+  'and a mixed pair goes masculine, as Portuguese does',
+  said({ name: 'A', g: 'f' }, { name: 'B', g: 'm' }).includes('dois filhos'),
+  said({ name: 'A', g: 'f' }, { name: 'B', g: 'm' }),
+)
+/* An age nobody gave is not a gap. The clause simply does not appear. */
+ok(
+  'an age withheld leaves no hole',
+  !said({ name: 'Tom', g: 'm' }).includes('anos'),
+  said({ name: 'Tom', g: 'm' }),
 )
 ok(
-  'and somebody with children is',
-  frameApplies(F('children_doing'), [ans('children', { count: 'três filhos' })]),
+  'and an age given is said as a word',
+  said({ name: 'Tom', g: 'm', age: '8' }).includes('oito anos'),
+  said({ name: 'Tom', g: 'm', age: '8' }),
+)
+/*
+  "And what do they do?" is gone rather than made conditional. It was a second question
+  about children — "Ainda andam na escola" — which describes one particular family and was
+  put in everybody's mouth. Removing it is also most of why building a Legend is shorter.
+*/
+ok(
+  'nobody is asked a second question about their children',
+  !LEGEND_FRAMES.some((f) => f.id === 'children_doing'),
 )
 
 console.log('\nthe count the Club shows\n')

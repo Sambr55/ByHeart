@@ -14,7 +14,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
 import { DUB, DUB_CLUB, DUB_MARK } from '../content/marks'
-import { LEGEND_FRAMES, REPAIR_KIT } from '../content/legend'
+import { LEGEND_FRAMES, REPAIR_KIT, childrenSentence } from '../content/legend'
 import {
   BLOCK_ORDER,
   EXAMPLES,
@@ -1211,8 +1211,38 @@ for (const e of EXAMPLES) {
       fail(F + 'declares rung ' + f.rung + ' but needs a rung ' + need + ' piece')
     }
 
+    /*
+      A composed frame is checked against what it composes.
+
+      The children card has no template — a repeating answer has no shape a string can
+      hold, so its sentence is built by `childrenSentence` from an actual list of children.
+      Its slot is therefore never written as {kids}, and its helpers live in sentences the
+      base frame does not contain.
+
+      So the lint reads the composed shapes instead of the literal, which keeps it strict:
+      every helper still has to appear in something the learner can actually be shown, and
+      a helper for a word no shape produces still fails.
+    */
+    const composed = f.slots.some((sl) => sl.kind === 'children')
+      ? [
+          childrenSentence([]),
+          childrenSentence([{ name: 'X', g: 'm', age: '8' }]),
+          childrenSentence([{ name: 'X', g: 'f', age: '8' }]),
+          childrenSentence([
+            { name: 'X', g: 'f', age: '8' },
+            { name: 'Y', g: 'f', age: '9' },
+          ]),
+          childrenSentence([
+            { name: 'X', g: 'm', age: '8' },
+            { name: 'Y', g: 'f', age: '9' },
+          ]),
+        ].map((c) => c.frame)
+      : null
+
     // Every slot the frame writes must exist, and every slot declared must be used.
-    const used = [...f.frame.matchAll(/\{(\w+)\}/g)].map((m) => m[1])
+    const used = composed
+      ? f.slots.map((sl) => sl.key)
+      : [...f.frame.matchAll(/\{(\w+)\}/g)].map((m) => m[1])
     for (const key of used) {
       if (!f.slots.some((sl) => sl.key === key)) fail(F + 'writes {' + key + '} with no such slot')
     }
@@ -1248,7 +1278,13 @@ for (const e of EXAMPLES) {
       choice. Requiring pieces for them would mean nobody could say they were Welsh until
       a vibe happened to teach it.
     */
-    const scaffolding = [f.frame, ...Object.values(f.variants ?? {}).map((v) => v.frame)].join(' ')
+    // Composed frames put every shape they can produce into the surface, so a helper for
+    // a word only the three-children sentence contains is still checked.
+    const scaffolding = [
+      f.frame,
+      ...(composed ?? []),
+      ...Object.values(f.variants ?? {}).map((v) => v.frame),
+    ].join(' ')
     const optionText = [
       ...f.slots.flatMap((sl) => (sl.options ?? []).flatMap((o) => [o.value, o.f ?? ''])),
       ...Object.values(f.variants ?? {}).flatMap((v) =>
@@ -1256,7 +1292,12 @@ for (const e of EXAMPLES) {
       ),
     ].join(' ')
     const surfaces = scaffolding + ' ' + optionText
-    const words = fold(scaffolding.replace(/\{\w+\}/g, ' ')).split(/[^\p{L}]+/u).filter(Boolean)
+    const words = fold(scaffolding.replace(/\{\w+\}/g, ' '))
+      .split(/[^\p{L}]+/u)
+      .filter(Boolean)
+      // X and Y stand in for the learner's own children in the composed samples above.
+      // Their names are theirs; no piece is ever going to teach them.
+      .filter((w) => !(composed && (w === 'x' || w === 'y')))
     for (const w of words) {
       if (taught.has(w) || GRAMMAR.has(w) || glossed.has(w)) continue
       fail(F + 'uses "' + w + '", which no piece teaches and the card does not gloss')

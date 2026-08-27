@@ -34,7 +34,7 @@ import { PIECES, type Rung } from './roots'
  *   It produces identical robots. So every card is a choice, not a blank.
  */
 
-export type SlotKind = 'name' | 'number' | 'place' | 'pick'
+export type SlotKind = 'name' | 'number' | 'place' | 'pick' | 'children'
 
 export interface LegendSlot {
   key: string
@@ -201,43 +201,22 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     ask: 'Tens filhos?',
     ask_en: 'Do you have children?',
     /*
-      The count chooses the sentence, and none is a real answer.
+      Your children, not a count of them.
 
-      This was "Tenho {n}. Chamam-se {names}." — which assumes you have children, and
-      more than one of them. Somebody childless was handed a sentence about their
-      children; somebody with one was taught a plural. A frame that only fits one shape
-      of life is not a Legend, it is somebody else's.
+      This asked "how many" from a fixed list, and then only had names for one son or one
+      daughter — so anybody with two got "Tenho dois filhos." and no names at all, and
+      anybody with two girls got the masculine plural. A frame that only fits one shape of
+      life is not a Legend, it is somebody else's, and a picker of counts is that same
+      mistake wearing a smaller hat.
+
+      So the answer is a list: a name, a boy or a girl, and an age if they want to give
+      one. The sentence is composed from it — the count agrees (duas filhas, not dois
+      filhos), the names are theirs, and every clause only appears when there is something
+      to put in it. See `childrenSentence`.
     */
-    frame: 'Tenho {count}.',
-    en: 'I have {count}.',
-    slots: [
-      {
-        key: 'count',
-        kind: 'pick',
-        hint: 'how many',
-        options: [
-          { value: 'nenhum', en: 'none' },
-          { value: 'um filho', en: 'one son' },
-          { value: 'uma filha', en: 'one daughter' },
-          { value: 'dois filhos', en: 'two children' },
-          { value: 'três filhos', en: 'three children' },
-          { value: 'quatro filhos', en: 'four or more' },
-        ],
-      },
-    ],
-    variants: {
-      nenhum: { frame: 'Não tenho filhos.', en: 'I do not have children.', slots: [] },
-      'um filho': {
-        frame: 'Tenho um filho. Chama-se {name}.',
-        en: 'I have one son. He is called {name}.',
-        slots: [{ key: 'name', kind: 'name', hint: 'his name' }],
-      },
-      'uma filha': {
-        frame: 'Tenho uma filha. Chama-se {name}.',
-        en: 'I have one daughter. She is called {name}.',
-        slots: [{ key: 'name', kind: 'name', hint: 'her name' }],
-      },
-    },
+    frame: 'Não tenho filhos.',
+    en: 'I do not have children.',
+    slots: [{ key: 'kids', kind: 'children', hint: 'your children' }],
     /*
       The showcase card, and the reason its rung is honest rather than convenient.
 
@@ -249,60 +228,26 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     */
     built_from: ['tenho', 'filhos', 'chamam'],
     rung: 5,
-    // The variants introduce their own scaffolding, and a Legend is only made of language
-    // the learner owns if every word around their answer is either taught or glossed here.
+    /*
+      The composed sentence brings its own words with it, and the lint caught two the card
+      was about to use without teaching: `filhas` and `duas`.
+
+      `duas` is the good one. Portuguese bends the NUMBER as well as the noun — two
+      daughters is duas filhas, not dois — and a learner meeting that on a card about their
+      own children will never need telling twice.
+    */
     helpers: {
       'Chama-se': 'he is / she is called',
+      'Chamam-se': 'they are called',
       filho: 'son',
       filha: 'daughter',
       filhos: 'children',
+      filhas: 'daughters — when they all are',
+      duas: 'two, when what you are counting is feminine',
+      'Têm': 'they are',
     },
     teaches:
       'Tenho again, doing exactly what it did with your age: you HAVE children, you do not be them. Chamam-se is chamo-me turned round to point at other people — the same verb, aimed outwards.'
-  },
-  {
-    id: 'children_doing',
-    card: 6,
-    ask: 'E o que fazem?',
-    ask_en: 'And what do they do?',
-    /*
-      Asked only of somebody who said they have children, and it no longer describes
-      mine.
-
-      It was "O {name} está na universidade. Os outros ainda andam na {place}." — one at
-      university, the others at school, more than one of them. That is one particular
-      family, written into a card handed to everybody.
-    */
-    requires: { frame: 'children', slot: 'count', notOneOf: ['nenhum'] },
-    frame: 'Ainda andam na {place}.',
-    en: 'They are still at {place}.',
-    slots: [
-      {
-        key: 'place',
-        kind: 'pick',
-        hint: 'where they are',
-        options: [
-          { value: 'escola', en: 'school' },
-          { value: 'universidade', en: 'university' },
-          { value: 'creche', en: 'nursery' },
-        ],
-      },
-    ],
-    variants: {
-      universidade: { frame: 'Já estão na universidade.', en: 'They are at university now.', slots: [] },
-    },
-    built_from: ['esta_', 'o_meu', 'ainda', 'escola'],
-    rung: 3,
-    helpers: {
-      andam: 'go / are',
-      ainda: 'still',
-      'Já': 'already',
-      'estão': 'they are',
-      // In the variant sentence rather than the base one, and still a word on the card.
-      universidade: 'university',
-    },
-    teaches:
-      'Ser and estar side by side on your own family, which is the one example nobody forgets. Está na universidade is where somebody is RIGHT NOW; it would be é if it were what they are forever.'
   },
   {
     id: 'work',
@@ -603,6 +548,97 @@ export function provenanceOf(frame: LegendFrame): { piece: string; family: strin
 }
 
 /** The learner's own words in the frame, with the endings agreeing where they must. */
+/**
+ * One child, as the learner gave them.
+ *
+ * `age` is optional and stays a string of digits, exactly as the age card does it: stored
+ * unambiguously, said as a word. A child with no age given is not an incomplete record, it
+ * is somebody who did not want to say.
+ */
+export interface Child {
+  name: string
+  g: 'm' | 'f'
+  age?: string
+}
+
+/** Stored as JSON in one slot, because a repeating answer has no shape a template can hold. */
+export function parseChildren(raw: string | undefined | null): Child[] {
+  if (!raw) return []
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed
+      .filter((c): c is Child => Boolean(c) && typeof (c as Child).name === 'string')
+      .map((c): Child => ({ name: c.name.trim(), g: c.g === 'f' ? 'f' : 'm', age: c.age }))
+  } catch {
+    return []
+  }
+}
+
+/** "Oscar, Tilly e Ted" — the Portuguese list, and its English twin. */
+function joinPt(xs: string[]): string {
+  return xs.length < 2 ? (xs[0] ?? '') : xs.slice(0, -1).join(', ') + ' e ' + xs[xs.length - 1]
+}
+function joinEn(xs: string[]): string {
+  return xs.length < 2 ? (xs[0] ?? '') : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1]
+}
+
+/**
+ * The sentence, composed rather than filled.
+ *
+ * Every clause appears only when there is something to put in it, which is the whole
+ * point: no count somebody did not give, no age somebody withheld, and the plural agreeing
+ * with who the children actually are. Two girls is `duas filhas` — feminine on the number
+ * as well as the noun, which is the mistake a fixed list of options cannot help making.
+ */
+export function childrenSentence(all: Child[]): { frame: string; en: string } {
+  /*
+    Filtered here rather than on the way in.
+
+    An unnamed child is a row somebody is still typing into — dropping it at parse time
+    meant the editor deleted every blank the moment it was added, so there was nothing to
+    type in. It is the sentence that has no use for a child without a name, not the record.
+  */
+  const kids = all.filter((k) => k.name.trim())
+  if (!kids.length) return { frame: 'Não tenho filhos.', en: 'I do not have children.' }
+  const names = kids.map((k) => k.name)
+  const aged = (k: Child) => Boolean(k.age && /^\d{1,2}$/.test(k.age))
+
+  if (kids.length === 1) {
+    const k = kids[0]
+    const they = k.g === 'f' ? 'She' : 'He'
+    const noun = k.g === 'f' ? 'uma filha' : 'um filho'
+    const nounEn = k.g === 'f' ? 'one daughter' : 'one son'
+    const age = aged(k) ? ' Tem ' + say(Number(k.age)) + ' anos.' : ''
+    const ageEn = aged(k) ? ' ' + they + ' is ' + k.age + '.' : ''
+    return {
+      frame: 'Tenho ' + noun + '. Chama-se ' + k.name + '.' + age,
+      en: 'I have ' + nounEn + '. ' + they + ' is called ' + k.name + '.' + ageEn,
+    }
+  }
+
+  // Mixed goes masculine, which is what Portuguese does and worth meeting here rather
+  // than as a rule: filhas only when every one of them is a girl.
+  const girls = kids.every((k) => k.g === 'f')
+  const noun = girls ? 'filhas' : 'filhos'
+  const count = say(kids.length, girls ? 'f' : 'm')
+  const ages = kids.every(aged)
+    ? ' Têm ' + joinPt(kids.map((k) => say(Number(k.age)))) + ' anos.'
+    : ''
+  const agesEn = kids.every(aged)
+    ? ' They are ' + joinEn(kids.map((k) => String(k.age))) + '.'
+    : ''
+  // Spelled out on both sides. "I have 2 daughters" is how a database talks.
+  const EN_COUNT = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight']
+  return {
+    frame: 'Tenho ' + count + ' ' + noun + '. Chamam-se ' + joinPt(names) + '.' + ages,
+    en:
+      'I have ' + (EN_COUNT[kids.length] ?? String(kids.length)) + ' ' +
+      (girls ? 'daughters' : 'children') +
+      '. They are called ' + joinEn(names) + '.' + agesEn,
+  }
+}
+
 export function fillFrame(
   frame: LegendFrame,
   values: Record<string, string>,
@@ -653,6 +689,15 @@ export function frameFor(
   frame: LegendFrame,
   values: Record<string, string> | undefined,
 ): { frame: string; en: string; slots: LegendSlot[] } {
+  /*
+    A repeating answer has no shape a template can hold, so this one is composed. Every
+    other frame is still a string with slots in it, which is what keeps them lint-checkable.
+  */
+  const kids = frame.slots.find((s) => s.kind === 'children')
+  if (kids) {
+    const { frame: f, en } = childrenSentence(parseChildren(values?.[kids.key]))
+    return { frame: f, en, slots: frame.slots }
+  }
   const chosen = frame.slots.map((s) => values?.[s.key]).find((v) => v && frame.variants?.[v])
   const variant = chosen ? frame.variants?.[chosen] : undefined
   if (!variant) return { frame: frame.frame, en: frame.en, slots: frame.slots }
