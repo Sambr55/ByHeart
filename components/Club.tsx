@@ -526,6 +526,8 @@ function Door({
     than assuming. A screen may not name an action its destination cannot honour.
   */
   const legend = legendStatus({ sectionsCompleted: sections })
+  /* Six is two rows of three — enough to read as a place, short of reading as a list. */
+  const peek = situationsFor(DEFAULT_CHAPTER).filter((s) => isCurrent(s)).slice(0, 6)
   return (
     <main
       data-stage="REAL WORLD"
@@ -535,6 +537,28 @@ function Door({
         <Wordmark mark="club" className="h-8" />
         <span className="flex-1" />
         <Menu />
+      </div>
+
+      {/*
+        The rooms, behind the door.
+
+        It described what was inside in a sentence while five photographs of it sat one
+        state away, which is a strange thing for a product that has spent a week learning
+        to show rather than tell. Nothing about the lock changes — these do not open —
+        but wanting in is the entire job of this screen, and a paragraph about people and
+        places cannot do what a picture of the pharmacy does.
+
+        Dimmed and not tappable, and the tiles carry no titles: this is a glimpse, not a
+        menu you can read your way around.
+      */}
+      <div aria-hidden className="-mx-5 grid grid-cols-3 gap-1 opacity-40">
+        {peek.map((s) =>
+          s.image ? (
+            <span key={s.id} className="relative block aspect-[3/4] overflow-hidden">
+              <Image src={s.image.src} alt="" fill sizes="33vw" className="object-cover" />
+            </span>
+          ) : null,
+        )}
       </div>
 
       <div className="flex flex-1 flex-col gap-3">
