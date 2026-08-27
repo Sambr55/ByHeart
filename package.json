@@ -43,7 +43,8 @@
     "fork": "tsx scripts/fork-check.mts",
     "intro": "tsx scripts/intro-check.mts",
     "drops": "tsx scripts/drop-check.mts",
-    "pipeline": "tsx scripts/drop-pipeline.mts"
+    "pipeline": "tsx scripts/drop-pipeline.mts",
+    "images": "tsx scripts/make-images.mts"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",
