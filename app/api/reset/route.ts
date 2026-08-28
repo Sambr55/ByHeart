@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { currentUser, deviceId, endSession, ensureDevice, forgetDevice } from '@/lib/auth'
-import { moveDeviceComp } from '@/lib/comp'
+import { forgetDeviceComp, moveDeviceComp } from '@/lib/comp'
 import { forgetLearnerFor } from '@/lib/store'
 
 export const runtime = 'nodejs'
@@ -33,6 +33,14 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: Request) {
   const user = await currentUser()
   const alsoSignOut = new URL(request.url).searchParams.get('signout') === '1'
+  /*
+    ?comp=drop turns this device back into an ordinary free one.
+
+    Without it a comp follows every reset, which is right for a tester who was given the
+    product and wrong for anybody trying to see what a new person sees — including the
+    person who built it, who could not reach the paywall on any device.
+  */
+  const dropComp = new URL(request.url).searchParams.get('comp') === 'drop'
 
   if (user && !alsoSignOut) {
     return NextResponse.json(
@@ -54,13 +62,33 @@ export async function POST(request: Request) {
   if (device) await forgetLearnerFor(device)
   await forgetDevice()
 
-  // Mint the replacement here rather than leaving it to the next request, because the
-  // grant needs somewhere to land and this is the only moment both ids are known.
+  /*
+    Mint the replacement here rather than leaving it to the next request, because the grant
+    needs somewhere to land and this is the only moment both ids are known.
+
+    The comp is carried across on purpose: a tester should not lose what they were given
+    because they wanted a clean run. But carrying it ALWAYS means somebody comped can never
+    see the free tier again, on any device, however many times they reset — which is how
+    "I never see the paygate" turns out to be true and by design at the same time.
+
+    So it is a choice now. Drop it and this device becomes an ordinary free one.
+  */
   let keptComp = false
+  let droppedComp = false
   if (device) {
     const fresh = await ensureDevice()
-    keptComp = await moveDeviceComp(device, fresh)
+    if (dropComp) {
+      await forgetDeviceComp(device)
+      droppedComp = true
+    } else {
+      keptComp = await moveDeviceComp(device, fresh)
+    }
   }
 
-  return NextResponse.json({ ok: true, forgot: Boolean(device), kept_comp: keptComp })
+  return NextResponse.json({
+    ok: true,
+    forgot: Boolean(device),
+    kept_comp: keptComp,
+    dropped_comp: droppedComp,
+  })
 }

@@ -28,7 +28,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, reason: 'No database configured.' }, { status: 503 })
   }
 
-  let body: { note?: string; uses?: number; until?: string | null; count?: number; club?: boolean }
+  let body: {
+    note?: string
+    uses?: number
+    until?: string | null
+    count?: number
+    club?: boolean
+    plan?: 'free' | 'pro'
+  }
   try {
     body = (await request.json()) as typeof body
   } catch {
@@ -44,6 +51,15 @@ export async function POST(request: Request) {
 
   // Opt-in per code, never a default: a code that opens the Club has to be asked for.
   const club = body.club === true
-  const codes = await issueCodes({ note, uses, until, count, club })
-  return NextResponse.json({ ok: true, codes, note, uses, until, club, redeem_at: '/account' })
+  /*
+    A Club pass need not also be a Pro comp.
+
+    They were the same thing, so handing somebody a pass to look at the Club silently gave
+    them unlimited vibes — and since /reset carries a comp forward deliberately, that person
+    could then never see the paywall again on any device. Pass plan:'free' for a code that
+    opens the room and leaves the free three alone.
+  */
+  const plan = body.plan === 'free' ? 'free' : 'pro'
+  const codes = await issueCodes({ note, uses, until, count, club, plan })
+  return NextResponse.json({ ok: true, codes, note, uses, until, club, plan, redeem_at: '/account' })
 }

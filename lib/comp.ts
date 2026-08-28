@@ -170,6 +170,20 @@ export async function entitlementsForDevice(device: string | null): Promise<Enti
  * silently lose their access and land back behind the paywall. Their PROGRESS should go.
  * Their access should not.
  */
+/**
+ * Give a device back its ordinary free tier.
+ *
+ * The counterpart to moveDeviceComp. A comp follows a reset by default — a tester should
+ * not lose what they were given because they wanted a clean run — and that means somebody
+ * comped can never see the free tier again on any device. This is the way out, and it is
+ * the only way to look at the paywall once you have been given the product.
+ */
+export async function forgetDeviceComp(device: string): Promise<void> {
+  const sql = db()
+  if (!sql) return
+  await sql`delete from device_comps where device_id = ${device}`
+}
+
 export async function moveDeviceComp(from: string, to: string): Promise<boolean> {
   const sql = db()
   if (!sql || from === to) return false
@@ -193,6 +207,16 @@ export async function issueCodes(opts: {
   count: number
   /** Also opens the Club. Deliberate, per code, and off by default. */
   club?: boolean
+  /**
+   * What the code is worth. 'pro' by default, which is what a comp has always meant.
+   *
+   * 'free' exists because the two were welded together: every code granted pro, so a
+   * Club pass handed out for testing also removed the paywall — and the person testing
+   * then could not see the paywall at all, on any device, because /reset carries a comp
+   * forward on purpose. A pass to look at a room is not the same thing as being given
+   * the product.
+   */
+  plan?: 'free' | 'pro'
 }): Promise<string[]> {
   const sql = db()
   if (!sql) return []
@@ -205,7 +229,7 @@ export async function issueCodes(opts: {
     const code = raw.slice(0, 4) + '-' + raw.slice(4)
     await sql`
       insert into comp_codes (code, plan, note, max_uses, grants_until, grants_club)
-      values (${code}, 'pro', ${opts.note}, ${opts.uses}, ${opts.until}, ${Boolean(opts.club)})
+      values (${code}, ${opts.plan ?? 'pro'}, ${opts.note}, ${opts.uses}, ${opts.until}, ${Boolean(opts.club)})
     `
     out.push(code)
   }

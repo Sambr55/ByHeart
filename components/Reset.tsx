@@ -47,10 +47,20 @@ export function Reset() {
    * emptied copy up, or a restore could pull the full one down. The server forgets
    * first, and only then is there nothing to come back.
    */
+  /*
+    Whether to keep what this device was given.
+
+    A comp follows a reset by default, which is right for a tester who was handed the
+    product and wrong for anybody trying to see what a NEW person sees — including the
+    person who built it, for whom the paywall was unreachable on every device because the
+    comp came along every time.
+  */
+  const [dropComp, setDropComp] = useState(false)
+
   async function wipe() {
     setState('wiping')
     try {
-      const res = await fetch('/api/reset', { method: 'POST' })
+      const res = await fetch('/api/reset' + (dropComp ? '?comp=drop' : ''), { method: 'POST' })
       const body = (await res.json()) as { ok?: boolean; signed_in?: boolean }
       if (!body.ok && body.signed_in) {
         setState('signedin')
@@ -187,6 +197,34 @@ export function Reset() {
       {/* mt-10, not mt-auto: a button sits under the words that earned it rather
           than at the foot of the screen. See the Cta in Journey.tsx for why. */}
       <div className="mt-10 flex flex-col gap-3">
+        {/*
+          A toggle rather than a second red button: it modifies the wipe rather than being a
+          different one, and two destructive buttons is a screen nobody reads carefully.
+
+          Built as an aria-pressed chip like every other choice in the product rather than a
+          checkbox, because a 16px checkbox is a 16px target — which the mobile gate said
+          out loud the moment this was written.
+        */}
+        <button
+          type="button"
+          data-testid="reset-drop-comp"
+          aria-pressed={dropComp}
+          onClick={() => setDropComp(!dropComp)}
+          className={
+            'tap-target flex w-full items-start gap-3 rounded border px-4 py-3 text-left text-xs leading-relaxed transition ' +
+            (dropComp ? 'border-accent bg-accent/10 text-fg' : 'border-line text-muted')
+          }
+        >
+          <span aria-hidden className="mt-px shrink-0 font-semibold">
+            {dropComp ? '✓' : '·'}
+          </span>
+          <span>
+            Give up any code redeemed on this device too. Without this a comp follows the
+            reset — right for a tester, wrong if you are trying to see what somebody new
+            sees.
+          </span>
+        </button>
+
         <button
           type="button"
           data-testid="reset-confirm"
