@@ -3118,7 +3118,13 @@ function Close() {
         href="/club"
         data-testid="continue"
         onClick={() => finish()}
-        className="tap-target eyebrow mt-auto block w-full rounded mt-6 bg-accent px-5 py-3 text-center text-accent-ink"
+        /*
+          Both mt-auto and mt-6 were on this element — a cascade collision, where whichever
+          Tailwind emitted last won and the gap above the button was whatever the build
+          happened to produce. Exactly the fault the Cta above documents as fixed, still
+          living here. One value now, and it is the section step.
+        */
+        className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
       >
         {CLOSE.cta}
       </Link>

@@ -525,7 +525,8 @@ function BuildCard({
             type="button"
             data-testid="legend-make-mine"
             onClick={() => setBeat('build')}
-            className="tap-target eyebrow mt-auto w-full rounded bg-accent px-5 py-3 text-accent-ink"
+            /* mt-10, not mt-auto: under the words that earned it. See Journey's Cta. */
+            className="tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-accent-ink"
           >
             MAKE IT MINE
           </button>
@@ -628,7 +629,9 @@ function BuildCard({
 
           {/* Skippable, always. Some people have no children and some will not say why
               they left, so leaving it empty is a real answer rather than an omission. */}
-          <div className="mt-auto flex flex-col gap-3">
+          {/* mt-10, not mt-auto: a button sits under the words that earned it rather
+            than at the foot of the screen. See the Cta in Journey.tsx for why. */}
+          <div className="mt-10 flex flex-col gap-3">
             <button
               type="button"
               data-testid="legend-save"
@@ -897,7 +900,9 @@ function RunThrough({
         </div>
       ) : null}
 
-      <div className="mt-auto flex flex-col gap-3">
+      {/* mt-10, not mt-auto: a button sits under the words that earned it rather
+          than at the foot of the screen. See the Cta in Journey.tsx for why. */}
+      <div className="mt-10 flex flex-col gap-3">
         {!shown ? (
           <button
             type="button"

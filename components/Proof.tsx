@@ -303,8 +303,10 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
         something new.
       </p>
 
+      {/* mt-10, not mt-auto: a button sits under the words that earned it rather than at
+          the foot of the screen. See the Cta in Journey.tsx for why. */}
       {standalone ? (
-        <div className="mt-auto flex flex-col gap-3">
+        <div className="mt-10 flex flex-col gap-3">
           <Link
             href="/line"
             className="tap-target block w-full rounded-full border border-line px-5 py-3 text-center text-xs tracking-widest"

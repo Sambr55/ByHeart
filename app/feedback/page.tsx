@@ -82,7 +82,8 @@ function OpenFeedback() {
         </div>
         <Link
           href="/vibes"
-          className="tap-target eyebrow mt-auto block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          /* mt-10, not mt-auto. See Journey's Cta. */
+          className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >
           {FEEDBACK_COPY.sent_cta}
         </Link>

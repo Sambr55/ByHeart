@@ -184,7 +184,9 @@ export function Reset() {
         </div>
       )}
 
-      <div className="mt-auto flex flex-col gap-3">
+      {/* mt-10, not mt-auto: a button sits under the words that earned it rather
+          than at the foot of the screen. See the Cta in Journey.tsx for why. */}
+      <div className="mt-10 flex flex-col gap-3">
         <button
           type="button"
           data-testid="reset-confirm"
