@@ -213,8 +213,22 @@ for (const route of [
   await page.goto(BASE + route)
   await notch(page)
   await page.waitForTimeout(1000)
+  /*
+    Say so when a route redirected somewhere else.
+
+    /account redirects to /signin without a DATABASE_URL, so a local run measured the
+    sign-in page twice and reported /account as clean — and production, which has a
+    database, was serving a page with its back arrow behind the clock. A route that was
+    never actually loaded must not be able to report a pass on its own name.
+  */
+  const landed = new URL(page.url()).pathname
   const found = await buried(page)
-  ok(route, found.length === 0, found.join(', '))
+  const elsewhere = landed !== route && !(route === '/' && landed !== route)
+  ok(
+    route + (elsewhere ? ' → ' + landed : ''),
+    found.length === 0,
+    found.join(', ') || (elsewhere ? 'redirected, so ' + route + ' itself was not seen' : ''),
+  )
 }
 
 console.log('\nand inside a lesson\n')

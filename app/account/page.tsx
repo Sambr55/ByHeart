@@ -59,7 +59,8 @@ async function SignedOut() {
   const canSignIn = sendable()
 
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-xl flex-col gap-6 px-5 py-10">
+    /* safe-top: no .bar on this page, so its own first row would sit behind the clock. */
+    <main className="safe-top mx-auto flex min-h-svh w-full max-w-xl flex-col gap-6 px-5 py-10">
       {/* The same header the signed-in page has. A wordmark is sized by height, and
           leaving the class off renders it at its intrinsic size — enormous. */}
       <header className="flex items-center justify-between gap-3">
