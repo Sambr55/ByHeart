@@ -66,7 +66,7 @@ console.log('\nthe build beat, when you ask to be shown\n')
 /** Walk to the first build beat. */
 async function toBuild(p: Page): Promise<boolean> {
   for (let i = 0; i < 30; i++) {
-    if (await p.$('[data-testid="build-check"]')) return true
+    if (await p.$('[data-testid="tile-pool"]')) return true
     const next = await p.$('[data-testid="continue"]')
     if (!next || !(await next.isEnabled())) return false
     await next.click()
@@ -78,15 +78,47 @@ const built = await toBuild(page)
 ok('a build beat is reachable', built)
 
 if (built) {
-  ok('CHECK and SHOW ME sit together', Boolean(await page.$('[data-testid="build-help"]')))
-  ok('and there is nothing to retry yet', !(await page.$('[data-testid="build-retry"]')))
+  ok('SHOW ME is the only thing offered', Boolean(await page.$('[data-testid="build-help"]')))
+  ok('there is nothing to check with', !(await page.$('[data-testid="build-check"]')))
+  ok('and nothing to retry yet', !(await page.$('[data-testid="build-retry"]')))
 
-  const row = await page.evaluate(`(() => {
-    const a = document.querySelector('[data-testid="build-check"]').getBoundingClientRect()
-    const b = document.querySelector('[data-testid="build-help"]').getBoundingClientRect()
-    return Math.abs(a.top - b.top)
-  })()`) as number
-  ok('on the same line', row <= 2, row + 'px apart')
+  /*
+    The line marks itself.
+
+    CHECK was a second action for a decision already made — the app can see whether the
+    line is the sentence the moment the last tile lands. Tapping the pieces in order and
+    then waiting is what somebody actually does now, so that is what this does.
+  */
+  const answer = ((await page.getAttribute('[data-testid="tile-line"]', 'data-answer')) ?? '')
+    .split(/\s+/)
+    .filter(Boolean)
+  for (const word of answer) {
+    const tile = await page.$(
+      '[data-testid="tile-pool"] button:has-text("' + word.replace(/"/g, '') + '")',
+    )
+    if (tile) {
+      await tile.click()
+      await page.waitForTimeout(90)
+    }
+  }
+  await page.waitForTimeout(1200)
+  const settled = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
+  ok(
+    'the last word settles it, with nothing pressed',
+    Boolean(await page.$('[data-testid="continue"]')),
+    settled.slice(0, 50),
+  )
+
+  /* And the result carries its audio, on this beat as on every other. */
+  ok(
+    'and the answer can be heard',
+    Boolean(await page.$('[data-testid="audio"]')),
+    'every build ends in a banked row with its audio',
+  )
+
+  // Back to a fresh build to exercise being shown.
+  const again = await toBuild(page)
+  ok('another build beat is reachable', again)
 
   await page.click('[data-testid="build-help"]')
   await page.waitForTimeout(1800)
@@ -96,6 +128,11 @@ if (built) {
   ok('SHOW ME lays the answer out', shown > 0, shown + ' pieces placed')
   ok('and RETRY takes its place', Boolean(await page.$('[data-testid="build-retry"]')))
   ok('SHOW ME is gone — there is nothing left to show', !(await page.$('[data-testid="build-help"]')))
+  ok(
+    'being shown does not settle it for you',
+    Boolean(await page.$('[data-testid="build-said"]')),
+    'the words were not entered by anybody',
+  )
 
   await page.click('[data-testid="build-retry"]')
   await page.waitForTimeout(700)
@@ -115,15 +152,13 @@ console.log('\nwhat the end of a session claims\n')
 for (let i = 0; i < 60; i++) {
   const done = await page.$('[data-testid="section-done"], [data-testid="finish-another"]')
   if (done) break
-  const check = await page.$('[data-testid="build-check"]')
-  if (check) {
+  const pool = await page.$('[data-testid="tile-pool"]')
+  if (pool) {
     /*
-      Solved rather than shown.
+      Solved rather than shown, and nothing pressed afterwards.
 
-      Pressing SHOW ME and then CHECK worked until RETRY existed — retry clears the line,
-      CHECK is correctly disabled on an empty one, and the walk sat there clicking a
-      disabled button. Reading the answer off the line's data-answer seam and tapping the
-      pieces is what a person does anyway, and it exercises the beat properly.
+      Reading the answer off the line's data-answer seam and tapping the pieces is what a
+      person does anyway, and it exercises the beat properly. The last tap settles it.
     */
     const answer = ((await page.getAttribute('[data-testid="tile-line"]', 'data-answer')) ?? '')
       .split(/\s+/)
@@ -137,13 +172,13 @@ for (let i = 0; i < 60; i++) {
         await page.waitForTimeout(90)
       }
     }
-    const ready = await page.$('[data-testid="build-check"]')
-    if (ready && (await ready.isEnabled())) {
-      await ready.click()
-      await page.waitForTimeout(1200)
-    } else {
-      break
+    await page.waitForTimeout(1100)
+    const said = await page.$('[data-testid="build-said"]')
+    if (said) {
+      await said.click()
+      await page.waitForTimeout(900)
     }
+    if (!(await page.$('[data-testid="continue"]'))) break
     continue
   }
   const next = await page.$('[data-testid="continue"]')

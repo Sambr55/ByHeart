@@ -215,12 +215,9 @@ for (let i = 0; i < 26; i++) {
       await tile.click()
       await page.waitForTimeout(120)
     }
-    const check = await page.$('[data-testid="build-check"]')
-    if (check && (await check.isEnabled())) {
-      await check.click()
-      await page.waitForTimeout(900)
-      await look(page, 'beat ' + i + ' checked')
-    }
+    /* The last tile settles it; there is nothing to press. */
+    await page.waitForTimeout(1000)
+    await look(page, 'beat ' + i + ' settled')
   }
   const next = await page.$('[data-testid="continue"]')
   if (!next || !(await next.isEnabled())) break

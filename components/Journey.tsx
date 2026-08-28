@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -1600,22 +1600,52 @@ export function MiniBuild({
     track('build_retry', { target })
   }
 
-  function check() {
-    const built = placed.map((p) => p.text)
-    const right = built.length === answer.length && built.every((w, i) => w === answer[i])
-    attempts.current += 1
-    track('build_attempt', { target, correct: right })
-    if (right) {
-      setState('done')
-      // Being shown the order means it was not said cold, and the proof card counts
-      // nothing else. Quietly letting a helped line through would make the one number
-      // the product asks to be judged on a lie.
-      onSolved({ clean: attempts.current === 1 && !helped })
-    } else {
-      setState('wrong')
-      if (attempts.current >= 3) onStuck?.()
+  const check = useCallback(
+    (viaHelp = false) => {
+      const built = placed.map((p) => p.text)
+      const right = built.length === answer.length && built.every((w, i) => w === answer[i])
+      if (!viaHelp) attempts.current += 1
+      track('build_attempt', { target, correct: right })
+      if (right) {
+        setState('done')
+        // Being shown the order means it was not said cold, and the proof card counts
+        // nothing else. Quietly letting a helped line through would make the one number
+        // the product asks to be judged on a lie.
+        onSolved({ clean: attempts.current === 1 && !helped })
+      } else {
+        setState('wrong')
+        if (attempts.current >= 3) onStuck?.()
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [placed, helped, target],
+  )
+
+  /**
+   * The last word IS the answer. There is nothing to press.
+   *
+   * CHECK was a second action for a decision already made: the line is either the sentence
+   * or it is not, and the app can see which the instant the last tile lands. Asking for
+   * confirmation of something already decided is a tax on the person who got it right, and
+   * it is paid on every single build in the product.
+   *
+   * Not when the line was laid out by SHOW ME. Those words were not entered by anybody, so
+   * firing on them would mark the sentence solved on the learner's behalf and skip straight
+   * past the half that makes it stick — and it would take RETRY with it, since a finished
+   * build has no line left to clear.
+   */
+  const settled = useRef('')
+  useEffect(() => {
+    if (state === 'done' || helped) return
+    if (placed.length !== answer.length) {
+      settled.current = ''
+      return
     }
-  }
+    const line = placed.map((p) => p.text).join(' ')
+    if (settled.current === line) return
+    settled.current = line
+    check()
+  }, [placed, state, helped, answer.length, check])
 
   return (
     <div className="mt-6">
@@ -1676,9 +1706,9 @@ export function MiniBuild({
 
       {helped && state !== 'done' ? (
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          There it is, in order. Read it out loud, then check it — this one will not
-          count towards the sentences you can say cold, which is the only number here
-          worth anything.
+          There it is, in order. Read it out loud — this one will not count towards the
+          sentences you can say cold, which is the only number here worth anything. Put it
+          back yourself and it still will not, but you will know it.
         </p>
       ) : null}
 
@@ -1689,42 +1719,45 @@ export function MiniBuild({
         </div>
       ) : (
         /*
-          Two controls on one line, and the second one changes with what has happened.
+          What is left once CHECK goes.
 
-          "Need some help?" was a text link under everything else — the quietest thing on a
-          screen where somebody is stuck, which is the moment they are least inclined to go
-          hunting. It is a button beside CHECK now, and it says what it does: SHOW ME.
+          Before being shown there is one thing worth offering, so it gets the whole line:
+          SHOW ME. "Need some help?" used to be a text link under everything else — the
+          quietest thing on a screen where somebody is stuck, which is the moment they are
+          least inclined to go hunting.
 
-          Once it has been used the line is the answer, so offering to show it again is
-          nothing. RETRY takes its place: it clears the line and lets somebody put the words
-          back themselves, which is the only way being shown turns into being able. It does
-          NOT un-help — the proof card still refuses this line, because it was seen.
+          Afterwards the line already holds the answer, so offering to show it again is
+          nothing. RETRY clears it so the words can be put back by the person who is meant
+          to be learning them — the only way being shown turns into being able — and SAID IT
+          is the way past for somebody who has read it out and wants to move. Neither
+          un-helps: the proof card still refuses this line, because it was seen.
         */
         <div className="mt-3 flex gap-3">
-          <button
-            type="button"
-            data-testid="build-check"
-            disabled={!placed.length}
-            onClick={check}
-            className="tap-target eyebrow flex-1 rounded border border-accent bg-accent/10 px-4 py-3 text-accent disabled:border-line disabled:bg-transparent disabled:text-muted"
-          >
-            CHECK
-          </button>
           {helped ? (
-            <button
-              type="button"
-              data-testid="build-retry"
-              onClick={retry}
-              className="tap-target eyebrow flex-1 rounded border border-line-strong px-4 py-3 text-muted transition hover:text-fg"
-            >
-              RETRY
-            </button>
+            <>
+              <button
+                type="button"
+                data-testid="build-retry"
+                onClick={retry}
+                className="tap-target eyebrow flex-1 rounded border border-accent bg-accent/10 px-4 py-3 text-accent"
+              >
+                RETRY
+              </button>
+              <button
+                type="button"
+                data-testid="build-said"
+                onClick={() => check(true)}
+                className="tap-target eyebrow flex-1 rounded border border-line-strong px-4 py-3 text-muted transition hover:text-fg"
+              >
+                SAID IT
+              </button>
+            </>
           ) : (
             <button
               type="button"
               data-testid="build-help"
               onClick={showOrder}
-              className="tap-target eyebrow flex-1 rounded border border-line-strong px-4 py-3 text-muted transition hover:text-fg"
+              className="tap-target eyebrow w-full rounded border border-line-strong px-4 py-3 text-muted transition hover:text-fg"
             >
               SHOW ME
             </button>
@@ -2240,24 +2273,25 @@ function RootBeatView({
           <div className="flex flex-col gap-3">
             <p className="eyebrow text-muted">{RELEASE.ask_eyebrow}</p>
             {/*
-              THE DEMOTION — the mechanic that replaces every animation we are not
-              building. One conditional className: face, size, colour and position all
-              change the instant the sentence exists, inside a single mount.
+              The ask stays put, and the answer lands underneath it.
+
+              This beat used to swap the whole screen out: solving it unmounted the build
+              and replaced the question with the bare sentence in a display face, no audio,
+              nothing to press to hear it. Every other build in the product — the collision,
+              the no-cue prompts, the Legend rehearsal — keeps the build mounted, and its
+              done state shows the sentence in a banked row WITH the audio button. So this
+              was the one screen where getting it right took the sound away, on the single
+              beat that moves the ladder.
+
+              The question is worth keeping on screen too. Reading "what you were asked" and
+              "what you said" together is the whole point of the moment; replacing one with
+              the other leaves a sentence floating with nothing to have answered.
             */}
-            {done ? (
-              <>
-                <p className="pt t-said">{root.transfer_prompt.answer}</p>
-                <p className="text-xs text-muted">{root.transfer_prompt.ask}</p>
-              </>
-            ) : (
-              <>
-                <p className="text-sm font-semibold">{root.transfer_prompt.context}</p>
-                <p className="t-ask">“{root.transfer_prompt.ask}”</p>
-              </>
-            )}
+            <p className="text-sm font-semibold">{root.transfer_prompt.context}</p>
+            <p className="t-ask">“{root.transfer_prompt.ask}”</p>
           </div>
 
-          {done ? null : (
+          {(
             <MiniBuild
               target={root.transfer_prompt.answer}
               helpers={root.helpers}

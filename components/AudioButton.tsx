@@ -24,6 +24,7 @@ export function AudioButton({
   return (
     <button
       type="button"
+      data-testid="audio"
       aria-label={played ? 'Play ' + text + ' slowly' : 'Play ' + text}
       onClick={(e) => {
         e.stopPropagation()
