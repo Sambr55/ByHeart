@@ -299,6 +299,84 @@ export async function saveVocabMiss(
   return 'blob'
 }
 
+/**
+ * Record one translation, and say how many this device has had today.
+ *
+ * The count comes back from the same call that writes the row so the meter cannot drift
+ * from the log — a limiter kept anywhere else is a second source of truth about the same
+ * fact, and the two disagree the first time a write fails.
+ *
+ * With no database there is no meter. That is a deliberate choice rather than an
+ * oversight: DUB runs with zero configuration by design, and a deployment with no
+ * DATABASE_URL is a local or a tester build where nothing is at stake. The API key is the
+ * thing that has to be absent for the cost to be, and that is checked separately.
+ */
+export async function recordTranslation(
+  deviceId: string | null,
+  userId: string | null,
+  body: { ask: string; answer: string; note: string; direction: string },
+): Promise<{ layer: Layer; today: number; id: number | null }> {
+  const sql = db()
+  if (!sql) return { layer: 'none', today: 0, id: null }
+  const [row] = await sql<{ id: string }[]>`
+    insert into translation (device_id, user_id, ask, answer, note, direction)
+    values (${deviceId}, ${userId}, ${body.ask}, ${body.answer}, ${body.note}, ${body.direction})
+    returning id::text as id
+  `
+  const [count] = await sql<{ n: string }[]>`
+    select count(*)::text as n from translation
+    where device_id = ${deviceId} and at > now() - interval '24 hours'
+  `
+  return { layer: 'postgres', today: Number(count?.n ?? 0), id: Number(row?.id ?? 0) }
+}
+
+/** How many this device has asked for in the last day, before spending anything. */
+export async function translationsToday(deviceId: string | null): Promise<number> {
+  const sql = db()
+  if (!sql || !deviceId) return 0
+  const [row] = await sql<{ n: string }[]>`
+    select count(*)::text as n from translation
+    where device_id = ${deviceId} and at > now() - interval '24 hours'
+  `
+  return Number(row?.n ?? 0)
+}
+
+/**
+ * Mark one as kept.
+ *
+ * Scoped to the device that asked for it, so a guessed id reaches nothing. The flag is
+ * the strongest signal on the row — not "was this asked" but "was this worth keeping".
+ */
+export async function keepTranslation(deviceId: string | null, id: number): Promise<boolean> {
+  const sql = db()
+  if (!sql || !deviceId) return false
+  const rows = await sql`
+    update translation set kept = true where id = ${id} and device_id = ${deviceId}
+    returning id
+  `
+  return rows.length > 0
+}
+
+/** What people wanted to say, most-wanted first. The other half of the backlog. */
+export async function listTranslations(): Promise<
+  { ask: string; answer: string; n: number; kept: number; last: string }[]
+> {
+  const sql = db()
+  if (!sql) return []
+  const rows = await sql<{ ask: string; answer: string; n: string; kept: string; last: string }[]>`
+    select ask, max(answer) as answer, count(*)::text as n,
+           count(*) filter (where kept)::text as kept, max(at)::text as last
+    from translation group by ask order by count(*) desc, max(at) desc limit 200
+  `
+  return rows.map((r) => ({
+    ask: r.ask,
+    answer: r.answer,
+    n: Number(r.n),
+    kept: Number(r.kept),
+    last: r.last,
+  }))
+}
+
 /** The backlog, most-wanted first. Read by the same admin key as feedback. */
 export async function listVocabMisses(): Promise<{ query: string; n: number; last: string }[]> {
   const sql = db()

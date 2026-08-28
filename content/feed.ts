@@ -45,6 +45,23 @@ export type FeedCard =
       because: string
       image: { src: string; alt: string }
     }
+  /*
+    A sentence the learner asked the translator for and kept.
+
+    The only card in the feed DUB did not choose. Everything else here is content somebody
+    authored or a form the paradigm table could vouch for; this is a thing a person wanted
+    to say badly enough to look it up and then decided they would need again. That makes it
+    the most reliable signal in the product about what this particular learner is doing
+    with Portuguese, and it would be strange to know that and keep teaching around it.
+
+    KEEP promises the sentence comes back around. This is where it comes back.
+  */
+  | {
+      kind: 'asked'
+      id: string
+      ask: { pt: string; en: string; note: string; at: string }
+      image: { src: string; alt: string }
+    }
 
 /**
  * A vocab card is not a flashcard.
@@ -223,6 +240,34 @@ export function derivedCards(cards: DerivedCard[]): FeedCard[] {
   })
 }
 
+/**
+ * Kept sentences, as cards.
+ *
+ * Newest first, because the thing somebody looked up on the way here is the thing they are
+ * in the middle of needing — and rationed the same way derived cards are, so a learner who
+ * has kept thirty sentences does not get a feed made entirely of their own homework.
+ *
+ * Uses the calçada image rather than a vibe still: these came from the street, not from a
+ * film, and dressing one up in somebody else's photograph would say it did.
+ */
+export function askedCards(
+  asked: { pt: string; en: string; note: string; at: string }[],
+  finished: string[],
+): FeedCard[] {
+  const done = new Set(finished ?? [])
+  return [...(asked ?? [])]
+    .sort((a, b) => (a.at < b.at ? 1 : -1))
+    .map((ask) => ({
+      kind: 'asked' as const,
+      // Stable, and derived from the sentence, so a card done once is done for good.
+      id: 'asked:' + ask.pt.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+      ask,
+      image: REGISTER.next_person,
+    }))
+    .filter((c) => !done.has(c.id))
+    .slice(0, DERIVED_PER_SESSION)
+}
+
 /** The words, for the profile. Same card shape, different place to meet it. */
 export function wordCards(): FeedCard[] {
   return VOCAB.flatMap((v): FeedCard[] => {
@@ -313,6 +358,18 @@ export function cardFace(card: FeedCard): {
       eyebrow: card.card.kind === 'collision' ? 'YOU CAN SAY' : 'YOU LEARNED',
       title: card.card.target,
       blurb: card.card.note,
+      image: card.image,
+    }
+  }
+  if (card.kind === 'asked') {
+    /*
+      "YOU ASKED" rather than "YOU LEARNED", because it is not the same claim and the
+      difference is the point — nobody taught this one, it was wanted.
+    */
+    return {
+      eyebrow: 'YOU ASKED',
+      title: card.ask.pt,
+      blurb: card.ask.note || card.ask.en,
       image: card.image,
     }
   }

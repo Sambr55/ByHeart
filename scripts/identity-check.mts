@@ -146,10 +146,40 @@ await page.goto(BASE + '/reset')
 await page.waitForTimeout(1200)
 const wipe = await page.$('[data-testid="reset-confirm"], button:has-text("START AGAIN")')
 if (wipe) {
+  const before = JSON.parse((await read()) ?? '{}') as { learner_id?: string }
   await wipe.click()
   await page.waitForTimeout(1600)
   const left = await read()
-  ok('reset clears the record', !left, left ? 'still there' : 'gone')
+  /*
+    Cleared, not absent — and the difference is a real change rather than a softened test.
+
+    wipeLearner() does remove every byheart key. But it then resets the in-memory cache and
+    emits, and any mounted subscriber re-reads on that emit — which creates a fresh default
+    learner and persists it. The translator is mounted at the root of every page, so there
+    is now always such a subscriber, and the key exists again within a frame.
+    
+    That is the correct outcome and absence was only ever a proxy for it: what reset has to
+    guarantee is that nothing of the old learner survives. So that is what is asserted —
+    a different learner_id, no owner, no proof, no inventory. Asserting the key is missing
+    would now be asserting that no screen in DUB reads its own state.
+  */
+  const now = JSON.parse(left ?? '{}') as {
+    learner_id?: string
+    user_id?: string | null
+    proof?: unknown[]
+    inventory?: Record<string, unknown>
+  }
+  ok(
+    'reset leaves a different learner',
+    Boolean(now.learner_id) && now.learner_id !== before.learner_id,
+    before.learner_id?.slice(0, 8) + ' → ' + now.learner_id?.slice(0, 8),
+  )
+  ok('with nobody owning it', !now.user_id, 'the stamp is what a refusal is built on')
+  ok(
+    'and nothing of the old one on it',
+    (now.proof ?? []).length === 0 && Object.keys(now.inventory ?? {}).length === 0,
+    (now.proof ?? []).length + ' proof, ' + Object.keys(now.inventory ?? {}).length + ' pieces',
+  )
 } else {
   console.log('  · reset needs a confirmation this check could not find — skipped')
 }
@@ -184,7 +214,16 @@ console.log('\nthe way back in says the right thing to whoever is reading it\n')
     asserting the full-device copy against an empty device — which is how a check ends up
     testing the opposite of what it says.
   */
-  await page.goto(BASE + '/vibes')
+  /*
+    Seeded ON the page being tested, then reloaded — not seeded on /vibes and navigated in.
+
+    /vibes is guarded: arriving there without the deal accepted redirects, and the screen
+    it lands on writes a fresh learner. That write races the seed, so this passed the first
+    time it ran and failed once a reset ahead of it left the device empty enough to trigger
+    the redirect. /signin redirects nowhere, so writing there and reloading is a seed that
+    cannot be raced.
+  */
+  await page.goto(BASE + '/signin')
   await page.evaluate(
     ([k, pair, blob]) => {
       localStorage.setItem('byheart.pair', JSON.stringify(pair))
@@ -192,7 +231,7 @@ console.log('\nthe way back in says the right thing to whoever is reading it\n')
     },
     [KEY, DEFAULT_PAIR, seed] as const,
   )
-  await page.goto(BASE + '/signin')
+  await page.reload()
   await page.waitForTimeout(1200)
   const full = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
   ok('a device with proof is offered the protection', /Keep what you have learned/i.test(full))

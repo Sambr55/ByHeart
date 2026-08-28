@@ -138,6 +138,16 @@ export type EventName =
   /* Whether people install, and which of the two routes they were offered. */
   | 'install_dismissed'
   | 'install_accepted'
+  /*
+    The translator, and the one number on it that matters.
+
+    translate_ask is traffic. translate_kept is demand — the sentences somebody decided
+    they would need again, which is the closest thing DUB has to a content brief written
+    by its own learners.
+  */
+  | 'translate_opened'
+  | 'translate_ask'
+  | 'translate_kept'
 
 export interface AnalyticsEvent {
   seq: number

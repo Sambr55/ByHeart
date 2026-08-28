@@ -12,6 +12,7 @@ import {
   cardFace,
   dropDaysLeft,
   chapterName,
+  askedCards,
   derivedCards,
   feedFor,
   vocabWord,
@@ -79,6 +80,14 @@ export function Feed() {
     const done = new Set(learner.finished_cards ?? [])
     return [
       ...rooms.filter((c) => !done.has(c.id)),
+      /*
+        What they asked for comes first among the assembled cards.
+
+        A sentence somebody looked up this morning beats a form the paradigm table worked
+        out overnight — it is the one piece of content in the feed with evidence attached
+        that this particular learner wanted it.
+      */
+      ...askedCards(learner.asked ?? [], learner.finished_cards ?? []),
       ...derivedCards(
         derivedFor({
           inventory: learner.inventory ?? {},
@@ -86,7 +95,7 @@ export function Feed() {
         }),
       ),
     ]
-  }, [mounted, preview, learner.inventory, learner.finished_cards])
+  }, [mounted, preview, learner.inventory, learner.finished_cards, learner.asked])
   /*
     A save that says so.
 
@@ -532,6 +541,8 @@ export function Card({
               <Lines card={card} />
             ) : card.kind === 'derived' ? (
               <Derived card={card} />
+            ) : card.kind === 'asked' ? (
+              <Asked card={card} />
             ) : (
               <Word card={card} />
             )}
@@ -630,6 +641,38 @@ function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
         </div>
         <p className="mt-6 text-sm leading-relaxed text-fg/85">{d.note}</p>
       </div>
+    </div>
+  )
+}
+
+/**
+ * A sentence they went and asked for, handed back cold.
+ *
+ * The one card in the feed whose content came from the learner, so it is the one card that
+ * can be honest about where it came from — the date is not decoration, it is the evidence
+ * that this was wanted rather than chosen for them.
+ *
+ * No exercise on it. Everything else in the feed is DUB testing whether something landed;
+ * this is DUB returning something that was already needed, and turning that into a quiz
+ * would make looking a thing up feel like setting homework for yourself.
+ */
+function Asked({ card }: { card: Extract<FeedCard, { kind: 'asked' }> }) {
+  const when = new Date(card.ask.at)
+  const days = Math.max(0, Math.round((Date.now() - when.getTime()) / 86_400_000))
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="eyebrow text-muted">YOU ASKED FOR</p>
+      <p className="text-sm text-muted">“{card.ask.en}”</p>
+      <div className="flex items-center gap-3">
+        <AudioButton slug={slugFor(card.ask.pt)} text={card.ask.pt} />
+        <p className="pt display text-balance text-2xl text-accent">{card.ask.pt}</p>
+      </div>
+      {card.ask.note ? (
+        <p className="text-sm leading-relaxed text-muted">{card.ask.note}</p>
+      ) : null}
+      <p className="mt-3 text-xs text-muted">
+        {days === 0 ? 'You looked this up today.' : days === 1 ? 'You looked this up yesterday.' : 'You looked this up ' + days + ' days ago.'}
+      </p>
     </div>
   )
 }

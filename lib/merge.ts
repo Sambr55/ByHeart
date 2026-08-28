@@ -293,6 +293,21 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     saved: setUnion(l.saved, r.saved),
     liked: setUnion(l.liked, r.liked),
     finished_cards: setUnion(l.finished_cards, r.finished_cards),
+    /*
+      Kept sentences merge as a union on the Portuguese, oldest timestamp winning.
+
+      Nobody may lose a sentence they decided to keep by signing in on a second phone —
+      that is the whole promise the account makes. Two devices that kept the same line keep
+      one copy of it, dated from the first time it was wanted.
+    */
+    asked: [
+      ...new Map(
+        [...(r.asked ?? []), ...(l.asked ?? [])]
+          .slice()
+          .sort((a, b) => (a.at < b.at ? -1 : 1))
+          .map((a) => [a.pt, a] as const),
+      ).values(),
+    ],
     missions_completed: setUnion(l.missions_completed, r.missions_completed),
 
     display_name: newerOf(l.display_name, r.display_name) || '',

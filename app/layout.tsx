@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Archivo, Inter } from 'next/font/google'
 import { BRAND } from '@/content/brand'
 import './globals.css'
+import { Translator } from '@/components/Translator'
 
 const display = Archivo({
   variable: '--font-display',
@@ -66,7 +67,18 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         */}
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        {children}
+        {/*
+          Mounted at the root, because "anywhere" has to mean anywhere.
+
+          Putting it in each shell would be four copies with four chances to disagree, and
+          it would still be missing from the full-bleed screens — which are exactly the
+          ones somebody is on when a real conversation starts. It renders nothing at all
+          until the learner is in the Club and the server says a key is configured.
+        */}
+        <Translator />
+      </body>
     </html>
   )
 }

@@ -298,6 +298,20 @@ export interface LearnerState {
    */
   finished_cards: string[]
   /**
+   * Sentences the learner asked the translator for, and chose to keep.
+   *
+   * Not a translation history — the ones they pressed KEEP on. That gesture is the whole
+   * value of the list: everything typed into a translator is a moment of wanting to say
+   * something, but the kept ones are the sentences somebody decided they will need again,
+   * which is a better description of what a person is actually learning than anything DUB
+   * can infer from what it chose to teach them.
+   *
+   * Held on the learner rather than only in the database, because it has to work on a
+   * device with no account and survive being offline. The server row is the backlog; this
+   * is the learner's own.
+   */
+  asked: { pt: string; en: string; note: string; at: string }[]
+  /**
    * When the deal was accepted, or null. Kept per pair rather than globally, because
    * the deal screen speaks about the language being learned — "your Portuguese" — and
    * somebody arriving at a second pair has not been told that deal.
@@ -345,6 +359,7 @@ export function emptyLearner(): LearnerState {
     saved: [],
     liked: [],
     finished_cards: [],
+    asked: [],
     deal_accepted_at: null,
     evidence: [],
     affinity: {
@@ -449,6 +464,7 @@ export function loadLearner(): LearnerState {
           saved: arr(parsed.saved, []),
           liked: arr(parsed.liked, []),
           finished_cards: arr(parsed.finished_cards, []),
+          asked: arr(parsed.asked, []),
           deal_accepted_at: parsed.deal_accepted_at ?? null,
           collisions_played: arr(parsed.collisions_played, []),
           evidence: arr(parsed.evidence, []),
@@ -1120,6 +1136,22 @@ export function rememberLine(id: string) {
 export function rememberFinishedCard(id: string) {
   update((s) => {
     if (!s.finished_cards.includes(id)) s.finished_cards = [...s.finished_cards, id]
+  })
+}
+
+/**
+ * Keep a sentence the translator gave back.
+ *
+ * De-duplicated on the Portuguese, because asking the same thing twice is the most likely
+ * way this list gets used — you look something up on Tuesday, forget, and look it up again
+ * on Friday. Keeping it once and leaving the first timestamp in place means the list stays
+ * a record of what somebody needed rather than of how forgetful they are.
+ */
+export function keepAsk(ask: { pt: string; en: string; note: string }) {
+  update((s) => {
+    const already = (s.asked ?? []).some((a) => a.pt === ask.pt)
+    if (already) return
+    s.asked = [...(s.asked ?? []), { ...ask, at: new Date().toISOString() }]
   })
 }
 
