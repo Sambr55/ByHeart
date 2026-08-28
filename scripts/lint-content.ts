@@ -1524,6 +1524,86 @@ for (const e of EXAMPLES) {
     }
   }
 
+  /*
+    Every word a learner is asked to BUILD is either taught or glossed.
+
+    The build beat hands somebody a row of tiles and a gloss line under it. The gloss line
+    is drawn from the root's `helpers`, and anything that is neither a helper nor a piece
+    appears as a Portuguese word with nothing attached to it — which is the one thing this
+    product is not supposed to do.
+
+    It was hidden by a cap: the beat showed the first three matching helpers and dropped the
+    rest, so a missing gloss and a suppressed gloss looked identical on screen. With the cap
+    gone the gaps are visible, and this is what stops them coming back.
+
+    "Taught" means a piece anywhere teaches the word, not only this root — by the time
+    somebody meets a branch they may own it from another vibe, and demanding a local gloss
+    for `comigo` inside Top Gun would be glossing the thing Top Gun exists to give them.
+  */
+  {
+    const strip = (w: string) => w.toLowerCase().replace(/[.?,!…“”"'—:;]/g, '').trim()
+    /*
+      The connective tissue. Articles, prepositions, conjunctions and clitics — the words
+      no vocabulary list teaches and no learner asks about, because they arrive attached to
+      something else.
+    */
+    const GRAMMAR = new Set([
+      'a', 'o', 'as', 'os', 'um', 'uma', 'uns', 'umas', 'de', 'do', 'da', 'dos', 'das',
+      'e', 'é', 'em', 'no', 'na', 'nos', 'nas', 'que', 'se', 'me', 'te', 'lhe', 'nos',
+      'não', 'sim', 'com', 'para', 'por', 'ao', 'à', 'aos', 'às', 'ou', 'mas',
+    ])
+    /*
+      Names that open a sentence, where a capital proves nothing.
+
+      Listed rather than guessed at: "Royale com queijo" and "Paris é sempre uma boa
+      ideia" both start on a word no Portuguese piece will ever teach, and glossing either
+      would be explaining a place and a burger to somebody who came for the joke.
+    */
+    const NAMES = new Set(['royale', 'paris', 'goose', 'lisboa', 'bond', 'james'])
+    const taught = new Set<string>()
+    for (const piece of Object.values(PIECES)) {
+      for (const w of String(piece.target).split(/\s+/)) taught.add(strip(w))
+    }
+
+    for (const root of ROOTS) {
+      // Helper keys can be phrases — "com licença" covers both of its words.
+      const glossed = new Set<string>()
+      for (const key of Object.keys(root.helpers ?? {})) {
+        for (const w of key.split(/\s+/)) glossed.add(strip(w))
+      }
+      const shown = [
+        root.target,
+        ...(root.branches ?? []).map((b) => b.target),
+        root.transfer_prompt?.answer,
+      ].filter(Boolean) as string[]
+
+      const missing = new Set<string>()
+      for (const line of shown) {
+        const words = line.split(/\s+/)
+        for (let i = 0; i < words.length; i++) {
+          const raw = words[i]
+          const w = strip(raw)
+          if (!w || /^\d+$/.test(w)) continue
+          if (taught.has(w) || glossed.has(w) || GRAMMAR.has(w)) continue
+          // A proper noun is a name, not vocabulary. Mid-sentence a capital is enough to
+          // tell — at the start of one it is not, so those are listed.
+          if (i > 0 && /^[A-ZÀ-Þ]/.test(raw)) continue
+          if (NAMES.has(w)) continue
+          missing.add(raw)
+        }
+      }
+      if (missing.size) {
+        fail(
+          'root ' +
+            root.root_id +
+            ' builds with ' +
+            [...missing].join(', ') +
+            ' — no piece teaches it and the root does not gloss it',
+        )
+      }
+    }
+  }
+
   const openChapters = CHAPTERS.filter((c) => c.open)
   if (!openChapters.length) fail('no chapter is open, so the Club has nowhere to be')
   for (const c of openChapters) {

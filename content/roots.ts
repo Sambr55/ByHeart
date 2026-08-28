@@ -569,6 +569,7 @@ export const TOP_GUN: Root[] = [
       { target: 'Podes vir comigo?', en: 'Can you come with me?' , address: 'tu', formal: 'Pode vir comigo?' },
     ],
     helpers: {
+      Fala: 'talk, said as an order',
       'Vem': 'come',
       'Fica': 'stay',
       'vir': 'to come',
@@ -616,6 +617,9 @@ export const TOP_GUN: Root[] = [
     ],
     voice_rule: 'Both of these are the friendly tu form. For a stranger or someone older you swap podes for pode — same sentence, one letter, a completely different level of respect.',
     helpers: {
+      ser: 'to be — the permanent one',
+      parceiro: 'partner',
+      quiseres: 'you want, at some point',
       'vir': 'to come',
       'dizer': 'to say',
 
@@ -675,6 +679,7 @@ export const TOP_GUN: Root[] = [
       { target: 'Preciso de tempo.', en: 'I need time.' },
     ],
     helpers: {
+      Sinto: 'I feel',
       'ajuda': 'help',
       'um': 'a',
       'táxi': 'taxi',
@@ -878,6 +883,7 @@ export const JAMES_BOND: Root[] = [
     ],
     reinforces: ['podes'],
     helpers: {
+      morre: 'dies',
       'Até': 'until / see you',
       'não': 'not',
       'posso': 'I can',
@@ -1013,6 +1019,8 @@ export const JAMES_BOND: Root[] = [
     ],
     reinforces: ['com'],
     helpers: {
+      morrer: 'to die',
+      Sem: 'without',
       'açúcar': 'sugar',
       'gelo': 'ice',
       'Não': 'not',
@@ -1638,10 +1646,11 @@ export const PULP_FICTION: Root[] = [
       { target: 'Esse é bom.', en: 'That one is good.' },
     ],
     helpers: {
+      'hambúrguer': 'burger',
+      Esse: 'that one',
       'Isso': 'that',
       'é': 'is',
       'Muito': 'very',
-      'Esse': 'that one',
 
     },
     transfer_prompt: { context: 'You taste something excellent.', ask: 'That’s really good.', answer: 'Isso é mesmo bom.' },
@@ -1752,6 +1761,8 @@ export const PULP_FICTION: Root[] = [
     ],
     reinforces: ['por_favor'],
     helpers: {
+      batido: 'milkshake',
+      batidos: 'milkshakes',
       'euros': 'euros',
       'Um': 'a',
       'Dois': 'two',
@@ -1999,6 +2010,9 @@ export const AUDREY_HEPBURN: Root[] = [
       { target: 'As coisas mudam.', en: 'Things change.', demonstrates: ['coisa'] },
     ],
     helpers: {
+      pessoas: 'people',
+      importam: 'matter',
+      coisas: 'things',
       'As': 'the',
       'mudam': 'they change',
       'Tu': 'you',
@@ -2170,11 +2184,12 @@ export const MARCUS_AURELIUS: Root[] = [
     ],
     reinforces: ['podes'],
     helpers: {
+      Controla: 'control, said as an order',
+      controlar: 'to control',
       'O': 'what',
       'posso': 'I can',
       'fazer': 'to do',
       'Não': 'not',
-      'controlar': 'to control',
       'isso': 'that',
       'isto': 'this',
 
@@ -2209,8 +2224,11 @@ export const MARCUS_AURELIUS: Root[] = [
     ],
     reinforces: ['o_que'],
     helpers: {
+      controlas: 'you control',
+      reages: 'you react',
+      acontece: 'happens',
+      reagiste: 'you reacted',
       'aconteceu': 'happened',
-      'reagiste': 'you reacted',
       'Não': 'not',
       'posso': 'I can',
       'controlar': 'to control',
@@ -2263,6 +2281,8 @@ export const MARCUS_AURELIUS: Root[] = [
     ],
     voice_rule: 'Portuguese expects a small reason alongside a refusal. Não posso plus desculpa is enough — you never have to explain what you are doing instead.',
     helpers: {
+      'único': 'only',
+      momento: 'moment',
       'não': 'not',
       'E': 'and',
       'tempo': 'time',
@@ -2335,6 +2355,7 @@ export const MARCUS_AURELIUS: Root[] = [
     ],
     reinforces: ['podes'],
     helpers: {
+      Aceita: 'accept, said as an order',
       'podes': 'you can',
       'Posso': 'can I',
       'mudar': 'to change',
@@ -3764,7 +3785,17 @@ export const WIZARDRY: Root[] = [
       { target: 'A loja está fechada.', en: 'The shop is closed.', demonstrates: ['fechado', 'porta'] },
     ],
     reinforces: ['onde', 'esta_', 'por_favor'],
-    helpers: { 'A': 'the', 'a': 'the', 'é': 'is', 'Fecha': 'close', 'Está': 'is', 'loja': 'shop', 'está': 'is', 'fechada': 'closed (of a feminine thing)' },
+    helpers: {
+      A: 'the',
+      a: 'the',
+      é: 'is',
+      Fecha: 'close, said as an order',
+      Está: 'is',
+      está: 'is',
+      loja: 'shop',
+      fechado: 'closed',
+      fechada: 'closed — of a feminine thing',
+    },
     transfer_prompt: {
       context: 'You walk up to the shop at eight in the evening.',
       ask: 'It’s closed.',

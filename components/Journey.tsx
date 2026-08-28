@@ -1482,19 +1482,39 @@ export function MiniBuild({
     return shuffled
   }, [target])
 
+  /**
+   * The small words, all of them, in the order they appear.
+   *
+   * This took the first three matching helpers in whatever order the object happened to
+   * list them, so "Quero fazer as coisas que adoro." glossed que, fazer and as — and
+   * dropped `coisas`, which is in the helpers map and is the only noun in the sentence.
+   * Not a missing gloss: a cap, silently eating one, and choosing which three survived by
+   * the order somebody wrote the keys in.
+   *
+   * Two changes. The cap is gone — 39 of 492 build targets wanted more than three, and a
+   * word left unexplained to save a line is a worse trade than a line that wraps. And they
+   * are ordered by where they fall in the sentence, so reading the line left to right
+   * matches reading the tiles left to right.
+   *
+   * What is still NOT glossed is deliberate: the root's own extracts. `quero` and `adoro`
+   * are the pieces this root exists to give you, they were taught two beats ago, and
+   * glossing them here would say the thing you just learned is scaffolding.
+   */
   const glosses = useMemo(() => {
     if (!helpers) return []
-    const words = target.replace(/[.?,]/g, '').split(' ')
+    const words = target.replace(/[.?,!]/g, '').split(' ')
+    const at = (w: string) =>
+      words.findIndex((x) => x.toLowerCase() === w.replace(/[.?,!]/g, '').toLowerCase())
     const seen = new Set<string>()
     return Object.entries(helpers)
       .filter(([w]) => {
-        const bare = w.replace(/[.?,]/g, '')
-        if (!words.some((x) => x.toLowerCase() === bare.toLowerCase())) return false
-        if (seen.has(bare.toLowerCase())) return false
-        seen.add(bare.toLowerCase())
+        const bare = w.replace(/[.?,!]/g, '').toLowerCase()
+        if (at(w) === -1) return false
+        if (seen.has(bare)) return false
+        seen.add(bare)
         return true
       })
-      .slice(0, 3)
+      .sort((a, b) => at(a[0]) - at(b[0]))
   }, [helpers, target])
 
   const answer = target.split(' ')
