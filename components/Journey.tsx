@@ -1534,6 +1534,26 @@ export function MiniBuild({
     })
   }
 
+  /**
+   * Clear the line and go again, after being shown.
+   *
+   * Being shown the order is the useful half; putting it back yourself is the half that
+   * sticks, and until now there was no way to do it — the answer sat there, already
+   * correct, and the only move left was to press CHECK on somebody else's work.
+   *
+   * `helped` deliberately survives. It is a fact about this attempt, not a mood: the line
+   * was seen, so it cannot count towards the sentences said cold however many times it is
+   * rebuilt afterwards. Clearing that flag would quietly turn the one honest number in the
+   * product into a number about persistence.
+   */
+  function retry() {
+    timers.current.forEach(clearTimeout)
+    timers.current = []
+    setPlaced([])
+    setState('open')
+    track('build_retry', { target })
+  }
+
   function check() {
     const built = placed.map((p) => p.text)
     const right = built.length === answer.length && built.every((w, i) => w === answer[i])
@@ -1608,17 +1628,6 @@ export function MiniBuild({
         </p>
       ) : null}
 
-      {state !== 'done' && !helped ? (
-        <button
-          type="button"
-          data-testid="build-help"
-          onClick={showOrder}
-          className="tap-target mt-3 text-xs uppercase tracking-wider text-muted underline underline-offset-4 transition hover:text-fg"
-        >
-          Need some help?
-        </button>
-      ) : null}
-
       {helped && state !== 'done' ? (
         <p className="mt-3 text-sm leading-relaxed text-muted">
           There it is, in order. Read it out loud, then check it — this one will not
@@ -1633,14 +1642,48 @@ export function MiniBuild({
           <span className="pt text-lg">{target}</span>
         </div>
       ) : (
-        <button
-          type="button"
-          disabled={!placed.length}
-          onClick={check}
-          className="tap-target eyebrow mt-3 w-full rounded border border-accent bg-accent/10 px-4 py-3 text-accent disabled:border-line disabled:bg-transparent disabled:text-muted"
-        >
-          CHECK
-        </button>
+        /*
+          Two controls on one line, and the second one changes with what has happened.
+
+          "Need some help?" was a text link under everything else — the quietest thing on a
+          screen where somebody is stuck, which is the moment they are least inclined to go
+          hunting. It is a button beside CHECK now, and it says what it does: SHOW ME.
+
+          Once it has been used the line is the answer, so offering to show it again is
+          nothing. RETRY takes its place: it clears the line and lets somebody put the words
+          back themselves, which is the only way being shown turns into being able. It does
+          NOT un-help — the proof card still refuses this line, because it was seen.
+        */
+        <div className="mt-3 flex gap-3">
+          <button
+            type="button"
+            data-testid="build-check"
+            disabled={!placed.length}
+            onClick={check}
+            className="tap-target eyebrow flex-1 rounded border border-accent bg-accent/10 px-4 py-3 text-accent disabled:border-line disabled:bg-transparent disabled:text-muted"
+          >
+            CHECK
+          </button>
+          {helped ? (
+            <button
+              type="button"
+              data-testid="build-retry"
+              onClick={retry}
+              className="tap-target eyebrow flex-1 rounded border border-line-strong px-4 py-3 text-muted transition hover:text-fg"
+            >
+              RETRY
+            </button>
+          ) : (
+            <button
+              type="button"
+              data-testid="build-help"
+              onClick={showOrder}
+              className="tap-target eyebrow flex-1 rounded border border-line-strong px-4 py-3 text-muted transition hover:text-fg"
+            >
+              SHOW ME
+            </button>
+          )}
+        </div>
       )}
     </div>
   )
@@ -2566,10 +2609,28 @@ function SectionComplete() {
     )
   })
 
+  /*
+    Is the VIBE finished, or just this session of it?
+
+    A session serves at most four roots and the basics has fourteen, so the two are three or
+    four sittings apart — and this screen said "— DONE" and "VIBE COMPLETE" after the first
+    one. The learner is then told on the shelf that they have taken 3 of 14, and reasonably
+    concludes the count is broken. It was not: this was.
+
+    The headline underneath already said the true thing — "That is the basics, for today" —
+    and was fixed for exactly this reason. The eyebrow above it was missed, which is how a
+    screen ends up contradicting itself in two lines.
+  */
+  const inFamily = family ? (ROOTS_BY_FAMILY[family.id] ?? []) : []
+  const leftInFamily = inFamily.filter((r) => !state.rootsPlayed.includes(r.root_id)).length
+  const vibeFinished = Boolean(family) && inFamily.length > 0 && leftInFamily === 0
+
   return (
     <Shell stage="CHOICE">
       <div className="flex flex-1 flex-col justify-center">
-        <p className="eyebrow text-accent">{family ? family.title + ' — DONE' : 'VIBE COMPLETE'}</p>
+        <p className="eyebrow text-accent">
+          {vibeFinished && family ? family.title + ' — DONE' : 'A SESSION DONE'}
+        </p>
         {/*
           The capability sentence is not here any more.
 
@@ -2589,6 +2650,20 @@ function SectionComplete() {
           */}
           {family ? 'That is ' + family.title + ', for today.' : 'That vibe is done for today.'}
         </p>
+        {/*
+          And how much of it is left, said here rather than discovered on the shelf.
+
+          "3 of 14 taken" is true and it reads as a fault when the screen before it implied
+          the whole thing was finished. Saying the number at the moment somebody earns it
+          turns the shelf's count into a reminder instead of a contradiction.
+        */}
+        {leftInFamily > 0 ? (
+          <p className="mt-3 text-sm leading-relaxed text-muted">
+            {leftInFamily === 1
+              ? 'One more sitting in there whenever you want it.'
+              : 'There are ' + leftInFamily + ' more in there whenever you want them.'}
+          </p>
+        ) : null}
         {/*
           What you gained in THIS crate, not your whole bank. Showing everything at the
           end of every crate was the actual mess: it grows each time and says nothing

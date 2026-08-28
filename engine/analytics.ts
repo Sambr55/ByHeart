@@ -36,6 +36,9 @@ export type EventName =
   /* Derived cards. `derived_said` is the one that matters — it is a collision produced
      cold, with nothing Portuguese on the screen, which is the only thing DUB counts.
      `derived_kept` is a teaching card being finished with, and it is not the same claim. */
+  /* Rebuilding a line after being shown it. Worth knowing separately from build_help:
+     one is asking for the answer, the other is going back and earning it. */
+  | 'build_retry'
   | 'derived_said'
   | 'derived_kept'
   | 'feed_like'
