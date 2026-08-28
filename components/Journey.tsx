@@ -2202,12 +2202,19 @@ function RootBeatView({
               should want it to.
             */}
             <p className="drains text-base leading-relaxed text-muted">{RELEASE.why}</p>
+            {/*
+              The control lives INSIDE the block above it, not after it.
+
+              That block is flex-1: it absorbs every spare pixel on the screen, so a button placed
+              after it is pushed to the foot whatever margin the button carries. It is mt-auto wearing
+              different clothes, and it is why taking mt-auto off the buttons did not fix these
+              screens. Inside, the words and the button are one group — the button sits under the
+              sentence that earned it, and the group is what gets centred.
+            */}
+            {released === 'before' ? (
+              <Cta label={RELEASE.cta} onClick={() => setReleased('draining')} />
+            ) : null}
           </div>
-          {released === 'before' ? (
-            <Cta label={RELEASE.cta} onClick={() => setReleased('draining')} />
-          ) : (
-            <div className="mt-auto" />
-          )}
         </>
       ) : (
         <>
@@ -2339,8 +2346,17 @@ function Osmosis() {
               it waits until there is something real to point at rather than inventing one.
             </p>
           ) : null}
+          {/*
+            The control lives INSIDE the block above it, not after it.
+
+            That block is flex-1: it absorbs every spare pixel on the screen, so a button placed
+            after it is pushed to the foot whatever margin the button carries. It is mt-auto wearing
+            different clothes, and it is why taking mt-auto off the buttons did not fix these
+            screens. Inside, the words and the button are one group — the button sits under the
+            sentence that earned it, and the group is what gets centred.
+          */}
+          <Cta label="CONTINUE" onClick={next} />
         </div>
-        <Cta label="CONTINUE" onClick={next} />
       </Shell>
     )
   }
@@ -2712,34 +2728,43 @@ function SectionComplete() {
             whenever you want them.
           </p>
         ) : null}
-      </div>
 
-      {remaining.length ? (
-        <button
-          type="button"
-          data-testid="another-vibe"
-          onClick={() => finishSection('another')}
-          className="tap-target eyebrow mt-6 w-full rounded bg-accent px-5 py-3 text-accent-ink"
-        >
-          ANOTHER VIBE
-        </button>
-      ) : null}
+        {/*
+          The control lives INSIDE the block above it, not after it.
+
+          That block is flex-1: it absorbs every spare pixel on the screen, so a button placed
+          after it is pushed to the foot whatever margin the button carries. It is mt-auto wearing
+          different clothes, and it is why taking mt-auto off the buttons did not fix these
+          screens. Inside, the words and the button are one group — the button sits under the
+          sentence that earned it, and the group is what gets centred.
+        */}
+        {remaining.length ? (
+          <button
+            type="button"
+            data-testid="another-vibe"
+            onClick={() => finishSection('another')}
+            className="tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-accent-ink"
+          >
+            ANOTHER VIBE
+          </button>
+        ) : null}
       {/*
         The three cold prompts that follow are what GENERATE the number, so promising to
         show somebody what they have got and then testing them reads as a bait. The order
         was never the problem; the label was.
       */}
-      <button
-        type="button"
-        data-testid="im-done"
-        onClick={() => finishSection('done')}
-        className="tap-target eyebrow mt-3 w-full rounded border border-line px-5 py-3 text-fg"
-      >
-        PROVE IT
-      </button>
-      <p className="mt-3 text-center text-xs text-muted">
-        Three sentences, no clues. That is what fills the card.
-      </p>
+        <button
+          type="button"
+          data-testid="im-done"
+          onClick={() => finishSection('done')}
+          className="tap-target eyebrow mt-3 w-full rounded border border-line px-5 py-3 text-fg"
+        >
+          PROVE IT
+        </button>
+        <p className="mt-3 text-center text-xs text-muted">
+          Three sentences, no clues. That is what fills the card.
+        </p>
+      </div>
     </Shell>
   )
 }
@@ -2809,8 +2834,17 @@ function NoCueView({ i }: { i: number }) {
           <p className="mt-3 text-sm text-muted">
             Nothing here needs where it came from any more.
           </p>
+          {/*
+            The control lives INSIDE the block above it, not after it.
+
+            That block is flex-1: it absorbs every spare pixel on the screen, so a button placed
+            after it is pushed to the foot whatever margin the button carries. It is mt-auto wearing
+            different clothes, and it is why taking mt-auto off the buttons did not fix these
+            screens. Inside, the words and the button are one group — the button sits under the
+            sentence that earned it, and the group is what gets centred.
+          */}
+          <Cta label="CONTINUE" onClick={next} />
         </div>
-        <Cta label="CONTINUE" onClick={next} />
       </Shell>
     )
   }

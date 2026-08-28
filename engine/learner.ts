@@ -760,7 +760,20 @@ export function recordEvidence(
     s.evidence = [...s.evidence, entry]
 
     const existing: InventoryItem = s.inventory[ev.target_id]
-      ? { ...s.inventory[ev.target_id], reinforced_sources: [...s.inventory[ev.target_id].reinforced_sources] }
+      ? {
+          ...s.inventory[ev.target_id],
+          /*
+            Tolerant of a row that is not the shape we expect.
+
+            Spreading a missing list throws, and this runs inside the tap that banks a
+            piece — so one malformed row does not degrade the journey, it ENDS it: the
+            exception kills the handler before next(), the button stays live, and pressing
+            it again does the same nothing. A record written by an older build, or
+            half-merged from another device, should cost its own history and not the
+            learner's ability to move.
+          */
+          reinforced_sources: [...(s.inventory[ev.target_id].reinforced_sources ?? [])],
+        }
       : {
           target_id: ev.target_id,
           acquired_source: null,

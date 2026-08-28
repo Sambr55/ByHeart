@@ -112,13 +112,22 @@ export function Reset() {
             So this device is not the only copy — your account holds it too, and would
             put it straight back. Sign out first and the reset will stick.
           </p>
+          {/*
+            The control lives INSIDE the block above it, not after it.
+
+            That block is flex-1: it absorbs every spare pixel on the screen, so a button placed
+            after it is pushed to the foot whatever margin the button carries. It is mt-auto wearing
+            different clothes, and it is why taking mt-auto off the buttons did not fix these
+            screens. Inside, the words and the button are one group — the button sits under the
+            sentence that earned it, and the group is what gets centred.
+          */}
+          <a
+            href="/api/auth/logout"
+            className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            SIGN OUT
+          </a>
         </div>
-        <a
-          href="/api/auth/logout"
-          className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-        >
-          SIGN OUT
-        </a>
       </Frame>
     )
   }
@@ -134,13 +143,22 @@ export function Reset() {
             Legend and the language pair — and so is the copy the server was holding for
             this device. Nothing will come back.
           </p>
+          {/*
+            The control lives INSIDE the block above it, not after it.
+
+            That block is flex-1: it absorbs every spare pixel on the screen, so a button placed
+            after it is pushed to the foot whatever margin the button carries. It is mt-auto wearing
+            different clothes, and it is why taking mt-auto off the buttons did not fix these
+            screens. Inside, the words and the button are one group — the button sits under the
+            sentence that earned it, and the group is what gets centred.
+          */}
+          <Link
+            href="/"
+            className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            FROM THE TOP
+          </Link>
         </div>
-        <Link
-          href="/"
-          className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-        >
-          FROM THE TOP
-        </Link>
       </Frame>
     )
   }

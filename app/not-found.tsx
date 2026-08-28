@@ -31,20 +31,29 @@ export default function NotFound() {
           down. Nothing you have learned is affected — that lives with your account, not
           with a link.
         </p>
-      </div>
-      <div className="flex flex-col gap-3">
-        <Link
-          href="/club"
-          className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-        >
-          GO TO DUB CLUB
-        </Link>
-        <Link
-          href="/"
-          className="tap-target eyebrow block w-full rounded border border-line-strong px-5 py-3 text-center text-muted"
-        >
-          FROM THE TOP
-        </Link>
+        {/*
+          The control lives INSIDE the block above it, not after it.
+
+          That block is flex-1: it absorbs every spare pixel on the screen, so a button placed
+          after it is pushed to the foot whatever margin the button carries. It is mt-auto wearing
+          different clothes, and it is why taking mt-auto off the buttons did not fix these
+          screens. Inside, the words and the button are one group — the button sits under the
+          sentence that earned it, and the group is what gets centred.
+        */}
+        <div className="mt-10 flex flex-col gap-3">
+          <Link
+            href="/club"
+            className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            GO TO DUB CLUB
+          </Link>
+          <Link
+            href="/"
+            className="tap-target eyebrow block w-full rounded border border-line-strong px-5 py-3 text-center text-muted"
+          >
+            FROM THE TOP
+          </Link>
+        </div>
       </div>
     </main>
   )

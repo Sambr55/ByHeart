@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Back } from '@/components/Back'
 import { Wordmark } from '@/components/Wordmark'
+import { loadLearner } from '@/engine/learner'
 
 /**
  * Sign in.
@@ -16,6 +17,27 @@ import { Wordmark } from '@/components/Wordmark'
 export function SignIn({ accountsReady }: { accountsReady: boolean }) {
   // Read after mount rather than via useSearchParams, so this component needs no
   // Suspense boundary and the server render stays identical for everybody.
+  /*
+    Two people arrive here and the page only ever spoke to one of them.
+
+    Somebody who taps "Been here before?" on the front door is RETURNING — new phone,
+    cleared browser, a laptop — and what they want is the way back in. Telling them to
+    "keep what you have learned" is selling an account to a person who already has one, and
+    describing work that is not on this device as being on it.
+
+    Somebody who taps the line at the end of a session is the opposite: they have just
+    earned something, it is on this phone only, and the pitch is exactly right.
+
+    The device knows which is which without asking. An empty one is somebody coming back;
+    a full one is somebody with something to protect. Read after mount, like everything
+    else that comes out of localStorage.
+  */
+  const [kept, setKept] = useState<number | null>(null)
+  useEffect(() => {
+    setKept((loadLearner().proof ?? []).length)
+  }, [])
+  const returning = kept === 0
+
   const [expired, setExpired] = useState(false)
   useEffect(() => {
     setExpired(new URLSearchParams(window.location.search).get('expired') === '1')
@@ -116,10 +138,24 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
         </>
       ) : (
         <>
-          <h1 className="display text-balance text-3xl">Keep what you have learned.</h1>
+          <h1 className="display text-balance text-3xl">
+            {returning ? 'Welcome back.' : 'Keep what you have learned.'}
+          </h1>
           <p className="text-sm text-fg/80">
-            Everything you have done so far is on this phone. An account moves it somewhere it
-            cannot be lost, and lets you carry on wherever you are.
+            {returning
+              ? 'There is nothing on this device yet. Sign in and everything you have already done comes back — the sentences, your Legend, the lot.'
+              : /*
+                  The number, because it is the whole argument.
+
+                  "Keep what you have learned" is abstract. "Eleven sentences you can say
+                  cold, and they are on this phone only" is the same sentence with the
+                  stakes in it — and it is the one number DUB counts, so using it here is
+                  reporting rather than persuading.
+                */
+                (kept
+                  ? kept + (kept === 1 ? ' sentence you can say' : ' sentences you can say') +
+                    ' cold, and they are on this phone only. An account moves them somewhere they cannot be lost, and lets you carry on wherever you are.'
+                  : 'Everything you have done so far is on this phone. An account moves it somewhere it cannot be lost, and lets you carry on wherever you are.')}
           </p>
           <p className="text-sm text-muted">
             No password. We send a link, you tap it, you are in.

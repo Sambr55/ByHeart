@@ -154,6 +154,55 @@ if (wipe) {
   console.log('  · reset needs a confirmation this check could not find — skipped')
 }
 
+console.log('\nthe way back in says the right thing to whoever is reading it\n')
+/*
+  Two people arrive at /signin and it used to speak to one of them.
+
+  "Been here before?" on the front door is somebody RETURNING — new phone, cleared browser
+  — and "keep what you have learned" tells them work that is not on this device is on it.
+  The line at the end of a session is the opposite: they have just earned something and the
+  pitch is exactly right. The device knows which is which without asking.
+*/
+{
+  const fresh = await browser.newContext({ viewport: { width: 390, height: 900 } })
+  const blank = await fresh.newPage()
+  await blank.goto(BASE + '/signin')
+  await blank.waitForTimeout(1200)
+  const empty = ((await blank.textContent('main')) ?? '').replace(/\s+/g, ' ')
+  ok('an empty device is welcomed back', /Welcome back/i.test(empty), empty.slice(0, 44))
+  ok(
+    'and is not told its work is on this phone',
+    !/on this phone only/i.test(empty),
+    'there is nothing on it',
+  )
+  await blank.close()
+  await fresh.close()
+
+  /*
+    The same page on a device with something to lose. Re-seeded first: the reset check
+    above deliberately emptied this one, and reading it straight afterwards would be
+    asserting the full-device copy against an empty device — which is how a check ends up
+    testing the opposite of what it says.
+  */
+  await page.goto(BASE + '/vibes')
+  await page.evaluate(
+    ([k, pair, blob]) => {
+      localStorage.setItem('byheart.pair', JSON.stringify(pair))
+      localStorage.setItem(k as string, JSON.stringify(blob))
+    },
+    [KEY, DEFAULT_PAIR, seed] as const,
+  )
+  await page.goto(BASE + '/signin')
+  await page.waitForTimeout(1200)
+  const full = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
+  ok('a device with proof is offered the protection', /Keep what you have learned/i.test(full))
+  ok(
+    'and told exactly what is at stake',
+    /\d+ sentence/.test(full),
+    (full.match(/\d+ sentences? you can say cold/) ?? ['no count'])[0],
+  )
+}
+
 console.log('\nand through the server, if there is one\n')
 /*
   The round trip, because the bug this exists to catch was invisible from either end.

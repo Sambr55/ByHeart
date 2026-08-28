@@ -51,25 +51,45 @@ async function floats(p: Page) {
       if (!filled && !bordered) continue
 
       /*
-        Measured against the last content ABOVE it anywhere on the screen, not against its
-        own siblings.
+        Measured against the last GLYPH above it, not the last box.
 
-        The first version compared a button to the elements beside it in its parent — which
-        is exactly blind to the fault being looked for, because the usual way a button ends
-        up at the foot of a screen is being wrapped in a container that was pushed there.
-        Inside that wrapper it is the first child and has nothing to be compared with, so
-        every one of them passed.
+        Two versions of this check passed on screens that were plainly wrong, and both
+        failed the same way: they compared the button to element rectangles. The usual way
+        a button ends up at the foot of a screen is a flex-1 block above it — and a
+        flex-1 block's rectangle STRETCHES down to meet the button, so the gap measures
+        near zero and the fault reports as fine. The box is exactly the thing that lies.
 
-        Ancestors are skipped for the same reason: a wrapper's own box reaches down to the
-        button and would report a gap of zero.
+        Text does not stretch. A Range around a text node returns where the glyphs actually
+        are, so "the bottom of the last revealed text" is measured rather than inferred,
+        which is also the rule as it was asked for.
       */
       let last = null
-      for (const other of Array.from(document.querySelectorAll('main *'))) {
-        if (other === el || other.contains(el) || el.contains(other)) continue
-        if (!(other.textContent || '').trim()) continue
+      const walk = document.createTreeWalker(
+        document.querySelector('main'),
+        NodeFilter.SHOW_TEXT,
+      )
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+        if (!(n.textContent || '').trim()) continue
+        if (el.contains(n)) continue
+        const range = document.createRange()
+        range.selectNodeContents(n)
+        for (const orr of Array.from(range.getClientRects())) {
+          if (!orr.height || !orr.width) continue
+          if (orr.bottom > r.top) continue
+          if (last === null || orr.bottom > last) last = orr.bottom
+        }
+      }
+      /*
+        An image or an empty field can be the last thing revealed, and neither stretches.
+
+        Without the field, a card whose last row is a box waiting to be typed in measured
+        from the LABEL above the box — reporting a gap of 119px on a screen where the
+        button sits directly under the thing it submits. Reading only text is how a correct
+        screen gets called wrong, which costs as much trust as the reverse.
+      */
+      for (const other of Array.from(document.querySelectorAll('main img, main input, main textarea, main select'))) {
         const orr = other.getBoundingClientRect()
-        if (!orr.height || !orr.width) continue
-        if (orr.bottom > r.top) continue
+        if (!orr.height || orr.bottom > r.top) continue
         if (last === null || orr.bottom > last) last = orr.bottom
       }
       if (last === null) continue
@@ -94,8 +114,26 @@ async function look(p: Page, where: string) {
 }
 
 const opener = ROOTS.find((r) => r.rung === 1)!
+/*
+  Real inventory items, not the word 'strong'.
+
+  An InventoryItem is an object; seeding the string put a value in the record that the
+  evidence writer could not read, and the exception it threw took out the click handler
+  before it reached next(). The walk then pressed a live button twenty-four times without
+  moving, and reported twenty-four passing beats — a check measuring one screen over and
+  over while its log said it had covered the lesson.
+*/
 const everything = Object.fromEntries(
-  ROOTS.flatMap((r) => r.extracts).map((e) => [e.id, 'strong']),
+  ROOTS.flatMap((r) => r.extracts).map((e) => [
+    e.id,
+    {
+      target_id: e.id,
+      acquired_source: null,
+      reinforced_sources: [],
+      latest_state: 'strong',
+      latest_recall_at: null,
+    },
+  ]),
 )
 const seed = {
   version: 1,
@@ -164,13 +202,48 @@ await page.click('[data-testid="vibe-the_basics"]')
 await page.waitForSelector('[data-testid="vibe-begin"]')
 await page.click('[data-testid="vibe-begin"]')
 await page.waitForTimeout(2200)
-for (let i = 0; i < 8; i++) {
+/*
+  Far enough to reach the release, and it must SAY it got there.
+
+  The screen this check exists for — LAST TIME / TAKE IT AWAY, the one beat that moves the
+  ladder — sits deeper than eight beats. The walk stopped short of it, so the run went
+  green on a suite that had never loaded the screen somebody was looking at. A walk that
+  quietly ends early reports "nothing floating" when it means "nothing looked at", which is
+  the more expensive of the two lies.
+*/
+let sawRelease = false
+for (let i = 0; i < 26; i++) {
   await look(page, 'beat ' + i)
+  if (/LAST TIME/.test((await page.textContent('main')) ?? '')) sawRelease = true
+  /*
+    Answer the screen before pressing on.
+
+    A beat that needs a sentence built does not advance on CONTINUE, so the walk pressed a
+    dead button twenty-four times and measured the same screen twenty-four times over. The
+    log read as twenty-four passing beats. Tap the tiles in order — the pool is the answer
+    with the words shuffled, and CHECK is what unlocks the way forward.
+  */
+  const pool = await page.$('[data-testid="tile-pool"]')
+  if (pool) {
+    for (let t = 0; t < 14; t++) {
+      const tile = await page.$('[data-testid="tile-pool"] button:not([disabled])')
+      if (!tile) break
+      await tile.click()
+      await page.waitForTimeout(120)
+    }
+    const check = await page.$('[data-testid="build-check"]')
+    if (check && (await check.isEnabled())) {
+      await check.click()
+      await page.waitForTimeout(900)
+      await look(page, 'beat ' + i + ' checked')
+    }
+  }
   const next = await page.$('[data-testid="continue"]')
   if (!next || !(await next.isEnabled())) break
   await next.click()
   await page.waitForTimeout(1300)
 }
+ok('the walk reached the release beat', sawRelease, sawRelease ? '' : 'never loaded it')
 
 console.log('\nbuilding a Legend card\n')
 await page.goto(BASE + '/legend')

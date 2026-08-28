@@ -114,24 +114,30 @@ export function Line({ pushReady }: { pushReady: boolean }) {
           <div className="rounded border border-line bg-bg-elev p-4">
             <p className="text-sm leading-relaxed">{line.note}</p>
           </div>
+
+          {/*
+            Inside the block, not after it.
+
+            The block is flex-1 and swallows the spare screen, so a button placed after it
+            floated 400px below the sentence on a tall phone — the sentence at eye level and
+            the only thing to press down by the bar. It confirms saying THIS line, so it
+            belongs against it.
+          */}
+          <button
+            type="button"
+            onClick={() => {
+              track('line_said', { line: line.id })
+              setSaid(true)
+            }}
+            className={
+              'tap-target mt-6 w-full rounded-full px-5 py-3 text-xs tracking-widest transition ' +
+              (said ? 'border border-line text-muted' : 'bg-accent text-accent-ink')
+            }
+          >
+            {said ? 'SEE YOU TOMORROW' : 'SAID IT OUT LOUD'}
+          </button>
         </div>
       )}
-
-      {line ? (
-        <button
-          type="button"
-          onClick={() => {
-            track('line_said', { line: line.id })
-            setSaid(true)
-          }}
-          className={
-            'tap-target w-full rounded-full px-5 py-3 text-xs tracking-widest transition ' +
-            (said ? 'border border-line text-muted' : 'bg-accent text-accent-ink')
-          }
-        >
-          {said ? 'SEE YOU TOMORROW' : 'SAID IT OUT LOUD'}
-        </button>
-      ) : null}
 
       <PushToggle ready={pushReady} />
 
