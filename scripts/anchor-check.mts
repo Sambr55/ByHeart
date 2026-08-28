@@ -1,16 +1,21 @@
 /**
- * Every button sits under the words that earned it.
+ * The button is in the same place on every screen.
  *
  *   npm run anchor
  *
- * `mt-auto` pushes a control to the foot of its column. On a short screen that leaves a
- * lake of nothing between the last sentence and the thing to press, and puts a blue button
- * hard against the blue bar — two blues with a hairline between them, reading as one shape.
+ * This check used to assert the opposite: that a control sat close under the last line of
+ * text. That was the right rule for a browser tab, where the bottom of the screen is not a
+ * place — Safari's URL bar comes and goes as you scroll, so anything pinned down there
+ * moves under you.
  *
- * This was fixed on the journey's Cta and the demo and nowhere else, which is worse than
- * not fixing it: a rule applied to some screens is not a rule, it is an inconsistency with
- * a good reason. So this measures every screen rather than trusting a grep — the fault is
- * about where a control ENDS UP, and `mt-auto` is only one of the ways to get there.
+ * Installed to the home screen there is no URL bar. The bottom is fixed, and a docked
+ * action bar is what an app is expected to do. So the thing worth measuring flipped: not
+ * how near the button is to its sentence, but whether it is in the SAME place every time.
+ * A button that is 72px from the bottom here and 300px from the bottom on the next screen
+ * is one somebody has to look for.
+ *
+ * Two heights, because a fault that only shows on a tall screen is a fault that only shows
+ * on somebody else's phone.
  */
 import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
@@ -18,8 +23,6 @@ import { CRATES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
-/** A section step is 40px. Twice that is generous; past it, something pushed the button. */
-const LIMIT = 96
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
   console.log('  ' + (cond ? '✓' : '✗') + ' ' + label + (detail ? '   ' + detail : ''))
@@ -27,89 +30,70 @@ const ok = (label: string, cond: boolean, detail = '') => {
 }
 
 /**
- * Every prominent control on screen, and how far it floats below its own content.
+ * Every dock on screen, and how far it floats above the bottom.
  *
- * "Prominent" means full-width and filled — the thing somebody is meant to press. A quiet
- * text link at the foot of a page is a footnote and is allowed to sit there.
- *
- * Measured against the bottom of everything BEFORE it in its own column, not against the
- * last sentence: a screen that deliberately reserves space for something about to animate
- * in is not floating, and reading only text would call it that.
+ * Measured to the viewport bottom rather than to the content above it, because that is
+ * the promise being made: the bar beneath is a fixed height, and the dock sits directly
+ * on top of it whatever the screen contains.
  */
-async function floats(p: Page) {
+async function docks(p: Page) {
   return p.evaluate(`(() => {
+    const out = []
+    for (const el of Array.from(document.querySelectorAll('[data-testid="dock"]'))) {
+      const r = el.getBoundingClientRect()
+      if (!r.height) continue
+      out.push({
+        label: (el.textContent || '').trim().replace(/\\s+/g, ' ').slice(0, 26),
+        fromBottom: Math.round(window.innerHeight - r.bottom),
+      })
+    }
+    return out
+  })()`) as Promise<{ label: string; fromBottom: number }[]>
+}
+
+/**
+ * Prominent controls sitting OUTSIDE a dock, on a screen that has one.
+ *
+ * One docked button and one loose one is worse than neither: it teaches somebody where
+ * the button lives and then puts the next one somewhere else. Screens with no dock at all
+ * are left alone — the full-bleed cards run their own layout.
+ */
+async function strays(p: Page) {
+  return p.evaluate(`(() => {
+    if (!document.querySelector('[data-testid="dock"]')) return []
     const out = []
     const wide = window.innerWidth * 0.6
     for (const el of Array.from(document.querySelectorAll('main button, main a[href]'))) {
+      if (el.closest('[data-testid="dock"]')) continue
       if (el.closest('[data-testid="bottom-nav"]')) continue
       const s = getComputedStyle(el)
       const r = el.getBoundingClientRect()
       if (r.width < wide || r.height < 40) continue
       const bg = s.backgroundColor
       const filled = bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent'
-      const bordered = s.borderStyle !== 'none' && parseFloat(s.borderTopWidth) > 0
-      if (!filled && !bordered) continue
-
-      /*
-        Measured against the last GLYPH above it, not the last box.
-
-        Two versions of this check passed on screens that were plainly wrong, and both
-        failed the same way: they compared the button to element rectangles. The usual way
-        a button ends up at the foot of a screen is a flex-1 block above it — and a
-        flex-1 block's rectangle STRETCHES down to meet the button, so the gap measures
-        near zero and the fault reports as fine. The box is exactly the thing that lies.
-
-        Text does not stretch. A Range around a text node returns where the glyphs actually
-        are, so "the bottom of the last revealed text" is measured rather than inferred,
-        which is also the rule as it was asked for.
-      */
-      let last = null
-      const walk = document.createTreeWalker(
-        document.querySelector('main'),
-        NodeFilter.SHOW_TEXT,
-      )
-      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
-        if (!(n.textContent || '').trim()) continue
-        if (el.contains(n)) continue
-        const range = document.createRange()
-        range.selectNodeContents(n)
-        for (const orr of Array.from(range.getClientRects())) {
-          if (!orr.height || !orr.width) continue
-          if (orr.bottom > r.top) continue
-          if (last === null || orr.bottom > last) last = orr.bottom
-        }
-      }
-      /*
-        An image or an empty field can be the last thing revealed, and neither stretches.
-
-        Without the field, a card whose last row is a box waiting to be typed in measured
-        from the LABEL above the box — reporting a gap of 119px on a screen where the
-        button sits directly under the thing it submits. Reading only text is how a correct
-        screen gets called wrong, which costs as much trust as the reverse.
-      */
-      for (const other of Array.from(document.querySelectorAll('main img, main input, main textarea, main select'))) {
-        const orr = other.getBoundingClientRect()
-        if (!orr.height || orr.bottom > r.top) continue
-        if (last === null || orr.bottom > last) last = orr.bottom
-      }
-      if (last === null) continue
-      out.push({
-        label: (el.textContent || '').trim().replace(/\\s+/g, ' ').slice(0, 26),
-        gap: Math.round(r.top - last),
-      })
+      if (!filled) continue
+      out.push((el.textContent || '').trim().replace(/\\s+/g, ' ').slice(0, 26))
     }
     return out
-  })()`) as Promise<{ label: string; gap: number }[]>
+  })()`) as Promise<string[]>
 }
+
+/* The bar is 4.5rem, and the dock sits on it. Two pixels of slack for rounding. */
+const REST = 72
+const seen = new Map<string, number>()
 
 async function look(p: Page, where: string) {
   await p.waitForTimeout(900)
-  for (const c of await floats(p)) {
+  for (const d of await docks(p)) {
+    seen.set(where + ' — ' + d.label, d.fromBottom)
     ok(
-      where + ' — ' + c.label,
-      c.gap <= LIMIT,
-      c.gap + 'px below its content',
+      where + ' — ' + d.label,
+      Math.abs(d.fromBottom - REST) <= 2,
+      d.fromBottom + 'px above the bottom',
     )
+  }
+  for (const stray of await strays(p)) {
+    ok(where + ' — ' + stray + ' is outside the dock', false, 'a button somewhere else')
   }
 }
 
@@ -290,17 +274,24 @@ if (!process.env.ANCHOR_HEIGHT) {
       env: { ...process.env, ANCHOR_HEIGHT: '1300' },
       encoding: 'utf8',
     })
-    console.log(out.split('\n').filter((l) => /✗|viewport|every button/.test(l)).join('\n'))
+    console.log(out.split('\n').filter((l) => /✗|viewport|same place|docks, resting/.test(l)).join('\n'))
   } catch (e) {
     const err = e as { stdout?: string }
     console.log(err.stdout ?? String(e))
-    problems.push('controls float on a tall screen')
+    problems.push('controls move on a tall screen')
   }
 }
 
+const spread = [...new Set(seen.values())].sort((a, b) => a - b)
+console.log(
+  '\n' + seen.size + ' docks, resting ' +
+  (spread.length === 1 ? spread[0] + 'px' : spread[0] + '-' + spread[spread.length - 1] + 'px') +
+  ' above the bottom',
+)
+
 if (problems.length) {
-  console.log('\n' + problems.length + ' control(s) floating\n')
+  console.log('\n' + problems.length + ' control(s) out of place\n')
   for (const p of problems) console.log('  ✗ ' + p)
   process.exit(1)
 }
-console.log('\nevery button sits under the words that earned it')
+console.log('\nthe button is in the same place on every screen')

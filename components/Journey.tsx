@@ -54,6 +54,7 @@ import { LEGEND_COPY, LEGEND_FRAMES, legendStatus } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
 import { setPair } from '@/engine/pair'
+import { Install } from '@/components/Install'
 import { Wordmark } from '@/components/Wordmark'
 import { useNowAfterMount } from '@/engine/useNow'
 import { track } from '@/engine/analytics'
@@ -186,15 +187,23 @@ function Shell({
       {/* The field used to run behind the body text of every screen. It is a band under
           the header now — texture where it frames something, never under a paragraph. */}
       <div aria-hidden className="azulejo-band h-6 w-full shrink-0" />
-      <main className="flex-1">
-        {/*
-            mt-auto pushes the button to the foot of a short screen and gives nothing at
-            all on a full one, which is how the CTA came to land hard against the
-            paragraph above it. A real gap on the flex parent cannot collapse, and the
-            deeper bottom well stops the last row of a scrolling page finishing flush
-            with the screen edge.
-          */}
-        <div className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-md flex-col gap-6 px-5 pt-6 nav-clear">
+      {/*
+        One viewport unit, and no arithmetic.
+
+        The page was min-h-dvh and this column was min-h-[calc(100svh-4rem)] — two
+        different units for the same screen. dvh is DYNAMIC: it grows the moment Safari's
+        URL bar hides. svh is SMALL: it permanently assumes that bar is showing. So the
+        column that positions the button was sized against a height 60-90px different from
+        the page it sat in, and the difference changed as you scrolled. That is not a
+        button with a bad margin, it is a button measured against a moving ruler — and the
+        4rem it subtracted was a guess at the header that PageShell guessed as 6rem.
+
+        Flexing all the way down removes both problems: the column is exactly the room
+        between the header and the bar, whatever the chrome above it decides to do, and
+        there is no constant to fall out of step.
+      */}
+      <main className="flex flex-1 flex-col">
+        <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-5 pt-6 nav-clear">
           {children}
         </div>
       </main>
@@ -223,27 +232,35 @@ function Cta({
   disabled?: boolean
 }) {
   return (
-    <button
-      type="button"
-      data-testid="continue"
-      onClick={onClick}
-      disabled={disabled}
-      /*
-        Anchored to the last thing said, not to the bottom of the screen.
+    <Dock>
+      <button
+        type="button"
+        data-testid="continue"
+        onClick={onClick}
+        disabled={disabled}
+        className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink transition active:scale-[0.99] disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
+      >
+        {label}
+      </button>
+    </Dock>
+  )
+}
 
-        mt-auto pushed it to the foot of every short screen, which put a blue button
-        directly above a blue bar with a hairline between them — two blues reading as one
-        shape — and left a lake of nothing between the text and the thing to press. A
-        button belongs under the sentence that earned it.
-
-        mt-10 is the section step on the 1/3/6/10 scale: enough that it is plainly not part
-        of the paragraph above, close enough to still belong to it. mb-6 keeps the ground
-        between it and the bar for the screens where the content does reach that far.
-      */
-      className="tap-target eyebrow mb-6 mt-10 w-full rounded bg-accent px-5 py-3 text-accent-ink transition active:scale-[0.99] disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
-    >
-      {label}
-    </button>
+/**
+ * The action bar every screen's controls sit in.
+ *
+ * One per screen — two docks would stack on the same spot. Where a screen offers a
+ * choice, both controls go in the SAME dock rather than one docked and one loose, which
+ * is how a secondary button ends up somewhere a primary one never is.
+ *
+ * See .dock in globals.css for why this is docked at all; the short version is that it
+ * stopped being a browser tab and became an app.
+ */
+export function Dock({ children }: { children: React.ReactNode }) {
+  return (
+    <div data-testid="dock" className="dock flex flex-col gap-3">
+      {children}
+    </div>
   )
 }
 
@@ -1191,6 +1208,15 @@ function Picker() {
 
   return (
     <Shell stage="CHOICE">
+      {/*
+        Asking to be installed, on the screen somebody comes back to.
+
+        Not on the way in — a product that asks to be on your home screen before it has
+        shown you anything is asking for a commitment it has not earned. The picker is
+        where a returning learner starts, so it is the first honest moment. It renders
+        nothing at all once installed, or once waved away.
+      */}
+      <Install />
       {/* "Pick a vibe you connect with" is a promise about choice, and on the first
           visit there is exactly one card on the screen. Say the true thing instead. */}
       <h1 className="display text-balance text-2xl">
@@ -2202,19 +2228,12 @@ function RootBeatView({
               should want it to.
             */}
             <p className="drains text-base leading-relaxed text-muted">{RELEASE.why}</p>
-            {/*
-              The control lives INSIDE the block above it, not after it.
-
-              That block is flex-1: it absorbs every spare pixel on the screen, so a button placed
-              after it is pushed to the foot whatever margin the button carries. It is mt-auto wearing
-              different clothes, and it is why taking mt-auto off the buttons did not fix these
-              screens. Inside, the words and the button are one group — the button sits under the
-              sentence that earned it, and the group is what gets centred.
-            */}
-            {released === 'before' ? (
-              <Cta label={RELEASE.cta} onClick={() => setReleased('draining')} />
-            ) : null}
           </div>
+          {released === 'before' ? (
+            <Cta label={RELEASE.cta} onClick={() => setReleased('draining')} />
+          ) : (
+            <div className="mt-auto" />
+          )}
         </>
       ) : (
         <>
@@ -2346,17 +2365,8 @@ function Osmosis() {
               it waits until there is something real to point at rather than inventing one.
             </p>
           ) : null}
-          {/*
-            The control lives INSIDE the block above it, not after it.
-
-            That block is flex-1: it absorbs every spare pixel on the screen, so a button placed
-            after it is pushed to the foot whatever margin the button carries. It is mt-auto wearing
-            different clothes, and it is why taking mt-auto off the buttons did not fix these
-            screens. Inside, the words and the button are one group — the button sits under the
-            sentence that earned it, and the group is what gets centred.
-          */}
-          <Cta label="CONTINUE" onClick={next} />
         </div>
+        <Cta label="CONTINUE" onClick={next} />
       </Shell>
     )
   }
@@ -2728,22 +2738,15 @@ function SectionComplete() {
             whenever you want them.
           </p>
         ) : null}
+      </div>
 
-        {/*
-          The control lives INSIDE the block above it, not after it.
-
-          That block is flex-1: it absorbs every spare pixel on the screen, so a button placed
-          after it is pushed to the foot whatever margin the button carries. It is mt-auto wearing
-          different clothes, and it is why taking mt-auto off the buttons did not fix these
-          screens. Inside, the words and the button are one group — the button sits under the
-          sentence that earned it, and the group is what gets centred.
-        */}
+      <Dock>
         {remaining.length ? (
           <button
             type="button"
             data-testid="another-vibe"
             onClick={() => finishSection('another')}
-            className="tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-accent-ink"
+            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
           >
             ANOTHER VIBE
           </button>
@@ -2757,14 +2760,14 @@ function SectionComplete() {
           type="button"
           data-testid="im-done"
           onClick={() => finishSection('done')}
-          className="tap-target eyebrow mt-3 w-full rounded border border-line px-5 py-3 text-fg"
+          className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-fg"
         >
           PROVE IT
         </button>
-        <p className="mt-3 text-center text-xs text-muted">
+        <p className="text-center text-xs text-muted">
           Three sentences, no clues. That is what fills the card.
         </p>
-      </div>
+      </Dock>
     </Shell>
   )
 }
@@ -2834,17 +2837,8 @@ function NoCueView({ i }: { i: number }) {
           <p className="mt-3 text-sm text-muted">
             Nothing here needs where it came from any more.
           </p>
-          {/*
-            The control lives INSIDE the block above it, not after it.
-
-            That block is flex-1: it absorbs every spare pixel on the screen, so a button placed
-            after it is pushed to the foot whatever margin the button carries. It is mt-auto wearing
-            different clothes, and it is why taking mt-auto off the buttons did not fix these
-            screens. Inside, the words and the button are one group — the button sits under the
-            sentence that earned it, and the group is what gets centred.
-          */}
-          <Cta label="CONTINUE" onClick={next} />
         </div>
+        <Cta label="CONTINUE" onClick={next} />
       </Shell>
     )
   }

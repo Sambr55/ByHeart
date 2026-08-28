@@ -385,6 +385,38 @@ body {
 }
 
 /*
+  The action bar: the button, in the same place, on every screen.
+
+  This reverses an earlier rule, and the reason is the platform rather than the taste.
+  In a browser tab the bottom of the screen is not a place — Safari's URL bar comes and
+  goes as you scroll, so anything pinned there moves under you, which is why the button
+  was anchored to the last line of text instead. Installed to the home screen there is no
+  URL bar, the bottom is fixed, and a docked action bar is what an app is expected to do:
+  you learn where the button is once and never look for it again.
+
+  sticky rather than fixed, because sticky stays in the flow and therefore reserves its
+  own space — no height constant to keep in step with a fixed element, and nothing to
+  scroll underneath and get lost behind. margin-top: auto is what pins it on a screen
+  whose content does not reach the bottom; on a long screen it simply rides along and
+  sticks when it would otherwise leave the viewport.
+
+  The ground and the hairline are not decoration. A blue button directly above the blue
+  nav bar reads as one shape with a scratch across it; sitting the button on the page's
+  own sand, with a rule above and clear air below, makes the bar a layer rather than a
+  continuation of the bar beneath it.
+*/
+.dock {
+  position: sticky;
+  bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  z-index: 30;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  padding-bottom: 1.5rem;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+}
+
+/*
   The bar is chrome, not content, so it does not take the palette of the screen behind it.
 
   It reuses .bar's whole token scope rather than inventing one: on a coloured bar white IS

@@ -135,6 +135,9 @@ export type EventName =
   | 'legend_unlocked'
   /* The truth about what happens when you get it wrong. Once per learner, ever. */
   | 'switch_shown'
+  /* Whether people install, and which of the two routes they were offered. */
+  | 'install_dismissed'
+  | 'install_accepted'
 
 export interface AnalyticsEvent {
   seq: number

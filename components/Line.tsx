@@ -12,6 +12,7 @@ import { currentPair } from '@/engine/pair'
 import { rememberLine } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { Dock } from '@/components/Journey'
 
 /**
  * The Line — twenty seconds, once a day.
@@ -114,28 +115,6 @@ export function Line({ pushReady }: { pushReady: boolean }) {
           <div className="rounded border border-line bg-bg-elev p-4">
             <p className="text-sm leading-relaxed">{line.note}</p>
           </div>
-
-          {/*
-            Inside the block, not after it.
-
-            The block is flex-1 and swallows the spare screen, so a button placed after it
-            floated 400px below the sentence on a tall phone — the sentence at eye level and
-            the only thing to press down by the bar. It confirms saying THIS line, so it
-            belongs against it.
-          */}
-          <button
-            type="button"
-            onClick={() => {
-              track('line_said', { line: line.id })
-              setSaid(true)
-            }}
-            className={
-              'tap-target mt-6 w-full rounded-full px-5 py-3 text-xs tracking-widest transition ' +
-              (said ? 'border border-line text-muted' : 'bg-accent text-accent-ink')
-            }
-          >
-            {said ? 'SEE YOU TOMORROW' : 'SAID IT OUT LOUD'}
-          </button>
         </div>
       )}
 
@@ -159,7 +138,40 @@ export function Line({ pushReady }: { pushReady: boolean }) {
       >
         Got ten minutes? Open a vibe.
       </Link>
-      <BottomNavSpace />
+
+      {/*
+        Last in the column, because a dock can only rest on the bottom if nothing is
+        under it. The footnotes used to come after this and held it 188px up — the one
+        screen in the product where the button was not where the button is. They are
+        quiet links and read perfectly well above it.
+      */}
+      {line ? (
+        <Dock>
+          <button
+            type="button"
+            onClick={() => {
+              track('line_said', { line: line.id })
+              setSaid(true)
+            }}
+            className={
+              'tap-target w-full rounded-full px-5 py-3 text-xs tracking-widest transition ' +
+              (said ? 'border border-line text-muted' : 'bg-accent text-accent-ink')
+            }
+          >
+            {said ? 'SEE YOU TOMORROW' : 'SAID IT OUT LOUD'}
+          </button>
+        </Dock>
+      ) : (
+        /*
+          The nav's clearance, only when there is no dock.
+
+          A dock IS the clearance — it is sticky 4.5rem off the bottom, so it holds itself
+          above the bar. Leaving a 4.5rem spacer under it as well pushed its resting place
+          up by exactly that spacer plus the column's gap, and this was the one screen in
+          the product where the button was not where the button is.
+        */
+        <BottomNavSpace />
+      )}
       <BottomNav />
     </main>
   )

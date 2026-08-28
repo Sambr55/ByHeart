@@ -27,8 +27,9 @@ export function PageShell({
           <p className="eyebrow flex-1 truncate text-right">{eyebrow}</p>
         </div>
       </header>
-      <main className="flex-1">
-        <div className="mx-auto flex min-h-[calc(100svh-6rem)] w-full max-w-md flex-col px-5 py-6">
+      {/* One unit, no constants. See the same change in Journey's Shell. */}
+      <main className="flex flex-1 flex-col">
+        <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 py-6">
           {children}
         </div>
       </main>
