@@ -713,17 +713,29 @@ export function JourneyProvider({
        * Arriving in a second world is exactly the moment to show that the first one is
        * still working. Holding every collision back until the end meant a learner who
        * took two areas saw the compounding claim once, at the finish, if at all.
+       *
+       * But it went FIRST, which is worse than either. You tap Audrey Hepburn and the
+       * screen says "Olá, chamo-me Sam." — a sentence built out of the basics and a
+       * Beatles single, with nothing of Hepburn in it. And because the collision served is
+       * whichever one is next undone, opening the same vibe twice gives two different
+       * openers, so the vibe has no character at all at the moment it most needs one.
+       *
+       * A vibe opens with its own banger. The collision lands after it, which keeps the
+       * whole point — it is still early, it is still the moment of arriving somewhere new
+       * — while the thing you chose is the thing you get.
        */
       const bridging =
         state.rootsPlayed.length > 0
           ? availableCollision(state.rootsPlayed, state.collisionsPlayed)
           : null
+
+      const [opener, ...rest] = roots
+      if (opener) steps.push(...rootSteps(opener))
       if (bridging) {
         steps.push({ kind: 'collision', collisionId: bridging.id })
         rememberPlayed([], bridging.id)
       }
-
-      steps.push(...roots.flatMap((r) => rootSteps(r)))
+      steps.push(...rest.flatMap((r) => rootSteps(r)))
       steps.push({ kind: 'osmosis' })
       // One question between sections, never two, and only once the learner has
       // something to show for the time they have given us.
