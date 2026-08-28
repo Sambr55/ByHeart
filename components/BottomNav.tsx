@@ -38,7 +38,9 @@ export function BottomNav() {
         sits under the bar on every modern iPhone, which is the single most common way a
         bottom bar goes wrong.
       */
-      className="bar nav-bar fixed inset-x-0 bottom-0 z-50 flex pb-[env(safe-area-inset-bottom)]"
+      /* The home-indicator clearance is on .bar.nav-bar in globals.css, with the rest of
+         the inset handling, so there is one place the phone's furniture is described. */
+      className="bar nav-bar fixed inset-x-0 bottom-0 z-50 flex"
     >
       {TABS.map((t) => {
         const here = path === t.href || (t.href === '/vibes' && path === '/')

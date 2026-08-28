@@ -70,7 +70,9 @@ export function Line({ pushReady }: { pushReady: boolean }) {
   return (
     <main
       data-stage="REAL WORLD"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 py-6 text-fg"
+      /* safe-top: this screen has no .bar to carry the notch for it, so its own first
+         row would sit behind the clock on an installed phone. */
+      className="safe-top mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 py-6 text-fg"
     >
       <div className="flex items-center justify-between gap-3">
         <Link href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-muted">

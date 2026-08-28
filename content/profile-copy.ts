@@ -11,7 +11,7 @@ export const PROFILE_COPY = {
   name_hint: 'Your name',
   add_photo: 'ADD A PHOTO',
   done_label: 'BEEN THROUGH',
-  done_note: 'Vibes and rooms you have been all the way through. They stay here.',
+  done_note: 'Vibes you have been into, and rooms you have been through. They stay here.',
   done_empty: 'Nothing yet. Anything you finish turns up here on its own.',
   saved_label: 'KEPT',
   saved_note: 'The ones you saved for the night before you need them.',

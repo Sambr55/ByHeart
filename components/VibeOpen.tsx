@@ -77,7 +77,9 @@ export function VibeOpen({
       data-stage="REAL WORLD"
       className="fixed inset-0 z-50 h-svh w-full overflow-hidden bg-[#241f1a]"
     >
-      <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6">
+      {/* safe-top before the pt-6: a full-bleed takeover has nothing above it at all, so
+          its own chrome is the only thing between BACK and the clock. */}
+      <header className="safe-top pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6">
         <button
           type="button"
           data-testid="vibe-close"

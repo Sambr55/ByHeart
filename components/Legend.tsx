@@ -395,7 +395,8 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main
       data-stage="REAL WORLD"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
+      /* safe-top: no .bar on this screen, so the notch is its own to clear. */
+      className="safe-top mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
     >
       <div className="flex items-center gap-3">
         <Back />

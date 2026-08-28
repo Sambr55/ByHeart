@@ -222,7 +222,9 @@ export function Feed() {
   return (
     <main data-stage="REAL WORLD" className="relative h-svh w-full overflow-hidden bg-[#241f1a]">
       {/* Over the feed, not in it. The chrome does not scroll away. */}
-      <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6">
+      {/* safe-top: the feed card is full-bleed by design, so nothing else can clear the
+          notch for the controls sitting on top of it. */}
+      <header className="safe-top pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6">
         <Link href="/vibes" className="pointer-events-auto tap-target">
           <Wordmark mark="club" className="h-6 text-white" title={chapterName()} />
         </Link>

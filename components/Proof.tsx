@@ -163,7 +163,9 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
         'mx-auto flex w-full max-w-md flex-col gap-6 bg-bg px-5 text-fg ' +
         // Standalone it is the page; inside the journey the step below owns the
         // remaining height, and forcing full height here strands the CTA off-screen.
-        (standalone ? 'min-h-svh py-6' : 'pt-6 pb-3')
+        // safe-top only when it IS the page — inside the journey the Shell's bar has
+        // already cleared the notch, and a second inset would be a gap in the middle.
+        (standalone ? 'safe-top min-h-svh py-6' : 'pt-6 pb-3')
       }
     >
       {standalone ? (

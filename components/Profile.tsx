@@ -10,7 +10,7 @@ import { ThemeChoice } from '@/components/Theme'
 import { Wordmark } from '@/components/Wordmark'
 import { cardById, cardFace, derivedCards, roomsFor, wordCards, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
-import { CRATES, type CultureFamily } from '@/content/roots'
+import { CRATES, ROOTS, type CultureFamily } from '@/content/roots'
 import { LEGEND_FRAMES, legendStatus } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { getAvatar, setAvatarFromFile } from '@/engine/avatar'
@@ -30,7 +30,15 @@ import { useLearner } from '@/engine/useLearner'
  */
 type Tile =
   | { kind: 'card'; id: string; card: FeedCard }
-  | { kind: 'vibe'; id: string; family: CultureFamily; title: string; tone: string }
+  | {
+      kind: 'vibe'
+      id: string
+      family: CultureFamily
+      title: string
+      tone: string
+      /** False while there is still something in it. The tile says so rather than lying. */
+      through: boolean
+    }
 
 export function Profile() {
   const learner = useLearner()
@@ -47,11 +55,41 @@ export function Profile() {
       const card = cardById(id)
       return card ? { kind: 'card', id, card } : null
     }
-    const vibes: Tile[] = sections.flatMap((f) => {
+    /*
+      Every vibe they have actually been into, not only the ones they signed out of.
+
+      sections_completed is written in exactly one place: the two buttons on the
+      end-of-session screen. That was sound while a lesson was a held sequence with no way
+      out — and it stopped being sound the moment the bottom bar went onto the beats, which
+      it did deliberately. Leaving a vibe part-way is now the ordinary thing to do, and
+      doing the ordinary thing recorded nothing: somebody could work through four vibes and
+      find this shelf empty, which reads as the product having lost their week.
+
+      roots_played is the honest record — it is written at each release, by the tap that
+      banks a sentence, and nothing else touches it. So the shelf is built from that, and
+      the union with sections_completed keeps anybody who did sign out properly.
+    */
+    const played = new Set(learner.roots_played ?? [])
+    const been = new Set<string>(sections)
+    for (const root of ROOTS) if (played.has(root.root_id)) been.add(root.culture_family)
+
+    const vibes: Tile[] = [...been].flatMap((f) => {
       const crate = CRATES.find((c) => c.id === f)
-      return crate
-        ? [{ kind: 'vibe' as const, id: crate.id, family: crate.id, title: crate.title, tone: crate.tone }]
-        : []
+      if (!crate) return []
+      const rootsHere = ROOTS.filter((r) => r.culture_family === crate.id)
+      return [
+        {
+          kind: 'vibe' as const,
+          id: crate.id,
+          family: crate.id,
+          title: crate.title,
+          tone: crate.tone,
+          // All the way through means every root in it, or the learner said so themselves.
+          through:
+            sections.includes(crate.id) ||
+            (rootsHere.length > 0 && rootsHere.every((r) => played.has(r.root_id))),
+        },
+      ]
     })
     /*
       A finished derived card, recovered.
@@ -74,7 +112,13 @@ export function Profile() {
       saved: saved.flatMap((id) => asTile(id) ?? []),
       words: wordCards().map((c): Tile => ({ kind: 'card', id: c.id, card: c })),
     }
-  }, [saved.join('|'), finished.join('|'), sections.join('|'), learner.inventory])
+  }, [
+    saved.join('|'),
+    finished.join('|'),
+    sections.join('|'),
+    (learner.roots_played ?? []).join('|'),
+    learner.inventory,
+  ])
 
   if (open) {
     return (
@@ -219,6 +263,12 @@ function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void 
         </span>
         <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg via-bg/85 to-transparent px-3 pb-3 pt-6">
           <span className="display block text-xs leading-tight">{tile.title}</span>
+          {/* Said quietly, because the shelf is a record and not a to-do list. */}
+          {!tile.through ? (
+            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
+              still in there
+            </span>
+          ) : null}
         </span>
       </Link>
     )
