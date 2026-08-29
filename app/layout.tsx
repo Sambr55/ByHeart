@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Archivo, Inter } from 'next/font/google'
 import { BRAND } from '@/content/brand'
 import './globals.css'
+import { Tap } from '@/components/Tap'
 import { Translator } from '@/components/Translator'
 
 const display = Archivo({
@@ -78,6 +79,8 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
           until the learner is in the Club and the server says a key is configured.
         */}
         <Translator />
+        {/* One listener for every control in the product. See components/Tap.tsx. */}
+        <Tap />
       </body>
     </html>
   )

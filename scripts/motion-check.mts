@@ -160,28 +160,54 @@ for (const block of css.matchAll(/@keyframes\s+([\w-]+)\s*\{([\s\S]*?)\n\}/g)) {
 }
 
 /*
-  4. No interface sound, and no haptics. Ever.
+  4. Two places may make a sound, and nowhere else may.
 
-  DUB makes exactly two sounds: European Portuguese, and nothing. The audio channel IS
-  the content channel — the ear is the organ being trained — so any sound that is not
-  Portuguese competes for the exact channel the product exists to occupy. And a learner
-  on a bus who mutes the app's chirps has just muted the Portuguese; no OS gesture
-  separates them.
+  This rule used to be "no interface sound, and no haptics, ever", and the reasoning behind
+  it was sound rather than squeamish: the audio channel IS the content channel here, the ear
+  is the organ being trained, and a learner who mutes the app's chirps on a bus has just
+  muted the Portuguese, because no OS gesture separates them.
 
-  Haptics are worse: navigator.vibrate does not exist on iOS Safari at all, so it is a
-  signature half the audience cannot feel, and on the other half it drives a rotational
-  motor with one parameter. It cannot do restraint.
+  What has changed is the frame rather than the argument. DUB is installed to a home screen
+  now, and inside an app a press that makes no sound at all does not read as restraint, it
+  reads as a page. So there is exactly one interface sound, it confirms a press and nothing
+  else, it is quiet enough to sit under speech, and — the part that answers the objection
+  above rather than ignoring it — it has its own switch in the profile, so silencing the
+  interface does not silence the language.
+
+  The boundary is kept narrow and enforced here: engine/audio speaks Portuguese, engine/tap
+  confirms a press, and a third file doing either is the thing this catches. Haptics are
+  allowed in engine/tap on the same terms, and remain worth almost nothing — iOS Safari
+  implements no Vibration API at all, so it is a flourish half the audience cannot feel and
+  the sound has to carry the confirmation on its own.
 */
+const MAY_SOUND = /engine\/(audio|tap)/
 for (const file of files) {
   const src = strip(readFileSync(file, 'utf8'))
   src.split('\n').forEach((line, i) => {
-    if (/navigator\.vibrate|\.vibrate\(/.test(line)) {
-      fail(file + ':' + (i + 1) + ' vibrates — DUB has no haptics, and iOS Safari has no API for them')
+    if (/navigator\.vibrate|\.vibrate\(/.test(line) && !MAY_SOUND.test(file)) {
+      fail(file + ':' + (i + 1) + ' vibrates outside engine/tap — haptics have one home')
     }
-    if (/new AudioContext|webkitAudioContext|new Audio\(/.test(line) && !/engine\/audio/.test(file)) {
-      fail(file + ':' + (i + 1) + ' makes a sound outside engine/audio — the only sound DUB makes is Portuguese')
+    if (/new AudioContext|webkitAudioContext|new Audio\(/.test(line) && !MAY_SOUND.test(file)) {
+      fail(
+        file + ':' + (i + 1) +
+          ' makes a sound outside engine/audio and engine/tap — those two are the only voices DUB has',
+      )
     }
   })
+}
+
+/*
+  And the one interface sound stays switchable, which is the whole basis of allowing it.
+
+  A tap sound with no way off is the fastest route from "slick" to "uninstalled", and it
+  would also re-open the objection the old rule was built on. Asserted rather than trusted,
+  because it is the kind of thing a later refactor tidies away as an unused branch.
+*/
+{
+  const tapSrc = readFileSync('engine/tap.ts', 'utf8')
+  if (!/export function setSound/.test(tapSrc) || !/soundOn\(\)/.test(tapSrc)) {
+    fail('engine/tap.ts has no off switch — an interface sound is only allowed because it has one')
+  }
 }
 
 /*
@@ -197,7 +223,9 @@ if (drains.length > 4) {
   fail(drains.length + ' drain call sites (' + [...new Set(drains)].join(', ') + ') — the cap is 4')
 }
 
-console.log('4 durations · 2 curves · ' + drains.length + ' drain call site(s) · no sound, no haptics')
+console.log(
+  '4 durations · 2 curves · ' + drains.length + ' drain call site(s) · one interface sound, switchable',
+)
 if (problems.length) {
   console.log('\n' + problems.length + ' motion problem(s):')
   problems.forEach((p) => console.log('  ' + p))

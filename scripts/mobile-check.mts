@@ -48,7 +48,23 @@ async function tinyTargets(page: Page): Promise<string[]> {
           // The Next.js dev-tools launcher is not part of the product, and this suite
           // runs against the dev server. Excluded by its own attributes rather than by
           // size, so a real 32px control is never mistaken for it.
-          if (e.closest('nextjs-portal') || e.hasAttribute('data-next-mark') || e.id.startsWith('next-')) {
+          /*
+            Next's dev chrome, which is not DUB and is not shipped.
+
+            The three tests below miss the build indicator — the "Compiling..." pill that
+            appears while the dev server rebuilds — because it is rendered outside the
+            portal on some versions. It turned up in one run of the gate and not the next,
+            which is the worst kind of failure: a real-looking finding about a button no
+            learner will ever see, on a screen that was fine.
+          */
+          if (
+            e.closest('nextjs-portal') ||
+            e.closest('[data-nextjs-toast]') ||
+            e.closest('[data-nextjs-dev-tools-button]') ||
+            e.hasAttribute('data-next-mark') ||
+            e.id.startsWith('next-') ||
+            /Compiling|Turbopack|Issues|Route|Preferences/.test((e.textContent ?? '').trim())
+          ) {
             return null
           }
           if (r.width >= 44 && r.height >= 44) return null

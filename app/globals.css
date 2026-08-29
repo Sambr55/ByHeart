@@ -366,9 +366,61 @@ body {
   transform: translateY(-6px);
 }
 
+/*
+  A pressable thing: big enough to hit, and it behaves like a control rather than text.
+  
+  Three of the four rules here are removals, and between them they are most of what makes
+  a web page feel like a web page on a phone:
+  
+  The grey box. Tapping anything in a mobile browser flashes a translucent grey rectangle
+  over it — the browser's own guess at feedback, drawn at the browser's own timing, in a
+  colour from nobody's palette. It is the single loudest "this is a website" signal there
+  is, and it has been sitting under every button in DUB. Gone, and replaced below by a
+  press state we control.
+  
+  The callout and the loupe. Holding a button down for half a second in a WebView offers
+  to copy its label and raises the text-selection magnifier — which happens constantly by
+  accident, because people rest a thumb on a button while they read the screen. An app's
+  buttons are not text.
+  
+  Selection is off on CONTROLS only. The Portuguese is deliberately left selectable: it is
+  the one thing on screen somebody has a real reason to copy out, and a language app that
+  will not let you take the sentence with you is being tidy at the learner's expense.
+*/
 .tap-target {
   min-height: 44px;
   min-width: 44px;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/*
+  The press, ours rather than the browser's.
+
+  Scale alone reads as a wobble; scale with a touch of dimming reads as something taking
+  the weight of a finger. 60ms out and 120ms back, so the press is immediate and the
+  release is the part that settles — a symmetrical transition feels mechanical in the bad
+  sense. Cancelled entirely under reduced motion, where the sound is doing the work anyway.
+*/
+.tap-target {
+  transition:
+    transform 260ms var(--ease-drain, ease-out),
+    opacity 260ms var(--ease-drain, ease-out);
+}
+
+.tap-target:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+  /* 120 in, 260 out: the press is immediate and the release is what settles. Both are on
+     the duration scale — a press is not special enough to earn a fifth number. */
+  transition-duration: 120ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tap-target:active {
+    transform: none;
+  }
 }
 
 /*

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { setSound, soundOn, tap } from '@/engine/tap'
 
 export type Theme = 'system' | 'light' | 'dark'
 const KEY = 'byheart.theme'
@@ -52,6 +53,51 @@ export function readTheme(): Theme {
 export const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('${KEY}');if(t==='light'||t==='dark'){document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}}catch(e){}})()`
 
 const LABEL: Record<Theme, string> = { system: 'Match my phone', light: 'Light', dark: 'Dark' }
+
+/**
+ * Whether controls make a sound.
+ *
+ * Sits beside the theme because it is the same kind of thing: a fact about this person's
+ * copy of DUB rather than a place to go. It exists at all because a tap sound with no way
+ * to turn it off is the fastest route from "slick" to "uninstalled" — somebody sitting in
+ * a quiet office with the ringer on should be able to keep the app and lose the noise.
+ *
+ * Default on, because a confirmation nobody discovers is not a confirmation.
+ */
+export function SoundChoice() {
+  const [on, setOn] = useState(true)
+  useEffect(() => setOn(soundOn()), [])
+
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="eyebrow text-muted">TAPS</p>
+      <div role="group" aria-label="Tap sound" className="flex gap-1">
+        {[true, false].map((choice) => (
+          <button
+            key={String(choice)}
+            type="button"
+            data-testid={'sound-' + (choice ? 'on' : 'off')}
+            aria-pressed={on === choice}
+            onClick={() => {
+              setSound(choice)
+              setOn(choice)
+              // Played after the change, so turning it ON demonstrates what was turned on.
+              if (choice) tap()
+            }}
+            className={
+              'tap-target flex-1 rounded border px-3 py-1 text-[0.6rem] uppercase tracking-wider transition ' +
+              (on === choice
+                ? 'border-accent bg-accent/10 text-accent'
+                : 'border-line text-muted hover:text-fg')
+            }
+          >
+            {choice ? 'sound' : 'silent'}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 export function ThemeChoice() {
   // Read after mount. The stored theme is not something the server has, and the head
