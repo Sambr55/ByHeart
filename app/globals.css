@@ -406,6 +406,18 @@ body {
 }
 
 /*
+  A dock already holds itself above the bar, so a spacer as well is a spacer too many.
+
+  The dock is sticky at 4.5rem off the bottom and can only rest there if nothing follows it
+  in the flow. A clearance element underneath pushes it up by its own height plus the
+  column's gap — which is how the Legend's SAVE IT came to sit 136px off the bottom while
+  every other button in DUB sat at 72.
+*/
+body:has(.dock) .nav-clear {
+  padding-bottom: 0;
+}
+
+/*
   A screen with no bar of its own still has to clear the clock.
 
   Applied to the outermost element rather than to an inner column, so the page's ground

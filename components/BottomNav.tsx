@@ -93,6 +93,16 @@ export function BottomNav() {
 /**
  * The room the bar leaves. Sits at the foot of a scrolling page so its last line is
  * readable rather than tucked behind the nav.
+ *
+ * Collapses to nothing when the page it is on has a dock.
+ *
+ * A dock IS the clearance — it is sticky 4.5rem off the bottom and holds itself above the
+ * bar — and it can only rest there if nothing sits under it in the flow. A spacer under one
+ * pushes it up by the spacer's height plus the column's gap, which put the Legend's SAVE IT
+ * 136px off the bottom while every other button in the product sat at 72. Screens that
+ * switch between docked and undocked views (the Legend deck against a Legend card) cannot
+ * make that decision at the call site without threading state through for it, so the CSS
+ * makes it: :has() asks whether this page has a dock, which is exactly the question.
  */
 export function BottomNavSpace() {
   return <div aria-hidden className="nav-clear shrink-0" />

@@ -24,7 +24,7 @@ import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
 import { NumberPicker } from '@/components/NumberPicker'
 import { Back } from '@/components/Back'
-import { MiniBuild } from '@/components/Journey'
+import { Dock, MiniBuild } from '@/components/Journey'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
@@ -630,9 +630,8 @@ function BuildCard({
 
           {/* Skippable, always. Some people have no children and some will not say why
               they left, so leaving it empty is a real answer rather than an omission. */}
-          {/* mt-10, not mt-auto: a button sits under the words that earned it rather
-            than at the foot of the screen. See the Cta in Journey.tsx for why. */}
-          <div className="mt-10 flex flex-col gap-3">
+          {/* The same dock as everywhere else — see .dock in globals.css. */}
+          <Dock>
             <button
               type="button"
               data-testid="legend-save"
@@ -672,7 +671,7 @@ function BuildCard({
             >
               {remaining > 1 ? 'Stop here — ' + (remaining - 1) + ' more when you want them' : 'Back to your deck'}
             </button>
-          </div>
+          </Dock>
         </>
       ) : null}
 
@@ -681,11 +680,11 @@ function BuildCard({
           ask={frame.ask}
           answer={sentence}
           helpers={frame.helpers}
-          onDone={(clean) => {
+          onSolved={(clean) => {
             recordProof({ pt: sentence, en: frame.en, source: 'legend', clean })
             if (clean) rehearsedLegend(frame.id)
-            onDone()
           }}
+          onNext={onDone}
         />
       ) : null}
     </div>
@@ -795,12 +794,16 @@ function ColdSay({
   ask,
   answer,
   helpers,
-  onDone,
+  onSolved,
+  onNext,
 }: {
   ask: string
   answer: string
   helpers?: Record<string, string>
-  onDone: (clean: boolean) => void
+  /** Banked the moment it is right, so leaving here cannot cost the sentence. */
+  onSolved: (clean: boolean) => void
+  /** Moving on, which is the learner's decision and not a consequence of being right. */
+  onNext: () => void
 }) {
   const [done, setDone] = useState(false)
   return (
@@ -809,15 +812,43 @@ function ColdSay({
         <p className="eyebrow text-muted">NO CLUES</p>
         <p className="pt text-balance text-xl text-accent">{ask}</p>
       </div>
+      {/*
+        Getting it right is not the same event as moving on.
+
+        This called the parent's onDone straight out of onSolved, and the parent navigated
+        — so the screen left in the same frame the sentence was completed. MiniBuild's done
+        state, the banked row with the answer and its audio button, was rendered and
+        replaced too fast to read. Nobody ever heard their own Legend sentence said back to
+        them, on the one screen in the product where the sentence is theirs.
+
+        Auto-check made it worse rather than causing it: the last tile now settles the line,
+        so there was not even a tap on CHECK between finishing and the screen vanishing.
+
+        The proof is still recorded at the instant it is right — leaving without pressing
+        CONTINUE must not cost somebody a sentence they said.
+      */}
       <MiniBuild
         target={answer}
         helpers={helpers}
         onSolved={({ clean }) => {
           setDone(true)
-          onDone(clean)
+          onSolved(clean)
         }}
       />
-      {done ? null : <div className="mt-auto" />}
+      {done ? (
+        <Dock>
+          <button
+            type="button"
+            data-testid="legend-cold-next"
+            onClick={onNext}
+            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+          >
+            CONTINUE
+          </button>
+        </Dock>
+      ) : (
+        <div className="mt-auto" />
+      )}
     </div>
   )
 }
@@ -869,13 +900,15 @@ function RunThrough({
         <p className="display text-balance text-2xl">
           {cold ? 'That is the one that counts.' : 'All the way through, out loud.'}
         </p>
-        <button
-          type="button"
-          onClick={onDone}
-          className="tap-target eyebrow mt-6 w-full rounded bg-accent px-5 py-3 text-accent-ink"
-        >
-          MY LEGEND
-        </button>
+        <Dock>
+          <button
+            type="button"
+            onClick={onDone}
+            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+          >
+            MY LEGEND
+          </button>
+        </Dock>
       </div>
     )
   }
@@ -894,16 +927,27 @@ function RunThrough({
         ) : null}
       </div>
 
+      {/*
+        Their own sentence, with the button that says it.
+
+        The QUESTION had audio and the answer did not, which is the wrong way round on this
+        screen: the ask is a prompt somebody is about to answer, and the answer is the thing
+        they are trying to learn to say. Every other answer in DUB — the build beats, the
+        collision, the translator — comes back in a row with its audio on it, and this was
+        the one place a learner could not hear the sentence that is actually about them.
+      */}
       {shown ? (
         <div className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
           <p className="eyebrow text-muted">YOURS</p>
-          <p className="pt text-base text-accent">{answer}</p>
+          <div className="flex items-center gap-3">
+            <AudioButton slug={slugFor(answer)} text={answer} size="sm" />
+            <p className="pt min-w-0 text-base text-accent">{answer}</p>
+          </div>
         </div>
       ) : null}
 
-      {/* mt-10, not mt-auto: a button sits under the words that earned it rather
-          than at the foot of the screen. See the Cta in Journey.tsx for why. */}
-      <div className="mt-10 flex flex-col gap-3">
+      {/* The same dock as everywhere else — see .dock in globals.css. */}
+      <Dock>
         {!shown ? (
           <button
             type="button"
@@ -936,7 +980,7 @@ function RunThrough({
         >
           Stop here
         </button>
-      </div>
+      </Dock>
     </div>
   )
 }

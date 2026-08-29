@@ -107,7 +107,87 @@ ok(
   Boolean(await page.$('[data-testid="legend-card-' + first + '"]')),
 )
 
+/*
+  Saying it cold, and hearing it back.
+
+  The cold beat called the parent's onDone straight out of onSolved, and the parent
+  navigated — so the screen left in the same frame the sentence was finished. MiniBuild's
+  banked row, the answer with its audio, was rendered and replaced too fast to read. It was
+  the one screen in the product where the sentence is about the learner, and the one place
+  they could never hear it said.
+
+  Driven by tapping the pieces in order, which is what a person does now that the last one
+  settles the line by itself.
+*/
+console.log('\nsaying your own sentence cold\n')
+{
+  await page.goto(BASE + '/legend')
+  await page.waitForTimeout(1500)
+  const card = await page.$('[data-testid^="legend-card-"]')
+  if (card) {
+    await card.click()
+    await page.waitForTimeout(900)
+    const mine = await page.$('[data-testid="legend-make-mine"]')
+    if (mine) {
+      await mine.click()
+      await page.waitForTimeout(900)
+      // Fill whatever the card asks for, so there is a sentence to say back.
+      const fields = await page.$$('input[type="text"], input:not([type]), textarea')
+      for (const f of fields) await f.fill('Sam')
+      await page.waitForTimeout(400)
+      const save = await page.$('[data-testid="legend-save"]')
+      if (save && (await save.isEnabled())) {
+        await save.click()
+        await page.waitForTimeout(1400)
+
+        const pool = await page.$('[data-testid="tile-pool"]')
+        ok('it asks for it cold', Boolean(pool), 'no clues, tiles only')
+        if (pool) {
+          const answer = ((await page.getAttribute('[data-testid="tile-line"]', 'data-answer')) ?? '')
+            .split(/\s+/)
+            .filter(Boolean)
+          for (const word of answer) {
+            const tile = await page.$(
+              '[data-testid="tile-pool"] button:has-text("' + word.replace(/"/g, '') + '")',
+            )
+            if (tile) {
+              await tile.click()
+              await page.waitForTimeout(100)
+            }
+          }
+          await page.waitForTimeout(1300)
+          const shown = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
+          ok(
+            'the sentence stays on screen once it is right',
+            shown.includes(answer.join(' ')),
+            answer.join(' '),
+          )
+          ok(
+            'and it can be heard',
+            Boolean(await page.$('[data-testid="audio"]')),
+            'their own sentence, said back to them',
+          )
+          ok(
+            'moving on is a decision, not a consequence',
+            Boolean(await page.$('[data-testid="legend-cold-next"]')),
+          )
+        }
+      }
+    }
+  }
+}
+
 console.log('\nyour children are children, not a count\n')
+/*
+  Back to the deck first.
+
+  The section above finishes standing on a cold beat, not on the deck — so this walked
+  straight into a fifteen-second wait for a card that was not on screen, and took the whole
+  gate down with it. Each section starts from a known place rather than inheriting wherever
+  the last one happened to stop.
+*/
+await page.goto(BASE + '/legend')
+await page.waitForTimeout(1500)
 await page.click('[data-testid="legend-card-children"]')
 await page.waitForTimeout(1200)
 // The ask beat comes first; the build beat is where the rows live.
