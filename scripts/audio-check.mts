@@ -38,7 +38,18 @@ await page.goto(BASE + '/'); await page.waitForTimeout(1000)
 for (let i = 0; i < 8; i++) {
   const t = await page.evaluate(() => (document.querySelector('main') ?? document.body).innerText)
   if (t.includes('FALA COMIGO') || (await page.$('button[aria-label^="Play"]'))) break
-  const btn = await page.$('main button.bg-accent, main a.bg-accent, main button:not([aria-label])')
+  /*
+    The way forward is in the dock, which is no longer inside <main>.
+
+    The dock moved out of the scrolling region so nothing could pass behind it, and the
+    scrolling region is <main> — so a walk scoped to `main button` stopped being able to
+    advance at all, sat on the first screen, and reported that DUB has no speaker on it.
+    A structural change to the layout is a change to every harness that navigates by
+    clicking, and this was the one that noticed.
+  */
+  const btn =
+    (await page.$('[data-testid="dock"] button:not([disabled]), [data-testid="dock"] a')) ??
+    (await page.$('main button.bg-accent, main a.bg-accent, main button:not([aria-label])'))
   if (!btn) break
   await btn.click().catch(() => {})
   await page.waitForTimeout(600)

@@ -24,7 +24,8 @@ import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
 import { NumberPicker } from '@/components/NumberPicker'
 import { Back } from '@/components/Back'
-import { Dock, MiniBuild } from '@/components/Journey'
+import { Dock, Framed } from '@/components/Dock'
+import { MiniBuild } from '@/components/Journey'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
@@ -393,19 +394,21 @@ function missingFrom(frame: LegendFrame, owned: string[]): string {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main
+    <div
       data-stage="REAL WORLD"
       /* safe-top: no .bar on this screen, so the notch is its own to clear. */
-      className="safe-top mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
+      /* app-frame: one scrolling region, dock beneath it. See components/Dock.tsx. */
+      className="app-frame safe-top bg-bg text-fg"
     >
+      <Framed className="mx-auto flex w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
       <div className="flex items-center gap-3">
         <Back />
         <span className="flex-1" />
       </div>
       {children}
-      <BottomNavSpace />
+      </Framed>
       <BottomNav />
-    </main>
+    </div>
   )
 }
 

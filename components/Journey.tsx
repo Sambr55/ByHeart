@@ -54,7 +54,9 @@ import { LEGEND_COPY, LEGEND_FRAMES, legendStatus } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
 import { setPair } from '@/engine/pair'
+import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
+import { Tick } from '@/components/Tick'
 import { useScreenIn } from '@/components/Native'
 import { Wordmark } from '@/components/Wordmark'
 import { useNowAfterMount } from '@/engine/useNow'
@@ -154,7 +156,7 @@ function Shell({
       data-stage={stage}
       data-tone={tone}
       data-drain={drain ? 'on' : undefined}
-      className="flex min-h-dvh flex-col bg-bg text-fg"
+      className="app-frame bg-bg text-fg"
     >
       {/* The bar is solid: a coloured header needs neither the translucency nor the
           blur, and the blur was what forced the menu overlay to be portalled to the
@@ -217,18 +219,25 @@ function Shell({
         between the header and the bar, whatever the chrome above it decides to do, and
         there is no constant to fall out of step.
       */}
-      <main className="flex flex-1 flex-col">
+      {/*
+        One scrolling region, and the dock underneath it rather than on top of it.
+
+        See components/Dock.tsx: the button is still written next to the words that earned
+        it and lands outside the scroller by portal, so a summary taller than the phone
+        scrolls its own words WITHIN the region rather than behind the thing to press.
+      */}
+      <Framed className="flex flex-col">
         {/*
           Beats arrive rather than being swapped. See useScreenIn — the element stays
           mounted, so a half-built line survives a re-render that is only a re-render.
         */}
         <div
           ref={arriving}
-          className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-5 pt-6 nav-clear"
+          className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-5 pb-6 pt-6"
         >
           {children}
         </div>
-      </main>
+      </Framed>
       {/*
         The bar is on the lesson beats too.
 
@@ -265,24 +274,6 @@ function Cta({
         {label}
       </button>
     </Dock>
-  )
-}
-
-/**
- * The action bar every screen's controls sit in.
- *
- * One per screen — two docks would stack on the same spot. Where a screen offers a
- * choice, both controls go in the SAME dock rather than one docked and one loose, which
- * is how a secondary button ends up somewhere a primary one never is.
- *
- * See .dock in globals.css for why this is docked at all; the short version is that it
- * stopped being a browser tab and became an app.
- */
-export function Dock({ children }: { children: React.ReactNode }) {
-  return (
-    <div data-testid="dock" className="dock flex flex-col gap-3">
-      {children}
-    </div>
   )
 }
 
@@ -1745,7 +1736,9 @@ export function MiniBuild({
       {state === 'done' ? (
         <div className="animate-bank mt-3 flex items-center gap-3 rounded border border-correct/40 bg-correct/10 px-4 py-3">
           <AudioButton slug={slugFor(target)} text={target} size="sm" />
-          <span className="pt text-lg">{target}</span>
+          <span className="pt min-w-0 flex-1 text-lg">{target}</span>
+          {/* Acknowledgement, not applause. See components/Tick.tsx. */}
+          <Tick className="text-correct" />
         </div>
       ) : (
         /*

@@ -6,7 +6,7 @@ import { LEGEND_FRAMES } from '@/content/legend'
 import { PIECES } from '@/content/roots'
 import { Wordmark } from '@/components/Wordmark'
 import { learnerStorageKey, loadLearner, wipeLearner } from '@/engine/learner'
-import { Dock } from '@/components/Journey'
+import { Dock, Framed } from '@/components/Dock'
 
 /**
  * Start again on this device.
@@ -261,12 +261,15 @@ function Row({ n, one, many }: { n: number; one: string; many: string }) {
 
 function Frame({ children }: { children: React.ReactNode }) {
   return (
-    <main
+    <div
       data-stage="REAL WORLD"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
+      /* app-frame: one scrolling region, dock beneath it. See components/Dock.tsx. */
+      className="app-frame safe-top bg-bg text-fg"
     >
+      <Framed className="mx-auto flex w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
       <Wordmark className="h-3 text-muted" />
       {children}
-    </main>
+      </Framed>
+    </div>
   )
 }

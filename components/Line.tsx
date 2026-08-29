@@ -12,7 +12,7 @@ import { currentPair } from '@/engine/pair'
 import { rememberLine } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
-import { Dock } from '@/components/Journey'
+import { Dock, Framed } from '@/components/Dock'
 
 /**
  * The Line — twenty seconds, once a day.
@@ -68,12 +68,16 @@ export function Line({ pushReady }: { pushReady: boolean }) {
   const family = root ? CRATES.find((f) => f.id === root.culture_family) : undefined
 
   return (
-    <main
+    <div
       data-stage="REAL WORLD"
-      /* safe-top: this screen has no .bar to carry the notch for it, so its own first
-         row would sit behind the clock on an installed phone. */
-      className="safe-top mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 py-6 text-fg"
+      /*
+        safe-top because this screen has no .bar to carry the notch for it, and app-frame
+        because the dock belongs under the scrolling region rather than over it. Framed
+        supplies the <main> landmark, so this outer element is a div.
+      */
+      className="app-frame safe-top bg-bg text-fg"
     >
+      <Framed className="mx-auto flex w-full max-w-md flex-col gap-6 px-5 py-6">
       <div className="flex items-center justify-between gap-3">
         <Link href="/" className="tap-target flex shrink-0 items-center gap-1 eyebrow text-muted">
           <span aria-hidden>←</span>
@@ -163,19 +167,10 @@ export function Line({ pushReady }: { pushReady: boolean }) {
             {said ? 'SEE YOU TOMORROW' : 'SAID IT OUT LOUD'}
           </button>
         </Dock>
-      ) : (
-        /*
-          The nav's clearance, only when there is no dock.
-
-          A dock IS the clearance — it is sticky 4.5rem off the bottom, so it holds itself
-          above the bar. Leaving a 4.5rem spacer under it as well pushed its resting place
-          up by exactly that spacer plus the column's gap, and this was the one screen in
-          the product where the button was not where the button is.
-        */
-        <BottomNavSpace />
-      )}
+      ) : null}
+      </Framed>
       <BottomNav />
-    </main>
+    </div>
   )
 }
 

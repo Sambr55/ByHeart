@@ -533,6 +533,36 @@ body {
   animation on an element that stays mounted, because remounting a beat would throw away
   the tiles somebody has already placed on it.
 */
+/*
+  The tick, drawn.
+
+  pathLength={1} on the path means the dash numbers are fractions of the line rather than
+  pixels, so the same two rules work whatever the viewBox or the size — no measuring, and
+  no magic number that breaks the day the shape changes.
+
+  260ms on the scale, and a hold at the front of it: the row it sits in is arriving at the
+  same moment, and a tick that draws while its own container is still fading reads as two
+  things happening rather than one thing being confirmed.
+*/
+.tick path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: tick-draw 260ms var(--ease-drain, ease-out) 120ms forwards;
+}
+
+@keyframes tick-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tick path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
 @keyframes screen-in {
   from {
     opacity: 0;
@@ -610,6 +640,71 @@ body:has(.dock) .nav-clear {
   own sand, with a rule above and clear air below, makes the bar a layer rather than a
   continuation of the bar beneath it.
 */
+/*
+  A page the height of the screen, with one region inside it that scrolls.
+
+  The alternative — a document taller than the phone, scrolled by the body — is what put
+  the words of a summary behind its own button. Once the frame is fixed and the scrolling
+  is done by a region INSIDE it, the dock sits below that region and there is nothing for
+  content to pass behind.
+
+  Bottom padding is the fixed bar's room, and it grows by the keyboard so the frame itself
+  shrinks rather than the dock climbing over its own content.
+*/
+/*
+  On a frame the inset is padding, never margin.
+
+  .safe-top is a margin everywhere else so it stacks with whatever padding an element
+  already has. On a box that is exactly the height of the screen a top margin pushes the
+  whole thing down and the same amount falls off the bottom, taking the dock with it.
+*/
+.app-frame.safe-top {
+  margin-top: 0;
+  padding-top: var(--safe-top);
+}
+
+.app-frame {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(var(--bar-room) + var(--keyboard));
+}
+
+.app-scroll {
+  flex: 1 1 auto;
+  /* Without this a flex child refuses to shrink below its content and never scrolls. */
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/*
+  Where a portalled dock lands: under the scroller, above the bar, and never over anything.
+*/
+.dock-slot:empty {
+  display: none;
+}
+
+/*
+  The dock keeps the column's gutters and width, even though it no longer lives in it.
+
+  Moving it out of the scrolling region also moved it out of the mx-auto max-w-md column
+  that every screen's content sits in, so the button went edge to edge while the words above
+  it stayed inset — the two stopped looking like parts of the same page. The measurements
+  are the column's own: 28rem wide, 1.25rem of gutter.
+*/
+.dock-slot {
+  padding-inline: 1.25rem;
+}
+
+.dock-slot > .dock {
+  position: static;
+  margin-top: 0;
+  max-width: 28rem;
+  margin-inline: auto;
+}
+
 .dock {
   position: sticky;
   bottom: calc(var(--bar-room) + var(--keyboard));

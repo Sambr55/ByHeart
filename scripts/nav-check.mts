@@ -84,7 +84,36 @@ async function covered(p: Page) {
       // nobody can see it at all.
       if (r.top > window.innerHeight || r.bottom < 0) continue
       if (r.left > window.innerWidth || r.right < 0) continue
-      if (r.bottom > top + 2 && r.top < top) out.push(text.slice(0, 40))
+      /*
+        Nor is it on screen if its own region has scrolled past it.
+
+        The page used to be a tall document scrolled by the body, so a rectangle in the
+        band above the bar was a rectangle somebody could see. It is a fixed frame with an
+        internal scroller now — and getBoundingClientRect knows nothing about clipping, so
+        the two vibe tiles below the fold reported rectangles down in the bar and were
+        called buried. They are not buried, they are further down, and scrolling reaches
+        them. Same mistake the scroll check made, for the same reason.
+      */
+      let visTop = r.top
+      let visBottom = r.bottom
+      for (let p = el.parentElement; p; p = p.parentElement) {
+        const ov = getComputedStyle(p).overflowY
+        if (!/(auto|scroll|hidden)/.test(ov)) continue
+        const box = p.getBoundingClientRect()
+        visTop = Math.max(visTop, box.top)
+        visBottom = Math.min(visBottom, box.bottom)
+      }
+      /*
+        Clamped, not merely skipped when wholly outside.
+
+        A tile sitting across the scroller's bottom edge has one rectangle straddling it:
+        the top half is drawn, the bottom half is not, and testing the whole of it put the
+        undrawn half in the bar and called the tile buried. Intersecting with every clipping
+        ancestor first means the test is against the pixels a person can actually see, which
+        are the only ones that can be hidden by anything.
+      */
+      if (visBottom - visTop <= 0.5) continue
+      if (visBottom > top + 2 && visTop < top) out.push(text.slice(0, 40))
     }
     return out
   })

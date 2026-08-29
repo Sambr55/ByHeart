@@ -32,7 +32,7 @@ import { track } from '@/engine/analytics'
 import { loadLearner, welcomeToClub, type LearnerState } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { useNowAfterMount } from '@/engine/useNow'
-import { Dock } from '@/components/Journey'
+import { Dock, Framed } from '@/components/Dock'
 
 /**
  * Dub Club.
@@ -543,10 +543,12 @@ function Door({
   /* Six is two rows of three — enough to read as a place, short of reading as a list. */
   const peek = situationsFor(DEFAULT_CHAPTER).filter((s) => isCurrent(s)).slice(0, 6)
   return (
-    <main
+    <div
       data-stage="REAL WORLD"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
+      /* app-frame: one scrolling region, dock beneath it. See components/Dock.tsx. */
+      className="app-frame safe-top bg-bg text-fg"
     >
+      <Framed className="mx-auto flex w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
       <div className="flex items-center gap-3">
         <Wordmark mark="club" className="h-8" />
       </div>
@@ -618,8 +620,8 @@ function Door({
           {legend.open ? CLUB.door.cta : CLUB.door.cta_vibes}
         </Link>
       </Dock>
-      <BottomNavSpace />
-    </main>
+      </Framed>
+    </div>
   )
 }
 

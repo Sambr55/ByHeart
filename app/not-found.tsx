@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Wordmark } from '@/components/Wordmark'
-import { Dock } from '@/components/Journey'
+import { Dock, Framed } from '@/components/Dock'
 
 export const metadata = { title: 'Not here — DUB' }
 
@@ -19,10 +19,12 @@ export const metadata = { title: 'Not here — DUB' }
  */
 export default function NotFound() {
   return (
-    <main
+    <div
       data-stage="REAL WORLD"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
+      /* app-frame: one scrolling region, dock beneath it. See components/Dock.tsx. */
+      className="app-frame safe-top bg-bg text-fg"
     >
+      <Framed className="mx-auto flex w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
       <Wordmark className="h-3 text-muted" />
       <div className="flex flex-1 flex-col justify-center gap-3">
         <p className="eyebrow text-accent">NOT HERE</p>
@@ -47,6 +49,7 @@ export default function NotFound() {
           FROM THE TOP
         </Link>
       </Dock>
-    </main>
+      </Framed>
+    </div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
+import { Tick } from '@/components/Tick'
 import { slugFor } from '@/content/audio-manifest'
 import { clubOpen } from '@/content/legend'
 import { registerFor } from '@/content/roots'
@@ -232,7 +233,8 @@ export function Translator() {
               <>
                 <div className="animate-bank flex items-center gap-3 rounded border border-correct/40 bg-correct/10 px-4 py-3">
                   <AudioButton slug={slugFor(result.pt)} text={result.pt} size="sm" />
-                  <span className="pt text-lg">{result.pt}</span>
+                  <span className="pt min-w-0 flex-1 text-lg">{result.pt}</span>
+                  <Tick className="text-correct" />
                 </div>
                 {result.note ? (
                   <p className="text-sm leading-relaxed text-muted">{result.note}</p>

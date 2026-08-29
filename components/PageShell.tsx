@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
 import { Back } from '@/components/Back'
+import { Framed } from '@/components/Dock'
 import { useScreenIn } from '@/components/Native'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 
@@ -24,7 +25,7 @@ export function PageShell({
   const arriving = useScreenIn(usePathname())
 
   return (
-    <div data-stage={stage} className="flex min-h-dvh flex-col bg-bg text-fg">
+    <div data-stage={stage} className="app-frame bg-bg text-fg">
       <header className="bar sticky top-0 z-30 px-5 py-3">
         <div className="mx-auto flex w-full max-w-md items-center gap-3">
           <Back href={back} label={backLabel} />
@@ -32,13 +33,13 @@ export function PageShell({
         </div>
       </header>
       {/* One unit, no constants. See the same change in Journey's Shell. */}
-      <main className="flex flex-1 flex-col">
+      {/* One scrolling region, dock beneath it. See components/Dock.tsx. */}
+      <Framed className="flex flex-col">
         {/* The same arrival the beats use, keyed on the route. */}
         <div ref={arriving} className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 py-6">
           {children}
         </div>
-      </main>
-      <BottomNavSpace />
+      </Framed>
       <BottomNav />
     </div>
   )
