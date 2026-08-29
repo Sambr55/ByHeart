@@ -55,6 +55,7 @@ import { CrateIcon } from '@/components/CrateIcon'
 import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
 import { setPair } from '@/engine/pair'
 import { Install } from '@/components/Install'
+import { useScreenIn } from '@/components/Native'
 import { Wordmark } from '@/components/Wordmark'
 import { useNowAfterMount } from '@/engine/useNow'
 import { track } from '@/engine/analytics'
@@ -133,7 +134,16 @@ function Shell({
   drain?: boolean
   children: React.ReactNode
 }) {
-  const { back, goHome, canGoBack, owned } = useJourney()
+  const { back, goHome, canGoBack, owned, step } = useJourney()
+  /*
+    A token that changes exactly when the screen does.
+
+    The step's kind and beat rather than an index: the index moves when a section is
+    appended without the screen changing, and the point is to animate what somebody sees.
+  */
+  const arriving = useScreenIn(
+    step ? step.kind + ':' + (step.kind === 'root' ? step.beat + ':' + step.rootId : '') : 'none',
+  )
   // The pieces were taught one at a time and then vanished, so a learner could finish a
   // whole crate without ever seeing the "vocabulary bank" the picker promised them.
   // Read after mount, like everything else that comes out of saved state.
@@ -166,8 +176,13 @@ function Shell({
               </button>
             ) : null}
             <p className="eyebrow flex-1 truncate">{eyebrow ?? ''}</p>
+            {/* needs-learner: this is 0 until the browser has read the record, and a
+                count that corrects itself upward reads as the app changing its mind. */}
             {kept > 0 ? (
-              <span className="eyebrow shrink-0 tabular-nums opacity-80" title="Pieces you have kept">
+              <span
+                className="needs-learner eyebrow shrink-0 tabular-nums opacity-80"
+                title="Pieces you have kept"
+              >
                 {kept} kept
               </span>
             ) : null}
@@ -203,7 +218,14 @@ function Shell({
         there is no constant to fall out of step.
       */}
       <main className="flex flex-1 flex-col">
-        <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-5 pt-6 nav-clear">
+        {/*
+          Beats arrive rather than being swapped. See useScreenIn — the element stays
+          mounted, so a half-built line survives a re-render that is only a re-render.
+        */}
+        <div
+          ref={arriving}
+          className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-5 pt-6 nav-clear"
+        >
           {children}
         </div>
       </main>
@@ -1332,7 +1354,15 @@ function Picker() {
               The drop keeps its own row. It is time-pegged and carries a countdown and a
               ticket link, and a tile has nowhere to put either.
             */}
-            <div className={key === 'drops' ? 'flex flex-col gap-3' : 'grid grid-cols-2 gap-3'}>
+            {/* needs-learner: which of these are open is unknowable before localStorage
+                has been read, and drawing them all open first and locking eight of them a
+                frame later is the loudest guess in the product. */}
+            <div
+              className={
+                'needs-learner ' +
+                (key === 'drops' ? 'flex flex-col gap-3' : 'grid grid-cols-2 gap-3')
+              }
+            >
               {list.map(({ crate: f, finished, waiting, unreached, planLocked, at, taken, total }) => {
                 const image = vibeImage(f.id)
                 return f.drop ? (

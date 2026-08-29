@@ -22,6 +22,7 @@ import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
 import { recordProof, rememberFinishedCard, toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
+import { StatusBar } from '@/components/Native'
 
 /**
  * The Club as a feed.
@@ -224,6 +225,8 @@ export function Feed() {
       {/* Over the feed, not in it. The chrome does not scroll away. */}
       {/* safe-top: the feed card is full-bleed by design, so nothing else can clear the
           notch for the controls sitting on top of it. */}
+      {/* The feed is full-bleed photography, so the status bar goes dark with it. */}
+      <StatusBar color="#241f1a" />
       <header className="safe-top pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6">
         <Link href="/vibes" className="pointer-events-auto tap-target">
           <Wordmark mark="club" className="h-6 text-white" title={chapterName()} />

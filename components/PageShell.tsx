@@ -1,7 +1,9 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { usePathname } from 'next/navigation'
 import { Back } from '@/components/Back'
+import { useScreenIn } from '@/components/Native'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 
 /** Chrome for the objects that outlive a mission: the deck and the delayed recall. */
@@ -19,6 +21,8 @@ export function PageShell({
   backLabel?: string
   children: ReactNode
 }) {
+  const arriving = useScreenIn(usePathname())
+
   return (
     <div data-stage={stage} className="flex min-h-dvh flex-col bg-bg text-fg">
       <header className="bar sticky top-0 z-30 px-5 py-3">
@@ -29,7 +33,8 @@ export function PageShell({
       </header>
       {/* One unit, no constants. See the same change in Journey's Shell. */}
       <main className="flex flex-1 flex-col">
-        <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 py-6">
+        {/* The same arrival the beats use, keyed on the route. */}
+        <div ref={arriving} className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 py-6">
           {children}
         </div>
       </main>

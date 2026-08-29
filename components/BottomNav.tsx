@@ -29,6 +29,20 @@ const TABS = [
 
 export function BottomNav() {
   const path = usePathname()
+  /*
+    One rule for four tabs, rather than four rules one of which is showing.
+
+    Each tab used to draw its own marker and the others drew nothing, so moving between
+    them was a marker vanishing here and a different one appearing there — two events for
+    one movement, which is what makes a bar read as four separate buttons instead of one
+    object with a position in it. A single element that slides says the thing that is
+    actually true: you are somewhere on this bar, and now you are somewhere else on it.
+
+    -1 while the route is not one of the four (a lesson, a Legend card): the marker leaves
+    rather than sitting under a tab nobody is on.
+  */
+  const hereIndex = TABS.findIndex((t) => path === t.href || (t.href === '/vibes' && path === '/'))
+
   return (
     <nav
       data-testid="bottom-nav"
@@ -42,8 +56,25 @@ export function BottomNav() {
          the inset handling, so there is one place the phone's furniture is described. */
       className="bar nav-bar fixed inset-x-0 bottom-0 z-50 flex"
     >
-      {TABS.map((t) => {
-        const here = path === t.href || (t.href === '/vibes' && path === '/')
+      {/*
+        The marker itself, positioned by which tab is current. Transform rather than left,
+        so it is one compositor property and cannot reflow the bar it sits in.
+      */}
+      <span
+        aria-hidden
+        data-testid="nav-marker"
+        className="pointer-events-none absolute left-0 top-0 h-1 rounded-full bg-[color:var(--accent)] transition-transform duration-[260ms]"
+        style={{
+          width: '2.5rem',
+          transform:
+            hereIndex < 0
+              ? 'translateX(-4rem)'
+              : 'translateX(calc(' + (hereIndex * 100 + 50) + 'vw / 4 - 1.25rem))',
+          opacity: hereIndex < 0 ? 0 : 1,
+        }}
+      />
+      {TABS.map((t, i) => {
+        const here = i === hereIndex
         return (
           <Link
             key={t.href}
@@ -64,12 +95,6 @@ export function BottomNav() {
               (here ? 'text-accent' : 'text-muted')
             }
           >
-            {here ? (
-              <span
-                aria-hidden
-                className="absolute inset-x-0 top-0 mx-auto h-1 w-10 rounded-full bg-[color:var(--accent)]"
-              />
-            ) : null}
             <svg
               viewBox="0 0 24 24"
               aria-hidden

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PICKER } from '@/content/front-door'
 import type { Crate, Rung } from '@/content/roots'
 import { vibeImage } from '@/content/vibe-images'
+import { StatusBar } from '@/components/Native'
 
 /**
  * A vibe, full bleed, and one swipe from being inside it.
@@ -79,6 +80,9 @@ export function VibeOpen({
     >
       {/* safe-top before the pt-6: a full-bleed takeover has nothing above it at all, so
           its own chrome is the only thing between BACK and the clock. */}
+      {/* The phone's own bar, agreeing with the photograph under it rather than with a
+          header that is not on this screen. */}
+      <StatusBar color="#241f1a" />
       <header className="safe-top pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6">
         <button
           type="button"

@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Archivo, Inter } from 'next/font/google'
 import { BRAND } from '@/content/brand'
 import './globals.css'
+import { Native } from '@/components/Native'
 import { Tap } from '@/components/Tap'
 import { Translator } from '@/components/Translator'
 
@@ -81,6 +82,8 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <Translator />
         {/* One listener for every control in the product. See components/Tap.tsx. */}
         <Tap />
+        {/* Keyboard room, the hydration flag, and where you were on each tab. */}
+        <Native />
       </body>
     </html>
   )

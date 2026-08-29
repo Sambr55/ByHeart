@@ -451,6 +451,107 @@ body {
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /*
+    How much of the screen the on-screen keyboard is currently eating.
+
+    A fixed element is positioned against the LAYOUT viewport, which does not shrink when
+    the keyboard opens — so a docked button stays exactly where it was and the keyboard is
+    simply drawn on top of it. The translator is the clearest case: you type the sentence
+    you need and the button that translates it is underneath the keys you typed with.
+
+    visualViewport is the only thing that knows, so a listener writes the number here and
+    the layout reads it. Zero when there is no keyboard, which is every desktop and every
+    screen without a field on it.
+  */
+  --keyboard: 0px;
+
+  /* The room the bottom bar takes, which is none of it while the keyboard is up. */
+  --bar-room: calc(4.5rem + var(--safe-bottom));
+}
+
+/*
+  With the keyboard open the bar is gone, so the dock takes its place rather than sitting
+  where it would be.
+
+  Hiding the nav is what a phone does — a tab bar under a keyboard is four controls nobody
+  can reach, and keeping it would push the one control that matters another 4.5rem up.
+*/
+:root[data-keyboard='on'] {
+  --bar-room: 0.75rem;
+}
+
+[data-keyboard='on'] .nav-bar {
+  transform: translateY(110%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-bar,
+  [data-testid='nav-marker'] {
+    transition: none;
+  }
+}
+
+.nav-bar {
+  transition: transform 260ms var(--ease-drain, ease-out);
+}
+
+/*
+  Anything whose appearance depends on what the learner has done.
+
+  Before the browser has read localStorage the answer is not merely unknown, it is
+  UNKNOWABLE — and every screen was guessing. The shelf drew eleven open vibes and then
+  locked eight of them a frame later, the header drew "0 kept" and then the real number.
+  A guess that corrects itself reads as the product changing its mind about you.
+
+  So the parts that depend on it start invisible and fade in once, over 120ms, when the
+  answer exists. Nothing else on the screen waits — the headline, the ground and the bar
+  are all painted immediately, so this is a detail settling rather than a page loading.
+*/
+.needs-learner {
+  opacity: 0;
+}
+
+:root[data-ready='on'] .needs-learner {
+  opacity: 1;
+  transition: opacity 120ms var(--ease-drain, ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .needs-learner,
+  :root[data-ready='on'] .needs-learner {
+    opacity: 1;
+    transition: none;
+  }
+}
+
+/*
+  One screen arriving after another, rather than replacing it.
+
+  120ms and four pixels. Long enough that the eye follows the change instead of being
+  handed a new screen, short enough that nobody waits for it — and applied by restarting an
+  animation on an element that stays mounted, because remounting a beat would throw away
+  the tiles somebody has already placed on it.
+*/
+@keyframes screen-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.screen-in {
+  animation: screen-in 120ms var(--ease-drain, ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-in {
+    animation: none;
+  }
 }
 
 .nav-clear {
@@ -511,7 +612,7 @@ body:has(.dock) .nav-clear {
 */
 .dock {
   position: sticky;
-  bottom: calc(4.5rem + var(--safe-bottom));
+  bottom: calc(var(--bar-room) + var(--keyboard));
   z-index: 30;
   margin-top: auto;
   padding-top: 0.75rem;
