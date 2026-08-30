@@ -49,6 +49,18 @@ export interface DerivedCard {
   en: string
   /** One sentence saying what changed. Never two — one new thing per card. */
   note: string
+  /**
+   * For a collision: each piece and the vibe it came from, kept apart.
+   *
+   * These used to be flattened into `because` as
+   * "sim — The basics, in songs you know   ·   três — The world of wizardry", set in the
+   * Portuguese face, at the top of the card. Two languages, two registers and two vibes in
+   * one line of one typeface, and it read exactly as it looks written out: as though the
+   * app had confused a song with a wizard. The claim being made — you learned these in
+   * different places and nobody taught you the combination — was the most interesting
+   * thing on the screen and it was illegible.
+   */
+  sources?: { target: string; vibe: string }[]
 }
 
 /** Which vibe it came from, said the way a person would say it. */
@@ -281,9 +293,16 @@ function collisions(owned: Set<string>, done: Set<string>): DerivedCard[] {
           gloss: lead.piece.gloss,
           family: lead.piece.family,
         },
-        because: pieces
-          .map((x) => x.piece.target.trim() + ' — ' + vibeName(x.piece.family))
-          .join('   ·   '),
+        /*
+          The face gets the pieces alone, which is what a glance can take: two Portuguese
+          words joined by a plus. Where they came from is the payoff, and it belongs on the
+          screen that has room to say it in a sentence.
+        */
+        because: pieces.map((x) => x.piece.target.trim()).join(' + '),
+        sources: pieces.map((x) => ({
+          target: x.piece.target.trim(),
+          vibe: vibeName(x.piece.family),
+        })),
         target: c.answer,
         en: c.ask,
         note: c.provenance,

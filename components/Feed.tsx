@@ -533,15 +533,10 @@ export function Card({
           </div>
         </div>
 
-        <div className="nav-clear h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 pt-10 text-fg">
-          {/*
-            Clearance under the fixed header, composed from the scale rather than picked.
-
-            The header floats over the feed and does not scroll, so this pane has to start
-            below it — and 80px is not a step on the spacing scale. Ten plus six is, and it
-            comes to the same place.
-          */}
-          <div className="mt-6">
+        <div className="card-pane nav-clear h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 text-fg">
+          {/* Clearance is card-pane in globals.css — the header's own measurement, notch
+              included, so the two cannot drift apart. */}
+          <div>
             {card.kind === 'situation' ? (
               <Lines card={card} />
             ) : card.kind === 'derived' ? (
@@ -604,7 +599,21 @@ function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
       <div className="flex flex-col gap-6">
         <div>
           <p className="eyebrow text-accent">OUT OF</p>
-          <p className="pt mt-3 text-lg">{d.because}</p>
+          {/*
+            One row per piece, with the Portuguese and the vibe in different registers.
+
+            Flattened into a single line in the Portuguese face, this read as though DUB had
+            confused a song with a wizard — which is what it looked like, and the claim
+            underneath it is the best one the product makes.
+          */}
+          <ul className="mt-3 flex flex-col gap-1">
+            {(d.sources ?? [{ target: d.because, vibe: '' }]).map((s) => (
+              <li key={s.target} className="flex items-baseline gap-3">
+                <span className="pt shrink-0 text-lg text-accent">{s.target}</span>
+                {s.vibe ? <span className="min-w-0 text-sm text-muted">{s.vibe}</span> : null}
+              </li>
+            ))}
+          </ul>
         </div>
         <div className="border-t border-line pt-6">
           <div className="flex items-start gap-3">
@@ -619,6 +628,7 @@ function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
               cards in the feed. */}
           <p className="mt-6 text-sm leading-relaxed text-fg/85">{d.note}</p>
         </div>
+        <Done card={card} />
       </div>
     )
   }
@@ -646,7 +656,39 @@ function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
         </div>
         <p className="mt-6 text-sm leading-relaxed text-fg/85">{d.note}</p>
       </div>
+      <Done card={card} />
     </div>
+  )
+}
+
+/**
+ * The way off a card you have been shown.
+ *
+ * The reveal pane had no action on it at all: you swiped left to see the answer and then
+ * the only move left was to swipe back, so a card could be read and never finished — it
+ * stayed in the feed, and the feed stopped being a thing you could get to the end of.
+ *
+ * GOT IT rather than I SAID IT, and the difference is the whole of the honesty rule. The
+ * front of the card offers I SAID IT and records proof, because there the answer is
+ * hidden. Here it is on the screen. Marking the card spent is the only claim that can be
+ * made about somebody who has just read something.
+ */
+function Done({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
+  const [done, setDone] = useState(false)
+  return (
+    <button
+      type="button"
+      data-testid="derived-done"
+      disabled={done}
+      onClick={() => {
+        setDone(true)
+        rememberFinishedCard(card.id)
+        track('derived_kept', { card: card.id, kind: card.card.kind })
+      }}
+      className="tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
+    >
+      {done ? 'KEPT' : 'GOT IT'}
+    </button>
   )
 }
 

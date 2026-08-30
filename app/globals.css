@@ -698,6 +698,25 @@ body:has(.dock) .nav-clear {
   padding-inline: 1.25rem;
 }
 
+/*
+  A feed pane starts below the chrome floating over it, whatever height that chrome is.
+
+  The header on a card is absolutely positioned, so the pane cleared it with a fixed
+  10 + 6 — which was right until the header grew by a notch. On a phone with a status bar
+  the wordmark then sat on top of the pane's first line, and the eyebrow read as a
+  strikethrough. The clearance is the same measurement the header is made of, so the two
+  cannot drift apart again.
+*/
+.card-pane {
+  /*
+    6rem, not 4.5. The header is 4.5rem tall including its own top padding, so 4.5 clears it
+    by four pixels — which passes "do these overlap" and looks like a mistake, because a
+    line of type four pixels under a logo reads as having collided with it and stopped.
+    The extra 1.5rem is the gap between two things that are not related to each other.
+  */
+  padding-top: calc(6rem + var(--safe-top));
+}
+
 .dock-slot > .dock {
   position: static;
   margin-top: 0;
