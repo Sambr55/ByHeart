@@ -137,28 +137,90 @@ is for:
 
 ---
 
-## 05 Where the "why are you here" question goes
+## 05 Who, where and why — asked in set-up, before anything is tailored
 
-Not in the showcase — that is the mistake this spec opens by correcting. Somebody browsing a
-feed has not decided anything and asking them to classify themselves is the fastest way to
-lose them.
+> **This section previously said the opposite, and it was wrong.** Kept as a correction
+> rather than quietly rewritten, because the mistake is instructive.
 
-**It belongs at the top of the Legend**, which is the first moment the answer is both earned
-and useful: they have done five vibes, they are about to say seven things about themselves,
-and what a stranger asks you genuinely differs by whether you are here for four days or for
-good.
+### 05.1 The misreading
 
-It does two jobs there:
+The note that produced the original §05 was:
 
-1. **Routes Club content**, as already built — the Junta for a mover, never for a visitor.
-2. **Shapes the Legend.** A mover is asked where they live and what they do here; a visitor
-   is asked how long they are staying and where they are from. That needs a `purposes` field
-   on `LEGEND_FRAMES` and enough frames to draw three sets from.
+> *You are assuming the person is planning to learn Portuguese and visit Lisbon before we
+> have asked them anything.*
+
+I read that as **do not ask**, and pushed the purpose question five vibes downstream to the
+top of the Legend. It means **do not assume — ask.** The generic feed in front of set-up is
+generic *precisely because* these questions have not been answered yet; answering them is
+what turns it into somebody's.
+
+### 05.2 What the mistake actually cost
+
+Worse than misplacement. The three questions ended up in three different places and none of
+them reached the thing that builds the feed:
+
+| | Where it was | Reached the feed? |
+|---|---|---|
+| **Where** | Nowhere. `ChapterId` was a parameter on `feedFor`, `roomsFor`, `dropsFor` and `rowsFor`, and every caller passed the default. Two cities in `CHAPTERS`, no question anywhere. | No |
+| **Why** | A full screen at the top of the Legend — five vibes and a paywall after the content it was meant to shape | No. `feedFor` did not even accept a purpose. |
+| **Who** | An `onBlur` on a text field in Yours that nothing links to | No |
+
+So the answer to *"can we tailor the content?"* was **no**, and would have stayed no even
+after somebody answered, because the wiring stopped at the parameter.
+
+### 05.3 Where they go
+
+**All three in the set-up card**, in this order, before any content is tailored:
+
+```
+WHERE   which city          → chapter, and the pair falls out of it
+WHY     visiting/staying/moving → which of the city the Club offers
+WHO     your name           → optional; the answer to the first thing you say in Portuguese
+```
+
+The §00 correction still holds and is not in tension with this: **the argument comes first,
+the questions come seventh.** Nobody is asked to classify themselves at the front door. They
+are asked after four reasons and two demonstrations, on a card they can swipe past forever.
+Gates live on actions, never on the scroll.
+
+The language question is gone. Every chapter in `CHAPTERS` carries the same pair, so choosing
+Lisbon chooses pt-PT — asking twice for one answer is a form, not a decision.
+
+### 05.4 Ordering, not filtering — and why that is a content fact
+
+Turning the purpose filter on today would make the Club **emptier**, which is the exact
+problem it exists to solve. Of fifteen Situations:
+
+| Purpose | Matching rooms |
+|---|---|
+| moving | 15 |
+| staying | 6 |
+| visiting | 4 |
+
+A visitor would get a four-card Club. So `feedFor` **orders** by purpose instead: what
+somebody is here for leads, everything else follows, nothing is hidden. Identical wiring,
+lower strictness — pass `purpose` through to `roomsFor` and it becomes a filter the day
+`visiting` and `staying` have blocks of ten.
+
+**Save still outranks purpose.** A card somebody pressed a button to keep beats a preference
+inferred from a menu, always.
+
+### 05.5 What this makes urgent
+
+The asymmetry above is now the top content priority. `lisbon-moving-1.ts` gave `moving`
+ten rooms; `visiting` and `staying` have none of their own and are living on the four
+untagged originals. **A visitor who answers honestly currently gets the thinnest Club of the
+three** — the opposite of what answering should do.
+
+Two blocks of ten, `lisbon-visiting-1` and `lisbon-staying-1`, and then §05.4's ordering
+becomes a filter.
 
 The existing `why_here` card — *Porquê Portugal?* — stays exactly as it is. It collects a
 feeling and it is a good sentence; it was never a router.
 
----
+`WhyHere` stays in the Legend as a **fallback**, not the primary ask: it now fires only for
+learners who reached the deck without ever answering in set-up, and it has the forward exit
+its own doc comment always claimed it had.
 
 ## 06 Order of work
 
@@ -200,3 +262,77 @@ window makes content supply the whole game.**
    and it costs nothing that can be re-spent.
 3. **Do the explainers ever come back?** My proposal: each retires permanently once its
    thing has been used, and never returns. An explainer a member still sees is an advert.
+
+---
+
+## 08 The feed is the product, not a shell around it
+
+> Added after a fair complaint: the first version of this was me transcribing instructions
+> rather than thinking the flow through. What follows is the design position, including the
+> place where the brief contradicts itself and what to do about it.
+
+### 08.1 The contradiction worth naming
+
+**"Feels like TikTok" and "each swipe moves them on in the process" pull in opposite
+directions.** TikTok is infinite, orderless and lossless — swiping past costs nothing,
+because whatever you skipped comes back. A process is ordered, finite and has
+prerequisites, so swiping past loses something.
+
+Reconciling them is not a matter of tone. It needs one mechanism:
+
+**Save is what makes swiping past safe.** It is not a feature on the rail; it is the thing
+that lets a queue behave like a feed. Without it, "swipe past" means "lose", and a person
+who senses that stops swiping and starts reading everything — which is a corridor again,
+with extra steps.
+
+And today **save does nothing at all to the feed.** It fills a bookmark and files the card
+in YOURS. It is a filing action, not a deferring one, and only the second makes this model
+work. That is the single most important gap in the brief and it is invisible from outside.
+
+### 08.2 Three verbs, and only three
+
+| Gesture | Means | Costs |
+|---|---|---|
+| **Swipe up** | Next. Move on in the process. | Nothing, because of save |
+| **Swipe left** | Into this one. Do it. | The thing itself |
+| **Save** | Not now — bring it back. | Nothing |
+
+That is the whole grammar. Anything that cannot be expressed in it is a screen, and screens
+are what this restructure exists to remove.
+
+### 08.3 Gates live on actions, never on the scroll
+
+If every swipe is progress, then in principle a gate must stop a swipe — and a feed that
+stops your thumb is not a feed.
+
+**So nothing gates the scroll. Two things gate an ACTION.** The language pair decides which
+learner record even exists, and the deal is the thing DUB asks of somebody before it starts
+keeping their work. Neither can be skipped, and neither needs to block browsing.
+
+The resolution: **you may swipe past set-up forever; you cannot start a vibe without it.**
+The card sits in the feed like any other, and every call to action that needs it routes
+through it. Nothing stops the thumb; the process still cannot be entered sideways.
+
+### 08.4 The order, and why
+
+```
+1  you already understand more than you can say   ← the demo, playable
+2  the pharmacy                                   ← what it looks like, obvious
+3  seven questions a stranger will ask you        ← what you are working towards
+4  Bridget Jones cringe moments                   ← what it looks like, fun
+5  Lisbon as it is actually happening             ← why this is not a textbook
+6  the sentence we have not taught you yet        ← the translator
+7  SET UP — one decision, then you start          ← the pair, the deal, and in
+8+ the ordinary feed
+```
+
+Claim, then evidence, twice — because a claim without evidence is advertising and evidence
+without a claim is a mood board. Set-up comes seventh because by then somebody has been
+given four reasons and shown two of them working, which is the first moment asking for
+anything is fair.
+
+### 08.5 What "see it again" has to mean
+
+A saved card **leads the feed next time the Club is opened**, and survives being done.
+Anything less and the promise is a bookmark rather than a return, which is what it is now.
+

@@ -89,6 +89,11 @@ export type FeedCard =
     something obviously useful, and something that is obviously fun and turns out to be
     useful. See feedFor's pinned opening.
   */
+  /*
+    Set-up, in the feed, because the process has to be visible in the thing that IS the
+    process. It gates an action, never the scroll — see components/SetUp.tsx.
+  */
+  | { kind: 'setup'; id: string; image: { src: string; alt: string } }
   | {
       kind: 'vibe'
       id: string
@@ -138,7 +143,26 @@ const TEXTURE: Record<string, { src: string; alt: string }> = {
  * vocabulary. The mix is the point: it is what stops the feed feeling like a menu with a
  * glossary bolted on the end.
  */
-export function feedFor(chapter: ChapterId = DEFAULT_CHAPTER, preview = false): FeedCard[] {
+export function feedFor(
+  chapter: ChapterId = DEFAULT_CHAPTER,
+  preview = false,
+  /*
+    What they said they were here for, and it ORDERS rather than filters.
+
+    This is the change that makes the who/where/why questions worth asking, and the shape
+    of it is a content fact rather than a preference. Of fifteen Situations, `moving`
+    matches all fifteen, `staying` six and `visiting` four — so switching the filter on
+    would hand a visitor a four-card Club, and the first thing purpose ever did would be
+    making the product emptier. That is why roomsFor's filter has been documented as off
+    since it was written, and the reason has not gone away.
+
+    Ordering gets the benefit without the cost: what somebody is here for leads, everything
+    else follows, and nothing is hidden from anybody. When there are blocks of ten for
+    visiting and staying the same call can become a filter by passing purpose through to
+    roomsFor instead — the wiring is identical, only the strictness changes.
+  */
+  purpose: Purpose | null = null,
+): FeedCard[] {
   /*
     Rooms only.
 
@@ -148,7 +172,13 @@ export function feedFor(chapter: ChapterId = DEFAULT_CHAPTER, preview = false): 
     is where somebody goes looking for what is theirs rather than what is next.
   */
   // Drops first: they expire and nothing else on the screen does.
-  return [...dropsFor(chapter, new Date(), preview), ...roomsFor(chapter)]
+  const rooms = roomsFor(chapter)
+  const mine = (c: FeedCard) => c.kind === 'situation' && forPurpose(c.situation, purpose)
+  return [
+    ...dropsFor(chapter, new Date(), preview),
+    ...rooms.filter(mine),
+    ...rooms.filter((c) => !mine(c)),
+  ]
 }
 
 /**
@@ -354,6 +384,24 @@ export function vibeCard(family: CultureFamily): FeedCard | null {
 }
 
 /**
+ * The set-up card, for anybody who has not been through it.
+ *
+ * Retired the moment the deal is accepted, like every explainer: a card telling somebody to
+ * do a thing they have already done is an advert for their own past.
+ */
+export function setUpCard(dealAccepted: boolean): FeedCard | null {
+  if (dealAccepted) return null
+  return {
+    kind: 'setup',
+    id: 'setup',
+    image: {
+      src: '/lisbon/junta-doorway.jpg',
+      alt: 'Three people waiting at the plain stone doorway of a Portuguese municipal office.',
+    },
+  }
+}
+
+/**
  * The explainers this learner still has a reason to see, as cards.
  *
  * Interleaved rather than stacked — see the caller. Four explanations in a row is a
@@ -463,6 +511,14 @@ export function cardFace(card: FeedCard): {
       eyebrow: card.card.kind === 'collision' ? 'YOU CAN SAY' : 'YOU LEARNED',
       title: card.card.target,
       blurb: card.card.note,
+      image: card.image,
+    }
+  }
+  if (card.kind === 'setup') {
+    return {
+      eyebrow: 'ONE DECISION',
+      title: 'Then you start.',
+      blurb: 'Which language, and what DUB asks of you. It takes one tap and it is the last thing between you and your first three vibes.',
       image: card.image,
     }
   }

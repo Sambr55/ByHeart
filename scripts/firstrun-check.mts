@@ -85,11 +85,26 @@ const titles = (await page.evaluate(
     return (t[0] || '') + ' — ' + (t[1] || '')
   })`,
 )) as string[]
-ok('it opens on something obviously useful', /The pharmacy/.test(titles[1] ?? ''), titles[1] ?? '')
+/*
+  Explanation, then the thing it explained. Twice.
+
+  The order was the other way round and did not survive first contact: a stranger landed on
+  a photograph of a pharmacy whose only instruction read SWIPE LEFT — sideways, into the
+  room, away from every explanation there is — and the answer to "what is this" was the
+  third card with nothing on the first saying so.
+*/
+ok('it opens on an explanation', /SIXTY SECONDS/.test(titles[1] ?? ''), titles[1] ?? '')
 ok(
-  'and then on a vibe, with nothing between them',
-  /A VIBE/.test(titles[2] ?? ''),
+  'then on the obvious example of it',
+  /The pharmacy/.test(titles[2] ?? ''),
   titles[2] ?? '',
+)
+ok('then on the next explanation', /THE WAY IN/.test(titles[3] ?? ''), titles[3] ?? '')
+ok('then on a vibe, which is the other half of the product', /A VIBE/.test(titles[4] ?? ''), titles[4] ?? '')
+ok(
+  'and the first card says the feed keeps going',
+  /keep swiping/i.test((await page.textContent('main')) ?? ''),
+  'the only instruction on screen used to point sideways',
 )
 ok(
   'nothing is asked before anything is shown',
@@ -102,16 +117,47 @@ ok(
   taps, which is the thing this replaces.
 */
 const eyebrows = EXPLAINERS.map((e) => e.eyebrow)
-const at = cards.map((c, i) => (eyebrows.includes(c) ? i : -1)).filter((i) => i >= 0)
-ok('the explainers are in it', at.length >= 3, at.length + ' of ' + EXPLAINERS.length)
+/*
+  Without the clones, or the count lies.
+
+  The rail is [last, ...cards, first] so the loop is seamless, and with an explainer at each
+  end that yields five matches for four explainers — a number that is not wrong so much as
+  about a different list. Counting a clone as a card is how "and none of them are adjacent"
+  would one day pass on a feed where two of them are.
+*/
+const real = cards.slice(1, -1)
+const at = real.map((c, i) => (eyebrows.includes(c) ? i : -1)).filter((i) => i >= 0)
 ok(
-  'and none of them are adjacent',
-  at.every((n, i) => i === 0 || n - at[i - 1] > 1),
-  'positions ' + at.join(', '),
+  'the explainers are in it',
+  at.length === EXPLAINERS.length,
+  at.length + ' of ' + EXPLAINERS.length,
+)
+/*
+  At most two in a row, never three.
+
+  The rule used to be "never adjacent", which described the previous design — content-led,
+  with explanations woven through. The brief changed to explanations leading as a block with
+  the showcase examples among them, and a rule that no longer describes the intent is worse
+  than no rule: it fails on correct work and gets deleted in a hurry, taking the protection
+  with it.
+
+  What still has to hold is that this never becomes a corridor with swipes instead of taps.
+  Two short cards back to back is a pair; three is a lecture.
+*/
+let run = 1
+let longest = 1
+for (let i = 1; i < at.length; i++) {
+  run = at[i] - at[i - 1] === 1 ? run + 1 : 1
+  longest = Math.max(longest, run)
+}
+ok(
+  'and never three of them in a row',
+  longest <= 2,
+  'longest run ' + longest + ', at positions ' + at.join(', '),
 )
 ok(
   'real Lisbon content is between them',
-  cards.filter((c) => !eyebrows.includes(c)).length > at.length,
+  real.filter((c) => !eyebrows.includes(c)).length > at.length,
   'the shop, not just the sign',
 )
 
@@ -122,6 +168,112 @@ console.log('\nevery explainer points the same way\n')
   ) as string
   const links = (detail.match(new RegExp(EXPLAINER_CTA, 'g')) ?? []).length
   ok('one destination, several reasons', links >= 3, links + ' cards carry it')
+}
+
+/*
+  Seven cards of argument before the ordinary feed starts: the two explainers with their two
+  examples, the remaining two explainers, and set-up. Anything at or beyond this index is a
+  room like any other, which is what "nothing ordinary in front of it" is asking about.
+*/
+const LEAD_LENGTH = 7
+
+console.log('\nthe set-up is a card, and it does not block\n')
+/*
+  The process is visible in the thing that IS the process.
+
+  "Which language" was the one step that happened somewhere else — a person tapped the call
+  to action and arrived at a form nobody had mentioned. And it must not stop a thumb:
+  nothing gates the scroll here, two things gate an ACTION, and the difference is the whole
+  reason this is a feed rather than a corridor.
+*/
+{
+  // Clones off, so this index means the same thing as every other index in this file.
+  const set = (await page.evaluate(
+    `Array.from(document.querySelectorAll('.snap-y > section'))
+      .slice(1, -1)
+      .findIndex(s => (s.innerText || '').startsWith('ONE DECISION'))`,
+  )) as number
+  ok('set-up is in the feed', set >= 0, 'at position ' + set)
+  ok(
+    'and it comes after the argument, not before it',
+    set === LEAD_LENGTH - 1,
+    'last of the seven: four reasons and two of them shown working, first',
+  )
+  ok(
+    'and it can be swiped past',
+    /Keep swiping if you would rather look around/i.test((await page.textContent('main')) ?? ''),
+    'the gate is on the action, never on the thumb',
+  )
+}
+
+console.log('\nsaving a card brings it back\n')
+/*
+  The mechanism that makes swiping past safe, and the one that did nothing at all.
+
+  Save filled a bookmark and filed the card in YOURS — a filing action, not a deferring one.
+  If skipping loses things then nobody skips, and a feed nobody skips is a corridor.
+
+  READING THIS FEED NEEDS THE CLONES OFF. The loop renders [last, ...cards, first], so
+  children[0] is a copy of the end and the first real card is at index 1. The first draft of
+  this check took `before` straight off .children and then clicked the first feed-save on the
+  page — which belongs to the LEADING CLONE. It read one card's title and saved a different
+  card, then reported the feature broken. Every read below goes through titles(), and the
+  click is scoped to the section actually on screen.
+*/
+{
+  const titles = async () =>
+    (await page.evaluate(
+      `Array.from(document.querySelectorAll('.snap-y > section'))
+        .slice(1, -1)
+        .map(s => (s.innerText || '').split(String.fromCharCode(10)).filter(Boolean)[1] || '')`,
+    )) as string[]
+
+  const before = await titles()
+  // Somewhere well down the feed, so leading it afterwards cannot be a coincidence.
+  await page.evaluate(`(() => {
+    const r = document.querySelector('.snap-y')
+    if (r) r.scrollTop = r.clientHeight * 9
+  })()`)
+  await page.waitForTimeout(900)
+
+  const saving = (await page.evaluate(
+    `(() => {
+      const r = document.querySelector('.snap-y')
+      const s = r.children[Math.round(r.scrollTop / r.clientHeight)]
+      const b = s.querySelector('[data-testid="feed-save"]')
+      if (b) b.click()
+      return (s.innerText || '').split(String.fromCharCode(10)).filter(Boolean)[1] || ''
+    })()`,
+  )) as string
+  const wasAt = before.indexOf(saving)
+  ok('a card can be saved', wasAt > 0, saving + ', at ' + wasAt)
+
+  if (wasAt > 0) {
+    await page.waitForTimeout(1200)
+    await page.reload()
+    await page.waitForTimeout(2600)
+    const after = await titles()
+    const nowAt = after.indexOf(saving)
+    ok(
+      'and it leads the feed afterwards',
+      nowAt >= 0 && nowAt < wasAt,
+      saving + ': ' + wasAt + ' → ' + nowAt,
+    )
+    /*
+      Ahead of every other room, not merely earlier than it was.
+
+      "Earlier" would pass on a feed that had simply shuffled. The promise is that not now
+      means bring it back, and bringing it back at position nineteen is not bringing it back.
+    */
+    const lead = after
+      .slice(0, nowAt)
+      .filter((t) => t !== saving && before.indexOf(t) >= LEAD_LENGTH)
+    ok(
+      'and nothing ordinary is in front of it',
+      lead.length === 0,
+      lead.length ? 'still behind ' + lead.join(', ') : 'first among the rooms',
+    )
+  }
 }
 
 console.log('\none room is given away, and exactly one\n')
@@ -163,6 +315,106 @@ if (first) {
       /THE MOMENT/.test(second),
       'withholding capability, not information',
     )
+  }
+}
+
+console.log('\nset-up asks who, where and why — and the feed changes because of it\n')
+/*
+  The three questions that make tailoring possible, and the proof that it happened.
+
+  They were scattered: the city was a parameter with no question attached, the purpose was
+  a screen at the top of the Legend five vibes later, and the name was an onBlur in Yours
+  that nothing links to. So the Club built the same feed for everybody, however much it
+  knew — feedFor was called with `undefined` for the chapter and no purpose at all.
+
+  LAST IN THIS FILE ON PURPOSE. Committing set-up accepts the deal and moves the learner
+  out of showcase, so every assertion above it would be reading a different product.
+*/
+{
+  // The set-up card, reached the way a person reaches it.
+  await page.evaluate(`(() => {
+    const r = document.querySelector('.snap-y')
+    if (r) r.scrollTop = r.clientHeight * (LEAD + 1)
+  })()`.replace('LEAD', String(LEAD_LENGTH - 1)))
+  await page.waitForTimeout(900)
+
+  const where = await page.$('[data-testid="setup-where-lisbon"]')
+  ok('it asks where first', Boolean(where), 'a city, not a parameter nobody was asked about')
+  if (where) {
+    await where.click()
+    await page.waitForTimeout(400)
+    const why = await page.$('[data-testid="setup-why-moving"]')
+    ok('then why', Boolean(why), 'what a stranger asks you differs by this')
+    if (why) {
+      await why.click()
+      await page.waitForTimeout(400)
+      const who = await page.$('[data-testid="setup-who"]')
+      ok('then who', Boolean(who), 'the answer to the first thing you say in Portuguese')
+      if (who) await who.fill('Sam')
+      const commit = await page.$('[data-testid="setup-commit"]')
+      if (commit) await commit.click()
+      await page.waitForTimeout(1200)
+
+      /*
+        Recorded, all three, on the record the feed actually reads.
+
+        Checked in storage rather than by what the screen says next: a card that shows "you
+        are set up" while writing nothing is the exact failure this is here to catch.
+      */
+      const saved = (await page.evaluate(
+        /*
+          The record is keyed per pair — byheart.learner.v1:<pairId>, not one flat key.
+
+          Reading 'byheart.learner' returned null and every field came back undefined, which
+          reads exactly like "set-up wrote nothing" and is not. Finding the key by prefix
+          means this keeps working when a second pair exists.
+        */
+        `(() => {
+          try {
+            const k = Object.keys(localStorage).find(k => k.startsWith('byheart.learner.v1'))
+            return k ? JSON.parse(localStorage.getItem(k) || '{}') : {}
+          } catch { return {} }
+        })()`,
+      )) as { chapter?: string; purpose?: string; display_name?: string }
+      ok('where is recorded', saved.chapter === 'lisbon', String(saved.chapter))
+      ok('why is recorded', saved.purpose === 'moving', String(saved.purpose))
+      ok('who is recorded', saved.display_name === 'Sam', String(saved.display_name))
+
+      /*
+        And the feed is now theirs.
+
+        The point of asking. `moving` is the only purpose that owns a block of ten, so a
+        mover's rooms must lead — ordered rather than filtered, because visiting matches
+        four Situations of fifteen and a four-card Club is not tailoring.
+      */
+      await page.reload()
+      await page.waitForTimeout(2600)
+      const titles = (await page.evaluate(
+        `Array.from(document.querySelectorAll('.snap-y > section'))
+          .slice(1, -1)
+          .map(s => (s.innerText || '').split(String.fromCharCode(10)).filter(Boolean)[1] || '')`,
+      )) as string[]
+      const MOVER = ['Getting your NIF', 'A phone number that is yours', 'Getting a place at school']
+      const seen = MOVER.map((t) => titles.indexOf(t)).filter((i) => i >= 0)
+      ok('the mover content is there', seen.length > 0, seen.length + ' of ' + MOVER.length + ' found')
+      if (seen.length) {
+        /*
+          Measured against a room nobody saved, because save outranks purpose and should.
+
+          The first version of this compared against "A coffee, standing up" — which the
+          save section above had explicitly saved, so it was leading the feed by design.
+          The check called correct behaviour a failure. An inferred preference must never
+          beat somebody pressing a button, so the control here is an all-purpose room that
+          was never touched.
+        */
+        const bread = titles.indexOf('The bread queue')
+        ok(
+          'and it leads the untagged rooms',
+          bread < 0 || Math.min(...seen) < bread,
+          'moving at ' + Math.min(...seen) + ', all-purpose at ' + bread,
+        )
+      }
+    }
   }
 }
 

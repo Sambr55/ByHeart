@@ -36,6 +36,7 @@ export function Legend() {
   const learner = useLearner()
   const [mode, setMode] = useState<Mode>('deck')
   const [mounted, setMounted] = useState(false)
+  const [askedWhy, setAskedWhy] = useState(false)
   useEffect(() => {
     setMounted(true)
     // ?cold=1 lands straight in a cold open — from the Club, from the daily line, from a
@@ -163,7 +164,17 @@ export function Legend() {
     Only when it has never been answered. Changing it later is a setting, in Yours, and a
     question that reappears is a form rather than a decision.
   */
-  if (mounted && !learner.purpose) return <WhyHere onDone={() => setMode('deck')} />
+  /*
+    Asked once per visit to the deck, whether or not it was answered.
+
+    `learner.purpose` alone cannot express "asked and declined" — it is null in both the
+    never-asked and the just-skipped case, so a skip re-rendered the same screen and the
+    forward exit went nowhere. This is deliberately NOT persisted: the question is worth
+    asking again next time the deck is opened, and a decision somebody has genuinely not
+    made yet should not be recorded as one they refused.
+  */
+  if (mounted && !learner.purpose && !askedWhy)
+    return <WhyHere onDone={() => setMode('deck')} onSkip={() => setAskedWhy(true)} />
 
   return (
     <Shell>

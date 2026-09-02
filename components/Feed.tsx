@@ -15,6 +15,7 @@ import {
   askedCards,
   derivedCards,
   explainerCards,
+  setUpCard,
   vibeCard,
   feedFor,
   vocabWord,
@@ -25,6 +26,7 @@ import { track } from '@/engine/analytics'
 import { recordProof, rememberFinishedCard, toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { StatusBar } from '@/components/Native'
+import { SetUp } from '@/components/SetUp'
 import { EXPLAINER_CTA } from '@/content/explainers'
 import { cardDone } from '@/content/legend'
 import { loadLearner, tasteRoom } from '@/engine/learner'
@@ -84,7 +86,14 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       : false
 
   const cards = useMemo(() => {
-    const rooms = feedFor(undefined, preview)
+    /*
+      Tailored the moment there is an answer to tailor to.
+
+      This passed `undefined` for the chapter and nothing at all for the purpose, so the
+      Club built the same feed for everybody however much it knew about them. Both answers
+      now come from set-up, before any content is shown.
+    */
+    const rooms = feedFor(learner.chapter ?? undefined, preview, learner.purpose ?? null)
     if (!mounted) return rooms
     /*
       Done leaves the feed.
@@ -94,32 +103,32 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       the profile, and comes back through the Line rather than round the loop.
     */
     const done = new Set(learner.finished_cards ?? [])
-    let open = rooms.filter((c) => !done.has(c.id))
+    const saved = new Set(learner.saved ?? [])
 
     /*
-      The shop window opens on two deliberate cards, and only for a stranger.
+      SAVE IS WHAT MAKES SWIPING PAST SAFE, and until now it did nothing at all to the feed.
 
-      Left to the ordinary ordering the first thing a stranger saw was "Getting a place at
-      school" — rung-sorted, perfectly correct, and an absurd opening line for somebody who
-      has not said they are moving anywhere. A feed decides what it is in two cards and
-      those two were deciding it wrongly.
+      "Feels like TikTok" and "every swipe moves you on in the process" pull against each
+      other: TikTok is lossless, because whatever you skip comes back, while a process is
+      finite, so skipping loses something. A person who senses that stops swiping and starts
+      reading everything — which is a corridor again, with extra steps.
 
-      One obviously useful, one obviously fun. The pharmacy is the case for DUB at its most
-      practical — you feel rough, you would rather not do it in English — and Bridget Jones
-      is the other half of the product entirely: language arriving out of something you
-      already love. Either alone argues for a different product. A feed of Lisbon rooms is a
-      phrasebook with photographs; a feed of film quotes is a party trick.
+      Save is the mechanism that reconciles them, and it only reconciles them if it MEANS
+      something. It filled a bookmark and filed the card in YOURS: a filing action, not a
+      deferring one. So two changes, and both are the same promise.
+
+      A saved card leads the feed. Not now means bring it back, and bringing it back at
+      position nineteen is not bringing it back.
+
+      And a saved card survives being done. Everything else leaves the feed when it is
+      performed — correctly, since the feed is finite and a room you have done is spent —
+      but a person who said "keep this" has overruled that, and the product should let them.
     */
-    if (stage === 'showcase') {
-      const first = open.find((c) => c.id === 'lisbon_farmacia')
-      const vibe = vibeCard('bridget_jones')
-      const rest = open.filter((c) => c.id !== 'lisbon_farmacia')
-      open = [
-        ...(first ? [first] : []),
-        ...(vibe ? [vibe] : []),
-        ...rest,
-      ]
-    }
+    const open = [
+      ...rooms.filter((c) => saved.has(c.id)),
+      ...rooms.filter((c) => !saved.has(c.id) && !done.has(c.id)),
+    ]
+
     /*
       What they asked for comes first among the assembled cards.
 
@@ -144,22 +153,9 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       rooms. The first block of ten took the library to fifteen, and a card sixteen swipes
       down is a card nobody has ever seen — so the reinforcement half of the product would
       have quietly switched itself off as a direct consequence of the Club getting better.
-
-      Three rooms in: far enough that somebody arriving lands on Lisbon rather than on
-      their own homework, close enough that they reach it in one sitting. Drops keep the
-      top of the feed whatever else is true, because a room that expires and a room that
-      does not are different offers.
     */
     const AFTER = 3
 
-    /*
-      The explainers, one between every two rooms rather than four in a row.
-
-      Four explanations consecutively is a corridor with swipes instead of taps, which is
-      the thing this replaces. Interleaved, somebody who wants to look at Lisbon can keep
-      swiping past them, and somebody who wants to know what this is finds one every other
-      card. A showcase that argues for itself between exhibits rather than before them.
-    */
     const explainers = explainerCards({
       playedAVibe: (learner.roots_played ?? []).length > 0,
       legendWritten: cardDone(
@@ -172,23 +168,57 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     })
 
     /*
-      The showcase's opening pair stays a pair.
+      A stranger is told what this is BEFORE being shown it, and shown it immediately after.
 
-      The interleave used to drop an explainer after the very first card, which put SIXTY
-      SECONDS between the pharmacy and Bridget Jones — the two cards that exist to be read
-      one after the other, because either alone argues for a different product. So nothing
-      is inserted until the deliberate opening has been made.
+      The order was the other way round and it did not survive first contact: somebody
+      landed on a photograph of a pharmacy whose only instruction read SWIPE LEFT, which
+      takes you sideways into the room and therefore away from every explanation in the
+      product. The answer to "what is this" was the third card, and nothing on the first
+      said so. A vertical feed teaches its own gesture to people who already know what they
+      are looking at; it teaches nothing to somebody who does not.
+
+      So the explanations lead, and each is followed by the thing it just described:
+
+        you already understand more than you can say  →  the pharmacy
+        seven questions a stranger will ask you       →  Bridget Jones
+
+      The two examples are the ones they were always meant to be — one obviously useful,
+      one obviously fun — and they now arrive as evidence for a claim rather than as
+      unlabelled content. Either alone still argues for a different product: a feed of
+      Lisbon rooms is a phrasebook with photographs, a feed of film quotes is a party trick.
+
+      Everything after that is the ordinary feed, with whatever explainers are left woven
+      through it.
     */
-    const opening = stage === 'showcase' ? 2 : 1
+    if (stage === 'showcase') {
+      const pharmacy = open.find((c) => c.id === 'lisbon_farmacia')
+      const vibe = vibeCard('bridget_jones')
+      const rest = open.filter((c) => c.id !== 'lisbon_farmacia')
+      const [firstSay, secondSay, ...laterSay] = explainers
+
+      /*
+        Set-up comes after the argument, not before it.
+
+        Seventh: four reasons given and two of them shown working. That is the first moment
+        asking somebody for a decision is fair, and it is the last thing between them and a
+        vibe. It can be swiped past like anything else here — the gate is on the action,
+        not on the thumb.
+      */
+      const setup = setUpCard(Boolean(learner.deal_accepted_at))
+      const lead = [firstSay, pharmacy, secondSay, vibe, ...laterSay, setup].filter(
+        Boolean,
+      ) as FeedCard[]
+
+      return [...lead, ...rest]
+    }
+
     const withExplainers: FeedCard[] = []
     const rest = [...open.slice(0, AFTER), ...mine, ...open.slice(AFTER)]
     let e = 0
     rest.forEach((card, i) => {
       withExplainers.push(card)
-      const past = i - (opening - 1)
-      if (e < explainers.length && past >= 0 && past % 2 === 0) withExplainers.push(explainers[e++])
+      if (e < explainers.length && i % 2 === 0) withExplainers.push(explainers[e++])
     })
-    // Anything left over goes on the end rather than being dropped silently.
     return [...withExplainers, ...explainers.slice(e)]
   }, [
     mounted,
@@ -199,6 +229,12 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     learner.asked,
     learner.roots_played,
     learner.legend,
+    // Saved now decides ORDER, not just a bookmark icon, so the feed has to rebuild on it.
+    learner.saved,
+    learner.deal_accepted_at,
+    // Who, where and why: the feed is built from them now, so it rebuilds on them.
+    learner.chapter,
+    learner.purpose,
   ])
   /*
     A save that says so.
@@ -334,6 +370,23 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         <Link href="/vibes" className="pointer-events-auto tap-target">
           <Wordmark mark="club" className="h-6 text-white" title={chapterName()} />
         </Link>
+        {/*
+          One line saying what this is, for somebody who has never heard of it.
+
+          A stranger landed on a photograph of a pharmacy with a button reading SWIPE LEFT
+          and nothing else — no statement of what the app was, and the only instruction on
+          screen pointing sideways, into the one free room, away from every explanation. A
+          feed is a fine way to show a product to somebody who knows what they are looking
+          at. TikTok gets that for free; this does not.
+
+          Only in the showcase. A member knows where they are, and a permanent tagline is
+          a billboard on your own front room.
+        */}
+        {stage === 'showcase' ? (
+          <p className="text-[0.6rem] leading-tight text-white/85">
+            Lisbon, and the Portuguese for it.
+          </p>
+        ) : null}
         <span className="flex-1" />
 
       </header>
@@ -349,6 +402,12 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
             key={card.id + '_' + i}
             card={card}
             stage={stage}
+            /*
+              The cue rides on the first REAL card, which is index 1 — index 0 is the
+              loop's clone of the last one, and putting it there would show the hint on
+              the card somebody reaches by swiping backwards off the top.
+            */
+            hint={stage === 'showcase' && i === 1}
             saved={mounted && (learner.saved ?? []).includes(card.id)}
             liked={mounted && (learner.liked ?? []).includes(card.id)}
             onSaved={(on) => setToast(on ? 'saved' : 'unsaved')}
@@ -400,6 +459,7 @@ export function Card({
   onSaved,
   onDone,
   stage = 'member',
+  hint = false,
 }: {
   card: FeedCard
   saved: boolean
@@ -409,6 +469,8 @@ export function Card({
   onDone?: () => void
   /** Which Club this is. A member's rooms are never teased. */
   stage?: ClubStage
+  /** Show the "there is more below" cue. The first showcase card only. */
+  hint?: boolean
 }) {
   const pane = useRef<HTMLDivElement>(null)
   /*
@@ -663,6 +725,23 @@ export function Card({
                   SWIPE LEFT
                 </button>
               )}
+              {/*
+                And that the feed keeps going, which nothing on screen said.
+
+                Every card's only instruction pointed sideways — into the room, which for a
+                stranger is the one free one and therefore away from every explanation there
+                is. A vertical feed teaches its own gesture when you already know what it
+                is; on a product nobody has seen before it is a wall with a door in the
+                wrong direction.
+
+                Showcase only, and only until they have swiped once — after that the gesture
+                is learned and a standing instruction is nagging.
+              */}
+              {hint ? (
+                <p className="mb-3 flex items-center justify-center gap-1 text-[0.6rem] uppercase tracking-wider text-white/70">
+                  <span aria-hidden>↑</span> keep swiping — there is more
+                </p>
+              ) : null}
             </div>
             <Rail
               card={card}
@@ -700,6 +779,8 @@ export function Card({
               <Explains card={card} />
             ) : card.kind === 'vibe' ? (
               <Taste card={card} />
+            ) : card.kind === 'setup' ? (
+              <SetUp />
             ) : (
               <Word card={card} />
             )}

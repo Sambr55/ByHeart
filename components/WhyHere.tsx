@@ -21,7 +21,7 @@ import { setPurpose } from '@/engine/learner'
  * staying, because "a season" means nothing until you know it means the café that starts
  * recognising you.
  */
-export function WhyHere({ onDone }: { onDone: () => void }) {
+export function WhyHere({ onDone, onSkip }: { onDone: () => void; onSkip: () => void }) {
   return (
     <div data-stage="REAL WORLD" className="app-frame safe-top bg-bg text-fg">
       {/*
@@ -32,6 +32,11 @@ export function WhyHere({ onDone }: { onDone: () => void }) {
         nothing downstream requires it — purpose shapes what is offered, it does not unlock
         anything — so somebody who would rather get on with it can, and is asked again next
         time they open the deck.
+
+        THAT WAS TRUE OF THE COMMENT AND NOT OF THE CODE. Back was the only exit and Back
+        leaves the Legend altogether, so "get on with it" meant "give up on the deck". The
+        skip below is the forward exit this paragraph has been describing all along, and it
+        is the last thing in the first run that stopped somebody who had not decided.
       */}
       <Framed className="mx-auto flex w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
         <div className="flex items-center gap-3">
@@ -64,6 +69,27 @@ export function WhyHere({ onDone }: { onDone: () => void }) {
             </li>
           ))}
         </ul>
+
+        {/*
+          Quiet, and below the three, because it is the worse answer and should look like it.
+
+          Not a fourth option in the list: "prefer not to say" sitting among the three would
+          make declining feel like a choice with equal standing, and it is not — an answer
+          here costs one tap and makes every Club card that follows better. It is here so
+          that somebody who genuinely does not know yet can start their Legend anyway, which
+          is the thing they came for.
+        */}
+        <button
+          type="button"
+          data-testid="purpose-skip"
+          onClick={() => {
+            track('purpose_skipped', {})
+            onSkip()
+          }}
+          className="tap-target self-start text-sm text-muted underline underline-offset-4"
+        >
+          Not sure yet — get on with it
+        </button>
 
         <p className="text-xs leading-relaxed text-muted">{CLUB.welcome.ask_footnote}</p>
       </Framed>

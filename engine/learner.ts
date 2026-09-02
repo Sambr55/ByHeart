@@ -321,6 +321,17 @@ export interface LearnerState {
    */
   purpose: 'visiting' | 'staying' | 'moving' | null
   /**
+   * Which city, asked with the why and for the same reason.
+   *
+   * Chapter was a parameter everywhere and a question nowhere: feedFor, roomsFor, dropsFor
+   * and rowsFor all took a ChapterId and every caller passed the default, so the product
+   * had two cities in CHAPTERS and no way for anybody to say which one they were in.
+   *
+   * Null means Lisbon, not "unknown" — there is exactly one open chapter, and a learner
+   * who has not answered should get the club that exists rather than an empty screen.
+   */
+  chapter: 'lisbon' | 'faro' | null
+  /**
    * The one Club room handed over before anything was earned, or null.
    *
    * A showcase that only describes itself is a brochure. So the first room somebody opens
@@ -381,6 +392,7 @@ export function emptyLearner(): LearnerState {
     finished_cards: [],
     asked: [],
     purpose: null,
+    chapter: null,
     tasted: null,
     deal_accepted_at: null,
     evidence: [],
@@ -488,6 +500,7 @@ export function loadLearner(): LearnerState {
           finished_cards: arr(parsed.finished_cards, []),
           asked: arr(parsed.asked, []),
           purpose: parsed.purpose ?? null,
+          chapter: parsed.chapter ?? null,
           tasted: parsed.tasted ?? null,
           deal_accepted_at: parsed.deal_accepted_at ?? null,
           collisions_played: arr(parsed.collisions_played, []),
@@ -1183,6 +1196,12 @@ export function rememberFinishedCard(id: string) {
 export function setPurpose(purpose: 'visiting' | 'staying' | 'moving') {
   update((s) => {
     s.purpose = purpose
+  })
+}
+
+export function setChapter(chapter: 'lisbon' | 'faro') {
+  update((s) => {
+    s.chapter = chapter
   })
 }
 

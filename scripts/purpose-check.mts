@@ -149,7 +149,21 @@ ok(
 await page.goto(BASE + '/legend')
 await page.waitForTimeout(2000)
 ok('the Legend asks it first', Boolean(await page.$('[data-testid="purpose-moving"]')))
-ok('all three are offered', (await page.$$('[data-testid^="purpose-"]')).length === 3)
+/*
+  Named, not counted by prefix.
+
+  This counted every [data-testid^="purpose-"] and asserted three. Adding a skip control
+  called purpose-skip made it four and the check failed — correctly reporting a number, and
+  reporting nothing at all about whether visiting, staying and moving are on the screen,
+  which is the thing it is named after. A count is a proxy; the three ids are the claim.
+*/
+{
+  const offered = await Promise.all(
+    PURPOSES.map(async (p) => ((await page.$('[data-testid="purpose-' + p.id + '"]')) ? null : p.id)),
+  )
+  const missing = offered.filter(Boolean)
+  ok('all three are offered', missing.length === 0, missing.length ? 'missing ' + missing.join(', ') : PURPOSES.map((p) => p.id).join(', '))
+}
 
 await page.click('[data-testid="purpose-moving"]')
 await page.waitForTimeout(1400)
