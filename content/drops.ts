@@ -1,3 +1,4 @@
+import type { CalendarKind } from '@/content/calendar'
 import type { ChapterId } from '@/content/chapters'
 import type { Situation } from '@/content/situations'
 
@@ -40,11 +41,19 @@ export interface Drop {
   /** ISO date. The drop is gone the morning after. */
   on: string
   /**
+   * What sort of thing it is, which decides how far ahead it is worth knowing about.
+   *
+   * Absent means 'event', because everything pegged to a happening is one. See
+   * DROP_LEAD_DAYS: a gig you need a ticket for opens ninety days out, a strike fourteen.
+   */
+  kind?: CalendarKind
+  /**
    * When it starts BEING a drop rather than a date in the diary.
    *
-   * Absent means DROP_WINDOW days before, which is long enough to still get a ticket and
-   * short enough that the countdown means something. A drop authored months ahead is not a
-   * drop yet, and urgency spent early is urgency spent.
+   * Absent means DROP_LEAD_DAYS for its kind. This is the per-thing override, for anything
+   * that does not behave like its kind — a festival whose tickets go on sale in February.
+   * A drop authored months ahead is not a drop yet, and urgency spent early is urgency
+   * spent; but urgency spent TOO LATE is a sold-out show, which is the worse failure.
    */
   from?: string
   link?: { href: string; label: string }
@@ -66,9 +75,21 @@ export const DROPS: Drop[] = [
     id: 'duran_duran_arena',
     chapter: 'lisbon',
     event: 'Duran Duran',
-    place: { name: 'Altice Arena', area: 'Parque das Nações' },
-    on: '2026-11-14',
-    link: { href: 'https://www.altice-arena.com', label: 'TICKETS' },
+    /*
+      3 November, and it was 14 November until somebody checked.
+
+      The arena's own agenda, the official ticket seller and Bandsintown all say the 3rd;
+      the 14th is a different show entirely. This is the ONLY Drop in the product, so for
+      as long as it was wrong, every live-event claim DUB makes was wrong — and it would
+      have put somebody outside an arena on a night with nothing in it.
+
+      The venue is MEO Arena now. It was the Altice Arena, and before that the Pavilhão
+      Atlântico, and a learner asking for the old name will still be understood — but the
+      signs, the tickets and the metro announcements all say MEO.
+    */
+    place: { name: 'MEO Arena', area: 'Parque das Nações' },
+    on: '2026-11-03',
+    link: { href: 'https://arena.meo.pt/en/agenda/duran-duran_en/16275', label: 'TICKETS' },
     situations: [
       {
         id: 'drop_dd_where',
@@ -130,27 +151,27 @@ export const DROPS: Drop[] = [
         kind: 'moment',
         title: 'Asking somebody to come',
         why: 'The only one of these that is not about getting somewhere. It is the reason to learn the other three.',
-        on: '2026-11-14',
+        on: '2026-11-03',
         lines: [
           { pt: 'Queres vir comigo ao concerto?', en: 'Do you want to come to the concert with me?', when: 'The ask' },
-          { pt: 'É no dia catorze.', en: 'It is on the fourteenth.', when: 'When they ask when' },
+          { pt: 'É no dia três.', en: 'It is on the third.', when: 'When they ask when' },
           { pt: 'Eu compro os bilhetes.', en: 'I will get the tickets.', when: 'To make saying yes easy' },
         ],
         release: {
-          ask: 'Ask somebody to come with you on the fourteenth.',
-          answer: 'Queres vir comigo ao concerto no dia catorze?',
+          ask: 'Ask somebody to come with you on the third.',
+          answer: 'Queres vir comigo ao concerto no dia três?',
         },
         rung: 3,
       },
     ],
     sources: [
       {
-        fact: 'Duran Duran are at the Altice Arena on 14 November 2026',
-        where: 'altice-arena.com',
+        fact: 'Duran Duran are at the MEO Arena on 3 November 2026',
+        where: 'arena.meo.pt',
         checked: '2026-08-27',
       },
       {
-        fact: 'Oriente is on the red line, and is the stop for the Altice Arena',
+        fact: 'Oriente is on the red line, and is the stop for the MEO Arena',
         where: 'metrolisboa.pt',
         checked: '2026-08-27',
       },

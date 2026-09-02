@@ -4,20 +4,26 @@
     "kind": "concert",
     "chapter": "lisbon",
     "event": "Duran Duran",
-    "venue": { "name": "Altice Arena", "area": "Parque das Nações" },
+    "venue": {
+      "name": "MEO Arena",
+      "area": "Parque das Nações"
+    },
     "station": "Oriente",
-    "on": "2026-11-14",
-    "link": { "href": "https://www.altice-arena.com", "label": "TICKETS" },
+    "on": "2026-11-03",
+    "link": {
+      "href": "https://arena.meo.pt/en/agenda/duran-duran_en/16275",
+      "label": "TICKETS"
+    },
     "sources": [
       {
-        "fact": "Duran Duran are at the Altice Arena on 14 November 2026",
-        "where": "altice-arena.com",
-        "checked": "2026-08-27"
+        "fact": "Duran Duran are at the MEO Arena on 3 November 2026",
+        "where": "arena.meo.pt",
+        "checked": "2026-09-02"
       },
       {
-        "fact": "Oriente is on the red line, and is the stop for the Altice Arena",
+        "fact": "Oriente is on the red line, and is the stop for the MEO Arena",
         "where": "metrolisboa.pt",
-        "checked": "2026-08-27"
+        "checked": "2026-09-02"
       }
     ]
   },
@@ -26,19 +32,37 @@
     "kind": "concert",
     "chapter": "lisbon",
     "event": "Somebody At A Venue We Do Not Know",
-    "venue": { "name": "A Place", "area": "Somewhere" },
+    "venue": {
+      "name": "A Place",
+      "area": "Somewhere"
+    },
     "station": "",
     "on": "2026-12-01",
-    "sources": [{ "fact": "it is on", "where": "a listing", "checked": "2026-08-27" }]
+    "sources": [
+      {
+        "fact": "it is on",
+        "where": "a listing",
+        "checked": "2026-08-27"
+      }
+    ]
   },
   {
     "id": "fixture_past",
     "kind": "concert",
     "chapter": "lisbon",
     "event": "Already Happened",
-    "venue": { "name": "Coliseu dos Recreios", "area": "Restauradores" },
+    "venue": {
+      "name": "Coliseu dos Recreios",
+      "area": "Restauradores"
+    },
     "station": "Restauradores",
     "on": "2020-01-01",
-    "sources": [{ "fact": "it happened", "where": "a listing", "checked": "2026-08-27" }]
+    "sources": [
+      {
+        "fact": "it happened",
+        "where": "a listing",
+        "checked": "2026-08-27"
+      }
+    ]
   }
 ]

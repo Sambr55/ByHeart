@@ -400,6 +400,33 @@ export interface DropEvent {
  */
 export const DROP_WINDOW_DAYS = 21
 
+/**
+ * How long before a thing happens it is worth knowing about, by what kind of thing it is.
+ *
+ * Twenty-one days for everything was wrong in both directions, and the ticket case is the
+ * obvious one: if Duran Duran are playing in November you need to be thinking about it now,
+ * because by the time a three-week window opens the good seats are gone. Meanwhile a
+ * transport strike is typically called two to three weeks out, so a ninety-day window on
+ * one would mean showing an empty countdown for two months.
+ *
+ * So the lead time is a property of the KIND:
+ *
+ *   event       90  you may need a ticket, and tickets sell out
+ *   deadline    45  paperwork has a run-up, and Finanças has a queue
+ *   holiday     14  you need to know things are shut, not to plan around it
+ *   disruption  14  strikes are called late; earlier than this is speculation
+ *
+ * A Drop can still override with its own `from`, which is what to reach for when a
+ * particular thing does not behave like its kind — a festival whose tickets go on sale in
+ * February, say.
+ */
+export const DROP_LEAD_DAYS: Record<'event' | 'holiday' | 'deadline' | 'disruption', number> = {
+  event: 90,
+  deadline: 45,
+  holiday: 14,
+  disruption: 14,
+}
+
 export interface Crate {
   id: CultureFamily
   title: string

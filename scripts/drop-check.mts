@@ -62,14 +62,40 @@ console.log('\nwhen it is live\n')
 const d = DROPS[0]
 const day = (iso: string) => new Date(iso + 'T12:00:00Z')
 const event = new Date(d.on + 'T12:00:00Z')
+/*
+  Far enough out that nothing should be live, which is now further than it was.
+
+  Sixty days used to be "too early" because everything opened twenty-one days ahead. An
+  arena show now opens ninety days ahead — deliberately, because by the time a three-week
+  window opens the good seats are gone and a countdown you cannot act on is decoration. So
+  the too-early mark moves with it.
+*/
 const before = new Date(event)
-before.setUTCDate(before.getUTCDate() - 60)
+before.setUTCDate(before.getUTCDate() - 120)
 const inside = new Date(event)
 inside.setUTCDate(inside.getUTCDate() - 5)
 const after = new Date(event)
 after.setUTCDate(after.getUTCDate() + 2)
 
-ok('not two months out', !dropLive(d, before), 'urgency spent early is urgency spent')
+ok('not four months out', !dropLive(d, before), 'urgency spent early is urgency spent')
+/*
+  And the other end of the same rule, which is the half a single number could not express.
+
+  Widening was not simply "make it bigger". A strike is CALLED two to three weeks out, so a
+  ninety-day window on one would show an empty countdown for two months — urgency spent on
+  something nobody has announced yet. The lead time is a property of the kind, and this
+  proves the two kinds actually differ rather than both taking the larger number.
+*/
+{
+  const sixty = new Date(event)
+  sixty.setUTCDate(sixty.getUTCDate() - 60)
+  ok('a gig you need tickets for is live at sixty days', dropLive({ ...d, kind: 'event' }, sixty))
+  ok(
+    'a strike at the same distance is not',
+    !dropLive({ ...d, kind: 'disruption' }, sixty),
+    'called two to three weeks out, so earlier than that is speculation',
+  )
+}
 ok('live in the week before', dropLive(d, inside), dropDaysLeft(d, inside) + ' days left')
 ok('live on the day', dropLive(d, day(d.on)))
 ok('gone the morning after', !dropLive(d, after))
@@ -136,7 +162,16 @@ console.log('\nthe template reproduces the drop somebody wrote by hand\n')
       )
       // And the facts moved with them, which is the half the template does NOT own.
       ok('with the venue', result.drop.place.name === hand.place.name)
-      ok('and the date said as a word', result.drop.situations.some((s2) => s2.release.answer.includes('catorze')))
+      /*
+        The date, in the words a learner actually says — and it was 'catorze' here until the
+        Drop turned out to be on the wrong night.
+
+        Worth stating plainly: the metadata said 14 November and so did this sentence, so
+        the product would have taught somebody to invite a stranger to a concert on a day it
+        was not happening. Fixing the date field alone would have left the sentence wrong and
+        this check green, which is why it names the word rather than counting one.
+      */
+      ok('and the date said as a word', result.drop.situations.some((s2) => s2.release.answer.includes('três')))
     }
   }
 }

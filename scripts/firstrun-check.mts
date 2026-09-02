@@ -229,26 +229,35 @@ console.log('\nsaving a card brings it back\n')
     )) as string[]
 
   const before = await titles()
-  // Somewhere well down the feed, so leading it afterwards cannot be a coincidence.
-  await page.evaluate(`(() => {
-    const r = document.querySelector('.snap-y')
-    if (r) r.scrollTop = r.clientHeight * 9
-  })()`)
-  await page.waitForTimeout(900)
 
-  const saving = (await page.evaluate(
+  /*
+    The LAST card, chosen by position in the list rather than by a scroll offset.
+
+    This scrolled to a fixed multiple of the viewport and saved whatever was under it, which
+    worked only for as long as the feed's contents never changed. Verifying the calendar put
+    a live Drop at the front of the rooms, everything shifted down, and the card under that
+    offset turned out to be the one already leading — so saving it could not move it
+    forward and the check called a working feature broken.
+
+    Taking the last card makes the claim unambiguous: whatever else is in the feed, the
+    thing at the very bottom should be near the top after somebody saves it. The +1 is the
+    leading clone, so section index and title index stay in step.
+  */
+  const wasAt = before.length - 1
+  const saving = before[wasAt]
+  const clicked = (await page.evaluate(
     `(() => {
       const r = document.querySelector('.snap-y')
-      const s = r.children[Math.round(r.scrollTop / r.clientHeight)]
-      const b = s.querySelector('[data-testid="feed-save"]')
-      if (b) b.click()
-      return (s.innerText || '').split(String.fromCharCode(10)).filter(Boolean)[1] || ''
+      r.scrollTop = r.clientHeight * ${wasAt + 1}
+      const s = r.children[${wasAt + 1}]
+      const b = s && s.querySelector('[data-testid="feed-save"]')
+      if (b) { b.click(); return true }
+      return false
     })()`,
-  )) as string
-  const wasAt = before.indexOf(saving)
-  ok('a card can be saved', wasAt > 0, saving + ', at ' + wasAt)
+  )) as boolean
+  ok('a card can be saved', clicked && wasAt > 0, saving + ', at ' + wasAt)
 
-  if (wasAt > 0) {
+  if (clicked && wasAt > 0) {
     await page.waitForTimeout(1200)
     await page.reload()
     await page.waitForTimeout(2600)

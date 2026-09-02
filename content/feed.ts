@@ -1,5 +1,5 @@
 import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
-import { DROP_WINDOW_DAYS } from '@/content/roots'
+import { DROP_LEAD_DAYS } from '@/content/roots'
 import { SITUATIONS, isCurrent, type Purpose, type Situation } from '@/content/situations'
 import { DROPS, type Drop } from '@/content/drops'
 import { explainersFor, type Explainer } from '@/content/explainers'
@@ -213,11 +213,19 @@ export function dropLive(d: Drop, now: Date = new Date()): boolean {
   const gone = new Date(d.on + 'T00:00:00Z')
   gone.setUTCDate(gone.getUTCDate() + 1)
   if (now >= gone) return false
+  /*
+    How far ahead this opens depends on what it is.
+
+    It was twenty-one days for everything, and that is wrong at both ends: by the time a
+    three-week window opens on an arena show the good seats are gone, while a strike called
+    two weeks out would have shown an empty countdown for the fortnight before anybody knew
+    it was happening.
+  */
   const opens = d.from
     ? new Date(d.from + 'T00:00:00Z')
     : (() => {
         const o = new Date(d.on + 'T00:00:00Z')
-        o.setUTCDate(o.getUTCDate() - DROP_WINDOW_DAYS)
+        o.setUTCDate(o.getUTCDate() - DROP_LEAD_DAYS[d.kind ?? 'event'])
         return o
       })()
   return now >= opens
