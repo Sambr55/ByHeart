@@ -368,7 +368,24 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       {/* The feed is full-bleed photography, so the status bar goes dark with it. */}
       <StatusBar color="#241f1a" />
       <header className="safe-top pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6">
-        <Link href="/vibes" className="pointer-events-auto tap-target">
+        {/*
+          The logo goes to the front door, and the door stays open when you arrive by it.
+
+          It went to /vibes, which the bottom bar already offers — so the one control every
+          screen carries was a duplicate of a tab. Home is the more useful destination and
+          the more expected one: a wordmark that goes anywhere but the beginning is a
+          wordmark doing somebody else's job.
+
+          ?door=1 is what makes it work at all. The front door sends a returning learner
+          straight on to the Club or the shelf, so a bare link to / would bounce you back to
+          where you tapped it. The flag says "I asked for this", and only an explicit tap
+          can set it — nothing else in the product links here with it.
+        */}
+        <Link
+          href="/?door=1"
+          aria-label={chapterName() + ' — back to the front door'}
+          className="pointer-events-auto tap-target"
+        >
           <Wordmark mark="club" className="h-6 text-white" title={chapterName()} />
         </Link>
         {/*

@@ -77,6 +77,19 @@ export default function Page() {
   const [leaving, setLeaving] = useState(false)
 
   useEffect(() => {
+    /*
+      Asked for the door, so the door is what they get.
+
+      Everything below sends a returning learner onwards, which is right for somebody who
+      opened the app and wrong for somebody who just tapped the logo to come back here. The
+      redirect made the front door unreachable for anybody who had ever used DUB — the only
+      way to see it again was to wipe the device, which is a poor way to look at your own
+      product and an impossible one for a member.
+
+      Read from the URL rather than kept in state: it survives the reload, it is honest in
+      a shared link, and it cannot get stuck on.
+    */
+    if (new URLSearchParams(window.location.search).get('door') === '1') return
     // No pair chosen is a front-door problem, and the pair decides which learner record
     // even gets read — so it is checked first, exactly as the deal gate does it.
     if (!chosenPair()) return

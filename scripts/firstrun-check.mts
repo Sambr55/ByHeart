@@ -161,6 +161,32 @@ ok(
   'the shop, not just the sign',
 )
 
+console.log('\nthe logo goes back to the front door\n')
+/*
+  So the product can be looked at without being wiped.
+
+  The front door sends a returning learner straight on, which meant the only way to see it
+  again was to clear the device — impossible for a member and a bad way to test your own
+  first run. The logo now asks for the door explicitly and the door honours the ask.
+
+  Both halves are asserted, because either one alone is useless: a link that bounces, or a
+  door nothing links to.
+*/
+{
+  const logo = await page.$('header a[href*="door=1"]')
+  ok('the logo asks for the door', Boolean(logo), (logo ? await logo.getAttribute('href') : null) ?? 'not a link home')
+  if (logo) {
+    await logo.click()
+    await page.waitForTimeout(2200)
+    const body = ((await page.textContent('body')) ?? '').replace(/\s+/g, ' ')
+    ok('and the door opens rather than redirecting', /COME IN/.test(body), page.url().replace(BASE, ''))
+    ok('and it is the front door, not the Club', !page.url().includes('/club'), page.url().replace(BASE, ''))
+    // Back to where the rest of this file expects to be standing.
+    await page.goto(BASE + '/club')
+    await page.waitForTimeout(2400)
+  }
+}
+
 console.log('\nthe demo plays where a stranger lands\n')
 /*
   THE ONE SAM COULD NOT SEE, and no check would have caught it.
