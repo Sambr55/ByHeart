@@ -50,7 +50,15 @@ export const EXPLAINERS: Explainer[] = [
   {
     id: 'how_it_works',
     eyebrow: 'SIXTY SECONDS',
-    title: 'You already know more than you think.',
+    /*
+      The canonical wording, not a paraphrase of it.
+
+      DEMO_BEATS has said "You already understand more than you can say" since the product
+      began, and it is the best sentence in it — understand and say are the two halves of
+      the actual problem, where "know more than you think" is a compliment. Rewriting it
+      here would also have quietly split one claim into two versions.
+    */
+    title: 'You already understand more than you can say.',
     blurb:
       'Not a claim — a thing you can test right now, with a line you have known for forty years.',
     detail: {

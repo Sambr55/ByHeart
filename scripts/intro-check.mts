@@ -1,16 +1,21 @@
 /**
- * The way in, walked.
+ * The way in, walked — and it is a feed now, not a corridor.
  *
  *   npm run intro
  *
- * The intro is four screens and a demo before anybody has state, which is exactly why the
- * other gates miss it: every one of them seeds a learner with the deal already accepted so
- * it can get at the thing it is really testing. So the first thing a new person sees was
- * the least checked part of the product.
+ * This used to walk five screens in a fixed order: welcome, how you get in, the demo, the
+ * branches, where it goes, the language. Those screens are gone on purpose — see
+ * docs/spec-club-first-run.md. They were an argument delivered to somebody who had not seen
+ * a word of Portuguese and could not skip any of it.
  *
- * It checks the route, and it checks the rule that a button sits under the last thing said
- * rather than at the foot of the screen — which is where the demo's CTA was hiding, three
- * hundred pixels below the last card and hard against the bottom bar.
+ * What has to survive the change is not the route, it is the CLAIMS. So this checks that
+ * every promise the corridor used to make is still made somewhere a stranger will meet it,
+ * and that the screens which remain — the ones that were never pitch, the deal and the
+ * language pair — still put their button under the words that earned it.
+ *
+ * The reason it is still a separate check from firstrun: that one is about the shape of the
+ * feed, this one is about the sentences. A restructure that keeps the shape and loses the
+ * argument would pass firstrun and should not pass this.
  */
 import { chromium, type Page } from 'playwright'
 
@@ -66,52 +71,51 @@ await page.goto(BASE + '/')
 await page.waitForTimeout(2200)
 
 console.log('\nthe way in\n')
-const first = await page.$('main a, main button')
+const first = await page.$('[data-testid="landing-cta"]')
 ok('the door opens', Boolean(first))
 if (first) await first.click()
-await page.waitForTimeout(1500)
+await page.waitForTimeout(2500)
+ok(
+  'and it opens the Club',
+  new URL(page.url()).pathname === '/club',
+  new URL(page.url()).pathname,
+)
 
 /*
-  Named in the order they come, so a reordering shows up here as a wrong name rather than
-  as a silent pass. Each entry is a phrase that must be on that screen and nowhere else.
+  Every claim the corridor used to make, and where it lives now.
+
+  A claim that has quietly stopped being made is the failure this exists to catch — it is
+  the easiest thing in the world to lose while moving five screens into four cards, and the
+  hardest to notice, because nothing breaks.
 */
-const ROUTE: { name: string; says: RegExp }[] = [
-  { name: 'welcome', says: /Welcome to the Dub Club/i },
-  { name: 'how you get in', says: /get through the door/i },
-  { name: 'the demo', says: /already understand more than you can say/i },
-  { name: 'the branches', says: /One line\. Three things you can say/i },
-  { name: 'where it goes', says: /then your Legend, then the door/i },
-  { name: 'the language', says: /Where do you want DUB to take you/i },
+console.log('\nthe claims, still made\n')
+const feed = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
+const CLAIMS: { name: string; says: RegExp }[] = [
+  { name: 'you understand more than you can say', says: /already understand more than you can say/i },
+  { name: 'the Legend is the way in', says: /Seven questions a stranger will ask you/i },
+  { name: 'Lisbon is happening now', says: /as it is actually happening/i },
+  { name: 'ask for anything', says: /sentence we have not taught you yet/i },
 ]
+for (const c of CLAIMS) ok(c.name, c.says.test(feed), c.says.test(feed) ? '' : 'not said anywhere')
 
-for (const step of ROUTE) {
-  // The demo reveals in place, so walk forward until the screen says what it should.
-  let text = ''
-  for (let i = 0; i < 4; i++) {
-    text = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
-    if (step.says.test(text)) break
-    const next = await page.$('[data-testid="continue"]')
-    if (!next || !(await next.isEnabled())) break
-    await next.click()
-    await page.waitForTimeout(1100)
-  }
-  ok(step.name, step.says.test(text), text.slice(0, 46))
-
-  /*
-    Scrolled to first, because a tall screen scrolls and a button below the fold is not
-    overlapping anything — it is waiting. What `nav-clear` promises is that once you HAVE
-    scrolled to it, the bar is not sitting on top of it, and that is what gets measured.
-  */
-  // To the bottom of the document, not scrollIntoView — which aligns to the viewport edge
-  // and therefore parks the button under the bar by exactly the bar's height, every time.
+/*
+  And the screens that were never pitch. The deal and the language pair are commitment, they
+  survive the restructure, and they are now reached at the moment somebody has decided —
+  which is where the button rule still has to hold.
+*/
+console.log('\nand the screens that remain\n')
+await page.goto(BASE + '/vibes')
+await page.waitForTimeout(2000)
+for (let i = 0; i < 4; i++) {
+  const text = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
+  if (!text) break
   await page.evaluate(
     `(() => { const s = document.scrollingElement || document.documentElement; s.scrollTop = s.scrollHeight })()`,
   )
   await page.waitForTimeout(350)
-
   const under = await gap(page)
   ok(
-    '  its button sits under the words',
+    'a button sits under the words   ' + text.slice(0, 30),
     under === null || under <= 96,
     under === null ? 'no button' : under + 'px below the last line',
   )
@@ -122,13 +126,14 @@ for (const step of ROUTE) {
     clear === null ? 'no bar' : clear + 'px',
   )
 
-  const next = await page.$('[data-testid="continue"]')
-  // The language screen keeps its button disabled until something is picked, which is
-  // right and is not this check's business — it is the last screen either way.
-  if (next && (await next.isEnabled())) {
-    await next.click()
-    await page.waitForTimeout(1200)
-  }
+  /*
+    On to whatever the CTA leads to next, so the deal and the pair are both measured rather
+    than only the first of them.
+  */
+  const onward = await page.$('[data-testid="continue"]')
+  if (!onward || !(await onward.isEnabled())) break
+  await onward.click()
+  await page.waitForTimeout(1200)
 }
 
 await browser.close()
@@ -138,4 +143,4 @@ if (problems.length) {
   for (const p of problems) console.log('  ✗ ' + p)
   process.exit(1)
 }
-console.log('\nfour screens and a demo, each with its button under the words')
+console.log('\nevery claim the corridor made is still made, and the screens that remain still put the button under the words')
