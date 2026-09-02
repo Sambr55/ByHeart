@@ -25,7 +25,8 @@ import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_FRAMES } from '../content/legend'
 import { ROOTS } from '../content/roots'
 import { SITUATIONS, PURPOSES } from '../content/situations'
-import { CARD_SIZE, cardFor } from '../content/legend'
+import { CARD_RUNG, CARD_SIZE, CRATES_TO_UNLOCK_LEGEND, cardFor } from '../content/legend'
+import { FREE_ENTITLEMENTS } from '../lib/entitlements'
 import { forPurpose } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -131,6 +132,67 @@ await page.evaluate(
   },
   [KEY, DEFAULT_PAIR, seed] as const,
 )
+console.log('\na free learner can actually reach the Legend\n')
+/*
+  THE DEADLOCK, and it shipped without anybody walking into it.
+
+  Free allowed three crates. The Legend's card is assembled from pieces that live in five.
+  So a free learner hit the wall at crate three, could never complete five, could never
+  build a Legend — and therefore could never reach the paywall they were being walked
+  towards. The old gate blocked the road to the new one.
+
+  Invisible from the inside because everybody testing has an unlimited account, and
+  invisible from the outside because it looks like ordinary progress right up until it
+  stops. This walks the arithmetic rather than the product, which is the only way to see
+  it: no screen ever says "you cannot get there from here".
+*/
+{
+  const need = new Set<string>()
+  for (const f of cardFor(null)) for (const pc of f.built_from ?? []) need.add(pc)
+  const crates = new Set<string>()
+  /*
+    `extracts[].id`, and the first draft of this said `piece_id`.
+
+    There is no piece_id on an extract, so the set came back EMPTY and every assertion
+    below passed against zero — "free 5 vs 0 needed" is a green check measuring nothing,
+    which is worse than no check at all. The guard is the console line: it prints the crate
+    count, so a zero is visible rather than inferred from a tick.
+  */
+  for (const r of ROOTS as { rung?: number; culture_family: string; extracts?: { id: string }[] }[]) {
+    if ((r.rung ?? 9) > CARD_RUNG) continue
+    for (const e of r.extracts ?? []) {
+      if (need.has(e.id)) crates.add(r.culture_family)
+    }
+  }
+  /*
+    And the arithmetic is only meaningful if it found something.
+
+    Named separately so a future refactor that renames the field fails here — loudly, with
+    a number — instead of quietly passing the three checks underneath it.
+  */
+  ok('the card is built from crates that exist', crates.size > 0, crates.size + ' found')
+  console.log('  the card needs ' + need.size + ' pieces, living in ' + crates.size + ' crates')
+  console.log('  free allows ' + FREE_ENTITLEMENTS.crates + '\n')
+  ok(
+    'free reaches every crate the card is built from',
+    FREE_ENTITLEMENTS.crates >= crates.size,
+    'free ' + FREE_ENTITLEMENTS.crates + ' vs ' + crates.size + ' needed',
+  )
+  ok(
+    'and reaches the unlock itself',
+    FREE_ENTITLEMENTS.crates >= CRATES_TO_UNLOCK_LEGEND,
+    'a paywall in front of the thing the product is for is a paywall nobody pays',
+  )
+  /*
+    Fewer than seven, which was the target, and it already was.
+
+    Worth recording the number rather than the adjective: the Legend costs five crates, so
+    "can we do it in fewer than seven vibes" was answered before it was asked. What made it
+    feel unreachable was the allowance, not the length.
+  */
+  ok('and the Legend costs fewer than seven vibes', crates.size < 7, crates.size + ' crates')
+}
+
 await page.goto(BASE + '/club')
 await page.waitForTimeout(2200)
 

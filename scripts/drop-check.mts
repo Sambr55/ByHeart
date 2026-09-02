@@ -17,6 +17,7 @@ import { CRATES } from '../content/roots'
 import { dropDaysLeft, dropLive, dropsFor, feedFor } from '../content/feed'
 import { DROP_TEMPLATES } from '../content/drop-templates'
 import { WANTED, bankImage } from '../content/images'
+import { generatedDrops, generationReport } from '../content/generated'
 import { draftDrop, type Candidate } from '../lib/draft'
 import { readFileSync } from 'node:fs'
 
@@ -194,6 +195,60 @@ for (const t of DROP_TEMPLATES) {
 // Nothing in the wanted list has quietly arrived, and nothing in the bank is on both lists.
 const both = WANTED.filter((w) => bankImage(w.slug))
 ok('the wanted list has no pictures that already exist', !both.length, both.map((w) => w.slug).join(' '))
+
+console.log('\nthe calendar becoming drops\n')
+/*
+  The join that did not exist: rowsFor had no callers, so a verified row reached nobody.
+
+  What this asserts is mostly a REFUSAL, because that is what the pipeline is for. The
+  interesting number is `unreviewed` — finished work waiting on one person reading one
+  template — and it is separated from `blocked` so it cannot hide inside it.
+*/
+{
+  const now = new Date('2026-09-02T12:00:00Z')
+  const rep = generationReport('lisbon', now)
+  const count = (st: string) => rep.filter((r) => r.status === st).length
+  console.log(
+    '  ' + count('ready') + ' ready · ' + count('unreviewed') + ' waiting on a reading · ' + count('blocked') + ' blocked\n',
+  )
+  for (const r of rep) console.log('  ' + r.status.padEnd(11) + r.on + '  ' + r.name.slice(0, 44).padEnd(46) + r.why)
+  console.log()
+
+  ok('the calendar is read by something now', rep.length > 0, rep.length + ' rows considered')
+  ok(
+    'nothing unreviewed reaches the feed',
+    generatedDrops('lisbon', now).length === count('ready'),
+    'a drop that says the wrong thing is worse than no drop',
+  )
+  /*
+    A holiday drafts nothing, and that is a design statement rather than a gap.
+
+    "Things are shut" has no venue, no ticket and no metro stop. A template that tried to
+    teach it would be inventing an evening nobody is going to.
+  */
+  ok(
+    'a holiday is not an evening you go to',
+    rep.some((r) => r.id === 'lisbon_republica' && r.status === 'blocked'),
+    'no shape, so nothing drafts',
+  )
+  /*
+    And the station guard bites on a real row rather than a hypothetical one.
+
+    LAV is in Alcântara and has no metro. Inventing a line to fill the slot is the single
+    worst thing this pipeline could do, so the row refuses until a person writes down how
+    people actually get there.
+  */
+  ok(
+    'a venue with no station refuses rather than guesses',
+    rep.some((r) => r.id === 'lisbon_lemon_twigs' && /no station/.test(r.why)),
+    'an invented metro line puts somebody in the wrong place',
+  )
+  ok(
+    'and the football is waiting on a template, not on a reviewer',
+    rep.filter((r) => /no match template/.test(r.why)).length === 2,
+    'two fixtures, both drafting nothing',
+  )
+}
 
 console.log('\nand who has read the language\n')
 /*

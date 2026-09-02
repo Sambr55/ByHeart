@@ -1,4 +1,5 @@
 import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
+import { generatedDrops } from '@/content/generated'
 import { DROP_LEAD_DAYS } from '@/content/roots'
 import { SITUATIONS, isCurrent, type Purpose, type Situation } from '@/content/situations'
 import { DROPS, type Drop } from '@/content/drops'
@@ -201,7 +202,20 @@ export function dropsFor(
   */
   preview = false,
 ): FeedCard[] {
-  return DROPS.filter((d) => d.chapter === chapter && (preview || dropLive(d, now)))
+  /*
+    Hand-written Drops and generated ones, in one list sorted by date.
+
+    A learner should not be able to tell which is which, and nothing here treats them
+    differently — the difference is only in how the sentences were produced, and a
+    generated Drop reaches this line ONLY if a pt-PT speaker has read the template it came
+    from. See content/generated.ts. Today that gate stops all of them, so this is the same
+    list it was; the wiring is real so that reviewing one template is all it takes.
+
+    The window still applies to both, and `preview` still bypasses it for both.
+  */
+  const all = [...DROPS, ...generatedDrops(chapter, now)]
+  return all
+    .filter((d) => d.chapter === chapter && (preview || dropLive(d, now)))
     .sort((a, b) => a.on.localeCompare(b.on))
     .flatMap((d): FeedCard[] =>
       d.situations.map((s) => ({ kind: 'situation', id: s.id, situation: s, drop: d })),

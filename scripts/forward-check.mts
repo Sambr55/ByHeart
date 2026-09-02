@@ -18,6 +18,7 @@
 import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { CRATES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
+import { FREE_ENTITLEMENTS } from '../lib/entitlements'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -74,12 +75,27 @@ async function waysForward(page: Page) {
   })
 }
 
+/*
+  The cap is asked for rather than assumed, and the fixture is built to reach it.
+
+  This hardcoded three crates and called it "at the cap", which was true while the free
+  allowance was three. Raising free to the number the Legend actually needs left this
+  seeding a learner who is comfortably INSIDE the allowance and then failing because the
+  shelf did not show them a gateway they have not earned — a check reporting a wall that
+  correctly is not there.
+
+  Derived now, so the fixture follows the allowance instead of restating a number somebody
+  else is free to change.
+*/
+const CAP = FREE_ENTITLEMENTS.crates
+const upTo = (n: number) => (basics ? [basics.id, ...others.slice(0, Math.max(0, n - 1)).map((c) => c.id)] : [])
+
 const STATES: { name: string; crates: string[]; mustReachGate?: boolean }[] = [
   { name: 'brand new', crates: [] },
-  { name: 'basics done', crates: basics ? [basics.id] : [] },
-  { name: 'basics + 1', crates: basics ? [basics.id, others[0].id] : [] },
-  // The one Sam hit. Three claimed against an allowance of three.
-  { name: 'basics + 2 (at the cap)', crates: basics ? [basics.id, others[0].id, others[1].id] : [], mustReachGate: true },
+  { name: 'basics done', crates: upTo(1) },
+  { name: 'halfway to the cap', crates: upTo(Math.max(2, Math.floor(CAP / 2))) },
+  // The one Sam hit: as many claimed as the plan allows, with nothing saying what is next.
+  { name: 'at the cap (' + CAP + ' crates)', crates: upTo(CAP), mustReachGate: true },
 ]
 
 const browser = await chromium.launch()

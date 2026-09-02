@@ -40,6 +40,16 @@ export interface CalendarRow {
   /** The day it happens, ISO. A range uses `on` for the first day and `until` for the last. */
   on: string
   until?: string
+  /**
+   * What sort of evening it is, which decides which template can teach it.
+   *
+   * `kind` says what the row IS to a diary — an event, a holiday, a deadline. This says
+   * what it is to a LEARNER, because a gig and a match are both events and need completely
+   * different sentences: one is about tickets and a support act, the other about a stand,
+   * a queue and a result. Absent means nothing drafts from it, which is right for a holiday
+   * — "things are shut" is not an evening you go to.
+   */
+  shape?: 'concert' | 'match' | 'exhibition'
   /** In English, as a person would say it. Not a headline. */
   name: string
   /** Where, if anywhere. Feeds the template's venue and station slots. */
