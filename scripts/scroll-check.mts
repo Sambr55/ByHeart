@@ -37,7 +37,7 @@ const seed = {
   }])),
   roots_played: ROOTS.slice(0, 3).map((r) => r.root_id),
   sections_completed: CRATES.filter((c) => !c.drop).slice(0, 4).map((c) => c.id),
-  legend: [], saved: [], liked: [], finished_cards: [], asked: [], evidence: [],
+  legend: [], purpose: 'moving', saved: [], liked: [], finished_cards: [], asked: [], evidence: [],
   club_welcomed_at: '2026-08-20T00:00:00.000Z',
 }
 

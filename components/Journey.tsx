@@ -1480,13 +1480,22 @@ function Picker() {
                         you want them"). No denominator, because a denominator is a score
                         whatever sentence it is wrapped in.
                       */}
-                      {mounted && taken > 0 && taken < total ? (
-                        <span className="text-[0.6rem] text-white/80">
-                          {total - taken === 1
-                            ? 'One more in here'
-                            : total - taken + ' more in here'}
-                        </span>
-                      ) : null}
+                      {/*
+                        What the vibe is FOR, and no number at all.
+
+                        This read "3 of 14 taken", then "11 more in here", and the second
+                        was no better than the first because the unit was never the problem.
+                        Eleven what? A root is our word, a session serves three or four of
+                        them by design, and nobody has ever been told either of those things
+                        — so any count of them is noise attached to a thing somebody chose
+                        for the culture rather than for the arithmetic.
+
+                        The card says what is in it instead. Somebody deciding between Top
+                        Gun and Bridget Jones is choosing what to spend twenty minutes
+                        inside, and the useful sentence is about that, not about how much of
+                        it is left.
+                      */}
+                      <span className="text-[0.6rem] leading-tight text-white/80">{f.blurb}</span>
                     </span>
                   </button>
                 )
@@ -2797,9 +2806,16 @@ function SectionComplete() {
         */}
         {leftInFamily > 0 ? (
           <p className="mt-3 text-sm leading-relaxed text-muted">
-            {leftInFamily === 1
-              ? 'One more sitting in there whenever you want it.'
-              : 'There are ' + leftInFamily + ' more in there whenever you want them.'}
+            {/*
+              That there IS more, not how much more.
+
+              A session serves three or four roots and then ends; a vibe holds six to
+              fourteen. Saying "eleven more" counts a unit nobody has ever been told about,
+              on the screen that has just congratulated somebody for finishing — which is
+              how "I did all of it" and "you are a fifth of the way through" came to sit on
+              consecutive screens.
+            */}
+            There is more in there whenever you want it.
           </p>
         ) : null}
         {/*

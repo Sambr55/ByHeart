@@ -152,6 +152,8 @@ const seed = {
     .slice(0, 3)
     .map((c) => c.id),
   legend: [],
+  // Past the question the Legend now opens with; purpose-check owns that screen.
+  purpose: 'moving',
   saved: [],
   liked: [],
   finished_cards: [],

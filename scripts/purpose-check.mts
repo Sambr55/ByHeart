@@ -80,7 +80,12 @@ const seed = {
   purpose: null,
 }
 
-console.log('\nasked on the way in, once\n')
+console.log('\nasked at the top of the Legend, once\n')
+/*
+  Not at the Club's threshold, which is where it was first built and was wrong twice over:
+  it arrived after the Club had been earned rather than before it was explained, and it
+  arrived separately from the seven questions it exists to shape.
+*/
 await page.goto(BASE + '/club')
 await page.evaluate(
   ([k, pair, blob]) => {
@@ -90,30 +95,44 @@ await page.evaluate(
   [KEY, DEFAULT_PAIR, seed] as const,
 )
 await page.goto(BASE + '/club')
-await page.waitForTimeout(2000)
+await page.waitForTimeout(2200)
 
 const welcome = await page.$('[data-testid="club-welcome-cta"]')
-ok('the welcome comes first', Boolean(welcome), 'the biggest moment is not a form')
+ok('the Club still welcomes people', Boolean(welcome))
 if (welcome) {
-  ok(
-    'and it is not the question',
-    !(await page.$('[data-testid="purpose-moving"]')),
-    'welcoming somebody and configuring them are different jobs',
-  )
   await welcome.click()
-  await page.waitForTimeout(1000)
+  await page.waitForTimeout(1200)
 }
+ok(
+  'and it does not ask anything',
+  !(await page.$('[data-testid="purpose-moving"]')),
+  'the biggest moment in the product is not a form',
+)
 
-ok('the question follows it', Boolean(await page.$('[data-testid="purpose-moving"]')))
+await page.goto(BASE + '/legend')
+await page.waitForTimeout(2000)
+ok('the Legend asks it first', Boolean(await page.$('[data-testid="purpose-moving"]')))
 ok('all three are offered', (await page.$$('[data-testid^="purpose-"]')).length === 3)
 
 await page.click('[data-testid="purpose-moving"]')
-await page.waitForTimeout(1200)
+await page.waitForTimeout(1400)
 const stored = (await page.evaluate(
   `(() => { try { return JSON.parse(localStorage.getItem(${JSON.stringify(KEY)}) || '{}').purpose } catch { return null } })()`,
 )) as string | null
 ok('the answer is remembered', stored === 'moving', String(stored))
-ok('and it lets you into the Club', !(await page.$('[data-testid="purpose-moving"]')), 'asked once')
+ok(
+  'and it lets you straight on to the seven',
+  !(await page.$('[data-testid="purpose-moving"]')),
+  'asked once',
+)
+
+await page.reload()
+await page.waitForTimeout(1800)
+ok(
+  'and never asks again',
+  !(await page.$('[data-testid="purpose-moving"]')),
+  'a question that reappears is a form rather than a decision',
+)
 
 console.log('\nand changeable afterwards, as promised\n')
 await page.goto(BASE + '/profile')

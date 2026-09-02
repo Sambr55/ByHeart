@@ -69,10 +69,19 @@ export const CLUB = {
       somebody and the product, while here it is the last thing before a room they have
       just earned.
     */
+    /*
+      These four moved to the Legend and stayed here.
+
+      The question is asked at the top of the Legend now, which is the first moment the
+      answer is both earned and useful — five vibes done, seven things about themselves
+      about to be said, and what a stranger asks you genuinely differs by whether you are
+      here for four days or for good. The copy lives with the Club because the Club is what
+      it routes; the Legend imports it.
+    */
     ask_eyebrow: 'ONE THING',
     ask_headline: 'What brings you to Lisbon?',
     ask_body:
-      'It decides what the Club offers you. Buying a bus ticket and registering at the Junta are different products, and you should not have to scroll past one to find the other.',
+      'It decides what the Club offers you, and it decides some of what you are about to be asked. Buying a bus ticket and registering at the Junta are different products, and you should not have to scroll past one to find the other.',
     ask_footnote: 'Changeable any time, in Yours. Nothing you have done is affected.',
     /**
      * What the picture is, for anybody who cannot see it. The information, not the mood:

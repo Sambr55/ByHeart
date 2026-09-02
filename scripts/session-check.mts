@@ -230,8 +230,18 @@ if (/DONE|COMPLETE/i.test(seen)) {
     !claimsVibeDone || played >= basics.length,
     played + ' of ' + basics.length + ' roots played',
   )
+  /*
+    That there IS more, which is deliberately not how much more.
+
+    The label used to say "how much is left" and the screen used to answer it with a
+    number. Both are gone: a session serves three or four roots and a vibe holds six to
+    fourteen, so counting them on the screen that has just congratulated somebody produced
+    "I did all of it" and "you are a fifth of the way through" on consecutive screens. The
+    assertion survives because what it protects is that the vibe is not silently presented
+    as finished; only its wording needed to stop describing a behaviour we removed.
+  */
   ok(
-    'and says how much is left',
+    'and says there is more',
     played >= basics.length || /more in there/i.test(seen),
     seen.slice(0, 60),
   )

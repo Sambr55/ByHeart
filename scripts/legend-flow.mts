@@ -37,6 +37,15 @@ const seed = {
   roots_played: [],
   sections_completed: CRATES.filter((c) => !c.drop).slice(0, 6).map((c) => c.id),
   legend: [],
+  /*
+    Past the one question that comes before the seven.
+
+    The Legend now opens on "what brings you to Lisbon" for anybody who has not answered it
+    — see docs/spec-club-first-run.md §05 — and this check is about the deck behind it, not
+    about that screen. purpose-check owns the question itself, including that it is asked
+    once and never again.
+  */
+  purpose: 'moving',
   saved: [],
   liked: [],
   finished_cards: [],

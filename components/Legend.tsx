@@ -3,28 +3,13 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES } from '@/content/roots'
-import {
-  CRATES_TO_UNLOCK_LEGEND,
-  LEGEND_COPY,
-  LEGEND_FRAMES,
-  REPAIR_KIT,
-  cratesToGo,
-  cardDone,
-  fillFrame,
-  frameApplies,
-  frameFor,
-  isAnswered,
-  legendStatus,
-  parseChildren,
-  provenanceOf,
-  type Child,
-  type LegendFrame,
-} from '@/content/legend'
+import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, REPAIR_KIT, cardDone, cratesToGo, fillFrame, frameApplies, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame } from '@/content/legend'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
 import { NumberPicker } from '@/components/NumberPicker'
 import { Back } from '@/components/Back'
 import { Dock, Framed } from '@/components/Dock'
+import { WhyHere } from '@/components/WhyHere'
 import { MiniBuild } from '@/components/Journey'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
@@ -89,6 +74,10 @@ export function Legend() {
   */
   const unlocked = mounted && legendStatus({ sectionsCompleted: done }).open
   const toGo = cratesToGo(done)
+  /* The card is the seven at or below CARD_RUNG; the other two frames are a bonus. */
+  const onCard = answers.filter(
+    (a) => Object.keys(a.values).length > 0 && LEGEND_CARD.some((f) => f.id === a.frame_id),
+  )
   const reachable = useMemo(() => (mounted && unlocked ? LEGEND_FRAMES : []), [mounted, unlocked])
   const answered = useMemo(
     () => LEGEND_FRAMES.filter((f) => isAnswered(f, valuesFor(f.id))),
@@ -160,6 +149,21 @@ export function Legend() {
     )
   }
 
+  /*
+    One question before the seven.
+
+    Asked here rather than at the Club's threshold, which is where it was and which was the
+    wrong place twice over: it arrived after the Club had been earned rather than before it
+    was explained, and it arrived separately from the questions it exists to shape. This is
+    the first moment the answer is both earned and useful — five vibes are done, seven
+    things about themselves are about to be said, and what a stranger actually asks you
+    differs by whether you are here for four days or for good.
+
+    Only when it has never been answered. Changing it later is a setting, in Yours, and a
+    question that reappears is a form rather than a decision.
+  */
+  if (mounted && !learner.purpose) return <WhyHere onDone={() => setMode('deck')} />
+
   return (
     <Shell>
       <div className="flex flex-col gap-3">
@@ -169,10 +173,18 @@ export function Legend() {
             learner is doing something genuinely difficult — and it says plainly that
             theirs is true, or the metaphor curdles. */}
         <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.spy}</p>
-        {mounted && answered.length ? (
+        {/*
+          Seven, because seven is what every other screen promises.
+
+          This said "of 9" — the number of frames in the library — while the explainer, the
+          old door and this spec all say the card is seven questions. Two of the nine are
+          past the card's rung and are a bonus rather than a requirement, so counting them
+          in the denominator quietly moved the finish line and contradicted the only
+          promise the product makes about how long this takes.
+        */}
+        {mounted && onCard.length ? (
           <p className="text-xs tabular-nums text-muted">
-            {answered.length} of {LEGEND_FRAMES.length} answered ·{' '}
-            {reachable.length - answered.length} more your Portuguese already reaches
+            {onCard.length} of {LEGEND_CARD.length} on your card
           </p>
         ) : null}
       </div>

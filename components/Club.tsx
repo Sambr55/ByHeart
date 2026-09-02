@@ -268,16 +268,13 @@ function throughLine(n: number): string {
  */
 function Welcome({ onDone }: { onDone: () => void }) {
   /*
-    Two beats, and the second one asks the only question the Club needs.
+    The welcome asks nothing.
 
-    Welcoming somebody and configuring them are different jobs and they were going to end
-    up on one screen, which would have made the welcome — the biggest moment in the product
-    — into a form with a photograph behind it. So the picture and the sentence land first,
-    and the question comes after GOOD, on the page's own ground, once the room is already
-    theirs.
+    It used to run a second beat asking why somebody was in Lisbon, which was the wrong
+    place twice over: it arrived AFTER the Club had been earned rather than before it was
+    explained, and it arrived separately from the questions it exists to shape. It is the
+    first screen of the Legend now — see components/WhyHere.tsx.
   */
-  const [beat, setBeat] = useState<'welcome' | 'why'>('welcome')
-  if (beat === 'why') return <WhyHere onDone={onDone} />
   return (
     /*
       The second image in the product, and the second one that earns it.
@@ -317,62 +314,13 @@ function Welcome({ onDone }: { onDone: () => void }) {
         <button
           type="button"
           data-testid="club-welcome-cta"
-          onClick={() => setBeat('why')}
+          onClick={onDone}
           className="tap-target eyebrow mt-3 w-full rounded bg-[#1f5d8c] px-5 py-3 text-white"
         >
           {CLUB.welcome.cta}
         </button>
       </div>
     </main>
-  )
-}
-
-/**
- * What brings you to Lisbon.
- *
- * One tap, no skip, and no "prefer not to say" — because unlike every other question DUB
- * asks, this one has no wrong answer and nothing is done with it except choosing what to
- * show. A skip here would produce a learner the Club cannot serve well while looking like
- * it is serving them, which is worse for them than an answer they can change in Yours.
- *
- * The three are described by what they contain rather than by how long somebody is
- * staying, because "a season" means nothing until you know it means the café that starts
- * recognising you.
- */
-function WhyHere({ onDone }: { onDone: () => void }) {
-  return (
-    <div data-stage="REAL WORLD" className="app-frame safe-top bg-bg text-fg">
-      <Framed className="mx-auto flex w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
-        <Wordmark mark="club" className="h-8" />
-        <div className="flex flex-col gap-3">
-          <p className="eyebrow text-accent">{CLUB.welcome.ask_eyebrow}</p>
-          <h1 className="display text-balance text-2xl">{CLUB.welcome.ask_headline}</h1>
-          <p className="text-sm leading-relaxed text-muted">{CLUB.welcome.ask_body}</p>
-        </div>
-
-        <ul className="flex flex-col gap-3">
-          {PURPOSES.map((p) => (
-            <li key={p.id}>
-              <button
-                type="button"
-                data-testid={'purpose-' + p.id}
-                onClick={() => {
-                  setPurpose(p.id)
-                  track('purpose_chosen', { purpose: p.id })
-                  onDone()
-                }}
-                className="tap-target flex w-full flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3 text-left transition hover:border-accent/50"
-              >
-                <span className="display text-lg">{p.label}</span>
-                <span className="text-sm leading-relaxed text-muted">{p.blurb}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <p className="text-xs leading-relaxed text-muted">{CLUB.welcome.ask_footnote}</p>
-      </Framed>
-    </div>
   )
 }
 

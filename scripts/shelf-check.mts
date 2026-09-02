@@ -432,15 +432,24 @@ const text = await page.evaluate(() => (document.querySelector('main') ?? docume
   immediately after a screen congratulating you for finishing. A denominator is a score
   whatever sentence it is wrapped in, so the assertion is that there is not one.
 */
+/*
+  The card says what the vibe is FOR, and counts nothing.
+
+  It read "3 of 14 taken", then "11 more in here", and the second was no better than the
+  first because the unit was never the problem. Eleven what? A root is our word, a session
+  serves three or four of them by design, and nobody has ever been told either of those
+  things. So the assertion is that no count of them appears at all — a denominator is a
+  score whatever sentence it is wrapped in, and a numerator on its own is a riddle.
+*/
 ok(
-  'a part-played vibe says what is left',
-  /\d+ more in here|One more in here/.test(text),
-  (text.match(/(\d+|One) more in here/) ?? ['none'])[0],
+  'a vibe card says what is in it',
+  CRATES.some((c) => c.blurb && text.includes(c.blurb)),
+  (CRATES.find((c) => c.blurb && text.includes(c.blurb))?.blurb ?? 'none').slice(0, 44),
 )
 ok(
-  'and does not score you out of the whole vibe',
-  !/\d+ of \d+ taken/.test(text),
-  'a denominator is a score whatever sentence it is in',
+  'and counts nothing at a learner',
+  !/\d+ of \d+ taken/.test(text) && !/\d+ more in here/.test(text),
+  'no score, and no riddle either',
 )
 
 await browser.close()

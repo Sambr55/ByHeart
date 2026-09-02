@@ -129,6 +129,8 @@ const seed = {
   roots_played: [],
   sections_completed: CRATES.filter((c) => !c.drop).slice(0, 6).map((c) => c.id),
   legend: [],
+  // Past the question the Legend now opens with; purpose-check owns that screen.
+  purpose: 'moving',
   saved: [],
   liked: [],
   finished_cards: [],
