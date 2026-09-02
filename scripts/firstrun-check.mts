@@ -161,6 +161,65 @@ ok(
   'the shop, not just the sign',
 )
 
+console.log('\nthe demo plays where a stranger lands\n')
+/*
+  THE ONE SAM COULD NOT SEE, and no check would have caught it.
+
+  The two-beat Goose demo lived in the intro corridor. The front door's COME IN then started
+  going straight to /club, which skips every corridor step — so the strongest sixty seconds
+  in the product became unreachable for a new person, and what stood in its place was a card
+  DESCRIBING the demo with the Goose line behind a swipe. Reported from a phone as "only one
+  Goose screen showing", which is exactly what an advert for a demo looks like.
+
+  Every assertion here is about the FIRST CARD'S FACE — no swipe, no gesture anybody has to
+  discover — because the whole point is that it plays where somebody lands.
+*/
+{
+  const face = async () =>
+    ((await page.evaluate(
+      `(() => {
+        const r = document.querySelector('.snap-y')
+        return r && r.children[1] ? (r.children[1].innerText || '') : ''
+      })()`,
+    )) as string).replace(/\s+/g, ' ')
+
+  const first = await face()
+  ok('the first card is the demo', /SIXTY SECONDS/.test(first), first.slice(0, 44))
+  ok(
+    'and it plays rather than pointing sideways',
+    !/SWIPE LEFT/.test(first),
+    'a card that has to be DONE does not send you somewhere else to do it',
+  )
+  ok('the familiar line is on the face', /TALK TO ME, GOOSE/i.test(first), 'recognition, in English, first')
+
+  /*
+    Both beats, because for a while only the first was reachable.
+
+    The second is the half that turns a party trick into a product: one word out of one film
+    line, in three sentences you can now say. Counting only "the demo is there" would have
+    passed on the broken version.
+  */
+  const reveal = await page.$('[data-testid="demo-reveal"]')
+  ok('it can be played', Boolean(reveal), reveal ? '' : 'no control on the face')
+  if (reveal) {
+    await reveal.click()
+    await page.waitForTimeout(600)
+    const beat1 = await face()
+    ok('beat one gives the Portuguese', /FALA COMIGO, GOOSE/i.test(beat1), 'the reveal')
+    ok('and says what it gave you', /COMIGO = WITH ME/i.test(beat1), 'the line, then the word')
+
+    const on = await page.$('[data-testid="demo-build"]')
+    ok('there is a second beat', Boolean(on), on ? '' : 'only one Goose screen — the reported bug')
+    if (on) {
+      await on.click()
+      await page.waitForTimeout(600)
+      const beat2 = await face()
+      const said = ['Vem comigo', 'Fica comigo', 'Podes vir comigo'].filter((l) => beat2.includes(l))
+      ok('and it builds three sentences from the one word', said.length === 3, said.join(' / '))
+    }
+  }
+}
+
 console.log('\nevery explainer points the same way\n')
 {
   const detail = await page.evaluate(

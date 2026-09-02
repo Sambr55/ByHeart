@@ -155,6 +155,7 @@ export type EventName =
     purposes, and the split between them is the answer to "which block of ten do we write".
   */
   | 'purpose_chosen'
+  | 'demo_played'
   | 'purpose_skipped'
   | 'chapter_chosen'
   /* The one Club room given away before anything was earned, and which one it was. */

@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { DemoCard } from '@/components/DemoCard'
 import { AudioButton } from '@/components/AudioButton'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
@@ -498,6 +499,15 @@ export function Card({
     setClaimed(true)
   }
 
+  /*
+    The demo card, named once rather than tested for in three places.
+
+    Keyed on the explainer's id because it IS that card — the ordering, the retirement on
+    first vibe played, and the check that counts four explainers all still apply. What is
+    different is only that its front plays instead of pointing sideways.
+  */
+  const isDemo = card.kind === 'explainer' && card.explainer.id === 'how_it_works'
+
   const reveal = () => (
     claim(),
     pane.current?.scrollTo({
@@ -648,7 +658,7 @@ export function Card({
               {/* The kind-specific blocks above already say their own piece — a collision
                   puts its provenance under the sentence, and a teaching card its note. The
                   shared blurb is for the rooms, which have nothing else. */}
-              {card.kind === 'derived' ? null : (
+              {card.kind === 'derived' || isDemo ? null : (
                 <p className="mt-3 text-sm leading-relaxed text-white/80">{blurb}</p>
               )}
               {/*
@@ -712,6 +722,22 @@ export function Card({
                   >
                     GOT IT
                   </button>
+                </div>
+              ) : isDemo ? (
+                /*
+                  The one card that is done rather than read, so it has no SWIPE LEFT.
+
+                  Everything else here tells you something and offers more sideways. The
+                  demo has to PLAY — it is the strongest sixty seconds in the product and it
+                  became unreachable when COME IN started going straight to the Club, which
+                  skips the corridor the beats lived in. What stood here instead was an
+                  advert for a demo, which is why it read as "only one Goose screen".
+
+                  The pane behind it still exists and still says why it works; this is the
+                  doing, and the doing comes first.
+                */
+                <div className="mb-3">
+                  <DemoCard />
                 </div>
               ) : (
                 <button
