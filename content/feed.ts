@@ -148,19 +148,23 @@ export function feedFor(
   chapter: ChapterId = DEFAULT_CHAPTER,
   preview = false,
   /*
-    What they said they were here for, and it ORDERS rather than filters.
+    What they said they were here for, and it now FILTERS.
 
-    This is the change that makes the who/where/why questions worth asking, and the shape
-    of it is a content fact rather than a preference. Of fifteen Situations, `moving`
-    matches all fifteen, `staying` six and `visiting` four — so switching the filter on
-    would hand a visitor a four-card Club, and the first thing purpose ever did would be
-    making the product emptier. That is why roomsFor's filter has been documented as off
-    since it was written, and the reason has not gone away.
+    It ordered rather than filtered, and that was the right call while it lasted: of fifteen
+    Situations `moving` matched all fifteen, `staying` six and `visiting` four, so switching
+    the filter on would have handed a visitor a four-card Club and the first thing purpose
+    ever did would have been making the product emptier.
 
-    Ordering gets the benefit without the cost: what somebody is here for leads, everything
-    else follows, and nothing is hidden from anybody. When there are blocks of ten for
-    visiting and staying the same call can become a filter by passing purpose through to
-    roomsFor instead — the wiring is identical, only the strictness changes.
+    The blocks changed the arithmetic. With lisbon-visiting-1 and lisbon-staying-1 in, it is
+    14 / 16 / 23 — every purpose has a Club of its own, and the condition written here for
+    flipping it has been met. So the promise is finally kept: nobody on a four-day holiday
+    is sent to the Junta, and the answer to "why are you here" changes what you are shown
+    rather than merely what comes first.
+
+    An unanswered purpose still sees everything. forPurpose returns true for a null purpose
+    and for any untagged room, so a Club that empties itself until a question is answered
+    remains impossible — which is the property that matters most and the one a filter is
+    most likely to break.
   */
   purpose: Purpose | null = null,
 ): FeedCard[] {
@@ -173,13 +177,7 @@ export function feedFor(
     is where somebody goes looking for what is theirs rather than what is next.
   */
   // Drops first: they expire and nothing else on the screen does.
-  const rooms = roomsFor(chapter)
-  const mine = (c: FeedCard) => c.kind === 'situation' && forPurpose(c.situation, purpose)
-  return [
-    ...dropsFor(chapter, new Date(), preview),
-    ...rooms.filter(mine),
-    ...rooms.filter((c) => !mine(c)),
-  ]
+  return [...dropsFor(chapter, new Date(), preview), ...roomsFor(chapter, purpose)]
 }
 
 /**
@@ -268,12 +266,15 @@ export function forPurpose(s: Situation, purpose: Purpose | null): boolean {
 export function roomsFor(
   chapter: ChapterId = DEFAULT_CHAPTER,
   /*
-    Off until there is something to filter to.
+    On, now that there is something to filter to.
 
-    Five Situations divided by three purposes is one or two each, so turning this on before
-    a block of ten exists would make the first thing purpose does be making the Club emptier
-    — the exact problem it is meant to solve. The parameter is here so the wiring is real
-    and tested; the caller passes null until spec-purpose-and-depth §04 step 3 lands.
+    This was documented as deliberately off: five Situations divided by three purposes is
+    one or two each, and turning it on then would have made the first thing purpose ever did
+    be making the Club emptier. Three blocks of ten later it is 14 / 16 / 23 and every
+    purpose has a Club of its own.
+
+    Null still means everything, which is the property to protect: a Club that empties
+    itself until a question is answered is a Club with a form in front of it.
   */
   purpose: Purpose | null = null,
 ): FeedCard[] {

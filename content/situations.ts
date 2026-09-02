@@ -18,6 +18,8 @@
 import type { ChapterId } from '@/content/chapters'
 import type { Rung } from '@/content/roots'
 import { LISBON_MOVING_1 } from '@/content/blocks/lisbon-moving-1'
+import { LISBON_STAYING_1 } from '@/content/blocks/lisbon-staying-1'
+import { LISBON_VISITING_1 } from '@/content/blocks/lisbon-visiting-1'
 
 export type SituationKind = 'place' | 'person' | 'moment' | 'errand'
 
@@ -126,6 +128,8 @@ export interface Situation {
  */
 export const SITUATIONS: Situation[] = [
   ...LISBON_MOVING_1,
+  ...LISBON_STAYING_1,
+  ...LISBON_VISITING_1,
   {
     id: 'lisbon_farmacia',
     chapter: 'lisbon',

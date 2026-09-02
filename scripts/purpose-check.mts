@@ -266,21 +266,47 @@ ok(
   proof + ' sentences still there',
 )
 
-console.log('\nthe filter is built and deliberately off\n')
+console.log('\nthe filter is on, and it does not empty the Club\n')
 /*
-  Asserted rather than assumed. The Junta is tagged for staying and moving, so a visiting
-  learner would lose it the moment the filter is switched on — and with five rooms in the
-  product that is a quarter of the Club. Turning it on must be a deliberate act taken when
-  a block of ten exists, not something that drifts in.
+  This used to assert the OPPOSITE, and the change is the point.
+
+  The filter was built and deliberately off, because five Situations divided by three
+  purposes is one or two each — so switching it on would have made the first thing purpose
+  ever did be making the Club emptier. The check guarded that: it asserted a visiting
+  learner could still see the Junta, so the filter could not drift on before the content
+  existed to survive it.
+
+  The content exists now. With lisbon-visiting-1 and lisbon-staying-1 in it is 14 / 16 / 23,
+  every purpose has a Club of its own, and the guard has become the thing it was guarding
+  against. So it inverts: a visitor must NOT be sent to the Junta, and must still have a
+  Club worth opening.
 */
 await page.goto(BASE + '/club')
-await page.waitForTimeout(2200)
+await page.waitForTimeout(2600)
 const text = ((await page.textContent('body')) ?? '').replace(/\s+/g, ' ')
 ok(
-  'a visiting learner can still see every room',
-  text.includes('Junta'),
-  'five rooms divided by three purposes is one or two each',
+  'a visitor is not sent to the Junta',
+  !text.includes('Junta de Freguesia'),
+  'the promise the purpose question makes',
 )
+/*
+  And the fear that kept it off is measured rather than assumed.
+
+  "It does not empty the Club" is the whole reason this was not switched on two months ago,
+  so it is asserted on the rendered feed rather than on the content arithmetic — the numbers
+  can be right while the wiring drops everything.
+*/
+{
+  const shown = (await page.evaluate(
+    `Array.from(document.querySelectorAll('.snap-y > section')).length`,
+  )) as number
+  ok('and still has a Club worth opening', shown >= 10, shown + ' cards rendered')
+  ok(
+    'including rooms written for them',
+    /A table for two|fado|Sintra/i.test(text),
+    'the visiting block reaches the person it was written for',
+  )
+}
 
 await browser.close()
 
