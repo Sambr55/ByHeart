@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { PURPOSES, type Purpose } from '@/content/situations'
+import { loadLearner, setPurpose } from '@/engine/learner'
 import { setSound, soundOn, tap } from '@/engine/tap'
 
 export type Theme = 'system' | 'light' | 'dark'
@@ -95,6 +97,53 @@ export function SoundChoice() {
           </button>
         ))}
       </div>
+    </div>
+  )
+}
+
+/**
+ * Why you are in the city, changeable.
+ *
+ * The Club threshold promises this is here, so it has to be — a setting somebody is told
+ * they can change and then cannot find is worse than not offering the change at all.
+ *
+ * Nothing is retracted when it moves. Somebody who arrives for a holiday and decides to
+ * stay has not un-learned the bus; they have gained the Junta. So the copy says that
+ * plainly rather than leaving somebody to wonder whether changing it costs them anything.
+ */
+export function PurposeChoice() {
+  const [purpose, setPurposeState] = useState<Purpose | null>(null)
+  useEffect(() => setPurposeState(loadLearner().purpose ?? null), [])
+  if (!purpose) return null
+
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="eyebrow text-muted">IN LISBON</p>
+      <div role="group" aria-label="Why you are here" className="flex gap-1">
+        {PURPOSES.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            data-testid={'purpose-set-' + p.id}
+            aria-pressed={purpose === p.id}
+            onClick={() => {
+              setPurpose(p.id)
+              setPurposeState(p.id)
+            }}
+            className={
+              'tap-target flex-1 rounded border px-3 py-1 text-[0.6rem] uppercase tracking-wider transition ' +
+              (purpose === p.id
+                ? 'border-accent bg-accent/10 text-accent'
+                : 'border-line text-muted hover:text-fg')
+            }
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-1 text-xs leading-relaxed text-muted">
+        Changes what Lisbon offers you. Nothing you have already done goes anywhere.
+      </p>
     </div>
   )
 }

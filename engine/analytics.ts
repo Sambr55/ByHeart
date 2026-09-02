@@ -148,6 +148,13 @@ export type EventName =
   | 'translate_opened'
   | 'translate_ask'
   | 'translate_kept'
+  /*
+    Why people say they are here.
+
+    The single most useful number in the product for deciding what to author next: three
+    purposes, and the split between them is the answer to "which block of ten do we write".
+  */
+  | 'purpose_chosen'
 
 export interface AnalyticsEvent {
   seq: number

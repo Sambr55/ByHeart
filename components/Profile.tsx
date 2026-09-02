@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '@/components/Feed'
 import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
-import { SoundChoice, ThemeChoice } from '@/components/Theme'
+import { PurposeChoice, SoundChoice, ThemeChoice } from '@/components/Theme'
 import { Wordmark } from '@/components/Wordmark'
 import { cardById, cardFace, derivedCards, roomsFor, wordCards, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
@@ -195,6 +195,7 @@ export function Profile() {
           <div className="border-t border-line pt-6">
             <ThemeChoice />
             <SoundChoice />
+            <PurposeChoice />
           </div>
         </>
       )}

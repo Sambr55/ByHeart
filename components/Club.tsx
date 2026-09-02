@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   CRATES,
   PIECES,
@@ -29,10 +29,11 @@ import { LEGEND_FRAMES } from '@/content/legend'
 import { capabilities } from '@/engine/journey'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { track } from '@/engine/analytics'
-import { loadLearner, welcomeToClub, type LearnerState } from '@/engine/learner'
+import { loadLearner, setPurpose, type LearnerState, welcomeToClub } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { useNowAfterMount } from '@/engine/useNow'
 import { Dock, Framed } from '@/components/Dock'
+import { PURPOSES } from '@/content/situations'
 
 /**
  * Dub Club.
@@ -108,8 +109,25 @@ export function Club() {
     )
       return
     setWelcome(true)
-    welcomeToClub()
     track('club_welcome', { sections: state.sections_completed.length })
+  }, [])
+
+  /*
+    Marked welcomed when it has been SEEN, not when it has been decided.
+
+    welcomeToClub() used to fire inside the effect above, which records the ceremony at the
+    moment it is scheduled rather than the moment it happens — so closing the app on that
+    screen, or anything that remounts the component, spent the biggest moment in the
+    product without showing it. React's strict mode does exactly that in development:
+    mount, write the timestamp, remount, read the timestamp, skip the welcome. Which meant
+    the screen was unreachable on every dev machine and fine in production, the worst of
+    both — nobody building DUB could see it and nobody could prove it was broken.
+
+    Written on the way out instead, where the fact being recorded is true.
+  */
+  const finishWelcome = useCallback(() => {
+    welcomeToClub()
+    setWelcome(false)
   }, [])
 
   const answeredIds = useMemo(
@@ -139,7 +157,7 @@ export function Club() {
       welcomedAt: learner.club_welcomed_at,
     })
 
-  if (welcome) return <Welcome onDone={() => setWelcome(false)} />
+  if (welcome) return <Welcome onDone={finishWelcome} />
   /*
     Inside the Club is the feed.
 
@@ -233,6 +251,17 @@ function throughLine(n: number): string {
  * by being about what they did rather than about how often they showed up.
  */
 function Welcome({ onDone }: { onDone: () => void }) {
+  /*
+    Two beats, and the second one asks the only question the Club needs.
+
+    Welcoming somebody and configuring them are different jobs and they were going to end
+    up on one screen, which would have made the welcome — the biggest moment in the product
+    — into a form with a photograph behind it. So the picture and the sentence land first,
+    and the question comes after GOOD, on the page's own ground, once the room is already
+    theirs.
+  */
+  const [beat, setBeat] = useState<'welcome' | 'why'>('welcome')
+  if (beat === 'why') return <WhyHere onDone={onDone} />
   return (
     /*
       The second image in the product, and the second one that earns it.
@@ -272,13 +301,62 @@ function Welcome({ onDone }: { onDone: () => void }) {
         <button
           type="button"
           data-testid="club-welcome-cta"
-          onClick={onDone}
+          onClick={() => setBeat('why')}
           className="tap-target eyebrow mt-3 w-full rounded bg-[#1f5d8c] px-5 py-3 text-white"
         >
           {CLUB.welcome.cta}
         </button>
       </div>
     </main>
+  )
+}
+
+/**
+ * What brings you to Lisbon.
+ *
+ * One tap, no skip, and no "prefer not to say" — because unlike every other question DUB
+ * asks, this one has no wrong answer and nothing is done with it except choosing what to
+ * show. A skip here would produce a learner the Club cannot serve well while looking like
+ * it is serving them, which is worse for them than an answer they can change in Yours.
+ *
+ * The three are described by what they contain rather than by how long somebody is
+ * staying, because "a season" means nothing until you know it means the café that starts
+ * recognising you.
+ */
+function WhyHere({ onDone }: { onDone: () => void }) {
+  return (
+    <div data-stage="REAL WORLD" className="app-frame safe-top bg-bg text-fg">
+      <Framed className="mx-auto flex w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
+        <Wordmark mark="club" className="h-8" />
+        <div className="flex flex-col gap-3">
+          <p className="eyebrow text-accent">{CLUB.welcome.ask_eyebrow}</p>
+          <h1 className="display text-balance text-2xl">{CLUB.welcome.ask_headline}</h1>
+          <p className="text-sm leading-relaxed text-muted">{CLUB.welcome.ask_body}</p>
+        </div>
+
+        <ul className="flex flex-col gap-3">
+          {PURPOSES.map((p) => (
+            <li key={p.id}>
+              <button
+                type="button"
+                data-testid={'purpose-' + p.id}
+                onClick={() => {
+                  setPurpose(p.id)
+                  track('purpose_chosen', { purpose: p.id })
+                  onDone()
+                }}
+                className="tap-target flex w-full flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3 text-left transition hover:border-accent/50"
+              >
+                <span className="display text-lg">{p.label}</span>
+                <span className="text-sm leading-relaxed text-muted">{p.blurb}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <p className="text-xs leading-relaxed text-muted">{CLUB.welcome.ask_footnote}</p>
+      </Framed>
+    </div>
   )
 }
 

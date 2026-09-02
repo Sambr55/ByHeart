@@ -300,6 +300,15 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
       that is the whole promise the account makes. Two devices that kept the same line keep
       one copy of it, dated from the first time it was wanted.
     */
+    /*
+      The one field where the LATER answer wins.
+
+      Everything else here merges as a union or keeps the earliest, because nothing a
+      learner has done should be undone by picking up another phone. Purpose is different:
+      it is a statement about the present, and somebody who has changed it on the device in
+      their hand has not lost anything by having it respected.
+    */
+    purpose: r.purpose ?? l.purpose ?? null,
     asked: [
       ...new Map(
         [...(r.asked ?? []), ...(l.asked ?? [])]

@@ -17,8 +17,44 @@
  */
 import type { ChapterId } from '@/content/chapters'
 import type { Rung } from '@/content/roots'
+import { LISBON_MOVING_1 } from '@/content/blocks/lisbon-moving-1'
 
 export type SituationKind = 'place' | 'person' | 'moment' | 'errand'
+
+/**
+ * Why somebody is in this city, which is a different question from how good their
+ * Portuguese is.
+ *
+ * Deliberately NOT the Legend's `why_here`. That card asks *Porquê Portugal?* and collects
+ * a feeling — "someone I love is here" — which is the right thing for a sentence somebody
+ * recites in a bar and useless for routing content: it describes a mover and a
+ * long-distance visitor equally well, and says nothing about whether they need a NIF or a
+ * bus ticket. This is configuration, and it is asked as configuration.
+ *
+ * And it is not a difficulty setting. A tourist ordering a complicated coffee is doing
+ * something harder than a mover signing a form they printed out at home. Purpose decides
+ * WHICH content; the rung still decides WHEN. Collapsing the two is how this becomes a
+ * level system by accident.
+ */
+export type Purpose = 'visiting' | 'staying' | 'moving'
+
+export const PURPOSES: { id: Purpose; label: string; blurb: string }[] = [
+  {
+    id: 'visiting',
+    label: 'A few days',
+    blurb: 'Ordering, buying, asking. Everything with a stranger you will not see again.',
+  },
+  {
+    id: 'staying',
+    label: 'A season',
+    blurb: 'The same faces twice. Where small talk starts doing real work.',
+  },
+  {
+    id: 'moving',
+    label: 'For good',
+    blurb: 'The NIF, the bank, the Junta. The long ones, where getting it wrong costs a day.',
+  },
+]
 
 /**
  * A photograph of a real place is somebody's property, and a real place is a factual
@@ -66,11 +102,30 @@ export interface Situation {
   release: { ask: string; answer: string }
   image?: SituationImage
   rung: Rung
+  /**
+   * Who this is for. Absent means everybody.
+   *
+   * Most of Lisbon is for everybody — a pharmacy does not care why you are in the country
+   * — so the field is optional and an untagged Situation is shown to all three. Tagging is
+   * for the ones where purpose genuinely changes the answer: nobody on a four-day holiday
+   * needs the property-tax deadline, and telling them about it is the fastest way to make
+   * a Club feel like somebody else's.
+   */
+  purposes?: Purpose[]
   /** Past this date it is hidden rather than wrong. Silence beats a lie. */
   review_by?: string
 }
 
+/**
+ * Blocks live in their own files; the standing rooms stay here.
+ *
+ * Imported by hand rather than scanned, so a file joins the product because somebody
+ * decided it should. Ten at a time is the unit — see docs/spec-purpose-and-depth.md §02
+ * — because ten is what one image session yields, which forces a block to be conceived as
+ * a set with a shared look rather than ten cards commissioned separately.
+ */
 export const SITUATIONS: Situation[] = [
+  ...LISBON_MOVING_1,
   {
     id: 'lisbon_farmacia',
     chapter: 'lisbon',
@@ -220,6 +275,11 @@ export const SITUATIONS: Situation[] = [
   },
   {
     id: 'lisbon_junta',
+    /**
+     * A parish office is not a thing you walk into on holiday. Registering there is what you
+     * do when you have an address, and the sentences are worthless to anybody who has not.
+     */
+    purposes: ['staying', 'moving'],
     chapter: 'lisbon',
     kind: 'errand',
     title: 'The Junta de Freguesia',

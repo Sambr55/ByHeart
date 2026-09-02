@@ -79,15 +79,15 @@ export function Feed() {
       the profile, and comes back through the Line rather than round the loop.
     */
     const done = new Set(learner.finished_cards ?? [])
-    return [
-      ...rooms.filter((c) => !done.has(c.id)),
-      /*
-        What they asked for comes first among the assembled cards.
+    const open = rooms.filter((c) => !done.has(c.id))
+    /*
+      What they asked for comes first among the assembled cards.
 
-        A sentence somebody looked up this morning beats a form the paradigm table worked
-        out overnight — it is the one piece of content in the feed with evidence attached
-        that this particular learner wanted it.
-      */
+      A sentence somebody looked up this morning beats a form the paradigm table worked out
+      overnight — it is the one piece of content in the feed with evidence attached that
+      this particular learner wanted it.
+    */
+    const mine = [
       ...askedCards(learner.asked ?? [], learner.finished_cards ?? []),
       ...derivedCards(
         derivedFor({
@@ -96,6 +96,22 @@ export function Feed() {
         }),
       ),
     ]
+
+    /*
+      Interleaved, because appending stopped working the moment there was content.
+
+      These used to go on the end, which was invisible-but-fine while the Club held five
+      rooms. The first block of ten took the library to fifteen, and a card sixteen swipes
+      down is a card nobody has ever seen — so the reinforcement half of the product would
+      have quietly switched itself off as a direct consequence of the Club getting better.
+
+      Three rooms in: far enough that somebody arriving lands on Lisbon rather than on
+      their own homework, close enough that they reach it in one sitting. Drops keep the
+      top of the feed whatever else is true, because a room that expires and a room that
+      does not are different offers.
+    */
+    const AFTER = 3
+    return [...open.slice(0, AFTER), ...mine, ...open.slice(AFTER)]
   }, [mounted, preview, learner.inventory, learner.finished_cards, learner.asked])
   /*
     A save that says so.

@@ -122,8 +122,21 @@ ok('the record carries whose it is', JSON.parse((await read()) ?? '{}').user_id 
   on it convincingly. What is being asserted is the invariant — that signing out does not
   empty this origin's record — so the read happens on this origin.
 */
-await page.goto(BASE + '/api/auth/logout')
-await page.waitForTimeout(1200)
+/*
+  Requested, not navigated to.
+
+  The redirect points at whatever absoluteUrl resolves to — localhost:3000 in dev, whatever
+  port the server is actually on notwithstanding. Navigating there means the browser tries
+  to load an origin that usually has nothing listening, and page.goto does not shrug that
+  off: it throws ERR_CONNECTION_REFUSED and takes the whole gate with it. The check passed
+  for months only because a second dev server happened to be running on 3000.
+
+  page.request shares the context's cookie jar, so the route's Set-Cookie still applies —
+  which is the part being tested. maxRedirects: 0 stops before the destination, which is
+  the part that was never ours to depend on.
+*/
+await page.request.get(BASE + '/api/auth/logout', { maxRedirects: 0 })
+await page.waitForTimeout(600)
 await page.goto(BASE + '/vibes')
 await page.waitForTimeout(600)
 const after = await read()

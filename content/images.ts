@@ -71,6 +71,85 @@ export const IMAGE_BANK: Record<string, BankImage> = {
  * from a mood board and a picture made from a use are different pictures.
  */
 export const WANTED: { slug: string; brief: string; used_by: string }[] = [
+  /*
+    Lisbon · moving · block 1 — ten, and they have to look like ten of one thing.
+
+    One session of an image model produces ten, which is why a block is ten. The constraint
+    is a gift: commissioned separately these would be ten unrelated stock photographs, and
+    a feed of those reads as a directory. Commissioned together they read as a set, and a
+    set is what makes a block feel like a chapter of a city rather than a list of errands.
+
+    The shared look, held across all ten: INTERIORS AND THRESHOLDS, not landmarks. Waiting
+    rooms, counters, doorways, desks. Daylight through a window rather than golden hour.
+    Nobody's face — backs, hands, an empty chair — because the person in the picture is
+    meant to be the learner. No signage that names a real institution, no logos, no
+    readable documents: these are rooms of a kind, not photographs of a specific office,
+    and a legible letterhead turns a mood into a factual claim.
+
+    Sand and blue-grey range, matching the Club's existing photographs so a moving card and
+    a pharmacy card sit on the same shelf without one of them looking imported.
+  */
+  {
+    slug: 'moving_financas',
+    brief:
+      'The inside of a plain municipal tax office: a row of numbered counters, a waiting area with moulded chairs, a screen showing a queue number high on the wall. Two or three people waiting, seen from behind. Daylight from a tall window on the left. No readable signage, no logos.',
+    used_by: 'Getting your NIF',
+  },
+  {
+    slug: 'moving_bank_desk',
+    brief:
+      'A bank desk from the customer side: a monitor turned half away, a keyboard, a pen on a folded form, an empty chair opposite. Nobody in frame. Soft daylight. The feeling is that you are about to sit down for an hour.',
+    used_by: 'Opening a bank account',
+  },
+  {
+    slug: 'moving_phone_shop',
+    brief:
+      'A phone shop counter with handsets on a lit display behind it, seen slightly from the side. A shop assistant\'s hands on a tablet, no face. Bright, ordinary, low-stakes — the easiest room on the list.',
+    used_by: 'A phone number that is yours',
+  },
+  {
+    slug: 'moving_viewing',
+    brief:
+      'An empty Lisbon flat mid-viewing: bare boards, a tall shuttered window half open, one folding chair, dust in the light. A set of keys on the sill. Nobody in frame. It should feel like twenty minutes you have to make count.',
+    used_by: 'Seeing a flat',
+  },
+  {
+    slug: 'moving_signing',
+    brief:
+      'A kitchen table with a stapled contract face down, two coffee cups, a pen resting on the pages, one chair pushed back. Warm interior daylight. The document is closed and unreadable on purpose.',
+    used_by: 'Signing the lease',
+  },
+  {
+    slug: 'moving_meter',
+    brief:
+      'A small utility cupboard opened on a landing: an electricity meter with a dial, wires, a scrap of paper with numbers written by hand, a mobile phone held up to photograph it. Hands only. Dim hallway light.',
+    used_by: 'Getting the power on',
+  },
+  {
+    slug: 'moving_health_centre',
+    brief:
+      'A health-centre waiting corridor: a run of empty chairs against a pale tiled wall, a closed door at the end, a hand sanitiser stand. Clean, quiet, slightly institutional. One coat over a chair back suggests somebody is here.',
+    used_by: 'Registering at the health centre',
+  },
+  {
+    slug: 'moving_ticket_machine',
+    brief:
+      'A queue-ticket machine in a large public service hall, a printed paper tab hanging from its slot, a blurred crowd of people seated beyond it. Shot close on the machine so the hall reads as depth rather than detail.',
+    used_by: 'The Loja do Cidadão',
+  },
+  {
+    slug: 'moving_used_car',
+    brief:
+      'A small second-hand car parked on a Lisbon side street in flat afternoon light, bonnet open, a person standing beside it seen from behind. Ordinary, slightly worn, nothing aspirational. No number plate legible.',
+    used_by: 'Buying a car',
+  },
+  {
+    slug: 'moving_school_gate',
+    brief:
+      'A primary school entrance from the pavement: a painted gate, a low wall, a hopscotch grid faded on the ground, bags hanging on hooks just visible inside. Empty of children. Morning light.',
+    used_by: 'Getting a place at school',
+  },
+
   {
     slug: 'arena_night',
     brief:

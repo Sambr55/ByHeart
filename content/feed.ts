@@ -1,6 +1,6 @@
 import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
 import { DROP_WINDOW_DAYS } from '@/content/roots'
-import { SITUATIONS, isCurrent, type Situation } from '@/content/situations'
+import { SITUATIONS, isCurrent, type Purpose, type Situation } from '@/content/situations'
 import { DROPS, type Drop } from '@/content/drops'
 import { PIECES, displayForm, type Piece } from '@/content/roots'
 import type { DerivedCard } from '@/engine/derive'
@@ -165,8 +165,32 @@ export function dropDaysLeft(d: Drop, now: Date = new Date()): number {
   return Math.max(0, Math.ceil((gone.getTime() - now.getTime()) / 86_400_000))
 }
 
-export function roomsFor(chapter: ChapterId = DEFAULT_CHAPTER): FeedCard[] {
-  return SITUATIONS.filter((s) => s.chapter === chapter && isCurrent(s))
+/**
+ * Whether a Situation is for this learner.
+ *
+ * Untagged means everybody, which is most of Lisbon — a pharmacy does not care why you
+ * are in the country. Tagging is for the ones where the answer genuinely differs, and an
+ * unanswered purpose sees everything rather than nothing: a Club that empties itself
+ * until a question is answered is a Club with a form in front of it.
+ */
+export function forPurpose(s: Situation, purpose: Purpose | null): boolean {
+  if (!s.purposes || !purpose) return true
+  return s.purposes.includes(purpose)
+}
+
+export function roomsFor(
+  chapter: ChapterId = DEFAULT_CHAPTER,
+  /*
+    Off until there is something to filter to.
+
+    Five Situations divided by three purposes is one or two each, so turning this on before
+    a block of ten exists would make the first thing purpose does be making the Club emptier
+    — the exact problem it is meant to solve. The parameter is here so the wiring is real
+    and tested; the caller passes null until spec-purpose-and-depth §04 step 3 lands.
+  */
+  purpose: Purpose | null = null,
+): FeedCard[] {
+  return SITUATIONS.filter((s) => s.chapter === chapter && isCurrent(s) && forPurpose(s, purpose))
     .sort((a, b) => a.rung - b.rung)
     .map((s): FeedCard => ({ kind: 'situation', id: s.id, situation: s }))
 }

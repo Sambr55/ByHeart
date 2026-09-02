@@ -312,6 +312,15 @@ export interface LearnerState {
    */
   asked: { pt: string; en: string; note: string; at: string }[]
   /**
+   * Why they are in the city, or null if they have not been asked yet.
+   *
+   * Not a level and not a preference — it decides WHICH of Lisbon the Club offers, while
+   * the rung goes on deciding when. Null is a real state and is treated as "everything",
+   * because a Club that shows nothing until a question is answered is a Club with a form
+   * in front of it.
+   */
+  purpose: 'visiting' | 'staying' | 'moving' | null
+  /**
    * When the deal was accepted, or null. Kept per pair rather than globally, because
    * the deal screen speaks about the language being learned — "your Portuguese" — and
    * somebody arriving at a second pair has not been told that deal.
@@ -360,6 +369,7 @@ export function emptyLearner(): LearnerState {
     liked: [],
     finished_cards: [],
     asked: [],
+    purpose: null,
     deal_accepted_at: null,
     evidence: [],
     affinity: {
@@ -465,6 +475,7 @@ export function loadLearner(): LearnerState {
           liked: arr(parsed.liked, []),
           finished_cards: arr(parsed.finished_cards, []),
           asked: arr(parsed.asked, []),
+          purpose: parsed.purpose ?? null,
           deal_accepted_at: parsed.deal_accepted_at ?? null,
           collisions_played: arr(parsed.collisions_played, []),
           evidence: arr(parsed.evidence, []),
@@ -1147,6 +1158,21 @@ export function rememberFinishedCard(id: string) {
  * on Friday. Keeping it once and leaving the first timestamp in place means the list stays
  * a record of what somebody needed rather than of how forgetful they are.
  */
+/**
+ * Why they are here, set once at the Club threshold and changeable from YOURS.
+ *
+ * Nothing is taken away when it changes. Somebody who arrives for a holiday and decides to
+ * move has not un-learned the bus; they have gained the Junta. So this only ever changes
+ * what is OFFERED — no card is retracted, no progress is reset, and the merge keeps the
+ * most recent answer rather than the first, because this is the one field where the later
+ * answer is the true one.
+ */
+export function setPurpose(purpose: 'visiting' | 'staying' | 'moving') {
+  update((s) => {
+    s.purpose = purpose
+  })
+}
+
 export function keepAsk(ask: { pt: string; en: string; note: string }) {
   update((s) => {
     const already = (s.asked ?? []).some((a) => a.pt === ask.pt)

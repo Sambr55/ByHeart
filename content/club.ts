@@ -59,6 +59,21 @@ export const CLUB = {
     body: 'You can introduce yourself in Portuguese without reading it off a screen. That is the whole membership test, and it is the thing most people never get to. This is your way in from now on — no front door, no pitch, no starting again.',
     body_two: 'Nothing here counts days or asks where you have been. It just shows you what you can say and what is worth doing next.',
     cta: 'GOOD',
+    /*
+      The one question, asked once, on the way in.
+
+      Not in the Legend, deliberately. The Legend is a minute about yourself you can say
+      out loud in Portuguese; "are you a tourist" is configuration, and putting it into a
+      sentence somebody recites in a bar would spoil both. And it is asked HERE rather than
+      at the front door because at the front door it would be a form standing between
+      somebody and the product, while here it is the last thing before a room they have
+      just earned.
+    */
+    ask_eyebrow: 'ONE THING',
+    ask_headline: 'What brings you to Lisbon?',
+    ask_body:
+      'It decides what the Club offers you. Buying a bus ticket and registering at the Junta are different products, and you should not have to scroll past one to find the other.',
+    ask_footnote: 'Changeable any time, in Yours. Nothing you have done is affected.',
     /**
      * What the picture is, for anybody who cannot see it. The information, not the mood:
      * a conversation in a doorway, because a conversation is what has just been earned.
