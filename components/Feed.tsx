@@ -14,6 +14,7 @@ import {
   chapterName,
   askedCards,
   derivedCards,
+  explainerCards,
   feedFor,
   vocabWord,
   type FeedCard,
@@ -23,6 +24,9 @@ import { track } from '@/engine/analytics'
 import { recordProof, rememberFinishedCard, toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { StatusBar } from '@/components/Native'
+import { EXPLAINER_CTA } from '@/content/explainers'
+import { cardDone } from '@/content/legend'
+import { loadLearner, tasteRoom } from '@/engine/learner'
 
 /**
  * The Club as a feed.
@@ -39,7 +43,17 @@ import { StatusBar } from '@/components/Native'
  * fetching more. A product that has spent every other screen refusing to reward turning
  * up cannot have an infinite scroll on this one.
  */
-export function Feed() {
+/**
+ * Which of the three Clubs this is.
+ *
+ * One screen, three audiences: somebody who has never heard of DUB, somebody part way
+ * through earning their way in, and a member. See docs/spec-club-first-run.md §03 — the
+ * important one is `showcase`, which locks nothing at all, because a lock shown before a
+ * demonstration is just a wall.
+ */
+export type ClubStage = 'showcase' | 'working' | 'member'
+
+export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
   const learner = useLearner()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
@@ -111,8 +125,45 @@ export function Feed() {
       does not are different offers.
     */
     const AFTER = 3
-    return [...open.slice(0, AFTER), ...mine, ...open.slice(AFTER)]
-  }, [mounted, preview, learner.inventory, learner.finished_cards, learner.asked])
+
+    /*
+      The explainers, one between every two rooms rather than four in a row.
+
+      Four explanations consecutively is a corridor with swipes instead of taps, which is
+      the thing this replaces. Interleaved, somebody who wants to look at Lisbon can keep
+      swiping past them, and somebody who wants to know what this is finds one every other
+      card. A showcase that argues for itself between exhibits rather than before them.
+    */
+    const explainers = explainerCards({
+      playedAVibe: (learner.roots_played ?? []).length > 0,
+      legendWritten: cardDone(
+        (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0).map((a) => a.frame_id),
+        learner.legend ?? [],
+      ),
+      isMember: stage === 'member',
+      usedTranslator: (learner.asked ?? []).length > 0,
+    })
+
+    const withExplainers: FeedCard[] = []
+    const rest = [...open.slice(0, AFTER), ...mine, ...open.slice(AFTER)]
+    let e = 0
+    rest.forEach((card, i) => {
+      withExplainers.push(card)
+      // After the first, then every other one, until they run out.
+      if (e < explainers.length && (i === 0 || i % 2 === 0)) withExplainers.push(explainers[e++])
+    })
+    // Anything left over goes on the end rather than being dropped silently.
+    return [...withExplainers, ...explainers.slice(e)]
+  }, [
+    mounted,
+    preview,
+    stage,
+    learner.inventory,
+    learner.finished_cards,
+    learner.asked,
+    learner.roots_played,
+    learner.legend,
+  ])
   /*
     A save that says so.
 
@@ -261,6 +312,7 @@ export function Feed() {
           <Card
             key={card.id + '_' + i}
             card={card}
+            stage={stage}
             saved={mounted && (learner.saved ?? []).includes(card.id)}
             liked={mounted && (learner.liked ?? []).includes(card.id)}
             onSaved={(on) => setToast(on ? 'saved' : 'unsaved')}
@@ -311,6 +363,7 @@ export function Card({
   liked,
   onSaved,
   onDone,
+  stage = 'member',
 }: {
   card: FeedCard
   saved: boolean
@@ -318,6 +371,8 @@ export function Card({
   onSaved?: (on: boolean) => void
   /** Spent, and on its way to the profile. The feed rebuilds without it. */
   onDone?: () => void
+  /** Which Club this is. A member's rooms are never teased. */
+  stage?: ClubStage
 }) {
   const pane = useRef<HTMLDivElement>(null)
   /*
@@ -328,11 +383,49 @@ export function Card({
     can follow the next time without looking for a button at all. It scrolls rather than
     navigates, so going back is the same gesture in reverse.
   */
-  const reveal = () =>
+  /**
+   * Claim the one free room, if this is the moment it is claimed.
+   *
+   * On the way IN rather than on arrival, so the pane a person lands on is already the
+   * open one — deciding after the scroll would show them the tease for a frame and then
+   * swap it, which reads as the product changing its mind about them.
+   */
+  const claim = () => {
+    // `free` already covers member and non-situation; repeating them here narrowed the
+    // type to nothing and told the compiler this branch was unreachable.
+    if (free || card.kind !== 'situation') return
+    if (loadLearner().tasted) return
+    tasteRoom(card.id)
+    track('room_tasted', { card: card.id })
+    setClaimed(true)
+  }
+
+  const reveal = () => (
+    claim(),
     pane.current?.scrollTo({
       left: pane.current.clientWidth,
       behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
     })
+  )
+  /*
+    Whether this room is free to this person — derived, never latched at first render.
+
+    The first version took this with useState's initializer, which runs exactly once, on
+    the first render. On that render `stage` is still 'member': the Club cannot know who it
+    is talking to until the browser has read localStorage, so it says member and corrects
+    itself a frame later. The initializer captured the provisional answer and held it
+    forever, which made every room free to everybody — and looked entirely correct, because
+    the cards further down the rail mount after the correction and behaved properly. The
+    one that was wrong was the first one somebody saw.
+
+    Computed every render instead, with `claimed` carrying the only thing that genuinely
+    must not flip: a room somebody has just been given stays given, without waiting for the
+    write to come back round through the store.
+  */
+  const learner = useLearner()
+  const [claimed, setClaimed] = useState(false)
+  const free =
+    stage === 'member' || card.kind !== 'situation' || claimed || learner.tasted === card.id
   const [isSaved, setSaved] = useState(saved)
   const [isLiked, setLiked] = useState(liked)
   useEffect(() => setSaved(saved), [saved])
@@ -554,11 +647,21 @@ export function Card({
               included, so the two cannot drift apart. */}
           <div>
             {card.kind === 'situation' ? (
-              <Lines card={card} />
+              /*
+                One room is given away, and the rest are teased until the Legend exists.
+
+                A showcase that only describes itself is a brochure, so the first room
+                somebody opens is theirs outright — the Portuguese, the audio, all of it.
+                After that the tease does the work, and it can because they have now held
+                the real thing once and know what is being withheld.
+              */
+              free ? <Lines card={card} /> : <Teased card={card} />
             ) : card.kind === 'derived' ? (
               <Derived card={card} />
             ) : card.kind === 'asked' ? (
               <Asked card={card} />
+            ) : card.kind === 'explainer' ? (
+              <Explains card={card} />
             ) : (
               <Word card={card} />
             )}
@@ -566,6 +669,56 @@ export function Card({
         </div>
       </div>
     </section>
+  )
+}
+
+/**
+ * A room somebody has not earned: the moment, and not what to say.
+ *
+ * The lock withholds CAPABILITY rather than information, which is the only version of this
+ * that is honest. Reading that your landlord has just said the deposit is not coming back
+ * costs nothing and is not what DUB sells; knowing what to say back is the entire product.
+ *
+ * Showing the Portuguese greyed out or blurred would be worse than either extreme — it
+ * says "we have it and you cannot have it", which is a shop with a guard on the door
+ * rather than a window.
+ */
+function Teased({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
+  const s = card.situation
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-accent">THE MOMENT</p>
+        <h2 className="display text-balance text-2xl">{s.title}</h2>
+        <p className="text-sm leading-relaxed text-fg/85">{s.why}</p>
+      </div>
+
+      <div className="flex flex-col gap-3 border-t border-line pt-6">
+        <p className="eyebrow text-muted">WHAT HAPPENS</p>
+        <ul className="flex flex-col gap-3">
+          {s.lines.slice(0, 3).map((l) => (
+            <li key={l.pt} className="text-sm leading-relaxed text-muted">
+              “{l.en}”
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="rounded border border-line-strong bg-bg-elev px-4 py-3">
+        <p className="text-sm font-semibold">What to say arrives with your Legend.</p>
+        <p className="mt-1 text-xs leading-relaxed text-muted">
+          Seven questions a stranger will ask you, answered in Portuguese out of language
+          you own. That is the whole of the way in.
+        </p>
+      </div>
+
+      <Link
+        href="/vibes"
+        className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+      >
+        {EXPLAINER_CTA}
+      </Link>
+    </div>
   )
 }
 
@@ -705,6 +858,50 @@ function Done({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
     >
       {done ? 'KEPT' : 'GOT IT'}
     </button>
+  )
+}
+
+/**
+ * The far side of an explainer: the proof, not more of the pitch.
+ *
+ * The front of the card makes one claim. This is where it is made good on — and for the
+ * demo that means a line you can actually hear, because "you already understand more than
+ * you can say" is an argument until you press play and it becomes a fact.
+ */
+function Explains({ card }: { card: Extract<FeedCard, { kind: 'explainer' }> }) {
+  const e = card.explainer
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-accent">{e.detail.heading.toUpperCase().slice(0, 14)}</p>
+        <h2 className="display text-balance text-2xl">{e.detail.heading}</h2>
+        <p className="text-sm leading-relaxed text-fg/85">{e.detail.body}</p>
+      </div>
+
+      {e.say ? (
+        <div className="border-t border-line pt-6">
+          <p className="text-sm text-muted">“{e.say.en}”</p>
+          <div className="mt-3 flex items-center gap-3">
+            <AudioButton slug={slugFor(e.say.pt)} text={e.say.pt} />
+            <span className="pt display min-w-0 text-2xl text-accent">{e.say.pt}</span>
+          </div>
+          <p className="mt-3 text-sm leading-relaxed text-muted">{e.say.note}</p>
+        </div>
+      ) : null}
+
+      {/*
+        The same call to action on all four.
+
+        Somebody sold by the Drop and somebody sold by the demo end up in the same place,
+        which is what makes this a funnel rather than a menu.
+      */}
+      <Link
+        href="/vibes"
+        className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+      >
+        {EXPLAINER_CTA}
+      </Link>
+    </div>
   )
 }
 

@@ -567,7 +567,7 @@ function TheWay() {
 // --------------------------------------------------------------- front door
 
 function Landing() {
-  const { next } = useJourney()
+  const router = useRouter()
   const access = useEntitlements()
   return (
     /*
@@ -639,10 +639,23 @@ function Landing() {
         <button
           type="button"
           data-testid="landing-cta"
+          /*
+            Straight into the Club, not into the corridor.
+
+            This used to advance through WELCOME, HOW_IN, the demo and THE_WAY — four
+            screens of argument delivered to somebody who had not yet seen the product and
+            could not skip any of them. Those four are cards in the Club's feed now, where
+            they can be swiped past by anybody who would rather just look.
+
+            What the corridor is still needed for is the two screens that were never pitch:
+            the deal and the language pair. Those are commitment, and they are reached from
+            the Club's own call to action, at the moment somebody has decided — which is a
+            far better place for them than in front of somebody who has not.
+          */
           onClick={() => {
             primeAudio()
             track('landing_cta_tap', {})
-            next()
+            router.push('/club')
           }}
           /*
             Azulejo blue, pinned rather than tokenised.

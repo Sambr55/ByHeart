@@ -18,7 +18,7 @@ import {
   type Rung,
 } from '@/content/roots'
 import { CLUB, MOVES } from '@/content/club'
-import { Feed } from '@/components/Feed'
+import { Feed, type ClubStage } from '@/components/Feed'
 import { cardDone, cardToGo, clubOpen, legendStatus } from '@/content/legend'
 import { DEFAULT_CHAPTER } from '@/content/chapters'
 import { isCurrent, situationsFor } from '@/content/situations'
@@ -157,6 +157,22 @@ export function Club() {
       welcomedAt: learner.club_welcomed_at,
     })
 
+  /*
+    Three Clubs, one screen. See docs/spec-club-first-run.md §03.
+
+    The door is gone. It was a wall shown to somebody who had never been told what was
+    behind it, which is the assumption this whole restructure exists to remove — and its
+    argument, the one about seven questions a stranger asks you, is now a card in the feed
+    where it can be read by somebody who has not committed to anything.
+
+    `mounted` still matters: the answer is unknowable before the browser has read
+    localStorage, and showing a stranger's Club to a member is worse than a moment of
+    nothing. Unknown resolves to member, because a member is who is most likely to be here.
+  */
+  const started =
+    (learner.sections_completed ?? []).length > 0 || (learner.roots_played ?? []).length > 0
+  const stage: ClubStage = !mounted || inside ? 'member' : started ? 'working' : 'showcase'
+
   if (welcome) return <Welcome onDone={finishWelcome} />
   /*
     Inside the Club is the feed.
@@ -166,7 +182,7 @@ export function Club() {
     tired of. The moves are still reachable from the feed's own cards; what changes is
     that the room comes first.
   */
-  if (!inside) return <Door answered={answeredIds} answers={learner.legend ?? []} sections={learner.sections_completed ?? []} />
+
   /*
     Inside the Club is the feed.
 
@@ -175,7 +191,7 @@ export function Club() {
     moves it offered are all reachable from the feed's own cards; what changes is that
     the room comes first and the menu does not come at all.
   */
-  return <Feed />
+  return <Feed stage={stage} />
 
   return (
     <main
@@ -571,137 +587,18 @@ function Moves({
 }
 
 
-/**
- * What somebody outside the Club sees.
- *
- * It has to say the same thing the deal screen says, because this is the goal the whole
- * product is pointed at: the way in is being able to introduce yourself in Portuguese.
- * Two different reasons for being outside, and they are not the same problem — the card
- * is not written yet, or it is written and has never been said cold.
- */
-function Door({
-  answered,
-  answers,
-  sections,
-}: {
-  answered: string[]
-  /* The values too, not just which ids are done: a card whose condition is unmet is not
-     outstanding, and the condition lives in another card's answer. */
-  answers: { frame_id: string; values: Record<string, string> }[]
-  sections: string[]
-}) {
-  const left = cardToGo(answered, answers)
-  const written = cardDone(answered, answers)
-  /*
-    ?preview=drops asked for the feed, and this is the door.
+/*
+  The door is gone, and its argument is not.
 
-    The preview fills the feed with a drop before its window opens; it does not open the
-    Club, and it should not — a URL that lets anybody past the gate the whole product is
-    built around is not a testing affordance, it is a hole. But arriving here with the
-    param and being shown the ordinary door is a silent dead end, so it says what to do.
-    Only ever seen by somebody who typed it.
-  */
-  const [previewing, setPreviewing] = useState(false)
-  useEffect(() => {
-    setPreviewing(new URLSearchParams(window.location.search).get('preview') === 'drops')
-  }, [])
-  /*
-    Where the way in actually leads.
+  It was a wall shown to somebody who had never been told what was behind it — "the way in
+  is your Legend Card: seven questions a stranger will ask you" — which is a good sentence
+  said at the worst possible moment. It is now the_legend explainer in content/explainers.ts,
+  where it is read by somebody who has committed to nothing and can swipe past it.
 
-    This said BUILD MY CARD and sent everybody to /legend — which is itself locked until
-    five vibes are done. So a learner three vibes short was told the way in was their
-    card, tapped the button, and landed on a screen saying the cards do not open yet.
-    A door into a wall.
+  What replaced the door is not a softer door. It is the room, with the price of admission
+  written on one of the cards in it.
+*/
 
-    It is the same fault as the session screen announcing cards the Legend had no concept
-    of, rebuilt one screen over, which is why it now asks the same single function rather
-    than assuming. A screen may not name an action its destination cannot honour.
-  */
-  const legend = legendStatus({ sectionsCompleted: sections })
-  /* Six is two rows of three — enough to read as a place, short of reading as a list. */
-  const peek = situationsFor(DEFAULT_CHAPTER).filter((s) => isCurrent(s)).slice(0, 6)
-  return (
-    <div
-      data-stage="REAL WORLD"
-      /* app-frame: one scrolling region, dock beneath it. See components/Dock.tsx. */
-      className="app-frame safe-top bg-bg text-fg"
-    >
-      <Framed className="mx-auto flex w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
-      <div className="flex items-center gap-3">
-        <Wordmark mark="club" className="h-8" />
-      </div>
-      <BottomNav />
-
-      {/*
-        The rooms, behind the door.
-
-        It described what was inside in a sentence while five photographs of it sat one
-        state away, which is a strange thing for a product that has spent a week learning
-        to show rather than tell. Nothing about the lock changes — these do not open —
-        but wanting in is the entire job of this screen, and a paragraph about people and
-        places cannot do what a picture of the pharmacy does.
-
-        Dimmed and not tappable, and the tiles carry no titles: this is a glimpse, not a
-        menu you can read your way around.
-      */}
-      <div aria-hidden className="-mx-5 grid grid-cols-3 gap-1 opacity-40">
-        {peek.map((s) =>
-          s.image ? (
-            <span key={s.id} className="relative block aspect-[3/4] overflow-hidden">
-              <Image src={s.image.src} alt="" fill sizes="33vw" className="object-cover" />
-            </span>
-          ) : null,
-        )}
-      </div>
-
-      {previewing ? (
-        <div className="rounded border border-line-strong bg-bg-elev px-4 py-3">
-          <p className="text-sm font-semibold">The preview fills the feed, not the door.</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted">
-            This device is not in the Club yet, so there is no feed to fill. Redeem a code
-            with a Club pass on it at{' '}
-            <Link href="/account" className="text-accent underline underline-offset-4">
-              your account
-            </Link>{' '}
-            and come back to this link.
-          </p>
-        </div>
-      ) : null}
-
-      <div className="flex flex-1 flex-col gap-3">
-        <p className="eyebrow text-muted">{CLUB.door.eyebrow}</p>
-        <h1 className="display text-balance text-3xl">{CLUB.door.headline}</h1>
-        <p className="text-sm leading-relaxed text-muted">{CLUB.door.body}</p>
-
-        {/* Where they actually are, said as a distance rather than a failure. */}
-        <p className="mt-3 text-sm font-semibold">
-          {!legend.open
-            ? legend.toGo === 1
-              ? 'Your card opens after one more vibe.'
-              : 'Your card opens after ' + legend.toGo + ' more vibes.'
-            : written
-              ? CLUB.door.speak
-              : left === 1
-                ? 'One question left on your card.'
-                : left + ' questions left on your card.'}
-        </p>
-
-        <p className="mt-6 text-xs leading-relaxed text-muted">{CLUB.door.inside}</p>
-      </div>
-
-      {/* The button goes where the work actually is, in the place every button is. */}
-      <Dock>
-        <Link
-          href={legend.open ? '/legend' : '/vibes'}
-          className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-        >
-          {legend.open ? CLUB.door.cta : CLUB.door.cta_vibes}
-        </Link>
-      </Dock>
-      </Framed>
-    </div>
-  )
-}
 
 
 /** What is worth doing in the city, as opposed to what is worth doing in the language. */

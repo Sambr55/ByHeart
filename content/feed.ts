@@ -2,6 +2,7 @@ import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
 import { DROP_WINDOW_DAYS } from '@/content/roots'
 import { SITUATIONS, isCurrent, type Purpose, type Situation } from '@/content/situations'
 import { DROPS, type Drop } from '@/content/drops'
+import { explainersFor, type Explainer } from '@/content/explainers'
 import { PIECES, displayForm, type Piece } from '@/content/roots'
 import type { DerivedCard } from '@/engine/derive'
 
@@ -62,6 +63,14 @@ export type FeedCard =
       ask: { pt: string; en: string; note: string; at: string }
       image: { src: string; alt: string }
     }
+  /*
+    A card that explains the product, sitting among the ones that are the product.
+
+    The four of them replace the linear intro. Kept as a feed card rather than a screen
+    because that is the entire point: somebody arriving should be able to swipe past an
+    explanation they do not want, which a corridor never let them do.
+  */
+  | { kind: 'explainer'; id: string; explainer: Explainer; image: { src: string; alt: string } }
 
 /**
  * A vocab card is not a flashcard.
@@ -292,6 +301,26 @@ export function askedCards(
     .slice(0, DERIVED_PER_SESSION)
 }
 
+/**
+ * The explainers this learner still has a reason to see, as cards.
+ *
+ * Interleaved rather than stacked — see the caller. Four explanations in a row is a
+ * corridor with swipes instead of taps, which is the thing this replaces.
+ */
+export function explainerCards(state: {
+  playedAVibe: boolean
+  legendWritten: boolean
+  isMember: boolean
+  usedTranslator: boolean
+}): FeedCard[] {
+  return explainersFor(state).map((e) => ({
+    kind: 'explainer' as const,
+    id: 'explainer_' + e.id,
+    explainer: e,
+    image: e.image,
+  }))
+}
+
 /** The words, for the profile. Same card shape, different place to meet it. */
 export function wordCards(): FeedCard[] {
   return VOCAB.flatMap((v): FeedCard[] => {
@@ -382,6 +411,14 @@ export function cardFace(card: FeedCard): {
       eyebrow: card.card.kind === 'collision' ? 'YOU CAN SAY' : 'YOU LEARNED',
       title: card.card.target,
       blurb: card.card.note,
+      image: card.image,
+    }
+  }
+  if (card.kind === 'explainer') {
+    return {
+      eyebrow: card.explainer.eyebrow,
+      title: card.explainer.title,
+      blurb: card.explainer.blurb,
       image: card.image,
     }
   }

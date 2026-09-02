@@ -155,6 +155,8 @@ export type EventName =
     purposes, and the split between them is the answer to "which block of ten do we write".
   */
   | 'purpose_chosen'
+  /* The one Club room given away before anything was earned, and which one it was. */
+  | 'room_tasted'
 
 export interface AnalyticsEvent {
   seq: number

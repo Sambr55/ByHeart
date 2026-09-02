@@ -321,6 +321,17 @@ export interface LearnerState {
    */
   purpose: 'visiting' | 'staying' | 'moving' | null
   /**
+   * The one Club room handed over before anything was earned, or null.
+   *
+   * A showcase that only describes itself is a brochure. So the first room somebody opens
+   * is given to them outright — the whole thing, the Portuguese, the audio — and after that
+   * the rest are teased until the Legend is written.
+   *
+   * One, ever, and the id is stored rather than a counter so it cannot be re-spent by
+   * clearing something else, and so the room they were given stays open to them.
+   */
+  tasted: string | null
+  /**
    * When the deal was accepted, or null. Kept per pair rather than globally, because
    * the deal screen speaks about the language being learned — "your Portuguese" — and
    * somebody arriving at a second pair has not been told that deal.
@@ -370,6 +381,7 @@ export function emptyLearner(): LearnerState {
     finished_cards: [],
     asked: [],
     purpose: null,
+    tasted: null,
     deal_accepted_at: null,
     evidence: [],
     affinity: {
@@ -476,6 +488,7 @@ export function loadLearner(): LearnerState {
           finished_cards: arr(parsed.finished_cards, []),
           asked: arr(parsed.asked, []),
           purpose: parsed.purpose ?? null,
+          tasted: parsed.tasted ?? null,
           deal_accepted_at: parsed.deal_accepted_at ?? null,
           collisions_played: arr(parsed.collisions_played, []),
           evidence: arr(parsed.evidence, []),
@@ -1170,6 +1183,19 @@ export function rememberFinishedCard(id: string) {
 export function setPurpose(purpose: 'visiting' | 'staying' | 'moving') {
   update((s) => {
     s.purpose = purpose
+  })
+}
+
+/**
+ * Hand over the one free room, if it has not been handed over already.
+ *
+ * Deliberately first-wins: whichever room somebody opened first is the one they keep. A
+ * later call cannot move it, so browsing on cannot quietly take back the thing they were
+ * given.
+ */
+export function tasteRoom(id: string) {
+  update((s) => {
+    if (!s.tasted) s.tasted = id
   })
 }
 

@@ -309,6 +309,14 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
       their hand has not lost anything by having it respected.
     */
     purpose: r.purpose ?? l.purpose ?? null,
+    /*
+      First wins, unlike purpose.
+
+      Purpose is a statement about the present so the later answer is the true one. This is
+      a thing that was GIVEN, once, and a merge that moved it would either take back a room
+      somebody has been reading or hand out a second one.
+    */
+    tasted: l.tasted ?? r.tasted ?? null,
     asked: [
       ...new Map(
         [...(r.asked ?? []), ...(l.asked ?? [])]
