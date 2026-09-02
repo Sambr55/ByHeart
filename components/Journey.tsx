@@ -37,7 +37,6 @@ import {
   GATEWAY,
   LANDING,
   NO_CUE_PROMPTS,
-  PAIR_STEP,
   PICKER,
 } from '@/content/front-door'
 import { BottomNav } from '@/components/BottomNav'
@@ -52,12 +51,11 @@ import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
 import { LEGEND_COPY, LEGEND_FRAMES, legendStatus } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
-import { PAIRS, SOURCE_CULTURES } from '@/content/pairs'
-import { setPair } from '@/engine/pair'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
 import { Tick } from '@/components/Tick'
 import { useScreenIn } from '@/components/Native'
+import { SetUp } from '@/components/SetUp'
 import { Wordmark } from '@/components/Wordmark'
 import { useNowAfterMount } from '@/engine/useNow'
 import { track } from '@/engine/analytics'
@@ -287,6 +285,22 @@ function Piece({ pt, gloss }: { pt: string; gloss: string }) {
   )
 }
 
+/**
+ * Set-up, when the journey is what needed it rather than the Club.
+ *
+ * The same component the Club shows on card seven. It is reached by tapping a call to
+ * action without having answered where, why and who — so it is the answer to "you cannot
+ * start a vibe sideways", shown in place rather than by sending somebody back to the feed.
+ */
+function SetUpStep() {
+  const { next } = useJourney()
+  return (
+    <Shell stage="CHOICE">
+      <SetUp onDone={next} />
+    </Shell>
+  )
+}
+
 export function Journey() {
   const { step } = useJourney()
   if (!step) return null
@@ -299,8 +313,8 @@ export function Journey() {
       return <HowIn />
     case 'demo':
       return <Demo i={step.i} />
-    case 'pair':
-      return <PairStep />
+    case 'setup':
+      return <SetUpStep />
     case 'theway':
       return <TheWay />
     case 'picker':
@@ -341,122 +355,6 @@ export function Journey() {
  * block is the one that matters: saying plainly what DUB has refused to build stops
  * people measuring it against the thing everyone else built.
  */
-/**
- * Choosing the language.
- *
- * Everything unavailable is shown rather than hidden, and stays inert — a disabled row
- * must never become an email capture. The deal screen two beats later promises DUB does
- * not do that kind of thing, and the only honest moment to ask for an email is at the
- * end, when there is something worth keeping.
- */
-function PairStep() {
-  const { next } = useJourney()
-  const [showSources, setShowSources] = useState(false)
-  const [picked, setPicked] = useState<string | null>(null)
-  const source = SOURCE_CULTURES.find((c) => c.available)!
-
-  return (
-    <Shell stage="CHOICE">
-      {/* Rhythm on the parent. The children carry no vertical margin at all, so
-          nothing can collapse, nothing can double, and the whole screen's spacing is
-          readable in one line rather than scattered through forty. */}
-      <div className="flex flex-col gap-3">
-        <p className="eyebrow text-muted">{PAIR_STEP.eyebrow}</p>
-        <h1 className="display text-balance text-2xl">{PAIR_STEP.headline}</h1>
-        <p className="text-sm leading-relaxed text-muted">{PAIR_STEP.sub}</p>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        {PAIRS.map((p) => (
-          <button
-            key={p.target_locale}
-            type="button"
-            data-testid={'pair-' + p.target_locale}
-            aria-pressed={picked === p.target_locale}
-            disabled={!p.available}
-            onClick={() => setPicked(p.target_locale)}
-            className={
-              'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-3 text-left transition ' +
-              (!p.available
-                ? 'border-line/40 bg-surface/30 opacity-40'
-                : picked === p.target_locale
-                  ? 'border-accent bg-accent/10'
-                  : 'border-line bg-bg-elev hover:border-accent/50')
-            }
-          >
-            <span className="min-w-0">
-              <span className="display block text-base">
-                {p.native} {p.flag}
-              </span>
-              <span className="mt-1 block text-xs text-muted">{p.label}</span>
-            </span>
-            {!p.available ? (
-              <span className="shrink-0 rounded-full border border-line px-2 py-1 text-[0.55rem] uppercase tracking-wider text-muted">
-                {PAIR_STEP.soon}
-              </span>
-            ) : null}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-6 flex flex-wrap items-baseline gap-x-3 text-xs text-muted">
-        <span>
-          {PAIR_STEP.source_label}: {source.label} {source.flag}
-        </span>
-        <button
-          type="button"
-          data-testid="pair-source"
-          onClick={() => setShowSources((v) => !v)}
-          className="tap-target underline underline-offset-4 transition hover:text-fg"
-        >
-          {PAIR_STEP.source_change}
-        </button>
-      </div>
-
-      {showSources ? (
-        <div className="mt-3 rounded border border-line bg-bg-elev px-4 py-3">
-          <p className="text-xs leading-relaxed text-muted">{PAIR_STEP.source_note}</p>
-          <ul className="mt-3 flex flex-wrap gap-3">
-            {SOURCE_CULTURES.map((c) => (
-              <li
-                key={c.id}
-                className={
-                  'rounded-full border px-2.5 py-1 text-xs ' +
-                  (c.available
-                    ? 'border-accent/50 text-accent'
-                    : 'border-line text-muted')
-                }
-              >
-                {c.label} {c.flag}
-                {c.available ? '' : ' · soon'}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      <Cta
-        label={PAIR_STEP.cta}
-        disabled={!picked}
-        onClick={() => {
-          const chosen = PAIRS.find((p) => p.target_locale === picked)
-          if (!chosen) return
-          setPair({
-            source_culture: chosen.source_culture,
-            target_language: chosen.target_language,
-            target_locale: chosen.target_locale,
-            day_zone: chosen.day_zone,
-          })
-          // The record to read has just changed. Drop the cached one so the next read
-          // loads this pair's, rather than whatever was in memory from the default.
-          resetLearnerCache()
-          track('pair_chosen', { pair: chosen.source_culture + ':' + chosen.target_locale })
-          next()
-        }}
-      />
-    </Shell>
-  )
-}
 
 /**
  * Welcome — what the room is, before anything about how to reach it.

@@ -45,7 +45,7 @@ import { DEFAULT_PAIR } from '@/content/pairs'
  */
 type Step = 'where' | 'why' | 'who'
 
-export function SetUp() {
+export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   const [step, setStep] = useState<Step>('where')
   const [name, setName] = useState('')
   const [done, setDone] = useState(false)
@@ -90,6 +90,23 @@ export function SetUp() {
             Three vibes are waiting. Nothing else to decide.
           </p>
         </div>
+        {/*
+          Continue in place when the journey is asking, navigate when the Club is.
+
+          The same card serves both, because the alternative was two components asking one
+          question and that is the thing this whole change removed. Inside /vibes there is
+          nowhere to go — they are already where the link points.
+        */}
+        {onDone ? (
+          <button
+            type="button"
+            data-testid="setup-go"
+            onClick={onDone}
+            className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            {EXPLAINER_CTA}
+          </button>
+        ) : (
         <Link
           href="/vibes"
           data-testid="setup-go"
@@ -105,6 +122,7 @@ export function SetUp() {
           */}
           {EXPLAINER_CTA}
         </Link>
+        )}
       </div>
     )
   }
@@ -222,7 +240,10 @@ export function SetUp() {
           <button
             type="button"
             data-testid="setup-commit"
-            onClick={finish}
+            onClick={() => {
+              finish()
+              onDone?.()
+            }}
             className="tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
             THAT IS ME

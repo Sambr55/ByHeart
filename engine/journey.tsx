@@ -56,8 +56,8 @@ export type Step =
   /** How you get in — sets the demo up, so the Goose line arrives as an example. */
   | { kind: 'howin' }
   | { kind: 'demo'; i: number }
-  | { kind: 'pair' }
   /** Where it goes, and where the deal is accepted. Named for what it says. */
+  | { kind: 'setup' }
   | { kind: 'theway' }
   | { kind: 'picker' }
   | { kind: 'root'; rootId: string; beat: RootBeat; pieceIndex?: number }
@@ -254,7 +254,19 @@ const initial: JourneyState = {
       setup admin in the intro comes after the story rather than interrupting it.
     */
     { kind: 'theway' },
-    { kind: 'pair' },
+    /*
+      Set-up stands where the pair step used to, and asks three things instead of one.
+
+      The pair step asked for a language on its own screen, and every chapter in CHAPTERS
+      carries the same pair — so choosing Lisbon already chooses pt-PT. Two screens asking
+      for one answer is a form, and it was the second of them a person actually hit.
+
+      IT MUST BE IN THIS ARRAY, not only in the switch. A jump looks the kind up in steps
+      and returns the state unchanged when it is missing, so dispatching to a step that
+      exists only as a case is a silent no-op — the gate would let somebody through rather
+      than stop them, which is the worst way for a gate to fail.
+    */
+    { kind: 'setup' },
     { kind: 'picker' },
   ],
   index: 0,
@@ -617,10 +629,25 @@ export function JourneyProvider({
     // from one that has never accepted — so deciding off the snapshot sent everybody who
     // HAD accepted back to the deal. Doing it here also makes the order the spec
     // requires literal: pair, then that pair's record, then the step.
-    // No pair chosen is a front-door problem, not a picker one, and it is checked
-    // first: the pair decides which learner record even gets read.
+    /*
+      No pair chosen SHOWS set-up, rather than a screen that asks something else.
+
+      THIS WAS THE LEAK. Set-up moved into the Club as a card carrying where, why and who,
+      and its whole promise is that you may swipe past it forever because every call to
+      action that needs an answer brings the question back. This line did not: somebody who
+      swiped past set-up and then tapped TRY YOUR FIRST THREE VIBES on any explainer landed
+      on the old full-screen language list — the exact question set-up had stopped asking,
+      in the exact place the restructure existed to remove.
+
+      The first fix redirected to /club?setup=1, and bouncing somebody back to the feed one
+      tap after they asked to start reads as a rejection. It also raced every check that
+      seeds a device on /vibes: a hard navigation mid-evaluate destroys the execution
+      context, which is how shelf-check found it.
+
+      So the same component renders here instead. One question, one component, two places.
+    */
     if (!chosenPair()) {
-      dispatch({ type: 'jump', kind: 'pair' })
+      dispatch({ type: 'jump', kind: 'setup' })
       return
     }
     loadLearner()

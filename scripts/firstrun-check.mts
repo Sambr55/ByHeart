@@ -418,6 +418,49 @@ console.log('\nset-up asks who, where and why — and the feed changes because o
   }
 }
 
+console.log('\nthe call to action cannot land on a question set-up already asks\n')
+/*
+  The leak that shipped, and the reason it shipped.
+
+  Set-up can be swiped past forever, and the promise attached to that is that every call to
+  action needing an answer routes BACK to the card. /vibes did not: it checked for a chosen
+  pair and, finding none, jumped to a full-screen language list — the exact question set-up
+  had stopped asking, in the exact place the restructure existed to remove. So anybody who
+  swiped past set-up and tapped TRY YOUR FIRST THREE VIBES on any explainer got the old
+  form. Reported from a phone, not by any check here, which is why this one exists.
+*/
+{
+  const fresh = await browser.newContext()
+  const p2 = await fresh.newPage()
+  await p2.goto(BASE + '/vibes')
+  await p2.waitForTimeout(3000)
+
+  const text = ((await p2.textContent('body')) ?? '').replace(/\s+/g, ' ')
+  ok(
+    'no language list stands between them and a vibe',
+    !/Portuguese \(European\)|English \(British\)/i.test(text),
+    'the question set-up already asks',
+  )
+  /*
+    It shows set-up in place, rather than bouncing them back to the feed.
+
+    Sending somebody to the Club one tap after they asked to start reads as a rejection —
+    and a hard navigation here destroyed the execution context of every check that seeds a
+    device on /vibes. The same component the Club shows on card seven renders here.
+  */
+  ok(
+    'set-up is what they get instead',
+    Boolean(await p2.$('[data-testid="setup-where-lisbon"]')),
+    'one question, one component, two places',
+  )
+  ok(
+    'and they are still where they asked to be',
+    p2.url().includes('/vibes'),
+    p2.url().replace(BASE, '') || '/',
+  )
+  await fresh.close()
+}
+
 await browser.close()
 
 if (problems.length) {
