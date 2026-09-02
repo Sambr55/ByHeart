@@ -66,6 +66,31 @@ await page.waitForTimeout(2500)
 
 const cards = await rail(page)
 ok('there is a feed', cards.length > 6, cards.length + ' cards')
+
+/*
+  The opening pair, in order, with nothing between them.
+
+  A feed decides what it is in two cards, and left to the ordinary rung ordering these two
+  were "Getting a place at school" — correct, and an absurd opening line for somebody who
+  has not said they are moving anywhere.
+
+  One obviously useful and one obviously fun, because either alone argues for a different
+  product: a feed of Lisbon rooms is a phrasebook with photographs, and a feed of film
+  quotes is a party trick. Index 0 is the loop's clone of the last card, so the real first
+  is 1.
+*/
+const titles = (await page.evaluate(
+  `Array.from(document.querySelectorAll('.snap-y > section')).map(s => {
+    const t = (s.innerText || '').split('\\n').filter(Boolean)
+    return (t[0] || '') + ' — ' + (t[1] || '')
+  })`,
+)) as string[]
+ok('it opens on something obviously useful', /The pharmacy/.test(titles[1] ?? ''), titles[1] ?? '')
+ok(
+  'and then on a vibe, with nothing between them',
+  /A VIBE/.test(titles[2] ?? ''),
+  titles[2] ?? '',
+)
 ok(
   'nothing is asked before anything is shown',
   !/purpose-|deal|accept/i.test((await page.textContent('main')) ?? ''),

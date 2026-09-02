@@ -3,7 +3,16 @@ import { DROP_WINDOW_DAYS } from '@/content/roots'
 import { SITUATIONS, isCurrent, type Purpose, type Situation } from '@/content/situations'
 import { DROPS, type Drop } from '@/content/drops'
 import { explainersFor, type Explainer } from '@/content/explainers'
-import { PIECES, displayForm, type Piece } from '@/content/roots'
+import { VIBE_IMAGES } from '@/content/vibe-images'
+import {
+  CRATES,
+  PIECES,
+  ROOTS_BY_FAMILY,
+  displayForm,
+  type Crate,
+  type CultureFamily,
+  type Piece,
+} from '@/content/roots'
 import type { DerivedCard } from '@/engine/derive'
 
 /**
@@ -71,6 +80,23 @@ export type FeedCard =
     explanation they do not want, which a corridor never let them do.
   */
   | { kind: 'explainer'; id: string; explainer: Explainer; image: { src: string; alt: string } }
+  /*
+    A taste of a vibe, for the showcase.
+
+    The Club is half the product and the other half is the vibes — language arriving out of
+    something you already love rather than out of a syllabus. A feed of Lisbon rooms alone
+    argues for a phrasebook with photographs, so the shop window has to carry one of each:
+    something obviously useful, and something that is obviously fun and turns out to be
+    useful. See feedFor's pinned opening.
+  */
+  | {
+      kind: 'vibe'
+      id: string
+      crate: Crate
+      /** One real line out of it, which is the whole argument in four words. */
+      taste: { pt: string; en: string; why: string }
+      image: { src: string; alt: string }
+    }
 
 /**
  * A vocab card is not a flashcard.
@@ -302,6 +328,32 @@ export function askedCards(
 }
 
 /**
+ * One vibe, as a card, with a real line out of it.
+ *
+ * Not a promotion for the vibes tab — the line on the back is a genuine root from the crate
+ * and it is the argument in four words: you knew this already, and here is the Portuguese
+ * you just got for free.
+ */
+export function vibeCard(family: CultureFamily): FeedCard | null {
+  const crate = CRATES.find((c) => c.id === family)
+  const image = VIBE_IMAGES[family]
+  const root = (ROOTS_BY_FAMILY[family] ?? []).find((r) => r.extracts.length > 0)
+  if (!crate || !image || !root) return null
+  const piece = root.extracts[0]
+  return {
+    kind: 'vibe',
+    id: 'vibe_' + family,
+    crate,
+    taste: {
+      pt: root.target,
+      en: root.root_display,
+      why: piece.target.replace('…', '').trim() + ' — ' + piece.gloss,
+    },
+    image: { src: image.src, alt: image.alt },
+  }
+}
+
+/**
  * The explainers this learner still has a reason to see, as cards.
  *
  * Interleaved rather than stacked — see the caller. Four explanations in a row is a
@@ -411,6 +463,14 @@ export function cardFace(card: FeedCard): {
       eyebrow: card.card.kind === 'collision' ? 'YOU CAN SAY' : 'YOU LEARNED',
       title: card.card.target,
       blurb: card.card.note,
+      image: card.image,
+    }
+  }
+  if (card.kind === 'vibe') {
+    return {
+      eyebrow: 'A VIBE',
+      title: card.crate.title,
+      blurb: card.crate.blurb,
       image: card.image,
     }
   }

@@ -15,6 +15,7 @@ import {
   askedCards,
   derivedCards,
   explainerCards,
+  vibeCard,
   feedFor,
   vocabWord,
   type FeedCard,
@@ -93,7 +94,32 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       the profile, and comes back through the Line rather than round the loop.
     */
     const done = new Set(learner.finished_cards ?? [])
-    const open = rooms.filter((c) => !done.has(c.id))
+    let open = rooms.filter((c) => !done.has(c.id))
+
+    /*
+      The shop window opens on two deliberate cards, and only for a stranger.
+
+      Left to the ordinary ordering the first thing a stranger saw was "Getting a place at
+      school" — rung-sorted, perfectly correct, and an absurd opening line for somebody who
+      has not said they are moving anywhere. A feed decides what it is in two cards and
+      those two were deciding it wrongly.
+
+      One obviously useful, one obviously fun. The pharmacy is the case for DUB at its most
+      practical — you feel rough, you would rather not do it in English — and Bridget Jones
+      is the other half of the product entirely: language arriving out of something you
+      already love. Either alone argues for a different product. A feed of Lisbon rooms is a
+      phrasebook with photographs; a feed of film quotes is a party trick.
+    */
+    if (stage === 'showcase') {
+      const first = open.find((c) => c.id === 'lisbon_farmacia')
+      const vibe = vibeCard('bridget_jones')
+      const rest = open.filter((c) => c.id !== 'lisbon_farmacia')
+      open = [
+        ...(first ? [first] : []),
+        ...(vibe ? [vibe] : []),
+        ...rest,
+      ]
+    }
     /*
       What they asked for comes first among the assembled cards.
 
@@ -139,18 +165,28 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       legendWritten: cardDone(
         (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0).map((a) => a.frame_id),
         learner.legend ?? [],
+        learner.purpose ?? null,
       ),
       isMember: stage === 'member',
       usedTranslator: (learner.asked ?? []).length > 0,
     })
 
+    /*
+      The showcase's opening pair stays a pair.
+
+      The interleave used to drop an explainer after the very first card, which put SIXTY
+      SECONDS between the pharmacy and Bridget Jones — the two cards that exist to be read
+      one after the other, because either alone argues for a different product. So nothing
+      is inserted until the deliberate opening has been made.
+    */
+    const opening = stage === 'showcase' ? 2 : 1
     const withExplainers: FeedCard[] = []
     const rest = [...open.slice(0, AFTER), ...mine, ...open.slice(AFTER)]
     let e = 0
     rest.forEach((card, i) => {
       withExplainers.push(card)
-      // After the first, then every other one, until they run out.
-      if (e < explainers.length && (i === 0 || i % 2 === 0)) withExplainers.push(explainers[e++])
+      const past = i - (opening - 1)
+      if (e < explainers.length && past >= 0 && past % 2 === 0) withExplainers.push(explainers[e++])
     })
     // Anything left over goes on the end rather than being dropped silently.
     return [...withExplainers, ...explainers.slice(e)]
@@ -662,6 +698,8 @@ export function Card({
               <Asked card={card} />
             ) : card.kind === 'explainer' ? (
               <Explains card={card} />
+            ) : card.kind === 'vibe' ? (
+              <Taste card={card} />
             ) : (
               <Word card={card} />
             )}
@@ -858,6 +896,39 @@ function Done({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
     >
       {done ? 'KEPT' : 'GOT IT'}
     </button>
+  )
+}
+
+/**
+ * A vibe, tasted: one real line, and the word it hands you.
+ *
+ * The whole argument in four words. Not "learn Portuguese through culture" — the actual
+ * line, the Portuguese it becomes, and the piece that is now yours. Somebody who reads this
+ * card has had the experience the product is selling rather than a description of it.
+ */
+function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-accent">YOU KNOW THIS</p>
+        <p className="display text-balance text-2xl">{card.taste.en}</p>
+      </div>
+
+      <div className="border-t border-line pt-6">
+        <div className="flex items-center gap-3">
+          <AudioButton slug={slugFor(card.taste.pt)} text={card.taste.pt} />
+          <span className="pt display min-w-0 text-2xl text-accent">{card.taste.pt}</span>
+        </div>
+        <p className="mt-6 text-sm leading-relaxed text-fg/85">{card.taste.why}</p>
+      </div>
+
+      <Link
+        href="/vibes"
+        className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+      >
+        {EXPLAINER_CTA}
+      </Link>
+    </div>
   )
 }
 

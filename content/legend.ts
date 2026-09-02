@@ -1,5 +1,6 @@
 import { say } from './numbers'
 import { PIECES, type Rung } from './roots'
+import type { Purpose } from './situations'
 
 /**
  * Your Legend — the minute about yourself you can deliver without thinking.
@@ -49,6 +50,20 @@ export interface LegendSlot {
 
 export interface LegendFrame {
   id: string
+  /**
+   * Who is asked this, or everybody when absent.
+   *
+   * What a stranger asks you genuinely differs by why you are here. "Onde moras?" is the
+   * second thing anybody says to somebody who has moved and is meaningless to a person on
+   * a four-day holiday; "Quanto tempo ficas?" is the reverse. A single set of seven has to
+   * be the intersection of three lives, and the intersection of three lives is small talk.
+   *
+   * THE HARD CONSTRAINT: every purpose's card is exactly CARD_SIZE. Seven is promised on
+   * the front door, in the explainer and on the deck, and a card that is six for a visitor
+   * and eight for a mover breaks the only promise this product makes about how long the
+   * work takes. scripts/purpose-check.mts fails if any set is not seven.
+   */
+  purposes?: Purpose[]
   /** The question this answers. Cards are ordered by the order you get asked. */
   card: number
   /** The Portuguese question you will actually hear. */
@@ -158,6 +173,15 @@ export const LEGEND_FRAMES: LegendFrame[] = [
   },
   {
     id: 'age',
+    /*
+     Off the card, and still answerable.
+
+     Seven is the promise, and two of the seven now depend on why somebody is here — so two
+     universal frames had to give up their place. Age went first: it is asked, but nobody
+     has ever failed a conversation in a bar for not knowing how to say how old they are,
+     and it is the one question on the list a person might actively prefer not to answer.
+    */
+    purposes: [],
     card: 3,
     ask: 'Que idade tens?',
     ask_en: 'How old are you?',
@@ -317,6 +341,103 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       'Porque without an accent starts an answer; porquê with one asks the question. Two spellings, one sound, and getting it right is the small thing that makes writing look native.'
   },
   {
+    /*
+      NOT REVIEWED — mine, unseen by a native speaker.
+
+      And rebuilt once already, by the lint. The first version was "Fico cá uma semana",
+      which needs `fico` and `cá`, and neither is a piece a learner owns at this rung: the
+      frame would have sat on the card asking for language nobody had. That is exactly what
+      built_from is for, and it is a better constraint than it looks — the natural answer to
+      "quanto tempo ficas?" is not a sentence anyway. It is "uma semana."
+
+      A fourth frame, `lives` — Moro em {area} — was written and then dropped for the same
+      reason. There is no `moro` and no `em` in the inventory, and inventing a piece to prop
+      up a frame would put the tail before the dog. It wants a root that hands over "moro",
+      and that is a content job with the reviewer, not a tagging job here.
+    */
+    id: 'staying_for',
+    /* The single most asked question of somebody who has just arrived. */
+    purposes: ['visiting'],
+    card: 11,
+    ask: 'Quanto tempo ficas?',
+    ask_en: 'How long are you staying?',
+    frame: '{how_long}.',
+    en: '{how_long}.',
+    slots: [
+      {
+        key: 'how_long',
+        kind: 'pick',
+        hint: 'how long',
+        options: [
+          { value: 'Uns dias', en: 'A few days' },
+          { value: 'Uma semana', en: 'A week' },
+          { value: 'Duas semanas', en: 'Two weeks' },
+          { value: 'Um mês', en: 'A month' },
+        ],
+      },
+    ],
+    built_from: ['um', 'semana'],
+    rung: 2,
+    helpers: { uma: 'a', semana: 'week' },
+    teaches:
+      'Nobody answers this with a sentence. "Uma semana" on its own is the whole reply, and trying to build a full one is the tell that you are translating in your head.',
+  },
+  {
+    id: 'first_time',
+    /* Asked of anybody who is plainly not from here, and never of a resident. */
+    purposes: ['staying'],
+    card: 12,
+    ask: 'É a primeira vez?',
+    ask_en: 'Is this your first time?',
+    frame: '{answer}.',
+    en: '{answer}.',
+    slots: [
+      {
+        key: 'answer',
+        kind: 'pick',
+        hint: 'first time?',
+        options: [
+          { value: 'Sim, a primeira vez', en: 'Yes, my first time' },
+          { value: 'Não, já cá estive', en: 'No, I have been here before' },
+          { value: 'Não, venho todos os anos', en: 'No, I come every year' },
+        ],
+      },
+    ],
+    built_from: ['sim', 'nao'],
+    rung: 2,
+    helpers: { já: 'already', 'todos os anos': 'every year' },
+    teaches:
+      'Sim and não are the two words you already own, and this is the first question where the interesting answer is the long one — "não, já cá estive" is what turns a transaction into a conversation.',
+  },
+  {
+    id: 'moved_when',
+    /* Only somebody who has moved has an answer to this that is not a holiday. */
+    purposes: ['moving'],
+    card: 13,
+    ask: 'Há quanto tempo estás cá?',
+    ask_en: 'How long have you been here?',
+    frame: 'Há {how_long}.',
+    en: '{how_long} ago.',
+    slots: [
+      {
+        key: 'how_long',
+        kind: 'pick',
+        hint: 'how long',
+        options: [
+          { value: 'uns meses', en: 'A few months' },
+          { value: 'um ano', en: 'A year' },
+          { value: 'dois anos', en: 'Two years' },
+          { value: 'muitos anos', en: 'Many years' },
+        ],
+      },
+    ],
+    built_from: ['dois', 'anos'],
+    rung: 2,
+    helpers: { Há: 'for / ago', anos: 'years' },
+    teaches:
+      'Há is what Portuguese uses for elapsed time, and it is the answer on its own: "há dois anos" is both "two years ago" and "for two years". The language treats time gone by as something the world is holding.',
+  },
+  {
     id: 'portuguese',
     card: 10,
     ask: 'Falas português?',
@@ -426,7 +547,35 @@ export const REPAIR_KIT: { pt: string; en: string; why: string; built_from: stri
  * are inside.
  */
 export const CARD_RUNG = 2
-export const LEGEND_CARD = LEGEND_FRAMES.filter((f) => f.rung <= CARD_RUNG)
+
+/** Seven, everywhere, for everybody. See LegendFrame.purposes. */
+export const CARD_SIZE = 7
+
+/** Applies to this learner: untagged frames are for everybody, as most of them are. */
+export function frameForPurpose(f: LegendFrame, purpose: Purpose | null): boolean {
+  return !f.purposes || !purpose || f.purposes.includes(purpose)
+}
+
+/**
+ * The seven questions on this learner's card.
+ *
+ * Was `rung <= CARD_RUNG`, which was fine while every frame applied to everybody. Now that
+ * two of the seven depend on why somebody is here, the card is the reachable frames that
+ * apply to them — and it is asserted to be seven rather than assumed to be, because the
+ * moment it silently becomes six the deck starts promising a finish line it will reach
+ * early.
+ *
+ * A learner who has not answered the purpose question yet gets the visiting set. It is the
+ * most universally true of the three — everybody is, at first, somebody who has recently
+ * arrived — and it is replaced the moment they say otherwise.
+ */
+export function cardFor(purpose: Purpose | null): LegendFrame[] {
+  const use = purpose ?? 'visiting'
+  return LEGEND_FRAMES.filter((f) => f.rung <= CARD_RUNG && frameForPurpose(f, use))
+}
+
+/** The universal seven, for the places that ask before a purpose exists. */
+export const LEGEND_CARD = cardFor(null)
 
 /**
  * Is the card finished?
@@ -452,16 +601,26 @@ export const LEGEND_CARD = LEGEND_FRAMES.filter((f) => f.rung <= CARD_RUNG)
 export function cardDone(
   answeredFrameIds: string[],
   answers: { frame_id: string; values: Record<string, string> }[] = [],
+  purpose: Purpose | null = null,
 ): boolean {
-  return cardToGo(answeredFrameIds, answers) === 0
+  return cardToGo(answeredFrameIds, answers, purpose) === 0
 }
 
+/**
+ * How many of this learner's seven are still outstanding.
+ *
+ * Takes the purpose because the seven are not the same seven for everybody — see cardFor.
+ * Defaulting to null keeps every existing caller correct rather than silently measuring a
+ * mover against a visitor's card: null yields the universal set, which is what those
+ * callers were asking for before there was a choice.
+ */
 export function cardToGo(
   answeredFrameIds: string[],
   answers: { frame_id: string; values: Record<string, string> }[] = [],
+  purpose: Purpose | null = null,
 ): number {
   const done = new Set(answeredFrameIds)
-  return LEGEND_CARD.filter((f) => frameApplies(f, answers) && !done.has(f.id)).length
+  return cardFor(purpose).filter((f) => frameApplies(f, answers) && !done.has(f.id)).length
 }
 
 /**
@@ -474,13 +633,25 @@ export function cardToGo(
  */
 export function clubOpen(opts: {
   answeredFrameIds: string[]
+  /**
+   * Which seven this learner's card is.
+   *
+   * Absent means the universal set, which is right for every caller that asks the question
+   * before a purpose exists — and wrong to leave absent in the Club and the Legend, where
+   * the learner has one and being measured against somebody else's card would either open
+   * the door early or refuse to open it at all.
+   */
+  purpose?: Purpose | null
   /** The answers themselves, because a card can be conditional on another card's. */
   answers?: { frame_id: string; values: Record<string, string> }[]
   rung: number
   welcomedAt?: string | null
 }): boolean {
   if (opts.welcomedAt) return true
-  return cardDone(opts.answeredFrameIds, opts.answers ?? []) && opts.rung >= CARD_RUNG
+  return (
+    cardDone(opts.answeredFrameIds, opts.answers ?? [], opts.purpose ?? null) &&
+    opts.rung >= CARD_RUNG
+  )
 }
 
 export const CRATES_TO_UNLOCK_LEGEND = 5

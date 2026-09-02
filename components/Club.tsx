@@ -105,6 +105,7 @@ export function Club() {
         answeredFrameIds: answered,
         answers: state.legend ?? [],
         rung: rungReached(state.proof),
+        purpose: state.purpose ?? null,
       })
     )
       return
@@ -155,6 +156,9 @@ export function Club() {
       answers: learner.legend ?? [],
       rung,
       welcomedAt: learner.club_welcomed_at,
+      // Measured against THIS learner's seven — see cardFor. Somebody being checked against
+      // another purpose's card would find the door opening early or never.
+      purpose: learner.purpose ?? null,
     })
 
   /*

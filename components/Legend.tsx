@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES } from '@/content/roots'
-import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, REPAIR_KIT, cardDone, cratesToGo, fillFrame, frameApplies, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame } from '@/content/legend'
+import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillFrame, frameApplies, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame } from '@/content/legend'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
 import { NumberPicker } from '@/components/NumberPicker'
@@ -75,8 +75,9 @@ export function Legend() {
   const unlocked = mounted && legendStatus({ sectionsCompleted: done }).open
   const toGo = cratesToGo(done)
   /* The card is the seven at or below CARD_RUNG; the other two frames are a bonus. */
+  const myCard = cardFor(learner.purpose ?? null)
   const onCard = answers.filter(
-    (a) => Object.keys(a.values).length > 0 && LEGEND_CARD.some((f) => f.id === a.frame_id),
+    (a) => Object.keys(a.values).length > 0 && myCard.some((f) => f.id === a.frame_id),
   )
   const reachable = useMemo(() => (mounted && unlocked ? LEGEND_FRAMES : []), [mounted, unlocked])
   const answered = useMemo(
@@ -184,7 +185,7 @@ export function Legend() {
         */}
         {mounted && onCard.length ? (
           <p className="text-xs tabular-nums text-muted">
-            {onCard.length} of {LEGEND_CARD.length} on your card
+            {onCard.length} of {myCard.length} on your card
           </p>
         ) : null}
       </div>
@@ -277,7 +278,8 @@ export function Legend() {
               ))}
             </ul>
           </div>
-        ) : cardDone(answered.map((f) => f.id), answers) && !learner.club_welcomed_at ? (
+        ) : cardDone(answered.map((f) => f.id), answers, learner.purpose ?? null) &&
+          !learner.club_welcomed_at ? (
           /*
             The card is finished and the Club is the point of finishing it.
 

@@ -25,6 +25,7 @@ import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_FRAMES } from '../content/legend'
 import { ROOTS } from '../content/roots'
 import { SITUATIONS, PURPOSES } from '../content/situations'
+import { CARD_SIZE, cardFor } from '../content/legend'
 import { forPurpose } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -34,6 +35,42 @@ const ok = (label: string, cond: boolean, detail = '') => {
   console.log('  ' + (cond ? '✓' : '✗') + ' ' + label + (detail ? '   ' + detail : ''))
   if (!cond) problems.push(label + (detail ? ' — ' + detail : ''))
 }
+
+console.log('\nseven, for everybody\n')
+/*
+  The hard constraint on the whole per-purpose idea.
+
+  Seven is promised on the front door, in the explainer, and on the deck. Two of the seven
+  now depend on why somebody is here, which means the set is assembled rather than fixed —
+  and an assembled set is one tag away from being six for a visitor and eight for a mover,
+  which would break the only promise this product makes about how long the work takes. It
+  is also exactly the bug that was just fixed on the deck, where nine frames were being
+  counted against a card of seven.
+*/
+for (const p of PURPOSES) {
+  const card = cardFor(p.id)
+  ok(
+    p.id + '’s card is seven',
+    card.length === CARD_SIZE,
+    card.length + ': ' + card.map((f) => f.id).join(', '),
+  )
+}
+ok(
+  'and so is the card for somebody who has not said',
+  cardFor(null).length === CARD_SIZE,
+  cardFor(null).length + ' — everybody is, at first, somebody who has recently arrived',
+)
+/*
+  Different sevens, or the axis is decoration. If two purposes produce the same card then
+  the tagging has quietly collapsed and nobody would notice, because every set would still
+  be the right length.
+*/
+const sets = PURPOSES.map((p) => cardFor(p.id).map((f) => f.id).sort().join('|'))
+ok(
+  'and no two of them are the same seven',
+  new Set(sets).size === PURPOSES.length,
+  new Set(sets).size + ' distinct of ' + PURPOSES.length,
+)
 
 console.log('\nthe content model\n')
 ok('there are three purposes', PURPOSES.length === 3, PURPOSES.map((p) => p.id).join(', '))

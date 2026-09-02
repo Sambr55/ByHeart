@@ -68,6 +68,7 @@ function isMember(s: LearnerState): boolean {
     answers,
     rung: rungReached(s.proof ?? []),
     welcomedAt: s.club_welcomed_at,
+    purpose: s.purpose ?? null,
   })
 }
 

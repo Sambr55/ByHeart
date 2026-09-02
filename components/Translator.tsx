@@ -69,6 +69,7 @@ export function Translator() {
     answers: learner.legend ?? [],
     rung: rungReached(learner.proof),
     welcomedAt: learner.club_welcomed_at,
+    purpose: learner.purpose,
   })
 
   useEffect(() => {
