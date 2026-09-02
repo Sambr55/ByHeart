@@ -1,7 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
+import { EXPLAINER_CTA } from '@/content/explainers'
 import { DEMO_BEATS } from '@/content/front-door'
 import { track } from '@/engine/analytics'
 import { slugFor } from '@/content/audio-manifest'
@@ -113,6 +115,26 @@ export function DemoCard() {
               </li>
             ))}
           </ul>
+          {/*
+            The way on, which the last beat did not have.
+
+            It ended on three sentences and nothing else — so the strongest moment in the
+            product, the one where somebody has just watched a film line turn into three
+            things they can say, offered them no way to act on it. Reported from a phone as
+            "no way forward from this one", and it is the worst possible place for a dead
+            end: the exact instant the argument lands.
+
+            The shared call to action rather than a new one. Every explainer points here, so
+            somebody sold by the demo and somebody sold by the Drop arrive at the same
+            place, which is what makes this a funnel rather than a menu.
+          */}
+          <Link
+            href="/vibes"
+            data-testid="demo-go"
+            className="tap-target eyebrow mt-3 block w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
+          >
+            {EXPLAINER_CTA}
+          </Link>
         </>
       ) : null}
     </div>

@@ -242,6 +242,23 @@ console.log('\nthe demo plays where a stranger lands\n')
       const beat2 = await face()
       const said = ['Vem comigo', 'Fica comigo', 'Podes vir comigo'].filter((l) => beat2.includes(l))
       ok('and it builds three sentences from the one word', said.length === 3, said.join(' / '))
+      /*
+        AND THERE IS A WAY ON, which the last beat did not have.
+
+        The version above this asserted the three sentences were present and stopped there —
+        so it went green on a demo that ended in a dead end, at the exact instant the
+        argument lands. Reported from a phone, not by this file.
+
+        The lesson is the one forward-check already applies to the shelf: content being
+        correct is not the same as a person being able to proceed, and only the second is
+        what somebody actually experiences. Checking what a screen SAYS while never asking
+        what it lets you DO is how a dead end passes review.
+      */
+      ok(
+        'and the last beat has a way on',
+        Boolean(await page.$('[data-testid="demo-go"]')),
+        'a demo that ends in nothing wastes the moment it just earned',
+      )
     }
   }
 }
