@@ -49,6 +49,86 @@ function seed(rootIds: string[], sections: string[]) {
 }
 
 /** Every card on the shelf, with how it looks and what it will do. */
+/**
+ * Wait for the shelf to exist, rather than for a number of milliseconds.
+ *
+ * Every read here used to follow a fixed pause tuned on localhost, where the whole page is
+ * a few milliseconds away. Run against production and 1200ms lands before the tiles do, so
+ * `cards()` returns an empty list and the check reports that the shelf is empty and every
+ * vibe is locked — a catastrophic-looking failure produced entirely by network latency.
+ *
+ * Waiting for the thing being measured is both correct and faster: it returns the moment
+ * the tiles are there instead of always paying the worst case.
+ */
+/**
+ * Put a learner on a device, and make sure it stayed there.
+ *
+ * The obvious sequence — goto, write localStorage, goto again — has a race in it that is
+ * invisible on localhost and decisive over the network. On the first load the app boots
+ * and writes its own empty default learner. Locally that happens in under a hundred
+ * milliseconds, comfortably before the write; against production the boot lands AFTER it,
+ * so the app's empty record overwrites the seed and the second navigation reads a device
+ * that has never done anything.
+ *
+ * The symptom is a check reporting that the shelf is empty and every vibe is locked, on a
+ * product that is fine — which is exactly what happened, and which I diagnosed wrongly
+ * three times before finding this.
+ *
+ * So the seed is written and then CONFIRMED, with one retry. Reading back what you wrote is
+ * cheap; trusting a write you raced for is not.
+ */
+async function seedInto(page: Page, blob: unknown) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await page.goto(BASE + '/vibes')
+    await page.waitForTimeout(attempt * 800)
+    await page.evaluate(
+      ([k, pair, s]) => {
+        localStorage.setItem('byheart.pair', JSON.stringify(pair))
+        localStorage.setItem(k as string, JSON.stringify(s))
+      },
+      [KEY, DEFAULT_PAIR, blob] as const,
+    )
+    await page.goto(BASE + '/vibes')
+    await page.waitForTimeout(600)
+    const stuck = (await page.evaluate(
+      `(() => { try { return Boolean(JSON.parse(localStorage.getItem(${JSON.stringify(KEY)}) || '{}').deal_accepted_at) } catch { return false } })()`,
+    )) as boolean
+    if (stuck) return
+  }
+  console.log('  · the seed would not stick — the app kept overwriting it')
+}
+
+async function shelfReady(page: Page) {
+  try {
+    await page.waitForSelector('[data-testid^="vibe-"]', { timeout: 20000 })
+  } catch {
+    /*
+      Say what was on screen instead, rather than carrying on with nothing.
+
+      Swallowing this and reading an empty shelf is how a latency problem gets reported as
+      "every vibe is locked and the shelf is empty" — a catastrophic-looking finding about
+      a product that is fine. If the tiles never arrive, the useful output is the screen
+      that arrived instead.
+    */
+    const where = page.url()
+    /*
+      main, not body.
+
+      textContent('body') includes the text of inline <script> tags, and Next puts its
+      flight payload in one — so every page on earth "starts with (self.__next_f" and a
+      body-text heuristic reports a perfectly rendered screen as never having hydrated. It
+      cost me three wrong diagnoses in a row before I noticed the detector was the thing
+      that was broken.
+    */
+    const what = ((await page.textContent('main').catch(() => '')) ?? '')
+      .replace(/\s+/g, ' ')
+      .slice(0, 140)
+    console.log('  · no shelf at ' + where + ' — screen said: ' + (what || '(nothing)'))
+  }
+  // One frame past first paint, so the dimming that depends on the learner has settled.
+  await page.waitForTimeout(400)
+}
+
 async function cards(page: Page) {
   return page.$$eval('main button', (els) =>
     els
@@ -100,16 +180,8 @@ const played = [
   ...(((ROOTS_BY_FAMILY['bridget_jones' as never] ?? []) as { root_id: string }[]).slice(0, 2).map((r) => r.root_id)),
 ]
 
-await page.goto(BASE + '/vibes')
-await page.evaluate(
-  ([k, pair, s]) => {
-    localStorage.setItem('byheart.pair', JSON.stringify(pair))
-    localStorage.setItem(k as string, JSON.stringify(s))
-  },
-  [KEY, DEFAULT_PAIR, seed(played, ['the_basics', 'james_bond', 'bridget_jones'])] as const,
-)
-await page.goto(BASE + '/vibes')
-await page.waitForTimeout(1200)
+await seedInto(page, seed(played, ['the_basics', 'james_bond', 'bridget_jones']))
+await shelfReady(page)
 
 const list = await cards(page)
 console.log('\n' + list.length + ' cards on the shelf\n')
@@ -225,17 +297,9 @@ ok(
   const basicsRoots = ((ROOTS_BY_FAMILY['the_basics' as never] ?? []) as { root_id: string }[])
     .slice(0, 3)
     .map((r) => r.root_id)
-  await page2.goto(BASE + '/vibes')
-  await page2.evaluate(
-    ([k, pair, s]) => {
-      localStorage.setItem('byheart.pair', JSON.stringify(pair))
-      localStorage.setItem(k as string, JSON.stringify(s))
-    },
-    // Roots played, and NOTHING in sections_completed. Exactly the reported device.
-    [KEY, DEFAULT_PAIR, seed(basicsRoots, [])] as const,
-  )
-  await page2.goto(BASE + '/vibes')
-  await page2.waitForTimeout(1200)
+  // Roots played, and NOTHING in sections_completed. Exactly the reported device.
+  await seedInto(page2, seed(basicsRoots, []))
+  await shelfReady(page2)
   const after = await cards(page2)
   const locked = after.filter((c) => c.disabled)
   console.log('\nplayed the basics, never tapped through\n')
@@ -306,6 +370,20 @@ await page.click('[data-testid="vibe-the_basics"]')
 await page.waitForSelector('[data-testid="vibe-open"]')
 ok('the tap opens it full bleed', Boolean(await page.$('[data-testid="vibe-open"]')))
 ok('and has not entered anything yet', Boolean(await page.$('[data-testid="vibe-begin"]')))
+/*
+  Wait for the picture to arrive before asking whether it arrived.
+
+  naturalWidth was read the instant the element appeared, which on localhost is after the
+  file is in cache and over the network is well before it. The assertion then reported that
+  the hero image of the whole shelf had failed to paint, on a screen where it paints fine a
+  few hundred milliseconds later.
+*/
+await page
+  .waitForFunction(
+    `(() => { const i = document.querySelector('[data-testid="vibe-open"] img'); return Boolean(i && i.naturalWidth > 0) })()`,
+    { timeout: 15000 },
+  )
+  .catch(() => {})
 const full = await page.$eval('[data-testid="vibe-open"] img', (el) => {
   const r = el.getBoundingClientRect()
   return { w: Math.round(r.width), h: Math.round(r.height), painted: (el as HTMLImageElement).naturalWidth > 0 }
@@ -323,16 +401,8 @@ ok(
 console.log('\na vibe you cannot have yet still opens\n')
 {
   const p3 = await browser.newPage({ viewport: { width: 390, height: 900 } })
-  await p3.goto(BASE + '/vibes')
-  await p3.evaluate(
-    ([k, pair, s2]) => {
-      localStorage.setItem('byheart.pair', JSON.stringify(pair))
-      localStorage.setItem(k as string, JSON.stringify(s2))
-    },
-    [KEY, DEFAULT_PAIR, seed([], [])] as const,
-  )
-  await p3.goto(BASE + '/vibes')
-  await p3.waitForTimeout(1800)
+  await seedInto(p3, seed([], []))
+  await shelfReady(p3)
   const locked = await p3.$$eval('[data-testid^="vibe-"]', (els) =>
     els.map((el) => el.getAttribute('data-testid')).filter(Boolean),
   )
@@ -351,7 +421,7 @@ console.log('\na vibe you cannot have yet still opens\n')
 console.log('\nhow far in you are is on the card\n')
 // The swipe above left this page inside a lesson. Back to the shelf before reading it.
 await page.goto(BASE + '/vibes')
-await page.waitForTimeout(1500)
+await shelfReady(page)
 const text = await page.evaluate(() => (document.querySelector('main') ?? document.body).innerText)
 /*
   Says what is LEFT, and never a denominator.
