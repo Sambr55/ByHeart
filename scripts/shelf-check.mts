@@ -353,7 +353,25 @@ console.log('\nhow far in you are is on the card\n')
 await page.goto(BASE + '/vibes')
 await page.waitForTimeout(1500)
 const text = await page.evaluate(() => (document.querySelector('main') ?? document.body).innerText)
-ok('a part-played vibe says so', /\d+ of \d+ taken/.test(text), (text.match(/\d+ of \d+ taken/) ?? ['none'])[0])
+/*
+  Says what is LEFT, and never a denominator.
+
+  The card used to read "3 of 14 taken", which is arithmetically correct and tells somebody
+  the opposite of the truth: a session serves three or four roots by design, so doing
+  everything DUB offers, correctly, in one sitting, earned a card scoring you at a fifth —
+  immediately after a screen congratulating you for finishing. A denominator is a score
+  whatever sentence it is wrapped in, so the assertion is that there is not one.
+*/
+ok(
+  'a part-played vibe says what is left',
+  /\d+ more in here|One more in here/.test(text),
+  (text.match(/(\d+|One) more in here/) ?? ['none'])[0],
+)
+ok(
+  'and does not score you out of the whole vibe',
+  !/\d+ of \d+ taken/.test(text),
+  'a denominator is a score whatever sentence it is in',
+)
 
 await browser.close()
 

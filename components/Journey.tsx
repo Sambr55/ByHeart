@@ -1447,9 +1447,31 @@ function Picker() {
                     />
                     <span className="relative flex flex-col gap-1 text-white">
                       <span className="display text-sm leading-tight">{f.title}</span>
+                      {/*
+                        Said as an offer, not a tally.
+
+                        This read "3 of 14 taken", which is arithmetically correct and
+                        communicates the opposite of what is true. A session serves three
+                        or four roots and then ends — that is the design — so somebody who
+                        does everything DUB gives them, all of it, correctly, is handed a
+                        card saying they are 21% of the way through. Right after a screen
+                        that congratulated them for finishing. The product told them they
+                        had done well and then scored them at a fifth.
+
+                        Nothing on the card explained that a vibe is several sittings, and
+                        "taken" is our word for it rather than anybody else's — taken from
+                        what, by whom.
+
+                        So it says what is left and what happens if you come back, in the
+                        same shape the Legend already uses for exactly this ("8 more when
+                        you want them"). No denominator, because a denominator is a score
+                        whatever sentence it is wrapped in.
+                      */}
                       {mounted && taken > 0 && taken < total ? (
-                        <span className="text-[0.6rem] tabular-nums text-white/80">
-                          {taken} of {total} taken
+                        <span className="text-[0.6rem] text-white/80">
+                          {total - taken === 1
+                            ? 'One more in here'
+                            : total - taken + ' more in here'}
                         </span>
                       ) : null}
                     </span>
