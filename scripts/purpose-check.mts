@@ -208,49 +208,96 @@ ok(
   'the biggest moment in the product is not a form',
 )
 
-await page.goto(BASE + '/legend')
-await page.waitForTimeout(2000)
-ok('the Legend asks it first', Boolean(await page.$('[data-testid="purpose-moving"]')))
+console.log('\nasked once, in set-up, and not again on the way into the deck\n')
 /*
-  Named, not counted by prefix.
+  This used to assert the Legend asked it FIRST, and that was right when the Legend was the
+  first place it appeared.
 
-  This counted every [data-testid^="purpose-"] and asserted three. Adding a skip control
-  called purpose-skip made it four and the check failed — correctly reporting a number, and
-  reporting nothing at all about whether visiting, staying and moving are on the screen,
-  which is the thing it is named after. A count is a proxy; the three ids are the claim.
+  It is not any more. Set-up carries where, why and who before any content is tailored,
+  which is the entire argument for asking there — so a second ask on the way into the deck
+  was the same question twice with a different screen around it. Reported as "we now have
+  two instances of why are you here".
+
+  So the assertion inverts, and the pair matters more than either half: something must still
+  ask, and only one thing may. A check that only proved the Legend had stopped asking would
+  pass just as happily on a product that had stopped asking at all.
 */
-{
-  const offered = await Promise.all(
-    PURPOSES.map(async (p) => ((await page.$('[data-testid="purpose-' + p.id + '"]')) ? null : p.id)),
-  )
-  const missing = offered.filter(Boolean)
-  ok('all three are offered', missing.length === 0, missing.length ? 'missing ' + missing.join(', ') : PURPOSES.map((p) => p.id).join(', '))
-}
-
-await page.click('[data-testid="purpose-moving"]')
-await page.waitForTimeout(1400)
-const stored = (await page.evaluate(
-  `(() => { try { return JSON.parse(localStorage.getItem(${JSON.stringify(KEY)}) || '{}').purpose } catch { return null } })()`,
-)) as string | null
-ok('the answer is remembered', stored === 'moving', String(stored))
+await page.goto(BASE + '/legend')
+await page.waitForTimeout(2200)
 ok(
-  'and it lets you straight on to the seven',
-  !(await page.$('[data-testid="purpose-moving"]')),
-  'asked once',
-)
-
-await page.reload()
-await page.waitForTimeout(1800)
-ok(
-  'and never asks again',
+  'the Legend does not ask again',
   !(await page.$('[data-testid="purpose-moving"]')),
   'a question that reappears is a form rather than a decision',
 )
+ok(
+  'and it does not stand in front of the deck',
+  /YOUR LEGEND|Seven questions/i.test((await page.textContent('body')) ?? ''),
+  'somebody who never answered still gets the universal seven',
+)
+
+/*
+  And set-up still asks it, which is the half that makes the removal safe.
+
+  ON A CLEAN DEVICE, in its own context. The learner this file seeds already has a pair, so
+  /vibes hands them the picker rather than set-up — the first version of this asserted
+  against that learner, failed, and would have read as "set-up stopped asking" when set-up
+  was working perfectly. A separate context also leaves the page below undisturbed, which
+  the Yours section depends on.
+*/
+{
+  const fresh = await browser.newContext()
+  const p2 = await fresh.newPage()
+  await p2.goto(BASE + '/vibes')
+  await p2.waitForTimeout(2800)
+  const where = await p2.$('[data-testid="setup-where-lisbon"]')
+  ok('set-up is where it is asked now', Boolean(where), 'once, before anything is tailored')
+  if (where) {
+    await where.click()
+    await p2.waitForTimeout(600)
+    const missing = (
+      await Promise.all(
+        PURPOSES.map(async (pu) =>
+          (await p2.$('[data-testid="setup-why-' + pu.id + '"]')) ? null : pu.id,
+        ),
+      )
+    ).filter(Boolean)
+    ok(
+      'all three are offered',
+      missing.length === 0,
+      missing.length ? 'missing ' + missing.join(', ') : PURPOSES.map((pu) => pu.id).join(', '),
+    )
+    await p2.click('[data-testid="setup-why-moving"]')
+    await p2.waitForTimeout(1500)
+    const stored = (await p2.evaluate(
+      `(() => {
+        try {
+          const k = Object.keys(localStorage).find(k => k.startsWith('byheart.learner.v1'))
+          return k ? JSON.parse(localStorage.getItem(k) || '{}').purpose : null
+        } catch { return null }
+      })()`,
+    )) as string | null
+    ok('the answer is remembered', stored === 'moving', String(stored))
+  }
+  await fresh.close()
+}
 
 console.log('\nand changeable afterwards, as promised\n')
 await page.goto(BASE + '/profile')
 await page.waitForTimeout(1600)
-ok('it is in Yours', Boolean(await page.$('[data-testid="purpose-set-visiting"]')))
+/*
+  And it is reachable by somebody who has NOT answered, which it was not.
+
+  This control returned null on a null purpose — harmless while the Legend asked the
+  question, invisible-and-fatal the moment it stopped: swipe past set-up and the one place
+  left to choose a purpose hid itself because you had not chosen one. The learner this file
+  seeds has no purpose precisely because the Legend no longer sets one, which is how it
+  surfaced.
+*/
+ok(
+  'it is in Yours, answered or not',
+  Boolean(await page.$('[data-testid="purpose-set-visiting"]')),
+  'the unset state is when a setting is most worth showing',
+)
 await page.click('[data-testid="purpose-set-visiting"]')
 await page.waitForTimeout(700)
 const changed = (await page.evaluate(

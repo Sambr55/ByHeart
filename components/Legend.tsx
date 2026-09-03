@@ -9,7 +9,6 @@ import { AudioButton } from '@/components/AudioButton'
 import { NumberPicker } from '@/components/NumberPicker'
 import { Back } from '@/components/Back'
 import { Dock, Framed } from '@/components/Dock'
-import { WhyHere } from '@/components/WhyHere'
 import { MiniBuild } from '@/components/Journey'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
@@ -36,7 +35,6 @@ export function Legend() {
   const learner = useLearner()
   const [mode, setMode] = useState<Mode>('deck')
   const [mounted, setMounted] = useState(false)
-  const [askedWhy, setAskedWhy] = useState(false)
   useEffect(() => {
     setMounted(true)
     // ?cold=1 lands straight in a cold open — from the Club, from the daily line, from a
@@ -152,30 +150,22 @@ export function Legend() {
   }
 
   /*
-    One question before the seven.
+    The Legend does NOT ask why you are here. Set-up already did.
 
-    Asked here rather than at the Club's threshold, which is where it was and which was the
-    wrong place twice over: it arrived after the Club had been earned rather than before it
-    was explained, and it arrived separately from the questions it exists to shape. This is
-    the first moment the answer is both earned and useful — five vibes are done, seven
-    things about themselves are about to be said, and what a stranger actually asks you
-    differs by whether you are here for four days or for good.
+    It asked here for good reasons — five vibes done, seven things about to be said, and
+    what a stranger asks you genuinely differs by whether you are for four days or for good
+    — and those reasons were sound while this was the FIRST place the question appeared.
+    It is not any more. Set-up carries where, why and who before any content is tailored,
+    which is the whole argument for asking there, so a second ask on the way into the deck
+    is the same question twice with a different screen around it.
 
-    Only when it has never been answered. Changing it later is a setting, in Yours, and a
-    question that reappears is a form rather than a decision.
+    Somebody who never answered still gets a Legend: cardFor(null) is the universal seven
+    and the Club shows everything on a null purpose. An unanswered question costs a slightly
+    less pointed card, and that is a far smaller price than a form standing in front of the
+    thing the whole product is for.
+
+    Changing it later is still a setting, in Yours.
   */
-  /*
-    Asked once per visit to the deck, whether or not it was answered.
-
-    `learner.purpose` alone cannot express "asked and declined" — it is null in both the
-    never-asked and the just-skipped case, so a skip re-rendered the same screen and the
-    forward exit went nowhere. This is deliberately NOT persisted: the question is worth
-    asking again next time the deck is opened, and a decision somebody has genuinely not
-    made yet should not be recorded as one they refused.
-  */
-  if (mounted && !learner.purpose && !askedWhy)
-    return <WhyHere onDone={() => setMode('deck')} onSkip={() => setAskedWhy(true)} />
-
   return (
     <Shell>
       <div className="flex flex-col gap-3">

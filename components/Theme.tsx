@@ -112,9 +112,23 @@ export function SoundChoice() {
  * plainly rather than leaving somebody to wonder whether changing it costs them anything.
  */
 export function PurposeChoice() {
-  const [purpose, setPurposeState] = useState<Purpose | null>(null)
+  /*
+    'unknown' rather than null, because null had two meanings and one of them hid this.
+
+    It returned null when no purpose was set, which was harmless while the Legend asked the
+    question on the way into the deck — anybody without an answer met it there. The Legend
+    stopped asking, because set-up asks it now and asking twice is a form. Which left this:
+    somebody who swipes past set-up has no purpose, so the one control that would let them
+    choose one hides ITSELF on the grounds that they have not chosen.
+
+    The unset state is exactly when this is most worth showing. It is a setting, not a
+    prompt, so nothing here nags — it is simply present, with nothing selected.
+  */
+  const [purpose, setPurposeState] = useState<Purpose | null | 'unknown'>('unknown')
   useEffect(() => setPurposeState(loadLearner().purpose ?? null), [])
-  if (!purpose) return null
+  // Only before the browser has read storage. Flashing an empty control at somebody who
+  // answered weeks ago is worse than a moment of nothing.
+  if (purpose === 'unknown') return null
 
   return (
     <div className="flex flex-col gap-1">
