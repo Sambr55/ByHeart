@@ -21,6 +21,7 @@
  */
 import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
+import { INTRO_CARDS } from '../content/intro'
 import { EXPLAINERS, EXPLAINER_CTA } from '../content/explainers'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -86,21 +87,45 @@ const titles = (await page.evaluate(
   })`,
 )) as string[]
 /*
-  Explanation, then the thing it explained. Twice.
+  THE SEQUENCE, AND IT IS THE SHOWCASE RATHER THAN A CORRIDOR IN FRONT OF ONE.
 
-  The order was the other way round and did not survive first contact: a stranger landed on
-  a photograph of a pharmacy whose only instruction read SWIPE LEFT — sideways, into the
-  room, away from every explanation there is — and the answer to "what is this" was the
-  third card with nothing on the first saying so.
+  It used to be seven: a claim, an example, a claim, an example, three explainers and set-up
+  — and this file asserted that order card by card. The brief replaced it with a longer,
+  plainer sequence that also teaches the gestures, so the old assertions describe a product
+  that no longer exists. A rule that no longer describes the intent is worse than no rule:
+  it fails on correct work and gets deleted in a hurry, taking the protection with it.
+
+  What is asserted now is the ORDER ITSELF, against content/intro.ts rather than against a
+  list retyped here — a check that restates the sequence would pass on any sequence, as long
+  as somebody remembered to edit it in two places.
 */
-ok('it opens on an explanation', /SIXTY SECONDS/.test(titles[1] ?? ''), titles[1] ?? '')
-ok(
-  'then on the obvious example of it',
-  /The pharmacy/.test(titles[2] ?? ''),
-  titles[2] ?? '',
-)
-ok('then on the next explanation', /THE WAY IN/.test(titles[3] ?? ''), titles[3] ?? '')
-ok('then on a vibe, which is the other half of the product', /A VIBE/.test(titles[4] ?? ''), titles[4] ?? '')
+{
+  const real = cards.slice(1, -1)
+  const wanted = INTRO_CARDS.map((c) => c.eyebrow)
+  const got = real.slice(0, 40)
+  const at = wanted.map((e) => got.findIndex((g) => g === e))
+  ok('every argument card is in the feed', at.every((i) => i >= 0), at.join(', '))
+  ok(
+    'and in the order the content declares',
+    at.every((v, i) => i === 0 || v > at[i - 1]),
+    wanted.join(' → '),
+  )
+  /*
+    The two woven cards, and where they sit is the whole reason they are woven.
+
+    The demo lands after VIBES so the claim about popular culture is followed immediately by
+    a film line; set-up lands after the Legend card, which is the first moment somebody has
+    been told what the answers are for. Asserted as ADJACENCY rather than as fixed indices,
+    so adding an argument card does not fail a check about something else.
+  */
+  const demoAt = got.findIndex((g) => /SIXTY SECONDS/.test(g))
+  const vibesAt = got.indexOf('VIBES')
+  ok('the demo follows the vibes claim', demoAt === vibesAt + 1, 'vibes ' + vibesAt + ', demo ' + demoAt)
+  const setupAt = got.findIndex((g) => /ONE DECISION/.test(g))
+  const legendAt = got.indexOf('YOUR LEGEND')
+  ok('and set-up follows the Legend card', setupAt === legendAt + 1, 'legend ' + legendAt + ', set-up ' + setupAt)
+}
+
 ok(
   'and the first card says the feed keeps going',
   /keep swiping/i.test((await page.textContent('main')) ?? ''),
@@ -111,54 +136,17 @@ ok(
   !/purpose-|deal|accept/i.test((await page.textContent('main')) ?? ''),
   'no form in front of the demonstration',
 )
-
 /*
-  Interleaved, not stacked. Four explanations in a row is a corridor with swipes instead of
-  taps, which is the thing this replaces.
-*/
-const eyebrows = EXPLAINERS.map((e) => e.eyebrow)
-/*
-  Without the clones, or the count lies.
+  The gestures are taught, which nothing did before.
 
-  The rail is [last, ...cards, first] so the loop is seamless, and with an explainer at each
-  end that yields five matches for four explainers — a number that is not wrong so much as
-  about a different list. Counting a clone as a card is how "and none of them are adjacent"
-  would one day pass on a feed where two of them are.
+  Left used to open a card and now it sends it away, so even somebody who has used DUB
+  before is holding a different product — and there is no tutorial anywhere else.
 */
-const real = cards.slice(1, -1)
-const at = real.map((c, i) => (eyebrows.includes(c) ? i : -1)).filter((i) => i >= 0)
 ok(
-  'the explainers are in it',
-  at.length === EXPLAINERS.length,
-  at.length + ' of ' + EXPLAINERS.length,
-)
-/*
-  At most two in a row, never three.
-
-  The rule used to be "never adjacent", which described the previous design — content-led,
-  with explanations woven through. The brief changed to explanations leading as a block with
-  the showcase examples among them, and a rule that no longer describes the intent is worse
-  than no rule: it fails on correct work and gets deleted in a hurry, taking the protection
-  with it.
-
-  What still has to hold is that this never becomes a corridor with swipes instead of taps.
-  Two short cards back to back is a pair; three is a lecture.
-*/
-let run = 1
-let longest = 1
-for (let i = 1; i < at.length; i++) {
-  run = at[i] - at[i - 1] === 1 ? run + 1 : 1
-  longest = Math.max(longest, run)
-}
-ok(
-  'and never three of them in a row',
-  longest <= 2,
-  'longest run ' + longest + ', at positions ' + at.join(', '),
-)
-ok(
-  'real Lisbon content is between them',
-  real.filter((c) => !eyebrows.includes(c)).length > at.length,
-  'the shop, not just the sign',
+  'the grammar is taught in the sequence',
+  /Swipe left and it goes to the back/.test((await page.textContent('main')) ?? '') &&
+    /Tap a card to open it/.test((await page.textContent('main')) ?? ''),
+  'reject and enter, both said before either is needed',
 )
 
 console.log('\nthe logo goes back to the front door\n')
@@ -201,16 +189,34 @@ console.log('\nthe demo plays where a stranger lands\n')
   discover — because the whole point is that it plays where somebody lands.
 */
 {
+  /*
+    FOUND BY ITS EYEBROW, NOT BY ITS INDEX.
+
+    This read children[1] because the demo was the first card. It is the fifth now — the
+    sequence puts three argument cards and the vibes claim in front of it — and an index is
+    the wrong way to identify a card in a list whose order is a content decision. Every
+    assertion below is about the demo's FACE, so the card has to be located first.
+  */
+  const demoAt = (await page.evaluate(
+    `Array.from(document.querySelectorAll('.snap-y > section')).findIndex(s => (s.innerText||'').startsWith('SIXTY SECONDS'))`,
+  )) as number
+  ok('the demo is in the sequence', demoAt > 0, 'at ' + demoAt)
   const face = async () =>
     ((await page.evaluate(
       `(() => {
         const r = document.querySelector('.snap-y')
-        return r && r.children[1] ? (r.children[1].innerText || '') : ''
+        return r && r.children[${demoAt}] ? (r.children[${demoAt}].innerText || '') : ''
       })()`,
     )) as string).replace(/\s+/g, ' ')
 
+  // It has to be on screen for its controls to be clickable.
+  await page.evaluate(`(() => {
+    const r = document.querySelector('.snap-y')
+    if (r) r.scrollTop = r.clientHeight * ${demoAt}
+  })()`)
+  await page.waitForTimeout(900)
+
   const first = await face()
-  ok('the first card is the demo', /SIXTY SECONDS/.test(first), first.slice(0, 44))
   ok(
     'and it plays rather than pointing sideways',
     !/SWIPE LEFT/.test(first),
@@ -265,19 +271,30 @@ console.log('\nthe demo plays where a stranger lands\n')
 
 console.log('\nevery explainer points the same way\n')
 {
-  const detail = await page.evaluate(
-    `Array.from(document.querySelectorAll('.snap-y > section')).map(s => s.innerText || '').filter(t => ${JSON.stringify(eyebrows)}.some(e => t.startsWith(e))).join(' ~~ ')`,
-  ) as string
+  /*
+    Every card carrying the call to action, rather than every card on a list of eyebrows.
+
+    The list was EXPLAINERS, which the sequence replaced — so the filter was selecting from
+    a set that no longer describes the feed. Counting the string across the whole feed is
+    both simpler and closer to the claim: one destination, several reasons.
+  */
+  const detail = (await page.evaluate(
+    `Array.from(document.querySelectorAll('.snap-y > section')).map(s => s.innerText || '').join(' ~~ ')`,
+  )) as string
   const links = (detail.match(new RegExp(EXPLAINER_CTA, 'g')) ?? []).length
   ok('one destination, several reasons', links >= 3, links + ' cards carry it')
 }
 
 /*
-  Seven cards of argument before the ordinary feed starts: the two explainers with their two
-  examples, the remaining two explainers, and set-up. Anything at or beyond this index is a
-  room like any other, which is what "nothing ordinary in front of it" is asking about.
+  How much of the feed is the sequence, DERIVED rather than typed.
+
+  It was 7 — two explainers with their examples, two more explainers, and set-up. The
+  sequence replaced that with nine argument cards plus the demo and set-up woven in, and a
+  hardcoded 7 then reported four argument cards as "ordinary rooms in front of the saved
+  one". Taking it from the content means adding a card to the sequence cannot silently
+  break a check about something else.
 */
-const LEAD_LENGTH = 7
+const LEAD_LENGTH = INTRO_CARDS.length + 2
 
 console.log('\nthe set-up is a card, and it does not block\n')
 /*
@@ -296,10 +313,22 @@ console.log('\nthe set-up is a card, and it does not block\n')
       .findIndex(s => (s.innerText || '').startsWith('ONE DECISION'))`,
   )) as number
   ok('set-up is in the feed', set >= 0, 'at position ' + set)
+  /*
+    After the Legend card, which is the first moment somebody has been told what the answers
+    are FOR — and no longer last, since four more arguments follow it.
+
+    It was asserted as "last of the lead", which was true when set-up closed the sequence.
+    The new order puts drops, revision, ask and share after it, so the meaningful claim is
+    adjacency to the card that gives it a reason, not a position in a list.
+  */
+  const legendAt = (await page.evaluate(
+    `Array.from(document.querySelectorAll('.snap-y > section')).slice(1, -1)
+      .findIndex(s => (s.innerText || '').startsWith('YOUR LEGEND'))`,
+  )) as number
   ok(
-    'and it comes after the argument, not before it',
-    set === LEAD_LENGTH - 1,
-    'last of the seven: four reasons and two of them shown working, first',
+    'and it comes straight after the Legend card',
+    set === legendAt + 1,
+    'legend ' + legendAt + ', set-up ' + set,
   )
   ok(
     'and it can be swiped past',

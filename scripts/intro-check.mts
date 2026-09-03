@@ -90,11 +90,35 @@ ok(
 */
 console.log('\nthe claims, still made\n')
 const feed = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
+/*
+  MATCHED ON THE CLAIM, NOT ON A SENTENCE, and this list has just proved why that matters.
+
+  Every pattern here was a verbatim phrase from the four explainers. The sequence replaced
+  them, and "Lisbon, as it is actually happening" became "What is actually on in Lisbon, and
+  what to say when you get there" — the same claim, different words, and the check reported
+  it as gone.
+
+  That is the right kind of failure: it is exactly the alarm this file exists to raise, and
+  the fix is to confirm by hand that the claim survived and then widen the pattern to the
+  claim rather than the sentence. Anchoring on the wording would mean re-editing this list
+  on every copy pass, which is how a check ends up being loosened until it asserts nothing.
+
+  Each was checked against the rendered feed before its pattern was changed.
+*/
 const CLAIMS: { name: string; says: RegExp }[] = [
-  { name: 'you understand more than you can say', says: /already understand more than you can say/i },
-  { name: 'the Legend is the way in', says: /Seven questions a stranger will ask you/i },
-  { name: 'Lisbon is happening now', says: /as it is actually happening/i },
+  { name: 'you understand more than you can say', says: /understand more than you can say/i },
+  { name: 'the Legend is the way in', says: /(Seven questions a stranger will ask you|Build your legend)/i },
+  { name: 'Lisbon is happening now', says: /(as it is actually happening|actually on in Lisbon)/i },
   { name: 'ask for anything', says: /sentence we have not taught you yet/i },
+  /*
+    Two the sequence added, held to the same standard.
+
+    A claim made once and then quietly dropped in a later edit is the same failure whether
+    it is old or new, and these two are the ones with no other screen making them: nothing
+    else in the product teaches the gestures, and nothing else says revision happens.
+  */
+  { name: 'the gestures are taught', says: /goes to the back of the pile/i },
+  { name: 'revision comes round', says: /regular, relevant revision/i },
 ]
 for (const c of CLAIMS) ok(c.name, c.says.test(feed), c.says.test(feed) ? '' : 'not said anywhere')
 

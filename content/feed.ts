@@ -4,6 +4,7 @@ import { DROP_LEAD_DAYS } from '@/content/roots'
 import { SITUATIONS, isCurrent, type Purpose, type Situation } from '@/content/situations'
 import { DROPS, type Drop } from '@/content/drops'
 import { explainersFor, type Explainer } from '@/content/explainers'
+import { INTRO_CARDS, type IntroCard } from '@/content/intro'
 import { VIBE_IMAGES } from '@/content/vibe-images'
 import {
   CRATES,
@@ -81,6 +82,15 @@ export type FeedCard =
     explanation they do not want, which a corridor never let them do.
   */
   | { kind: 'explainer'; id: string; explainer: Explainer; image: { src: string; alt: string } }
+  /*
+    An argument, on sand rather than on a photograph.
+
+    The one card kind in the feed with no image, and that is the point rather than a gap.
+    A photograph says "here is Lisbon"; these say "here is what we do", and giving them the
+    same full-bleed treatment would both flatten that difference and require eleven pictures
+    the bank does not have. The change of ground IS the rhythm of the sequence.
+  */
+  | { kind: 'intro'; id: string; intro: IntroCard }
   /*
     A taste of a vibe, for the showcase.
 
@@ -421,6 +431,17 @@ export function vibeCard(family: CultureFamily): FeedCard | null {
  * Playing a root is the honest retirement condition. The card's job is to get somebody
  * started; it is finished when they have started, not when they have agreed to.
  */
+/**
+ * The showcase sequence, in order, with the demo and set-up woven in.
+ *
+ * Declared here rather than assembled in the component so the ORDER is a content decision
+ * somebody can read, and so a check can assert it against one list rather than against a
+ * chain of array spreads.
+ */
+export function introCards(): FeedCard[] {
+  return INTRO_CARDS.map((intro) => ({ kind: 'intro', id: intro.id, intro }))
+}
+
 export function setUpCard(dealAccepted: boolean, started = false): FeedCard | null {
   if (dealAccepted && started) return null
   return {
@@ -588,6 +609,21 @@ export function cardFace(card: FeedCard): {
       title: card.ask.pt,
       blurb: card.ask.note || card.ask.en,
       image: card.image,
+    }
+  }
+  if (card.kind === 'intro') {
+    /*
+      No image, and the face reads it as a sand card rather than looking for a photograph.
+
+      Every other kind here hands back an image because every other kind is a thing being
+      shown. An argument has nothing to show, and a borrowed picture behind one would make
+      it look like content it is not.
+    */
+    return {
+      eyebrow: card.intro.eyebrow,
+      title: card.intro.headline,
+      blurb: card.intro.body,
+      image: undefined,
     }
   }
   return {

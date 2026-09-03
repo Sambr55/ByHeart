@@ -8,6 +8,7 @@ import { AudioButton } from '@/components/AudioButton'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
+import { INTRO_DEMO_AFTER, INTRO_SETUP_AFTER } from '@/content/intro'
 import { mintShowing } from '@/engine/showing'
 import {
   FEED_COPY,
@@ -17,6 +18,7 @@ import {
   askedCards,
   derivedCards,
   explainerCards,
+  introCards,
   setUpCard,
   vibeCard,
   feedFor,
@@ -208,28 +210,42 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       through it.
     */
     if (stage === 'showcase') {
-      const pharmacy = open.find((c) => c.id === 'lisbon_farmacia')
-      const vibe = vibeCard('bridget_jones')
-      const rest = open.filter((c) => c.id !== 'lisbon_farmacia')
-      const [firstSay, secondSay, ...laterSay] = explainers
-
       /*
-        Set-up comes after the argument, not before it.
+        THE SEQUENCE IS THE SHOWCASE, rather than a corridor in front of it.
 
-        Seventh: four reasons given and two of them shown working. That is the first moment
-        asking somebody for a decision is fair, and it is the last thing between them and a
-        vibe. It can be swiped past like anything else here — the gate is on the action,
-        not on the thumb.
+        It was seven cards: a claim, an example, a claim, an example, then three explainers
+        and set-up. That was a good argument and it is not the one being made now — the new
+        flow says the same things in a longer, plainer order, and it teaches the gestures
+        while it does it, which nothing did before.
+
+        The demo and set-up are WOVEN IN rather than declared in content/intro.ts, because
+        neither is an argument. The demo is a photograph that plays; set-up is a form that
+        answers back. Everything around them is sand and type, and the change of ground each
+        time is the rhythm of the thing.
+
+        Where they sit is a content decision and it is written down: the demo lands after
+        VIBES, so the claim about popular culture is followed immediately by a film line, and
+        set-up lands after the Legend card, which is the first moment somebody has been told
+        what the answers are for.
       */
+      const demo = explainerCards({
+        playedAVibe: false,
+        legendWritten: false,
+        isMember: false,
+        usedTranslator: false,
+      }).find((c) => c.kind === 'explainer' && c.explainer.id === 'how_it_works')
       const setup = setUpCard(
         Boolean(learner.deal_accepted_at),
         (learner.roots_played ?? []).length > 0,
       )
-      const lead = [firstSay, pharmacy, secondSay, vibe, ...laterSay, setup].filter(
-        Boolean,
-      ) as FeedCard[]
 
-      return [...lead, ...rest]
+      const lead: FeedCard[] = []
+      for (const c of introCards()) {
+        lead.push(c)
+        if (c.id === INTRO_DEMO_AFTER && demo) lead.push(demo)
+        if (c.id === INTRO_SETUP_AFTER && setup) lead.push(setup)
+      }
+      return [...lead, ...open]
     }
 
     const withExplainers: FeedCard[] = []
@@ -672,7 +688,18 @@ export function Card({
           layout, so the lanes land where the grammar needs them and the markup stays put.
         */}
         <div className="relative order-2 h-full w-full shrink-0 snap-start">
-          {image ? (
+          {/*
+            An argument card has no photograph, and does not borrow one.
+
+            Everything else in the feed is full-bleed image, dark scrim, white type — the
+            treatment for a thing being SHOWN. These are being argued, and the change of
+            ground is what tells somebody which they are looking at. It also means the whole
+            intro sequence needs no new pictures, which is the difference between shipping it
+            and waiting on a commissioning session.
+          */}
+          {card.kind === 'intro' ? (
+            <span aria-hidden className="absolute inset-0 bg-bg" />
+          ) : image ? (
             <Image src={image.src} alt={image.alt} fill sizes="100vw" className="object-cover" />
           ) : (
             /*
@@ -694,19 +721,41 @@ export function Card({
             above the fold of the gradient — a contrast failure the gate cannot see, because
             it measures tokens against grounds rather than text against a photograph.
           */}
-          <div
-            aria-hidden
-            className={
-              'absolute inset-x-0 bottom-0 bg-gradient-to-t to-transparent ' +
-              (card.kind === 'derived'
-                ? 'h-[85%] from-black/95 via-black/80'
-                : 'h-[62%] from-black/92 via-black/60')
-            }
-          />
+          {/* No scrim over sand: the gradient exists to make white type survive a photograph. */}
+          {card.kind === 'intro' ? null : (
+            <div
+              aria-hidden
+              className={
+                'absolute inset-x-0 bottom-0 bg-gradient-to-t to-transparent ' +
+                (card.kind === 'derived'
+                  ? 'h-[85%] from-black/95 via-black/80'
+                  : 'h-[62%] from-black/92 via-black/60')
+              }
+            />
+          )}
           {/* nav-clear keeps the rail and the title above the bar rather than under it. */}
-          <div className="nav-clear absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 text-white">
+          <div
+            className={
+              'nav-clear absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 ' +
+              (card.kind === 'intro' ? 'text-fg' : 'text-white')
+            }
+          >
             <div className="min-w-0 flex-1">
-              {card.kind === 'derived' && card.card.kind === 'collision' ? (
+              {card.kind === 'intro' ? (
+                /*
+                  Sand, dark ink, and the gesture drawn rather than described.
+
+                  An arrow you can look at beats a sentence about an arrow, and these two
+                  cards exist because the grammar changed under people who already knew the
+                  old one — left used to open a card and now it sends it away.
+                */
+                <>
+                  <p className="eyebrow text-accent">{face.eyebrow}</p>
+                  <h2 className="display mt-3 text-balance text-3xl">{face.title}</h2>
+                  <p className="mt-3 text-sm leading-relaxed text-muted">{blurb}</p>
+                  {card.intro.gesture ? <Gesture kind={card.intro.gesture} /> : null}
+                </>
+              ) : card.kind === 'derived' && card.card.kind === 'collision' ? (
                 /*
                   The Portuguese is NOT on this side.
 
@@ -770,7 +819,7 @@ export function Card({
               {/* The kind-specific blocks above already say their own piece — a collision
                   puts its provenance under the sentence, and a teaching card its note. The
                   shared blurb is for the rooms, which have nothing else. */}
-              {card.kind === 'derived' || isDemo ? null : (
+              {card.kind === 'derived' || card.kind === 'intro' || isDemo ? null : (
                 <p className="mt-3 text-sm leading-relaxed text-white/80">{blurb}</p>
               )}
               {/*
@@ -835,6 +884,15 @@ export function Card({
                     GOT IT
                   </button>
                 </div>
+              ) : card.kind === 'intro' && !card.intro.examples ? (
+                /*
+                  Nothing to open, so nothing offering to open.
+
+                  An argument is complete where it stands. A TAP TO OPEN leading to a pane
+                  that restates the card teaches somebody that opening cards is not worth
+                  doing — which is the opposite of what this sequence is for.
+                */
+                <div className="mb-3 mt-6" />
               ) : isDemo ? (
                 /*
                   The one card that is done rather than read, so it has no SWIPE LEFT.
@@ -931,6 +989,8 @@ export function Card({
               <Taste card={card} />
             ) : card.kind === 'setup' ? (
               <SetUp />
+            ) : card.kind === 'intro' ? (
+              <IntroPane card={card} />
             ) : (
               <Word card={card} />
             )}
@@ -1190,6 +1250,80 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
  * demo that means a line you can actually hear, because "you already understand more than
  * you can say" is an argument until you press play and it becomes a fact.
  */
+/**
+ * Behind an argument card.
+ *
+ * Most of them have nothing back there and say so — an argument is complete on its face,
+ * and a pane full of restated copy would teach somebody that opening cards is not worth it.
+ * The Legend card is the exception: five specimen answers are better shown than described.
+ *
+ * Every one of these sentences is invented. They are the SHAPE of an answer, never anybody's
+ * real Legend, which does not leave the device at all.
+ */
+/**
+ * The gesture, drawn.
+ *
+ * Three arrows and nothing else. Deliberately not animated: the product's motion scale is
+ * four durations and two curves, none of which is a loop, and a pulsing arrow on a card
+ * somebody is reading is the kind of movement that reads as urgency when it means
+ * instruction. The arrow points; the sentence above it says what happens.
+ *
+ * `prefers-reduced-motion` therefore needs no handling here, which is the other reason not
+ * to animate it.
+ */
+function Gesture({ kind }: { kind: 'up' | 'away' | 'in' }) {
+  const label =
+    kind === 'up' ? 'Swipe up' : kind === 'away' ? 'Swipe left' : 'Tap, or swipe right'
+  return (
+    <p data-testid={'gesture-' + kind} className="mt-6 flex items-center gap-3 text-muted">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+        {kind === 'up' ? (
+          <>
+            <path d="M12 20V5" />
+            <path d="m6 11 6-6 6 6" />
+          </>
+        ) : kind === 'away' ? (
+          <>
+            <path d="M20 12H5" />
+            <path d="m11 18-6-6 6-6" />
+          </>
+        ) : (
+          <>
+            <path d="M4 12h15" />
+            <path d="m13 6 6 6-6 6" />
+          </>
+        )}
+      </svg>
+      <span className="eyebrow">{label}</span>
+    </p>
+  )
+}
+
+function IntroPane({ card }: { card: Extract<FeedCard, { kind: 'intro' }> }) {
+  const c = card.intro
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-accent">{c.eyebrow}</p>
+        <h2 className="display text-balance text-2xl">{c.headline}</h2>
+        <p className="text-sm leading-relaxed text-fg/85">{c.body}</p>
+      </div>
+      {c.examples ? (
+        <ul data-testid="intro-examples" className="flex flex-col gap-1">
+          {c.examples.map((line) => (
+            <li key={line} className="rounded border border-line bg-bg-elev px-4 py-3">
+              <span className="pt display block text-lg">{line}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <p className="text-xs leading-relaxed text-muted">
+        {c.examples ? 'Examples. Yours will be true.' : 'Keep swiping.'}
+      </p>
+    </div>
+  )
+}
+
 function Explains({ card }: { card: Extract<FeedCard, { kind: 'explainer' }> }) {
   const e = card.explainer
   return (
