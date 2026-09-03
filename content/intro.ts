@@ -48,6 +48,25 @@ export interface IntroCard {
    * people who already knew the old one.
    */
   gesture?: 'up' | 'away' | 'in'
+  /**
+   * A REAL specimen from the product, shown rather than described.
+   *
+   * The sequence is not a trailer for the lookaround — it IS the lookaround, because the
+   * wall is the Legend and everything before it is free. Which means an argument card that
+   * only argues is the one thing this sequence cannot afford: somebody deciding whether DUB
+   * is worth their afternoon is deciding on these cards, and a promise reads exactly like a
+   * promise.
+   *
+   * 'root' names a root by id and shows its actual line, with its audio. 'drop' resolves to
+   * whatever is genuinely live and says its real date and venue — so the card is empty when
+   * nothing is on, which is honest and is the point. 'legend' derives its examples from
+   * LEGEND_FRAMES, so the specimens cannot drift from the questions the product asks.
+   */
+  shows?:
+    | { kind: 'root'; root_id: string }
+    | { kind: 'drop' }
+    | { kind: 'legend' }
+    | { kind: 'lines'; lines: { pt: string; en: string }[] }
 }
 
 export const INTRO_CARDS: IntroCard[] = [
@@ -91,25 +110,39 @@ export const INTRO_CARDS: IntroCard[] = [
     eyebrow: 'VIBES',
     headline: 'Learn from what you have already seen a hundred times.',
     body: 'Top Gun, Bond, Bridget Jones. You do not learn the line — you recognise it, and keep a word out of it that works everywhere.',
+    // A real Bond line, with its real audio. Not an example of a line: a line.
+    shows: { kind: 'root', root_id: 'jb_russia' },
   },
   {
     id: 'intro_legend',
     eyebrow: 'YOUR LEGEND',
     headline: 'Build your legend out of what you have learned.',
     body: 'Seven things about yourself, said in Portuguese with nothing on screen. It is what a stranger asks you, in the order they ask it.',
-    examples: [
-      'Chamo-me Sam.',
-      'Sou inglês.',
-      'Trabalho aqui.',
-      'Estou cá há dois anos.',
-      'Quero aprender português.',
-    ],
+    /*
+      Derived from LEGEND_FRAMES rather than typed here.
+
+      Five hand-written specimens drift the moment a frame changes, and this is the card
+      that tells somebody what the Legend IS — a wrong example here is a promise about the
+      wrong product. Deriving them means they cannot go stale without the questions going
+      stale too.
+
+      They are still specimens. Nobody's real Legend leaves the device.
+    */
+    shows: { kind: 'legend' },
   },
   {
     id: 'intro_drops',
     eyebrow: 'DROPS',
     headline: 'What is actually on in Lisbon, and what to say when you get there.',
     body: 'A gig, a match, a holiday that shuts the city. It arrives when the thing is close and it goes the morning after.',
+    /*
+      Whatever is genuinely on, with its real date.
+
+      Empty when nothing is live, which is the honest outcome and the one worth having: a
+      card promising live events while showing none is the exact failure this whole sequence
+      is meant to avoid.
+    */
+    shows: { kind: 'drop' },
   },
   {
     /*
@@ -124,18 +157,44 @@ export const INTRO_CARDS: IntroCard[] = [
     eyebrow: 'THE FOUR RS',
     headline: 'Regular, relevant revision reminders.',
     body: 'Every day, a handful of the words you own come back round — the ones you are closest to losing, not the ones you learned last.',
+    // A real word out of a real root, which is what would actually come back round.
+    shows: { kind: 'root', root_id: 'ah_enjoy' },
   },
   {
     id: 'intro_ask',
     eyebrow: 'ASK',
     headline: 'The sentence we have not taught you yet.',
     body: 'Ask for it, anywhere, any time, and get it back in the Portuguese they actually speak here. It goes into your own library.',
+    /*
+      A real answer to a real question, written out rather than resolved from a root.
+
+      The translator's own output needs a key and a round trip, and a card that sometimes
+      shows nothing would be worse than one that shows a true example of what comes back.
+      These two are the register the translator is built to produce — European, and the
+      thing somebody would actually need on a Tuesday.
+    */
+    shows: {
+      kind: 'lines',
+      lines: [
+        { pt: 'Pode partir a conta em dois?', en: 'Could you split the bill in two?' },
+        { pt: 'Isto leva glúten?', en: 'Does this have gluten in it?' },
+      ],
+    },
   },
   {
     id: 'intro_share',
     eyebrow: 'WITH MATES',
     headline: 'Show somebody three things you can say.',
     body: 'They can show you theirs. Learning the same city at the same time as somebody you know is the difference between a habit and a chore.',
+    // The shape of a showing: three sentences somebody has said cold.
+    shows: {
+      kind: 'lines',
+      lines: [
+        { pt: 'Uma bica, se faz favor.', en: 'An espresso, please.' },
+        { pt: 'A fila é aqui?', en: 'Is the queue here?' },
+        { pt: 'Pode repetir mais devagar?', en: 'Could you say that again more slowly?' },
+      ],
+    },
   },
 ]
 

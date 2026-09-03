@@ -82,7 +82,25 @@ export function Club() {
     }
     return out
   }, [learner.roots_played])
-  const capped = access.known && claimed.size >= access.entitlements.crates
+  /*
+    OPEN AT ONCE, the same way the picker counts it — and it did not, until now.
+
+    The allowance is documented as how many crates can be open at once, and the picker was
+    fixed to count only unfinished ones after a learner who opened five and finished three
+    found themselves capped for ever, short of a Legend that needs five finished. This file
+    kept the old arithmetic: claimed.size, cumulative, every crate ever touched.
+
+    So the same person was capped here and not there. Two spellings of one rule is how a
+    product ends up disagreeing with itself about whether somebody has run out, and the
+    disagreement is invisible until somebody walks into it.
+  */
+  const finished = useMemo(
+    () => new Set(learner.sections_completed ?? []),
+    [learner.sections_completed],
+  )
+  const capped =
+    access.known &&
+    [...claimed].filter((id) => !finished.has(id)).length >= access.entitlements.crates
 
   /**
    * The welcome, once.
@@ -175,7 +193,29 @@ export function Club() {
   */
   const started =
     (learner.sections_completed ?? []).length > 0 || (learner.roots_played ?? []).length > 0
-  const stage: ClubStage = !mounted || inside ? 'member' : started ? 'working' : 'showcase'
+  /*
+    THE WALL IS THE LEGEND, and the teased state is what sits behind it.
+
+    "Free until the Legend, then pay" needed no new screen: the three Club states already
+    describe it exactly. Showcase is the sequence — the argument, the demo, the Legend
+    explained. Working is content with the Portuguese withheld: you can read what the
+    moment IS and not what to say, which is precisely a decent lookaround. Member is the
+    whole thing.
+
+    So graduating opens the door and paying walks through it. Somebody who has built their
+    Legend and not subscribed keeps everything they earned and sees the Club teased, which
+    is a far better argument for paying than a locked screen — they are looking at the
+    thing rather than at a price.
+
+    WHEN BILLING IS NOT CONFIGURED, EVERYBODY IS IN. Gating on a subscription in an
+    environment that cannot sell one would lock every person out of the Club permanently,
+    including whoever is testing it — and the product already follows this rule everywhere
+    else: nothing is purchasable until it is, and until then nothing is withheld either.
+  */
+  const entitled =
+    !access.known || !access.billingReady || access.entitlements.plan === 'pro'
+  const stage: ClubStage =
+    !mounted || (inside && entitled) ? 'member' : inside || started ? 'working' : 'showcase'
 
   if (welcome) return <Welcome onDone={finishWelcome} />
   /*

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import { setAvatarFromFile } from '@/engine/avatar'
 import { CHAPTERS } from '@/content/chapters'
 import { roomsFor } from '@/content/feed'
 import { CLUB } from '@/content/club'
@@ -49,6 +50,7 @@ type Step = 'where' | 'why' | 'who'
 export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   const [step, setStep] = useState<Step>('where')
   const [name, setName] = useState('')
+  const [photo, setPhoto] = useState<string | null>(null)
   const [done, setDone] = useState(false)
 
   const already = typeof window !== 'undefined' && Boolean(loadLearner().deal_accepted_at)
@@ -197,7 +199,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             <h2 className="display text-balance text-2xl">And what do they call you?</h2>
             <p className="text-sm leading-relaxed text-muted">
               The first thing you will say in Portuguese is your own name. This is the answer
-              to it.
+              to it. A photo if you want one.
             </p>
           </>
         )}
@@ -275,16 +277,56 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
       */}
       {step === 'who' ? (
         <>
-          <input
-            type="text"
-            inputMode="text"
-            autoComplete="given-name"
-            data-testid="setup-who"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your name"
-            className="tap-target w-full rounded border border-line bg-bg-elev px-4 py-3 text-base text-fg placeholder:text-muted"
-          />
+          <div className="flex items-center gap-3">
+            {/*
+              The photograph, and it never leaves this phone.
+
+              engine/avatar.ts keeps it in its own storage key rather than on the learner,
+              because the learner blob is posted to /api/session and merged across every row
+              somebody owns — putting a face on it would quietly ship that face to a server
+              with no use for it. Nothing in DUB needs this off the device, so nothing takes
+              it off the device.
+
+              The consequence is worth knowing rather than hiding: it does not survive a new
+              phone. That is the honest trade for not holding somebody's face.
+            */}
+            <label
+              className="tap-target relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-line bg-bg-elev"
+              aria-label="Add a photo"
+            >
+              {photo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photo} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center text-xs text-muted">
+                  PHOTO
+                </span>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                data-testid="setup-photo"
+                className="absolute inset-0 cursor-pointer opacity-0"
+                onChange={async (e) => {
+                  const f = e.target.files?.[0]
+                  if (f) setPhoto(await setAvatarFromFile(f))
+                }}
+              />
+            </label>
+            <input
+              type="text"
+              inputMode="text"
+              autoComplete="given-name"
+              data-testid="setup-who"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+              className="tap-target min-w-0 flex-1 rounded border border-line bg-bg-elev px-4 py-3 text-base text-fg placeholder:text-muted"
+            />
+          </div>
+          <p className="text-xs leading-relaxed text-muted">
+            The photo is optional and stays on this phone.
+          </p>
           <button
             type="button"
             data-testid="setup-commit"

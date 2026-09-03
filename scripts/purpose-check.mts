@@ -20,6 +20,7 @@
  * and tested; the caller passes null until the content lands. This asserts that it is off,
  * so turning it on is a deliberate act rather than a drift.
  */
+import { readFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_FRAMES } from '../content/legend'
@@ -191,6 +192,25 @@ console.log('\na free learner can actually reach the Legend\n')
     feel unreachable was the allowance, not the length.
   */
   ok('and the Legend costs fewer than seven vibes', crates.size < 7, crates.size + ' crates')
+  /*
+    And the cap is counted the same way everywhere.
+
+    The picker and the Club each worked out whether somebody had run out, and only one of
+    them was fixed when the counting changed from "ever touched" to "open at once" — so the
+    same learner was capped on one screen and not the other. Two spellings of one rule
+    disagree silently, and the disagreement only surfaces when a person walks into it.
+
+    Asserted as a grep because it is a claim about the CODE rather than about behaviour: the
+    two call sites have to subtract finished crates, and no rendered screen can show you
+    that they both do.
+  */
+  const clubSrc = readFileSync('components/Club.tsx', 'utf8')
+  const pickerSrc = readFileSync('components/Journey.tsx', 'utf8')
+  ok(
+    'both screens count crates open, not crates ever touched',
+    /finished\.has\(id\)/.test(clubSrc) && /finished\.has\(id\)/.test(pickerSrc),
+    'one rule, one spelling',
+  )
 }
 
 await page.goto(BASE + '/club')

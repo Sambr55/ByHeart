@@ -8,7 +8,9 @@ import { AudioButton } from '@/components/AudioButton'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
-import { INTRO_DEMO_AFTER, INTRO_SETUP_AFTER } from '@/content/intro'
+import { INTRO_DEMO_AFTER, INTRO_SETUP_AFTER, type IntroCard } from '@/content/intro'
+import { ROOTS } from '@/content/roots'
+import { cardFor } from '@/content/legend'
 import { mintShowing } from '@/engine/showing'
 import {
   FEED_COPY,
@@ -17,6 +19,7 @@ import {
   chapterName,
   askedCards,
   derivedCards,
+  dropsFor,
   explainerCards,
   introCards,
   setUpCard,
@@ -754,6 +757,7 @@ export function Card({
                   <h2 className="display mt-3 text-balance text-3xl">{face.title}</h2>
                   <p className="mt-3 text-sm leading-relaxed text-muted">{blurb}</p>
                   {card.intro.gesture ? <Gesture kind={card.intro.gesture} /> : null}
+                  {card.intro.shows ? <Specimen shows={card.intro.shows} /> : null}
                 </>
               ) : card.kind === 'derived' && card.card.kind === 'collision' ? (
                 /*
@@ -1296,6 +1300,66 @@ function Gesture({ kind }: { kind: 'up' | 'away' | 'in' }) {
       </svg>
       <span className="eyebrow">{label}</span>
     </p>
+  )
+}
+
+/**
+ * The real thing an argument card is arguing about.
+ *
+ * The sequence IS the free lookaround — the wall is the Legend and everything before it
+ * costs nothing — so a card that only makes a claim is the one thing it cannot afford.
+ * Somebody deciding whether DUB is worth their afternoon is deciding on these cards, and a
+ * promise reads exactly like a promise.
+ *
+ * Everything here is resolved from content at render rather than written into the card, so
+ * none of it can quietly become untrue: the Bond line is the Bond line, the drop is whatever
+ * is genuinely live, and the Legend questions are the questions the Legend actually asks.
+ */
+function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
+  const lines = useMemo((): { pt: string; en: string }[] => {
+    if (shows.kind === 'lines') return shows.lines
+    if (shows.kind === 'root') {
+      const r = ROOTS.find((x) => x.root_id === shows.root_id)
+      return r ? [{ pt: r.target, en: r.source }] : []
+    }
+    if (shows.kind === 'legend') {
+      /*
+        The questions, not invented answers.
+
+        "Seven questions a stranger will ask you" is the claim, so the seven questions are
+        the honest specimen — and they are true by construction, because they are the same
+        strings the Legend asks with.
+      */
+      return cardFor(null)
+        .slice(0, 5)
+        .map((f) => ({ pt: f.ask, en: f.ask_en }))
+    }
+    /*
+      Whatever is genuinely on, and nothing when nothing is.
+
+      A card promising live events while showing an invented one is the exact failure this
+      sequence exists to avoid, so an empty month renders no specimen at all.
+    */
+    const live = dropsFor(undefined, new Date(), false)
+    const first = live.find((c) => c.kind === 'situation' && c.drop)
+    if (!first || first.kind !== 'situation' || !first.drop) return []
+    const l = first.situation.lines[0]
+    return l ? [{ pt: l.pt, en: first.drop.event + ' · ' + first.drop.place.name }] : []
+  }, [shows])
+
+  if (!lines.length) return null
+  return (
+    <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-3">
+      {lines.map((l) => (
+        <li key={l.pt} className="flex items-center gap-3">
+          <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
+          <span className="min-w-0">
+            <span className="pt display block text-lg text-accent">{l.pt}</span>
+            <span className="block text-xs text-muted">{l.en}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
   )
 }
 
