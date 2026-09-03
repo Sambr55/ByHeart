@@ -332,6 +332,18 @@ export interface LearnerState {
    */
   chapter: 'lisbon' | 'faro' | null
   /**
+   * Cards pushed to the back, oldest first.
+   *
+   * Reject is "not this one now", not "never" — the feed is finite and a bored thumb on a
+   * bus should not be able to permanently shrink somebody's Club. So a rejected card sinks
+   * behind everything else rather than leaving, and the order here is the order they sink
+   * in, which is also what makes rewind possible: the last one is on the end.
+   *
+   * The mirror of `saved`. Save pulls a card to the front, reject pushes it to the back,
+   * and nothing is ever lost in either direction.
+   */
+  rejected: string[]
+  /**
    * The one Club room handed over before anything was earned, or null.
    *
    * A showcase that only describes itself is a brochure. So the first room somebody opens
@@ -393,6 +405,7 @@ export function emptyLearner(): LearnerState {
     asked: [],
     purpose: null,
     chapter: null,
+    rejected: [],
     tasted: null,
     deal_accepted_at: null,
     evidence: [],
@@ -501,6 +514,7 @@ export function loadLearner(): LearnerState {
           asked: arr(parsed.asked, []),
           purpose: parsed.purpose ?? null,
           chapter: parsed.chapter ?? null,
+          rejected: arr(parsed.rejected, []),
           tasted: parsed.tasted ?? null,
           deal_accepted_at: parsed.deal_accepted_at ?? null,
           collisions_played: arr(parsed.collisions_played, []),
@@ -1203,6 +1217,36 @@ export function setChapter(chapter: 'lisbon' | 'faro') {
   update((s) => {
     s.chapter = chapter
   })
+}
+
+/**
+ * Push a card to the back. Rejecting the same card twice moves it, it does not double it.
+ *
+ * Saved and rejected are opposites and a card cannot be both: rejecting something you
+ * saved is you changing your mind, and the newer decision is the one that counts.
+ */
+export function rejectCard(id: string) {
+  update((s) => {
+    s.rejected = [...(s.rejected ?? []).filter((x) => x !== id), id]
+    s.saved = (s.saved ?? []).filter((x) => x !== id)
+  })
+}
+
+/**
+ * Undo the last reject, and only the last.
+ *
+ * One step, deliberately. "Tap rewind if you want it back" is about the card that just
+ * left the screen — a full history would be a second navigation model for a gesture whose
+ * whole point is that it is cheap.
+ */
+export function rewindReject(): string | null {
+  let back: string | null = null
+  update((s) => {
+    const list = [...(s.rejected ?? [])]
+    back = list.pop() ?? null
+    s.rejected = list
+  })
+  return back
 }
 
 /**

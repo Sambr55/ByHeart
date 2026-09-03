@@ -25,7 +25,7 @@ import {
 } from '@/content/feed'
 import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
-import { recordProof, rememberFinishedCard, toggleCard } from '@/engine/learner'
+import { recordProof, rejectCard, rememberFinishedCard, rewindReject, toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { StatusBar } from '@/components/Native'
 import { SetUp } from '@/components/SetUp'
@@ -126,9 +126,24 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       performed — correctly, since the feed is finite and a room you have done is spent —
       but a person who said "keep this" has overruled that, and the product should let them.
     */
+    /*
+      One axis, three positions: pulled forward, ordinary, pushed back.
+
+      Save and reject are opposites now rather than neighbours. Save pulls a card to the
+      front; reject sinks it behind everything else in the order it was rejected, so the
+      most recently dismissed is last — which is also what makes rewind a single step.
+
+      NOTHING IS LOST IN EITHER DIRECTION. The feed is finite, thirty-five rooms, and a
+      reject that removed a card would let a bored thumb on a bus permanently shrink
+      somebody's Club. "Not this one now" is what the gesture means, so it is what it does.
+    */
+    const rejected = learner.rejected ?? []
+    const back = new Set(rejected)
     const open = [
-      ...rooms.filter((c) => saved.has(c.id)),
-      ...rooms.filter((c) => !saved.has(c.id) && !done.has(c.id)),
+      ...rooms.filter((c) => saved.has(c.id) && !back.has(c.id)),
+      ...rooms.filter((c) => !saved.has(c.id) && !done.has(c.id) && !back.has(c.id)),
+      // In the order they were pushed away, so the last one rejected is the last one back.
+      ...rejected.map((id) => rooms.find((c) => c.id === id)).filter(Boolean) as FeedCard[],
     ]
 
     /*
@@ -237,6 +252,8 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     // Who, where and why: the feed is built from them now, so it rebuilds on them.
     learner.chapter,
     learner.purpose,
+    // Reject reorders the feed, so the feed rebuilds on it.
+    learner.rejected,
   ])
   /*
     A save that says so.
@@ -246,7 +263,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     not found yet. It says where the thing went and offers the way there, then gets out
     of the way on its own.
   */
-  const [toast, setToast] = useState<'saved' | 'unsaved' | 'done' | null>(null)
+  const [toast, setToast] = useState<'saved' | 'unsaved' | 'done' | 'back' | null>(null)
   useEffect(() => {
     if (!toast) return
     const t = setTimeout(() => setToast(null), 3600)
@@ -430,6 +447,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
             saved={mounted && (learner.saved ?? []).includes(card.id)}
             liked={mounted && (learner.liked ?? []).includes(card.id)}
             onSaved={(on) => setToast(on ? 'saved' : 'unsaved')}
+            onBack={() => setToast('back')}
             onDone={() => setToast('done')}
           />
         ))}
@@ -449,7 +467,7 @@ export /**
  * been swiped past by the time somebody reads it — and a message that scrolls away with
  * its subject is a message nobody reads.
  */
-function Toast({ kind }: { kind: 'saved' | 'unsaved' | 'done' }) {
+function Toast({ kind }: { kind: 'saved' | 'unsaved' | 'done' | 'back' }) {
   return (
     <div
       role="status"
@@ -457,7 +475,13 @@ function Toast({ kind }: { kind: 'saved' | 'unsaved' | 'done' }) {
       className="animate-bank absolute inset-x-0 bottom-0 z-50 flex items-center gap-3 bg-black/85 px-5 py-3 text-white"
     >
       <p className="min-w-0 flex-1 text-sm">
-        {kind === 'saved' ? FEED_COPY.saved : kind === 'done' ? FEED_COPY.done : FEED_COPY.unsaved}
+        {kind === 'saved'
+          ? FEED_COPY.saved
+          : kind === 'done'
+            ? FEED_COPY.done
+            : kind === 'back'
+              ? FEED_COPY.back
+              : FEED_COPY.unsaved}
       </p>
       {kind === 'saved' || kind === 'done' ? (
         <Link
@@ -476,6 +500,8 @@ export function Card({
   saved,
   liked,
   onSaved,
+  onRejected,
+  onBack,
   onDone,
   stage = 'member',
   hint = false,
@@ -484,6 +510,10 @@ export function Card({
   saved: boolean
   liked: boolean
   onSaved?: (on: boolean) => void
+  /** So the feed can say a card went away, and offer it back. */
+  onRejected?: () => void
+  /** A card came back, so the feed can say so. */
+  onBack?: () => void
   /** Spent, and on its way to the profile. The feed rebuilds without it. */
   onDone?: () => void
   /** Which Club this is. A member's rooms are never teased. */
@@ -526,13 +556,55 @@ export function Card({
   */
   const isDemo = card.kind === 'explainer' && card.explainer.id === 'how_it_works'
 
-  const reveal = () => (
-    claim(),
-    pane.current?.scrollTo({
-      left: pane.current.clientWidth,
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-    })
-  )
+  const smooth = () =>
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? ('auto' as const)
+      : ('smooth' as const)
+
+  /*
+    Enter: scroll to lane 0, which is the language. Reached by tapping or swiping right.
+
+    It scrolled to clientWidth when the language lived on the right. Left now means reject,
+    so entering scrolls the other way, and the same call serves the tap.
+  */
+  const reveal = () => (claim(), pane.current?.scrollTo({ left: 0, behavior: smooth() }))
+
+  /*
+    Settling on the away lane is the reject, and settling is the whole point.
+
+    Fired on scroll rather than on a gesture handler so a half-swipe that springs back does
+    nothing — the card has to actually come to rest out there. The guard stops the same
+    reject firing on every scroll event of the animation.
+  */
+  /*
+    Start on the middle lane.
+
+    A three-lane scroller opens at lane 0, which is now the language — so without this every
+    card would open already answered, with the Portuguese showing and the photograph
+    somewhere off to the right. Set with 'auto' and no animation: this is where the card
+    begins, not somewhere it travels to.
+  */
+  useEffect(() => {
+    const el = pane.current
+    if (el) el.scrollLeft = el.clientWidth
+  }, [card.id])
+
+  const wentAway = useRef(false)
+  const onPaneScroll = () => {
+    const el = pane.current
+    if (!el) return
+    const away = el.scrollLeft >= el.clientWidth * 1.5
+    if (away && !wentAway.current) {
+      wentAway.current = true
+      rejectCard(card.id)
+      track('card_rejected', { card: card.id })
+      onRejected?.()
+      // Back to the face, so the card that takes this one's place is not showing its lane.
+      el.scrollTo({ left: el.clientWidth, behavior: 'auto' })
+    }
+    if (!away) wentAway.current = false
+  }
   /*
     Whether this room is free to this person — derived, never latched at first render.
 
@@ -565,19 +637,38 @@ export function Card({
   return (
     <section className="relative h-full w-full snap-start snap-always">
       {/*
-        Two panes side by side, snapped horizontally: the room, then the language.
+        Three lanes side by side, and the card starts in the middle one.
 
-        Swiping left is a reveal rather than a navigation — the card does not go
-        anywhere, and swiping back is the same gesture in reverse. That matters on a
-        screen somebody opens while standing outside the place it is about.
+        THE ORDER IS THE GRAMMAR. The language sits to the LEFT of the face, so revealing it
+        means swiping right; an empty lane sits to the RIGHT, so swiping left carries the
+        card away. Both are the same native CSS snap the feed has always used, which is what
+        keeps the gesture feeling like the phone rather than like JavaScript.
+
+        It was two lanes with the language on the right, and swiping left was the reveal.
+        That inverted: left is reject now and right is enter. The face's own instruction
+        changed with it — a card that still read SWIPE LEFT would be telling somebody to
+        throw it away.
+
+        Away is a LANE rather than an event, deliberately. A half-swipe snaps back and
+        nothing happens, so the gesture can be started and abandoned — which matters a great
+        deal for a verb whose whole point is that it is cheap.
       */}
       <div
         ref={pane}
         data-testid="card-panes"
         className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain"
         style={{ scrollbarWidth: 'none' }}
+        onScroll={onPaneScroll}
       >
-        <div className="relative h-full w-full shrink-0 snap-start">
+        {/*
+          Laid out by `order` rather than by DOM position.
+
+          The language pane is a long block of JSX and moving it to sit before the face
+          would be a large diff for a purely visual reordering — and a large diff is where
+          a pane quietly loses a wrapper. Flex order changes layout, scroll-snap works on
+          layout, so the lanes land where the grammar needs them and the markup stays put.
+        */}
+        <div className="relative order-2 h-full w-full shrink-0 snap-start">
           {image ? (
             <Image src={image.src} alt={image.alt} fill sizes="100vw" className="object-cover" />
           ) : (
@@ -724,7 +815,7 @@ export function Card({
                     onClick={reveal}
                     className="tap-target eyebrow w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
                   >
-                    SWIPE LEFT
+                    TAP TO OPEN
                   </button>
                   <button
                     type="button"
@@ -766,7 +857,18 @@ export function Card({
                      touching read as one shape, and the shape was neither. */
                   className="tap-target eyebrow mb-3 mt-6 w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
                 >
-                  SWIPE LEFT
+                  {/*
+                    TAP TO OPEN, because left no longer opens anything.
+
+                    Every card face read SWIPE LEFT, which was true when left was the reveal.
+                    Left is reject now, so the old instruction would have been telling people
+                    to throw the card away — the worst possible way for copy to go stale.
+
+                    Tap rather than "swipe right": tapping is the gesture nobody has to be
+                    taught, the button is already under their thumb, and swiping right works
+                    anyway for anybody who finds it.
+                  */}
+                  TAP TO OPEN
                 </button>
               )}
               {/*
@@ -797,11 +899,12 @@ export function Card({
                 onSaved?.(on)
               }}
               onLike={() => setLiked(toggleCard('liked', card.id))}
+              onRewound={() => onBack?.()}
             />
           </div>
         </div>
 
-        <div className="card-pane nav-clear h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 text-fg">
+        <div className="card-pane nav-clear order-1 h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 text-fg">
           {/* Clearance is card-pane in globals.css — the header's own measurement, notch
               included, so the two cannot drift apart. */}
           <div>
@@ -829,6 +932,26 @@ export function Card({
               <Word card={card} />
             )}
           </div>
+        </div>
+        {/*
+          The away lane: what swiping left carries the card into.
+
+          Empty of controls on purpose. It is not a screen and nothing here is pressed — it
+          exists so the gesture has somewhere to go and something to say while it is
+          happening. Snapping onto it fires the reject; snapping back off it does nothing at
+          all, which is what makes a half-swipe free.
+
+          The words matter more than they look like they should. "Gone" would be a lie: the
+          card sinks behind the others and comes back, and somebody who believes rejecting
+          destroys things will stop doing it.
+        */}
+        <div
+          aria-hidden
+          data-testid="card-away"
+          className="order-3 flex h-full w-full shrink-0 snap-start flex-col items-start justify-end gap-1 bg-bg px-5 pb-10 text-fg"
+        >
+          <p className="eyebrow text-muted">NOT NOW</p>
+          <p className="display text-balance text-2xl">Back later, behind the rest.</p>
         </div>
       </div>
     </section>
@@ -1172,12 +1295,14 @@ function Rail({
   isLiked,
   onSave,
   onLike,
+  onRewound,
 }: {
   card: FeedCard
   isSaved: boolean
   isLiked: boolean
   onSave: () => void
   onLike: () => void
+  onRewound?: () => void
 }) {
   /*
     The rail reads the learner because the share button now sends what they can SAY.
@@ -1225,6 +1350,32 @@ function Rail({
           <path d="M20 15a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z" />
         </svg>
       </Link>
+
+      {/*
+        Rewind: back on the one that just went away, and only when there is one.
+
+        Absent rather than disabled when nothing has been rejected — a permanently greyed
+        control on a rail of four live ones reads as broken, and this is a verb somebody
+        needs exactly once, immediately, in the second after a swipe they did not mean.
+      */}
+      {(learner.rejected ?? []).length ? (
+        <button
+          type="button"
+          aria-label="Bring back the last card"
+          data-testid="feed-rewind"
+          onClick={() => {
+            const back = rewindReject()
+            if (back) track('card_rewound', { card: back })
+            onRewound?.()
+          }}
+          className={btn + ' text-white/85'}
+        >
+          <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+            <path d="M9 14 4 9l5-5" />
+            <path d="M4 9h10a6 6 0 0 1 0 12h-3" />
+          </svg>
+        </button>
+      ) : null}
 
       <button
         type="button"

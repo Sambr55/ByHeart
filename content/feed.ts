@@ -494,6 +494,14 @@ export const FEED_COPY = {
   saved: 'Kept. It is on your profile.',
   saved_cta: 'SEE IT',
   unsaved: 'Taken off your profile.',
+  /*
+    A rewind, said as what happened to the card rather than as an undo.
+
+    "Undone" describes the button. This describes the card, which is what the person was
+    thinking about when they pressed it — and it repeats the promise the away lane makes,
+    because a reject that people believe is destructive is a reject nobody uses.
+  */
+  back: 'Back in the pile.',
 } as const
 
 

@@ -156,6 +156,8 @@ export type EventName =
   */
   | 'purpose_chosen'
   | 'demo_played'
+  | 'card_rejected'
+  | 'card_rewound'
   | 'purpose_skipped'
   | 'chapter_chosen'
   /* The one Club room given away before anything was earned, and which one it was. */
