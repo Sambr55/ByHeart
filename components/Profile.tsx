@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '@/components/Feed'
 import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { Friends } from '@/components/Friends'
 import { PurposeChoice, SoundChoice, ThemeChoice } from '@/components/Theme'
 import { Wordmark } from '@/components/Wordmark'
 import { cardById, cardFace, derivedCards, roomsFor, wordCards, type FeedCard } from '@/content/feed'
@@ -185,6 +186,11 @@ export function Profile() {
             onOpen={setOpen}
           />
           <LegendRow />
+          {/*
+            Above More rather than below it, because a friend is a thing you have and More
+            is the drawer for everything else.
+          */}
+          <Friends />
           <More />
           {/*
             The dark theme was complete, correct, and only reachable from the burger —

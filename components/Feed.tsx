@@ -8,6 +8,7 @@ import { AudioButton } from '@/components/AudioButton'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
+import { mintShowing } from '@/engine/showing'
 import {
   FEED_COPY,
   cardFace,
@@ -1178,6 +1179,14 @@ function Rail({
   onSave: () => void
   onLike: () => void
 }) {
+  /*
+    The rail reads the learner because the share button now sends what they can SAY.
+
+    Taken from the store rather than passed down: the rail is rendered per card and the
+    proof it mints from is the same for all of them, so threading it through every call
+    site would be five props saying one thing.
+  */
+  const learner = useLearner()
   const btn = 'tap-target flex h-11 w-11 items-center justify-center rounded-full transition'
   return (
     <div className="flex shrink-0 flex-col items-center gap-3">
@@ -1240,11 +1249,28 @@ function Rail({
         data-testid="feed-share"
         onClick={async () => {
           track('feed_share', { card: card.id })
-          const url = window.location.origin + '/club'
+          /*
+            WHAT GETS SENT, and it used to be the homepage.
+
+            This shared window.location.origin + '/club' — a link to the front of the app,
+            with no card, no sentences and nothing of the sender in it. The most-tapped
+            share control in the product was posting an advert, while the artefact actually
+            built to be worth sending, the showing, was reachable only from /proof.
+
+            "Are you on DUB?" lands very differently as three things your friend can say in
+            Portuguese than as a URL.
+
+            The fallback is still a link, and honestly so: somebody who has not said
+            anything cold yet has nothing to show, and the invitation is the next best
+            thing they can offer.
+          */
+          const { path } = await mintShowing(learner)
+          const url = window.location.origin + (path ?? '/club')
           const title = cardFace(card).title
           // The platform sheet where there is one; the clipboard where there is not.
           if (navigator.share) await navigator.share({ title, url }).catch(() => {})
           else await navigator.clipboard?.writeText(url).catch(() => {})
+          if (path) track('showing_sent', {})
         }}
         className={btn + ' text-white/85'}
       >
