@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CHAPTERS } from '@/content/chapters'
+import { roomsFor } from '@/content/feed'
 import { CLUB } from '@/content/club'
 import { EXPLAINER_CTA } from '@/content/explainers'
 import { PAIR_STEP } from '@/content/front-door'
@@ -52,6 +53,25 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
 
   const already = typeof window !== 'undefined' && Boolean(loadLearner().deal_accepted_at)
 
+  /*
+    Five of them, and five is a judgement rather than a round number.
+
+    Fewer than four reads as a thin product; more than five stops being a promise and starts
+    being an inventory somebody has to read. They are taken from the front of the filtered
+    list, which is the order the feed will actually show them in — so this is a preview, not
+    a sample.
+  */
+  const topics = useMemo(() => {
+    if (typeof window === 'undefined') return []
+    const me = loadLearner()
+    if (!me.deal_accepted_at && !done) return []
+    return roomsFor(me.chapter ?? undefined, me.purpose ?? null)
+      .filter((c) => c.kind === 'situation')
+      .slice(0, 5)
+      .map((c) => (c.kind === 'situation' ? c.situation.title : ''))
+      .filter(Boolean)
+  }, [done])
+
   const finish = () => {
     /*
       The pair, derived rather than asked.
@@ -85,11 +105,39 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
-          <h2 className="display text-balance text-2xl">You are set up.</h2>
+          <h2 className="display text-balance text-2xl">Then this is your Lisbon.</h2>
           <p className="text-sm leading-relaxed text-muted">
-            Three vibes are waiting. Nothing else to decide.
+            {topics.length
+              ? 'Rooms you will get because of what you just said.'
+              : 'Three vibes are waiting. Nothing else to decide.'}
           </p>
         </div>
+
+        {/*
+          WHAT THE ANSWER BOUGHT, said back in the learner's own Club.
+
+          Purpose filtered the feed in total silence: somebody answered "I am here for a few
+          days", the Club quietly became a different Club, and nothing told them. This is the
+          moment the question visibly pays, and it is the only place in the product where a
+          person can see that answering did anything at all.
+
+          THE TITLES ARE REAL. They come from roomsFor with this learner's own chapter and
+          purpose — the same call the feed makes — so they are not a promise about content,
+          they are the content, listed. Inventing topic names would make this the one screen
+          in DUB that could go out of date without anybody editing it.
+        */}
+        {topics.length ? (
+          <ul data-testid="setup-topics" className="flex flex-col gap-1">
+            {topics.map((t) => (
+              <li
+                key={t}
+                className="rounded border border-line bg-bg-elev px-4 py-3 text-sm"
+              >
+                {t}
+              </li>
+            ))}
+          </ul>
+        ) : null}
         {/*
           Continue in place when the journey is asking, navigate when the Club is.
 

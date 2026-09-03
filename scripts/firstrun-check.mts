@@ -487,6 +487,33 @@ console.log('\nset-up asks who, where and why — and the feed changes because o
           } catch { return {} }
         })()`,
       )) as { chapter?: string; purpose?: string; display_name?: string }
+      /*
+        AND THE ANSWER PAYS, VISIBLY, which nothing in the product did before.
+
+        Purpose filtered the feed in silence: somebody answered "a few days", the Club
+        quietly became a different Club, and no screen ever said so. This asserts the rooms
+        named back are REAL — drawn from roomsFor with the learner's own chapter and purpose,
+        the same call the feed makes — because the failure worth catching is not a missing
+        list, it is a convincing one made of invented topic names that nothing keeps true.
+      */
+      const topics = (await page.evaluate(
+        `Array.from(document.querySelectorAll('[data-testid="setup-topics"] li')).map(li => li.textContent.trim())`,
+      )) as string[]
+      ok('the answer names what it bought', topics.length > 0, topics.join(' · ').slice(0, 70))
+      if (topics.length) {
+        const rooms = new Set(
+          (await page.evaluate(
+            `Array.from(document.querySelectorAll('.snap-y > section')).slice(1,-1)
+              .map(s => (s.innerText||'').split(String.fromCharCode(10)).filter(Boolean)[1] || '')`,
+          )) as string[],
+        )
+        const invented = topics.filter((t) => !rooms.has(t))
+        ok(
+          'and every one of them is a room in their own feed',
+          invented.length === 0,
+          invented.length ? 'invented: ' + invented.join(', ') : topics.length + ' real',
+        )
+      }
       ok('where is recorded', saved.chapter === 'lisbon', String(saved.chapter))
       ok('why is recorded', saved.purpose === 'moving', String(saved.purpose))
       ok('who is recorded', saved.display_name === 'Sam', String(saved.display_name))

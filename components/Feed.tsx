@@ -221,7 +221,10 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         vibe. It can be swiped past like anything else here — the gate is on the action,
         not on the thumb.
       */
-      const setup = setUpCard(Boolean(learner.deal_accepted_at))
+      const setup = setUpCard(
+        Boolean(learner.deal_accepted_at),
+        (learner.roots_played ?? []).length > 0,
+      )
       const lead = [firstSay, pharmacy, secondSay, vibe, ...laterSay, setup].filter(
         Boolean,
       ) as FeedCard[]

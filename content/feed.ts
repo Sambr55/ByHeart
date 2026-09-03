@@ -407,13 +407,22 @@ export function vibeCard(family: CultureFamily): FeedCard | null {
 }
 
 /**
- * The set-up card, for anybody who has not been through it.
+ * The set-up card, for anybody who has not been through it AND NOT YET STARTED.
  *
- * Retired the moment the deal is accepted, like every explainer: a card telling somebody to
- * do a thing they have already done is an advert for their own past.
+ * Retired on the first vibe played rather than on the deal being accepted, and the
+ * difference is the whole reason the output card can exist.
+ *
+ * It retired on acceptance — sensible on its face, since a card telling somebody to do a
+ * thing they have already done is an advert for their own past. But accepting is the last
+ * tap of the card itself, so the card was removed from the feed at the exact instant it had
+ * something to say back: "then this is your Lisbon", with the rooms their answers just
+ * bought. The reply was unreachable by construction and nothing said so.
+ *
+ * Playing a root is the honest retirement condition. The card's job is to get somebody
+ * started; it is finished when they have started, not when they have agreed to.
  */
-export function setUpCard(dealAccepted: boolean): FeedCard | null {
-  if (dealAccepted) return null
+export function setUpCard(dealAccepted: boolean, started = false): FeedCard | null {
+  if (dealAccepted && started) return null
   return {
     kind: 'setup',
     id: 'setup',
