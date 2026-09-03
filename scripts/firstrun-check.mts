@@ -22,6 +22,8 @@
 import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { INTRO_CARDS } from '../content/intro'
+import { ROOTS } from '../content/roots'
+import { cardFor } from '../content/legend'
 import { EXPLAINERS, EXPLAINER_CTA } from '../content/explainers'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -124,6 +126,56 @@ const titles = (await page.evaluate(
   const setupAt = got.findIndex((g) => /ONE DECISION/.test(g))
   const legendAt = got.indexOf('YOUR LEGEND')
   ok('and set-up follows the Legend card', setupAt === legendAt + 1, 'legend ' + legendAt + ', set-up ' + setupAt)
+}
+
+/*
+  THE SEQUENCE IS THE FREE LOOKAROUND, so it has to show rather than promise.
+
+  The wall is the Legend now: everything up to building one costs nothing, and these cards
+  are what somebody decides on. A card that only makes a claim is the one thing this
+  sequence cannot afford — a promise reads exactly like a promise, and the product has
+  real Portuguese, real events and real questions sitting one import away.
+
+  Asserted per-card rather than as a total, because a total passes when one card carries
+  six specimens and four carry none.
+*/
+{
+  const shows = (await page.evaluate(
+    `Array.from(document.querySelectorAll('.snap-y > section')).slice(1, -1).slice(0, 12).map(s => {
+       const t = (s.innerText || '').split(String.fromCharCode(10)).filter(Boolean)[0] || ''
+       return t + ':' + s.querySelectorAll('[data-testid="intro-shows"] li').length
+     })`,
+  )) as string[]
+  const seen = new Map(shows.map((r) => [r.split(':')[0], Number(r.split(':')[1])]))
+  const mustShow = ['VIBES', 'YOUR LEGEND', 'DROPS', 'THE FOUR RS', 'ASK', 'WITH MATES']
+  const bare = mustShow.filter((e) => !(seen.get(e) ?? 0))
+  ok(
+    'every card that claims something shows it',
+    bare.length === 0,
+    bare.length ? 'bare: ' + bare.join(', ') : mustShow.map((e) => e + ' ' + seen.get(e)).join(' · '),
+  )
+  /*
+    And the specimens are the product's own, not copies typed into the sequence.
+
+    The Bond line is checked against ROOTS and the Legend questions against LEGEND_FRAMES,
+    because a hand-typed specimen is exactly the thing that goes quietly out of date — and
+    a card teaching the wrong question about the Legend is a promise about a different
+    product.
+  */
+  const feedText = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
+  const bond = ROOTS.find((r) => r.root_id === 'jb_russia')
+  ok(
+    'the vibe specimen is a real root line',
+    Boolean(bond && feedText.includes(bond.target)),
+    bond ? bond.target : 'jb_russia missing',
+  )
+  const asks = cardFor(null).slice(0, 5).map((f) => f.ask)
+  const missing = asks.filter((a) => !feedText.includes(a))
+  ok(
+    'and the Legend specimens are the questions it actually asks',
+    missing.length === 0,
+    missing.length ? 'not shown: ' + missing.join(', ') : asks.length + ' real questions',
+  )
 }
 
 ok(
