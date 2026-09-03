@@ -947,7 +947,31 @@ function Picker() {
     return out
   }, [state.rootsPlayed])
   const allowance = access.entitlements.crates
-  const spent = claimed.size
+  /*
+    OPEN AT ONCE, which is what the entitlement has always said and never did.
+
+    `crates` is documented as "how many crates can be open at once" and was implemented as
+    how many have EVER been touched — every crate a root was played in, cumulative, for
+    ever. Those two are the same number only for somebody who finishes everything they
+    start, and the difference is a trap:
+
+      The Legend needs five crates COMPLETED. The allowance counted five STARTED. Start
+      five, finish three, wander off from two — and you are at the limit with nothing left
+      to open and no way to reach the Legend. Permanently. Nothing on screen says so,
+      because from the inside it looks exactly like ordinary progress that has stopped.
+
+    Counting only what is still open removes it: finishing a crate frees its slot, so the
+    road to the Legend can always be walked, and somebody who abandons two can go back and
+    finish them rather than being stranded by them.
+
+    It also makes the free tier mean what its own copy claims — three or five things on the
+    go at a time, not three or five things ever.
+  */
+  const finished = useMemo(
+    () => new Set(learner.sections_completed ?? []),
+    [learner.sections_completed],
+  )
+  const spent = [...claimed].filter((id) => !finished.has(id)).length
   const atLimit = access.known && spent >= allowance
   const anyLocked = shown.some((c) => entryRung(c) > rung)
 

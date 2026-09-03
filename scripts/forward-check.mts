@@ -37,6 +37,18 @@ function rootsOf(ids: string[]): string[] {
   })
 }
 
+/**
+ * A learner who started some crates and finished only some of them.
+ *
+ * The state that produced the trap: `roots_played` marks a crate CLAIMED, and
+ * `sections_completed` marks it FINISHED. The allowance counted the first and the Legend
+ * counts the second, so somebody who opens five and finishes three is at the cap with two
+ * unfinished and no way to reach a Legend that needs five finished.
+ */
+function seedPartial(started: string[], finished: string[]) {
+  return { ...seed(started), sections_completed: finished }
+}
+
 function seed(crateIds: string[]) {
   const opener = ROOTS.find((r) => r.rung === 1)
   return {
@@ -90,13 +102,65 @@ async function waysForward(page: Page) {
 const CAP = FREE_ENTITLEMENTS.crates
 const upTo = (n: number) => (basics ? [basics.id, ...others.slice(0, Math.max(0, n - 1)).map((c) => c.id)] : [])
 
-const STATES: { name: string; crates: string[]; mustReachGate?: boolean }[] = [
+const STATES: { name: string; crates: string[]; finished?: string[]; mustReachGate?: boolean }[] = [
   { name: 'brand new', crates: [] },
   { name: 'basics done', crates: upTo(1) },
   { name: 'halfway to the cap', crates: upTo(Math.max(2, Math.floor(CAP / 2))) },
-  // The one Sam hit: as many claimed as the plan allows, with nothing saying what is next.
-  { name: 'at the cap (' + CAP + ' crates)', crates: upTo(CAP), mustReachGate: true },
+  /*
+    The one Sam hit, and being at the cap now means something more specific.
+
+    The allowance counts crates OPEN, not crates ever touched — so five FINISHED crates is
+    zero open and correctly not at the cap. To be capped you have to be holding the whole
+    allowance unfinished, which is what `finished: []` says.
+  */
+  { name: 'at the cap (' + CAP + ' open)', crates: upTo(CAP), finished: [], mustReachGate: true },
 ]
+
+console.log('abandoning crates does not strand you short of the Legend\n')
+/*
+  THE TRAP, walked in the product rather than in arithmetic.
+
+  Raising the free allowance to the number of crates the Legend needs made the road exactly
+  as long as the road, with no margin. `crates` is documented as "how many can be open at
+  once" and was implemented as how many have EVER been touched — the same number only for
+  somebody who finishes everything they start. Open five, finish three, wander off from two,
+  and you are capped with nothing left to open and no way to reach the Legend. Permanently,
+  and with nothing on screen saying so: from the inside it is ordinary progress that stopped.
+
+  Reported from a phone as "not getting to the Legend after completing multiple vibes".
+
+  Asserted on the RENDERED picker, because a version of this written as arithmetic over the
+  two constants passes whether or not the code was ever fixed.
+*/
+{
+  const b0 = await chromium.launch()
+  const p0 = await b0.newPage({ viewport: { width: 390, height: 780 } })
+  const all = upTo(CAP)
+  const done = all.slice(0, Math.max(1, CAP - 2))
+  await p0.goto(BASE + '/vibes')
+  await p0.evaluate(
+    ([k, pair, blob]) => {
+      localStorage.setItem('byheart.pair', JSON.stringify(pair))
+      localStorage.setItem(k as string, JSON.stringify(blob))
+    },
+    [KEY, DEFAULT_PAIR, seedPartial(all, done)] as const,
+  )
+  await p0.goto(BASE + '/vibes')
+  await p0.waitForTimeout(2600)
+  const body = ((await p0.textContent('body')) ?? '').replace(/\s+/g, ' ')
+  const capped = /WHAT MEMBERSHIP OPENS/.test(body)
+  const line = 'started ' + all.length + ', finished ' + done.length
+  if (capped) {
+    problems.push(
+      line + ': at the cap with unfinished crates and no way to reach the Legend — ' +
+        'finishing must free the slot, or abandoning one is terminal',
+    )
+    console.log('  ✗ ' + line + ' — capped\n')
+  } else {
+    console.log('  ✓ ' + line + ' — not capped; finishing frees the slot\n')
+  }
+  await b0.close()
+}
 
 const browser = await chromium.launch()
 console.log('routes out of the shelf, per state\n')
@@ -110,7 +174,7 @@ for (const st of STATES) {
       localStorage.setItem('byheart.pair', JSON.stringify(pair))
       localStorage.setItem(k as string, JSON.stringify(s))
     },
-    [KEY, DEFAULT_PAIR, seed(st.crates)] as const,
+    [KEY, DEFAULT_PAIR, seedPartial(st.crates, st.finished ?? st.crates)] as const,
   )
   await page.goto(BASE + '/vibes', { waitUntil: 'domcontentloaded' })
   await page.waitForTimeout(900)
