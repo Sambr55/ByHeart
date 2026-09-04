@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { DemoCard } from '@/components/DemoCard'
+import { Destination } from '@/components/Destination'
 import { AudioButton } from '@/components/AudioButton'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
@@ -306,6 +307,43 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
   }, [cards.length])
 
   /*
+    THE TUTORIAL CARDS HOLD YOU UNTIL YOU DO THE THING, and this is the only place in DUB
+    where the scroll is stopped rather than an action.
+
+    That is a deliberate exception to a rule I have argued for repeatedly — gates live on
+    actions, never on the thumb — and it earns the exception because on these two cards the
+    gate IS the lesson. "Swipe left to send a card back" is not learned by reading it; a
+    person who swipes up past the instruction has been told a gesture and never made it,
+    which is the same as not being told.
+
+    Released per card and never re-armed: once you have rejected something you know how, and
+    meeting the same lock again would be a quiz rather than a lesson. Held in state rather
+    than on the learner because it is about this reading of the sequence, not about the
+    person — and because a lock that survives a reload is a trap if anything ever goes wrong
+    with the gesture.
+  */
+  const [freed, setFreed] = useState<string[]>([])
+  const [atIndex, setAtIndex] = useState(0)
+  const lockedNow = useMemo(() => {
+    const card = cards[atIndex]
+    if (!card || card.kind !== 'intro' || !card.intro.only) return null
+    return freed.includes(card.id) ? null : card.id
+  }, [atIndex, cards, freed])
+
+  /*
+    Which card is on screen, tracked so the lock knows what it is looking at.
+
+    Read on scroll rather than kept in sync with the settle handler: the lock has to bite
+    the moment somebody starts to move away, not once the movement has finished.
+  */
+  const watchPosition = () => {
+    const el = rail.current
+    if (!el || !el.clientHeight) return
+    // Minus the leading clone, which is a copy of the last card rather than a card.
+    setAtIndex(Math.max(0, Math.round(el.scrollTop / el.clientHeight) - 1))
+  }
+
+  /*
     The jump, on settle rather than on every scroll event.
 
     Moving scrollTop mid-gesture fights the momentum the browser is still applying, so
@@ -452,7 +490,13 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       <div
         ref={rail}
         data-testid="feed"
-        className="h-full snap-y snap-mandatory overflow-y-auto overscroll-y-contain"
+        data-locked={lockedNow ?? undefined}
+        onScroll={watchPosition}
+        className={
+          'h-full snap-y snap-mandatory overscroll-y-contain ' +
+          // The one place the thumb is stopped, and only until the gesture is made.
+          (lockedNow ? 'overflow-y-hidden' : 'overflow-y-auto')
+        }
         style={{ scrollbarWidth: 'none' }}
       >
         {looped.map((card, i) => (
@@ -469,6 +513,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
             saved={mounted && (learner.saved ?? []).includes(card.id)}
             liked={mounted && (learner.liked ?? []).includes(card.id)}
             onSaved={(on) => setToast(on ? 'saved' : 'unsaved')}
+            onFreed={(id: string) => setFreed((f) => (f.includes(id) ? f : [...f, id]))}
             onBack={() => setToast('back')}
             onDone={() => setToast('done')}
           />
@@ -524,6 +569,7 @@ export function Card({
   onSaved,
   onRejected,
   onBack,
+  onFreed,
   onDone,
   stage = 'member',
   hint = false,
@@ -536,6 +582,8 @@ export function Card({
   onRejected?: () => void
   /** A card came back, so the feed can say so. */
   onBack?: () => void
+  /** The tutorial gesture was made, so the lock on this card lifts. */
+  onFreed?: (id: string) => void
   /** Spent, and on its way to the profile. The feed rebuilds without it. */
   onDone?: () => void
   /** Which Club this is. A member's rooms are never teased. */
@@ -590,7 +638,11 @@ export function Card({
     It scrolled to clientWidth when the language lived on the right. Left now means reject,
     so entering scrolls the other way, and the same call serves the tap.
   */
-  const reveal = () => (claim(), pane.current?.scrollTo({ left: 0, behavior: smooth() }))
+  const reveal = () => {
+    claim()
+    if (card.kind === 'intro' && card.intro.only === 'in') onFreed?.(card.id)
+    pane.current?.scrollTo({ left: 0, behavior: smooth() })
+  }
 
   /*
     Settling on the away lane is the reject, and settling is the whole point.
@@ -621,11 +673,23 @@ export function Card({
       wentAway.current = true
       rejectCard(card.id)
       track('card_rejected', { card: card.id })
+      // The lesson is the doing. Rejecting the reject card is what proves it landed.
+      if (card.kind === 'intro' && card.intro.only === 'away') onFreed?.(card.id)
       onRejected?.()
       // Back to the face, so the card that takes this one's place is not showing its lane.
       el.scrollTo({ left: el.clientWidth, behavior: 'auto' })
     }
     if (!away) wentAway.current = false
+    /*
+      Swiping right counts as entering, the same as the button does.
+
+      The lock releases on reveal(), which is the tap. A person who follows the other half of
+      the instruction — "or swipe right" — would otherwise still be held, which would teach
+      them the gesture does not work.
+    */
+    if (el.scrollLeft < el.clientWidth * 0.5 && card.kind === 'intro' && card.intro.only === 'in') {
+      onFreed?.(card.id)
+    }
   }
   /*
     Whether this room is free to this person — derived, never latched at first render.
@@ -753,11 +817,28 @@ export function Card({
                   old one — left used to open a card and now it sends it away.
                 */
                 <>
-                  <p className="eyebrow text-accent">{face.eyebrow}</p>
-                  <h2 className="display mt-3 text-balance text-3xl">{face.title}</h2>
-                  <p className="mt-3 text-sm leading-relaxed text-muted">{blurb}</p>
-                  {card.intro.gesture ? <Gesture kind={card.intro.gesture} /> : null}
-                  {card.intro.shows ? <Specimen shows={card.intro.shows} /> : null}
+                  {/*
+                    A pillar's eyebrow IS the headline, and arrives as one.
+
+                    VIBES, DROPS, THE FOUR RS, ASK and WITH MATES are what the product is,
+                    and they were eleven-point labels above a sentence — the smallest type
+                    on the card carrying the biggest idea on it.
+                  */}
+                  {card.intro.pillar ? (
+                    <p data-testid="pillar" className="pillar text-accent">
+                      {face.eyebrow}
+                    </p>
+                  ) : (
+                    <p className="eyebrow text-accent">{face.eyebrow}</p>
+                  )}
+                  <div className={card.intro.pillar ? 'pillar-body' : undefined}>
+                    <h2 className="display mt-3 text-balance text-3xl">{face.title}</h2>
+                    <p className="mt-3 text-sm leading-relaxed text-muted">{blurb}</p>
+                    {card.intro.gesture ? (
+                      <Gesture kind={card.intro.gesture} moving={Boolean(card.intro.only) || card.intro.gesture === 'up'} />
+                    ) : null}
+                    {card.intro.shows ? <Specimen shows={card.intro.shows} /> : null}
+                  </div>
                 </>
               ) : card.kind === 'derived' && card.card.kind === 'collision' ? (
                 /*
@@ -888,7 +969,7 @@ export function Card({
                     GOT IT
                   </button>
                 </div>
-              ) : card.kind === 'intro' && !card.intro.examples ? (
+              ) : card.kind === 'intro' && !card.intro.shows && !card.intro.asks ? (
                 /*
                   Nothing to open, so nothing offering to open.
 
@@ -993,6 +1074,8 @@ export function Card({
               <Taste card={card} />
             ) : card.kind === 'setup' ? (
               <SetUp />
+            ) : card.kind === 'intro' && card.intro.asks === 'where' ? (
+              <Destination />
             ) : card.kind === 'intro' ? (
               <IntroPane card={card} />
             ) : (
@@ -1275,12 +1358,23 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
  * `prefers-reduced-motion` therefore needs no handling here, which is the other reason not
  * to animate it.
  */
-function Gesture({ kind }: { kind: 'up' | 'away' | 'in' }) {
+function Gesture({ kind, moving = false }: { kind: 'up' | 'away' | 'in'; moving?: boolean }) {
   const label =
     kind === 'up' ? 'Swipe up' : kind === 'away' ? 'Swipe left' : 'Tap, or swipe right'
+  /*
+    It moves only where it is the ONLY way off the card.
+
+    An arrow that loops on every screen is decoration and stops being read. On the three
+    tutorial cards it is the entire instruction and the only place a person can be stuck, so
+    there the movement IS the instruction. Everywhere else the arrow is still.
+
+    Stopped entirely under prefers-reduced-motion, with the label carrying the meaning on
+    its own — an instruction that only works when it moves would be a trap.
+  */
+  const nudge = !moving ? '' : kind === 'up' ? ' nudge-up' : kind === 'away' ? ' nudge-left' : ' nudge-right'
   return (
     <p data-testid={'gesture-' + kind} className="mt-6 flex items-center gap-3 text-muted">
-      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+      <svg viewBox="0 0 24 24" className={'h-6 w-6 shrink-0' + nudge} fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
         {kind === 'up' ? (
           <>
             <path d="M12 20V5" />
@@ -1318,6 +1412,7 @@ function Gesture({ kind }: { kind: 'up' | 'away' | 'in' }) {
 function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
   const lines = useMemo((): { pt: string; en: string }[] => {
     if (shows.kind === 'lines') return shows.lines
+    if (shows.kind === 'exchange') return shows.exchange.map((e) => ({ pt: e.pt, en: e.en }))
     if (shows.kind === 'root') {
       const r = ROOTS.find((x) => x.root_id === shows.root_id)
       return r ? [{ pt: r.target, en: r.source }] : []
@@ -1330,9 +1425,14 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
         the honest specimen — and they are true by construction, because they are the same
         strings the Legend asks with.
       */
-      return cardFor(null)
-        .slice(0, 5)
-        .map((f) => ({ pt: f.ask, en: f.ask_en }))
+      /*
+        All seven, not the first five.
+
+        The card's claim is "seven questions a stranger will ask you" and it showed five, so
+        the card contradicted itself on its own face. A card that undercounts the thing it
+        is describing is worse than one that describes nothing.
+      */
+      return cardFor(null).map((f) => ({ pt: f.ask, en: f.ask_en }))
     }
     /*
       Whatever is genuinely on, and nothing when nothing is.
@@ -1346,6 +1446,30 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
     const l = first.situation.lines[0]
     return l ? [{ pt: l.pt, en: first.drop.event + ' · ' + first.drop.place.name }] : []
   }, [shows])
+
+  /*
+    The exchange is drawn as an exchange, because the act is what this card has to show.
+
+    Rendered as question-then-answer rather than as a pair of sentences: two lines side by
+    side read as vocabulary, and the claim is that you can ASK for a sentence nobody taught
+    you and be handed European Portuguese back. Nothing else in the sequence demonstrates a
+    thing the learner initiates.
+  */
+  if (shows.kind === 'exchange') {
+    return (
+      <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-6">
+        {shows.exchange.map((e) => (
+          <li key={e.pt} className="flex flex-col gap-1">
+            <span className="text-sm text-muted">“{e.asked}”</span>
+            <span className="flex items-center gap-3">
+              <AudioButton slug={slugFor(e.pt)} text={e.pt} size="sm" />
+              <span className="pt display min-w-0 text-lg text-accent">{e.pt}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
 
   if (!lines.length) return null
   return (

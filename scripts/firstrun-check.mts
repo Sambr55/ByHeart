@@ -21,7 +21,7 @@
  */
 import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
-import { INTRO_CARDS } from '../content/intro'
+import { INTRO_CARDS, INTRO_SETUP_AFTER } from '../content/intro'
 import { ROOTS } from '../content/roots'
 import { cardFor } from '../content/legend'
 import { EXPLAINERS, EXPLAINER_CTA } from '../content/explainers'
@@ -123,9 +123,23 @@ const titles = (await page.evaluate(
   const demoAt = got.findIndex((g) => /SIXTY SECONDS/.test(g))
   const vibesAt = got.indexOf('VIBES')
   ok('the demo follows the vibes claim', demoAt === vibesAt + 1, 'vibes ' + vibesAt + ', demo ' + demoAt)
+  /*
+    Set-up follows whatever the content says it follows, which is the last card now.
+
+    It was asserted against the Legend card by name. Set-up moved to the end — drops,
+    revision, ask and share are the reasons to bother, and asking somebody to decide before
+    they have heard them is asking early to no purpose — and the check failed on correct
+    work. Taking the anchor from INTRO_SETUP_AFTER means moving it again is a content edit
+    rather than a content edit plus a test edit.
+  */
   const setupAt = got.findIndex((g) => /ONE DECISION/.test(g))
-  const legendAt = got.indexOf('YOUR LEGEND')
-  ok('and set-up follows the Legend card', setupAt === legendAt + 1, 'legend ' + legendAt + ', set-up ' + setupAt)
+  const afterEyebrow = INTRO_CARDS.find((c) => c.id === INTRO_SETUP_AFTER)?.eyebrow ?? ''
+  const anchorAt = got.indexOf(afterEyebrow)
+  ok(
+    'and set-up follows the card the content anchors it to',
+    setupAt === anchorAt + 1,
+    afterEyebrow + ' ' + anchorAt + ', set-up ' + setupAt,
+  )
 }
 
 /*
@@ -163,11 +177,22 @@ const titles = (await page.evaluate(
     product.
   */
   const feedText = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
-  const bond = ROOTS.find((r) => r.root_id === 'jb_russia')
+  /*
+    Whichever root the vibes card names, not a root named here.
+
+    This hardcoded jb_russia. The card's specimen changed to the Goose line — the only one in
+    the library that proves "you already know more than you think" to somebody who has never
+    heard of DUB — and the check failed on the improvement. What it is actually asserting is
+    that the specimen RESOLVES: that the card names a root which exists and whose real line
+    reaches the screen.
+  */
+  const vibes = INTRO_CARDS.find((c) => c.id === 'intro_vibes')
+  const named = vibes?.shows?.kind === 'root' ? vibes.shows.root_id : ''
+  const root = ROOTS.find((r) => r.root_id === named)
   ok(
     'the vibe specimen is a real root line',
-    Boolean(bond && feedText.includes(bond.target)),
-    bond ? bond.target : 'jb_russia missing',
+    Boolean(root && feedText.includes(root.target)),
+    root ? named + ': ' + root.target : 'no such root: ' + named,
   )
   const asks = cardFor(null).slice(0, 5).map((f) => f.ask)
   const missing = asks.filter((a) => !feedText.includes(a))
@@ -175,6 +200,74 @@ const titles = (await page.evaluate(
     'and the Legend specimens are the questions it actually asks',
     missing.length === 0,
     missing.length ? 'not shown: ' + missing.join(', ') : asks.length + ' real questions',
+  )
+}
+
+/*
+  THE TUTORIAL CARDS HOLD YOU UNTIL YOU DO THE THING.
+
+  The only place in DUB where the scroll is stopped rather than an action, and a deliberate
+  exception to a rule argued for repeatedly: gates live on actions, never on the thumb. It
+  earns the exception because here the gate IS the lesson — "swipe left to send a card back"
+  is not learned by reading it, and somebody who swipes past the instruction has been told a
+  gesture and never made it, which is the same as not being told.
+
+  Asserted as the lock ATTRIBUTE plus the released state, because a check that only looked
+  at whether scrolling moved could not tell a lock from a slow browser.
+*/
+{
+  const lockedAt = INTRO_CARDS.findIndex((c) => c.only)
+  await page.evaluate(`(() => {
+    const r = document.querySelector('.snap-y')
+    if (r) r.scrollTop = r.clientHeight * ${lockedAt + 1}
+  })()`)
+  await page.waitForTimeout(900)
+  const held = await page.evaluate(
+    `document.querySelector('[data-testid="feed"]').getAttribute('data-locked')`,
+  )
+  ok('the reject lesson holds the thumb', held === INTRO_CARDS[lockedAt].id, String(held))
+  ok(
+    'and says so with a moving arrow',
+    Boolean(await page.$('.nudge-left')),
+    'on the three tutorial cards only — an arrow that loops everywhere stops being read',
+  )
+
+  /*
+    And doing it lets go. Released per card and never re-armed: once you have rejected
+    something you know how, and meeting the same lock twice is a quiz rather than a lesson.
+  */
+  await page.evaluate(`(() => {
+    const r = document.querySelector('.snap-y')
+    const s = r.children[${lockedAt + 1}]
+    const pane = s && s.querySelector('[data-testid="card-panes"]')
+    if (pane) pane.scrollLeft = pane.clientWidth * 2
+  })()`)
+  await page.waitForTimeout(1500)
+  ok(
+    'and making the gesture lets go',
+    !(await page.evaluate(`document.querySelector('[data-testid="feed"]').getAttribute('data-locked')`)),
+    'the lesson is the doing',
+  )
+}
+
+console.log('\nthe five pillars arrive as headlines\n')
+/*
+  They were eleven-point labels carrying the biggest ideas in the product.
+
+  Asserted against the content's own `pillar` flag rather than a list retyped here, and on
+  the rendered class rather than on the copy — a pillar that is declared and not styled is
+  exactly the failure mode, and it is invisible in the text.
+*/
+{
+  const pillars = INTRO_CARDS.filter((c) => c.pillar).map((c) => c.eyebrow)
+  const rendered = (await page.evaluate(
+    `Array.from(document.querySelectorAll('[data-testid="pillar"]')).map(e => e.textContent.trim())`,
+  )) as string[]
+  const missed = pillars.filter((e) => !rendered.includes(e))
+  ok(
+    'every pillar lands as one',
+    missed.length === 0,
+    missed.length ? 'flat: ' + missed.join(', ') : pillars.join(' · '),
   )
 }
 
@@ -373,14 +466,22 @@ console.log('\nthe set-up is a card, and it does not block\n')
     The new order puts drops, revision, ask and share after it, so the meaningful claim is
     adjacency to the card that gives it a reason, not a position in a list.
   */
-  const legendAt = (await page.evaluate(
+  /*
+    After whatever the content anchors it to — the last card of the sequence now.
+
+    Named by content rather than by "the Legend card", for the same reason as above: where
+    set-up sits is a decision that belongs in content/intro.ts, and a check naming a
+    specific neighbour fails every time that decision is revisited.
+  */
+  const anchor = INTRO_CARDS.find((c) => c.id === INTRO_SETUP_AFTER)?.eyebrow ?? ''
+  const anchorIdx = (await page.evaluate(
     `Array.from(document.querySelectorAll('.snap-y > section')).slice(1, -1)
-      .findIndex(s => (s.innerText || '').startsWith('YOUR LEGEND'))`,
+      .findIndex(s => (s.innerText || '').startsWith(${JSON.stringify(anchor)}))`,
   )) as number
   ok(
-    'and it comes straight after the Legend card',
-    set === legendAt + 1,
-    'legend ' + legendAt + ', set-up ' + set,
+    'and it comes straight after the card it is anchored to',
+    set === anchorIdx + 1,
+    anchor + ' ' + anchorIdx + ', set-up ' + set,
   )
   ok(
     'and it can be swiped past',
@@ -530,8 +631,8 @@ console.log('\nset-up asks who, where and why — and the feed changes because o
   })()`.replace('LEAD', String(LEAD_LENGTH - 1)))
   await page.waitForTimeout(900)
 
-  const where = await page.$('[data-testid="setup-where-lisbon"]')
-  ok('it asks where first', Boolean(where), 'a city, not a parameter nobody was asked about')
+  const where = await page.$('[data-testid="where-lisbon"]')
+  ok('where is asked on its own card, third', Boolean(where), 'moved out of set-up so every card after it is true of somewhere')
   if (where) {
     await where.click()
     await page.waitForTimeout(400)
@@ -667,9 +768,16 @@ console.log('\nthe call to action cannot land on a question set-up already asks\
     and a hard navigation here destroyed the execution context of every check that seeds a
     device on /vibes. The same component the Club shows on card seven renders here.
   */
+  /*
+    Set-up opens on WHY now, because where moved to its own card third in the sequence.
+
+    The gate itself is unchanged — /vibes without a chosen pair still shows set-up rather
+    than a language list — but the first thing set-up asks is different, and the check named
+    the old first step.
+  */
   ok(
     'set-up is what they get instead',
-    Boolean(await p2.$('[data-testid="setup-where-lisbon"]')),
+    Boolean(await p2.$('[data-testid="setup-why-visiting"]')),
     'one question, one component, two places',
   )
   ok(

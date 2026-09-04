@@ -72,6 +72,55 @@ export const IMAGE_BANK: Record<string, BankImage> = {
  */
 export const WANTED: { slug: string; brief: string; used_by: string }[] = [
   /*
+    THE INTRO SEQUENCE, six pictures.
+
+    The argument cards were built to work on sand with no photograph — that is what let the
+    whole sequence ship without a commissioning session, and the rule holds: a picture here
+    is an improvement, never a dependency, and a missing one leaves a card that still reads.
+
+    They share a look on purpose, because the sequence is read in one sitting: Lisbon
+    interiors and streets, nobody's face, natural light, no signage a person would try to
+    translate. The card's own type sits over the bottom third, so the interest belongs in the
+    top two thirds and the foot wants to be quiet.
+  */
+  {
+    slug: 'intro_arrival',
+    brief:
+      'A Lisbon street from the point of view of somebody who has just arrived — bags not in shot, one turn ahead unresolved. Morning, low sun along the calçada. The feeling is the first hour of a trip, not a postcard.',
+    used_by: 'intro_how — DUB, your travel companion',
+  },
+  {
+    slug: 'intro_away_card',
+    brief:
+      'Something set down and left for later: a folded newspaper on a café table, a jacket over the back of a chair. Nothing discarded and nothing lost — the whole card is the promise that it comes back.',
+    used_by: 'intro_away — swipe left sends it to the back',
+  },
+  {
+    slug: 'intro_in_card',
+    brief:
+      'A doorway standing open onto an interior you cannot quite see into. Warm inside, cooler outside. The card says tap to go in, and the picture should make that look worth doing.',
+    used_by: 'intro_in — tap to open',
+  },
+  {
+    slug: 'intro_vibes_card',
+    brief:
+      'A television on in a Portuguese living room in the late evening, the screen out of focus and the room lit by it. Nothing identifiable playing — the point is the familiarity of the setting, not the thing on screen.',
+    used_by: 'intro_vibes — learn from what you have seen a hundred times',
+  },
+  {
+    slug: 'intro_drops_card',
+    brief:
+      'A Lisbon street at night with a crowd walking the same direction, seen from behind. Somewhere between a match and a gig. No visible branding and no legible poster.',
+    used_by: 'intro_drops — what is actually on',
+  },
+  {
+    slug: 'intro_revision_card',
+    brief:
+      'The same café counter at the same hour on an ordinary day — repetition rather than event. Empty cup, folded paper, the light of a morning that has happened many times.',
+    used_by: 'intro_revision — the four Rs',
+  },
+
+  /*
     Lisbon · moving · block 1 — ten, and they have to look like ten of one thing.
 
     One session of an image model produces ten, which is why a block is ten. The constraint

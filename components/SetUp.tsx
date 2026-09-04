@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { setAvatarFromFile } from '@/engine/avatar'
-import { CHAPTERS } from '@/content/chapters'
 import { roomsFor } from '@/content/feed'
 import { CLUB } from '@/content/club'
 import { EXPLAINER_CTA } from '@/content/explainers'
@@ -14,7 +13,6 @@ import {
   acceptDeal,
   loadLearner,
   resetLearnerCache,
-  setChapter,
   setDisplayName,
   setPurpose,
 } from '@/engine/learner'
@@ -45,10 +43,17 @@ import { DEFAULT_PAIR } from '@/content/pairs'
  * determined: every chapter in CHAPTERS carries the same pair, so choosing Lisbon chooses
  * pt-PT. Asking twice for one answer is a form, not a decision.
  */
-type Step = 'where' | 'why' | 'who'
+/*
+  Where left. It is card three now, in components/Destination.tsx.
+
+  Asking it here meant eight screens of argument were written about a city nobody had
+  chosen — the drops card could not say what was on, the rooms card could not name rooms.
+  Asked early it costs one tap and makes every card after it true of somewhere specific.
+*/
+type Step = 'why' | 'who'
 
 export function SetUp({ onDone }: { onDone?: () => void } = {}) {
-  const [step, setStep] = useState<Step>('where')
+  const [step, setStep] = useState<Step>('why')
   const [name, setName] = useState('')
   const [photo, setPhoto] = useState<string | null>(null)
   const [done, setDone] = useState(false)
@@ -181,15 +186,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
-        {step === 'where' ? (
-          <>
-            <h2 className="display text-balance text-2xl">Where do you want DUB to take you?</h2>
-            <p className="text-sm leading-relaxed text-muted">
-              One is built. The other is honest about not being — nothing here will take your
-              email and promise to let you know.
-            </p>
-          </>
-        ) : step === 'why' ? (
+        {step === 'why' ? (
           <>
             <h2 className="display text-balance text-2xl">{CLUB.welcome.ask_headline}</h2>
             <p className="text-sm leading-relaxed text-muted">{CLUB.welcome.ask_body}</p>
@@ -204,41 +201,6 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
           </>
         )}
       </div>
-
-      {/*
-        WHERE. Two chapters, one open, and the closed one named honestly as closed.
-
-        Listed rather than hidden because somebody deciding whether this is for them is owed
-        the shape of the plan — and a disabled row must never become an email capture.
-      */}
-      {step === 'where' ? (
-        <ul className="flex flex-col gap-3">
-          {CHAPTERS.map((c) => (
-            <li key={c.id}>
-              <button
-                type="button"
-                data-testid={'setup-where-' + c.id}
-                disabled={!c.open}
-                onClick={() => {
-                  setChapter(c.id)
-                  track('chapter_chosen', { chapter: c.id })
-                  setStep('why')
-                }}
-                className={
-                  'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-3 text-left transition ' +
-                  (c.open ? 'border-line hover:border-accent/50' : 'border-line/40 bg-surface/30 opacity-40')
-                }
-              >
-                <span className="flex flex-col gap-1">
-                  <span className="display text-lg">{c.city}</span>
-                  <span className="text-sm text-muted">{c.country}</span>
-                </span>
-                {c.open ? null : <span className="eyebrow shrink-0 text-muted">NOT OPEN</span>}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
 
       {/*
         WHY. The three, described by what they contain rather than by how long somebody is

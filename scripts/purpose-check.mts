@@ -269,11 +269,19 @@ ok(
   const p2 = await fresh.newPage()
   await p2.goto(BASE + '/vibes')
   await p2.waitForTimeout(2800)
-  const where = await p2.$('[data-testid="setup-where-lisbon"]')
-  ok('set-up is where it is asked now', Boolean(where), 'once, before anything is tailored')
-  if (where) {
-    await where.click()
-    await p2.waitForTimeout(600)
+  /*
+    Set-up opens on WHY, because where left it.
+
+    The city moved to its own card third in the sequence — asked before eight screens of
+    argument are written about a place nobody has chosen. So set-up's first step is the
+    purpose, and this check clicked a where-button that no longer exists on it.
+
+    What it is asserting is unchanged and is the half that matters: the question is still
+    asked, once, somewhere a person actually reaches.
+  */
+  const asks = await p2.$('[data-testid="setup-why-visiting"]')
+  ok('set-up is where why is asked now', Boolean(asks), 'once, before anything is tailored')
+  if (asks) {
     const missing = (
       await Promise.all(
         PURPOSES.map(async (pu) =>

@@ -62,18 +62,35 @@ export interface IntroCard {
    * nothing is on, which is honest and is the point. 'legend' derives its examples from
    * LEGEND_FRAMES, so the specimens cannot drift from the questions the product asks.
    */
+  /**
+   * This card asks for something, so a component renders it rather than the copy above.
+   *
+   * The copy is still declared, because the sequence's order should be readable in one list
+   * and because a card with no headline cannot be found by a check.
+   */
+  asks?: 'where'
+  /**
+   * A foundational pillar: the eyebrow arrives as a headline rather than a label.
+   *
+   * Five of them — VIBES, DROPS, THE FOUR RS, ASK, WITH MATES — and they are what the
+   * product IS. They were eleven-point labels doing a headline's job.
+   */
+  pillar?: true
+  /** The gesture that is the ONLY way off this card. Locks the scroll until it is made. */
+  only?: 'away' | 'in'
   shows?:
     | { kind: 'root'; root_id: string }
     | { kind: 'drop' }
     | { kind: 'legend' }
     | { kind: 'lines'; lines: { pt: string; en: string }[] }
+    | { kind: 'exchange'; exchange: { asked: string; pt: string; en: string }[] }
 }
 
 export const INTRO_CARDS: IntroCard[] = [
   {
     id: 'intro_how',
     eyebrow: 'HOW IT WORKS',
-    headline: 'Portuguese you already half-know, from things you already love.',
+    headline: 'DUB — your travel companion.',
     /*
       The media are not named, which the vocabulary lint enforces and which is right.
 
@@ -81,7 +98,34 @@ export const INTRO_CARDS: IntroCard[] = [
       of thing. Listing the formats makes it sound like a syllabus with better sources; the
       point is that you have already done the work without noticing.
     */
-    body: 'Things you have known for years, and the city you are going to. Nothing to memorise and no lessons — you swipe, and you keep what sticks.',
+    body: 'Learn a language and immerse yourself in its local culture.',
+  },
+  {
+    /*
+      Where, third, and it is interactive rather than an argument.
+
+      The card kind carries no copy of its own — components/Destination.tsx renders it —
+      because the choice is the content. Declared here so the ORDER stays one readable list
+      rather than a chain of spreads in the component.
+    */
+    id: 'intro_where',
+    eyebrow: 'WHERE TO',
+    headline: 'Where do you want DUB to take you?',
+    body: 'One is built. The other is honest about not being.',
+    asks: 'where',
+  },
+  {
+    /*
+      The swipe-up card, which is its own screen now rather than a footnote on the first.
+
+      Three gestures, three cards, in the order somebody needs them: up to move on, left to
+      send a card back, tap to go in. It was a chevron under the opening argument, which is
+      where an instruction goes to be ignored.
+    */
+    id: 'intro_up',
+    eyebrow: 'KEEP GOING',
+    headline: 'Swipe up for the next card.',
+    body: 'That is the whole of it. The feed goes on as long as you do.',
     gesture: 'up',
   },
   {
@@ -93,6 +137,7 @@ export const INTRO_CARDS: IntroCard[] = [
       a list.
     */
     id: 'intro_away',
+    only: 'away',
     eyebrow: 'NOT THIS ONE',
     headline: 'Swipe left and it goes to the back of the pile.',
     body: 'Not gone — behind the rest, for later. Change your mind and the rewind arrow brings it straight back.',
@@ -100,6 +145,7 @@ export const INTRO_CARDS: IntroCard[] = [
   },
   {
     id: 'intro_in',
+    only: 'in',
     eyebrow: 'THIS ONE',
     headline: 'Tap a card to open it. Or swipe right.',
     body: 'Inside is the Portuguese: what to say, when to say it, and somebody saying it.',
@@ -107,11 +153,19 @@ export const INTRO_CARDS: IntroCard[] = [
   },
   {
     id: 'intro_vibes',
+    pillar: true,
     eyebrow: 'VIBES',
     headline: 'Learn from what you have already seen a hundred times.',
     body: 'Top Gun, Bond, Bridget Jones. You do not learn the line — you recognise it, and keep a word out of it that works everywhere.',
-    // A real Bond line, with its real audio. Not an example of a line: a line.
-    shows: { kind: 'root', root_id: 'jb_russia' },
+    /*
+      The Goose line, because it is the one the whole product rests on.
+
+      It was a Bond line, which is a real specimen and the wrong one: this card is the claim
+      that you already know more than you think, and "Talk to me, Goose" is the only line in
+      the library that proves it to somebody who has never heard of DUB. The demo follows
+      immediately and does it properly — this is the trailer for the thing one card later.
+    */
+    shows: { kind: 'root', root_id: 'tg_goose' },
   },
   {
     id: 'intro_legend',
@@ -132,6 +186,7 @@ export const INTRO_CARDS: IntroCard[] = [
   },
   {
     id: 'intro_drops',
+    pillar: true,
     eyebrow: 'DROPS',
     headline: 'What is actually on in Lisbon, and what to say when you get there.',
     body: 'A gig, a match, a holiday that shuts the city. It arrives when the thing is close and it goes the morning after.',
@@ -154,6 +209,7 @@ export const INTRO_CARDS: IntroCard[] = [
       what each thing can actually keep.
     */
     id: 'intro_revision',
+    pillar: true,
     eyebrow: 'THE FOUR RS',
     headline: 'Regular, relevant revision reminders.',
     body: 'Every day, a handful of the words you own come back round — the ones you are closest to losing, not the ones you learned last.',
@@ -162,6 +218,7 @@ export const INTRO_CARDS: IntroCard[] = [
   },
   {
     id: 'intro_ask',
+    pillar: true,
     eyebrow: 'ASK',
     headline: 'The sentence we have not taught you yet.',
     body: 'Ask for it, anywhere, any time, and get it back in the Portuguese they actually speak here. It goes into your own library.',
@@ -173,16 +230,24 @@ export const INTRO_CARDS: IntroCard[] = [
       These two are the register the translator is built to produce — European, and the
       thing somebody would actually need on a Tuesday.
     */
+    /*
+      The translator as an exchange rather than as two sentences.
+
+      A pair of lines reads as vocabulary. What this card has to show is the ACT: somebody
+      asked for something in English and got European Portuguese back, which is the thing
+      no other card in the sequence demonstrates.
+    */
     shows: {
-      kind: 'lines',
-      lines: [
-        { pt: 'Pode partir a conta em dois?', en: 'Could you split the bill in two?' },
-        { pt: 'Isto leva glúten?', en: 'Does this have gluten in it?' },
+      kind: 'exchange',
+      exchange: [
+        { asked: 'How do I ask them to split the bill?', pt: 'Pode partir a conta em dois?', en: 'Could you split the bill in two?' },
+        { asked: 'Does this have gluten in it?', pt: 'Isto leva glúten?', en: 'Does this have gluten in it?' },
       ],
     },
   },
   {
     id: 'intro_share',
+    pillar: true,
     eyebrow: 'WITH MATES',
     headline: 'Show somebody three things you can say.',
     body: 'They can show you theirs. Learning the same city at the same time as somebody you know is the difference between a habit and a chore.',
@@ -198,6 +263,17 @@ export const INTRO_CARDS: IntroCard[] = [
   },
 ]
 
-/** The two cards that are woven into the sequence rather than declared in it. */
+/**
+ * The two cards woven into the sequence rather than declared in it.
+ *
+ * SET-UP MOVED TO THE END. It sat after the Legend card, on the reasoning that the Legend
+ * is the first moment somebody has been told what the answers are for — which was true, and
+ * left four arguments stranded behind a commitment. Drops, revision, ask and share are the
+ * reasons to bother, and asking somebody to decide before they have heard them is asking
+ * early to no purpose.
+ *
+ * Last means last: they have seen everything the product does, chosen a city, watched the
+ * demo, and read what a Legend is. Then one decision.
+ */
 export const INTRO_DEMO_AFTER = 'intro_vibes'
-export const INTRO_SETUP_AFTER = 'intro_legend'
+export const INTRO_SETUP_AFTER = 'intro_share'

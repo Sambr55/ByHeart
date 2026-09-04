@@ -1074,3 +1074,96 @@ summary:focus-visible,
   --accent: var(--bar-ink);
   --accent-ink: var(--bar-bg);
 }
+
+
+/*
+  THE FIVE PILLARS, and the one place in DUB where something is allowed to shout.
+
+  VIBES, DROPS, THE FOUR RS, ASK and WITH MATES are what the product IS, and they were
+  eyebrows — eleven-point labels doing the job of a headline. They arrive big now: the word
+  lands, holds, and settles back to being a label on the card underneath it.
+
+  WITHIN THE EXISTING SCALE. 620ms and 260ms are two of the product's four durations and
+  --ease-drain is one of its two curves, so this adds no new motion vocabulary — which
+  matters, because a fifth duration is a violation and the scale is the reason the product
+  moves like one thing.
+*/
+@keyframes pillar-land {
+  0% {
+    opacity: 0;
+    transform: translateY(0.5em);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+  BIG BY BEING BIG, rather than by growing.
+
+  The brief asked for the word to bounce in huge and then resolve down to a label. Two of
+  this product's motion rules forbid exactly that, and both were written on purpose: scale
+  is not an entrance property, because a thing that grows into place reads as inflating and
+  inflating is one derivative from bouncing; and an overshooting curve is banned by number
+  rather than by name, because bounce is the signature of a toy.
+
+  So the word does not shrink to settle — it ARRIVES at the size it keeps. Same drama,
+  carried by type size and a rise out of the baseline instead of by a scale transform, and
+  the card underneath follows a beat later. The one thing not delivered from the brief is
+  the shrink, and it is a deliberate refusal rather than an oversight.
+*/
+.pillar {
+  display: block;
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.5rem, 13vw, 4rem);
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  animation: pillar-land 620ms var(--ease-drain, ease-out) both;
+}
+
+/* The card follows the word rather than arriving with it. */
+.pillar-body {
+  animation: pillar-land 420ms var(--ease-drain, ease-out) 260ms both;
+}
+
+/*
+  The arrows that say which way to go, and the only looping motion in the product.
+
+  A one-shot arrow on a card whose ONLY exit is a particular gesture is an instruction
+  somebody can miss by looking away. These three cards are the tutorial, they are the only
+  place a person can be stuck, and the movement is the instruction rather than decoration.
+
+  Six pixels and 620ms: enough to read as alive, small and slow enough not to nag.
+*/
+@keyframes nudge-x {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(var(--nudge, -6px)); }
+}
+
+@keyframes nudge-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.nudge-left { animation: nudge-x 620ms var(--ease-drain, ease-out) infinite; --nudge: -6px; }
+.nudge-right { animation: nudge-x 620ms var(--ease-drain, ease-out) infinite; --nudge: 6px; }
+.nudge-up { animation: nudge-y 620ms var(--ease-drain, ease-out) infinite; }
+
+/*
+  And all of it stops for anybody who has asked for less movement.
+
+  A looping animation is exactly what that setting exists to switch off, and an instruction
+  that only works when it moves would be a trap — so the arrows stay, still, and the copy
+  beside them carries the whole meaning on its own.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .pillar,
+  .pillar-body,
+  .nudge-left,
+  .nudge-right,
+  .nudge-up {
+    animation: none;
+  }
+}
