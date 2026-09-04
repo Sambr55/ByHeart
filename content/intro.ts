@@ -70,6 +70,14 @@ export interface IntroCard {
    */
   asks?: 'where'
   /**
+   * A slug in IMAGE_BANK, where this card has a photograph.
+   *
+   * Optional and always will be. The sequence was built to read on sand precisely so it
+   * could ship before any of these existed, and a card whose picture has not been made yet
+   * is a card that still works rather than a hole.
+   */
+  image?: string
+  /**
    * A foundational pillar: the eyebrow arrives as a headline rather than a label.
    *
    * Five of them — VIBES, DROPS, THE FOUR RS, ASK, WITH MATES — and they are what the
@@ -89,6 +97,7 @@ export interface IntroCard {
 export const INTRO_CARDS: IntroCard[] = [
   {
     id: 'intro_how',
+    image: 'intro_arrival',
     eyebrow: 'HOW IT WORKS',
     headline: 'DUB — your travel companion.',
     /*
@@ -137,6 +146,7 @@ export const INTRO_CARDS: IntroCard[] = [
       a list.
     */
     id: 'intro_away',
+    image: 'intro_away_card',
     only: 'away',
     eyebrow: 'NOT THIS ONE',
     headline: 'Swipe left and it goes to the back of the pile.',
@@ -145,6 +155,7 @@ export const INTRO_CARDS: IntroCard[] = [
   },
   {
     id: 'intro_in',
+    image: 'intro_in_card',
     only: 'in',
     eyebrow: 'THIS ONE',
     headline: 'Tap a card to open it. Or swipe right.',
@@ -153,6 +164,7 @@ export const INTRO_CARDS: IntroCard[] = [
   },
   {
     id: 'intro_vibes',
+    image: 'intro_vibes_card',
     pillar: true,
     eyebrow: 'VIBES',
     headline: 'Learn from what you have already seen a hundred times.',
@@ -186,6 +198,7 @@ export const INTRO_CARDS: IntroCard[] = [
   },
   {
     id: 'intro_drops',
+    image: 'intro_drops_card',
     pillar: true,
     eyebrow: 'DROPS',
     headline: 'What is actually on in Lisbon, and what to say when you get there.',
@@ -209,6 +222,7 @@ export const INTRO_CARDS: IntroCard[] = [
       what each thing can actually keep.
     */
     id: 'intro_revision',
+    image: 'intro_revision_card',
     pillar: true,
     eyebrow: 'THE FOUR RS',
     headline: 'Regular, relevant revision reminders.',

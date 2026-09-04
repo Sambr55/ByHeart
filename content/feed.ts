@@ -5,6 +5,7 @@ import { SITUATIONS, isCurrent, type Purpose, type Situation } from '@/content/s
 import { DROPS, type Drop } from '@/content/drops'
 import { explainersFor, type Explainer } from '@/content/explainers'
 import { INTRO_CARDS, type IntroCard } from '@/content/intro'
+import { bankImage } from '@/content/images'
 import { VIBE_IMAGES } from '@/content/vibe-images'
 import {
   CRATES,
@@ -619,11 +620,18 @@ export function cardFace(card: FeedCard): {
       shown. An argument has nothing to show, and a borrowed picture behind one would make
       it look like content it is not.
     */
+    /*
+      A photograph where one has been made, sand where one has not.
+
+      The sequence was built to read on sand so it could ship before any of these existed,
+      and that stays true: the image is optional, and a card whose picture has not been
+      taken yet is a card that still works rather than a hole in the argument.
+    */
     return {
       eyebrow: card.intro.eyebrow,
       title: card.intro.headline,
       blurb: card.intro.body,
-      image: undefined,
+      image: card.intro.image ? bankImage(card.intro.image) : undefined,
     }
   }
   return {

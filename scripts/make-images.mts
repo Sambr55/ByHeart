@@ -16,8 +16,12 @@
  *
  * Costs money on somebody's account, so --write is required and it says what it will spend.
  */
+import { loadEnv } from './env.mjs'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { IMAGE_BANK, WANTED } from '../content/images'
+
+// Nothing else loads .env.local for a script. See scripts/env.mts.
+loadEnv()
 
 /*
   The house look, appended to every brief.
@@ -68,6 +72,26 @@ if (!write) {
 }
 
 const key = process.env.OPENAI_API_KEY
+
+/*
+  Check the key is for the right shop BEFORE spending eighteen requests finding out.
+
+  An Anthropic key saved as OPENAI_API_KEY produced eighteen identical 401s, one per
+  picture, each one four lines of JSON — a wall of noise for a single mistake made once, and
+  the actual cause (sk-ant-, not sk-) was buried in the middle of the first one.
+
+  Checked on the prefix rather than by calling: a key that cannot possibly work should fail
+  before the network, and saying WHICH key is in there is the difference between a fix and a
+  guess. Claude does not generate images, so this is not a thing to route around.
+*/
+if (key?.startsWith('sk-ant-')) {
+  console.log(
+    '\nThat is an Anthropic key (sk-ant-…), and this needs an OpenAI one — gpt-image-1 is ' +
+      'theirs.\n\nAn Anthropic key belongs in ANTHROPIC_API_KEY, where the translator and the ' +
+      'calendar harvester use it.\n',
+  )
+  process.exit(1)
+}
 if (!key) {
   console.log('\nOPENAI_API_KEY is not set, so there is nothing to generate with.')
   console.log('Run without --write to get the prompts to paste instead.\n')

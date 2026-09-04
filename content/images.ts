@@ -56,6 +56,48 @@ export const IMAGE_BANK: Record<string, BankImage> = {
     alt: 'A zinc café counter in Lisbon with an empty espresso cup on a saucer and a folded newspaper beside it.',
     rights_status: 'generated',
   },
+  /*
+    The intro sequence, generated 4 September and converted to JPEG to match the bank.
+
+    Alt text says what is in the frame, not how it feels — somebody who cannot see it should
+    be able to tell you what is there.
+  */
+  intro_arrival: {
+    src: '/lisbon/intro-arrival.jpg',
+    alt: 'A narrow Lisbon street at sunrise, wet calçada catching the light, tiled and painted façades on both sides, nobody in it.',
+    rights_status: 'generated',
+    taken_at: '2026-09-04',
+  },
+  intro_away_card: {
+    src: '/lisbon/intro-away.jpg',
+    alt: 'A café table with an empty cup and a folded newspaper, a coat left over the back of a bentwood chair, the street beyond.',
+    rights_status: 'generated',
+    taken_at: '2026-09-04',
+  },
+  intro_in_card: {
+    src: '/lisbon/intro-in.jpg',
+    alt: 'A heavy green door standing open in an azulejo-tiled wall, a warm lamplit hallway visible inside.',
+    rights_status: 'generated',
+    taken_at: '2026-09-04',
+  },
+  intro_vibes_card: {
+    src: '/lisbon/intro-vibes.jpg',
+    alt: 'A dark living room lit by a television, the screen out of focus, a glass and a remote on the side table.',
+    rights_status: 'generated',
+    taken_at: '2026-09-04',
+  },
+  intro_drops_card: {
+    src: '/lisbon/intro-drops.jpg',
+    alt: 'A crowd walking downhill through a Lisbon street at night, seen from behind, a lit bridge in the distance.',
+    rights_status: 'generated',
+    taken_at: '2026-09-04',
+  },
+  intro_revision_card: {
+    src: '/lisbon/intro-revision.jpg',
+    alt: 'A zinc café counter in morning light with one cup of coffee and a folded newspaper, the street through the open front.',
+    rights_status: 'generated',
+    taken_at: '2026-09-04',
+  },
   tram_distant: {
     src: '/lisbon/tram-distant.jpg',
     alt: 'A yellow Lisbon tram seen far down a narrow street, framed by buildings on both sides.',
@@ -83,42 +125,6 @@ export const WANTED: { slug: string; brief: string; used_by: string }[] = [
     translate. The card's own type sits over the bottom third, so the interest belongs in the
     top two thirds and the foot wants to be quiet.
   */
-  {
-    slug: 'intro_arrival',
-    brief:
-      'A Lisbon street from the point of view of somebody who has just arrived — bags not in shot, one turn ahead unresolved. Morning, low sun along the calçada. The feeling is the first hour of a trip, not a postcard.',
-    used_by: 'intro_how — DUB, your travel companion',
-  },
-  {
-    slug: 'intro_away_card',
-    brief:
-      'Something set down and left for later: a folded newspaper on a café table, a jacket over the back of a chair. Nothing discarded and nothing lost — the whole card is the promise that it comes back.',
-    used_by: 'intro_away — swipe left sends it to the back',
-  },
-  {
-    slug: 'intro_in_card',
-    brief:
-      'A doorway standing open onto an interior you cannot quite see into. Warm inside, cooler outside. The card says tap to go in, and the picture should make that look worth doing.',
-    used_by: 'intro_in — tap to open',
-  },
-  {
-    slug: 'intro_vibes_card',
-    brief:
-      'A television on in a Portuguese living room in the late evening, the screen out of focus and the room lit by it. Nothing identifiable playing — the point is the familiarity of the setting, not the thing on screen.',
-    used_by: 'intro_vibes — learn from what you have seen a hundred times',
-  },
-  {
-    slug: 'intro_drops_card',
-    brief:
-      'A Lisbon street at night with a crowd walking the same direction, seen from behind. Somewhere between a match and a gig. No visible branding and no legible poster.',
-    used_by: 'intro_drops — what is actually on',
-  },
-  {
-    slug: 'intro_revision_card',
-    brief:
-      'The same café counter at the same hour on an ordinary day — repetition rather than event. Empty cup, folded paper, the light of a morning that has happened many times.',
-    used_by: 'intro_revision — the four Rs',
-  },
 
   /*
     Lisbon · moving · block 1 — ten, and they have to look like ten of one thing.

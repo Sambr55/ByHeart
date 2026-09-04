@@ -19,10 +19,14 @@
  * The upstream itself is checked separately and only when a key is present, because a
  * check that cannot run without a paid credential is a check that is off.
  */
+import { loadEnv } from './env.mjs'
 import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_FRAMES } from '../content/legend'
 import { ROOTS } from '../content/roots'
+
+// Nothing else loads .env.local for a script. See scripts/env.mts.
+loadEnv()
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)

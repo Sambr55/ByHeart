@@ -717,6 +717,16 @@ export function Card({
 
   const face = cardFace(card)
   const image = face.image
+  /*
+    Sand or photograph, decided once and used four times.
+
+    An argument card has no picture until somebody makes one, so the treatment has to follow
+    the picture rather than the card KIND — which is what it did while none of them had one.
+    With a photograph it takes the Club's own language: scrim, white type, the same as every
+    room. Without, it stays sand and dark ink and reads perfectly well, which is the property
+    that let the whole sequence ship before any of these existed.
+  */
+  const onSand = card.kind === 'intro' && !image
   const title = face.title
   const blurb = face.blurb
 
@@ -764,7 +774,7 @@ export function Card({
             intro sequence needs no new pictures, which is the difference between shipping it
             and waiting on a commissioning session.
           */}
-          {card.kind === 'intro' ? (
+          {onSand ? (
             <span aria-hidden className="absolute inset-0 bg-bg" />
           ) : image ? (
             <Image src={image.src} alt={image.alt} fill sizes="100vw" className="object-cover" />
@@ -789,7 +799,7 @@ export function Card({
             it measures tokens against grounds rather than text against a photograph.
           */}
           {/* No scrim over sand: the gradient exists to make white type survive a photograph. */}
-          {card.kind === 'intro' ? null : (
+          {onSand ? null : (
             <div
               aria-hidden
               className={
@@ -804,7 +814,7 @@ export function Card({
           <div
             className={
               'nav-clear absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 ' +
-              (card.kind === 'intro' ? 'text-fg' : 'text-white')
+              (onSand ? 'text-fg' : 'text-white')
             }
           >
             <div className="min-w-0 flex-1">
@@ -825,15 +835,22 @@ export function Card({
                     on the card carrying the biggest idea on it.
                   */}
                   {card.intro.pillar ? (
-                    <p data-testid="pillar" className="pillar text-accent">
+                    <p
+                      data-testid="pillar"
+                      className={'pillar ' + (onSand ? 'text-accent' : 'text-white')}
+                    >
                       {face.eyebrow}
                     </p>
                   ) : (
-                    <p className="eyebrow text-accent">{face.eyebrow}</p>
+                    <p className={'eyebrow ' + (onSand ? 'text-accent' : 'text-white/80')}>
+                      {face.eyebrow}
+                    </p>
                   )}
                   <div className={card.intro.pillar ? 'pillar-body' : undefined}>
                     <h2 className="display mt-3 text-balance text-3xl">{face.title}</h2>
-                    <p className="mt-3 text-sm leading-relaxed text-muted">{blurb}</p>
+                    <p className={'mt-3 text-sm leading-relaxed ' + (onSand ? 'text-muted' : 'text-white/80')}>
+                      {blurb}
+                    </p>
                     {card.intro.gesture ? (
                       <Gesture kind={card.intro.gesture} moving={Boolean(card.intro.only) || card.intro.gesture === 'up'} />
                     ) : null}

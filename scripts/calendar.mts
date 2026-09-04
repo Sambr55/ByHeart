@@ -29,6 +29,7 @@
  * --prompt prints the whole thing instead of running it, for pasting into a chat window if
  * you would rather do it that way. Same instructions either way.
  */
+import { loadEnv } from './env.mjs'
 import Anthropic from '@anthropic-ai/sdk'
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { PURPOSES } from '../content/situations'
@@ -226,6 +227,9 @@ writeFileSync(
  * should, which is exactly the property this content must not have.
  */
 import type { CalendarRow } from '@/content/calendar'
+
+// Nothing else loads .env.local for a script. See scripts/env.mts.
+loadEnv()
 
 export const ${city.toUpperCase()}_${month.replace('-', '_')}: CalendarRow[] = [
 ${body}
