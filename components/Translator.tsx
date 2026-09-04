@@ -4,9 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
 import { Tick } from '@/components/Tick'
 import { slugFor } from '@/content/audio-manifest'
-import { clubOpen } from '@/content/legend'
 import { registerFor } from '@/content/roots'
-import { rungReached } from '@/content/roots'
 import { track } from '@/engine/analytics'
 import { keepAsk, loadLearner } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
@@ -63,18 +61,43 @@ export function Translator() {
     }
   }, [])
 
-  const answered = (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0)
-  const member = clubOpen({
-    answeredFrameIds: answered.map((a) => a.frame_id),
-    answers: learner.legend ?? [],
-    rung: rungReached(learner.proof),
-    welcomedAt: learner.club_welcomed_at,
-    purpose: learner.purpose,
-  })
+  /*
+    SET UP, NOT A MEMBER — and the promise in the sequence is why.
+
+    This was gated on clubOpen: Legend finished and rung two reached. Which made ASK a
+    member benefit, and coherent as one, right up until the intro sequence started selling
+    it. A stranger now meets "the sentence we have not taught you yet" on card eleven, with
+    a worked example, and then cannot find it for five crates. A card that promises a thing
+    the product will not give you for a fortnight is the kind of small lie a person
+    remembers.
+
+    So it opens at set-up: chosen a city, said why they are here, agreed the deal. That is
+    also the answer to what the free lookaround is FOR — of everything in the Club, the
+    translator is the one thing that is useful to somebody on day one, because it works on
+    whatever they happen to need rather than on what they have earned.
+
+    THE SPEND IS BOUNDED, which is what makes this safe to do. Sixty asks a day per device,
+    counted off rows in `translation` rather than held in a process a serverless platform is
+    free to recycle between two requests — see app/api/translate/route.ts.
+  */
+  const setUp = Boolean(learner.deal_accepted_at)
 
   useEffect(() => {
     if (open) box.current?.focus()
   }, [open])
+
+  /*
+    Opened from elsewhere, because the feed asks from its own rail.
+
+    A DOM event rather than context or a store: the translator is mounted once at the root
+    and the rail is rendered per card, so threading a callback between them would mean
+    passing it through every card in the feed to reach a button that already exists.
+  */
+  useEffect(() => {
+    const ask = () => setOpen(true)
+    window.addEventListener('dub:ask', ask)
+    return () => window.removeEventListener('dub:ask', ask)
+  }, [])
 
   // Esc closes, because a panel over the whole screen that only closes by aiming at a
   // small X is a panel people learn to avoid opening.
@@ -87,7 +110,7 @@ export function Translator() {
     return () => window.removeEventListener('keydown', onKey)
   }, [open])
 
-  if (!on || !member) return null
+  if (!on || !setUp) return null
 
   async function ask() {
     const asking = text.trim()

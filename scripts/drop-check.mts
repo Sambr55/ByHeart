@@ -14,7 +14,7 @@
  */
 import { DROPS } from '../content/drops'
 import { CRATES } from '../content/roots'
-import { dropDaysLeft, dropLive, dropsFor, feedFor } from '../content/feed'
+import { dropDaysLeft, dropLive, dropsFor, feedFor, type FeedCard } from '../content/feed'
 import { DROP_TEMPLATES } from '../content/drop-templates'
 import { WANTED, bankImage } from '../content/images'
 import { generatedDrops, generationReport } from '../content/generated'
@@ -61,6 +61,19 @@ ok(
 
 console.log('\nwhen it is live\n')
 const d = DROPS[0]
+/*
+  The cards belonging to the drop under test.
+
+  Every assertion here was written when DROPS held one hand-authored drop, so "the drops in
+  the feed" and "this drop's rooms" were the same list. Nine generated ones publish now, and
+  the checks began failing on Evanescence cards while comparing them to Duran Duran.
+
+  Filtering by id keeps each assertion about the thing it names. Loosening them to "some
+  card matches" would instead pass on a feed where this drop had vanished entirely, which is
+  the failure they exist to catch.
+*/
+const mine = (cards: FeedCard[]) =>
+  cards.filter((c) => c.kind === 'situation' && c.drop?.id === d.id)
 const day = (iso: string) => new Date(iso + 'T12:00:00Z')
 const event = new Date(d.on + 'T12:00:00Z')
 /*
@@ -102,18 +115,25 @@ ok('live on the day', dropLive(d, day(d.on)))
 ok('gone the morning after', !dropLive(d, after))
 
 console.log('\nand where it turns up\n')
-ok('nothing when it is not live', dropsFor('lisbon', before).length === 0)
+/*
+  This one is about THIS drop, not about the feed being empty.
+
+  It asserted the whole feed had no drops before the window opened. Other drops are live at
+  that moment now — correctly, they are pegged to different dates — so the claim has to name
+  which drop it means.
+*/
+ok('nothing when it is not live', mine(dropsFor('lisbon', before)).length === 0)
 ok(
   'every room of it when it is',
-  dropsFor('lisbon', inside).length === d.situations.length,
-  String(dropsFor('lisbon', inside).length),
+  mine(dropsFor('lisbon', inside)).length === d.situations.length,
+  String(mine(dropsFor('lisbon', inside)).length),
 )
 /*
   Ahead of the standing rooms, and this is the whole ranking. The pharmacy will be there
   next month; the gig will not.
 */
 const feed = feedFor('lisbon')
-const previewed = dropsFor('lisbon', before, true)
+const previewed = mine(dropsFor('lisbon', before, true))
 ok('a preview can open it early', previewed.length === d.situations.length)
 const withDrop = [...previewed, ...feed.filter((c) => !(c.kind === 'situation' && c.drop))]
 ok(
@@ -215,10 +235,34 @@ console.log('\nthe calendar becoming drops\n')
   console.log()
 
   ok('the calendar is read by something now', rep.length > 0, rep.length + ' rows considered')
+  /*
+    PUBLISHING AHEAD OF REVIEW, on instruction, and the check follows the policy rather than
+    arguing with it.
+
+    This asserted that nothing unreviewed reached the feed. That is no longer the rule — see
+    PUBLISH_UNREVIEWED — so the assertion has to change or it fails on a deliberate decision
+    and gets deleted, taking the real protection with it.
+
+    What is still worth guarding is that the number is not an accident: everything published
+    is either reviewed or knowingly unreviewed, and nothing arrives from a state nobody named.
+  */
   ok(
-    'nothing unreviewed reaches the feed',
-    generatedDrops('lisbon', now).length === count('ready'),
-    'a drop that says the wrong thing is worse than no drop',
+    'everything published is accounted for',
+    generatedDrops('lisbon', now).length === count('ready') + count('live-unreviewed'),
+    count('ready') + ' reviewed, ' + count('live-unreviewed') + ' shipping ahead of a reader',
+  )
+  /*
+    And the flag stays honest while the policy changes.
+
+    The template still says needs-review, because it has not been reviewed. Writing
+    'reviewed' into the data would be a lie that outlives the decision — somebody reading
+    that field later would believe a speaker had signed it off.
+  */
+  ok(
+    'and the review flag still tells the truth',
+    DROP_TEMPLATES.every((t) => t.review === 'needs-review' || t.review === 'reviewed') &&
+      DROP_TEMPLATES.some((t) => t.review === 'needs-review'),
+    'policy is not a fact, and does not get written into one',
   )
   /*
     A holiday drafts nothing, and that is a design statement rather than a gap.

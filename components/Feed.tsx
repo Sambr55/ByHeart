@@ -1719,6 +1719,31 @@ function Rail({
         </button>
       ) : null}
 
+      {/*
+        ASK, in the rail rather than floating over it.
+
+        The translator's own button is bottom-right above the nav, which is exactly where
+        this rail is — so once the translator opened at set-up instead of at membership, it
+        landed on top of SHARE. A control somebody can see, aim at, and not press is worse
+        than one that is missing.
+
+        Here it sits with the other four verbs, which is where a person looks for what they
+        can do to a card anyway. The floating button stands down whenever a feed is on
+        screen; see globals.css.
+      */}
+      <button
+        type="button"
+        aria-label="How do I say something"
+        data-testid="rail-ask"
+        onClick={() => window.dispatchEvent(new CustomEvent('dub:ask'))}
+        className={btn + ' text-white/85'}
+      >
+        <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+          <path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5" />
+          <path d="M12 17.5h.01" />
+        </svg>
+      </button>
+
       <button
         type="button"
         aria-label={isSaved ? 'Remove from saved' : 'Save'}

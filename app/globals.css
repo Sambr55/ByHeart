@@ -1167,3 +1167,22 @@ summary:focus-visible,
     animation: none;
   }
 }
+
+
+/*
+  THE ASK BUTTON STANDS DOWN WHERE THE FEED HAS ITS OWN RAIL.
+
+  Both live bottom-right above the nav: the translator floats there on every screen, and the
+  feed's rail stacks like, comment, save, share and rewind in the same corner. They did not
+  collide while the translator was a member benefit, because nobody had both at once. It
+  opens at set-up now, and the floating button landed on top of SHARE — a control a person
+  could see, aim at, and not press, which is worse than one that is missing.
+
+  Hidden by CSS rather than by a condition in the component, because the component cannot
+  know what else is on the screen without reaching into the DOM at render, and a layout fact
+  belongs in the layout. The feed puts ASK in its rail instead, where the other four verbs
+  already are.
+*/
+body:has([data-testid='feed']) [data-testid='translator-open'] {
+  display: none;
+}

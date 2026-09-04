@@ -48,10 +48,21 @@ const proof = ROOTS.filter((r) => r.rung <= 2)
   }))
 
 /** A learner the Club is open to, and one it is not. */
-function seed(member: boolean) {
+/*
+  `setUp`, not `member`, because the threshold moved.
+
+  The translator was a member benefit — Legend finished, rung two — and became a set-up one
+  when the intro sequence started selling it as a pillar: a stranger meets "the sentence we
+  have not taught you yet" on card eleven and could not find it for five crates.
+
+  The seed always wrote deal_accepted_at, so both sides of this check were set up and both
+  got the button. The distinguishing fact has to be the one the gate reads.
+*/
+function seed(setUp: boolean) {
+  const member = setUp
   return {
     version: 1,
-    deal_accepted_at: '2026-08-01T00:00:00.000Z',
+    deal_accepted_at: setUp ? '2026-08-01T00:00:00.000Z' : null,
     proof: member ? proof : [{ ...proof[0] }],
     inventory: {},
     roots_played: [],
@@ -113,8 +124,15 @@ const browser = await chromium.launch()
 console.log('\nwho gets the button\n')
 {
   const { context, page } = await open(browser, false, true)
+  /*
+    The protection this was written for survives; only the line moved.
+
+    It said "not before the Club". The claim underneath it — a metered API is not for every
+    stranger who finds the site — is unchanged, and set-up is still a threshold a passer-by
+    has not crossed: they have chosen a city, said why they are here, and agreed the deal.
+  */
   ok(
-    'not before the Club',
+    'not before set-up',
     !(await page.$('[data-testid="translator-open"]')),
     'a metered API is not for every stranger who finds the site',
   )
@@ -131,7 +149,7 @@ console.log('\nwho gets the button\n')
 }
 
 const { context, page } = await open(browser, true, true)
-ok('a member with a key gets it', Boolean(await page.$('[data-testid="translator-open"]')))
+ok('somebody set up, with a key, gets it', Boolean(await page.$('[data-testid="translator-open"]')))
 
 /*
   It is on every screen, including the ones a conversation actually starts on.
@@ -140,16 +158,35 @@ ok('a member with a key gets it', Boolean(await page.$('[data-testid="translator
   about four components remembering to include it.
 */
 console.log('\nand it is everywhere\n')
+/*
+  REACHABLE ON EVERY SCREEN, WHICH IS NOT THE SAME AS ONE BUTTON ON EVERY SCREEN.
+
+  This asked for translator-open by name. On the Club that button now stands down, because
+  the feed's rail occupies the same corner and the floating one was landing on top of SHARE
+  — so the check would have reported ASK as missing from the one screen where a conversation
+  is most likely to start, which is the opposite of the truth.
+
+  The claim worth protecting is that a person can always ask. Where they ask from is a
+  layout decision, and pinning the check to a single testid turned it into an assertion
+  about markup.
+*/
+const asker = '[data-testid="translator-open"], [data-testid="rail-ask"]'
 for (const route of ['/vibes', '/club', '/line', '/profile', '/proof', '/vocab']) {
   await page.goto(BASE + route)
   await page.waitForTimeout(1100)
-  ok('on ' + route, Boolean(await page.$('[data-testid="translator-open"]')))
+  const el = await page.$(asker)
+  ok(
+    'on ' + route,
+    Boolean(el),
+    el ? String(await el.getAttribute('data-testid')) : 'no way to ask',
+  )
 }
 
 console.log('\nasking for something\n')
 await page.goto(BASE + '/club')
 await page.waitForTimeout(1300)
-await page.click('[data-testid="translator-open"]')
+// From the rail here, because that is what the Club offers.
+await page.click('[data-testid="rail-ask"]')
 await page.waitForSelector('[data-testid="translator"]')
 ok('the panel opens', Boolean(await page.$('[data-testid="translator-input"]')))
 

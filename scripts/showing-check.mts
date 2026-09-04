@@ -110,6 +110,41 @@ if (share) {
   )
 }
 
+console.log('\nand nothing sits on top of the rail\n')
+/*
+  A CONTROL SOMEBODY CAN SEE AND CANNOT PRESS, which is worse than one that is missing.
+
+  The translator floats bottom-right above the nav; the feed's rail stacks its verbs in the
+  same corner. They never met while the translator was a member benefit, because nobody had
+  both at once. It opens at set-up now, and the floating button landed exactly on SHARE.
+
+  Asserted with elementFromPoint rather than by clicking, because a click that succeeds
+  proves nothing about the twenty pixels next to it — and the failure mode here is
+  geometric, not behavioural.
+*/
+{
+  const covered = (await page.evaluate(
+    `Array.from(document.querySelectorAll('[data-testid="feed"] button[data-testid^="feed-"], [data-testid="rail-ask"]'))
+      .map(b => {
+        const r = b.getBoundingClientRect()
+        if (!r.width) return null
+        const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+        return top && !b.contains(top) && top !== b ? b.getAttribute('data-testid') : null
+      })
+      .filter(Boolean)`,
+  )) as string[]
+  ok(
+    'every control in the rail can actually be pressed',
+    covered.length === 0,
+    covered.length ? 'covered: ' + covered.join(', ') : 'nothing over them',
+  )
+  ok(
+    'and ASK is one of them',
+    Boolean(await page.$('[data-testid="rail-ask"]')),
+    'the translator asks from the rail on the feed, not from a button on top of it',
+  )
+}
+
 console.log('\nand the people you have shown are in Yours\n')
 /*
   The relationship was invisible. showingsFor has existed and been correct the whole time;
