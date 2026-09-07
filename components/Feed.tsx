@@ -763,7 +763,25 @@ export function Card({
   const from = useRef<{ x: number; y: number } | null>(null)
   const fired = useRef(false)
 
-  const done = () => {
+  /*
+    THE CARD HAS TO GO THE WAY THE THUMB WENT.
+
+    The gesture was read correctly and then thrown away. Every gate ended in the same call —
+    onPassed, which scrolls the rail down to the next card — so swiping a card LEFT moved
+    the screen UP, and swiping it RIGHT also moved the screen UP. Nothing ever travelled
+    sideways. That is what "glitchy" is: not a dropped frame, a direction that disagrees
+    with the hand. The eye reads direction before it reads anything else, and when the
+    answer contradicts the question the whole thing feels broken even though every value
+    in it is correct.
+
+    So a locked card follows the finger, and only the way it is allowed to go. Pushed the
+    wrong way it does not move at all — the card is not resisting, it has one door. Then it
+    leaves by that door.
+  */
+  const [drag, setDrag] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const [flew, setFlew] = useState<'away' | 'in' | null>(null)
+
+  const done = (fly: 'away' | 'in' | null) => {
     if (fired.current) return
     fired.current = true
     if (gate === 'away') {
@@ -776,7 +794,30 @@ export function Card({
       rejectCard(card.id)
       track('card_rejected', { card: card.id })
     }
+    /*
+      UP does not fly, and that is not an omission.
+
+      The rail's own smooth scroll already carries this card off the top of the screen. A
+      lift here as well would move one card twice, at two speeds, which is the flavour of
+      wrong that is hard to name and easy to feel.
+    */
+    const reduced =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (fly && !reduced) setFlew(fly)
     onPassed?.(card.id)
+    /*
+      The transform is dropped once the card is nobody's business.
+
+      A rejected card comes back later in the pile, and it must not come back still holding
+      the position it left in. Clearing it the moment the lock releases would snap the card
+      home while the rail is still scrolling — visible, and it reads as the card changing
+      its mind. 620ms is the far end of the scale and the rail has finished by then.
+    */
+    window.setTimeout(() => {
+      setFlew(null)
+      setDrag({ x: 0, y: 0 })
+    }, 620)
   }
 
   const onDown = (e: React.PointerEvent) => {
@@ -801,11 +842,15 @@ export function Card({
     if (!locked || !from.current || fired.current) return
     const dx = e.clientX - from.current.x
     const dy = e.clientY - from.current.y
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < MIN) return
     const sideways = Math.abs(dx) > Math.abs(dy)
-    if (gate === 'up' && !sideways && dy < 0) done()
-    if (gate === 'away' && sideways && dx < 0) done()
-    if (gate === 'in' && sideways && dx > 0) done()
+    // The permitted direction, and nothing else, is transferred to the card.
+    if (gate === 'up') setDrag({ x: 0, y: !sideways && dy < 0 ? dy : 0 })
+    if (gate === 'away') setDrag({ x: sideways && dx < 0 ? dx : 0, y: 0 })
+    if (gate === 'in') setDrag({ x: sideways && dx > 0 ? dx : 0, y: 0 })
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < MIN) return
+    if (gate === 'up' && !sideways && dy < 0) done(null)
+    if (gate === 'away' && sideways && dx < 0) done('away')
+    if (gate === 'in' && sideways && dx > 0) done('in')
   }
 
   const onUp = (e: React.PointerEvent) => {
@@ -814,12 +859,15 @@ export function Card({
     const dy = e.clientY - from.current.y
     from.current = null
     // A tap, which counts only where tapping is the taught gesture.
-    if (!fired.current && Math.max(Math.abs(dx), Math.abs(dy)) < MIN && gate === 'in') done()
+    if (!fired.current && Math.max(Math.abs(dx), Math.abs(dy)) < MIN && gate === 'in') done(null)
+    // An abandoned swipe goes home rather than staying where the finger left it.
+    if (!fired.current) setDrag({ x: 0, y: 0 })
   }
 
   // A cancelled pointer is the browser taking the gesture, not the person abandoning it.
   const onCancel = () => {
     from.current = null
+    if (!fired.current) setDrag({ x: 0, y: 0 })
   }
 
   const wentAway = useRef(false)
@@ -889,7 +937,14 @@ export function Card({
   const blurb = face.blurb
 
   return (
-    <section className="relative h-full w-full snap-start snap-always">
+    /*
+      Clipped only while a card can travel, so a departing card cannot widen the rail.
+    */
+    <section
+      className={
+        'relative h-full w-full snap-start snap-always' + (locked || flew ? ' overflow-hidden' : '')
+      }
+    >
       {/*
         Three lanes side by side, and the card starts in the middle one.
 
@@ -920,7 +975,42 @@ export function Card({
           never hears the rest of it. Only while locked: everywhere else the native scroll
           IS the interaction.
         */
-        style={{ scrollbarWidth: 'none', touchAction: locked ? 'none' : undefined }}
+        /*
+          Followed instantly, then carried off.
+
+          No transition while the finger is down — a card that eases towards the thumb is a
+          card that lags behind it. The transition arrives with `flew`, so the 24px the hand
+          moved becomes the first 24px of the exit rather than a separate little animation.
+        */
+        style={{
+          scrollbarWidth: 'none',
+          touchAction: locked ? 'none' : undefined,
+          transform: flew
+            ? `translate3d(${flew === 'away' ? '-100%' : '100%'}, 0, 0)`
+            : drag.x || drag.y
+              ? `translate3d(${drag.x}px, ${drag.y}px, 0)`
+              : undefined,
+          opacity: flew ? 0 : undefined,
+          /*
+            No transition while the finger is down, one every other time.
+
+            A card that eases towards the thumb is a card that lags behind it, so the follow
+            is untransitioned. But the same rule made an abandoned half-swipe snap home in a
+            single frame, which is its own small glitch — the card jumps rather than returns.
+            `from.current` is the finger: non-null between pointerdown and the release or the
+            cancel. Read during render, which is impure and deliberate — every moment that
+            matters here is already accompanied by a setState, so there is nothing to miss,
+            and a second piece of state set on every pointerdown would re-render every locked
+            card for a touch that may go nowhere.
+
+            `!flew` because a committed swipe leaves WHILE the finger is still down: without
+            it the flight would be instant, which is the bug this whole change is about.
+          */
+          transition:
+            from.current && !flew
+              ? undefined
+              : 'transform 260ms var(--ease-out), opacity 260ms var(--ease-out)',
+        }}
         className={
           'flex h-full w-full snap-x snap-mandatory overscroll-x-contain ' +
           // A locked card has one lane and listens for its gesture; scrolling it is meaningless.

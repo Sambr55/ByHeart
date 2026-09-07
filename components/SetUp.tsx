@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { setAvatarFromFile } from '@/engine/avatar'
 import { roomsFor } from '@/content/feed'
 import { CLUB } from '@/content/club'
@@ -58,7 +58,34 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   const [photo, setPhoto] = useState<string | null>(null)
   const [done, setDone] = useState(false)
 
-  const already = typeof window !== 'undefined' && Boolean(loadLearner().deal_accepted_at)
+  /*
+    MOUNTED FIRST, because the server cannot know any of this.
+
+    `typeof window !== 'undefined'` inside a render is a hydration bug wearing a guard. The
+    server has no localStorage, so it rendered the WHY question; the browser hydrated a
+    frame later with the answer to hand and swapped to the done state. The question appeared
+    and vanished — reported, exactly, as "these missing screens may be flashing up and
+    disappearing". Feed already answers this the right way (`if (!mounted) return []`) and
+    this card should answer it the same way rather than invent a second habit.
+  */
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  /*
+    ALREADY MEANS ASKED, not merely agreed.
+
+    This read the deal and nothing else, and the deal is the oldest of the three marks —
+    every record written before why and who moved into this card carries it. So a learner
+    who had never been asked anything was shown the answer screen: "Then this is your
+    Lisbon", over a room list built from a null purpose, which is why it offered a
+    launderette and a table for two in the same breath. Those rooms were the tell. A card
+    may only claim to be finished about questions it actually put.
+  */
+  const already = useMemo(() => {
+    if (!mounted) return false
+    const me = loadLearner()
+    return Boolean(me.deal_accepted_at) && Boolean(me.purpose)
+  }, [mounted])
 
   /*
     Five of them, and five is a judgement rather than a round number.
@@ -69,7 +96,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     a sample.
   */
   const topics = useMemo(() => {
-    if (typeof window === 'undefined') return []
+    if (!mounted) return []
     const me = loadLearner()
     if (!me.deal_accepted_at && !done) return []
     return roomsFor(me.chapter ?? undefined, me.purpose ?? null)
@@ -77,7 +104,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
       .slice(0, 5)
       .map((c) => (c.kind === 'situation' ? c.situation.title : ''))
       .filter(Boolean)
-  }, [done])
+  }, [done, mounted])
 
   const finish = () => {
     /*
@@ -106,6 +133,15 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     acceptDeal()
     setDone(true)
   }
+
+  /*
+    Nothing at all until the record has been read.
+
+    Rendering the question and then withdrawing it IS the flash. A card that is one frame
+    late is never noticed; a card that asks who you are and snatches it back is the only
+    thing anybody remembers about it.
+  */
+  if (!mounted) return <div className="flex flex-col gap-6" />
 
   if (already || done) {
     return (

@@ -383,6 +383,57 @@ ok(
   )
 }
 
+console.log('\nan old record is not an answered one\n')
+/*
+  THE SET-UP CARD SHOWED ITS ANSWER SCREEN TO SOMEBODY IT HAD NEVER ASKED.
+
+  Reported as: "I have no idea what this screen is — not least because we haven't asked
+  them WHY they are here yet. We also haven't asked WHO they are." The screen was set-up's
+  done state, "Then this is your Lisbon", over a room list that mixed a launderette with a
+  table for two — which is the tell, because that list can only be built from a null
+  purpose.
+
+  Two faults stacked. The card decided it was finished from `deal_accepted_at` alone, and
+  the deal is the oldest of the three marks: every record written before why and who moved
+  into this card carries it. And it read localStorage during render behind a
+  `typeof window` guard, so the server rendered the question and the browser replaced it a
+  frame later — "these missing screens may be flashing up and disappearing", exactly.
+
+  Seeded with no pair, because that is what routes /vibes to set-up, and with the deal set
+  and the purpose null, because that is the record the fault needs. Asserted on the WHY
+  buttons being THERE rather than on the done state being gone: a check that only watches
+  for the wrong screen also passes when there is no screen at all.
+*/
+{
+  const stale = await browser.newPage({ viewport: { width: 390, height: 844 } })
+  stale.setDefaultTimeout(15000)
+  await stale.goto(BASE + '/vibes')
+  await stale.evaluate(
+    ([k, blob]) => {
+      localStorage.clear()
+      localStorage.setItem(k as string, JSON.stringify(blob))
+    },
+    [KEY, { ...seed, deal_accepted_at: '2026-08-01T00:00:00.000Z', purpose: null }] as const,
+  )
+  await stale.goto(BASE + '/vibes')
+  await stale.waitForTimeout(2200)
+  const asks = await stale.isVisible('[data-testid="setup-why-' + PURPOSES[0].id + '"]')
+  ok('why is asked of a record that was never asked it', asks, 'deal accepted, purpose null')
+  const shownDone = await stale.isVisible('[data-testid="setup-topics"]')
+  ok('and the answer screen is not shown instead', !shownDone, 'no rooms before a purpose')
+  /*
+    Held for a beat, because the flash was the whole complaint. If the question is going to
+    be withdrawn on hydration it has been withdrawn by now.
+  */
+  await stale.waitForTimeout(1200)
+  ok(
+    'and the question is still there a moment later',
+    await stale.isVisible('[data-testid="setup-why-' + PURPOSES[0].id + '"]'),
+    'it appeared and vanished before',
+  )
+  await stale.close()
+}
+
 await browser.close()
 
 if (problems.length) {

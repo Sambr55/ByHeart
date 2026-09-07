@@ -324,6 +324,76 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
     await page.waitForTimeout(1200)
   }
 
+  /*
+    DOES THE CARD GO THE WAY THE THUMB WENT?
+
+    Every check here asked what card you ended up on, and every one of them passed while
+    swiping LEFT moved the screen UP — because the destination was right and only the
+    journey was wrong. Direction is the first thing an eye reads, so a gesture whose answer
+    contradicts it feels broken no matter how correct the outcome is, and no assertion about
+    outcomes can ever see that. This measures the card's own transform instead.
+
+    Held below the 24px threshold on purpose: the card must answer the finger BEFORE it
+    commits, or the first thing a swipe does is nothing.
+  */
+  const readPane = `(() => {
+    const p = window.__pane
+    if (!p) return null
+    const t = getComputedStyle(p).transform
+    if (!t || t === 'none') return { x: 0, y: 0 }
+    const m = new DOMMatrixReadOnly(t)
+    return { x: Math.round(m.m41), y: Math.round(m.m42) }
+  })()`
+
+  const held = async (dx: number, dy: number) => {
+    await page.evaluate(`(() => {
+      const el = document.elementFromPoint(195, 380)
+      if (!el) return
+      window.__pane = el.closest('[data-testid="card-panes"]')
+      const send = function (cx, cy, type) {
+        el.dispatchEvent(new PointerEvent(type, {
+          pointerId: 1, pointerType: 'touch', isPrimary: true,
+          clientX: cx, clientY: cy, bubbles: true, cancelable: true,
+        }))
+      }
+      send(195, 380, 'pointerdown')
+      for (let i = 1; i <= 4; i++) send(195 + (${dx} * i) / 4, 380 + (${dy} * i) / 4, 'pointermove')
+    })()`)
+    await page.waitForTimeout(120)
+    const at = (await page.evaluate(readPane)) as { x: number; y: number } | null
+    await page.evaluate(`(() => {
+      const el = document.elementFromPoint(195, 380)
+      if (el) el.dispatchEvent(new PointerEvent('pointercancel', {
+        pointerId: 1, pointerType: 'touch', isPrimary: true,
+        clientX: 195, clientY: 380, bubbles: true, cancelable: true,
+      }))
+    })()`)
+    await page.waitForTimeout(120)
+    return at
+  }
+
+  /* A committed swipe, measured mid-flight rather than after it has landed. */
+  const flight = async (dx: number, dy: number) => {
+    await page.evaluate(`(() => {
+      const el = document.elementFromPoint(195, 380)
+      if (!el) return
+      window.__pane = el.closest('[data-testid="card-panes"]')
+      const send = function (cx, cy, type) {
+        el.dispatchEvent(new PointerEvent(type, {
+          pointerId: 1, pointerType: 'touch', isPrimary: true,
+          clientX: cx, clientY: cy, bubbles: true, cancelable: true,
+        }))
+      }
+      send(195, 380, 'pointerdown')
+      for (let i = 1; i <= 6; i++) send(195 + (${dx} * i) / 6, 380 + (${dy} * i) / 6, 'pointermove')
+      send(195 + ${dx}, 380 + ${dy}, 'pointercancel')
+    })()`)
+    await page.waitForTimeout(120)
+    const at = (await page.evaluate(readPane)) as { x: number; y: number } | null
+    await page.waitForTimeout(1100)
+    return at
+  }
+
   // Onto the destination card, then choose — which is that card's gesture.
   await page.evaluate(`(() => {
     const r = document.querySelector('.snap-y')
@@ -337,9 +407,19 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
     await page.waitForTimeout(1500)
     ok('and choosing moves you on by itself', /KEEP GOING/.test(await where()), await where())
 
+    const lift = await held(0, -20)
+    ok('the card follows the thumb upward', Boolean(lift && lift.y <= -12), lift ? lift.y + 'px' : 'no card')
+    /*
+      The lock says no by not moving. A card that gave a little in every direction would be
+      promising a door that is not there.
+    */
+    const pushed = await held(0, 20)
+    ok('and will not budge the way it is not allowed', Boolean(pushed && pushed.y === 0), pushed ? pushed.y + 'px' : 'no card')
+
     await swipe(0, -120)
     ok('swipe up reaches the reject lesson', /NOT THIS ONE/.test(await where()), await where())
-    await swipe(-120, 0)
+    const left = await flight(-120, 0)
+    ok('a rejected card leaves to the left', Boolean(left && left.x < -40), left ? left.x + 'px' : 'no card')
     ok('swipe left reaches the open lesson', /THIS ONE/.test(await where()), await where())
     await swipe(120, 0)
     ok('swipe right reaches the vibes claim', /VIBES/.test(await where()), await where())
