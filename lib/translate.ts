@@ -96,10 +96,25 @@ export async function translate(opts: {
   const res = await fetch(ENDPOINT, {
     method: 'POST',
     signal: opts.signal,
+    /*
+      THE WORKSPACE HEADER, for keys that are not scoped to one.
+
+      Anthropic issues two shapes of key. A workspace key carries its workspace with it; an
+      organisation key does not, and every request made with one has to say which workspace
+      to bill and count against — otherwise it is a 400, which is what production was
+      answering while the identical code worked on a laptop holding the other shape of key.
+
+      Sent only when ANTHROPIC_WORKSPACE_ID is set, because a workspace key with the header
+      attached is its own error. So either kind of key works, and neither needs the code to
+      know which one it has.
+    */
     headers: {
       'content-type': 'application/json',
       'x-api-key': key,
       'anthropic-version': '2023-06-01',
+      ...(process.env.ANTHROPIC_WORKSPACE_ID
+        ? { 'anthropic-workspace-id': process.env.ANTHROPIC_WORKSPACE_ID }
+        : {}),
     },
     body: JSON.stringify({
       model: MODEL,

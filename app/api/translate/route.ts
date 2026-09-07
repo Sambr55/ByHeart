@@ -178,7 +178,9 @@ export async function POST(request: Request) {
             ? 'The translator is out of credit or asking too fast (429). Ours to fix.'
             : status === 404
               ? 'The translator is pointed at a model that is not there (404). Ours to fix.'
-              : status
+              : /workspace/i.test(detail)
+                ? 'The translator key is an organisation key and needs ANTHROPIC_WORKSPACE_ID set alongside it. Ours to fix.'
+                : status
                 ? 'The translator answered ' + status + '. ' + detail + ' That is ours to fix.'
                 : 'Could not reach the translator. Try again in a moment.'
     return NextResponse.json({ error: 'upstream', status, why }, { status: 502 })
