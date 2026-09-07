@@ -286,11 +286,41 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
       })()`,
     )) as string).trim()
 
+  /*
+    SWIPED THE WAY A PHONE SWIPES, which is not the way a mouse does.
+
+    This drove page.mouse, and every card passed while the real thing was stuck on the
+    third screen. The difference is the end of the gesture: a mouse always sends pointerup,
+    and a touch browser that decides a gesture belongs to it sends POINTERCANCEL and no
+    pointerup at all. Code that waits for the release therefore works in a headless check
+    and does nothing under a thumb — a bug this file was structurally unable to see.
+
+    So the events are dispatched by hand, with pointerType 'touch' and ending in
+    pointercancel. If a card only advances on release, this fails.
+  */
   const swipe = async (dx: number, dy: number) => {
-    await page.mouse.move(195, 380)
-    await page.mouse.down()
-    await page.mouse.move(195 + dx, 380 + dy, { steps: 8 })
-    await page.mouse.up()
+    /*
+      Written as a string rather than a function, and that is not a style choice.
+
+      tsx compiles a named inner arrow with an esbuild helper called __name, which does not
+      exist in the browser — so a perfectly correct closure passed to page.evaluate dies with
+      "__name is not defined". Every other evaluate in this file is a string for the same
+      reason.
+    */
+    await page.evaluate(`(() => {
+      const el = document.elementFromPoint(195, 380)
+      if (!el) return
+      const send = function (cx, cy, type) {
+        el.dispatchEvent(new PointerEvent(type, {
+          pointerId: 1, pointerType: 'touch', isPrimary: true,
+          clientX: cx, clientY: cy, bubbles: true, cancelable: true,
+        }))
+      }
+      send(195, 380, 'pointerdown')
+      for (let i = 1; i <= 6; i++) send(195 + (${dx} * i) / 6, 380 + (${dy} * i) / 6, 'pointermove')
+      // No pointerup. The browser took the gesture, which is what a phone does.
+      send(195 + ${dx}, 380 + ${dy}, 'pointercancel')
+    })()`)
     await page.waitForTimeout(1200)
   }
 

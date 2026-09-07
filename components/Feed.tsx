@@ -729,36 +729,65 @@ export function Card({
   const gate = card.kind === 'intro' ? card.intro.only : undefined
   const locked = Boolean(gate) && !freedHere
   const from = useRef<{ x: number; y: number } | null>(null)
+  const fired = useRef(false)
+
+  const done = () => {
+    if (fired.current) return
+    fired.current = true
+    if (gate === 'away') {
+      /*
+        The lesson is that the card goes to the back, so it actually goes to the back.
+
+        Teaching the gesture without performing it would leave somebody who later swipes
+        left in the real feed surprised by what happens — the opposite of a lesson.
+      */
+      rejectCard(card.id)
+      track('card_rejected', { card: card.id })
+    }
+    onPassed?.(card.id)
+  }
 
   const onDown = (e: React.PointerEvent) => {
     if (!locked) return
     from.current = { x: e.clientX, y: e.clientY }
+    fired.current = false
   }
+
+  /*
+    DECIDED ON THE MOVE, NOT ON THE RELEASE — because on a phone the release may never come.
+
+    This waited for pointerup, which is fine with a mouse and wrong with a thumb: when a
+    touch browser decides a gesture belongs to it, it sends pointercancel and no pointerup
+    at all. So the swipe worked in a headless check driven by the mouse and did nothing on
+    an actual phone, which is exactly the shape of bug a browser check cannot see.
+
+    Firing the moment the threshold is crossed also makes the card feel like it is
+    responding to the movement rather than to letting go, which is what a swipe should do.
+  */
+  const MIN = 24
+  const onMove = (e: React.PointerEvent) => {
+    if (!locked || !from.current || fired.current) return
+    const dx = e.clientX - from.current.x
+    const dy = e.clientY - from.current.y
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < MIN) return
+    const sideways = Math.abs(dx) > Math.abs(dy)
+    if (gate === 'up' && !sideways && dy < 0) done()
+    if (gate === 'away' && sideways && dx < 0) done()
+    if (gate === 'in' && sideways && dx > 0) done()
+  }
+
   const onUp = (e: React.PointerEvent) => {
     if (!locked || !from.current) return
     const dx = e.clientX - from.current.x
     const dy = e.clientY - from.current.y
     from.current = null
-    const MIN = 24
-    const sideways = Math.abs(dx) > Math.abs(dy)
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < MIN) {
-      // A tap, which counts only where tapping is the taught gesture.
-      if (gate === 'in') onPassed?.(card.id)
-      return
-    }
-    if (gate === 'up' && !sideways && dy < 0) onPassed?.(card.id)
-    if (gate === 'away' && sideways && dx < 0) {
-      /*
-        The lesson is that the card goes to the back, so it actually goes to the back.
+    // A tap, which counts only where tapping is the taught gesture.
+    if (!fired.current && Math.max(Math.abs(dx), Math.abs(dy)) < MIN && gate === 'in') done()
+  }
 
-        Teaching the gesture without performing it would leave somebody who later swipes
-        left in the real feed surprised by what happens — which is the opposite of a lesson.
-      */
-      rejectCard(card.id)
-      track('card_rejected', { card: card.id })
-      onPassed?.(card.id)
-    }
-    if (gate === 'in' && sideways && dx > 0) onPassed?.(card.id)
+  // A cancelled pointer is the browser taking the gesture, not the person abandoning it.
+  const onCancel = () => {
+    from.current = null
   }
 
   const wentAway = useRef(false)
@@ -851,13 +880,20 @@ export function Card({
         data-testid="card-panes"
         data-gate={locked ? gate : undefined}
         onPointerDown={onDown}
+        onPointerMove={onMove}
         onPointerUp={onUp}
+        onPointerCancel={onCancel}
+        /*
+          The browser must not claim the gesture, or it cancels the pointer and this card
+          never hears the rest of it. Only while locked: everywhere else the native scroll
+          IS the interaction.
+        */
+        style={{ scrollbarWidth: 'none', touchAction: locked ? 'none' : undefined }}
         className={
           'flex h-full w-full snap-x snap-mandatory overscroll-x-contain ' +
           // A locked card has one lane and listens for its gesture; scrolling it is meaningless.
           (locked ? 'overflow-x-hidden' : 'overflow-x-auto')
         }
-        style={{ scrollbarWidth: 'none' }}
         onScroll={onPaneScroll}
       >
         {/*
