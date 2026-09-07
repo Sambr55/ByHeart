@@ -331,6 +331,27 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
   }, [atIndex, cards, freed])
 
   /*
+    The gesture landed, so the rail moves — because on a locked card nothing else can.
+
+    Native scrolling is off while a card is holding somebody, so the advance has to be
+    driven. Smooth, unlike the snap-into-place when a lock engages: that one is a
+    correction, this one is the movement the person just asked for and should be able to
+    see happen.
+  */
+  const passed = (id: string) => {
+    setFreed((f) => (f.includes(id) ? f : [...f, id]))
+    const el = rail.current
+    if (!el) return
+    const to = (atIndex + 2) * el.clientHeight
+    requestAnimationFrame(() =>
+      el.scrollTo({
+        top: to,
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      }),
+    )
+  }
+
+  /*
     Which card is on screen, tracked so the lock knows what it is looking at.
 
     Read on scroll rather than kept in sync with the settle handler: the lock has to bite
@@ -534,6 +555,8 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
             liked={mounted && (learner.liked ?? []).includes(card.id)}
             onSaved={(on) => setToast(on ? 'saved' : 'unsaved')}
             onFreed={(id: string) => setFreed((f) => (f.includes(id) ? f : [...f, id]))}
+            freedHere={freed.includes(card.id)}
+            onPassed={passed}
             onBack={() => setToast('back')}
             onDone={() => setToast('done')}
           />
@@ -590,6 +613,8 @@ export function Card({
   onRejected,
   onBack,
   onFreed,
+  freedHere,
+  onPassed,
   onDone,
   stage = 'member',
   hint = false,
@@ -604,6 +629,10 @@ export function Card({
   onBack?: () => void
   /** The tutorial gesture was made, so the lock on this card lifts. */
   onFreed?: (id: string) => void
+  /** True once this card's gesture has been made, so it stops listening. */
+  freedHere?: boolean
+  /** The one gesture happened: free this card and move on to the next. */
+  onPassed?: (id: string) => void
   /** Spent, and on its way to the profile. The feed rebuilds without it. */
   onDone?: () => void
   /** Which Club this is. A member's rooms are never teased. */
@@ -683,6 +712,54 @@ export function Card({
     const el = pane.current
     if (el) el.scrollLeft = el.clientWidth
   }, [card.id])
+
+  /*
+    A LOCKED CARD IS DRIVEN BY HAND, not by scroll snap.
+
+    The lanes are how an ordinary card works: three side by side, and the browser's own
+    snapping decides what you land on. That is exactly wrong for a card whose whole job is
+    to accept ONE movement — CSS cannot express "left is allowed and right is not", so the
+    lock would have to fight the snap it is sitting inside.
+
+    So a locked card renders its face alone and listens for the gesture itself. Twenty-four
+    pixels of travel, whichever axis moved further, and only the permitted direction does
+    anything. Everything else is ignored rather than resisted, which is what makes the card
+    feel like it is waiting rather than broken.
+  */
+  const gate = card.kind === 'intro' ? card.intro.only : undefined
+  const locked = Boolean(gate) && !freedHere
+  const from = useRef<{ x: number; y: number } | null>(null)
+
+  const onDown = (e: React.PointerEvent) => {
+    if (!locked) return
+    from.current = { x: e.clientX, y: e.clientY }
+  }
+  const onUp = (e: React.PointerEvent) => {
+    if (!locked || !from.current) return
+    const dx = e.clientX - from.current.x
+    const dy = e.clientY - from.current.y
+    from.current = null
+    const MIN = 24
+    const sideways = Math.abs(dx) > Math.abs(dy)
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < MIN) {
+      // A tap, which counts only where tapping is the taught gesture.
+      if (gate === 'in') onPassed?.(card.id)
+      return
+    }
+    if (gate === 'up' && !sideways && dy < 0) onPassed?.(card.id)
+    if (gate === 'away' && sideways && dx < 0) {
+      /*
+        The lesson is that the card goes to the back, so it actually goes to the back.
+
+        Teaching the gesture without performing it would leave somebody who later swipes
+        left in the real feed surprised by what happens — which is the opposite of a lesson.
+      */
+      rejectCard(card.id)
+      track('card_rejected', { card: card.id })
+      onPassed?.(card.id)
+    }
+    if (gate === 'in' && sideways && dx > 0) onPassed?.(card.id)
+  }
 
   const wentAway = useRef(false)
   const onPaneScroll = () => {
@@ -772,7 +849,14 @@ export function Card({
       <div
         ref={pane}
         data-testid="card-panes"
-        className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain"
+        data-gate={locked ? gate : undefined}
+        onPointerDown={onDown}
+        onPointerUp={onUp}
+        className={
+          'flex h-full w-full snap-x snap-mandatory overscroll-x-contain ' +
+          // A locked card has one lane and listens for its gesture; scrolling it is meaningless.
+          (locked ? 'overflow-x-hidden' : 'overflow-x-auto')
+        }
         style={{ scrollbarWidth: 'none' }}
         onScroll={onPaneScroll}
       >
@@ -867,14 +951,36 @@ export function Card({
                     </p>
                   )}
                   <div className={card.intro.pillar ? 'pillar-body' : undefined}>
-                    <h2 className="display mt-3 text-balance text-3xl">{face.title}</h2>
-                    <p className={'mt-3 text-sm leading-relaxed ' + (onSand ? 'text-muted' : 'text-white/80')}>
-                      {blurb}
-                    </p>
+                    {/* Destination carries its own heading, so the face does not repeat it. */}
+                    {card.intro.asks === 'where' ? null : (
+                      <>
+                        <h2 className="display mt-3 text-balance text-3xl">{face.title}</h2>
+                        <p
+                          className={
+                            'mt-3 text-sm leading-relaxed ' + (onSand ? 'text-muted' : 'text-white/80')
+                          }
+                        >
+                          {blurb}
+                        </p>
+                      </>
+                    )}
                     {card.intro.gesture ? (
                       <Gesture kind={card.intro.gesture} moving={Boolean(card.intro.only) || card.intro.gesture === 'up'} />
                     ) : null}
                     {card.intro.shows ? <Specimen shows={card.intro.shows} /> : null}
+                    {/*
+                      The city list is ON THE FACE, because the card that asks for it admits
+                      no other gesture — and the pane it used to live in is hidden while a
+                      card is holding somebody. A question behind a swipe that has been
+                      disabled is a question nobody can answer.
+
+                      Choosing is the gesture, so choosing advances.
+                    */}
+                    {card.intro.asks === 'where' ? (
+                      <div className="mt-6">
+                        <Destination onDone={() => onPassed?.(card.id)} />
+                      </div>
+                    ) : null}
                   </div>
                 </>
               ) : card.kind === 'derived' && card.card.kind === 'collision' ? (
@@ -1087,7 +1193,17 @@ export function Card({
           </div>
         </div>
 
-        <div className="card-pane nav-clear order-1 h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 text-fg">
+        {/*
+          No language lane on a locked card.
+
+          A card that admits one gesture must not have somewhere else to go: leaving the
+          lane in place means a right-swipe reveals a pane instead of moving on, and the
+          card teaches the wrong thing about the movement it is named after.
+        */}
+        <div
+          hidden={locked}
+          className="card-pane nav-clear order-1 h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 text-fg"
+        >
           {/* Clearance is card-pane in globals.css — the header's own measurement, notch
               included, so the two cannot drift apart. */}
           <div>
@@ -1134,6 +1250,7 @@ export function Card({
         */}
         <div
           aria-hidden
+          hidden={locked}
           data-testid="card-away"
           className="order-3 flex h-full w-full shrink-0 snap-start flex-col items-start justify-end gap-1 bg-bg px-5 pb-10 text-fg"
         >

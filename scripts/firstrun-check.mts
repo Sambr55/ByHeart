@@ -252,21 +252,70 @@ const titles = (await page.evaluate(
   )
 
   /*
-    And doing it lets go. Released per card and never re-armed: once you have rejected
-    something you know how, and meeting the same lock twice is a quiz rather than a lesson.
+    Releasing it is covered below, with a real swipe.
+
+    This used to scroll the card's pane sideways to simulate the reject. A locked card has
+    one lane and no horizontal scrolling now — the gesture is read from the pointer, not from
+    the scroller — so moving scrollLeft does nothing and the check was asserting against a
+    mechanism that no longer exists. The chain walk further down does it properly, with the
+    mouse, which is also the only way to prove the lock is real: a check that moves the
+    scroller directly would pass on a rail with no locks at all.
   */
+}
+
+console.log('\nthe intro is a rail, and every gesture is made rather than read\n')
+/*
+  THE WHOLE CHAIN, WALKED WITH REAL GESTURES.
+
+  Choose a city, swipe up, swipe left, swipe right, swipe right — and each card admits that
+  one movement and nothing else. A person who swipes past an instruction has been told a
+  gesture and never performed it, which is the same as not being told, so the intro asks for
+  each in turn before any of them matters.
+
+  Driven with the mouse rather than by setting scrollTop, because scrollTop is precisely
+  what these cards have turned off: a check that moved the scroller directly would pass on a
+  rail with no locks at all, which is the failure it exists to catch.
+*/
+{
+  const where = async () =>
+    ((await page.evaluate(
+      `(() => {
+        const r = document.querySelector('.snap-y')
+        const s = r.children[Math.round(r.scrollTop / r.clientHeight)]
+        return ((s && s.innerText) || '').split(String.fromCharCode(10)).filter(Boolean)[0] || '?'
+      })()`,
+    )) as string).trim()
+
+  const swipe = async (dx: number, dy: number) => {
+    await page.mouse.move(195, 380)
+    await page.mouse.down()
+    await page.mouse.move(195 + dx, 380 + dy, { steps: 8 })
+    await page.mouse.up()
+    await page.waitForTimeout(1200)
+  }
+
+  // Onto the destination card, then choose — which is that card's gesture.
   await page.evaluate(`(() => {
     const r = document.querySelector('.snap-y')
-    const s = r.children[${lockedAt + 1}]
-    const pane = s && s.querySelector('[data-testid="card-panes"]')
-    if (pane) pane.scrollLeft = pane.clientWidth * 2
+    if (r) r.scrollTop = r.clientHeight * 2
   })()`)
-  await page.waitForTimeout(1500)
-  ok(
-    'and making the gesture lets go',
-    !(await page.evaluate(`document.querySelector('[data-testid="feed"]').getAttribute('data-locked')`)),
-    'the lesson is the doing',
-  )
+  await page.waitForTimeout(900)
+  const lisbon = await page.$('[data-testid="where-lisbon"]')
+  ok('the city list is on the face, not behind a swipe', Boolean(lisbon), 'choosing is the gesture')
+  if (lisbon) {
+    await lisbon.click()
+    await page.waitForTimeout(1500)
+    ok('and choosing moves you on by itself', /KEEP GOING/.test(await where()), await where())
+
+    await swipe(0, -120)
+    ok('swipe up reaches the reject lesson', /NOT THIS ONE/.test(await where()), await where())
+    await swipe(-120, 0)
+    ok('swipe left reaches the open lesson', /THIS ONE/.test(await where()), await where())
+    await swipe(120, 0)
+    ok('swipe right reaches the vibes claim', /VIBES/.test(await where()), await where())
+    await swipe(120, 0)
+    ok('and again reaches the demo it describes', /SIXTY SECONDS/.test(await where()), await where())
+  }
 }
 
 console.log('\nthe five pillars arrive as headlines\n')

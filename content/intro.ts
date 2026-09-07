@@ -84,8 +84,23 @@ export interface IntroCard {
    * product IS. They were eleven-point labels doing a headline's job.
    */
   pillar?: true
-  /** The gesture that is the ONLY way off this card. Locks the scroll until it is made. */
-  only?: 'away' | 'in'
+  /**
+   * The one gesture that moves you off this card. Nothing else does anything.
+   *
+   * THE INTRO IS A RAIL, not a feed you can wander. Each of these cards teaches exactly one
+   * movement and then asks for it, in order — choose, up, left, right — so that by the time
+   * somebody reaches real content they have made every gesture the product uses rather than
+   * read about them. A person who swipes past an instruction has been told a gesture and
+   * never performed it, which is the same as not being told.
+   *
+   * 'choose' is the destination card: picking a city is the gesture, and it advances by
+   * itself. The other three are the movements themselves.
+   *
+   * The required gesture ADVANCES rather than doing its usual job. Swiping right here does
+   * not open a pane, it moves you on — because on these cards there is nothing behind the
+   * face worth opening, and the lesson is the movement rather than the destination.
+   */
+  only?: 'choose' | 'up' | 'away' | 'in'
   shows?:
     | { kind: 'root'; root_id: string }
     | { kind: 'drop' }
@@ -118,6 +133,7 @@ export const INTRO_CARDS: IntroCard[] = [
       rather than a chain of spreads in the component.
     */
     id: 'intro_where',
+    only: 'choose',
     eyebrow: 'WHERE TO',
     headline: 'Where do you want DUB to take you?',
     body: 'Pick the one you are going to.',
@@ -132,6 +148,7 @@ export const INTRO_CARDS: IntroCard[] = [
       where an instruction goes to be ignored.
     */
     id: 'intro_up',
+    only: 'up',
     eyebrow: 'KEEP GOING',
     headline: 'Swipe up for the next card.',
     body: 'That is the whole of it. The feed goes on as long as you do.',
@@ -165,6 +182,8 @@ export const INTRO_CARDS: IntroCard[] = [
   {
     id: 'intro_vibes',
     image: 'intro_vibes_card',
+    // Tap or swipe right, and it goes to the demo — which is the thing it is describing.
+    only: 'in',
     pillar: true,
     eyebrow: 'VIBES',
     headline: 'Learn from what you have already seen a hundred times.',

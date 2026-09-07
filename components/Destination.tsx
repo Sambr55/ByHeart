@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { CHAPTERS } from '@/content/chapters'
 import { DEFAULT_PAIR } from '@/content/pairs'
 import { track } from '@/engine/analytics'
-import { loadLearner, setChapter } from '@/engine/learner'
+import { setChapter } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
 
 /**
@@ -24,9 +24,14 @@ import { setPair } from '@/engine/pair'
  * only open one anyway. The sequence never stops a thumb; it only stops an action.
  */
 export function Destination({ onDone }: { onDone?: () => void } = {}) {
-  const [chosen, setChosen] = useState<string | null>(
-    typeof window === 'undefined' ? null : (loadLearner().chapter ?? null),
-  )
+  /*
+    NOTHING IS PRE-SELECTED, ever, including on a device that has chosen before.
+
+    It read the stored chapter, so anybody who had been through set-up once met this card
+    with Lisbon already highlighted — which turns a question into a confirmation and makes
+    the one action the card wants look as though it has already been taken.
+  */
+  const [chosen, setChosen] = useState<string | null>(null)
 
   return (
     <div className="flex flex-col gap-6">
