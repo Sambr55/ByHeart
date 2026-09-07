@@ -167,6 +167,8 @@ export async function POST(request: Request) {
     */
     const message = (e as Error)?.message ?? ''
     const status = Number(message.match(/upstream (\d+)/)?.[1] ?? 0)
+    // What the upstream said and which model we asked about, for the statuses that need it.
+    const detail = message.replace(/^upstream \d+:?\s*/, '').slice(0, 200)
     const why =
       (e as Error)?.name === 'AbortError'
         ? 'That took too long. Try again.'
@@ -177,7 +179,7 @@ export async function POST(request: Request) {
             : status === 404
               ? 'The translator is pointed at a model that is not there (404). Ours to fix.'
               : status
-                ? 'The translator answered ' + status + '. That is ours to fix.'
+                ? 'The translator answered ' + status + '. ' + detail + ' That is ours to fix.'
                 : 'Could not reach the translator. Try again in a moment.'
     return NextResponse.json({ error: 'upstream', status, why }, { status: 502 })
   }

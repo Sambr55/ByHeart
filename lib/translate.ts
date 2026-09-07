@@ -115,7 +115,28 @@ export async function translate(opts: {
     }),
   })
 
-  if (!res.ok) throw new Error('upstream ' + res.status)
+  if (!res.ok) {
+    /*
+      CARRY WHAT THE UPSTREAM ACTUALLY SAID, and which model we asked it about.
+
+      A bare status was enough to rule out the key and the credit — 400 is neither — and
+      then stopped being enough, because a 400 is "your request was wrong" without saying
+      which part. The one part of this request that changes between machines is the model,
+      which comes from an environment variable, so it is the first thing worth seeing.
+
+      Anthropic's message for a 400 names the offending field. It is their error text about
+      our request, not our key and not the learner's sentence, and it is truncated because
+      an error is a sentence rather than a log.
+    */
+    let said = ''
+    try {
+      const body = (await res.json()) as { error?: { message?: string } }
+      said = (body.error?.message ?? '').slice(0, 160)
+    } catch {
+      /* A non-JSON error body tells us nothing extra; the status still does. */
+    }
+    throw new Error('upstream ' + res.status + (said ? ': ' + said : '') + ' [model ' + MODEL + ']')
+  }
   const body = (await res.json()) as { content?: { type: string; text?: string }[] }
   const text = (body.content ?? []).find((c) => c.type === 'text')?.text ?? ''
 
