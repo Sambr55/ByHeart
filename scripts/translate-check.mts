@@ -20,6 +20,7 @@
  * check that cannot run without a paid credential is a check that is off.
  */
 import { loadEnv } from './env.mjs'
+import { readFileSync } from 'node:fs'
 import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_FRAMES } from '../content/legend'
@@ -157,6 +158,36 @@ ok('somebody set up, with a key, gets it', Boolean(await page.$('[data-testid="t
   Mounted at the root rather than per-shell, so this is a claim about the layout and not
   about four components remembering to include it.
 */
+console.log('\nthe meter speaks for itself when it breaks\n')
+/*
+  The failure that cost an hour: the daily-count read sat outside the route's try/catch, so
+  a missing table became an unhandled 500 and the client showed "could not reach the
+  translator" — a sentence about the network, for a fault in the database. It sent me to
+  check the key, the model and the endpoint, all of which were fine.
+
+  Asserted against the SOURCE rather than by breaking a database, because the claim is
+  structural: the read is inside a handler, and what it returns names the meter.
+*/
+{
+  const route = readFileSync('app/api/translate/route.ts', 'utf8')
+  const guarded = /try \{\s*already = await translationsToday/.test(route)
+  ok('the meter read is inside a handler', guarded, 'an unhandled throw becomes the wrong message')
+  ok(
+    'and its failure says the meter, not the network',
+    /error: 'meter'/.test(route),
+    'an error should name the thing that broke',
+  )
+  /*
+    And it fails CLOSED. The cap is the only thing between a text box and somebody else's
+    money, so a meter that cannot be read must stop the feature rather than uncap it.
+  */
+  ok(
+    'and it fails closed rather than uncapping',
+    /status: 503/.test(route) && !/already = 0\s*\/\/ *uncapped/.test(route),
+    'no count means no spending',
+  )
+}
+
 console.log('\nand it is everywhere\n')
 /*
   REACHABLE ON EVERY SCREEN, WHICH IS NOT THE SAME AS ONE BUTTON ON EVERY SCREEN.

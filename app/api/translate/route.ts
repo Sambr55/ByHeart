@@ -79,7 +79,30 @@ export async function POST(request: Request) {
     )
   }
 
-  const already = await translationsToday(device)
+  /*
+    THE METER'S OWN FAILURE IS ITS OWN MESSAGE.
+
+    This line sat outside the try below, so anything it threw became an unhandled 500 — and
+    the client's fallback text, "could not reach the translator", which is a sentence about
+    the network and the upstream. It sent me to check the key, the model and the endpoint,
+    all of which were fine, while the actual fault was a missing table.
+
+    An error should name the thing that broke. This one now does, and it fails CLOSED: the
+    cap is the only thing between a text box and somebody else's money, so a meter that
+    cannot be read stops the feature rather than quietly uncapping it.
+  */
+  let already = 0
+  try {
+    already = await translationsToday(device)
+  } catch {
+    return NextResponse.json(
+      {
+        error: 'meter',
+        why: 'The translator cannot count today\'s asks, so it is not spending anything. This is ours to fix.',
+      },
+      { status: 503 },
+    )
+  }
   if (already >= MAX_PER_DAY) {
     return NextResponse.json(
       {

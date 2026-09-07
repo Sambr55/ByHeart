@@ -330,15 +330,77 @@ export async function recordTranslation(
   return { layer: 'postgres', today: Number(count?.n ?? 0), id: Number(row?.id ?? 0) }
 }
 
-/** How many this device has asked for in the last day, before spending anything. */
+/*
+  The translator's table, made if it is not there.
+
+  WHY A ROUTE MAKES A TABLE. `next build` runs the migrations, and it runs them with
+  --optional so that a machine with no database can still build — which means a deployment
+  whose build environment lacks DATABASE_URL skips them SILENTLY and boots a product whose
+  storage is one table short. That is what happened: the translator answered "could not
+  reach the translator" on production while working perfectly locally, because the meter's
+  read threw on a relation that was never created.
+
+  `create table if not exists` is idempotent and costs one statement per process. It is not
+  a substitute for migrations and does not pretend to be — it is a floor under one feature
+  that is otherwise dead with no way to tell why from the outside.
+*/
+let ensured: Promise<void> | null = null
+async function ensureTranslationTable(): Promise<void> {
+  const sql = db()
+  if (!sql) return
+  if (!ensured) {
+    ensured = (async () => {
+      await sql`
+        create table if not exists translation (
+          id bigserial primary key,
+          device_id text,
+          user_id text,
+          ask text not null,
+          answer text,
+          note text,
+          direction text,
+          kept boolean not null default false,
+          at timestamptz not null default now()
+        )
+      `
+      await sql`create index if not exists translation_device_at_idx on translation (device_id, at desc)`
+      await sql`create index if not exists translation_at_idx on translation (at desc)`
+    })().catch((e) => {
+      // Let the next call try again rather than caching a failure for the process's life.
+      ensured = null
+      throw e
+    })
+  }
+  return ensured
+}
+
+/**
+ * How many this device has asked for in the last day, before spending anything.
+ *
+ * THIS RAN OUTSIDE THE ROUTE'S TRY/CATCH, so a missing table did not become "the meter is
+ * unavailable", it became an unhandled 500 and a client-side message about not reaching the
+ * translator — which pointed at the API, the key and the model, none of which were wrong.
+ *
+ * It fails closed. Without a working count there is no cap, and the cap is the only thing
+ * standing between a text box and somebody else's money, so a meter that cannot be read
+ * stops the feature rather than quietly uncapping it.
+ */
 export async function translationsToday(deviceId: string | null): Promise<number> {
   const sql = db()
   if (!sql || !deviceId) return 0
-  const [row] = await sql<{ n: string }[]>`
-    select count(*)::text as n from translation
-    where device_id = ${deviceId} and at > now() - interval '24 hours'
-  `
-  return Number(row?.n ?? 0)
+  const count = async () => {
+    const [row] = await sql<{ n: string }[]>`
+      select count(*)::text as n from translation
+      where device_id = ${deviceId} and at > now() - interval '24 hours'
+    `
+    return Number(row?.n ?? 0)
+  }
+  try {
+    return await count()
+  } catch {
+    await ensureTranslationTable()
+    return await count()
+  }
 }
 
 /**
