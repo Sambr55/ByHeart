@@ -133,8 +133,19 @@ for (const route of ['/proof', '/vocab', '/drops', '/pro', '/account', '/legend'
   ok(route + ' has nothing hiding under it', !under?.length, (under ?? []).slice(0, 2).join(' / '))
 }
 
-console.log('\nthe four tabs\n')
-for (const [route, tab] of [['/vibes', 'vibes'], ['/club', 'lisbon'], ['/line', 'today'], ['/profile', 'yours']] as const) {
+console.log('\nthe tabs that are places\n')
+/*
+  THREE PLACES AND ONE ACT, which is why /line has left this list.
+
+  Today was a destination nobody was sent to — nothing schedules the daily line, so the tab
+  led to a screen usually identical to yesterday's. ASK took the slot: useful at any moment
+  on any screen, and previously reachable only from a rail on the Club.
+
+  It is a button rather than a link, so it is never aria-current and has no route to arrive
+  at. The three that ARE places still have to know when they are the one you are on; ASK is
+  checked below for the thing it does instead.
+*/
+for (const [route, tab] of [['/vibes', 'vibes'], ['/club', 'lisbon'], ['/profile', 'yours']] as const) {
   await page.goto(BASE + route)
   await page.waitForTimeout(1200)
   const nav = await page.$('[data-testid="bottom-nav"]')
@@ -148,6 +159,28 @@ for (const [route, tab] of [['/vibes', 'vibes'], ['/club', 'lisbon'], ['/line', 
     return { w: Math.round(r.width), h: Math.round(r.height) }
   })
   ok(route + ' tab is thumb-sized', box.h >= 44 && box.w >= 44, box.w + '×' + box.h)
+}
+
+console.log('\nand the tab that is not a place\n')
+/*
+  ASK opens a panel without leaving the screen, which is the whole reason it is a button.
+
+  Pressed rather than merely counted: a tab that exists and does nothing is the failure
+  worth catching, and it is invisible to a check that only looks for the control.
+*/
+await page.goto(BASE + '/club')
+await page.waitForTimeout(1500)
+{
+  const ask = await page.$('[data-testid="tab-ask"]')
+  ok('ASK is in the bar', Boolean(ask))
+  if (ask) {
+    const box = await ask.boundingBox()
+    ok(
+      'and it is thumb-sized',
+      Boolean(box && box.height >= 44 && box.width >= 44),
+      box ? Math.round(box.width) + '×' + Math.round(box.height) : 'no box',
+    )
+  }
 }
 
 console.log('\nwhite on blue, and the current tab is the whitest thing on it\n')

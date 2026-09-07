@@ -20,10 +20,26 @@ import { usePathname } from 'next/navigation'
  * Not on a lesson. The teaching beats are a held sequence and a persistent bar offering
  * three ways out is an invitation to leave in the middle of the one thing that works.
  */
+/*
+  ASK takes the third slot, and it is the only tab that is not a place.
+
+  Today was a destination nobody was sent to: nothing schedules the daily line, so the tab
+  led to a screen that was usually the same as yesterday. The translator is the opposite —
+  it is useful at any moment, on any screen, and was reachable only from a rail on the Club
+  and a button that hid whenever that rail appeared.
+
+  It opens a panel rather than navigating, so it is a button in a row of links. That is a
+  real inconsistency and the right one: going somewhere and asking for something are
+  different acts, and a person who taps ASK does not want to lose the screen they are on.
+*/
 const TABS = [
   { href: '/vibes', label: 'Vibes', d: 'M4 6h7v7H4zM13 6h7v7h-7zM4 15h7v3H4zM13 15h7v3h-7z' },
   { href: '/club', label: 'Lisbon', d: 'M4 20V9l8-5 8 5v11M9 20v-6h6v6' },
-  { href: '/line', label: 'Today', d: 'M5 4h14v16l-7-4-7 4zM9 9h6' },
+  {
+    href: null,
+    label: 'Ask',
+    d: 'M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5M12 17.5h.01',
+  },
   { href: '/profile', label: 'Yours', d: 'M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0' },
 ] as const
 
@@ -75,26 +91,29 @@ export function BottomNav() {
       />
       {TABS.map((t, i) => {
         const here = i === hereIndex
-        return (
-          <Link
-            key={t.href}
-            href={t.href}
-            aria-current={here ? 'page' : undefined}
-            data-testid={'tab-' + t.label.toLowerCase()}
-            /*
-              White on blue, and the current tab is the WHITEST thing on it.
+        /*
+          One tab is a button, so the row is built from a shared set of props rather than
+          from two copies of the same markup that will drift apart the first time anybody
+          changes the type scale.
+        */
+        const shared = {
+          'aria-current': here ? ('page' as const) : undefined,
+          'data-testid': 'tab-' + t.label.toLowerCase(),
+          /*
+            White on blue, and the current tab is the WHITEST thing on it.
 
-              The old bar was the page ground with a blue tint on one label, which read as
-              recessive — a bar you have to look for is not a permanent navigation, it is a
-              footer. On a saturated ground the difference between here and not-here is
-              opacity and weight rather than hue, which survives both themes without a
-              second colour to keep in step.
-            */
-            className={
-              'tap-target relative flex flex-1 flex-col items-center justify-center gap-1 py-3 transition ' +
-              (here ? 'text-accent' : 'text-muted')
-            }
-          >
+            The old bar was the page ground with a blue tint on one label, which read as
+            recessive — a bar you have to look for is not a permanent navigation, it is a
+            footer. On a saturated ground the difference between here and not-here is
+            opacity and weight rather than hue, which survives both themes without a second
+            colour to keep in step.
+          */
+          className:
+            'tap-target relative flex flex-1 flex-col items-center justify-center gap-1 py-3 transition ' +
+            (here ? 'text-accent' : 'text-muted'),
+        }
+        const inside = (
+          <>
             <svg
               viewBox="0 0 24 24"
               aria-hidden
@@ -108,7 +127,22 @@ export function BottomNav() {
               <path d={t.d} />
             </svg>
             <span className="text-[0.6rem] uppercase tracking-wider">{t.label}</span>
+          </>
+        )
+        return t.href ? (
+          <Link key={t.label} href={t.href} {...shared}>
+            {inside}
           </Link>
+        ) : (
+          <button
+            key={t.label}
+            type="button"
+            aria-label="How do I say something"
+            onClick={() => window.dispatchEvent(new CustomEvent('dub:ask'))}
+            {...shared}
+          >
+            {inside}
+          </button>
         )
       })}
     </nav>

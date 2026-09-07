@@ -129,7 +129,7 @@ console.log('\nand nothing sits on top of the rail\n')
 */
 {
   const covered = (await page.evaluate(
-    `Array.from(document.querySelectorAll('[data-testid="feed"] button[data-testid^="feed-"], [data-testid="rail-ask"]'))
+    `Array.from(document.querySelectorAll('[data-testid="feed"] button[data-testid^="feed-"]'))
       .map(b => {
         const r = b.getBoundingClientRect()
         if (!r.width) return null
@@ -143,10 +143,18 @@ console.log('\nand nothing sits on top of the rail\n')
     covered.length === 0,
     covered.length ? 'covered: ' + covered.join(', ') : 'nothing over them',
   )
+  /*
+    ASK IS NOT IN THE RAIL ANY MORE, and that is the point of this assertion now.
+
+    It moved here when the translator's floating button landed on top of SHARE — which
+    fixed the collision and left ASK reachable only from the Club. It lives in the bottom
+    bar now, on every screen, so the rail is only the things you do to a card. Asserted so
+    that putting it back would be a decision rather than a drift.
+  */
   ok(
-    'and ASK is one of them',
-    Boolean(await page.$('[data-testid="rail-ask"]')),
-    'the translator asks from the rail on the feed, not from a button on top of it',
+    'and the rail is only card verbs',
+    !(await page.$('[data-testid="rail-ask"]')),
+    'ASK is in the bar, on every screen, rather than on one rail',
   )
 }
 

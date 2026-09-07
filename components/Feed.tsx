@@ -102,7 +102,19 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       now come from set-up, before any content is shown.
     */
     const rooms = feedFor(learner.chapter ?? undefined, preview, learner.purpose ?? null)
-    if (!mounted) return rooms
+    /*
+      NOTHING, rather than the wrong thing, before the browser has read who this is.
+
+      This returned the raw room list, so the first frame of a stranger's first visit was a
+      Drop — "Finding the arena" — flashing past before the sequence replaced it. Reported
+      as a flash of "find your venue" on the way in, and it is the worst possible first
+      impression: a card about a concert, for somebody who has not said where they are.
+
+      An empty list holds the layout and paints nothing, which is a blank moment rather than
+      a wrong one. The store answers within a frame; a card that turns out to be for
+      somebody else lasts long enough to be read.
+    */
+    if (!mounted) return []
     /*
       Done leaves the feed.
 
@@ -962,9 +974,17 @@ export function Card({
           {onSand ? null : (
             <div
               aria-hidden
+              /*
+                A heavier wash where the card is asking for something.
+
+                The standard scrim is tuned for a headline and a line of body over a dark
+                room. The destination card puts a heading, a subhead and three tappable rows
+                over calçada in daylight — pale, high-contrast stone — and 62 per cent was
+                not enough to hold any of it. A form needs its ground to be quiet.
+              */
               className={
                 'absolute inset-x-0 bottom-0 bg-gradient-to-t to-transparent ' +
-                (card.kind === 'derived'
+                (card.kind === 'derived' || (card.kind === 'intro' && card.intro.asks)
                   ? 'h-[85%] from-black/95 via-black/80'
                   : 'h-[62%] from-black/92 via-black/60')
               }
@@ -1924,30 +1944,13 @@ function Rail({
       ) : null}
 
       {/*
-        ASK, in the rail rather than floating over it.
+        ASK LEFT THE RAIL. It is in the bottom bar now, on every screen.
 
-        The translator's own button is bottom-right above the nav, which is exactly where
-        this rail is — so once the translator opened at set-up instead of at membership, it
-        landed on top of SHARE. A control somebody can see, aim at, and not press is worse
-        than one that is missing.
-
-        Here it sits with the other four verbs, which is where a person looks for what they
-        can do to a card anyway. The floating button stands down whenever a feed is on
-        screen; see globals.css.
+        It moved here when the translator's floating button landed on top of SHARE, which
+        solved the collision and left ASK reachable only from the Club. The nav is the
+        honest home for something useful at any moment on any screen — and it means this
+        rail is only the things you do to a card, which is what a rail should be.
       */}
-      <button
-        type="button"
-        aria-label="How do I say something"
-        data-testid="rail-ask"
-        onClick={() => window.dispatchEvent(new CustomEvent('dub:ask'))}
-        className={btn + ' text-white/85'}
-      >
-        <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
-          <path d="M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5" />
-          <path d="M12 17.5h.01" />
-        </svg>
-      </button>
-
       <button
         type="button"
         aria-label={isSaved ? 'Remove from saved' : 'Save'}

@@ -170,23 +170,35 @@ console.log('\nand it is everywhere\n')
   layout decision, and pinning the check to a single testid turned it into an assertion
   about markup.
 */
-const asker = '[data-testid="translator-open"], [data-testid="rail-ask"]'
+/*
+  VISIBLE, not merely present — and this check was passing on a hidden button.
+
+  page.$ returns an element that CSS has set to display:none, so "there is a way to ask on
+  every screen" went green while the only control on five of them was invisible. A check
+  that cannot tell a control from a hidden control is not checking reachability at all.
+
+  isVisible() is the whole fix, and it is the difference between asserting the markup and
+  asserting the product.
+*/
+const ASKERS = ['[data-testid="tab-ask"]', '[data-testid="translator-open"]']
 for (const route of ['/vibes', '/club', '/line', '/profile', '/proof', '/vocab']) {
   await page.goto(BASE + route)
   await page.waitForTimeout(1100)
-  const el = await page.$(asker)
-  ok(
-    'on ' + route,
-    Boolean(el),
-    el ? String(await el.getAttribute('data-testid')) : 'no way to ask',
-  )
+  let found = ''
+  for (const sel of ASKERS) {
+    if (await page.isVisible(sel).catch(() => false)) {
+      found = sel.replace(/\[data-testid="|"\]/g, '')
+      break
+    }
+  }
+  ok('on ' + route, Boolean(found), found || 'no visible way to ask')
 }
 
 console.log('\nasking for something\n')
 await page.goto(BASE + '/club')
 await page.waitForTimeout(1300)
-// From the rail here, because that is what the Club offers.
-await page.click('[data-testid="rail-ask"]')
+// From the bar, which is where ASK lives on every screen that has one.
+await page.click('[data-testid="tab-ask"]')
 await page.waitForSelector('[data-testid="translator"]')
 ok('the panel opens', Boolean(await page.$('[data-testid="translator-input"]')))
 
