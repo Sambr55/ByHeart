@@ -330,7 +330,7 @@ export interface LearnerState {
    * Null means Lisbon, not "unknown" — there is exactly one open chapter, and a learner
    * who has not answered should get the club that exists rather than an empty screen.
    */
-  chapter: 'lisbon' | 'faro' | null
+  chapter: 'lisbon' | 'porto' | 'algarve' | null
   /**
    * Cards pushed to the back, oldest first.
    *
@@ -1213,7 +1213,7 @@ export function setPurpose(purpose: 'visiting' | 'staying' | 'moving') {
   })
 }
 
-export function setChapter(chapter: 'lisbon' | 'faro') {
+export function setChapter(chapter: 'lisbon' | 'porto' | 'algarve') {
   update((s) => {
     s.chapter = chapter
   })

@@ -17,7 +17,7 @@
  */
 import { DEFAULT_PAIR, pairId } from '@/content/pairs'
 
-export type ChapterId = 'lisbon' | 'faro'
+export type ChapterId = 'lisbon' | 'porto' | 'algarve'
 
 export interface Chapter {
   id: ChapterId
@@ -47,15 +47,32 @@ export const CHAPTERS: Chapter[] = [
     zone: 'Europe/Lisbon',
     open: true,
   },
+  /*
+    The two that are not open yet, listed and greyed rather than explained.
+
+    They were one chapter with a paragraph of copy about which was built and which was not.
+    A closed door does not need a speech: greying it out says everything the sentence did,
+    in less time, without making the product sound like it is apologising for itself.
+
+    Porto and the Algarve rather than Faro, because they are the two places somebody
+    choosing Portugal would actually name — Faro is an airport more than a destination.
+  */
   {
-    id: 'faro',
-    name: 'Dub Club — Faro',
-    city: 'Faro',
+    id: 'porto',
+    name: 'Dub Club — Porto',
+    city: 'Porto',
     country: 'Portugal',
     pair: pairId(DEFAULT_PAIR),
     zone: 'Europe/Lisbon',
-    // Second on purpose, and second is the point: it is proof the layering works before
-    // it is a growth move. A club with nobody in it is worse than one that is full.
+    open: false,
+  },
+  {
+    id: 'algarve',
+    name: 'Dub Club — The Algarve',
+    city: 'The Algarve',
+    country: 'Portugal',
+    pair: pairId(DEFAULT_PAIR),
+    zone: 'Europe/Lisbon',
     open: false,
   },
 ]

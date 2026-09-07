@@ -344,6 +344,26 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
   }
 
   /*
+    LANDING THE LOCK ON A CARD, because freezing wherever the finger stopped is worse than
+    not locking at all.
+
+    `overflow-y-hidden` stops the scroller instantly, mid-gesture — so the feed froze at
+    whatever offset the swipe had reached, showing the tail of the card above wedged over
+    the header with the next one below it. Reported from a phone as "trailing messages from
+    the previous screen", and it looked like a rendering bug rather than a gate.
+
+    Snapping to the locked card first makes the lock read as what it is: the card holds you,
+    rather than the app stops working. `auto` and not smooth — this is not a journey, it is
+    the position the feed should have been in already.
+  */
+  useEffect(() => {
+    const el = rail.current
+    if (!el || !lockedNow || !el.clientHeight) return
+    const want = (atIndex + 1) * el.clientHeight
+    if (Math.abs(el.scrollTop - want) > 2) el.scrollTop = want
+  }, [lockedNow, atIndex])
+
+  /*
     The jump, on settle rather than on every scroll event.
 
     Moving scrollTop mid-gesture fights the momentum the browser is still applying, so

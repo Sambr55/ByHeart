@@ -120,7 +120,7 @@ export const INTRO_CARDS: IntroCard[] = [
     id: 'intro_where',
     eyebrow: 'WHERE TO',
     headline: 'Where do you want DUB to take you?',
-    body: 'One is built. The other is honest about not being.',
+    body: 'Pick the one you are going to.',
     asks: 'where',
   },
   {

@@ -57,7 +57,8 @@
     "backfill": "tsx scripts/backfill-check.mts",
     "purpose": "tsx scripts/purpose-check.mts",
     "calendar": "tsx scripts/calendar.mts",
-    "firstrun": "tsx scripts/firstrun-check.mts"
+    "firstrun": "tsx scripts/firstrun-check.mts",
+    "live": "tsx scripts/live.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",

@@ -33,10 +33,15 @@ export function Destination({ onDone }: { onDone?: () => void } = {}) {
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-accent">WHERE TO</p>
         <h2 className="display text-balance text-2xl">Where do you want DUB to take you?</h2>
-        <p className="text-sm leading-relaxed text-muted">
-          One is built. The other is honest about not being — nothing here will take your email
-          and promise to let you know.
-        </p>
+        {/*
+          No paragraph about which of these is built.
+
+          It said "one is built, the others are honest about not being", which was true and
+          was the product explaining itself instead of working. A greyed row already says a
+          place is not open; saying it again in prose reads as an apology, and a product
+          that apologises for its own roadmap on the third screen sounds smaller than it is.
+        */}
+        <p className="text-sm leading-relaxed text-muted">Pick the one you are going to.</p>
       </div>
 
       <ul className="flex flex-col gap-3">

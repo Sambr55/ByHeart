@@ -226,6 +226,25 @@ const titles = (await page.evaluate(
     `document.querySelector('[data-testid="feed"]').getAttribute('data-locked')`,
   )
   ok('the reject lesson holds the thumb', held === INTRO_CARDS[lockedAt].id, String(held))
+  /*
+    AND IT HOLDS YOU ON A CARD, not between two.
+
+    overflow-y-hidden stops the scroller instantly, so the feed froze at whatever offset the
+    swipe had reached — the tail of the card above wedged over the header with the next one
+    below it. Reported from a phone as "trailing messages from the previous screen", and it
+    read as a rendering fault rather than as a gate.
+
+    Measured against the card height rather than by looking for stray text, because the
+    symptom is a scroll position: anything not a whole multiple of the viewport means two
+    cards are on screen at once.
+  */
+  const off = (await page.evaluate(
+    `(() => {
+      const r = document.querySelector('.snap-y')
+      return Math.min(r.scrollTop % r.clientHeight, r.clientHeight - (r.scrollTop % r.clientHeight))
+    })()`,
+  )) as number
+  ok('and it lands on the card rather than between two', off <= 2, off + 'px off the snap point')
   ok(
     'and says so with a moving arrow',
     Boolean(await page.$('.nudge-left')),
