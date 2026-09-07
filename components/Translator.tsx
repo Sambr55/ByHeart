@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
 import { Tick } from '@/components/Tick'
@@ -99,6 +100,18 @@ export function Translator() {
     return () => window.removeEventListener('dub:ask', ask)
   }, [])
 
+  /*
+    Going somewhere closes it, because going somewhere is what it stopped preventing.
+
+    The panel is mounted at the root and survives a route change, so with the bar now
+    reachable a tap on VIBES would leave it hanging over a screen nobody asked it to be on.
+    Leaving IS the dismissal; there is no second gesture to learn.
+  */
+  const path = usePathname()
+  useEffect(() => {
+    setOpen(false)
+  }, [path])
+
   // Esc closes, because a panel over the whole screen that only closes by aiming at a
   // small X is a panel people learn to avoid opening.
   useEffect(() => {
@@ -196,12 +209,32 @@ export function Translator() {
   }
 
   return (
+    /*
+      IT STOPS ABOVE THE BAR, and it is not modal any more.
+
+      inset-0 and z-50 put it over the navigation, so the only way to go anywhere was to
+      close it first — which is a strange demand from a panel you open mid-sentence in a
+      shop. The bar is the one thing that should never be covered: it is how you leave.
+
+      aria-modal went with the geometry. It said "nothing behind this is reachable", which
+      was true and is not any more, and a screen reader told the truth about the old layout
+      and would have lied about this one.
+
+      Height comes from --bar-room and --keyboard, the same two values .app-frame uses, so
+      the bar's furniture is described in one place rather than measured again here.
+
+      z-50, the same layer as the bar, and not a new one between them. The first attempt
+      used z-40 to sit under it — which the layer lint refused, correctly: three layers is a
+      decision this product made, and a fourth invented to solve a stacking problem is how
+      three becomes seven. Nothing needs to sit between them, because they no longer
+      overlap at all.
+    */
     <div
       data-testid="translator"
       role="dialog"
-      aria-modal="true"
       aria-label="How do I say"
-      className="fixed inset-0 z-50 flex flex-col bg-bg text-fg"
+      className="fixed inset-x-0 top-0 z-50 flex flex-col bg-bg text-fg"
+      style={{ bottom: 'calc(var(--bar-room) + var(--keyboard))' }}
     >
       <header className="bar flex items-center justify-between gap-3 px-5 py-3">
         <p className="eyebrow">HOW DO I SAY</p>

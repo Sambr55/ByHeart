@@ -158,6 +158,44 @@ ok('somebody set up, with a key, gets it', Boolean(await page.$('[data-testid="t
   Mounted at the root rather than per-shell, so this is a claim about the layout and not
   about four components remembering to include it.
 */
+console.log('\nthe panel leaves the bar alone\n')
+/*
+  You should not have to close a panel to go somewhere.
+
+  It was inset-0 and aria-modal, so it covered the navigation and the only way out was the
+  CLOSE button — a strange demand from something opened mid-sentence in a shop. The bar is
+  the one thing that must never be covered: it is how you leave.
+
+  Measured geometrically rather than by clicking a tab, because the failure is that the bar
+  is UNDER something, and a click that lands proves nothing about the pixels beside it.
+*/
+{
+  await page.goto(BASE + '/club')
+  await page.waitForTimeout(1400)
+  await page.click('[data-testid="tab-ask"]')
+  await page.waitForSelector('[data-testid="translator"]')
+  const clear = (await page.evaluate(
+    `(() => {
+      const panel = document.querySelector('[data-testid="translator"]').getBoundingClientRect()
+      const bar = document.querySelector('[data-testid="bottom-nav"]').getBoundingClientRect()
+      return { gap: Math.round(bar.top - panel.bottom), barTop: Math.round(bar.top) }
+    })()`,
+  )) as { gap: number; barTop: number }
+  ok(
+    'the panel stops above the bar',
+    clear.gap >= 0,
+    clear.gap + 'px between them',
+  )
+  const covered = (await page.evaluate(
+    `(() => {
+      const bar = document.querySelector('[data-testid="bottom-nav"]').getBoundingClientRect()
+      const top = document.elementFromPoint(bar.left + bar.width / 2, bar.top + bar.height / 3)
+      return top ? top.closest('[data-testid="translator"]') !== null : true
+    })()`,
+  )) as boolean
+  ok('and nothing of it is over the bar', !covered, 'the bar is how you leave')
+}
+
 console.log('\nkeeping one puts it somewhere\n')
 /*
   KEEP THIS wrote to the learner and nowhere on screen showed it.
