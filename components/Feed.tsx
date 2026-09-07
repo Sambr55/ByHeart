@@ -521,7 +521,19 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         <Link
           href="/?door=1"
           aria-label={chapterName() + ' — back to the front door'}
-          className="pointer-events-auto tap-target"
+          /*
+            THE MARK IS CENTRED IN ITS OWN TAP TARGET, and that is the misalignment.
+
+            `tap-target` gives this link a 44px minimum height so a thumb can find it. The
+            wordmark inside it is 24px and sat at the TOP of that box, while the tagline
+            beside it was centred by the header against the full 44 — so the two lined up
+            against different things and the sentence hung ten pixels below the logo. It
+            looked like a typographic decision and was a hit-area side effect.
+
+            Centring the mark inside its own target makes both children share one centre
+            line, with no magic numbers to go stale when the mark or the type changes.
+          */
+          className="pointer-events-auto tap-target flex items-center"
         >
           <Wordmark mark="club" className="h-6" title={chapterName()} />
         </Link>
@@ -706,6 +718,8 @@ export function Card({
     different is only that its front plays instead of pointing sideways.
   */
   const isDemo = card.kind === 'explainer' && card.explainer.id === 'how_it_works'
+  /** Which beat the demo is on, so the card can stop repeating the claim it is proving. */
+  const [demoBeat, setDemoBeat] = useState(0)
 
   const smooth = () =>
     typeof window !== 'undefined' &&
@@ -1235,7 +1249,21 @@ export function Card({
                       </span>
                     </p>
                   ) : null}
-                  <h2 className="display mt-3 text-balance text-3xl">{title}</h2>
+                  {/*
+                    The claim is made once, and then the demo makes it instead.
+
+                    This title is "You already understand more than you can say" — the best
+                    sentence in the product and the whole argument of the card. It stayed on
+                    screen through every beat, so the beat that PROVES it opened by saying it
+                    again, above three sentences that had just demonstrated it. A claim
+                    restated over its own evidence reads as padding and weakens both.
+
+                    Only the demo card, and only once it has started. Every other card keeps
+                    its title for as long as it is on screen, because nothing replaces it.
+                  */}
+                  {isDemo && demoBeat > 0 ? null : (
+                    <h2 className="display mt-3 text-balance text-3xl">{title}</h2>
+                  )}
                 </>
               )}
               {/* The kind-specific blocks above already say their own piece — a collision
@@ -1336,7 +1364,7 @@ export function Card({
                   doing, and the doing comes first.
                 */
                 <div className="mb-3">
-                  <DemoCard />
+                  <DemoCard onBeat={setDemoBeat} />
                 </div>
               ) : (
                 <button

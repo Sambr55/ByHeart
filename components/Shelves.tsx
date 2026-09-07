@@ -129,7 +129,16 @@ export function Shelves({
               ) : null}
               <span className="eyebrow shrink-0 tabular-nums text-muted">{list.length}</span>
             </button>
-            <p className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+            {/*
+              THE WORDS ARE THE PAYOFF, so they are not the smallest thing on the screen.
+
+              This shelf is what somebody just earned — the whole answer to "what did that
+              session give me" — and it was set at text-xs, smaller than the label above it
+              and the footnote below it. Everything on the screen was louder than the thing
+              the screen is about. Reported as "make these words larger, they are
+              important", which is the correct reading of a hierarchy that had them last.
+            */}
+            <p className="pt flex flex-wrap gap-x-3 gap-y-1 text-lg">
               {(expanded ? list : list.slice(0, 6)).map((e) => {
                 const isNew = highlight
                   ? e.forms.some((f) => highlight.has(f.id))

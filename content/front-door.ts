@@ -211,21 +211,43 @@ export const HOW_IN = {
 
 export const THE_WAY = {
   eyebrow: 'WHERE IT GOES',
-  headline: 'Five vibes, then your Legend, then the door.',
   /*
-    No place name in here any more, which is why the language pair can come after it now.
-    "Every time you meet somebody new" is true in Lisbon and true in the next city, and a
-    screen that does not need the answer should not have to wait for the question.
+    The name of the thing, not a description of the route to it.
+
+    It read "Five vibes, then your Legend, then the door", which is an itinerary — three
+    stages and two of them abstract, given to somebody who has not been told what a Legend
+    IS yet. The screen's job is to introduce one idea, so the headline is that idea's name
+    and the body does the explaining underneath it.
+  */
+  headline: 'Your Legend',
+  /*
+    No place name in here, which is why the language pair can come after it. "Every time
+    you meet somebody new" is true in Lisbon and true in the next city, and a screen that
+    does not need the answer should not have to wait for the question.
+
+    WHAT IT IS BEFORE WHAT IT COSTS. The body opened on the five vibes — the mechanism —
+    and only reached the definition in its second half. Somebody meeting the word for the
+    first time needs the noun first.
   */
   legend: {
     label: 'YOUR LEGEND',
-    body: 'As you build up your confidence through five vibes, you are also unlocking your Legend questions. With the first five in the bag we build it together — the minute of conversation you have every time you meet somebody new.',
+    body: 'Your Legend is the first minute of conversation you have every time you meet somebody new. As you build up your confidence through five vibes, you are also unlocking your Legend questions.',
   },
   club: {
     label: 'DUB CLUB',
-    body: 'Your Legend, and being able to say it, is what unlocks the door to the Dub Club.',
+    body: 'We build it together — and it is your ticket into the Dub Club.',
   },
-  cta: 'MY TURN',
+  /*
+    THE CALL TO ACTION IS THE NEXT SCREEN'S QUESTION, and it names the learner's own city.
+
+    "MY TURN" said nothing about what happens when you press it. The screen after this one
+    asks what brings you here, so the button asks it too — and a button that says what is
+    on the other side of it is the difference between a step and a leap of faith.
+
+    A FUNCTION, because the city is a fact about this learner. Lisbon was typed here and
+    typed again in the Club's own question, which is two places to forget when Porto opens.
+  */
+  cta: (city: string) => 'What brings you to ' + city + '?',
 } as const
 
 /** §08 / §09 — the first meaningful learner choice, and it comes after the demo. */

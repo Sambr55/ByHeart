@@ -79,7 +79,14 @@ export const CLUB = {
       it routes; the Legend imports it.
     */
     ask_eyebrow: 'ONE THING',
-    ask_headline: 'What brings you to Lisbon?',
+    /*
+      The city comes from the learner, because there is going to be more than one.
+
+      Lisbon was typed here and typed again on the screen before this one, so opening Porto
+      meant finding every place somebody had spelled the only city out. A function takes the
+      answer the learner already gave.
+    */
+    ask_headline: (city: string) => 'What brings you to ' + city + '?',
     ask_body:
       'It decides what the Club offers you, and it decides some of what you are about to be asked. Buying a bus ticket and registering at the Junta are different products, and you should not have to scroll past one to find the other.',
     ask_footnote: 'Changeable any time, in Yours. Nothing you have done is affected.',

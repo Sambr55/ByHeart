@@ -714,10 +714,35 @@ console.log('\nthe set-up is a card, and it does not block\n')
     set === anchorIdx + 1,
     anchor + ' ' + anchorIdx + ', set-up ' + set,
   )
+  /*
+    MEASURED ON THE THUMB, not on a sentence about the thumb.
+
+    This asserted that the words "Keep swiping if you would rather look around first" were
+    on screen — a promise printed next to the card, standing in for the property it
+    describes. So it broke the moment that line was deleted, while the property it exists to
+    protect was completely untouched; and it would equally have passed on a card that
+    printed the promise and then held you there.
+
+    The line went because it was the last thing on the screen that shapes every other
+    screen, so the final word on the one card that decides what the Club shows you was
+    permission to ignore it. The gate is still on the action and never on the thumb, and
+    that is what this now scrolls past to find out.
+  */
+  const past = (await page.evaluate(
+    `(() => {
+      const r = document.querySelector('.snap-y')
+      if (!r) return -1
+      const h = r.clientHeight
+      // Onto set-up, then off it. The clone in front means card i sits at (i + 1) * h.
+      r.scrollTop = (${set} + 1) * h
+      r.scrollTop = (${set} + 2) * h
+      return Math.round(r.scrollTop / h) - 1
+    })()`,
+  )) as number
   ok(
     'and it can be swiped past',
-    /Keep swiping if you would rather look around/i.test((await page.textContent('main')) ?? ''),
-    'the gate is on the action, never on the thumb',
+    past === set + 1,
+    'landed on card ' + past + ', set-up is ' + set,
   )
 }
 

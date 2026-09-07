@@ -98,6 +98,7 @@ import {
   nextProfileQuestion,
   useJourney,
 } from '@/engine/journey'
+import { chapterById } from '@/content/chapters'
 import { useLearner } from '@/engine/useLearner'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { AudioButton } from './AudioButton'
@@ -424,6 +425,14 @@ function HowIn() {
 function TheWay() {
   const { next } = useJourney()
   /*
+    The learner's own city, rather than the only one that existed when this was written.
+
+    chapterById falls back to the default, which is Lisbon and is also the only open
+    chapter — so this reads correctly before anybody has chosen and keeps reading correctly
+    the day Porto opens.
+  */
+  const city = chapterById(useLearner().chapter).city
+  /*
     No place name to fill in any more.
 
     This screen used to say "in Portugal" and had to wait for the language pair to be able
@@ -449,7 +458,7 @@ function TheWay() {
       </div>
 
       <Cta
-        label={THE_WAY.cta}
+        label={THE_WAY.cta(city)}
         onClick={() => {
           acceptDeal()
           track('deal_accepted', {})
@@ -1368,8 +1377,24 @@ function Picker() {
                         <span className={BADGE + ' text-white'}>done</span>
                       ) : unreached && f.id !== 'the_basics' && !basicsStarted ? (
                         <span className={BADGE + ' text-white'}>basics first</span>
-                      ) : unreached || waiting ? (
+                      ) : unreached ? (
                         <span className={BADGE + ' tabular-nums text-white'}>stage {at}</span>
+                      ) : waiting ? (
+                        /*
+                          STARTED AND EMPTY IS NOT THE SAME AS NOT REACHED, and it wore the
+                          same badge.
+
+                          `waiting` means you have been inside this vibe and there is nothing
+                          more in it right now — which is exactly what the session screen has
+                          just told you: "that is The basics, for today. There is more in
+                          there whenever you want it." The shelf then labelled it "stage 5",
+                          the wording for a vibe you have never opened and cannot yet reach.
+                          Two screens describing the same crate in contradictory terms.
+
+                          The tile still opens. Nothing here closes anything — it says which
+                          of the open vibes has already given you what it has for now.
+                        */
+                        <span className={BADGE + ' text-white'}>done for now</span>
                       ) : planLocked ? (
                         <span className={BADGE + ' text-white'}>PRO</span>
                       ) : null}
@@ -1691,11 +1716,26 @@ export function MiniBuild({
         </p>
       ) : null}
 
+      {/*
+        IT SAID SOMETHING THE ENGINE DOES NOT DO, and it said it harshly.
+
+        "Put it back yourself and it still will not, but you will know it" tells somebody
+        who has just been shown a sentence that nothing they do next can earn it. That is not
+        true: recordProof upgrades a line to clean the moment a later attempt is clean — "a
+        fumble is not permanent" is written into that function, deliberately, because a
+        single slip used to cost a rung forever.
+
+        So the copy was over-claiming against its own mechanism, in the direction of
+        punishment, at the exact moment somebody is stuck. Reported as "this seems very harsh
+        if they try again and get it right", which is precisely what it was.
+
+        The rule is unchanged and still worth stating plainly — being shown means this one
+        does not count now. What is added is the part that was always true.
+      */}
       {helped && state !== 'done' ? (
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          There it is, in order. Read it out loud — this one will not count towards the
-          sentences you can say cold, which is the only number here worth anything. Put it
-          back yourself and it still will not, but you will know it.
+          There it is, in order. Read it out loud. Being shown means this one does not count
+          yet — but say it cold next time it comes round and it does.
         </p>
       ) : null}
 
@@ -2696,7 +2736,20 @@ function SectionComplete() {
 
   return (
     <Shell stage="CHOICE">
-      <div className="flex flex-1 flex-col justify-center">
+      {/*
+        NOT CENTRED, because centring a column that overflows is how the box below got cut.
+
+        `justify-center` on a flex column only behaves while the content fits. Once it does
+        not — and this is the one screen in DUB that outgrows a phone — two things go wrong
+        at once: the children shrink, which is what sliced the Legend panel through its own
+        button, and the overflow goes off BOTH ends, putting the top of the screen somewhere
+        a scroll cannot reach.
+
+        Anchored to the top it keeps its natural height, nothing is squashed, and the fold
+        can only ever hide the tail. Reported as "the only screen so far with a scroll and a
+        fold"; this is the half of that which was a bug rather than a length.
+      */}
+      <div className="flex flex-1 flex-col">
         <p className="eyebrow text-accent">
           {vibeFinished && family ? family.title + ' — DONE' : 'A SESSION DONE'}
         </p>
@@ -2980,11 +3033,32 @@ function LegendPayoff() {
   const offering = usable && learner.legend_prompt === 'unseen'
   /** The hook is the questions themselves, not a count of them. */
   const preview = LEGEND_FRAMES.slice(0, 3)
+  /*
+    THE QUIET VERSION IS ACTUALLY QUIET NOW, and that is what fixes the fold.
+
+    This component's own note says it: the first time it appears it OFFERS the Legend, and
+    "after that it is quiet reinforcement". The two were built the same height — label,
+    headline, a restatement of the headline, three sample questions and a button — so the
+    reinforcement was 194px of panel on the one screen in DUB that does not fit a phone.
+
+    The consequence was worse than the length. The screen's scroll region is 514px and its
+    content was 631, so the panel's own call to action sat below the fold with nothing
+    marking a fold: it read as a bordered box sliced through by the buttons under it.
+    Reported as "the only screen so far with a scroll and a fold".
+
+    So when there is nothing to act on yet — the Legend is still locked and the offer has
+    already been made once — the panel says the two things worth saying and stops. Nothing
+    is lost: the button led to a screen that would tell them the same thing, the questions
+    are shown in full the moment the Legend opens, and the sentence above still names the
+    number of vibes left.
+  */
+  const quiet = !offering && !usable
 
   return (
     <div
       data-testid="legend-payoff"
-      className="mt-6 flex flex-col gap-3 rounded border border-accent bg-accent/10 px-4 py-3"
+      /* shrink-0: a panel with a border must never be shortened to fit — it clips itself. */
+      className="mt-6 flex shrink-0 flex-col gap-3 rounded border border-accent bg-accent/10 px-4 py-3"
     >
       <p className="eyebrow text-accent">{offering ? 'YOUR LEGEND' : 'LEGEND'}</p>
       <p className="text-sm font-semibold">
@@ -2996,18 +3070,20 @@ function LegendPayoff() {
               ? LEGEND_COPY.one_more
               : toGo + ' ' + LEGEND_COPY.more_to_go}
       </p>
-      {!usable ? (
+      {!usable && !quiet ? (
         <p className="text-xs leading-relaxed text-muted">
           {toGo === 1 ? LEGEND_COPY.banked_note_one : LEGEND_COPY.banked_note_many}
         </p>
       ) : null}
-      <p className="flex flex-wrap gap-x-3 gap-y-1">
-        {preview.map((f) => (
-          <span key={f.id} className="pt text-sm text-accent">
-            {f.ask}
-          </span>
-        ))}
-      </p>
+      {quiet ? null : (
+        <p className="flex flex-wrap gap-x-3 gap-y-1">
+          {preview.map((f) => (
+            <span key={f.id} className="pt text-sm text-accent">
+              {f.ask}
+            </span>
+          ))}
+        </p>
+      )}
       {/*
         One card is enough to offer on, because the offer is not only the cards.
 
@@ -3022,6 +3098,7 @@ function LegendPayoff() {
           <p className="text-xs leading-relaxed text-muted">{LEGEND_COPY.offer_repair}</p>
         </>
       ) : null}
+      {quiet ? null : (
       <div className="flex flex-wrap gap-3">
         <Link
           href="/legend"
@@ -3048,6 +3125,7 @@ function LegendPayoff() {
           </button>
         ) : null}
       </div>
+      )}
     </div>
   )
 }

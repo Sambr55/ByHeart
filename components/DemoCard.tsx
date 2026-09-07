@@ -29,8 +29,23 @@ import { slugFor } from '@/content/audio-manifest'
  * quietly writing to somebody's record before they have agreed to anything would be taking
  * something in exchange for a demonstration that is supposed to be free.
  */
-export function DemoCard() {
+export function DemoCard({ onBeat }: { onBeat?: (beat: number) => void } = {}) {
   const [beat, setBeat] = useState(0)
+  /*
+    The card behind this needs to know the demo has started.
+
+    Its title is the claim — "You already understand more than you can say" — and the claim
+    is made once, on the way in. It stayed on screen through every beat, so the screen that
+    proves it opened by repeating it: the headline, then the proof of the headline, then
+    three sentences. Reported as repetition, and it was.
+
+    A callback rather than the card reading into this component, because the beat belongs
+    to the demo and nothing else should be able to set it.
+  */
+  const go = (to: number) => {
+    setBeat(to)
+    onBeat?.(to)
+  }
   /*
     Found by key, not by position, and every optional field is guarded.
 
@@ -55,7 +70,7 @@ export function DemoCard() {
             data-testid="demo-reveal"
             onClick={() => {
               track('demo_played', { beat: 'recognise' })
-              setBeat(1)
+              go(1)
             }}
             className="tap-target eyebrow mt-3 w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
           >
@@ -87,7 +102,7 @@ export function DemoCard() {
             data-testid="demo-build"
             onClick={() => {
               track('demo_played', { beat: 'build' })
-              setBeat(2)
+              go(2)
             }}
             className="tap-target eyebrow mt-3 w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
           >

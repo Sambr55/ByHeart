@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { setAvatarFromFile } from '@/engine/avatar'
+import { chapterById } from '@/content/chapters'
 import { roomsFor } from '@/content/feed'
 import { CLUB } from '@/content/club'
 import { EXPLAINER_CTA } from '@/content/explainers'
@@ -143,12 +144,24 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   */
   if (!mounted) return <div className="flex flex-col gap-6" />
 
+  /*
+    The learner's city, so the question names the place they are actually going.
+
+    It was typed into the copy, in two files, which is two places to forget the day Porto
+    opens. chapterById falls back to the default — Lisbon, and the only open chapter — so
+    this reads correctly before anybody has chosen as well as after.
+
+    Read HERE and not at the top, because the top is before mount and reading the record
+    during a render the server also performs is the bug this file just fixed.
+  */
+  const city = chapterById(loadLearner().chapter).city
+
   if (already || done) {
     return (
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
-          <h2 className="display text-balance text-2xl">Then this is your Lisbon.</h2>
+          <h2 className="display text-balance text-2xl">{'Then this is your ' + city + '.'}</h2>
           <p className="text-sm leading-relaxed text-muted">
             {topics.length
               ? 'Rooms you will get because of what you just said.'
@@ -224,7 +237,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
         {step === 'why' ? (
           <>
-            <h2 className="display text-balance text-2xl">{CLUB.welcome.ask_headline}</h2>
+            <h2 className="display text-balance text-2xl">{CLUB.welcome.ask_headline(city)}</h2>
             <p className="text-sm leading-relaxed text-muted">{CLUB.welcome.ask_body}</p>
           </>
         ) : (
@@ -322,8 +335,16 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
               className="tap-target min-w-0 flex-1 rounded border border-line bg-bg-elev px-4 py-3 text-base text-fg placeholder:text-muted"
             />
           </div>
+          {/*
+            Why it is worth giving, next to the fact that it costs nothing.
+
+            "Optional and stays on this phone" is a reassurance and nothing else, so the
+            honest answer to it is to skip. A reason to say yes belongs in the same breath
+            as the reason not to worry.
+          */}
           <p className="text-xs leading-relaxed text-muted">
-            The photo is optional and stays on this phone.
+            The photo is optional and stays on this phone. It will be useful when you start
+            sharing with friends.
           </p>
           <button
             type="button"
@@ -339,9 +360,25 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         </>
       ) : null}
 
-      <p className="text-xs leading-relaxed text-muted">
-        Keep swiping if you would rather look around first. This will be here.
-      </p>
+      {/*
+        THE INVITATION TO SKIP IS GONE, and a reminder to answer stands where it was.
+
+        "Keep swiping if you would rather look around first" sat under both questions, and
+        it was the last thing on the screen — so the final word on the one card that shapes
+        every other card was permission to ignore it. Purpose is what filters the Club and
+        the name is what the Legend is built out of; a screen that shrugs at its own
+        question gets shrugged at back.
+
+        Nothing about the gate has changed. The card can still be swiped past, every call to
+        action that needs an answer still routes back here, and this is still not a wall.
+        What changed is that the product now says which answer it is waiting for instead of
+        offering to do without it.
+      */}
+      {step === 'why' ? (
+        <p className="text-xs leading-relaxed text-muted">
+          Pick one to start. It is what decides which rooms the Club puts in front of you.
+        </p>
+      ) : null}
     </div>
   )
 }
