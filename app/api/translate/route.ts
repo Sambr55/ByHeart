@@ -183,6 +183,28 @@ export async function POST(request: Request) {
                 : status
                 ? 'The translator answered ' + status + '. ' + detail + ' That is ours to fix.'
                 : 'Could not reach the translator. Try again in a moment.'
-    return NextResponse.json({ error: 'upstream', status, why }, { status: 502 })
+    /*
+      THE RAW FACT TRAVELS ALONGSIDE THE FRIENDLY SENTENCE, rather than instead of it.
+
+      The friendly sentence is chosen by matching on the upstream's words, so any OTHER
+      failure containing "workspace" — a wrong id, a revoked one — renders as the same
+      advice, and somebody who has already followed that advice is told to follow it again.
+      That is the exact fault this whole chain has been about: a specific fact replaced by a
+      general sentence, one level below where anybody reads it.
+
+      `detail` carries what was actually said. `workspace` says only WHETHER the id is set,
+      never its value — enough to tell "not configured" from "configured and refused", which
+      are the same screen and completely different problems.
+    */
+    return NextResponse.json(
+      {
+        error: 'upstream',
+        status,
+        why,
+        detail,
+        workspace: Boolean(process.env.ANTHROPIC_WORKSPACE_ID),
+      },
+      { status: 502 },
+    )
   }
 }
