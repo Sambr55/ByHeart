@@ -151,10 +151,34 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ...result, id, left: Math.max(0, MAX_PER_DAY - already - 1) })
   } catch (e) {
+    /*
+      THE STATUS IS THE DIAGNOSIS, and it was being thrown away.
+
+      lib/translate.ts throws `upstream 401` — the number that says which of the three
+      possible faults it is: the key, the credit, or the model. This caught it and replaced
+      it with "could not reach the translator", a sentence that fits all three equally and
+      distinguishes none, and which is therefore no use to the one person who can fix it.
+
+      A status code is safe to show: it is not the key and not the upstream's body, and
+      anybody looking at this screen is already looking at DUB's own error.
+
+      401 is the key. 429 is credit or rate. 404 is the model. Said in those words, because
+      "upstream 401" is a sentence for somebody who already knows what it means.
+    */
+    const message = (e as Error)?.message ?? ''
+    const status = Number(message.match(/upstream (\d+)/)?.[1] ?? 0)
     const why =
       (e as Error)?.name === 'AbortError'
         ? 'That took too long. Try again.'
-        : 'Could not reach the translator. Try again in a moment.'
-    return NextResponse.json({ error: 'upstream', why }, { status: 502 })
+        : status === 401 || status === 403
+          ? 'The translator key was refused (' + status + '). That is ours to fix.'
+          : status === 429
+            ? 'The translator is out of credit or asking too fast (429). Ours to fix.'
+            : status === 404
+              ? 'The translator is pointed at a model that is not there (404). Ours to fix.'
+              : status
+                ? 'The translator answered ' + status + '. That is ours to fix.'
+                : 'Could not reach the translator. Try again in a moment.'
+    return NextResponse.json({ error: 'upstream', status, why }, { status: 502 })
   }
 }
