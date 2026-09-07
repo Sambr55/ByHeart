@@ -5,6 +5,7 @@ import { SITUATIONS, isCurrent, type Purpose, type Situation } from '@/content/s
 import { DROPS, type Drop } from '@/content/drops'
 import { explainersFor, type Explainer } from '@/content/explainers'
 import { INTRO_CARDS, type IntroCard } from '@/content/intro'
+import { cardFor, frameApplies, type LegendFrame } from '@/content/legend'
 import { bankImage } from '@/content/images'
 import { VIBE_IMAGES } from '@/content/vibe-images'
 import {
@@ -39,7 +40,24 @@ export type FeedCard =
     card then carries the event and the countdown, because a room that expires and a room
     that does not are different offers and must not look the same.
   */
-  | { kind: 'situation'; id: string; situation: Situation; drop?: Drop }
+  | {
+      kind: 'situation'
+      id: string
+      situation: Situation
+      drop?: Drop
+      /*
+        The rest of a drop's rooms, carried BY the first one instead of beside it.
+
+        A drop is four or five rooms about one evening — where the arena is, whether there
+        are tickets, which line goes there, how to ask somebody to come. They were four
+        separate cards scattered through the feed, which is the shape for four unrelated
+        rooms and the wrong one for four steps of a single night out: you met "getting
+        there" nine swipes after "getting in", with rooms about a pharmacy in between.
+
+        One card now, and the rest of the evening is a rightward flow through it.
+      */
+      flow?: Situation[]
+    }
   /*
     A card assembled from something they already own.
 
@@ -83,6 +101,27 @@ export type FeedCard =
     explanation they do not want, which a corridor never let them do.
   */
   | { kind: 'explainer'; id: string; explainer: Explainer; image: { src: string; alt: string } }
+  /*
+    ONE QUESTION OF YOUR LEGEND, asked where you already are.
+
+    The Legend was a destination: a screen behind a tab, offered once at the end of a
+    session and otherwise reached only by remembering it existed. So "build your Legend"
+    was a thing you had to go and do, and the Club — the place people actually sit — had no
+    way to move it forward.
+
+    Deliberately NOT a drop and deliberately not shaped like one. A drop is an evening with
+    a deadline and its rooms are a flow through it; this is one question about you, with one
+    button, and it is finished the moment you answer. The two must not read as the same kind
+    of card or the deadline stops meaning anything.
+  */
+  | {
+      kind: 'legend'
+      id: string
+      frame: LegendFrame
+      /** How many of this learner's seven are still outstanding, this one included. */
+      toGo: number
+      image: { src: string; alt: string }
+    }
   /*
     An argument, on sand rather than on a photograph.
 
@@ -226,9 +265,11 @@ export function dropsFor(
   return all
     .filter((d) => d.chapter === chapter && (preview || dropLive(d, now)))
     .sort((a, b) => a.on.localeCompare(b.on))
-    .flatMap((d): FeedCard[] =>
-      d.situations.map((s) => ({ kind: 'situation', id: s.id, situation: s, drop: d })),
-    )
+    .flatMap((d): FeedCard[] => {
+      const [first, ...rest] = d.situations
+      if (!first) return []
+      return [{ kind: 'situation', id: first.id, situation: first, drop: d, flow: rest }]
+    })
 }
 
 /** Open once its window has, gone the morning after the thing it is pegged to. */
@@ -452,6 +493,65 @@ export function introCards(): FeedCard[] {
   return INTRO_CARDS.map((intro) => ({ kind: 'intro', id: intro.id, intro }))
 }
 
+/**
+ * Every vibe this learner has not been into, as cards for the Club.
+ *
+ * vibeCard has existed since the showcase was built and NOTHING HAS EVER CALLED IT: a card
+ * kind, a renderer and a place in the union, producing zero cards. So the half of the
+ * product that is the vibes — language arriving out of something you already love — was
+ * absent from the room where people spend their time, and the Club argued for itself as a
+ * phrasebook with photographs.
+ *
+ * Untouched ones only. A vibe you have played is not news, and the tile on the shelf says
+ * so better than a card can.
+ */
+export function vibeCards(playedRootIds: string[]): FeedCard[] {
+  const played = new Set(playedRootIds)
+  return CRATES.filter((c) => {
+    if (c.drop || c.built === false) return false
+    const roots = ROOTS_BY_FAMILY[c.id] ?? []
+    return roots.length > 0 && !roots.some((r) => played.has(r.root_id))
+  })
+    .map((c) => vibeCard(c.id))
+    .filter((c): c is FeedCard => Boolean(c))
+}
+
+/**
+ * The next unanswered question of this learner's Legend, as a card for the Club.
+ *
+ * ONE, not all seven. Seven cards would be a form wearing a feed, and the Legend already
+ * has a screen where the whole card can be filled in at once — this is the invitation to
+ * go there, carrying the actual next question rather than a slogan about it.
+ *
+ * The question is real and the count is real: both come from cardFor and cardToGo, the
+ * same functions the door itself is measured with, so a card promising "two to go" cannot
+ * disagree with the screen that opens on it.
+ */
+export function legendCards(
+  answeredFrameIds: string[],
+  answers: { frame_id: string; values: Record<string, string> }[],
+  purpose: Purpose | null,
+): FeedCard[] {
+  const done = new Set(answeredFrameIds)
+  const outstanding = cardFor(purpose).filter(
+    (f) => frameApplies(f, answers) && !done.has(f.id),
+  )
+  const next = outstanding[0]
+  if (!next) return []
+  return [
+    {
+      kind: 'legend',
+      id: 'legend_' + next.id,
+      frame: next,
+      toGo: outstanding.length,
+      image: {
+        src: '/lisbon/bakery-queue.jpg',
+        alt: 'A short queue at a Lisbon bakery counter in the morning, two people mid-conversation.',
+      },
+    },
+  ]
+}
+
 export function setUpCard(dealAccepted: boolean, started = false): FeedCard | null {
   if (dealAccepted && started) return null
   return {
@@ -475,6 +575,7 @@ export function explainerCards(state: {
   legendWritten: boolean
   isMember: boolean
   usedTranslator: boolean
+  actedOnACard: boolean
 }): FeedCard[] {
   return explainersFor(state).map((e) => ({
     kind: 'explainer' as const,
@@ -641,6 +742,22 @@ export function cardFace(card: FeedCard): {
       title: card.intro.headline,
       blurb: card.intro.body,
       image: card.intro.image ? bankImage(card.intro.image) : undefined,
+    }
+  }
+  if (card.kind === 'legend') {
+    /*
+      The face carries the QUESTION, in English, because that is what is being asked of the
+      person rather than of their Portuguese. The Portuguese is on the far side, with the
+      button — a card that opened in a language you cannot yet answer in would be a test.
+    */
+    return {
+      eyebrow: 'YOUR LEGEND',
+      title: card.frame.ask_en,
+      blurb:
+        card.toGo === 1
+          ? 'The last one on your card. Answer it and the Legend is yours.'
+          : card.toGo + ' of your seven still to go. This is the next one.',
+      image: card.image,
     }
   }
   return {

@@ -13,8 +13,8 @@ import { StatusBar } from '@/components/Native'
  *
  * The tile is a photograph now and a photograph two inches across is a thumbnail — it
  * identifies the vibe and it cannot do the other half of the job, which is make somebody
- * want it. So tapping does not enter: it opens the picture to the whole screen, and the
- * swipe left is what commits.
+ * want it. So tapping does not enter: it opens the picture to the whole screen, and a
+ * swipe RIGHT is what commits.
  *
  * That is the same gesture the Club runs on, and deliberately so. Two panes snapped
  * horizontally, the second one taking you in, and swiping back is the same movement in
@@ -51,12 +51,27 @@ export function VibeOpen({
     drives the second pane's own copy, so what somebody sees mid-swipe is the thing that
     is actually happening.
   */
+  /*
+    ENTERING IS RIGHTWARD, the same as everywhere else.
+
+    This committed when scrollLeft passed 60% — which is the pane moving toward its SECOND
+    lane, and a scroller moves that way when the finger goes LEFT. So opening a vibe was a
+    swipe left, in a product whose intro spends three cards teaching that left throws a
+    card away and right takes you in. The copy had already been corrected to TAP TO BEGIN
+    with a note saying "left opens nothing any more"; the geometry underneath it never
+    moved, so the words and the mechanism disagreed.
+
+    Fixed the way the feed's lanes were: the destination lane sits FIRST by flex order, the
+    scroller opens on the face, and going in means travelling toward zero.
+  */
   useEffect(() => {
     const el = pane.current
     if (!el || state !== 'open') return
+    // Open on the face, which is the second lane now.
+    el.scrollLeft = el.clientWidth
     const onScroll = () => {
       if (going) return
-      if (el.scrollLeft >= el.clientWidth * 0.6) {
+      if (el.scrollLeft <= el.clientWidth * 0.4) {
         setGoing(true)
         onEnter()
       }
@@ -68,7 +83,7 @@ export function VibeOpen({
   /** Tapping the words does what the words say. */
   const swipe = () =>
     pane.current?.scrollTo({
-      left: pane.current.clientWidth,
+      left: 0,
       behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
     })
 
@@ -100,7 +115,10 @@ export function VibeOpen({
         className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain"
         style={{ scrollbarWidth: 'none' }}
       >
-        <div className="relative h-full w-full shrink-0 snap-start">
+        {/*
+          order-2: the face, laid out AFTER the lane you enter through. See the effect above.
+        */}
+        <div className="relative order-2 h-full w-full shrink-0 snap-start">
           {image ? (
             <Image src={image.src} alt={image.alt} fill sizes="100vw" priority className="object-cover" />
           ) : null}
@@ -144,7 +162,7 @@ export function VibeOpen({
         </div>
 
         {state === 'open' ? (
-          <div className="flex h-full w-full shrink-0 snap-start flex-col justify-center gap-3 bg-bg px-5 text-fg">
+          <div className="order-1 flex h-full w-full shrink-0 snap-start flex-col justify-center gap-3 bg-bg px-5 text-fg">
             <p className="eyebrow text-accent">{PICKER.open_going}</p>
             <p className="display text-balance text-3xl">{crate.title}</p>
           </div>

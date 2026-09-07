@@ -38,9 +38,25 @@ const harder = LEGEND_FRAMES.filter((f) => f.rung > 2).map((f) => f.id)
 console.log('\nthe card\n')
 ok('is the seven questions a stranger asks', LEGEND_CARD.length === 7, String(LEGEND_CARD.length))
 ok('is entirely rung 1–2', LEGEND_CARD.every((f) => f.rung <= 2))
-// Two now, not three. "And what do they do?" is gone: it was a second question about
-// children, asked of everybody who had any, describing one particular family.
-ok('leaves the harder two for inside', harder.length === 2, harder.join(', '))
+/*
+  THE PROPERTY, NOT THE COUNT.
+
+  This asserted `harder.length === 2`, and the comment above it had already been edited once
+  from three to two — which is the tell. A bare count of content does not fail when the
+  product breaks, it fails when the content changes, and the only available response is to
+  bump the number. It went red today because a duplicated frame was deliberately removed;
+  nothing was wrong.
+
+  What the line is actually for is the shape of the card: there ARE questions held back, and
+  none of them is on the seven a stranger asks. Both halves matter — an empty `harder` would
+  mean the Legend has no inside left, and a harder frame appearing on the card would mean the
+  door is gated on something the ladder has not reached.
+*/
+ok(
+  'holds the harder ones back for inside',
+  harder.length > 0 && harder.every((id) => !all.includes(id)),
+  harder.join(', ') || 'nothing held back',
+)
 
 console.log('\nthe door\n')
 ok('a brand new learner is outside', !clubOpen({ answeredFrameIds: [], rung: 1 }))

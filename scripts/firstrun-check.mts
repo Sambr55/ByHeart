@@ -431,6 +431,37 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
     await page.waitForTimeout(1500)
     ok('and choosing moves you on by itself', /KEEP GOING/.test(await where()), await where())
 
+    /*
+      DOES THE CARD TAKE THE GESTURE OFF THE BROWSER?
+
+      The reported fault is a standalone PWA one: iOS applies its own horizontal swipe
+      navigation to any area with nothing to scroll, and a locked card — one lane, overflow
+      hidden — is exactly that. `touch-action: none` does not stop a system gesture; only
+      preventDefault on a touchmove from a non-passive listener does.
+
+      This cannot check iOS. What it CAN check is the half that is a property of our code:
+      that a cancelable touchmove on a locked card comes back defaultPrevented. If the
+      listener is ever dropped, made passive, or attached through React's root — where
+      preventDefault silently does nothing — this goes red. That is the part I can hold.
+    */
+    const claimed = await page.evaluate(`(() => {
+      const el = document.elementFromPoint(195, 380)
+      const pane = el && el.closest('[data-testid="card-panes"]')
+      if (!pane) return null
+      const touch = new Touch({ identifier: 1, target: pane, clientX: 195, clientY: 380 })
+      const ev = new TouchEvent('touchmove', {
+        touches: [touch], targetTouches: [touch], changedTouches: [touch],
+        bubbles: true, cancelable: true,
+      })
+      pane.dispatchEvent(ev)
+      return ev.defaultPrevented
+    })()`)
+    ok(
+      'a locked card takes the gesture off the browser',
+      claimed === true,
+      claimed === null ? 'no card' : 'defaultPrevented ' + claimed,
+    )
+
     const lift = await held(0, -20)
     ok('the card follows the thumb upward', Boolean(lift && lift.y <= -12), lift ? lift.y + 'px' : 'no card')
     /*

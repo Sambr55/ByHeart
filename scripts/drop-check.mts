@@ -123,18 +123,43 @@ console.log('\nand where it turns up\n')
   which drop it means.
 */
 ok('nothing when it is not live', mine(dropsFor('lisbon', before)).length === 0)
-ok(
-  'every room of it when it is',
-  mine(dropsFor('lisbon', inside)).length === d.situations.length,
-  String(mine(dropsFor('lisbon', inside)).length),
-)
+/*
+  ONE CARD, EVERY ROOM — and the difference between those two is the point.
+
+  This counted CARDS and expected one per room, which is how a drop used to arrive: four
+  separate cards for four steps of one evening, scattered nine swipes apart with a pharmacy
+  in between. A drop is one card now and its remaining rooms are a rightward flow inside it,
+  so counting cards measures the shape rather than the promise.
+
+  The promise is that nothing is lost. So it counts the ROOMS the card carries — the one on
+  its face plus the ones in its flow — which stays true whichever way they are laid out.
+*/
+{
+  const cards = mine(dropsFor('lisbon', inside))
+  const rooms = cards.reduce(
+    (n, c) => n + (c.kind === 'situation' ? 1 + (c.flow?.length ?? 0) : 0),
+    0,
+  )
+  ok('one card when it is live', cards.length === 1, cards.length + ' cards')
+  ok(
+    'and every room of it inside that card',
+    rooms === d.situations.length,
+    rooms + ' of ' + d.situations.length,
+  )
+}
 /*
   Ahead of the standing rooms, and this is the whole ranking. The pharmacy will be there
   next month; the gig will not.
 */
 const feed = feedFor('lisbon')
 const previewed = mine(dropsFor('lisbon', before, true))
-ok('a preview can open it early', previewed.length === d.situations.length)
+ok(
+  'a preview can open it early',
+  previewed.length === 1 &&
+    previewed[0].kind === 'situation' &&
+    1 + (previewed[0].flow?.length ?? 0) === d.situations.length,
+  previewed.length + ' card(s)',
+)
 const withDrop = [...previewed, ...feed.filter((c) => !(c.kind === 'situation' && c.drop))]
 ok(
   'and it sits ahead of the standing rooms',

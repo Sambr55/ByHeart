@@ -493,7 +493,23 @@ export const CRATES: Crate[] = [
       and a band does not expire.
     */
     id: 'duran_duran_lisboa',
-    title: 'Duran Duran, Lisboa',
+    /*
+      NAMED LIKE A VIBE, because it is one — and it was named like the gig.
+
+      Reported as "intro vibes is showing a Duran Duran drop, this should only be in the
+      club". It is not the drop. The drop is duran_duran_arena in content/drops.ts, which
+      the shelf does not import and cannot show; no crate anywhere carries a `drop` field,
+      so the shelf's own drops group is unreachable. What was on the shelf was this, a
+      permanent vibe about six song titles.
+
+      It looked like a drop because it was named like one. Every sibling is <property>
+      <content type> — Top Gun quotes, James Bond film titles, Bridget Jones cringe
+      moments, Audrey Hepburn musings — and this one carried a city, which in DUB is the
+      grammar of an event: a place, a date, a thing you can miss. A band does not expire
+      and neither does this crate, so the place name goes and the shelf reads as one kind
+      of object again.
+    */
+    title: 'Duran Duran song titles',
     blurb: 'Six song titles, and the words hiding inside them.',
     tone: 'kinetic',
     built: true,

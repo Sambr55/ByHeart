@@ -573,7 +573,7 @@ function BuildCard({
                   */
                   <NumberPicker
                     value={draft[slot.key] ?? ''}
-                    max={frame.id === 'how_long' ? 60 : 100}
+                    max={100}
                     onChange={(n) => setDraft((d) => ({ ...d, [slot.key]: n }))}
                   />
                 ) : slot.kind === 'pick' ? (

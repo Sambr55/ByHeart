@@ -40,7 +40,16 @@ export interface Explainer {
    * Written as a question about the learner rather than a flag we set, so it cannot drift
    * out of step with what has actually happened.
    */
-  retires: 'played-a-vibe' | 'legend-written' | 'is-member' | 'used-translator'
+  retires:
+    | 'played-a-vibe'
+    | 'legend-written'
+    | 'is-member'
+    | 'used-translator'
+    /*
+      Retired by DOING the thing it describes, which is the only honest trigger for a card
+      that explains a gesture. Saving or rejecting anything means the grammar has landed.
+    */
+    | 'acted-on-a-card'
 }
 
 /** Every explainer's call to action, and there is deliberately only one of them. */
@@ -124,6 +133,36 @@ export const EXPLAINERS: Explainer[] = [
     },
     retires: 'used-translator',
   },
+  {
+    /*
+      WHAT THIS PLACE IS, said inside it.
+
+      Every other explainer sells something — the demo, the Legend, the translator, the
+      drops. Not one of them says how the Club itself works, so the room a person spends
+      most of their time in was the only room with no sign on the door: cards arrive, some
+      of them are events and some are not, and the three gestures were taught once in an
+      intro that a returning learner never sees again.
+
+      One card, three facts: where the cards come from, why these ones, and what the swipes
+      do. It sits among the rooms it describes rather than in front of them, so it can be
+      thrown away like anything else — and throwing it away is itself the lesson, which is
+      why that is also what retires it.
+    */
+    id: 'how_the_club_works',
+    eyebrow: 'THIS PLACE',
+    title: 'Everything here is a moment you will actually be in.',
+    blurb:
+      'The rooms come from your city and your answers. Swipe right to open one, left to send it back, up for the next.',
+    detail: {
+      heading: 'Why this card and not another',
+      body: 'What you said at set-up decides which rooms you get — a few days in Lisbon and a life in it need different Portuguese. Anything pegged to a date comes first, because it expires and the rest does not. Nothing you send away is lost: it goes to the back and comes round again, so you can swipe freely.',
+    },
+    image: {
+      src: '/lisbon/calcada.jpg',
+      alt: 'A Lisbon side street in the late afternoon, calçada underfoot and washing strung between the balconies.',
+    },
+    retires: 'acted-on-a-card',
+  },
 ]
 
 /**
@@ -137,6 +176,8 @@ export function explainersFor(state: {
   legendWritten: boolean
   isMember: boolean
   usedTranslator: boolean
+  /** Saved or rejected anything. The Club explainer retires on the gesture it teaches. */
+  actedOnACard: boolean
 }): Explainer[] {
   /*
     A member sees none of them, whatever the individual conditions say.
@@ -154,6 +195,7 @@ export function explainersFor(state: {
     if (e.retires === 'played-a-vibe') return !state.playedAVibe
     if (e.retires === 'legend-written') return !state.legendWritten
     if (e.retires === 'is-member') return !state.isMember
+    if (e.retires === 'acted-on-a-card') return !state.actedOnACard
     return !state.usedTranslator
   })
 }

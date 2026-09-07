@@ -286,20 +286,24 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     teaches:
       'Trabalho is both the verb and the noun — I work, and the work. Portuguese leaves context to sort it out and context always does. Trabalho com is the natural way in: I work WITH, rather than I work as.'
   },
-  {
-    id: 'how_long',
-    card: 8,
-    ask: 'Há quanto tempo estás cá?',
-    ask_en: 'How long have you been here?',
-    frame: 'Mudei-me há {n} meses.',
-    en: 'I moved here {n} months ago.',
-    slots: [{ key: 'n', kind: 'number', hint: 'how many months' }],
-    built_from: ['mudar'],
-    rung: 6,
-    helpers: { 'Mudei-me': 'I moved', 'há': 'ago', meses: 'months' },
-    teaches:
-      'Há is what Portuguese uses for time gone by: há dois meses is “two months ago”. It looks like the verb to have, and historically it is — the language treats elapsed time as something the world is holding.'
-  },
+  /*
+    ASKED TWICE, IN THE SAME WORDS, and this was the second copy.
+
+    `how_long` and `moved_when` both asked "Há quanto tempo estás cá?" — same question, same
+    answer shape, and near-identical `teaches` about há holding elapsed time. A learner who
+    said they were moving got both, which is what was reported.
+
+    This one went rather than moved_when for three reasons. It was untagged, so it was
+    offered to everybody while its sentence — "Mudei-me há {n} meses", I MOVED HERE n months
+    ago — is untrue of anybody on a four-day trip. It sat at rung 6, so the same question
+    arrived far later and harder than the version already on a mover's card at rung 2. And
+    the three purpose-scoped time questions are now one each: a visitor is asked how long
+    they are staying, somebody here for a season whether it is their first time, and a mover
+    how long they have been here.
+
+    Nothing is lost from any card: rung 6 is above CARD_RUNG, so this was never one of
+    anybody's seven.
+  */
   {
     id: 'why_here',
     card: 9,

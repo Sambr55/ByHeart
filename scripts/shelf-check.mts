@@ -452,6 +452,79 @@ ok(
   'no score, and no riddle either',
 )
 
+console.log('\na vibe you have sat through says so\n')
+/*
+  THE STATE THE SHELF COULD NOT SHOW, AND THE BADGE I GOT WRONG TWICE.
+
+  Reported as: "I have done basics and one flirting vibe, neither are marked as done and
+  the number 11 hasn't changed." Both halves were true and the shelf was behaving exactly
+  as written — which is the problem.
+
+  `finished` needs every root in the crate played: six to fourteen of them, three or four
+  sittings. `waiting` needs every root still inside to sit ABOVE the learner's rung. After
+  doing a vibe once neither holds, so a crate played twice was pixel-identical to one never
+  opened, and the count above it could not move.
+
+  My first attempt hung the new badge on `waiting` — I read its comment ("explored as far
+  as this learner can go") and matched the English instead of the arithmetic, then shipped a
+  branch that cannot fire in ordinary play and reported it as fixed. So this check exists to
+  make that specific mistake impossible to repeat: it seeds the exact state being described
+  and asserts the badge IS THERE, on those crates and not on the others.
+*/
+{
+  const p = await browser.newPage({ viewport: { width: 390, height: 900 } })
+  p.setDefaultTimeout(20000)
+  /*
+    One session each, which is what a session is: a few roots and then the end screen,
+    which is what writes sections_completed. Deliberately NOT every root — the whole point
+    is the state between "never opened" and "finished".
+  */
+  const other = spending.find((c) => c.id !== 'the_basics')
+  const someBasics = (ROOTS_BY_FAMILY['the_basics'] ?? []).slice(0, 3).map((r) => r.root_id)
+  const someOther = other ? (ROOTS_BY_FAMILY[other.id] ?? []).slice(0, 2).map((r) => r.root_id) : []
+  await seedInto(p, seed([...someBasics, ...someOther], other ? ['the_basics', other.id] : ['the_basics']))
+  await shelfReady(p)
+
+  const badges = (await p.evaluate(`(() => {
+    const out = {}
+    for (const el of Array.from(document.querySelectorAll('[data-testid^="vibe-"]'))) {
+      const id = (el.getAttribute('data-testid') || '').replace('vibe-', '')
+      /*
+        Lowercased, because BADGE uppercases in CSS and innerText returns what is PAINTED.
+        The source says 'session done' and the screen says 'SESSION DONE', so a strict
+        comparison against the source string fails on a badge that is working perfectly —
+        which is exactly what it did on the first run of this check.
+      */
+      out[id] = (el.innerText || '').split(String.fromCharCode(10))[0].trim().toLowerCase()
+    }
+    return out
+  })()`)) as Record<string, string>
+
+  ok(
+    'the basics is marked once a session of it is done',
+    badges['the_basics'] === 'session done',
+    'badge: ' + JSON.stringify(badges['the_basics'] ?? '(none)'),
+  )
+  if (other) {
+    ok(
+      'and so is the other vibe that was sat through',
+      badges[other.id] === 'session done',
+      other.id + ' badge: ' + JSON.stringify(badges[other.id] ?? '(none)'),
+    )
+  }
+  /*
+    And NOT on everything, which is the other way this goes wrong — a badge that is on
+    every tile is not information, and this file already had that bug once with BASICS.
+  */
+  const marked = Object.values(badges).filter((b) => b === 'session done').length
+  ok(
+    'and nothing else claims a session it never had',
+    marked === (other ? 2 : 1),
+    marked + ' tiles marked of ' + Object.keys(badges).length,
+  )
+  await p.close()
+}
+
 await browser.close()
 
 if (problems.length) {

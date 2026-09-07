@@ -23,7 +23,9 @@ import {
   dropsFor,
   explainerCards,
   introCards,
+  legendCards,
   setUpCard,
+  vibeCards,
   vibeCard,
   feedFor,
   vocabWord,
@@ -200,6 +202,13 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       ),
       isMember: stage === 'member',
       usedTranslator: (learner.asked ?? []).length > 0,
+      /*
+        Saved or sent away anything at all. The Club explainer teaches those two gestures,
+        so doing either of them is what retires it — a card explaining a swipe to somebody
+        who has been swiping for a week is an advert for their own habits.
+      */
+      actedOnACard:
+        (learner.saved ?? []).length > 0 || (learner.rejected ?? []).length > 0,
     })
 
     /*
@@ -249,6 +258,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         legendWritten: false,
         isMember: false,
         usedTranslator: false,
+        actedOnACard: false,
       }).find((c) => c.kind === 'explainer' && c.explainer.id === 'how_it_works')
       const setup = setUpCard(
         Boolean(learner.deal_accepted_at),
@@ -264,14 +274,47 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       return [...lead, ...open]
     }
 
+    /*
+      THE VIBES, IN THE CLUB, which they have never been.
+
+      vibeCard has existed since the showcase was built and nothing ever called it — a card
+      kind with a renderer and no producer. So the Club was rooms and explanations only, and
+      the other half of the product was somewhere else behind a tab.
+
+      Interleaved on a different beat from the explainers so the two never arrive together:
+      an explanation and an advertisement back to back is a corridor, which is the thing the
+      feed exists to replace.
+    */
+    const vibes = vibeCards(learner.roots_played ?? [])
+
+    /*
+      THE LEGEND, CONTINUED IN THE CLUB, which it never could be.
+
+      It was offered once at the end of a session and otherwise lived behind a tab — so
+      "keep building your Legend" was something you had to remember to go and do, and the
+      room people actually sit in had no way to move it on. One card, carrying the real next
+      question and a button that says exactly what pressing it does.
+
+      Placed near the front rather than interleaved. It is the thing the whole Club is
+      walking towards, and one question is finished in a tap — burying it fifteen swipes
+      down would make it the same offer nobody was finding on the Legend screen.
+    */
+    const legend = legendCards(
+      (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0).map((a) => a.frame_id),
+      learner.legend ?? [],
+      learner.purpose ?? null,
+    )
+
     const withExplainers: FeedCard[] = []
-    const rest = [...open.slice(0, AFTER), ...mine, ...open.slice(AFTER)]
+    const rest = [...open.slice(0, AFTER), ...legend, ...mine, ...open.slice(AFTER)]
     let e = 0
+    let v = 0
     rest.forEach((card, i) => {
       withExplainers.push(card)
       if (e < explainers.length && i % 2 === 0) withExplainers.push(explainers[e++])
+      else if (v < vibes.length && i % 3 === 2) withExplainers.push(vibes[v++])
     })
-    return [...withExplainers, ...explainers.slice(e)]
+    return [...withExplainers, ...explainers.slice(e), ...vibes.slice(v)]
   }, [
     mounted,
     preview,
@@ -685,11 +728,32 @@ export function Card({
   hint?: boolean
 }) {
   const pane = useRef<HTMLDivElement>(null)
+
+  /*
+    A DROP IS ONE CARD AND ONE FLOW, not four cards scattered through the feed.
+
+    Its rooms are the steps of a single evening — where the arena is, whether there are
+    tickets, which line goes there, how to ask somebody to come with you. As separate cards
+    they arrived nine swipes apart with a pharmacy in between, which is the shape for four
+    unrelated rooms and the wrong one for four parts of one night.
+
+    So the extra rooms become panes to the LEFT of the face, in order, and going through
+    them is the same rightward swipe that opens any card — held down once and repeated.
+
+    THE FACE MOVES, and every measurement of this scroller has to move with it. The lanes
+    were [language, face, away] and the face was always lane 1; with a flow it is lane
+    1 + flow.length. Every threshold below is written against `faceLane` for that reason —
+    the three that were hard-coded to clientWidth are exactly the kind of arithmetic that
+    silently keeps working on the common case and breaks on the new one.
+  */
+  const flow = card.kind === 'situation' ? (card.flow ?? []) : []
+  const faceLane = 1 + flow.length
+
   /*
     Tapping the call to action does the same thing as the swipe.
 
     Two ways to reach one place, and the button says which gesture it stands in for
-    rather than naming a destination — "swipe left to continue" is a instruction somebody
+    rather than naming a destination — "swipe right to continue" is an instruction somebody
     can follow the next time without looking for a button at all. It scrolls rather than
     navigates, so going back is the same gesture in reverse.
   */
@@ -736,7 +800,17 @@ export function Card({
   const reveal = () => {
     claim()
     if (card.kind === 'intro' && card.intro.only === 'in') onFreed?.(card.id)
-    pane.current?.scrollTo({ left: 0, behavior: smooth() })
+    /*
+      One lane left, not lane zero.
+
+      With a drop's flow in front of it, scrolling to 0 would fling somebody past every
+      room of the evening to the last one. Opening a card means the pane immediately
+      behind it, whatever else is stacked beyond.
+    */
+    pane.current?.scrollTo({
+      left: pane.current.clientWidth * (faceLane - 1),
+      behavior: smooth(),
+    })
   }
 
   /*
@@ -756,8 +830,8 @@ export function Card({
   */
   useEffect(() => {
     const el = pane.current
-    if (el) el.scrollLeft = el.clientWidth
-  }, [card.id])
+    if (el) el.scrollLeft = el.clientWidth * faceLane
+  }, [card.id, faceLane])
 
   /*
     A LOCKED CARD IS DRIVEN BY HAND, not by scroll snap.
@@ -818,6 +892,43 @@ export function Card({
     that, which only a thumb produces. It reproduced on a phone and not once headlessly.
   */
   const inHand = locked || held || flew !== null
+
+  /*
+    THE CARD HAS TO TELL WEBKIT THE GESTURE IS ITS OWN, and only one thing does that.
+
+    Reported twice: the first swipe left in the intro leaves the app, and going through it
+    again works. The missing fact was how it is being opened — the saved Home Screen icon,
+    which is a standalone PWA. In standalone there is no address bar and iOS applies its own
+    horizontal swipe navigation to any area that has nothing to scroll. A locked card is
+    precisely that area: one lane, overflow hidden, nothing for the system gesture to
+    consume. An unlocked card has a real three-lane scroller which eats the touch — which is
+    exactly why the second pass behaves and the first does not.
+
+    `touch-action: none` DOES NOT STOP THIS. It governs panning and pinching; the swipe
+    navigation is a system gesture and outranks it. The only thing that takes the gesture
+    is calling preventDefault on a touchmove, from a NON-PASSIVE listener — and it has to
+    be a native listener, because React attaches its touch handlers passively at the root,
+    where preventDefault is a no-op that logs a warning and changes nothing.
+
+    So this is deliberately not a React prop. It is attached while the card is in hand and
+    removed the moment it is not, because a permanent one would stop the feed scrolling at
+    all.
+
+    A NOTE ON WHAT I COULD NOT DO. No check in this repo can see this: the checks drive
+    PointerEvents in headless Chromium, and the fault is a WebKit system gesture on a real
+    installed app. The check added alongside this asserts the nearest thing that IS
+    observable — that a touchmove on a locked card comes back defaultPrevented — which
+    proves the listener is live and non-passive. It cannot prove iOS then behaves.
+  */
+  useEffect(() => {
+    const el = pane.current
+    if (!el || !inHand) return
+    const claim = (e: TouchEvent) => {
+      if (e.cancelable) e.preventDefault()
+    }
+    el.addEventListener('touchmove', claim, { passive: false })
+    return () => el.removeEventListener('touchmove', claim)
+  }, [inHand])
 
   const done = (fly: 'away' | 'in' | null) => {
     if (fired.current) return
@@ -925,7 +1036,7 @@ export function Card({
   const onPaneScroll = () => {
     const el = pane.current
     if (!el) return
-    const away = el.scrollLeft >= el.clientWidth * 1.5
+    const away = el.scrollLeft >= el.clientWidth * (faceLane + 0.5)
     if (away && !wentAway.current) {
       wentAway.current = true
       rejectCard(card.id)
@@ -934,7 +1045,7 @@ export function Card({
       if (card.kind === 'intro' && card.intro.only === 'away') onFreed?.(card.id)
       onRejected?.()
       // Back to the face, so the card that takes this one's place is not showing its lane.
-      el.scrollTo({ left: el.clientWidth, behavior: 'auto' })
+      el.scrollTo({ left: el.clientWidth * faceLane, behavior: 'auto' })
     }
     if (!away) wentAway.current = false
     /*
@@ -944,7 +1055,11 @@ export function Card({
       the instruction — "or swipe right" — would otherwise still be held, which would teach
       them the gesture does not work.
     */
-    if (el.scrollLeft < el.clientWidth * 0.5 && card.kind === 'intro' && card.intro.only === 'in') {
+    if (
+      el.scrollLeft < el.clientWidth * (faceLane - 0.5) &&
+      card.kind === 'intro' &&
+      card.intro.only === 'in'
+    ) {
       onFreed?.(card.id)
     }
   }
@@ -1036,6 +1151,8 @@ export function Card({
         style={{
           scrollbarWidth: 'none',
           touchAction: inHand ? 'none' : undefined,
+          /* Nothing may hand a leftover gesture to an ancestor, or to the system. */
+          overscrollBehavior: inHand ? 'none' : undefined,
           transform: flew
             ? `translate3d(${flew === 'away' ? '-100%' : '100%'}, 0, 0)`
             : drag.x || drag.y
@@ -1197,7 +1314,7 @@ export function Card({
 
                   A collision is the only derived card that asks for something rather than
                   telling you something, and the ask has to be cold or it is not an ask.
-                  Say it, or swipe left and be shown — the same fork the Legend and the
+                  Say it, or swipe right and be shown — the same fork the Legend and the
                   release beat use, and the only one that keeps `proof` honest.
                 */
                 <>
@@ -1438,6 +1555,38 @@ export function Card({
           lane in place means a right-swipe reveals a pane instead of moving on, and the
           card teaches the wrong thing about the movement it is named after.
         */}
+        {/*
+          THE REST OF THE EVENING, one pane per room, further left with each step.
+
+          Laid out by negative flex order so they sit beyond the language lane without the
+          JSX having to move: lane 1 is the language, so the first extra room is 0, the next
+          -1, and so on. Left to right that reads Sn … S3, S2, language, face, away — which
+          means one repeated rightward swipe walks the drop in the order it was written.
+
+          Each one is a full room rather than half of one. Splitting the first into face and
+          language and then giving the rest whole would make the second swipe mean something
+          different from the third, and the whole point of a flow is that it does not.
+        */}
+        {flow.map((s, i) => (
+          <div
+            key={s.id}
+            hidden={locked}
+            data-testid={'card-flow-' + s.id}
+            style={{ order: -i }}
+            className="card-pane nav-clear h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 text-fg"
+          >
+            <div>
+              <Lines
+                card={{
+                  kind: 'situation',
+                  id: s.id,
+                  situation: s,
+                  drop: card.kind === 'situation' ? card.drop : undefined,
+                }}
+              />
+            </div>
+          </div>
+        ))}
         <div
           hidden={locked}
           className="card-pane nav-clear order-1 h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 text-fg"
@@ -1469,6 +1618,8 @@ export function Card({
               <Destination />
             ) : card.kind === 'intro' ? (
               <IntroPane card={card} />
+            ) : card.kind === 'legend' ? (
+              <LegendAsk card={card} />
             ) : (
               <Word card={card} />
             )}
@@ -1550,7 +1701,7 @@ function Teased({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
   )
 }
 
-/** The learning, one swipe left. */
+/** The learning, one swipe right. */
 function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
   const s = card.situation
   return (
@@ -1686,6 +1837,46 @@ function Done({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
     >
       {done ? 'KEPT' : 'GOT IT'}
     </button>
+  )
+}
+
+/**
+ * One question of the Legend, behind the card that asks it.
+ *
+ * THE PORTUGUESE IS HERE AND NOT ON THE FACE. The face asks in English, because the
+ * question is being put to the person rather than to their Portuguese; this side is what
+ * they will actually hear somebody say, and the button under it is the only thing on the
+ * card that does anything.
+ *
+ * ADD TO LEGEND rather than the shared explainer call to action. Every other card in the
+ * feed points at the same place on purpose — one funnel, not a menu — and this is the one
+ * that must not, because it is not selling the product, it is a piece of the thing being
+ * built. A learner who taps it should land on their own card with this question waiting.
+ */
+function LegendAsk({ card }: { card: Extract<FeedCard, { kind: 'legend' }> }) {
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-accent">WHAT THEY ASK</p>
+        <div className="flex items-center gap-3">
+          <AudioButton slug={slugFor(card.frame.ask)} text={card.frame.ask} />
+          <span className="pt display min-w-0 text-balance text-2xl">{card.frame.ask}</span>
+        </div>
+        <p className="text-sm leading-relaxed text-muted">{card.frame.ask_en}</p>
+      </div>
+
+      <div className="border-t border-line pt-6">
+        <p className="text-sm leading-relaxed text-fg/85">{card.frame.teaches}</p>
+      </div>
+
+      <Link
+        href="/legend"
+        data-testid="legend-add"
+        className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+      >
+        ADD TO LEGEND
+      </Link>
+    </div>
   )
 }
 

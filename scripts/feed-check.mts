@@ -15,7 +15,7 @@ import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_CARD } from '../content/legend'
 import { ROOTS } from '../content/roots'
-import { feedFor } from '../content/feed'
+import { feedFor, vibeCards } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -49,7 +49,19 @@ await page.evaluate(
 await page.goto(BASE + '/club')
 await page.waitForTimeout(1800)
 
-const real = feedFor().length
+/*
+  WHAT THE FEED ACTUALLY IS, not what one of its producers returns.
+
+  feedFor supplies the rooms and the drops. The component adds the explainers, the vibes
+  and the Legend question on top — and this seeded learner is a member with a finished
+  Legend, so explainers and the Legend card are both empty and only the vibes land.
+
+  It counted feedFor alone and passed for two months because vibeCards, though written,
+  was never called by anything. The moment the vibes reached the Club the number was 12
+  short and three assertions about looping went red for a reason that had nothing to do
+  with looping.
+*/
+const real = feedFor().length + vibeCards([]).length
 const feed = await page.$('[data-testid="feed"]')
 ok('the feed is there', Boolean(feed))
 
@@ -274,7 +286,15 @@ console.log('\nreject sinks a card, and rewind brings it back\n')
     const r = document.querySelector('.snap-y')
     const s = r.children[2]
     const p = s.querySelector('[data-testid="card-panes"]')
-    p.scrollLeft = p.clientWidth * 1.2
+    /*
+      A fifth of the way past the face, whatever lane the face is.
+
+      This was 1.2 * clientWidth, which assumed the face was lane 1 — true of a room and
+      false of a drop, whose remaining evening now sits between the face and the language
+      lane. Measured from the far end instead: away is the LAST lane, always.
+    */
+    const away = p.scrollWidth - p.clientWidth
+    p.scrollLeft = away - p.clientWidth * 0.8
   })()`)
   await page.waitForTimeout(600)
   ok(
@@ -288,7 +308,8 @@ console.log('\nreject sinks a card, and rewind brings it back\n')
     const r = document.querySelector('.snap-y')
     const s = r.children[2]
     const p = s.querySelector('[data-testid="card-panes"]')
-    p.scrollLeft = p.clientWidth * 2
+    // All the way to the away lane, which is the end of the scroller by construction.
+    p.scrollLeft = p.scrollWidth - p.clientWidth
   })()`)
   await page.waitForTimeout(1400)
   const now = await rejects()

@@ -1021,6 +1021,22 @@ function Picker() {
   interface Facts {
     crate: Crate
     finished: boolean
+    /*
+      A SESSION OF THIS CRATE HAS BEEN COMPLETED, which is the only sense of "done" a
+      learner ever experiences.
+
+      `finished` means every root in the crate has been played — six to fourteen of them,
+      three or four sittings. `waiting` means every root still inside sits above the
+      learner's rung. Neither is true after doing a vibe once, so the shelf had no way at
+      all to show that somebody had been in — a crate played twice looked identical to one
+      never opened, and the count above it never moved.
+
+      This is written by rememberSection the instant the session-done screen appears, which
+      is the same moment the product says "that is The basics, for today". So it is the
+      shelf agreeing with the screen the learner just read, out of a field that was already
+      being recorded and was only ever used to decide whether the basics had been started.
+    */
+    sessionDone: boolean
     waiting: boolean
     unreached: boolean
     planLocked: boolean
@@ -1064,6 +1080,7 @@ function Picker() {
     // "taken" in it, and saying so would be nonsense.
     const started = all.some((r) => playedIds.has(r.root_id))
     const waiting = !finished && started && available === 0
+    const sessionDone = (learner.sections_completed ?? []).includes(f.id)
     const nextAt = (unplayed.length ? Math.min(...unplayed.map((r) => r.rung)) : 6) as Rung
     const opensAt = entryRung(f)
     // Only a crate nobody has ever been able to open is closed. Anything already visited
@@ -1106,6 +1123,7 @@ function Picker() {
     return {
       crate: f,
       finished,
+      sessionDone,
       waiting,
       unreached,
       planLocked,
@@ -1298,7 +1316,7 @@ function Picker() {
                 (key === 'drops' ? 'flex flex-col gap-3' : 'grid grid-cols-2 gap-3')
               }
             >
-              {list.map(({ crate: f, finished, waiting, unreached, planLocked, at, taken, total }) => {
+              {list.map(({ crate: f, finished, sessionDone, waiting, unreached, planLocked, at, taken, total }) => {
                 const image = vibeImage(f.id)
                 return f.drop ? (
                   <DropRow key={f.id} crate={f} now={now} onOpen={() => { setEntering(f.id); chooseFamily(f.id) }} />
@@ -1381,20 +1399,33 @@ function Picker() {
                         <span className={BADGE + ' tabular-nums text-white'}>stage {at}</span>
                       ) : waiting ? (
                         /*
-                          STARTED AND EMPTY IS NOT THE SAME AS NOT REACHED, and it wore the
-                          same badge.
-
-                          `waiting` means you have been inside this vibe and there is nothing
-                          more in it right now — which is exactly what the session screen has
-                          just told you: "that is The basics, for today. There is more in
-                          there whenever you want it." The shelf then labelled it "stage 5",
-                          the wording for a vibe you have never opened and cannot yet reach.
-                          Two screens describing the same crate in contradictory terms.
-
-                          The tile still opens. Nothing here closes anything — it says which
-                          of the open vibes has already given you what it has for now.
+                          Started, and nothing left in it at this stage. Rare, and not the
+                          same as never reached — which is the badge it used to wear.
                         */
                         <span className={BADGE + ' text-white'}>done for now</span>
+                      ) : sessionDone ? (
+                        /*
+                          THE BADGE THAT WAS MISSING, and the one I got wrong twice.
+
+                          The first attempt hung this on `waiting`, which needs every root
+                          still inside the crate to sit above the learner's rung. After one
+                          session of a fourteen-root vibe that is false, so the branch could
+                          not fire and the shelf looked exactly as it had before — reported,
+                          correctly, as "I have done basics and one flirting vibe, neither
+                          are marked". I had changed a branch without checking it was
+                          reachable, which is the one thing this repo is most careful about
+                          everywhere else.
+
+                          `sessionDone` is reachable by construction: it is written when the
+                          session-done screen renders, so it is true of precisely the vibes
+                          the learner has sat through and nothing else.
+
+                          It stays in OPEN NOW and it still opens. Saying "done" outright
+                          would restart the older bug — a vibe called finished while eleven
+                          of its roots are untouched, contradicting the same screen that
+                          wrote this field.
+                        */
+                        <span className={BADGE + ' text-white'}>session done</span>
                       ) : planLocked ? (
                         <span className={BADGE + ' text-white'}>PRO</span>
                       ) : null}
