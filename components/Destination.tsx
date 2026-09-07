@@ -35,20 +35,13 @@ export function Destination({ onDone }: { onDone?: () => void } = {}) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3">
-        <p className="eyebrow text-accent">WHERE TO</p>
-        <h2 className="display text-balance text-2xl">Where do you want DUB to take you?</h2>
-        {/*
-          No paragraph about which of these is built.
+      {/*
+        NO HEADING HERE. The card face carries it.
 
-          It said "one is built, the others are honest about not being", which was true and
-          was the product explaining itself instead of working. A greyed row already says a
-          place is not open; saying it again in prose reads as an apology, and a product
-          that apologises for its own roadmap on the third screen sounds smaller than it is.
-        */}
-        <p className="text-sm leading-relaxed text-muted">Pick the one you are going to.</p>
-      </div>
-
+        This rendered its own eyebrow and headline while the face rendered the same ones, so
+        WHERE TO appeared twice, one above the other. Two components each doing half a card
+        is how that happens; the face owns the words and this owns the choice.
+      */}
       <ul className="flex flex-col gap-3">
         {CHAPTERS.map((c) => (
           <li key={c.id}>
@@ -71,16 +64,23 @@ export function Destination({ onDone }: { onDone?: () => void } = {}) {
               }}
               className={
                 'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-3 text-left transition ' +
+                /*
+                  Solid grounds, because this list sits over a photograph now.
+
+                  The closed rows were bg-surface/30 with opacity-40 — legible on sand and
+                  a smear on a picture. Greyed has to mean "not available", not "hard to
+                  read": a row somebody has to squint at reads as a rendering fault.
+                */
                 (!c.open
-                  ? 'border-line/40 bg-surface/30 opacity-40'
+                  ? 'border-line/60 bg-bg-elev/70 text-muted'
                   : chosen === c.id
-                    ? 'border-accent bg-accent/10 text-accent'
-                    : 'border-line hover:border-accent/50')
+                    ? 'border-accent bg-accent text-accent-ink'
+                    : 'border-line bg-bg-elev text-fg')
               }
             >
               <span className="flex flex-col gap-1">
                 <span className="display text-lg">{c.city}</span>
-                <span className="text-sm text-muted">
+                <span className={'text-sm ' + (chosen === c.id ? 'opacity-80' : 'text-muted')}>
                   {c.open ? c.country + ' · European Portuguese' : c.country}
                 </span>
               </span>
@@ -90,9 +90,7 @@ export function Destination({ onDone }: { onDone?: () => void } = {}) {
         ))}
       </ul>
 
-      <p className="text-xs leading-relaxed text-muted">
-        Keep swiping if you would rather look around first. This will be here.
-      </p>
+
     </div>
   )
 }

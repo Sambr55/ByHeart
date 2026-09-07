@@ -486,7 +486,13 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
           notch for the controls sitting on top of it. */}
       {/* The feed is full-bleed photography, so the status bar goes dark with it. */}
       <StatusBar color="#241f1a" />
-      <header className="safe-top pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6">
+      <header
+        className={
+          'safe-top pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6 ' +
+          // White over a photograph, ink over sand. It was white over both.
+          (cards[atIndex]?.kind === 'intro' && !introImage(cards[atIndex]) ? 'text-fg' : 'text-white')
+        }
+      >
         {/*
           The logo goes to the front door, and the door stays open when you arrive by it.
 
@@ -505,7 +511,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
           aria-label={chapterName() + ' — back to the front door'}
           className="pointer-events-auto tap-target"
         >
-          <Wordmark mark="club" className="h-6 text-white" title={chapterName()} />
+          <Wordmark mark="club" className="h-6" title={chapterName()} />
         </Link>
         {/*
           One line saying what this is, for somebody who has never heard of it.
@@ -520,7 +526,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
           a billboard on your own front room.
         */}
         {stage === 'showcase' ? (
-          <p className="text-[0.6rem] leading-tight text-white/85">
+          <p className="text-[0.6rem] leading-tight opacity-85">
             Lisbon, and the Portuguese for it.
           </p>
         ) : null}
@@ -532,6 +538,15 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         ref={rail}
         data-testid="feed"
         data-locked={lockedNow ?? undefined}
+        /*
+          What the card under the header IS, so things outside the card can match it.
+
+          The header is absolutely positioned over the feed and cannot see which card it is
+          sitting on — so its white type stayed white over a sand card and all but vanished.
+          Two facts, published once: the ground, and whether this card carries a rail.
+        */
+        data-ground={cards[atIndex]?.kind === 'intro' && !introImage(cards[atIndex]) ? 'sand' : 'photo'}
+        data-rail={cards[atIndex]?.kind === 'intro' ? 'off' : 'on'}
         onScroll={watchPosition}
         className={
           'h-full snap-y snap-mandatory overscroll-y-contain ' +
@@ -603,6 +618,11 @@ function Toast({ kind }: { kind: 'saved' | 'unsaved' | 'done' | 'back' }) {
       ) : null}
     </div>
   )
+}
+
+export /** Does this intro card have a photograph behind it? Sand if not. */
+function introImage(card: FeedCard | undefined): boolean {
+  return Boolean(card && card.kind === 'intro' && card.intro.image)
 }
 
 export function Card({
@@ -987,19 +1007,14 @@ export function Card({
                     </p>
                   )}
                   <div className={card.intro.pillar ? 'pillar-body' : undefined}>
-                    {/* Destination carries its own heading, so the face does not repeat it. */}
-                    {card.intro.asks === 'where' ? null : (
-                      <>
-                        <h2 className="display mt-3 text-balance text-3xl">{face.title}</h2>
-                        <p
-                          className={
-                            'mt-3 text-sm leading-relaxed ' + (onSand ? 'text-muted' : 'text-white/80')
-                          }
-                        >
-                          {blurb}
-                        </p>
-                      </>
-                    )}
+                    <h2 className="display mt-3 text-balance text-3xl">{face.title}</h2>
+                    <p
+                      className={
+                        'mt-3 text-sm leading-relaxed ' + (onSand ? 'text-muted' : 'text-white/80')
+                      }
+                    >
+                      {blurb}
+                    </p>
                     {card.intro.gesture ? (
                       <Gesture kind={card.intro.gesture} moving={Boolean(card.intro.only) || card.intro.gesture === 'up'} />
                     ) : null}
@@ -1148,13 +1163,20 @@ export function Card({
                     GOT IT
                   </button>
                 </div>
-              ) : card.kind === 'intro' && !card.intro.shows && !card.intro.asks ? (
+              ) : card.kind === 'intro' && card.intro.only !== 'in' ? (
                 /*
                   Nothing to open, so nothing offering to open.
 
                   An argument is complete where it stands. A TAP TO OPEN leading to a pane
                   that restates the card teaches somebody that opening cards is not worth
                   doing — which is the opposite of what this sequence is for.
+                */
+                /*
+                  No button unless tapping is the gesture being taught.
+
+                  The destination card had a TAP TO OPEN under a list that fires by itself,
+                  so the one thing on screen that looked like the action was not it. Swipe-up
+                  and swipe-left cards had one too, offering an action they refuse.
                 */
                 <div className="mb-3 mt-6" />
               ) : isDemo ? (
@@ -1214,6 +1236,14 @@ export function Card({
                 </p>
               ) : null}
             </div>
+            {/*
+              No rail on an argument card.
+
+              Like, comment, save, share and rewind are things you do to CONTENT. On a card
+              that is making a claim they are five controls with nothing to act on, and the
+              stack is the loudest thing on a screen whose whole job is one sentence.
+            */}
+            {card.kind === 'intro' ? null : (
             <Rail
               card={card}
               isSaved={isSaved}
@@ -1226,6 +1256,7 @@ export function Card({
               onLike={() => setLiked(toggleCard('liked', card.id))}
               onRewound={() => onBack?.()}
             />
+            )}
           </div>
         </div>
 

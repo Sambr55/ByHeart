@@ -260,7 +260,14 @@ export const PICKER = {
     all. Same words as the Club, on purpose — one gesture, learned once.
   */
   open_eyebrow: 'A VIBE',
-  open_cta: 'SWIPE LEFT TO BEGIN',
+  /*
+    Left opens nothing any more, so this stopped being an instruction and became a trap.
+
+    Left is reject: a card telling somebody to swipe left "to begin" is telling them to
+    throw it away. Tap is the gesture nobody has to be taught, and swipe right works for
+    anybody who has done the intro.
+  */
+  open_cta: 'TAP TO BEGIN',
   open_going: 'HERE WE GO',
   /* A vibe you cannot have yet still opens, and says which wall it is. Money cannot move
      the ladder, so the stage note has nothing to press. */

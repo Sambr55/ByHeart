@@ -1182,7 +1182,12 @@ summary:focus-visible,
   know what else is on the screen without reaching into the DOM at render, and a layout fact
   belongs in the layout. The feed puts ASK in its rail instead, where the other four verbs
   already are.
+
+  KEYED ON data-rail RATHER THAN ON THE FEED EXISTING. Argument cards carry no rail — there
+  is nothing on them to like, save or share — so on those the floating button has to come
+  back, or ASK is reachable from nowhere at all. The feed publishes which kind of card is
+  under the header; this follows it.
 */
-body:has([data-testid='feed']) [data-testid='translator-open'] {
+body:has([data-testid='feed'][data-rail='on']) [data-testid='translator-open'] {
   display: none;
 }

@@ -133,6 +133,8 @@ export const INTRO_CARDS: IntroCard[] = [
       rather than a chain of spreads in the component.
     */
     id: 'intro_where',
+    // Calçada: the pavement, which is the most Portuguese surface there is.
+    image: 'calcada',
     only: 'choose',
     eyebrow: 'WHERE TO',
     headline: 'Where do you want DUB to take you?',
