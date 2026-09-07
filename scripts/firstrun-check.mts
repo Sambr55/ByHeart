@@ -372,8 +372,11 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
     return at
   }
 
-  /* A committed swipe, measured mid-flight rather than after it has landed. */
-  const flight = async (dx: number, dy: number) => {
+  /*
+    A swipe that has fired and NOT been released — the state a real thumb is in for the
+    hundred pixels after the threshold, and the state no other check here has ever entered.
+  */
+  const inFlight = async (dx: number, dy: number) => {
     await page.evaluate(`(() => {
       const el = document.elementFromPoint(195, 380)
       if (!el) return
@@ -386,13 +389,34 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
       }
       send(195, 380, 'pointerdown')
       for (let i = 1; i <= 6; i++) send(195 + (${dx} * i) / 6, 380 + (${dy} * i) / 6, 'pointermove')
-      send(195 + ${dx}, 380 + ${dy}, 'pointercancel')
     })()`)
     await page.waitForTimeout(120)
-    const at = (await page.evaluate(readPane)) as { x: number; y: number } | null
-    await page.waitForTimeout(1100)
-    return at
+    const seen = (await page.evaluate(`(() => {
+      const p = window.__pane
+      if (!p) return null
+      const cs = getComputedStyle(p)
+      const t = cs.transform
+      const m = !t || t === 'none' ? null : new DOMMatrixReadOnly(t)
+      return {
+        touchAction: cs.touchAction,
+        overflowX: cs.overflowX,
+        x: m ? Math.round(m.m41) : 0,
+        y: m ? Math.round(m.m42) : 0,
+      }
+    })()`)) as { touchAction: string; overflowX: string; x: number; y: number } | null
+    /* Released only now, so the card is not left mid-gesture for the next assertion. */
+    await page.evaluate(`(() => {
+      const el = document.elementFromPoint(195, 380)
+      if (el) el.dispatchEvent(new PointerEvent('pointercancel', {
+        pointerId: 1, pointerType: 'touch', isPrimary: true,
+        clientX: 195, clientY: 380, bubbles: true, cancelable: true,
+      }))
+    })()`)
+    await page.waitForTimeout(1400)
+    return seen
   }
+
+
 
   // Onto the destination card, then choose — which is that card's gesture.
   await page.evaluate(`(() => {
@@ -418,8 +442,37 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
 
     await swipe(0, -120)
     ok('swipe up reaches the reject lesson', /NOT THIS ONE/.test(await where()), await where())
-    const left = await flight(-120, 0)
-    ok('a rejected card leaves to the left', Boolean(left && left.x < -40), left ? left.x + 'px' : 'no card')
+    /*
+      DOES THE CARD CHANGE MODE UNDER THE FINGER?
+
+      This is the one that mattered, and no check could see it because every synthetic swipe
+      ends at the threshold. A real thumb keeps travelling — another hundred pixels, then
+      momentum — and `done` had already freed the card by then, which flipped the pane back
+      to a native horizontal scroller with touch-action auto. The browser took the rest of
+      the gesture while `passed` was running its own smooth scroll, and the feed ended up
+      wherever the two of them left it. Reported as the first swipe left going to the home
+      page and the second one working: the second is correct precisely because the card was
+      already free, so nothing switched.
+
+      So the assertion is made WITH THE POINTER STILL DOWN, after the threshold has been
+      crossed. The card must still be refusing the browser.
+    */
+    const midway = await inFlight(-120, 0)
+    ok(
+      'the card is still in hand after the swipe fires',
+      midway?.touchAction === 'none',
+      'touch-action ' + (midway?.touchAction ?? '?'),
+    )
+    ok(
+      'and the browser cannot scroll it out from under the thumb',
+      midway?.overflowX === 'hidden',
+      'overflow-x ' + (midway?.overflowX ?? '?'),
+    )
+    ok(
+      'a rejected card leaves to the left',
+      Boolean(midway && midway.x < -40),
+      midway ? midway.x + 'px' : 'no card',
+    )
     ok('swipe left reaches the open lesson', /THIS ONE/.test(await where()), await where())
     await swipe(120, 0)
     ok('swipe right reaches the vibes claim', /VIBES/.test(await where()), await where())

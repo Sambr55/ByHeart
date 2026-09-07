@@ -780,6 +780,30 @@ export function Card({
   */
   const [drag, setDrag] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [flew, setFlew] = useState<'away' | 'in' | null>(null)
+  const [held, setHeld] = useState(false)
+
+  /*
+    THE CARD STAYS IN HAND UNTIL THE FINGER LEAVES, and this is the actual bug behind
+    "the first swipe left goes to the home page, the second one works".
+
+    `locked` is what makes a card hand-driven: it hides the horizontal overflow and sets
+    touch-action to none, so the browser cannot claim the gesture. But `done` frees the
+    card — that is what moves you on — and freeing it flips `locked` to false WHILE THE
+    FINGER IS STILL DOWN. In that instant the pane becomes a native horizontal scroller
+    again and touch-action goes back to auto, and the rest of the thumb's travel, which on
+    a real swipe is another hundred pixels and then momentum, is handed straight to the
+    browser. It scrolls the lane, or the rail, at the same moment `passed` is running its
+    own smooth scroll to the next card. Two things move the feed at once and the loop wraps
+    wherever they leave it.
+
+    The second attempt is correct because by then the card is already freed: it was never
+    hand-driven, so nothing switches mode underneath the gesture.
+
+    NO CHECK COULD HAVE SEEN THIS. A synthetic swipe is six pointermove events that stop
+    the moment the threshold is crossed — the fault lives entirely in the travel after
+    that, which only a thumb produces. It reproduced on a phone and not once headlessly.
+  */
+  const inHand = locked || held || flew !== null
 
   const done = (fly: 'away' | 'in' | null) => {
     if (fired.current) return
@@ -824,6 +848,14 @@ export function Card({
     if (!locked) return
     from.current = { x: e.clientX, y: e.clientY }
     fired.current = false
+    setHeld(true)
+  }
+
+  /* The finger has gone, whatever it did. Always clear, or the card never comes back. */
+  const release = () => {
+    from.current = null
+    setHeld(false)
+    if (!fired.current) setDrag({ x: 0, y: 0 })
   }
 
   /*
@@ -854,20 +886,25 @@ export function Card({
   }
 
   const onUp = (e: React.PointerEvent) => {
-    if (!locked || !from.current) return
+    /*
+      Not guarded on `locked` any more. A gesture that has just fired has ALREADY unlocked
+      the card, so guarding on it meant the release of the one gesture that matters was the
+      one release this never handled — and the card stayed in hand until some unrelated
+      render let it go.
+    */
+    if (!from.current) return
     const dx = e.clientX - from.current.x
     const dy = e.clientY - from.current.y
-    from.current = null
     // A tap, which counts only where tapping is the taught gesture.
-    if (!fired.current && Math.max(Math.abs(dx), Math.abs(dy)) < MIN && gate === 'in') done(null)
-    // An abandoned swipe goes home rather than staying where the finger left it.
-    if (!fired.current) setDrag({ x: 0, y: 0 })
+    const tap = !fired.current && Math.max(Math.abs(dx), Math.abs(dy)) < MIN && gate === 'in'
+    release()
+    if (tap) done(null)
   }
 
   // A cancelled pointer is the browser taking the gesture, not the person abandoning it.
   const onCancel = () => {
-    from.current = null
-    if (!fired.current) setDrag({ x: 0, y: 0 })
+    if (!from.current) return
+    release()
   }
 
   const wentAway = useRef(false)
@@ -942,7 +979,7 @@ export function Card({
     */
     <section
       className={
-        'relative h-full w-full snap-start snap-always' + (locked || flew ? ' overflow-hidden' : '')
+        'relative h-full w-full snap-start snap-always' + (inHand ? ' overflow-hidden' : '')
       }
     >
       {/*
@@ -984,7 +1021,7 @@ export function Card({
         */
         style={{
           scrollbarWidth: 'none',
-          touchAction: locked ? 'none' : undefined,
+          touchAction: inHand ? 'none' : undefined,
           transform: flew
             ? `translate3d(${flew === 'away' ? '-100%' : '100%'}, 0, 0)`
             : drag.x || drag.y
@@ -997,24 +1034,20 @@ export function Card({
             A card that eases towards the thumb is a card that lags behind it, so the follow
             is untransitioned. But the same rule made an abandoned half-swipe snap home in a
             single frame, which is its own small glitch — the card jumps rather than returns.
-            `from.current` is the finger: non-null between pointerdown and the release or the
-            cancel. Read during render, which is impure and deliberate — every moment that
-            matters here is already accompanied by a setState, so there is nothing to miss,
-            and a second piece of state set on every pointerdown would re-render every locked
-            card for a touch that may go nowhere.
+            `held` is the finger: true between pointerdown and the release or the cancel.
 
             `!flew` because a committed swipe leaves WHILE the finger is still down: without
             it the flight would be instant, which is the bug this whole change is about.
           */
           transition:
-            from.current && !flew
+            held && !flew
               ? undefined
               : 'transform 260ms var(--ease-out), opacity 260ms var(--ease-out)',
         }}
         className={
           'flex h-full w-full snap-x snap-mandatory overscroll-x-contain ' +
-          // A locked card has one lane and listens for its gesture; scrolling it is meaningless.
-          (locked ? 'overflow-x-hidden' : 'overflow-x-auto')
+          // A card in hand has one lane and listens for its gesture; scrolling it is meaningless.
+          (inHand ? 'overflow-x-hidden' : 'overflow-x-auto')
         }
         onScroll={onPaneScroll}
       >
