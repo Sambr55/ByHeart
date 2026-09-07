@@ -158,6 +158,36 @@ ok('somebody set up, with a key, gets it', Boolean(await page.$('[data-testid="t
   Mounted at the root rather than per-shell, so this is a claim about the layout and not
   about four components remembering to include it.
 */
+console.log('\nkeeping one puts it somewhere\n')
+/*
+  KEEP THIS wrote to the learner and nowhere on screen showed it.
+
+  keepAsk has always recorded the sentence, and the feed offered it back as practice — but
+  Yours, the screen that holds your things, had sections for done, saved and words and none
+  for the sentences somebody asked for. So the button looked broken while working perfectly,
+  which is the hardest kind of fault to report and the easiest to dismiss.
+
+  Made worse by the word: SAVED was labelled KEPT, so anybody who pressed KEEP THIS came
+  here, found a section called KEPT without their sentence in it, and reasonably concluded
+  the button had failed. Two acts wearing one word.
+*/
+{
+  const profile = readFileSync('components/Profile.tsx', 'utf8')
+  ok(
+    'Yours has a place for asked sentences',
+    /sets\.asked/.test(profile),
+    'a button that records something nothing displays looks broken while working',
+  )
+  const copy = readFileSync('content/profile-copy.ts', 'utf8')
+  const labels = [...copy.matchAll(/(\w+)_label: '([^']+)'/g)].map((m) => m[2])
+  const dupes = labels.filter((l, i) => labels.indexOf(l) !== i)
+  ok(
+    'and no two sections share a name',
+    dupes.length === 0,
+    dupes.length ? 'both called ' + dupes.join(', ') : labels.join(' · '),
+  )
+}
+
 console.log('\nthe meter speaks for itself when it breaks\n')
 /*
   The failure that cost an hour: the daily-count read sat outside the route's try/catch, so

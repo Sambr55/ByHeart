@@ -376,6 +376,15 @@ export function derivedCards(cards: DerivedCard[]): FeedCard[] {
 export function askedCards(
   asked: { pt: string; en: string; note: string; at: string }[],
   finished: string[],
+  /*
+    Everything, for the profile.
+
+    The feed wants a handful that are still to be done — it is offering practice. Yours
+    wants the whole list including the ones already said, because it is a record rather than
+    a queue, and a sentence disappearing from your own history the moment you use it is the
+    opposite of what keeping it meant.
+  */
+  all = false,
 ): FeedCard[] {
   const done = new Set(finished ?? [])
   return [...(asked ?? [])]
@@ -387,8 +396,8 @@ export function askedCards(
       ask,
       image: REGISTER.next_person,
     }))
-    .filter((c) => !done.has(c.id))
-    .slice(0, DERIVED_PER_SESSION)
+    .filter((c) => all || !done.has(c.id))
+    .slice(0, all ? undefined : DERIVED_PER_SESSION)
 }
 
 /**

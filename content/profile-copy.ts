@@ -13,9 +13,20 @@ export const PROFILE_COPY = {
   done_label: 'BEEN THROUGH',
   done_note: 'Vibes you have been into, and rooms you have been through. They stay here.',
   done_empty: 'Nothing yet. Anything you finish turns up here on its own.',
-  saved_label: 'KEPT',
-  saved_note: 'The ones you saved for the night before you need them.',
+  /*
+    SAVED, not KEPT — because the translator's button says KEEP and meant something else.
+
+    Two different acts wore one word: bookmarking a card, and keeping a sentence you asked
+    for. Somebody who pressed KEEP THIS in the translator came here, found a section called
+    KEPT with none of their sentences in it, and reasonably concluded the button was broken.
+    One word per thing, which is a rule this product already has.
+  */
+  saved_label: 'SAVED',
+  saved_note: 'The ones you put by for the night before you need them.',
   saved_empty: 'Nothing saved. The bookmark on any card puts it here.',
+  asked_label: 'KEPT',
+  asked_note: 'Sentences you asked for, in the words you asked in.',
+  asked_empty: 'Nothing kept yet. Ask for a sentence and press KEEP THIS.',
   words_label: 'WORTH HAVING',
   words_note: 'Small words that do a lot of work, each pinned to where you will want it.',
   /*

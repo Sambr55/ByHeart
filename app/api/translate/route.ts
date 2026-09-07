@@ -178,8 +178,21 @@ export async function POST(request: Request) {
             ? 'The translator is out of credit or asking too fast (429). Ours to fix.'
             : status === 404
               ? 'The translator is pointed at a model that is not there (404). Ours to fix.'
-              : /workspace/i.test(detail)
+              /*
+                Three workspace failures, three sentences.
+
+                They all say "workspace" and they need three different actions: set the
+                variable, correct its value, or check the key. One message for all three
+                tells somebody who has already done the first to do it again — which is what
+                happened, and cost another round trip.
+              */
+              : /workspace/i.test(detail) && !process.env.ANTHROPIC_WORKSPACE_ID
                 ? 'The translator key is an organisation key and needs ANTHROPIC_WORKSPACE_ID set alongside it. Ours to fix.'
+                : /workspace/i.test(detail) &&
+                    !(process.env.ANTHROPIC_WORKSPACE_ID ?? '').startsWith('wrkspc_')
+                  ? 'ANTHROPIC_WORKSPACE_ID is set but is not a workspace ID — they begin with wrkspc_. Ours to fix.'
+                  : /workspace/i.test(detail)
+                    ? 'The workspace ID was refused. It looks right but is not one this key can use. Ours to fix.'
                 : status
                 ? 'The translator answered ' + status + '. ' + detail + ' That is ours to fix.'
                 : 'Could not reach the translator. Try again in a moment.'

@@ -9,7 +9,7 @@ import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Friends } from '@/components/Friends'
 import { PurposeChoice, SoundChoice, ThemeChoice } from '@/components/Theme'
 import { Wordmark } from '@/components/Wordmark'
-import { cardById, cardFace, derivedCards, roomsFor, wordCards, type FeedCard } from '@/content/feed'
+import { askedCards, cardById, cardFace, derivedCards, roomsFor, wordCards, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
 import { CRATES, ROOTS, type CultureFamily } from '@/content/roots'
 import { LEGEND_FRAMES, legendStatus } from '@/content/legend'
@@ -108,9 +108,24 @@ export function Profile() {
         return feedCard ? [{ kind: 'card' as const, id, card: feedCard }] : []
       })
 
+    /*
+      The sentences somebody asked for, which had nowhere to be.
+
+      keepAsk writes them to the learner and the feed offers them back as practice — but
+      Yours never rendered them, so KEEP THIS was a button that appeared to do nothing. The
+      record was right the whole time; the screen that holds your things did not hold these.
+
+      `all` because this is a record rather than a queue: a sentence should not vanish from
+      your own history the moment you have said it.
+    */
+    const askedTiles: Tile[] = askedCards(learner.asked ?? [], finished, true).map(
+      (c): Tile => ({ kind: 'card', id: c.id, card: c }),
+    )
+
     return {
       done: [...vibes, ...derivedTiles, ...finished.flatMap((id) => asTile(id) ?? [])],
       saved: saved.flatMap((id) => asTile(id) ?? []),
+      asked: askedTiles,
       words: wordCards().map((c): Tile => ({ kind: 'card', id: c.id, card: c })),
     }
   }, [
@@ -176,6 +191,13 @@ export function Profile() {
             note={PROFILE_COPY.saved_note}
             empty={PROFILE_COPY.saved_empty}
             tiles={sets.saved}
+            onOpen={setOpen}
+          />
+          <Section
+            label={PROFILE_COPY.asked_label}
+            note={PROFILE_COPY.asked_note}
+            empty={PROFILE_COPY.asked_empty}
+            tiles={sets.asked}
             onOpen={setOpen}
           />
           <Section
