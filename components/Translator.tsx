@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
 import { Tick } from '@/components/Tick'
 import { slugFor } from '@/content/audio-manifest'
+import { CopyButton } from '@/components/CopyButton'
 import { Lens } from '@/components/Lens'
 import { registerFor } from '@/content/roots'
 import { track } from '@/engine/analytics'
@@ -316,6 +317,41 @@ export function Translator() {
             placeholder="I'd like to pay by card"
             className="w-full rounded border border-line bg-surface px-4 py-3 text-base text-fg outline-none focus:border-accent"
           />
+          {/*
+            THE CAMERA, SAID IN WORDS, UNDER THE THING IT IS AN ALTERNATIVE TO.
+
+            It was an icon in the panel's header and nothing else — reported as needing to
+            be "more visible/obvious", which is fair: a glyph beside CLOSE reads as chrome
+            for the panel rather than as a second way of asking the question the panel is
+            for. Somebody who has not been told it exists will not find it there.
+
+            Here it sits directly beneath the text box, phrased as the alternative it
+            actually is: type the thing, or point at it. The header icon stays for anybody
+            who has learned it — two doors into one room is fine when the room is the point;
+            what was wrong was having only the hidden one.
+          */}
+          <button
+            type="button"
+            data-testid="translator-lens-wide"
+            onClick={() => {
+              track('lens_opened', {})
+              setLens(true)
+            }}
+            className="tap-target flex w-full items-center justify-center gap-3 rounded border border-line bg-surface px-4 py-3 text-sm text-fg transition hover:border-accent/60"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5 shrink-0 text-accent"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              aria-hidden
+            >
+              <path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <circle cx="12" cy="12.5" r="3.5" />
+            </svg>
+            Or point the camera at it
+          </button>
         </div>
 
         {state === 'asking' ? <p className="text-sm text-muted">Asking…</p> : null}
@@ -336,6 +372,8 @@ export function Translator() {
                 <div className="animate-bank flex items-center gap-3 rounded border border-correct/40 bg-correct/10 px-4 py-3">
                   <AudioButton slug={slugFor(result.pt)} text={result.pt} size="sm" />
                   <span className="pt min-w-0 flex-1 text-lg">{result.pt}</span>
+                  {/* The commonest thing to do with a looked-up sentence is send it. */}
+                  <CopyButton text={result.pt} size="sm" />
                   <Tick className="text-correct" />
                 </div>
                 {result.note ? (

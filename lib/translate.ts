@@ -103,6 +103,13 @@ function systemPrompt(register: Register): string {
 export interface Reading {
   /** What was on the sign, line by line, in the order it was written. */
   lines: { pt: string; en: string }[]
+  /**
+   * How many lines the model could NOT read with confidence, and dropped.
+   *
+   * Surfaced rather than swallowed: the screen says how much was unreadable, because a
+   * short answer with no explanation looks like a short sign.
+   */
+  dropped: number
   /** One line about the whole thing, or empty. Same rule as a translation's note. */
   note: string
 }
@@ -127,12 +134,23 @@ export async function readImage(opts: {
     'PORTUGAL, NOT BRAZIL, in every translation and every note.',
     '',
     'Answer with JSON only, no prose around it, in this exact shape:',
-    '{"lines": [{"pt": "...", "en": "..."}], "note": "..."}',
+    '{"lines": [{"pt": "...", "en": "...", "sure": true}], "note": "..."}',
     '',
     'One entry per line of Portuguese, in the order it is written on the thing photographed.',
     'pt is EXACTLY what is printed, transcribed and not corrected or tidied — a learner is',
     'standing in front of it and has to be able to match what you say against what they see.',
     'en is what it means, in plain English a person would use, not a gloss.',
+    '',
+    'EVERY LINE CARRIES A `sure` FLAG. Set it to true ONLY when you can actually read every',
+    'word of that line in the image. Set it to false when the text is small, blurred, at an',
+    'angle, cut off, or when you are completing a word or a phrase from what the sentence',
+    'seems to be about rather than from what you can see. Reconstructing plausible',
+    'Portuguese from context is the single worst thing you can do here: the learner cannot',
+    'tell a transcription from an invention, and they will say it to somebody.',
+    '',
+    'If more than a few lines would be false, prefer returning the readable ones only and',
+    'saying in note that the rest could not be read. Fewer true lines is always better than',
+    'more uncertain ones.',
     '',
     'Skip prices, numbers on their own, and anything already in English. If a line is',
     'unreadable, leave it out rather than guessing at it: a wrong word on a menu sends',
@@ -197,7 +215,7 @@ export async function readImage(opts: {
   const close = text.lastIndexOf('}')
   if (open < 0 || close <= open) throw new Error('unparseable')
   const parsed = JSON.parse(text.slice(open, close + 1)) as {
-    lines?: { pt?: unknown; en?: unknown }[]
+    lines?: { pt?: unknown; en?: unknown; sure?: unknown }[]
     note?: unknown
   }
 
@@ -206,16 +224,41 @@ export async function readImage(opts: {
     cap of forty stops one photograph of a wall of text from becoming a screen nobody can
     scroll — the point is what is in front of somebody, not everything in the frame.
   */
-  const lines = (Array.isArray(parsed.lines) ? parsed.lines : [])
+  const all = (Array.isArray(parsed.lines) ? parsed.lines : [])
     .map((l) => ({
       pt: typeof l?.pt === 'string' ? l.pt.trim() : '',
       en: typeof l?.en === 'string' ? l.en.trim() : '',
+      /*
+        Absent means UNSURE, not sure.
+
+        A model that forgets the flag must not have its silence read as confidence — this
+        is the one place in the product where being wrong is indistinguishable from being
+        right, so the default has to fail towards showing less.
+      */
+      sure: l?.sure === true,
     }))
     .filter((l) => l.pt)
     .slice(0, 40)
 
+  /*
+    UNSURE LINES DO NOT SHIP.
+
+    Reported from a real photograph: a page read at an angle came back as fluent Portuguese
+    that was not on the page — "os lusitanos assassinaram" where the book said "resistiram",
+    which inverts the meaning — with an equally fluent English translation underneath. The
+    English reading perfectly is the tell: it was a translation of the model's own
+    reconstruction, not of the page.
+
+    The prompt already said not to guess and it guessed anyway, so instruction alone is not
+    enough. Dropping what is flagged unsure is the mechanism behind the instruction, and the
+    count goes back so the screen can say WHY it is showing less rather than appearing to
+    have found a very short sign.
+  */
+  const lines = all.filter((l) => l.sure).map(({ pt, en }) => ({ pt, en }))
+
   return {
     lines,
+    dropped: all.length - lines.length,
     note: typeof parsed.note === 'string' ? parsed.note.trim().slice(0, 200) : '',
   }
 }

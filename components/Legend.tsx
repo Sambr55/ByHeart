@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES } from '@/content/roots'
-import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillFrame, frameApplies, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame } from '@/content/legend'
+import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame } from '@/content/legend'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
+import { CopyButton } from '@/components/CopyButton'
 import { NumberPicker } from '@/components/NumberPicker'
 import { Back } from '@/components/Back'
 import { Dock, Framed } from '@/components/Dock'
@@ -78,7 +79,52 @@ export function Legend() {
   const onCard = answers.filter(
     (a) => Object.keys(a.values).length > 0 && myCard.some((f) => f.id === a.frame_id),
   )
-  const reachable = useMemo(() => (mounted && unlocked ? LEGEND_FRAMES : []), [mounted, unlocked])
+  /*
+    THIS LEARNER'S FRAMES, NOT EVERY FRAME THERE IS.
+
+    `reachable` was LEGEND_FRAMES whole, and the only filter anywhere near the deck was
+    frameApplies — which reads `frame.requires`, and NO FRAME DECLARES `requires`. So the
+    filter returned true for everything and cardFor, already computed on the line above as
+    `myCard`, was never applied to the deck at all.
+
+    The consequence is not cosmetic. `staying_for` is scoped to visitors and its longest
+    option is A MONTH; `first_time` is scoped to somebody here for a season. Answer "I am
+    moving there" at set-up and the deck dealt you both anyway, so the product asked how
+    long you were staying and offered you nothing longer than a month — reported exactly
+    that way, by somebody staying a year. Worse, `nextAfter` hands the next card over
+    automatically, so a contradictory question arrives without anybody choosing it, and the
+    rehearsal then reads the answers back as though they were all true of one person.
+
+    The purpose-scoped frames are one each by design — a visitor is asked how long they are
+    staying, somebody here for a season whether it is their first time, a mover how long
+    they have been here. Filtering by the learner's own card is what makes that design real
+    rather than a comment.
+
+    frameApplies stays in the queue below: `requires` is unused today and is the mechanism
+    for a frame that depends on an ANSWER rather than on a purpose, which is a different
+    question from this one.
+  */
+  const reachable = useMemo(
+    () =>
+      mounted && unlocked
+        ? /*
+            BY PURPOSE, NOT BY CARD — and the first attempt at this got it wrong.
+
+            Filtering to `myCard` removed the wrong-purpose frames correctly and also
+            removed `children`, which is rung 5: a legitimate deeper question that is simply
+            above CARD_RUNG and therefore not one of the seven. The deck is meant to hold
+            the card PLUS the bonus frames — the comment two lines up says so — and
+            legend-flow caught it immediately by finding that card disabled.
+
+            frameForPurpose is the right test, because the question being asked here is "is
+            this frame for this learner", not "is it on their card". A mover keeps children
+            and loses staying_for; a visitor keeps children and loses moved_when.
+          */
+          LEGEND_FRAMES.filter((f) => frameForPurpose(f, learner.purpose ?? null))
+        : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mounted, unlocked, learner.purpose],
+  )
   const answered = useMemo(
     () => LEGEND_FRAMES.filter((f) => isAnswered(f, valuesFor(f.id))),
     [answers],
@@ -379,6 +425,7 @@ export function Legend() {
           {REPAIR_KIT.map((r) => (
             <li key={r.pt} className="flex items-start gap-3 rounded border border-line bg-bg-elev px-4 py-3">
               <AudioButton slug={slugFor(r.pt)} text={r.pt} size="sm" />
+              <CopyButton text={r.pt} size="sm" />
               <span className="min-w-0">
                 <span className="pt block text-sm text-accent">{r.pt}</span>
                 <span className="mt-1 block text-xs text-muted">{r.en}</span>
@@ -663,32 +710,44 @@ function BuildCard({
             >
               SAVE IT
             </button>
-            <button
-              type="button"
-              data-testid="legend-skip"
-              onClick={() => {
-                answerLegend(frame.id, {})
-                track('legend_card_skipped', { card: frame.id })
-                onDone()
-              }}
-              className="tap-target text-center text-xs text-muted underline underline-offset-4"
-            >
-              Leave this one empty
-            </button>
             {/*
-              Running on needs a way to stop, or it is a form with the exits removed.
+              THE TWO WAYS OUT SIT BESIDE EACH OTHER, NOT UNDER THE BUTTON.
 
+              They were two more full-width rows stacked below SAVE IT, which made the dock
+              three deep — and on this screen the keyboard is open, so three rows of dock
+              pushed the one button that matters off the bottom and the whole thing had to
+              be scrolled to reach. Reported with a photograph of exactly that.
+
+              Side by side they are one row instead of two, which is the height back. It is
+              also the truer shape: these are alternatives to each other — skip this one, or
+              stop for now — rather than two separate afterthoughts to the save.
+
+              Running on still needs a way to stop, or it is a form with the exits removed.
               Said as a sentence rather than a counter: "two more after this" is a shape,
               and "2/7" is a score with a progress bar implied behind it.
             */}
-            <button
-              type="button"
-              data-testid="legend-stop"
-              onClick={onStop}
-              className="tap-target text-center text-xs text-muted underline underline-offset-4"
-            >
-              {remaining > 1 ? 'Stop here — ' + (remaining - 1) + ' more when you want them' : 'Back to your deck'}
-            </button>
+            <div className="flex items-center justify-between gap-3">
+              <button
+                type="button"
+                data-testid="legend-skip"
+                onClick={() => {
+                  answerLegend(frame.id, {})
+                  track('legend_card_skipped', { card: frame.id })
+                  onDone()
+                }}
+                className="tap-target text-xs text-muted underline underline-offset-4"
+              >
+                Leave this one empty
+              </button>
+              <button
+                type="button"
+                data-testid="legend-stop"
+                onClick={onStop}
+                className="tap-target text-right text-xs text-muted underline underline-offset-4"
+              >
+                {remaining > 1 ? 'Stop here — ' + (remaining - 1) + ' more' : 'Back to your deck'}
+              </button>
+            </div>
           </Dock>
         </>
       ) : null}
@@ -697,6 +756,7 @@ function BuildCard({
         <ColdSay
           ask={frame.ask}
           answer={sentence}
+          english={fillEnglish(frame, draft)}
           helpers={frame.helpers}
           onSolved={(clean) => {
             recordProof({ pt: sentence, en: frame.en, source: 'legend', clean })
@@ -811,12 +871,15 @@ function ChildRows({ value, onChange }: { value: string; onChange: (next: string
 function ColdSay({
   ask,
   answer,
+  english,
   helpers,
   onSolved,
   onNext,
 }: {
   ask: string
   answer: string
+  /** What they are being asked to say, in English. See below. */
+  english: string
   helpers?: Record<string, string>
   /** Banked the moment it is right, so leaving here cannot cost the sentence. */
   onSolved: (clean: boolean) => void
@@ -829,6 +892,20 @@ function ColdSay({
       <div className="flex flex-col gap-1">
         <p className="eyebrow text-muted">NO CLUES</p>
         <p className="pt text-balance text-xl text-accent">{ask}</p>
+        {/*
+          WHAT THEY ARE BEING ASKED TO SAY, which was nowhere on this screen.
+
+          It showed the Portuguese question and a pile of Portuguese tiles and nothing else,
+          so somebody was asked to build a sentence with no statement of what the sentence
+          meant. On "tens filhos?" that is guessable. On "falas português?", where the
+          answer is a shape nobody would predict, it is a memory test with the question
+          taken out — and this is the moment the product asks somebody to perform.
+
+          NO CLUES still holds: the English is the ASK, not the answer in disguise. Knowing
+          you are trying to say "I am learning. A little, but I try." is the task; producing
+          it in Portuguese with nothing on screen to copy is still entirely on them.
+        */}
+        <p className="mt-1 text-sm leading-relaxed text-muted">{english}</p>
       </div>
       {/*
         Getting it right is not the same event as moving on.
@@ -959,6 +1036,7 @@ function RunThrough({
           <p className="eyebrow text-muted">YOURS</p>
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(answer)} text={answer} size="sm" />
+            <CopyButton text={answer} size="sm" />
             <p className="pt min-w-0 text-base text-accent">{answer}</p>
           </div>
         </div>

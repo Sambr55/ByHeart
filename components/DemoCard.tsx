@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
+import { CopyButton } from '@/components/CopyButton'
 import { EXPLAINER_CTA } from '@/content/explainers'
 import { DEMO_BEATS } from '@/content/front-door'
 import { track } from '@/engine/analytics'
@@ -90,6 +91,7 @@ export function DemoCard({ onBeat }: { onBeat?: (beat: number) => void } = {}) {
           */}
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(recognise.translation.pt)} text={recognise.translation.pt} />
+            <CopyButton text={recognise.translation.pt} />
             <p className="pt display min-w-0 text-balance text-3xl">{recognise.translation.pt}</p>
           </div>
           <p className="text-sm text-white/80">{recognise.translation.en}</p>
@@ -123,6 +125,7 @@ export function DemoCard({ onBeat }: { onBeat?: (beat: number) => void } = {}) {
             {build.branches.map((b) => (
               <li key={b.pt} className="flex items-center gap-3">
                 <AudioButton slug={slugFor(b.pt)} text={b.pt} />
+                <CopyButton text={b.pt} />
                 <span className="min-w-0">
                   <span className="pt display block text-xl">{b.pt}</span>
                   <span className="block text-sm text-white/75">{b.en}</span>

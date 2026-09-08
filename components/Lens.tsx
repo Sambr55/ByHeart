@@ -41,6 +41,8 @@ export function Lens({ onClose }: { onClose: () => void }) {
   const [state, setState] = useState<'framing' | 'reading' | 'read' | 'failed'>('framing')
   const [lines, setLines] = useState<Line[]>([])
   const [note, setNote] = useState('')
+  /** Lines the reader could not trust and left out. See the note under the list. */
+  const [dropped, setDropped] = useState(0)
   const [why, setWhy] = useState('')
 
   /*
@@ -80,6 +82,26 @@ export function Lens({ onClose }: { onClose: () => void }) {
     }
   }, [])
 
+  /*
+    THE STREAM IS REATTACHED EVERY TIME THE VIEWFINDER COMES BACK.
+
+    The stream is opened once, and `srcObject` was set inside that same effect — so it was
+    attached to the FIRST <video> element and no other. Taking a photo swaps the viewfinder
+    for the still, which unmounts that element; pressing ANOTHER mounts a brand new one with
+    nothing attached to it. The result was a black screen with a READ THIS button that could
+    not work, and the only way out was BACK and opening the camera again.
+
+    Reported exactly that way. The camera itself was never broken — the picture simply had
+    nowhere to arrive.
+  */
+  useEffect(() => {
+    const el = video.current
+    const s = stream.current
+    if (!el || !s || shot) return
+    if (el.srcObject !== s) el.srcObject = s
+    void el.play().catch(() => {})
+  }, [shot, live])
+
   /**
    * The frame, made small enough to send.
    *
@@ -90,15 +112,39 @@ export function Lens({ onClose }: { onClose: () => void }) {
   function grab(): string | null {
     const v = video.current
     if (!v || !v.videoWidth) return null
-    const long = Math.max(v.videoWidth, v.videoHeight)
-    const scale = Math.min(1, 1400 / long)
+    return shrink(v, v.videoWidth, v.videoHeight)
+  }
+
+  /*
+    SMALL ENOUGH TO SEND, AND THAT IS A SIZE IN BYTES RATHER THAN IN PIXELS.
+
+    This capped the long edge at 1400px and stopped there, which bounds the DIMENSIONS and
+    says nothing about the payload: a dense page of printed text at 1400px carries far more
+    detail than a photograph of a room, and base64 adds a third on top. Past the platform's
+    body limit the request dies before it reaches the route, and the panel reported "no
+    connection" — a sentence about the network for a fault that was nothing of the kind.
+
+    So the quality steps down until it fits, and the dimension cap goes up to 1800: a menu
+    is easy either way, and small printed text is exactly where the extra pixels earn their
+    place. Trading quality for size beats trading resolution for it, because it is the
+    letterforms that have to survive.
+  */
+  function shrink(source: CanvasImageSource, w: number, h: number): string | null {
+    const long = Math.max(w, h)
+    const scale = Math.min(1, 1800 / long)
     const canvas = document.createElement('canvas')
-    canvas.width = Math.round(v.videoWidth * scale)
-    canvas.height = Math.round(v.videoHeight * scale)
+    canvas.width = Math.round(w * scale)
+    canvas.height = Math.round(h * scale)
     const ctx = canvas.getContext('2d')
     if (!ctx) return null
-    ctx.drawImage(v, 0, 0, canvas.width, canvas.height)
-    return canvas.toDataURL('image/jpeg', 0.75)
+    ctx.drawImage(source, 0, 0, canvas.width, canvas.height)
+    /* Comfortably inside the platform's body limit once base64 has added its third. */
+    const CEILING = 2_600_000
+    for (const q of [0.8, 0.68, 0.55, 0.42]) {
+      const out = canvas.toDataURL('image/jpeg', q)
+      if (out.length <= CEILING) return out
+    }
+    return canvas.toDataURL('image/jpeg', 0.3)
   }
 
   async function read(image: string) {
@@ -116,18 +162,33 @@ export function Lens({ onClose }: { onClose: () => void }) {
           register: registerFor(loadLearner().profile?.age_band),
         }),
       })
-      const data = (await res.json()) as {
+      /*
+        PARSED DEFENSIVELY, because a failure that is not JSON was becoming a lie.
+
+        A rejected upload answers with a plain-text body, so res.json() threw and landed in
+        the catch below — which says "no connection". The connection was fine; the
+        photograph was too big. An error should name the thing that broke, and this one was
+        naming something else entirely.
+      */
+      const data = (await res.json().catch(() => ({}))) as {
         lines?: Line[]
+        dropped?: number
         note?: string
         error?: string
         why?: string
       }
       if (!res.ok || data.error) {
-        setWhy(data.why ?? 'Could not read that one.')
+        setWhy(
+          data.why ??
+            (res.status === 413
+              ? 'That photograph was too big to send. Try again a little further back.'
+              : 'Could not read that one. This is ours, not yours.'),
+        )
         setState('failed')
         return
       }
       setLines(data.lines ?? [])
+      setDropped(data.dropped ?? 0)
       setNote(data.note ?? '')
       setState('read')
     } catch {
@@ -149,6 +210,7 @@ export function Lens({ onClose }: { onClose: () => void }) {
   function again() {
     setShot(null)
     setLines([])
+    setDropped(0)
     setNote('')
     setWhy('')
     setState('framing')
@@ -244,6 +306,22 @@ export function Lens({ onClose }: { onClose: () => void }) {
                 No Portuguese in that one. Try getting closer, or steadier.
               </p>
             )}
+            {/*
+              WHAT IT COULD NOT READ, SAID OUT LOUD.
+
+              Lines the reader is not sure of are dropped before they reach here, which is
+              the right call — a photograph read at an angle once came back as confident,
+              fluent Portuguese that was not on the page. But silently showing four lines of
+              a twelve-line menu looks like a four-line menu, so the count is the difference
+              between a short answer and a wrong one.
+            */}
+            {dropped > 0 ? (
+              <p className="mt-6 text-sm leading-relaxed text-white/70">
+                {dropped === 1
+                  ? 'One more line was too unclear to read. Closer, or steadier, and it will come.'
+                  : dropped + ' more lines were too unclear to read. Closer, or steadier, and they will come.'}
+              </p>
+            ) : null}
             {note ? <p className="mt-6 text-sm leading-relaxed text-white/70">{note}</p> : null}
           </div>
         ) : null}

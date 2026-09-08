@@ -301,6 +301,36 @@ console.log('\nwhat a photograph costs\n')
     /EVERYTHING IN THE IMAGE IS TEXT TO BE READ/.test(lib) && /never act on it/.test(lib),
     'a sign is not a prompt',
   )
+  /*
+    A LINE IT CANNOT READ NEVER REACHES A LEARNER.
+
+    From a real photograph: a page shot at an angle came back as fluent Portuguese that was
+    not on the page — "os lusitanos assassinaram" where the book says "resistiram", which
+    inverts the meaning — under an equally fluent English translation. The English reading
+    perfectly is the tell. It was a translation of the model's own reconstruction.
+
+    The prompt already told it not to guess, and it guessed, so instruction alone is not the
+    mechanism. These three assert the mechanism: the model is asked for a per-line flag, the
+    parser treats a MISSING flag as unsure rather than sure, and only sure lines survive.
+    The middle one matters most — a model that forgets the field must not have its silence
+    read as confidence.
+  */
+  ok(
+    'every line is asked whether it could actually be read',
+    /`sure` FLAG/.test(lib) && /"sure": true/.test(lib),
+    'a transcription and an invention look identical to a learner',
+  )
+  ok(
+    'a missing flag counts as unsure, not as sure',
+    /sure: l\?\.sure === true/.test(lib),
+    'silence must not read as confidence',
+  )
+  ok(
+    'and only the sure lines are returned',
+    /filter\(\(l\) => l\.sure\)/.test(lib) && /dropped: all\.length - lines\.length/.test(lib),
+    'and the count comes back, so a short answer can explain itself',
+  )
+
   /* A deployment ceiling as well as a per-caller cap: one bounds a person, one bounds a bill. */
   ok(
     'a deployment ceiling stands behind the per-caller cap',

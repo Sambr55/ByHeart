@@ -153,7 +153,16 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       {
         key: 'nationality',
         kind: 'pick',
-        hint: 'where you are from',
+        /*
+          The hint names the ANSWER, not the question.
+
+          Both slots on this card said "where you are from" — one wanting a nationality and
+          one wanting a town — so the screen asked the same thing twice and then took two
+          different kinds of answer. A hint sits above the options a person is choosing
+          between, so it has to describe those options rather than restate the ask, which is
+          already at the top of the card in both languages.
+        */
+        hint: 'your nationality',
         gendered: true,
         options: [
           { value: 'inglês', f: 'inglesa', en: 'English' },
@@ -280,11 +289,49 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     ask_en: 'What do you do?',
     frame: 'Trabalho com {thing}.',
     en: 'I work with {thing}.',
-    slots: [{ key: 'thing', kind: 'place', hint: 'what your work is' }],
+    /*
+      A PICK, BECAUSE A TEXT BOX HERE ASKED THE LEARNER TO DO THE TRANSLATING.
+
+      This was `kind: 'place'` — a bare input whose contents drop straight into "Trabalho
+      com {thing}" as the learner's own Portuguese. That is right for a town, which is a
+      proper noun and does not translate, and wrong for a profession, which is the one word
+      on the card somebody actually needs supplying. Reported as "it expects me to know the
+      translation", which is exactly what it did.
+
+      Deliberately "trabalho COM" rather than "sou": com takes a noun and needs no article
+      and no gender agreement, so "trabalho com computadores" works for anybody, where "sou
+      professor / professora" would need the gendered pair for every entry. The frame's own
+      note already makes that argument; the options now honour it.
+
+      NOT AN EXHAUSTIVE LIST, and it should not become one. These are the broad fields most
+      people can point at, plus the two answers — retired, studying — that are not fields at
+      all and are the commonest reasons this question gets an awkward reply. Somebody whose
+      work is not here says the nearest one, which is what people do in a second language
+      anyway. A hundred professions would be a dropdown, and a dropdown is a form.
+    */
+    slots: [
+      {
+        key: 'thing',
+        kind: 'pick',
+        hint: 'the closest one to your work',
+        options: [
+          { value: 'computadores', en: 'computers' },
+          { value: 'design', en: 'design' },
+          { value: 'crianças', en: 'children' },
+          { value: 'pessoas', en: 'people' },
+          { value: 'números', en: 'numbers' },
+          { value: 'construção', en: 'building' },
+          { value: 'restauração', en: 'restaurants' },
+          { value: 'saúde', en: 'health' },
+          { value: 'música', en: 'music' },
+          { value: 'vendas', en: 'sales' },
+        ],
+      },
+    ],
     built_from: ['trabalho'],
     rung: 2,
     teaches:
-      'Trabalho is both the verb and the noun — I work, and the work. Portuguese leaves context to sort it out and context always does. Trabalho com is the natural way in: I work WITH, rather than I work as.'
+      'Trabalho is both the verb and the noun — I work, and the work. Portuguese leaves context to sort it out and context always does. Trabalho com is the natural way in: I work WITH, rather than I work as — which is why none of these needs an article or a gender.'
   },
   /*
     ASKED TWICE, IN THE SAME WORDS, and this was the second copy.
@@ -421,13 +468,38 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     ask: 'Há quanto tempo estás cá?',
     ask_en: 'How long have you been here?',
     frame: 'Há {how_long}.',
-    en: '{how_long} ago.',
+    /*
+      "FOR", NOT "AGO", and the difference is the whole answer.
+
+      This read "{how_long} ago", which is what `há` means in "há dois anos" pointing at an
+      event — I arrived two years ago. Asked "há quanto tempo estás cá?", the same words
+      mean the span you have been here FOR, and the reply is about a state that is still
+      running. Somebody reading the English would have learned the wrong one of the two.
+
+      Written so the option leads, because every option is capitalised to stand alone in a
+      chip: "For A few weeks" is what a prefix produces, and "A few weeks, so far" carries
+      the still-running sense without fighting the label.
+    */
+    en: '{how_long}, so far.',
     slots: [
       {
         key: 'how_long',
         kind: 'pick',
         hint: 'how long',
+        /*
+          IT HAS TO START SHORTER THAN A FEW MONTHS.
+
+          The range opened at "uns meses", so somebody who moved last week or last month had
+          nothing true to choose and the shortest honest answer available was already an
+          exaggeration. Reported by somebody in exactly that position.
+
+          A mover's first weeks are also when this question gets asked MOST — it is what
+          every neighbour, every colleague and every person behind a counter opens with when
+          they place your accent — so the missing end of the range was the end that matters.
+        */
         options: [
+          { value: 'umas semanas', en: 'A few weeks' },
+          { value: 'um mês', en: 'A month' },
           { value: 'uns meses', en: 'A few months' },
           { value: 'um ano', en: 'A year' },
           { value: 'dois anos', en: 'Two years' },
@@ -820,8 +892,22 @@ export function fillFrame(
   gender: 'm' | 'f' | null,
 ): string {
   const shape = frameFor(frame, values)
+  /*
+    TRIMMED, BECAUSE A TRAILING SPACE BECOMES A WORD.
+
+    Every free-text slot goes into the sentence verbatim, and MiniBuild builds its tiles by
+    splitting that sentence on spaces. So "Advertising " — one stray space, which a phone
+    keyboard adds without anybody noticing — turned "Trabalho com {thing}." into four tiles
+    with a lone FULL STOP among them, and the learner was asked to place a piece of
+    punctuation in a sentence about their job. Reported with a screenshot of exactly that.
+
+    Fixed here rather than in the builder: the sentence is also what gets recorded as proof,
+    read aloud, and compared against later, so a phantom space is wrong everywhere and not
+    only where it happens to be visible. Trimming at the point the sentence is MADE fixes
+    all of them at once.
+  */
   return shape.frame.replace(/\{(\w+)\}/g, (whole, key: string) => {
-    const raw = values[key]
+    const raw = values[key]?.trim()
     if (!raw) return whole
     /*
       A number is stored as digits and said as a word.
@@ -880,6 +966,38 @@ export function frameFor(
   // slots follow it.
   const chooser = frame.slots.filter((s) => values?.[s.key] === chosen)
   return { frame: variant.frame, en: variant.en, slots: [...chooser, ...(variant.slots ?? [])] }
+}
+
+/**
+ * The same sentence, in English, filled with the same answers.
+ *
+ * WHY THIS EXISTS. The cold-recall screen showed the Portuguese question and a pile of
+ * Portuguese tiles and nothing else — so a learner was asked to build a sentence with no
+ * statement anywhere of what the sentence was supposed to MEAN. On a card asking "tens
+ * filhos?" that is guessable; on "falas português?", where the answer is a shape nobody
+ * would predict, it is a memory test with the question removed. Reported as "on all of
+ * these legend cards we need the English sentence we are translating".
+ *
+ * It goes through frameFor for the same reason fillFrame does: a variant or a children
+ * answer changes BOTH sentences together, and reading `frame.en` directly would show the
+ * English of a shape the Portuguese is no longer using.
+ *
+ * Numbers stay as digits here. "I am fifty-six" is not how anybody reads their own age in
+ * their own language, and this line exists to be understood at a glance rather than said.
+ */
+export function fillEnglish(
+  frame: LegendFrame,
+  values: Record<string, string>,
+): string {
+  const shape = frameFor(frame, values)
+  return shape.en.replace(/\{(\w+)\}/g, (whole, key: string) => {
+    const raw = values[key]?.trim()
+    if (!raw) return whole
+    const slot = shape.slots.find((sl) => sl.key === key)
+    /* A pick shows its English label; a typed answer is already the learner's own words. */
+    const option = slot?.options?.find((o) => o.value === raw || o.f === raw)
+    return option?.en ?? raw
+  })
 }
 
 /**

@@ -462,6 +462,37 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
       claimed === null ? 'no card' : 'defaultPrevented ' + claimed,
     )
 
+    /*
+      IS THE CARD ACTUALLY PARKED WHERE A RIGHT SWIPE CAN WORK?
+
+      Reported as "everything is still swipe left", on every card of the guided rail, on
+      every device — and every existing check here passed throughout, because they all
+      drive the gesture HANDLERS. The handlers were right. The scroller was at lane zero.
+
+      The side lanes carry `hidden={locked}`, so while a card holds you the scroller has one
+      child and the opening `scrollLeft` is clamped to 0. When the lock releases the lanes
+      appear either side and nothing re-takes the position, so the card sits at its left
+      edge with the face merely LOOKING centred because flex order puts it there. From lane
+      zero there is nothing to the left: a rightward swipe does nothing and the only gesture
+      that moves anything is a swipe left.
+
+      It is invisible in a screenshot and invisible to a handler test. The only thing that
+      sees it is the number below, so that is what this asserts.
+    */
+    const parked = (await page.evaluate(`(() => {
+      const r = document.querySelector('.snap-y')
+      if (!r || !r.clientHeight) return null
+      const i = Math.round(r.scrollTop / r.clientHeight)
+      const p = r.children[i] && r.children[i].querySelector('[data-testid="card-panes"]')
+      if (!p || !p.clientWidth) return null
+      return { lane: Math.round(p.scrollLeft / p.clientWidth), lanes: Math.round(p.scrollWidth / p.clientWidth) }
+    })()`)) as { lane: number; lanes: number } | null
+    ok(
+      'the card is parked with a lane to its left to swipe into',
+      Boolean(parked && (parked.lanes < 2 || parked.lane > 0)),
+      parked ? 'lane ' + parked.lane + ' of ' + parked.lanes : 'no card',
+    )
+
     const lift = await held(0, -20)
     ok('the card follows the thumb upward', Boolean(lift && lift.y <= -12), lift ? lift.y + 'px' : 'no card')
     /*

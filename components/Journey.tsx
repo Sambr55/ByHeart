@@ -103,6 +103,7 @@ import { buzz, nope } from '@/engine/tap'
 import { useLearner } from '@/engine/useLearner'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { AudioButton } from './AudioButton'
+import { CopyButton } from './CopyButton'
 
 /**
  * The journey UI.
@@ -655,6 +656,7 @@ function Demo({ i }: { i: number }) {
                 className="animate-bank flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3"
               >
                 <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
+                <CopyButton text={b.pt} size="sm" />
                 <span>
                   <span className="pt block text-lg text-accent">{b.pt}</span>
                   <span className="mt-1 block text-sm text-fg/75">{b.en}</span>
@@ -1875,6 +1877,14 @@ export function MiniBuild({
         <div className="animate-bank mt-3 flex items-center gap-3 rounded border border-correct/40 bg-correct/10 px-4 py-3">
           <AudioButton slug={slugFor(target)} text={target} size="sm" />
           <span className="pt min-w-0 flex-1 text-lg">{target}</span>
+          {/*
+            Hear it, take it, and then the acknowledgement.
+
+            Copy sits beside the speaker because they are the same idea: a sentence you
+            carry out of the app, said or sent. The tick stays last — it is the state of the
+            row rather than something to press.
+          */}
+          <CopyButton text={target} size="sm" />
           {/* Acknowledgement, not applause. See components/Tick.tsx. */}
           <Tick className="text-correct" />
         </div>
@@ -1967,6 +1977,7 @@ function BranchRow({ branch, i, register }: { branch: Branch; i: number; registe
       className="animate-bank flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3"
     >
       <AudioButton slug={slugFor(shown)} text={shown} size="sm" />
+      <CopyButton text={shown} size="sm" />
       <span className="min-w-0">
         <span className="pt block text-lg text-accent">{shown}</span>
         <span className="mt-1 block text-sm text-fg/75">{branch.en}</span>
@@ -2115,6 +2126,7 @@ function RootBeatView({
             <p className="pt text-balance text-3xl text-accent">{root.target}</p>
             <div>
               <AudioButton slug={slugFor(root.target)} text={root.target} />
+              <CopyButton text={root.target} />
             </div>
           </div>
         </div>
@@ -2967,9 +2979,21 @@ function SectionComplete() {
           </button>
         ) : null}
       {/*
-        The three cold prompts that follow are what GENERATE the number, so promising to
-        show somebody what they have got and then testing them reads as a bait. The order
-        was never the problem; the label was.
+        SAY WHAT HAPPENS, RATHER THAN DARING SOMEBODY TO DO IT.
+
+        This read PROVE IT, with "three sentences, no clues" as a line underneath. Reported
+        as "I am never sure what prove it means — feels aggressive and unclear and how it
+        fits in the flow", and all three halves of that are fair. It is a challenge rather
+        than a description; it names no destination; and the sentence that DID explain it
+        was in the smallest type on the screen, below the control it belonged to.
+
+        What actually follows is three prompts with nothing on screen to copy from, and
+        what they fill is the proof card. So the button says that. The label carries its own
+        meaning now, which is what lets the sub-line go — and losing that line is also the
+        third row of dock that was pushing this screen into a scroll.
+
+        The testid stays `im-done`: it is the identity of the control, not its wording, and
+        renaming it would break the checks for a copy change.
       */}
         <button
           type="button"
@@ -2977,11 +3001,8 @@ function SectionComplete() {
           onClick={() => finishSection('done')}
           className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-fg"
         >
-          PROVE IT
+          SAY THREE COLD
         </button>
-        <p className="text-center text-xs text-muted">
-          Three sentences, no clues. That is what fills the card.
-        </p>
       </Dock>
     </Shell>
   )
@@ -3404,6 +3425,7 @@ function CapabilityRow({
             {lines.map((l) => (
               <li key={l.target} className="flex items-center gap-3">
                 <AudioButton slug={slugFor(l.target)} text={l.target} size="sm" />
+                <CopyButton text={l.target} size="sm" />
                 <span className="min-w-0">
                   <span className="pt block text-sm text-accent">{l.target}</span>
                   <span className="block text-xs text-muted">{l.en}</span>

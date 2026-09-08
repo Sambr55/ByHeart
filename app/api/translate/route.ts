@@ -267,6 +267,8 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         lines: seen.lines,
+        /* How many lines were too unclear to trust. The screen says so; see lib/translate. */
+        dropped: seen.dropped,
         note: seen.note,
         left: Math.max(0, MAX_PER_DAY - already - 1),
       })

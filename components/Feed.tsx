@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { DemoCard } from '@/components/DemoCard'
 import { Destination } from '@/components/Destination'
 import { AudioButton } from '@/components/AudioButton'
+import { CopyButton } from '@/components/CopyButton'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
@@ -969,10 +970,6 @@ export function Card({
     somewhere off to the right. Set with 'auto' and no animation: this is where the card
     begins, not somewhere it travels to.
   */
-  useEffect(() => {
-    const el = pane.current
-    if (el) el.scrollLeft = el.clientWidth * faceLane
-  }, [card.id, faceLane])
 
   /*
     A LOCKED CARD IS DRIVEN BY HAND, not by scroll snap.
@@ -989,6 +986,37 @@ export function Card({
   */
   const gate = card.kind === 'intro' ? card.intro.only : undefined
   const locked = Boolean(gate) && !freedHere
+
+  /*
+    AND AGAIN WHEN THE LOCK LETS GO, which is the whole of a bug reported as
+    "everything is still swipe left".
+
+    The side lanes carry `hidden={locked}`, so while a guided-rail card is holding you the
+    scroller has exactly ONE child. Setting scrollLeft to a lane width against a
+    single-lane scroller is not an error — the browser clamps it to 0 and moves on. The
+    lock then releases, the language and away lanes appear either side, and nothing ever
+    re-runs this: the card is left parked at lane zero with the face merely LOOKING centred
+    because flex order puts it there.
+
+    From lane zero there is nothing to the left, so a rightward swipe does nothing at all
+    and the only gesture that moves the card is a swipe left. Every intro card behaved that
+    way, on every device, and it survived the checks because the checks drive the gesture
+    handlers directly rather than settling a real scroller — and because the card looks
+    exactly right in a screenshot.
+
+    `locked` in the dependencies is the fix. The position is re-taken the moment the lanes
+    actually exist.
+  */
+  useEffect(() => {
+    const el = pane.current
+    if (!el) return
+    /*
+      Skipped while still locked: a one-lane scroller has nowhere to be put, and writing 0
+      here would be indistinguishable from the bug.
+    */
+    if (locked) return
+    el.scrollLeft = el.clientWidth * faceLane
+  }, [card.id, faceLane, locked])
   const from = useRef<{ x: number; y: number } | null>(null)
   const fired = useRef(false)
 
@@ -1475,6 +1503,7 @@ export function Card({
                   <p className="pt mt-1 text-sm text-white/80">{card.card.because}</p>
                   <div className="mt-3 flex items-center gap-3">
                     <AudioButton slug={slugFor(card.card.target)} text={card.card.target} />
+                    <CopyButton text={card.card.target} />
                     <p className="pt display text-balance text-4xl">{card.card.target}</p>
                   </div>
                   <p className="mt-1 text-sm text-white/80">{card.card.en}</p>
@@ -1484,6 +1513,7 @@ export function Card({
                   <p className="eyebrow text-white/70">WORTH HAVING</p>
                   <div className="mt-3 flex items-center gap-3">
                     <AudioButton slug={slugFor(card.piece.target)} text={card.piece.target} />
+                    <CopyButton text={card.piece.target} />
                     <p className="pt display text-balance text-4xl">{title}</p>
                   </div>
                   <p className="mt-1 text-sm text-white/80">{card.piece.gloss}</p>
@@ -1856,6 +1886,7 @@ function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
           <li key={l.pt} className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
             <div className="flex items-center gap-3">
               <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
+              <CopyButton text={l.pt} size="sm" />
               <p className="pt min-w-0 text-lg text-accent">{l.pt}</p>
             </div>
             <p className="text-sm text-fg/80">{l.en}</p>
@@ -1909,6 +1940,7 @@ function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
         <div className="border-t border-line pt-6">
           <div className="flex items-start gap-3">
             <AudioButton slug={slugFor(d.target)} text={d.target} />
+            <CopyButton text={d.target} />
             <span className="min-w-0">
               <span className="pt display block text-2xl text-accent">{d.target}</span>
               <span className="mt-1 block text-sm text-muted">{d.en}</span>
@@ -1929,6 +1961,7 @@ function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
         <p className="eyebrow text-muted">YOU HAVE</p>
         <div className="mt-3 flex items-center gap-3">
           <AudioButton slug={slugFor(d.from.target)} text={d.from.target} size="sm" />
+          <CopyButton text={d.from.target} size="sm" />
           <span className="min-w-0">
             <span className="pt block text-xl">{d.from.target}</span>
             <span className="block text-xs text-muted">{d.from.gloss}</span>
@@ -1940,6 +1973,7 @@ function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
         <p className="eyebrow text-accent">AND NOW</p>
         <div className="mt-3 flex items-center gap-3">
           <AudioButton slug={slugFor(d.target)} text={d.target} />
+          <CopyButton text={d.target} />
           <span className="min-w-0">
             <span className="pt display block text-3xl text-accent">{d.target}</span>
             <span className="mt-1 block text-sm text-muted">{d.en}</span>
@@ -2041,6 +2075,7 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
       <div className="border-t border-line pt-6">
         <div className="flex items-center gap-3">
           <AudioButton slug={slugFor(card.taste.pt)} text={card.taste.pt} />
+          <CopyButton text={card.taste.pt} />
           <span className="pt display min-w-0 text-2xl text-accent">{card.taste.pt}</span>
         </div>
         <p className="mt-6 text-sm leading-relaxed text-fg/85">{card.taste.why}</p>
@@ -2189,6 +2224,7 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
             <span className="text-sm text-muted">“{e.asked}”</span>
             <span className="flex items-center gap-3">
               <AudioButton slug={slugFor(e.pt)} text={e.pt} size="sm" />
+              <CopyButton text={e.pt} size="sm" />
               <span className="pt display min-w-0 text-lg text-accent">{e.pt}</span>
             </span>
           </li>
@@ -2203,6 +2239,7 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
       {lines.map((l) => (
         <li key={l.pt} className="flex items-center gap-3">
           <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
+          <CopyButton text={l.pt} size="sm" />
           <span className="min-w-0">
             <span className="pt display block text-lg text-accent">{l.pt}</span>
             <span className="block text-xs text-muted">{l.en}</span>
@@ -2253,6 +2290,7 @@ function Explains({ card }: { card: Extract<FeedCard, { kind: 'explainer' }> }) 
           <p className="text-sm text-muted">“{e.say.en}”</p>
           <div className="mt-3 flex items-center gap-3">
             <AudioButton slug={slugFor(e.say.pt)} text={e.say.pt} />
+            <CopyButton text={e.say.pt} />
             <span className="pt display min-w-0 text-2xl text-accent">{e.say.pt}</span>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-muted">{e.say.note}</p>
@@ -2295,6 +2333,7 @@ function Asked({ card }: { card: Extract<FeedCard, { kind: 'asked' }> }) {
       <p className="text-sm text-muted">“{card.ask.en}”</p>
       <div className="flex items-center gap-3">
         <AudioButton slug={slugFor(card.ask.pt)} text={card.ask.pt} />
+        <CopyButton text={card.ask.pt} />
         <p className="pt display text-balance text-2xl text-accent">{card.ask.pt}</p>
       </div>
       {card.ask.note ? (
@@ -2313,6 +2352,7 @@ function Word({ card }: { card: Extract<FeedCard, { kind: 'vocab' }> }) {
       <p className="eyebrow text-muted">THE WORD</p>
       <div className="flex items-center gap-3">
         <AudioButton slug={slugFor(card.piece.target)} text={card.piece.target} />
+        <CopyButton text={card.piece.target} />
         <p className="pt display text-balance text-3xl text-accent">{vocabWord(card.piece)}</p>
       </div>
       <p className="text-sm text-fg/85">{card.piece.gloss}</p>

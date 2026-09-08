@@ -1191,3 +1191,18 @@ summary:focus-visible,
 body:has([data-testid='bottom-nav']) [data-testid='translator-open'] {
   display: none;
 }
+
+/*
+  AND NOT ON A CEREMONY, which has no bar to key on.
+
+  The rule above covers everywhere the bottom bar is. A full-bleed takeover has no bar, so
+  the button came back on the Welcome — the single biggest moment in the product, where
+  somebody has just introduced themselves in Portuguese to a stranger — and offered them a
+  translator. Reported as "remove translator icon from Club home page".
+
+  Keyed on an attribute the screen sets rather than on its route, so the next screen that is
+  a moment rather than a place is covered by saying so.
+*/
+body:has([data-ceremony='true']) [data-testid='translator-open'] {
+  display: none;
+}

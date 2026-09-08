@@ -178,6 +178,31 @@ ok(
 console.log('\nnumbers are words\n')
 ok('an age reads as Portuguese, not digits', fillFrame(F('age'), { n: '56' }, 'm').includes('cinquenta e seis'),
   fillFrame(F('age'), { n: '56' }, 'm'))
+
+/*
+  NO SENTENCE CONTAINS A WORD THAT IS ONLY PUNCTUATION.
+
+  Every free-text answer goes into the frame verbatim, and the build screen makes its tiles
+  by splitting the sentence on spaces — so one stray trailing space, which a phone keyboard
+  adds without anybody noticing, turned "Trabalho com {thing}." into four tiles with a lone
+  FULL STOP among them. The learner was asked to place a piece of punctuation into a
+  sentence about their job.
+
+  Asserted on the sentence rather than on the tiles, because the sentence is also what is
+  recorded as proof, said aloud and compared against later: a phantom space is wrong
+  everywhere, not only where it is visible.
+*/
+{
+  const messy = ['Advertising ', ' design', '  música  ']
+  const bad = messy
+    .map((v) => fillFrame(F('work'), { thing: v }, 'm'))
+    .filter((sentence) => sentence.split(' ').some((w) => /^[.,!?]+$/.test(w)))
+  ok(
+    'a stray space never becomes a tile of its own',
+    bad.length === 0,
+    bad.join(' | ') || 'trimmed where the sentence is made',
+  )
+}
 ok('and it is the European sixteen', say(16) === 'dezasseis', say(16))
 ok('twenty-one composes with e', say(21) === 'vinte e um', say(21))
 

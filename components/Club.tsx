@@ -334,6 +334,20 @@ function Welcome({ onDone }: { onDone: () => void }) {
     */
     <main
       data-stage="REAL WORLD"
+      /*
+        A CEREMONY, AND NOTHING ELSE ON IT.
+
+        The floating ASK button is hidden wherever the bottom bar is, because there it would
+        be a second control for one act. This screen has no bar — it is a full-bleed
+        takeover — so the button appeared over the one moment in DUB that is purely a
+        moment: somebody has just proved they can introduce themselves to a stranger, and
+        the product offered them a text box.
+
+        Marked rather than named. The rule in globals.css keys on this attribute, so any
+        future screen that is a ceremony rather than a place says so and is covered, instead
+        of the stylesheet growing a list of routes to make exceptions for.
+      */
+      data-ceremony="true"
       className="relative mx-auto flex min-h-svh w-full max-w-md flex-col justify-end overflow-hidden bg-[#241f1a] text-white"
     >
       <Image

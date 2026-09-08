@@ -42,6 +42,8 @@ export type EventName =
   /* A tile put in the wrong place, which now bounces out rather than waiting for CHECK. */
   | 'build_misplaced'
   /* A photograph sent to be read. One per photo, which is also one metered ask. */
+  /* A sentence taken out of the app — pasted into a message, a note, somebody else's chat. */
+  | 'sentence_copied'
   | 'lens_read'
   | 'lens_opened'
   | 'derived_said'
