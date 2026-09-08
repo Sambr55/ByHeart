@@ -32,8 +32,26 @@ import { usePathname } from 'next/navigation'
   real inconsistency and the right one: going somewhere and asking for something are
   different acts, and a person who taps ASK does not want to lose the screen they are on.
 */
+/*
+  VIBES LEFT THE BAR, and the argument for it is the Club itself.
+
+  A tab is for somewhere you go from anywhere. The vibe shelf stopped being that the day
+  the Club started carrying vibes in its own feed: an untouched vibe arrives as a card
+  where you already are, a played one is in Yours under BEEN THROUGH, and TRY YOUR FIRST
+  THREE VIBES and the Profile tiles both open the shelf directly. So the tab was a fifth
+  door into a room with four already, and the one most likely to be tapped by accident —
+  which is how it came to be reported at all.
+
+  THE ROUTE STAYS. Twelve links point at /vibes, several of them opening one named vibe;
+  removing the page would break every one of them. What has gone is the standing invitation
+  to browse a shelf, on a product whose whole argument is that the next thing should come to
+  you rather than be chosen from a menu.
+
+  Four tabs again: the city, what is on, the tool, your things. The marker divides by
+  TABS.length, so it needs nothing done to it — which is the point of having fixed that
+  when the fifth arrived.
+*/
 const TABS = [
-  { href: '/vibes', label: 'Vibes', d: 'M4 6h7v7H4zM13 6h7v7h-7zM4 15h7v3H4zM13 15h7v3h-7z' },
   { href: '/club', label: 'Lisbon', d: 'M4 20V9l8-5 8 5v11M9 20v-6h6v6' },
   /*
     What is on, and it belongs next to the city rather than out at the end.
@@ -68,7 +86,14 @@ export function BottomNav() {
     -1 while the route is not one of the four (a lesson, a Legend card): the marker leaves
     rather than sitting under a tab nobody is on.
   */
-  const hereIndex = TABS.findIndex((t) => path === t.href || (t.href === '/vibes' && path === '/'))
+  /*
+    The shelf is not a tab any more, so neither is the route that used to stand in for it.
+
+    This also matched '/' to the Vibes tab, because the front door led there. With Vibes
+    gone the marker simply leaves on a route that is not one of the four, which is what it
+    already does on a lesson or a Legend card — see the note above.
+  */
+  const hereIndex = TABS.findIndex((t) => path === t.href)
 
   return (
     <nav

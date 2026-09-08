@@ -120,16 +120,30 @@ await seeded(page, '/profile')
 const marker = await page.$('[data-testid="nav-marker"]')
 ok('there is one marker', Boolean(marker))
 const onProfile = await page.evaluate(`document.querySelector('[data-testid="nav-marker"]').getBoundingClientRect().x`)
-await page.click('[data-testid="tab-vibes"]')
+/* Any other tab. The shelf left the bar; the marker's behaviour is what is measured. */
+await page.click('[data-testid="tab-lisbon"]')
 await page.waitForTimeout(900)
-const onVibes = await page.evaluate(`document.querySelector('[data-testid="nav-marker"]').getBoundingClientRect().x`)
-ok('and it moves between tabs', onProfile !== onVibes, Math.round(onProfile as number) + ' → ' + Math.round(onVibes as number))
+const onOther = await page.evaluate(`document.querySelector('[data-testid="nav-marker"]').getBoundingClientRect().x`)
+ok('and it moves between tabs', onProfile !== onOther, Math.round(onProfile as number) + ' → ' + Math.round(onOther as number))
 ok(
   'rather than one appearing per tab',
   ((await page.$$('[data-testid="nav-marker"]')).length) === 1,
 )
 
 console.log('\nnothing guesses at what the learner has done\n')
+/*
+  ON THE SHELF, SAID OUT LOUD.
+
+  This block used to inherit whatever page the one above it left behind, which happened to
+  be /vibes only because the marker test clicked the VIBES tab. When that tab was removed
+  the click became tab-lisbon, and the Club carries no `.needs-learner` — so the element
+  query returned null and the assertion below failed on a product that was fine.
+
+  The crate picker is where the class lives (Journey.tsx, "which of these are open is
+  unknowable before localStorage"), so this goes there deliberately rather than depending
+  on a previous block's last click.
+*/
+await seeded(page, '/vibes')
 ok(
   'the browser says when it has read the record',
   (await page.getAttribute('html', 'data-ready')) === 'on',
@@ -162,7 +176,8 @@ await page.evaluate('window.scrollTo(0, 600)')
 await page.waitForTimeout(700)
 const went = (await page.evaluate('window.scrollY')) as number
 ok('there is a page long enough to scroll', went > 200, Math.round(went) + 'px')
-await page.click('[data-testid="tab-vibes"]')
+/* Any other tab. The shelf left the bar; the marker's behaviour is what is measured. */
+await page.click('[data-testid="tab-lisbon"]')
 await page.waitForTimeout(1200)
 await page.goto(BASE + '/vocab')
 await hideDevChrome(page)

@@ -37,7 +37,8 @@ import {
   syncSession,
   rememberSection,
 } from './learner'
-import { chosenPair } from './pair'
+import { chosenPair, setPair } from './pair'
+import { DEFAULT_PAIR } from '@/content/pairs'
 import { useLearner } from './useLearner'
 
 /**
@@ -646,9 +647,36 @@ export function JourneyProvider({
 
       So the same component renders here instead. One question, one component, two places.
     */
+    /*
+      A MISSING PAIR IS TWO DIFFERENT PEOPLE, and treating them alike was the bug.
+
+      This gate sent everybody without a pair to set-up. That is right for somebody who
+      has not been through it — the pair is written when set-up finishes, so its absence
+      usually does mean "not done". But it is wrong for a learner who HAS finished and
+      reached the Club another way: they have a deal, a goal and a name, and the missing
+      key is bookkeeping. Every one of the twelve links pointing at /vibes dropped them on
+      set-up's "then this is your Lisbon" screen. Reported as tapping VIBES giving "this
+      random screen", every time.
+
+      So the record decides which of the two they are, using the same test set-up itself
+      uses to decide it is finished (`already` in SetUp.tsx): the deal, and profile.goal,
+      which all five WHY answers write. Not `purpose` — "no reason, I just like it"
+      deliberately sets none, and measuring on it would ask that learner the question
+      forever.
+
+      Finished, so repair the key and carry on: every chapter is on DEFAULT_PAIR, so
+      nothing is being chosen on their behalf. Unfinished, so route to set-up exactly as
+      before — which is what keeps a fresh device, and a record that was never asked WHY,
+      seeing the question rather than the shelf.
+    */
     if (!chosenPair()) {
-      dispatch({ type: 'jump', kind: 'setup' })
-      return
+      const me = loadLearner()
+      if (me.deal_accepted_at && me.profile?.goal) {
+        setPair(DEFAULT_PAIR)
+      } else {
+        dispatch({ type: 'jump', kind: 'setup' })
+        return
+      }
     }
     loadLearner()
     dispatch({ type: 'jump', kind: hasAcceptedDeal() ? 'picker' : 'theway' })

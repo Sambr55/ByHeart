@@ -125,7 +125,7 @@ console.log('\nthe bar is on every screen\n')
   footer that some pages happen to have — and the pages it was missing from were exactly
   the ones somebody lands on from the profile and then has to find their way back out of.
 */
-for (const route of ['/proof', '/vocab', '/drops', '/pro', '/account', '/legend', '/feedback', '/signin']) {
+for (const route of ['/proof', '/vocab', '/drops', '/pro', '/account', '/legend', '/feedback', '/signin', '/vibes']) {
   await page.goto(BASE + route)
   await page.waitForTimeout(900)
   ok(route + ' has the bar', Boolean(await page.$('[data-testid="bottom-nav"]')))
@@ -135,17 +135,24 @@ for (const route of ['/proof', '/vocab', '/drops', '/pro', '/account', '/legend'
 
 console.log('\nthe tabs that are places\n')
 /*
-  THREE PLACES AND ONE ACT, which is why /line has left this list.
+  TWO PLACES AND ONE ACT, which is why /line and now /vibes have left this list.
 
   Today was a destination nobody was sent to — nothing schedules the daily line, so the tab
   led to a screen usually identical to yesterday's. ASK took the slot: useful at any moment
   on any screen, and previously reachable only from a rail on the Club.
 
-  It is a button rather than a link, so it is never aria-current and has no route to arrive
-  at. The three that ARE places still have to know when they are the one you are on; ASK is
-  checked below for the thing it does instead.
+  VIBES went the same way and for the same reason. The shelf stopped being somewhere you
+  go from anywhere once the Club began carrying vibes in its own feed — untouched ones
+  arrive as cards where you already are, played ones sit in Yours under BEEN THROUGH — so
+  it was a fifth door into a room with four, and the one most often opened by accident.
+  The ROUTE is still live and still linked to from a dozen places, so /vibes keeps its
+  bar-and-safe-area checks in the list above; what it no longer has is a tab to be current.
+
+  ASK is a button rather than a link, so it is never aria-current and has no route to
+  arrive at. The two that ARE places still have to know when they are the one you are on;
+  ASK is checked below for the thing it does instead.
 */
-for (const [route, tab] of [['/vibes', 'vibes'], ['/club', 'lisbon'], ['/profile', 'yours']] as const) {
+for (const [route, tab] of [['/club', 'lisbon'], ['/profile', 'yours']] as const) {
   await page.goto(BASE + route)
   await page.waitForTimeout(1200)
   const nav = await page.$('[data-testid="bottom-nav"]')
