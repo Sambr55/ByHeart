@@ -1052,25 +1052,29 @@ function Picker() {
   }
 
   /**
-   * The doorway opens on having BEEN THROUGH some of the basics, not on having tapped
-   * the button at the end of them.
+   * A SECTION of the basics, which is what the card promises — not one root of fourteen.
    *
-   * It read sections_completed alone, and that is only written by finishSection — the
-   * two buttons on the end-of-section screen. A learner who played the basics and then
-   * went to the shelf by any other route (the header, a bookmark, the back gesture, or
-   * simply closing the tab and coming back) had played three roots and finished nothing,
-   * so every other vibe stayed shut behind "AFTER BASICS" while the basics card itself
-   * said "3 of 14 taken" directly above it. The product contradicted itself on one
-   * screen, and the only way out was a button that was no longer on screen.
+   * The history matters, because the loose test was a fix for a real deadlock and is now
+   * a bug of its own.
    *
-   * Having played a basics root is the honest test, and it is what the copy on those
-   * cards already claims: "opens once you have been through a section of the basics".
-   * It also cannot be lost by navigating, which the old one could.
+   * It first read sections_completed alone, and that was only written by finishSection —
+   * the two buttons on the end-of-section screen. A learner who played the basics and
+   * then reached the shelf any other way (the header, a bookmark, the back gesture,
+   * closing the tab) had done the work and banked none of it, so every other vibe stayed
+   * shut while the basics card said "3 of 14 taken" directly above it. The escape hatch
+   * added here was `.some(played)` — one root of the basics opens the door.
+   *
+   * That deadlock has since been fixed at its source: SectionComplete records the
+   * section the instant the screen appears, not when a button is pressed. So the hatch
+   * now does nothing but let eleven crates open after a single root, while the tile on
+   * top of them still reads "basics first" and the copy still promises "opens once you
+   * have been through a section of the basics". Reported exactly that way: everything
+   * below the basics is available even though it is labelled basics-first.
+   *
+   * Back to the promise, which is now safe to keep because finishing is recorded where
+   * the finishing happens rather than where a button is.
    */
-  const basicsStarted =
-    !mounted ||
-    (learner.sections_completed ?? []).includes('the_basics') ||
-    (ROOTS_BY_FAMILY['the_basics' as CultureFamily] ?? []).some((r) => playedIds.has(r.root_id))
+  const basicsStarted = !mounted || (learner.sections_completed ?? []).includes('the_basics')
 
   const facts = (f: Crate): Facts => {
     const all = ROOTS_BY_FAMILY[f.id] ?? []

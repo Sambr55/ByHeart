@@ -284,33 +284,80 @@ ok(
 )
 
 /*
-  The doorway, for somebody who played the basics and never tapped the button.
+  THE DOORWAY IS A SECTION, and this block used to assert the opposite.
 
-  The state in the report: three basics roots played, sections_completed empty, because
-  the only thing that writes it is the end-of-section screen and there are a dozen ways
-  to leave before it — the header, a bookmark, the back gesture, closing the tab. Every
-  other vibe sat behind "AFTER BASICS" while the basics card said "3 of 14 taken"
-  directly above it.
+  Its original concern was real: sections_completed was written only by the two buttons on
+  the end-of-section screen, so a learner who played the basics and left any other way was
+  locked out of everything while the basics card said "3 of 14 taken" above it. The fix
+  applied at the time was to open the door on ONE root being played.
+
+  That deadlock is now fixed at its source — SectionComplete records the section the
+  instant the screen appears, not when a button is pressed — so the one-root hatch did
+  nothing but open eleven crates to somebody who had played a single card, under tiles
+  that still read "basics first" and copy still promising "opens once you have been
+  through a section of the basics". Reported as: all the vibes below the basics are
+  immediately available even though they are labelled basics first.
+
+  The old assertion PASSED throughout, because it measured `disabled` — and a basics-first
+  tile is deliberately still tappable, since tapping is how you find out what it needs. It
+  was reading a property the lock does not use. The lock is a dashed border, a drained
+  photograph and a "basics first" badge, so that is what this reads now.
 */
 {
-  const page2 = await browser.newPage({ viewport: { width: 390, height: 900 } })
   const basicsRoots = ((ROOTS_BY_FAMILY['the_basics' as never] ?? []) as { root_id: string }[])
-    .slice(0, 3)
     .map((r) => r.root_id)
-  // Roots played, and NOTHING in sections_completed. Exactly the reported device.
-  await seedInto(page2, seed(basicsRoots, []))
+
+  /** One root played is not a section, and must not open anything. */
+  const early = await browser.newPage({ viewport: { width: 390, height: 900 } })
+  await seedInto(early, seed(basicsRoots.slice(0, 3), []))
+  await shelfReady(early)
+  const shut = await cards(early)
+  const stillShut = shut.filter((c) => c.locked)
+  console.log('\nthree basics roots played, no section finished\n')
+  console.log('  ' + stillShut.length + ' of ' + shut.length + ' still shut')
+  ok(
+    'the rest of the shelf waits for a section, not for one card',
+    stillShut.length > 1,
+    stillShut.length + ' locked',
+  )
+  ok(
+    'and the basics itself is never locked',
+    !shut.find((c) => /basics/i.test(c.title))?.locked,
+    'the one crate you are being sent to',
+  )
+  await early.close()
+
+  /*
+    And it opens on the section, by the record the end-of-section screen writes. This is
+    the half the original block was protecting: having done the work must be enough, with
+    no button-press required, or the deadlock comes back.
+  */
+  const page2 = await browser.newPage({ viewport: { width: 390, height: 900 } })
+  await seedInto(page2, seed(basicsRoots, ['the_basics']))
   await shelfReady(page2)
   const after = await cards(page2)
-  const locked = after.filter((c) => c.disabled)
-  console.log('\nplayed the basics, never tapped through\n')
-  console.log('  ' + after.filter((c) => !c.disabled).length + ' of ' + after.length + ' tappable')
-  ok(
-    'playing the basics opens the shelf, tapped through or not',
-    after.filter((c) => !c.disabled).length > 1,
-    locked.length + ' locked: ' + locked.map((c) => c.title).slice(0, 3).join(', '),
-  )
+  const locked = after.filter((c) => c.locked)
+  console.log('\nthe basics section finished\n')
+  console.log('  ' + after.filter((c) => !c.locked).length + ' of ' + after.length + ' open')
+  /*
+    Measured on the BADGE, not on the lock, because two different walls draw the same
+    dashed border. Swearing opens at stage 6 and this seed carries no proof, so it is
+    still shut by the ladder — correctly, and it would be shut for a paying learner too.
+    My first version of this asserted nothing was locked and failed on exactly that,
+    which would have been a check demanding the wrong product.
+
+    What must be gone is the BASICS door specifically. Anything still shut here is shut
+    for a reason the basics cannot fix.
+  */
   const txt2 = await page2.evaluate(() => (document.querySelector('main') ?? document.body).innerText)
+  ok(
+    'finishing a section of the basics opens the shelf',
+    after.filter((c) => !c.locked).length > 1,
+    after.filter((c) => !c.locked).length + ' of ' + after.length + ' open; still shut: ' +
+      (locked.map((c) => c.title).slice(0, 3).join(', ') || 'none'),
+  )
   ok('and nothing says AFTER BASICS to somebody who has done them', !/AFTER BASICS/.test(txt2))
+  ok('nor basics first', !/basics first/i.test(txt2))
   await page2.close()
 }
 
