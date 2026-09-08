@@ -164,7 +164,17 @@ export function Calendar() {
                   data-testid={'cal-day-' + day}
                   aria-label={on.map((d) => d.event).join(', ') + ' on the ' + day + 'th'}
                   className={
-                    'tap-target flex aspect-square flex-col items-center justify-center rounded bg-accent text-sm tabular-nums text-accent-ink ' +
+                    /*
+                      NO tap-target HERE, and that is the opposite of the usual advice.
+
+                      .tap-target forces a 44px minimum WIDTH, and these sit in seven grid
+                      tracks that are 36.6px wide on a 320px phone — so adjacent days
+                      physically overlapped and the right-hand edge of one day opened the
+                      next day's drop. aspect-square already gives the cell a real height,
+                      and a day is a cell in a grid rather than a button in a row: the
+                      thing that makes it hittable is the grid, not a minimum.
+                    */
+                    'flex aspect-square flex-col items-center justify-center rounded bg-accent text-sm tabular-nums text-accent-ink ' +
                     (isToday ? 'ring-1 ring-fg' : '')
                   }
                 >

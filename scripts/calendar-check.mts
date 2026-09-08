@@ -124,14 +124,28 @@ if (!target) {
   const cell = await page.$('[data-testid="cal-day-' + day + '"]')
   ok('the day it is on is marked', Boolean(cell), 'the ' + day + 'th')
   /*
-    And a day with nothing on is NOT a control. An empty square that takes a tap and does
-    nothing is the commonest way a calendar feels broken.
+    AND ONLY THOSE DAYS ARE LINKS — counted against the month, not merely "more than none".
+
+    The first version asserted `anchors > 0`, which is the opposite claim: it cannot fail in
+    the direction its own label names, and it was strictly dominated by the assertion nine
+    lines above, which already proves one day is a link. A day with nothing on that takes a
+    tap and does nothing is the commonest way a calendar feels broken, so the number is
+    compared with the number of days the content actually has something on.
   */
-  const empty = await page.evaluate(`(() => {
+  const expected = new Set(
+    dropsInMonth('lisbon', target.getUTCFullYear(), target.getUTCMonth(), now).map((d) =>
+      new Date(d.on + 'T00:00:00Z').getUTCDate(),
+    ),
+  ).size
+  const anchors = (await page.evaluate(`(() => {
     const cells = Array.from(document.querySelectorAll('[data-testid="cal-grid"] > *'))
     return cells.filter(c => c.tagName === 'A').length
-  })()`)
-  ok('and only the days with something on are links', (empty as number) > 0, empty + ' of the month is tappable')
+  })()`)) as number
+  ok(
+    'and only the days with something on are links',
+    anchors === expected,
+    anchors + ' tappable of ' + expected + ' days with something on',
+  )
 
   console.log('\ntapping one lands you inside it, not next to it\n')
   const row = await page.$('[data-testid^="cal-drop-"]')

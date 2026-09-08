@@ -774,7 +774,20 @@ function Toast({
     <div
       role="status"
       data-testid="feed-toast"
-      className="animate-bank absolute inset-x-0 bottom-0 z-50 flex items-center gap-3 bg-black/85 px-5 py-3 text-white"
+      /*
+        ABOVE THE BAR, because underneath it this said nothing to anybody.
+
+        Both the toast and the nav are z-50 and the nav comes later in the DOM, so for its
+        whole 3.6s life every toast in the feed rendered behind the bar — including the
+        BRING IT BACK button added tonight, whose tap landed on the ASK tab instead. A
+        message nobody can see is worse than no message: the reject looked destructive,
+        which is the one thing the away lane promises it is not.
+
+        The same two values .app-frame already uses, so the bar and the things that must
+        clear it cannot drift apart.
+      */
+      style={{ bottom: 'calc(var(--bar-room) + var(--keyboard))' }}
+      className="animate-bank absolute inset-x-0 z-50 flex items-center gap-3 bg-black/85 px-5 py-3 text-white"
     >
       <p className="min-w-0 flex-1 text-sm">
         {kind === 'saved'

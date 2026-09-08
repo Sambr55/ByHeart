@@ -57,7 +57,7 @@ const TABS = [
 export function BottomNav() {
   const path = usePathname()
   /*
-    One rule for four tabs, rather than four rules one of which is showing.
+    One rule for every tab, rather than one rule per tab and one of them showing.
 
     Each tab used to draw its own marker and the others drew nothing, so moving between
     them was a marker vanishing here and a different one appearing there — two events for
@@ -96,7 +96,20 @@ export function BottomNav() {
           transform:
             hereIndex < 0
               ? 'translateX(-4rem)'
-              : 'translateX(calc(' + (hereIndex * 100 + 50) + 'vw / 4 - 1.25rem))',
+              : /*
+                   Divided by the number of tabs, not by four.
+
+                   The 4 was correct for as long as there were four, and a fifth was added
+                   for the calendar — so the marker sat off-centre on /vibes, over ASK on
+                   /calendar, and entirely off-screen on /profile. The label styling and
+                   aria-current stayed right, which is why it read as a stray dash rather
+                   than as broken navigation.
+                 */
+                'translateX(calc(' +
+                (hereIndex * 100 + 50) +
+                'vw / ' +
+                TABS.length +
+                ' - 1.25rem))',
           opacity: hereIndex < 0 ? 0 : 1,
         }}
       />
