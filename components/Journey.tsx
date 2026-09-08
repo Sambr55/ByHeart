@@ -3358,9 +3358,26 @@ function CanSay() {
         ))}
       </ul>
 
+      {/*
+        YOURS MEANS YOURS, and this heading was over the whole dictionary.
+
+        Shelves takes `pool` as its only filter — `owned` decides how a word is DRAWN, not
+        whether it appears at all, and the prop is documented "omit to shelve the whole
+        bank". This call omitted it. So under a heading reading YOUR PORTUGUESE a learner
+        who had finished one crate was shown all 177 pieces in the product: THINGS 30,
+        ASKING 9, DESCRIBING 16 — the product-wide totals, presented as their own.
+
+        Reported after a reset and the basics alone: "completely wrong". It is the same
+        bug the end-of-crate screen already fixed and left a note about — showing the whole
+        bank says nothing about what just happened — and this screen makes a stronger claim
+        than that one, because it puts a possessive in the heading.
+
+        Pooled to what the learner owns, so the counts are theirs and the shelves that are
+        genuinely empty do not appear (Shelves drops an empty list).
+      */}
       <div className="flex flex-col gap-3">
         <p className="text-xs uppercase tracking-wider text-muted">Your Portuguese</p>
-        <Shelves owned={new Set(owned)} />
+        <Shelves owned={new Set(owned)} pool={new Set(owned)} />
       </div>
 
       <p className="text-sm text-muted">
