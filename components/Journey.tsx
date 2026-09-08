@@ -3352,6 +3352,7 @@ function CanSay() {
             act={e.act}
             pieces={e.pieces}
             owned={owned}
+            mine={[...families] as CultureFamily[]}
             open={open === e.act}
             onToggle={() => setOpen(open === e.act ? null : e.act)}
           />
@@ -3406,16 +3407,37 @@ function CapabilityRow({
   act,
   pieces,
   owned,
+  mine,
   open,
   onToggle,
 }: {
   act: string
   pieces: string[]
   owned: string[]
+  /** The crates this learner has actually opened, so the examples come from those. */
+  mine: CultureFamily[]
   open: boolean
   onToggle: () => void
 }) {
-  const lines = open ? pieces.flatMap((p) => linesFor(p, 2, undefined)).slice(0, 3) : []
+  /*
+    THE EXAMPLES COME FROM CRATES THE LEARNER HAS OPENED.
+
+    linesFor's third argument sorts lines from your own crates first — it is the whole
+    reason the parameter exists, and the library passes it. This call passed `undefined`,
+    so the sort had nothing to work with and the first two lines were whichever the graph
+    happened to reach first. For não that is tg_wingman_leave: Top Gun, rung 4.
+
+    So a learner who had finished the basics and nothing else was shown "Não vou sair" and
+    "Não vou amanhã" as evidence of what they could now say — two sentences built out of
+    sair and amanhã, which the basics do not teach. Reported as "apparently I have learned
+    sair and amanhã - which I have not". With the crates passed, the same row shows
+    "Não, obrigado" and "Sim ou não?", both rung 1 of the basics.
+
+    It is a sort and not a filter on purpose: a piece that only ever appears in one root
+    would otherwise have no examples at all. What the sort guarantees is that anything the
+    learner recognises comes first, which is all this screen needs.
+  */
+  const lines = open ? pieces.flatMap((p) => linesFor(p, 2, mine)).slice(0, 3) : []
   const root = open ? sourceOf(pieces[0]) : null
   const crate = root ? CRATES.find((c) => c.id === root.culture_family) : undefined
 

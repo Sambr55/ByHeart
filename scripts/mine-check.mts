@@ -20,7 +20,9 @@
  * and it fails on a screen that has not been written yet as readily as on this one.
  */
 import { buildEntries } from '../components/Shelves'
-import { PIECES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
+import { PIECES, ROOTS_BY_FAMILY, linesFor, fold } from '../content/roots'
+import type { CultureFamily } from '../content/roots'
+import { capabilityEntries } from '../engine/journey'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -95,6 +97,87 @@ ok(
   'no Shelves in the journey shelves the whole bank',
   unpooled.length === 0,
   unpooled.length ? unpooled.map((c) => c.replace(/\s+/g, ' ')).join(' | ') : 'every call pools',
+)
+
+console.log('\nthe examples come from crates you have opened\n')
+/*
+  THE SECOND HALF OF THE SAME COMPLAINT.
+
+  "Apparently I have learned sair and amanhã — which I have not." The words were not on
+  the shelf; they were in the EXAMPLE SENTENCES under a capability, which is a stronger
+  claim than the shelf makes — the row says this is a thing you can now say.
+
+  linesFor's third argument sorts lines from the learner's own crates first. The library
+  passes it; the journey screen passed `undefined`. With nothing to sort by, `não` drew
+  its two lines from tg_wingman_leave — Top Gun, rung 4 — so the basics alone produced
+  "Não vou sair" and "Não vou amanhã".
+
+  Asserted on the WORDS, not on the root the line comes from. My first attempt tested the
+  crate and was wrong: "Um, dois, três" and "Boa noite" come from another crate and are
+  made entirely of basics words, which makes them good examples — the sort exists precisely
+  so a piece with few home-crate lines can still be shown something recognisable. What must
+  not appear is a word DUB teaches somewhere the learner has not been, which is what sair
+  and amanhã were.
+
+  A word the graph never teaches (por, favor, muito) is left alone deliberately: this is
+  about not claiming credit for vocabulary, not about restricting every function word to
+  ones with their own card.
+*/
+const basicsOnly: CultureFamily[] = ['the_basics']
+const acts = capabilityEntries([...owned])
+ok('the basics give some capabilities', acts.length > 0, acts.length + ' acts')
+
+/** Every taught word, by its surface form, so a line can be read against the graph. */
+const taught = new Map<string, string>()
+for (const [id, piece] of Object.entries(PIECES)) {
+  const w = fold(String(piece.target).replace(/…/g, '').trim())
+  if (w && !taught.has(w)) taught.set(w, id)
+}
+
+const strayed: string[] = []
+for (const e of acts) {
+  const lines = e.pieces.flatMap((piece) => linesFor(piece, 2, basicsOnly)).slice(0, 3)
+  for (const line of lines) {
+    for (const raw of String(line.target).split(/\s+/)) {
+      const id = taught.get(fold(raw.replace(/[.,?!¿¡]/g, '')))
+      if (id && !owned.has(id)) strayed.push(e.act + ': "' + line.target + '" teaches ' + id)
+    }
+  }
+}
+/*
+  TWO FAULTS, AND ONLY ONE OF THEM IS CODE.
+
+  The `undefined` argument was reaching four rungs into another crate — that is the bug,
+  and it is fixed and asserted below. What remains is a handful of lines the BASICS
+  THEMSELVES author out of words the basics do not teach: "Olá, bom dia", "Adeus, até
+  logo", "Talvez amanhã". Those are a curriculum judgement, not a defect: a greeting
+  probably should be shown whole, and 34 branches across the graph do the same thing.
+
+  So this is measured and held at today's number rather than asserted to zero. It cannot
+  grow without somebody deciding it should, and if the content is later changed the number
+  comes down and the check says so. Asserting zero would either be a lie or would force a
+  rewrite of the greetings on my own authority.
+*/
+const KNOWN_AHEAD = 5
+const distinct = [...new Set(strayed.map((x) => x.split(': ')[1]))]
+console.log('  · lines the basics author from words they do not teach: ' + distinct.length)
+for (const d of distinct) console.log('    ' + d)
+ok(
+  'and no more of them than there were',
+  distinct.length <= KNOWN_AHEAD,
+  distinct.length + ' of at most ' + KNOWN_AHEAD + ' — all authored inside the basics',
+)
+
+/*
+  And the call sites agree, for the same reason the Shelves ones do: this is a bug of
+  omission, and a screen that shows example lines must say whose crates count.
+*/
+const lineCalls = [...journey.matchAll(/linesFor\([^)]*\)/g)].map((m) => m[0])
+const blind = lineCalls.filter((c) => /undefined/.test(c))
+ok(
+  'no linesFor in the journey is left blind',
+  blind.length === 0,
+  blind.length ? blind.join(' | ') : lineCalls.length + ' call sites',
 )
 
 if (problems.length) {
