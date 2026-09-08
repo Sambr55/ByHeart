@@ -99,6 +99,32 @@ export function tap() {
 }
 
 /**
+ * A press that is refused.
+ *
+ * Lower and shorter than `tap`, and deliberately NOT a buzzer. The word-picker rejects a
+ * tile the moment it lands in the wrong place, and the feeling wanted there is a door that
+ * does not open — not a klaxon. Two descending notes say "not that" in about a tenth of a
+ * second, which is under the threshold at which a sound starts to feel like a telling-off.
+ *
+ * It exists because of what `buzz` says below it: iOS Safari has no Vibration API,
+ * installed to the home screen or not, so on the phone this product is built for the
+ * haptic simply does not fire. Sound is the only channel that reaches every device, so the
+ * rejection has one of its own rather than borrowing the press.
+ */
+export function nope() {
+  if (!soundOn()) return
+  const c = audio()
+  if (!c) return
+  try {
+    const now = c.currentTime
+    tone(c, now, 220, 60, 0.05, 'sine')
+    tone(c, now + 0.055, 165, 80, 0.045, 'sine')
+  } catch {
+    /* Nothing to do about it, and nothing worth telling anybody. */
+  }
+}
+
+/**
  * And the same press, felt.
  *
  * Android only, and said plainly rather than discovered later: iOS Safari implements no

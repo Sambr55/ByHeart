@@ -39,6 +39,8 @@ export type EventName =
   /* Rebuilding a line after being shown it. Worth knowing separately from build_help:
      one is asking for the answer, the other is going back and earning it. */
   | 'build_retry'
+  /* A tile put in the wrong place, which now bounces out rather than waiting for CHECK. */
+  | 'build_misplaced'
   | 'derived_said'
   | 'derived_kept'
   | 'feed_like'

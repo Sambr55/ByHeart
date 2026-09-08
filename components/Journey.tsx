@@ -99,6 +99,7 @@ import {
   useJourney,
 } from '@/engine/journey'
 import { chapterById } from '@/content/chapters'
+import { buzz, nope } from '@/engine/tap'
 import { useLearner } from '@/engine/useLearner'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { AudioButton } from './AudioButton'
@@ -1592,7 +1593,76 @@ export function MiniBuild({
   const [helped, setHelped] = useState(false)
   const attempts = useRef(0)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
-  const pool = tiles.filter((t) => !placed.some((p) => p.id === t.id))
+
+  /*
+    A WORD IN THE WRONG PLACE COMES STRAIGHT BACK, and it is felt on the way.
+
+    The build beat only ever answered at the END: a wrong word sat in the line looking
+    perfectly plausible until the last tile landed, and what somebody learned from that was
+    "the attempt failed" rather than "that word cannot go there". Correction belongs at the
+    moment the mistake is made, because that is the moment the learner is still holding the
+    thought that produced it.
+
+    So a wrong tile LANDS and then leaves. Not a refused tap — a tap that does nothing reads
+    as a broken button, and the whole point is to see the word arrive in the place it does
+    not belong. It is deliberately kept OUT of `placed`: the settle effect below fires a
+    check the instant the line is the right length, and a word that briefly joined the line
+    would trip it.
+  */
+  const [bounced, setBounced] = useState<{ id: string; text: string; why: string } | null>(null)
+  const bounce = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const pool = tiles.filter(
+    (t) => !placed.some((p) => p.id === t.id) && bounced?.id !== t.id,
+  )
+
+  /**
+   * Why it came back, out of the sentence itself.
+   *
+   * NOTHING IS GENERATED AND NOTHING IS AUTHORED. The tiles have no decoys — they are
+   * exactly the words of this sentence, shuffled — so a wrong tap can only ever be the
+   * right word in the wrong place, and where it actually goes is already known. That makes
+   * the explanation free: no model call, no reviewer, nothing to keep in step with the
+   * content.
+   *
+   * It says POSITION and never grammar. "That one comes later" is true and teaches word
+   * order; anything about WHY Portuguese wants it later would be a claim about a language
+   * nobody qualified has reviewed here, invented at the worst possible moment — while
+   * somebody is stuck and inclined to believe it.
+   *
+   * And it never names the word that should have gone in. Being corrected is not the same
+   * as being told, and telling would remove the only thing this beat asks of anybody.
+   */
+  const whyBack = (word: string) => {
+    const at = answer.indexOf(word, placed.length)
+    if (at === answer.length - 1 && placed.length < answer.length - 1) return 'That one ends it.'
+    return 'That one comes later.'
+  }
+
+  const tapTile = (t: { id: string; text: string }) => {
+    if (state === 'done') return
+    if (t.text === answer[placed.length]) {
+      setBounced(null)
+      setPlaced((cur) => [...cur, t])
+      return
+    }
+    /*
+      Felt where it can be, heard everywhere. engine/tap.ts is plain about it: iOS Safari
+      implements no Vibration API, installed to the home screen or not — so on the phone
+      this is being built for, `buzz` does nothing and the sound is the whole signal.
+    */
+    nope()
+    buzz(12)
+    track('build_misplaced', { target, word: t.text })
+    setBounced({ ...t, why: whyBack(t.text) })
+    if (bounce.current) clearTimeout(bounce.current)
+    /*
+      Long enough to be read as an event rather than a flicker, short enough that the hand
+      is still moving. 620ms is the far end of the product's own scale.
+    */
+    bounce.current = setTimeout(() => setBounced(null), 620)
+    timers.current.push(bounce.current)
+  }
 
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
 
@@ -1608,6 +1678,7 @@ export function MiniBuild({
     if (helped) return
     setHelped(true)
     setState('open')
+    setBounced(null)
     setPlaced([])
     track('build_help', { target })
     const reduced =
@@ -1638,6 +1709,7 @@ export function MiniBuild({
   function retry() {
     timers.current.forEach(clearTimeout)
     timers.current = []
+    setBounced(null)
     setPlaced([])
     setState('open')
     track('build_retry', { target })
@@ -1704,7 +1776,7 @@ export function MiniBuild({
         data-answer={target}
         className="min-h-[3.5rem] rounded border border-dashed border-line bg-bg-elev/60 p-2"
       >
-        {placed.length ? (
+        {placed.length || bounced ? (
           <div className="flex flex-wrap gap-3">
             {placed.map((p) => (
               <button
@@ -1720,11 +1792,40 @@ export function MiniBuild({
                 <span className="pt">{p.text}</span>
               </button>
             ))}
+            {/*
+              The refused word, in the line it does not belong in.
+
+              A span rather than a button: it is not something to press, it is something
+              being handed back. It sits at the end of the line for the moment it is there,
+              which is where the thumb just put it.
+            */}
+            {bounced ? (
+              <span
+                data-testid="tile-bounced"
+                aria-hidden
+                className="rounded border border-coach/60 bg-coach/10 px-3 py-3 text-coach"
+              >
+                <span className="pt">{bounced.text}</span>
+              </span>
+            ) : null}
           </div>
         ) : (
           <p className="px-1 py-3 text-xs text-muted">Tap the pieces in order.</p>
         )}
       </div>
+
+      {/*
+        And why, for as long as the word is on its way back.
+
+        role=status rather than a silent visual, because somebody using a screen reader gets
+        no bounce and no sound and would otherwise be told nothing at all about a tap that
+        appeared to do nothing.
+      */}
+      {bounced ? (
+        <p role="status" data-testid="tile-why" className="mt-3 text-sm text-coach">
+          {bounced.why}
+        </p>
+      ) : null}
 
       {state === 'done' ? null : (
         <div data-testid="tile-pool" className="mt-3 flex flex-wrap gap-3">
@@ -1732,7 +1833,7 @@ export function MiniBuild({
             <button
               key={t.id}
               type="button"
-              onClick={() => setPlaced((cur) => [...cur, t])}
+              onClick={() => tapTile(t)}
               className="tap-target rounded border border-line bg-bg-elev px-3 py-3 hover:border-accent/50"
             >
               <span className="pt">{t.text}</span>

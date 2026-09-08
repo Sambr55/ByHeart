@@ -92,6 +92,54 @@ if (built) {
   const answer = ((await page.getAttribute('[data-testid="tile-line"]', 'data-answer')) ?? '')
     .split(/\s+/)
     .filter(Boolean)
+
+  /*
+    A WORD IN THE WRONG PLACE COMES BACK, and the line is not left holding it.
+
+    The build beat used to answer only at the end: a wrong word sat in the line looking
+    plausible until the last tile landed, so what a learner took from it was "that attempt
+    failed" rather than "that word cannot go there". A misplaced tile now lands, sounds,
+    says where it actually belongs, and leaves.
+
+    Driven with the LAST word of the sentence on an empty line, which is wrong by
+    construction for anything longer than one word — and asserted on all three halves,
+    because each can rot on its own: the word must not stay in the line, it must come back
+    to the pool, and the reason must be shown rather than the word silently vanishing.
+  */
+  if (answer.length > 2) {
+    const wrong = answer[answer.length - 1]
+    const tile = await page.$(
+      '[data-testid="tile-pool"] button:has-text("' + wrong.replace(/"/g, '') + '")',
+    )
+    ok('the last word is there to be misplaced', Boolean(tile), wrong)
+    if (tile) {
+      await tile.click()
+      await page.waitForTimeout(120)
+      ok(
+        'a misplaced word says where it really goes',
+        Boolean(await page.$('[data-testid="tile-why"]')),
+        'corrected while the thought that produced it is still there',
+      )
+      /* And it is gone again, without having joined the line. */
+      await page.waitForTimeout(900)
+      ok(
+        'and then it goes back',
+        !(await page.$('[data-testid="tile-bounced"]')),
+        'a rejection that stays is just a wrong answer',
+      )
+      const back = await page.$(
+        '[data-testid="tile-pool"] button:has-text("' + wrong.replace(/"/g, '') + '")',
+      )
+      ok('back in the pool, not lost', Boolean(back), wrong + ' is pickable again')
+      const line = ((await page.textContent('[data-testid="tile-line"]')) ?? '').trim()
+      ok(
+        'and the line never held it',
+        !line.includes(wrong),
+        line || 'the line is empty, which is right',
+      )
+    }
+  }
+
   for (const word of answer) {
     const tile = await page.$(
       '[data-testid="tile-pool"] button:has-text("' + word.replace(/"/g, '') + '")',
