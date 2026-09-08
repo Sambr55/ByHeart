@@ -560,11 +560,46 @@ export async function listFeedback(): Promise<Record<string, unknown>[]> {
 export async function listSessions(): Promise<Record<string, unknown>[]> {
   const sql = db()
   if (sql) {
-    return (await sql`
-      select l.device_id, l.state, l.updated_at, u.email
-        from learners l left join users u on u.id = l.user_id
+    /*
+      PROJECTED TO WHAT THE PAGE ACTUALLY RENDERS, which is far less than the row holds.
+
+      This returned `l.state` whole, for a thousand learners, on every poll of the admin
+      page — and `state` is the entire learner record. This file says elsewhere what that
+      contains: the names of children, ages, marital status, and why somebody left a
+      country. None of it was rendered. The page reads seven fields and an email address it
+      never displays at all.
+
+      So the blob is opened HERE and only the seven come out. Everything downstream of this
+      function — the response body, the browser's memory, any log or cache that touches it —
+      carries a tester's variant and how many pieces they own, and nothing about their
+      family. The narrowest thing that answers the question is the right thing to send.
+
+      AND IT FIXES A LIVE BUG. The page has always read session_id, tester_label,
+      experiment, affinity, inventory, voice_signals and evidence; the Postgres branch
+      returned device_id, state, updated_at and email. Not one field matched, so against a
+      real database this table rendered a row per learner with every column empty. The blob
+      fallback returned the flat shape, which is why it looked fine wherever it was
+      actually being used.
+    */
+    const rows = (await sql`
+      select l.device_id, l.state, l.updated_at
+        from learners l
        order by l.updated_at desc limit 1000
-    `) as unknown as Record<string, unknown>[]
+    `) as unknown as { device_id: string; state: Record<string, unknown>; updated_at: string }[]
+
+    return rows.map((r) => {
+      const st = (r.state ?? {}) as Record<string, unknown>
+      return {
+        session_id: r.device_id,
+        recorded_at: r.updated_at,
+        tester_label: st.tester_label,
+        experiment: st.experiment,
+        affinity: st.affinity,
+        inventory: st.inventory,
+        voice_signals: st.voice_signals,
+        evidence: st.evidence,
+      }
+    })
   }
   const rows = await listBlobs('sessions/')
   rows.sort((a, b) => String(a.recorded_at).localeCompare(String(b.recorded_at)))

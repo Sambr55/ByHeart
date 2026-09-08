@@ -53,7 +53,20 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const key = new URL(request.url).searchParams.get('key') ?? request.headers.get('x-admin-key')
+  /*
+    THE HEADER, AND ONLY THE HEADER.
+
+    The key used to be read from `?key=` first. A query string is written into the
+    platform's access log and the CDN's on every request, so the one secret that unlocks
+    every learner record was being copied into logs each time the admin page polled — which
+    is several times a session, for as long as the page is open.
+
+    A header is not secret either, but it is not written down by default, and that is the
+    whole difference. The query branch is gone rather than deprecated: leaving it as a
+    fallback would mean the exposure survives exactly as long as one caller keeps using it,
+    and the caller is our own page.
+  */
+  const key = request.headers.get('x-admin-key')
   if (!adminKeyValid(key)) {
     return NextResponse.json({ error: 'unauthorised' }, { status: 401 })
   }

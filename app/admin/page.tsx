@@ -48,9 +48,18 @@ export default function AdminPage() {
   const load = useCallback(async (k: string) => {
     setError('')
     try {
+      /*
+        The key rides in a header, never in the URL.
+
+        A query string is written into the platform's access log and the CDN's on every
+        request, and this page polls — so the one secret that opens every learner record
+        was being copied into logs several times per sitting. A header is not secret
+        either; it is simply not written down by default, which is the whole difference.
+      */
+      const admin = { 'x-admin-key': k }
       const [s, f] = await Promise.all([
-        fetch('/api/session?key=' + encodeURIComponent(k)).then((r) => r.json()),
-        fetch('/api/feedback?key=' + encodeURIComponent(k)).then((r) => r.json()),
+        fetch('/api/session', { headers: admin }).then((r) => r.json()),
+        fetch('/api/feedback', { headers: admin }).then((r) => r.json()),
       ])
       if (s.error || f.error) {
         setError(s.error ?? f.error)

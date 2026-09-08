@@ -36,7 +36,8 @@ export default function ReportsPage() {
   const load = useCallback(async (k: string) => {
     setError('')
     try {
-      const res = await fetch('/api/showing/reports?key=' + encodeURIComponent(k))
+      /* In a header, never the URL — a query string lands in every access log. */
+      const res = await fetch('/api/showing/reports', { headers: { 'x-admin-key': k } })
       const body = (await res.json()) as { ok?: boolean; reports?: Report[]; error?: string }
       if (!body.ok) {
         setError(body.error ?? 'could not load')
@@ -50,9 +51,9 @@ export default function ReportsPage() {
   }, [])
 
   async function done(id: number) {
-    await fetch('/api/showing/reports?key=' + encodeURIComponent(key), {
+    await fetch('/api/showing/reports', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', 'x-admin-key': key },
       body: JSON.stringify({ id }),
     })
     setReports((r) => (r ?? []).filter((x) => x.id !== id))

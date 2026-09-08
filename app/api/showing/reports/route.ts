@@ -15,17 +15,29 @@ export const dynamic = 'force-dynamic'
  * Admin key, like every other operational route here. There is no UI for it inside the
  * product because the person who reads these is not a member.
  */
+/*
+  THE HEADER, AND ONLY THE HEADER — and this route is the one that had no other way.
+
+  Three of the admin routes accepted `x-admin-key` as an alternative and no caller used it.
+  This one read the query string alone, so there was nothing to switch to: the key was
+  written into the access log on every poll of the reports queue with no header path
+  available even to a caller who wanted one. That is why it is worth naming here rather
+  than fixing quietly — the pattern existed elsewhere in the codebase and this route is
+  where it was dropped.
+*/
+function adminHeader(request: Request): string | null {
+  return request.headers.get('x-admin-key')
+}
+
 export async function GET(request: Request) {
-  const key = new URL(request.url).searchParams.get('key')
-  if (!adminKeyValid(key)) {
+  if (!adminKeyValid(adminHeader(request))) {
     return NextResponse.json({ error: 'unauthorised' }, { status: 401 })
   }
   return NextResponse.json({ ok: true, reports: await openReports() })
 }
 
 export async function POST(request: Request) {
-  const url = new URL(request.url)
-  if (!adminKeyValid(url.searchParams.get('key'))) {
+  if (!adminKeyValid(adminHeader(request))) {
     return NextResponse.json({ error: 'unauthorised' }, { status: 401 })
   }
   let body: { id?: unknown }
