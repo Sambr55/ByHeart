@@ -15,7 +15,7 @@ import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_CARD } from '../content/legend'
 import { ROOTS } from '../content/roots'
-import { feedFor, vibeCards } from '../content/feed'
+import { explainerCards, feedFor, vibeCards } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -61,7 +61,25 @@ await page.waitForTimeout(1800)
   short and three assertions about looping went red for a reason that had nothing to do
   with looping.
 */
-const real = feedFor().length + vibeCards([]).length
+const real =
+  feedFor().length +
+  vibeCards([]).length +
+  /*
+    And the explainers this seeded learner still sees.
+
+    They used to be none: explainersFor returned nothing at all for a member. It does not
+    any more — a member is done being sold to and is not done being told how things work,
+    so the translator card and the Club's own explainer survive membership. Computed from
+    the same function the component calls rather than typed as a number here, because a
+    literal would be right today and silently wrong the next time one is added.
+  */
+  explainerCards({
+    playedAVibe: false,
+    legendWritten: true,
+    isMember: true,
+    usedTranslator: false,
+    actedOnACard: false,
+  }).length
 const feed = await page.$('[data-testid="feed"]')
 ok('the feed is there', Boolean(feed))
 

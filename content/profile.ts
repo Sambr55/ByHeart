@@ -11,10 +11,32 @@
  * thank you, and that is the honest reason to ask.
  */
 
+import type { Purpose } from '@/content/situations'
+
 export type LanguageGender = 'm' | 'f'
 export type AgeBand = 'under25' | '25to39' | '40to59' | '60plus'
 export type Goal = 'trip' | 'someone' | 'moving' | 'work' | 'curious'
 
+/*
+  THE ONE WHY, and there were two.
+
+  This question — "Why are you here?", five reasons, each with a line under it — was asked
+  at the end of a vibe and drove NOTHING: `goal` is read on the proof card and nowhere else,
+  which its own note admits. Meanwhile set-up asked a plainer three-option version ("A few
+  days / A season / For good") that drives everything: feedFor builds the Club from it and
+  cardFor picks the seven Legend frames from it.
+
+  So the better-written question was an orphan, arriving after the content it should have
+  shaped had already been served, and the product asked why you were here twice.
+
+  They are merged. This is the question now, asked once, at set-up, and every answer carries
+  the purpose it implies — so the Club and the Legend stay driven exactly as they were while
+  the person gets the version worth answering.
+
+  `curious` carries null on purpose. Somebody who says "no reason, I just like it" has made
+  no claim about the city, and forPurpose treats a null purpose as "show me everything" —
+  which is the widest Club, and the honest answer to no answer.
+*/
 export interface ProfileQuestion {
   id: 'gender' | 'age' | 'goal'
   /** Who asks. The product's own questions get the same treatment as its lessons. */
@@ -23,7 +45,18 @@ export interface ProfileQuestion {
   headline: string
   /** Why we are asking, in terms of what they get. Never in terms of what we get. */
   why: string
-  options: { id: string; label: string; sub?: string }[]
+  options: {
+    id: string
+    label: string
+    sub?: string
+    /*
+      What this answer means for the CONTENT, where it means anything.
+
+      Only the goal question carries these, and it carries them because it is asked at
+      set-up now rather than at the end of somebody's second vibe. See REASONS below.
+    */
+    purpose?: Purpose | null
+  }[]
   skip: string
   skipNote: string
 }
@@ -109,11 +142,13 @@ export const GOAL_QUESTION: ProfileQuestion = {
     */
     'Your card will tell you how close you are to it, and which piece is next. It does not change the order of anything — it just stops the number being abstract.',
   options: [
-    { id: 'trip', label: 'I’VE GOT A TRIP COMING', sub: 'days or weeks, not years' },
-    { id: 'someone', label: 'SOMEONE IN MY LIFE SPEAKS IT', sub: 'and I would like to keep up' },
-    { id: 'moving', label: 'I’M MOVING THERE', sub: 'or seriously thinking about it' },
-    { id: 'work', label: 'IT’S FOR WORK', sub: 'colleagues, clients, calls' },
-    { id: 'curious', label: 'NO REASON. I JUST LIKE IT', sub: 'the best reason there is' },
+    { id: 'trip', label: 'I’VE GOT A TRIP COMING', sub: 'days or weeks, not years', purpose: 'visiting' },
+    /* Keeping up with a person means the same faces twice, which is what staying is. */
+    { id: 'someone', label: 'SOMEONE IN MY LIFE SPEAKS IT', sub: 'and I would like to keep up', purpose: 'staying' },
+    { id: 'moving', label: 'I’M MOVING THERE', sub: 'or seriously thinking about it', purpose: 'moving' },
+    { id: 'work', label: 'IT’S FOR WORK', sub: 'colleagues, clients, calls', purpose: 'staying' },
+    /* No claim about the city, so no filter on it. Everything, which is the widest Club. */
+    { id: 'curious', label: 'NO REASON. I JUST LIKE IT', sub: 'the best reason there is', purpose: null },
   ],
   skip: 'NOT SURE YET',
   skipNote: 'Fair enough. We will keep giving you the things people actually say.',

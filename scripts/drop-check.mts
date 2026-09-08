@@ -198,8 +198,29 @@ console.log('\nthe template reproduces the drop somebody wrote by hand\n')
           s2.release.answer,
           s2.release.ask,
         ])
-      const a = say(hand)
+      /*
+        ONE DELIBERATE DIVERGENCE, NAMED, and the check is stronger for naming it.
+
+        The hand-authored drop says "É a linha vermelha." — it is the red line — and that is
+        correct, because it is at Oriente and somebody checked. The TEMPLATE cannot say it,
+        because the template does not know which station it is being filled with: three of
+        the nine drops publishing today are on the blue and yellow lines, and every one of
+        them was teaching red.
+
+        So the fidelity claim changes shape rather than being weakened. It was "the template
+        reproduces the authored drop exactly". It is now "the template reproduces every line
+        of it except the one that states a fact the template cannot source" — and the second
+        assertion below pins that exception open, so nobody can quietly put a metro colour
+        back into a template.
+      */
+      const SOURCED_AWAY = 'É a linha vermelha. | It is the red line.'
+      const a = say(hand).filter((line) => line !== SOURCED_AWAY)
       const b = say(result.drop)
+      ok(
+        'the template names no metro line of its own',
+        !b.some((line) => /linha (vermelha|azul|verde|amarela)/i.test(line)),
+        'a colour it cannot know is a learner standing on the wrong platform',
+      )
       const differ = a.filter((line, i) => line !== b[i])
       ok(
         'every line comes back the same',

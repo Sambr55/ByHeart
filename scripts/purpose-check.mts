@@ -26,6 +26,7 @@ import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_FRAMES } from '../content/legend'
 import { ROOTS } from '../content/roots'
 import { SITUATIONS, PURPOSES } from '../content/situations'
+import { GOAL_QUESTION } from '../content/profile'
 import { CARD_RUNG, CARD_SIZE, CRATES_TO_UNLOCK_LEGEND, cardFor } from '../content/legend'
 import { FREE_ENTITLEMENTS } from '../lib/entitlements'
 import { forPurpose } from '../content/feed'
@@ -279,20 +280,43 @@ ok(
     What it is asserting is unchanged and is the half that matters: the question is still
     asked, once, somewhere a person actually reaches.
   */
-  const asks = await p2.$('[data-testid="setup-why-visiting"]')
+  /*
+    FIVE REASONS NOW, NOT THREE PURPOSES.
+
+    The question set-up asks is the goal question — the better-written one that used to
+    arrive at the end of a vibe and drive nothing. Each of its answers carries the purpose it
+    implies, so what is stored is unchanged and what is asked is worth answering. The
+    testids follow the reason, which is why this looks for `trip` rather than `visiting`.
+  */
+  const asks = await p2.$('[data-testid="setup-why-' + GOAL_QUESTION.options[0].id + '"]')
   ok('set-up is where why is asked now', Boolean(asks), 'once, before anything is tailored')
   if (asks) {
     const missing = (
       await Promise.all(
-        PURPOSES.map(async (pu) =>
-          (await p2.$('[data-testid="setup-why-' + pu.id + '"]')) ? null : pu.id,
+        GOAL_QUESTION.options.map(async (o) =>
+          (await p2.$('[data-testid="setup-why-' + o.id + '"]')) ? null : o.id,
         ),
       )
     ).filter(Boolean)
     ok(
-      'all three are offered',
+      'all five reasons are offered',
       missing.length === 0,
-      missing.length ? 'missing ' + missing.join(', ') : PURPOSES.map((pu) => pu.id).join(', '),
+      missing.length
+        ? 'missing ' + missing.join(', ')
+        : GOAL_QUESTION.options.map((o) => o.id).join(', '),
+    )
+    /*
+      And every purpose the Club can filter on is still reachable through them, which is the
+      property the merge could silently break: five reasons that all mapped to `visiting`
+      would look fine on screen and quietly collapse the content axis to one.
+    */
+    const reachable = new Set(
+      GOAL_QUESTION.options.map((o) => o.purpose).filter(Boolean) as string[],
+    )
+    ok(
+      'and between them they still reach all three purposes',
+      PURPOSES.every((pu) => reachable.has(pu.id)),
+      [...reachable].join(', '),
     )
     await p2.click('[data-testid="setup-why-moving"]')
     await p2.waitForTimeout(1500)
@@ -417,7 +441,7 @@ console.log('\nan old record is not an answered one\n')
   )
   await stale.goto(BASE + '/vibes')
   await stale.waitForTimeout(2200)
-  const asks = await stale.isVisible('[data-testid="setup-why-' + PURPOSES[0].id + '"]')
+  const asks = await stale.isVisible('[data-testid="setup-why-' + GOAL_QUESTION.options[0].id + '"]')
   ok('why is asked of a record that was never asked it', asks, 'deal accepted, purpose null')
   const shownDone = await stale.isVisible('[data-testid="setup-topics"]')
   ok('and the answer screen is not shown instead', !shownDone, 'no rooms before a purpose')
@@ -428,7 +452,7 @@ console.log('\nan old record is not an answered one\n')
   await stale.waitForTimeout(1200)
   ok(
     'and the question is still there a moment later',
-    await stale.isVisible('[data-testid="setup-why-' + PURPOSES[0].id + '"]'),
+    await stale.isVisible('[data-testid="setup-why-' + GOAL_QUESTION.options[0].id + '"]'),
     'it appeared and vanished before',
   )
   await stale.close()

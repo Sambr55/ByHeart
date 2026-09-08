@@ -8,13 +8,14 @@ import { roomsFor } from '@/content/feed'
 import { CLUB } from '@/content/club'
 import { EXPLAINER_CTA } from '@/content/explainers'
 import { PAIR_STEP } from '@/content/front-door'
-import { PURPOSES } from '@/content/situations'
+import { GOAL_QUESTION } from '@/content/profile'
 import { track } from '@/engine/analytics'
 import {
   acceptDeal,
   loadLearner,
   resetLearnerCache,
   setDisplayName,
+  setProfile,
   setPurpose,
 } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
@@ -85,7 +86,18 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   const already = useMemo(() => {
     if (!mounted) return false
     const me = loadLearner()
-    return Boolean(me.deal_accepted_at) && Boolean(me.purpose)
+    /*
+      ASKED, not filtered.
+
+      This read `purpose`, which was the same thing while every answer set one. It is not
+      any more: "no reason, I just like it" deliberately sets no purpose, because somebody
+      who has made no claim about the city should see all of it. Measured on purpose, that
+      learner would be asked the question again forever.
+
+      `goal` is written by all five answers, so it is the honest record of "this was asked
+      and answered".
+    */
+    return Boolean(me.deal_accepted_at) && Boolean(me.profile?.goal)
   }, [mounted])
 
   /*
@@ -238,6 +250,14 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         {step === 'why' ? (
           <>
             <h2 className="display text-balance text-2xl">{CLUB.welcome.ask_headline(city)}</h2>
+            {/*
+              The orphan's framing, which was the better half of it.
+
+              "There is no wrong answer, and the last one is a real one" exists because the
+              fifth option is "no reason, I just like it" and somebody scanning five reasons
+              needs telling that one counts. It arrived with the question; it comes with it.
+            */}
+            <p className="text-sm italic leading-relaxed text-muted">{GOAL_QUESTION.askerLine}</p>
             <p className="text-sm leading-relaxed text-muted">{CLUB.welcome.ask_body}</p>
           </>
         ) : (
@@ -258,20 +278,35 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
       */}
       {step === 'why' ? (
         <ul className="flex flex-col gap-3">
-          {PURPOSES.map((p) => (
-            <li key={p.id}>
+          {GOAL_QUESTION.options.map((o) => (
+            <li key={o.id}>
               <button
                 type="button"
-                data-testid={'setup-why-' + p.id}
+                data-testid={'setup-why-' + o.id}
                 onClick={() => {
-                  setPurpose(p.id)
-                  track('purpose_chosen', { purpose: p.id })
+                  /*
+                    ONE ANSWER, TWO RECORDS, and that is the whole merge.
+
+                    `purpose` is what the product runs on — feedFor builds the Club from it,
+                    cardFor picks the seven Legend frames from it. `goal` is what the proof
+                    card reads. They were collected by two different questions on two
+                    different screens, both of them asking why you are here.
+
+                    Writing both here means nothing downstream changes and nothing gets
+                    asked twice: nextProfileQuestion sees goal answered and never orphans
+                    this question at the end of a vibe again.
+                  */
+                  if (o.purpose) setPurpose(o.purpose)
+                  setProfile('goal', o.id)
+                  track('purpose_chosen', { purpose: o.purpose ?? 'none', goal: o.id })
                   setStep('who')
                 }}
                 className="tap-target flex w-full flex-col gap-1 rounded border border-line px-4 py-3 text-left transition hover:border-accent/50"
               >
-                <span className="display text-lg">{p.label}</span>
-                <span className="text-sm leading-relaxed text-muted">{p.blurb}</span>
+                <span className="display text-lg">{o.label}</span>
+                {o.sub ? (
+                  <span className="text-sm leading-relaxed text-muted">{o.sub}</span>
+                ) : null}
               </button>
             </li>
           ))}

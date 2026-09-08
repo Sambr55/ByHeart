@@ -1064,7 +1064,7 @@ console.log('\nthe call to action cannot land on a question set-up already asks\
   */
   ok(
     'set-up is what they get instead',
-    Boolean(await p2.$('[data-testid="setup-why-visiting"]')),
+    Boolean(await p2.$('[data-testid="setup-why-trip"]')),
     'one question, one component, two places',
   )
   ok(

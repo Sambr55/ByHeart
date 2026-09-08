@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { vibeImage } from '@/content/vibe-images'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '@/components/Feed'
@@ -272,13 +273,20 @@ function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void 
 
   if (tile.kind === 'vibe') {
     /*
-      A vibe has no photograph and does not need one.
+      THE SAME PHOTOGRAPH THE SHELF USES, because it is the same object.
 
-      The shelf has identified vibes by tone and a line drawing since long before there
-      were any images in this product, and inventing eleven photographs to fill a grid
-      would put stock imagery next to the evidence photographs in the Club — which is the
-      exact confusion the two registers exist to avoid.
+      This said "a vibe has no photograph and does not need one", and that was true when it
+      was written: the shelf identified vibes by tone and a line drawing because there were
+      no vibe pictures in the product. There are now — the shelf is a grid of them — so the
+      only screen still drawing the pattern was this one, and a learner met Top Gun as a
+      photograph in one place and as a line icon in another. Two pictures of one thing is
+      worse than either.
+
+      The drawing stays as the fallback rather than being deleted. A vibe authored before
+      its picture exists should look deliberate, not broken, and that is exactly what the
+      pattern and the icon are for.
     */
+    const shot = vibeImage(tile.family)
     return (
       <Link
         href={'/vibes?open=' + tile.family}
@@ -286,16 +294,41 @@ function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void 
         // data-tone, not a style variable: the tone is a NAME the stylesheet maps to a
         // colour, and setting --tone to "reflective" silently produced no pattern at all.
         data-tone={tile.tone}
-        className={shell + ' azulejo-block'}
+        className={shell + (shot ? '' : ' azulejo-block')}
       >
-        <span className="absolute inset-0 flex items-center justify-center">
-          <CrateIcon crate={tile.family} className="h-10 w-10 text-[color:var(--tone)]" />
-        </span>
-        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg via-bg/85 to-transparent px-3 pb-3 pt-6">
-          <span className="display block text-xs leading-tight">{tile.title}</span>
+        {shot ? (
+          <Image
+            src={shot.src}
+            alt=""
+            aria-hidden
+            fill
+            sizes="(max-width:448px) 50vw, 224px"
+            className="object-cover"
+          />
+        ) : (
+          <span className="absolute inset-0 flex items-center justify-center">
+            <CrateIcon crate={tile.family} className="h-10 w-10 text-[color:var(--tone)]" />
+          </span>
+        )}
+        <span
+          className={
+            'absolute inset-x-0 bottom-0 px-3 pb-3 pt-6 ' +
+            (shot
+              ? 'bg-gradient-to-t from-black/90 via-black/45 to-transparent'
+              : 'bg-gradient-to-t from-bg via-bg/85 to-transparent')
+          }
+        >
+          <span className={'display block text-xs leading-tight ' + (shot ? 'text-white' : '')}>
+            {tile.title}
+          </span>
           {/* Said quietly, because the shelf is a record and not a to-do list. */}
           {!tile.through ? (
-            <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
+            <span
+              className={
+                'mt-1 block text-[0.55rem] uppercase tracking-wider ' +
+                (shot ? 'text-white/75' : 'text-muted')
+              }
+            >
               still in there
             </span>
           ) : null}

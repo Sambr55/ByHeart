@@ -180,18 +180,25 @@ export function explainersFor(state: {
   actedOnACard: boolean
 }): Explainer[] {
   /*
-    A member sees none of them, whatever the individual conditions say.
+    A MEMBER IS DONE BEING SOLD TO. THEY ARE NOT DONE BEING SHOWN HOW THINGS WORK.
 
-    Each card retires on its own trigger, and those triggers are about USE — has a vibe been
-    played, has the translator been asked. A member has by definition answered all four
-    questions, so any that survive their own condition are surviving on a technicality: the
-    seeded case is a member with no roots_played, but the real one is a member who has never
-    happened to use the translator being sold it forever.
+    This returned nothing at all for a member, on the argument that an explainer a member
+    still sees is an advert. That is right about three of these and wrong about the other
+    two — and the consequence was total, because DUB hands out membership to everybody the
+    moment billing is not configured. So on the live build nobody saw a single explainer in
+    the Club, including the card that explains what the Club IS, which was written for
+    exactly the people this line was hiding it from. Reported as the translator explainer
+    being left out; it was, along with all the others.
 
-    An explainer a member is still being shown is an advert.
+    The split is between selling and telling. The demo, the Legend and the drops argue for
+    the product to somebody deciding whether to have it — a member has decided, so they go.
+    The translator and the Club's own grammar are instructions for a tool that is already
+    theirs, and somebody who has never used the translator does not know it exists however
+    long they have been a member.
   */
-  if (state.isMember) return []
+  const SELLS: Explainer['retires'][] = ['played-a-vibe', 'legend-written', 'is-member']
   return EXPLAINERS.filter((e) => {
+    if (state.isMember && SELLS.includes(e.retires)) return false
     if (e.retires === 'played-a-vibe') return !state.playedAVibe
     if (e.retires === 'legend-written') return !state.legendWritten
     if (e.retires === 'is-member') return !state.isMember

@@ -26,7 +26,52 @@ import type { SituationKind } from '@/content/situations'
  *   {day}     catorze — the date said as a Portuguese word, never a numeral
  *   {day_en}  14th — the same date in English, because "on the catorze" is not a sentence
  */
-export type Slot = 'event' | 'venue' | 'station' | 'day' | 'day_en'
+export type Slot = 'event' | 'venue' | 'station' | 'station_to' | 'day' | 'day_en'
+
+/**
+ * A station name with the preposition already agreed with it.
+ *
+ * "para o {station}" was baked into the concert template and is wrong for two of the nine
+ * drops that publish today: Praça dos Restauradores takes `os`, Avenida da Liberdade takes
+ * `a`. Article agreement is the most audible marker of a foreigner's Portuguese, and this
+ * is a sentence somebody says cold to a stranger in a metro station.
+ *
+ * DELIBERATELY A SMALL, HONEST RULE RATHER THAN A CLEVER ONE. Lisbon's metro stations are
+ * a closed list of about fifty names, and the handful that carry an article carry it in
+ * their own name — Os Restauradores, A Avenida, O Cais do Sodré. Everything else is a bare
+ * proper noun and takes `para` alone, which is both correct and what people say. So the
+ * rule is: name the exceptions, and default to no article.
+ *
+ * Guessing from the ending would be the clever version and it would be wrong — Baixa-Chiado
+ * looks feminine and takes none, Areeiro looks masculine and takes none.
+ */
+const STATION_ARTICLE: Record<string, string> = {
+  /*
+    Oriente is the one entry here with a native reading behind it: the hand-authored Duran
+    Duran drop says "para o Oriente", and that drop was written and reviewed as language
+    rather than assembled. The check that replays the template against it caught me
+    dropping the article — I had defaulted Oriente to bare and it is not.
+
+    THE REST OF THIS MAP HAS NOT BEEN READ BY A NATIVE SPEAKER. It is my best reading and
+    it is the kind of thing that is quietly wrong: os Restauradores and a Avenida are
+    confident, the last three less so. It belongs in the reviewer's pass, and until it has
+    had one this comment is the honest label on it.
+  */
+  'Oriente': 'o',
+  'Restauradores': 'os',
+  'Praça dos Restauradores': 'os',
+  'Avenida': 'a',
+  'Cais do Sodré': 'o',
+  'Rossio': 'o',
+  'Marquês de Pombal': 'o',
+  'Terreiro do Paço': 'o',
+}
+
+/** "para Oriente", "para os Restauradores", "para a Avenida". */
+export function stationTo(station: string): string {
+  const article = STATION_ARTICLE[station.trim()]
+  return article ? article + ' ' + station : station
+}
 
 export interface TemplateLine {
   pt: string
@@ -160,14 +205,47 @@ export const DROP_TEMPLATES: DropTemplate[] = [
         title: 'Getting to {station}',
         why: 'The crowd will be doing it with you, which makes it the easiest place in Lisbon to ask a question.',
         image: 'metro_platform',
+        /*
+          NO METRO LINE IS NAMED HERE ANY MORE, and this is the most serious thing this
+          file has got wrong.
+
+          The second line read "É a linha vermelha." — it is the red line — as "what you
+          will hear back". The station is a slot; the colour was not. This template was
+          abstracted from the hand-authored Duran Duran drop, which is at Oriente, where red
+          is correct, and the claim came along without the sentence that justified it.
+
+          Nine generated drops publish today. Three of them name a station that is not on
+          the red line: Restauradores and Avenida are Blue, Campo Pequeno is Yellow. The
+          learner reads the reply in full before they go, is primed to hear "vermelha",
+          hears "azul", and concludes they misunderstood — which is the exact opposite of
+          what this product is for.
+
+          Three separate comments in this pipeline declare this impossible: a drop that
+          gives the wrong metro line is somebody standing in the wrong place; a metro line
+          invented to fill a slot is the worst thing this pipeline could produce; DUB
+          sources the fact and writes the language, and the language is never sourced. Every
+          guard checks that FACTS are sourced and that LANGUAGE is authored. This was a fact
+          living inside an authored sentence, where no guard looks — and a native speaker
+          reviewing the template would see nothing wrong, because it is correct for Oriente.
+          The error is manufactured at fill time, out of data no reviewer reads.
+
+          The reply is simply gone. It is the one line in the room nobody needs: you ask
+          which line it is BECAUSE you do not know, and a made-up answer is worse than none.
+          The right long-term fix is a sourced `line` on the calendar row, refused by
+          `needs` when absent the way a missing station already is — but that is a content
+          job, and until it is done this file must not guess.
+
+          The article is a slot now for the same reason. "para o {station}" is baked and
+          wrong for two of the same nine — os Restauradores, a Avenida — and article
+          agreement is the most audible marker of a foreigner's Portuguese.
+        */
         lines: [
-          { pt: 'Qual é a linha para o {station}?', en: 'Which line goes to {station}?', when: 'In the station' },
-          { pt: 'É a linha vermelha.', en: 'It is the red line.', when: 'What you will hear back' },
+          { pt: 'Qual é a linha para {station_to}?', en: 'Which line goes to {station}?', when: 'In the station' },
           { pt: 'Onde fica a saída?', en: 'Where is the way out?', when: 'When you arrive with everybody else' },
         ],
         release: {
           ask: 'Ask which line goes to {station}.',
-          answer: 'Qual é a linha para o {station}?',
+          answer: 'Qual é a linha para {station_to}?',
         },
         rung: 2,
       },

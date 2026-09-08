@@ -272,6 +272,33 @@ export function dropsFor(
     })
 }
 
+/**
+ * Everything pegged to a date in this chapter in one month, live or not.
+ *
+ * DELIBERATELY NOT FILTERED BY dropLive. A feed shows what is open to you now; a calendar
+ * shows what is ON. A gig ninety days out is not a drop yet — it will not appear in the
+ * Club and it should not — but it is the single most useful thing a calendar can tell
+ * somebody, and "nothing this month" while a stadium show sits in the diary is a lie of
+ * omission.
+ *
+ * Generated drops are in as well as authored ones, so the month never disagrees with the
+ * feed about what exists.
+ */
+export function dropsInMonth(
+  chapter: ChapterId = DEFAULT_CHAPTER,
+  year: number,
+  month: number,
+  now: Date = new Date(),
+): Drop[] {
+  return [...DROPS, ...generatedDrops(chapter, now)]
+    .filter((d) => {
+      if (d.chapter !== chapter) return false
+      const on = new Date(d.on + 'T00:00:00Z')
+      return on.getUTCFullYear() === year && on.getUTCMonth() === month
+    })
+    .sort((a, b) => a.on.localeCompare(b.on))
+}
+
 /** Open once its window has, gone the morning after the thing it is pegged to. */
 export function dropLive(d: Drop, now: Date = new Date()): boolean {
   const gone = new Date(d.on + 'T00:00:00Z')
@@ -643,6 +670,19 @@ export const FEED_COPY = {
     because a reject that people believe is destructive is a reject nobody uses.
   */
   back: 'Back in the pile.',
+  /*
+    Said the moment a card goes, with the way back attached.
+
+    The rail's rewind button describes itself as "a verb somebody needs exactly once,
+    immediately, in the second after a swipe they did not mean" — and then rendered
+    permanently, as a small icon among four others, from the first reject onwards. It was
+    right about when the verb is wanted and it never appeared at that moment.
+
+    So the moment gets its own line. It states what happened, because a card leaving the
+    screen is ambiguous, and it offers the undo for as long as the thought lasts.
+  */
+  rejected: 'Sent to the back.',
+  rejected_cta: 'BRING IT BACK',
 } as const
 
 

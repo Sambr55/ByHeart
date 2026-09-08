@@ -7,7 +7,7 @@ import {
   fill,
   templateFor,
   type DropTemplate,
-  type Slot,
+  type Slot, stationTo
 } from '@/content/drop-templates'
 import type { ChapterId } from '@/content/chapters'
 import type { Situation } from '@/content/situations'
@@ -80,6 +80,11 @@ export function draftDrop(c: Candidate, now: Date = new Date()): DraftResult {
       event: c.event,
       venue: c.venue.name,
       station: c.station,
+      /*
+        The same name with its preposition agreed. See stationTo: "para o {station}" was
+        baked into the template and is wrong for two of the nine drops publishing today.
+      */
+      station_to: stationTo(c.station),
       day: dayWord(c.on),
       day_en: dayEnglish(c.on),
     }

@@ -35,6 +35,17 @@ import { usePathname } from 'next/navigation'
 const TABS = [
   { href: '/vibes', label: 'Vibes', d: 'M4 6h7v7H4zM13 6h7v7h-7zM4 15h7v3H4zM13 15h7v3h-7z' },
   { href: '/club', label: 'Lisbon', d: 'M4 20V9l8-5 8 5v11M9 20v-6h6v6' },
+  /*
+    What is on, and it belongs next to the city rather than out at the end.
+
+    The bar is the shape of the product: the vibes, the city, the tool, your things. A
+    calendar is the city with a date on it, so it sits where the city is.
+  */
+  {
+    href: '/calendar',
+    label: 'On',
+    d: 'M4 7a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8 4v4M16 4v4',
+  },
   {
     href: null,
     label: 'Ask',

@@ -72,6 +72,34 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
   useEffect(() => setMounted(true), [])
 
   /*
+    What this learner had already done when they arrived, read once and then held.
+
+    See actedOnACard below: a retirement condition that reads live turns using the product
+    into cards disappearing while somebody is looking at them.
+
+    DECLARED HERE, ABOVE THE MEMO THAT READS IT, and that is not a tidying preference.
+
+    It sat 176 lines BELOW the `cards` useMemo that reads it. A useMemo runs its factory
+    during render, so the read hit the const's temporal dead zone — and the whole of /club
+    white-screened with "Cannot access 'actedAtEntry' before initialization". It survived
+    the first render only because the memo bails at `if (!mounted) return []` before
+    reaching the read, and `mounted` is the memo's first dependency, so the mount effect
+    fired it straight into the crash.
+
+    tsc does not flag use-before-declaration across a closure and `next build` never took
+    the path, so it passed both. The browser checks went red on a missing SELECTOR rather
+    than on a dead page, which is the more useful lesson: a check that cannot tell a crash
+    from a rename teaches you that red does not mean broken.
+  */
+  const [actedAtEntry, setActedAtEntry] = useState(false)
+  const entryRead = useRef(false)
+  useEffect(() => {
+    if (!mounted || entryRead.current) return
+    entryRead.current = true
+    setActedAtEntry((learner.saved ?? []).length > 0 || (learner.rejected ?? []).length > 0)
+  }, [mounted, learner.saved, learner.rejected])
+
+  /*
     Authored rooms first, then a few assembled ones.
 
     The ranking is one of URGENCY, not of quality. A room is the best card in the product
@@ -203,12 +231,19 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       isMember: stage === 'member',
       usedTranslator: (learner.asked ?? []).length > 0,
       /*
-        Saved or sent away anything at all. The Club explainer teaches those two gestures,
-        so doing either of them is what retires it — a card explaining a swipe to somebody
-        who has been swiping for a week is an advert for their own habits.
+        Saved or sent away anything BEFORE THIS VISIT — not during it.
+
+        The Club explainer retires on the gesture it teaches, which is right, and the first
+        version read the live value. So the first reject of a person's life retired the card
+        mid-scroll: they swiped one card away and a different one vanished from the feed at
+        the same instant. That is precisely the thing the away lane promises does not happen
+        — "nothing is lost, it goes to the back" — and it was caught by the check that
+        asserts nothing leaves the feed on a reject.
+
+        Latched at entry instead. The card stays for the session in which it is first used
+        and is gone the next time, which is what "it has done its job" actually means.
       */
-      actedOnACard:
-        (learner.saved ?? []).length > 0 || (learner.rejected ?? []).length > 0,
+      actedOnACard: actedAtEntry,
     })
 
     /*
@@ -332,6 +367,15 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     learner.purpose,
     // Reject reorders the feed, so the feed rebuilds on it.
     learner.rejected,
+    /*
+      The latched entry value, which the memo reads and did not depend on.
+
+      learner.saved and learner.rejected ARE in this list, so without this the memo would
+      rebuild on the first save while still holding the stale `false` — and then rebuild
+      again when the latch landed, retiring the Club explainer mid-scroll. That is exactly
+      the vanishing card this latch was added to prevent, arriving through the back door.
+    */
+    actedAtEntry,
   ])
   /*
     A save that says so.
@@ -341,7 +385,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     not found yet. It says where the thing went and offers the way there, then gets out
     of the way on its own.
   */
-  const [toast, setToast] = useState<'saved' | 'unsaved' | 'done' | 'back' | null>(null)
+  const [toast, setToast] = useState<'saved' | 'unsaved' | 'done' | 'back' | 'rejected' | null>(null)
   useEffect(() => {
     if (!toast) return
     const t = setTimeout(() => setToast(null), 3600)
@@ -393,6 +437,48 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     correction, this one is the movement the person just asked for and should be able to
     see happen.
   */
+  /*
+    ARRIVING FROM THE CALENDAR, on the drop you tapped, already opened.
+
+    "Clicking a day opens the relevant cards like a swipe right" — so this does exactly
+    what the swipe does and nothing more: it lands the rail on that drop's card and then
+    scrolls its pane one lane, which is the reveal. Not a different screen, not a modal;
+    the same card the feed would have given you, at the point the gesture would have left
+    it.
+
+    ONCE, and only once. `landed` latches because the effect re-runs whenever the feed
+    rebuilds — and a feed rebuild is exactly what saving or rejecting causes, so without
+    the latch the first save after arriving would yank somebody back to the drop.
+
+    Failing silently is deliberate too. A link to a drop that has since gone the morning
+    after its gig is a dead date, and the honest answer to that is the ordinary Club rather
+    than an error about a concert that has happened.
+  */
+  const landed = useRef(false)
+  useEffect(() => {
+    if (landed.current || !mounted) return
+    const wanted = new URLSearchParams(window.location.search).get('drop')
+    if (!wanted) return
+    const i = cards.findIndex((c) => c.kind === 'situation' && c.drop?.id === wanted)
+    if (i < 0) return
+    landed.current = true
+    const el = rail.current
+    if (!el || !el.clientHeight) return
+    // Plus one for the leading clone, which is a copy of the last card rather than a card.
+    el.scrollTop = (i + 1) * el.clientHeight
+    /*
+      One frame later for the reveal: the card's own effect sets its opening lane on mount,
+      and scrolling the pane before that runs would be overwritten by it.
+    */
+    requestAnimationFrame(() => {
+      const section = el.children[i + 1] as HTMLElement | undefined
+      const pane = section?.querySelector('[data-testid="card-panes"]') as HTMLElement | null
+      if (!pane || !pane.clientWidth) return
+      const face = Math.round(pane.scrollLeft / pane.clientWidth)
+      pane.scrollTo({ left: pane.clientWidth * Math.max(0, face - 1), behavior: 'smooth' })
+    })
+  }, [cards, mounted])
+
   const passed = (id: string) => {
     setFreed((f) => (f.includes(id) ? f : [...f, id]))
     const el = rail.current
@@ -640,12 +726,30 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
             freedHere={freed.includes(card.id)}
             onPassed={passed}
             onBack={() => setToast('back')}
+            /*
+              A REJECT NOW SAYS SO, AND OFFERS THE WAY BACK.
+
+              `onRejected` has been declared on Card and called on every reject since the
+              away lane was built, and NOTHING HAS EVER PASSED IT — so the one moment the
+              rewind is actually wanted was the one moment nothing happened. Same shape as
+              vibeCard: a wire with both ends connected and no current.
+            */
+            onRejected={() => setToast('rejected')}
             onDone={() => setToast('done')}
           />
         ))}
       </div>
 
-      {toast ? <Toast kind={toast} /> : null}
+      {toast ? (
+        <Toast
+          kind={toast}
+          onRewind={() => {
+            const came = rewindReject()
+            if (came) track('card_rewound', { card: came })
+            setToast('back')
+          }}
+        />
+      ) : null}
       {/* Over the feed, like the header — the cards scroll under it. */}
       <BottomNav />
     </main>
@@ -659,7 +763,13 @@ export /**
  * been swiped past by the time somebody reads it — and a message that scrolls away with
  * its subject is a message nobody reads.
  */
-function Toast({ kind }: { kind: 'saved' | 'unsaved' | 'done' | 'back' }) {
+function Toast({
+  kind,
+  onRewind,
+}: {
+  kind: 'saved' | 'unsaved' | 'done' | 'back' | 'rejected'
+  onRewind?: () => void
+}) {
   return (
     <div
       role="status"
@@ -673,9 +783,27 @@ function Toast({ kind }: { kind: 'saved' | 'unsaved' | 'done' | 'back' }) {
             ? FEED_COPY.done
             : kind === 'back'
               ? FEED_COPY.back
-              : FEED_COPY.unsaved}
+              : kind === 'rejected'
+                ? FEED_COPY.rejected
+                : FEED_COPY.unsaved}
       </p>
-      {kind === 'saved' || kind === 'done' ? (
+      {kind === 'rejected' ? (
+        /*
+          The undo, where the thought is.
+
+          Not a link to somewhere — the card is three seconds from being irretrievable in
+          any way a person would notice, and asking them to go and find a control is the
+          reason the rail's rewind was never the answer.
+        */
+        <button
+          type="button"
+          data-testid="toast-rewind"
+          onClick={onRewind}
+          className="tap-target eyebrow shrink-0 rounded bg-white px-4 py-3 text-[#241f1a]"
+        >
+          {FEED_COPY.rejected_cta}
+        </button>
+      ) : kind === 'saved' || kind === 'done' ? (
         <Link
           href="/profile"
           className="tap-target eyebrow shrink-0 rounded bg-white px-4 py-3 text-[#241f1a]"
@@ -942,6 +1070,8 @@ export function Card({
       */
       rejectCard(card.id)
       track('card_rejected', { card: card.id })
+      // The lesson card teaches that nothing is lost, so it offers the proof as well.
+      onRejected?.()
     }
     /*
       UP does not fly, and that is not an omission.
