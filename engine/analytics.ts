@@ -41,6 +41,9 @@ export type EventName =
   | 'build_retry'
   /* A tile put in the wrong place, which now bounces out rather than waiting for CHECK. */
   | 'build_misplaced'
+  /* A photograph sent to be read. One per photo, which is also one metered ask. */
+  | 'lens_read'
+  | 'lens_opened'
   | 'derived_said'
   | 'derived_kept'
   | 'feed_like'

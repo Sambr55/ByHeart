@@ -315,12 +315,13 @@ export async function recordTranslation(
   deviceId: string | null,
   userId: string | null,
   body: { ask: string; answer: string; note: string; direction: string },
+  clientHash: string | null = null,
 ): Promise<{ layer: Layer; today: number; id: number | null }> {
   const sql = db()
   if (!sql) return { layer: 'none', today: 0, id: null }
   const [row] = await sql<{ id: string }[]>`
-    insert into translation (device_id, user_id, ask, answer, note, direction)
-    values (${deviceId}, ${userId}, ${body.ask}, ${body.answer}, ${body.note}, ${body.direction})
+    insert into translation (device_id, user_id, ask, answer, note, direction, client_hash)
+    values (${deviceId}, ${userId}, ${body.ask}, ${body.answer}, ${body.note}, ${body.direction}, ${clientHash})
     returning id::text as id
   `
   const [count] = await sql<{ n: string }[]>`
@@ -328,6 +329,33 @@ export async function recordTranslation(
     where device_id = ${deviceId} and at > now() - interval '24 hours'
   `
   return { layer: 'postgres', today: Number(count?.n ?? 0), id: Number(row?.id ?? 0) }
+}
+
+/**
+ * Everything this deployment has spent in a day, across everybody.
+ *
+ * The per-caller cap is the friendly limit and it cannot be the only one: it bounds what
+ * ONE person does and says nothing about a thousand of them, or about one person with a
+ * thousand addresses. This is the number that has to be true whatever the per-caller cap
+ * fails to catch, and it is the difference between a bad day and a bad month.
+ *
+ * Fails CLOSED, like the meter above it. A ceiling that cannot be read is not a ceiling.
+ */
+export async function translationsEverywhereToday(): Promise<number | null> {
+  const sql = db()
+  if (!sql) return null
+  const count = async () => {
+    const [row] = await sql<{ n: string }[]>`
+      select count(*)::text as n from translation where at > now() - interval '24 hours'
+    `
+    return Number(row?.n ?? 0)
+  }
+  try {
+    return await count()
+  } catch {
+    await ensureTranslationTable()
+    return await count()
+  }
 }
 
 /*
@@ -363,7 +391,25 @@ async function ensureTranslationTable(): Promise<void> {
           at timestamptz not null default now()
         )
       `
+      /*
+        The column that makes the cap mean anything.
+
+        The meter counted by device_id alone, and ensureDevice mints a FRESH id whenever a
+        request arrives without the cookie — so a caller that simply does not send cookies
+        counted zero every time and was never capped. The file it lives in calls this "the
+        one place in DUB where a stranger can spend money"; the cap was a suggestion.
+
+        `client_hash` is a salted hash of the first forwarded hop, so it is something the
+        caller cannot throw away by clearing a cookie, and it is not an IP address sitting
+        in a table — the salt is server-side and never leaves it, so the column cannot be
+        reversed into "who was at this address" even by somebody holding the database.
+
+        Added as an ALTER rather than only in the CREATE, because the table already exists
+        wherever this has run before and a create-if-not-exists would silently skip it.
+      */
+      await sql`alter table translation add column if not exists client_hash text`
       await sql`create index if not exists translation_device_at_idx on translation (device_id, at desc)`
+      await sql`create index if not exists translation_client_at_idx on translation (client_hash, at desc)`
       await sql`create index if not exists translation_at_idx on translation (at desc)`
     })().catch((e) => {
       // Let the next call try again rather than caching a failure for the process's life.
@@ -385,13 +431,28 @@ async function ensureTranslationTable(): Promise<void> {
  * standing between a text box and somebody else's money, so a meter that cannot be read
  * stops the feature rather than quietly uncapping it.
  */
-export async function translationsToday(deviceId: string | null): Promise<number> {
+export async function translationsToday(
+  deviceId: string | null,
+  clientHash: string | null = null,
+): Promise<number> {
   const sql = db()
-  if (!sql || !deviceId) return 0
+  if (!sql || (!deviceId && !clientHash)) return 0
+  /*
+    THE GREATER OF THE TWO, and that is the whole fix.
+
+    Counting by device alone was defeated by not sending a cookie. Counting by client alone
+    would put everybody behind one office NAT on a shared allowance. Taking the larger means
+    a caller has to beat BOTH to spend more than the cap: a new cookie does not lower the
+    client count, and a new address does not lower the device count.
+  */
   const count = async () => {
     const [row] = await sql<{ n: string }[]>`
-      select count(*)::text as n from translation
-      where device_id = ${deviceId} and at > now() - interval '24 hours'
+      select greatest(
+        count(*) filter (where ${deviceId}::text is not null and device_id = ${deviceId}),
+        count(*) filter (where ${clientHash}::text is not null and client_hash = ${clientHash})
+      )::text as n
+      from translation
+      where at > now() - interval '24 hours'
     `
     return Number(row?.n ?? 0)
   }

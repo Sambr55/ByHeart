@@ -1,7 +1,13 @@
+import { createHash } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { currentUser, ensureDevice } from '@/lib/auth'
-import { keepTranslation, recordTranslation, translationsToday } from '@/lib/store'
-import { translate, translatorConfigured } from '@/lib/translate'
+import {
+  keepTranslation,
+  recordTranslation,
+  translationsEverywhereToday,
+  translationsToday,
+} from '@/lib/store'
+import { readImage, translate, translatorConfigured } from '@/lib/translate'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -29,6 +35,59 @@ export const dynamic = 'force-dynamic'
  */
 const MAX_CHARS = 300
 const MAX_PER_DAY = Number(process.env.TRANSLATE_DAILY_CAP ?? 60)
+/*
+  AND A CEILING FOR THE WHOLE DEPLOYMENT, because a per-caller cap bounds one person.
+
+  Sixty a day each is the friendly limit. It says nothing about a thousand callers, or one
+  caller who has worked out how to look like a thousand — and the per-caller number cannot
+  be raised to cover that without making the friendly limit unfriendly. Two numbers, two
+  jobs: what one person may reasonably do, and what this deployment will spend in a day
+  before it stops and tells me.
+
+  Deliberately generous against real use and tight against a bill: 2,000 asks is far more
+  than DUB has learners, and it is a rounding error in money. Raise it when the first
+  honest day gets near it.
+*/
+const MAX_EVERYWHERE = Number(process.env.TRANSLATE_DAILY_CEILING ?? 2000)
+
+/*
+  A photograph, bounded before it is believed.
+
+  Base64 costs a third on top, so this is about 1.5MB of actual image — plenty for a menu
+  from a phone camera and far below the point where an upload becomes a way to make the
+  server do expensive work for free. The type is read from the data URL rather than trusted
+  from a field, and only the two the model accepts are allowed through.
+*/
+const MAX_IMAGE_B64 = 2_000_000
+
+function readPhoto(raw: string): { data: string; media: 'image/jpeg' | 'image/png' } | null {
+  const m = /^data:(image\/jpeg|image\/png);base64,([A-Za-z0-9+/=]+)$/.exec(raw.trim())
+  if (!m) return null
+  if (m[2].length > MAX_IMAGE_B64) return null
+  return { data: m[2], media: m[1] as 'image/jpeg' | 'image/png' }
+}
+
+/**
+ * Who is asking, in a form they cannot throw away and I cannot read back.
+ *
+ * ensureDevice mints a fresh id whenever the cookie is missing, so counting by device alone
+ * meant a caller who sent no cookies counted zero on every request and was never capped at
+ * all. The first forwarded hop is the thing they cannot discard.
+ *
+ * Hashed with a server-side salt, and this matters: an IP address in a table is personal
+ * data with a retention question attached, and DUB has no use for one. A salted hash counts
+ * the same caller twice without anybody — including whoever holds the database — being able
+ * to turn the column back into an address. Falls back to the deployment's own secret so it
+ * is never unsalted; if neither exists there is no hash and the device cap stands alone,
+ * which is where this started rather than somewhere worse.
+ */
+function clientFingerprint(request: Request): string | null {
+  const hop = (request.headers.get('x-forwarded-for') ?? '').split(',')[0].trim()
+  if (!hop) return null
+  const salt = process.env.CLIENT_HASH_SALT ?? process.env.FEEDBACK_ADMIN_KEY ?? ''
+  if (!salt) return null
+  return createHash('sha256').update(salt + '|' + hop).digest('base64url').slice(0, 32)
+}
 
 export async function GET() {
   /*
@@ -46,7 +105,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'off', why: 'The translator is not switched on.' }, { status: 503 })
   }
 
-  let body: { text?: unknown; register?: unknown; keep?: unknown }
+  let body: { text?: unknown; register?: unknown; keep?: unknown; image?: unknown }
   try {
     body = (await request.json()) as typeof body
   } catch {
@@ -67,9 +126,33 @@ export async function POST(request: Request) {
     return NextResponse.json({ kept: ok })
   }
 
+  /*
+    A PHOTOGRAPH IS AN ASK, and it comes through here rather than through a route of its own.
+
+    Everything below this line — the meter, the per-caller cap, the deployment ceiling, the
+    row that is both the record and the meter — exists because this is the one place in DUB
+    where a stranger can spend money. A second endpoint would have to say all of it again,
+    and the two would drift; the first thing to drift would be the cap.
+
+    One ask per photograph, whatever is on it. A menu costs a learner one of their day's
+    allowance rather than one per line, which is both kinder and the only version that is
+    affordable.
+  */
+  const photo = typeof body.image === 'string' ? body.image : ''
+  const shot = photo ? readPhoto(photo) : null
+  if (photo && !shot) {
+    return NextResponse.json(
+      {
+        error: 'bad photo',
+        why: 'That did not arrive as a photograph we can read. Try taking it again.',
+      },
+      { status: 400 },
+    )
+  }
+
   const text = typeof body.text === 'string' ? body.text.trim() : ''
-  if (!text) return NextResponse.json({ error: 'empty' }, { status: 400 })
-  if (text.length > MAX_CHARS) {
+  if (!text && !shot) return NextResponse.json({ error: 'empty' }, { status: 400 })
+  if (!shot && text.length > MAX_CHARS) {
     return NextResponse.json(
       {
         error: 'too long',
@@ -91,9 +174,25 @@ export async function POST(request: Request) {
     cap is the only thing between a text box and somebody else's money, so a meter that
     cannot be read stops the feature rather than quietly uncapping it.
   */
+  const client = clientFingerprint(request)
+
   let already = 0
   try {
-    already = await translationsToday(device)
+    already = await translationsToday(device, client)
+    /*
+      The ceiling is checked with the meter and fails the same way, because a ceiling that
+      is skipped when the count is unavailable is not a ceiling.
+    */
+    const everywhere = await translationsEverywhereToday()
+    if (everywhere !== null && everywhere >= MAX_EVERYWHERE) {
+      return NextResponse.json(
+        {
+          error: 'ceiling',
+          why: 'The translator has done all it is doing today. Nothing is wrong with your ask — this is ours.',
+        },
+        { status: 503 },
+      )
+    }
   } catch {
     return NextResponse.json(
       {
@@ -124,7 +223,55 @@ export async function POST(request: Request) {
       platform's own timeout — which is a spinner that never resolves.
     */
     const controller = new AbortController()
-    const bail = setTimeout(() => controller.abort(), 12_000)
+    /*
+      A photograph gets longer, because it is doing more.
+
+      Twelve seconds is the right ceiling for a sentence typed in a shop. Reading a menu is
+      a bigger call and a slower one, and aborting a photograph at twelve seconds would
+      spend the money and then show a failure — the worst of both. Twenty-five is still
+      inside the platform's own timeout.
+    */
+    const bail = setTimeout(() => controller.abort(), shot ? 25_000 : 12_000)
+
+    if (shot) {
+      const seen = await readImage({
+        image: shot.data,
+        media: shot.media,
+        register,
+        signal: controller.signal,
+      }).finally(() => clearTimeout(bail))
+
+      /*
+        Recorded like any other ask, because it IS one — it is the row the meter counts.
+
+        `ask` says what was asked rather than storing the photograph: DUB has no use for a
+        picture of somebody's lunch, and a table of them is a retention question nobody
+        wants. The Portuguese that came back is kept, because that is the part a learner
+        may want again.
+      */
+      try {
+        await recordTranslation(
+          device,
+          user?.id ?? null,
+          {
+            ask: 'a photograph',
+            answer: seen.lines.map((l) => l.pt).join(' / '),
+            note: seen.note,
+            direction: 'pt-en',
+          },
+          client,
+        )
+      } catch {
+        /* The reading still happened. */
+      }
+
+      return NextResponse.json({
+        lines: seen.lines,
+        note: seen.note,
+        left: Math.max(0, MAX_PER_DAY - already - 1),
+      })
+    }
+
     const result = await translate({ text, register, signal: controller.signal }).finally(() =>
       clearTimeout(bail),
     )
@@ -138,12 +285,17 @@ export async function POST(request: Request) {
     */
     let id: number | null = null
     try {
-      const written = await recordTranslation(device, user?.id ?? null, {
+      const written = await recordTranslation(
+        device,
+        user?.id ?? null,
+        {
         ask: text,
         answer: result.pt,
         note: result.note,
         direction: result.direction,
-      })
+        },
+        client,
+      )
       id = written.id
     } catch {
       /* The translation still happened. */

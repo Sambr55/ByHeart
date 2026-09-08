@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
 import { Tick } from '@/components/Tick'
 import { slugFor } from '@/content/audio-manifest'
+import { Lens } from '@/components/Lens'
 import { registerFor } from '@/content/roots'
 import { track } from '@/engine/analytics'
 import { keepAsk, loadLearner } from '@/engine/learner'
@@ -40,6 +41,8 @@ export function Translator() {
   const [result, setResult] = useState<Result | null>(null)
   const [why, setWhy] = useState('')
   const [kept, setKept] = useState(false)
+  /** The camera, over the panel rather than instead of it — CLOSE goes back to the box. */
+  const [lens, setLens] = useState(false)
   const box = useRef<HTMLTextAreaElement>(null)
 
   /*
@@ -110,6 +113,12 @@ export function Translator() {
   const path = usePathname()
   useEffect(() => {
     setOpen(false)
+    /*
+      And the camera with it. The Lens unmounts either way — it lives inside this panel's
+      tree — but saying so here means the camera is never left running by a code path
+      somebody adds later that closes the panel a different way.
+    */
+    setLens(false)
   }, [path])
 
   // Esc closes, because a panel over the whole screen that only closes by aiming at a
@@ -117,11 +126,14 @@ export function Translator() {
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key !== 'Escape') return
+      // The camera is on top, so it is what Escape means while it is open.
+      if (lens) setLens(false)
+      else setOpen(false)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+  }, [open, lens])
 
   if (!on || !setUp) return null
 
@@ -238,6 +250,37 @@ export function Translator() {
     >
       <header className="bar flex items-center justify-between gap-3 px-5 py-3">
         <p className="eyebrow">HOW DO I SAY</p>
+        <span className="flex-1" />
+        {/*
+          The camera lives with the translator because it IS the translator.
+
+          A menu is the same question as the text box — what does this say, and how would I
+          say it — asked by pointing instead of typing. Giving it a tab of its own would put
+          two doors on one room, and it is metered out of the same daily allowance, so it
+          belongs where a learner can see what it costs them.
+        */}
+        <button
+          type="button"
+          aria-label="Read something with the camera"
+          data-testid="translator-lens"
+          onClick={() => {
+            track('lens_opened', {})
+            setLens(true)
+          }}
+          className="tap-target eyebrow px-2 opacity-80"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            aria-hidden
+          >
+            <path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <circle cx="12" cy="12.5" r="3.5" />
+          </svg>
+        </button>
         <button
           type="button"
           data-testid="translator-close"
@@ -247,6 +290,8 @@ export function Translator() {
           CLOSE
         </button>
       </header>
+
+      {lens ? <Lens onClose={() => setLens(false)} /> : null}
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-y-auto px-5 py-6">
         <div className="flex flex-col gap-3">
