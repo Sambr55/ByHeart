@@ -1624,7 +1624,7 @@ export function Card({
                     GOT IT
                   </button>
                 </div>
-              ) : card.kind === 'intro' && card.intro.only !== 'in' ? (
+              ) : card.kind === 'intro' && (card.intro.only !== 'in' || card.intro.pillar) ? (
                 /*
                   Nothing to open, so nothing offering to open.
 
@@ -1638,6 +1638,17 @@ export function Card({
                   The destination card had a TAP TO OPEN under a list that fires by itself,
                   so the one thing on screen that looked like the action was not it. Swipe-up
                   and swipe-left cards had one too, offering an action they refuse.
+
+                  And none on a PILLAR, which draws its gesture instead. A card carrying
+                  the moving arrow plus a button underneath gives two instructions for one
+                  act, and the arrow is the one that matches the rail.
+
+                  Keyed on `pillar` rather than on having a gesture, because intro_in has
+                  both a gesture and a button and must keep the button: its headline is
+                  "Tap a card to open it. Or swipe right." — it is the card that TEACHES
+                  tapping, so taking the button off it would contradict its own copy. A
+                  pillar is making an argument about the product, not demonstrating a
+                  control. Tapping still works either way; reveal() is bound to the card.
                 */
                 <div className="mb-3 mt-6" />
               ) : isDemo ? (
@@ -2176,7 +2187,21 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
     if (shows.kind === 'exchange') return shows.exchange.map((e) => ({ pt: e.pt, en: e.en }))
     if (shows.kind === 'root') {
       const r = ROOTS.find((x) => x.root_id === shows.root_id)
-      return r ? [{ pt: r.target, en: r.source }] : []
+      /*
+        THE LINE AS PEOPLE KNOW IT, not a paraphrase of what it means.
+
+        This read `source`, which is the meaning gloss — for tg_goose, "Say something. I
+        need you with me." True, and it undercuts the only claim the card makes. The card
+        says you already recognise this; showing an explanation of the line instead of the
+        line hands somebody a sentence they have never heard and asks them to take the
+        recognition on trust. `root_display` is the line itself — "Talk to me, Goose." —
+        which is the whole proof.
+
+        Both cards on this path are the same shape (ah_enjoy: "Enjoy your life", not "Make
+        the most of your life"), so this is the general fix and not a special case. The
+        fallback keeps the old field for any root that has no display line.
+      */
+      return r ? [{ pt: r.target, en: r.root_display ?? r.source }] : []
     }
     if (shows.kind === 'legend') {
       /*

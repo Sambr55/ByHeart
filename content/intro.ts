@@ -186,10 +186,24 @@ export const INTRO_CARDS: IntroCard[] = [
     image: 'intro_vibes_card',
     // Tap or swipe right, and it goes to the demo — which is the thing it is describing.
     only: 'in',
+    /*
+      The gesture is drawn, not offered as a button.
+
+      This card had TAP TO OPEN under it, which is the fallback every intro card without a
+      declared gesture gets. On the one card whose whole job is to hand somebody the demo,
+      a static button teaches the wrong thing: the rail is a swipe product, and the arrow
+      that moves is what says so. `gesture: 'in'` renders the right-pointing arrow with the
+      nudge-right animation and the label "Tap, or swipe right" — the same affordance the
+      other guided cards use, so the instruction is consistent across the sequence rather
+      than being a button here and an arrow three cards earlier.
+
+      Tapping still works: reveal() is bound to the card, not to the button that was here.
+    */
+    gesture: 'in',
     pillar: true,
     eyebrow: 'VIBES',
     headline: 'Learn from what you have already seen a hundred times.',
-    body: 'Top Gun, Bond, Bridget Jones. You do not learn the line — you recognise it, and keep a word out of it that works everywhere.',
+    body: 'Top Gun, Bridget Jones, Bond. You don’t learn the line — you recognise it, and keep a word or two that works everywhere.',
     /*
       The Goose line, because it is the one the whole product rests on.
 
