@@ -1503,8 +1503,8 @@ export function Card({
                   <p className="pt mt-1 text-sm text-white/80">{card.card.because}</p>
                   <div className="mt-3 flex items-center gap-3">
                     <AudioButton slug={slugFor(card.card.target)} text={card.card.target} />
-                    <CopyButton text={card.card.target} />
                     <p className="pt display text-balance text-4xl">{card.card.target}</p>
+                    <CopyButton text={card.card.target} />
                   </div>
                   <p className="mt-1 text-sm text-white/80">{card.card.en}</p>
                 </>
@@ -1513,8 +1513,8 @@ export function Card({
                   <p className="eyebrow text-white/70">WORTH HAVING</p>
                   <div className="mt-3 flex items-center gap-3">
                     <AudioButton slug={slugFor(card.piece.target)} text={card.piece.target} />
-                    <CopyButton text={card.piece.target} />
                     <p className="pt display text-balance text-4xl">{title}</p>
+                    <CopyButton text={card.piece.target} />
                   </div>
                   <p className="mt-1 text-sm text-white/80">{card.piece.gloss}</p>
                 </>
@@ -1886,8 +1886,8 @@ function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
           <li key={l.pt} className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
             <div className="flex items-center gap-3">
               <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
+              <p className="pt min-w-0 flex-1 text-lg text-accent">{l.pt}</p>
               <CopyButton text={l.pt} size="sm" />
-              <p className="pt min-w-0 text-lg text-accent">{l.pt}</p>
             </div>
             <p className="text-sm text-fg/80">{l.en}</p>
             <p className="text-xs leading-relaxed text-muted">{l.when}</p>
@@ -1940,11 +1940,11 @@ function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
         <div className="border-t border-line pt-6">
           <div className="flex items-start gap-3">
             <AudioButton slug={slugFor(d.target)} text={d.target} />
-            <CopyButton text={d.target} />
             <span className="min-w-0">
               <span className="pt display block text-2xl text-accent">{d.target}</span>
               <span className="mt-1 block text-sm text-muted">{d.en}</span>
             </span>
+            <CopyButton text={d.target} />
           </div>
           {/* The provenance line, written by hand for all sixty-eight of these. It is the
               compounding claim made concrete, and it is the reason these are the best
@@ -1961,11 +1961,11 @@ function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
         <p className="eyebrow text-muted">YOU HAVE</p>
         <div className="mt-3 flex items-center gap-3">
           <AudioButton slug={slugFor(d.from.target)} text={d.from.target} size="sm" />
-          <CopyButton text={d.from.target} size="sm" />
           <span className="min-w-0">
             <span className="pt block text-xl">{d.from.target}</span>
             <span className="block text-xs text-muted">{d.from.gloss}</span>
           </span>
+          <CopyButton text={d.from.target} size="sm" />
         </div>
       </div>
 
@@ -1973,11 +1973,11 @@ function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
         <p className="eyebrow text-accent">AND NOW</p>
         <div className="mt-3 flex items-center gap-3">
           <AudioButton slug={slugFor(d.target)} text={d.target} />
-          <CopyButton text={d.target} />
           <span className="min-w-0">
             <span className="pt display block text-3xl text-accent">{d.target}</span>
             <span className="mt-1 block text-sm text-muted">{d.en}</span>
           </span>
+          <CopyButton text={d.target} />
         </div>
         <p className="mt-6 text-sm leading-relaxed text-fg/85">{d.note}</p>
       </div>
@@ -2075,8 +2075,8 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
       <div className="border-t border-line pt-6">
         <div className="flex items-center gap-3">
           <AudioButton slug={slugFor(card.taste.pt)} text={card.taste.pt} />
+          <span className="pt display min-w-0 flex-1 text-2xl text-accent">{card.taste.pt}</span>
           <CopyButton text={card.taste.pt} />
-          <span className="pt display min-w-0 text-2xl text-accent">{card.taste.pt}</span>
         </div>
         <p className="mt-6 text-sm leading-relaxed text-fg/85">{card.taste.why}</p>
       </div>
@@ -2224,8 +2224,8 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
             <span className="text-sm text-muted">“{e.asked}”</span>
             <span className="flex items-center gap-3">
               <AudioButton slug={slugFor(e.pt)} text={e.pt} size="sm" />
+              <span className="pt display min-w-0 flex-1 text-lg text-accent">{e.pt}</span>
               <CopyButton text={e.pt} size="sm" />
-              <span className="pt display min-w-0 text-lg text-accent">{e.pt}</span>
             </span>
           </li>
         ))}
@@ -2290,8 +2290,8 @@ function Explains({ card }: { card: Extract<FeedCard, { kind: 'explainer' }> }) 
           <p className="text-sm text-muted">“{e.say.en}”</p>
           <div className="mt-3 flex items-center gap-3">
             <AudioButton slug={slugFor(e.say.pt)} text={e.say.pt} />
+            <span className="pt display min-w-0 flex-1 text-2xl text-accent">{e.say.pt}</span>
             <CopyButton text={e.say.pt} />
-            <span className="pt display min-w-0 text-2xl text-accent">{e.say.pt}</span>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-muted">{e.say.note}</p>
         </div>
@@ -2333,8 +2333,8 @@ function Asked({ card }: { card: Extract<FeedCard, { kind: 'asked' }> }) {
       <p className="text-sm text-muted">“{card.ask.en}”</p>
       <div className="flex items-center gap-3">
         <AudioButton slug={slugFor(card.ask.pt)} text={card.ask.pt} />
-        <CopyButton text={card.ask.pt} />
         <p className="pt display text-balance text-2xl text-accent">{card.ask.pt}</p>
+        <CopyButton text={card.ask.pt} />
       </div>
       {card.ask.note ? (
         <p className="text-sm leading-relaxed text-muted">{card.ask.note}</p>
@@ -2352,8 +2352,8 @@ function Word({ card }: { card: Extract<FeedCard, { kind: 'vocab' }> }) {
       <p className="eyebrow text-muted">THE WORD</p>
       <div className="flex items-center gap-3">
         <AudioButton slug={slugFor(card.piece.target)} text={card.piece.target} />
-        <CopyButton text={card.piece.target} />
         <p className="pt display text-balance text-3xl text-accent">{vocabWord(card.piece)}</p>
+        <CopyButton text={card.piece.target} />
       </div>
       <p className="text-sm text-fg/85">{card.piece.gloss}</p>
       {card.piece.note ? (

@@ -874,7 +874,6 @@ function EntryRow({
         <div className="mt-1 flex flex-col gap-3 rounded border border-line bg-bg-elev px-4 py-3">
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(head.target)} text={head.target} size="sm" />
-            <CopyButton text={head.target} size="sm" />
             <span className="min-w-0">
               <span className="pt block text-lg text-accent">{displayForm(head)}</span>
               <span className="block text-xs text-muted">
@@ -883,6 +882,7 @@ function EntryRow({
                 {head.plural ? ' · pl. ' + head.plural : ''}
               </span>
             </span>
+            <CopyButton text={head.target} size="sm" />
           </div>
 
           <p className="eyebrow text-muted">
@@ -935,11 +935,11 @@ function EntryRow({
                 {lines.map((l) => (
                   <li key={l.target} className="flex items-center gap-3">
                     <AudioButton slug={slugFor(l.target)} text={l.target} size="sm" />
-                    <CopyButton text={l.target} size="sm" />
-                    <span className="min-w-0">
+                    <span className="min-w-0 flex-1">
                       <span className="pt block text-sm">{l.target}</span>
                       <span className="block text-xs text-muted">{l.en}</span>
                     </span>
+                    <CopyButton text={l.target} size="sm" />
                   </li>
                 ))}
               </ul>

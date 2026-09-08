@@ -87,9 +87,17 @@ export function Translator() {
   */
   const setUp = Boolean(learner.deal_accepted_at)
 
-  useEffect(() => {
-    if (open) box.current?.focus()
-  }, [open])
+  /*
+    THE KEYBOARD NO LONGER COMES UP BY ITSELF.
+
+    Focusing the box on open was right when typing was the only way to ask. There are two
+    ways now, and forcing the keyboard up hides the lower half of the panel — including the
+    camera button, which is the one somebody was told to look for. Reported with a
+    screenshot of exactly that: a keyboard covering the thing the message pointed at.
+
+    Tapping the box still opens it, which is the gesture everybody already has. What has
+    gone is the product deciding on somebody's behalf which of its two doors they wanted.
+  */
 
   /*
     Opened from elsewhere, because the feed asks from its own rail.
@@ -246,9 +254,40 @@ export function Translator() {
       data-testid="translator"
       role="dialog"
       aria-label="How do I say"
+      /*
+        TWO THINGS AT ONCE, AND THE FIRST ATTEMPT TRADED ONE FOR THE OTHER.
+
+        Nothing may show through beneath the panel, and the bar must stay tappable — it is
+        how you leave. This was bounded to `bottom: bar-room + keyboard`, which kept the bar
+        clear and, the moment a keyboard opened, lifted the panel's own floor with it: the
+        screen underneath showed through the gap. Reported as "the residue of the previous
+        calendar screen", and it is why tapping out was temperamental — the thing being
+        tapped was a live calendar below the panel rather than the panel.
+
+        Making the panel full height fixed the hole and broke the bar, which the gate caught
+        immediately. So the two jobs are split rather than traded: the panel's BOX stops
+        above the bar exactly as it did, and a fill sits behind it covering the keyboard's
+        strip, so there is nothing to see through and nothing over the bar.
+      */
       className="fixed inset-x-0 top-0 z-50 flex flex-col bg-bg text-fg"
       style={{ bottom: 'calc(var(--bar-room) + var(--keyboard))' }}
     >
+      {/*
+        THE GROUND UNDER THE KEYBOARD'S STRIP.
+
+        The panel stops above the bar so the bar stays reachable, which leaves the band a
+        keyboard occupies uncovered — and on the way in and out of that keyboard, the screen
+        beneath was visible in it. This is a plain fill, pinned behind everything, ending
+        where the bar begins: it cannot take a tap and it cannot cover the bar, it simply
+        means there is never a window onto the last screen.
+      */}
+      <span
+        aria-hidden
+        data-testid="translator-floor"
+        className="pointer-events-none fixed inset-x-0 z-[1] bg-bg"
+        style={{ top: 'auto', bottom: 'var(--bar-room)', height: 'var(--keyboard)' }}
+      />
+
       <header className="bar flex items-center justify-between gap-3 px-5 py-3">
         <p className="eyebrow">HOW DO I SAY</p>
         <span className="flex-1" />

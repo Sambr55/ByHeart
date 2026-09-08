@@ -91,8 +91,8 @@ export function DemoCard({ onBeat }: { onBeat?: (beat: number) => void } = {}) {
           */}
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(recognise.translation.pt)} text={recognise.translation.pt} />
+            <p className="pt display min-w-0 flex-1 text-balance text-3xl">{recognise.translation.pt}</p>
             <CopyButton text={recognise.translation.pt} />
-            <p className="pt display min-w-0 text-balance text-3xl">{recognise.translation.pt}</p>
           </div>
           <p className="text-sm text-white/80">{recognise.translation.en}</p>
           <div className="border-t border-white/25 pt-6">

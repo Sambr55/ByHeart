@@ -73,6 +73,28 @@ console.log('\nand it copies the Portuguese, nothing else\n')
     'silence would read as failure',
   )
   /*
+    IN WORDS, NOT ONLY AS A CHANGED ICON.
+
+    A tick where the icon was is the quietest possible acknowledgement, and the clipboard is
+    invisible — so somebody not looking at that exact icon at that exact moment learns
+    nothing. role=status carries it to a screen reader as well, which a colour change cannot.
+  */
+  ok(
+    'and it says so in words a screen reader can hear',
+    /data-testid="copy-said"/.test(src) && /role="status"/.test(src),
+    'a changed icon is not a message',
+  )
+  /*
+    And the message clears the bar and the keyboard, using the same two values .app-frame
+    does — a confirmation rendered underneath the navigation is the lamp-under-a-table bug
+    the feed's own toast had.
+  */
+  ok(
+    'and it sits above the bar rather than under it',
+    /var\(--bar-room\) \+ var\(--keyboard\)/.test(src),
+    'a message nobody can see is worse than no message',
+  )
+  /*
     A phone that refuses the modern API still gets the sentence. navigator.clipboard needs a
     secure context and, on some iOS versions, a gesture the browser agrees was one.
   */

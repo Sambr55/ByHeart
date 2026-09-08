@@ -73,11 +73,41 @@ export function CopyButton({
     track('sentence_copied', { chars: text.length })
     setDone(true)
     if (timer.current) clearTimeout(timer.current)
-    /* Long enough to be read as an answer, short enough that the row goes back to normal. */
-    timer.current = setTimeout(() => setDone(false), 1200)
+    /* Long enough to read a sentence, not long enough to sit in the way. */
+    timer.current = setTimeout(() => setDone(false), 1600)
   }
 
   return (
+    <>
+      {/*
+        SAID OUT LOUD, not only drawn.
+
+        The icon turning into a tick is the acknowledgement a row can hold, and it is too
+        quiet for the thing that just happened: the clipboard is invisible, so somebody who
+        does not happen to be looking at the icon at that instant has no idea whether the
+        tap worked. Asked for directly — "add a copied to clipboard success message".
+
+        Fixed to the foot of the screen rather than placed in the row, because copy appears
+        on twenty-six rows across seven screens and a per-row message would need threading
+        through every one of them. It also belongs where the eye goes when something has
+        been done rather than where the finger happens to be.
+
+        role=status so a screen reader hears it too. Without it the only feedback is a
+        colour change on an icon nobody is looking at.
+      */}
+      {done ? (
+        <p
+          role="status"
+          data-testid="copy-said"
+          className="animate-bank fixed inset-x-0 bottom-0 z-50 px-5 py-3 text-center text-sm text-white"
+          style={{
+            marginBottom: 'calc(var(--bar-room) + var(--keyboard))',
+            background: 'rgb(0 0 0 / 0.85)',
+          }}
+        >
+          Copied. Paste it wherever you need it.
+        </p>
+      ) : null}
     <button
       type="button"
       data-testid="copy-pt"
@@ -99,5 +129,6 @@ export function CopyButton({
         </svg>
       )}
     </button>
+    </>
   )
 }

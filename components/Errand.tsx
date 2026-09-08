@@ -80,8 +80,8 @@ export function Errand({ situation }: { situation: Situation }) {
               <li key={l.pt} className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
                 <div className="flex items-center gap-3">
                   <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
+                  <p className="pt min-w-0 flex-1 text-lg text-accent">{l.pt}</p>
                   <CopyButton text={l.pt} size="sm" />
-                  <p className="pt min-w-0 text-lg text-accent">{l.pt}</p>
                 </div>
                 <p className="text-sm text-fg/80">{l.en}</p>
                 <p className="text-xs leading-relaxed text-muted">{l.when}</p>
@@ -125,8 +125,8 @@ export function Errand({ situation }: { situation: Situation }) {
             <p className="text-sm text-muted">{situation.release.ask}</p>
             <div className="flex items-center gap-3">
               <AudioButton slug={slugFor(situation.release.answer)} text={situation.release.answer} />
-              <CopyButton text={situation.release.answer} />
               <p className="pt text-balance text-2xl text-accent">{situation.release.answer}</p>
+              <CopyButton text={situation.release.answer} />
             </div>
           </div>
           {/*

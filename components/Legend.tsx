@@ -1036,8 +1036,8 @@ function RunThrough({
           <p className="eyebrow text-muted">YOURS</p>
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(answer)} text={answer} size="sm" />
+            <p className="pt min-w-0 flex-1 text-base text-accent">{answer}</p>
             <CopyButton text={answer} size="sm" />
-            <p className="pt min-w-0 text-base text-accent">{answer}</p>
           </div>
         </div>
       ) : null}

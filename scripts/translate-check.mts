@@ -174,17 +174,34 @@ console.log('\nthe panel leaves the bar alone\n')
   await page.waitForTimeout(1400)
   await page.click('[data-testid="tab-ask"]')
   await page.waitForSelector('[data-testid="translator"]')
-  const clear = (await page.evaluate(
+  /*
+    MEASURED ON WHAT IS UNDERNEATH IT, NOT ON WHERE ITS BOX ENDS.
+
+    This asserted the panel's rectangle stopped above the bar — which was how the clearance
+    happened to be built, not the property worth holding. Ending the box above the bar also
+    ended it above the KEYBOARD, so the moment one opened the panel's floor rose with it and
+    the screen underneath showed through the gap. Reported as "the residue of the previous
+    calendar screen", and it made tapping out temperamental too: the thing being tapped was
+    a live screen visible below the panel rather than the panel.
+
+    The panel is full height now with the clearance held as padding, so its box legitimately
+    reaches the bar. The two things that must be true are that nothing shows through it and
+    that it does not cover the bar — and both are hit tests rather than arithmetic.
+  */
+  const seeThrough = (await page.evaluate(
     `(() => {
-      const panel = document.querySelector('[data-testid="translator"]').getBoundingClientRect()
+      const panel = document.querySelector('[data-testid="translator"]')
       const bar = document.querySelector('[data-testid="bottom-nav"]').getBoundingClientRect()
-      return { gap: Math.round(bar.top - panel.bottom), barTop: Math.round(bar.top) }
+      /* Just above the bar, where the gap opened: is the panel still the thing there? */
+      const y = bar.top - 8
+      const hit = document.elementFromPoint(window.innerWidth / 2, y)
+      return hit ? !panel.contains(hit) && hit !== panel : true
     })()`,
-  )) as { gap: number; barTop: number }
+  )) as boolean
   ok(
-    'the panel stops above the bar',
-    clear.gap >= 0,
-    clear.gap + 'px between them',
+    'nothing shows through beneath the panel',
+    !seeThrough,
+    'a panel that ends above the keyboard is a window onto what it was covering',
   )
   const covered = (await page.evaluate(
     `(() => {
