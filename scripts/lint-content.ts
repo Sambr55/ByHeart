@@ -11,6 +11,7 @@
  */
 
 import { existsSync, readFileSync } from 'node:fs'
+import { INTRO_CARDS } from '../content/intro'
 import { join } from 'node:path'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
 import { DUB, DUB_CLUB, DUB_MARK } from '../content/marks'
@@ -1618,6 +1619,90 @@ for (const e of EXAMPLES) {
 
 // --- report ----------------------------------------------------------------
 const screenCount = MISSION_ORDER.reduce((n, m) => n + MISSIONS[m].screens.length, 0)
+/*
+  THE RAIL, KEPT HONEST.
+
+  The intro's guided cards carry one field — `exit` — and everything else about the rail is
+  derived from it. That is a recent simplification: there used to be a second field naming
+  the arrow to draw, the two always agreed across all eleven cards, and the conditions
+  reading them were disjunctions whose second term could never decide anything.
+
+  These three rules stop the shape drifting back. They are cheap because the file is small
+  and the rules are about the SET of cards rather than any one of them, which is exactly the
+  kind of fact no single card's author can see.
+*/
+{
+  const guided = INTRO_CARDS.filter((c) => c.exit)
+
+  /*
+    1. A card that asks a question answers it on its own face.
+
+    `asks: 'where'` renders Destination, which advances by itself when a city is picked —
+    so the card must be locked, or the learner can swipe past a question the rail is
+    waiting on. And `exit: 'choose'` without an `asks` is a genuine dead end: the gesture
+    that would free it is a component that is not on the card.
+
+    Neither combination exists today. This is what pins that.
+  */
+  for (const c of INTRO_CARDS) {
+    if (c.asks && c.exit !== 'choose') {
+      errors.push('intro ' + c.id + ' asks a question but is not locked to it (exit: ' + String(c.exit) + ')')
+    }
+    if (c.exit === 'choose' && !c.asks) {
+      errors.push('intro ' + c.id + " has exit: 'choose' and nothing to choose — no way off the card")
+    }
+  }
+
+  /*
+    2. Each gesture is INTRODUCED before it is used again.
+
+    My first version of this rule counted cards per exit kind and failed, correctly finding
+    two `in` cards — and the rule was wrong, not the content. intro_in TEACHES the gesture
+    ("Tap a card to open it. Or swipe right."); intro_vibes USES it, three cards later, to
+    reach the demo. Repeating a gesture on purpose is how a rail stops being a tutorial.
+
+    What must not happen is the reverse: a card requiring a gesture the rail has not taught
+    yet, which is somebody stuck on a card with no idea what to do. So this is about order,
+    not count — the first card demanding a gesture must be the one whose own copy is about
+    that gesture.
+  */
+  const teaches: Record<string, RegExp> = {
+    up: /swipe up/i,
+    away: /swipe left/i,
+    in: /swipe right|tap a card/i,
+  }
+  for (const kind of ['up', 'away', 'in']) {
+    const first = INTRO_CARDS.find((c) => c.exit === kind)
+    if (!first) continue
+    if (!teaches[kind].test(first.headline)) {
+      errors.push(
+        'the first card demanding ' + kind + ' is ' + first.id +
+          ', whose headline does not teach it: "' + first.headline + '"',
+      )
+    }
+  }
+
+  /*
+    3. `pillar` stays out of gesture code.
+
+    It is typography — a headline-sized eyebrow — and it was borrowed once to decide
+    whether a card showed a CTA button. That rule then flip-flopped across two releases,
+    which is what a field answering a question it is not about produces. The borrow is
+    undone; this stops it being re-borrowed.
+
+    Read from the source rather than reasoned about, because the point is to catch the
+    edit, not the intention.
+  */
+  const feed = readFileSync('components/Feed.tsx', 'utf8')
+  const gestureRegion = feed.slice(
+    Math.max(0, feed.indexOf('const gate =')),
+    feed.indexOf('const inHand ='),
+  )
+  if (/\bintro\.pillar\b/.test(gestureRegion)) {
+    errors.push('components/Feed.tsx decides a gesture from `pillar`, which is typography')
+  }
+}
+
 console.log(
   MISSION_ORDER.length +
     ' missions · ' +

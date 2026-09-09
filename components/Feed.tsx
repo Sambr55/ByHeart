@@ -427,7 +427,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
   const [atIndex, setAtIndex] = useState(0)
   const lockedNow = useMemo(() => {
     const card = cards[atIndex]
-    if (!card || card.kind !== 'intro' || !card.intro.only) return null
+    if (!card || card.kind !== 'intro' || !card.intro.exit) return null
     return freed.includes(card.id) ? null : card.id
   }, [atIndex, cards, freed])
 
@@ -954,7 +954,17 @@ export function Card({
   */
   const reveal = () => {
     claim()
-    if (card.kind === 'intro' && card.intro.only === 'in') onFreed?.(card.id)
+    /*
+      The unlock that used to be here could not be reached.
+
+      `reveal` is bound to three buttons and to nothing else, and an intro card renders
+      none of them — it takes the no-button branch below. So the line freeing an exit:'in'
+      card from inside reveal() was residue from when that branch was conditional. Verified
+      by driving the intro: every card with an arrow has no card-continue button.
+
+      A locked card is freed by the gesture landing, in onUp — which is where the tap is
+      handled too, so tapping still works. See the note above `done`.
+    */
     /*
       One lane left, not lane zero.
 
@@ -997,7 +1007,7 @@ export function Card({
     anything. Everything else is ignored rather than resisted, which is what makes the card
     feel like it is waiting rather than broken.
   */
-  const gate = card.kind === 'intro' ? card.intro.only : undefined
+  const gate = card.kind === 'intro' ? card.intro.exit : undefined
   const locked = Boolean(gate) && !freedHere
 
   /*
@@ -1226,7 +1236,7 @@ export function Card({
       rejectCard(card.id)
       track('card_rejected', { card: card.id })
       // The lesson is the doing. Rejecting the reject card is what proves it landed.
-      if (card.kind === 'intro' && card.intro.only === 'away') onFreed?.(card.id)
+      if (card.kind === 'intro' && card.intro.exit === 'away') onFreed?.(card.id)
       onRejected?.()
       // Back to the face, so the card that takes this one's place is not showing its lane.
       el.scrollTo({ left: el.clientWidth * faceLane, behavior: 'auto' })
@@ -1242,7 +1252,7 @@ export function Card({
     if (
       el.scrollLeft < el.clientWidth * (faceLane - 0.5) &&
       card.kind === 'intro' &&
-      card.intro.only === 'in'
+      card.intro.exit === 'in'
     ) {
       onFreed?.(card.id)
     }
@@ -1473,8 +1483,23 @@ export function Card({
                     >
                       {blurb}
                     </p>
-                    {card.intro.gesture ? (
-                      <Gesture kind={card.intro.gesture} moving={Boolean(card.intro.only) || card.intro.gesture === 'up'} />
+                    {/*
+                      The arrow IS the exit, drawn.
+
+                      This read a separate `gesture` field and asked
+                      `Boolean(only) || gesture === 'up'` for whether it should move. Both
+                      terms were dead weight: every card that declares an exit declares the
+                      same value for both fields — eleven cards, no exceptions — so the
+                      second disjunct's set was empty and the first restated `exit` itself.
+                      Two fields for one fact, and a condition that read as a choice while
+                      deciding nothing.
+
+                      Derived now, which is what makes it impossible for the drawn arrow and
+                      the allowed gesture to disagree. 'choose' draws nothing, because on
+                      that card choosing IS the gesture and the cities are on the face.
+                    */}
+                    {card.intro.exit && card.intro.exit !== 'choose' ? (
+                      <Gesture kind={card.intro.exit} moving />
                     ) : null}
                     {card.intro.shows ? <Specimen shows={card.intro.shows} /> : null}
                     {/*
@@ -1637,7 +1662,7 @@ export function Card({
                     GOT IT
                   </button>
                 </div>
-              ) : card.kind === 'intro' && (card.intro.only !== 'in' || card.intro.gesture) ? (
+              ) : card.kind === 'intro' ? (
                 /*
                   Nothing to open, so nothing offering to open.
 

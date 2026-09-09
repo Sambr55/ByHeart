@@ -41,14 +41,6 @@ export interface IntroCard {
    */
   examples?: string[]
   /**
-   * The gesture this card is about, where it is about one.
-   *
-   * Drives an illustration rather than copy — an arrow you can look at beats a sentence
-   * describing an arrow, and these two cards exist because the grammar changed under
-   * people who already knew the old one.
-   */
-  gesture?: 'up' | 'away' | 'in'
-  /**
    * A REAL specimen from the product, shown rather than described.
    *
    * The sequence is not a trailer for the lookaround — it IS the lookaround, because the
@@ -100,7 +92,23 @@ export interface IntroCard {
    * not open a pane, it moves you on — because on these cards there is nothing behind the
    * face worth opening, and the lesson is the movement rather than the destination.
    */
-  only?: 'choose' | 'up' | 'away' | 'in'
+  /*
+    ONE FIELD, AND THE ARROW IS DERIVED FROM IT.
+
+    This was `only`, beside a second field `gesture` that named the arrow to draw. Across
+    all eleven cards the two always agreed — every card declaring an exit declared the same
+    value twice — so they were one fact wearing two names, and the conditions reading them
+    (`only !== 'in' || gesture`, `Boolean(only) || gesture === 'up'`) were disjunctions
+    whose second term could never decide anything. They read as choices and were not, which
+    is the whole of why this felt like conflicting logic.
+
+    `exit` rather than `only` because `only` reads as a quantifier — `only === 'in'` looks
+    like a test of how many, not of which. This is the one way off the card.
+
+    It also closes a hole in the language story: the arrow is derived, so a Spanish intro
+    file cannot declare a rail that differs from the one the engine enforces.
+  */
+  exit?: 'choose' | 'up' | 'away' | 'in'
   shows?:
     | { kind: 'root'; root_id: string }
     | { kind: 'drop' }
@@ -135,7 +143,7 @@ export const INTRO_CARDS: IntroCard[] = [
     id: 'intro_where',
     // Calçada: the pavement, which is the most Portuguese surface there is.
     image: 'calcada',
-    only: 'choose',
+    exit: 'choose',
     eyebrow: 'WHERE TO',
     headline: 'Where do you want DUB to take you?',
     body: 'Pick the one you are going to.',
@@ -150,11 +158,10 @@ export const INTRO_CARDS: IntroCard[] = [
       where an instruction goes to be ignored.
     */
     id: 'intro_up',
-    only: 'up',
+    exit: 'up',
     eyebrow: 'KEEP GOING',
     headline: 'Swipe up for the next card.',
     body: 'That is the whole of it. The feed goes on as long as you do.',
-    gesture: 'up',
   },
   {
     /*
@@ -166,26 +173,24 @@ export const INTRO_CARDS: IntroCard[] = [
     */
     id: 'intro_away',
     image: 'intro_away_card',
-    only: 'away',
+    exit: 'away',
     eyebrow: 'NOT THIS ONE',
     headline: 'Swipe left and it goes to the back of the pile.',
     body: 'Not gone — behind the rest, for later. Change your mind and the rewind arrow brings it straight back.',
-    gesture: 'away',
   },
   {
     id: 'intro_in',
     image: 'intro_in_card',
-    only: 'in',
+    exit: 'in',
     eyebrow: 'THIS ONE',
     headline: 'Tap a card to open it. Or swipe right.',
     body: 'Inside is the Portuguese: what to say, when to say it, and somebody saying it.',
-    gesture: 'in',
   },
   {
     id: 'intro_vibes',
     image: 'intro_vibes_card',
     // Tap or swipe right, and it goes to the demo — which is the thing it is describing.
-    only: 'in',
+    exit: 'in',
     /*
       The gesture is drawn, not offered as a button.
 
@@ -199,7 +204,6 @@ export const INTRO_CARDS: IntroCard[] = [
 
       Tapping still works: reveal() is bound to the card, not to the button that was here.
     */
-    gesture: 'in',
     pillar: true,
     eyebrow: 'VIBES',
     headline: 'Learn from what you have already seen a hundred times.',

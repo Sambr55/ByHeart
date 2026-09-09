@@ -225,7 +225,7 @@ const titles = (await page.evaluate(
   at whether scrolling moved could not tell a lock from a slow browser.
 */
 {
-  const lockedAt = INTRO_CARDS.findIndex((c) => c.only)
+  const lockedAt = INTRO_CARDS.findIndex((c) => c.exit)
   await page.evaluate(`(() => {
     const r = document.querySelector('.snap-y')
     if (r) r.scrollTop = r.clientHeight * ${lockedAt + 1}
