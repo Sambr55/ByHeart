@@ -20,11 +20,11 @@
  * a fresh device tapped COME IN and got the explainer. So both halves are asserted, and
  * the second is the one that matters.
  */
-import { chromium } from 'playwright'
+import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { cardFor } from '../content/legend'
 import { ROOTS } from '../content/roots'
-const BASE = 'http://localhost:3111'
+const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
 
 const base = {
@@ -51,6 +51,73 @@ const member = {
   })),
 }
 
+/*
+  Wait for the app, not for a number of milliseconds.
+
+  Every read here used a fixed pause tuned on localhost. Run against production and the
+  page has not rendered yet, so the bar comes back empty and a member looks locked out —
+  a catastrophic-looking failure produced entirely by latency. The same lesson shelf-check
+  learned; this waits for the screen to have decided instead.
+*/
+async function settled(p: Page) {
+  /*
+    A FIXED WAIT, ARRIVED AT HONESTLY.
+
+    Two cleverer versions of this failed against production while a standalone script doing
+    the identical navigation passed every time — so the fault was in the waiting, not in the
+    deploy, and I could not tell you exactly why the waitForFunction returned early. What is
+    measured here is a routing decision, which is cheap and happens once; a wait long enough
+    for the slowest of them on a cold Vercel response is the honest tool, and pretending to
+    a precision I could not demonstrate is how a check ends up passing for the wrong reason.
+
+    Local runs pay the same three seconds. That is a fair price for a check that means the
+    same thing in both places.
+  */
+  await p.waitForTimeout(process.env.BASE_URL ? 5000 : 2600)
+}
+
+
+/**
+ * The record AND THE PAIR, because the pair is what decides which record is read.
+ *
+ * This wrote the learner blob and cleared everything else, which wipes `byheart.pair` —
+ * so `loadLearner` looked under a different key and found nothing, and a fully seeded
+ * member read as a stranger. Against production that failed four assertions; on localhost
+ * it passed, because the journey repairs a missing pair and the dev server was quick
+ * enough for the repair to land before the check looked. A check that passes on timing is
+ * not passing.
+ *
+ * Every other check in this repo seeds the pair. This one now does too.
+ */
+async function seed(p: Page, blob: Record<string, unknown>) {
+  /*
+    SEEDED BEFORE THE APP RUNS, not on top of it.
+
+    This seeded from /vibes, which is a live page: the journey reads the record, repairs it
+    and WRITES IT BACK. So the sequence was write-seed, navigate, and the outgoing page's
+    own save landed after the seed — the record that arrived at /club was the default one,
+    with legend=[] and welcomed=null, and a fully seeded member read as a stranger. Four
+    assertions failed against production and passed on localhost, which is timing, which is
+    a check passing for the wrong reason.
+
+    addInitScript puts the values in before any of the app's own code runs on the next
+    navigation, so nothing can overwrite them on the way in. Same reason the product's own
+    checks seed and then re-navigate rather than seeding in place.
+  */
+  await p.addInitScript(
+    ([k, pair, v]) => {
+      try {
+        localStorage.clear()
+        localStorage.setItem('byheart.pair', JSON.stringify(pair))
+        localStorage.setItem(k as string, JSON.stringify(v))
+      } catch {
+        /* private mode; the assertions will say so */
+      }
+    },
+    [KEY, DEFAULT_PAIR, blob] as const,
+  )
+}
+
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
   console.log('  ' + (cond ? '✓' : '✗') + ' ' + label + (detail ? '   ' + detail : ''))
@@ -71,10 +138,9 @@ const b = await chromium.launch()
 console.log('\nbefore the Legend, every tab explains itself\n')
 for (const route of TABS) {
   const p = await b.newPage({ viewport: { width: 390, height: 844 } })
-  await p.goto(BASE + '/vibes')
-  await p.evaluate(([k, v]) => { localStorage.clear(); localStorage.setItem(k as string, JSON.stringify(v)) }, [KEY, base] as const)
+  await seed(p, base)
   await p.goto(BASE + route)
-  await p.waitForTimeout(2200)
+  await settled(p)
   const explainer = await p.isVisible('[data-testid="notyet-go"]')
   ok(route + ' explains rather than opens', explainer)
   /*
@@ -91,10 +157,9 @@ for (const route of TABS) {
 console.log('\nand Yours is empty rather than full of headings over nothing\n')
 {
   const p = await b.newPage({ viewport: { width: 390, height: 844 } })
-  await p.goto(BASE + '/vibes')
-  await p.evaluate(([k, v]) => { localStorage.clear(); localStorage.setItem(k as string, JSON.stringify(v)) }, [KEY, base] as const)
+  await seed(p, base)
   await p.goto(BASE + '/profile')
-  await p.waitForTimeout(2200)
+  await settled(p)
   /*
     The SECTIONS, not the words. My first version grepped for "been through" and failed on
     the explainer's own sentence — "the vibes you have been through" — which is a check
@@ -128,9 +193,9 @@ console.log('\nthe front door still opens, which is the half that broke\n')
   await p.goto(BASE + '/')
   await p.evaluate(() => localStorage.clear())
   await p.goto(BASE + '/')
-  await p.waitForTimeout(2400)
+  await settled(p)
   await p.click('[data-testid="landing-cta"]')
-  await p.waitForTimeout(3000)
+  await settled(p)
   const pillars = await p.$$eval('[data-testid="pillar"]', (els) => els.map((e) => (e.textContent ?? '').trim()))
   ok(
     'COME IN still reaches the sequence',
@@ -150,10 +215,9 @@ console.log('\nand Yours shows work as soon as there is any\n')
     feed-check seeds, and the one my first version of this got wrong: it told this
     learner "not yet" about their own saved words.
   */
-  await p.evaluate(([k, v]) => { localStorage.clear(); localStorage.setItem(k as string, JSON.stringify(v)) },
-    [KEY, { ...base, sections_completed: ['the_basics'], finished_cards: ['lisbon_farmacia'], saved: ['lisbon_cafe'] }] as const)
+  await seed(p, { ...base, sections_completed: ['the_basics'], finished_cards: ['lisbon_farmacia'], saved: ['lisbon_cafe'] })
   await p.goto(BASE + '/profile')
-  await p.waitForTimeout(2400)
+  await settled(p)
   ok('a learner mid-journey sees their own things', !(await p.isVisible('[data-testid="notyet-go"]')))
   const sections = await p.$$eval('main [data-testid^="section-"]', (els) => els.length)
   ok('and the sections are there', sections > 0, sections + ' sections')
@@ -163,10 +227,9 @@ console.log('\nand Yours shows work as soon as there is any\n')
 console.log('\nwith the Legend done, the tabs are the product\n')
 for (const route of [...TABS, '/profile']) {
   const p = await b.newPage({ viewport: { width: 390, height: 844 } })
-  await p.goto(BASE + '/vibes')
-  await p.evaluate(([k, v]) => { localStorage.clear(); localStorage.setItem(k as string, JSON.stringify(v)) }, [KEY, member] as const)
+  await seed(p, member)
   await p.goto(BASE + route)
-  await p.waitForTimeout(2600)
+  await settled(p)
   ok(route + ' opens for a member', !(await p.isVisible('[data-testid="notyet-go"]')))
   await p.close()
 }
@@ -174,10 +237,9 @@ for (const route of [...TABS, '/profile']) {
 console.log('\nand no tab is named after a city\n')
 {
   const p = await b.newPage({ viewport: { width: 390, height: 844 } })
-  await p.goto(BASE + '/vibes')
-  await p.evaluate(([k, v]) => { localStorage.clear(); localStorage.setItem(k as string, JSON.stringify(v)) }, [KEY, member] as const)
+  await seed(p, member)
   await p.goto(BASE + '/club')
-  await p.waitForTimeout(2400)
+  await settled(p)
   const labels = await p.$$eval('[data-testid="bottom-nav"] [data-testid^="tab-"]', (els) =>
     els.map((e) => (e.textContent ?? '').trim()))
   console.log('  bar: ' + labels.join(', '))
