@@ -27,7 +27,7 @@ import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { NotYet } from '@/components/NotYet'
 import { Wordmark } from '@/components/Wordmark'
-import { LEGEND_FRAMES } from '@/content/legend'
+import { LEGEND_FRAMES, frameApplies, frameForPurpose } from '@/content/legend'
 import { capabilities } from '@/engine/journey'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { track } from '@/engine/analytics'
@@ -35,7 +35,7 @@ import { loadLearner, setPurpose, type LearnerState, welcomeToClub } from '@/eng
 import { useLearner } from '@/engine/useLearner'
 import { useNowAfterMount } from '@/engine/useNow'
 import { Dock, Framed } from '@/components/Dock'
-import { PURPOSES } from '@/content/situations'
+import { PURPOSES, type Purpose } from '@/content/situations'
 
 /**
  * Dub Club.
@@ -303,6 +303,20 @@ export function Club() {
           legendAnswered: (learner.legend ?? [])
             .filter((a) => Object.keys(a.values).length > 0)
             .map((a) => a.frame_id),
+          /*
+            THE LEARNER'S OWN DENOMINATOR, computed here because this is where the purpose
+            is known. The move used LEGEND_FRAMES.length — eleven — against a deck that
+            opens eight for anybody who answered set-up, so `left` never reached zero and a
+            learner who had answered everything the product allows saw a permanent
+            "8 of 11" with three questions they could not action. A progress line with an
+            unreachable denominator is the opposite of a sense of building.
+          */
+          legendTotal: LEGEND_FRAMES.filter(
+            (f) =>
+              frameForPurpose(f, learner.purpose ?? null) &&
+              frameApplies(f, learner.legend ?? []),
+          ).length,
+          purpose: learner.purpose ?? null,
           legendPrompt: learner.legend_prompt ?? 'unseen',
           legendUnlocked: legendStatus({ sectionsCompleted: learner.sections_completed ?? [] }).open,
           capped,
@@ -440,6 +454,10 @@ function Moves({
     owned: number
     ownedPieces: string[]
     legendAnswered: string[]
+    /** How many questions are this learner's, which is never the size of the table. */
+    legendTotal: number
+    /** Why they are here — the Legend's own filter, and what the next crate leans on. */
+    purpose: Purpose | null
     legendPrompt: LearnerState['legend_prompt']
     legendUnlocked: boolean
     /** The picker's own allowance rule, so the two screens cannot disagree. */
@@ -482,14 +500,21 @@ function Moves({
       vibes and opens all ten at once, so the number here was from a model the page it
       links to had no concept of. Once it is open, what is left is simply what is left.
     */
-    const total = LEGEND_FRAMES.length
+    const total = learner.legendTotal
     const done = learner.legendAnswered.length
     const left = total - done
-    if (left) {
+    if (left > 0) {
       moves.push({
         key: 'legend',
         ...MOVES.legend,
-        detail: done ? done + ' of ' + total + ' answered' : 'Ten questions, one at a time',
+        /*
+          The count derived rather than typed. "Ten questions" was written when the table
+          had ten and the deck showed all of them; it is eleven now and a learner sees
+          eight, so the sentence was wrong in both directions at once.
+        */
+        detail: done
+          ? done + ' of ' + total + ' answered'
+          : total + ' questions, one at a time',
         href: '/legend',
         urgent: false,
       })
@@ -537,13 +562,41 @@ function Moves({
       guard refused, and nothing happened with no message. A home screen that offers a
       move the product will not honour is worse than one that offers nothing.
     */
-    const fresh = CRATES.find(
+    const eligible = CRATES.filter(
       (c) =>
         !c.drop &&
         entryRung(c) <= rung &&
         !(ROOTS_BY_FAMILY[c.id] ?? []).some((r) => played.has(r.root_id)) &&
         (!capped || claimed.has(c.id)),
     )
+    /*
+      A TIEBREAK, NOT A SORT — and the distinction is the whole point.
+
+      This was CRATES.find(), so the suggestion was the first eligible crate in declaration
+      order. That made the five-crate gate a count blind to WHICH five: one learner arrives
+      at the Legend owning twelve of its eighteen words, another arrives with seven, and
+      the product could not tell them apart. The provenance line noticed and shrugged —
+      "Some of that is new — it is yours now either way."
+
+      So the ONE crate the Club suggests now leans toward the one that hands over the most
+      words the Legend is still waiting for. The shelf itself is untouched and stays in its
+      own order: a sorted shelf would make choosing by vibe pointless, which is the thing
+      the product is actually about. This is a nudge on a single tile, not a curriculum.
+
+      Ties keep declaration order, because Array.prototype.sort is stable — so a learner
+      who needs nothing in particular gets exactly what they got before.
+    */
+    const needed = new Set(
+      LEGEND_FRAMES.filter((f) => frameForPurpose(f, learner.purpose ?? null))
+        .flatMap((f) => f.built_from)
+        .filter((piece) => !learner.ownedPieces.includes(piece)),
+    )
+    const owed = (c: (typeof CRATES)[number]) =>
+      (ROOTS_BY_FAMILY[c.id] ?? []).reduce(
+        (n, r) => n + r.extracts.filter((e) => needed.has(e.id)).length,
+        0,
+      )
+    const fresh = [...eligible].sort((a, b) => owed(b) - owed(a))[0]
     if (fresh) {
       moves.push({
         key: 'open',

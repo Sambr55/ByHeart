@@ -21,7 +21,8 @@
  * not honour, and it must count the vibe being finished right now.
  */
 import { CRATES } from '../content/roots'
-import { LEGEND_FRAMES, cratesToGo, legendStatus, legendUnlocked } from '../content/legend'
+import { LEGEND_FRAMES, cratesToGo, frameForPurpose, legendStatus, legendUnlocked } from '../content/legend'
+import type { Purpose } from '../content/situations'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -32,26 +33,83 @@ const ok = (label: string, cond: boolean, detail = '') => {
 const spending = CRATES.filter((c) => !c.drop && c.built !== false).map((c) => c.id)
 
 /** What /legend will actually do with this many vibes finished. */
-function legendOffers(done: string[]): number {
-  return legendUnlocked(done) ? LEGEND_FRAMES.length : 0
+/**
+ * How many cards a learner is actually offered — WHICH IS NOT THE SIZE OF THE TABLE.
+ *
+ * This returned LEGEND_FRAMES.length, so it asserted 11 against a deck that shows a
+ * purpose-scoped subset. It passed while the Club displayed "8 of 11 answered" with three
+ * questions nobody could action, and while `age` was rendered to everybody and openable by
+ * nobody. A gate written to catch one screen disagreeing with another was blind to the live
+ * instance of exactly that, because it never called the filter the deck is built from.
+ *
+ * Per purpose now, through frameForPurpose — the same predicate the deck, the Club counter
+ * and cardFor all use.
+ */
+function legendOffers(done: string[], purpose: Purpose | null): number {
+  if (!legendUnlocked(done)) return 0
+  return LEGEND_FRAMES.filter((f) => frameForPurpose(f, purpose)).length
 }
 
 console.log('\nwhat the Legend does, per vibe finished\n')
-for (let n = 0; n <= 6; n++) {
-  const done = spending.slice(0, n)
-  const offers = legendOffers(done)
-  const toGo = cratesToGo(done)
-  console.log(
-    '  ' + String(n).padStart(2) + ' vibes → ' +
-      String(offers).padStart(2) + ' cards openable, ' + toGo + ' to go',
-  )
-  // The only two states there are. Anything between them is the old model leaking.
+/*
+  Null last, because it is the odd one: a learner who has not answered set-up sees every
+  frame, and the three purposes each lose the two that are not theirs.
+*/
+const WHO: (Purpose | null)[] = ['visiting', 'staying', 'moving', null]
+for (const purpose of WHO) {
+  const full = legendOffers(spending, purpose)
+  for (let n = 0; n <= 6; n++) {
+    const done = spending.slice(0, n)
+    const offers = legendOffers(done, purpose)
+    if (purpose === 'visiting') {
+      console.log(
+        '  ' + String(n).padStart(2) + ' vibes → ' +
+          String(offers).padStart(2) + ' cards openable, ' + cratesToGo(done) + ' to go',
+      )
+    }
+    // The only two states there are. Anything between them is the old model leaking.
+    ok(
+      String(purpose) + ' · ' + n + ' vibes offers all or nothing',
+      offers === 0 || offers === full,
+      String(offers) + ' of ' + full,
+    )
+  }
+}
+
+console.log('\nand every card the deck shows can be opened\n')
+/*
+  THE ASSERTION THAT WAS MISSING, and the one that would have caught `age`.
+
+  A frame excluded from every purpose renders on the deck greyed, captioned NOT YET, and
+  can never be opened by anybody — the product naming a price no payment settles. It is
+  invisible to a count, because the count was of the table rather than of what a learner
+  can reach.
+*/
+for (const purpose of WHO) {
+  const shown = LEGEND_FRAMES.filter((f) => frameForPurpose(f, purpose))
   ok(
-    n + ' vibes offers all or nothing',
-    offers === 0 || offers === LEGEND_FRAMES.length,
-    String(offers),
+    String(purpose) + ' can reach every frame on their deck',
+    shown.length > 0,
+    shown.length + ' frames',
   )
 }
+/*
+  REAL PURPOSES ONLY, and the first version of this got it wrong.
+
+  frameForPurpose is `!f.purposes || !purpose || f.purposes.includes(purpose)`. The middle
+  clause means a NULL purpose passes every frame — including one excluded from all three —
+  so an assertion that included null in its sweep could never find an orphan. It passed
+  against the exact bug it was written for.
+
+  A learner who has answered set-up has one of the three. That is who this is about.
+*/
+const REAL: Purpose[] = ['visiting', 'staying', 'moving']
+const orphans = LEGEND_FRAMES.filter((f) => !REAL.some((p) => frameForPurpose(f, p)))
+ok(
+  'no frame is excluded from every purpose',
+  orphans.length === 0,
+  orphans.length ? orphans.map((f) => f.id + ' (purposes: ' + JSON.stringify(f.purposes) + ')').join(', ') : 'every frame belongs to somebody',
+)
 
 console.log('\nthe promise\n')
 /*
@@ -74,13 +132,18 @@ ok(
 ok('four does not', !payoffSaysOpen(spending.slice(0, 4)))
 ok(
   'and /legend reads the identical number',
-  legendOffers(spending.slice(0, 5)) === LEGEND_FRAMES.length,
+  /*
+    Against the visitor's own count, not the table's. The two screens agreeing is the
+    subject; which number they agree on is a property of the learner.
+  */
+  legendOffers(spending.slice(0, 5), 'visiting') ===
+    LEGEND_FRAMES.filter((f) => frameForPurpose(f, 'visiting')).length,
 )
 
 for (let n = 0; n <= 6; n++) {
   const done = spending.slice(0, n)
   const promised = payoffSaysOpen(done)
-  const honoured = legendOffers(done) > 0
+  const honoured = legendOffers(done, 'visiting') > 0
   ok(
     n + ' vibes: the session screen and the Legend agree',
     promised === honoured,

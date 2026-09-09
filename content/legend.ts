@@ -194,14 +194,25 @@ export const LEGEND_FRAMES: LegendFrame[] = [
   {
     id: 'age',
     /*
-     Off the card, and still answerable.
+     Off the card, and still answerable — WHICH IS NOW WHAT THE CODE DOES.
 
      Seven is the promise, and two of the seven now depend on why somebody is here — so two
      universal frames had to give up their place. Age went first: it is asked, but nobody
      has ever failed a conversation in a bar for not knowing how to say how old they are,
      and it is the one question on the list a person might actively prefer not to answer.
+
+     The mechanism was `purposes: []`, and it did not mean what it reads as. frameForPurpose
+     is `!f.purposes || !purpose || f.purposes.includes(purpose)` — an empty array is truthy,
+     so the first clause passes it through to `includes`, which is false for everything. The
+     frame was not off the card; it was off the product, for everybody who answered set-up.
+     It rendered on the deck greyed and captioned NOT YET, so the learner was shown a price
+     they could pay and a door that would never move.
+
+     Rung 5 with no purposes instead, which is exactly how `children` already does this: a
+     bonus frame is one ABOVE CARD_RUNG, not one excluded from every purpose. cardFor filters
+     on `rung <= CARD_RUNG` and still returns seven; the deck shows it, and anybody who wants
+     to say their age can.
     */
-    purposes: [],
     card: 3,
     ask: 'Que idade tens?',
     ask_en: 'How old are you?',
@@ -209,7 +220,12 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     en: 'I am {n} years old.',
     slots: [{ key: 'n', kind: 'number', hint: 'your age' }],
     built_from: ['tenho', 'anos'],
-    rung: 2,
+    /*
+      Above the card, with children. The teaching rung is still 2 — the sentence needs
+      nothing a rung-2 learner lacks — but the CARD rung is what decides the seven, and
+      this one is deliberately not among them.
+    */
+    rung: 5,
     teaches:
       'The one every English speaker gets wrong exactly once. Portuguese does not BE an age, it HAS one — tenho cinquenta e seis anos, “I have fifty-six years”. Say sou and you have said “I am fifty-six”, which means nothing at all.'
   },

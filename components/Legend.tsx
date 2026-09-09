@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES } from '@/content/roots'
-import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame } from '@/content/legend'
+import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
 import { CopyButton } from '@/components/CopyButton'
@@ -125,9 +125,37 @@ export function Legend() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mounted, unlocked, learner.purpose],
   )
+  /*
+    ANSWERED, AND STILL TRUE — the same two predicates the deck applies.
+
+    This was the whole library with no purpose filter, sitting directly under `reachable`,
+    which has one. Purpose is changeable from Yours, and set-up asks it once, so a learner
+    who arrives as a visitor and later moves has answers on file for questions that are no
+    longer theirs.
+
+    The deck greys those out. Rehearsal and COLD OPEN did not: `answered` feeds RunThrough,
+    which shuffles and deals one card, so a mover could be asked how long they are staying
+    and told the answer is "uma semana". That is the one path in the Legend that reaches a
+    learner's mouth, and it was drilling them on a sentence about a life they had left.
+
+    The long note above `reachable` diagnoses exactly this class of bug and fixes it in
+    three places. Not here, which is the fourth.
+
+    frameApplies as well as frameForPurpose, because a conditional frame — one whose
+    `requires` points at another card's answer — can stop applying when that answer changes,
+    and a rehearsal of a sentence whose premise is gone is the same failure in a quieter
+    form.
+  */
   const answered = useMemo(
-    () => LEGEND_FRAMES.filter((f) => isAnswered(f, valuesFor(f.id))),
-    [answers],
+    () =>
+      LEGEND_FRAMES.filter(
+        (f) =>
+          isAnswered(f, valuesFor(f.id)) &&
+          frameForPurpose(f, learner.purpose ?? null) &&
+          frameApplies(f, answers),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [answers, learner.purpose],
   )
 
   /*
@@ -362,8 +390,23 @@ export function Legend() {
               "And what do they do?" is a question about children and it was dealt to
               everybody, so somebody childless was handed a sentence about theirs and
               then counted as having one question outstanding for ever.
+
+              AND NEITHER IS A CARD THAT IS NOT FOR YOU. frameForPurpose was applied to
+              `reachable` but not to the list, so a frame that does not belong to this
+              learner still rendered — greyed, marked NOT YET, and carrying a caption
+              about vocabulary it does not need. `age` declares `purposes: []`, so it was
+              shown to everybody who completed set-up and could never be opened by any of
+              them: the product named a price, the learner could pay it, and the door did
+              not move.
+
+              Purpose-blocked is not blocked. It is NOT FOR YOU, and the honest rendering
+              of that is nothing at all — a deck of the questions a stranger will ask THIS
+              person. Vocabulary-blocked stays, because that one is a debt with an
+              address, and the caption below now gives the address.
             */}
-            {LEGEND_FRAMES.filter((f) => frameApplies(f, answers)).map((f) => {
+            {LEGEND_FRAMES.filter(
+              (f) => frameApplies(f, answers) && frameForPurpose(f, learner.purpose ?? null),
+            ).map((f) => {
               const values = valuesFor(f.id)
               const done = isAnswered(f, values)
               const open = reachable.some((r) => r.id === f.id)
@@ -394,12 +437,14 @@ export function Legend() {
                       <span className="pt mt-1 block text-sm">
                         {fillFrame(f, values ?? {}, learner.profile?.gender ?? null)}
                       </span>
-                    ) : !open ? (
-                      <span className="mt-1 block text-xs text-muted">
-                        Needs {missingFrom(f, owned)}
-                      </span>
                     ) : null}
                   </button>
+                  {/*
+                    OUTSIDE the button, because it is a link and a link inside a button is
+                    neither. The card itself is disabled while the word is missing; this
+                    row is the one thing on it that still does something.
+                  */}
+                  {!done && !open ? <Missing frame={f} owned={owned} /> : null}
                 </li>
               )
             })}
@@ -439,19 +484,113 @@ export function Legend() {
   )
 }
 
-/** Which crate a learner still needs, said as a destination rather than a lack. */
-function missingFrom(frame: LegendFrame, owned: string[]): string {
+/**
+ * The English a pick option already carries, keyed by the Portuguese it belongs to.
+ *
+ * `lint-content` exempts pick options from the taught-or-glossed rule on the grounds that
+ * an option shows its English beside it. That is true in the build beat and false in the
+ * cold beat, where the option has been shredded into tiles with no English attached — so
+ * this carries the option's own gloss across, rather than leaving the hole the exemption
+ * assumed could not exist.
+ *
+ * Multi-word options are split, because the cold beat works in tiles: "Uns dias" becomes
+ * two tiles and each wants its own line. A single English gloss cannot be divided
+ * honestly between them, so it is attached to the whole phrase and to nothing else — a
+ * tile that has no gloss still shows, it simply shows without one, which is what the
+ * frame's own helpers already do for words like `e`.
+ */
+function pickGlosses(
+  shape: { slots: LegendSlot[] },
+  draft: Record<string, string>,
+): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const slot of shape.slots) {
+    if (slot.kind !== 'pick' || !slot.options) continue
+    const chosen = draft[slot.key]
+    if (!chosen) continue
+    const option = slot.options.find((o) => o.value === chosen || o.f === chosen)
+    if (option?.en) out[chosen] = option.en
+  }
+  return out
+}
+
+/**
+ * What is missing, said as one word and a way to go and get it.
+ *
+ * The blocked Legend card was the one place in the product that named a thing you needed
+ * and did not link to it — while /vibes?open= already had six working callers elsewhere.
+ * So the caption is now the invitation: the word, what it means, and the vibe that hands
+ * it over.
+ */
+function Missing({ frame, owned }: { frame: LegendFrame; owned: string[] }) {
+  const need = missingFrom(frame, owned)
+  if (!need) {
+    /*
+      Reachable but not open, and no word outstanding. Rare — it means the frame is held
+      by something other than vocabulary — and the honest line says so rather than
+      inventing a reason.
+    */
+    return <p className="mt-1 px-4 text-xs text-muted">Not open yet.</p>
+  }
+  const line = (
+    <>
+      One more word — <span className="pt text-fg">{need.word}</span>, {need.gloss}
+    </>
+  )
+  if (!need.crate) return <p className="mt-1 px-4 text-xs text-muted">{line}</p>
+  return (
+    <Link
+      href={'/vibes?open=' + need.crate}
+      data-testid={'legend-need-' + frame.id}
+      className="tap-target mt-1 block px-4 text-xs text-muted underline decoration-line underline-offset-4 transition hover:text-accent hover:decoration-accent"
+    >
+      {line} — go and get it
+    </Link>
+  )
+}
+
+/**
+ * The word a learner still needs, and where it lives.
+ *
+ * THIS RETURNED CRATE TITLES, and that is the whole of what made a blocked card feel like
+ * a wall. It mapped each missing piece through PIECES[p].family to a crate title and threw
+ * the piece away, so a card read "Needs Duran Duran song titles and Bridget Jones cringe
+ * moments" — naming two cultural artefacts the learner has no reason to care about, in
+ * place of the one word they actually lack.
+ *
+ * The generic line, "a word you have not met yet", was the FALLBACK for when nothing is
+ * missing — so the nicer sentence was the unreachable one, and the more Portuguese you
+ * knew the more likely you were to see it.
+ *
+ * Now it names the piece. `tenho` carries {gloss: 'I have'} and PIECES has a `family` that
+ * resolves to a crate id, so the caption can say what the word is and the link can go
+ * straight to the vibe that teaches it — /vibes?open= is a live route with six existing
+ * callers. One word, not two crates: a debt with an address is something you can settle,
+ * and a list of two is a shopping trip.
+ *
+ * AND IT IS THE FIX THAT SURVIVES SPANISH. A crate title is a licensing artefact and is
+ * different in every market. `gloss` is a field on every piece in every language.
+ */
+function missingFrom(
+  frame: LegendFrame,
+  owned: string[],
+): { word: string; gloss: string; crate: string | null } | null {
   const have = new Set(owned)
   const short = frame.built_from.filter((p) => !have.has(p))
-  const crates = [
-    ...new Set(
-      short
-        .map((p) => CRATES.find((c) => c.id === PIECES[p]?.family)?.title)
-        .filter(Boolean) as string[],
-    ),
-  ]
-  if (!crates.length) return 'a word you have not met yet'
-  return crates.slice(0, 2).join(' and ')
+  if (!short.length) return null
+  /*
+    The first one, in the order the frame declares its own words. Not "the rarest" or "the
+    nearest" — the frame's order is the order the sentence needs them, which is the only
+    ordering that means anything to somebody reading the question above it.
+  */
+  const id = short[0]
+  const piece = PIECES[id]
+  if (!piece) return null
+  return {
+    word: piece.target,
+    gloss: piece.gloss,
+    crate: CRATES.find((c) => c.id === piece.family)?.id ?? null,
+  }
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -557,7 +696,27 @@ function BuildCard({
     are actually building rather than the one this card started as.
   */
   const shape = frameFor(frame, draft)
-  const filled = shape.slots.every((s) => draft[s.key]?.trim())
+  /*
+    FILLED MEANS THE SENTENCE SAYS SOMETHING THEY MEANT, not that the buffer is non-empty.
+
+    The children slot's value is a JSON string, so `[{"name":"","g":"m"}]` — a child added
+    and the name not yet typed — is non-empty and passed `.trim()`. filled went true,
+    isAnswered went true, SAVE IT lit, and fillFrame returned "Não tenho filhos."
+
+    So: tap MAKE IT MINE on "Tens filhos?", add a child, pick boy, get distracted before
+    typing the name, press the lit button. The cold beat then asks you to say, tile by
+    tile, that you are childless, and banks it to your proof card. On the card the content
+    file calls the showcase card.
+
+    A children slot is filled when at least one child has a name, which is the same
+    question parseChildren already answers — it trims names on the way through, so an
+    entry that is only whitespace does not count.
+  */
+  const filled = shape.slots.every((s) =>
+    s.kind === 'children'
+      ? parseChildren(draft[s.key]).some((c) => c.name.length > 0)
+      : draft[s.key]?.trim(),
+  )
   const sentence = fillFrame(frame, draft, gender)
   const provenance = provenanceOf(frame)
   /*
@@ -839,9 +998,38 @@ function BuildCard({
           ask={frame.ask}
           answer={sentence}
           english={fillEnglish(frame, draft)}
-          helpers={frame.helpers}
+          /*
+            THE WORDS ON SCREEN, GLOSSED — including the ones that came from a chip.
+
+            This sent `frame.helpers`, which describes the BASE frame. frameFor may have
+            swapped in a variant, so answering "Quanto tempo ficas?" with "Uns dias" gave
+            two tiles and no gloss at all: the helpers were {uma: 'a', semana: 'week'},
+            which belong to a chip the learner did not pick. "Não, venho todos os anos"
+            produced zero glosses across four words.
+
+            A variant carries no helpers of its own to fall back to, and inventing them
+            would be authoring content in a component. What the picks DO carry is their
+            English, right there on the option — so the chosen option's own gloss is added
+            under its Portuguese. It is the same pairing the build beat shows two beats
+            earlier, which is the point: the cold beat should not introduce a word the
+            learner has not just seen explained.
+          */
+          helpers={{ ...frame.helpers, ...pickGlosses(shape, draft) }}
           onSolved={(clean) => {
-            recordProof({ pt: sentence, en: frame.en, source: 'legend', clean })
+            /*
+              THE ENGLISH THAT WAS ON SCREEN, not the template it came from.
+
+              This banked `frame.en` — the raw pattern — while the correct value is
+              computed three lines above and handed to ColdSay. So the proof card stored
+              "Chamo-me Sam." against "My name is {name}." and, for the children variant,
+              a sentence about two daughters against "I do not have children." — because
+              frameFor swaps the whole frame and frame.en is then the no-children base.
+
+              It renders on the proof card and in the share image, and recordProof dedupes
+              on `pt` and only ever upgrades `clean`, so a bad row never self-heals on a
+              re-say. Rows banked before this fix need the one-off repair below.
+            */
+            recordProof({ pt: sentence, en: fillEnglish(frame, draft), source: 'legend', clean })
             if (clean) rehearsedLegend(frame.id)
           }}
           onNext={onDone}
