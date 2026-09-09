@@ -1637,7 +1637,7 @@ export function Card({
                     GOT IT
                   </button>
                 </div>
-              ) : card.kind === 'intro' && (card.intro.only !== 'in' || card.intro.pillar) ? (
+              ) : card.kind === 'intro' && (card.intro.only !== 'in' || card.intro.gesture) ? (
                 /*
                   Nothing to open, so nothing offering to open.
 
@@ -1652,16 +1652,23 @@ export function Card({
                   so the one thing on screen that looked like the action was not it. Swipe-up
                   and swipe-left cards had one too, offering an action they refuse.
 
-                  And none on a PILLAR, which draws its gesture instead. A card carrying
-                  the moving arrow plus a button underneath gives two instructions for one
-                  act, and the arrow is the one that matches the rail.
+                  AND NONE WHERE THE CARD DRAWS ITS GESTURE, which is now every card that
+                  admits only one.
 
-                  Keyed on `pillar` rather than on having a gesture, because intro_in has
-                  both a gesture and a button and must keep the button: its headline is
-                  "Tap a card to open it. Or swipe right." — it is the card that TEACHES
-                  tapping, so taking the button off it would contradict its own copy. A
-                  pillar is making an argument about the product, not demonstrating a
-                  control. Tapping still works either way; reveal() is bound to the card.
+                  An arrow that moves plus a labelled instruction plus a button is three
+                  instructions for one act. The arrow is the one that matches the rail, so
+                  it is the one that stays.
+
+                  This was keyed on `pillar` for one release, to spare intro_in — the card
+                  whose headline is "Tap a card to open it. Or swipe right." — on the
+                  argument that taking the button off the card that teaches tapping would
+                  contradict its own copy. It does not: the card already says "Tap", the
+                  drawn gesture already reads TAP, OR SWIPE RIGHT, and the whole card is
+                  the tap target, so the sentence stays true with one fewer control under
+                  it. Asked for directly, and it collapses two rules into one.
+
+                  Tapping still works; reveal() is bound to the card, never to the button
+                  that used to be here.
                 */
                 <div className="mb-3 mt-6" />
               ) : isDemo ? (
