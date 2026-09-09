@@ -239,7 +239,21 @@ export function Club() {
     it and without a Legend gets the explainer, which points at /vibes.
   */
   if (!mounted) return <div className="min-h-svh bg-bg" aria-hidden />
-  if (stage === 'showcase' && !fromDoor) {
+  /*
+    NOT INSIDE IS NOT INSIDE, whatever stage the room is in.
+
+    This keyed on `stage === 'showcase'`, and stage has three values: showcase, working,
+    member. `working` is reached by `started` — having played any root at all — so a learner
+    who did the basics and three vibes was not in showcase, and walked straight past the
+    door into the venue. Reported exactly that: "I just basics and three vibes, then tapped
+    on Club, got straight through to finding the venue, no legend, no gate, nothing."
+
+    The mistake was mine and it is the same one three times over: `inside` already answers
+    the question — it IS clubOpen — and I wrote a second test beside it that answers a
+    different question and looks like the same one. `stage` is about what the room shows to
+    somebody who is in it. `inside` is about whether they are. Only one of those is a door.
+  */
+  if (!inside && !fromDoor) {
     return (
       <NotYet
         what="THE CLUB"

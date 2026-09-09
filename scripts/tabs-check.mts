@@ -206,6 +206,32 @@ console.log('\nthe front door still opens, which is the half that broke\n')
   await p.close()
 }
 
+console.log('\nmidway through, and still outside\n')
+/*
+  THE STATE THAT WALKED STRAIGHT IN.
+
+  "I just basics and three vibes, then tapped on Club, got straight through to finding the
+  venue, no legend, no gate, nothing."
+
+  The first version of the tab gate keyed on `stage === 'showcase'`, and stage has three
+  values. Playing any root at all makes it `working`, so this learner was never in showcase
+  and the gate never fired. A fresh device was tested and a member was tested; the person
+  in between — which is every real learner between their first session and their Legend —
+  was not.
+*/
+for (const route of TABS) {
+  const p = await b.newPage({ viewport: { width: 390, height: 844 } })
+  await seed(p, {
+    ...base,
+    sections_completed: ['the_basics', 'top_gun', 'james_bond', 'bridget_jones'],
+    roots_played: ['tb_yes_no', 'tg_goose'],
+  })
+  await p.goto(BASE + route)
+  await settled(p)
+  ok(route + ' is shut to a learner with no Legend', await p.isVisible('[data-testid="notyet-go"]'))
+  await p.close()
+}
+
 console.log('\nand Yours shows work as soon as there is any\n')
 {
   const p = await b.newPage({ viewport: { width: 390, height: 844 } })
