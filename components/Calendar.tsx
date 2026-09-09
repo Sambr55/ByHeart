@@ -3,11 +3,13 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Back } from '@/components/Back'
+import { NotYet } from '@/components/NotYet'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { chapterById } from '@/content/chapters'
 import type { Drop } from '@/content/drops'
 import { dropLive, dropsInMonth } from '@/content/feed'
 import { loadLearner } from '@/engine/learner'
+import { useClub } from '@/engine/useClub'
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -36,6 +38,7 @@ const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
  * calendar that ends in a paragraph about a concert is a listings site.
  */
 export function Calendar() {
+  const club = useClub()
   /*
     The clock after mount, like every other date in this product.
 
@@ -76,6 +79,23 @@ export function Calendar() {
   const firstWeekday = anchor ? (new Date(Date.UTC(year, month, 1)).getUTCDay() + 6) % 7 : 0
   const today =
     now && now.getUTCFullYear() === year && now.getUTCMonth() === month ? now.getUTCDate() : null
+
+  /*
+    The calendar is the city with a date on it, so it is behind the same door as the city.
+
+    It rendered in full to a device that had been reset four seconds earlier: a month of
+    events in a chapter nobody had chosen, under a header naming a city nobody had named.
+    The door is the Legend, asked through useClub so this screen and the Club cannot
+    disagree about who is inside.
+  */
+  if (!club.open) {
+    return (
+      <NotYet
+        what="WHAT IS ON"
+        line="Drops are pegged to real dates in your city — a market, a match, a festival — and each one opens the Portuguese for being there. They start arriving once you are in the Club."
+      />
+    )
+  }
 
   return (
     <main

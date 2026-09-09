@@ -161,6 +161,60 @@ export function Profile() {
     )
   }
 
+  /*
+    EMPTY WHEN IT IS EMPTY — which is not the same question as whether the Club is open.
+
+    Reported as: "The Yours page should be accessible but EMPTY because no content has been
+    selected yet. It is currently full of content even after reset." It was — every section
+    rendered against empty arrays, so a device with nothing on it got BEEN THROUGH, SAVED,
+    YOUR PORTUGUESE and a Legend, all of them headings over nothing.
+
+    The first fix put Yours behind the Club door with the other three, and that was wrong in
+    a way the gate caught: feed-check seeds a learner who has finished the basics, completed
+    one card and saved another, with no Legend yet — and my gate told them "not yet" about
+    their own saved words. Yours is not a room you are admitted to; it is a record of what
+    you have done, and hiding somebody's own work from them is a worse failure than the one
+    being fixed.
+
+    So the test is the CONTENT, which is what the report actually said. Nothing kept, nothing
+    finished, no vibe been through: the explainer, because there is genuinely nothing here.
+    Anything at all: their things, however few. The other three tabs stay on the Club door,
+    because a room, a calendar of that room's events and the tool inside it are all things
+    you are let into — this one you fill.
+  */
+  /*
+    EMPTY OF CONTENT, NOT EMPTY OF SCREEN.
+
+    Reported as: "The Yours page should be accessible but EMPTY because no content has been
+    selected yet. It is currently full of content even after reset." It was — BEEN THROUGH,
+    SAVED, KEPT and WORTH HAVING all rendered against empty arrays, four headings over
+    nothing.
+
+    Two wrong fixes before this one, and the gate caught both. First I put the whole screen
+    behind the Club door, which told a learner who had finished the basics and saved a card
+    "not yet" about their own saved words — Yours is a record you fill, not a room you are
+    admitted to. Then I replaced the whole screen with an explainer, which took the NAME,
+    the theme, the sound switch and the purpose choice with it: `tap-check` asks for the
+    sound toggle on this screen and could not find it, correctly.
+
+    So the empty state is this screen, whole — header, identity, settings — with one honest
+    line where the sections would be. A setting is never empty; only the record is.
+  */
+  /*
+    PROOF COUNTS, and leaving it out was the third mistake on this screen.
+
+    A learner who has said three sentences cold has done the hardest thing the product
+    asks and has a mintable card to show for it — showing-reach seeds exactly that and
+    found no share control, because this test only counted cards saved and vibes finished.
+    Proof is the record at its most literal: things this person has actually said.
+  */
+  const hasSomething =
+    saved.length > 0 ||
+    finished.length > 0 ||
+    sections.length > 0 ||
+    (learner.proof ?? []).length > 0 ||
+    (learner.legend ?? []).length > 0
+
   return (
     /*
       No data-stage on purpose.
@@ -178,7 +232,30 @@ export function Profile() {
 
       <Identity />
 
-      {!mounted ? null : (
+      {!mounted ? null : !hasSomething ? (
+        /*
+          The line, and a way to start. Not a dead end: this is the one screen a person can
+          reach with nothing on it, so it has to point somewhere.
+        */
+        <div className="flex flex-col gap-6">
+          <p className="text-sm leading-relaxed text-muted" data-testid="yours-empty">
+            Nothing here yet. The vibes you go through, the Portuguese you keep and your
+            Legend all collect on this screen.
+          </p>
+          <Link
+            href="/vibes"
+            data-testid="yours-start"
+            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            START HERE
+          </Link>
+          <div className="border-t border-line pt-6">
+            <ThemeChoice />
+            <SoundChoice />
+            <PurposeChoice />
+          </div>
+        </div>
+      ) : (
         <>
           <Section
             label={PROFILE_COPY.done_label}
@@ -247,7 +324,15 @@ function Section({
   onOpen: (c: FeedCard) => void
 }) {
   return (
-    <section className="flex flex-col gap-3">
+    /*
+      Named so a check can ask whether any section is on screen at all. Yours is empty
+      before the Club, and "empty" is the absence of these — which is invisible to a text
+      search that matches the explainer's own prose.
+    */
+    <section
+      data-testid={'section-' + label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
+      className="flex flex-col gap-3"
+    >
       <div className="flex items-baseline gap-3">
         <h2 className="eyebrow min-w-0 text-accent">{label}</h2>
         <span className="h-px flex-1 bg-line" />

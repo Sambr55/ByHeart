@@ -86,6 +86,16 @@ await page.evaluate(
         roots_played: [],
         sections_completed: [],
         legend: [],
+        /*
+          Welcomed, because the calendar is behind the Club door now.
+
+          /calendar rendered a month of a city to a device that had been reset four seconds
+          earlier, so it is gated on the Legend with the Club and ASK. This file is about
+          what the calendar SHOWS, not about who may see it — the door has its own check —
+          so it seeds somebody who is through it. `club_welcomed_at` is the one clubOpen
+          honours outright, which keeps this seed short and says plainly why it is here.
+        */
+        club_welcomed_at: '2026-08-20T00:00:00.000Z',
         saved: [],
         liked: [],
         finished_cards: [],

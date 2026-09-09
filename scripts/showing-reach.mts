@@ -42,6 +42,15 @@ const seed = {
   inventory: {},
   roots_played: [],
   sections_completed: [],
+  /*
+    Inside the Club, because that is where the feed is.
+
+    /club is behind the Legend now — the tab used to offer the room to somebody who had not
+    entered it. This file is about whether a mintable card can be SHOWN, not about who may
+    reach the feed, so it seeds somebody through the door. `club_welcomed_at` is the term
+    clubOpen honours outright.
+  */
+  club_welcomed_at: '2026-08-20T00:00:00.000Z',
 }
 
 const browser = await chromium.launch()

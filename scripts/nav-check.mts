@@ -152,7 +152,7 @@ console.log('\nthe tabs that are places\n')
   arrive at. The two that ARE places still have to know when they are the one you are on;
   ASK is checked below for the thing it does instead.
 */
-for (const [route, tab] of [['/club', 'lisbon'], ['/profile', 'yours']] as const) {
+for (const [route, tab] of [['/club', 'club'], ['/profile', 'yours']] as const) {
   await page.goto(BASE + route)
   await page.waitForTimeout(1200)
   const nav = await page.$('[data-testid="bottom-nav"]')

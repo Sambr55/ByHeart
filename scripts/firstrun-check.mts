@@ -64,7 +64,16 @@ console.log('\nthe front door goes to the Club\n')
 
 console.log('\nand a stranger can look at all of it\n')
 const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
-await page.goto(BASE + '/club')
+/*
+  ?in=1, because that is how a stranger actually gets here.
+
+  The Club tab shows an explainer to anybody without a Legend — the bar used to offer the
+  room to somebody who had not entered it. The showcase sequence lives at /club too, so the
+  front door marks its own arrivals; a bare /club is the tab, and the tab is not this test's
+  subject. Arriving the way COME IN arrives is both more honest and what this has always
+  been measuring.
+*/
+await page.goto(BASE + '/club?in=1')
 await page.waitForTimeout(2500)
 
 const cards = await rail(page)
@@ -607,8 +616,8 @@ console.log('\nthe logo goes back to the front door\n')
     const body = ((await page.textContent('body')) ?? '').replace(/\s+/g, ' ')
     ok('and the door opens rather than redirecting', /COME IN/.test(body), page.url().replace(BASE, ''))
     ok('and it is the front door, not the Club', !page.url().includes('/club'), page.url().replace(BASE, ''))
-    // Back to where the rest of this file expects to be standing.
-    await page.goto(BASE + '/club')
+    // Back to where the rest of this file expects to be standing, by the door.
+    await page.goto(BASE + '/club?in=1')
     await page.waitForTimeout(2400)
   }
 }

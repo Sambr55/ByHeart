@@ -32,6 +32,7 @@ import {
   vocabWord,
   type FeedCard,
 } from '@/content/feed'
+import { chapterById } from '@/content/chapters'
 import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
 import { recordProof, rejectCard, rememberFinishedCard, rewindReject, toggleCard } from '@/engine/learner'
@@ -679,9 +680,21 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
           Only in the showcase. A member knows where they are, and a permanent tagline is
           a billboard on your own front room.
         */}
+        {/*
+          THE CITY, ONCE THERE IS ONE — and a promise rather than a place before that.
+
+          This read "Lisbon, and the Portuguese for it." to everybody, including somebody
+          who had not been asked where they were going. Reported exactly that way: "why does
+          it say Lisbon in the header strapline before I have told you where I am travelling
+          to". `learner.chapter` is null until Destination or set-up writes it, and null
+          genuinely means UNCHOSEN — so the honest line before a choice names no city at
+          all, and the moment one exists the strapline is theirs.
+        */}
         {stage === 'showcase' ? (
           <p className="text-[0.6rem] leading-tight opacity-85">
-            Lisbon, and the Portuguese for it.
+            {learner.chapter
+              ? chapterById(learner.chapter).city + ', and the Portuguese for it.'
+              : 'European Portuguese, and the places you will use it.'}
           </p>
         ) : null}
         <span className="flex-1" />

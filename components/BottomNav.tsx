@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useClub } from '@/engine/useClub'
 
 /**
  * Four places, always there.
@@ -51,8 +52,22 @@ import { usePathname } from 'next/navigation'
   TABS.length, so it needs nothing done to it — which is the point of having fixed that
   when the fifth arrived.
 */
+/*
+  THE FIRST TAB IS THE CLUB, not a city.
+
+  It read "Lisbon", which is the one chapter that happens to be open — so the bar named a
+  place before anybody had said they were going there, and would have needed editing the
+  day Porto opened. The product is Dub Club; the city is a property of the learner's
+  chapter, not a fixed label on a control. Reported as: "the use of Lisbon again is clearly
+  hard-coding and we are supposed to be being driven by user-selection".
+
+  A constant rather than chapter.city, deliberately. This tab is the CLUB — one club, whose
+  contents change with your chapter — and naming it after the current city would be the same
+  mistake with an extra lookup in front of it. The city belongs on the screens that are
+  about the city, where it is already read from the chapter.
+*/
 const TABS = [
-  { href: '/club', label: 'Lisbon', d: 'M4 20V9l8-5 8 5v11M9 20v-6h6v6' },
+  { href: '/club', label: 'Club', d: 'M4 20V9l8-5 8 5v11M9 20v-6h6v6' },
   /*
     What is on, and it belongs next to the city rather than out at the end.
 
@@ -74,6 +89,16 @@ const TABS = [
 
 export function BottomNav() {
   const path = usePathname()
+  /*
+    ASK is behind the same door as everywhere else it can be reached from.
+
+    The translator opened on any screen, to anybody, including a device that had just been
+    reset — so one of the four tabs handed a stranger the paid tool while the other three
+    were arguing for it. Routing to the explainer rather than opening and bouncing: a panel
+    that appears and refuses is worse than a screen that says what this is.
+  */
+  const club = useClub()
+  const router = useRouter()
   /*
     One rule for every tab, rather than one rule per tab and one of them showing.
 
@@ -187,7 +212,10 @@ export function BottomNav() {
             key={t.label}
             type="button"
             aria-label="How do I say something"
-            onClick={() => window.dispatchEvent(new CustomEvent('dub:ask'))}
+            onClick={() => {
+              if (club.open) window.dispatchEvent(new CustomEvent('dub:ask'))
+              else router.push('/ask')
+            }}
             {...shared}
           >
             {inside}

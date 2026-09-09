@@ -564,7 +564,16 @@ function Landing() {
           onClick={() => {
             primeAudio()
             track('landing_cta_tap', {})
-            router.push('/club')
+            /*
+              ?in=1 says "the front door sent me", which is what makes the showcase legal.
+
+              The Club tab now shows an explainer to anybody outside, because the bar sat
+              on /vibes offering a stranger the room. The sequence lives at /club too, so
+              without a marker the same gate would shut the front door on the one person it
+              is built for. The URL carries it for the same reasons ?door=1 does: it
+              survives a reload, it is honest in a shared link, and it cannot get stuck on.
+            */
+            router.push('/club?in=1')
           }}
           /*
             Azulejo blue, pinned rather than tokenised.

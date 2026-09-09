@@ -1,5 +1,6 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -24,6 +25,7 @@ import { DEFAULT_CHAPTER } from '@/content/chapters'
 import { isCurrent, situationsFor } from '@/content/situations'
 import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { NotYet } from '@/components/NotYet'
 import { Wordmark } from '@/components/Wordmark'
 import { LEGEND_FRAMES } from '@/content/legend'
 import { capabilities } from '@/engine/journey'
@@ -53,6 +55,9 @@ import { PURPOSES } from '@/content/situations'
  * first and the moves are ordered by what expires rather than by what is overdue.
  */
 export function Club() {
+  const params = useSearchParams()
+  /* Set by the front door's COME IN, and by nothing else. */
+  const fromDoor = params.get('in') === '1'
   const learner = useLearner()
   const now = useNowAfterMount()
   const mounted = now !== null
@@ -218,6 +223,30 @@ export function Club() {
     !mounted || (inside && entitled) ? 'member' : inside || started ? 'working' : 'showcase'
 
   if (welcome) return <Welcome onDone={finishWelcome} />
+
+  /*
+    THE SHOWCASE IS THE FRONT DOOR, NOT A TAB.
+
+    `showcase` is the intro sequence — the argument, the demo, set-up — and it is exactly
+    right for somebody arriving at `/`, which is why app/page.tsx sends a non-member there.
+    It is wrong as a destination for the CLUB TAB, which sat in the bar on /vibes offering
+    a stranger the room they have not earned.
+
+    The sequence IS at /club — COME IN pushes here and the argument is the feed — so this
+    cannot key on the route alone without shutting the front door on the one person it was
+    built for. `?in=1` is what the door adds, and it is the difference between "I was sent
+    here to be shown the product" and "I tapped a tab in a bar". Anybody arriving without
+    it and without a Legend gets the explainer, which points at /vibes.
+  */
+  if (!mounted) return <div className="min-h-svh bg-bg" aria-hidden />
+  if (stage === 'showcase' && !fromDoor) {
+    return (
+      <NotYet
+        what="THE CLUB"
+        line="Your city, in Portuguese — what is on this week, the rooms you will actually stand in, and the words for being there. It opens when your Legend does."
+      />
+    )
+  }
   /*
     Inside the Club is the feed.
 
