@@ -19,6 +19,7 @@ import { BLOCK_ORDER, TARGETS } from '@/content/targets'
  */
 import { DEFAULT_PAIR, pairId, type Pair } from '@/content/pairs'
 import { mergeLearner, mergeOwner } from '@/lib/merge'
+import { LEGEND_FRAMES, fillEnglish, fillFrame } from '@/content/legend'
 import { currentPair } from './pair'
 
 export type PieceId = string
@@ -441,6 +442,70 @@ function save() {
   }
 }
 
+/**
+ * The one-off repair for Legend proof banked with its template English.
+ *
+ * WHAT WENT WRONG. `recordProof` was passed `frame.en` — the raw pattern — where the
+ * filled value was computed three lines above and handed to the screen. So a learner's
+ * proof card stored "Chamo-me Sam." against "My name is {name}.", and, because frameFor
+ * swaps the whole frame for the children variant, somebody with two daughters banked a
+ * sentence about them against "I do not have children."
+ *
+ * WHY IT NEEDS A MIGRATION AT ALL. `recordProof` dedupes on `pt` and only ever upgrades
+ * `clean` — it never rewrites `en` — so saying the sentence again does not heal the row.
+ * The bad English is on the proof card and in the share image until something replaces it.
+ *
+ * HOW IT IS SAFE. The learner's own answers are still in `legend`, so the correct English
+ * is not guessed: it is recomputed from what they actually said, and only accepted when
+ * the Portuguese it produces matches the Portuguese already stored. A row that does not
+ * match is left exactly as it is. Nothing is deleted, no row is added, and `clean` and
+ * `at` are carried through untouched — this rewrites one field on rows that are provably
+ * the same sentence.
+ *
+ * It runs on load rather than as a script because the record lives on the phone. Records
+ * that never had the problem are returned by identity, so the common case allocates
+ * nothing and the pass is invisible.
+ *
+ * Exported so `npm run proof:repair` can exercise it directly. loadLearner is client code
+ * — it reads localStorage — and mocking a browser to reach a pure function is a way of
+ * testing the mock. This is the function that does the work.
+ */
+export function repairLegendEnglish(proof: ProofLine[], legend: LegendAnswer[]): ProofLine[] {
+  /*
+    A template is the tell. Every damaged row has a brace in it — either an unfilled slot,
+    or, for children, the base sentence which is a different string from the one the
+    learner built. Rows without one are already right and are not touched.
+  */
+  const suspect = proof.some((line) => line.source === 'legend' && /[{}]/.test(line.en))
+  if (!suspect) return proof
+  if (!legend.length) return proof
+
+  return proof.map((line) => {
+    if (line.source !== 'legend' || !/[{}]/.test(line.en)) return line
+    for (const answer of legend) {
+      const frame = LEGEND_FRAMES.find((f) => f.id === answer.frame_id)
+      if (!frame) continue
+      /*
+        Matched on the Portuguese, and on nothing else. Gender is unknown at this point in
+        the load — profile is parsed further down — so both endings are tried and the one
+        that reproduces the stored sentence is the one that was said.
+      */
+      const said =
+        fillFrame(frame, answer.values, 'm') === line.pt
+          ? 'm'
+          : fillFrame(frame, answer.values, 'f') === line.pt
+            ? 'f'
+            : null
+      if (!said) continue
+      const better = fillEnglish(frame, answer.values)
+      /* Never trade one template for another. */
+      if (/[{}]/.test(better)) return line
+      return { ...line, en: better }
+    }
+    return line
+  })
+}
+
 export function loadLearner(): LearnerState {
   if (state) return state
   if (typeof window === 'undefined') return emptyLearner()
@@ -488,7 +553,10 @@ export function loadLearner(): LearnerState {
           voice_signals: arr(parsed.voice_signals, []),
           osmosis_seen: arr(parsed.osmosis_seen, []),
           missions_completed: arr(parsed.missions_completed, []),
-          proof: arr(parsed.proof, []),
+          proof: repairLegendEnglish(
+            arr(parsed.proof, []) as ProofLine[],
+            arr(parsed.legend, []) as LegendAnswer[],
+          ),
           roots_played: arr(parsed.roots_played, []),
           nocue_done: arr(parsed.nocue_done, []),
           lines_seen: arr(parsed.lines_seen, []),
