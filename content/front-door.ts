@@ -137,7 +137,24 @@ export const DEMO_BEATS: DemoBeat[] = [
       three sentences on the screen have just done it; explaining them afterwards is the
       product taking a bow.
     */
-    cta: 'ACCESSING THE CLUB',
+    /*
+      THE BUTTON NAMES WHAT IS BEHIND IT, which this one did not.
+
+      It read ACCESSING THE CLUB and does nothing of the kind — it opens the third beat,
+      whose own headline is "One line. Three things you can say." The Club is two screens
+      and a set-up further on, so the label promised a destination the tap does not reach
+      and undersold the one it does: the moment a film line becomes three sentences you
+      can use is the argument, and the button was pointing past it.
+
+      Sam's wording. It is the beat's own display line, which is what makes it honest.
+
+      Longer than the fourteen-character eyebrow rule, and deliberately so: that rule is
+      for labels above a heading, and every CTA in this list is already past it (SHOW ME
+      WHAT THAT UNLOCKS is twenty-five). vocabulary-check measures literal eyebrows only,
+      so nothing here was being enforced either way — the constraint that matters on a
+      full-width button is that it fits on one line, and this does.
+    */
+    cta: 'THREE THINGS YOU CAN SAY',
   },
 ]
 
