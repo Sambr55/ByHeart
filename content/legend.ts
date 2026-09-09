@@ -46,6 +46,17 @@ export interface LegendSlot {
   options?: { value: string; en: string; f?: string }[]
   /** True when the answer's ending depends on profile.gender. */
   gendered?: boolean
+  /**
+   * For `pick`: the list is the common answers, not the only ones.
+   *
+   * A closed set is right for a nationality and wrong for a profession. Ten fields cover
+   * most people and cannot cover everybody — advertising is nobody's nearest neighbour of
+   * computers, design or sales — so a slot that says so gets a way to ask the translator
+   * for the word and drop it straight in. The string is what the panel puts in its box.
+   *
+   * Absent means closed, which every other pick slot is.
+   */
+  open?: string
 }
 
 export interface LegendFrame {
@@ -314,6 +325,22 @@ export const LEGEND_FRAMES: LegendFrame[] = [
         key: 'thing',
         kind: 'pick',
         hint: 'the closest one to your work',
+        /*
+          AND A WAY OUT OF THE LIST, because ten fields cannot hold everybody.
+
+          The note above says somebody whose work is not here says the nearest one. That
+          holds for a data analyst picking números; it does not hold for advertising, which
+          is not near any of these — reported exactly that way: "it doesn't have advertising
+          for instance so that is me stumped".
+
+          A plain text box would put us back where this slot started: the frame is
+          "Trabalho com {thing}" and typing into it asks the learner to do the translating,
+          which is the complaint that made this a pick list. So the way out is the
+          translator, which is the product's own answer to "what is the word for this" and
+          is already mounted at the root — it opens over the Legend without navigating, so
+          the half-built card is still there when the word comes back.
+        */
+        open: 'advertising',
         options: [
           { value: 'computadores', en: 'computers' },
           { value: 'design', en: 'design' },

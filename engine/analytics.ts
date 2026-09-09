@@ -156,6 +156,14 @@ export type EventName =
   | 'translate_ask'
   | 'translate_kept'
   /*
+    The translator answering a slot rather than a person.
+
+    Distinct from translate_kept on purpose: kept is somebody deciding a sentence is worth
+    having later, used is the Legend borrowing one word because its pick list did not cover
+    the job. A rising count here names the fields the list should have had.
+  */
+  | 'translate_used'
+  /*
     Why people say they are here.
 
     The single most useful number in the product for deciding what to author next: three

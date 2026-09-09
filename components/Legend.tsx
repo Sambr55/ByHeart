@@ -510,6 +510,44 @@ function BuildCard({
 }) {
   const [draft, setDraft] = useState<Record<string, string>>(values)
   const [beat, setBeat] = useState<'ask' | 'build' | 'cold'>('ask')
+
+  /*
+    The word coming back from the translator.
+
+    Addressed rather than broadcast: the detail carries the id this card sent, so a panel
+    opened from somewhere else cannot drop a word into a slot that did not ask for one. The
+    id encodes the frame and the slot, which is enough to be unambiguous without holding a
+    reference to anything.
+
+    It goes into `draft` exactly as a chip would, so everything downstream — the sentence
+    preview, `filled`, SAVE IT — carries on as if the word had been on the list all along.
+  */
+  useEffect(() => {
+    const took = (e: Event) => {
+      const d = (e as CustomEvent<{ for: string; pt: string }>).detail
+      if (!d?.for || !d.pt) return
+      const [scope, frameId, slotKey] = d.for.split(':')
+      if (scope !== 'legend' || frameId !== frame.id) return
+      /*
+        Cleaned HERE, where the word lands, not only where it was sent.
+
+        The frame supplies its own punctuation — "Trabalho com {thing}." — and Portuguese
+        likes an article in front of a bare noun, so a model answering "a publicidade."
+        produced "Trabalho com a publicidade..". Doing this in the translator's button as
+        well would be two places to keep in step, and this is the one that cannot be
+        bypassed: every route into the slot passes through it.
+      */
+      const word = d.pt
+        .trim()
+        .replace(/[.!?]+$/, '')
+        .replace(/^(?:o|a|os|as|um|uma)\s+/i, '')
+        .trim()
+      if (!word) return
+      setDraft((was) => ({ ...was, [slotKey]: word }))
+    }
+    window.addEventListener('dub:word', took)
+    return () => window.removeEventListener('dub:word', took)
+  }, [frame.id])
   /*
     The shape follows the answer.
 
@@ -624,7 +662,7 @@ function BuildCard({
                     onChange={(n) => setDraft((d) => ({ ...d, [slot.key]: n }))}
                   />
                 ) : slot.kind === 'pick' ? (
-                  <div className="flex flex-wrap gap-1">
+                  <div className="flex flex-wrap items-start gap-1">
                     {/*
                       Both endings when the profile question was skipped.
 
@@ -651,17 +689,61 @@ function BuildCard({
                             type="button"
                             aria-pressed={on}
                             onClick={() => setDraft({ ...draft, [slot.key]: on ? '' : form })}
+                            /*
+                              A CHIP THAT WRAPS LIKE A LABEL, not like centred prose.
+
+                              A button centres its text, and these two spans were inline —
+                              so an option that is a whole sentence ("Falo pouco, mas estou
+                              a tentar. I speak little, but I am trying.") broke mid-phrase
+                              and left the tail floating in the middle of the row, with the
+                              Portuguese and the English running together on the same line.
+                              Reported as the layout being a mess, and it only showed on the
+                              long picks — "computadores computers" never had to wrap.
+
+                              text-left stops the centring, and the English goes on its own
+                              line so the two languages are never mistaken for one sentence.
+                              items-start on the row keeps chips of different heights
+                              aligned at the top rather than stretched to match the tallest.
+                            */
                             className={
-                              'tap-target rounded border px-3 py-1 text-sm transition ' +
+                              'tap-target flex flex-col items-start gap-1 rounded border px-3 py-1 text-left text-sm transition ' +
                               (on ? 'border-accent bg-accent/10 text-accent' : 'border-line text-muted')
                             }
                           >
                             <span className="pt">{form}</span>
-                            <span className="ml-1 text-xs text-muted">{o.en}</span>
+                            <span className="text-xs text-muted">{o.en}</span>
                           </button>
                         )
                       })
                     })}
+                    {/*
+                      NOT ON THE LIST, ASK FOR IT.
+
+                      Sits inside the chip row and looks like a chip, because it is the same
+                      choice: one of these ten, or the one you are about to fetch. A link
+                      under the row would read as navigation, and this does not navigate —
+                      the translator is mounted at the root and opens over this card, so the
+                      half-built Legend is still here when the word arrives.
+                    */}
+                    {slot.open ? (
+                      <button
+                        type="button"
+                        data-testid={'slot-ask-' + slot.key}
+                        onClick={() =>
+                          window.dispatchEvent(
+                            new CustomEvent('dub:ask-word', {
+                              detail: {
+                                for: 'legend:' + frame.id + ':' + slot.key,
+                                hint: slot.open,
+                              },
+                            }),
+                          )
+                        }
+                        className="tap-target rounded border border-dashed border-line px-3 py-1 text-sm text-muted transition hover:border-accent/50"
+                      >
+                        Not here? Ask for it
+                      </button>
+                    ) : null}
                   </div>
                 ) : (
                   <input

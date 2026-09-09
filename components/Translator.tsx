@@ -44,6 +44,19 @@ export function Translator() {
   const [kept, setKept] = useState(false)
   /** The camera, over the panel rather than instead of it — CLOSE goes back to the box. */
   const [lens, setLens] = useState(false)
+  /*
+    ASKED FOR ON SOMEBODY ELSE'S BEHALF.
+
+    The Legend's work slot offers ten fields and a person whose job is not one of them —
+    advertising, say — has nothing to pick. It cannot be a plain text box either: the frame
+    is "Trabalho com {thing}" and a bare box asks the learner to do the translating, which
+    is the exact complaint that turned this slot into a pick list in the first place.
+
+    So the slot borrows the translator. `want` carries who asked and what for, and when it
+    is set the panel offers USE THIS WORD alongside KEEP — the result goes back to the
+    caller instead of only into the asked list.
+  */
+  const [want, setWant] = useState<{ for: string; hint: string } | null>(null)
   const box = useRef<HTMLTextAreaElement>(null)
 
   /*
@@ -107,9 +120,34 @@ export function Translator() {
     passing it through every card in the feed to reach a button that already exists.
   */
   useEffect(() => {
-    const ask = () => setOpen(true)
+    const ask = () => {
+      setWant(null)
+      setOpen(true)
+    }
+    /*
+      The same panel, asked for one word rather than a sentence.
+
+      detail carries `for` (an id the caller listens back on) and `hint` (what to put in the
+      box). Everything else about the panel is unchanged, which is the point: one translator,
+      one API call, one set of rules about register — the difference is only what happens to
+      the answer.
+    */
+    const want1 = (e: Event) => {
+      const d = (e as CustomEvent<{ for: string; hint: string; seed?: string }>).detail
+      if (!d?.for) return
+      setResult(null)
+      setKept(false)
+      setState('idle')
+      setText(d.seed ?? '')
+      setWant({ for: d.for, hint: d.hint })
+      setOpen(true)
+    }
     window.addEventListener('dub:ask', ask)
-    return () => window.removeEventListener('dub:ask', ask)
+    window.addEventListener('dub:ask-word', want1)
+    return () => {
+      window.removeEventListener('dub:ask', ask)
+      window.removeEventListener('dub:ask-word', want1)
+    }
   }, [])
 
   /*
@@ -353,7 +391,10 @@ export function Translator() {
             rows={3}
             maxLength={300}
             data-testid="translator-input"
-            placeholder="I'd like to pay by card"
+            /* What the caller asked for, when one did. A placeholder is the shortest
+               possible way to say what this box wants, and "I'd like to pay by card" is
+               the wrong prompt when the answer has to be one noun. */
+            placeholder={want ? want.hint : "I'd like to pay by card"}
             className="w-full rounded border border-line bg-surface px-4 py-3 text-base text-fg outline-none focus:border-accent"
           />
           {/*
@@ -430,12 +471,55 @@ export function Translator() {
         <div className="mt-auto flex flex-col gap-3">
           {state === 'done' && result?.pt ? (
             <>
+              {/*
+                THE ANSWER GOES BACK TO WHOEVER ASKED, when somebody asked.
+
+                First, and in the accent, because for a caller this IS the action — KEEP
+                puts a sentence in a list they will read later, and this puts a word in the
+                box they are filling now.
+
+                The Portuguese only. The caller wanted one noun for "Trabalho com {thing}",
+                and a model asked for a word usually answers with one — but not always, so
+                the word is trimmed of a trailing stop and of the article Portuguese likes
+                to put in front of a bare noun. "a publicidade" and "publicidade." both
+                become "publicidade", which is what the frame needs.
+              */}
+              {want ? (
+                <button
+                  type="button"
+                  data-testid="translator-use"
+                  onClick={() => {
+                    const word = (result?.pt ?? '').trim()
+                    if (!word) return
+                    /*
+                      Sent as the model gave it. The caller trims the article and the full
+                      stop, because the caller is the one that knows what shape its own
+                      frame needs — and doing it in both places would be two rules to keep
+                      in step over one word.
+                    */
+                    window.dispatchEvent(
+                      new CustomEvent('dub:word', { detail: { for: want.for, pt: word, en: result?.en ?? '' } }),
+                    )
+                    track('translate_used', { for: want.for })
+                    setOpen(false)
+                    setWant(null)
+                  }}
+                  className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+                >
+                  USE THIS WORD
+                </button>
+              ) : null}
               <button
                 type="button"
                 data-testid="translator-keep"
                 onClick={keep}
                 disabled={kept}
-                className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
+                className={
+                  'tap-target eyebrow w-full rounded px-5 py-3 disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted ' +
+                  (want
+                    ? 'border border-line-strong text-muted'
+                    : 'bg-accent text-accent-ink')
+                }
               >
                 {kept ? 'KEPT' : 'KEEP THIS'}
               </button>
@@ -456,7 +540,7 @@ export function Translator() {
               disabled={!text.trim() || state === 'asking'}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
             >
-              {state === 'asking' ? 'ASKING' : 'SAY IT IN PORTUGUESE'}
+              {state === 'asking' ? 'ASKING' : want ? 'FIND THE WORD' : 'SAY IT IN PORTUGUESE'}
             </button>
           )}
           {kept ? (
