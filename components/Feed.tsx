@@ -2126,6 +2126,13 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-accent">YOU KNOW THIS</p>
         <p className="display text-balance text-2xl">{card.taste.en}</p>
+        {/*
+          Under the quote, as it is on the root card, so the two screens teach the same
+          shape: the line, then where you would hear it, then the Portuguese.
+        */}
+        {card.taste.credit ? (
+          <p className="mt-1 text-sm text-white/70">{card.taste.credit}</p>
+        ) : null}
       </div>
 
       <div className="border-t border-line pt-6">

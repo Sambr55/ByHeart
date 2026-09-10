@@ -150,7 +150,13 @@ export type FeedCard =
       id: string
       crate: Crate
       /** One real line out of it, which is the whole argument in four words. */
-      taste: { pt: string; en: string; why: string }
+      taste: {
+        pt: string
+        en: string
+        why: string
+        /** Where you would hear it — see `credit` on a root. Absent on a root without one. */
+        credit?: string
+      }
       image: { src: string; alt: string }
     }
 
@@ -488,6 +494,15 @@ export function vibeCard(family: CultureFamily): FeedCard | null {
     taste: {
       pt: root.target,
       en: root.root_display,
+      /*
+        The anchor travels with the quote.
+
+        A line arriving in the feed with no context is the complaint this exists for —
+        "some are very vague... lets not feel like some of these quotes come out of the
+        blue" — and the feed is where a stranger meets a vibe first, so it needs the
+        anchor more than the card does, not less.
+      */
+      credit: root.credit,
       why: piece.target.replace('…', '').trim() + ' — ' + piece.gloss,
     },
     image: { src: image.src, alt: image.alt },

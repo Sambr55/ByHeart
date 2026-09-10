@@ -569,6 +569,7 @@ export const TOP_GUN: Root[] = [
     source_label: 'What Top Gun actually is',
     source_status: 'paraphrased',
     root_display: 'Top Gun is a school. You are here to work.',
+    credit: 'Viper, to the new class, day one',
     source: 'This is a school. You are here to work.',
     target: 'Isto é uma escola. Estás aqui para trabalhar.',
     semantic_bridge:
@@ -600,6 +601,7 @@ export const TOP_GUN: Root[] = [
     rung: 2,
     source_label: 'Top Gun',
     root_display: 'Talk to me, Goose.',
+    credit: 'Maverick to his back-seater, mid-flight',
     source: 'Say something. I need you with me.',
     target: 'Fala comigo, Goose.',
     semantic_bridge:
@@ -629,6 +631,7 @@ export const TOP_GUN: Root[] = [
     rung: 4,
     source_label: 'Top Gun',
     root_display: 'You can be my wingman anytime.',
+    credit: 'Iceman to Maverick, at the end',
     source: 'You can be my partner whenever you want.',
     target: 'Podes ser o meu parceiro quando quiseres.',
     semantic_bridge:
@@ -677,6 +680,7 @@ export const TOP_GUN: Root[] = [
     rung: 3,
     source_label: 'Top Gun',
     root_display: 'What were you thinking?',
+    credit: 'Asked after somebody does something reckless',
     source: 'What was going through your head?',
     target: 'Em que estavas a pensar?',
     literal_note: 'Literally “in what were you thinking?”',
@@ -710,6 +714,7 @@ export const TOP_GUN: Root[] = [
     rung: 2,
     source_label: 'Top Gun',
     root_display: 'I feel the need…',
+    credit: 'Maverick and Goose, before the speed',
     source: 'I need something, badly.',
     target: 'Sinto que preciso…',
     semantic_bridge:
@@ -738,6 +743,7 @@ export const TOP_GUN: Root[] = [
     rung: 4,
     source_label: 'Top Gun',
     root_display: 'I will not leave my wingman.',
+    credit: 'The promise pilots make to each other',
     source: 'I am not going to abandon my partner.',
     target: 'Não vou deixar o meu parceiro.',
     semantic_bridge:
@@ -789,6 +795,7 @@ export const TOP_GUN: Root[] = [
     source_label: 'Top Gun — looking for your wingman',
     source_status: 'paraphrased',
     root_display: 'Where\u2019s my wingman?',
+    credit: 'Shouted across a bar when somebody wanders off',
     source: 'Where is my wingman?',
     target: 'Onde est\u00e1 o meu parceiro?',
     semantic_bridge:
@@ -844,6 +851,7 @@ export const JAMES_BOND: Root[] = [
     source_label: 'Bond introducing himself, in every film',
     source_status: 'paraphrased',
     root_display: 'Bond. James Bond. English.',
+    credit: 'Said at a border, or a first day',
     source: 'I am English.',
     target: 'Sou inglês.',
     semantic_bridge:
@@ -877,6 +885,7 @@ export const JAMES_BOND: Root[] = [
     root_type: 'quote',
     source_label: 'James Bond',
     root_display: 'My name is… James Bond.',
+    credit: 'How you introduce yourself, anywhere',
     source: 'The most famous introduction in film.',
     target: 'Chamo-me… James Bond.',
     literal_note: 'Literally “I call myself”.',
@@ -910,6 +919,7 @@ export const JAMES_BOND: Root[] = [
     source_label: 'Tomorrow Never Dies',
     source_status: 'verified',
     root_display: 'Tomorrow Never Dies',
+    credit: 'Amanhã, on every shop sign and closed door',
     source: 'Tomorrow never dies.',
     target: 'Amanhã nunca morre.',
     semantic_bridge:
@@ -959,6 +969,7 @@ export const JAMES_BOND: Root[] = [
     source_label: 'From Russia with Love',
     source_status: 'verified',
     root_display: 'From Russia with Love',
+    credit: 'How a postcard or a parcel is signed off',
     source: 'From Russia, with love.',
     target: 'Da Rússia com amor.',
     semantic_bridge:
@@ -995,6 +1006,7 @@ export const JAMES_BOND: Root[] = [
     source_label: 'Never Say Never Again',
     source_status: 'verified',
     root_display: 'Never Say Never Again',
+    credit: 'Outra vez, when you did not catch it',
     source: 'Don’t say “never” again.',
     target: 'Não digas “nunca” outra vez.',
     semantic_bridge:
@@ -1046,6 +1058,7 @@ export const JAMES_BOND: Root[] = [
     source_label: 'No Time to Die',
     source_status: 'verified',
     root_display: 'No Time to Die',
+    credit: 'Sem tempo, the excuse everybody uses',
     source: 'There is no time to die.',
     target: 'Sem tempo para morrer.',
     semantic_bridge:
@@ -1084,6 +1097,7 @@ export const JAMES_BOND: Root[] = [
     source_label: '007',
     source_status: 'verified',
     root_display: 'Bond. 007.',
+    credit: 'Reading digits back, at a till',
     source: 'Double-oh-seven.',
     target: 'Zero zero sete.',
     semantic_bridge:
@@ -1121,6 +1135,7 @@ export const JAMES_BOND: Root[] = [
     source_label: 'Quantum of Solace',
     source_status: 'verified',
     root_display: 'Quantum of Solace',
+    credit: 'Asked at a market stall in Portugal',
     source: 'A quantum is an amount \u2014 a measure of how much.',
     target: 'Quanto custa?',
     semantic_bridge:
@@ -1165,6 +1180,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'The diary, which opens on the statistics',
     source_status: 'paraphrased',
     root_display: 'Thirty-two years old. Weight: unchanged.',
+    credit: 'Counted once a year, reluctantly',
     source: 'I am thirty-two years old.',
     target: 'Tenho trinta e dois anos.',
     semantic_bridge:
@@ -1198,6 +1214,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'Smug Marrieds, at a dinner party',
     source_status: 'paraphrased',
     root_display: 'So — why are you still single?',
+    credit: 'Asked lightly, by someone who is married',
     source: 'Are you married?',
     target: 'És casada?',
     semantic_bridge:
@@ -1232,6 +1249,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'Every Bridget Jones entrance, ever',
     source_status: 'paraphrased',
     root_display: 'Sorry. Sorry. Sorry.',
+    credit: 'Coming in late, past everyone, still talking',
     source: 'Sorry, sorry — sorry.',
     target: 'Desculpe, desculpe — desculpe.',
     semantic_bridge:
@@ -1276,6 +1294,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
     root_display: 'You overshare. There is now a silence.',
+    credit: 'Two drinks in, when the table goes quiet',
     source: 'I said too much.',
     target: 'Falei demais.',
     semantic_bridge:
@@ -1310,6 +1329,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
     root_display: 'You arrive late. Everyone is already there.',
+    credit: 'Coming through the door, coat still on',
     source: 'Sorry I’m late.',
     target: 'Desculpa o atraso.',
     semantic_bridge:
@@ -1358,6 +1378,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
     root_display: 'You forget the name of the person you are talking to.',
+    credit: 'Ten minutes into talking to somebody',
     source: 'Sorry… what’s your name?',
     target: 'Desculpa… como te chamas?',
     semantic_bridge:
@@ -1389,6 +1410,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
     root_display: 'You say the wrong thing while trying to impress someone.',
+    credit: 'Straight after it comes out wrong',
     source: 'Sorry. That’s not what I meant.',
     target: 'Desculpa. Não era isso que queria dizer.',
     semantic_bridge:
@@ -1424,6 +1446,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'DUB-authored cringe moment',
     source_status: 'paraphrased',
     root_display: 'The joke does not land.',
+    credit: 'In the pause after nobody laughs',
     source: 'It was a joke.',
     target: 'Era uma piada.',
     semantic_bridge:
@@ -1473,6 +1496,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'Bridget Jones\u2019s Diary \u2014 alone, with a very large glass',
     source_status: 'paraphrased',
     root_display: 'Bridget, alone, with an extremely large glass of wine',
+    credit: 'Ordering, at any counter in Lisbon',
     source: 'A glass of wine, please.',
     target: 'Um copo de vinho, por favor.',
     semantic_bridge:
@@ -1514,6 +1538,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'Bridget Jones\u2019s Diary \u2014 the whole diary, really',
     source_status: 'paraphrased',
     root_display: 'The entire diary, in one question',
+    credit: 'One in the morning, to a patient friend',
     source: 'Does he like me?',
     target: 'Ele gosta de mim?',
     semantic_bridge:
@@ -1563,6 +1588,7 @@ export const PULP_FICTION: Root[] = [
     source_label: 'Jules, on being asked to repeat himself',
     source_status: 'paraphrased',
     root_display: 'What? — Say “what” again.',
+    credit: 'Jules, to Brett, across the table',
     source: 'I did not catch that. Slower, please.',
     target: 'Não percebi. Mais devagar, por favor.',
     semantic_bridge:
@@ -1594,6 +1620,7 @@ export const PULP_FICTION: Root[] = [
     rung: 1,
     source_label: 'Pulp Fiction',
     root_display: 'Royale with Cheese.',
+    credit: 'Vincent, to Jules, in the car',
     source: 'A Royale with cheese.',
     target: 'Royale com queijo.',
     semantic_bridge:
@@ -1627,6 +1654,7 @@ export const PULP_FICTION: Root[] = [
     rung: 3,
     source_label: 'Pulp Fiction',
     root_display: 'Say “what” again!',
+    credit: 'Jules, leaning in on Brett',
     source: 'Say “what” one more time.',
     target: 'Diz “o quê” outra vez!',
     semantic_bridge:
@@ -1673,6 +1701,7 @@ export const PULP_FICTION: Root[] = [
     rung: 1,
     source_label: 'Pulp Fiction',
     root_display: 'That’s a tasty burger.',
+    credit: 'Jules, helping himself to Brett\'s burger',
     source: 'That burger is really good.',
     target: 'Esse hambúrguer é mesmo bom.',
     literal_note: 'A literal “saboroso” is possible but sounds written, not spoken.',
@@ -1706,6 +1735,7 @@ export const PULP_FICTION: Root[] = [
     rung: 2,
     source_label: 'Pulp Fiction',
     root_display: 'Be cool.',
+    credit: 'Said to somebody about to panic',
     source: 'Calm down.',
     target: 'Tem calma.',
     semantic_bridge:
@@ -1754,6 +1784,7 @@ export const PULP_FICTION: Root[] = [
     source_label: 'Pulp Fiction — paraphrased scene reference',
     source_status: 'paraphrased',
     root_display: 'The famous conversation about what they call it over there.',
+    credit: 'Vincent, on what Europe renames things',
     source: 'What is it called?',
     target: 'Como é que se chama?',
     literal_note: 'Literally “how is it called?”',
@@ -1787,6 +1818,7 @@ export const PULP_FICTION: Root[] = [
     source_label: 'Pulp Fiction',
     source_status: 'verified',
     root_display: 'A five-dollar shake',
+    credit: 'Vincent, doubting the price at Mia\'s table',
     source: 'A five-euro milkshake.',
     target: 'Um batido de cinco euros.',
     semantic_bridge:
@@ -1829,6 +1861,7 @@ export const PULP_FICTION: Root[] = [
     source_label: 'Pulp Fiction',
     source_status: 'verified',
     root_display: 'They call it a Royale with Cheese',
+    credit: 'Vincent, reporting it back from Paris',
     source: 'They call it a Royale with cheese.',
     target: 'Eles chamam-lhe Royale com queijo.',
     semantic_bridge:
@@ -1873,6 +1906,7 @@ export const PULP_FICTION: Root[] = [
     source_label: 'Pulp Fiction',
     source_status: 'verified',
     root_display: 'Who\u2019s Zed?',
+    credit: 'Butch, to Marsellus, after the basement',
     source: 'Who is Zed?',
     target: 'Quem \u00e9 o Zed?',
     semantic_bridge:
@@ -1920,6 +1954,7 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'Audrey Hepburn, on what she actually liked',
     source_status: 'paraphrased',
     root_display: 'I love people who make me laugh.',
+    credit: 'Explaining why you like someone',
     source: 'I love people who make me laugh.',
     target: 'Adoro pessoas que me fazem rir.',
     semantic_bridge:
@@ -1952,6 +1987,7 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'Audrey Hepburn — attribution requires review',
     source_status: 'needs-review',
     root_display: 'Paris is always a good idea.',
+    credit: 'Printed on half the tote bags in Europe',
     source: 'Paris is always a good idea.',
     target: 'Paris é sempre uma boa ideia.',
     semantic_bridge:
@@ -1999,6 +2035,7 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'DUB paraphrase of a documented Audrey theme',
     source_status: 'paraphrased',
     root_display: 'Enjoy your life.',
+    credit: 'Shouted after somebody heading out',
     source: 'Make the most of your life.',
     target: 'Aproveita a vida.',
     semantic_bridge:
@@ -2036,6 +2073,7 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'DUB paraphrase of documented human-connection themes',
     source_status: 'paraphrased',
     root_display: 'People matter more than things.',
+    credit: 'Said when something has been broken',
     source: 'People matter more than things.',
     target: 'As pessoas importam mais do que as coisas.',
     semantic_bridge:
@@ -2077,6 +2115,7 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'DUB paraphrase of a documented Audrey sentiment',
     source_status: 'paraphrased',
     root_display: 'Look for the good in people.',
+    credit: 'Advice from someone older than you',
     source: 'Look for the good side of people.',
     target: 'Procura o lado bom das pessoas.',
     semantic_bridge:
@@ -2114,6 +2153,7 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'DUB paraphrase of a documented Audrey sentiment',
     source_status: 'paraphrased',
     root_display: 'The most important thing is to be happy.',
+    credit: 'What people say about a big decision',
     source: 'The most important thing is to be happy.',
     target: 'O mais importante é ser feliz.',
     semantic_bridge:
@@ -2178,6 +2218,7 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'Meditations, Book One — the debts he owed his family',
     source_status: 'paraphrased',
     root_display: 'From my grandfather: character. From my father: modesty.',
+    credit: 'The opening pages, thanking each relative in turn',
     source: 'My children are what I have.',
     target: 'Os meus filhos são o que tenho.',
     semantic_bridge:
@@ -2211,6 +2252,7 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'DUB distillation of a recurring Meditations theme',
     source_status: 'public-domain-derived',
     root_display: 'Control what you can control.',
+    credit: 'The line people quote back at a crisis',
     source: 'Control what you can control.',
     target: 'Controla o que podes controlar.',
     semantic_bridge:
@@ -2251,6 +2293,7 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
     root_display: 'You do not control what happens. You control how you react.',
+    credit: 'What somebody says after the bad news lands',
     source: 'You control your response, not the event.',
     target: 'Não controlas o que acontece. Controlas como reages.',
     semantic_bridge:
@@ -2293,6 +2336,7 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
     root_display: 'The only moment you have is now.',
+    credit: 'Said to somebody stuck on yesterday',
     source: 'Now is all you have.',
     target: 'O único momento que tens é agora.',
     semantic_bridge:
@@ -2344,6 +2388,7 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
     root_display: 'If it is not true, do not say it.',
+    credit: 'A rule to keep before repeating gossip',
     source: 'Don’t say it if it isn’t true.',
     target: 'Se não é verdade, não digas.',
     semantic_bridge:
@@ -2381,6 +2426,7 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'DUB source-derived wisdom',
     source_status: 'public-domain-derived',
     root_display: 'Accept what you cannot change.',
+    credit: 'What is left when the complaining runs out',
     source: 'Accept what you cannot change.',
     target: 'Aceita o que não podes mudar.',
     semantic_bridge:
@@ -2437,6 +2483,7 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'Meditations, Book VII',
     source_status: 'public-domain-derived',
     root_display: 'Do not be ashamed to need help',
+    credit: 'Written to himself, in a private notebook',
     source: 'Don\u2019t be ashamed to ask for help.',
     target: 'N\u00e3o tenhas vergonha de pedir ajuda.',
     semantic_bridge:
@@ -2478,6 +2525,7 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'Meditations, Book II',
     source_status: 'public-domain-derived',
     root_display: 'When you wake, remember who you are about to meet',
+    credit: 'The morning list, before the day\'s difficult people',
     source: 'People do what they know how to do.',
     target: 'As pessoas fazem o que sabem.',
     semantic_bridge:
@@ -2520,6 +2568,7 @@ export const MARCUS_AURELIUS: Root[] = [
     source_label: 'Meditations, Book II',
     source_status: 'public-domain-derived',
     root_display: 'We were born to work with one another',
+    credit: 'Told to himself, about people he found tiresome',
     source: 'We are made for one another.',
     target: 'N\u00f3s somos feitos uns para os outros.',
     semantic_bridge:
@@ -2584,6 +2633,7 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'Piss off. I have had enough.',
+    credit: 'The end of a row, not a joke',
     source: 'Go away. I am fed up.',
     target: 'Vai à merda, estou farto.',
     literal_note: 'Literally “go to the shit”. Portuguese sends people to places.',
@@ -2621,6 +2671,7 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'Oh for God’s sake — I forgot.',
+    credit: 'What you hear when a phone screen cracks',
     source: 'The all-purpose explosion, followed by the reason for it.',
     target: 'Foda-se, esqueci-me.',
     literal_note: 'FODA-SE is a verb with a pronoun stuck on the back of it. So is ESQUECI-ME. Same machinery, very different reputations.',
@@ -2673,6 +2724,7 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'Sod it. I’m going anyway.',
+    credit: 'Said to yourself, deciding to go anyway',
     source: 'Writing something off, and carrying on regardless.',
     target: 'Que se foda, vou na mesma.',
     literal_note: 'Notice the SE has moved. In “foda-se” it sits behind the verb; after QUE it jumps in front. That is a rule, not an accident.',
@@ -2706,6 +2758,7 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'What the hell is this?',
+    credit: 'A boiler that has stopped working',
     source: 'Genuine confusion, expressed at volume.',
     target: 'Que caralho é isto?',
     literal_note: 'The same word, with DO in front of it, means the exact opposite. Isto é do caralho = this is brilliant.',
@@ -2757,6 +2810,7 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'I feel like crap today.',
+    credit: 'Monday, in the office kitchen',
     source: 'Today, specifically, you are not at your best.',
     target: 'Hoje estou uma merda.',
     literal_note: 'ESTOU, not É. É would mean you are permanently rubbish, which is a different and much sadder sentence.',
@@ -2792,6 +2846,7 @@ export const SWEARING: Root[] = [
     source_label: 'Portuguese television, with the subtitles on',
     source_status: 'paraphrased',
     root_display: 'You absolute bastard.',
+    credit: 'Between friends, and one of them is winning',
     source: 'Said to a close friend, this is nearly affectionate. Said to anyone else, it is not.',
     target: 'És um grande cabrão.',
     literal_note: 'GRANDE means “big”, but in front of the noun it stops meaning size and starts meaning “utter”.',
@@ -2866,6 +2921,7 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'You look great tonight.',
+    credit: 'Said on arrival, meeting someone out',
     source: 'A remark about this evening, not a verdict on her existence.',
     target: 'Estás muito gira hoje.',
     literal_note: 'ESTÁS, not és. És linda is a statement about her whole life; estás linda is about tonight.',
@@ -2910,6 +2966,7 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'Can I get you a drink?',
+    credit: 'A bar in Cais do Sodré, about eleven',
     source: 'The oldest opening line there is, in a language that softens it.',
     target: 'Posso oferecer-te uma bebida?',
     literal_note: 'OFERECER-TE — offer to you. The little TE hooks onto the end of the verb, exactly as it does in esqueci-me.',
@@ -2940,6 +2997,7 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'I would like to see you again.',
+    credit: 'At the end of the night, saying goodbye',
     source: 'Said at the end of an evening you do not want to be the last one.',
     target: 'Gostava de te ver outra vez.',
     literal_note: 'GOSTAVA is a past tense being used about the future. Portuguese softens a want by putting it slightly out of reach.',
@@ -2985,6 +3043,7 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Love Actually — the one who learns Portuguese',
     source_status: 'paraphrased',
     root_display: 'I came here to ask you something.',
+    credit: 'In the restaurant, in front of everyone',
     source: 'The whole point of learning the language in the first place.',
     target: 'Vim aqui para te pedir uma coisa.',
     literal_note: 'PARA + a verb is “in order to”. And notice the TE has moved in front of pedir — after para, it goes first.',
@@ -3016,6 +3075,7 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'I’m nervous. I’m not good at this.',
+    credit: 'Said halfway through asking',
     source: 'Admitting it, which works considerably better than not admitting it.',
     target: 'Estou nervoso, não sou bom nisto.',
     literal_note: 'NERVOSO with an O because a man is saying it. A woman says nervosa, and the sentence is otherwise identical.',
@@ -3046,6 +3106,7 @@ export const FLIRTING_M2F: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'Will you give me your number?',
+    credit: 'At the end of the night, before she leaves',
     source: 'The only question that matters at the end.',
     target: 'Dás-me o teu número?',
     literal_note: 'O TEU because número is a masculine word. Ask for her morada and it becomes A TUA.',
@@ -3078,6 +3139,7 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'You look good tonight.',
+    credit: 'Said in passing, on the way past',
     source: 'A remark about this evening, not a verdict on his existence.',
     target: 'Estás muito giro hoje.',
     literal_note: 'GIRO with an O because you are describing a man. The sentence is otherwise word for word the same.',
@@ -3122,6 +3184,7 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'Do you fancy going for a drink?',
+    credit: 'When the plan is still open',
     source: 'An invitation with no weight on it, which is why it works.',
     target: 'Apetece-te ir beber qualquer coisa?',
     literal_note: 'Literally “does it appeal to you”. Portuguese asks the desire, not the person — so nobody has to be the one who wanted it.',
@@ -3166,6 +3229,7 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'I’d like to get to know you better.',
+    credit: 'Later, when the noise has dropped',
     source: 'Interest, stated once, without a speech attached.',
     target: 'Queria conhecer-te melhor.',
     literal_note: 'QUERIA is a past tense doing a present job. Queria um café is how you order coffee — the same softening, in a café.',
@@ -3196,6 +3260,7 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'You’re really funny.',
+    credit: 'After he has made you laugh',
     source: 'The most effective sentence in this entire vibe.',
     target: 'És muito engraçado.',
     literal_note: 'ÉS this time, not estás. Funny is not something he is being tonight; it is something he is.',
@@ -3241,6 +3306,7 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Every hello and goodbye in Portugal',
     source_status: 'paraphrased',
     root_display: 'Give me a little kiss.',
+    credit: 'At the door, arriving or leaving',
     source: 'And also, unremarkably, how the entire country says hello.',
     target: 'Dá-me um beijinho.',
     literal_note: 'BEIJO is a kiss. BEIJINHO is a small one — and in Portugal the small one is the greeting, given twice, to almost everybody.',
@@ -3271,6 +3337,7 @@ export const FLIRTING_F2M: Root[] = [
     source_label: 'Anywhere in Portugal, most evenings',
     source_status: 'paraphrased',
     root_display: 'Will you call me later?',
+    credit: 'At the goodbye, before you part',
     source: 'Handing the next move over, deliberately.',
     target: 'Ligas-me logo?',
     literal_note: 'LIGAS-ME is you calling me. LIGO-TE is me calling you. Same verb, two endings, opposite directions.',
@@ -3318,6 +3385,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'New Moon on Monday',
     source_status: 'verified',
     root_display: 'And the rest of the week',
+    credit: 'On every shop door and timetable',
     source: 'Tuesday, Wednesday, Thursday, Friday.',
     target: 'Terça, quarta, quinta, sexta.',
     semantic_bridge:
@@ -3359,6 +3427,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Hungry Like the Wolf',
     source_status: 'verified',
     root_display: 'Hungry Like the Wolf',
+    credit: 'Duran Duran',
     source: 'Hungry like the wolf.',
     target: 'Tenho uma fome de lobo.',
     literal_note: 'Literally “I have a hunger of wolf”.',
@@ -3414,6 +3483,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'New Moon on Monday',
     source_status: 'verified',
     root_display: 'New Moon on Monday',
+    credit: 'Duran Duran',
     source: 'New moon on Monday.',
     target: 'Lua nova na segunda-feira.',
     semantic_bridge:
@@ -3454,6 +3524,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Is There Something I Should Know?',
     source_status: 'verified',
     root_display: 'Is There Something I Should Know?',
+    credit: 'Duran Duran',
     source: 'Is there something I should know?',
     target: 'Há alguma coisa que eu deva saber?',
     semantic_bridge:
@@ -3511,6 +3582,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Save a Prayer',
     source_status: 'verified',
     root_display: 'Save a Prayer (…till the morning after)',
+    credit: 'Duran Duran',
     source: 'Save a prayer for the morning after.',
     target: 'Guarda uma oração para a manhã seguinte.',
     semantic_bridge:
@@ -3554,6 +3626,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'All You Need Is Now',
     source_status: 'verified',
     root_display: 'All You Need Is Now',
+    credit: 'Duran Duran',
     source: 'All you need is now.',
     target: 'Tudo o que precisas é agora.',
     semantic_bridge:
@@ -3610,6 +3683,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Ordinary World',
     source_status: 'verified',
     root_display: 'Ordinary World',
+    credit: 'Duran Duran',
     source: 'Ordinary world.',
     target: 'Um mundo normal.',
     semantic_bridge:
@@ -3674,6 +3748,7 @@ export const WIZARDRY: Root[] = [
     source_label: 'The platform number everybody knows',
     source_status: 'paraphrased',
     root_display: 'Nine and three-quarters.',
+    credit: 'Counting out loud, with something to count',
     source: 'Nine and three-quarters.',
     target: 'Nove e três quartos.',
     semantic_bridge:
@@ -3714,6 +3789,7 @@ export const WIZARDRY: Root[] = [
     source_label: 'The silencing word, in every wizarding story',
     source_status: 'paraphrased',
     root_display: 'Silencio.',
+    credit: 'The word for quiet, in every wizarding story',
     source: 'Silence.',
     target: 'Silêncio.',
     semantic_bridge:
@@ -3747,6 +3823,7 @@ export const WIZARDRY: Root[] = [
     source_label: 'The wand-light word, and the one that puts it out',
     source_status: 'paraphrased',
     root_display: 'Lumos. Nox.',
+    credit: 'Light on, light off, either side of a day',
     source: 'Light. Night.',
     target: 'Luz. Noite.',
     semantic_bridge:
@@ -3780,6 +3857,7 @@ export const WIZARDRY: Root[] = [
     source_label: 'The water-conjuring word',
     source_status: 'paraphrased',
     root_display: 'Aguamenti.',
+    credit: 'Ordering at any counter in Portugal',
     source: 'Water.',
     target: 'Um copo de água, por favor.',
     semantic_bridge:
@@ -3812,6 +3890,7 @@ export const WIZARDRY: Root[] = [
     source_label: 'The door-locking word',
     source_status: 'paraphrased',
     root_display: 'Colloportus.',
+    credit: 'A shop door at eight in the evening',
     source: 'The door is locked.',
     target: 'A porta está fechada.',
     semantic_bridge:
@@ -3871,6 +3950,7 @@ export const WIZARDRY: Root[] = [
     source_label: 'The platform that is not quite there',
     source_status: 'paraphrased',
     root_display: 'A platform between two others.',
+    credit: 'Asked in a station, slightly too late',
     source: 'Where is the platform?',
     target: 'Onde é a plataforma do comboio?',
     semantic_bridge:
@@ -3904,6 +3984,7 @@ export const WIZARDRY: Root[] = [
     source_label: 'The wood you are told to stay out of',
     source_status: 'paraphrased',
     root_display: 'The forest you are forbidden to enter.',
+    credit: 'On signs, at the edge of somewhere',
     source: 'It is forbidden.',
     target: 'É proibido.',
     semantic_bridge:
@@ -3936,6 +4017,7 @@ export const WIZARDRY: Root[] = [
     source_label: 'The word that turns a fear into a joke',
     source_status: 'paraphrased',
     root_display: 'Riddikulus.',
+    credit: 'Muttered to whoever is next to you',
     source: 'This is ridiculous.',
     target: 'Isto é ridículo.',
     semantic_bridge:
@@ -4029,6 +4111,7 @@ export const THE_BASICS: Root[] = [
     source_label: 'Hello, Goodbye — The Beatles',
     source_status: 'verified',
     root_display: 'You say yes, I say no.',
+    credit: 'The call and response in the chorus',
     source: 'You say yes, I say no.',
     target: 'Tu dizes sim, eu digo não.',
     semantic_bridge:
@@ -4163,6 +4246,7 @@ export const THE_BASICS: Root[] = [
     source_label: 'The sentence that keeps a conversation in Portuguese',
     source_status: 'paraphrased',
     root_display: 'Bear with me — I am learning.',
+    credit: 'Said early, before the waiter switches to English',
     source: 'I am learning. Bear with me.',
     target: 'Estou a aprender. Tenha paciência.',
     semantic_bridge:
@@ -4196,6 +4280,7 @@ export const THE_BASICS: Root[] = [
     source_label: 'Four Weddings and a Funeral',
     source_status: 'verified',
     root_display: 'Four Weddings and a Funeral',
+    credit: 'Counting off guests at a wedding table',
     source: 'Four weddings and a funeral.',
     target: 'Quatro casamentos e um funeral.',
     semantic_bridge:
@@ -4228,6 +4313,7 @@ export const THE_BASICS: Root[] = [
     source_label: 'Six Days, Seven Nights',
     source_status: 'verified',
     root_display: 'Six Days, Seven Nights',
+    credit: 'The nights on a hotel booking',
     source: 'Six days, seven nights.',
     target: 'Seis dias, sete noites.',
     semantic_bridge:
@@ -4296,6 +4382,7 @@ export const THE_BASICS: Root[] = [
     source_label: '10 Things I Hate About You',
     source_status: 'verified',
     root_display: '10 Things I Hate About You',
+    credit: 'Counting on your fingers, past five',
     source: 'Ten things.',
     target: 'Dez coisas.',
     semantic_bridge:
@@ -4362,6 +4449,7 @@ export const THE_BASICS: Root[] = [
     source_label: 'Quizás, Quizás, Quizás',
     source_status: 'verified',
     root_display: 'Perhaps, perhaps, perhaps',
+    credit: 'A soft no, repeated three times',
     source: 'Perhaps, perhaps, perhaps.',
     target: 'Talvez, talvez, talvez.',
     semantic_bridge:
@@ -4394,6 +4482,7 @@ export const THE_BASICS: Root[] = [
     source_label: 'Saturday Night Fever',
     source_status: 'verified',
     root_display: 'Saturday Night Fever',
+    credit: 'The night the city stays out',
     source: 'Saturday Night Fever',
     target: 'Febre de Sábado à Noite.',
     semantic_bridge:
@@ -4460,6 +4549,7 @@ export const THE_BASICS: Root[] = [
     source_label: 'Why Do Fools Fall in Love',
     source_status: 'verified',
     root_display: 'Why Do Fools Fall in Love',
+    credit: 'The answer a parent gives, eventually',
     source: 'Why? Because I want to.',
     target: 'Porquê? Porque quero.',
     semantic_bridge:
