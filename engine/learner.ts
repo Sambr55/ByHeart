@@ -102,7 +102,22 @@ export interface ProofLine {
    * once. legend = a question about yourself, answered cold — which counts on exactly
    * the same terms as the rest, because it is exactly the same thing.
    */
-  source: 'release' | 'nocue' | 'collision' | 'legend'
+  /**
+   * Where it was said with nothing on screen.
+   *
+   * `room` is the Club's own: an errand performed in a Situation. It is distinct from
+   * `release` because a room is not a root — it carries its own rung rather than borrowing
+   * one from the graph, and rungReached had no way to score it while the two shared a name.
+   */
+  source: 'release' | 'nocue' | 'collision' | 'legend' | 'room'
+  /**
+   * The rung this line is worth, for a source that is not in the root graph.
+   *
+   * Absent on every other source, where the rung comes from the root the sentence belongs
+   * to — and absent on every record written before rooms could count, which is why
+   * rungReached treats a missing value as "not on the ladder" rather than as zero.
+   */
+  rung?: number
   /** Whether it came out right first time, with no hint taken. */
   clean: boolean
   at: string
@@ -971,6 +986,44 @@ export function acquirePiece(id: PieceId, family: string) {
     culture_context: family as PropertyId,
     mission_id: null,
   })
+}
+
+/**
+ * A word used away from where it was learned, which is what makes it yours.
+ *
+ * THE LIBRARY WAS A LIST OF WORDS PERMANENTLY MARKED NEW. `acquirePiece` hardcodes a
+ * perfect first try, so one acquire gives NEW and so do five; SOLID, STRONGER, YOURS and
+ * NEEDS ANOTHER LOOK all require a reinforce, transfer, crossover or delayed_recall event,
+ * and nothing in the app ever wrote one. That silently deleted six features on the vocab
+ * screen — the amber ordering, the shaky count, the set flag, the underline, the row badge
+ * and the coach panel — and with them the one designed reason to reopen the library.
+ *
+ * A room performed cold is a TRANSFER by the plainest reading of the word: the learner
+ * produced a sentence, with nothing on screen, in a place that did not teach them any of
+ * it. deriveState turns that into YOURS, which is the honest label.
+ *
+ * ONLY WORDS THEY ALREADY HAVE. The room does not declare what it teaches, and inferring
+ * it from the sentence would bank `bom`, `um` and `com` off any errand that happens to
+ * contain them — inventing an acquisition out of a word-match, which is the class of bug
+ * that put the Club off the ladder in the first place. So this reinforces what is already
+ * owned and claims nothing new. Rooms will hand over new vocabulary when they say which
+ * words they teach, and not before.
+ */
+export function transferPieces(ids: PieceId[]) {
+  const owned = getLearner().inventory
+  for (const id of ids) {
+    if (!owned[id]) continue
+    recordEvidence({
+      target_id: id,
+      event_type: 'transfer',
+      correct_first_try: true,
+      hint_count: 0,
+      revealed: false,
+      latency_ms: 0,
+      culture_context: null,
+      mission_id: null,
+    })
+  }
 }
 
 export function itemFor(target: PieceId): InventoryItem | undefined {

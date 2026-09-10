@@ -5262,7 +5262,7 @@ export function rungReached(
   // ProofLine keeps its own `pt`: it is a record of what the learner said, not a field
   // of the content graph, and renaming it here would have been the rename escaping its
   // own scope.
-  proof: { pt: string; source: string; clean: boolean }[],
+  proof: { pt: string; source: string; clean: boolean; rung?: number }[],
 ): Rung {
   /*
     A release moves the ladder. Being FIRST-TIME perfect is a different question.
@@ -5284,11 +5284,53 @@ export function rungReached(
   */
   let top = 0
   for (const line of proof) {
+    /*
+      A ROOM COUNTS, AND SAYS SO ITSELF.
+
+      This read `release` alone and found the rung by matching the sentence exactly against
+      a root's transfer answer. Room releases are a disjoint set of strings, so all 45 of
+      them scored nothing: a learner could perform every errand in the Club and stay at
+      stage 1 forever, which is the whole of "the content never gets more advanced".
+
+      A room is not a root and should not be looked up as one — it declares its own rung,
+      and carries it on the line. Read directly, and only when present, so a record written
+      before rooms could count is left where it was rather than silently promoted.
+    */
+    if (line.source === 'room') {
+      if (typeof line.rung === 'number' && line.rung > top) top = line.rung
+      continue
+    }
     if (line.source !== 'release') continue
     const root = ROOTS.find((r) => r.transfer_prompt.answer === line.pt)
     if (root && root.rung > top) top = root.rung
   }
   return Math.min(6, Math.max(1, top + 1)) as Rung
+}
+
+/**
+ * Which taught pieces appear in a sentence, by whole word.
+ *
+ * Used to reinforce what a learner already owns after they say a room's release cold. It
+ * is deliberately blunt — a whole-word match against a piece's own surface form — because
+ * its only caller filters the result down to pieces already in the inventory. Nothing is
+ * acquired from a match here; a word that is not already yours stays not yours.
+ *
+ * Accent-folded, so `número` matches `NUMERO`, and punctuation-stripped so a word ending a
+ * sentence still counts.
+ */
+export function piecesIn(sentence: string): string[] {
+  const words = new Set(
+    fold(sentence)
+      .replace(/[.,!?;:()"'¿¡]/g, ' ')
+      .split(/\s+/)
+      .filter(Boolean),
+  )
+  const out: string[] = []
+  for (const [id, piece] of Object.entries(PIECES)) {
+    const form = fold(String(piece.target).replace(/…/g, '').trim())
+    if (form && words.has(form)) out.push(id)
+  }
+  return out
 }
 
 /** The root that first taught a piece — where the learner met it. */

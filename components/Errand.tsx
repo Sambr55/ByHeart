@@ -7,9 +7,10 @@ import { AudioButton } from '@/components/AudioButton'
 import { CopyButton } from '@/components/CopyButton'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
+import { piecesIn } from '@/content/roots'
 import { chapterById } from '@/content/chapters'
 import type { Situation } from '@/content/situations'
-import { recordProof, rememberFinishedCard } from '@/engine/learner'
+import { recordProof, rememberFinishedCard, transferPieces } from '@/engine/learner'
 import { track } from '@/engine/analytics'
 
 /**
@@ -26,6 +27,44 @@ import { track } from '@/engine/analytics'
 export function Errand({ situation }: { situation: Situation }) {
   const chapter = chapterById(situation.chapter)
   const [stage, setStage] = useState<'read' | 'cold' | 'done'>('read')
+
+  /*
+    ONE PLACE THAT BANKS A ROOM, and it is what puts the Club on the ladder.
+
+    The Club could not raise a rung at all. rungReached counts proof lines whose source is
+    'release' and identifies the rung by matching the sentence EXACTLY against a root's
+    transfer_prompt.answer — and room releases are a disjoint set of strings. Measured: 45
+    rooms, zero matches, rung stays 1 whatever you do. Everything a learner did in the room
+    the product calls home was invisible to the thing that opens more of it.
+
+    A room already declares its own `rung`. It does not need to be matched to a root, it
+    needs to be able to say so — so a room banks `source: 'room'` and carries `rung` on the
+    line, and rungReached reads it directly.
+
+    `clean` still means what it has always meant: said with nothing on screen. That is why
+    it is an argument here rather than a constant — the cold stage passes true, the reveal
+    passes false, and the proof card keeps counting only the first.
+  */
+  const bank = (clean: boolean) => {
+    recordProof({
+      pt: situation.release.answer,
+      en: situation.release.ask,
+      source: 'room',
+      clean,
+      rung: situation.rung,
+    })
+    /*
+      And the words in it, when it was said cold.
+
+      Only on the cold claim: a sentence read off the screen demonstrates nothing about the
+      words in it. `transferPieces` reinforces what the learner already owns and adds
+      nothing new — a room does not declare what it teaches, and guessing from the sentence
+      would bank every `bom` and `um` it happens to contain.
+    */
+    if (clean) transferPieces(piecesIn(situation.release.answer))
+    rememberFinishedCard(situation.id)
+    track('errand_done', { id: situation.id, clean })
+  }
 
   return (
     <main
@@ -108,13 +147,42 @@ export function Errand({ situation }: { situation: Situation }) {
           {/* Nothing on screen to copy from. That is the entire mechanism. */}
           <p className="eyebrow text-muted">SAY IT</p>
           <p className="t-ask display text-balance text-2xl">{situation.release.ask}</p>
-          <button
-            type="button"
-            onClick={() => setStage('done')}
-            className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
-          >
-            SHOW ME
-          </button>
+          {/*
+            THE CLAIM IS MADE HERE, WITH NOTHING ON SCREEN — which is what makes it a claim.
+
+            I SAID IT used to live on the next stage, under the answer, so `clean: true` was
+            banked by somebody reading the sentence they were claiming to have produced cold.
+            recordProof only ever UPGRADES clean, so that true was permanent and
+            uncorrectable: the one number DUB asks to be judged on was inflated by the
+            easiest tap in the flow.
+
+            A cold claim can only honestly be made before the reveal. So the fork is here —
+            I said it, or show me — and the screen that shows the answer can no longer claim
+            anything.
+          */}
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              data-testid="errand-said"
+              onClick={() => {
+                bank(true)
+                window.location.assign('/club')
+              }}
+              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+            >
+              I SAID IT
+            </button>
+            {/* Muted, because the trade should be visible before it is made. */}
+            <p className="text-center text-xs text-muted">Banked as proof.</p>
+            <button
+              type="button"
+              data-testid="errand-show"
+              onClick={() => setStage('done')}
+              className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
+            >
+              OPEN
+            </button>
+          </div>
         </div>
       ) : null}
 
@@ -130,27 +198,24 @@ export function Errand({ situation }: { situation: Situation }) {
             </div>
           </div>
           {/*
-            Two buttons and neither of them is a score. "Got it" records proof, which is
-            the only thing DUB has ever counted; "not yet" costs nothing and says so,
-            because a tool you can fail in front of is the whole point of the Club.
+            NEITHER BUTTON CLAIMS ANYTHING NOW, because the answer is on the screen.
+
+            GOT IT is the honest verb for "the answer was in front of me and I am done with
+            it" — it marks the room spent and moves on. It still banks the sentence, because
+            a room done with help is real work and belongs on the ladder; what it does not
+            do is claim it was said cold.
           */}
           <div className="flex flex-col gap-3">
             <button
               type="button"
+              data-testid="errand-got"
               onClick={() => {
-                recordProof({
-                  pt: situation.release.answer,
-                  en: situation.release.ask,
-                  source: 'release',
-                  clean: true,
-                })
-                rememberFinishedCard(situation.id)
-                track('errand_done', { id: situation.id, clean: true })
+                bank(false)
                 window.location.assign('/club')
               }}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
             >
-              I SAID IT
+              GOT IT
             </button>
             <button
               type="button"

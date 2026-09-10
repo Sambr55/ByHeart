@@ -1634,7 +1634,16 @@ export function Card({
                     onClick={reveal}
                     className="tap-target eyebrow w-full rounded border border-white/50 px-5 py-3 text-center text-white"
                   >
-                    SHOW ME
+                    {/*
+                      OPEN, not SHOW ME.
+
+                      This and TAP TO OPEN four branches down were the same handler with the
+                      same testid, differing only in label — and in colour and position,
+                      because one is the secondary under I SAID IT and the other the primary
+                      above GOT IT. So on adjacent cards the same act changed name, colour
+                      and place at once. One verb, one act.
+                    */}
+                    OPEN
                   </button>
                 </div>
               ) : card.kind === 'derived' ? (
@@ -1645,7 +1654,7 @@ export function Card({
                     onClick={reveal}
                     className="tap-target eyebrow w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
                   >
-                    TAP TO OPEN
+                    OPEN
                   </button>
                   <button
                     type="button"
@@ -1722,7 +1731,7 @@ export function Card({
                   className="tap-target eyebrow mb-3 mt-6 w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
                 >
                   {/*
-                    TAP TO OPEN, because left no longer opens anything.
+                    OPEN, because left no longer opens anything.
 
                     Every card face read SWIPE LEFT, which was true when left was the reveal.
                     Left is reject now, so the old instruction would have been telling people
@@ -1732,7 +1741,7 @@ export function Card({
                     taught, the button is already under their thumb, and swiping right works
                     anyway for anybody who finds it.
                   */}
-                  TAP TO OPEN
+                  OPEN
                 </button>
               )}
               {/*
@@ -1950,11 +1959,19 @@ function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
           </li>
         ))}
       </ul>
+      {/*
+        A DESTINATION, NAMED AS ONE.
+
+        This read SAY IT COLD, which is a good phrase and is what the NEXT screen asks for —
+        so a button that only navigates was carrying a fifth verb, and the act it named
+        happened somewhere else. The grammar is four verbs: OPEN reveals, GOT IT spends,
+        I SAID IT claims, and anything else is a place. This is a place.
+      */}
       <Link
         href={'/errand/' + s.id}
         className="tap-target eyebrow mt-3 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
       >
-        SAY IT COLD
+        THE ROOM
       </Link>
     </div>
   )

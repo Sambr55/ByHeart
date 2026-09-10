@@ -1933,7 +1933,17 @@ export function MiniBuild({
                 onClick={() => check(true)}
                 className="tap-target eyebrow flex-1 rounded border border-line-strong px-4 py-3 text-muted transition hover:text-fg"
               >
-                SAID IT
+                {/*
+                  GOT IT, because that is the act.
+
+                  This read SAID IT one word from the feed's I SAID IT, and the two recorded
+                  opposite claims: this branch renders only after help was taken, so it
+                  always writes clean:false, while I SAID IT writes clean:true. The more
+                  emphatic label conceded a fumble and the plainer one claimed a perfect
+                  record. GOT IT is already the product's word for "the answer was on screen
+                  and I am done with it" — see the note at the reveal pane in Feed.tsx.
+                */}
+                GOT IT
               </button>
             </>
           ) : (
