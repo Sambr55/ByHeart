@@ -1,7 +1,7 @@
 import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
 import { generatedDrops } from '@/content/generated'
 import { DROP_LEAD_DAYS } from '@/content/roots'
-import { SITUATIONS, isCurrent, type Purpose, type Situation } from '@/content/situations'
+import { SITUATIONS, isCurrent, situationById, type Purpose, type Situation } from '@/content/situations'
 import { DROPS, type Drop } from '@/content/drops'
 import { explainersFor, type Explainer } from '@/content/explainers'
 import { INTRO_CARDS, type IntroCard } from '@/content/intro'
@@ -366,6 +366,32 @@ export function roomsFor(
   return SITUATIONS.filter((s) => s.chapter === chapter && isCurrent(s) && forPurpose(s, purpose))
     .sort((a, b) => a.rung - b.rung)
     .map((s): FeedCard => ({ kind: 'situation', id: s.id, situation: s }))
+}
+
+/**
+ * Any room the Club can serve, by id — including the ones inside drops.
+ *
+ * THE FIRST CARD IN THE CLUB HAD A DEAD BUTTON. A room's only call to action is SAY IT
+ * COLD, which goes to /errand/<id>, and that route resolved ids with `situationById` —
+ * which searches SITUATIONS and nothing else. Drop rooms do not live there: they hang off
+ * `Drop.situations` and reach the feed through `dropsFor`. Drops sort first, so the top
+ * three cards of the default Lisbon feed were all unresolvable, and the shortest possible
+ * path through the product — open the Club, read the Portuguese, press the one button —
+ * ended on "NOT HERE — This page does not exist."
+ *
+ * Resolved here rather than in content/situations.ts because drops.ts already imports that
+ * file for its Situation type, so a value import back would be circular — and because
+ * `generatedDrops` builds rooms that no static export can hold. This file already knows
+ * about both, which is what makes it the honest place to ask.
+ */
+export function roomById(id: string, chapter: ChapterId = DEFAULT_CHAPTER, now = new Date()): Situation | undefined {
+  const own = situationById(id)
+  if (own) return own
+  for (const drop of [...DROPS, ...generatedDrops(chapter, now)]) {
+    const found = drop.situations.find((s) => s.id === id)
+    if (found) return found
+  }
+  return undefined
 }
 
 /**
