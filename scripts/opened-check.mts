@@ -17,16 +17,49 @@
  * here across every way a learner can spend the free tier, and it stays measured.
  */
 import { framesJustOpened, cardFor, CARD_SIZE } from '../content/legend'
-import { ROOTS, CRATES } from '../content/roots'
+import { ROOTS, CRATES, type CultureFamily, type Rung } from '../content/roots'
+import { sectionRoots } from '../engine/journey'
 import { FREE_ENTITLEMENTS } from '../lib/entitlements'
 
 const fail: string[] = []
 const note = (s: string) => console.log('  ' + s)
 
-const piecesOf = (fam: string) =>
-  ROOTS.filter((r) => r.culture_family === fam).flatMap((r) =>
-    r.extracts.map((e) => e.id),
-  )
+/*
+  A VIBE IS NOT ONE SITTING, and modelling it as one is how this check first lied.
+
+  The first version added a whole vibe's pieces in one step, which made the basics look
+  like a single event that hands over all seven card questions at once. Driven in a real
+  browser it is nothing of the sort: the basics is 16 roots played over FOUR sittings,
+  and the card arrives 1, then 5, then 1, then 1. The screen that was supposed to say
+  "you have a Legend now" could therefore never fire, because no single sitting opens the
+  whole card.
+
+  So this walks sittings, using sectionRoots — the product's own answer to "what does this
+  session serve" — rather than a convenient fiction about vibes being atomic.
+*/
+const sittingsOf = (fam: CultureFamily, reached: Rung = 6): string[][] => {
+  const out: string[][] = []
+  const played: string[] = []
+  const total = ROOTS.filter((r) => r.culture_family === fam && r.rung <= reached).length
+  /*
+    STOP WHEN THE VIBE IS EXHAUSTED, not when sectionRoots goes quiet — it never does.
+
+    `fresh.length ? fresh : replay` means that once every root has been played it starts
+    serving them AGAIN, for ever, so a `!roots.length` guard runs to whatever bound it is
+    given. With 20 it reported "20 sittings" for a 4-sitting vibe, which is the check
+    describing its own loop rather than the product.
+
+    A replayed root teaches nothing new, so counting played roots is the honest end.
+  */
+  while (played.length < total) {
+    const roots = sectionRoots(fam, reached, played)
+    const fresh = roots.filter((r) => !played.includes(r.root_id))
+    if (!fresh.length) break
+    out.push(fresh.flatMap((r) => r.extracts.map((e) => e.id)))
+    for (const r of fresh) played.push(r.root_id)
+  }
+  return out
+}
 
 const BASICS = 'the_basics'
 const others = CRATES.map((c) => c.id).filter((id) => id !== BASICS)
@@ -46,13 +79,23 @@ pick(0, [])
 
 let firings = 0
 let silent = 0
+/* Sittings are the same for every run, so resolve each vibe's once. */
+const SITTINGS = new Map<string, string[][]>(
+  [BASICS, ...others].map((id) => [id, sittingsOf(id as CultureFamily)]),
+)
+
 for (const run of runs) {
   const owned = new Set<string>()
   let fires = 0
   for (const fam of run) {
-    const before = new Set(owned)
-    for (const p of piecesOf(fam)) owned.add(p)
-    if (framesJustOpened({ before, after: owned, answered: [], purpose: null, answers: [] }).length) fires++
+    /* Every sitting of the vibe, in order, exactly as somebody plays it. */
+    for (const sitting of SITTINGS.get(fam) ?? []) {
+      const before = new Set(owned)
+      for (const p of sitting) owned.add(p)
+      if (framesJustOpened({ before, after: owned, answered: [], purpose: null, answers: [] }).length) {
+        fires++
+      }
+    }
   }
   firings += fires
   if (fires === 0) silent++
@@ -66,39 +109,78 @@ if (silent > 0) {
 }
 
 /*
-  The doorway hands over the whole card, and the screen says so in different words.
+  THE BASICS STILL HANDS OVER THE WHOLE CARD — over its sittings, not in one of them.
 
-  If a content change ever leaves one card question unopened by the basics, the doorway
-  firing silently becomes an ordinary one — the learner is told "another part opened"
-  about seven questions, and the five-vibe trap is quietly back.
+  This is the invariant that untrapped the card (see docs/spec-legend-parts.md): whichever
+  five vibes somebody picks, the forced doorway gives them every question on it. What is
+  NOT true, and what a browser had to show me, is that it arrives all at once: the basics
+  is 16 roots over four sittings and the card lands 1, then 5, then 1, then 1.
 */
-const byBasics = framesJustOpened({
-  before: new Set(),
-  after: new Set(piecesOf(BASICS)),
-  answered: [],
-  purpose: null,
-  answers: [],
-})
+const basicsSittings = SITTINGS.get(BASICS) ?? []
+const openedByBasics: string[] = []
+{
+  const owned = new Set<string>()
+  for (const sitting of basicsSittings) {
+    const before = new Set(owned)
+    for (const p of sitting) owned.add(p)
+    for (const f of framesJustOpened({ before, after: owned, answered: [], purpose: null, answers: [] })) {
+      openedByBasics.push(f.id)
+    }
+  }
+}
 const card = cardFor(null)
-const missing = card.filter((f) => !byBasics.some((o) => o.id === f.id))
+const missing = card.filter((f) => !openedByBasics.includes(f.id))
 if (missing.length) {
   fail.push(`the basics does not open the whole card — missing ${missing.map((f) => f.id).join(', ')}`)
 } else {
-  note(`the basics opens all ${CARD_SIZE} card questions (+${byBasics.length - CARD_SIZE} above it)`)
+  note(
+    `the basics opens all ${CARD_SIZE} card questions across ${basicsSittings.length} sittings ` +
+      `(+${openedByBasics.length - CARD_SIZE} above the card)`,
+  )
 }
 
 /*
-  And it must still have something left to say afterwards. A doorway that opens every
-  frame in the product leaves every later vibe silent, which is the 87% bug wearing a
-  different hat.
+  NO SITTING MAY HAND OVER THE WHOLE CARD, which is the opposite of what I first assumed
+  and the reason the doorway screen was cut.
+
+  The screen had a second framing — "YOU HAVE a Legend now" — for a firing that opened the
+  entire card at once. Driven in a browser, no sitting does: the most any one of them
+  opens is five of the seven. A branch that can never be true is dead copy that reads as
+  shipped, so it went, and this keeps the fact it was cut for honest: if content ever
+  changes so one sitting DOES hand over the card, this fails and the doorway framing is
+  worth writing again.
+*/
+{
+  const owned = new Set<string>()
+  let biggest = 0
+  for (const sitting of basicsSittings) {
+    const before = new Set(owned)
+    for (const p of sitting) owned.add(p)
+    const op = framesJustOpened({ before, after: owned, answered: [], purpose: null, answers: [] })
+    const onCard = op.filter((f) => card.some((c) => c.id === f.id)).length
+    biggest = Math.max(biggest, onCard)
+  }
+  note(`the biggest single sitting opens ${biggest} of the ${CARD_SIZE} card questions`)
+  if (biggest >= CARD_SIZE) {
+    fail.push('one sitting now opens the whole card — the doorway framing is worth writing again')
+  }
+}
+
+/*
+  And it must still have something left to say afterwards. A doorway that opened every
+  frame in the product would leave every later vibe silent, which is the 87% bug wearing
+  a different hat.
 */
 const later = runs.filter((run) => {
-  const owned = new Set(piecesOf(BASICS))
-  return run.slice(1).some((fam) => {
-    const before = new Set(owned)
-    for (const p of piecesOf(fam)) owned.add(p)
-    return framesJustOpened({ before, after: owned, answered: [], purpose: null, answers: [] }).length > 0
-  })
+  const owned = new Set<string>()
+  for (const sitting of SITTINGS.get(BASICS) ?? []) for (const p of sitting) owned.add(p)
+  return run.slice(1).some((fam) =>
+    (SITTINGS.get(fam) ?? []).some((sitting) => {
+      const before = new Set(owned)
+      for (const p of sitting) owned.add(p)
+      return framesJustOpened({ before, after: owned, answered: [], purpose: null, answers: [] }).length > 0
+    }),
+  )
 }).length
 note(`${later} of ${runs.length} runs open another question after the basics`)
 if (later === 0) fail.push('nothing opens after the basics — the screen fires once, ever')

@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { LEGEND_COPY, LEGEND_FRAMES, framesJustOpened, legendStatus, provenanceOf, cardFor, type LegendFrame } from '@/content/legend'
+import { LEGEND_COPY, LEGEND_FRAMES, framesJustOpened, legendStatus, provenanceOf, type LegendFrame } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
@@ -2862,14 +2862,11 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
 function LegendOpened({
   frames,
   toGo,
-  card,
   onDone,
 }: {
   frames: LegendFrame[]
   /** Vibes still owed before the Legend itself opens. 0 means the door is open. */
   toGo: number
-  /** This firing handed over the whole card, not another question. The basics does this. */
-  card: boolean
   onDone: () => void
 }) {
   const router = useRouter()
@@ -2888,27 +2885,23 @@ function LegendOpened({
     <Shell stage="CHOICE" eyebrow="YOUR LEGEND">
       <div className="flex flex-1 flex-col justify-center gap-6">
         {/*
-          TWO FIRINGS, NOT ONE, and the difference is real rather than cosmetic.
+          ONE FRAMING, because the other one could never fire.
 
-          The basics is not a vibe somebody chose — it is the doorway everybody walks
-          through, and it hands over all seven card questions at once plus one above them.
-          Measured: 7 of the 8 it opens ARE the card, and no card question is left behind.
-
-          Running that through the same "another part opened, 7 more too" screen would be
-          the trophy cabinet this component exists to avoid, and it would make the next
-          firing — one question, from a vibe they actually picked — read as a downgrade.
-          So the doorway says the true and bigger thing: you have a Legend now. Every
-          firing after it is one more question on a Legend that already exists.
+          This had a second headline — "YOU HAVE a Legend now" — for the firing that hands
+          over the whole card at once, on the reasoning that the basics is the forced
+          doorway and gives everybody their seven. The first half is true and the second
+          is not: a vibe is not one sitting. The basics is 16 roots across SIX sittings and
+          the card arrives a few questions at a time; the biggest single sitting opens four
+          of the seven. So the branch was unreachable copy that read as shipped, and it is
+          gone. scripts/opened-check.mts measures it and will say if that ever changes.
         */}
-        <p className="pillar text-accent">{card ? 'YOU HAVE' : 'ANOTHER PART'}</p>
+        <p className="pillar text-accent">ANOTHER PART</p>
 
         <div className="pillar-body flex flex-col gap-6">
           <p className="text-sm leading-relaxed text-fg/85">
-            {card
-              ? 'a Legend now — seven things about you, in Portuguese. Here is the first.'
-              : toGo === 0
-                ? 'of your Legend just opened. You have the words for this now.'
-                : 'of your Legend is ready. You have the words for this now.'}
+            {toGo === 0
+              ? 'of your Legend just opened. You have the words for this now.'
+              : 'of your Legend is ready. You have the words for this now.'}
           </p>
 
           {/*
@@ -2948,7 +2941,20 @@ function LegendOpened({
                   {CRATES.find((c) => c.id === p.family)?.title ?? 'another vibe'}.
                 </p>
               ))}
-              <p className="mt-1 text-xs text-muted">None of it was ever about you.</p>
+              {/*
+                THE LINE ONLY LANDS WHEN THERE IS A COLLISION TO POINT AT.
+
+                "None of it was ever about you" is the product's best sentence and it is an
+                argument about RANGE — your own family arriving out of Duran Duran and Pulp
+                Fiction, neither of which was about you. Printed under a single word from
+                the vibe just played it says nothing, because there is nowhere for the word
+                to have travelled from: driven in a browser the basics fired this with one
+                source, "sim came out of The basics", and the claim underneath read as
+                filler. So it waits for two.
+              */}
+              {provenance.length > 1 ? (
+                <p className="mt-1 text-xs text-muted">None of it was ever about you.</p>
+              ) : null}
             </div>
           ) : null}
 
@@ -2959,11 +2965,9 @@ function LegendOpened({
           */}
           {more > 0 ? (
             <p className="text-xs text-muted">
-              {card
-                ? `${more} more make up your card. They are on your Legend.`
-                : more === 1
-                  ? 'One more question opened too.'
-                  : `${more} more questions opened too.`}
+              {more === 1
+                ? 'One more question opened too.'
+                : `${more} more questions opened too.`}
             </p>
           ) : null}
         </div>
@@ -3139,10 +3143,6 @@ function SectionComplete() {
       <LegendOpened
         frames={opened}
         toGo={legend.open ? 0 : legend.toGo}
-        /* The whole card arriving at once, which in practice means the basics. Derived
-           from what actually opened rather than from the family id, so a content change
-           that moves a card word elsewhere cannot leave this lying. */
-        card={cardFor(learner.purpose ?? null).every((f) => opened.some((o) => o.id === f.id))}
         onDone={() => setShowOpened(false)}
       />
     )

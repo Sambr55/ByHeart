@@ -1,15 +1,36 @@
 /**
- * Walk the v0.6 journey end to end: landing → demo → free text → picker → four roots
- * with a "where next?" between each → collisions → no-cue → things you can say → the
- * five questions. Asserts the mandated order actually holds (§20.16).
+ * Walk the journey a new learner actually takes, end to end.
  *
  *   npm run journey
+ *
+ * door → COME IN → the Club's showcase → /vibes → set-up → the shelf → one whole vibe
+ * (roots, collisions, no-cue) → the proof card → the close → the Club.
+ *
+ * IT WAS DEAD, and silently. This walked "v0.6": landing → demo → free text → picker,
+ * waiting for testid `continue` and the words SHOW ME HOW on a front door that has said
+ * COME IN for some time. It failed at its FIRST TAP, so none of the 470 lines behind it
+ * had run in a long while, and nothing else noticed — every other check stayed green
+ * because each one covers a screen rather than the path between them.
+ *
+ * That is what this file is for, and why it is worth repairing rather than deleting: it
+ * is the only check that walks the product the way a person does. Three of the four
+ * things it then found were the same bug in different places — a check describing an
+ * older product — which is the failure mode to watch for here:
+ *
+ *   · the front door became the Club's feed, so the demo corridor is gone
+ *   · a vibe grew a cover screen, so entering one and STARTING one are two taps
+ *   · the Club went behind the Legend, so one finished vibe no longer opens it
+ *   · the help copy says "vibe" where this still said "crate"
+ *
+ * Where possible it now reads the product's own content files instead of restating them,
+ * so a rewording moves the check with it rather than breaking it.
  */
 import { BRAND } from '../content/brand'
 import { chromium, type Locator, type Page } from 'playwright'
 import { CRATES, ROOTS, entryRung, isLive } from '../content/roots'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { CLOSE, PICKER } from '../content/front-door'
+import { HELP } from '../content/help'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 // Must default to a crate a brand-new learner can actually open: the ladder now
@@ -46,102 +67,113 @@ async function main() {
       problems.push('console: ' + m.text().slice(0, 160))
   })
   page.setDefaultTimeout(20000)
-  // The no-bypass rule: /crates with nothing stored must land on the deal, never the
-  // picker. Checked before the walk so a regression here fails loudly rather than
-  // showing up as a confusing step count later.
+  /*
+    THE FRONT DOOR IS THE CLUB NOW, and this walk was still knocking on the old one.
+
+    It waited for testid "continue" and the words SHOW ME HOW on a landing page that has
+    said COME IN for some time, so `npm run journey` had been dead at its first tap — the
+    whole 470-line walk unreachable, silently, while every other check stayed green.
+
+    What changed in the product: WELCOME, HOW_IN, the demo and THE_WAY used to be four
+    screens of argument delivered to somebody who had not seen the product yet and could
+    not skip any of them. They are cards in the Club's feed now (Journey.tsx:552-562), so
+    the landing CTA goes straight to /club?in=1 and the corridor's remaining job is the
+    two screens that were never pitch: set-up, and the shelf.
+
+    So the walk enters the way a new learner actually does — /vibes, which is what
+    `enter: 'vibes'` routes (engine/journey.tsx:604-683) — and the demo assertions are
+    gone rather than rewritten: the demo is feed cards, and the feed has its own checks.
+  */
+
+  /*
+    The no-bypass rule, still real and still worth asserting: a cleared device must meet
+    set-up, never the shelf. What it lands on changed — the pair chooser became set-up's
+    three questions — so this asserts the rule rather than the old screen's words.
+  */
   await page.goto(BASE + '/vibes', { waitUntil: 'networkidle' })
   await page.evaluate(() => localStorage.clear())
   await page.reload({ waitUntil: 'networkidle' })
   await page.waitForTimeout(700)
   const gated = await page.evaluate(() => document.body.innerText)
-  if (/Pick a vibe/.test(gated)) problems.push('/crates bypassed the front door with cleared storage')
-  if (!/Where do you want DUB to take you/.test(gated)) {
-    problems.push('/crates with cleared storage did not land on the language choice')
+  if (/Pick a vibe/.test(gated)) problems.push('/vibes bypassed set-up with cleared storage')
+  if (!/What brings you to/i.test(gated)) {
+    problems.push('/vibes with cleared storage did not land on set-up; got: ' + gated.slice(0, 80))
   }
 
-  await page.goto(BASE + '/?tester=smoke', { waitUntil: 'networkidle' })
+  /*
+    THE LANDING PAGE STILL HAS TO OPEN, and it is one tap to the Club.
 
-  // The ladder dims anything above the learner's rung, and this walk is testing the
-  // CONTENT of one crate rather than the gate. So open the ladder just far enough to
-  // reach it, the same way a learner would have: a line already said cold.
+    Kept because it is the first thing a Lisbon tester will see, and because the testid
+    drift this whole repair is about is exactly the sort of thing that goes unnoticed
+    when nothing walks it.
+  */
+  await page.goto(BASE + '/?tester=smoke', { waitUntil: 'networkidle' })
+  await page.waitForTimeout(900)
+  const door = await page.evaluate(() => document.body.innerText)
+  if (!new RegExp(BRAND.strapline, 'i').test(door)) problems.push('landing strapline missing')
+  if (/Learn Portuguese through the films/.test(door)) {
+    problems.push('landing still names the language — the brand layer is pair-neutral')
+  }
+  if (!(await page.getByTestId('landing-cta').isVisible().catch(() => false))) {
+    problems.push('the front door has no way in')
+  } else {
+    await press(page.getByTestId('landing-cta'), 'come in')
+    await page.waitForURL('**/club**', { timeout: 20000 }).catch(() => {})
+    if (!/\/club/.test(page.url())) {
+      problems.push('COME IN did not reach the Club; url=' + page.url())
+    }
+  }
+
+  /*
+    SET-UP: one screen of why, then a name. Both are real commitments and both write the
+    record the rest of the walk depends on — profile.goal is what stops a finished
+    learner being asked again (engine/journey.tsx:650-670).
+  */
+  await page.goto(BASE + '/vibes', { waitUntil: 'networkidle' })
+  await page.waitForTimeout(1200)
+  const why = await page.evaluate(() => document.body.innerText)
+  if (!/There is no wrong answer/i.test(why)) problems.push('set-up no longer says the last answer is real')
+  await press(page.getByTestId('setup-why-curious'), 'why: just curious')
+  await page.getByTestId('setup-who').fill('Sam')
+  await press(page.getByTestId('setup-commit'), 'finish set-up')
+  await page.waitForTimeout(1500)
+
+  /*
+    The ladder dims anything above the learner's rung, and this walk tests the CONTENT of
+    one vibe rather than the gate — so it opens the ladder just far enough to reach it,
+    the way a learner would have: one line already said cold.
+  */
   const needed = entryRung(CRATES.find((c) => c.id === family)!)
   if (needed > 1) {
-    // Exactly one rung below, because a clean release at rung N opens rung N+1 and
-    // nothing higher — picking any lower root only ever reaches rung 2.
+    // Exactly one rung below: a clean release at rung N opens N+1 and nothing higher.
     const opener = ROOTS.find((r) => r.rung === needed - 1)!
-    // The namespaced key, not the legacy one: by the time this runs the app has already
-    // written an empty record for this pair, so the legacy migration will correctly
-    // decline to overwrite it and the seed would be silently ignored.
+    /*
+      Merged into the record rather than written over it. Set-up has just written the
+      deal, the goal and the name, and replacing the blob would throw all three away —
+      sending the walk straight back to the question it has just answered.
+    */
     const key = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
     await page.evaluate(
-      ([pt, en, k]) =>
-        localStorage.setItem(
-          k,
-          JSON.stringify({
-            version: 1,
-            proof: [{ pt, en, source: 'release', clean: true, at: '2026-01-01T00:00:00.000Z' }],
-          }),
-        ),
+      ([pt, en, k]) => {
+        const raw = JSON.parse(localStorage.getItem(k) ?? '{}')
+        raw.proof = [
+          ...(raw.proof ?? []),
+          { pt, en, source: 'release', clean: true, at: '2026-01-01T00:00:00.000Z' },
+        ]
+        localStorage.setItem(k, JSON.stringify(raw))
+      },
       [opener.transfer_prompt.answer, opener.transfer_prompt.ask, key],
     )
     await page.reload({ waitUntil: 'networkidle' })
+    await page.waitForTimeout(900)
   }
 
   const seen: string[] = []
   let sections = 0
   let legendOffers = 0
+  let unlocks = 0
   const stage = async () =>
     (await page.evaluate(() => document.querySelector('[data-stage]')?.getAttribute('data-stage'))) ?? '?'
-
-  seen.push(await stage())
-  const body0 = await page.evaluate(() => document.body.innerText)
-  // The door is a photograph and a strapline now, not four paragraphs of argument.
-  if (!new RegExp(BRAND.strapline, 'i').test(body0)) problems.push('landing strapline missing')
-  if (/Learn Portuguese through the films/.test(body0)) {
-    problems.push('landing still names the language — the brand layer is pair-neutral')
-  }
-  if (!/SHOW ME HOW/.test(body0)) problems.push('SHOW ME HOW missing')
-
-  await press(page.getByTestId('continue'), 'landing cta')
-
-  // Beat 1 stages three reveals on one screen.
-  const d1 = await page.evaluate(() => document.body.innerText)
-  if (!/TALK TO ME, GOOSE/.test(d1)) problems.push('demo beat 1 wrong')
-  await press(page.getByTestId('continue'), 'reveal translation')
-  const d2 = await page.evaluate(() => document.body.innerText)
-  if (!/FALA COMIGO, GOOSE/.test(d2)) problems.push('translation did not animate in')
-  await press(page.getByTestId('continue'), 'reveal takeaway')
-  const d3 = await page.evaluate(() => document.body.innerText)
-  if (!/COMIGO = WITH ME/.test(d3)) problems.push('takeaway missing')
-  await press(page.getByTestId('continue'), 'to branches')
-
-  const d4 = await page.evaluate(() => document.body.innerText)
-  if (!/Three things you can say/i.test(d4)) problems.push('branch beat missing')
-  if (!/That’s DUB/.test(d4)) problems.push('demo close line missing')
-  await press(page.getByTestId('continue'), 'to the language choice')
-
-  // The language pair is chosen after the demo: the demo is the argument for choosing
-  // at all, and the deal cannot say "your Portuguese" until this is known.
-  const pairScreen = await page.evaluate(() => document.body.innerText)
-  if (!/Where do you want DUB to take you/.test(pairScreen)) problems.push('pair step missing')
-  if (!/Português/.test(pairScreen)) problems.push('pair step does not offer Portuguese')
-  if (!/COMING SOON/.test(pairScreen)) problems.push('pair step hides what is not built')
-  // Not the word — the copy uses it to promise the opposite. What must not exist is a
-  // way to actually hand one over.
-  const capture = await page.evaluate(
-    () => document.querySelectorAll('input, textarea, form').length,
-  )
-  if (capture > 0) problems.push('the pair step has grown a field — coming soon is not a mailing list')
-  await press(page.getByTestId('pair-pt-PT'), 'choose European Portuguese')
-  await press(page.getByTestId('continue'), 'to the deal')
-
-  // The deal sits between the demo and the picker and must answer all three questions.
-  const deal = await page.evaluate(() => document.body.innerText)
-  for (const heading of ['HOW IT WORKS', 'WHAT WE ASK OF YOU', 'WHAT YOU GET', 'WHAT THIS IS NOT']) {
-    if (!deal.includes(heading)) problems.push('the deal screen is missing ' + heading)
-  }
-  if (!/streak/i.test(deal)) problems.push('the deal screen no longer says what DUB refuses to do')
-  await press(page.getByTestId('continue'), 'accept the deal')
 
   const b2 = await page.evaluate(() => document.body.innerText)
   /*
@@ -217,25 +249,32 @@ async function main() {
     await browser.close()
     return
   }
-  // Tapping a crate enters it. There is no confirm step any more: a list where every
-  // row is a destination behaves like one.
-  await press(page.getByRole('button', { name: chosen.title, exact: false }).first(), 'enter the crate')
+  /*
+    A VIBE HAS A DOORWAY AGAIN, and this walk had the older shape of it.
 
-  // The back button has to work from anywhere the tester might be.
-  const back = page.getByTestId('back')
-  if (!(await back.isVisible().catch(() => false))) problems.push('no back button inside a section')
+    "There is no confirm step any more" was true when it was written; tapping a vibe now
+    opens a cover — the image, the blurb and TAP TO BEGIN — and the session starts on
+    `vibe-begin`. Walking past that step is why this reported zero sections while sitting
+    on the cover screen: the walk had entered the vibe and never started it.
+  */
+  await press(page.getByTestId('vibe-' + chosen.id).first(), 'open the vibe')
+  await page.waitForTimeout(900)
+
+  // The way out has to work from the cover, before anything has been committed to.
+  const back = page.getByTestId('vibe-close')
+  if (!(await back.isVisible().catch(() => false))) problems.push('no way out of a vibe cover')
   else {
     const before = await page.evaluate(() => document.body.innerText)
     await press(back, 'back')
+    await page.waitForTimeout(900)
     const after = await page.evaluate(() => document.body.innerText)
     if (before === after) problems.push('back button did not move the learner')
-    // Back lands on the picker, which no longer has a confirm button — so going forward
-    // again means tapping the crate again, exactly as a learner would.
-    await press(
-      page.getByRole('button', { name: chosen.title, exact: false }).first(),
-      're-enter the crate',
-    )
+    await press(page.getByTestId('vibe-' + chosen.id).first(), 're-open the vibe')
+    await page.waitForTimeout(900)
   }
+
+  await press(page.getByTestId('vibe-begin'), 'begin the vibe')
+  await page.waitForTimeout(1200)
 
   // Walk roots until the close.
   for (let guard = 0; guard < 260; guard++) {
@@ -267,6 +306,30 @@ async function main() {
         await press(q, 'profile answer')
         break
       }
+    }
+
+    /*
+      THE UNLOCK SCREEN TAKES THE SCREEN, and a walk that does not know it exists stalls
+      on it — which is how this found it: FAMILY=the_basics hung at the close waiting for
+      a `continue` that was two taps away behind a screen the walk had never seen.
+
+      It is deliberately interposed before the session summary (SectionComplete), so it is
+      handled here rather than treated as a fault. What IS asserted is that it keeps its
+      promise: it must name a question, in Portuguese, and it must be declinable — a screen
+      you cannot get past at the end of every vibe is the nag the product refuses to be.
+    */
+    if (await page.getByTestId('opened-later').isVisible().catch(() => false)) {
+      const unlocked = await page.evaluate(() => document.body.innerText)
+      if (!/ANOTHER PART/i.test(unlocked)) {
+        problems.push('the unlock screen showed without saying what opened')
+      }
+      if (!/You have the words for this now/i.test(unlocked)) {
+        problems.push('the unlock screen does not say why the question is answerable')
+      }
+      unlocks++
+      await press(page.getByTestId('opened-later'), 'past the unlock screen')
+      await page.waitForTimeout(900)
+      continue
     }
 
     const done = page.getByTestId('im-done')
@@ -420,15 +483,36 @@ async function main() {
     real.
   */
   await press(page.getByTestId('continue'), 'into Dub Club')
-  await page.waitForURL('**/club', { timeout: 20000 }).catch(() => {})
+  await page.waitForURL('**/club**', { timeout: 20000 }).catch(() => {})
   if (!/\/club/.test(page.url())) problems.push('the close did not land on the Club; url=' + page.url())
-  await page.waitForTimeout(1200)
+  await page.waitForTimeout(1500)
   const club = await page.evaluate(() => document.body.innerText)
-  if (!/DUB CLUB/i.test(club)) problems.push('the Club did not render')
-  // The ceremony or the home — both are correct here, an empty screen is not.
-  if (!/WORTH DOING NEXT|Welcome to Dub Club/i.test(club)) {
-    problems.push('the Club rendered neither its moves nor its welcome')
+  /*
+    ONE VIBE DOES NOT OPEN THE CLUB, and asserting that it did was this walk describing an
+    older product.
+
+    The Club is behind the Legend now (`clubOpen`, content/legend.ts) and the Legend opens
+    at five completed vibes. This walk finishes ONE, so the honest thing on screen is the
+    explainer — and a walk that demanded "DUB CLUB" and "WORTH DOING NEXT" here was
+    requiring the gate to be broken in order to pass.
+
+    So what is asserted is the rule: arriving from the close either lands INSIDE the Club,
+    for somebody who has earned it, or on an explainer that says what opens it. An empty
+    screen is the only failure, and it is the one that used to hide here.
+  */
+  const inside = /WORTH DOING NEXT|Welcome to Dub Club/i.test(club)
+  const explained = /this opens with your Legend|It opens when your Legend does/i.test(club)
+  if (!inside && !explained) {
+    problems.push('the Club rendered neither its moves nor an explanation; got: ' + club.slice(0, 90))
   }
+  /*
+    And the explainer must name the way in rather than just refusing. A locked door with
+    no sign on it is the failure this pairs with.
+  */
+  if (!inside && !/Legend/i.test(club)) {
+    problems.push('the Club explainer does not say what opens it')
+  }
+
   // Finishing a section is what unlocks the Club, so it has to have been recorded.
   const sectionsDone = await page.evaluate((k) => {
     try {
@@ -453,8 +537,35 @@ async function main() {
   await page.goto(BASE + '/feedback', { waitUntil: 'networkidle' })
   await page.waitForTimeout(600)
   const help = await page.evaluate(() => document.body.innerText)
-  for (const q of ['Why is a crate dimmed', 'Is this Portuguese or Brazilian', 'What actually counts']) {
-    if (!help.includes(q)) problems.push('feedback page does not answer: ' + q)
+  /*
+    READ FROM THE COPY, not restated here.
+
+    These were three hand-typed question strings, and one of them still said "Why is a
+    CRATE dimmed" — the word the product dropped for "vibe" some time ago. So this failed
+    on a question the page answers perfectly well, which is a check reporting a content
+    bug that does not exist while saying nothing about the one that might.
+
+    Asking HELP for its own questions means a rewording moves the check with it, and what
+    is actually asserted is the thing worth asserting: every question the content file
+    promises is on the page.
+  */
+  for (const item of HELP) {
+    if (!help.includes(item.q)) problems.push('feedback page does not answer: ' + item.q)
+  }
+  /*
+    A FLOOR, because reading from HELP alone cannot catch a deletion.
+
+    Iterating the content file fixes the false positive — a rewording moves the check with
+    it — but it also means DELETING a question removes it from the page and from the list
+    in the same stroke, and the loop above sails through. Verified by deleting one: the
+    walk stayed green.
+
+    So the count is asserted against a number that lives here. Five is what the page
+    carries today; adding a sixth is free, and dropping to four has to be a deliberate
+    edit in two files rather than a quiet loss in one.
+  */
+  if (HELP.length < 5) {
+    problems.push('the feedback page answers only ' + HELP.length + ' questions; it had 5')
   }
   if (!/What did not land/i.test(help)) problems.push('feedback page has no open box')
 
@@ -464,8 +575,11 @@ async function main() {
     problems.forEach((p) => console.log('  ' + p))
     process.exit(1)
   }
-  console.log('journey clean: landing → demo → choice → ' + family + ' mixtape → no-cue → five questions')
+  console.log(
+    'journey clean: door → club → set-up → shelf → ' + family + ' → cold → proof → the close',
+  )
   console.log('stages seen: ' + [...new Set(seen)].join(' → '))
+  console.log('legend questions announced during the walk: ' + unlocks)
 }
 
 main()
