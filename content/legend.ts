@@ -102,11 +102,43 @@ export const LEGEND_PARTS: { id: LegendPart; name: string; what: string; opens: 
   },
   {
     id: 'city',
-    name: 'About the city',
+    /*
+      {NAME} AND THE CITY — and the braces are the point.
+
+      This was "About the city", which is geography. Sam's: "it's not About the City, it's
+      You and the City — we could even play on Sex and the City and frame it as Sam and the
+      City, Claire and the City."
+
+      That is the cultural hook the part was missing, and it does something the other two
+      names cannot: it puts the learner in the title. Nobody's Legend is about Lisbon. It is
+      about what Lisbon is like for them — which café is theirs, how they get about, where
+      they ended up living. The name says so before the questions do.
+
+      Filled by the deck from `display_name`, which set-up collects and which a learner may
+      decline to give. `nameFor` below handles that honestly rather than rendering a brace
+      or an apology.
+    */
+    name: '{name} and the city',
     what: 'Where you live, how you get about, and what you do here.',
     opens: 'Opens once you can say where you are and how you got there.',
   },
 ]
+
+/**
+ * A part's name, with the learner in it where the name asks for one.
+ *
+ * Only `city` carries a brace today. A part whose name has no placeholder is returned
+ * unchanged, so this is safe to call on all three and there is no second list of which
+ * parts are personal.
+ *
+ * NO NAME IS A REAL STATE. Set-up asks but does not insist, and a learner who declined
+ * should not meet a brace, an empty gap, or a nudge to go and fill something in. "You and
+ * the city" is true of everybody and reads as deliberate rather than as a fallback.
+ */
+export function nameFor(part: { name: string }, displayName?: string | null): string {
+  const who = (displayName ?? '').trim()
+  return part.name.replace('{name}', who || 'You')
+}
 
 export interface LegendFrame {
   id: string
@@ -376,6 +408,53 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     },
     teaches:
       'Tenho again, doing exactly what it did with your age: you HAVE children, you do not be them. Chamam-se is chamo-me turned round to point at other people — the same verb, aimed outwards.'
+  },
+  {
+    id: 'who_with',
+    /*
+      ABOVE `married`, NOT INSTEAD OF IT — and that was a real choice.
+
+      "És casado?" is on the card and stays there: it is what a stranger actually opens
+      with, it is one word of an answer, and replacing a card frame risks the seven that
+      every purpose is promised. This is the fuller answer, for somebody who has more to
+      say than yes or no — and putting it above CARD_RUNG means the card is unchanged and
+      this is what you build afterwards.
+
+      NAMORADO IS NOT IN built_from, and the omission is deliberate rather than an
+      oversight. VOUCHED is derived from the paradigm table, which holds verbs and
+      agreements — a noun can never appear in it, so parts-check cannot tell a reviewed
+      noun from a typo. Listing `namorado` there would either fail the build or force the
+      check to stop distinguishing the two, and a check that cannot fail is worse than the
+      gap it was guarding.
+
+      So the frame declares the words it is BUILT from — sou and solteiro, both taught —
+      and `namorado` rides along inside a pick option, where the lint already requires it
+      to be taught or glossed. The chip carries its own English, which is what every other
+      pick in the Legend does.
+    */
+    part: 'them',
+    card: 8,
+    ask: 'Estás com alguém?',
+    ask_en: 'Are you with somebody?',
+    frame: '{status}',
+    en: '{status}',
+    slots: [
+      {
+        key: 'status',
+        kind: 'pick',
+        hint: 'whichever is true',
+        gendered: true,
+        options: [
+          { value: 'Sou solteiro.', en: 'I am single.', f: 'Sou solteira.' },
+          { value: 'Tenho namorado.', en: 'I have a boyfriend.', f: 'Tenho namorada.' },
+          { value: 'Sou casado.', en: 'I am married.', f: 'Sou casada.' },
+        ],
+      },
+    ],
+    built_from: ['sou', 'solteiro'],
+    rung: 5,
+    teaches:
+      'SOU for what you are and TENHO for what you have — Portuguese draws the line where English does not. You ARE single and you HAVE a boyfriend, and saying it the other way round is the kind of mistake that gets you a smile rather than a correction.',
   },
   {
     id: 'work',

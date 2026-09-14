@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES } from '@/content/roots'
-import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
+import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, nameFor, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
 import { CopyButton } from '@/components/CopyButton'
@@ -417,7 +417,14 @@ export function Legend() {
               return (
                 <section key={part.id} className="flex flex-col gap-3">
                   <div className="flex items-baseline gap-3">
-                    <h3 className="eyebrow min-w-0 text-accent">{part.name.toUpperCase()}</h3>
+                    {/*
+                      The learner's own name, where the part asks for one. Only {name} and
+                      the city does; the other two are returned unchanged, so there is no
+                      list here of which parts are personal.
+                    */}
+                    <h3 className="eyebrow min-w-0 text-accent">
+                      {nameFor(part, learner.display_name).toUpperCase()}
+                    </h3>
                     <span className="h-px flex-1 bg-line" />
                     <span className="eyebrow shrink-0 tabular-nums text-muted">
                       {doneHere + ' of ' + mine.length}

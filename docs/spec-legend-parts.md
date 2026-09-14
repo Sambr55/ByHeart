@@ -52,10 +52,20 @@ answered is a content brief — *this question needs `moro`, and no vibe teaches
 it* — which is more useful than restricting the Legend to accidental
 recombination of the 177 pieces that happen to exist.
 
-Consequence: `parts-check` must report unteachable words **as a brief, not a
-failure**. A frame naming a word no vibe teaches is expected during authoring;
-what must fail is a frame naming a word that does not exist *as a piece at all*,
-because that is a typo rather than a plan.
+**But writing ahead is not shipping ahead**, and the distinction cost a frame to
+learn. `lint-content` requires every `built_from` piece to exist, and it is right
+to: a frame on a learner's deck naming a word nothing teaches is a question they
+can never answer. So a frame written ahead of its vocabulary lives **here, in
+this brief**, until a root teaches the words — see `they_do` below.
+
+`parts-check` sits one step looser, and deliberately. It prints unteachable words
+as a backlog rather than failing, and draws its own line at `VOUCHED` — the
+reviewed-forms allowlist — so it can tell *not taught yet* from *not real*.
+
+One caveat found the hard way: `VOUCHED` derives from the paradigm table, which
+holds verbs and agreements. **A noun can never appear in it.** So a new noun
+belongs in a pick option, where the lint already requires it to be taught or
+glossed, rather than in `built_from`.
 
 ## About the city — "your life here"
 
@@ -127,10 +137,31 @@ answer and belongs above CARD_RUNG so the card stays seven.*
 
 **`they_do` — E ela, o que faz?** · *And her, what does she do?*
 `Ela trabalha com {thing}.` — She works with {thing}.
-Needs: `ela` ✓, `trabalha` **new** (third person of `trabalho`, which exists —
-so this is a *form*, not a new word, and `derive.ts`'s `next_person` machinery
-already generates exactly this kind of card).
-*The cheapest frame in the brief.*
+Needs: `ela` **new**, `trabalha` **new**.
+
+**Written, then parked — and the reason is the useful part.**
+
+`trabalha` is the third person of `trabalho`, which the Legend already uses. The
+paradigm knows it and both words are in `VOUCHED`, so they are real, reviewed
+Portuguese. It looked like the cheapest frame in the brief.
+
+But `lint-content` enforces the stricter rule — a frame's `built_from` must name
+pieces that exist — and **it is right to.** A frame on a learner's deck that
+names a word nothing teaches is a question they can never answer, whatever the
+authoring intent behind it. The authoring rule permits writing ahead of the
+vocabulary; it does not permit *shipping* ahead of it.
+
+No root says either word, so there is nowhere honest to attach them. Teaching
+them means authoring a root — which is the vibe work below, not a line in a
+frame.
+
+The frame is written and ready. It lands the day a vibe teaches `ela` and
+`trabalha`, and that is one root, not a whole vibe:
+
+> *"E ela? Trabalha com computadores."* — a person, a verb ending, and the
+> question that follows "what do you do?" about ninety seconds later.
+
+**This is the cheapest real content in the brief: one root unlocks one frame.**
 
 **`how_met` — Como se conheceram?** · *How did you meet?*
 Harder — it needs a past tense DUB does not teach. **Defer.** Named here so it
@@ -138,8 +169,10 @@ is a known gap rather than an oversight.
 
 ## Ordering
 
-1. **`they_do`** — needs one verb form the paradigm already knows.
-2. **`who_with`** — one new word, everything else exists.
+1. **`who_with`** — shipped. Sits above `married` rather than replacing it: the
+   card frame is what a stranger opens with, and replacing one risks the seven.
+2. **`they_do`** — written and parked. One root teaching `ela` and `trabalha`
+   lands it.
 3. **`local`** — one new noun.
 4. **`lives`, `gets_about`, `weekend`** — need the new vibe.
 5. **`how_met`** — deferred until there is a past tense.
