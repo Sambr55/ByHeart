@@ -110,12 +110,43 @@ can fill what the list cannot — the same mechanism `work` uses.
 
 ### The vibe this implies
 
-One new vibe would carry most of it: **getting about and where you live** —
-`morar`, `perto`, `longe`, `autocarro`, `metro`, `a pé`, `bairro`, `café`,
-`fim de semana`.
+One new vibe carries most of it: **You and the city** — `morar`, `perto`,
+`longe`, `autocarro`, `metro`, `a pé`, `bairro`, `café`, `fim de semana`.
 
-It needs a cultural source in the existing style. That is the open question for
-this part, and it is Sam's to answer, not mine.
+**Its source is the city itself**, and that is settled. I stalled once asking
+what "cultural hook" it needed, and the question was wrong: there is no hook
+field on a vibe — only `id`, `title`, `blurb`, `tone` — and the swearing vibe
+already hangs off no film at all. Its source is *"Portuguese television, with the
+subtitles on"*. 27 of 96 roots are `root_type: 'other'`; a root that is not a
+quote is the norm, not an exception.
+
+So the roots are real Lisbon lines: *"Moro em Alfama"*, *"O 28 vai ao Chiado"*,
+*"Fica perto do rio."* The recognition is the place, which is the strongest
+possible source for the one part of a Legend that is about being somewhere.
+
+**Named for the part it feeds**, breaking the `<property> <content type>` pattern
+on purpose. A vibe named after what it unlocks is a better promise than one named
+after where its lines came from.
+
+### What it costs — found by trying
+
+Declaring the vibe ahead of its roots does not work, and the shelf said so.
+
+`built: false` **does not hide a tile.** The shelf rendered 13 and
+`shelf-check` failed on a missing image — it asserts every picture actually
+loads. There are exactly 12 images for 12 vibes.
+
+So a new vibe needs, as one indivisible piece of work:
+
+1. **An image** — `/public/vibes/you-and-the-city.jpg`, in the house style
+   (an object or a street, Lisbon light, no text).
+2. **Its roots** — 6–8, each a real line with `extracts`, `branches`,
+   `transfer_prompt` and a `credit` in the "where you would hear it" register.
+3. **The `CultureFamily` union, `ROOTS_BY_FAMILY` and `VIBE_IMAGES`** — the type
+   system requires all three, which is the system working.
+
+The declaration was written and backed out rather than shipped half-done. This
+section is what it taught.
 
 ## About them — the people in your life
 
