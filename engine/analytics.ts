@@ -140,6 +140,12 @@ export type EventName =
   | 'legend_rehearse'
   | 'legend_cold_open'
   | 'legend_unlocked'
+  /*
+    A vibe just made a Legend question answerable, and the learner was told so on a screen
+    of its own. `took` is the whole point of measuring it: the screen is only worth its
+    interruption if people answer the question there and then rather than nodding it away.
+  */
+  | 'legend_opened'
   /* The truth about what happens when you get it wrong. Once per learner, ever. */
   | 'switch_shown'
   /* Whether people install, and which of the two routes they were offered. */

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES } from '@/content/roots'
-import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, nameFor, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
+import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, frameReady, nameFor, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
 import { CopyButton } from '@/components/CopyButton'
@@ -41,7 +41,22 @@ export function Legend() {
     // ?cold=1 lands straight in a cold open — from the Club, from the daily line, from a
     // notification. Read from the URL after mount rather than useSearchParams, so this
     // page needs no Suspense boundary.
-    if (new URLSearchParams(window.location.search).get('cold') === '1') setMode('cold')
+    const q = new URLSearchParams(window.location.search)
+    if (q.get('cold') === '1') setMode('cold')
+    /* ?run=1 is the same run-through the deck's own button starts, reachable from Yours —
+       where the daily practice is actually offered. Same mode, one entry point nearer. */
+    if (q.get('run') === '1') setMode('rehearse')
+    /*
+      ?build=<frame> lands straight on one question, and it has one caller: the screen at
+      the end of a vibe that says this question just opened. ANSWER IT has to arrive at
+      the question it named — sending somebody to the deck to hunt for it would undo the
+      whole point of announcing it.
+
+      Checked against the frames that exist, so a stale link degrades to the deck rather
+      than to a build screen for nothing.
+    */
+    const build = q.get('build')
+    if (build && LEGEND_FRAMES.some((f) => f.id === build)) setMode({ build })
   }, [])
 
   const owned = useMemo(
@@ -120,10 +135,28 @@ export function Legend() {
             this frame for this learner", not "is it on their card". A mover keeps children
             and loses staying_for; a visitor keeps children and loses moved_when.
           */
-          LEGEND_FRAMES.filter((f) => frameForPurpose(f, learner.purpose ?? null))
+          /*
+            AND THE WORDS, which is what makes an unlock mean something.
+
+            This was purpose only, so every question read `ready` the instant five vibes
+            were done — the `not yet` chip and the whole Missing row below were unreachable
+            code, and a question could not become answerable because it already was.
+
+            Per-question readiness was deleted once and the reason is on record in
+            content/legend.ts: it quietly meant "play these eight particular vibes", because
+            every word was taught in exactly one place. That is fixed — every word the card
+            needs is now in the basics too — so what a word decides is whether the DEEPER
+            questions are ready, never whether the card can be finished.
+
+            frameReady is the single source: the deck renders from it and the end of a vibe
+            announces from it, so the two cannot disagree the way they did before.
+          */
+          LEGEND_FRAMES.filter(
+            (f) => frameForPurpose(f, learner.purpose ?? null) && frameReady(f, owned),
+          )
         : [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mounted, unlocked, learner.purpose],
+    [mounted, unlocked, learner.purpose, owned],
   )
   /*
     ANSWERED, AND STILL TRUE — the same two predicates the deck applies.
@@ -209,7 +242,15 @@ export function Legend() {
     )
   }
 
-  if (mode === 'rehearse' || mode === 'cold') {
+  /*
+    A run-through needs something to run through.
+
+    The deck only offers these at two answers or more and Yours asks the same question, but
+    both are now reachable by URL — ?run=1 and ?cold=1 — and a typed or stale link with an
+    empty Legend would render a run-through of nothing at all. Falling back to the deck is
+    the honest answer to that: it is the screen that says what to do next.
+  */
+  if ((mode === 'rehearse' || mode === 'cold') && answered.length >= 2) {
     return (
       <Shell>
         <RunThrough

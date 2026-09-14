@@ -983,6 +983,58 @@ export function legendStatus(opts: { sectionsCompleted: string[] }): LegendStatu
   }
 }
 
+/**
+ * Does this learner have the words for this question?
+ *
+ * THE ONE PLACE THAT ANSWERS IT, and the reason that matters is on record. The Legend
+ * used to open card by card on exactly this test, and it was deleted — because the
+ * session screen announced "two Legend cards just opened" while the Legend itself said
+ * "one more vibe and these open". Two screens, internally correct, running different
+ * products, and the learner tapped through to a wall.
+ *
+ * It comes back because the thing that made it dishonest is fixed. Every word the card
+ * needs is now taught in the basics as well as wherever it came from, so "you have the
+ * words" can no longer secretly mean "you happened to pick the right five vibes". The
+ * card is finishable from any five; what a word now decides is whether the DEEPER
+ * questions — the ones above the card — are ready.
+ *
+ * Both consumers ask this function. The deck renders `not yet` from it and the end of a
+ * vibe announces from it, so the announcement and the destination cannot disagree again.
+ */
+export function frameReady(frame: LegendFrame, owned: Iterable<string>): boolean {
+  const have = owned instanceof Set ? owned : new Set(owned)
+  return frame.built_from.every((id) => have.has(id))
+}
+
+/**
+ * The questions a session just made answerable.
+ *
+ * `before` is the inventory as it was; `after` includes what the vibe handed over. A frame
+ * counts only if it crossed — already-ready frames are not news, and an answered one is
+ * not an unlock.
+ *
+ * Ordered by the frame's own `card` number so a learner meets them in the order a stranger
+ * asks them, rather than in whatever order the inventory happened to grow.
+ */
+export function framesJustOpened(opts: {
+  before: Iterable<string>
+  after: Iterable<string>
+  answered: string[]
+  purpose: Purpose | null
+  answers: { frame_id: string; values: Record<string, string> }[]
+}): LegendFrame[] {
+  const before = opts.before instanceof Set ? opts.before : new Set(opts.before)
+  const after = opts.after instanceof Set ? opts.after : new Set(opts.after)
+  return LEGEND_FRAMES.filter(
+    (f) =>
+      !opts.answered.includes(f.id) &&
+      frameForPurpose(f, opts.purpose) &&
+      frameApplies(f, opts.answers) &&
+      frameReady(f, after) &&
+      !frameReady(f, before),
+  ).sort((a, b) => a.card - b.card)
+}
+
 /** Every card the learner's language reaches, answered or not. Drives the count. */
 /**
  * Which crates a frame's words came from — the line that makes this DUB.

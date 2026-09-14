@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { LEGEND_COPY, LEGEND_FRAMES, legendStatus } from '@/content/legend'
+import { LEGEND_COPY, LEGEND_FRAMES, framesJustOpened, legendStatus, provenanceOf, cardFor, type LegendFrame } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
@@ -2842,6 +2842,184 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
  * choice belongs here, once they have something to show for the area they picked,
  * rather than between every single root.
  */
+/**
+ * Another part of your Legend, and it takes the screen.
+ *
+ * WHAT THIS IS FOR. The Legend is the spine, and until now nothing marked the moment a
+ * question became answerable. A vibe ended, some words landed on a shelf, and somewhere
+ * behind that a stranger's question had quietly turned into something the learner could
+ * answer about their own life. The biggest thing that happened was the quietest one.
+ *
+ * NOT A REWARD SCREEN. Nothing counts up, no streak moves, nothing is awarded — the whole
+ * argument of DUB is that turning up is not an achievement and saying something is. So the
+ * prize IS the question, set at the size reserved for produced language, and the only claim
+ * made is that the learner now has the words for it.
+ *
+ * The motion is the pillar's: type arriving at the size it keeps, over 620ms, body
+ * following at 260ms. No scale, no bounce. The one place DUB shouts, aimed at the one
+ * thing worth shouting about.
+ */
+function LegendOpened({
+  frames,
+  toGo,
+  card,
+  onDone,
+}: {
+  frames: LegendFrame[]
+  /** Vibes still owed before the Legend itself opens. 0 means the door is open. */
+  toGo: number
+  /** This firing handed over the whole card, not another question. The basics does this. */
+  card: boolean
+  onDone: () => void
+}) {
+  const router = useRouter()
+  /*
+    ONE QUESTION, even when a vibe opens several.
+
+    A screen listing three of them is a trophy cabinet; the point is the single thing you
+    can now say. The rest are on the deck when they get there, and the line below says how
+    many are waiting — a fact, not a tally that grows.
+  */
+  const first = frames[0]
+  const more = frames.length - 1
+  const provenance = provenanceOf(first)
+
+  return (
+    <Shell stage="CHOICE" eyebrow="YOUR LEGEND">
+      <div className="flex flex-1 flex-col justify-center gap-6">
+        {/*
+          TWO FIRINGS, NOT ONE, and the difference is real rather than cosmetic.
+
+          The basics is not a vibe somebody chose — it is the doorway everybody walks
+          through, and it hands over all seven card questions at once plus one above them.
+          Measured: 7 of the 8 it opens ARE the card, and no card question is left behind.
+
+          Running that through the same "another part opened, 7 more too" screen would be
+          the trophy cabinet this component exists to avoid, and it would make the next
+          firing — one question, from a vibe they actually picked — read as a downgrade.
+          So the doorway says the true and bigger thing: you have a Legend now. Every
+          firing after it is one more question on a Legend that already exists.
+        */}
+        <p className="pillar text-accent">{card ? 'YOU HAVE' : 'ANOTHER PART'}</p>
+
+        <div className="pillar-body flex flex-col gap-6">
+          <p className="text-sm leading-relaxed text-fg/85">
+            {card
+              ? 'a Legend now — seven things about you, in Portuguese. Here is the first.'
+              : toGo === 0
+                ? 'of your Legend just opened. You have the words for this now.'
+                : 'of your Legend is ready. You have the words for this now.'}
+          </p>
+
+          {/*
+            The question at the size nothing else in the product reaches. `.t-said` is
+            reserved for language the learner produced; this is language they are one tap
+            from producing, which is the closest thing to it and the only other moment
+            that earns the size.
+          */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <AudioButton slug={slugFor(first.ask)} text={first.ask} size="sm" />
+              <span className="min-w-0">
+                <span data-testid="opened-ask" className="pt t-said block text-accent">
+                  {first.ask}
+                </span>
+                <span className="block text-sm text-muted">{first.ask_en}</span>
+              </span>
+            </div>
+          </div>
+
+          {/*
+            Where the words came from, in the same block the build screen uses. This is
+            the product's own argument in one line — the language for talking about
+            yourself arrived inside something that was never about you — and it is the
+            reason this screen is worth stopping for rather than a congratulation.
+          */}
+          {provenance.length ? (
+            <div className="flex flex-col gap-1 rounded border-l-2 border-accent/50 bg-surface px-3 py-3">
+              <p className="eyebrow text-muted">YOU KNOW THESE</p>
+              {provenance.map((p, i) => (
+                <p
+                  key={p.piece}
+                  className="animate-bank text-xs leading-relaxed text-fg/85"
+                  style={{ animationDelay: `${i * 70}ms` }}
+                >
+                  <span className="pt text-accent">{p.piece}</span> came out of{' '}
+                  {CRATES.find((c) => c.id === p.family)?.title ?? 'another vibe'}.
+                </p>
+              ))}
+              <p className="mt-1 text-xs text-muted">None of it was ever about you.</p>
+            </div>
+          ) : null}
+
+          {/*
+            What is waiting, said as a fact about the Legend rather than a tally that
+            grows. On the doorway firing the other questions are not bonus extras — they
+            are the rest of the card — so it says so in those words.
+          */}
+          {more > 0 ? (
+            <p className="text-xs text-muted">
+              {card
+                ? `${more} more make up your card. They are on your Legend.`
+                : more === 1
+                  ? 'One more question opened too.'
+                  : `${more} more questions opened too.`}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      <Dock>
+        {/*
+          THE DOOR DECIDES THE BUTTON, and this is the whole reason the card-by-card
+          unlock was deleted once before: one screen said "two cards just opened" while
+          the Legend, one tap later, said "one more vibe and these open". Two screens,
+          each correct, running different products.
+
+          It cannot happen here because both branches ask legendStatus. Before the door,
+          the screen offers nothing to tap into — it says the words are banked and names
+          exactly what is left, which is a promise it can keep. After it, ANSWER IT goes
+          straight to that question rather than to a deck to hunt through.
+        */}
+        {toGo === 0 ? (
+          <button
+            type="button"
+            data-testid="opened-answer"
+            onClick={() => {
+              track('legend_opened', { frame: first.id, opened: frames.length, took: true })
+              router.push(`/legend?build=${first.id}`)
+            }}
+            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            ANSWER IT NOW
+          </button>
+        ) : (
+          <p className="px-3 pb-1 text-center text-xs leading-relaxed text-muted">
+            {toGo === 1
+              ? 'One more vibe and your Legend opens — this question will be waiting.'
+              : `${toGo} more vibes and your Legend opens — this question will be waiting.`}
+          </p>
+        )}
+        {/*
+          Carrying on is a real option and says so plainly. A screen you cannot decline
+          has started managing somebody, and the question does not expire.
+        */}
+        <button
+          type="button"
+          data-testid="opened-later"
+          onClick={() => {
+            track('legend_opened', { frame: first.id, opened: frames.length, took: false, toGo })
+            onDone()
+          }}
+          className="tap-target block w-full py-3 text-center text-sm text-muted underline decoration-line underline-offset-4"
+        >
+          {toGo === 0 ? 'Later' : 'Carry on'}
+        </button>
+      </Dock>
+    </Shell>
+  )
+}
+
 function SectionComplete() {
   const { finishSection, owned, state } = useJourney()
   /*
@@ -2900,6 +3078,75 @@ function SectionComplete() {
   const inFamily = family ? (ROOTS_BY_FAMILY[family.id] ?? []) : []
   const leftInFamily = inFamily.filter((r) => !state.rootsPlayed.includes(r.root_id)).length
   const vibeFinished = Boolean(family) && inFamily.length > 0 && leftInFamily === 0
+
+  /*
+    WHICH QUESTIONS THIS VIBE JUST MADE ANSWERABLE.
+
+    The arithmetic was always available here and never performed: `justGained` is what this
+    session handed over, so the inventory before it is simply owned minus that. Nothing in
+    the product joined the two against the Legend.
+
+    Announced ONLY when the Legend is open. A question opening inside a Legend the learner
+    cannot reach yet is the exact failure that got per-question unlocking deleted — the
+    screen promised something and the destination refused it.
+  */
+  const legend = legendStatus({ sectionsCompleted: learner.sections_completed ?? [] })
+  /*
+    WHICH QUESTIONS THIS VIBE JUST MADE ANSWERABLE — measured, not assumed.
+
+    This was first written to return [] unless the Legend was already open, on the
+    reasonable-sounding grounds that you should not announce a room somebody cannot enter.
+    Measured across all 330 ways to spend the five free vibes, that gate fired the screen
+    0.13 times per run and 87% of learners would NEVER HAVE SEEN IT ONCE.
+
+    The arithmetic is brutal once you look: the Legend opens at five completed vibes, and
+    the words that make questions answerable are all taught in vibes one to five. So
+    gating on the door means only the last vibe can ever announce anything, by which point
+    there is nothing left to open. The celebration and its trigger were at opposite ends
+    of the same five vibes.
+
+    So it announces BEFORE the door, and the screen changes what it offers instead of
+    staying silent — which is also the better product: it gives the five-vibe wait a
+    running reason, week by week, instead of one cliff at the end.
+  */
+  const opened = useMemo(() => {
+    const after = new Set(owned)
+    const before = new Set([...after].filter((id) => !justGained.has(id)))
+    return framesJustOpened({
+      before,
+      after,
+      answered: (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0).map((a) => a.frame_id),
+      purpose: learner.purpose ?? null,
+      answers: learner.legend ?? [],
+    })
+  }, [owned, justGained, learner.legend, learner.purpose])
+
+  /*
+    The unlock takes the screen, and it takes it FIRST.
+
+    Sam: "this needs to be an achievement as it is now the main spine of our learning."
+    The thing that just happened is not that a vibe ended — vibes end every session — it is
+    that a question a stranger will ask you became answerable in your own words. So it is
+    not a row on the summary. It is the screen, and the summary waits behind it.
+
+    Without going full Duolingo: nothing counts up, nothing is awarded, no streak moves.
+    The reward IS the question — the Portuguese at the one size reserved for produced
+    language — because what changed is what the learner can do, not what they have earned.
+  */
+  const [showOpened, setShowOpened] = useState(true)
+  if (opened.length && showOpened) {
+    return (
+      <LegendOpened
+        frames={opened}
+        toGo={legend.open ? 0 : legend.toGo}
+        /* The whole card arriving at once, which in practice means the basics. Derived
+           from what actually opened rather than from the family id, so a content change
+           that moves a card word elsewhere cannot leave this lying. */
+        card={cardFor(learner.purpose ?? null).every((f) => opened.some((o) => o.id === f.id))}
+        onDone={() => setShowOpened(false)}
+      />
+    )
+  }
 
   return (
     <Shell stage="CHOICE">

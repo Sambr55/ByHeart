@@ -12,8 +12,8 @@ import { PurposeChoice, SoundChoice, ThemeChoice } from '@/components/Theme'
 import { Wordmark } from '@/components/Wordmark'
 import { askedCards, cardById, cardFace, derivedCards, roomsFor, wordCards, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
-import { CRATES, ROOTS, type CultureFamily } from '@/content/roots'
-import { LEGEND_FRAMES, legendStatus } from '@/content/legend'
+import { CRATES, PIECES, ROOTS, type CultureFamily } from '@/content/roots'
+import { LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { getAvatar, setAvatarFromFile } from '@/engine/avatar'
 import { setDisplayName } from '@/engine/learner'
@@ -257,6 +257,16 @@ export function Profile() {
         </div>
       ) : (
         <>
+          {/*
+            THE LEGEND GOES FIRST, and everything else on this screen is what built it.
+
+            It was fifth, under three grids of cards. The order of this page is an argument
+            about what DUB is for: a screen that opens on saved cards says the product is a
+            collection, and one that opens on the Legend says it is a thing you are making.
+            The vibes, the words and the cards below are the raw material — they read as
+            provenance under it rather than as rivals to it.
+          */}
+          <LegendHero />
           <Section
             label={PROFILE_COPY.done_label}
             note={PROFILE_COPY.done_note}
@@ -285,7 +295,6 @@ export function Profile() {
             tiles={sets.words}
             onOpen={setOpen}
           />
-          <LegendRow />
           {/*
             Above More rather than below it, because a friend is a thing you have and More
             is the drawer for everything else.
@@ -520,41 +529,164 @@ function Identity() {
 
 
 /**
- * The Legend, as one row rather than a tab.
+ * THE LEGEND, AS THE HERO OF THIS SCREEN.
  *
- * It is the biggest thing somebody makes here and it sat in a menu of eleven, level with
- * the feedback form. A row with its real state on it says more than a link did.
+ * Sam: "building your legend is the main purpose of all this… if a person practised their
+ * Legend once a day they will be flying with Portuguese. Your UI has been quite basic and
+ * recessive so far, it's time to punch it up a lot."
+ *
+ * It was a bordered row, fifth down the page, under saved cards and asked cards and words,
+ * set at `text-base` — the same size as a saved card, which is to say the same size as
+ * everything else on a screen of things. The spine of the product was a link.
+ *
+ * Three things make it the hero, in the order somebody uses them:
+ *
+ *   1. WHAT YOU HAVE, at pillar size. Not "5 of 7" — a possession, counted up, with no
+ *      denominator anywhere. See profile-copy: a fraction caps at twelve and tells
+ *      somebody they are finished, and Sam wants them to want thirty.
+ *   2. PRACTICE, above the fold and above everything else, because that is the daily act
+ *      the whole claim rests on. Both routes — out loud, and cold — were buried at the
+ *      bottom of the Legend's own second screen and nothing on this page pointed at them.
+ *   3. WHAT IS WAITING, from the same frameReady the unlock screen announces from, so a
+ *      question announced at the end of a vibe is the question sitting here afterwards.
+ *
+ * It counts nothing that can go down and shows no percentage.
  */
-function LegendRow() {
+function LegendHero() {
   const learner = useLearner()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   const answers = learner.legend ?? []
-  const done = answers.filter((a) => Object.keys(a.values).length > 0).length
+  const answered = answers.filter((a) => Object.keys(a.values).length > 0)
+  const done = answered.length
   const status = legendStatus({ sectionsCompleted: learner.sections_completed ?? [] })
-  const line = !status.open
-    ? PROFILE_COPY.legend_locked.replace('{n}', String(status.toGo))
-    : done >= LEGEND_FRAMES.length
-      ? PROFILE_COPY.legend_done
-      : PROFILE_COPY.legend_building
-          .replace('{done}', String(done))
-          .replace('{all}', String(LEGEND_FRAMES.length))
+
+  /*
+    WHAT IS WAITING — the same question the unlock screen asks, asked the same way.
+
+    frameReady is the one answer to "do they have the words for this", so the question
+    announced at the end of a vibe is the question sitting here when they arrive. Asking
+    it differently on two screens is precisely how the card-by-card unlock got itself
+    deleted the first time.
+  */
+  const owned = useMemo(
+    () => new Set(Object.keys(learner.inventory ?? {}).filter((id) => PIECES[id])),
+    [learner.inventory],
+  )
+  const ready = useMemo(
+    () =>
+      LEGEND_FRAMES.filter(
+        (f) =>
+          !answered.some((a) => a.frame_id === f.id) &&
+          frameForPurpose(f, learner.purpose ?? null) &&
+          frameApplies(f, answers) &&
+          frameReady(f, owned),
+      ),
+    [owned, learner.purpose, answers, answered],
+  )
+
+  /* Server and first paint agree: nothing personal is counted until mounted. */
+  const n = mounted ? done : 0
 
   return (
-    <section className="flex flex-col gap-3">
+    <section data-testid="legend-hero" className="flex flex-col gap-6">
       <div className="flex items-baseline gap-3">
         <h2 className="eyebrow min-w-0 text-accent">{PROFILE_COPY.legend_label}</h2>
         <span className="h-px flex-1 bg-line" />
       </div>
-      <Link
-        href="/legend"
-        data-testid="profile-legend"
-        className="tap-target flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3 transition hover:border-accent/50"
-      >
-        <span className="min-w-0 flex-1">
-          <span className="display block text-base">The minute about yourself</span>
-          <span className="mt-1 block text-xs text-muted">{line}</span>
-        </span>
-        <span aria-hidden className="shrink-0 text-muted">→</span>
-      </Link>
+
+      {/*
+        The number, at the size the product reserves for the things it is actually about.
+        `pillar` lands over 620ms and `pillar-body` follows at 260ms — the same arrival the
+        end of a vibe uses, because this is the same claim being restated on the screen
+        that holds it.
+      */}
+      {/*
+        THE ACCENT SLAB, and the colour is an argument rather than decoration.
+
+        --accent is the azulejo blue the product reserves for "the Portuguese" — the
+        header, the CTA, and every Portuguese word on every screen. A white card with a
+        blue number on it is a statistic; the Legend rendered IN that blue is the same
+        claim the rest of the product makes about what matters, said on the screen that
+        holds it. It is the one thing on Yours that is not a tile, which is the whole
+        point: everything below is material, this is the thing made out of it.
+      */}
+      <div className="flex flex-col gap-3 rounded bg-accent px-5 py-6 text-accent-ink">
+        {mounted && n > 0 ? (
+          <>
+            {/* 620ms, the same arrival the end of a vibe uses for the same claim. */}
+            <p className="pillar tabular-nums">{n}</p>
+            <p className="pillar-body text-sm leading-relaxed opacity-90">
+              {n === 1
+                ? PROFILE_COPY.legend_have_one
+                : PROFILE_COPY.legend_have.replace('{done}', String(n))}
+            </p>
+          </>
+        ) : (
+          <p className="display text-balance text-xl">{PROFILE_COPY.legend_have_none}</p>
+        )}
+
+        {/*
+          PRACTICE FIRST, and only once there is something to practise. Two answers is
+          what the Legend's own screen requires before it offers a run-through, asked the
+          same way here so this cannot offer a button that screen then refuses.
+        */}
+        {mounted && done >= 2 ? (
+          <div className="mt-3 flex flex-col gap-3">
+            <Link
+              href="/legend?run=1"
+              data-testid="hero-practise"
+              /* Inverted: on the slab the accent IS the ground, so the button is the ink. */
+              className="tap-target eyebrow w-full rounded bg-accent-ink px-5 py-3 text-center text-accent"
+            >
+              {PROFILE_COPY.legend_practise.toUpperCase()}
+            </Link>
+            <Link
+              href="/legend?cold=1"
+              data-testid="hero-cold"
+              className="tap-target eyebrow w-full rounded border border-accent-ink/40 px-5 py-3 text-center opacity-90"
+            >
+              {PROFILE_COPY.legend_practise_cold.toUpperCase()}
+            </Link>
+          </div>
+        ) : (
+          <Link
+            href="/legend"
+            data-testid="profile-legend"
+            className="tap-target eyebrow mt-3 w-full rounded bg-accent-ink px-5 py-3 text-center text-accent"
+          >
+            {status.open ? 'BUILD YOUR LEGEND' : 'SEE WHAT IT IS'}
+          </Link>
+        )}
+      </div>
+
+      {/*
+        What is waiting, under the practice rather than over it: somebody arriving to say
+        their Legend out loud should not have to walk past a to-do list to do it.
+      */}
+      {mounted && !status.open ? (
+        <p className="text-xs text-muted">
+          {PROFILE_COPY.legend_locked.replace('{n}', String(status.toGo))}
+        </p>
+      ) : mounted && ready.length ? (
+        <Link
+          href="/legend"
+          data-testid="legend-waiting"
+          className="tap-target flex items-center gap-3 rounded border border-line px-4 py-3 transition hover:border-accent/50"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm">
+              {ready.length === 1
+                ? PROFILE_COPY.legend_ready_one
+                : PROFILE_COPY.legend_ready.replace('{n}', String(ready.length))}
+            </span>
+            {/* The question itself, so the row is an invitation rather than a count. */}
+            <span className="pt mt-1 block text-xs text-accent">{ready[0].ask}</span>
+          </span>
+          <span aria-hidden className="shrink-0 text-muted">→</span>
+        </Link>
+      ) : null}
     </section>
   )
 }
