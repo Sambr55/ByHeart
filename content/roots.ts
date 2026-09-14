@@ -4273,6 +4273,107 @@ export const THE_BASICS: Root[] = [
     next_root_hooks: ['porque'],
   }),
   q({
+    root_id: 'tb_introduce',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The sentence everybody says first, in every language',
+    source_status: 'needs-review',
+    root_display: 'My name is — and I am English.',
+    credit: 'The first ten seconds of meeting anybody',
+    source: 'My name is Sam. I am English.',
+    target: 'Chamo-me Sam. Sou inglês.',
+    semantic_bridge:
+      'CHAMO-ME is literally "I call myself", which is how Portuguese introduces people — the verb hangs on you rather than on your name. SOU is the permanent one: what you are and where you are from, the things that do not change by Tuesday.',
+    subtext: 'Not a lesson. The thing you will say more often than anything else you learn.',
+    /*
+      ONE OF THE TWO ROOTS THAT UNTRAP THE CARD.
+
+      Every word the Legend's card needs was taught by exactly one vibe, and five of those
+      words forced three specific vibes. With a free allowance of five there were 792 ways
+      to choose and exactly ONE that let a learner finish their card — so 791 choices, of a
+      learner picking by what they LIKE, opened the Legend and left it unfinishable.
+
+      These are not specialist words. They are your name, your nationality, whether you are
+      married and what you do — the four things a stranger asks first, and the four the card
+      is built from. They belong in the basics on their own merits; that they also make
+      every choice of five vibes viable is the fix.
+
+      SPLIT ACROSS TWO ROOTS because a root teaches 1–3 pieces and I first wrote one with
+      five. The lint refused it, and it was right: five extracts is a vocabulary list, not a
+      line somebody says. Introducing yourself and saying what you are are two moments
+      anyway — you give your name, and then they ask.
+
+      PIECES keeps the lowest rung, so each word files at rung 1 here rather than wherever
+      it was. The vibes that taught them keep teaching them.
+    */
+    extracts: [
+      { id: 'chamo_me', target: 'chamo-me…', gloss: 'my name is', shelf: 'people', note: 'Literally "I call myself". The name goes straight after it, with nothing in between.' },
+      { id: 'sou', target: 'sou', gloss: 'I am', shelf: 'doing', lemma: 'ser', form: 'I', note: 'The permanent one. Sou inglês is for life; estou cansado is for tonight.' },
+      { id: 'ingles', target: 'inglês', gloss: 'English', shelf: 'describing', note: 'Inglesa if you are a woman. Nationalities take an ending like every other description.' },
+    ],
+    branches: [
+      { target: 'Chamo-me Ana.', en: 'My name is Ana.', demonstrates: ['chamo_me'] },
+      { target: 'Sou inglesa.', en: 'I am English.', demonstrates: ['sou', 'ingles'] },
+      { target: 'Sou de Londres.', en: 'I am from London.', demonstrates: ['sou'] },
+    ],
+    reinforces: ['ola'],
+    helpers: { 'Sam': 'a name', 'de': 'from', 'Londres': 'London', 'inglesa': 'English, said by a woman' },
+    /*
+      A DIFFERENT SENTENCE, from the same words. The release proves the words moved, so it
+      cannot be the line they have just been reading — the lint refuses that, correctly: a
+      release that repeats the root is a memory test wearing a transfer's clothes.
+    */
+    transfer_prompt: {
+      context: 'A woman at the next table has asked where you are from.',
+      ask: 'I am English. I am from London.',
+      answer: 'Sou inglesa. Sou de Londres.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['first-day', 'introduce'],
+    next_root_hooks: ['casado'],
+  }),
+  q({
+    root_id: 'tb_married_work',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The second and third things anybody asks',
+    source_status: 'needs-review',
+    root_display: 'I am married, and I work.',
+    credit: 'About a minute into meeting anybody',
+    source: 'I am married. I work.',
+    target: 'Sou casado. Trabalho.',
+    semantic_bridge:
+      'Two answers and no extra words. TRABALHO is both "I work" and "the work" — Portuguese leaves context to sort it out, and context always does.',
+    subtext: 'The two questions that follow your name, in the order they come.',
+    /*
+      The other half of the introduction — see tb_introduce above for why these words are
+      in the basics at all. Separated because a root teaches 1–3 pieces, and because your
+      name and your circumstances are two different moments in a conversation.
+    */
+    extracts: [
+      /* lemma so the agreement paradigm still has an owner — PIECES keeps the lowest rung, so this entry replaces Bridget Jones's and must carry everything it did. */
+      { id: 'casado', target: 'casado', gloss: 'married', shelf: 'describing', lemma: 'casado', note: 'Casada if you are a woman.' },
+      { id: 'trabalho', target: 'trabalho', gloss: 'I work', shelf: 'doing', lemma: 'trabalhar', form: 'I', note: 'Also the noun — o trabalho, the work.' },
+    ],
+    branches: [
+      { target: 'Não sou casado.', en: 'I am not married.', demonstrates: ['casado'] },
+      { target: 'Trabalho aqui.', en: 'I work here.', demonstrates: ['trabalho'] },
+      { target: 'Sou casada.', en: 'I am married.', demonstrates: ['casado'] },
+    ],
+    reinforces: ['sou', 'nao'],
+    helpers: { 'aqui': 'here', 'não': 'not', 'casada': 'married, said by a woman' },
+    transfer_prompt: {
+      context: 'They have asked what you do, and the answer is nothing complicated.',
+      ask: 'I work here. I am not married.',
+      answer: 'Trabalho aqui. Não sou casado.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['first-day', 'introduce'],
+    next_root_hooks: ['porque'],
+  }),
+  q({
     root_id: 'tb_four_weddings',
     culture_family: 'the_basics',
     rung: 1,
@@ -4558,6 +4659,24 @@ export const THE_BASICS: Root[] = [
     extracts: [
       { id: 'porque', target: 'porque', gloss: 'because', shelf: 'small_words', note: 'Porquê? with the accent asks. Porque without it answers. Two words, one sound.' },
       { id: 'ainda', target: 'ainda', gloss: 'still / yet', shelf: 'when' },
+      /*
+        A SECOND SOURCE FOR `quero`, and it was already here.
+
+        Every word the Legend's card needs was taught by exactly one vibe. With a free
+        allowance of five and five forced vibes, there were 792 ways to choose five and
+        exactly ONE let a learner finish their card — so 791 choices opened the Legend and
+        left it unfinishable. A learner picking vibes by what they like, which is the whole
+        premise, would almost certainly pick wrong.
+
+        Nothing is invented here. "Porque quero." is already this root's own branch and
+        `quero` is already in its helpers, glossed "I want". It was taught in everything
+        but name; this makes it a piece so the inventory can see it.
+
+        PIECES keeps the lowest rung, so `quero` stays rung 2 and files where it always
+        did. What changes is that somebody who does the basics — which everybody does —
+        now owns it, and `why_here` no longer forces Audrey Hepburn.
+      */
+      { id: 'quero', target: 'quero', gloss: 'I want', shelf: 'doing', lemma: 'querer', form: 'I' },
     ],
     branches: [
       { target: 'Porque quero.', en: 'Because I want to.', demonstrates: ['porque'] },

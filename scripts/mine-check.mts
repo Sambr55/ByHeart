@@ -158,7 +158,24 @@ for (const e of acts) {
   comes down and the check says so. Asserting zero would either be a lie or would force a
   rewrite of the greetings on my own authority.
 */
-const KNOWN_AHEAD = 5
+/*
+  SEVEN, AND TWO OF THEM ARRIVED WITHOUT ANY LINE BEING WRITTEN.
+
+  Was five. The basics gained an introduction root — chamo-me, sou, inglês, casado,
+  trabalho — because every word the Legend's card needs was single-sourced and 791 of 792
+  five-vibe choices left the card unfinishable.
+
+  The two new entries are both "E tu, como te chamas?", which is a JAMES BOND line and was
+  already in the graph. linesFor gathers every line that shows a piece across the whole
+  product, so the moment `chamo_me` had a home in the basics, Bond's line became reachable
+  from it. Nothing was authored; a door opened.
+
+  That is the mechanism working — the library's whole argument is that a word stops
+  belonging to the vibe that taught it. The number goes up when a basics piece is taught
+  somewhere richer, which is a good thing happening, so this is a baseline rather than a
+  budget. It still cannot grow without somebody deciding it should.
+*/
+const KNOWN_AHEAD = 7
 const distinct = [...new Set(strayed.map((x) => x.split(': ')[1]))]
 console.log('  · lines the basics author from words they do not teach: ' + distinct.length)
 for (const d of distinct) console.log('    ' + d)

@@ -208,6 +208,50 @@ is a known gap rather than an oversight.
 4. **`lives`, `gets_about`, `weekend`** — need the new vibe.
 5. **`how_met`** — deferred until there is a past tense.
 
+## The five-vibe trap, and how it was fixed
+
+Found while preparing for tester recruitment, and it would have wrecked the first
+session for almost everybody.
+
+**Every word the card needs was taught by exactly one vibe.** Five of them forced
+three specific vibes. With a free allowance of five there were **792 ways to pick
+five vibes and exactly one** that let a learner finish their card — so 791
+choices opened the Legend and left it unfinishable. A learner picking by what
+they like, which is the entire premise of vibes, would almost certainly pick
+wrong.
+
+`parts-check` had reported this as *"5 vibes needed, 5 free — zero slack"*. That
+read as tight. It was broken: it only held if you picked the right five.
+
+**Three things fixed it**, in increasing order of honesty:
+
+1. `quero` second-sourced into `tb_why` — *"Porque quero."* was already that
+   root's own branch and already in its helpers. It was taught in everything but
+   name. **1 → 1 of 792.** Not enough alone.
+2. `why_here` stopped naming `adoro` in `built_from`. The word appears in one of
+   five options, so a learner picking any other never says it — yet it held the
+   whole frame, and `adoro` is Audrey-only. **1 → 8 of 792.**
+3. **Two new basics roots** — `tb_introduce` (*"Chamo-me Sam. Sou inglês."*) and
+   `tb_married_work` (*"Sou casado. Trabalho."*). Five words that are your name,
+   your nationality, whether you are married and what you do. They belong in the
+   basics on their own merits; that they also untrap the card is the fix.
+   **→ 100%.**
+
+   Written first as ONE root with five extracts, and the lint refused it: a root
+   teaches 1–3 pieces. It was right — five extracts is a vocabulary list, not a
+   line somebody says. Splitting it is also truer to the conversation: you give
+   your name, and then they ask what you do.
+
+Every choice that includes the basics now finishes the card, and the basics is
+the forced doorway (`gatedByBasics`, `components/Journey.tsx:1116`).
+
+**A knock-on worth knowing.** `mine-check`'s count of basics lines using untaught
+words went 5 → 7, and neither new entry was authored: both are *"E tu, como te
+chamas?"*, a **James Bond** line that became reachable the moment `chamo_me` had
+a home in the basics. `linesFor` gathers every line showing a piece across the
+whole graph. That is the library's argument working — a word stops belonging to
+the vibe that taught it — so the baseline moved rather than the check loosening.
+
 ## What must stay true
 
 - **The card is seven.** Every new frame goes above `CARD_RUNG`, like `children`

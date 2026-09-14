@@ -575,7 +575,25 @@ export const LEGEND_FRAMES: LegendFrame[] = [
         ],
       },
     ],
-    built_from: ['porque', 'quero', 'adoro'],
+    /*
+      WHAT THE FRAME NEEDS, not every word any option might use.
+
+      This named `adoro`, which appears in exactly one of five options — "quero fazer o que
+      adoro". A learner picking any of the other four never says it, yet the word held the
+      whole frame hostage: `adoro` is taught only by Audrey Hepburn, so `why_here` forced
+      that vibe on everybody.
+
+      That mattered more than it looks. Every word the card needs was single-sourced, and
+      with five forced vibes against a free allowance of five there were 792 ways to choose
+      and exactly ONE that let a learner finish. Trimming this to what the frame actually
+      requires — a reason, introduced by `porque` — is the difference between a promise and
+      a trap.
+
+      `quero` opens three of the five options and is now taught in the basics as well, which
+      everybody does. The Audrey option still works for anybody who owns `adoro`; it is
+      simply no longer the price of the question.
+    */
+    built_from: ['porque', 'quero'],
     rung: 2,
     helpers: { Porque: 'because' },
     teaches:
