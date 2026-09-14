@@ -69,8 +69,8 @@ console.log('\nand the words a part needs are inside the free tier\n')
 /*
   THE INVARIANT THE MATRIX REVIEW LEFT OPEN.
 
-  A frame's built_from names pieces, each taught by exactly one crate. If a part's words
-  span more crates than the free allowance permits, a learner on the free tier can reach
+  A frame's built_from names pieces, each taught by exactly one vibe. If a part's words
+  span more vibes than the free allowance permits, a learner on the free tier can reach
   the Legend and never finish it — and the failure is silent, because nothing today reads
   built_from as a reachability question.
 */
@@ -106,7 +106,7 @@ for (const purpose of [null, ...PURPOSES.map((p) => p.id)]) {
     ghosts.length === 0 && families.size <= allowance,
     ghosts.length
       ? 'unknown pieces: ' + ghosts.join(', ')
-      : families.size + ' crates needed, ' + allowance + ' free',
+      : families.size + ' vibes needed, ' + allowance + ' free',
   )
 }
 
@@ -121,6 +121,34 @@ for (const part of LEGEND_PARTS) {
   ok(part.name + "'s words are all real", ghosts.length === 0, ghosts.join(', ') || mine.length + ' questions')
 }
 
+console.log('\nand what is still to be taught\n')
+/*
+  A BRIEF, NOT A FAILURE.
+
+  A frame may name a word no vibe teaches yet — that is the authoring rule, and it is what
+  makes a frame useful before it is answerable: "this question needs `moro`, and nothing
+  teaches it" is a commission. Failing the build on it would restrict the Legend to
+  accidental recombination of whatever pieces happen to exist.
+
+  What DOES fail is a frame naming a piece that is not in PIECES at all, asserted above.
+  That is a typo rather than a plan — nobody can teach a word that does not exist.
+
+  So this prints. A rising number here is the content backlog, and a learner never sees it
+  because an unanswerable frame renders as blocked with its missing word named.
+*/
+const taught = new Set(Object.keys(PIECES))
+const brief: string[] = []
+for (const f of LEGEND_FRAMES) {
+  const missing = f.built_from.filter((id) => !taught.has(id))
+  if (missing.length) brief.push(f.id + ' needs ' + missing.join(', '))
+}
+if (brief.length) {
+  console.log('  · ' + brief.length + ' question(s) waiting on vocabulary:')
+  for (const b of brief) console.log('    ' + b)
+} else {
+  console.log('  · every question can be answered from words DUB teaches')
+}
+
 /*
   And the crates named are crates that exist — a built_from pointing at a family with no
   crate is a part that can never be completed by any route at all.
@@ -133,7 +161,7 @@ const orphanFamilies = [
       .filter((fam) => Boolean(fam) && !crateIds.has(fam as never)),
   ),
 ]
-ok('and every crate they name exists', orphanFamilies.length === 0, orphanFamilies.join(', ') || 'all real')
+ok('and every vibe they name exists', orphanFamilies.length === 0, orphanFamilies.join(', ') || 'all real')
 
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)\n')
