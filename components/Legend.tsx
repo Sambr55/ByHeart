@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES } from '@/content/roots'
-import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
+import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
 import { CopyButton } from '@/components/CopyButton'
@@ -383,31 +383,51 @@ export function Legend() {
             </Link>
           </div>
         ) : (
-          <ul className="flex flex-col gap-3">
-            {/*
-              A card that does not apply is not a card.
+          /*
+            THREE PARTS, NOT ONE LIST.
 
-              "And what do they do?" is a question about children and it was dealt to
-              everybody, so somebody childless was handed a sentence about theirs and
-              then counted as having one question outstanding for ever.
+            A Legend is who you are, who you are with, and where you are — and a flat list
+            of eleven makes those the same kind of thing. The parts are declared on the
+            frames themselves (LEGEND_PARTS in content/legend.ts); this only groups by what
+            is already there.
 
-              AND NEITHER IS A CARD THAT IS NOT FOR YOU. frameForPurpose was applied to
-              `reachable` but not to the list, so a frame that does not belong to this
-              learner still rendered — greyed, marked NOT YET, and carrying a caption
-              about vocabulary it does not need. `age` declares `purposes: []`, so it was
-              shown to everybody who completed set-up and could never be opened by any of
-              them: the product named a price, the learner could pay it, and the door did
-              not move.
+            A part with nothing in it is not rendered. An empty heading promising a section
+            that does not exist yet is worse than no heading: it is the product describing
+            a plan rather than showing work.
+          */
+          <div className="flex flex-col gap-6">
+            {LEGEND_PARTS.map((part) => {
+              const mine = LEGEND_FRAMES.filter(
+                (f) =>
+                  (f.part ?? 'you') === part.id &&
+                  frameApplies(f, answers) &&
+                  frameForPurpose(f, learner.purpose ?? null),
+              )
+              if (!mine.length) return null
+              const doneHere = mine.filter((f) => isAnswered(f, valuesFor(f.id))).length
+              /*
+                THE WORDS THAT BUILT THIS PART, under it. `built_from` already names the
+                pieces every frame needs; this is the first thing to read it as a list
+                worth showing. It is how vocabulary sits UNDER the Legend rather than on a
+                screen of its own — the words are here because these questions needed them.
+              */
+              const words = [...new Set(mine.flatMap((f) => f.built_from))]
+                .map((id) => ({ id, piece: PIECES[id] }))
+                .filter((w) => w.piece)
+              return (
+                <section key={part.id} className="flex flex-col gap-3">
+                  <div className="flex items-baseline gap-3">
+                    <h3 className="eyebrow min-w-0 text-accent">{part.name.toUpperCase()}</h3>
+                    <span className="h-px flex-1 bg-line" />
+                    <span className="eyebrow shrink-0 tabular-nums text-muted">
+                      {doneHere + ' of ' + mine.length}
+                    </span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-muted">{part.what}</p>
+                  <ul className="flex flex-col gap-3">
+                    {mine.map((f) => {
 
-              Purpose-blocked is not blocked. It is NOT FOR YOU, and the honest rendering
-              of that is nothing at all — a deck of the questions a stranger will ask THIS
-              person. Vocabulary-blocked stays, because that one is a debt with an
-              address, and the caption below now gives the address.
-            */}
-            {LEGEND_FRAMES.filter(
-              (f) => frameApplies(f, answers) && frameForPurpose(f, learner.purpose ?? null),
-            ).map((f) => {
-              const values = valuesFor(f.id)
+                      const values = valuesFor(f.id)
               const done = isAnswered(f, values)
               const open = reachable.some((r) => r.id === f.id)
               return (
@@ -446,9 +466,36 @@ export function Legend() {
                   */}
                   {!done && !open ? <Missing frame={f} owned={owned} /> : null}
                 </li>
+                      )
+                    })}
+                  </ul>
+                  {/*
+                    The words, solid when they are yours and dimmed when they are not, each
+                    one a way into the library. This is the whole of "vocabulary sits under
+                    the Legend": no second screen, no count, just the words these questions
+                    are made of and whether you have them.
+                  */}
+                  {words.length ? (
+                    <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-xs">
+                      {words.map((w) => (
+                        <Link
+                          key={w.id}
+                          href={'/vocab?q=' + encodeURIComponent(w.piece.target)}
+                          data-testid={'part-word-' + w.id}
+                          className={
+                            'tap-target ' +
+                            (owned.includes(w.id) ? 'pt text-fg' : 'pt text-muted opacity-60')
+                          }
+                        >
+                          {w.piece.target}
+                        </Link>
+                      ))}
+                    </p>
+                  ) : null}
+                </section>
               )
             })}
-          </ul>
+          </div>
         )}
       </section>
 
@@ -457,7 +504,7 @@ export function Legend() {
 
         What ends a conversation is never running out of things to say — it is the moment
         they answer, you catch nothing, and you switch to English. These four are worth
-        more than the ten cards above, so every learner has them whether or not they have
+        more than the questions above, so every learner has them whether or not they have
         built anything at all.
       */}
       <section className="flex flex-col gap-3">
@@ -614,7 +661,8 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * One card, five beats — the same rhythm as a root, which is what stops it feeling like
+ * One card, three beats — ask, build, cold. The same rhythm as a root, which is what
+ * stops it feeling like
  * a form.
  *
  *   1  the question, heard first, in Portuguese

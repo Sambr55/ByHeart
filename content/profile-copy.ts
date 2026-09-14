@@ -40,7 +40,13 @@ export const PROFILE_COPY = {
   legend_label: 'YOUR LEGEND',
   legend_locked: 'Opens {n} vibes from here.',
   legend_building: '{done} of {all} questions answered.',
-  legend_done: 'All ten answered.',
+  /*
+    No number. This said "All ten" while the denominator passed alongside it was
+    LEGEND_FRAMES.length — eleven — so the line was not merely wrong, it was unreachable:
+    the condition that selects it could never be true. The count above it is derived; this
+    one had no business carrying one at all.
+  */
+  legend_done: 'Every question answered.',
   /*
     Everything the burger was holding.
 

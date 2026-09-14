@@ -59,8 +59,65 @@ export interface LegendSlot {
   open?: string
 }
 
+/**
+ * The three parts of a Legend.
+ *
+ * A Legend used to be one flat list of eleven questions, which is fine while they are all
+ * about you and stops being fine the moment they are not. "Tens filhos?" is not a question
+ * about the learner; "Onde moras?" is a question about the city they are standing in. A
+ * flat list makes those the same kind of thing, and they are not.
+ *
+ * So: who you are, who you are with, and where you are. It is the shape of a real
+ * conversation — you introduce yourself, you talk about the people in your life, and then
+ * you talk about the place you have both ended up in.
+ *
+ * THE CONTENT WAS ALREADY THIS SHAPE. Situations carry a `kind` — 20 errands and 8 places
+ * are the city, 3 `person` situations and both flirting crates are the people. Nobody had
+ * drawn the line between that and the Legend.
+ *
+ * `you` is the default rather than a required field: every frame that exists today is
+ * about the learner, and a frame that forgets to say otherwise should land in the part
+ * that asks least of it.
+ */
+export type LegendPart = 'you' | 'them' | 'city'
+
+export const LEGEND_PARTS: { id: LegendPart; name: string; what: string; opens: string }[] = [
+  /*
+    `name` is what the deck calls the section. `what` is the one line under it — what this
+    part of a Legend is FOR, in the register the RUNGS table uses: what you will be able to
+    do, never what you have not done yet. `opens` is what a part says while it is still
+    shut, and it names a conversation rather than a stage.
+  */
+  {
+    id: 'you',
+    name: 'About you',
+    what: 'The first minute. Who you are, where you are from, what you do.',
+    opens: 'The part everybody starts with.',
+  },
+  {
+    id: 'them',
+    name: 'About them',
+    what: 'The people in your life, and the person opposite you.',
+    opens: 'Opens once you can talk about somebody who is not you.',
+  },
+  {
+    id: 'city',
+    name: 'About the city',
+    what: 'Where you live, how you get about, and what you do here.',
+    opens: 'Opens once you can say where you are and how you got there.',
+  },
+]
+
 export interface LegendFrame {
   id: string
+  /**
+   * Which part of the Legend this belongs to. Absent means `you`.
+   *
+   * Deliberately a tag on the frame rather than a separate list, for the same reason
+   * `purposes` is: a frame knows what it is about, and a second structure naming which
+   * frames go where is a second thing to keep in step.
+   */
+  part?: LegendPart
   /**
    * Who is asked this, or everybody when absent.
    *
@@ -131,7 +188,11 @@ export interface LegendFrame {
 }
 
 /**
- * The ten cards, in roughly the order you get asked them.
+ * The frames, in roughly the order you get asked them.
+ *
+ * Not a fixed number — it was "the ten cards" when there were ten, is eleven now, and
+ * grows as ABOUT THEM and ABOUT THE CITY are written. Every count shown to a learner is
+ * derived from this array or from their own card; none is typed.
  *
  * Ten is the cap. A legend longer than a minute is one you will not deliver. And the deck
  * GROWS rather than arriving whole — you start with the cards your language already
@@ -257,6 +318,13 @@ export const LEGEND_FRAMES: LegendFrame[] = [
   },
   {
     id: 'children',
+    /*
+      The one frame today that is not about the learner. It is the seed of ABOUT THEM —
+      the questions that are about the people in your life rather than about you — and it
+      already behaves like one: it is above CARD_RUNG, so it is not on the seven, and it
+      is what somebody builds after the introduction is finished.
+    */
+    part: 'them',
     card: 5,
     ask: 'Tens filhos?',
     ask_en: 'Do you have children?',
@@ -589,7 +657,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
  *
  * What ends a conversation is not running out of things to say. It is the moment they
  * answer, you understand nothing, and you switch to English. These four are worth more
- * than the ten cards above, so they are fixed, non-optional, and present for every
+ * than the questions above, so they are fixed, non-optional, and present for every
  * learner whether or not they have built anything else.
  *
  * The last one is the most important line in the feature. Said early it changes the whole
@@ -1120,7 +1188,12 @@ export const LEGEND_COPY = {
     'What ends a conversation is not running out of things to say. It is the moment they answer, you catch nothing, and you switch to English. These are yours whether or not you build anything else.',
   cold_head: 'No warning.',
   cold_body: 'One question, and a beat of silence. That silence is the thing you are practising.',
-  locked_head: 'Ten questions a stranger will ask you.',
+  /*
+    No number. It said "Ten questions" against a table of eleven, and it will be wrong
+    again the moment a frame is added — which is the point of the parts. A count that has
+    to be maintained by hand is a count that will lie.
+  */
+  locked_head: 'The questions a stranger will ask you.',
   locked_body:
     'They are not a form — each one is a short lesson built round your own answer, and you keep what it teaches. The vibes are where you get the language to build them.',
   empty_head: 'Nothing here yet.',
