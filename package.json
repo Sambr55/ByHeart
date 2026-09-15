@@ -79,7 +79,9 @@
     "quiet": "tsx scripts/quiet-check.mts",
     "panes": "tsx scripts/panes-check.mts",
     "doorway": "tsx scripts/doorway-check.mts",
-    "signature": "tsx scripts/signature-check.mts"
+    "signature": "tsx scripts/signature-check.mts",
+    "sim": "tsx scripts/sim.mts",
+    "sim:truth": "tsx scripts/sim-truth-check.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",
