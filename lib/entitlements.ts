@@ -22,7 +22,7 @@
  * early advocate costs more than it ever earns.
  */
 
-import { CRATES_TO_UNLOCK_LEGEND } from '@/content/legend'
+import { FREE_CRATES } from '@/content/legend'
 
 export type Plan = 'free' | 'pro'
 
@@ -75,21 +75,24 @@ export const FREE_ENTITLEMENTS: Entitlements = {
   /*
     Enough to reach the Legend, and DERIVED from that rather than chosen.
 
-    It was three, and the Legend needs pieces from five crates — so a free learner hit the
-    wall at crate three, could never complete five, could never build their Legend, and
-    therefore could never reach the thing they would have paid for. The old gate blocked the
-    road to the new one. Nobody had noticed because nobody had walked it on a free account.
+    It was three, and the Legend then needed pieces from five crates — so a free learner
+    hit the wall at crate three, could never complete five, could never build their Legend,
+    and therefore could never reach the thing they would have paid for. The old gate
+    blocked the road to the new one, and nobody had noticed because nobody had walked it on
+    a free account.
 
-    Written as the unlock number rather than as 5 so the two cannot drift apart again. If
-    the Legend ever needs a sixth crate, the free tier follows it automatically, and the
-    deadlock cannot come back by somebody editing one constant and not the other.
+    THAT DEADLOCK IS STRUCTURALLY GONE. The Legend opens on finishing the basics, which is
+    the forced doorway and costs no allowance at all — so no combination of choices can
+    stand between a free learner and their Legend. This number no longer has to track the
+    door, and the two constants are deliberately separate now rather than one wearing two
+    names.
 
-    This is also what the free tier IS now, said out loud: the whole path to the Legend.
-    You may look around as long as you like and build the one thing DUB is actually for;
-    what money buys is the Club afterwards. Full value exchange, and the value is delivered
-    before the ask rather than promised.
+    What the free tier IS, said out loud: the whole path to the Legend, plus four more
+    vibes chosen for the pleasure of them. You build the one thing DUB is actually for
+    before being asked for anything; what money buys is the Club afterwards. Full value
+    exchange, and the value is delivered before the ask rather than promised.
   */
-  crates: CRATES_TO_UNLOCK_LEGEND,
+  crates: FREE_CRATES,
   drops: UNLIMITED,
   booth: false,
   share: true,

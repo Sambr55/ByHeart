@@ -20,8 +20,8 @@
  * made the bug possible: the session screen may never promise something the Legend will
  * not honour, and it must count the vibe being finished right now.
  */
-import { CRATES } from '../content/roots'
-import { LEGEND_FRAMES, cratesToGo, frameForPurpose, legendStatus, legendUnlocked } from '../content/legend'
+import { ROOTS_BY_FAMILY } from '../content/roots'
+import { DOORWAY, LEGEND_FRAMES, doorwayToGo, frameForPurpose, legendStatus, legendUnlocked } from '../content/legend'
 import type { Purpose } from '../content/situations'
 
 const problems: string[] = []
@@ -30,7 +30,15 @@ const ok = (label: string, cond: boolean, detail = '') => {
   if (!cond) problems.push(label + (detail ? ' — ' + detail : ''))
 }
 
-const spending = CRATES.filter((c) => !c.drop && c.built !== false).map((c) => c.id)
+/*
+  THE DOORWAY, ROOT BY ROOT — the axis this whole file is swept along.
+
+  It was a list of vibe ids, because the door used to be "five vibes finished". It is the
+  basics finished now, so the axis is that vibe's roots: index n means "n lines of the
+  basics played". Every assertion below is unchanged in meaning — only the unit moved.
+*/
+const doorway = (ROOTS_BY_FAMILY[DOORWAY] ?? []).map((r) => r.root_id)
+const STEPS = doorway.length
 
 /** What /legend will actually do with this many vibes finished. */
 /**
@@ -45,26 +53,26 @@ const spending = CRATES.filter((c) => !c.drop && c.built !== false).map((c) => c
  * Per purpose now, through frameForPurpose — the same predicate the deck, the Club counter
  * and cardFor all use.
  */
-function legendOffers(done: string[], purpose: Purpose | null): number {
-  if (!legendUnlocked(done)) return 0
+function legendOffers(played: string[], purpose: Purpose | null): number {
+  if (!legendUnlocked(played)) return 0
   return LEGEND_FRAMES.filter((f) => frameForPurpose(f, purpose)).length
 }
 
-console.log('\nwhat the Legend does, per vibe finished\n')
+console.log('\nwhat the Legend does, per line of the basics played\n')
 /*
   Null last, because it is the odd one: a learner who has not answered set-up sees every
   frame, and the three purposes each lose the two that are not theirs.
 */
 const WHO: (Purpose | null)[] = ['visiting', 'staying', 'moving', null]
 for (const purpose of WHO) {
-  const full = legendOffers(spending, purpose)
-  for (let n = 0; n <= 6; n++) {
-    const done = spending.slice(0, n)
+  const full = legendOffers(doorway, purpose)
+  for (let n = 0; n <= STEPS; n++) {
+    const done = doorway.slice(0, n)
     const offers = legendOffers(done, purpose)
     if (purpose === 'visiting') {
       console.log(
-        '  ' + String(n).padStart(2) + ' vibes → ' +
-          String(offers).padStart(2) + ' cards openable, ' + cratesToGo(done) + ' to go',
+        '  ' + String(n).padStart(2) + ' lines → ' +
+          String(offers).padStart(2) + ' cards openable, ' + doorwayToGo(done) + ' to go',
       )
     }
     // The only two states there are. Anything between them is the old model leaking.
@@ -121,31 +129,30 @@ console.log('\nthe promise\n')
   records the section on mount now, so by the time anything on it speaks the section is
   real and every screen reads the same number.
 */
-const payoffSaysOpen = (sectionsCompleted: string[]) =>
-  legendStatus({ sectionsCompleted }).open
+const payoffSaysOpen = (rootsPlayed: string[]) => legendStatus({ rootsPlayed }).open
 
 ok(
-  'the fifth recorded vibe opens it',
-  payoffSaysOpen(spending.slice(0, 5)),
+  'the last line of the basics opens it',
+  payoffSaysOpen(doorway),
   'recorded on mount, so this is the present rather than a prediction',
 )
-ok('four does not', !payoffSaysOpen(spending.slice(0, 4)))
+ok('one short does not', !payoffSaysOpen(doorway.slice(0, STEPS - 1)))
 ok(
   'and /legend reads the identical number',
   /*
     Against the visitor's own count, not the table's. The two screens agreeing is the
     subject; which number they agree on is a property of the learner.
   */
-  legendOffers(spending.slice(0, 5), 'visiting') ===
+  legendOffers(doorway, 'visiting') ===
     LEGEND_FRAMES.filter((f) => frameForPurpose(f, 'visiting')).length,
 )
 
-for (let n = 0; n <= 6; n++) {
-  const done = spending.slice(0, n)
+for (let n = 0; n <= STEPS; n++) {
+  const done = doorway.slice(0, n)
   const promised = payoffSaysOpen(done)
   const honoured = legendOffers(done, 'visiting') > 0
   ok(
-    n + ' vibes: the session screen and the Legend agree',
+    n + ' lines: the session screen and the Legend agree',
     promised === honoured,
     promised && !honoured ? 'PROMISED AND NOT HONOURED' : '',
   )
@@ -162,15 +169,15 @@ console.log('\nwhere each screen sends you\n')
   Both were correct on their own screen. So this checks the join: for every number of
   vibes, where the door sends somebody must be somewhere they can act.
 */
-const doorSends = (done: string[]) => (legendStatus({ sectionsCompleted: done }).open ? '/legend' : '/vibes')
+const doorSends = (done: string[]) => (legendStatus({ rootsPlayed: done }).open ? '/legend' : '/vibes')
 
-for (let n = 0; n <= 6; n++) {
-  const done = spending.slice(0, n)
+for (let n = 0; n <= STEPS; n++) {
+  const done = doorway.slice(0, n)
   const target = doorSends(done)
-  const legendUsable = legendStatus({ sectionsCompleted: done }).open
-  console.log('  ' + String(n).padStart(2) + ' vibes → the door sends you to ' + target)
+  const legendUsable = legendStatus({ rootsPlayed: done }).open
+  console.log('  ' + String(n).padStart(2) + ' lines → the door sends you to ' + target)
   ok(
-    n + ' vibes: the door does not send you to a locked page',
+    n + ' lines: the door does not send you to a locked page',
     target !== '/legend' || legendUsable,
     target === '/legend' && !legendUsable ? 'BUILD MY CARD into a wall' : '',
   )

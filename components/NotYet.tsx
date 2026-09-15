@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { cratesToGo, legendUnlocked } from '@/content/legend'
+import { doorwayToGo, legendUnlocked } from '@/content/legend'
 import { useLearner } from '@/engine/useLearner'
 
 /**
@@ -34,9 +34,9 @@ export function NotYet({
 }) {
   const router = useRouter()
   const learner = useLearner()
-  const done = learner.sections_completed ?? []
-  const open = legendUnlocked(done)
-  const left = cratesToGo(done)
+  const played = learner.roots_played ?? []
+  const open = legendUnlocked(played)
+  const left = doorwayToGo(played)
 
   return (
     <main data-stage="CHOICE" className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-5 pt-6">
@@ -47,14 +47,18 @@ export function NotYet({
         {/*
           Where they actually are, not a generic "keep going". The number is the same one
           the Legend and the shelf quote, so the three screens cannot drift apart.
+
+          It counts LINES of the basics now rather than vibes, because that is what the
+          door actually is — and it moves every time somebody plays something instead of
+          once a sitting.
         */}
         Your Legend is seven things about yourself, said in Portuguese with nothing on
         screen.{' '}
         {open
           ? 'It is open now — build it and the Club is yours.'
           : left === 1
-            ? 'One more vibe and it opens.'
-            : left + ' more vibes and it opens.'}
+            ? 'One more line of the basics and it opens.'
+            : left + ' more lines of the basics and it opens.'}
       </p>
 
       <div className="mt-3 flex flex-col gap-3">

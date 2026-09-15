@@ -562,7 +562,7 @@ function LegendHero() {
   const answers = learner.legend ?? []
   const answered = answers.filter((a) => Object.keys(a.values).length > 0)
   const done = answered.length
-  const status = legendStatus({ sectionsCompleted: learner.sections_completed ?? [] })
+  const status = legendStatus({ rootsPlayed: learner.roots_played ?? [] })
 
   /*
     WHAT IS WAITING — the same question the unlock screen asks, asked the same way.

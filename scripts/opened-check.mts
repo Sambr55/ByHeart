@@ -37,8 +37,11 @@ const note = (s: string) => console.log('  ' + s)
   So this walks sittings, using sectionRoots — the product's own answer to "what does this
   session serve" — rather than a convenient fiction about vibes being atomic.
 */
-const sittingsOf = (fam: CultureFamily, reached: Rung = 6): string[][] => {
-  const out: string[][] = []
+/** One sitting: the roots it served and the pieces they teach. The door needs both. */
+type Sitting = { roots: string[]; pieces: string[] }
+
+const sittingsOf = (fam: CultureFamily, reached: Rung = 6): Sitting[] => {
+  const out: Sitting[] = []
   const played: string[] = []
   const total = ROOTS.filter((r) => r.culture_family === fam && r.rung <= reached).length
   /*
@@ -55,7 +58,7 @@ const sittingsOf = (fam: CultureFamily, reached: Rung = 6): string[][] => {
     const roots = sectionRoots(fam, reached, played)
     const fresh = roots.filter((r) => !played.includes(r.root_id))
     if (!fresh.length) break
-    out.push(fresh.flatMap((r) => r.extracts.map((e) => e.id)))
+    out.push({ roots: fresh.map((r) => r.root_id), pieces: fresh.flatMap((r) => r.extracts.map((e) => e.id)) })
     for (const r of fresh) played.push(r.root_id)
   }
   return out
@@ -82,30 +85,30 @@ let silent = 0
 let beforeDoor = 0
 let pending = 0
 /* Sittings are the same for every run, so resolve each vibe's once. */
-const SITTINGS = new Map<string, string[][]>(
+const SITTINGS = new Map<string, Sitting[]>(
   [BASICS, ...others].map((id) => [id, sittingsOf(id as CultureFamily)]),
 )
 
 /*
   THE RULE, MODELLED THE WAY THE COMPONENT ACTUALLY RUNS.
 
-  SectionComplete records the finished vibe on mount, so by the time it decides what to
-  announce, that vibe is already in sections_completed — the last sitting of the fifth
-  vibe is therefore the moment the door opens. `wasOpen` latches the state from before
-  that, which is what separates the opening from an ordinary sitting after it.
+  The door is the DOORWAY VIBE FINISHED, so it opens on whichever sitting plays the last
+  root of the basics — not on a vibe count. Roots are accumulated as they are served and
+  the door is asked after each sitting, which is exactly what SectionComplete does.
+  `wasOpen` separates the opening sitting from ordinary ones after it.
 */
 for (const run of runs) {
   const owned = new Set<string>()
-  const done: string[] = []
+  const played: string[] = []
   let wasOpen = false
   let fires = 0
   for (const fam of run) {
     const sits = SITTINGS.get(fam) ?? []
     for (let i = 0; i < sits.length; i++) {
       const before = new Set(owned)
-      for (const p of sits[i]) owned.add(p)
-      const doneNow = i === sits.length - 1 ? [...done, fam] : done
-      const open = legendStatus({ sectionsCompleted: doneNow }).open
+      for (const p of sits[i].pieces) owned.add(p)
+      played.push(...sits[i].roots)
+      const open = legendStatus({ rootsPlayed: played }).open
       /*
         NOTHING FIRES WHILE THE DOOR IS SHUT. Sam, on a phone at the end of his first vibe:
         "these unlockers shouldn't show while doing the first five vibes where we are
@@ -135,7 +138,6 @@ for (const run of runs) {
       }
       wasOpen = true
     }
-    done.push(fam)
   }
   firings += fires
   if (fires === 0) silent++
@@ -172,7 +174,7 @@ const openedByBasics: string[] = []
   const owned = new Set<string>()
   for (const sitting of basicsSittings) {
     const before = new Set(owned)
-    for (const p of sitting) owned.add(p)
+    for (const p of sitting.pieces) owned.add(p)
     for (const f of framesJustOpened({ before, after: owned, answered: [], purpose: null, answers: [] })) {
       openedByBasics.push(f.id)
     }
@@ -205,7 +207,7 @@ if (missing.length) {
   let biggest = 0
   for (const sitting of basicsSittings) {
     const before = new Set(owned)
-    for (const p of sitting) owned.add(p)
+    for (const p of sitting.pieces) owned.add(p)
     const op = framesJustOpened({ before, after: owned, answered: [], purpose: null, answers: [] })
     const onCard = op.filter((f) => card.some((c) => c.id === f.id)).length
     biggest = Math.max(biggest, onCard)
@@ -223,11 +225,11 @@ if (missing.length) {
 */
 const later = runs.filter((run) => {
   const owned = new Set<string>()
-  for (const sitting of SITTINGS.get(BASICS) ?? []) for (const p of sitting) owned.add(p)
+  for (const sitting of SITTINGS.get(BASICS) ?? []) for (const p of sitting.pieces) owned.add(p)
   return run.slice(1).some((fam) =>
     (SITTINGS.get(fam) ?? []).some((sitting) => {
       const before = new Set(owned)
-      for (const p of sitting) owned.add(p)
+      for (const p of sitting.pieces) owned.add(p)
       return framesJustOpened({ before, after: owned, answered: [], purpose: null, answers: [] }).length > 0
     }),
   )

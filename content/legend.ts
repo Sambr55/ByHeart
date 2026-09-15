@@ -1,5 +1,5 @@
 import { say } from './numbers'
-import { PIECES, type Rung } from './roots'
+import { PIECES, ROOTS_BY_FAMILY, type CultureFamily, type Rung } from './roots'
 import type { Purpose } from './situations'
 
 /**
@@ -961,15 +961,85 @@ export function clubOpen(opts: {
   return cardDone(opts.answeredFrameIds, opts.answers ?? [], opts.purpose ?? null)
 }
 
-export const CRATES_TO_UNLOCK_LEGEND = 5
+/**
+ * THE FREE ALLOWANCE. No longer the door — see legendUnlocked.
+ *
+ * This was `CRATES_TO_UNLOCK_LEGEND` and it was doing two jobs under one name: how many
+ * vibes open the Legend, and how many a free learner may have at once. lib/entitlements
+ * read it for the second while the Legend read it for the first, and its comment argued
+ * that was a feature — "the free tier IS the whole path to the Legend".
+ *
+ * The door has moved to finishing the basics, and the allowance has deliberately NOT
+ * moved. So the two are separate numbers now and this one keeps only the job it still
+ * has. The offer is unchanged and reads better for it: reach your Legend free, plus four
+ * more vibes chosen for the pleasure of them.
+ */
+export const FREE_CRATES = 5
 
-export function legendUnlocked(sectionsCompleted: string[]): boolean {
-  return new Set(sectionsCompleted).size >= CRATES_TO_UNLOCK_LEGEND
+/** The vibe every learner is sent through first, and the one the Legend is built from. */
+export const DOORWAY: CultureFamily = 'the_basics'
+
+/**
+ * THE DOOR: the basics, finished. Not five vibes, visited.
+ *
+ * It counted five distinct `sections_completed`, and a section is recorded after ONE
+ * SITTING of 2–4 roots. So the gate measured turning up five times while the card needed
+ * ten specific words, and those two never met. Measured on a real five-vibe run: 23
+ * pieces owned and 3 of 7 questions answerable, which is exactly what Sam hit — the
+ * Legend opened and could not be finished.
+ *
+ * Worse, the four other vibes were not helping. Every word the card needs is taught in
+ * the basics (a fix for the five-vibe trap, which was real), so the other seven of twelve
+ * vibes contribute NOTHING to the card. The requirement was four vibes of unrelated words
+ * standing between a learner and a card that was waiting on a basics nobody asked them to
+ * finish.
+ *
+ * Finishing the basics gives 7 of 7 — measured — and leaves the four deeper questions
+ * shut behind words that live in Bridget Jones, Duran Duran, Marcus Aurelius and Pulp
+ * Fiction. That is the shape the product wants: the basics earns your Legend, and the
+ * vibes you chose for pleasure deepen it.
+ *
+ * Asked of roots played rather than sections completed, because "finished" and "one
+ * sitting done" are different facts and the shelf already draws that distinction
+ * (components/Journey.tsx — `finished` vs `sessionDone`).
+ */
+export function legendUnlocked(rootsPlayed: string[]): boolean {
+  return doorwayToGo(rootsPlayed) === 0
 }
 
-/** How far off it is, for the one line that says so. */
-export function cratesToGo(sectionsCompleted: string[]): number {
-  return Math.max(0, CRATES_TO_UNLOCK_LEGEND - new Set(sectionsCompleted).size)
+/**
+ * How much of the doorway is left, in roots.
+ *
+ * A truer progress line than a vibe count ever was: it moves every time somebody plays
+ * something, rather than once per sitting.
+ */
+export function doorwayToGo(rootsPlayed: string[]): number {
+  const played = new Set(rootsPlayed)
+  return doorwayRoots().filter((r) => !played.has(r.root_id)).length
+}
+
+/**
+ * THE DOORWAY IS WHAT THE CARD NEEDS, not every root in the vibe.
+ *
+ * A first version counted all 16 basics roots, and that made the entire Legend hang on
+ * ONE of them: `tb_why` ("Why Do Fools Fall in Love") is the only root in the product that
+ * teaches `porque`, and it is rung 2. So a learner at rung 1 could play every other line
+ * in the basics and never open their Legend — measured, 15 roots and 29 pieces with the
+ * door still shut, which is the same class of dead end the five-vibe trap was.
+ *
+ * It counts the roots that actually carry card vocabulary instead. Those are the ones the
+ * promise depends on; the rest of the basics is lovely and is not load-bearing, so
+ * finishing it is not made a condition of the thing the product is for.
+ *
+ * `tb_why` is still in the set, because `porque` genuinely is needed — what changes is
+ * that the count is derived from the card rather than from a vibe's length, so adding a
+ * sixteenth song to the basics can never again move the door.
+ */
+export function doorwayRoots(): { root_id: string }[] {
+  const need = new Set(LEGEND_CARD.flatMap((f) => f.built_from))
+  return (ROOTS_BY_FAMILY[DOORWAY] ?? []).filter((r) =>
+    r.extracts.some((e) => need.has(e.id)),
+  )
 }
 
 /**
@@ -991,17 +1061,17 @@ export function cratesToGo(sectionsCompleted: string[]): number {
  */
 export interface LegendStatus {
   open: boolean
-  /** Vibes still needed. Zero when open. */
+  /** Roots of the doorway still to play. Zero when open. */
   toGo: number
   /** Cards that can be built right now — all of them, or none. */
   openCards: number
 }
 
-export function legendStatus(opts: { sectionsCompleted: string[] }): LegendStatus {
-  const open = legendUnlocked(opts.sectionsCompleted)
+export function legendStatus(opts: { rootsPlayed: string[] }): LegendStatus {
+  const open = legendUnlocked(opts.rootsPlayed)
   return {
     open,
-    toGo: cratesToGo(opts.sectionsCompleted),
+    toGo: doorwayToGo(opts.rootsPlayed),
     openCards: open ? LEGEND_FRAMES.length : 0,
   }
 }

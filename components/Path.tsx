@@ -1,6 +1,6 @@
 'use client'
 
-import { CRATES_TO_UNLOCK_LEGEND } from '@/content/legend'
+import { DOORWAY, FREE_CRATES } from '@/content/legend'
 import type { LearnerState } from '@/engine/learner'
 
 /**
@@ -29,7 +29,7 @@ export const PATH: Step[] = [
   { id: 'gate', label: 'Membership', note: 'If you want to carry on.', gate: true },
   // The deal explains the Legend in full just above this, so the map only has to place
   // it. On the shelf, where there is no such block, the label still carries the idea.
-  { id: 'legend', label: 'Your Legend opens', note: CRATES_TO_UNLOCK_LEGEND + ' vibes in.' },
+  { id: 'legend', label: 'Your Legend opens', note: 'When the basics are done.' },
   { id: 'club', label: 'Dub Club', note: 'Where your Legend grows.' },
 ]
 
@@ -42,9 +42,11 @@ export const PATH: Step[] = [
 export function whereOnPath(s: LearnerState, crates: number, capped: boolean): number {
   const built = (s.legend ?? []).filter((a) => Object.keys(a.values).length > 0).length
   if (built >= 5) return 4
-  if (crates >= CRATES_TO_UNLOCK_LEGEND) return 3
+  if (crates >= FREE_CRATES) return 3
   if (capped) return 2
-  if ((s.sections_completed ?? []).includes('basics') || crates > 0) return 1
+  /* DOORWAY, not the string 'basics' — the vibe's id is `the_basics`, so this test had
+     never once been true and the step only ever advanced on `crates > 0`. */
+  if ((s.sections_completed ?? []).includes(DOORWAY) || crates > 0) return 1
   return 0
 }
 

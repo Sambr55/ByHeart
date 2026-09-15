@@ -30,6 +30,7 @@ import { chromium, type Locator, type Page } from 'playwright'
 import { CRATES, ROOTS, entryRung, isLive } from '../content/roots'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { CLOSE, PICKER } from '../content/front-door'
+import { doorwayRoots } from '../content/legend'
 import { HELP } from '../content/help'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -224,19 +225,52 @@ async function main() {
       DOOR=1 walks the vibe that OPENS THE LEGEND, which is the only sitting that may
       announce anything.
 
-      The unlock screen fires once, on the fifth completed vibe, carrying everything banked
-      on the way — so an ordinary run of this walk finishes ONE section and correctly sees
-      nothing. Without a way to reach the door the screen is untestable in a browser, and
-      it is the moment the whole feature exists for.
+      The unlock screen fires once, on the sitting that FINISHES THE BASICS, carrying
+      everything banked on the way — so an ordinary run of this walk plays one sitting and
+      correctly sees nothing. Without a way to reach the door the screen is untestable in a
+      browser, and it is the moment the whole feature exists for.
 
-      Seeds four OTHER vibes as completed, so the one being walked is the fifth.
+      SEEDS THE BASICS ALL BUT DONE. This used to seed four OTHER vibes as completed, back
+      when the door was "five vibes visited"; against the current gate that opens nothing
+      at all, and the walk reported the component broken when it was the fixture that was
+      stale. Now it seeds every root of the doorway except the ones this walk is about to
+      play, so the sitting being walked is the one that shuts the gap.
     */
-    const others4 = live
-      .filter((c) => c.id !== family && !c.drop)
-      .slice(0, 4)
-      .map((c) => c.id)
+    /*
+      All of the doorway except what this walk is about to play, plus the rest of the vibe
+      so the seeded learner is a plausible one. `doorwayRoots` is the product's own answer
+      to which roots the door depends on — six of the basics' sixteen — so this fixture
+      cannot drift from the gate the way its predecessor did.
+    */
+    /*
+      Hold back ONE root, and make sure it is one the ladder will actually serve.
+
+      A first version held back two and the walk never closed the door: `tb_why` is rung 2
+      and the seeded learner has no proof rows, so `rungReached` puts them at rung 1 and
+      sectionRoots will not serve it. That is not a fixture quirk — it is the real shape of
+      the gate, and quiet-check's sibling below asserts it can never become a dead end.
+
+      A real learner releases a line in their first sitting and is at rung 2 before this
+      matters. The fixture has no such history, so it holds back a rung-1 root and lets the
+      walk close the gap the way the ladder allows.
+    */
+    const keep = new Set(
+      doorwayRoots()
+        .filter((r) => (ROOTS.find((x) => x.root_id === r.root_id)?.rung ?? 9) <= 1)
+        .slice(-1)
+        .map((r) => r.root_id),
+    )
+    const seedRoots =
+      process.env.DOOR === '1'
+        ? ROOTS.filter((r) => r.culture_family === 'the_basics' && !keep.has(r.root_id)).map(
+            (r) => r.root_id,
+          )
+        : []
     const seedSections =
-      process.env.DOOR === '1' ? others4 : family !== 'the_basics' ? ['the_basics'] : []
+      process.env.DOOR === '1' ? ['the_basics'] : family !== 'the_basics' ? ['the_basics'] : []
+    if (process.env.DOOR === '1') {
+      console.log('  DOOR: seeding ' + seedRoots.length + ' doorway roots, sections ' + seedSections.join(','))
+    }
     if (seedSections.length) {
       /*
         A COMPLETED VIBE COMES WITH ITS WORDS, and seeding one without them is not a
@@ -251,18 +285,24 @@ async function main() {
         So the words come with the sections, which is also what makes the assertion mean
         something: the screen is supposed to carry what five vibes actually banked.
       */
-      const words = ROOTS.filter((r) => seedSections.includes(r.culture_family)).flatMap((r) =>
-        r.extracts.map((e) => e.id),
-      )
+      /*
+        The words AND the roots. The door reads roots_played now, so seeding sections and
+        inventory without it produces a learner whose Legend can never open — the fixture
+        equivalent of the bug this walk exists to catch.
+      */
+      const words = ROOTS.filter(
+        (r) => seedSections.includes(r.culture_family) && (!seedRoots.length || seedRoots.includes(r.root_id)),
+      ).flatMap((r) => r.extracts.map((e) => e.id))
       await page.evaluate(
-        ([k, add, pieces]) => {
+        ([k, add, pieces, roots]) => {
           const raw = JSON.parse(localStorage.getItem(k) ?? '{}')
           raw.sections_completed = [...new Set([...(raw.sections_completed ?? []), ...add])]
+          raw.roots_played = [...new Set([...(raw.roots_played ?? []), ...roots])]
           raw.inventory = { ...(raw.inventory ?? {}) }
           for (const id of pieces) raw.inventory[id] ??= { at: '2026-01-01T00:00:00.000Z' }
           localStorage.setItem(k, JSON.stringify(raw))
         },
-        ['byheart.learner.v1:' + pairId(DEFAULT_PAIR), seedSections, words] as const,
+        ['byheart.learner.v1:' + pairId(DEFAULT_PAIR), seedSections, words, seedRoots] as const,
       )
       await page.reload({ waitUntil: 'domcontentloaded' })
       await page.waitForTimeout(600)
@@ -628,7 +668,7 @@ async function main() {
   */
   if (process.env.DOOR === '1') {
     if (unlocks !== 1) {
-      problems.push('the vibe that opens the Legend announced ' + unlocks + ' times, not once')
+      problems.push('the sitting that opens the Legend announced ' + unlocks + ' times, not once')
     }
   } else if (unlocks > 0) {
     problems.push(unlocks + ' unlock screens interrupted a walk with the Legend still shut')

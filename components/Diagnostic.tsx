@@ -8,7 +8,7 @@ import {
   rungReached,
   type CultureFamily,
 } from '@/content/roots'
-import { cratesToGo } from '@/content/legend'
+import { doorwayToGo } from '@/content/legend'
 import { loadLearner, type LearnerState } from '@/engine/learner'
 import { useEntitlements } from '@/engine/useEntitlements'
 
@@ -67,7 +67,7 @@ export function Diagnostic() {
     ['Vibes finished', done.length ? done.join(', ') : 'none'],
     ['Vibes claimed', claimed.size + ' of ' + (allowance > 999 ? 'unlimited' : allowance)],
     ['Roots played', String((s.roots_played ?? []).length)],
-    ['Legend opens in', cratesToGo(done) + ' more'],
+    ['Legend opens in', doorwayToGo(s.roots_played ?? []) + ' more basics lines'],
     ['Entitlements known', String(access.known)],
     ['Plan', access.entitlements.plan + (access.comped ? ' (comped)' : '')],
     ['At the paywall', String(atLimit)],

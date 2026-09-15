@@ -8,7 +8,7 @@
     "start": "next start",
     "lint:content": "tsx scripts/lint-content.ts",
     "audio:generate": "tsx scripts/generate-audio.ts",
-    "check": "npm run lint:content && npm run line:test && npm run merge:test && npm run first && npm run club && npm run opener && npm run drops && npm run fork && npm run legend && npm run ladder && npm run parts && npm run opened && npm run nocue && npm run shelf:group && npm run quiet && npm run panes && npm run viewport && npm run paradigms && npm run derive && npm run showing && next build",
+    "check": "npm run lint:content && npm run line:test && npm run merge:test && npm run first && npm run club && npm run opener && npm run drops && npm run fork && npm run legend && npm run ladder && npm run parts && npm run doorway && npm run opened && npm run nocue && npm run shelf:group && npm run quiet && npm run panes && npm run viewport && npm run paradigms && npm run derive && npm run showing && next build",
     "walkthrough": "tsx scripts/walkthrough.ts",
     "shots": "tsx scripts/screenshots.ts",
     "journey": "tsx scripts/journey-smoke.ts",
@@ -77,7 +77,8 @@
     "viewport": "tsx scripts/viewport-check.mts",
     "shelf:group": "tsx scripts/shelf-group-check.mts",
     "quiet": "tsx scripts/quiet-check.mts",
-    "panes": "tsx scripts/panes-check.mts"
+    "panes": "tsx scripts/panes-check.mts",
+    "doorway": "tsx scripts/doorway-check.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",

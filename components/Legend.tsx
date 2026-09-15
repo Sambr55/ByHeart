@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { CRATES, PIECES } from '@/content/roots'
-import { CRATES_TO_UNLOCK_LEGEND, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, frameReady, nameFor, REPAIR_KIT, cardDone, cardFor, cratesToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
+import { CRATES, PIECES, ROOTS_BY_FAMILY } from '@/content/roots'
+import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, frameReady, nameFor, REPAIR_KIT, cardDone, cardFor, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
 import { CopyButton } from '@/components/CopyButton'
@@ -78,7 +78,7 @@ export function Legend() {
     Every card is then open at once. The words are not a precondition any more; building
     a card teaches them.
   */
-  const done = learner.sections_completed ?? []
+  const played = learner.roots_played ?? []
   /*
     The same function every other screen uses.
 
@@ -87,8 +87,10 @@ export function Legend() {
     finished, one said "your Legend is open, fill them in" and this one, a tap later,
     showed ten dashed cards. Both correct, different questions.
   */
-  const unlocked = mounted && legendStatus({ sectionsCompleted: done }).open
-  const toGo = cratesToGo(done)
+  const unlocked = mounted && legendStatus({ rootsPlayed: played }).open
+  const toGo = doorwayToGo(played)
+  /* For the readout below: how long the doorway is, so the line can say N of M. */
+  const basicsTotal = (ROOTS_BY_FAMILY[DOORWAY] ?? []).length
   /* The card is the seven at depth 'card'; the deeper frames are a bonus. */
   const myCard = cardFor(learner.purpose ?? null)
   const onCard = answers.filter(
@@ -350,30 +352,29 @@ export function Legend() {
             <div className="rounded border border-line-strong bg-bg-elev px-4 py-3">
               <p className="text-sm font-semibold">{LEGEND_COPY.locked_head}</p>
               <p className="mt-1 text-xs leading-relaxed text-muted">
+                {/* Lines of the basics, not vibes — the door is the doorway finished. */}
                 {toGo === 1
                   ? 'One more vibe and these open.'
-                  : toGo + ' more vibes and these open.'}{' '}
+                  : toGo + ' more lines of the basics and these open.'}{' '}
                 {LEGEND_COPY.locked_body}
               </p>
               {/*
-                Which ones it has actually counted.
-                
-                "One more vibe and these open" is unarguable and useless when a learner
-                believes they have done five. There was no way to see what the product
-                thought — so a mismatch between what somebody did and what was recorded
-                looked exactly like the feature being broken, and could not be told apart
-                from it by anyone, including me. A vibe counts when you reach the end of
-                it; leaving halfway does not, and now that is visible rather than
-                mysterious.
+                What the product has actually counted.
+
+                "One more vibe and these open" was unarguable and useless when a learner
+                believed they had done five — there was no way to see what was recorded, so
+                a mismatch looked exactly like the feature being broken and could not be
+                told apart from it by anyone, including me.
+
+                The door is the basics finished now, so the honest readout is how much of
+                the basics is played. Better than the vibe list it replaces: it moves every
+                time somebody plays a line rather than once a sitting, so it can never sit
+                still while somebody is working.
               */}
               <p className="mt-3 text-xs leading-relaxed text-muted">
-                {done.length === 0
-                  ? 'None finished yet.'
-                  : 'Finished so far: ' +
-                    done
-                      .map((id) => CRATES.find((c) => c.id === id)?.title ?? id)
-                      .join(', ') +
-                    '.'}
+                {toGo === 0
+                  ? 'The basics are done.'
+                  : basicsTotal - toGo + ' of ' + basicsTotal + ' of the basics played.'}
               </p>
               <Link
                 href="/vibes"

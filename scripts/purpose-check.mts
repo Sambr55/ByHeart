@@ -27,7 +27,7 @@ import { LEGEND_FRAMES } from '../content/legend'
 import { ROOTS } from '../content/roots'
 import { SITUATIONS, PURPOSES } from '../content/situations'
 import { GOAL_QUESTION } from '../content/profile'
-import { CARD_SIZE, CRATES_TO_UNLOCK_LEGEND, cardFor } from '../content/legend'
+import { CARD_SIZE, FREE_CRATES, cardFor } from '../content/legend'
 import { FREE_ENTITLEMENTS } from '../lib/entitlements'
 import { forPurpose } from '../content/feed'
 
@@ -183,7 +183,7 @@ console.log('\na free learner can actually reach the Legend\n')
   )
   ok(
     'and reaches the unlock itself',
-    FREE_ENTITLEMENTS.crates >= CRATES_TO_UNLOCK_LEGEND,
+    FREE_ENTITLEMENTS.crates >= FREE_CRATES,
     'a paywall in front of the thing the product is for is a paywall nobody pays',
   )
   /*
