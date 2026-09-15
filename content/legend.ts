@@ -79,6 +79,9 @@ export interface LegendSlot {
  * about the learner, and a frame that forgets to say otherwise should land in the part
  * that asks least of it.
  */
+/** A frame is one of the seven, or it is deeper than the seven. */
+export type LegendDepth = 'card' | 'deeper'
+
 export type LegendPart = 'you' | 'them' | 'city'
 
 export const LEGEND_PARTS: { id: LegendPart; name: string; what: string; opens: string }[] = [
@@ -196,7 +199,20 @@ export interface LegendFrame {
    * shipping with a piece that does not exist.
    */
   built_from: string[]
-  rung: Rung
+  /**
+   * ON THE CARD, OR PAST IT. Not a difficulty.
+   *
+   * This was `rung: Rung`, the same field name a Root carries — and on a Root it means
+   * difficulty, which this never did. Seven of the twelve frames declared a rung ABOVE
+   * what their own words need (`age` said 5 for rung-2 vocabulary, `who_with` the same),
+   * because the number was being used to push a frame off the seven-question card rather
+   * than to describe how hard it is. lint-content allows that on purpose: it only fails a
+   * frame that declares LOWER than its pieces, so the dial worked and only the name lied.
+   *
+   * Two values, because there were only ever two: the card you hand a stranger, and what
+   * you build once you are inside.
+   */
+  depth: LegendDepth
   /**
    * The scaffolding words, glossed — exactly as a root does it.
    *
@@ -242,7 +258,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     en: 'My name is {name}.',
     slots: [{ key: 'name', kind: 'name', hint: 'your name' }],
     built_from: ['chamo_me'],
-    rung: 1,
+    depth: 'card',
     teaches:
       'Chamo-me is literally “I call myself”, which is how Portuguese introduces people — the verb hangs on you rather than on your name. It works everywhere, from a doorstep to a dinner table.'
   },
@@ -279,7 +295,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       { key: 'place', kind: 'place', hint: 'your town or city' },
     ],
     built_from: ['sou', 'ingles'],
-    rung: 1,
+    depth: 'card',
     helpers: { de: 'from' },
     teaches:
       'Sou is the permanent one: what you are and where you are from, the things that do not change by Tuesday. Nationalities take an ending like every other description — inglês if you are a man, inglesa if you are a woman.'
@@ -302,8 +318,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
      they could pay and a door that would never move.
 
      Rung 5 with no purposes instead, which is exactly how `children` already does this: a
-     bonus frame is one ABOVE CARD_RUNG, not one excluded from every purpose. cardFor filters
-     on `rung <= CARD_RUNG` and still returns seven; the deck shows it, and anybody who wants
+     bonus frame is one at `depth: 'deeper'`, not one excluded from every purpose. cardFor
+     filters on `depth === 'card'` and still returns seven; the deck shows it, and anybody who wants
      to say their age can.
     */
     card: 3,
@@ -318,7 +334,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       nothing a rung-2 learner lacks — but the CARD rung is what decides the seven, and
       this one is deliberately not among them.
     */
-    rung: 5,
+    depth: 'deeper',
     teaches:
       'The one every English speaker gets wrong exactly once. Portuguese does not BE an age, it HAS one — tenho cinquenta e seis anos, “I have fifty-six years”. Say sou and you have said “I am fifty-six”, which means nothing at all.'
   },
@@ -344,7 +360,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       },
     ],
     built_from: ['sou', 'casado'],
-    rung: 2,
+    depth: 'card',
     teaches:
       'All three answers are descriptions, so all three take an ending: casado or casada, solteiro or solteira, divorciado or divorciada. And they go with sou rather than estou — Portuguese files this under what you are, not how you are today.'
   },
@@ -353,7 +369,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     /*
       The one frame today that is not about the learner. It is the seed of ABOUT THEM —
       the questions that are about the people in your life rather than about you — and it
-      already behaves like one: it is above CARD_RUNG, so it is not on the seven, and it
+      already behaves like one: it is `depth: 'deeper'`, so it is not on the seven, and it
       is what somebody builds after the introduction is finished.
     */
     part: 'them',
@@ -387,7 +403,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       opens the moment somebody has been through Pulp Fiction.
     */
     built_from: ['tenho', 'filhos', 'chamam'],
-    rung: 5,
+    depth: 'deeper',
     /*
       The composed sentence brings its own words with it, and the lint caught two the card
       was about to use without teaching: `filhas` and `duas`.
@@ -417,7 +433,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       "És casado?" is on the card and stays there: it is what a stranger actually opens
       with, it is one word of an answer, and replacing a card frame risks the seven that
       every purpose is promised. This is the fuller answer, for somebody who has more to
-      say than yes or no — and putting it above CARD_RUNG means the card is unchanged and
+      say than yes or no — and making it `depth: 'deeper'` means the card is unchanged and
       this is what you build afterwards.
 
       NAMORADO IS NOT IN built_from, and the omission is deliberate rather than an
@@ -452,7 +468,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       },
     ],
     built_from: ['sou', 'solteiro'],
-    rung: 5,
+    depth: 'deeper',
     teaches:
       'SOU for what you are and TENHO for what you have — Portuguese draws the line where English does not. You ARE single and you HAVE a boyfriend, and saying it the other way round is the kind of mistake that gets you a smile rather than a correction.',
   },
@@ -519,7 +535,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       },
     ],
     built_from: ['trabalho'],
-    rung: 2,
+    depth: 'card',
     teaches:
       'Trabalho is both the verb and the noun — I work, and the work. Portuguese leaves context to sort it out and context always does. Trabalho com is the natural way in: I work WITH, rather than I work as — which is why none of these needs an article or a gender.'
   },
@@ -538,7 +554,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     they are staying, somebody here for a season whether it is their first time, and a mover
     how long they have been here.
 
-    Nothing is lost from any card: rung 6 is above CARD_RUNG, so this was never one of
+    Nothing is lost from any card: this is `depth: 'deeper'`, so it was never one of
     anybody's seven.
   */
   {
@@ -594,7 +610,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       simply no longer the price of the question.
     */
     built_from: ['porque', 'quero'],
-    rung: 2,
+    depth: 'card',
     helpers: { Porque: 'because' },
     teaches:
       'Porque without an accent starts an answer; porquê with one asks the question. Two spellings, one sound, and getting it right is the small thing that makes writing look native.'
@@ -636,7 +652,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       },
     ],
     built_from: ['um', 'semana'],
-    rung: 2,
+    depth: 'card',
     helpers: { uma: 'a', semana: 'week' },
     teaches:
       'Nobody answers this with a sentence. "Uma semana" on its own is the whole reply, and trying to build a full one is the tell that you are translating in your head.',
@@ -663,7 +679,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       },
     ],
     built_from: ['sim', 'nao'],
-    rung: 2,
+    depth: 'card',
     helpers: { já: 'already', 'todos os anos': 'every year' },
     teaches:
       'Sim and não are the two words you already own, and this is the first question where the interesting answer is the long one — "não, já cá estive" is what turns a transaction into a conversation.',
@@ -716,7 +732,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       },
     ],
     built_from: ['dois', 'anos'],
-    rung: 2,
+    depth: 'card',
     helpers: { Há: 'for / ago', anos: 'years' },
     teaches:
       'Há is what Portuguese uses for elapsed time, and it is the answer on its own: "há dois anos" is both "two years ago" and "for two years". The language treats time gone by as something the world is holding.',
@@ -742,7 +758,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       },
     ],
     built_from: ['aprender'],
-    rung: 1,
+    depth: 'card',
     helpers: { Falo: 'I speak', pouco: 'little', mas: 'but', tentar: 'to try' },
     teaches:
       'Estou a aprender is how European Portuguese builds an ongoing action — estou a plus the verb. Brazil says estou aprendendo; here it is estou a aprender, and using the Portuguese one is itself a signal you are learning the right language.'
@@ -830,8 +846,6 @@ export const REPAIR_KIT: { pt: string; en: string; why: string; built_from: stri
  * The seven are the card you hand somebody. The other three are what you build once you
  * are inside.
  */
-export const CARD_RUNG = 2
-
 /** Seven, everywhere, for everybody. See LegendFrame.purposes. */
 export const CARD_SIZE = 7
 
@@ -843,7 +857,7 @@ export function frameForPurpose(f: LegendFrame, purpose: Purpose | null): boolea
 /**
  * The seven questions on this learner's card.
  *
- * Was `rung <= CARD_RUNG`, which was fine while every frame applied to everybody. Now that
+ * Was a rung comparison, which was fine while every frame applied to everybody. Now that
  * two of the seven depend on why somebody is here, the card is the reachable frames that
  * apply to them — and it is asserted to be seven rather than assumed to be, because the
  * moment it silently becomes six the deck starts promising a finish line it will reach
@@ -855,7 +869,7 @@ export function frameForPurpose(f: LegendFrame, purpose: Purpose | null): boolea
  */
 export function cardFor(purpose: Purpose | null): LegendFrame[] {
   const use = purpose ?? 'visiting'
-  return LEGEND_FRAMES.filter((f) => f.rung <= CARD_RUNG && frameForPurpose(f, use))
+  return LEGEND_FRAMES.filter((f) => f.depth === 'card' && frameForPurpose(f, use))
 }
 
 /** The universal seven, for the places that ask before a purpose exists. */
@@ -869,9 +883,22 @@ export const LEGEND_CARD = cardFor(null)
  * being put on the spot the feature becomes the anxiety it exists to remove — and a gate
  * is the strongest kind of score there is.
  *
- * Cold speech is still what opens the door; it is just measured where it is already
- * measured honestly. The rung only moves on a clean release with nothing on screen, so
- * "reached the rung these cards are written at" IS "has said this kind of thing cold".
+ * IT NO LONGER ASKS THE RUNG EITHER, and the reason is worth keeping.
+ *
+ * This used to argue that the door was honest because "the rung only moves on a clean
+ * release with nothing on screen, so reaching the rung IS having said this kind of thing
+ * cold". That stopped being true: rungReached deliberately dropped the `clean` test
+ * (content/roots.ts — "a real run through the basics produces three releases and, quite
+ * normally, zero clean ones"), so the rung had not measured cold speech for some time and
+ * the argument outlived its mechanism.
+ *
+ * The clause it justified could never decide anything either. Stage 1 requires ZERO
+ * releases ever, while finishing the card requires five completed vibes — which produce
+ * releases — and any Club room banks rung 2 or higher on its own. Card-done and stage-1
+ * cannot coexist, so `rung >= CARD_RUNG` was inert.
+ *
+ * So the door is what it always actually was: the card is finished, or you have been
+ * welcomed already.
  */
 /*
   Cards that do not apply are not outstanding.
@@ -928,14 +955,10 @@ export function clubOpen(opts: {
   purpose?: Purpose | null
   /** The answers themselves, because a card can be conditional on another card's. */
   answers?: { frame_id: string; values: Record<string, string> }[]
-  rung: number
   welcomedAt?: string | null
 }): boolean {
   if (opts.welcomedAt) return true
-  return (
-    cardDone(opts.answeredFrameIds, opts.answers ?? [], opts.purpose ?? null) &&
-    opts.rung >= CARD_RUNG
-  )
+  return cardDone(opts.answeredFrameIds, opts.answers ?? [], opts.purpose ?? null)
 }
 
 export const CRATES_TO_UNLOCK_LEGEND = 5

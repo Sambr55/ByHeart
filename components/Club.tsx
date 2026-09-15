@@ -127,7 +127,6 @@ export function Club() {
       !clubOpen({
         answeredFrameIds: answered,
         answers: state.legend ?? [],
-        rung: rungReached(state.proof),
         purpose: state.purpose ?? null,
       })
     )
@@ -177,7 +176,6 @@ export function Club() {
     clubOpen({
       answeredFrameIds: answeredIds,
       answers: learner.legend ?? [],
-      rung,
       welcomedAt: learner.club_welcomed_at,
       // Measured against THIS learner's seven — see cardFor. Somebody being checked against
       // another purpose's card would find the door opening early or never.
@@ -302,7 +300,14 @@ export function Club() {
             : CLUB.greeting}
         </h1>
         <p className="text-sm text-muted">
-          {mounted ? RUNGS[rung - 1].name + ', stage ' + rung + ' of 6.' : ' '}
+          {/*
+            WHAT YOU HAVE, not which stage you are on. This read "Talk about other
+            people, stage 5 of 6." — the ladder, on the most prominent line of the screen
+            a returning learner lands on, with no onboarding anywhere for what a stage is.
+            The Legend is the spine now, so this says what has been built, in the same
+            terms Yours uses. The nbsp holds the line's height before mount.
+          */}
+          {mounted ? legendLine(answeredIds.length) : ' '}
           {done.size ? ' ' + throughLine(done.size) : ''}
         </p>
       </div>
@@ -356,6 +361,18 @@ export function Club() {
 }
 
 /** Crates finished, said as a fact about them rather than as a score. */
+/**
+ * What the learner can say about themselves, counted up and never down.
+ *
+ * The same rule the Yours hero follows: a possession, not a fraction. No denominator —
+ * the seven are a start, not a quota — so the line still works at thirty.
+ */
+function legendLine(n: number): string {
+  if (!n) return 'Your Legend is waiting.'
+  if (n === 1) return 'One thing you can say about yourself.'
+  return n + ' things you can say about yourself.'
+}
+
 function throughLine(n: number): string {
   if (n === 1) return 'One vibe all the way through.'
   return n + ' vibes all the way through.'

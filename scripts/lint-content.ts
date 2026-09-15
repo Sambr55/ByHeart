@@ -1216,11 +1216,24 @@ for (const e of EXAMPLES) {
     for (const id of f.built_from) {
       if (!PIECES[id]) fail(F + 'built_from names "' + id + '", which is not a piece')
     }
-    // The rung a frame can first be reached at is the highest of its pieces. Declaring
-    // it lower is a promise the graph cannot keep.
+    /*
+      A CARD FRAME HAS TO BE REACHABLE EARLY, which is the real invariant the old rung
+      test was reaching for.
+
+      It compared a frame's declared rung against the highest rung among its pieces and
+      failed when the frame declared LOWER. That was the honest half of a field doing two
+      jobs: `rung` on a frame never meant difficulty — seven of twelve declared above what
+      their words need, purely to push themselves off the card — so the comparison only
+      ever caught the one direction nobody was using it for.
+
+      `depth` says the real thing now, and the real constraint is about the card: the seven
+      you hand a stranger are the first thing a learner builds, so their words must be
+      teachable early. A card frame needing a late-rung piece is a card that cannot be
+      finished when it is offered.
+    */
     const need = Math.max(...f.built_from.map((id) => PIECES[id]?.rung ?? 1))
-    if (f.rung < need) {
-      fail(F + 'declares rung ' + f.rung + ' but needs a rung ' + need + ' piece')
+    if (f.depth === 'card' && need > 2) {
+      fail(F + 'is on the card but needs a rung ' + need + ' piece — the card is built first')
     }
 
     /*
@@ -1329,13 +1342,20 @@ for (const e of EXAMPLES) {
 
   /*
     And the promise in §0.1: the landing page says you will build a Legend, so the first
-    session has to be able to deliver one. A frame reachable at rung 1 is the proof.
+    session has to be able to deliver one.
+
+    Asked of the WORDS rather than of a declared number. This counted frames declaring
+    `rung === 1`, which was a self-report — a frame could satisfy it by declaring low
+    while needing anything at all. What actually has to be true is that some frames can be
+    answered out of rung-1 vocabulary, so that is what is counted.
   */
-  const atOne = LEGEND_FRAMES.filter((f) => f.rung === 1)
+  const atOne = LEGEND_FRAMES.filter((f) =>
+    f.built_from.every((id) => (PIECES[id]?.rung ?? 1) <= 1),
+  )
   if (atOne.length < 2) {
     fail(
-      'only ' + atOne.length + ' Legend frame(s) reachable at rung 1 — the landing promises ' +
-        'a Legend in the first session and the content cannot deliver it',
+      'only ' + atOne.length + ' Legend frame(s) answerable from rung-1 words — the landing ' +
+        'promises a Legend in the first session and the content cannot deliver it',
     )
   }
   /*

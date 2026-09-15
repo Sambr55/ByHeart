@@ -27,7 +27,7 @@ import { LEGEND_FRAMES } from '../content/legend'
 import { ROOTS } from '../content/roots'
 import { SITUATIONS, PURPOSES } from '../content/situations'
 import { GOAL_QUESTION } from '../content/profile'
-import { CARD_RUNG, CARD_SIZE, CRATES_TO_UNLOCK_LEGEND, cardFor } from '../content/legend'
+import { CARD_SIZE, CRATES_TO_UNLOCK_LEGEND, cardFor } from '../content/legend'
 import { FREE_ENTITLEMENTS } from '../lib/entitlements'
 import { forPurpose } from '../content/feed'
 
@@ -161,7 +161,8 @@ console.log('\na free learner can actually reach the Legend\n')
     count, so a zero is visible rather than inferred from a tick.
   */
   for (const r of ROOTS as { rung?: number; culture_family: string; extracts?: { id: string }[] }[]) {
-    if ((r.rung ?? 9) > CARD_RUNG) continue
+    /* Rung 2 and below: what a learner building their card has actually been served. */
+    if ((r.rung ?? 9) > 2) continue
     for (const e of r.extracts ?? []) {
       if (need.has(e.id)) crates.add(r.culture_family)
     }

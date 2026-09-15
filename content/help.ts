@@ -28,7 +28,7 @@ export const HELP: HelpItem[] = [
   {
     id: 'dimmed',
     q: 'Why is a vibe dimmed?',
-    a: 'It opens at a stage you have not reached yet. You move up by saying something cold — with nothing on screen to copy from — never by turning up or by waiting. Every dimmed vibe says which stage opens it, and nothing is ever locked forever.',
+    a: 'It needs something you cannot do yet — and it says which thing. You get there by saying something cold, with nothing on screen to copy from, never by turning up or by waiting. Nothing is ever locked forever.',
     link: { href: '/vibes', label: 'See where you are' },
   },
   {

@@ -7,7 +7,6 @@ import { JourneyProvider } from '@/engine/journey'
 import { chosenPair } from '@/engine/pair'
 import { loadLearner, type LearnerState } from '@/engine/learner'
 import { clubOpen } from '@/content/legend'
-import { rungReached } from '@/content/roots'
 
 /**
  * The front door — or the Club, for somebody who has already been through it.
@@ -66,7 +65,6 @@ function isMember(s: LearnerState): boolean {
   return clubOpen({
     answeredFrameIds: answers.filter((a) => Object.keys(a.values).length > 0).map((a) => a.frame_id),
     answers,
-    rung: rungReached(s.proof ?? []),
     welcomedAt: s.club_welcomed_at,
     purpose: s.purpose ?? null,
   })

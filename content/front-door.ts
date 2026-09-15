@@ -308,9 +308,16 @@ export const PICKER = {
   */
   open_cta: 'TAP TO BEGIN',
   open_going: 'HERE WE GO',
-  /* A vibe you cannot have yet still opens, and says which wall it is. Money cannot move
-     the ladder, so the stage note has nothing to press. */
-  open_stage: 'Opens at stage {n}',
+  /*
+    A vibe you cannot have yet still opens, and says which wall it is. Money cannot move
+    the ladder, so this note has nothing to press.
+
+    It said "Opens at stage {n}". A number with no onboarding anywhere behind it is not an
+    explanation — the learner has never been told what a stage is, or how to get one. The
+    rung's NAME is the honest half of that table, so the line says the thing you have to be
+    able to do, which is also the thing the vibe is full of.
+  */
+  open_stage: 'Opens once you can {what}',
   open_pro_cta: 'WHAT DUB OPENS',
   basics_first_head: 'The basics come first.',
   basics_first_sub:

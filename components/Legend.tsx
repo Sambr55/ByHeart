@@ -89,7 +89,7 @@ export function Legend() {
   */
   const unlocked = mounted && legendStatus({ sectionsCompleted: done }).open
   const toGo = cratesToGo(done)
-  /* The card is the seven at or below CARD_RUNG; the other two frames are a bonus. */
+  /* The card is the seven at depth 'card'; the deeper frames are a bonus. */
   const myCard = cardFor(learner.purpose ?? null)
   const onCard = answers.filter(
     (a) => Object.keys(a.values).length > 0 && myCard.some((f) => f.id === a.frame_id),
@@ -127,7 +127,7 @@ export function Legend() {
 
             Filtering to `myCard` removed the wrong-purpose frames correctly and also
             removed `children`, which is rung 5: a legitimate deeper question that is simply
-            above CARD_RUNG and therefore not one of the seven. The deck is meant to hold
+            at depth 'deeper' and therefore not one of the seven. The deck is meant to hold
             the card PLUS the bonus frames — the comment two lines up says so — and
             legend-flow caught it immediately by finding that card disabled.
 

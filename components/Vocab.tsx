@@ -856,7 +856,7 @@ function EntryRow({
             </span>
           ) : entry.opensAt ? (
             <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
-              opens at stage {entry.opensAt}
+              opens once you can {RUNGS[entry.opensAt - 1].name.toLowerCase()}
             </span>
           ) : entry.nearly ? (
             <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-accent">
@@ -886,7 +886,7 @@ function EntryRow({
           </div>
 
           <p className="eyebrow text-muted">
-            Stage {head.rung} · {RUNGS[head.rung - 1].name}
+            {RUNGS[head.rung - 1].name}
           </p>
 
           {entry.needsLook ? (

@@ -14,7 +14,7 @@
  * browser — the routing decision is a function of saved state and nothing else.
  */
 import { LEGEND_CARD, clubOpen } from '../content/legend'
-import { ROOTS, rungReached } from '../content/roots'
+import { ROOTS } from '../content/roots'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -36,7 +36,6 @@ function member(answers: Answer[], proof: typeof rung2): boolean {
   return clubOpen({
     answeredFrameIds: answers.map((a) => a.frame_id),
     answers,
-    rung: rungReached(proof),
     welcomedAt: null,
   })
 }
@@ -57,15 +56,21 @@ for (const n of [1, 3, 5, 6]) {
   )
 }
 
-ok(
-  'the whole card plus rung 2 is a member',
-  member(answersFor(LEGEND_CARD.length), rung2),
-)
-ok(
-  'and the card alone is not — it has to have been said',
-  !member(answersFor(LEGEND_CARD.length), []),
-  'the ladder is what proves you can say it',
-)
+ok('the whole card is a member', member(answersFor(LEGEND_CARD.length), rung2))
+/*
+  THE CARD IS THE DOOR, and the assertion that used to sit here was the ladder's last
+  claim on it: "the card alone is not — it has to have been said", justified by "the
+  ladder is what proves you can say it".
+
+  Neither half survived inspection. rungReached dropped its `clean` test long ago, so the
+  rung stopped proving anything about cold speech; and the state being asserted could not
+  occur, because finishing a card takes five completed vibes and those produce releases.
+  The clause it guarded was inert, so it went, and this went with it.
+
+  What is asserted instead is the thing that is actually load-bearing: the card decides,
+  and playing without answering does not.
+*/
+ok('the whole card with no releases at all is still a member', member(answersFor(LEGEND_CARD.length), []))
 
 console.log('\nand it is asked in one place\n')
 /*

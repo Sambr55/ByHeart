@@ -33,11 +33,11 @@ const ok = (label: string, cond: boolean, detail = '') => {
 }
 
 const all = LEGEND_CARD.map((f) => f.id)
-const harder = LEGEND_FRAMES.filter((f) => f.rung > 2).map((f) => f.id)
+const harder = LEGEND_FRAMES.filter((f) => f.depth === 'deeper').map((f) => f.id)
 
 console.log('\nthe card\n')
 ok('is the seven questions a stranger asks', LEGEND_CARD.length === 7, String(LEGEND_CARD.length))
-ok('is entirely rung 1–2', LEGEND_CARD.every((f) => f.rung <= 2))
+ok('is entirely card-depth frames', LEGEND_CARD.every((f) => f.depth === 'card'))
 /*
   THE PROPERTY, NOT THE COUNT.
 
@@ -59,24 +59,31 @@ ok(
 )
 
 console.log('\nthe door\n')
-ok('a brand new learner is outside', !clubOpen({ answeredFrameIds: [], rung: 1 }))
-ok('most of a card is still outside', !clubOpen({ answeredFrameIds: all.slice(0, 6), rung: 2 }))
-ok(
-  'a finished card with no cold speech is still outside',
-  !clubOpen({ answeredFrameIds: all, rung: 1 }),
-  'the ladder is what measures speaking',
-)
-ok('a finished card plus rung 2 is in', clubOpen({ answeredFrameIds: all, rung: 2 }))
+ok('a brand new learner is outside', !clubOpen({ answeredFrameIds: [] }))
+ok('most of a card is still outside', !clubOpen({ answeredFrameIds: all.slice(0, 6) }))
+/*
+  THE RUNG IS NO LONGER ASKED, and the assertion it used to carry was the clearest sign
+  the clause had to go.
+
+  This said "a finished card with no cold speech is still outside", on the grounds that
+  "the ladder is what measures speaking". Two things had quietly stopped being true:
+  rungReached dropped its `clean` test long ago, so the rung had not measured cold speech
+  for some time; and the state being asserted was unreachable anyway — stage 1 means zero
+  releases ever, while finishing a card takes five completed vibes, which produce them.
+
+  So the door is the card, plus the grandfather clause below.
+*/
+ok('a finished card is in', clubOpen({ answeredFrameIds: all }))
 ok(
   'answering the HARD three does not sneak you in',
-  !clubOpen({ answeredFrameIds: harder, rung: 6 }),
+  !clubOpen({ answeredFrameIds: harder }),
   'those are what you build inside',
 )
 
 console.log('\nnobody already inside is put back out\n')
 ok(
   'an existing member with nothing on their card stays in',
-  clubOpen({ answeredFrameIds: [], rung: 1, welcomedAt: '2026-08-01T00:00:00.000Z' }),
+  clubOpen({ answeredFrameIds: [], welcomedAt: '2026-08-01T00:00:00.000Z' }),
   'grandfathered',
 )
 

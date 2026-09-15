@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react'
 import { clubOpen } from '@/content/legend'
-import { rungReached, type Rung } from '@/content/roots'
 import { useLearner } from '@/engine/useLearner'
 import { useNowAfterMount } from '@/engine/useNow'
 
@@ -39,20 +38,17 @@ export function useClub(): { open: boolean; mounted: boolean } {
     [learner.legend],
   )
 
-  const rung: Rung = mounted ? rungReached(learner.proof ?? []) : 1
-
   const open = useMemo(
     () =>
       mounted &&
       clubOpen({
         answeredFrameIds: answeredIds,
         answers: learner.legend ?? [],
-        rung,
         welcomedAt: learner.club_welcomed_at,
         /* Measured against THIS learner's seven — see cardFor. */
         purpose: learner.purpose ?? null,
       }),
-    [mounted, answeredIds, learner.legend, rung, learner.club_welcomed_at, learner.purpose],
+    [mounted, answeredIds, learner.legend, learner.club_welcomed_at, learner.purpose],
   )
 
   return { open, mounted }

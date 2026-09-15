@@ -5346,16 +5346,6 @@ export const COLLISIONS: Collision[] = [
   },
 ]
 
-/** Every root at or below a rung — what a crate may serve at that point. */
-export function rootsUpTo(rung: Rung, family?: CultureFamily): Root[] {
-  return ROOTS.filter((r) => r.rung <= rung && (!family || r.culture_family === family))
-}
-
-/** How much of a crate is still above the learner. Drives the dimmed state. */
-export function lockedIn(family: CultureFamily, rung: Rung): number {
-  return (ROOTS_BY_FAMILY[family] ?? []).filter((r) => r.rung > rung).length
-}
-
 /**
  * The rung a crate can first be entered at — what it declares, or failing that the
  * lowest thing actually in it.

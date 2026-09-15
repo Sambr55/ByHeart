@@ -82,7 +82,7 @@ const allowance = FREE_ENTITLEMENTS.crates
 
   It measured every frame in a part and failed: ABOUT YOU spans six crates against a free
   allowance of five. The content is right and the assertion was wrong. The sixth is Duran
-  Duran, needed only by `age` and `children`, which sit ABOVE CARD_RUNG on purpose — they
+  Duran, needed only by `age` and `children`, which are `depth: 'deeper'` on purpose — they
   are the bonus questions a learner builds after the card, not part of the promise.
 
   What must fit in the free tier is the CARD: the seven a learner is promised, which is

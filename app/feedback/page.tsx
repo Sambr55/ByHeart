@@ -97,7 +97,7 @@ function OpenFeedback() {
       <div>
         <h1 className="display text-balance text-2xl">{FEEDBACK_COPY.headline}</h1>
         <p className="mt-3 text-xs text-muted">
-          You are at stage {stage}, {RUNGS[stage - 1].name.toLowerCase()}, with {kept}{' '}
+          You can {RUNGS[stage - 1].name.toLowerCase()}, with {kept}{' '}
           {kept === 1 ? 'piece' : 'pieces'} kept.
         </p>
       </div>

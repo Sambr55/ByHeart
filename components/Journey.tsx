@@ -731,81 +731,6 @@ function DropClock({ crate, now }: { crate: Crate; now: Date | null }) {
   )
 }
 
-/**
- * The ladder, drawn.
- *
- * It is the spine of the product and it was an ordered list inside a disclosure, which
- * made it look like a footnote. Drawing it makes it a thing you climb with your position
- * marked on it — and it is a real object rather than a decoration: the rungs you have
- * passed are solid, the one you are on is filled, and the ones above are drawn but
- * empty, which is the whole argument of the stage model in one picture.
- *
- * Bottom-to-top, because that is what climbing looks like. Inline SVG, so it costs no
- * asset and takes its colour from the theme it lands in.
- */
-function Ladder({ here }: { here: Rung }) {
-  const step = 34
-  const height = RUNGS.length * step + 16
-  return (
-    <figure className="mt-3">
-      <svg
-        viewBox={'0 0 260 ' + height}
-        role="img"
-        aria-label={'Stage ' + here + ' of 6: ' + RUNGS[here - 1].name}
-        className="w-full max-w-[260px]"
-        style={{ height: height }}
-      >
-        {/* the two rails */}
-        <line x1="14" y1="8" x2="14" y2={height - 8} stroke="currentColor" strokeOpacity="0.25" strokeWidth="1.5" />
-        <line x1="40" y1="8" x2="40" y2={height - 8} stroke="currentColor" strokeOpacity="0.25" strokeWidth="1.5" />
-        {RUNGS.map((r, i) => {
-          // Drawn from the bottom up: stage 1 is the rung you stand on first.
-          const y = height - 16 - i * step
-          const reached = r.rung <= here
-          const isHere = r.rung === here
-          return (
-            <g key={r.rung}>
-              <line
-                x1="14"
-                y1={y}
-                x2="40"
-                y2={y}
-                stroke={reached ? 'var(--accent)' : 'currentColor'}
-                strokeOpacity={reached ? 1 : 0.3}
-                strokeWidth={isHere ? 3 : 2}
-                strokeLinecap="round"
-              />
-              <circle
-                cx="27"
-                cy={y}
-                r={isHere ? 5 : 3}
-                fill={isHere ? 'var(--accent)' : reached ? 'var(--accent)' : 'none'}
-                fillOpacity={isHere ? 1 : reached ? 0.45 : 0}
-                stroke={reached ? 'var(--accent)' : 'currentColor'}
-                strokeOpacity={reached ? 1 : 0.3}
-                strokeWidth="1.5"
-              />
-              <text
-                x="56"
-                y={y + 4}
-                fontSize="11"
-                fill="currentColor"
-                fillOpacity={isHere ? 1 : reached ? 0.75 : 0.42}
-                fontWeight={isHere ? 600 : 400}
-              >
-                {r.name}
-              </text>
-            </g>
-          )
-        })}
-      </svg>
-      <figcaption className="mt-1 text-xs text-muted">
-        You are on {RUNGS[here - 1].name.toLowerCase()}. Nothing above is locked forever —
-        each one opens by saying something cold.
-      </figcaption>
-    </figure>
-  )
-}
 
 type GroupKey = 'open' | 'later' | 'done' | 'pro' | 'drops'
 
@@ -818,32 +743,6 @@ type GroupKey = 'open' | 'later' | 'done' | 'pro' | 'drops'
  */
 const GROUP_ORDER: GroupKey[] = ['open', 'later', 'done', 'pro', 'drops']
 
-/**
- * What opens it, and how far off that is.
- *
- * A stage NAME is not a distance. "MEAN IT" reads as an instruction, and a learner
- * sitting on stage 5 has no way to tell whether that is next or four away. Every
- * stage-gated card gets both halves: RUNGS supplies what opens it, and the subtraction
- * supplies the rest.
- */
-function distanceTo(at: Rung, rung: Rung): string {
-  const away = at - rung
-  const how =
-    away <= 0
-      ? ''
-      : away === 1
-        ? ' You are on stage ' + rung + ' — one to go.'
-        : ' You are on stage ' + rung + ' — ' + away + ' to go.'
-  return 'Opens at stage ' + at + ', ' + RUNGS[at - 1].opens.replace(/^Opens once /, 'when ') + how
-}
-
-/**
- * The drop keeps its row.
- *
- * It is the one card with a countdown and a ticket link on it, and a three-by-four tile
- * has nowhere to put either. It is also the only thing on the shelf that can be lost by
- * being busy, so it is worth it looking different from everything around it.
- */
 function DropRow({
   crate,
   now,
@@ -1430,7 +1329,9 @@ function Picker() {
                       ) : unreached && f.id !== 'the_basics' && !basicsStarted ? (
                         <span className={BADGE + ' text-white'}>basics first</span>
                       ) : unreached ? (
-                        <span className={BADGE + ' tabular-nums text-white'}>stage {at}</span>
+                        /* The capability, not the number — see PICKER.open_stage. A badge reading
+                           "stage 4" tells somebody nothing they can act on. */
+                        <span className={BADGE + ' text-white'}>{RUNGS[at - 1].name}</span>
                       ) : waiting ? (
                         /*
                           Started, and nothing left in it at this stage. Rare, and not the
@@ -2417,9 +2318,9 @@ function RootBeatView({
     move of the entire visual system fired on a screen nobody watched, and the payoff was
     a small grey line reading "That one no longer needs the original cue."
 
-    It outranks everything else because rungReached counts clean releases and nothing
-    else: this is the sole beat that moves the ladder — in every crate at once — and the
-    only beat in a crate that produces a proof line.
+    It outranks everything else because this is the sole beat that moves the ladder — in
+    every crate at once — and the only beat in a crate that produces a proof line. (It used
+    to say rungReached counts CLEAN releases; it does not, and has not for some time.)
 
     Three states, one mount. The Shell is the same element throughout, so the drain
     happens under the learner rather than across a screen transition.

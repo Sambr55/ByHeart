@@ -849,9 +849,11 @@ export function JourneyProvider({
         The capability screen comes BEFORE the cold prompts, and that is a reordering
         rather than a tidy-up.
 
-        rungReached counts clean releases and nothing else. The release is the sole beat
-        that moves the ladder, in every crate at once, and the only beat in a crate that
-        produces a proof line. The three no-cue screens sitting at the tail of a section
+        The release is the sole beat that moves the ladder, in every crate at once, and the
+        only beat in a crate that produces a proof line. (This said "rungReached counts CLEAN
+        releases and nothing else" — it stopped reading `clean` some time ago, deliberately:
+        a real run through the basics produces three releases and, quite normally, zero
+        clean ones.) The three no-cue screens sitting at the tail of a section
         FELT like the summit and moved nothing at all — so the emotional peak and the
         meaningful peak were in different places, four times a session.
 

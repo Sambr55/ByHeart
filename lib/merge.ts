@@ -204,7 +204,7 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
 
       recordProof lets a learner upgrade a fumbled release by getting it right later.
       A plain union would let a stale copy of the same row carry the old false back —
-      and `clean` is what rungReached counts, so that is a lost rung, not a cosmetic
+      and `clean` is what the proof card counts, so that is a lost sentence, not a cosmetic
       flag.
     */
     proof: unionBy(

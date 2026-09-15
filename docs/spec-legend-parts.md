@@ -164,7 +164,7 @@ the second half. `ele`/`ela`, `gosta`, `comigo`, `és` are all taught.
 Pick: `Sou solteiro/a` ✓ · `Tenho namorado/a` (**new** `namorado`) ·
 `Sou casado/a` ✓.
 *Note it overlaps `married`, which is on the card. This one is the fuller
-answer and belongs above CARD_RUNG so the card stays seven.*
+answer and is `depth: 'deeper'` so the card stays seven.*
 
 **`they_do` — E ela, o que faz?** · *And her, what does she do?*
 `Ela trabalha com {thing}.` — She works with {thing}.
@@ -254,13 +254,17 @@ the vibe that taught it — so the baseline moved rather than the check loosenin
 
 ## What must stay true
 
-- **The card is seven.** Every new frame goes above `CARD_RUNG`, like `children`
-  and `age`. `scripts/purpose-check.mts` fails otherwise.
+- **The card is seven.** Every new frame is `depth: 'deeper'`, like `children` and `age`. `scripts/purpose-check.mts` fails otherwise.
 - **The card fits the free tier.** Measured at exactly 5 vibes against 5 free —
-  zero slack. A new frame *on the card* needing a sixth vibe breaks it.
+  zero slack. A new `depth: 'card'` frame needing a sixth vibe breaks it.
   `scripts/parts-check.mts` asserts this.
 - **Every word is taught or glossed** — `scripts/lint-content.ts`.
-- **A frame's declared rung is ≥ the highest rung of its pieces.**
+- **A card frame's words are teachable early** — `depth: 'card'` means the seven you
+  hand a stranger, so nothing on the card may need a piece above rung 2.
+  (This replaces "a frame's declared rung is ≥ the highest rung of its pieces". The
+  `rung` field on a frame never meant difficulty — seven of twelve declared *above* what
+  their words needed, purely to push themselves off the card — so it is now `depth`,
+  which says what it does.)
 
 ## Open questions for Sam
 

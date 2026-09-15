@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { PICKER } from '@/content/front-door'
-import type { Crate, Rung } from '@/content/roots'
+import { RUNGS, type Crate, type Rung } from '@/content/roots'
 import { vibeImage } from '@/content/vibe-images'
 import { StatusBar } from '@/components/Native'
 
@@ -157,7 +157,7 @@ export function VibeOpen({
                 data-testid="vibe-stage"
                 className="mt-3 rounded border border-white/40 px-4 py-3 text-center text-xs uppercase tracking-wider text-white/80"
               >
-                {PICKER.open_stage.replace('{n}', String(at))}
+                {PICKER.open_stage.replace('{what}', RUNGS[at - 1].name.toLowerCase())}
               </p>
             )}
           </div>

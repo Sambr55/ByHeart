@@ -138,7 +138,7 @@ export const MOVES = {
   cold: { verb: 'Cold open', why: 'One question, no warning. The half-second that decides it.' },
   drop: { verb: 'Catch the drop', why: 'It expires. Nothing else here does.' },
   line: { verb: 'Take today’s line', why: 'Twenty seconds, and it is different every morning.' },
-  resume: { verb: 'Pick up where you stopped', why: 'There is more in this one your stage now reaches.' },
+  resume: { verb: 'Pick up where you stopped', why: 'There is more in this one you can reach now.' },
   open: { verb: 'Open a new vibe', why: 'Something else you already carry around with you.' },
   again: { verb: 'Go through one again', why: 'It stays yours, and the second pass is where it sets.' },
   proof: { verb: 'See what you can say', why: 'Only the sentences you produced with nothing to copy from.' },
