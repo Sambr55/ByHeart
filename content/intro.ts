@@ -110,6 +110,30 @@ export interface IntroCard {
   */
   exit?: 'choose' | 'up' | 'away' | 'in'
   shows?:
+    /*
+      ONE LINE BECOMING THREE — the demonstration the product is built on and has never
+      shown a stranger.
+
+      `root` renders the line alone, which is an advert for the trick rather than the
+      trick. `unpack` renders the descent: the line you already know, the Portuguese it
+      becomes, the word that did the work, and the three sentences that word now builds.
+      All four are already on every root — 306 branches across 98 roots — so this is a
+      renderer, not content.
+
+      Resolved from ROOTS rather than restated here. DEMO_BEATS in front-door.ts
+      hand-copies tg_goose's three branches, which is one edit away from a demo that
+      disagrees with the lesson it is advertising.
+    */
+    | { kind: 'unpack'; root_id: string }
+    /*
+      TWO VIBES MAKING ONE SENTENCE. The strongest proof in the codebase, and until now
+      visible only mid-session to somebody who already owned both words — which is to say,
+      locked behind the commitment it exists to earn.
+
+      68 authored collisions, every one spanning two or more vibes, each carrying its own
+      provenance line: "A Beatles single and a Bridget Jones disaster, in one order."
+    */
+    | { kind: 'collision'; id: string }
     | { kind: 'root'; root_id: string }
     | { kind: 'drop' }
     | { kind: 'legend' }
@@ -119,18 +143,39 @@ export interface IntroCard {
 
 export const INTRO_CARDS: IntroCard[] = [
   {
-    id: 'intro_how',
-    image: 'intro_arrival',
-    eyebrow: 'HOW IT WORKS',
-    headline: 'DUB — your travel companion.',
     /*
-      The media are not named, which the vocabulary lint enforces and which is right.
+      CARD ONE IS THE TRICK, not a description of the trick.
 
-      DUB teaches from vibes, and a vibe is a thing you already know rather than a category
-      of thing. Listing the formats makes it sound like a syllabus with better sources; the
-      point is that you have already done the work without noticing.
+      This read "DUB — your travel companion. Learn a language and immerse yourself in its
+      local culture." — a category description, true of forty apps, showing nothing. It was
+      the first thing a stranger met, and the five cards after it were gesture instructions
+      and more description. The six cards that actually demonstrated something came
+      SEVENTH onwards.
+
+      Sam: "I want people to come in and be blown away by how you can unpack royale with
+      cheese and talk to me goose into useable phrases… we need to SHOW it in the app."
+
+      The line is one everybody knows, so the recognition is free and instant. The claim
+      underneath is the oldest sentence in the product and still the best one: you already
+      understand more than you can say. Then the unpack proves it in the same breath —
+      `comigo` comes out, and three sentences a person would actually use come with it.
     */
-    body: 'Learn a language and immerse yourself in its local culture.',
+    id: 'intro_how',
+    /*
+      SAND, NOT A PHOTOGRAPH — and this was caught by looking at it rather than reasoning.
+
+      With `image: 'intro_arrival'` the unpack rendered accent-blue Portuguese and muted
+      English over a sunlit Lisbon street. The shape was right and the words were close to
+      unreadable, which on the one card that has to land is fatal.
+
+      The rule the sequence already follows: a card that SHOWS LANGUAGE takes the sand
+      ground (intro_ask, intro_share), and a card that sets a mood takes a photograph. This
+      is now the most language-dense card in the product.
+    */
+    eyebrow: 'SIXTY SECONDS',
+    headline: 'You already understand more than you can say.',
+    body: 'One line you have known for forty years, and the Portuguese hiding inside it.',
+    shows: { kind: 'unpack', root_id: 'tg_goose' },
   },
   {
     /*
@@ -188,7 +233,7 @@ export const INTRO_CARDS: IntroCard[] = [
   },
   {
     id: 'intro_vibes',
-    image: 'intro_vibes_card',
+    /* Sand, for the same reason as card one: this shows an unpack now, not a mood. */
     // Tap or swipe right, and it goes to the demo — which is the thing it is describing.
     exit: 'in',
     /*
@@ -209,14 +254,36 @@ export const INTRO_CARDS: IntroCard[] = [
     headline: 'Learn from what you have already seen a hundred times.',
     body: 'Top Gun, Bridget Jones, Bond. You don’t learn the line — you recognise it, and keep a word or two that works everywhere.',
     /*
-      The Goose line, because it is the one the whole product rests on.
+      ROYALE, BECAUSE ONE UNPACK IS A TRICK AND TWO IS A SYSTEM.
 
-      It was a Bond line, which is a real specimen and the wrong one: this card is the claim
-      that you already know more than you think, and "Talk to me, Goose" is the only line in
-      the library that proves it to somebody who has never heard of DUB. The demo follows
-      immediately and does it properly — this is the trailer for the thing one card later.
+      This showed tg_goose — correct when card one was an advert and this was the first
+      specimen anybody met. Card one IS the Goose unpack now, so repeating it here proves
+      nothing and looks like the product only has one example.
+
+      Pulp Fiction is the other line Sam names, it comes from a different film and a
+      different vibe, and `com` builds a different set of sentences — so the second unpack
+      says the thing the first one cannot: this happens to every line, not just that one.
     */
-    shows: { kind: 'root', root_id: 'tg_goose' },
+    shows: { kind: 'unpack', root_id: 'pf_royale' },
+  },
+  {
+    /*
+      TWO VIBES, ONE SENTENCE — the strongest thing DUB does, shown for the first time.
+
+      Every collision in the product combines pieces from DIFFERENT vibes, and until now
+      they were visible only mid-session to a learner who already owned both words. So the
+      clearest proof of the whole thesis was locked behind the commitment it exists to earn.
+
+      `ola` comes out of a Beatles single in the basics; `vinho` out of a Bridget Jones
+      disaster. Neither was about ordering a drink. Together they are the sentence somebody
+      needs at a table on their first evening, and the collision's own provenance line says
+      exactly that — authored, not written here.
+    */
+    id: 'intro_collision',
+    eyebrow: 'TWO VIBES',
+    headline: 'Two things you knew. One sentence you need.',
+    body: 'Words from different vibes collide, and what comes out is not in either of them.',
+    shows: { kind: 'collision', id: 'tb_bj_vinho' },
   },
   {
     id: 'intro_legend',
@@ -328,5 +395,20 @@ export const INTRO_CARDS: IntroCard[] = [
  * Last means last: they have seen everything the product does, chosen a city, watched the
  * demo, and read what a Legend is. Then one decision.
  */
-export const INTRO_DEMO_AFTER = 'intro_vibes'
+/**
+ * THE DEMO IS NO LONGER WOVEN IN, because card one is the demo.
+ *
+ * `how_it_works` — the playable three-beat DemoCard — used to be spliced in after the
+ * VIBES card, back when the sequence opened on "DUB — your travel companion" and nothing
+ * demonstrated anything for six cards. It was the only thing showing Portuguese being
+ * built, and it was seventh.
+ *
+ * The unpack is card one now and uses the same Goose line, so weaving the explainer in
+ * replayed the same demonstration four cards later under the same SIXTY SECONDS eyebrow —
+ * which firstrun-check caught as two cards sharing an eyebrow and one of them bare.
+ *
+ * DemoCard itself stays: it is the /vibes experience and its beat structure works there.
+ * What stops is the splice into the showcase feed.
+ */
+export const INTRO_DEMO_AFTER: string | null = null
 export const INTRO_SETUP_AFTER = 'intro_share'

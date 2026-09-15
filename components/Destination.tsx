@@ -84,7 +84,13 @@ export function Destination({ onDone }: { onDone?: () => void } = {}) {
                   {c.open ? c.country + ' · European Portuguese' : c.country}
                 </span>
               </span>
-              {c.open ? null : <span className="eyebrow shrink-0 text-muted">NOT OPEN</span>}
+              {/*
+                COMING, not NOT OPEN. The same fact, and the opposite feeling: one is a
+                refusal and the other is a roadmap. Sam's brief is that a stranger should
+                feel a product that knows where they are heading — a greyed row saying
+                COMING says the ambition is real and Lisbon is simply first.
+              */}
+              {c.open ? null : <span className="eyebrow shrink-0 text-muted">COMING</span>}
             </button>
           </li>
         ))}

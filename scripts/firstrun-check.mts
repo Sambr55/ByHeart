@@ -122,16 +122,24 @@ const titles = (await page.evaluate(
     wanted.join(' → '),
   )
   /*
-    The two woven cards, and where they sit is the whole reason they are woven.
+    THE FIRST CARD SHOWS PORTUGUESE BEING BUILT. That is the rule now, and it is stronger
+    than the one it replaces.
 
-    The demo lands after VIBES so the claim about popular culture is followed immediately by
-    a film line; set-up lands after the Legend card, which is the first moment somebody has
-    been told what the answers are for. Asserted as ADJACENCY rather than as fixed indices,
-    so adding an argument card does not fail a check about something else.
+    This asserted that the woven demo explainer sat immediately after the VIBES card — true
+    while card one was "DUB — your travel companion" and the demo was a separate card seven
+    positions later. Sam, on meeting that: "we need to SHOW it in the app."
+
+    Card one IS the unpack now, so the adjacency it was protecting no longer exists. What
+    replaces it is the thing that actually matters: whatever a stranger meets first has to
+    demonstrate, not describe.
   */
-  const demoAt = got.findIndex((g) => /SIXTY SECONDS/.test(g))
-  const vibesAt = got.indexOf('VIBES')
-  ok('the demo follows the vibes claim', demoAt === vibesAt + 1, 'vibes ' + vibesAt + ', demo ' + demoAt)
+  const firstCard = INTRO_CARDS[0]
+  ok(
+    'the first card shows rather than tells',
+    firstCard?.shows?.kind === 'unpack',
+    firstCard ? firstCard.eyebrow + ' shows ' + (firstCard.shows?.kind ?? 'NOTHING') : 'no cards',
+  )
+
   /*
     Set-up follows whatever the content says it follows, which is the last card now.
 
@@ -164,13 +172,33 @@ const titles = (await page.evaluate(
 */
 {
   const shows = (await page.evaluate(
-    `Array.from(document.querySelectorAll('.snap-y > section')).slice(1, -1).slice(0, 12).map(s => {
+    /*
+      slice(1, -1) drops the loop's clones at either end, then 14 rather than 12 because the
+      sequence grew by the collision card and the woven set-up.
+    */
+    `Array.from(document.querySelectorAll('.snap-y > section')).slice(1, -1).slice(0, 14).map(s => {
        const t = (s.innerText || '').split(String.fromCharCode(10)).filter(Boolean)[0] || ''
-       return t + ':' + s.querySelectorAll('[data-testid="intro-shows"] li').length
+       const n = s.querySelectorAll('[data-testid="intro-shows"] li').length
+         + s.querySelectorAll('[data-testid="intro-unpack"] li').length
+         + s.querySelectorAll('[data-testid="intro-collision"] li').length
+       return t + ':' + n
      })`,
   )) as string[]
   const seen = new Map(shows.map((r) => [r.split(':')[0], Number(r.split(':')[1])]))
-  const mustShow = ['VIBES', 'YOUR LEGEND', 'DROPS', 'THE FOUR RS', 'ASK', 'WITH MATES']
+  /*
+    SIXTY SECONDS and TWO VIBES join the list, because they are now the two cards carrying
+    the heaviest claims in the sequence — the unpack and the collision.
+  */
+  const mustShow = [
+    'SIXTY SECONDS',
+    'VIBES',
+    'TWO VIBES',
+    'YOUR LEGEND',
+    'DROPS',
+    'THE FOUR RS',
+    'ASK',
+    'WITH MATES',
+  ]
   const bare = mustShow.filter((e) => !(seen.get(e) ?? 0))
   ok(
     'every card that claims something shows it',
@@ -196,7 +224,9 @@ const titles = (await page.evaluate(
     reaches the screen.
   */
   const vibes = INTRO_CARDS.find((c) => c.id === 'intro_vibes')
-  const named = vibes?.shows?.kind === 'root' ? vibes.shows.root_id : ''
+  /* `unpack` now, having been `root` — both name a root_id and both must resolve. */
+  const named =
+    vibes?.shows?.kind === 'root' || vibes?.shows?.kind === 'unpack' ? vibes.shows.root_id : ''
   const root = ROOTS.find((r) => r.root_id === named)
   ok(
     'the vibe specimen is a real root line',
@@ -548,7 +578,8 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
     await swipe(120, 0)
     ok('swipe right reaches the vibes claim', /VIBES/.test(await where()), await where())
     await swipe(120, 0)
-    ok('and again reaches the demo it describes', /SIXTY SECONDS/.test(await where()), await where())
+    /* VIBES is followed by the collision card now, not by the woven demo. */
+    ok('and again reaches the collision', /TWO VIBES/.test(await where()), await where())
   }
 }
 
@@ -672,48 +703,46 @@ console.log('\nthe demo plays where a stranger lands\n')
   ok('the familiar line is on the face', /TALK TO ME, GOOSE/i.test(first), 'recognition, in English, first')
 
   /*
-    Both beats, because for a while only the first was reachable.
+    THE WHOLE UNPACK IS ON THE FACE, which is stronger than "it can be played".
 
-    The second is the half that turns a party trick into a product: one word out of one film
-    line, in three sentences you can now say. Counting only "the demo is there" would have
-    passed on the broken version.
+    This looked for `demo-reveal`, the button on the woven DemoCard — three beats behind two
+    taps. That card is no longer spliced into the showcase: card one IS the unpack, and it
+    is static on purpose, because an intro card is a gesture rail with one exit and a card
+    needing three taps fights the swipe it is teaching.
+
+    So what is asserted is the half that always mattered — one word out of one film line, in
+    three sentences somebody can now say — and it is asserted as VISIBLE rather than as
+    reachable behind a control.
   */
-  const reveal = await page.$('[data-testid="demo-reveal"]')
-  ok('it can be played', Boolean(reveal), reveal ? '' : 'no control on the face')
-  if (reveal) {
-    await reveal.click()
-    await page.waitForTimeout(600)
-    const beat1 = await face()
-    ok('beat one gives the Portuguese', /FALA COMIGO, GOOSE/i.test(beat1), 'the reveal')
-    ok('and says what it gave you', /COMIGO = WITH ME/i.test(beat1), 'the line, then the word')
+  const branches = await page.$$('[data-testid="intro-unpack"] li')
+  ok(
+    'and the three sentences it becomes are on the face',
+    branches.length >= 3,
+    branches.length + ' branches, no tap needed',
+  )
+  /*
+    AND IT SAYS WHAT IT GAVE YOU, AND IT BUILDS THREE SENTENCES FROM ONE WORD.
 
-    const on = await page.$('[data-testid="demo-build"]')
-    ok('there is a second beat', Boolean(on), on ? '' : 'only one Goose screen — the reported bug')
-    if (on) {
-      await on.click()
-      await page.waitForTimeout(600)
-      const beat2 = await face()
-      const said = ['Vem comigo', 'Fica comigo', 'Podes vir comigo'].filter((l) => beat2.includes(l))
-      ok('and it builds three sentences from the one word', said.length === 3, said.join(' / '))
-      /*
-        AND THERE IS A WAY ON, which the last beat did not have.
+    These were three separate assertions walked across the woven DemoCard's beats — click
+    reveal, check the Portuguese; click build, check the branches; check there is a way on.
+    That card is not in the showcase any more, so the walk is gone and the CLAIMS survive,
+    asserted against what is now simply on screen.
 
-        The version above this asserted the three sentences were present and stopped there —
-        so it went green on a demo that ended in a dead end, at the exact instant the
-        argument lands. Reported from a phone, not by this file.
-
-        The lesson is the one forward-check already applies to the shelf: content being
-        correct is not the same as a person being able to proceed, and only the second is
-        what somebody actually experiences. Checking what a screen SAYS while never asking
-        what it lets you DO is how a dead end passes review.
-      */
-      ok(
-        'and the last beat has a way on',
-        Boolean(await page.$('[data-testid="demo-go"]')),
-        'a demo that ends in nothing wastes the moment it just earned',
-      )
-    }
-  }
+    The last of them is worth keeping in spirit: the old demo once ended in a dead end at
+    the exact instant its argument landed, found on a phone rather than by this file. The
+    static card cannot dead-end — the feed carries on underneath it — so what is asserted
+    instead is that the swipe cue is visible, which is the same question of "can a person
+    proceed" asked of the card that replaced it.
+  */
+  const faceNow = await face()
+  ok('and says what it gave you', /COMIGO = WITH ME/i.test(faceNow), 'the line, then the word')
+  const said = ['Vem comigo', 'Fica comigo', 'Podes vir comigo'].filter((l) => faceNow.includes(l))
+  ok('and it builds three sentences from the one word', said.length === 3, said.join(' / '))
+  ok(
+    'and there is a way on',
+    /keep swiping/i.test(faceNow),
+    'a card that ends in nothing wastes the moment it just earned',
+  )
 }
 
 console.log('\nevery explainer points the same way\n')

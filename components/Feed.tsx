@@ -11,7 +11,7 @@ import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { INTRO_DEMO_AFTER, INTRO_SETUP_AFTER, type IntroCard } from '@/content/intro'
-import { ROOTS } from '@/content/roots'
+import { COLLISIONS, CRATES, PIECES, ROOTS } from '@/content/roots'
 import { cardFor } from '@/content/legend'
 import { mintShowing } from '@/engine/showing'
 import {
@@ -305,7 +305,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       const lead: FeedCard[] = []
       for (const c of introCards()) {
         lead.push(c)
-        if (c.id === INTRO_DEMO_AFTER && demo) lead.push(demo)
+        if (INTRO_DEMO_AFTER && c.id === INTRO_DEMO_AFTER && demo) lead.push(demo)
         if (c.id === INTRO_SETUP_AFTER && setup) lead.push(setup)
       }
       return [...lead, ...open]
@@ -1786,7 +1786,18 @@ export function Card({
                 is learned and a standing instruction is nagging.
               */}
               {hint ? (
-                <p className="mb-3 flex items-center justify-center gap-1 text-[0.6rem] uppercase tracking-wider text-white/70">
+                <p
+                  /*
+                    Follows the ground. This was a hard-coded text-white/70, which is right
+                    over a photograph and invisible on sand — and card one is sand now that
+                    it carries the unpack, so the one instruction a stranger needs had
+                    disappeared on the one card they need it on.
+                  */
+                  className={
+                    'mb-3 flex items-center justify-center gap-1 text-[0.6rem] uppercase tracking-wider ' +
+                    (onSand ? 'text-muted' : 'text-white/70')
+                  }
+                >
                   <span aria-hidden>↑</span> keep swiping — there is more
                 </p>
               ) : null}
@@ -2330,6 +2341,108 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
     const l = first.situation.lines[0]
     return l ? [{ pt: l.pt, en: first.drop.event + ' · ' + first.drop.place.name }] : []
   }, [shows])
+
+  /*
+    THE UNPACK — one line, one word, three sentences, drawn as a descent.
+
+    This is the thing DUB does and the thing it had never shown anybody. Sam: "I want
+    people to come in and be blown away by how you can unpack royale with cheese and talk
+    to me goose into useable phrases."
+
+    Drawn rather than described, and STATIC rather than revealed beat by beat. DemoCard
+    does the same content as three taps, which is right on its own screen and wrong here:
+    an intro card is a gesture rail with one exit, so a card that needs three taps fights
+    the swipe it is teaching. The argument is the SHAPE — a single line fanning out into
+    three — and a shape reads in under a second without being tapped.
+
+    The word that did the work sits between the two halves because it is the hinge of the
+    whole claim: you did not learn "com açúcar", you were given `com` and it built itself.
+
+    `.t-said` is not used here on purpose. It is reserved for language the learner
+    produced, and none of this is theirs yet — that is the point of showing it.
+  */
+  if (shows.kind === 'unpack') {
+    const r = ROOTS.find((x) => x.root_id === shows.root_id)
+    if (!r) return null
+    /* The piece the branches are built from — the first extract is the root's own hinge. */
+    const hinge = r.extracts[0]
+    return (
+      <div data-testid="intro-unpack" className="mt-6 flex flex-col gap-3">
+        <p className="text-xs text-muted">{r.root_display}</p>
+        <span className="flex items-center gap-3">
+          <AudioButton slug={slugFor(r.target)} text={r.target} size="sm" />
+          <span className="pt display min-w-0 flex-1 text-xl text-accent">{r.target}</span>
+        </span>
+
+        {hinge ? (
+          <p className="eyebrow text-muted">
+            <span className="pt text-accent">{hinge.target}</span>
+            {' = ' + hinge.gloss}
+          </p>
+        ) : null}
+
+        <ul className="flex flex-col gap-3 border-l-2 border-accent/40 pl-3">
+          {r.branches.map((b, i) => (
+            <li
+              key={b.target}
+              /*
+                Staggered in at i*70, which is the repo's own rule for a sequence arriving.
+                The three landing one after another IS the fan; all three at once is a list.
+              */
+              className="animate-bank flex items-center gap-3"
+              style={{ animationDelay: `${i * 70}ms` }}
+            >
+              <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
+              <span className="min-w-0">
+                <span className="pt display block text-lg text-accent">{b.target}</span>
+                <span className="block text-xs text-muted">{b.en}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  /*
+    THE COLLISION — two vibes, one sentence a learner will actually need.
+
+    The product's whole thesis, and it was visible only mid-session to somebody who already
+    owned both words. Every one of the 68 spans two or more vibes and carries its own line
+    about where it came from, so this card is assembled rather than written.
+
+    The two sources are named through PIECES[id].family, which resolves to a vibe title —
+    so the chips say "The basics, in songs you know" and "Bridget Jones cringe moments"
+    rather than two piece ids nobody outside the codebase has met.
+  */
+  if (shows.kind === 'collision') {
+    const c = COLLISIONS.find((x) => x.id === shows.id)
+    if (!c) return null
+    const from = c.requires.map((id) => ({
+      word: PIECES[id]?.target ?? id,
+      vibe: CRATES.find((k) => k.id === PIECES[id]?.family)?.title ?? '',
+    }))
+    return (
+      <div data-testid="intro-collision" className="mt-6 flex flex-col gap-3">
+        <ul className="flex flex-col gap-1">
+          {from.map((f) => (
+            <li key={f.word} className="flex items-baseline gap-3 text-xs">
+              <span className="pt text-accent">{f.word}</span>
+              <span className="min-w-0 flex-1 truncate text-muted">{f.vibe}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="text-xs leading-relaxed text-muted">{c.context}</p>
+        <span className="flex items-center gap-3">
+          <AudioButton slug={slugFor(c.answer)} text={c.answer} size="sm" />
+          <span className="pt display min-w-0 flex-1 text-lg text-accent">{c.answer}</span>
+          <CopyButton text={c.answer} size="sm" />
+        </span>
+        {/* The authored line about where it came from. This is the ad copy, already written. */}
+        <p className="text-xs leading-relaxed text-fg/85">{c.provenance}</p>
+      </div>
+    )
+  }
 
   /*
     The exchange is drawn as an exchange, because the act is what this card has to show.
