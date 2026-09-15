@@ -91,7 +91,9 @@ export function VibeOpen({
     <main
       data-testid="vibe-open"
       data-stage="REAL WORLD"
-      className="fixed inset-0 z-50 h-svh w-full overflow-hidden bg-[#241f1a]"
+      /* inset-0 already fills the viewport; h-svh then shortened it to the chrome-showing
+         height and let the ground show under the bar. Same bug as the feed's main. */
+      className="fixed inset-0 z-50 w-full overflow-hidden bg-[#241f1a]"
     >
       {/* safe-top before the pt-6: a full-bleed takeover has nothing above it at all, so
           its own chrome is the only thing between BACK and the clock. */}

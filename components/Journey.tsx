@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { LEGEND_COPY, LEGEND_FRAMES, framesJustOpened, legendStatus, provenanceOf, type LegendFrame } from '@/content/legend'
+import { LEGEND_COPY, LEGEND_FRAMES, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
@@ -2861,15 +2861,17 @@ function GoalPayoff({ goal, owned }: { goal: Goal; owned: string[] }) {
  */
 function LegendOpened({
   frames,
-  toGo,
+  door,
   onDone,
 }: {
   frames: LegendFrame[]
-  /** Vibes still owed before the Legend itself opens. 0 means the door is open. */
-  toGo: number
+  /** This is the moment the Legend opened, carrying everything banked on the way. */
+  door: boolean
   onDone: () => void
 }) {
   const router = useRouter()
+  /* The gender the answer has to agree with, for the frames whose endings move. */
+  const learner = useLearner()
   /*
     ONE QUESTION, even when a vibe opens several.
 
@@ -2895,31 +2897,57 @@ function LegendOpened({
           of the seven. So the branch was unreachable copy that read as shipped, and it is
           gone. scripts/opened-check.mts measures it and will say if that ever changes.
         */}
-        <p className="pillar text-accent">ANOTHER PART</p>
+        <p className="pillar text-accent">{door ? 'YOUR LEGEND' : 'ANOTHER PART'}</p>
 
         <div className="pillar-body flex flex-col gap-6">
           <p className="text-sm leading-relaxed text-fg/85">
-            {toGo === 0
-              ? 'of your Legend just opened. You have the words for this now.'
-              : 'of your Legend is ready. You have the words for this now.'}
+            {door
+              ? 'is open. Everything you have learned so far went into it — here is the first thing you can say.'
+              : 'of your Legend just opened. You have the words for this now.'}
           </p>
 
           {/*
-            The question at the size nothing else in the product reaches. `.t-said` is
-            reserved for language the learner produced; this is language they are one tap
-            from producing, which is the closest thing to it and the only other moment
-            that earns the size.
+            THE ANSWER IS THE HERO, NOT THE QUESTION — and getting that round the wrong way
+            was the bug Sam found on a phone at the end of his first vibe.
+
+            This put frame.ask at .t-said, the size reserved for language the learner
+            PRODUCED, under the line "you have the words for this now". But an ask is the
+            stranger's words, not the learner's: measured, ten of the twelve frames ask
+            using vocabulary DUB has never taught. So "O que fazes?" arrived at hero size
+            claiming to be something he could say, built out of `fazes`, which nothing
+            teaches — and the provenance underneath credited `trabalho`, which is the
+            ANSWER word and has nothing to do with `fazes`. Three complaints, one cause.
+
+            The deck had it right all along and this screen dropped the label: it shows the
+            ask small under THEY ASK, because it is somebody else talking. So the sizes go
+            where the truth is — their question quietly above, your sentence at the size
+            nothing else reaches, and the provenance now sits under the words that actually
+            built it.
           */}
           <div className="flex flex-col gap-3">
+            <p className="eyebrow text-muted">THEY ASK</p>
             <div className="flex items-center gap-3">
               <AudioButton slug={slugFor(first.ask)} text={first.ask} size="sm" />
               <span className="min-w-0">
-                <span data-testid="opened-ask" className="pt t-said block text-accent">
+                <span data-testid="opened-ask" className="pt block text-xl text-accent">
                   {first.ask}
                 </span>
-                <span className="block text-sm text-muted">{first.ask_en}</span>
+                <span className="block text-xs text-muted">{first.ask_en}</span>
               </span>
             </div>
+          </div>
+
+          {/*
+            YOU SAY — the shape of the answer, with the slot still to fill. It is the thing
+            the vibe just made possible and the only half of this exchange the claim above
+            is true about.
+          */}
+          <div className="flex flex-col gap-3">
+            <p className="eyebrow text-muted">YOU SAY</p>
+            <p data-testid="opened-say" className="pt t-said text-accent">
+              {fillFrame(first, {}, learner.profile?.gender ?? null)}
+            </p>
+            <p className="text-sm text-muted">{fillEnglish(first, {})}</p>
           </div>
 
           {/*
@@ -2963,11 +2991,19 @@ function LegendOpened({
             grows. On the doorway firing the other questions are not bonus extras — they
             are the rest of the card — so it says so in those words.
           */}
+          {/*
+            What is waiting, said as a fact rather than a tally. At the door this is the
+            whole banked set, which is the honest thing to say about five vibes of work —
+            and it is deliberately not a list: one question you can answer now beats ten
+            you are being shown.
+          */}
           {more > 0 ? (
             <p className="text-xs text-muted">
-              {more === 1
-                ? 'One more question opened too.'
-                : `${more} more questions opened too.`}
+              {door
+                ? `${more} more are ready to answer, on your Legend.`
+                : more === 1
+                  ? 'One more question opened too.'
+                  : `${more} more questions opened too.`}
             </p>
           ) : null}
         </div>
@@ -2975,49 +3011,38 @@ function LegendOpened({
 
       <Dock>
         {/*
-          THE DOOR DECIDES THE BUTTON, and this is the whole reason the card-by-card
-          unlock was deleted once before: one screen said "two cards just opened" while
-          the Legend, one tap later, said "one more vibe and these open". Two screens,
-          each correct, running different products.
+          ALWAYS ACTIONABLE, because this screen no longer appears before the door.
 
-          It cannot happen here because both branches ask legendStatus. Before the door,
-          the screen offers nothing to tap into — it says the words are banked and names
-          exactly what is left, which is a promise it can keep. After it, ANSWER IT goes
-          straight to that question rather than to a deck to hunt through.
+          It used to have a second branch offering nothing to tap, for the firings that
+          happened while the Legend was still shut. Those are gone — nothing is announced
+          until it can be acted on — so the only button that belongs here is the one that
+          goes and answers it.
         */}
-        {toGo === 0 ? (
-          <button
-            type="button"
-            data-testid="opened-answer"
-            onClick={() => {
-              track('legend_opened', { frame: first.id, opened: frames.length, took: true })
-              router.push(`/legend?build=${first.id}`)
-            }}
-            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-          >
-            ANSWER IT NOW
-          </button>
-        ) : (
-          <p className="px-3 pb-1 text-center text-xs leading-relaxed text-muted">
-            {toGo === 1
-              ? 'One more vibe and your Legend opens — this question will be waiting.'
-              : `${toGo} more vibes and your Legend opens — this question will be waiting.`}
-          </p>
-        )}
+        <button
+          type="button"
+          data-testid="opened-answer"
+          onClick={() => {
+            track('legend_opened', { frame: first.id, opened: frames.length, took: true, door })
+            router.push(`/legend?build=${first.id}`)
+          }}
+          className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+        >
+          ANSWER IT NOW
+        </button>
         {/*
-          Carrying on is a real option and says so plainly. A screen you cannot decline
-          has started managing somebody, and the question does not expire.
+          Later is a real option and says so plainly. A screen you cannot decline has
+          started managing somebody, and the question does not expire.
         */}
         <button
           type="button"
           data-testid="opened-later"
           onClick={() => {
-            track('legend_opened', { frame: first.id, opened: frames.length, took: false, toGo })
+            track('legend_opened', { frame: first.id, opened: frames.length, took: false, door })
             onDone()
           }}
           className="tap-target block w-full py-3 text-center text-sm text-muted underline decoration-line underline-offset-4"
         >
-          {toGo === 0 ? 'Later' : 'Carry on'}
+          Later
         </button>
       </Dock>
     </Shell>
@@ -3096,34 +3121,72 @@ function SectionComplete() {
   */
   const legend = legendStatus({ sectionsCompleted: learner.sections_completed ?? [] })
   /*
-    WHICH QUESTIONS THIS VIBE JUST MADE ANSWERABLE — measured, not assumed.
+    IS THIS THE VIBE THAT OPENED THE DOOR? Asked of the record, not of the clock.
 
-    This was first written to return [] unless the Legend was already open, on the
-    reasonable-sounding grounds that you should not announce a room somebody cannot enter.
-    Measured across all 330 ways to spend the five free vibes, that gate fired the screen
-    0.13 times per run and 87% of learners would NEVER HAVE SEEN IT ONCE.
+    First written as a useRef latched on the first render, on the reasoning that
+    rememberSection fires in an effect and so the first render still sees the old count.
+    Driven in a browser, that fired nothing at all: SectionComplete can mount with the
+    section ALREADY recorded — a remount, a re-render, a record repaired on load — and then
+    the latch captures `true`, the announcement falls back to the delta, and the delta is
+    empty because those words were banked in earlier vibes. Zero screens, which is the
+    silence this whole feature was rebuilt to remove.
 
-    The arithmetic is brutal once you look: the Legend opens at five completed vibes, and
-    the words that make questions answerable are all taught in vibes one to five. So
-    gating on the door means only the last vibe can ever announce anything, by which point
-    there is nothing left to open. The celebration and its trigger were at opposite ends
-    of the same five vibes.
+    So it is derived from the data instead: the door belongs to this vibe if the Legend is
+    open WITHOUT it and shut WITH it removed. That cannot drift with render timing, and it
+    is the same question in any order.
+  */
+  const doorIsThisVibe =
+    legend.open &&
+    !legendStatus({
+      sectionsCompleted: (learner.sections_completed ?? []).filter((id) => id !== state.family),
+    }).open
 
-    So it announces BEFORE the door, and the screen changes what it offers instead of
-    staying silent — which is also the better product: it gives the five-vibe wait a
-    running reason, week by week, instead of one cliff at the end.
+  /*
+    BANKED QUIETLY, ANNOUNCED ONCE — and it took two wrong answers to get here.
+
+    FIRST TRY: announce only once the Legend is open. Measured across all 330 ways to spend
+    the five free vibes, that fired 0.13 times per run and 87% of learners would never have
+    seen it once — because the Legend opens at five completed vibes and the words that make
+    questions answerable are all taught in vibes one to five. The celebration and its
+    trigger sat at opposite ends of the same five vibes.
+
+    SECOND TRY: announce before the door too, changing what the screen offers rather than
+    going silent. That fixed the silence and produced the opposite failure, which Sam hit
+    on a phone at the end of his first vibe: SIX interruptions before the door and ZERO
+    after it. Every firing landed in the stretch where the learner cannot act on any of it.
+    "These unlockers shouldn't show while doing the first five vibes."
+
+    Both are the same mistake — treating each sitting as its own event. So nothing is
+    announced while the door is shut; the questions simply become ready, which they already
+    do. The screen appears ONCE, on the vibe that opens the Legend, carrying everything
+    banked on the way. One moment, at the moment it can be acted on, which is also the only
+    moment it is true that you can go and answer it.
   */
   const opened = useMemo(() => {
+    if (!legend.open) return []
+    const answered = (learner.legend ?? [])
+      .filter((a) => Object.keys(a.values).length > 0)
+      .map((a) => a.frame_id)
+    /*
+      Everything ready and unanswered, not merely what THIS sitting turned over.
+
+      framesJustOpened asks what crossed the line in one step, which is the right question
+      while the door is open and the wrong one at the moment it opens: five vibes of banked
+      questions would be reduced to whichever handful the last sitting happened to finish.
+      So the door itself reports the lot, and every sitting after it reports the delta.
+    */
     const after = new Set(owned)
-    const before = new Set([...after].filter((id) => !justGained.has(id)))
+    const before = doorIsThisVibe
+      ? new Set<string>()
+      : new Set([...after].filter((id) => !justGained.has(id)))
     return framesJustOpened({
       before,
       after,
-      answered: (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0).map((a) => a.frame_id),
+      answered,
       purpose: learner.purpose ?? null,
       answers: learner.legend ?? [],
     })
-  }, [owned, justGained, learner.legend, learner.purpose])
+  }, [legend.open, doorIsThisVibe, owned, justGained, learner.legend, learner.purpose])
 
   /*
     The unlock takes the screen, and it takes it FIRST.
@@ -3142,7 +3205,8 @@ function SectionComplete() {
     return (
       <LegendOpened
         frames={opened}
-        toGo={legend.open ? 0 : legend.toGo}
+        /* The door itself, rather than an ordinary sitting after it. */
+        door={doorIsThisVibe}
         onDone={() => setShowOpened(false)}
       />
     )
@@ -3316,22 +3380,47 @@ function CollisionView({ id }: { id: string }) {
  * transfer.
  */
 function NoCueView({ i }: { i: number }) {
-  const { next, owned } = useJourney()
+  const { next, owned, state } = useJourney()
   const learner = useLearner()
   /**
-   * Unseen prompts first.
+   * Unseen prompts first, AND THIS VIBE'S OWN PROMPTS BEFORE ANYBODY ELSE'S.
    *
-   * This used to index the filtered list by step number, so every section ended with
-   * exactly the same three sentences — which makes the number on the proof card look
-   * like it is measuring one thing repeatedly. Falls back to the whole pool once a
-   * learner has been through all of them, because a repeat is better than a blank.
+   * Unseen-first was already here: indexing the filtered list by step number meant every
+   * section ended with the same three sentences, which makes the proof card look like it
+   * is measuring one thing repeatedly.
+   *
+   * The vibe filter is new, and it is the fix for the loudest thing a tester has said
+   * about this product. Sam, mid-Marcus-Aurelius: "in the middle of every vibe it seems
+   * to throw in a section that has nothing to do with that vibe — so here I am in the
+   * middle of Marcus Aurelius and it is talking about my grandfather's modesty and the
+   * next screen is about my three children??? It does this oddity in every vibe which
+   * loses the flow and vibe of the vibe."
+   *
+   * The pool was global and filtered ONLY by which pieces the learner owns, so the three
+   * cold screens at the end of a section were drawn from wherever. Measured: four vibes
+   * own NO prompts at all and five own one or two, against three needed per session — so
+   * borrowing was not an edge case, it was the normal path.
+   *
+   * Preference, not a hard filter: a vibe with two of its own still needs a third, and a
+   * sentence the learner can say cold is worth more than a tidy theme. So its own come
+   * first and the rest fill in behind them, which is the best available answer until the
+   * content gap is closed — scripts/nocue-check.mts reports the size of it.
    */
   const prompts = useMemo(() => {
     const able = NO_CUE_PROMPTS.filter((p) => owned.includes(p.requires))
     const seen = new Set(learner.nocue_done ?? [])
     const fresh = able.filter((p) => !seen.has(p.answer))
-    return fresh.length ? fresh : able
-  }, [owned, learner.nocue_done])
+    const pool = fresh.length ? fresh : able
+    /* Which pieces this vibe actually teaches, so "its own" means taught HERE. */
+    const mine = new Set(
+      (ROOTS_BY_FAMILY[state.family as CultureFamily] ?? []).flatMap((r) =>
+        r.extracts.map((e) => e.id),
+      ),
+    )
+    const here = pool.filter((p) => mine.has(p.requires))
+    const elsewhere = pool.filter((p) => !mine.has(p.requires))
+    return [...here, ...elsewhere]
+  }, [owned, learner.nocue_done, state.family])
   const prompt = prompts[i % Math.max(prompts.length, 1)]
   const [done, setDone] = useState(false)
 

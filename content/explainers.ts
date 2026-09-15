@@ -52,8 +52,19 @@ export interface Explainer {
     | 'acted-on-a-card'
 }
 
-/** Every explainer's call to action, and there is deliberately only one of them. */
-export const EXPLAINER_CTA = 'TRY YOUR FIRST THREE VIBES'
+/**
+ * Every explainer's call to action, and there is deliberately only one of them.
+ *
+ * It said TRY YOUR FIRST THREE VIBES, which names the mechanism rather than the point.
+ * Sam: "the cta is wrong — should be 'It's all about building your Legend'". Three vibes
+ * is what you do next; the Legend is what it is FOR, and the Legend is the spine — so the
+ * one button every explainer shares should say the thing the whole product is about
+ * rather than the first chore on the way to it.
+ *
+ * The apostrophe is the typographic one (U+2019), like every other apostrophe in the copy;
+ * scripts/copy-check.mts holds that line.
+ */
+export const EXPLAINER_CTA = 'IT’S ALL ABOUT BUILDING YOUR LEGEND'
 
 export const EXPLAINERS: Explainer[] = [
   {

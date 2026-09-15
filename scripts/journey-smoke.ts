@@ -220,12 +220,50 @@ async function main() {
         problems.push(c.title + ' is open to a brand-new learner — the basics doorway is not holding')
       }
     }
-    if (family !== 'the_basics') {
-      await page.evaluate((k) => {
-        const raw = JSON.parse(localStorage.getItem(k) ?? '{}')
-        raw.sections_completed = [...new Set([...(raw.sections_completed ?? []), 'the_basics'])]
-        localStorage.setItem(k, JSON.stringify(raw))
-      }, 'byheart.learner.v1:' + pairId(DEFAULT_PAIR))
+    /*
+      DOOR=1 walks the vibe that OPENS THE LEGEND, which is the only sitting that may
+      announce anything.
+
+      The unlock screen fires once, on the fifth completed vibe, carrying everything banked
+      on the way — so an ordinary run of this walk finishes ONE section and correctly sees
+      nothing. Without a way to reach the door the screen is untestable in a browser, and
+      it is the moment the whole feature exists for.
+
+      Seeds four OTHER vibes as completed, so the one being walked is the fifth.
+    */
+    const others4 = live
+      .filter((c) => c.id !== family && !c.drop)
+      .slice(0, 4)
+      .map((c) => c.id)
+    const seedSections =
+      process.env.DOOR === '1' ? others4 : family !== 'the_basics' ? ['the_basics'] : []
+    if (seedSections.length) {
+      /*
+        A COMPLETED VIBE COMES WITH ITS WORDS, and seeding one without them is not a
+        learner that exists.
+
+        The first DOOR run announced nothing and the component looked wrong. It was not:
+        this seeded four completed sections and an EMPTY inventory, so the learner had
+        finished four vibes and owned no vocabulary — every Legend frame correctly read
+        "not ready", and there was nothing to announce. `frameReady` was doing its job on a
+        person who could not exist.
+
+        So the words come with the sections, which is also what makes the assertion mean
+        something: the screen is supposed to carry what five vibes actually banked.
+      */
+      const words = ROOTS.filter((r) => seedSections.includes(r.culture_family)).flatMap((r) =>
+        r.extracts.map((e) => e.id),
+      )
+      await page.evaluate(
+        ([k, add, pieces]) => {
+          const raw = JSON.parse(localStorage.getItem(k) ?? '{}')
+          raw.sections_completed = [...new Set([...(raw.sections_completed ?? []), ...add])]
+          raw.inventory = { ...(raw.inventory ?? {}) }
+          for (const id of pieces) raw.inventory[id] ??= { at: '2026-01-01T00:00:00.000Z' }
+          localStorage.setItem(k, JSON.stringify(raw))
+        },
+        ['byheart.learner.v1:' + pairId(DEFAULT_PAIR), seedSections, words] as const,
+      )
       await page.reload({ waitUntil: 'domcontentloaded' })
       await page.waitForTimeout(600)
     }
@@ -320,11 +358,20 @@ async function main() {
     */
     if (await page.getByTestId('opened-later').isVisible().catch(() => false)) {
       const unlocked = await page.evaluate(() => document.body.innerText)
-      if (!/ANOTHER PART/i.test(unlocked)) {
-        problems.push('the unlock screen showed without saying what opened')
+      /*
+        ASSERT THE PROMISE, NOT THE WORDING.
+
+        These matched two exact sentences and both went stale the moment the screen grew
+        its door variant — a check failing on copy that is working as intended, which is
+        how a check earns itself an --ignore. What must be true on either variant is the
+        structure: somebody else's question, and the sentence the learner can now say in
+        reply. That is the whole claim the screen makes.
+      */
+      if (!/THEY ASK/i.test(unlocked)) {
+        problems.push('the unlock screen does not show the question being asked')
       }
-      if (!/You have the words for this now/i.test(unlocked)) {
-        problems.push('the unlock screen does not say why the question is answerable')
+      if (!/YOU SAY/i.test(unlocked)) {
+        problems.push('the unlock screen does not show what the learner can now say')
       }
       unlocks++
       await press(page.getByTestId('opened-later'), 'past the unlock screen')
@@ -570,6 +617,23 @@ async function main() {
   if (!/What did not land/i.test(help)) problems.push('feedback page has no open box')
 
   await browser.close()
+
+  /*
+    THE RULE, ASSERTED IN BOTH DIRECTIONS.
+
+    Sam: "these unlockers shouldn't show while doing the first five vibes." An ordinary run
+    finishes one vibe with the Legend still shut, so it must see NOTHING; a DOOR=1 run
+    finishes the fifth, so it must see exactly one. Asserting only the first would pass on a
+    screen that never fires at all, which is the failure this feature has already had once.
+  */
+  if (process.env.DOOR === '1') {
+    if (unlocks !== 1) {
+      problems.push('the vibe that opens the Legend announced ' + unlocks + ' times, not once')
+    }
+  } else if (unlocks > 0) {
+    problems.push(unlocks + ' unlock screens interrupted a walk with the Legend still shut')
+  }
+
   if (problems.length) {
     console.log(problems.length + ' problem(s):')
     problems.forEach((p) => console.log('  ' + p))

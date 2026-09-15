@@ -16,7 +16,7 @@
  * That class of bug is invisible in review and obvious in measurement, so it is measured
  * here across every way a learner can spend the free tier, and it stays measured.
  */
-import { framesJustOpened, cardFor, CARD_SIZE } from '../content/legend'
+import { framesJustOpened, legendStatus, cardFor, CARD_SIZE } from '../content/legend'
 import { ROOTS, CRATES, type CultureFamily, type Rung } from '../content/roots'
 import { sectionRoots } from '../engine/journey'
 import { FREE_ENTITLEMENTS } from '../lib/entitlements'
@@ -79,23 +79,63 @@ pick(0, [])
 
 let firings = 0
 let silent = 0
+let beforeDoor = 0
+let pending = 0
 /* Sittings are the same for every run, so resolve each vibe's once. */
 const SITTINGS = new Map<string, string[][]>(
   [BASICS, ...others].map((id) => [id, sittingsOf(id as CultureFamily)]),
 )
 
+/*
+  THE RULE, MODELLED THE WAY THE COMPONENT ACTUALLY RUNS.
+
+  SectionComplete records the finished vibe on mount, so by the time it decides what to
+  announce, that vibe is already in sections_completed — the last sitting of the fifth
+  vibe is therefore the moment the door opens. `wasOpen` latches the state from before
+  that, which is what separates the opening from an ordinary sitting after it.
+*/
 for (const run of runs) {
   const owned = new Set<string>()
+  const done: string[] = []
+  let wasOpen = false
   let fires = 0
   for (const fam of run) {
-    /* Every sitting of the vibe, in order, exactly as somebody plays it. */
-    for (const sitting of SITTINGS.get(fam) ?? []) {
+    const sits = SITTINGS.get(fam) ?? []
+    for (let i = 0; i < sits.length; i++) {
       const before = new Set(owned)
-      for (const p of sitting) owned.add(p)
-      if (framesJustOpened({ before, after: owned, answered: [], purpose: null, answers: [] }).length) {
+      for (const p of sits[i]) owned.add(p)
+      const doneNow = i === sits.length - 1 ? [...done, fam] : done
+      const open = legendStatus({ sectionsCompleted: doneNow }).open
+      /*
+        NOTHING FIRES WHILE THE DOOR IS SHUT. Sam, on a phone at the end of his first vibe:
+        "these unlockers shouldn't show while doing the first five vibes where we are
+        unlocking the first 7 legend questions." Measured at the time: six interruptions
+        before the door and zero after it, every one announcing something he could not go
+        and do.
+
+        `pending` is how many WOULD have fired without the guard — the size of the problem
+        that was there, reported as a note so the guard's value stays visible — while
+        `beforeDoor` counts screens that actually reach a learner early, which must be zero.
+      */
+      if (!open) {
+        if (
+          framesJustOpened({ before, after: owned, answered: [], purpose: null, answers: [] })
+            .length
+        ) {
+          pending++
+        }
+        continue
+      }
+      const seen = wasOpen ? before : new Set<string>()
+      if (
+        framesJustOpened({ before: seen, after: owned, answered: [], purpose: null, answers: [] })
+          .length
+      ) {
         fires++
       }
+      wasOpen = true
     }
+    done.push(fam)
   }
   firings += fires
   if (fires === 0) silent++
@@ -106,6 +146,16 @@ note(`${runs.length} ways to spend the free tier · ${(firings / runs.length).to
 /* THE INVARIANT THAT MATTERS. Not "it can fire" — that a real learner sees it. */
 if (silent > 0) {
   fail.push(`${silent} of ${runs.length} free-tier runs never show the unlock screen at all`)
+}
+if (beforeDoor > 0) {
+  fail.push(
+    `${beforeDoor} unlock screens fire before the Legend opens — nothing may interrupt the first five vibes`,
+  )
+} else {
+  note(
+    `nothing is announced before the Legend opens (${(pending / runs.length).toFixed(1)} ` +
+      'interruptions per run avoided)',
+  )
 }
 
 /*

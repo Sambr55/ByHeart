@@ -622,8 +622,22 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     )
   }
 
+  /*
+    dvh, NOT svh, and the difference is a strip of sand under the bottom bar.
+
+    `svh` is the SMALL viewport height — how tall the screen is when the browser's own
+    chrome is SHOWING. This screen paints edge to edge with that chrome hidden, so on a
+    phone it ended short by exactly the height of the hidden toolbar and the page ground
+    showed through beneath the blue bar. Reported as "there is a gap beneath the bottom
+    nav", and the gap is not in the nav: the nav is flush with the bottom of a main that
+    stops too soon.
+
+    `dvh` is the DYNAMIC height, which is what .app-frame has always used for this same
+    reason (globals.css:667). The bar needs no change — it already carries the
+    home-indicator inset as its own padding.
+  */
   return (
-    <main data-stage="REAL WORLD" className="relative h-svh w-full overflow-hidden bg-[#241f1a]">
+    <main data-stage="REAL WORLD" className="relative h-dvh w-full overflow-hidden bg-[#241f1a]">
       {/* Over the feed, not in it. The chrome does not scroll away. */}
       {/* safe-top: the feed card is full-bleed by design, so nothing else can clear the
           notch for the controls sitting on top of it. */}
