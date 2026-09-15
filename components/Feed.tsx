@@ -916,7 +916,22 @@ export function Card({
     silently keeps working on the common case and breaks on the new one.
   */
   const flow = card.kind === 'situation' ? (card.flow ?? []) : []
-  const faceLane = 1 + flow.length
+  /*
+    A CARD WITH NOTHING BEHIND IT HAS NO BEHIND.
+
+    The language lane rendered for every unlocked card, and for an intro card IntroPane
+    shows the eyebrow, headline and body the face is already showing — so the far side was
+    a verbatim copy of the front, captioned "Keep swiping". Reported from the installed
+    app, where there is no browser chrome to absorb the drag: the home page could be
+    pushed left and right onto an empty panel.
+
+    `sides` is the single answer to "does this card have lanes", and BOTH the lanes and
+    faceLane read it — because the face's index is 1 + flow.length only while a lane sits
+    to its left. Computing those separately is exactly the hard-coded lane arithmetic the
+    note above warns about: it keeps working on the common case and breaks on the new one.
+  */
+  const sides = card.kind !== 'intro' || introHasPane(card)
+  const faceLane = (sides ? 1 : 0) + flow.length
 
   /*
     Tapping the call to action does the same thing as the swipe.
@@ -1840,7 +1855,7 @@ export function Card({
           </div>
         ))}
         <div
-          hidden={locked}
+          hidden={locked || !sides}
           className="card-pane nav-clear order-1 h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 text-fg"
         >
           {/* Clearance is card-pane in globals.css — the header's own measurement, notch
@@ -1891,7 +1906,7 @@ export function Card({
         */}
         <div
           aria-hidden
-          hidden={locked}
+          hidden={locked || !sides}
           data-testid="card-away"
           className="order-3 flex h-full w-full shrink-0 snap-start flex-col items-start justify-end gap-1 bg-bg px-5 pb-10 text-fg"
         >
@@ -2356,6 +2371,24 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
       ))}
     </ul>
   )
+}
+
+/**
+ * Has this intro card anything to SAY on its far side?
+ *
+ * IntroPane renders eyebrow, headline and body — which is exactly what the card face
+ * already shows. So an intro card with no examples reveals a verbatim copy of itself,
+ * captioned "Keep swiping." Reported from the app: a card that can be pushed left and
+ * right on the home page, showing an empty panel. Four of the eleven intro cards do it;
+ * three are gesture-locked at the time and hide their lanes, which is why `intro_how` —
+ * the only unlocked one — is the one anybody meets.
+ *
+ * `examples` is the whole of the difference: with them the pane is the list of lines, and
+ * that IS more than the face. Without them there is nothing behind the card, so there
+ * should be no behind.
+ */
+function introHasPane(card: Extract<FeedCard, { kind: 'intro' }>): boolean {
+  return Boolean(card.intro.examples?.length) || card.intro.asks === 'where'
 }
 
 function IntroPane({ card }: { card: Extract<FeedCard, { kind: 'intro' }> }) {
