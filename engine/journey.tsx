@@ -312,6 +312,21 @@ export function nextProfileQuestion(): 'gender' | 'age' | 'goal' | null {
  * them is the wrong cap: four short roots and four long ones differ by twenty screens.
  * Whatever is left over is what brings somebody back.
  */
+/**
+ * What this vibe is mostly made of — its promise, derived from its own roots.
+ *
+ * Not a field on the crate, because a field can disagree with the content and this one
+ * cannot: it is counted from the roots every time.
+ */
+function dominantType(roots: Root[]): Root['root_type'] | null {
+  const counts = new Map<Root['root_type'], number>()
+  for (const r of roots) counts.set(r.root_type, (counts.get(r.root_type) ?? 0) + 1)
+  let best: Root['root_type'] | null = null
+  let top = 0
+  for (const [kind, n] of counts) if (n > top) { top = n; best = kind }
+  return best
+}
+
 export function sectionRoots(
   family: CultureFamily,
   reached: Rung,
@@ -346,9 +361,30 @@ export function sectionRoots(
     It is still filtered by the ladder above, so an unreachable banger is simply not in
     this list and the vibe opens on the next best thing.
   */
+  /*
+    AND THEN THE VIBE'S OWN KIND OF THING, before difficulty.
+
+    The banger leads, and everything after it went back to rung order — which is how Sam
+    opened "James Bond film titles" and found no film titles in it. Measured: the vibe
+    holds six, and a first sitting served "Bond. James Bond. English." and "My name is…
+    James Bond." Both are rung 1, both are Bond, and neither is a title. *From Russia with
+    Love* is ALSO rung 1 and simply lost the sort to whichever root was authored first.
+
+    Every vibe has a dominant root_type and it matches the promise on its tile: james_bond
+    is 6 titles of 8, the basics 12 songs of 16, marcus_aurelius 8 wisdom of 9. So the
+    signature kind is derived from the content rather than hand-set, and a vibe cannot
+    claim to be something its roots are not.
+
+    Still after the freebie and still before rung, so the fundamentals-first ordering
+    survives inside each kind — this only decides which of two equally-hard roots a learner
+    meets, and answers it with "the one this vibe is famous for".
+  */
+  const signature = dominantType(all)
   const eligible = (fresh.length ? fresh : replay.length ? replay : lowest).sort(
     (a, b) =>
-      Number(Boolean(b.freebie_flag)) - Number(Boolean(a.freebie_flag)) || a.rung - b.rung,
+      Number(Boolean(b.freebie_flag)) - Number(Boolean(a.freebie_flag)) ||
+      Number(b.root_type === signature) - Number(a.root_type === signature) ||
+      a.rung - b.rung,
   )
 
   const out: Root[] = []
