@@ -1127,9 +1127,27 @@ function Picker() {
       something paying would not unlock. Whichever wall you would hit FIRST is the one
       worth naming, and money cannot move that one.
     */
+    /*
+      WHAT YOU HAVE SAT THROUGH OUTRANKS WHAT IS LEFT IN IT.
+
+      `waiting` sent a vibe to OPENS AS YOU GO — started, with nothing left at this rung —
+      and it was tested before anything asked whether the learner had actually completed a
+      session in it. Audrey has 2 roots at rung 2 out of 6, Marcus 2 out of 9, so ONE
+      session exhausts what the ladder will serve and both dropped off the top of the
+      shelf into a heading that means "not yet".
+
+      Reported from a phone: "why do I see the basics plus four vibes as session done and
+      then scrolling down on the same screen sees Marcus and Audrey under opens as you go
+      with a status as done for now?" Both are true statements about the same vibe and the
+      screen made them look like different states.
+
+      sessionDone wins. A vibe somebody has been through is a vibe they have been through,
+      whatever the ladder is holding back inside it — and the badge still says `done for
+      now`, which is the honest word for "there is more, later".
+    */
     const group: GroupKey = f.drop
       ? 'drops'
-      : unreached || waiting
+      : (unreached || waiting) && !sessionDone
         ? 'later'
         : planLocked
           ? 'pro'
@@ -1417,6 +1435,12 @@ function Picker() {
                         /*
                           Started, and nothing left in it at this stage. Rare, and not the
                           same as never reached — which is the badge it used to wear.
+
+                          It outranks `sessionDone` deliberately: both are true of a vibe
+                          that was sat through and is now out of reachable roots, and this
+                          is the one carrying the extra fact — there is more in here, and
+                          the ladder is what is holding it. The GROUP no longer follows it,
+                          so the tile stays with the others the learner has been through.
                         */
                         <span className={BADGE + ' text-white'}>done for now</span>
                       ) : sessionDone ? (
