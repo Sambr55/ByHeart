@@ -194,10 +194,19 @@ export type EventName =
   /*
     Cheat sheets, and the two numbers that decide whether they belong in the feed at all.
 
-    `sheet_tested` is interest — somebody studied a group and chose to be asked. It is not
-    a score and never will be: DUB does not mark recall anywhere else. `sheet_dismissed`
-    is the honest opposite, and it is the more useful of the two — a sheet nobody wants is
-    a card taking up a slot in a feed, and the only way to know is to let people say so.
+    `sheet_tested` is interest — somebody studied a group and chose to be asked.
+    `sheet_dismissed` is the honest opposite, and it is the more useful of the two — a
+    sheet nobody wants is a card taking up a slot in a feed, and the only way to know is
+    to let people say so.
+
+    STILL NOT A SCORE, though the test now banks what somebody got.
+
+    This said DUB "does not mark recall anywhere else", which was the reason the test
+    asked nothing and therefore could never move the ticks — so a learner could sit it
+    twice and watch nothing change. The half that is true survives: nothing is counted
+    back at them, no percentage, no streak. What changed is that a yes ACQUIRES the piece,
+    exactly as a vibe's release does, because a word you can say cold is yours no matter
+    which screen you said it on. Self-marked, like every cold prompt in the journey.
   */
   /*
     The soft gate, one vibe from the Legend, and whether it was taken.

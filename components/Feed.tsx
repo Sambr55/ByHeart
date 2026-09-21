@@ -40,7 +40,7 @@ import {
 import { chapterById } from '@/content/chapters'
 import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
-import { recordProof, rejectCard, rememberFinishedCard, rewindReject, toggleCard } from '@/engine/learner'
+import { acquirePiece, recordProof, rejectCard, rememberFinishedCard, rewindReject, toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { StatusBar } from '@/components/Native'
 import { SetUp } from '@/components/SetUp'
@@ -3198,6 +3198,18 @@ function Sheet({ card, onDone }: {
   /* Null until they ask to be tested; then the index of the member being asked. */
   const [asking, setAsking] = useState<number | null>(null)
   const [shown, setShown] = useState(false)
+  /*
+    WHAT THE TEST BANKED, so a tick can be earned rather than only inherited.
+
+    The ticks read `learner.inventory`, which only a vibe ever wrote — so somebody could
+    take this test twice, get everything, and watch nothing change. Sam: "I did all teh
+    questions onm teh cheat sheet twice, but same remain unticked."
+
+    The test asks whether they got it now, and a yes acquires the piece exactly as a vibe's
+    release does. Kept in state as well so the sheet can say what just happened; the ticks
+    themselves come from the learner record, which is the one source of truth.
+  */
+  const [justGot, setJustGot] = useState<string[]>([])
 
   const members = card.set.members
 
@@ -3241,19 +3253,66 @@ function Sheet({ card, onDone }: {
           </div>
         ) : null}
 
-        <button
-          type="button"
-          data-testid={shown ? 'sheet-next' : 'sheet-check'}
-          onClick={() => {
-            if (!shown) { setShown(true); return }
-            if (last) { setAsking(null); setShown(false); return }
-            setAsking(asking + 1)
-            setShown(false)
-          }}
-          className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-        >
-          {!shown ? 'CHECK' : last ? 'DONE' : 'NEXT'}
-        </button>
+        {/*
+          AND THEN WHETHER THEY GOT IT, which is the half that was missing.
+
+          CHECK then NEXT asked nothing, so the test could not bank anything and the ticks
+          could never move — the reason somebody could sit it twice and see no change. Two
+          answers instead of one carry-on: a yes acquires the piece, exactly as a vibe's
+          release does, and a no simply moves on.
+
+          Self-marked, deliberately. Nothing here can hear them, and the alternative is a
+          typing test — which would make a reference card into an exam and is the one thing
+          this was never meant to be. The learner knows whether it came out; the product
+          takes their word for it, as it does on every cold prompt in the journey.
+        */}
+        {!shown ? (
+          <button
+            type="button"
+            data-testid="sheet-check"
+            onClick={() => setShown(true)}
+            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            CHECK
+          </button>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              data-testid="sheet-got"
+              onClick={() => {
+                if (pieceId && !owned.has(member)) {
+                  /*
+                    The piece's OWN family, not the sheet's id. culture_context becomes
+                    acquired_source — where a word came from — and a set id is not a place
+                    the product teaches; PIECES[id].family is what every other acquire
+                    writes and what the library resolves to a vibe title.
+                  */
+                  acquirePiece(pieceId as never, PIECES[pieceId]?.family ?? card.set.id)
+                  setJustGot((g) => (g.includes(member) ? g : [...g, member]))
+                }
+                if (last) { setAsking(null); setShown(false); return }
+                setAsking(asking + 1)
+                setShown(false)
+              }}
+              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+            >
+              {last ? 'GOT IT — DONE' : 'GOT IT'}
+            </button>
+            <button
+              type="button"
+              data-testid="sheet-missed"
+              onClick={() => {
+                if (last) { setAsking(null); setShown(false); return }
+                setAsking(asking + 1)
+                setShown(false)
+              }}
+              className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted"
+            >
+              {last ? 'NOT YET — DONE' : 'NOT YET'}
+            </button>
+          </div>
+        )}
       </div>
     )
   }
@@ -3265,7 +3324,15 @@ function Sheet({ card, onDone }: {
         <h2 className="display text-balance text-2xl">{card.set.label}</h2>
         {owned.size ? (
           <p className="text-sm leading-relaxed text-muted">
-            You already have {owned.size} of these {members.length}.
+            {/*
+              What the ticks mean, said once, because they were being read as a score.
+
+              A tick is "this word is yours" — banked from a vibe, or from getting it in
+              the test here. It was neither stated nor earnable, so somebody who sat the
+              test twice saw the same ticks and reasonably read it as broken.
+            */}
+            You have {owned.size} of these {members.length}
+            {justGot.length ? ' — ' + justGot.length + ' just now' : ''}.
           </p>
         ) : null}
       </div>
@@ -3313,6 +3380,24 @@ function Sheet({ card, onDone }: {
         >
           TEST ME
         </button>
+        {/*
+          AND A WAY TO KEEP THEM, once there is something to keep.
+
+          Sam: "Add a save to Your profile button when done." The words banked here go to
+          the same library a vibe fills, so this is a link to it rather than a second kind
+          of saving — two places holding "your words" would be the split this codebase
+          keeps having to undo. It appears only once the sheet has ticks, because a library
+          link on a sheet nobody has worked through points at nothing they just did.
+        */}
+        {owned.size ? (
+          <Link
+            href="/vocab"
+            data-testid="sheet-save"
+            className="tap-target eyebrow w-full rounded border border-accent px-5 py-3 text-center text-accent transition hover:bg-accent hover:text-accent-ink"
+          >
+            {justGot.length ? 'SAVED TO YOURS' : 'SEE THESE IN YOURS'}
+          </Link>
+        ) : null}
         <button
           type="button"
           data-testid="sheet-dismiss"
