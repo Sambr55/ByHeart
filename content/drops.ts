@@ -97,6 +97,22 @@ export const DROPS: Drop[] = [
         kind: 'place',
         title: 'Finding the arena',
         why: 'You have a ticket, you are somewhere near Oriente, and everything is signposted for people who already know where they are going.',
+        /*
+          THE PICTURE THIS ROOM ALWAYS MEANT, added late because the bank came later.
+
+          Every room in this drop was written before there was an image bank, so all four
+          are bare — which was invisible while a drop was only ever read in the Club feed
+          with its own banner above it. Rendered as a tile on Yours it is a grey rectangle
+          among eleven photographs, which is what Sam saw.
+
+          arena_night is not a guess: this drop is at the MEO Arena and the picture is Gare
+          do Oriente, the station its own metro room names.
+        */
+        image: {
+          src: '/bank/arena-night.jpg',
+          alt: 'Gare do Oriente lit at night, its arched canopy above a plaza with people crossing towards the entrance.',
+          rights_status: 'generated',
+        },
         lines: [
           { pt: 'Onde é o concerto?', en: 'Where is the concert?', when: 'To anybody outside the station' },
           { pt: 'É longe?', en: 'Is it far?', when: 'When they point vaguely' },
@@ -112,6 +128,12 @@ export const DROPS: Drop[] = [
         kind: 'errand',
         title: 'A ticket, on the night',
         why: 'The website says sold out and the box office often says otherwise. It is worth one sentence to find out.',
+        /* Same picture the template gives this room — see the note on the where room. */
+        image: {
+          src: '/bank/box-office.jpg',
+          alt: 'A ticket window at night, a lit booth behind the glass and a metal grille at the counter.',
+          rights_status: 'generated',
+        },
         lines: [
           { pt: 'Ainda há bilhetes?', en: 'Are there still tickets?', when: 'At the box office' },
           { pt: 'Quanto custa?', en: 'How much is it?', when: 'Before you commit to anything' },
@@ -127,6 +149,12 @@ export const DROPS: Drop[] = [
         kind: 'errand',
         title: 'Getting to Oriente',
         why: 'It is the red line, it is the last stop, and the crowd will be doing it with you — which makes it the easiest place in Lisbon to ask a question.',
+        /* Same picture the template gives this room — see the note on the where room. */
+        image: {
+          src: '/bank/metro-platform.jpg',
+          alt: 'A crowd walking away down a tiled metro passage towards the tunnel, all seen from behind.',
+          rights_status: 'generated',
+        },
         lines: [
           { pt: 'Qual é a linha para o Oriente?', en: 'Which line goes to Oriente?', when: 'In the station' },
           { pt: 'É a linha vermelha.', en: 'It is the red line.', when: 'What you will hear back' },
@@ -152,6 +180,12 @@ export const DROPS: Drop[] = [
         title: 'Asking somebody to come',
         why: 'The only one of these that is not about getting somewhere. It is the reason to learn the other three.',
         on: '2026-11-03',
+        /* Same picture the template gives this room — see the note on the where room. */
+        image: {
+          src: '/bank/two-at-a-bar.jpg',
+          alt: 'Two people at a small outdoor table with glasses of white wine, turned towards each other, a Lisbon street behind them at dusk.',
+          rights_status: 'generated',
+        },
         lines: [
           { pt: 'Queres vir comigo ao concerto?', en: 'Do you want to come to the concert with me?', when: 'The ask' },
           { pt: 'É no dia três.', en: 'It is on the third.', when: 'When they ask when' },

@@ -388,6 +388,37 @@ console.log('\nthe calendar becoming drops\n')
     arrivals.size >= 3,
     arrivals.size + ' distinct venue rooms across the live drops',
   )
+  /*
+    AND EVERY DROP CARD HAS A PICTURE, which is not decoration here.
+
+    dropsFor takes each drop's FIRST situation as its card, and every first situation is
+    the arrival — so on any screen that renders these as a grid the photograph is most of
+    what tells one night from another. The hand-authored Duran Duran drop had no image on
+    any of its rooms, because it was written before there was a bank, and it rendered as a
+    grey rectangle among eleven photographs on Yours.
+
+    Invisible in the Club feed, where the drop's own banner sits above the card, which is
+    why it survived this long.
+  */
+  const cards = dropsFor('lisbon', now)
+  const noImage = cards.filter((c) => c.kind === 'situation' && !c.situation.image)
+  ok(
+    'every drop card has a photograph',
+    noImage.length === 0,
+    noImage.length ? noImage.map((c) => c.id).join(', ') : cards.length + ' cards',
+  )
+  /*
+    And more than one of them, because twelve nights with one picture is one card twelve
+    times. Counted rather than named so a new venue kind cannot quietly collapse it.
+  */
+  const shots = new Set(
+    cards.flatMap((c) => (c.kind === 'situation' && c.situation.image ? [c.situation.image.src] : [])),
+  )
+  ok(
+    'and the nights do not all look the same',
+    shots.size >= 3,
+    shots.size + ' distinct photographs across ' + cards.length + ' drops',
+  )
 }
 
 console.log('\nand who has read the language\n')

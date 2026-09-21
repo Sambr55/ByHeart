@@ -149,7 +149,29 @@ export interface TemplateRoom {
     Absent means the room does not vary, which is most of them: the metro is the metro and
     asking somebody to come is asking somebody to come.
   */
-  variants?: Partial<Record<VenueKind, { lines: TemplateLine[]; release: { ask: string; answer: string } }>>
+  variants?: Partial<
+    Record<
+      VenueKind,
+      {
+        lines: TemplateLine[]
+        release: { ask: string; answer: string }
+        /*
+          AND THE PICTURE, because twelve nights were twelve identical photographs.
+
+          Every drop's `where` room hardcoded arena_night — Gare do Oriente lit up — so a
+          football match at the Luz and a concert at the Coliseu arrived as the same
+          image of the same station. In the Club feed that is survivable, since the drop's
+          banner names the night above it; as a grid of tiles it reads as one card
+          repeated, which is what Sam saw.
+
+          Optional, like the lines: a variant that only changes the language keeps the
+          default picture, and the default stays the arena because the drop this template
+          was abstracted from is one.
+        */
+        image?: string
+      }
+    >
+  >
 }
 
 /**
@@ -161,7 +183,7 @@ export interface TemplateRoom {
  */
 export function roomFor(room: TemplateRoom, kind: VenueKind): TemplateRoom {
   const v = room.variants?.[kind]
-  return v ? { ...room, lines: v.lines, release: v.release } : room
+  return v ? { ...room, lines: v.lines, release: v.release, image: v.image ?? room.image } : room
 }
 
 export interface DropTemplate {
@@ -297,6 +319,7 @@ export const DROP_TEMPLATES: DropTemplate[] = [
               { pt: 'É esta a porta?', en: 'Is this the door?', when: 'When you think you have found it' },
             ],
             release: { ask: 'Ask somebody where the {venue} is.', answer: 'Onde é o {venue}?' },
+            image: 'queue_outside',
           },
           /*
             A grand old hall in the middle of town — the Coliseu, the Capitólio, the
@@ -314,6 +337,8 @@ export const DROP_TEMPLATES: DropTemplate[] = [
               { pt: 'Já se pode entrar?', en: 'Can we go in yet?', when: 'When nothing is moving' },
             ],
             release: { ask: 'Ask whether this is the entrance.', answer: 'É aqui a entrada?' },
+            /* The queue on the pavement, which is what a hall's front door actually is. */
+            image: 'queue_outside',
           },
         },
       },
@@ -436,7 +461,8 @@ export const DROP_TEMPLATES: DropTemplate[] = [
         kind: 'place',
         title: 'Finding the ground',
         why: 'You can see it from the metro and still not know which turnstile is yours. Everybody around you is going to the same place, which makes it the easiest question you will ask all week.',
-        image: 'arena_night',
+        /* A stand, not Gare do Oriente. The bank has had this picture all along. */
+        image: 'stadium_stand',
         lines: [
           { pt: 'Onde é o jogo?', en: 'Where is the match?', when: 'If you have come out of the wrong exit' },
           { pt: 'Para que lado é a bancada?', en: 'Which way is the stand?', when: 'Ticket in hand' },

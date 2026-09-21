@@ -675,7 +675,24 @@ function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void 
   const card = tile.card
   const face = cardFace(card)
   const image = face.image
-  const title = face.title
+  /*
+    A DROP TILE SAYS WHICH NIGHT IT IS, not which room comes first.
+
+    dropsFor returns the FIRST SITUATION of each drop as the card, and every drop's first
+    situation is called "Finding the venue" — so twelve different evenings rendered as
+    twelve identical tiles. Sam: "finding the venue just repeats itelf like this, not
+    showinh teh actual events."
+
+    It reads correctly in the Club feed, where the drop's own banner is above the card and
+    the room title is the next thing you need. On a tile there is no banner, so the room
+    title is the whole label and the one fact that distinguishes the twelve — the event —
+    is not on screen at all.
+
+    The event and the date, because a drop is a thing with a night attached: `on` is what
+    makes this section WHAT IS ON rather than another pile of rooms.
+  */
+  const drop = card.kind === 'situation' ? card.drop : undefined
+  const title = drop ? drop.event : face.title
   return (
     <button type="button" data-testid={'tile-' + tile.id} onClick={() => onOpen(card)} className={shell}>
       {image ? (
@@ -683,12 +700,38 @@ function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void 
       ) : null}
       <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
       <span className="absolute inset-x-0 bottom-0 px-3 pb-3">
+        {drop ? (
+          <span className="eyebrow mb-1 block text-[0.5rem] text-white/80">{onNight(drop.on)}</span>
+        ) : null}
         <span className={'display block text-xs leading-tight text-white ' + (card.kind === 'vocab' ? 'pt' : '')}>
           {title}
         </span>
+        {drop ? (
+          <span className="mt-1 block text-[0.6rem] leading-tight text-white/70">
+            {drop.place.name}
+          </span>
+        ) : null}
       </span>
     </button>
   )
+}
+
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+
+/**
+ * The night itself, in UTC.
+ *
+ * Journey's goneOn says when a drop EXPIRES, which is the right fact on a shelf somebody
+ * is deciding what to open. Here the question is which evening this is, so it is the date
+ * of the thing rather than the day after it.
+ *
+ * Formatted from the ISO string in UTC for the reason goneOn gives: a date formatted from
+ * local time renders differently on the server and in the browser, which is a hydration
+ * mismatch waiting to happen.
+ */
+function onNight(on: string): string {
+  const d = new Date(on + 'T00:00:00Z')
+  return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()]
 }
 
 
