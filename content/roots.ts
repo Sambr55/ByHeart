@@ -4757,7 +4757,21 @@ export const THE_BASICS: Root[] = [
   q({
     root_id: 'tb_why',
     culture_family: 'the_basics',
-    rung: 2,
+    /*
+      RUNG 1, NOT 2, AND THE ACCENT IS NOT THE DIFFICULTY.
+
+      This was rung 2, which made it the only basics root a rung-1 learner could not
+      reach — and it is one of the six the Legend card is built from, so the door could
+      not open for them at all. Measured: every other basics root served, the card still
+      shut, `porque` never taught. That is the same class of dead end doorwayRoots() was
+      written to remove, surviving inside the doorway itself.
+
+      `porque` is a rung-1 word: because. What is advanced here is the porquê/porque
+      accent distinction, and that lives in the extract's own note where a learner meets
+      it when they are ready to care — a nuance in a footnote does not make the sentence
+      hard to say.
+    */
+    rung: 1,
     root_type: 'title',
     source_label: 'Why Do Fools Fall in Love',
     source_status: 'verified',

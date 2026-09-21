@@ -90,7 +90,7 @@ export function Legend() {
   */
   const unlocked =
     mounted &&
-    legendStatus({ rootsPlayed: played, sectionsCompleted: sections }).open
+    legendStatus({ rootsPlayed: played, sectionsCompleted: sections, sittings: learner.sittings ?? 0 }).open
   const toGo = doorwayToGo(played)
   /* For the readout below: how long the doorway is, so the line can say N of M. */
   const basicsTotal = (ROOTS_BY_FAMILY[DOORWAY] ?? []).length

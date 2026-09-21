@@ -76,11 +76,26 @@ from the same call: the shelf under its headline ("Finish one more vibe and your
 opens"), the Club door, and the payoff panel at the end of a vibe. Measured across five
 states, the shelf reads 6-lines / 3-vibes / 2-vibes / one-more / silent-when-open.*
 
-*The OUTCOME half is what the check below still measures, and it is still BROKEN: one
-sitting of each of the twelve vibes does not finish any of them, so a learner following
-the shelf's invitation ends without a Legend. That is a content-shape problem — a sitting
-serves three or four roots and a vibe holds six to sixteen — rather than a screen
-problem, and it is the next thing to look at.*
+*The OUTCOME half is still BROKEN, and the check below still says so — but the shape of
+the failure has changed and is worth stating precisely.*
+
+*What was wrong on 2026-09-21: the door counted vibes FINISHED, and finishing a vibe means
+playing every root in it. The basics hold 16 and a sitting serves about four, so "basics +
+3 vibes" cost roughly ELEVEN sittings. Sam did five, watched five SESSION DONE badges
+appear, and the door had not moved: "why are we so disconnected here." Worse, the six
+doorway roots sat at positions 3, 5, 6, 7, 10 and 16, and the last was rung 2 — so a
+rung-1 learner could not open it at all.*
+
+*Three changes: the door counts SITTINGS, which is the number SESSION DONE is already
+claiming; the doorway roots are front-loaded inside the basics; and tb_why is rung 1,
+because `porque` is a rung-1 word and it was the accent nuance that was advanced.
+Measured: a learner doing the obvious thing — three sittings of the basics, then one vibe
+they chose — opens the Legend on sitting FOUR.*
+
+*What is still broken is the thin-spread case the check models: one sitting of each of the
+twelve vibes finishes the basics no faster, so that learner still ends without a Legend.
+It is better than it was (4 doorway roots short rather than 5, card 3/7 rather than 2/7)
+and it is not fixed. That is a content-shape problem rather than a screen one.*
 
 ## P3 — A vibe ends on its own lines
 

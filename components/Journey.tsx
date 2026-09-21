@@ -995,6 +995,7 @@ function Picker() {
   const shelfLegend = legendStatus({
     rootsPlayed: learner.roots_played ?? [],
     sectionsCompleted: learner.sections_completed ?? [],
+    sittings: learner.sittings ?? 0,
   })
 
   /*
@@ -3156,6 +3157,7 @@ function SectionComplete() {
   const legend = legendStatus({
     rootsPlayed: learner.roots_played ?? [],
     sectionsCompleted: learner.sections_completed ?? [],
+    sittings: learner.sittings ?? 0,
   })
   /*
     IS THIS THE VIBE THAT OPENED THE DOOR? Asked of the record, not of the clock.
@@ -3593,6 +3595,7 @@ function LegendPayoff() {
   const status = legendStatus({
     rootsPlayed: learner.roots_played ?? [],
     sectionsCompleted: learner.sections_completed ?? [],
+    sittings: learner.sittings ?? 0,
   })
   const answered = (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0).length
   const waiting = LEGEND_FRAMES.length - answered

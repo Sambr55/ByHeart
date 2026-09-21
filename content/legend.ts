@@ -1015,24 +1015,42 @@ export const DOORWAY: CultureFamily = 'the_basics'
 export const VIBES_FOR_LEGEND = 3
 
 /**
- * The vibes a learner has FINISHED, not counting the compulsory one.
+ * SITTINGS OF VIBES THE LEARNER CHOSE, which is not the same as vibes finished.
  *
- * `sections_completed` holds vibe ids and is written when a vibe is finished rather than
- * when a sitting ends — the shelf already relies on that distinction to free an
- * allowance slot, so the Legend can rely on it too.
+ * It counted `sections_completed` — distinct vibes sat through — and read it as "vibes
+ * finished". Those are three different numbers and the code was conflating two of them:
  *
- * The basics are excluded because they are not a choice. Counting them would mean the
- * door opens on "the compulsory vibe plus two", which is a different promise from the one
- * the progress line makes.
+ *   sittings          one pass through a vibe, about ten minutes. What SESSION DONE marks.
+ *   vibes sat through  sections_completed, deduped by family.
+ *   vibes FINISHED    every root played. Nothing records this and nothing ever did.
+ *
+ * The cost of the difference: the basics hold 16 roots and a sitting serves about four,
+ * so "basics + 3 vibes finished" is roughly ELEVEN sittings. Sam did five, watched five
+ * SESSION DONE badges appear, and the door had not moved. "Why are we so disconnected
+ * here."
+ *
+ * So the door counts sittings, which is the number the product is already showing him.
+ * The basics ones are subtracted for the reason the old function excluded the basics: it
+ * is compulsory, so it is not one of the vibes somebody chose.
  */
-export function chosenVibesFinished(sectionsCompleted: string[]): number {
-  return new Set(sectionsCompleted.filter((id) => id !== DOORWAY)).size
+export function chosenVibesFinished(sectionsCompleted: string[], sittings = 0): number {
+  const basicsSat = sectionsCompleted.includes(DOORWAY) ? 1 : 0
+  /*
+    A floor of the deduped count, so a record written before sittings existed is not
+    punished for it — and never more than the sittings actually taken.
+  */
+  const chosen = new Set(sectionsCompleted.filter((id) => id !== DOORWAY)).size
+  return Math.max(chosen, sittings - basicsSat)
 }
 
-export function legendUnlocked(rootsPlayed: string[], sectionsCompleted: string[]): boolean {
+export function legendUnlocked(
+  rootsPlayed: string[],
+  sectionsCompleted: string[],
+  sittings = 0,
+): boolean {
   return (
     doorwayToGo(rootsPlayed) === 0 &&
-    chosenVibesFinished(sectionsCompleted) >= VIBES_FOR_LEGEND
+    chosenVibesFinished(sectionsCompleted, sittings) >= VIBES_FOR_LEGEND
   )
 }
 
@@ -1108,6 +1126,8 @@ export interface LegendStatus {
 
 export function legendStatus(opts: {
   rootsPlayed: string[]
+  /** Sittings taken, which is what the door counts. See chosenVibesFinished. */
+  sittings?: number
   /*
     REQUIRED, not optional, and that is the point of the change.
 
@@ -1120,11 +1140,11 @@ export function legendStatus(opts: {
   sectionsCompleted: string[]
 }): LegendStatus {
   const sections = opts.sectionsCompleted
-  const open = legendUnlocked(opts.rootsPlayed, sections)
+  const open = legendUnlocked(opts.rootsPlayed, sections, opts.sittings ?? 0)
   return {
     open,
     toGo: doorwayToGo(opts.rootsPlayed),
-    vibesDone: chosenVibesFinished(sections),
+    vibesDone: chosenVibesFinished(sections, opts.sittings ?? 0),
     vibesNeeded: VIBES_FOR_LEGEND,
     openCards: open ? LEGEND_FRAMES.length : 0,
   }

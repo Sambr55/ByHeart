@@ -302,6 +302,14 @@ export interface LearnerState {
    * can be inflated by repetition is the beginning of a streak.
    */
   sections_completed: string[]
+  /**
+   * How many sittings this learner has done, in total, across every vibe.
+   *
+   * A sitting is one pass through a vibe — capped by screen count rather than by roots,
+   * so it is about ten minutes rather than a fixed amount of content. It is what the
+   * SESSION DONE badge marks, and now what the Legend counts.
+   */
+  sittings: number
   /** When the Club welcomed them. Fires once, ever. Earliest wins on a merge. */
   club_welcomed_at: string | null
   /**
@@ -427,6 +435,7 @@ export function emptyLearner(): LearnerState {
     save_prompt: 'unseen',
     switch_seen_at: null,
     sections_completed: [],
+    sittings: 0,
     club_welcomed_at: null,
     saved: [],
     liked: [],
@@ -604,6 +613,17 @@ export function loadLearner(): LearnerState {
           user_id: typeof parsed.user_id === 'string' && parsed.user_id ? parsed.user_id : null,
           switch_seen_at: parsed.switch_seen_at ?? null,
           sections_completed: arr(parsed.sections_completed, []),
+          /*
+            Back-filled from sections_completed for anybody who has one and no count.
+
+            Their real total is higher — a vibe they sat twice counts once here — and
+            guessing upward would open the door on work nobody did. The floor is the
+            honest reading of a record written before this field existed.
+          */
+          sittings:
+            typeof parsed.sittings === 'number'
+              ? parsed.sittings
+              : arr(parsed.sections_completed, []).length,
           club_welcomed_at: parsed.club_welcomed_at ?? null,
           saved: arr(parsed.saved, []),
           liked: arr(parsed.liked, []),
@@ -803,6 +823,7 @@ export async function syncSession(reason: string): Promise<boolean> {
         osmosis_seen: s.osmosis_seen,
         roots_played: s.roots_played,
         sections_completed: s.sections_completed,
+        sittings: s.sittings,
         club_welcomed_at: s.club_welcomed_at,
         collisions_played: s.collisions_played,
         nocue_done: s.nocue_done,
@@ -1436,6 +1457,25 @@ export function rememberSection(family: string) {
     if (!s.sections_completed.includes(family)) {
       s.sections_completed = [...s.sections_completed, family]
     }
+    /*
+      AND THE SITTING ITSELF, counted separately, because the two are not the same fact.
+
+      `sections_completed` dedupes by vibe: four sittings of the basics leave one entry.
+      That is the right shape for "which vibes has this person been inside", and it is the
+      wrong shape for "how much work have they done" — and the Legend was asking it the
+      second question.
+
+      The gap is not small. The basics hold 16 roots and a sitting serves about four, so
+      "basics + 3 vibes finished" costs roughly ELEVEN sittings. Sam did five, saw five
+      SESSION DONE badges, and had finished nothing by that definition: "I've now done
+      basics and 5 vibes ... why are we so disconnected here."
+
+      So sittings are counted here, one per pass, and the door counts these. It is the
+      same number the SESSION DONE badge is already claiming, which is the whole point —
+      a learner should be able to add up what the product tells them and get the answer
+      the product is using.
+    */
+    s.sittings = (s.sittings ?? 0) + 1
   })
 }
 

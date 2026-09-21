@@ -37,6 +37,7 @@ import {
   syncSession,
   rememberSection,
 } from './learner'
+import { doorwayRoots } from '@/content/legend'
 import { chosenPair, setPair } from './pair'
 import { DEFAULT_PAIR } from '@/content/pairs'
 import { useLearner } from './useLearner'
@@ -380,9 +381,29 @@ export function sectionRoots(
     meets, and answers it with "the one this vibe is famous for".
   */
   const signature = dominantType(all)
+  /*
+    AND THE DOORWAY FIRST, inside the basics, because the Legend waits on it.
+
+    The six roots carrying the Legend card's vocabulary sat at positions 3, 5, 6, 7, 10
+    and 16 of the basics' sixteen — so the door could not open before the FOURTH sitting,
+    and the last of them (tb_why) is rung 2, which a rung-1 learner cannot reach at all.
+    Sam did five sittings and the basics half had not closed: "why are we so disconnected
+    here."
+
+    Front-loaded, the same six arrive in the first two sittings and the door stops waiting
+    on the last root in the vibe. Nothing is removed and the basics are no shorter — what
+    changes is that the load-bearing part comes first, which is what every other ordering
+    rule here already argues for.
+
+    Ranked BELOW the freebie so a vibe still opens on the line it is famous for, and above
+    the signature type because being able to build the card outranks being on-theme. It
+    only applies where a doorway exists, so every other vibe sorts exactly as before.
+  */
+  const doorway = new Set(doorwayRoots().map((r) => r.root_id))
   const eligible = (fresh.length ? fresh : replay.length ? replay : lowest).sort(
     (a, b) =>
       Number(Boolean(b.freebie_flag)) - Number(Boolean(a.freebie_flag)) ||
+      Number(doorway.has(b.root_id)) - Number(doorway.has(a.root_id)) ||
       Number(b.root_type === signature) - Number(a.root_type === signature) ||
       a.rung - b.rung,
   )

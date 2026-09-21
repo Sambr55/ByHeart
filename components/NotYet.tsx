@@ -39,7 +39,7 @@ export function NotYet({
   const learner = useLearner()
   const played = learner.roots_played ?? []
   const sections = learner.sections_completed ?? []
-  const status = legendStatus({ rootsPlayed: played, sectionsCompleted: sections })
+  const status = legendStatus({ rootsPlayed: played, sectionsCompleted: sections, sittings: learner.sittings ?? 0 })
   const open = status.open
   const left = status.toGo
   const vibesLeft = Math.max(0, status.vibesNeeded - status.vibesDone)
