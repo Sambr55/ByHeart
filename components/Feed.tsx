@@ -1682,17 +1682,31 @@ export function Card({
                 the ground, or the most language-dense cards in the product are the ones
                 least readable.
 
-                A specimen is a stack: a Portuguese line, its English, sometimes a field and
-                a sign. That is the same problem the destination card has — several rows of
-                small type rather than one headline — so it takes the same heavier gradient
+                A specimen is a stack: a line, its English, sometimes a field and a sign.
+                That is the same problem the destination card has — several rows of small
+                type rather than one headline — so it takes the same heavier gradient
                 rather than the one tuned for a title over a dark room.
+
+                AND ON A SPECIMEN CARD IT COVERS THE WHOLE FRAME, which 85% did not.
+
+                Reported on the Legend: the strapline and the body copy were unreadable. At
+                85% the gradient starts an eighth of the way down, so everything above that
+                line — the wordmark, the strapline beside it, and on a seven-row card the
+                body copy too — sat on the bare photograph. intro-arrival is a sunrise: the
+                top of that frame is bright sky, which is the worst possible ground for the
+                white type the card uses everywhere else.
+
+                inset-0 rather than a height, with the top third of the gradient carrying
+                enough black to hold small text. The picture is still a picture — 45% at
+                the very top is a wash rather than a curtain — and the card is legible from
+                the wordmark down.
               */
               className={
-                'absolute inset-x-0 bottom-0 bg-gradient-to-t to-transparent ' +
+                'absolute inset-x-0 bg-gradient-to-t to-transparent ' +
                 (card.kind === 'derived' ||
                 (card.kind === 'intro' && (card.intro.asks || card.intro.shows))
-                  ? 'h-[85%] from-black/95 via-black/80'
-                  : 'h-[62%] from-black/92 via-black/60')
+                  ? 'inset-y-0 from-black/95 via-black/85 to-black/45'
+                  : 'bottom-0 h-[62%] from-black/92 via-black/60')
               }
             />
           )}
@@ -2777,8 +2791,17 @@ function Specimen({
             <li
               key={b.target}
               /*
-                Staggered in at i*70, which is the repo's own rule for a sequence arriving.
-                The three landing one after another IS the fan; all three at once is a list.
+                Staggered at the WATCHABLE pace, not the cascade pace.
+
+                70ms is a fan — three things arriving as one shape. That was the right
+                reading of this card and the wrong speed for it: at 70ms the three
+                sentences are over in 210ms, which is quick enough that nobody reads them
+                arriving, they simply appear. Sam: "too fast."
+
+                190ms is the repo's own number for a stagger meant to be watched
+                (motion-check names it). Three at 190 take about half a second, which is
+                long enough to see each sentence land and short enough that the fan still
+                reads as one gesture.
               */
               /*
                 HELD UNTIL THE CARD IS REACHED, then fanned.
@@ -2794,7 +2817,7 @@ function Specimen({
               className={
                 'flex items-center gap-3 ' + (onScreen ? 'animate-bank' : 'opacity-0')
               }
-              style={{ animationDelay: `${i * 70}ms` }}
+              style={{ animationDelay: `${i * 190}ms` }}
             >
               <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
               <span className="min-w-0">
@@ -2945,10 +2968,16 @@ function Specimen({
             own question, which is what the card is claiming they are: what a stranger
             asks you, in the order they ask it.
 
-            Capped at 5 like every other cascade in the repo, so the seventh does not wait
-            420ms on its own: a stagger is meant to read as one hand fanning cards, and
-            past about five steps it becomes a queue. motion-check enforces both the 70ms
-            step and the cap.
+            NOT CAPPED, and not at cascade speed, because this is not a fan.
+
+            The first version staggered at 70ms capped at five, which is the rule for a
+            list arriving as one object. Seven questions are not one object — the card
+            says so itself, "in the order they ask it" — and at 70ms all seven were over
+            in 350ms, which reads as the list appearing rather than assembling. Sam: "too
+            fast."
+
+            190ms each, uncapped, so the seventh actually arrives seventh. About 1.1s for
+            the set, which is a list being read down rather than a hand of cards.
 
             Held invisible until the card is on screen, for the reason given on the unpack
             above: every card mounts at once, so an unheld cascade is over before anybody
@@ -2957,7 +2986,7 @@ function Specimen({
           className={
             'flex items-center gap-3 ' + (onScreen ? 'animate-rise' : 'opacity-0')
           }
-          style={{ animationDelay: Math.min(i, 5) * 70 + 'ms' }}
+          style={{ animationDelay: i * 190 + 'ms' }}
         >
           <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
           <CopyButton text={l.pt} size="sm" />

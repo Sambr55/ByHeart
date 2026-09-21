@@ -89,10 +89,22 @@ for (const file of files) {
   inside 420ms: below the threshold where the items read as separate events. A hand
   fanning cards, not a sequence of arrivals.
 
-  The one exception is named rather than tolerated. MiniBuild.showOrder staggers at
-  190ms, and it is NOT a cascade — it is deliberately watchable, because the learner is
-  meant to see where each word goes. Naming it here is what stops the next person
-  "fixing" it into the scale.
+  The exceptions are named rather than tolerated. MiniBuild.showOrder staggers at 190ms,
+  and it is NOT a cascade — it is deliberately watchable, because the learner is meant to
+  see where each word goes. Naming it here is what stops the next person "fixing" it into
+  the scale.
+
+  THE INTRO SPECIMENS ARE THE SAME KIND OF MOMENT, and they are named for the same reason.
+  A cascade is right when a list is arriving as one object: the three comigo branches
+  fanning out of one word are a shape, and 70ms is what makes them read as a shape rather
+  than three events. The Legend's seven questions are not a shape. They are seven separate
+  things a stranger will ask, and the card says so — "in the order they ask it" — so each
+  one has to land long enough to be read before the next arrives. Sam, on both: "too
+  fast."
+
+  190ms is the value the repo already uses for "meant to be watched", so this adds no new
+  number. Seven questions at 190 take 1.14s to arrive, which is slow for a fan and right
+  for a list somebody is reading down.
 */
 const CASCADE_MS = 70
 const TEACH_MS = 190
@@ -102,8 +114,17 @@ for (const file of files) {
     // The multiplied form: `animationDelay: i * 70 + 'ms'`.
     for (const m of line.matchAll(/animationDelay[^\n]*?\*\s*(\d+)/g)) {
       const ms = Number(m[1])
-      if (ms !== CASCADE_MS) {
-        fail(file + ':' + (i + 1) + ' staggers at ' + ms + 'ms — a cascade is ' + CASCADE_MS + 'ms')
+      /*
+        TEACH_MS is allowed here as well as in setTimeout, because a watchable stagger can
+        be written either way — showOrder builds its list in JS, the intro specimens hand
+        theirs to CSS. Same intent, same number, and the check should not force the second
+        one to lie about which it is.
+      */
+      if (ms !== CASCADE_MS && ms !== TEACH_MS) {
+        fail(
+          file + ':' + (i + 1) + ' staggers at ' + ms + 'ms — a cascade is ' + CASCADE_MS +
+            'ms, a watchable stagger is ' + TEACH_MS + 'ms',
+        )
       }
     }
     /*
