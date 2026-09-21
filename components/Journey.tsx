@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame } from '@/content/legend'
+import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
@@ -3124,7 +3124,16 @@ function LegendOpened({
  */
 function LegendOpen() {
   const { next } = useJourney()
-  const preview = LEGEND_FRAMES.slice(0, 3)
+  const learner = useLearner()
+  /*
+    THE CARD'S OWN QUESTIONS, not the first three in the library.
+
+    LEGEND_FRAMES is authored order and its third entry is `age` — a depth 'deeper' frame
+    that opens nothing and is marked `extra` on the Legend page. So the screen selling the
+    Legend advertised a question that does not count towards it, one screen before the
+    page that labels it as a bonus.
+  */
+  const preview = cardFor(learner.purpose ?? null).slice(0, 3)
   return (
     <Shell stage="CHOICE" nav={false}>
       <div className="flex flex-1 flex-col justify-center gap-3">
@@ -3864,7 +3873,15 @@ function LegendPayoff() {
     learner.save_prompt === 'unseen'
   const offering = usable && learner.legend_prompt === 'unseen'
   /** The hook is the questions themselves, not a count of them. */
-  const preview = LEGEND_FRAMES.slice(0, 3)
+  /*
+    THE CARD'S OWN QUESTIONS, not the first three in the library.
+
+    LEGEND_FRAMES is authored order and its third entry is `age` — a depth 'deeper' frame
+    that opens nothing and is marked `extra` on the Legend page. So the screen selling the
+    Legend advertised a question that does not count towards it, one screen before the
+    page that labels it as a bonus.
+  */
+  const preview = cardFor(learner.purpose ?? null).slice(0, 3)
   /*
     THE QUIET VERSION IS ACTUALLY QUIET NOW, and that is what fixes the fold.
 
