@@ -333,10 +333,60 @@ console.log('\nthe calendar becoming drops\n')
     rep.some((r) => r.id === 'lisbon_lemon_twigs' && /no station/.test(r.why)),
     'an invented metro line puts somebody in the wrong place',
   )
+  /*
+    AND THE FOOTBALL DRAFTS NOW, which is what this line used to be waiting for.
+
+    It read "the football is waiting on a template, not on a reviewer" and asserted that
+    two fixtures drafted nothing — correct while the only template was the concert, and
+    the right way to hold a gap open: the alternative was Benfica v Celtic telling somebody
+    to ask "onde é o concerto?" outside the Estádio da Luz.
+
+    The match template exists, so the assertion turns over rather than being deleted. What
+    it guards now is that both fixtures reach a learner, and that neither of them is
+    quietly being served concert language.
+  */
+  const football = rep.filter((r) => /benfica|sporting/.test(r.id))
   ok(
-    'and the football is waiting on a template, not on a reviewer',
-    rep.filter((r) => /no match template/.test(r.why)).length === 2,
-    'two fixtures, both drafting nothing',
+    'the football drafts, and drafts as football',
+    football.length === 2 && football.every((r) => r.status !== 'blocked'),
+    football.map((r) => r.id + ': ' + r.status).join(', '),
+  )
+  const matchDrops = generatedDrops('lisbon', now).filter((d) => /benfica|sporting/.test(d.id))
+  ok(
+    'and nobody is sent to a match asking about a concert',
+    matchDrops.length === 2 &&
+      matchDrops.every((d) =>
+        d.situations.some((s2) => s2.lines.some((l) => l.pt === 'Onde é o jogo?')),
+      ) &&
+      !matchDrops.some((d) =>
+        d.situations.some((s2) => s2.lines.some((l) => /concerto/.test(l.pt))),
+      ),
+    matchDrops.length + ' fixtures drafted',
+  )
+  /*
+    AND THE VENUE ROOM IS NOT ONE SENTENCE NINE TIMES.
+
+    Sam, reading the drops: "They are all identical, we need to link them in some way to
+    teh context of teh event." Every live drop ran the one concert room, so the arrival at
+    a twenty-thousand-seat arena and the arrival at a hall on Restauradores were the same
+    three lines with the station swapped.
+
+    Counted rather than named, so the assertion survives new venues: what it refuses is the
+    state where every drop says the same thing, not any particular wording. Three is what
+    the current calendar can produce — arena, hall, ground — and a fourth is written and
+    waiting on a station for LAV.
+  */
+  const arrivals = new Set(
+    generatedDrops('lisbon', now).map((d) =>
+      (d.situations.find((s2) => s2.id.endsWith('_where'))?.lines ?? [])
+        .map((l) => l.pt)
+        .join(' / '),
+    ),
+  )
+  ok(
+    'the arrival is said differently for different buildings',
+    arrivals.size >= 3,
+    arrivals.size + ' distinct venue rooms across the live drops',
   )
 }
 

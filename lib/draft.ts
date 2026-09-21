@@ -5,7 +5,9 @@ import {
   dayEnglish,
   dayWord,
   fill,
+  roomFor,
   templateFor,
+  venueKind,
   type DropTemplate,
   type Slot, stationTo
 } from '@/content/drop-templates'
@@ -107,7 +109,16 @@ export function draftDrop(c: Candidate, now: Date = new Date()): DraftResult {
   const wants: string[] = []
   let situations: Situation[]
   try {
-    situations = template.rooms.map((room): Situation => {
+    /*
+      WHICH BUILDING THIS IS, decided once for the whole drop.
+
+      Read from the venue name through a reviewed table rather than guessed from the
+      candidate, and resolved here rather than inside the loop so every room of one drop
+      agrees about where it is happening.
+    */
+    const building = venueKind(c.venue?.name)
+    situations = template.rooms.map((base): Situation => {
+      const room = roomFor(base, building)
       const image = bankImage(room.image)
       if (!image) wants.push(room.image)
       return {

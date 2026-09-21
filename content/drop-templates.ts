@@ -79,6 +79,51 @@ export interface TemplateLine {
   when: string
 }
 
+/**
+ * WHAT SORT OF PLACE THIS IS, because nine concerts were saying one sentence.
+ *
+ * Every live drop ran the same room — "Onde é o concerto?", "É longe?", "A que horas
+ * abre?" — with only the station and the date moving. Sam: "They are all identical, we
+ * need to link them in some way to teh context of teh event."
+ *
+ * The honest lever is the building. Walking into a twenty-thousand-seat arena out at
+ * Parque das Nações is not the errand that walking into a hall on Restauradores is: one
+ * has gates and a ticket check a hundred metres from the door, the other has a foyer off
+ * the street, and the small rooms are the ones nobody can find at all.
+ *
+ * A TABLE RATHER THAN A FIELD ON THE ROW, for two reasons. The venues repeat — four rows
+ * are the MEO Arena — so a field would be the same fact typed four times and wrong the
+ * first time somebody edited one of them. And this is a judgement about a building, which
+ * is exactly the sort of thing that belongs somewhere a reviewer can read the whole list
+ * at once rather than scattered through a calendar.
+ *
+ * DEFAULTS TO `hall`, deliberately. An unknown venue gets the version that asks where the
+ * entrance is and what time it opens, which is true of any building you have a ticket
+ * for. The variants differ in what they let you ask NEXT, so a wrong guess here costs a
+ * useful sentence rather than producing a false one.
+ */
+export type VenueKind = 'arena' | 'hall' | 'room' | 'ground'
+
+export const VENUE_KIND: Record<string, VenueKind> = {
+  /* Gates, a concourse, and a ticket check well before the door. */
+  'MEO Arena': 'arena',
+  'Altice Arena': 'arena',
+  /* Grand old halls in town. One foyer, off the street, and everybody uses it. */
+  'Coliseu dos Recreios': 'hall',
+  'Capitólio': 'hall',
+  /* A bullring with a concert inside it — an arena's shape, a hall's front door. */
+  'Sagres Campo Pequeno': 'hall',
+  /* Small, and the whole problem is finding the door. */
+  'LAV — Lisboa Ao Vivo': 'room',
+  /* Football. Turnstiles, a stand, a block and a seat. */
+  'Estádio da Luz': 'ground',
+  'Estádio José Alvalade': 'ground',
+}
+
+export function venueKind(name: string | undefined): VenueKind {
+  return (name && VENUE_KIND[name]) || 'hall'
+}
+
 export interface TemplateRoom {
   /** Suffixed onto the drop's id. */
   id: string
@@ -90,6 +135,33 @@ export interface TemplateRoom {
   lines: TemplateLine[]
   release: { ask: string; answer: string }
   rung: Rung
+  /*
+    AND THE SAME ROOM SAID FOR A DIFFERENT KIND OF BUILDING.
+
+    Authored per venue kind and picked deterministically, so the same venue always says
+    the same thing — a drop is a thing somebody reads twice, and language that shuffled
+    between visits would read as a fault rather than as variety.
+
+    Only the lines and the release move. The room's purpose, title, image and rung are the
+    same errand whichever building it is, and a variant that changed those would be a
+    second room wearing the first one's id.
+
+    Absent means the room does not vary, which is most of them: the metro is the metro and
+    asking somebody to come is asking somebody to come.
+  */
+  variants?: Partial<Record<VenueKind, { lines: TemplateLine[]; release: { ask: string; answer: string } }>>
+}
+
+/**
+ * The room as this venue says it.
+ *
+ * Falls through to the authored default whenever there is no variant for the kind, which
+ * is both the common case and the safe one: a room that has not been written for a
+ * bullring is simply the room, rather than nothing.
+ */
+export function roomFor(room: TemplateRoom, kind: VenueKind): TemplateRoom {
+  const v = room.variants?.[kind]
+  return v ? { ...room, lines: v.lines, release: v.release } : room
 }
 
 export interface DropTemplate {
@@ -184,6 +256,66 @@ export const DROP_TEMPLATES: DropTemplate[] = [
         ],
         release: { ask: 'Ask somebody where the concert is.', answer: 'Onde é o concerto?' },
         rung: 2,
+        /*
+          THE SAME ARRIVAL, IN THE BUILDING YOU ARE ACTUALLY ARRIVING AT.
+
+          The default above is the hall version and it was being said for all nine drops —
+          an arena out at Parque das Nações and a small room in Alcântara got the identical
+          three sentences. These are the questions that building actually puts to you.
+
+          NOT REVIEWED BY A NATIVE SPEAKER, like the rest of this template. `review` on the
+          template covers these too, and the reviewer's pass is one sitting for all of it.
+        */
+        variants: {
+          /*
+            THE ARENA IS THE DEFAULT, and that is a finding rather than a shortcut.
+
+            The default lines above ARE the arena version: they were lifted from the
+            hand-authored Duran Duran drop, which is at the MEO Arena and was written and
+            reviewed as language rather than assembled. Writing a separate `arena` variant
+            meant writing a second, unreviewed answer to a question a native speaker had
+            already answered — and `npm run drops` said so immediately, because the
+            template stopped reproducing the drop it was abstracted from.
+
+            Twice. The first attempt replaced all three lines with gates and entrances,
+            which answers a later beat than this room: the `when` on the first line is "To
+            anybody outside the station", so this is the walk from the metro, before you
+            are in the grounds at all. At that moment the question is the same whatever the
+            building is.
+
+            So the variants are the buildings that are NOT arenas, and the check that
+            refused the other version is the reason to trust the ones that remain.
+          */
+          /*
+            A small room on a side street, where the whole problem is the door. Nobody
+            can see it, the sign is small, and the useful sentence names the place.
+          */
+          room: {
+            lines: [
+              { pt: 'Onde é o {venue}?', en: 'Where is the {venue}?', when: 'To anybody on the street' },
+              { pt: 'É longe daqui?', en: 'Is it far from here?', when: 'When they point' },
+              { pt: 'É esta a porta?', en: 'Is this the door?', when: 'When you think you have found it' },
+            ],
+            release: { ask: 'Ask somebody where the {venue} is.', answer: 'Onde é o {venue}?' },
+          },
+          /*
+            A grand old hall in the middle of town — the Coliseu, the Capitólio, the
+            bullring at Campo Pequeno. One foyer, straight off the street, and everybody
+            goes in the same way, so there is no gate to find and no concourse to cross.
+
+            What it does have is a queue and a cloakroom, which an arena handles with
+            signage and staff. "Já se pode entrar?" is the question people actually ask
+            outside the Coliseu on a cold night.
+          */
+          hall: {
+            lines: [
+              { pt: 'Onde é o concerto?', en: 'Where is the concert?', when: 'To anybody outside the station' },
+              { pt: 'É aqui a entrada?', en: 'Is this the entrance?', when: 'At the front, if there is a queue' },
+              { pt: 'Já se pode entrar?', en: 'Can we go in yet?', when: 'When nothing is moving' },
+            ],
+            release: { ask: 'Ask whether this is the entrance.', answer: 'É aqui a entrada?' },
+          },
+        },
       },
       {
         id: 'ticket',
@@ -272,6 +404,101 @@ export const DROP_TEMPLATES: DropTemplate[] = [
         release: {
           ask: 'Ask somebody to come with you on the {day_en}.',
           answer: 'Queres vir comigo ao concerto no dia {day}?',
+        },
+        rung: 3,
+      },
+    ],
+  },
+  {
+    /*
+      THE MATCH TEMPLATE, which unblocks the two most Portuguese evenings in the calendar.
+
+      Benfica v Celtic and Sporting v LASK were both refused with "no match template
+      exists yet" — correctly, because the alternative was telling somebody to ask "onde é
+      o concerto?" outside the Estádio da Luz. The pipeline blocking them was the guard
+      working; this is the content it was waiting for.
+
+      It is not the concert template with nouns swapped. A match has turnstiles rather than
+      doors, a stand and a block rather than a gate, and nobody asks what time a football
+      ground opens — they ask which way their seat is. The ticket errand is different too:
+      you do not turn up at the Luz hoping for a return.
+
+      NOT REVIEWED BY A NATIVE SPEAKER. Same standing as the concert template, and the same
+      reviewer's pass covers both.
+    */
+    id: 'match',
+    kind: 'match',
+    needs: ['event', 'venue', 'station', 'day', 'day_en'],
+    review: 'needs-review',
+    rooms: [
+      {
+        id: 'where',
+        kind: 'place',
+        title: 'Finding the ground',
+        why: 'You can see it from the metro and still not know which turnstile is yours. Everybody around you is going to the same place, which makes it the easiest question you will ask all week.',
+        image: 'arena_night',
+        lines: [
+          { pt: 'Onde é o jogo?', en: 'Where is the match?', when: 'If you have come out of the wrong exit' },
+          { pt: 'Para que lado é a bancada?', en: 'Which way is the stand?', when: 'Ticket in hand' },
+          { pt: 'É esta a entrada?', en: 'Is this the entrance?', when: 'At the turnstiles' },
+        ],
+        release: { ask: 'Ask which way your stand is.', answer: 'Para que lado é a bancada?' },
+        rung: 2,
+      },
+      {
+        id: 'ticket',
+        kind: 'errand',
+        title: 'Getting in',
+        why: 'A ticket for a European night is not something you buy at the gate, but a scarf is, and both transactions are the same three sentences.',
+        image: 'box_office',
+        lines: [
+          { pt: 'Ainda há bilhetes?', en: 'Are there still tickets?', when: 'At the ticket office' },
+          { pt: 'Quanto custa?', en: 'How much is it?', when: 'Before you commit to anything' },
+          { pt: 'Aceitam cartão?', en: 'Do you take card?', when: 'At the kiosk outside' },
+        ],
+        release: { ask: 'Ask whether they take card.', answer: 'Aceitam cartão?' },
+        rung: 2,
+      },
+      {
+        id: 'metro',
+        kind: 'errand',
+        title: 'Getting to {station}',
+        why: 'Half the carriage is going where you are going. Follow them, and ask the one question that saves you a walk.',
+        image: 'metro_platform',
+        /* No line is named, for the reason the concert template's metro room gives at
+           length: a metro line invented to fill a slot is the worst thing this pipeline
+           could produce. */
+        lines: [
+          { pt: 'Qual é a linha para {station_to}?', en: 'Which line goes to {station}?', when: 'In the station' },
+          { pt: 'Onde fica a saída?', en: 'Where is the way out?', when: 'When you arrive with everybody else' },
+        ],
+        release: {
+          ask: 'Ask which line goes to {station}.',
+          answer: 'Qual é a linha para {station_to}?',
+        },
+        rung: 2,
+      },
+      {
+        /*
+          The point of this cluster, same as the concert's.
+
+          "Queres vir ver o jogo?" is the sentence somebody actually says in Lisbon, and it
+          is the one evening in the calendar where the invitation is more likely to be
+          accepted than explained.
+        */
+        id: 'invite',
+        kind: 'moment',
+        title: 'Asking somebody to come',
+        why: 'The only one of these that is not about getting somewhere. It is the reason to learn the other three.',
+        image: 'two_at_a_bar',
+        lines: [
+          { pt: 'Queres vir ver o jogo comigo?', en: 'Do you want to come and watch the match with me?', when: 'The ask' },
+          { pt: 'É no dia {day}.', en: 'It is on the {day_en}.', when: 'When they ask when' },
+          { pt: 'Eu compro os bilhetes.', en: 'I will get the tickets.', when: 'To make saying yes easy' },
+        ],
+        release: {
+          ask: 'Ask somebody to come and watch on the {day_en}.',
+          answer: 'Queres vir ver o jogo comigo no dia {day}?',
         },
         rung: 3,
       },
