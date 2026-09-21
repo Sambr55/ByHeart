@@ -2054,7 +2054,7 @@ export function Card({
                   one card in the sequence that may not be skipped.
                 */
                 <div className="mb-3 mt-6">
-                  <Choose onDone={() => setPairChosen(true)} />
+                  <Choose onSand={onSand} onDone={() => setPairChosen(true)} />
                 </div>
               ) : (
                 <button

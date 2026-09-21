@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CHAPTERS } from '@/content/chapters'
 import { PAIRS, pairId, type Pair } from '@/content/pairs'
 import { track } from '@/engine/analytics'
@@ -38,7 +38,26 @@ import { setPair } from '@/engine/pair'
  * screen makes the promise: nothing here takes an address and offers to let you know. A
  * greyed row is a roadmap, and it stays one.
  */
-export function Choose({ onDone }: { onDone?: () => void } = {}) {
+export function Choose({
+  onDone,
+  onSand = true,
+}: {
+  onDone?: () => void
+  /*
+    Which ground this is drawn on, because one line in here has to know.
+
+    The rows carry their own colours — they are solid by design, so they read the same on
+    sand or on a photograph. The AND WHERE label does not: it is an `eyebrow text-muted`,
+    which is rgb(99,92,80) on sand and near-invisible on a dark doorway. Measured that way
+    on the set-up card: topmost element, full opacity, and unreadable.
+
+    Wrapping the whole selector in `.shown-on-photo` fixed the label and broke the rows —
+    that scope redefines --accent to white, and a selected row is `bg-accent
+    text-accent-ink`, so Portuguese and Lisbon rendered white on white. One line needs the
+    ground, so one line gets it.
+  */
+  onSand?: boolean
+} = {}) {
   /*
     NOTHING IS PRE-SELECTED, which Destination learned the hard way.
 
@@ -50,6 +69,59 @@ export function Choose({ onDone }: { onDone?: () => void } = {}) {
   */
   const [lang, setLang] = useState<Pair | null>(null)
   const [city, setCity] = useState<string | null>(null)
+
+  /*
+    THE SECOND QUESTION HAS TO BE ON SCREEN TO BE ANSWERED.
+
+    The city list appears below the five languages, and five rows plus the card's own
+    headline and body is taller than the card: measured, Lisbon's row landed at y=712 with
+    the bottom bar at 776, and The Algarve at 875 — off the bottom of a 844 screen
+    entirely. So answering the first question revealed a second one that looked like
+    nothing had happened, with the only clue below the fold.
+
+    Scrolled to rather than re-laid-out, because the order is the point — the cities are a
+    consequence of the language, so they belong under it. `block: 'center'` rather than
+    'start' so the chosen language stays visible above them: the answer to the first
+    question is the context for the second, and pushing it off the top would make the city
+    list look like a screen of its own.
+
+    In an effect keyed on `lang` rather than inside the click handler, because the section
+    does not exist in the DOM until the render that follows the choice.
+  */
+  const cities_ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!lang) return
+    const el = cities_ref.current
+    if (!el) return
+    /*
+      Respecting the setting that asks for less movement: 'auto' still brings the list
+      into view, it simply does not travel there.
+    */
+    const still =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    /*
+      Scrolled so the BOTTOM of the section clears the bar, which is the only version that
+      fits.
+
+      Three tries, each measured. 'center' put the cities on screen and pushed the AND
+      WHERE label off the top. 'nearest' kept the label and left The Algarve under the
+      bottom bar at 844. The list plus its label is 262px and the space above the bar is
+      776, so both fit — the browser's presets simply do not aim at that.
+
+      So it is aimed by hand: put the section's bottom edge a gap above the bar, and the
+      label comes with it. `.card-face` is the scroller here, which is why this is
+      scrollTop arithmetic rather than another scrollIntoView.
+    */
+    const face = el.closest('.card-face') as HTMLElement | null
+    if (!face) return
+    const nav = document.querySelector('[data-testid="bottom-nav"]')
+    const room = nav ? nav.getBoundingClientRect().top : window.innerHeight
+    /* 16px, the product's own gap between a thing and the furniture under it. */
+    const overshoot = el.getBoundingClientRect().bottom - room + 16
+    if (overshoot <= 0) return
+    face.scrollTo({ top: face.scrollTop + overshoot, behavior: still ? 'auto' : 'smooth' })
+  }, [lang])
 
   /*
     The cities that speak the chosen language, and none before one is chosen.
@@ -147,8 +219,8 @@ export function Choose({ onDone }: { onDone?: () => void } = {}) {
         list is a consequence of the language rather than a second unrelated decision.
       */}
       {lang ? (
-        <div className="flex flex-col gap-3">
-          <p className="eyebrow text-muted">AND WHERE</p>
+        <div ref={cities_ref} className="flex flex-col gap-3">
+          <p className={'eyebrow ' + (onSand ? 'text-muted' : 'text-white/80')}>AND WHERE</p>
           <ul className="flex flex-col gap-3">
             {cities.map((c) => (
               <li key={c.id}>
