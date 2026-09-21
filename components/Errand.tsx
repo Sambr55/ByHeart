@@ -161,6 +161,29 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
   const isInvite = Boolean(drop) && /(^|_)invite$/.test(situation.id)
 
   /*
+    A NIGHT IS ONE SEQUENCE, NOT FOUR ROOMS YOU MIGHT FIND.
+
+    The first version of this put a list under TAKE IT AWAY called THE REST OF THE NIGHT.
+    Sam: "The The Rest of teh Night and Take it away are jarring. It's too easy to miss teh
+    rest of the night, make it into one flow, ending on teh invite."
+
+    He is right, and the list was a patch rather than a fix: it made the other rooms
+    REACHABLE without making them the obvious next thing, so the default was still to
+    finish one room and stop. A drop is an evening — find it, get a ticket, get there, ask
+    somebody — and the order was authored that way from the start. Nothing needed
+    inventing; the rooms simply never handed on.
+
+    So each room's exit carries to the next, and the last one is the invitation. Which is
+    the shape the template's own note describes: three rooms about logistics and then the
+    reason to have learned them.
+  */
+  const rooms = drop?.situations ?? []
+  const at = rooms.findIndex((s2) => s2.id === situation.id)
+  const nextRoom = at >= 0 ? rooms[at + 1] : undefined
+  const onward = (id: string) =>
+    '/errand/' + id + (back === '/profile' ? '?from=yours' : '')
+
+  /*
     WHERE THIS ROOM WAS OPENED FROM, because it was always the Club.
 
     Every exit here — the wordmark, DONE and GOT IT — went to /club, which was true while
@@ -271,7 +294,35 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
           ) : null}
 
           <div className="flex flex-col gap-3">
-            <p className="eyebrow text-muted">{chapter.city.toUpperCase()}</p>
+            {/*
+              WHERE THIS ROOM IS IN THE NIGHT, said in one line instead of a menu.
+
+              The list that used to sit under TAKE IT AWAY made the other rooms reachable
+              and made the screen read as two competing offers — "take this away" above
+              "or go somewhere else". Sam: "The The Rest of teh Night and Take it away are
+              jarring."
+
+              The sequence is the flow now, so this only has to say where you are in it.
+              Four dots and the event's name: enough to know there is more and that this is
+              part of something, and not enough to be a decision.
+            */}
+            {drop && rooms.length > 1 ? (
+              <div className="flex items-center gap-3" data-testid="night-progress">
+                <span className="flex shrink-0 items-center gap-1" aria-hidden>
+                  {rooms.map((s2, i) => (
+                    <span
+                      key={s2.id}
+                      className={
+                        'block h-1 w-4 rounded-full ' + (i <= at ? 'bg-accent' : 'bg-line')
+                      }
+                    />
+                  ))}
+                </span>
+                <span className="eyebrow min-w-0 truncate text-muted">{drop.event}</span>
+              </div>
+            ) : (
+              <p className="eyebrow text-muted">{chapter.city.toUpperCase()}</p>
+            )}
             <h1 className="display text-balance text-3xl">{situation.title}</h1>
             <p className="text-sm leading-relaxed text-muted">{situation.why}</p>
           </div>
@@ -306,54 +357,6 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             TAKE IT AWAY
           </button>
 
-          {/*
-            THE REST OF THE NIGHT, because three quarters of a drop had one way in.
-
-            dropsFor hands the feed the drop's FIRST room and puts the other three in a
-            sideways `flow` inside that card. That works in the Club, where a card is a
-            thing you swipe through. It means that anywhere else — a link, a tile on Yours,
-            a bookmark — the other three rooms do not exist: Sam went looking for the
-            invitation he had just been told about and could not find it, because the only
-            route to it was a sideways swipe on a card in a different screen.
-
-            So a drop room lists its siblings. Ordered as the evening is — find it, get a
-            ticket, get there, ask somebody — because that order is the teaching, and the
-            ask is last for the reason the template's own note gives: it is the only one
-            that is not about getting somewhere.
-
-            `from` travels with them, so somebody who came from Yours stays in Yours all
-            the way through.
-          */}
-          {drop && drop.situations.length > 1 ? (
-            <div className="mt-10 flex flex-col gap-3">
-              <div className="flex items-baseline gap-3">
-                <h2 className="eyebrow min-w-0 text-accent">THE REST OF THE NIGHT</h2>
-                <span className="h-px flex-1 bg-line" />
-              </div>
-              <div className="flex flex-col">
-                {drop.situations
-                  .filter((s2) => s2.id !== situation.id)
-                  .map((s2) => (
-                    <Link
-                      key={s2.id}
-                      href={'/errand/' + s2.id + (back === '/profile' ? '?from=yours' : '')}
-                      data-testid={'sibling-' + s2.id}
-                      className="tap-target flex items-baseline justify-between gap-3 border-b border-line/60 py-3 transition hover:text-accent"
-                    >
-                      <span className="min-w-0">
-                        <span className="display block text-sm">{s2.title}</span>
-                        <span className="mt-1 block text-xs leading-relaxed text-muted">
-                          {s2.lines[0]?.pt ?? ''}
-                        </span>
-                      </span>
-                      <span aria-hidden className="shrink-0 text-muted">
-                        →
-                      </span>
-                    </Link>
-                  ))}
-              </div>
-            </div>
-          ) : null}
         </>
       ) : null}
 
@@ -442,21 +445,47 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             <p className="text-sm text-muted">{situation.release.ask}</p>
           </div>
           <div className="flex flex-col gap-3">
-            <button
-              type="button"
-              data-testid="errand-done"
-              onClick={() => window.location.assign(back)}
-              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-            >
-              DONE
-            </button>
+            {/*
+              ON TO THE NEXT ROOM, which is what makes the night a night.
+
+              DONE used to leave. That was right while a room was a thing you arrived at
+              from a feed and left again — and it is why nine of Sam's nine finished rooms
+              were the arrival: the product never once suggested there was more.
+
+              The label names the room rather than saying NEXT, so the button is an offer
+              with a subject. The way out is still there underneath, because a sequence
+              somebody cannot leave is a trap rather than a flow.
+            */}
+            {nextRoom ? (
+              <Link
+                href={onward(nextRoom.id)}
+                data-testid="errand-next"
+                className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+              >
+                {nextRoom.title.toUpperCase()}
+              </Link>
+            ) : null}
             {/*
               And the ask, made sendable — the moment it is worth offering.
 
               Right after somebody has said it out loud is when they know it works, and
-              the invitation is the one sentence in a drop that has somewhere to go.
+              the invitation is the one sentence in a drop that has somewhere to go. It is
+              the LAST room, so nothing follows it but this.
             */}
             {isInvite && drop ? <SendInvite situation={situation} drop={drop} /> : null}
+            <button
+              type="button"
+              data-testid="errand-done"
+              onClick={() => window.location.assign(back)}
+              className={
+                'tap-target eyebrow w-full rounded px-5 py-3 text-center ' +
+                (nextRoom || isInvite
+                  ? 'border border-line text-muted'
+                  : 'bg-accent text-accent-ink')
+              }
+            >
+              {nextRoom || isInvite ? 'THAT IS ENOUGH FOR NOW' : 'DONE'}
+            </button>
           </div>
         </div>
       ) : null}
@@ -481,16 +510,24 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             do is claim it was said cold.
           */}
           <div className="flex flex-col gap-3">
+            {/*
+              GOT IT BANKS AND CARRIES ON, rather than banking and leaving.
+
+              Same change as the cold path's DONE and for the same reason: a room that
+              ends by closing the night is why nobody got past the first one. The verb is
+              unchanged — GOT IT still marks the room spent without claiming it was said
+              cold — what changes is where it puts you afterwards.
+            */}
             <button
               type="button"
               data-testid="errand-got"
               onClick={() => {
                 bank(false)
-                window.location.assign(back)
+                window.location.assign(nextRoom ? onward(nextRoom.id) : back)
               }}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
             >
-              GOT IT
+              {nextRoom ? 'GOT IT — ' + nextRoom.title.toUpperCase() : 'GOT IT'}
             </button>
             <button
               type="button"

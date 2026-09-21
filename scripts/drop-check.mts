@@ -452,6 +452,27 @@ console.log('\nthe calendar becoming drops\n')
     askable.length === cards.length,
     askable.length + ' of ' + cards.length + ' nights can be offered to somebody',
   )
+  /*
+    AND IT IS LAST, because the night is a sequence now.
+
+    Errand walks a drop's rooms in authored order and hands each one on to the next, so
+    the room that ends the evening is whichever is written last — and the whole shape
+    depends on that being the ask. Sam: "make it into one flow, ending on teh invite and a
+    minted card to share the invite."
+
+    Authored order is easy to change without noticing what it decides, which is exactly
+    why it is worth an assertion rather than a comment.
+  */
+  const endsOnAsk = cards.filter((c) => {
+    if (c.kind !== 'situation' || !c.drop) return false
+    const last = c.drop.situations[c.drop.situations.length - 1]
+    return Boolean(last) && /(^|_)invite$/.test(last.id)
+  })
+  ok(
+    'and the night ends on it',
+    endsOnAsk.length === cards.length,
+    endsOnAsk.length + ' of ' + cards.length + ' end on the ask',
+  )
 }
 
 console.log('\nand who has read the language\n')
