@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
 import { CopyButton } from '@/components/CopyButton'
 import { Wordmark } from '@/components/Wordmark'
@@ -159,6 +159,25 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
     nothing to send.
   */
   const isInvite = Boolean(drop) && /(^|_)invite$/.test(situation.id)
+
+  /*
+    WHERE THIS ROOM WAS OPENED FROM, because it was always the Club.
+
+    Every exit here — the wordmark, DONE and GOT IT — went to /club, which was true while
+    a room could only be reached from the feed. It is not any more: NIGHTS OUT on Yours
+    lists the evenings somebody has been to, and finishing a room from there dumped them
+    on a screen they had not asked for. Sam: "both the close back to a find teh venue card
+    in club but we shoudl still be in YOURS."
+
+    Read from ?from= rather than from the referrer, which is unreliable and empty on a
+    fresh tab. Restricted to a known list rather than used as a URL: a `from` somebody can
+    type is an open redirect, and this one is on a page anybody can link to.
+  */
+  const [back, setBack] = useState('/club')
+  useEffect(() => {
+    const from = new URLSearchParams(window.location.search).get('from')
+    if (from === 'yours') setBack('/profile')
+  }, [])
   /*
     A FOURTH STAGE, because I SAID IT walked straight out of the door.
 
@@ -219,7 +238,7 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
       className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
     >
       <header className="flex items-center gap-3">
-        <Link href="/club" className="tap-target eyebrow flex shrink-0 items-center gap-1 text-accent">
+        <Link href={back} className="tap-target eyebrow flex shrink-0 items-center gap-1 text-accent">
           <span aria-hidden>←</span>
           <Wordmark mark="club" className="h-5" title="Back to the Club" />
         </Link>
@@ -286,6 +305,55 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
           >
             TAKE IT AWAY
           </button>
+
+          {/*
+            THE REST OF THE NIGHT, because three quarters of a drop had one way in.
+
+            dropsFor hands the feed the drop's FIRST room and puts the other three in a
+            sideways `flow` inside that card. That works in the Club, where a card is a
+            thing you swipe through. It means that anywhere else — a link, a tile on Yours,
+            a bookmark — the other three rooms do not exist: Sam went looking for the
+            invitation he had just been told about and could not find it, because the only
+            route to it was a sideways swipe on a card in a different screen.
+
+            So a drop room lists its siblings. Ordered as the evening is — find it, get a
+            ticket, get there, ask somebody — because that order is the teaching, and the
+            ask is last for the reason the template's own note gives: it is the only one
+            that is not about getting somewhere.
+
+            `from` travels with them, so somebody who came from Yours stays in Yours all
+            the way through.
+          */}
+          {drop && drop.situations.length > 1 ? (
+            <div className="mt-10 flex flex-col gap-3">
+              <div className="flex items-baseline gap-3">
+                <h2 className="eyebrow min-w-0 text-accent">THE REST OF THE NIGHT</h2>
+                <span className="h-px flex-1 bg-line" />
+              </div>
+              <div className="flex flex-col">
+                {drop.situations
+                  .filter((s2) => s2.id !== situation.id)
+                  .map((s2) => (
+                    <Link
+                      key={s2.id}
+                      href={'/errand/' + s2.id + (back === '/profile' ? '?from=yours' : '')}
+                      data-testid={'sibling-' + s2.id}
+                      className="tap-target flex items-baseline justify-between gap-3 border-b border-line/60 py-3 transition hover:text-accent"
+                    >
+                      <span className="min-w-0">
+                        <span className="display block text-sm">{s2.title}</span>
+                        <span className="mt-1 block text-xs leading-relaxed text-muted">
+                          {s2.lines[0]?.pt ?? ''}
+                        </span>
+                      </span>
+                      <span aria-hidden className="shrink-0 text-muted">
+                        →
+                      </span>
+                    </Link>
+                  ))}
+              </div>
+            </div>
+          ) : null}
         </>
       ) : null}
 
@@ -321,14 +389,29 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             </button>
             {/* Muted, because the trade should be visible before it is made. */}
             <p className="text-center text-xs text-muted">Banked as proof.</p>
+            {/*
+              SHOW ME, not OPEN, and it says what it costs.
+
+              The fork is the most consequential tap in the room — one banks a cold claim
+              and the other does not — and it read as two unlabelled doors: "I SAID IT"
+              over a bare "OPEN". Sam: "I cant see teh difference between I said it and
+              open." Both now lead to a screen with the sentence on it, which makes the
+              labels the only thing telling them apart, so the labels have to carry it.
+
+              OPEN was a verb from the grammar this file's own note sets out — OPEN
+              reveals, GOT IT spends, I SAID IT claims — and it is still that verb. What it
+              was missing is the object: open WHAT. "Show me the answer" names the thing,
+              and the line under it names the trade, in the same shape as the one above.
+            */}
             <button
               type="button"
               data-testid="errand-show"
               onClick={() => setStage('done')}
               className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
             >
-              OPEN
+              SHOW ME THE ANSWER
             </button>
+            <p className="text-center text-xs text-muted">Not banked — you read it first.</p>
           </div>
         </div>
       ) : null}
@@ -362,7 +445,7 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             <button
               type="button"
               data-testid="errand-done"
-              onClick={() => window.location.assign('/club')}
+              onClick={() => window.location.assign(back)}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
             >
               DONE
@@ -403,7 +486,7 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
               data-testid="errand-got"
               onClick={() => {
                 bank(false)
-                window.location.assign('/club')
+                window.location.assign(back)
               }}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
             >

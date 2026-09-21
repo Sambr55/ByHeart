@@ -419,6 +419,39 @@ console.log('\nthe calendar becoming drops\n')
     shots.size >= 3,
     shots.size + ' distinct photographs across ' + cards.length + ' drops',
   )
+  /*
+    AND THE WHOLE NIGHT IS REACHABLE FROM ANY OF ITS ROOMS.
+
+    dropsFor hands the feed the drop's FIRST room and puts the other three in a sideways
+    `flow` inside that card, which works in the Club and nowhere else. Anywhere a room is
+    reached directly — a link, a tile on Yours, a bookmark — three quarters of the evening
+    did not exist. Sam went looking for the invitation he had just been told about and
+    could not find it: "Cant see the invite card at all."
+
+    Checked as data rather than as pixels, because the fault was structural: the rooms
+    were always in the drop, and nothing outside the feed ever offered them.
+  */
+  const withSiblings = cards.filter((c) => {
+    if (c.kind !== 'situation' || !c.drop) return false
+    return c.drop.situations.length > 1
+  })
+  ok(
+    'every drop has more than one room to reach',
+    withSiblings.length === cards.length,
+    withSiblings.length + ' of ' + cards.length,
+  )
+  /*
+    And one of them is the ask, which is the room with somewhere to go. Matched the same
+    way Errand matches it, so the two cannot drift.
+  */
+  const askable = cards.filter(
+    (c) => c.kind === 'situation' && c.drop?.situations.some((s2) => /(^|_)invite$/.test(s2.id)),
+  )
+  ok(
+    'and one of them is an invitation',
+    askable.length === cards.length,
+    askable.length + ' of ' + cards.length + ' nights can be offered to somebody',
+  )
 }
 
 console.log('\nand who has read the language\n')

@@ -708,24 +708,48 @@ function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void 
   */
   const drop = card.kind === 'situation' ? card.drop : undefined
   const title = drop ? drop.event : face.title
+  /*
+    A NIGHT OPENS ITS ROOM, not a card about its room.
+
+    Every tile here opened the Club card in an overlay — the same card the feed shows,
+    with THE ROOM as a link inside it. For a saved card that is right: the card IS the
+    thing. For a night somebody has already been to it is a detour through an
+    advertisement for a room they have finished, and it was why the invite could not be
+    found: Sam went looking on Yours and got a card, not the room that mints it.
+
+    `?from=yours` so the room knows where to send them back. Every exit in Errand went to
+    /club, which was true while the feed was the only way in.
+  */
+  if (drop) {
+    return (
+      <Link
+        href={'/errand/' + card.id + '?from=yours'}
+        data-testid={'tile-' + tile.id}
+        className={shell}
+      >
+        {image ? (
+          <Image src={image.src} alt="" aria-hidden fill sizes="(max-width:448px) 50vw, 224px" className="object-cover" />
+        ) : null}
+        <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+        <span className="absolute inset-x-0 bottom-0 px-3 pb-3">
+          <span className="eyebrow mb-1 block text-[0.5rem] text-white/80">{onNight(drop.on)}</span>
+          <span className="display block text-xs leading-tight text-white">{title}</span>
+          <span className="mt-1 block text-[0.6rem] leading-tight text-white/70">{drop.place.name}</span>
+        </span>
+      </Link>
+    )
+  }
   return (
     <button type="button" data-testid={'tile-' + tile.id} onClick={() => onOpen(card)} className={shell}>
       {image ? (
         <Image src={image.src} alt="" aria-hidden fill sizes="(max-width:448px) 50vw, 224px" className="object-cover" />
       ) : null}
       <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+      {/* No drop branch here: a night returns above, as a link to its own room. */}
       <span className="absolute inset-x-0 bottom-0 px-3 pb-3">
-        {drop ? (
-          <span className="eyebrow mb-1 block text-[0.5rem] text-white/80">{onNight(drop.on)}</span>
-        ) : null}
         <span className={'display block text-xs leading-tight text-white ' + (card.kind === 'vocab' ? 'pt' : '')}>
           {title}
         </span>
-        {drop ? (
-          <span className="mt-1 block text-[0.6rem] leading-tight text-white/70">
-            {drop.place.name}
-          </span>
-        ) : null}
       </span>
     </button>
   )
