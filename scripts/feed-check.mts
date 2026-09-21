@@ -14,7 +14,7 @@
 import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_CARD } from '../content/legend'
-import { ROOTS } from '../content/roots'
+import { PIECES, ROOTS } from '../content/roots'
 import { explainerCards, sheetCards, feedFor, vibeCards } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -185,16 +185,37 @@ console.log('\nyours, on the profile\n')
 */
 const prof = await browser.newPage({ viewport: { width: 390, height: 1200 } })
 await prof.goto(BASE + '/profile')
+/*
+  With a couple of words banked, because YOUR WORDS is the learner's inventory now.
+
+  The fixture had `inventory: {}` — right while that section was four editorial cards
+  shown to everybody, and wrong now that it is what this person owns. An empty inventory
+  renders the empty state correctly, so the assertion below was measuring the fixture
+  rather than the screen.
+*/
+const someWords = Object.keys(PIECES).slice(0, 3)
 await prof.evaluate(
-  ([k, pair]) => {
+  ([k, pair, words]) => {
     localStorage.setItem('byheart.pair', JSON.stringify(pair))
     localStorage.setItem(k as string, JSON.stringify({
-      version: 1, deal_accepted_at: '2026-08-01T00:00:00.000Z', proof: [], inventory: {},
+      version: 1, deal_accepted_at: '2026-08-01T00:00:00.000Z', proof: [],
+      inventory: Object.fromEntries(
+        (words as string[]).map((id, i) => [
+          id,
+          {
+            target_id: id,
+            acquired_source: 'the_basics',
+            reinforced_sources: [],
+            latest_state: 'NEW',
+            latest_recall_at: '2026-08-0' + (i + 1) + 'T00:00:00.000Z',
+          },
+        ]),
+      ),
       roots_played: [], sections_completed: ['the_basics'],
       finished_cards: ['lisbon_farmacia'], saved: ['lisbon_cafe'], liked: [],
     }))
   },
-  [KEY, DEFAULT_PAIR] as const,
+  [KEY, DEFAULT_PAIR, someWords] as const,
 )
 await prof.goto(BASE + '/profile')
 await prof.waitForTimeout(1200)
@@ -202,14 +223,44 @@ await prof.waitForTimeout(1200)
 const feedText = await page.evaluate(() => (document.querySelector('main') as HTMLElement).innerText)
 ok('no word cards in the feed', !/WORTH HAVING/.test(feedText))
 
-const tiles = await prof.$$eval('[data-testid^="tile-"]', (els) =>
-  els.map((el) => {
-    const r = el.getBoundingClientRect()
-    return { id: el.getAttribute('data-testid'), ratio: Number((r.width / r.height).toFixed(2)) }
-  }),
-)
+/*
+  THE TILES ARE INSIDE SECTIONS THAT START CLOSED.
+
+  Yours is a concertina now — five rows, one open at a time — so a tile only exists in the
+  DOM once its section is open. That is the design rather than a regression: the screen's
+  first statement is how much there is of each pile, not the first six things in the first
+  one.
+
+  So the check opens the two sections that hold tiles and looks in both. It no longer
+  looks for a vocab tile on this screen at all: WORTH HAVING rendered four editorial cards
+  that were identical for every learner, and the row that replaced it is the learner's own
+  inventory, rendered as lines of Portuguese rather than as 3/4 photographs.
+*/
+const tiles: { id: string | null; ratio: number }[] = []
+for (const section of ['been-through', 'put-aside']) {
+  const toggle = await prof.$('[data-testid="open-' + section + '"]')
+  if (!toggle) continue
+  await toggle.click()
+  await prof.waitForTimeout(500)
+  const found = await prof.$$eval('[data-testid^="tile-"]', (els) =>
+    els.map((el) => {
+      const r = el.getBoundingClientRect()
+      return { id: el.getAttribute('data-testid'), ratio: Number((r.width / r.height).toFixed(2)) }
+    }),
+  )
+  tiles.push(...found)
+  /* Two across is the whole point of a grid: one across is a list wearing a grid's clothes. */
+  if (found.length) {
+    const cols = await prof.evaluate(() => {
+      const g = document.querySelector('[data-testid^="tile-"]')?.parentElement as HTMLElement
+      return g ? getComputedStyle(g).gridTemplateColumns.split(' ').length : 0
+    })
+    ok('two across in ' + section, cols === 2, String(cols))
+  }
+  await toggle.click()
+  await prof.waitForTimeout(300)
+}
 console.log('  ' + tiles.length + ' tiles')
-ok('the words are here instead', tiles.some((t) => t.id?.includes('vocab')))
 ok('what you finished is here', tiles.some((t) => t.id === 'tile-lisbon_farmacia'))
 ok('and what you saved', tiles.some((t) => t.id === 'tile-lisbon_cafe'))
 ok('and the vibes you have been through', tiles.some((t) => t.id === 'tile-the_basics'))
@@ -218,13 +269,30 @@ ok(
   tiles.every((t) => Math.abs(t.ratio - 0.75) < 0.02),
   [...new Set(tiles.map((t) => t.ratio))].join(', '),
 )
-/* Two across is the whole point of a grid: one across is a list wearing a grid's clothes. */
-const cols = await prof.evaluate(() => {
-  const g = document.querySelector('[data-testid^="tile-"]')?.parentElement as HTMLElement
-  return getComputedStyle(g).gridTemplateColumns.split(' ').length
-})
-ok('two across', cols === 2, String(cols))
+/* And the words, which are lines now rather than tiles. */
+const wordsToggle = await prof.$('[data-testid="open-your-words"]')
+if (wordsToggle) {
+  await wordsToggle.click()
+  await prof.waitForTimeout(500)
+}
+ok(
+  'the words are here instead',
+  await prof.evaluate(() => {
+    const s2 = document.querySelector('[data-testid="section-your-words"]')
+    return Boolean(s2 && s2.querySelectorAll('.pt').length > 0)
+  }),
+  'the learner inventory, not the editorial four',
+)
+if (wordsToggle) {
+  await wordsToggle.click()
+  await prof.waitForTimeout(300)
+}
 
+const reopen = await prof.$('[data-testid="open-been-through"]')
+if (reopen) {
+  await reopen.click()
+  await prof.waitForTimeout(500)
+}
 await prof.click('[data-testid="tile-lisbon_farmacia"]')
 await prof.waitForTimeout(900)
 const panes = await prof.evaluate(() => {

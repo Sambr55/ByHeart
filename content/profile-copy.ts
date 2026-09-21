@@ -21,14 +21,42 @@ export const PROFILE_COPY = {
     KEPT with none of their sentences in it, and reasonably concluded the button was broken.
     One word per thing, which is a rule this product already has.
   */
-  saved_label: 'SAVED',
-  saved_note: 'The ones you put by for the night before you need them.',
-  saved_empty: 'Nothing saved. The bookmark on any card puts it here.',
-  asked_label: 'KEPT',
-  asked_note: 'Sentences you asked for, in the words you asked in.',
-  asked_empty: 'Nothing kept yet. Ask for a sentence and press KEEP THIS.',
-  words_label: 'WORTH HAVING',
-  words_note: 'Small words that do a lot of work, each pinned to where you will want it.',
+  /*
+    SAVED AND KEPT WERE ONE PILE ALL ALONG.
+
+    Two sections sat next to each other on Yours — "the ones you put by for the night
+    before you need them" and "sentences you asked for" — and both answer "I wanted this
+    later". The difference was which button had been pressed, which is a fact about the
+    product rather than about the learner: somebody hunting for a thing they set aside had
+    to remember whether they had bookmarked it or asked for it.
+  */
+  aside_label: 'PUT ASIDE',
+  aside_note: 'Cards you bookmarked and sentences you asked for, kept for when you need them.',
+  aside_empty: 'Nothing here yet. The bookmark on any card, or KEEP THIS on a sentence you asked for.',
+  /*
+    THE PROOF, AS A SECTION RATHER THAN A LINK IN A DRAWER.
+
+    It is the one number DUB says is real — what somebody produced with nothing on screen
+    — and it was a row at the foot of the page next to the feedback form. The section
+    shows the last six and the button goes to the card.
+  */
+  cold_label: 'SAID COLD',
+  cold_note: 'Portuguese you produced with nothing on the screen to copy from.',
+  cold_empty: 'Nothing yet. This fills the first time you say something with no cue.',
+  /*
+    AND WHAT REPLACES WORTH HAVING.
+
+    That section rendered four cards from a hardcoded editorial list — identical for every
+    learner, on the screen that is supposed to be theirs — while the real inventory was a
+    link called "Vocab library". One is a shop window and the other is the cupboard, and
+    the shop window had the better position.
+  */
+  words_label: 'YOUR WORDS',
+  words_note: 'Every piece you have banked, the ones you have used most recently first.',
+  words_empty: 'Nothing banked yet. Words arrive as you go through a vibe.',
+  drops_label: 'WHAT IS ON',
+  drops_note: 'Pegged to something really happening, with the language for the night.',
+  drops_empty: 'Nothing on just now. Drops open three weeks before the night itself.',
   /*
     The Legend, as the hero of this screen rather than a row on it.
 

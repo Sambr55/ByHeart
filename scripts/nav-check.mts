@@ -336,8 +336,29 @@ const links = await page.$$eval('main a[href]', (els) => els.map((e) => e.getAtt
   nothing the burger held may become unreachable. What changes is that three of them are
   one hop further, so the check takes the hop.
 */
-for (const href of ['/proof', '/vocab', '/drops', '/legend']) {
-  ok(href + ' is on the profile', links.includes(href))
+ok('/legend is on the profile', links.includes('/legend'))
+/*
+  AND THE THREE ROOMS ARE BEHIND THEIR OWN SECTIONS NOW.
+
+  Proof, the library and the drops were rows in a drawer at the foot of Yours. They are
+  sections in the concertina instead — each shows what is in it and carries a button to
+  the room — so their links are not in the DOM until the section is open, which is the
+  entire point of a concertina and not a regression.
+
+  The promise this block makes is unchanged: nothing the burger held may become
+  unreachable. So the check opens each one and looks, which is also a test that the
+  concertina works at all.
+*/
+for (const [section, href] of [
+  ['said-cold', '/proof'],
+  ['your-words', '/vocab'],
+  ['what-is-on', '/drops'],
+] as const) {
+  const toggle = await page.$('[data-testid="open-' + section + '"]')
+  if (toggle) await toggle.click()
+  await page.waitForTimeout(400)
+  const inside = await page.$$eval('main a[href]', (els) => els.map((e) => e.getAttribute('href')))
+  ok(href + ' is on the profile', inside.includes(href), 'inside ' + section)
 }
 ok('and the cog is the way to the rest', links.includes('/settings'))
 await page.goto(BASE + '/settings')

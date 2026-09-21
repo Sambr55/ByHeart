@@ -9,7 +9,7 @@ import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Friends } from '@/components/Friends'
 import { Wordmark } from '@/components/Wordmark'
-import { askedCards, cardById, cardFace, derivedCards, roomsFor, wordCards, type FeedCard } from '@/content/feed'
+import { askedCards, cardById, cardFace, derivedCards, dropsFor, roomsFor, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
 import { CRATES, PIECES, ROOTS, type CultureFamily } from '@/content/roots'
 import { LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
@@ -29,8 +29,87 @@ import { useLearner } from '@/engine/useLearner'
  * something you already know is there. Tapping opens it full-bleed, and swiping left
  * from there is the same reveal it is everywhere else in the Club.
  */
+/**
+ * The five piles, declared once.
+ *
+ * A table rather than five hand-written call sites, because the whole point of the
+ * concertina is that every section is the same device — and five blocks of JSX that
+ * differ only in their strings is how they stop being.
+ *
+ * WHAT EARNS A ROW: it has to be a pile of Portuguese this person made. That is the line
+ * the cog drew for settings and it is the same line here. BEEN THROUGH is where they have
+ * been, PUT ASIDE is what they set by, SAID COLD is what they produced, YOUR WORDS is
+ * what they own, and DROPS is what is on — the one that is not a possession, kept because
+ * it is the only thing on this screen pegged to a date.
+ *
+ * WORTH HAVING is not here. It rendered four cards from a hardcoded editorial list, the
+ * same four for every learner, while the actual inventory was a link in a drawer. One of
+ * those is a shop window and the other is the cupboard; the cupboard has the row now.
+ */
+const SECTIONS: {
+  id: 'done' | 'aside' | 'cold' | 'words' | 'drops'
+  label: string
+  note: string
+  empty: string
+  count: (tiles: Tile[], learner: ReturnType<typeof useLearner>) => string
+  more?: { href: string; label: string }
+}[] = [
+  {
+    id: 'done',
+    label: PROFILE_COPY.done_label,
+    note: PROFILE_COPY.done_note,
+    empty: PROFILE_COPY.done_empty,
+    count: (t) => String(t.length),
+  },
+  {
+    id: 'aside',
+    label: PROFILE_COPY.aside_label,
+    note: PROFILE_COPY.aside_note,
+    empty: PROFILE_COPY.aside_empty,
+    count: (t) => String(t.length),
+  },
+  {
+    id: 'cold',
+    label: PROFILE_COPY.cold_label,
+    note: PROFILE_COPY.cold_note,
+    empty: PROFILE_COPY.cold_empty,
+    /*
+      The whole pile, not the six shown. A section that says 6 while the proof card says
+      41 is two screens disagreeing about the same fact, which is the failure this repo
+      keeps having to undo.
+    */
+    count: (_t, l) => String((l.proof ?? []).length),
+    more: { href: '/proof', label: 'THE PROOF CARD' },
+  },
+  {
+    id: 'words',
+    label: PROFILE_COPY.words_label,
+    note: PROFILE_COPY.words_note,
+    empty: PROFILE_COPY.words_empty,
+    count: (_t, l) => String(Object.keys(l.inventory ?? {}).filter((id) => PIECES[id]).length),
+    more: { href: '/vocab', label: 'THE WHOLE LIBRARY' },
+  },
+  {
+    id: 'drops',
+    label: PROFILE_COPY.drops_label,
+    note: PROFILE_COPY.drops_note,
+    empty: PROFILE_COPY.drops_empty,
+    count: (t) => String(t.length),
+    more: { href: '/drops', label: 'EVERYTHING ON' },
+  },
+]
+
 type Tile =
   | { kind: 'card'; id: string; card: FeedCard }
+  /*
+    A LINE OF PORTUGUESE, which is not a picture and should not be squeezed into one.
+
+    SAID COLD and YOUR WORDS are the two piles this screen was missing, and both are
+    language rather than cards — a sentence somebody produced, a word they own. Rendering
+    them as 3/4 photo tiles would mean cropping a sentence to fit a shape chosen for
+    vibes, so they get rows instead and the concertina stays the same device either way.
+  */
+  | { kind: 'line'; id: string; pt: string; en: string; note?: string }
   | {
       kind: 'vibe'
       id: string
@@ -45,6 +124,15 @@ export function Profile() {
   const learner = useLearner()
   const [mounted, setMounted] = useState(false)
   const [open, setOpen] = useState<FeedCard | null>(null)
+  /*
+    WHICH SECTION IS OPEN, and null on arrival.
+
+    Not remembered between visits, deliberately. The reason this screen is a concertina is
+    that the breadth is the first thing it should say — restoring whatever was open last
+    time would mean landing back in one pile's depth, which is the state the redesign was
+    built to stop being the default.
+  */
+  const [openSection, setOpenSection] = useState<string | null>(null)
   useEffect(() => setMounted(true), [])
 
   const saved = learner.saved ?? []
@@ -124,9 +212,79 @@ export function Profile() {
 
     return {
       done: [...vibes, ...derivedTiles, ...finished.flatMap((id) => asTile(id) ?? [])],
-      saved: saved.flatMap((id) => asTile(id) ?? []),
-      asked: askedTiles,
-      words: wordCards().map((c): Tile => ({ kind: 'card', id: c.id, card: c })),
+      /*
+        SAVED AND KEPT ARE ONE PILE, because the difference was about which button you
+        pressed rather than about the thing.
+
+        Two sections sat next to each other — "the ones you put by for the night before
+        you need them" and "sentences you asked for" — and both answer "I wanted this
+        later". A learner looking for something they put aside had to remember whether
+        they had bookmarked it or asked for it, which is a fact about the product rather
+        than about them.
+
+        Bookmarks first: they are cards with pictures and they make the grid read.
+      */
+      aside: [...saved.flatMap((id) => asTile(id) ?? []), ...askedTiles],
+      /*
+        WHAT THEY HAVE SAID WITH NOTHING ON SCREEN — the product's own measure of itself.
+
+        This was a row in a drawer at the foot of the page pointing at /proof, which is
+        the one number DUB claims is real. Newest first and six of them: the section is a
+        window onto the proof card rather than a copy of it, and the button at the bottom
+        goes to the whole thing.
+      */
+      cold: [...(learner.proof ?? [])]
+        .reverse()
+        .slice(0, 6)
+        .map(
+          (l, i): Tile => ({
+            kind: 'line',
+            id: 'proof_' + i,
+            pt: l.pt,
+            en: l.en,
+            note: l.clean ? 'first go' : undefined,
+          }),
+        ),
+      /*
+        AND THE WORDS THEY ACTUALLY OWN, which is what WORTH HAVING was pretending to be.
+
+        WORTH HAVING rendered four editorial cards from a hardcoded list — the same four
+        for every learner, on the screen that is supposed to be theirs. The real inventory
+        was a drawer row pointing at the library. So the teaser is gone and the inventory
+        takes its place: these are pieces this person banked, newest first.
+      */
+      words: Object.entries(learner.inventory ?? {})
+        .filter(([id]) => PIECES[id])
+        /*
+          Newest first where there is a date to sort on.
+
+          InventoryItem carries latest_recall_at and no acquisition date — a gap worth
+          naming rather than papering over, since "newest first" is the obvious ordering
+          for a pile somebody is adding to. Items never recalled sort last, which puts the
+          ones they have actually used in front, and that is a defensible second-best.
+        */
+        .sort((a, b) =>
+          String(b[1]?.latest_recall_at ?? '').localeCompare(String(a[1]?.latest_recall_at ?? '')),
+        )
+        .slice(0, 6)
+        .map(
+          ([id]): Tile => ({
+            kind: 'line',
+            id: 'piece_' + id,
+            pt: PIECES[id].target,
+            en: PIECES[id].gloss ?? '',
+          }),
+        ),
+      /*
+        WHAT IS ON, which is the one row here that is not a possession.
+
+        Drops were a link in the drawer and they are the only thing in DUB pegged to a
+        date — a gig three weeks out is a reason to open the app that nothing else on this
+        screen provides. Cards, with their photographs, because that is what they are.
+      */
+      drops: dropsFor(learner.chapter ?? undefined).map(
+        (c): Tile => ({ kind: 'card', id: c.id, card: c }),
+      ),
     }
   }, [
     saved.join('|'),
@@ -134,6 +292,9 @@ export function Profile() {
     sections.join('|'),
     (learner.roots_played ?? []).join('|'),
     learner.inventory,
+    /* SAID COLD reads the proof, so it has to recompute when a sentence lands. */
+    (learner.proof ?? []).length,
+    learner.asked,
   ])
 
   if (open) {
@@ -263,40 +424,38 @@ export function Profile() {
             provenance under it rather than as rivals to it.
           */}
           <LegendHero />
-          <Section
-            label={PROFILE_COPY.done_label}
-            note={PROFILE_COPY.done_note}
-            empty={PROFILE_COPY.done_empty}
-            tiles={sets.done}
-            onOpen={setOpen}
-          />
-          <Section
-            label={PROFILE_COPY.saved_label}
-            note={PROFILE_COPY.saved_note}
-            empty={PROFILE_COPY.saved_empty}
-            tiles={sets.saved}
-            onOpen={setOpen}
-          />
-          <Section
-            label={PROFILE_COPY.asked_label}
-            note={PROFILE_COPY.asked_note}
-            empty={PROFILE_COPY.asked_empty}
-            tiles={sets.asked}
-            onOpen={setOpen}
-          />
-          <Section
-            label={PROFILE_COPY.words_label}
-            note={PROFILE_COPY.words_note}
-            empty=""
-            tiles={sets.words}
-            onOpen={setOpen}
-          />
+          {/*
+            FIVE ROWS, ONE DEVICE, CLOSED ON ARRIVAL.
+
+            Seven things ran down this page in one column — four grids and a drawer of
+            three links — so what somebody owned was a scroll rather than a shape. Closed,
+            these fit under the Legend on one screen, and the page's first statement is
+            how much there is of each.
+
+            Only one open at a time. Two open sections is two depths on screen and the
+            breadth is gone again, which is the thing the concertina exists to protect.
+          */}
+          <div className="flex flex-col">
+            {SECTIONS.map((sec) => (
+              <Section
+                key={sec.id}
+                label={sec.label}
+                note={sec.note}
+                empty={sec.empty}
+                tiles={sets[sec.id]}
+                onOpen={setOpen}
+                open={openSection === sec.id}
+                onToggle={() => setOpenSection(openSection === sec.id ? null : sec.id)}
+                count={sec.count(sets[sec.id], learner)}
+                more={sec.more}
+              />
+            ))}
+          </div>
           {/*
             Above More rather than below it, because a friend is a thing you have and More
             is the drawer for everything else.
           */}
           <Friends />
-          <More />
           {/*
             The theme, the sound and the purpose used to sit here, at the foot of the list.
 
@@ -320,38 +479,108 @@ function Section({
   empty,
   tiles,
   onOpen,
+  open,
+  onToggle,
+  count,
+  more,
 }: {
   label: string
   note: string
   empty: string
   tiles: Tile[]
   onOpen: (c: FeedCard) => void
+  open: boolean
+  onToggle: () => void
+  /*
+    What the closed row says on its right.
+
+    A number for most of them, because "how much have I got" is the question. Passed in
+    rather than read off `tiles.length`, since two of these summarise a room holding more
+    than the six tiles shown — the count has to be the truth about the pile, not about
+    the preview of it.
+  */
+  count: string
+  /** The room this section is the front of, where one exists. */
+  more?: { href: string; label: string }
 }) {
+  const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '-')
   return (
     /*
       Named so a check can ask whether any section is on screen at all. Yours is empty
       before the Club, and "empty" is the absence of these — which is invisible to a text
       search that matches the explainer's own prose.
     */
-    <section
-      data-testid={'section-' + label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
-      className="flex flex-col gap-3"
-    >
-      <div className="flex items-baseline gap-3">
-        <h2 className="eyebrow min-w-0 text-accent">{label}</h2>
-        <span className="h-px flex-1 bg-line" />
-      </div>
-      <p className="text-xs leading-relaxed text-muted">{note}</p>
-      {!tiles.length ? (
-        <p className="rounded border border-line bg-bg-elev px-4 py-3 text-sm text-muted">{empty}</p>
-      ) : (
-        /* Two across, three-by-four — the shape of something you scan rather than read. */
-        <div className="grid grid-cols-2 gap-3">
-          {tiles.map((t) => (
-            <TileView key={t.kind + t.id} tile={t} onOpen={onOpen} />
-          ))}
+    <section data-testid={'section-' + id} className="flex flex-col">
+      {/*
+        THE ROW IS THE WHOLE DEVICE, and every section on this screen uses it.
+
+        Sam: "lets have a big clean up of the YOURS section... one device mechanice for
+        all sectios that survice, probably using concertina to open close so we can see
+        breath first off without seeing depth."
+
+        Four grids and three links used to run down this page in one column — so the shape
+        of what somebody owned was something you scrolled past rather than saw. Closed,
+        the five rows fit one screen, and the first thing the page says is how much there
+        is of each rather than the first six things in the first pile.
+
+        THE COUNT IS THE POINT OF THE CLOSED STATE. A row that said only BEEN THROUGH
+        would be a worse link; a row that says 12 is an answer to the question somebody
+        opened this screen with.
+      */}
+      <button
+        type="button"
+        data-testid={'open-' + id}
+        aria-expanded={open}
+        onClick={onToggle}
+        className="tap-target flex w-full items-center gap-3 border-b border-line py-4 text-left transition"
+      >
+        <span
+          aria-hidden
+          className={
+            'shrink-0 text-muted transition-transform duration-[260ms] ' +
+            (open ? 'rotate-90' : '')
+          }
+        >
+          ▸
+        </span>
+        <span className="eyebrow min-w-0 flex-1 text-accent">{label}</span>
+        <span className="shrink-0 tabular-nums text-sm text-muted">{count}</span>
+      </button>
+
+      {open ? (
+        <div className="flex flex-col gap-3 py-6">
+          <p className="text-xs leading-relaxed text-muted">{note}</p>
+          {!tiles.length ? (
+            <p className="rounded border border-line bg-bg-elev px-4 py-3 text-sm text-muted">
+              {empty}
+            </p>
+          ) : (
+            /* Two across, three-by-four — the shape of something you scan rather than read. */
+            <div className="grid grid-cols-2 gap-3">
+              {tiles.map((t) => (
+                <TileView key={t.kind + t.id} tile={t} onOpen={onOpen} />
+              ))}
+            </div>
+          )}
+          {/*
+            And the way into the room this section summarises, where there is one.
+
+            SAID COLD and YOUR WORDS have whole screens of their own — the proof card and
+            the library — which used to be rows in a drawer at the foot of the page, miles
+            from the thing they belong to. A section that shows six of sixty needs a door
+            at the bottom of it rather than a link somewhere else.
+          */}
+          {more ? (
+            <Link
+              href={more.href}
+              data-testid={'more-' + id}
+              className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-fg transition hover:border-accent hover:text-accent"
+            >
+              {more.label}
+            </Link>
+          ) : null}
         </div>
-      )}
+      ) : null}
     </section>
   )
 }
@@ -359,6 +588,23 @@ function Section({
 function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void }) {
   const shell =
     'tap-target relative block aspect-[3/4] w-full overflow-hidden rounded border border-line text-left'
+
+  /*
+    The Portuguese at the size reserved for it, and the English under it small.
+
+    Same hierarchy the whole product uses for produced language: what the learner can say
+    is the thing on the card, and the gloss is the footnote. Not a link — these are a
+    record rather than a route, and the room each section belongs to is one button below.
+  */
+  if (tile.kind === 'line') {
+    return (
+      <div className="col-span-2 rounded border border-line bg-bg-elev px-4 py-3">
+        <p className="pt text-base text-accent">{tile.pt}</p>
+        <p className="mt-1 text-xs text-muted">{tile.en}</p>
+        {tile.note ? <p className="mt-1 text-[0.65rem] uppercase tracking-wider text-muted">{tile.note}</p> : null}
+      </div>
+    )
+  }
 
   if (tile.kind === 'vibe') {
     /*
@@ -754,45 +1000,13 @@ function LegendHero() {
   )
 }
 
-/**
- * What the burger was holding.
- *
- * A flat list of eleven where Dub Club and the feedback form were peers. They are not
- * peers — most of these answer "what have I got", and that question has a screen now.
- *
- * AND THE THREE THAT ARE NOT ABOUT LANGUAGE HAVE GONE TO SETTINGS. Membership, the
- * account and feedback were rows in this list, so the drawer under somebody's Legend held
- * both "every piece you have kept" and "cancel your subscription" as equals. What is left
- * is three piles of Portuguese, which is what this screen is for — see components/Settings.
- */
-const MORE = [
-  { href: '/proof', label: 'Proof', hint: 'The sentences you can say cold' },
-  { href: '/vocab', label: 'Vocab library', hint: 'Every piece you have kept' },
-  { href: '/drops', label: 'Drops', hint: 'Pegged to something really happening' },
-]
+/*
+  THE DRAWER IS GONE, because all three of its rows are sections now.
 
-function More() {
-  return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-baseline gap-3">
-        <h2 className="eyebrow min-w-0 text-accent">{PROFILE_COPY.more_label}</h2>
-        <span className="h-px flex-1 bg-line" />
-      </div>
-      <div className="flex flex-col">
-        {MORE.map((m) => (
-          <Link
-            key={m.href}
-            href={m.href}
-            className="tap-target flex items-baseline justify-between gap-3 border-b border-line/60 py-3 transition hover:text-accent"
-          >
-            <span className="min-w-0">
-              <span className="display block text-sm">{m.label}</span>
-              <span className="mt-1 block text-xs leading-relaxed text-muted">{m.hint}</span>
-            </span>
-            <span aria-hidden className="shrink-0 text-muted">→</span>
-          </Link>
-        ))}
-      </div>
-    </section>
-  )
-}
+  It held Proof, the vocab library and the drops — three piles of Portuguese reached
+  through a list at the foot of the page, under the grids of the things they belonged
+  with. Membership, the account and feedback left for the cog; these three came up into
+  the concertina, where a learner can see how much is in each before deciding to look.
+
+  Nothing is less reachable: each section carries a button to the room it summarises.
+*/
