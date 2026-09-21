@@ -997,6 +997,20 @@ function Picker() {
     sectionsCompleted: learner.sections_completed ?? [],
   })
 
+  /*
+    The same offer LegendPayoff makes, on the screen people come back to.
+
+    Identical condition on purpose — two screens asking one question, and `save_prompt`
+    means answering it on either retires it on both.
+  */
+  const shelfSaveOffer =
+    mounted &&
+    access.signInReady &&
+    !access.signedIn &&
+    shelfLegend.toGo === 0 &&
+    shelfLegend.vibesDone >= 2 &&
+    learner.save_prompt === 'unseen'
+
   const facts = (f: Crate): Facts => {
     const all = ROOTS_BY_FAMILY[f.id] ?? []
     const finished = all.length > 0 && all.every((r) => playedIds.has(r.root_id))
@@ -1173,6 +1187,47 @@ function Picker() {
                 Math.max(0, shelfLegend.vibesNeeded - shelfLegend.vibesDone),
               )}
         </p>
+      ) : null}
+      {/*
+        AND THE SAVE OFFER, HERE TOO, because one screen was not enough.
+
+        It lives in LegendPayoff, on the section-complete screen — which somebody can pass
+        through quickly, and which returns null for reasons that have nothing to do with
+        saving work. Sam finished a third vibe and never saw it.
+
+        The shelf is the screen a learner returns to between vibes, so an offer here
+        cannot be outrun by finishing one. Same condition, same once-only state: whichever
+        screen puts the question, answering it anywhere retires it everywhere.
+      */}
+      {shelfSaveOffer ? (
+        <div
+          data-testid="shelf-save"
+          className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/5 px-4 py-3"
+        >
+          <p className="text-sm font-semibold">{LEGEND_COPY.save_head}</p>
+          <p className="text-xs leading-relaxed text-muted">{LEGEND_COPY.save_body}</p>
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/signin"
+              data-testid="shelf-save-go"
+              onClick={() => track('save_offered', { at: 'shelf', took: true })}
+              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+            >
+              {LEGEND_COPY.save_cta}
+            </Link>
+            <button
+              type="button"
+              data-testid="shelf-save-skip"
+              onClick={() => {
+                setSaveDeclined()
+                track('save_offered', { at: 'shelf', took: false })
+              }}
+              className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted"
+            >
+              {LEGEND_COPY.save_skip}
+            </button>
+          </div>
+        </div>
       ) : null}
       {/*
         The ladder is quiet now.
@@ -3564,20 +3619,34 @@ function LegendPayoff() {
   const toGo = status.toGo > 0 ? status.toGo : vibesLeft
 
   /*
-    ONE VIBE OUT, ASKED ONCE, AND ONLY OF SOMEBODY WHO COULD LOSE SOMETHING.
+    A FLOOR, NOT A WINDOW — and the difference is a bug Sam caught by living it.
 
-    All four conditions earn their place. The basics done and exactly one chosen vibe left
-    is the moment Sam asked for — near enough the door that keeping the work is obviously
-    worth a tap. `save_prompt === 'unseen'` makes it once-only. And `!signedIn` because
-    somebody whose work is already off the device has nothing to be warned about; offering
-    anyway would be the product not knowing its own state.
+    This was `vibesLeft === 1`: the offer existed only while exactly one chosen vibe
+    remained. Sam finished a third and asked "shouldn't I have had the soft gateway?" He
+    should. The window had closed behind him, and a prompt that exists for one vibe and
+    then never again is a prompt most people never see — measured across the five states,
+    it fired on exactly one of them.
+
+    Two compounding reasons it was missable, and only one was the count. It renders inside
+    LegendPayoff, which appears on the section-complete screen and returns null for things
+    that have nothing to do with saving work: a declined Legend prompt, or a card already
+    built. So a single skipped screen skipped the offer for good.
+
+    So: once the basics are done and two chosen vibes are finished, it keeps asking until
+    it is answered. Sam: "fire it after basics + 2 vibes completed." Still once-only —
+    `save_prompt` records the answer and NOT NOW is an answer — and it still never blocks.
+    What changes is that finishing a vibe quickly no longer costs somebody the offer.
+
+    `!signedIn` because somebody whose work is already off the device has nothing to be
+    warned about, and `signInReady` because where accounts are not configured there is no
+    link to send and the button could not work.
   */
   const saveOffer =
     mounted &&
     access.signInReady &&
     !access.signedIn &&
     status.toGo === 0 &&
-    vibesLeft === 1 &&
+    status.vibesDone >= 2 &&
     learner.save_prompt === 'unseen'
   const offering = usable && learner.legend_prompt === 'unseen'
   /** The hook is the questions themselves, not a count of them. */
