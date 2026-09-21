@@ -3666,7 +3666,10 @@ function CanSay() {
         genuinely empty do not appear (Shelves drops an empty list).
       */}
       <div className="flex flex-col gap-3">
-        <p className="text-xs uppercase tracking-wider text-muted">Your Portuguese</p>
+        {/* "Yours" rather than the language by name: the shelves are what this learner
+            owns, and naming the language here would be the last hardcoded assumption in
+            a screen they reach after choosing one. */}
+        <p className="text-xs uppercase tracking-wider text-muted">Yours so far</p>
         <Shelves owned={new Set(owned)} pool={new Set(owned)} />
       </div>
 
