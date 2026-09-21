@@ -3227,7 +3227,7 @@ function SaveStep() {
 }
 
 function SectionComplete() {
-  const { finishSection, owned, state } = useJourney()
+  const { chooseFamily, finishSection, owned, state } = useJourney()
   /*
     The section is finished because this screen exists, not because a button was pressed.
 
@@ -3520,12 +3520,47 @@ function SectionComplete() {
       </div>
 
       <Dock>
+        {/*
+          MORE BASICS, WHILE THE BASICS ARE THE DOOR.
+
+          The only primary action here was ANOTHER VIBE, which points away from the one
+          vibe that opens the Legend — so the screen said "2 of 3 basics sessions, 1 to
+          go" directly above a button offering something else, and the learner had to
+          leave, find the shelf and pick the basics again to do the thing the sentence
+          had just asked for.
+
+          Sam: "yes add more basics to complete your legend."
+
+          It takes the primary slot only while the door is shut and only on the basics;
+          the moment the doorway is finished this vanishes and ANOTHER VIBE is the
+          headline action again, which is correct — by then the vibes ARE the remaining
+          half of the door.
+
+          chooseFamily rather than finishSection: the sitting was already banked when
+          this screen rendered (see the note at the top of this component), so this is
+          simply opening the same vibe again — the identical call the shelf makes.
+        */}
+        {isDoorway && legend.toGo > 0 ? (
+          <button
+            type="button"
+            data-testid="more-basics"
+            onClick={() => chooseFamily(DOORWAY)}
+            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+          >
+            MORE BASICS
+          </button>
+        ) : null}
         {remaining.length ? (
           <button
             type="button"
             data-testid="another-vibe"
             onClick={() => finishSection('another')}
-            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+            className={
+              'tap-target eyebrow w-full rounded px-5 py-3 ' +
+              (isDoorway && legend.toGo > 0
+                ? 'border border-line text-fg'
+                : 'bg-accent text-accent-ink')
+            }
           >
             ANOTHER VIBE
           </button>
