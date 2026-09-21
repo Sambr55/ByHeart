@@ -15,7 +15,7 @@ import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_CARD } from '../content/legend'
 import { ROOTS } from '../content/roots'
-import { explainerCards, feedFor, vibeCards } from '../content/feed'
+import { explainerCards, sheetCards, feedFor, vibeCards } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -79,7 +79,17 @@ const real =
     isMember: true,
     usedTranslator: false,
     actedOnACard: false,
-  }).length
+  }).length +
+  /*
+    And the cheat sheets, for the reason the block above gives.
+
+    Nine closed sets woven in on a beat of five. Counted from sheetCards rather than
+    written as 9, because a literal is right today and silently wrong the next time a set
+    is added — which is precisely what happened to this check when the vibes arrived.
+
+    Nothing dismissed: this learner is seeded fresh, so every sheet is offered.
+  */
+  sheetCards([]).length
 const feed = await page.$('[data-testid="feed"]')
 ok('the feed is there', Boolean(feed))
 

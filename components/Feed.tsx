@@ -14,7 +14,7 @@ import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { INTRO_DEMO_AFTER, INTRO_SETUP_AFTER, type IntroCard } from '@/content/intro'
-import { COLLISIONS, CRATES, PIECES, ROOTS } from '@/content/roots'
+import { COLLISIONS, CRATES, PIECES, ROOTS, setPieces } from '@/content/roots'
 import { cardFor } from '@/content/legend'
 import { mintShowing } from '@/engine/showing'
 import {
@@ -29,6 +29,8 @@ import {
   introCards,
   legendCards,
   setUpCard,
+  sheetCards,
+  sheetOwned,
   vibeCards,
   vibeCard,
   feedFor,
@@ -353,16 +355,46 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       learner.purpose ?? null,
     )
 
+    /*
+      THE CHEAT SHEETS, on a beat of their own.
+
+      Sam asked for these "randomly into the Club feed", and a fixed beat is the version of
+      that which cannot go wrong. Every other rhythm here is deliberate — explainers every
+      two, vibes every three — so genuine randomness would be the one thing in the feed
+      that could drop two sheets together or bury them all past the fold. Five is the
+      first number that shares no factor with either of the others, which is what stops a
+      sheet ever landing on the same card as an explainer or a vibe.
+
+      Dismissed sheets never enter: NOT FOR ME writes finished_cards, which the feed
+      already honours everywhere else.
+    */
+    const sheets = sheetCards(learner.finished_cards ?? [])
+
     const withExplainers: FeedCard[] = []
     const rest = [...open.slice(0, AFTER), ...legend, ...mine, ...open.slice(AFTER)]
     let e = 0
     let v = 0
+    let sh = 0
     rest.forEach((card, i) => {
       withExplainers.push(card)
       if (e < explainers.length && i % 2 === 0) withExplainers.push(explainers[e++])
       else if (v < vibes.length && i % 3 === 2) withExplainers.push(vibes[v++])
+      /*
+        The sheet beat is its OWN `if`, not another `else if`.
+
+        Chained, it only fired on the cards the first two had already declined — which on
+        a 2-and-3 rhythm is rare enough that five of the nine sheets fell off the end into
+        the tail instead of being woven in. Measured: 0, 8, 16, 30, 38, then 53, 54, 55,
+        56, 57 all in a row, which is the opposite of interleaved.
+
+        Its own condition instead. Five shares no factor with two or three, so a sheet can
+        land on the same index as one of the others — and should: two cards after one
+        original card is what every other pairing here already does, and it beats a run of
+        nine sheets at the bottom of the feed.
+      */
+      if (sh < sheets.length && i % 5 === 4) withExplainers.push(sheets[sh++])
     })
-    return [...withExplainers, ...explainers.slice(e), ...vibes.slice(v)]
+    return [...withExplainers, ...explainers.slice(e), ...vibes.slice(v), ...sheets.slice(sh)]
   }, [
     mounted,
     preview,
@@ -2204,6 +2236,8 @@ export function Card({
               <IntroPane card={card} />
             ) : card.kind === 'legend' ? (
               <LegendAsk card={card} />
+            ) : card.kind === 'sheet' ? (
+              <Sheet card={card} onDone={() => onDone?.()} />
             ) : (
               <Word card={card} />
             )}
@@ -3127,6 +3161,171 @@ function Asked({ card }: { card: Extract<FeedCard, { kind: 'asked' }> }) {
       <p className="mt-3 text-xs text-muted">
         {days === 0 ? 'You looked this up today.' : days === 1 ? 'You looked this up yesterday.' : 'You looked this up ' + days + ' days ago.'}
       </p>
+    </div>
+  )
+}
+
+/**
+ * A CHEAT SHEET: the whole group, and what a person can do about it.
+ *
+ * The three actions come out of what a sheet IS. It is a reference rather than a lesson,
+ * so nothing here teaches and nothing here scores:
+ *
+ *   TEST ME      the say-it-cold the product already uses everywhere. Each member in
+ *                English, you say it out loud, tap to check. No marks — DUB does not
+ *                score recall anywhere else and a sheet is not where that starts.
+ *   KEEP IT      saves the card, the same as any other card. It goes to the profile and
+ *                can be come back to. It does NOT grant the words: ownership is earned by
+ *                saying things, and a tap that quietly filled the inventory would make
+ *                every count in the product a lie.
+ *   NOT FOR ME   spends the card, using the same finished_cards the rest of the feed
+ *                already honours. Gone, and it stays gone.
+ *
+ * WHAT IS OWNED IS MARKED, which is the argument for showing a group at all. Somebody who
+ * has met cinco and sete sees two ticks against ten members and knows what is left —
+ * content/roots.ts: "the same four pieces read as four of ten with six to come".
+ */
+function Sheet({ card, onDone }: {
+  card: Extract<FeedCard, { kind: 'sheet' }>
+  onDone?: () => void
+}) {
+  const learner = useLearner()
+  const owned = useMemo(
+    () => sheetOwned(card.set, learner.inventory ?? {}),
+    [card.set, learner.inventory],
+  )
+  const covered = useMemo(() => setPieces(card.set), [card.set])
+  /* Null until they ask to be tested; then the index of the member being asked. */
+  const [asking, setAsking] = useState<number | null>(null)
+  const [shown, setShown] = useState(false)
+
+  const members = card.set.members
+
+  if (asking !== null) {
+    const member = members[asking]
+    const pieceId = covered.get(member)
+    const piece = pieceId ? PIECES[pieceId] : undefined
+    const last = asking === members.length - 1
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
+          <p className="eyebrow text-muted">
+            {asking + 1} of {members.length}
+          </p>
+          {/*
+            The English is the prompt, because cold means cold. Asking in Portuguese would
+            be a reading test, which is the one thing this is not.
+          */}
+          {/*
+            The English where DUB teaches the member, the Portuguese where it does not.
+
+            A set is deliberately allowed to list members the product has no piece for —
+            that is the gap, and it is the content brief. Asking "say the English for a
+            word we have never glossed" would be asking somebody to invent one, so an
+            untaught member is shown as itself and read aloud instead. Still worth doing:
+            saying "sempre em frente" cold is the thing that makes it stick.
+          */}
+          <h2 className="display text-balance text-2xl">
+            {piece?.gloss ?? member}
+          </h2>
+          <p className="text-sm leading-relaxed text-muted">
+            {piece?.gloss ? 'Say it out loud, then check.' : 'Say it out loud, then hear it.'}
+          </p>
+        </div>
+
+        {shown ? (
+          <div className="flex items-center gap-3">
+            <AudioButton slug={slugFor(member)} text={member} size="sm" />
+            <span className="pt display min-w-0 flex-1 text-2xl text-accent">{member}</span>
+            <CopyButton text={member} size="sm" />
+          </div>
+        ) : null}
+
+        <button
+          type="button"
+          data-testid={shown ? 'sheet-next' : 'sheet-check'}
+          onClick={() => {
+            if (!shown) { setShown(true); return }
+            if (last) { setAsking(null); setShown(false); return }
+            setAsking(asking + 1)
+            setShown(false)
+          }}
+          className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+        >
+          {!shown ? 'CHECK' : last ? 'DONE' : 'NEXT'}
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-muted">CHEAT SHEET</p>
+        <h2 className="display text-balance text-2xl">{card.set.label}</h2>
+        {owned.size ? (
+          <p className="text-sm leading-relaxed text-muted">
+            You already have {owned.size} of these {members.length}.
+          </p>
+        ) : null}
+      </div>
+
+      <ul className="flex flex-col gap-3">
+        {members.map((m) => {
+          const pieceId = covered.get(m)
+          const piece = pieceId ? PIECES[pieceId] : undefined
+          return (
+            <li key={m} className="flex items-center gap-3">
+              <AudioButton slug={slugFor(m)} text={m} size="sm" />
+              <span className="min-w-0 flex-1">
+                <span className="pt display block text-lg text-accent">{m}</span>
+                {piece?.gloss ? (
+                  <span className="block text-xs text-muted">{piece.gloss}</span>
+                ) : null}
+              </span>
+              {/*
+                A tick on what they own, and nothing at all on what they do not.
+
+                An "unlearned" marker would turn a reference into a scorecard, and the
+                untaught members are not a failure — they are the shape of the group, which
+                is the reason it is shown whole.
+              */}
+              {owned.has(m) ? (
+                <span aria-label="you have this" className="shrink-0 text-accent">
+                  ✓
+                </span>
+              ) : null}
+            </li>
+          )
+        })}
+      </ul>
+
+      <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          data-testid="sheet-test"
+          onClick={() => {
+            setAsking(0)
+            setShown(false)
+            track('sheet_tested', { sheet: card.set.id, members: members.length })
+          }}
+          className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+        >
+          TEST ME
+        </button>
+        <button
+          type="button"
+          data-testid="sheet-dismiss"
+          onClick={() => {
+            rememberFinishedCard(card.id)
+            track('sheet_dismissed', { sheet: card.set.id })
+            onDone?.()
+          }}
+          className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted"
+        >
+          NOT FOR ME
+        </button>
+      </div>
     </div>
   )
 }

@@ -146,7 +146,28 @@ export interface Extract {
   set?: SetId
 }
 
-export type SetId = 'numbers_1_10' | 'weekdays' | 'greetings' | 'yes_no' | 'courtesy'
+export type SetId =
+  | 'numbers_1_10'
+  | 'weekdays'
+  | 'greetings'
+  | 'yes_no'
+  | 'courtesy'
+  /*
+    THE FOUR THE CHEAT SHEETS ADDED, and they are sets rather than a new kind of content.
+
+    A cheat sheet is a closed group of up to ten words shown as a group — which is exactly
+    what a WordSet already is, down to the rule that the members DUB does not teach stay
+    visible as the shape of the thing. The only thing missing was somewhere to show them
+    other than the library, which is behind a tab.
+
+    So these are declared here beside the five that existed, the feed renders any of them,
+    and the library keeps working unchanged. Two lists of the same words drifting apart was
+    the alternative.
+  */
+  | 'pronouns'
+  | 'action_words'
+  | 'around_the_house'
+  | 'directions'
 
 export interface WordSet {
   id: SetId
@@ -214,6 +235,97 @@ export const SETS: WordSet[] = [
       'sexta',
       'sábado',
       'domingo',
+    ],
+    partial: true,
+  },
+  /*
+    PEOPLE, FIRST, because every sentence needs one.
+
+    Eight rather than ten: European Portuguese has no separate "you all" in ordinary
+    speech — vocês covers it — and inventing a ninth and tenth to reach a round number
+    would be padding a closed set, which is the one thing a set may not do.
+  */
+  {
+    id: 'pronouns',
+    label: 'Who you are talking about',
+    shelf: 'people',
+    members: ['eu', 'tu', 'você', 'ele', 'ela', 'nós', 'eles', 'elas'],
+    partial: true,
+  },
+  /*
+    THE TEN VERBS A DAY IS MADE OF, in the infinitive.
+
+    Infinitives rather than conjugations on purpose: a sheet is a reference, and "ser / to
+    be" is a thing somebody can hold. The conjugating is what the vibes teach, and the
+    Doing shelf already gathers forms under the word they are a form of.
+  */
+  {
+    id: 'action_words',
+    label: 'The ten verbs you cannot avoid',
+    shelf: 'doing',
+    members: [
+      'ser',
+      'estar',
+      'ter',
+      'ir',
+      'querer',
+      'poder',
+      'fazer',
+      'dizer',
+      'saber',
+      'dar',
+    ],
+    partial: true,
+  },
+  /*
+    THE THINGS IN THE ROOM, which is the set with the least glamour and the most use.
+
+    Chosen for what is pointed at rather than what is picturesque: a table, a chair, a
+    glass. The gender is the actual lesson here and the Things shelf carries it, so the
+    sheet's job is to put the ten in one place rather than to teach them one at a time
+    alphabetised among unrelated words.
+  */
+  {
+    id: 'around_the_house',
+    label: 'The things in the room',
+    shelf: 'things',
+    members: [
+      'a mesa',
+      'a cadeira',
+      'o copo',
+      'a porta',
+      'a janela',
+      'a chave',
+      'o carro',
+      'a árvore',
+      'o cão',
+      'o gato',
+    ],
+    partial: true,
+  },
+  /*
+    HOW TO BE TOLD WHERE TO GO, which is the one set here that is phrases rather than words.
+
+    A direction is useless as a noun: "left" alone does not get anybody anywhere, and the
+    thing a person actually has to recognise is "vire à esquerda" coming at them at speed.
+    So the members are the instructions themselves, which is why this set sits on the
+    small_words shelf rather than things — none of these is a thing.
+  */
+  {
+    id: 'directions',
+    label: 'Being told where to go',
+    shelf: 'small_words',
+    members: [
+      'à esquerda',
+      'à direita',
+      'sempre em frente',
+      'vire',
+      'siga',
+      'atravesse',
+      'no fim da rua',
+      'à sua frente',
+      'ao lado de',
+      'em frente a',
     ],
     partial: true,
   },

@@ -191,6 +191,16 @@ export type EventName =
     honest demand signal the product collects.
   */
   | 'language_chosen'
+  /*
+    Cheat sheets, and the two numbers that decide whether they belong in the feed at all.
+
+    `sheet_tested` is interest — somebody studied a group and chose to be asked. It is not
+    a score and never will be: DUB does not mark recall anywhere else. `sheet_dismissed`
+    is the honest opposite, and it is the more useful of the two — a sheet nobody wants is
+    a card taking up a slot in a feed, and the only way to know is to let people say so.
+  */
+  | 'sheet_tested'
+  | 'sheet_dismissed'
   /* The one Club room given away before anything was earned, and which one it was. */
   | 'room_tasted'
 

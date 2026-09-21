@@ -1,6 +1,6 @@
 import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
 import { generatedDrops } from '@/content/generated'
-import { DROP_LEAD_DAYS } from '@/content/roots'
+import { DROP_LEAD_DAYS, SETS, setPieces, type WordSet } from '@/content/roots'
 import { SITUATIONS, isCurrent, situationById, type Purpose, type Situation } from '@/content/situations'
 import { DROPS, type Drop } from '@/content/drops'
 import { explainersFor, type Explainer } from '@/content/explainers'
@@ -145,6 +145,26 @@ export type FeedCard =
     process. It gates an action, never the scroll — see components/SetUp.tsx.
   */
   | { kind: 'setup'; id: string; image: { src: string; alt: string } }
+  /*
+    A CHEAT SHEET: a closed group, shown whole, in the place people actually are.
+
+    Everything else in this feed teaches one thing at a time out of a line somebody
+    recognises, which is the product's whole argument and is right. It leaves a gap it
+    cannot fill: a learner who has met cinco in one vibe and sete in another owns two
+    numbers and has no idea there are ten. content/roots.ts says this better than I can —
+    the library "was filing a closed set as loose vocabulary", and "shown as a group, the
+    same four pieces read as four of ten with six to come".
+
+    SETS already solved that, and only the vocab tab ever showed it. This card is that
+    data in the feed.
+
+    The sheet is a REFERENCE rather than a lesson, which is what makes the three actions
+    the right three: study it, test yourself on it cold, keep it, or say you do not want
+    it. Nothing here claims the words are learned — saving bookmarks the sheet, and the
+    test is the existing say-it-cold, so ownership is still earned the way it is
+    everywhere else.
+  */
+  | { kind: 'sheet'; id: string; set: WordSet; image: { src: string; alt: string } }
   | {
       kind: 'vibe'
       id: string
@@ -653,6 +673,53 @@ export function explainerCards(state: {
   }))
 }
 
+/*
+  THE CHEAT SHEETS, which are the sets DUB already declares.
+
+  Every one is `partial` and will stay that way for a while: these are closed groups where
+  the product teaches some members and not others, and the untaught ones are deliberately
+  still listed. That is the whole argument for showing a group rather than a word —
+  somebody who owns cinco and sete should be able to see they own two of ten.
+
+  WHICH SHEETS APPEAR IS NOT A CONTENT DECISION HERE. A sheet a learner has said no to is
+  gone, which the feed passes in; everything else is offered. Filtering by "have they
+  learned enough for this yet" was tempting and is wrong — a reference is most useful to
+  the person who knows least, and a sheet is not a lesson they can fail.
+
+  The grounds are textures rather than photographs of places, because a sheet is not about
+  anywhere. Azulejo for the closed sets that feel like tiling — numbers, pronouns — and the
+  calçada for directions, which is literally the surface you are being told to walk along.
+*/
+const SHEET_GROUND: Record<string, keyof typeof TEXTURE> = {
+  numbers_1_10: 'azulejo',
+  pronouns: 'azulejo',
+  action_words: 'wall',
+  around_the_house: 'cafe-counter',
+  directions: 'calcada',
+  greetings: 'wall',
+  yes_no: 'azulejo',
+  courtesy: 'wall',
+  weekdays: 'calcada',
+}
+
+export function sheetCards(dismissed: string[] = []): FeedCard[] {
+  return SETS.filter((set) => !dismissed.includes('sheet_' + set.id)).map((set) => ({
+    kind: 'sheet' as const,
+    id: 'sheet_' + set.id,
+    set,
+    image: TEXTURE[SHEET_GROUND[set.id] ?? 'azulejo'],
+  }))
+}
+
+/** How many of a sheet's members the learner already owns, and which. */
+export function sheetOwned(set: WordSet, inventory: Record<string, unknown>): Set<string> {
+  const owned = new Set<string>()
+  for (const [member, pieceId] of setPieces(set)) {
+    if (inventory[pieceId]) owned.add(member)
+  }
+  return owned
+}
+
 /** The words, for the profile. Same card shape, different place to meet it. */
 export function wordCards(): FeedCard[] {
   return VOCAB.flatMap((v): FeedCard[] => {
@@ -838,6 +905,24 @@ export function cardFace(card: FeedCard): {
         card.toGo === 1
           ? 'The last one on your card. Answer it and the Legend is yours.'
           : card.toGo + ' of your seven still to go. This is the next one.',
+      image: card.image,
+    }
+  }
+  /*
+    A SHEET NAMES THE GROUP, not one of its members.
+
+    Every other card's face is one thing — a room, a word, a question. A sheet's face is
+    the promise of a closed set, so the title is the set's own label and the blurb says
+    how big it is. The ten are behind the card, which is what makes opening it worth
+    doing.
+  */
+  if (card.kind === 'sheet') {
+    return {
+      eyebrow: 'CHEAT SHEET',
+      title: card.set.label,
+      blurb:
+        card.set.members.length +
+        ' of them, on one card. Study it, test yourself, or keep it for later.',
       image: card.image,
     }
   }

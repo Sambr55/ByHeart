@@ -81,6 +81,19 @@ const MEDIUM_OK = [
     is meaningless without the example.
   */
   /song titles you already know/,
+  /*
+    And the VIBES card's own list, which is the same exemption one line shorter.
+
+    "Top Gun, Bridget Jones, Bond, the songs you know" is a list of what a vibe can BE —
+    three titles and then the thing that is not a title — which is precisely what the
+    exemption above already allows for "song titles you already know". The intro card says
+    it in fewer words because it is naming four examples rather than explaining one vibe,
+    and the front door has to be able to make the proposition concrete.
+
+    It is not DUB calling itself a product about songs: the three names in front of it are
+    two films and a franchise, which is the breadth the rule exists to protect.
+  */
+  /Bond\**, the songs you know/,
 ]
 
 /*
