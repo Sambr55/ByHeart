@@ -620,12 +620,17 @@ export function Legend() {
                         of `yours`: the state that matters about it is not that you have it,
                         it is that having it changes nothing about the door.
                       */}
-                      <span
-                        className={
-                          'shrink-0 text-[0.55rem] uppercase tracking-wider ' +
-                          (onCardHere.some((c) => c.id === f.id) ? 'text-muted' : 'text-muted/70')
-                        }
-                      >
+                      {/*
+                        NOT DIMMED, because the word already says it.
+
+                        This faded the extra chip to a 70% muted to set it apart, which
+                        contrast-check measured at 2.94 — under the bar, and on the one row
+                        whose whole job is to explain why a question does not count. A
+                        label somebody has to squint at to learn that reads as a rendering
+                        fault rather than as a decision, which is the same argument the
+                        greyed rows in Choose make.
+                      */}
+                      <span className="shrink-0 text-[0.55rem] uppercase tracking-wider text-muted">
                         {!onCardHere.some((c) => c.id === f.id)
                           ? 'extra'
                           : done
@@ -786,7 +791,7 @@ function Missing({ frame, owned }: { frame: LegendFrame; owned: string[] }) {
       <Link
         href={'/vibes?open=' + need.crate}
         data-testid={'legend-need-' + frame.id}
-        className="tap-target eyebrow inline-flex w-full items-center justify-center rounded border border-accent px-4 py-2 text-center text-accent transition hover:bg-accent hover:text-accent-ink"
+        className="tap-target eyebrow inline-flex w-full items-center justify-center rounded border border-accent px-4 py-3 text-center text-accent transition hover:bg-accent hover:text-accent-ink"
       >
         GO AND GET IT
       </Link>
@@ -1528,7 +1533,21 @@ function RunThrough({
   return (
     <div className="flex flex-1 flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <p className="eyebrow text-muted">{cold ? 'NO WARNING' : i + 1 + ' OF ' + order.length}</p>
+        {/*
+          A COLD RUN STILL SAYS WHERE YOU ARE IN IT.
+
+          NO WARNING is the right idea and it was the only thing on the line, so a shuffled
+          run had no position marker at all — question three looked exactly like question
+          one, and after a reveal the next screen read as an unrelated card rather than as
+          the next of seven. Half of "shows something completely different" was this.
+
+          Both, then: the count places you, and the phrase still says what kind of run it
+          is. The shuffle stays, because a cold open in a fixed order is not cold.
+        */}
+        <p className="eyebrow text-muted">
+          {i + 1} OF {order.length}
+          {cold ? ' · NO WARNING' : ''}
+        </p>
         <div className="flex items-center gap-3">
           <AudioButton slug={slugFor(frame.ask)} text={frame.ask} size="sm" />
           <span className="pt min-w-0 text-xl text-accent">{frame.ask}</span>
@@ -1561,17 +1580,48 @@ function RunThrough({
       {/* The same dock as everywhere else — see .dock in globals.css. */}
       <Dock>
         {!shown ? (
-          <button
-            type="button"
-            data-testid="legend-reveal"
-            onClick={() => {
-              setShown(true)
-              if (cold) rehearsedLegend(frame.id)
-            }}
-            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
-          >
-            {cold ? 'SAID IT — SHOW ME' : 'SHOW ME'}
-          </button>
+          /*
+            TWO BUTTONS ON A COLD RUN, because one was making two claims at once.
+
+            It read SAID IT — SHOW ME and did both on one tap: recorded that the learner
+            produced the sentence, and then showed it to them. Sam: "the cold with nothing
+            on screen makes no sense. You get a phrase, click said it show means out shows
+            something completely different."
+
+            Two things were wrong and they compounded. The label claimed something the tap
+            could not know — somebody who could not remember it at all pressed the same
+            button as somebody who said it perfectly, and both were counted as having said
+            it cold. And because a cold run is SHUFFLED, the screen after it looked
+            unrelated to the one before: a different question, in a different order, with
+            no number to place it.
+
+            So the fork is the one the rest of the product uses — I SAID IT claims and
+            records, SHOW ME reveals and records nothing. Same rule as the Errand's note:
+            a cold claim can only honestly be made before the reveal.
+          */
+          <div className="flex w-full flex-col gap-3">
+            <button
+              type="button"
+              data-testid="legend-reveal"
+              onClick={() => {
+                setShown(true)
+                if (cold) rehearsedLegend(frame.id)
+              }}
+              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+            >
+              {cold ? 'I SAID IT' : 'SHOW ME'}
+            </button>
+            {cold ? (
+              <button
+                type="button"
+                data-testid="legend-show"
+                onClick={() => setShown(true)}
+                className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
+              >
+                SHOW ME THE ANSWER
+              </button>
+            ) : null}
+          </div>
         ) : (
           <button
             type="button"

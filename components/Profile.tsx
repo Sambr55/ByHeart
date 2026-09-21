@@ -12,7 +12,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { askedCards, cardById, cardFace, derivedCards, dropsFor, roomsFor, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
 import { CRATES, PIECES, ROOTS, type CultureFamily } from '@/content/roots'
-import { LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
+import { LEGEND_FRAMES, WORDS_FOR_MOST_OF_A_DAY, cardFor, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/avatar'
 import { setDisplayName } from '@/engine/learner'
@@ -56,6 +56,21 @@ const SECTIONS: {
   note: string
   empty: string
   count: (tiles: Tile[], learner: ReturnType<typeof useLearner>) => string
+  /*
+    WHAT THE NUMBER IS OF, said under it at pillar scale.
+
+    Sam: "I like the large 8 things you can say about yourself (the large letter 8) and
+    would like to mirror this approach to all sections in YOURS."
+
+    The Legend hero has done this since it was written — the count at clamp(2.5rem, 13vw,
+    4rem) with one line of prose under it — and every section below it had the same fact
+    as small grey type at the end of a row. The numbers were already there and already
+    correct; what they lacked was the weight.
+
+    A function of the count so the noun can agree with it. "1 pieces you have banked" is
+    the kind of thing that reads as a machine wrote the screen.
+  */
+  unit: (n: number) => string
   more?: { href: string; label: string }
 }[] = [
   {
@@ -63,6 +78,7 @@ const SECTIONS: {
     label: PROFILE_COPY.done_label,
     note: PROFILE_COPY.done_note,
     empty: PROFILE_COPY.done_empty,
+    unit: (n) => (n === 1 ? 'vibe or room you have been through' : 'vibes and rooms you have been through'),
     count: (t) => String(t.length),
   },
   {
@@ -70,6 +86,7 @@ const SECTIONS: {
     label: PROFILE_COPY.aside_label,
     note: PROFILE_COPY.aside_note,
     empty: PROFILE_COPY.aside_empty,
+    unit: (n) => (n === 1 ? 'thing you put by for later' : 'things you put by for later'),
     count: (t) => String(t.length),
   },
   {
@@ -82,6 +99,7 @@ const SECTIONS: {
       41 is two screens disagreeing about the same fact, which is the failure this repo
       keeps having to undo.
     */
+    unit: (n) => (n === 1 ? 'sentence said with nothing on screen' : 'sentences said with nothing on screen'),
     count: (_t, l) => String((l.proof ?? []).length),
     more: { href: '/proof', label: 'THE PROOF CARD' },
   },
@@ -90,6 +108,7 @@ const SECTIONS: {
     label: PROFILE_COPY.words_label,
     note: PROFILE_COPY.words_note,
     empty: PROFILE_COPY.words_empty,
+    unit: (n) => (n === 1 ? 'piece of Portuguese, banked' : 'pieces of Portuguese, banked'),
     count: (_t, l) => String(Object.keys(l.inventory ?? {}).filter((id) => PIECES[id]).length),
     more: { href: '/vocab', label: 'THE WHOLE LIBRARY' },
   },
@@ -98,6 +117,7 @@ const SECTIONS: {
     label: PROFILE_COPY.sheets_label,
     note: PROFILE_COPY.sheets_note,
     empty: PROFILE_COPY.sheets_empty,
+    unit: (n) => (n === 1 ? 'group you kept to check' : 'groups you kept to check'),
     count: (t) => String(t.length),
   },
   {
@@ -105,6 +125,7 @@ const SECTIONS: {
     label: PROFILE_COPY.drops_label,
     note: PROFILE_COPY.drops_note,
     empty: PROFILE_COPY.drops_empty,
+    unit: (n) => (n === 1 ? 'night you took it to' : 'nights you took it to'),
     count: (t) => String(t.length),
     /* And the calendar itself, which is a listings page and belongs behind a button. */
     more: { href: '/drops', label: 'WHAT IS ON NOW' },
@@ -508,6 +529,8 @@ export function Profile() {
                 open={openSection === sec.id}
                 onToggle={() => setOpenSection(openSection === sec.id ? null : sec.id)}
                 count={sec.count(sets[sec.id], learner)}
+                unit={sec.unit}
+                showBar={sec.id === 'words'}
                 more={sec.more}
               />
             ))}
@@ -544,6 +567,8 @@ function Section({
   open,
   onToggle,
   count,
+  unit,
+  showBar,
   more,
 }: {
   label: string
@@ -564,6 +589,10 @@ function Section({
     the preview of it.
   */
   count: string
+  /** The noun under the big number, agreeing with it. */
+  unit: (n: number) => string
+  /** Only the words have a sourced target to measure against. */
+  showBar?: boolean
   /** The room this section is the front of, where one exists. */
   more?: { href: string; label: string }
 }) {
@@ -596,7 +625,7 @@ function Section({
         data-testid={'open-' + id}
         aria-expanded={open}
         onClick={onToggle}
-        className="tap-target flex w-full items-center gap-3 border-b border-line py-4 text-left transition"
+        className="tap-target flex w-full items-center gap-3 border-b border-line py-3 text-left transition"
       >
         <span
           aria-hidden
@@ -608,11 +637,68 @@ function Section({
           ▸
         </span>
         <span className="eyebrow min-w-0 flex-1 text-accent">{label}</span>
-        <span className="shrink-0 tabular-nums text-sm text-muted">{count}</span>
+        {/*
+          The count on the row, and only while the row is shut.
+
+          Open, the same number sits immediately below at pillar scale — so leaving it here
+          printed it twice, one line apart, in two sizes. The closed row is where it earns
+          its place: it is the whole reason the concertina can be read as a shape.
+        */}
+        {open ? null : (
+          <span className="shrink-0 tabular-nums text-sm text-muted">{count}</span>
+        )}
       </button>
 
       {open ? (
         <div className="flex flex-col gap-3 py-6">
+          {/*
+            THE NUMBER AT THE SIZE THE LEGEND USES, because it is the same kind of fact.
+
+            The count was already on the closed row as small grey type at the end of a
+            line, which is where a number goes when nobody is sure it matters. It does:
+            it is the whole answer to "how am I doing", and this screen is the only place
+            in the product that answers it.
+
+            `.pillar` is the Legend hero's own class rather than a copy of its numbers —
+            same clamp, same 620ms landing — so the six sections and the hero cannot drift
+            into six sizes of one idea.
+          */}
+          <p className="pillar tabular-nums text-accent">{count}</p>
+          <p className="pillar-body text-sm leading-relaxed">{unit(Number(count) || 0)}</p>
+          {/*
+            AND ON THE WORDS, HOW FAR THAT IS, because it is the one count with a real bar.
+
+            Sam: "I want to show actual progress" — and not a streak, which counts days and
+            measures attendance. This measures what somebody owns. It only ever rises, it
+            rises only when a word is banked, and nothing about time or turning up touches
+            it: a fortnight away leaves it exactly where it was.
+
+            WORDS_FOR_MOST_OF_A_DAY is sourced rather than chosen — see its note — which is
+            why this is the only section that gets a bar. Inventing a target for sentences
+            said cold or nights out would be the same gauge with nothing behind it, and a
+            progress bar measuring against a number somebody made up is worse than no bar.
+          */}
+          {showBar ? (
+            <div className="flex flex-col gap-1">
+              <div
+                className="h-2 w-full overflow-hidden rounded-full bg-line"
+                role="img"
+                aria-label={count + ' of ' + WORDS_FOR_MOST_OF_A_DAY + ' words'}
+              >
+                <div
+                  className="h-full rounded-full bg-accent transition-[width] duration-[620ms]"
+                  style={{
+                    width:
+                      Math.min(100, (Number(count) / WORDS_FOR_MOST_OF_A_DAY) * 100).toFixed(1) +
+                      '%',
+                  }}
+                />
+              </div>
+              <p className="text-xs leading-relaxed text-muted">
+                {PROFILE_COPY.words_toward(Number(count) || 0, WORDS_FOR_MOST_OF_A_DAY)}
+              </p>
+            </div>
+          ) : null}
           <p className="text-xs leading-relaxed text-muted">{note}</p>
           {!tiles.length ? (
             <p className="rounded border border-line bg-bg-elev px-4 py-3 text-sm text-muted">

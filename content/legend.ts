@@ -974,6 +974,31 @@ export function clubOpen(opts: {
  * has. The offer is unchanged and reads better for it: reach your Legend free, plus four
  * more vibes chosen for the pleasure of them.
  */
+/**
+ * HOW MANY WORDS IS ENOUGH, and where the number comes from.
+ *
+ * Sam: "I do want to convert some sense of achievement here that in totality shows your
+ * improvement without going all Dua Lingo. But that counts streaks right? I want to show
+ * actual progress."
+ *
+ * The distinction he is drawing is the one this product is built on. A streak counts DAYS
+ * — it goes up for turning up and to zero for a fortnight in hospital, which measures
+ * attendance and calls it learning. This counts WORDS SOMEBODY OWNS: it moves when they
+ * bank one and never otherwise, it cannot fall, and time does nothing to it.
+ *
+ * THE FIGURE IS NOT INVENTED, which is the only reason it is allowed on the screen. Corpus
+ * frequency work puts the most common 800-1,000 word families at roughly 75% coverage of
+ * everyday speech, and around 3,000 at 95% — the numbers behind every "2,000 words is
+ * conversational" claim. 800 is the near end of that range, deliberately: it is where
+ * somebody stops decoding and starts following, and a target that can be reached is worth
+ * more than an honest one that cannot.
+ *
+ * A LEARNER IS NEVER TOLD THEY ARE FINISHED AT IT. The line says what the number covers,
+ * not that the language is done — "you now speak Portuguese" is a claim no count can make,
+ * and the product would be lying the moment somebody met a doctor.
+ */
+export const WORDS_FOR_MOST_OF_A_DAY = 800
+
 export const FREE_CRATES = 5
 
 /** The vibe every learner is sent through first, and the one the Legend is built from. */

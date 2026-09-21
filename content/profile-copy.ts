@@ -79,6 +79,17 @@ export const PROFILE_COPY = {
   sheets_label: 'CHEAT SHEETS',
   sheets_note: 'Groups you kept — the ten of a thing, in one place.',
   sheets_empty: 'None kept yet. The bookmark on a cheat sheet in the Club puts it here.',
+  /*
+    The one line on Yours that says where somebody is going rather than where they have been.
+
+    Says what the number COVERS rather than what it finishes. "800 words and you speak
+    Portuguese" is a claim no count can make and would be false the moment somebody met a
+    doctor; "most of a day" is what the corpus figure actually supports.
+  */
+  words_toward: (have: number, need: number) =>
+    have >= need
+      ? 'Past the 800 that cover most of a day in Lisbon.'
+      : have + ' of the ' + need + ' that cover most of a day in Lisbon.',
   drops_label: 'DROPS',
   drops_note: 'Pegged to something really happening, with the language you took to it.',
   drops_empty: 'None yet. Open a drop from the Club and finish a room, and it lands here.',
