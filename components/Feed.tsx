@@ -2324,21 +2324,39 @@ function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
   const s = card.situation
   return (
     <div className="flex flex-col gap-3">
+      {/*
+        A PREVIEW, NOT THE ROOM. The room is one tap away and prints all of this.
+
+        Sam, with two screenshots of the same four sentences: "you are repeating these
+        first two screens everywhere. Remove."
+
+        He is right, and it was mine: this lane printed the full line list — Portuguese,
+        English and the `when` note for every one — and then the room it links to printed
+        exactly the same list again, under the same title. Two screens, one content, one
+        immediately after the other.
+
+        The lane earns its place as a taste rather than a copy. One sentence, which is the
+        first thing you would say, and a count of what else is in there. That is enough to
+        decide whether to go in, which is the only job a feed card has.
+      */}
       <p className="eyebrow text-muted">WHAT TO SAY</p>
       <h2 className="display text-balance text-2xl">{s.title}</h2>
-      <ul className="mt-3 flex flex-col gap-3">
-        {s.lines.map((l) => (
-          <li key={l.pt} className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
-            <div className="flex items-center gap-3">
-              <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
-              <p className="pt min-w-0 flex-1 text-lg text-accent">{l.pt}</p>
-              <CopyButton text={l.pt} size="sm" />
-            </div>
-            <p className="text-sm text-fg/80">{l.en}</p>
-            <p className="text-xs leading-relaxed text-muted">{l.when}</p>
-          </li>
-        ))}
-      </ul>
+      <p className="text-sm leading-relaxed text-muted">{s.why}</p>
+      {s.lines[0] ? (
+        <div className="mt-3 flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+          <div className="flex items-center gap-3">
+            <AudioButton slug={slugFor(s.lines[0].pt)} text={s.lines[0].pt} size="sm" />
+            <p className="pt min-w-0 flex-1 text-lg text-accent">{s.lines[0].pt}</p>
+            <CopyButton text={s.lines[0].pt} size="sm" />
+          </div>
+          <p className="text-sm text-fg/80">{s.lines[0].en}</p>
+        </div>
+      ) : null}
+      {s.lines.length > 1 ? (
+        <p className="text-xs text-muted">
+          {s.lines.length - 1} more {s.lines.length === 2 ? 'line' : 'lines'} inside.
+        </p>
+      ) : null}
       {/*
         A DESTINATION, NAMED AS ONE.
 

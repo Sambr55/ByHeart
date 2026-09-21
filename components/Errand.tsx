@@ -355,7 +355,25 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             /* mt-10, not mt-auto. See Journey's Cta. */
             className="tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
-            TAKE IT AWAY
+            {/*
+              THE CTA NAMES WHAT IT OPENS, rather than describing the mechanic.
+
+              Sam: "The CTAs in venbues are supposed to feed teh next section, not repeat
+              take it away." Every room's button said TAKE IT AWAY, so four screens in a
+              row carried the same label and none of them said where it went — which reads
+              as a loop rather than a sequence, and was the same fault as four lanes all
+              labelled THE ROOM.
+
+              TAKE IT AWAY described what happens to the lines (they go off the screen) and
+              that is the mechanic, not the destination. The destination is the sentence
+              this room is for, so the button says it — the PDF's own note on screen 3:
+              "Change CTA to Finding the entrance".
+
+              From release.ask, which is already the one-line statement of the job and is
+              what the next screen shows at the top. The two cannot drift because they are
+              the same string.
+            */}
+            {situation.release.ask.replace(/\.$/, '').toUpperCase()}
           </button>
 
           {/*

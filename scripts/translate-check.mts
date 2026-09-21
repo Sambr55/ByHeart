@@ -132,25 +132,44 @@ console.log('\nwho gets the button\n')
     stranger who finds the site — is unchanged, and set-up is still a threshold a passer-by
     has not crossed: they have chosen a city, said why they are here, and agreed the deal.
   */
+  /*
+    MEASURED ON THE PANEL NOW, because the floating button is gone.
+
+    These two gates are the point of this block and they are unchanged: a metered API is
+    not for every stranger who finds the site, and a button that can only apologise teaches
+    that DUB is broken. What changed is where they are enforced. The floating translator
+    was removed — ASK in the bottom bar opened the same panel, so it was two doors to one
+    thing, one of them hovering over every screen in the app — and the door is now the tab,
+    which falls through to /ask for anybody who cannot use it.
+
+    So the assertion is that the PANEL does not open, which is the fact both gates were
+    ever about.
+  */
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('dub:ask')))
+  await page.waitForTimeout(500)
   ok(
     'not before set-up',
-    !(await page.$('[data-testid="translator-open"]')),
+    !(await page.$('[data-testid="translator"]')),
     'a metered API is not for every stranger who finds the site',
   )
   await context.close()
 }
 {
   const { context, page } = await open(browser, true, false)
+  await page.evaluate(() => window.dispatchEvent(new CustomEvent('dub:ask')))
+  await page.waitForTimeout(500)
   ok(
     'not without a key',
-    !(await page.$('[data-testid="translator-open"]')),
-    'a button that can only apologise costs a tap and teaches that DUB is broken',
+    !(await page.$('[data-testid="translator"]')),
+    'a panel that can only apologise costs a tap and teaches that DUB is broken',
   )
   await context.close()
 }
 
 const { context, page } = await open(browser, true, true)
-ok('somebody set up, with a key, gets it', Boolean(await page.$('[data-testid="translator-open"]')))
+await page.evaluate(() => window.dispatchEvent(new CustomEvent('dub:ask')))
+await page.waitForTimeout(600)
+ok('somebody set up, with a key, gets it', Boolean(await page.$('[data-testid="translator"]')))
 
 /*
   It is on every screen, including the ones a conversation actually starts on.
@@ -228,9 +247,22 @@ console.log('\nkeeping one puts it somewhere\n')
 */
 {
   const profile = readFileSync('components/Profile.tsx', 'utf8')
+  /*
+    IN PUT ASIDE NOW, which is where SAVED and KEPT merged.
+
+    This grepped for `sets.asked`, the section that held them alone. Yours was cleaned up —
+    SAVED and KEPT were one pile wearing two names, since both answer "I wanted this later"
+    and the difference was which button you pressed — so the section is `sets.aside` and it
+    holds both.
+
+    The promise is unchanged and is the reason this is not deleted: a button that records
+    something nothing displays looks broken while working perfectly, which is the hardest
+    kind of fault to report. So the check asks that askedCards still reaches a section,
+    rather than naming the one it used to reach.
+  */
   ok(
     'Yours has a place for asked sentences',
-    /sets\.asked/.test(profile),
+    /askedTiles/.test(profile) && /sets\.aside|aside:/.test(profile),
     'a button that records something nothing displays looks broken while working',
   )
   const copy = readFileSync('content/profile-copy.ts', 'utf8')
@@ -388,7 +420,8 @@ console.log('\nand it is everywhere\n')
   isVisible() is the whole fix, and it is the difference between asserting the markup and
   asserting the product.
 */
-const ASKERS = ['[data-testid="tab-ask"]', '[data-testid="translator-open"]']
+/* One door now: the floating button is gone and ASK is the way in. */
+const ASKERS = ['[data-testid="tab-ask"]']
 for (const route of ['/vibes', '/club', '/line', '/profile', '/proof', '/vocab']) {
   await page.goto(BASE + route)
   await page.waitForTimeout(1100)

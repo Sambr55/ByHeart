@@ -1332,39 +1332,18 @@ summary:focus-visible,
 
 
 /*
-  THE ASK BUTTON STANDS DOWN WHERE THE FEED HAS ITS OWN RAIL.
+  THE FLOATING TRANSLATOR IS GONE, and these two rules with it.
 
-  Both live bottom-right above the nav: the translator floats there on every screen, and the
-  feed's rail stacks like, comment, save, share and rewind in the same corner. They did not
-  collide while the translator was a member benefit, because nobody had both at once. It
-  opens at set-up now, and the floating button landed on top of SHARE — a control a person
-  could see, aim at, and not press, which is worse than one that is missing.
+  They hid it on any screen with a bottom bar, and then on ceremonies, which have no bar
+  to key on — two exceptions carving a button down to the screens nobody had complained
+  about yet. Sam: "remove all instances of teh floating translater icon that is now in teh
+  club nav."
 
-  Hidden by CSS rather than by a condition in the component, because the component cannot
-  know what else is on the screen without reaching into the DOM at render, and a layout fact
-  belongs in the layout. The feed puts ASK in its rail instead, where the other four verbs
-  already are.
+  The argument for keeping it was a lesson: no bar, so no ASK, so the floating button is
+  the only way to ask. That turned out to be false — Shell renders the bar on every beat
+  (`nav = true` by default) and only the two interrupting screens opt out, which are a
+  payoff and a save offer and want no translator over them. So the exception had nothing
+  left to protect.
 
-  KEYED ON THE BOTTOM BAR, because that is where ASK lives now. Wherever the bar is, the
-  floating button would be a second control for one act. Where the bar is not — a lesson,
-  which deliberately offers no way out mid-sequence — the floating button is the only way to
-  ask, so it stays.
+  components/Translator.tsx now renders nothing when closed and waits for `dub:ask`.
 */
-body:has([data-testid='bottom-nav']) [data-testid='translator-open'] {
-  display: none;
-}
-
-/*
-  AND NOT ON A CEREMONY, which has no bar to key on.
-
-  The rule above covers everywhere the bottom bar is. A full-bleed takeover has no bar, so
-  the button came back on the Welcome — the single biggest moment in the product, where
-  somebody has just introduced themselves in Portuguese to a stranger — and offered them a
-  translator. Reported as "remove translator icon from Club home page".
-
-  Keyed on an attribute the screen sets rather than on its route, so the next screen that is
-  a moment rather than a place is covered by saying so.
-*/
-body:has([data-ceremony='true']) [data-testid='translator-open'] {
-  display: none;
-}

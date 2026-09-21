@@ -240,32 +240,20 @@ export function Translator() {
     box.current?.focus()
   }
 
-  if (!open) {
-    return (
-      <button
-        type="button"
-        data-testid="translator-open"
-        onClick={() => {
-          setOpen(true)
-          track('translate_opened', {})
-        }}
-        aria-label="How do I say something"
-        /*
-          Above the bar, clear of the dock, on the side a thumb reaches.
+  /*
+    NO FLOATING BUTTON ANY MORE, because ASK is the door.
 
-          It sits at the nav's height plus a step so it never covers a docked button, and
-          z-30 keeps it under the bar rather than over it — a floating control that hides
-          navigation is a floating control people resent.
-        */
-        className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-3 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-ink shadow-lg transition active:scale-95"
-      >
-        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <path d="M4 6h10M9 4v2c0 4-2.5 7-5 8M7 11c1.5 3 4 5 6 5.5" />
-          <path d="M13 20l4-9 4 9M14.5 17h5" />
-        </svg>
-      </button>
-    )
-  }
+    This rendered a round accent button on every screen in the product — it lives in the
+    root layout — and the bottom bar has carried an ASK tab that opens this same panel for
+    some time. Two doors to one thing, one of them hovering over the corner of every
+    screen in the app. Sam: "remove all instances of teh floating translater icon that is
+    now in teh club nav."
+
+    Nothing is lost: ASK dispatches `dub:ask`, which the effect above listens for, and
+    `dub:ask-word` still opens it pre-filled from a word somewhere else in the product.
+    Closed, this component now renders nothing at all and waits.
+  */
+  if (!open) return null
 
   return (
     /*
