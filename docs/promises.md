@@ -68,10 +68,19 @@ SESSION DONE on the basics with 13 of its 16 roots unplayed. Nothing on that scr
 mentions the doorway.
 
 *This is the bug Sam hit twice, and a third time on 2026-09-21: "I have just done
-multiple vibes but the legend isn't opening." The door now has two halves and
-`legendStatus` carries both as numbers rather than one boolean, so a screen can say which
-half somebody is on — NotYet.tsx does. The remaining half of this promise is the shelf,
-which still says SESSION DONE without saying what is left.*
+multiple vibes but the legend isn't opening."*
+
+*The SCREENS half is done. `legendStatus` carries both halves of the door as numbers
+rather than one boolean, and the three screens that matter all say where somebody stands,
+from the same call: the shelf under its headline ("Finish one more vibe and your Legend
+opens"), the Club door, and the payoff panel at the end of a vibe. Measured across five
+states, the shelf reads 6-lines / 3-vibes / 2-vibes / one-more / silent-when-open.*
+
+*The OUTCOME half is what the check below still measures, and it is still BROKEN: one
+sitting of each of the twelve vibes does not finish any of them, so a learner following
+the shelf's invitation ends without a Legend. That is a content-shape problem — a sitting
+serves three or four roots and a vibe holds six to sixteen — rather than a screen
+problem, and it is the next thing to look at.*
 
 ## P3 — A vibe ends on its own lines
 

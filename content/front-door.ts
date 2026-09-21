@@ -248,7 +248,17 @@ export const THE_WAY = {
   */
   legend: {
     label: 'YOUR LEGEND',
-    body: 'Your Legend is the first minute of conversation you have every time you meet somebody new. As you build up your confidence through five vibes, you are also unlocking your Legend questions.',
+    /*
+      NO NUMBER IN THIS SENTENCE, for the reason two of them have now gone stale.
+
+      It said "through five vibes", which was the rule two rules ago — the door counted
+      basics roots after that, and counts the basics plus three chosen vibes now. This
+      screen is met before anybody has played anything, so it is describing a shape rather
+      than quoting a threshold, and the shape is what stays true: the vibes you pick
+      unlock the questions. The exact count is said where somebody can act on it, from
+      legendStatus, on the shelf and the door.
+    */
+    body: 'Your Legend is the first minute of conversation you have every time you meet somebody new. As you build up your confidence through the vibes you pick, you are also unlocking your Legend questions.',
   },
   club: {
     label: 'DUB CLUB',
@@ -280,6 +290,32 @@ export const PICKER = {
   headline: 'Pick a vibe you connect with.',
   /** One line, not a banner, and only once the Legend is a thing they have. */
   feeds_legend: 'Everything in here feeds your Legend.',
+  /*
+    WHERE THE DOOR IS, said on the screen where the work is chosen.
+
+    P2 in docs/promises.md — "at every moment before the Legend opens, the screen a
+    learner is on says what to do next and how far away it is" — has been BROKEN against
+    this exact screen. The shelf said SESSION DONE on a vibe and nothing anywhere about
+    the Legend, so somebody who had finished the basics and two vibes could not tell from
+    the place they pick their next one that a third would open the door.
+
+    Written as functions rather than strings because the number comes from legendStatus
+    and a number typed into prose is one that goes stale silently — which is what
+    happened to banked_note_many, still saying "five vibes" two rules after that stopped
+    being true.
+
+    It names the half they are ON, not both. Naming the vibes while the basics are
+    unfinished is an instruction nobody can act on yet.
+  */
+  legend_basics: (left: number) =>
+    left === 1
+      ? 'One more line of the basics, then three vibes of your own, and your Legend opens.'
+      : left + ' more lines of the basics, then three vibes of your own, and your Legend opens.',
+  legend_vibes: (left: number) =>
+    left === 1
+      ? 'Finish one more vibe and your Legend opens.'
+      : 'Finish ' + left + ' more vibes and your Legend opens.',
+  legend_open: 'Your Legend is open — build it and the Club is yours.',
   /*
     Why the rest of the shelf is dimmed on somebody's first visit.
 

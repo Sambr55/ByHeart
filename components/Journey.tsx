@@ -985,6 +985,18 @@ function Picker() {
    */
   const basicsStarted = !mounted || (learner.sections_completed ?? []).includes('the_basics')
 
+  /*
+    Where this learner stands with the Legend, for the line under the headline.
+
+    The same call NotYet and LegendPayoff make. Three screens, one question, one answer —
+    which is the whole reason legendStatus exists rather than each screen counting for
+    itself.
+  */
+  const shelfLegend = legendStatus({
+    rootsPlayed: learner.roots_played ?? [],
+    sectionsCompleted: learner.sections_completed ?? [],
+  })
+
   const facts = (f: Crate): Facts => {
     const all = ROOTS_BY_FAMILY[f.id] ?? []
     const finished = all.length > 0 && all.every((r) => playedIds.has(r.root_id))
@@ -1135,6 +1147,32 @@ function Picker() {
           any of this for" at the exact moment they are choosing. */}
       {mounted && learner.legend_prompt === 'accepted' ? (
         <p className="-mt-3 text-sm text-muted">{PICKER.feeds_legend}</p>
+      ) : null}
+      {/*
+        AND HOW FAR OFF THE DOOR IS, for everybody else.
+
+        This is the second half of P2, and the shelf is where it was missing: a learner
+        who had finished the basics and two vibes saw SESSION DONE badges and nothing at
+        all about the Legend, so the one screen where the next vibe is CHOSEN never said
+        that choosing one more would open it. Sam hit the consequence three times.
+
+        Only while the door is shut. Once it is open the line above already does the job
+        for anybody who accepted the offer, and a standing "your Legend is open" on the
+        shelf would be a banner rather than a fact somebody can act on — /legend is one
+        tap away and says it better.
+
+        Same numbers as NotYet and the payoff panel, from the same legendStatus, so the
+        three screens cannot drift apart. That drift is the exact failure this promise
+        exists to catch.
+      */}
+      {mounted && !shelfLegend.open ? (
+        <p data-testid="shelf-legend" className="-mt-3 text-sm text-muted">
+          {shelfLegend.toGo > 0
+            ? PICKER.legend_basics(shelfLegend.toGo)
+            : PICKER.legend_vibes(
+                Math.max(0, shelfLegend.vibesNeeded - shelfLegend.vibesDone),
+              )}
+        </p>
       ) : null}
       {/*
         The ladder is quiet now.
