@@ -4,10 +4,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { DemoCard } from '@/components/DemoCard'
-import { Choose } from '@/components/Choose'
 import { Destination } from '@/components/Destination'
 import { AudioButton } from '@/components/AudioButton'
+import { Choose } from '@/components/Choose'
 import { CopyButton } from '@/components/CopyButton'
+import { chosenPair } from '@/engine/pair'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
@@ -1144,6 +1145,20 @@ export function Card({
     wrong way it does not move at all — the card is not resisting, it has one door. Then it
     leaves by that door.
   */
+  /*
+    Has this learner settled a language yet?
+
+    Latched in state rather than read live, because Choose writes to localStorage and this
+    component has no reason to re-render when it does — the callback is the signal. It
+    starts true for anybody who has chosen before, so a returning learner is never asked
+    again, and mounted-gated for the usual reason: the server has no localStorage, and
+    branching on it during render is a hydration mismatch.
+  */
+  const [pairChosen, setPairChosen] = useState(true)
+  useEffect(() => {
+    if (card.kind === 'setup') setPairChosen(Boolean(chosenPair()))
+  }, [card.kind])
+
   const [drag, setDrag] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [flew, setFlew] = useState<'away' | 'in' | null>(null)
   const [held, setHeld] = useState(false)
@@ -1707,18 +1722,6 @@ export function Card({
                         <Destination onDone={() => onPassed?.(card.id)} />
                       </div>
                     ) : null}
-                    {/*
-                      The language and the city, on the face for the same reason.
-
-                      It advances on the CITY rather than on the language, because the city
-                      is the second of two taps and the pair is not settled until both are
-                      in. Choose calls onDone only from the city row.
-                    */}
-                    {card.intro.asks === 'choose' ? (
-                      <div className="mt-6">
-                        <Choose onDone={() => onPassed?.(card.id)} />
-                      </div>
-                    ) : null}
                   </div>
                 </>
               ) : card.kind === 'derived' && card.card.kind === 'collision' ? (
@@ -1924,6 +1927,28 @@ export function Card({
                 */
                 <div className="mb-3">
                   <DemoCard onBeat={setDemoBeat} />
+                </div>
+              ) : card.kind === 'setup' && !pairChosen ? (
+                /*
+                  THE LANGUAGE IS ANSWERED ON THE FACE, BEFORE THE BUTTON THAT COMMITS.
+
+                  Sam: "move language selector to its logical slot so its dependants
+                  follow." Moving it into SetUp as the first step was half the job and left
+                  the other half wrong: SetUp renders in the PANE, and the pane is reached
+                  by tapping OPEN. So the order a person actually met was commit, then
+                  choose — the language still arriving after the decision that assumes it.
+
+                  On the face it is genuinely first. Nothing about this card can be acted on
+                  until the pair exists, which is what "its dependants follow" means: the
+                  headline behind OPEN interpolates the city, and the who step names the
+                  language.
+
+                  The button is not drawn while the question is open. A card offering OPEN
+                  beside an unanswered question is offering a way past it, and this is the
+                  one card in the sequence that may not be skipped.
+                */
+                <div className="mb-3 mt-6">
+                  <Choose onDone={() => setPairChosen(true)} />
                 </div>
               ) : (
                 <button

@@ -60,12 +60,31 @@ import { DEFAULT_PAIR } from '@/content/pairs'
   falls back to Lisbon for — correct today and wrong the day a second city opens. finish()
   writes it explicitly now.
 
-  When there IS a second open city the question comes back here, on the card that already
-  asks why and who, rather than as a ninth screen.
+  THE QUESTION IS BACK, AND IT IS FIRST — because why and who both depend on it.
+
+  It returned as a screen of its own after ONE DECISION, which put it in the right place in
+  the sequence and the wrong place in the logic: the card's own form asks why and who
+  BEFORE the sequence reaches it. So a person committed, answered two questions, and only
+  then chose the language those answers were written in.
+
+  The dependency is not theoretical. `ask_headline(city)` interpolates the city — "What
+  brings you to Lisbon?" — and the who step says "the first thing you will say in
+  Portuguese is your own name". Both name an answer the learner has not given.
+
+  So it is a STEP rather than a screen: choose, then why, then who, inside one card. Sam:
+  "move language selector to its logical slot so its dependants follow."
 */
 type Step = 'why' | 'who'
 
 export function SetUp({ onDone }: { onDone?: () => void } = {}) {
+  /*
+    Starts on `choose` unless the pair is already settled.
+
+    A returning learner who has chosen once should not be asked again — `chosenPair()` is
+    null only before the first answer, which is exactly the population this step is for.
+    Read inside the initialiser rather than in an effect: it is a device fact, and the
+    card already gates its whole render on `mounted`, so there is no hydration hazard.
+  */
   const [step, setStep] = useState<Step>('why')
   const [name, setName] = useState('')
   const [photo, setPhoto] = useState<string | null>(null)
@@ -82,7 +101,9 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     this card should answer it the same way rather than invent a second habit.
   */
   const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   /*
     ALREADY MEANS ASKED, not merely agreed.
