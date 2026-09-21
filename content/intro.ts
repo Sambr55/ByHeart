@@ -9,16 +9,20 @@
  * cards would need eleven photographs the bank does not have, and would flatten the
  * difference between "here is Lisbon" and "here is what we do".
  *
- * So the sequence alternates deliberately: argument, argument, then the demo, which is a
- * photograph and plays. The change of ground is the rhythm, and it means the whole thing
- * needs no new pictures at all.
+ * EVERY SCREEN CARRIES A PHOTOGRAPH NOW, and that is a reversal of what this file used to
+ * argue. The sand ground was chosen so the sequence could ship before the pictures existed
+ * — eleven cards, and the bank had six. The sequence is eight screens and the bank has
+ * grown, so every one of them has a ground of its own and the alternation it used to rely
+ * on for rhythm is gone. What replaces it is order: two gestures, then four things the
+ * product does, then one decision.
  *
- * WHY THE GESTURE CARDS ARE IN IT. Two of these teach the grammar — left sends a card back,
- * tap opens it — and they are the only cards in the product that describe an interaction
- * rather than the language. They earn their place because the grammar changed: left used to
- * open a card and now it sends it away, so even somebody who has used DUB before is holding
- * a different product. And they teach by being: the card you are told to swipe is the card
- * that responds.
+ * WHY THE GESTURE CARDS ARE IN IT, AND WHY THERE ARE TWO. They open the sequence — left
+ * sends a card back, tap or right opens one — and they are the only cards in the product
+ * that describe an interaction rather than the language. They earn their place because the
+ * grammar changed: left used to open a card and now it sends it away, so even somebody who
+ * has used DUB before is holding a different product. And they teach by being: the card you
+ * are told to swipe is the card that responds, and the swipe left on the first is what
+ * lands you on the second.
  *
  * THE FIVE LEGEND EXAMPLES ARE SPECIMENS, NOT ANYBODY'S. Worth saying out loud in the file
  * that holds them, because the rule that a Legend contains somebody's children by name,
@@ -139,82 +143,44 @@ export interface IntroCard {
     | { kind: 'legend' }
     | { kind: 'lines'; lines: { pt: string; en: string }[] }
     | { kind: 'exchange'; exchange: { asked: string; pt: string; en: string }[] }
+    /*
+      THE TWO WAYS INTO ASK, shown as the act rather than listed as features.
+
+      `exchange` renders a stack of question-and-answer pairs, which reads as a FAQ: the
+      more examples it carries the more it looks like documentation. What ASK actually is
+      is two inputs — a phrase you type, and a camera pointed at words you cannot read —
+      and the second one is the half nothing in the sequence has ever shown.
+
+      So this carries one of each, and the answer sits under them rather than beside them.
+      `shot` keeps its own English because a photographed sign is the one case where the
+      translation IS the whole point: somebody looking at "Encerrado para férias" on a
+      locked door needs to know the shop is shut, not how to say it.
+    */
+    | {
+        kind: 'asking'
+        typed: { asked: string; pt: string }
+        shot: { caption: string; pt: string; en: string }
+      }
 }
 
 export const INTRO_CARDS: IntroCard[] = [
   {
     /*
-      CARD ONE IS THE TRICK, not a description of the trick.
+      THE GESTURE TUTORIAL IS TWO SLIDES, AND THIS IS THE FIRST OF THEM.
 
-      This read "DUB — your travel companion. Learn a language and immerse yourself in its
-      local culture." — a category description, true of forty apps, showing nothing. It was
-      the first thing a stranger met, and the five cards after it were gesture instructions
-      and more description. The six cards that actually demonstrated something came
-      SEVENTH onwards.
+      It opens the sequence now. The splash hands over to it directly — COME IN, and the
+      very next thing is the one gesture nobody arrives knowing.
 
-      Sam: "I want people to come in and be blown away by how you can unpack royale with
-      cheese and talk to me goose into useable phrases… we need to SHOW it in the app."
+      What used to be here was SIXTY SECONDS: the Goose unpack, arguing that you already
+      understand more than you can say. That argument has not been lost, it has been moved
+      to where it belongs — slide 4, VIBES, which now carries the Goose line itself. Two
+      cards making the same demonstration under two eyebrows was the actual fault: the
+      unpack appeared twice in the build, four cards apart, and the second one read as the
+      product repeating itself.
 
-      The line is one everybody knows, so the recognition is free and instant. The claim
-      underneath is the oldest sentence in the product and still the best one: you already
-      understand more than you can say. Then the unpack proves it in the same breath —
-      `comigo` comes out, and three sentences a person would actually use come with it.
-    */
-    id: 'intro_how',
-    /*
-      SAND, NOT A PHOTOGRAPH — and this was caught by looking at it rather than reasoning.
-
-      With `image: 'intro_arrival'` the unpack rendered accent-blue Portuguese and muted
-      English over a sunlit Lisbon street. The shape was right and the words were close to
-      unreadable, which on the one card that has to land is fatal.
-
-      The rule the sequence already follows: a card that SHOWS LANGUAGE takes the sand
-      ground (intro_ask, intro_share), and a card that sets a mood takes a photograph. This
-      is now the most language-dense card in the product.
-    */
-    eyebrow: 'SIXTY SECONDS',
-    headline: 'You already understand more than you can say.',
-    body: 'One line you have known for forty years, and the Portuguese hiding inside it.',
-    shows: { kind: 'unpack', root_id: 'tg_goose' },
-  },
-  {
-    /*
-      Where, third, and it is interactive rather than an argument.
-
-      The card kind carries no copy of its own — components/Destination.tsx renders it —
-      because the choice is the content. Declared here so the ORDER stays one readable list
-      rather than a chain of spreads in the component.
-    */
-    id: 'intro_where',
-    // Calçada: the pavement, which is the most Portuguese surface there is.
-    image: 'calcada',
-    exit: 'choose',
-    eyebrow: 'WHERE TO',
-    headline: 'Where do you want DUB to take you?',
-    body: 'Pick the one you are going to.',
-    asks: 'where',
-  },
-  {
-    /*
-      The swipe-up card, which is its own screen now rather than a footnote on the first.
-
-      Three gestures, three cards, in the order somebody needs them: up to move on, left to
-      send a card back, tap to go in. It was a chevron under the opening argument, which is
-      where an instruction goes to be ignored.
-    */
-    id: 'intro_up',
-    exit: 'up',
-    eyebrow: 'KEEP GOING',
-    headline: 'Swipe up for the next card.',
-    body: 'That is the whole of it. The feed goes on as long as you do.',
-  },
-  {
-    /*
-      The reject card, and the promise is the whole of it.
-
-      "Not now" only works as a gesture if people believe the card comes back. Somebody who
-      thinks swiping left destroys something will stop swiping, and a feed nobody swipes is
-      a list.
+      Left first, because left is the gesture the grammar changed. It used to open a card
+      and now it sends one away, so even somebody who has used DUB before is holding a
+      different product.
     */
     id: 'intro_away',
     image: 'intro_away_card',
@@ -224,69 +190,60 @@ export const INTRO_CARDS: IntroCard[] = [
     body: 'Not gone — behind the rest, for later. Change your mind and the rewind arrow brings it straight back.',
   },
   {
+    /*
+      AND THE SECOND SLIDE, which is the other half of the same lesson.
+
+      Reached BY the swipe left, which is what makes the pair work: the instruction on the
+      card before it is performed to get here, so the tutorial is never read without being
+      done. Then this one asks for the opposite movement.
+
+      "Here's how it works" rather than THIS ONE. The eyebrow was naming the card — this
+      one, that one — which is the language of a pile rather than of a lesson, and on the
+      second of two tutorial slides what somebody needs told is what they are being shown.
+    */
     id: 'intro_in',
     image: 'intro_in_card',
     exit: 'in',
-    eyebrow: 'THIS ONE',
+    eyebrow: "HERE'S HOW IT WORKS",
     headline: 'Tap a card to open it. Or swipe right.',
     body: 'Inside is the Portuguese: what to say, when to say it, and somebody saying it.',
   },
   {
     id: 'intro_vibes',
-    /* Sand, for the same reason as card one: this shows an unpack now, not a mood. */
-    // Tap or swipe right, and it goes to the demo — which is the thing it is describing.
-    exit: 'in',
-    /*
-      The gesture is drawn, not offered as a button.
-
-      This card had TAP TO OPEN under it, which is the fallback every intro card without a
-      declared gesture gets. On the one card whose whole job is to hand somebody the demo,
-      a static button teaches the wrong thing: the rail is a swipe product, and the arrow
-      that moves is what says so. `gesture: 'in'` renders the right-pointing arrow with the
-      nudge-right animation and the label "Tap, or swipe right" — the same affordance the
-      other guided cards use, so the instruction is consistent across the sequence rather
-      than being a button here and an arrow three cards earlier.
-
-      Tapping still works: reveal() is bound to the card, not to the button that was here.
-    */
+    image: 'intro_vibes_card',
     pillar: true,
     eyebrow: 'VIBES',
     headline: 'Learn from what you have already seen a hundred times.',
-    body: 'Top Gun, Bridget Jones, Bond. You don’t learn the line — you recognise it, and keep a word or two that works everywhere.',
     /*
-      ROYALE, BECAUSE ONE UNPACK IS A TRICK AND TWO IS A SYSTEM.
+      THE SONGS YOU KNOW IS NOT BOLD, and that is a deliberate piece of typography rather
+      than an oversight.
 
-      This showed tg_goose — correct when card one was an advert and this was the first
-      specimen anybody met. Card one IS the Goose unpack now, so repeating it here proves
-      nothing and looks like the product only has one example.
-
-      Pulp Fiction is the other line Sam names, it comes from a different film and a
-      different vibe, and `com` builds a different set of sentences — so the second unpack
-      says the thing the first one cannot: this happens to every line, not just that one.
+      The three before it are titles — Top Gun, Bridget Jones, Bond — and they are set in
+      the emphasis this card uses for a named thing. "the songs you know" is not a title.
+      Bolding it would make the list read as four franchises, one of which nobody can
+      place; leaving it plain is what makes the sentence land as "and everything else you
+      already carry around".
     */
-    shows: { kind: 'unpack', root_id: 'pf_royale' },
-  },
-  {
+    body: '**Top Gun**, **Bridget Jones**, **Bond**, the songs you know. You don’t learn the line — you recognise it, and keep a word or two that works everywhere.',
     /*
-      TWO VIBES, ONE SENTENCE — the strongest thing DUB does, shown for the first time.
+      GOOSE, NOT ROYALE, and the reason is that there is only one unpack in the sequence
+      now.
 
-      Every collision in the product combines pieces from DIFFERENT vibes, and until now
-      they were visible only mid-session to a learner who already owned both words. So the
-      clearest proof of the whole thesis was locked behind the commitment it exists to earn.
+      This card showed pf_royale on the reasoning that card one was already the Goose
+      unpack, so a second line from a second film proved the trick was a system rather
+      than a one-off. Card one is gone — the SIXTY SECONDS screen went with it — and with
+      it the thing royale was contrasting against. What is left is a single specimen, and
+      the single specimen should be the strongest one: "Talk to me, Goose" is the line
+      Sam names first, it is the one everybody can hear in their head, and `comigo` comes
+      out of it into three sentences somebody would actually use.
 
-      `ola` comes out of a Beatles single in the basics; `vinho` out of a Bridget Jones
-      disaster. Neither was about ordering a drink. Together they are the sentence somebody
-      needs at a table on their first evening, and the collision's own provenance line says
-      exactly that — authored, not written here.
+      The Royale com queijo card went entirely in the same pass — see the removals.
     */
-    id: 'intro_collision',
-    eyebrow: 'TWO VIBES',
-    headline: 'Two things you knew. One sentence you need.',
-    body: 'Words from different vibes collide, and what comes out is not in either of them.',
-    shows: { kind: 'collision', id: 'tb_bj_vinho' },
+    shows: { kind: 'unpack', root_id: 'tg_goose' },
   },
   {
     id: 'intro_legend',
+    image: 'intro_arrival',
     eyebrow: 'YOUR LEGEND',
     headline: 'Build your legend out of what you have learned.',
     body: 'Seven things about yourself, said in Portuguese with nothing on screen. It is what a stranger asks you, in the order they ask it.',
@@ -301,6 +258,34 @@ export const INTRO_CARDS: IntroCard[] = [
       They are still specimens. Nobody's real Legend leaves the device.
     */
     shows: { kind: 'legend' },
+  },
+  {
+    id: 'intro_ask',
+    image: 'pharmacy',
+    pillar: true,
+    eyebrow: 'ASK',
+    headline: 'The sentence we have not taught you yet.',
+    body: 'Ask for it, anywhere, any time, and get it back in the Portuguese they actually speak here. It goes into your own library.',
+    /*
+      THE ACT, NOT A LIST OF QUESTIONS.
+
+      This showed an exchange: two questions somebody typed and the European Portuguese
+      that came back. As copy it was true and as a card it was a FAQ — a stack of
+      sentences, read left to right, describing a feature.
+
+      What the card has to show is the two ways in, because they are the whole of what
+      ASK is: type a phrase, or point the camera at something written in a language you
+      cannot read. A person looking at a menu they cannot order from is the entire use
+      case, and no list of example questions puts them in that moment.
+
+      So the specimen is the input rather than the output — a phrase being typed, and a
+      sign being photographed — and the answer comes underneath one of them.
+    */
+    shows: {
+      kind: 'asking',
+      typed: { asked: 'How do I ask them to split the bill?', pt: 'Pode partir a conta em dois?' },
+      shot: { caption: 'Or photograph what you cannot read.', pt: 'Encerrado para férias', en: 'Closed for holidays' },
+    },
   },
   {
     id: 'intro_drops',
@@ -318,97 +303,35 @@ export const INTRO_CARDS: IntroCard[] = [
     */
     shows: { kind: 'drop' },
   },
-  {
-    /*
-      The 4 R's, and the copy is careful about "daily" on purpose.
-
-      Revision genuinely can be daily — it draws on what somebody already owns and never
-      runs out. Drops cannot: they are pegged to real events and can be weeks apart. So
-      this card promises every day and the drops card does not, which is the split between
-      what each thing can actually keep.
-    */
-    id: 'intro_revision',
-    image: 'intro_revision_card',
-    pillar: true,
-    eyebrow: 'THE FOUR RS',
-    headline: 'Regular, relevant revision reminders.',
-    body: 'Every day, a handful of the words you own come back round — the ones you are closest to losing, not the ones you learned last.',
-    // A real word out of a real root, which is what would actually come back round.
-    shows: { kind: 'root', root_id: 'ah_enjoy' },
-  },
-  {
-    id: 'intro_ask',
-    pillar: true,
-    eyebrow: 'ASK',
-    headline: 'The sentence we have not taught you yet.',
-    body: 'Ask for it, anywhere, any time, and get it back in the Portuguese they actually speak here. It goes into your own library.',
-    /*
-      A real answer to a real question, written out rather than resolved from a root.
-
-      The translator's own output needs a key and a round trip, and a card that sometimes
-      shows nothing would be worse than one that shows a true example of what comes back.
-      These two are the register the translator is built to produce — European, and the
-      thing somebody would actually need on a Tuesday.
-    */
-    /*
-      The translator as an exchange rather than as two sentences.
-
-      A pair of lines reads as vocabulary. What this card has to show is the ACT: somebody
-      asked for something in English and got European Portuguese back, which is the thing
-      no other card in the sequence demonstrates.
-    */
-    shows: {
-      kind: 'exchange',
-      exchange: [
-        { asked: 'How do I ask them to split the bill?', pt: 'Pode partir a conta em dois?', en: 'Could you split the bill in two?' },
-        { asked: 'Does this have gluten in it?', pt: 'Isto leva glúten?', en: 'Does this have gluten in it?' },
-      ],
-    },
-  },
-  {
-    id: 'intro_share',
-    pillar: true,
-    eyebrow: 'WITH MATES',
-    headline: 'Show somebody three things you can say.',
-    body: 'They can show you theirs. Learning the same city at the same time as somebody you know is the difference between a habit and a chore.',
-    // The shape of a showing: three sentences somebody has said cold.
-    shows: {
-      kind: 'lines',
-      lines: [
-        { pt: 'Uma bica, se faz favor.', en: 'An espresso, please.' },
-        { pt: 'A fila é aqui?', en: 'Is the queue here?' },
-        { pt: 'Pode repetir mais devagar?', en: 'Could you say that again more slowly?' },
-      ],
-    },
-  },
 ]
 
 /**
- * The two cards woven into the sequence rather than declared in it.
+ * Screen eight, woven into the sequence rather than declared in it.
  *
- * SET-UP MOVED TO THE END. It sat after the Legend card, on the reasoning that the Legend
- * is the first moment somebody has been told what the answers are for — which was true, and
- * left four arguments stranded behind a commitment. Drops, revision, ask and share are the
- * reasons to bother, and asking somebody to decide before they have heard them is asking
- * early to no purpose.
+ * ONE DECISION is the set-up card — a form that answers back rather than an argument —
+ * which is why it is spliced in here instead of sitting in the list above with the six
+ * that are copy. It is last because last is what it means: by the time somebody reaches
+ * it they have made both gestures, seen what a vibe is, what a Legend is, what ASK does
+ * and what is on in Lisbon. Then one decision, and tapping OPEN ends the intro.
  *
- * Last means last: they have seen everything the product does, chosen a city, watched the
- * demo, and read what a Legend is. Then one decision.
+ * It follows DROPS because DROPS is the final card now. It used to follow `intro_share`,
+ * the WITH MATES card, which no longer exists — that card, THE FOUR RS and the collision
+ * went in the same pass that took the sequence to eight screens.
  */
 /**
- * THE DEMO IS NO LONGER WOVEN IN, because card one is the demo.
+ * THE DEMO IS NOT WOVEN IN.
  *
  * `how_it_works` — the playable three-beat DemoCard — used to be spliced in after the
  * VIBES card, back when the sequence opened on "DUB — your travel companion" and nothing
  * demonstrated anything for six cards. It was the only thing showing Portuguese being
  * built, and it was seventh.
  *
- * The unpack is card one now and uses the same Goose line, so weaving the explainer in
- * replayed the same demonstration four cards later under the same SIXTY SECONDS eyebrow —
- * which firstrun-check caught as two cards sharing an eyebrow and one of them bare.
+ * VIBES carries the Goose unpack itself now, so weaving the explainer in would replay the
+ * same demonstration on the very next card — which is the duplication this rework exists
+ * to remove.
  *
  * DemoCard itself stays: it is the /vibes experience and its beat structure works there.
  * What stops is the splice into the showcase feed.
  */
 export const INTRO_DEMO_AFTER: string | null = null
-export const INTRO_SETUP_AFTER = 'intro_share'
+export const INTRO_SETUP_AFTER = 'intro_drops'

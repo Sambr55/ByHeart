@@ -14,6 +14,7 @@ import {
   acceptDeal,
   loadLearner,
   resetLearnerCache,
+  setChapter,
   setDisplayName,
   setProfile,
   setPurpose,
@@ -46,11 +47,21 @@ import { DEFAULT_PAIR } from '@/content/pairs'
  * pt-PT. Asking twice for one answer is a form, not a decision.
  */
 /*
-  Where left. It is card three now, in components/Destination.tsx.
+  WHERE CAME BACK, and it is a write rather than a question again.
 
-  Asking it here meant eight screens of argument were written about a city nobody had
-  chosen — the drops card could not say what was on, the rooms card could not name rooms.
-  Asked early it costs one tap and makes every card after it true of somewhere specific.
+  It was moved out to a card of its own — WHERE TO, components/Destination.tsx — on the
+  argument that eight screens of argument were being written about a city nobody had
+  chosen. The fix map's eight screens do not include it: the sequence opens on the gesture
+  tutorial and every card after it is about Lisbon, which is the only open chapter, so the
+  tap was buying nothing.
+
+  What matters is that the chapter is still RECORDED, because the feed reads it. Removing
+  the card took `setChapter` with it and left the field null, which chapterById quietly
+  falls back to Lisbon for — correct today and wrong the day a second city opens. finish()
+  writes it explicitly now.
+
+  When there IS a second open city the question comes back here, on the card that already
+  asks why and who, rather than as a ninth screen.
 */
 type Step = 'why' | 'who'
 
@@ -129,6 +140,23 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     */
     setPair(DEFAULT_PAIR)
     /*
+      AND THE CITY, which nothing was writing any more.
+
+      The destination card wrote it — `setChapter(c.id)` next to `setPair` — and that card
+      is not one of the eight screens. Removing it took the write with it silently: every
+      other part of the record was still being set here, so set-up looked complete, and the
+      chapter simply stayed null. A null chapter is not a crash, it is worse — chapterById
+      falls back to Lisbon, so the product behaves correctly for the only open city and
+      would start handing people the wrong one the moment a second city opens.
+
+      Lisbon explicitly rather than the fallback, for the reason the pair is set explicitly
+      one line above: a learner record should say what it is teaching rather than leave it
+      to be inferred from a constant that may gain siblings. When there is a second open
+      city this is where the question goes — on the card that already asks why and who,
+      which is where the fix map moved it.
+    */
+    setChapter('lisbon')
+    /*
       The record to read has just changed, so the cached one goes.
 
       Without this the next read returns whatever was in memory from the default pair, and
@@ -173,7 +201,25 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
-          <h2 className="display text-balance text-2xl">{'Then this is your ' + city + '.'}</h2>
+          {/*
+            THEN YOU START, where this card ends the intro.
+
+            The two contexts want different sentences and it took the fix map to make that
+            obvious. Inside /vibes the learner has just answered the purpose question and
+            "Then this is your Lisbon." is the answer landing — it names the city back at
+            them, which is the whole payoff of having asked.
+
+            At the end of the intro nobody has answered anything. It is the eighth screen
+            of a sequence somebody has swiped through, and the only thing left is to begin:
+            the sentence has to be about them starting, not about a city they were never
+            asked to choose. `onDone` is the tell — it exists only when the journey is
+            asking — so the branch that navigates is the branch that closes the intro.
+
+            The city line is not lost; it is still what /vibes says.
+          */}
+          <h2 className="display text-balance text-2xl">
+            {onDone ? 'Then this is your ' + city + '.' : 'Then you start.'}
+          </h2>
           <p className="text-sm leading-relaxed text-muted">
             {topics.length
               ? 'Rooms you will get because of what you just said.'
@@ -229,14 +275,17 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
           className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >
           {/*
-            The shared constant, not a second copy of the same sentence.
+            OPEN, because this is the door at the end of the intro.
 
-            Written out here it was flagged as a 26-character eyebrow — which it is not, it
-            is a full-width button that happens to use the eyebrow's typography. The right
-            fix is not to appease the rule but to stop having two spellings of the one call
-            to action: every explainer already points here with this exact string.
+            EXPLAINER_CTA — "IT'S ALL ABOUT BUILDING YOUR LEGEND" — is the right words on an
+            explainer, where the button has to argue its way to the next thing. Here it is
+            the eighth screen of eight and the argument is over: everything the product does
+            has been shown, and what is left is one word that opens it.
+
+            The constant still serves every explainer that points at /vibes. It is this one
+            call site, at the end of the sequence, that says OPEN.
           */}
-          {EXPLAINER_CTA}
+          OPEN
         </Link>
         )}
       </div>

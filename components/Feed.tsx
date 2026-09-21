@@ -486,11 +486,41 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     const el = rail.current
     if (!el) return
     const to = (atIndex + 2) * el.clientHeight
+    /*
+      THE RAIL CANNOT BE SCROLLED WHILE IT IS STILL LOCKED, and that one frame is the whole
+      of "swipe right does not work in the intro".
+
+      A locked rail carries `overflow-y-hidden` — that is what stops the thumb wandering off
+      a card that is holding somebody. Freeing the card is a React state change, so the class
+      does not come off until the next render. This fired its scroll inside a single
+      requestAnimationFrame, which lands BEFORE that render commits: the scroll is issued
+      against a container that is still overflow:hidden, the browser clamps it to where it
+      already is, and the gesture is spent with nothing to show for it.
+
+      Measured, because it looks exactly like a snap fighting a scroll and is not: the rail
+      moved 1690 → 1880 and came back to 1688, while the very same scrollTo run by hand a
+      second later went to 2532 and stayed. Nothing was pulling it back — the scroll was
+      being thrown away before it began, and what showed in the trace was the tail of the
+      thumb's own momentum.
+
+      Why the left-swipe always worked: rejecting a card re-renders the feed with that card
+      pulled out of the pile, and the rail lands on the next one without needing this scroll
+      to survive at all. So the one gesture that depended on it was the one that had no
+      second mechanism behind it.
+
+      Two frames rather than one. The first lets React commit the unlock, the second runs
+      once the class is actually off the element. A scroll that arrives a frame late is
+      invisible; a scroll that arrives a frame early does nothing whatsoever.
+    */
     requestAnimationFrame(() =>
-      el.scrollTo({
-        top: to,
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-      }),
+      requestAnimationFrame(() =>
+        el.scrollTo({
+          top: to,
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            ? 'auto'
+            : 'smooth',
+        }),
+      ),
     )
   }
 
@@ -1059,6 +1089,13 @@ export function Card({
     `locked` in the dependencies is the fix. The position is re-taken the moment the lanes
     actually exist.
   */
+  /*
+    Declared above the lane effect because that effect reads `fired` — see the note in it.
+    `from` keeps its company rather than being stranded further down on its own.
+  */
+  const from = useRef<{ x: number; y: number } | null>(null)
+  const fired = useRef(false)
+
   useEffect(() => {
     const el = pane.current
     if (!el) return
@@ -1067,10 +1104,29 @@ export function Card({
       here would be indistinguishable from the bug.
     */
     if (locked) return
+    /*
+      AND SKIPPED ON A CARD THAT IS LEAVING, which is the second half of "swipe right does
+      not work".
+
+      `fired` means this card's one gesture has landed and the rail is already scrolling to
+      the next card. Writing scrollLeft here then re-anchors the snap-mandatory rail onto
+      THIS card — the browser resolves a scroll inside a snap container by re-settling it —
+      and the advance is cancelled a frame after it starts.
+
+      Measured rather than reasoned about: the rail's scrollTop went 1690 → 1868 → back to
+      1688, a smooth scroll toward the next card abandoned mid-flight. The card ended up
+      unlocked, centred, and immovable, because its gesture had already been spent.
+
+      The left-swipe never showed it. A rejected card is pulled out of the pile by
+      rejectCard, so the snap it would have re-anchored to is not there any more.
+
+      The lane still needs re-taking for every other transition — mounting, a card coming
+      back from the pile, the lanes appearing when a lock releases without a gesture — so
+      the effect stays and only the departing case is skipped.
+    */
+    if (fired.current) return
     el.scrollLeft = el.clientWidth * faceLane
   }, [card.id, faceLane, locked])
-  const from = useRef<{ x: number; y: number } | null>(null)
-  const fired = useRef(false)
 
   /*
     THE CARD HAS TO GO THE WAY THE THUMB WENT.
@@ -1163,8 +1219,23 @@ export function Card({
       */
       rejectCard(card.id)
       track('card_rejected', { card: card.id })
-      // The lesson card teaches that nothing is lost, so it offers the proof as well.
-      onRejected?.()
+      /*
+        NO TOAST ON THE TUTORIAL CARD, and this is a deliberate removal.
+
+        The reject toast says "Sent to the back." with a BRING IT BACK button beside it,
+        which is exactly right in the feed: a card vanished, and the person needs telling
+        where it went while the thought is still there.
+
+        On the gesture tutorial it was three things saying one thing. The card itself reads
+        "Swipe left and it goes to the back of the pile", the toast then announced that it
+        had gone to the back, and the button offered to bring it back — a label, a caption
+        and a control for a single idea, landing on top of the next slide as it arrives.
+
+        What replaces it is the rewind arrow on slide two, looping: the promise is kept as
+        a picture on the card it belongs to rather than as furniture over the card after
+        it. Everywhere else in the product the toast is untouched.
+      */
+      if (card.kind !== 'intro') onRejected?.()
     }
     /*
       UP does not fly, and that is not an omission.
@@ -1283,7 +1354,31 @@ export function Card({
       card.kind === 'intro' &&
       card.intro.exit === 'in'
     ) {
-      onFreed?.(card.id)
+      /*
+        SWIPING RIGHT HAS TO MOVE YOU ON, and this is the whole of "swipe right does not
+        work anywhere in the intro".
+
+        The gesture was being read correctly and then half-honoured. `onFreed` unlocks the
+        card — that is all it does — so a right-swipe on the tutorial released the lock and
+        left the rail exactly where it was. The card sat there, now unlocked, showing the
+        same words it showed before the gesture. Nothing moved, so from the hand's point of
+        view nothing happened: the instruction said swipe right, the person swiped right,
+        and the screen did not change.
+
+        It looked correct in the code because the card WAS freed, and it looked correct in
+        a screenshot because the card is the same card either way. The only observable
+        difference is whether the rail scrolls, which nothing was asserting.
+
+        `done(null)` rather than onPassed directly: it is the one exit path, it guards
+        against firing twice with `fired`, and it is what the left-swipe and the tap
+        already use. Freeing is part of what it does — onPassed adds the id to `freed` —
+        so this loses nothing and gains the scroll.
+
+        The lanes-based path stays for ordinary cards, where swiping right opens the
+        language pane and staying put is exactly right. This branch is intro-only and
+        always was.
+      */
+      done(null)
     }
   }
   /*
@@ -1459,9 +1554,25 @@ export function Card({
                 over calçada in daylight — pale, high-contrast stone — and 62 per cent was
                 not enough to hold any of it. A form needs its ground to be quiet.
               */
+              /*
+                AND THE SAME WASH WHERE THE CARD IS SHOWING LANGUAGE.
+
+                This file used to argue that a card showing language takes the sand ground
+                and only a mood card takes a photograph — which was true while the bank had
+                six pictures and the sequence had eleven cards. Every screen carries a
+                photograph now, so the argument has to be settled by the scrim instead of by
+                the ground, or the most language-dense cards in the product are the ones
+                least readable.
+
+                A specimen is a stack: a Portuguese line, its English, sometimes a field and
+                a sign. That is the same problem the destination card has — several rows of
+                small type rather than one headline — so it takes the same heavier gradient
+                rather than the one tuned for a title over a dark room.
+              */
               className={
                 'absolute inset-x-0 bottom-0 bg-gradient-to-t to-transparent ' +
-                (card.kind === 'derived' || (card.kind === 'intro' && card.intro.asks)
+                (card.kind === 'derived' ||
+                (card.kind === 'intro' && (card.intro.asks || card.intro.shows))
                   ? 'h-[85%] from-black/95 via-black/80'
                   : 'h-[62%] from-black/92 via-black/60')
               }
@@ -1510,7 +1621,7 @@ export function Card({
                         'mt-3 text-sm leading-relaxed ' + (onSand ? 'text-muted' : 'text-white/80')
                       }
                     >
-                      {blurb}
+                      <Emphasised text={blurb} />
                     </p>
                     {/*
                       The arrow IS the exit, drawn.
@@ -1528,9 +1639,31 @@ export function Card({
                       that card choosing IS the gesture and the cities are on the face.
                     */}
                     {card.intro.exit && card.intro.exit !== 'choose' ? (
-                      <Gesture kind={card.intro.exit} moving />
+                      <Gesture
+                        kind={card.intro.exit}
+                        moving
+                        /*
+                          The rewind rides on slide two of the tutorial and nowhere else:
+                          it answers the swipe the previous card just asked for.
+                        */
+                        rewind={card.id === 'intro_in'}
+                      />
                     ) : null}
-                    {card.intro.shows ? <Specimen shows={card.intro.shows} /> : null}
+                    {card.intro.shows ? (
+                      /*
+                        The specimen's palette follows the ground it landed on.
+
+                        Specimen draws in the sand colours — azulejo blue for the
+                        Portuguese, deep indigo for the English, a warm hairline round the
+                        typed field — which was right while language cards sat on sand. All
+                        eight screens carry a photograph now, so on a photo the subtree
+                        takes the white-is-the-accent palette the rest of the full-bleed
+                        product uses. On sand it is left exactly as it was.
+                      */
+                      <div className={onSand ? undefined : 'shown-on-photo'}>
+                        <Specimen shows={card.intro.shows} />
+                      </div>
+                    ) : null}
                     {/*
                       The city list is ON THE FACE, because the card that asks for it admits
                       no other gesture — and the pane it used to live in is hidden while a
@@ -2229,6 +2362,40 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
  * real Legend, which does not leave the device at all.
  */
 /**
+ * The named things in a line of copy, set apart from the rest of it.
+ *
+ * ONE CARD NEEDS THIS AND IT IS WORTH THE FUNCTION. The VIBES body reads "Top Gun,
+ * Bridget Jones, Bond, the songs you know" — three titles and one thing that is not a
+ * title. Set them all the same and the sentence lists four franchises, the last of which
+ * nobody can place; set the titles apart and it reads the way it is meant to, as three
+ * films and then everything else you already carry around.
+ *
+ * Deliberately not a markdown library. The product has exactly one kind of emphasis in
+ * one string, and pulling in a parser — with its links, its lists and its raw HTML — to
+ * serve that would be a dependency and an injection surface for a pair of asterisks.
+ * `**` is the whole grammar. Anything else is printed as written.
+ *
+ * Odd segments of the split are the emphasised ones, which holds for a well-formed string
+ * and degrades to plain text for a malformed one rather than throwing.
+ */
+function Emphasised({ text }: { text: string }) {
+  if (!text.includes('**')) return <>{text}</>
+  return (
+    <>
+      {text.split('**').map((part, i) =>
+        i % 2 ? (
+          <em key={i} className="font-semibold not-italic">
+            {part}
+          </em>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  )
+}
+
+/**
  * The gesture, drawn.
  *
  * Three arrows and nothing else. Deliberately not animated: the product's motion scale is
@@ -2239,7 +2406,29 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
  * `prefers-reduced-motion` therefore needs no handling here, which is the other reason not
  * to animate it.
  */
-function Gesture({ kind, moving = false }: { kind: 'up' | 'away' | 'in'; moving?: boolean }) {
+function Gesture({
+  kind,
+  moving = false,
+  rewind = false,
+}: {
+  kind: 'up' | 'away' | 'in'
+  moving?: boolean
+  /*
+    The promise that the card comes back, kept as a picture.
+
+    Only the second tutorial slide passes this. It is the slide somebody lands on BY
+    swiping the first one away, so it is the one moment in the product where a person has
+    just made a card disappear and has not yet been told it is retrievable — which is
+    precisely when the reject toast used to fire, over the top of this card, saying it in
+    words with a button attached.
+
+    Three icons stood here at one point: this one, a "Sent to back" and a "Bring it back".
+    Two of those were captions on an event that had already happened. What survives is the
+    one that is about the future, turning, on the card that is being read rather than over
+    the card that is arriving.
+  */
+  rewind?: boolean
+}) {
   const label =
     kind === 'up' ? 'Swipe up' : kind === 'away' ? 'Swipe left' : 'Tap, or swipe right'
   /*
@@ -2274,6 +2463,26 @@ function Gesture({ kind, moving = false }: { kind: 'up' | 'away' | 'in'; moving?
         )}
       </svg>
       <span className="eyebrow">{label}</span>
+      {rewind ? (
+        <span data-testid="gesture-rewind" className="ml-auto flex items-center gap-3">
+          {/*
+            The same arrow the rail's own rewind control uses, so the picture on the
+            tutorial is the picture on the button somebody will later press.
+          */}
+          <svg
+            viewBox="0 0 24 24"
+            className="rewind-loop h-5 w-5 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            aria-hidden
+          >
+            <path d="M9 14 4 9l5-5" />
+            <path d="M4 9h10a6 6 0 0 1 0 12h-3" />
+          </svg>
+          <span className="eyebrow">Comes back</span>
+        </span>
+      ) : null}
     </p>
   )
 }
@@ -2339,7 +2548,26 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
     const first = live.find((c) => c.kind === 'situation' && c.drop)
     if (!first || first.kind !== 'situation' || !first.drop) return []
     const l = first.situation.lines[0]
-    return l ? [{ pt: l.pt, en: first.drop.event + ' · ' + first.drop.place.name }] : []
+    /*
+      THE ENGLISH UNDER THE PORTUGUESE, which is what every other specimen on the rail
+      does and this one alone did not.
+
+      The line rendered "Onde é o concerto?" with the event and the venue underneath —
+      "Duran Duran · MEO Arena" — because the `en` slot was being used to carry the
+      provenance. On a card whose whole subject is what is on in Lisbon that looked
+      reasonable, and it meant the one screen in the sequence showing a sentence somebody
+      would actually say was the one screen that never said what it meant. A stranger four
+      cards into the product cannot read it, and DROPS is exactly where they are being
+      promised they will be able to.
+
+      The line's own `en` is authored beside the Portuguese in content/drops.ts, so this is
+      a renderer fix rather than new copy: "Where is the concert?" was already sitting
+      there unused.
+
+      The event and the venue are not lost — they are the drop card's own subject, said on
+      its face. They were never this line's translation.
+    */
+    return l ? [{ pt: l.pt, en: l.en }] : []
   }, [shows])
 
   /*
@@ -2469,6 +2697,64 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
     )
   }
 
+  /*
+    THE TWO WAYS IN, drawn as inputs rather than listed as answers.
+
+    ASK showed an exchange — two questions and their Portuguese — which is true and reads
+    as documentation: the more pairs it carried the more it looked like a FAQ somebody had
+    pasted onto a card. What the pillar actually offers is two doors, and one of them (the
+    camera) had never appeared anywhere in the sequence.
+
+    So the typed half is drawn as a field with a caret in it, the way it looks a moment
+    before somebody hits send, and the photographed half is drawn as a sign with its
+    translation under it. The English is kept ONLY on the photographed one, because there
+    the translation is the entire point — somebody at a locked door needs to know the shop
+    is shut, not how to pronounce it.
+
+    A caret that blinks would be motion for its own sake on a card nobody is typing into,
+    so it does not: it is a shape that says "a cursor lives here", which is all the
+    picture needs to do.
+  */
+  if (shows.kind === 'asking') {
+    return (
+      /* A list, because it is two ways in rather than one thing with a caption. */
+      <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-6">
+        <li className="flex flex-col gap-3">
+          {/* The field, as it looks the moment before it is sent. */}
+          <div className="flex items-center gap-3 rounded-xl border border-line bg-bg/80 px-3 py-3">
+            {/* A speech mark, drawn the way every other icon in this file is drawn. */}
+            <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-muted" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+              <path d="M20 15a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z" />
+            </svg>
+            <span className="min-w-0 flex-1 text-sm text-fg/90">{shows.typed.asked}</span>
+            <span aria-hidden className="h-4 w-px shrink-0 bg-accent" />
+          </div>
+          <span className="flex items-center gap-3 pl-1">
+            <AudioButton slug={slugFor(shows.typed.pt)} text={shows.typed.pt} size="sm" />
+            <span className="pt display min-w-0 flex-1 text-lg text-accent">{shows.typed.pt}</span>
+            <CopyButton text={shows.typed.pt} size="sm" />
+          </span>
+        </li>
+
+        <li className="flex flex-col gap-3">
+          <span className="text-sm text-muted">{shows.shot.caption}</span>
+          {/*
+            The sign itself, and it is deliberately not styled like the app.
+
+            A photographed notice is somebody else's typography — painted, printed, stuck
+            to a door — so it gets a border and a centred line rather than the accent
+            treatment every other Portuguese string in the product wears. The difference
+            is the point: this is words DUB found, not words DUB taught.
+          */}
+          <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-line px-3 py-6 text-center">
+            <span className="pt display text-lg text-fg">{shows.shot.pt}</span>
+            <span className="text-xs text-muted">{shows.shot.en}</span>
+          </div>
+        </li>
+      </ul>
+    )
+  }
+
   if (!lines.length) return null
   return (
     <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-3">
@@ -2511,7 +2797,9 @@ function IntroPane({ card }: { card: Extract<FeedCard, { kind: 'intro' }> }) {
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-accent">{c.eyebrow}</p>
         <h2 className="display text-balance text-2xl">{c.headline}</h2>
-        <p className="text-sm leading-relaxed text-fg/85">{c.body}</p>
+        <p className="text-sm leading-relaxed text-fg/85">
+          <Emphasised text={c.body} />
+        </p>
       </div>
       {c.examples ? (
         <ul data-testid="intro-examples" className="flex flex-col gap-1">

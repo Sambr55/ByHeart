@@ -104,6 +104,27 @@ export const IMAGE_BANK: Record<string, BankImage> = {
     rights_status: 'generated',
   },
   /*
+    IN THE REPO AND NOT IN THE BANK, which is a picture that may as well not exist.
+
+    pharmacy.jpg has been in public/lisbon since the first set and was never given an entry
+    here, so nothing could reference it: the bank is a declared list precisely so a slug
+    cannot point at a hole, and the same rule means a file with no slug is unreachable.
+    Registered now because the ASK card needed a ground and the sequence's rule is to spend
+    what is already in the repo before asking for new art.
+
+    It earns that card rather than merely filling it. A pharmacy is the place somebody has
+    a sentence they were never taught and needs it immediately — which is the whole of what
+    ASK is for, and the Feed's own comment already names the pharmacy as the destination of
+    that argument.
+
+    Alt from the picture, as the block below insists: what is in the frame, not the mood.
+  */
+  pharmacy: {
+    src: '/lisbon/pharmacy.jpg',
+    alt: 'The inside of an old Lisbon pharmacy: floor-to-ceiling dark wood shelves stacked with medicine boxes, a marble-topped counter, and a pharmacist in a white coat with her back to the room.',
+    rights_status: 'generated',
+  },
+  /*
     THE MOVING BLOCK AND THE DROP TEMPLATES, generated 2026-09-08 and looked at one by one.
 
     The alt text is written from the picture rather than the brief, which is why this was

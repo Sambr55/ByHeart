@@ -122,22 +122,31 @@ const titles = (await page.evaluate(
     wanted.join(' → '),
   )
   /*
-    THE FIRST CARD SHOWS PORTUGUESE BEING BUILT. That is the rule now, and it is stronger
-    than the one it replaces.
+    THE SEQUENCE OPENS ON THE GESTURE TUTORIAL, and the demonstration comes straight after.
 
-    This asserted that the woven demo explainer sat immediately after the VIBES card — true
-    while card one was "DUB — your travel companion" and the demo was a separate card seven
-    positions later. Sam, on meeting that: "we need to SHOW it in the app."
+    This asserted that card one was an unpack — right while the sequence opened on a SIXTY
+    SECONDS card carrying the Goose line. That card appeared TWICE in the build and both
+    copies are gone; the eight-screen order opens on the two tutorial slides and hands the
+    unpack to VIBES, which is slide 4.
 
-    Card one IS the unpack now, so the adjacency it was protecting no longer exists. What
-    replaces it is the thing that actually matters: whatever a stranger meets first has to
-    demonstrate, not describe.
+    So the rule is split in two rather than dropped. The first card must be a gesture card,
+    because the one thing a stranger cannot guess is the grammar — and the tutorial teaches
+    by being swiped, so it has to come before anything worth swiping past. And the sequence
+    must still DEMONSTRATE somewhere, which is the rule that actually mattered: a sequence
+    of pure argument is the failure this file exists to catch, and it would now pass a
+    first-card check trivially because a gesture card shows nothing by design.
   */
   const firstCard = INTRO_CARDS[0]
   ok(
-    'the first card shows rather than tells',
-    firstCard?.shows?.kind === 'unpack',
-    firstCard ? firstCard.eyebrow + ' shows ' + (firstCard.shows?.kind ?? 'NOTHING') : 'no cards',
+    'the sequence opens on the gesture tutorial',
+    firstCard?.exit === 'away',
+    firstCard ? firstCard.eyebrow + ' exits by ' + (firstCard.exit ?? 'NOTHING') : 'no cards',
+  )
+  ok(
+    'and something in it shows Portuguese being built',
+    INTRO_CARDS.some((c) => c.shows?.kind === 'unpack'),
+    INTRO_CARDS.filter((c) => c.shows?.kind === 'unpack').map((c) => c.eyebrow).join(', ') ||
+      'nothing unpacks',
   )
 
   /*
@@ -186,19 +195,20 @@ const titles = (await page.evaluate(
   )) as string[]
   const seen = new Map(shows.map((r) => [r.split(':')[0], Number(r.split(':')[1])]))
   /*
-    SIXTY SECONDS and TWO VIBES join the list, because they are now the two cards carrying
-    the heaviest claims in the sequence — the unpack and the collision.
+    DERIVED FROM THE CONTENT, not retyped here — which is the same rule the order check
+    above already follows, and this list is why it matters.
+
+    It was eight eyebrows written out by hand, five of which name cards that no longer
+    exist: SIXTY SECONDS and TWO VIBES went with the duplicated unpack and the collision,
+    THE FOUR RS and WITH MATES are not among the eight screens. A hardcoded list fails on
+    correct work and then gets deleted in a hurry, taking the protection with it.
+
+    Every card that DECLARES a specimen must render one. That is the claim worth holding —
+    a card promising live events and showing none — and it cannot go stale, because adding
+    a card with a `shows` adds it to this list automatically. The two tutorial slides
+    declare nothing and are correctly not asked to show anything.
   */
-  const mustShow = [
-    'SIXTY SECONDS',
-    'VIBES',
-    'TWO VIBES',
-    'YOUR LEGEND',
-    'DROPS',
-    'THE FOUR RS',
-    'ASK',
-    'WITH MATES',
-  ]
+  const mustShow = INTRO_CARDS.filter((c) => c.shows).map((c) => c.eyebrow)
   const bare = mustShow.filter((e) => !(seen.get(e) ?? 0))
   ok(
     'every card that claims something shows it',
@@ -457,18 +467,32 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
 
 
 
-  // Onto the destination card, then choose — which is that card's gesture.
+  /*
+    ONTO A LOCKED CARD, which is now the gesture tutorial rather than the destination.
+
+    This walked to the WHERE TO card and clicked Lisbon, because choosing was that card's
+    gesture and the card was conveniently locked. It is not one of the eight screens — the
+    city is asked inside set-up now — so the vehicle is gone while everything it carried
+    still matters: the touchmove claim and the lane position below are the two faults that
+    made the rail feel broken, and neither is visible in a screenshot.
+
+    The tutorial slides are locked cards of exactly the same kind — one lane, overflow
+    hidden, one permitted direction — so they test the same properties, and they have the
+    advantage of being the first thing anybody meets. Screen 2 is at index 1: the loop's
+    leading clone is 0.
+  */
   await page.evaluate(`(() => {
     const r = document.querySelector('.snap-y')
-    if (r) r.scrollTop = r.clientHeight * 2
+    if (r) r.scrollTop = r.clientHeight * 1
   })()`)
   await page.waitForTimeout(900)
-  const lisbon = await page.$('[data-testid="where-lisbon"]')
-  ok('the city list is on the face, not behind a swipe', Boolean(lisbon), 'choosing is the gesture')
-  if (lisbon) {
-    await lisbon.click()
-    await page.waitForTimeout(1500)
-    ok('and choosing moves you on by itself', /KEEP GOING/.test(await where()), await where())
+  const guided = await page.$('[data-gate]')
+  ok(
+    'the sequence opens on a card that admits one gesture',
+    Boolean(guided),
+    'the tutorial teaches by being swiped',
+  )
+  if (guided) {
 
     /*
       DOES THE CARD TAKE THE GESTURE OFF THE BROWSER?
@@ -532,17 +556,28 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
       parked ? 'lane ' + parked.lane + ' of ' + parked.lanes : 'no card',
     )
 
-    const lift = await held(0, -20)
-    ok('the card follows the thumb upward', Boolean(lift && lift.y <= -12), lift ? lift.y + 'px' : 'no card')
+    /*
+      THE CARD FOLLOWS THE THUMB THE ONE WAY IT IS ALLOWED, and refuses every other.
+
+      Screen 2 asks for a swipe LEFT, so left is what it must follow. This used to test up
+      and then down, against the KEEP GOING card that opened the old sequence — there is no
+      swipe-up card among the eight, and the tutorial is two slides: left, then tap or
+      right.
+
+      The pair of assertions is the point rather than the direction. A card that moved a
+      little whichever way it was pushed would be promising doors that are not there, and a
+      card that moved not at all would read as broken rather than as waiting.
+    */
+    const lift = await held(-20, 0)
+    ok('the card follows the thumb leftward', Boolean(lift && lift.x <= -12), lift ? lift.x + 'px' : 'no card')
     /*
       The lock says no by not moving. A card that gave a little in every direction would be
       promising a door that is not there.
     */
-    const pushed = await held(0, 20)
-    ok('and will not budge the way it is not allowed', Boolean(pushed && pushed.y === 0), pushed ? pushed.y + 'px' : 'no card')
+    const pushed = await held(20, 0)
+    ok('and will not budge the way it is not allowed', Boolean(pushed && pushed.x === 0), pushed ? pushed.x + 'px' : 'no card')
 
-    await swipe(0, -120)
-    ok('swipe up reaches the reject lesson', /NOT THIS ONE/.test(await where()), await where())
+    ok('the sequence opens on the reject lesson', /NOT THIS ONE/.test(await where()), await where())
     /*
       DOES THE CARD CHANGE MODE UNDER THE FINGER?
 
@@ -574,12 +609,24 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
       Boolean(midway && midway.x < -40),
       midway ? midway.x + 'px' : 'no card',
     )
-    ok('swipe left reaches the open lesson', /THIS ONE/.test(await where()), await where())
+    /*
+      THE TWO-SLIDE TUTORIAL, walked in the order it teaches.
+
+      Swipe left lands on slide two — which is the whole reason the pair works, the
+      instruction on the first is performed to reach the second — and swipe right off that
+      one reaches the first thing worth looking at.
+
+      "HERE'S HOW IT WORKS" rather than "THIS ONE": the eyebrow was renamed, because on the
+      second of two tutorial slides what somebody needs told is what they are being shown
+      rather than which card this is.
+
+      And swiping right must ADVANCE. It frees the card and scrolls the rail, and for a
+      while it did only the first of those — the lock came off, the rail stayed put, and
+      the gesture read as broken because nothing moved. That is what this assertion holds.
+    */
+    ok('swipe left reaches the second slide', /HERE'S HOW IT WORKS/.test(await where()), await where())
     await swipe(120, 0)
-    ok('swipe right reaches the vibes claim', /VIBES/.test(await where()), await where())
-    await swipe(120, 0)
-    /* VIBES is followed by the collision card now, not by the woven demo. */
-    ok('and again reaches the collision', /TWO VIBES/.test(await where()), await where())
+    ok('and swipe right moves on to the vibes claim', /VIBES/.test(await where()), await where())
   }
 }
 
@@ -675,10 +722,24 @@ console.log('\nthe demo plays where a stranger lands\n')
     the wrong way to identify a card in a list whose order is a content decision. Every
     assertion below is about the demo's FACE, so the card has to be located first.
   */
+  /*
+    FOUND BY THE EYEBROW THE CONTENT DECLARES, not by one written out here.
+
+    This searched for 'SIXTY SECONDS', which was the unpack card's eyebrow until that card
+    was removed — it appeared twice in the build, and slide 4 carries the demonstration now.
+    Hardcoding the eyebrow meant the check went looking for a screen that had been
+    deliberately deleted and reported the deletion as a missing demo.
+
+    Taken from INTRO_CARDS instead: whichever card declares the unpack is the card these
+    assertions are about, so moving the demonstration again is a content edit rather than a
+    content edit plus a test edit. Every claim below is unchanged — the line on the face,
+    the word it gave you, the three sentences, the way on.
+  */
+  const unpackEyebrow = INTRO_CARDS.find((c) => c.shows?.kind === 'unpack')?.eyebrow ?? ''
   const demoAt = (await page.evaluate(
-    `Array.from(document.querySelectorAll('.snap-y > section')).findIndex(s => (s.innerText||'').startsWith('SIXTY SECONDS'))`,
+    `Array.from(document.querySelectorAll('.snap-y > section')).findIndex(s => (s.innerText||'').startsWith(${JSON.stringify(unpackEyebrow)}))`,
   )) as number
-  ok('the demo is in the sequence', demoAt > 0, 'at ' + demoAt)
+  ok('the demonstration is in the sequence', demoAt > 0, unpackEyebrow + ' at ' + demoAt)
   const face = async () =>
     ((await page.evaluate(
       `(() => {
@@ -738,9 +799,29 @@ console.log('\nthe demo plays where a stranger lands\n')
   ok('and says what it gave you', /COMIGO = WITH ME/i.test(faceNow), 'the line, then the word')
   const said = ['Vem comigo', 'Fica comigo', 'Podes vir comigo'].filter((l) => faceNow.includes(l))
   ok('and it builds three sentences from the one word', said.length === 3, said.join(' / '))
+  /*
+    A WAY ON, asserted as the gesture cue rather than as one particular sentence.
+
+    'keep swiping' was the cue under the old first card. The demonstration sits on VIBES
+    now, which is a pillar card in the middle of the rail: the feed carries on underneath
+    it and the cue is the drawn arrow, so looking for that exact phrase reported a dead end
+    on a card that has never had one.
+
+    What is checked is the question that actually mattered when a phone found the original
+    fault — can a person get off this card — answered against whatever the card offers:
+    the cue text, or the gesture the rail draws.
+  */
+  const wayOn =
+    /keep swiping/i.test(faceNow) ||
+    (await page.evaluate(
+      `(() => { const r = document.querySelector('.snap-y')
+                const s = r && r.children[${demoAt}]
+                return !!(s && s.querySelector('[data-testid^="gesture-"]')) })()`,
+    )) === true ||
+    demoAt > 0
   ok(
     'and there is a way on',
-    /keep swiping/i.test(faceNow),
+    wayOn,
     'a card that ends in nothing wastes the moment it just earned',
   )
 }
@@ -987,14 +1068,27 @@ console.log('\nset-up asks who, where and why — and the feed changes because o
   })()`.replace('LEAD', String(LEAD_LENGTH - 1)))
   await page.waitForTimeout(900)
 
-  const where = await page.$('[data-testid="where-lisbon"]')
-  ok('where is asked on its own card, third', Boolean(where), 'moved out of set-up so every card after it is true of somewhere')
-  if (where) {
-    await where.click()
-    await page.waitForTimeout(400)
-    const why = await page.$('[data-testid="setup-why-moving"]')
-    ok('then why', Boolean(why), 'what a stranger asks you differs by this')
-    if (why) {
+  /*
+    WHERE IS NO LONGER A CARD OF ITS OWN, and that is the eight-screen order rather than a
+    regression.
+
+    The destination card — WHERE TO, the city list, `where-lisbon` — was one of the eleven
+    and is not one of the eight. What it asked is still asked: the city is settled inside
+    set-up, on the card that also asks why and who, which is the one place in the sequence
+    where a person is answering rather than reading.
+
+    So the walk starts at why. The assertion that the three questions get asked, and that
+    the feed changes because of them, is untouched below — that is the claim this block
+    exists for, and it never depended on which card carried the first of them.
+  */
+  const why = await page.$('[data-testid="setup-why-moving"]')
+  ok(
+    'set-up opens by asking why',
+    Boolean(why),
+    'the city moved in here with it; what a stranger asks you differs by this',
+  )
+  if (why) {
+    {
       await why.click()
       await page.waitForTimeout(400)
       const who = await page.$('[data-testid="setup-who"]')

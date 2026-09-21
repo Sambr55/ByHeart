@@ -258,12 +258,53 @@ for (const [key, where] of [...found].sort()) {
   the palette and by nothing else; a stage, a tone or a state may change any other token it
   likes. This is the check that would have caught it, and the one that keeps it caught.
 */
+/*
+  THE SPECIMEN PALETTE, measured over the scrim it actually sits on.
+
+  Every intro screen carries a photograph now, so the cards showing language draw in
+  .shown-on-photo — white as the ink, with --muted and --line derived from it. That scope
+  reassigns --accent, which is the one thing the rule below forbids outside a measured
+  palette, and rightly: a palette nothing measures is a palette nobody has checked.
+
+  So it gets measured rather than exempted. The ground is the scrim at its WEAKEST, not the
+  photograph: contrast cannot be measured against a picture, which is the reason the scrim
+  exists. Specimens sit in the bottom portion of a card under the heavier of the two
+  gradients — 95% black at the foot, 80% at the via stop — so 80% black over the worst case
+  a Lisbon photograph offers (white) is the darkest ground a specimen line can land on.
+
+  Same token set and same thresholds as the bars, because it is the same kind of scope: an
+  inverted palette on a dark ground where white IS the accent.
+*/
+console.log('\nthe specimen palette, composited over the scrim it sits on')
+{
+  // The scrim's via stop over the palest thing a photograph can be.
+  const scrim = over('#000000', 0.8, '#ffffff')
+  const worst = ON_BAR.map(([label, pct, need]) => {
+    const r = ratio(over('#ffffff', pct, scrim), scrim)
+    return { label, r, need, ok: r >= need }
+  })
+  const bad = worst.filter((w) => !w.ok)
+  if (bad.length) failures++
+  console.log(
+    '  ' + (bad.length ? 'FAIL' : 'ok  ') + ' ' + 'shown-on-photo'.padEnd(18) +
+      worst.map((w) => w.label.split(' ')[0] + ' ' + w.r.toFixed(2)).join('  ') +
+      (bad.length ? '   <- ' + bad.map((w) => w.label + ' needs ' + w.need).join(', ') : ''),
+  )
+}
+
 console.log('\none accent, declared in one place')
 {
   const css = readFileSync('app/globals.css', 'utf8').split('\n')
-  // Where a palette is legitimately declared: :root, the two dark-theme blocks, and the
-  // .bar scope, which inverts inside itself so white is the accent on a coloured ground.
-  const PALETTE = /^(:root|\s*:root|@media|\.bar|\.nav-bar)/
+  /*
+    Where a palette is legitimately declared: :root, the two dark-theme blocks, the .bar
+    scope, which inverts inside itself so white is the accent on a coloured ground — and
+    .shown-on-photo, which does the same thing for a specimen sitting on a photograph.
+
+    A scope earns its place on this list by being MEASURED, not by being listed. Both of
+    the inverting scopes are composited and checked above; adding a name here without a
+    block up there would be the exact hole this rule exists to close.
+  */
+  const PALETTE = /^(:root|\s*:root|@media|\.bar|\.nav-bar|\.shown-on-photo)/
   let open: string[] = []
   const strays: string[] = []
   for (let i = 0; i < css.length; i++) {

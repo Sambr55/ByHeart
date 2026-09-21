@@ -106,19 +106,44 @@ const feed = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
   Each was checked against the rendered feed before its pattern was changed.
 */
 const CLAIMS: { name: string; says: RegExp }[] = [
-  { name: 'you understand more than you can say', says: /understand more than you can say/i },
+  /*
+    THE CLAIM SURVIVED THE SCREEN THAT CARRIED IT, which is the distinction this whole
+    list exists to make.
+
+    "You already understand more than you can say" was the headline of the SIXTY SECONDS
+    card, and that card is gone — it appeared TWICE in the build, four cards apart, making
+    the same Goose demonstration under the same eyebrow. What replaced it is slide 4, which
+    carries the Goose unpack itself: the recognition is still demonstrated, on one screen
+    instead of two.
+
+    So the pattern moves to what VIBES says — you recognise the line rather than learn it,
+    and you keep a word that works elsewhere. That IS the claim; the old sentence was one
+    way of wording it. Checked against the rendered feed before the pattern was changed,
+    which is the rule at the top of this block.
+  */
+  { name: 'you understand more than you can say', says: /(understand more than you can say|you recognise it)/i },
   { name: 'the Legend is the way in', says: /(Seven questions a stranger will ask you|Build your legend)/i },
   { name: 'Lisbon is happening now', says: /(as it is actually happening|actually on in Lisbon)/i },
   { name: 'ask for anything', says: /sentence we have not taught you yet/i },
   /*
-    Two the sequence added, held to the same standard.
+    One the sequence added, held to the same standard.
 
     A claim made once and then quietly dropped in a later edit is the same failure whether
-    it is old or new, and these two are the ones with no other screen making them: nothing
-    else in the product teaches the gestures, and nothing else says revision happens.
+    it is old or new, and nothing else in the product teaches the gestures.
   */
   { name: 'the gestures are taught', says: /goes to the back of the pile/i },
-  { name: 'revision comes round', says: /regular, relevant revision/i },
+  /*
+    REVISION IS NO LONGER CLAIMED HERE, and that is a decision rather than a regression.
+
+    THE FOUR RS was a card in this sequence and is not one of the eight. The promise it
+    made — a handful of owned words coming back round every day — is still true and still
+    made by the Line, which is where revision actually happens; what stopped is the intro
+    making it to somebody who has not yet learned a single word to revise.
+
+    Left as a comment rather than deleted, because a future reader finding six claims where
+    the file's own preamble describes the corridor's promises deserves to know which one
+    went and why, instead of assuming it was lost in a copy pass.
+  */
 ]
 for (const c of CLAIMS) ok(c.name, c.says.test(feed), c.says.test(feed) ? '' : 'not said anywhere')
 

@@ -55,8 +55,26 @@ note(`  no lanes: ${without.length} of them`)
 if (!without.length) {
   fail.push('every intro card now claims a side pane — the duplicate-face guard is untested')
 }
+/*
+  NO INTRO CARD HAS A SIDE PANE NOW, and that is the eight-screen order rather than dead
+  logic.
+
+  This failed the moment the destination card went. `hasPane` is examples-or-asks-where,
+  no intro card has ever used `examples`, and WHERE TO — whose pane was a real form rather
+  than a copy of its own face — is not one of the eight screens: the city is asked inside
+  set-up. So the one card that legitimately had a side no longer exists.
+
+  Failing on that would be asserting that the product must keep a screen in order to keep a
+  test honest. What this file is FOR is the opposite invariant — that a card with nothing
+  behind it has no behind — and that is checked by `without.length` above and by the four
+  source-level guards below, none of which depend on any card actually having a lane.
+
+  So the condition is inverted into a note. If an intro card is ever authored with examples
+  the lane logic wakes up on its own, and the guards below already prove Feed.tsx is still
+  the thing deciding.
+*/
 if (!withPane.length) {
-  fail.push('no intro card has a side pane at all — the lane logic is dead')
+  note('  none have one today — the lane logic is guarded at source below rather than by a live card')
 }
 
 /*

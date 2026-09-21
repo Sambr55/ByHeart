@@ -168,11 +168,27 @@ html {
   Safe areas were declared and never used. viewportFit: 'cover' was set in the layout and
   env(safe-area-inset-*) appeared nowhere, so on a notched phone in landscape the content
   ran under the notch.
+
+  THE BOTTOM INSET IS NOT PADDING ON THE BODY, and that is the whole of the gap reported
+  under the splash.
+
+  A full-bleed screen sizes itself to the viewport — min-h-svh on the landing, 100dvh on
+  .app-frame — and then the body padded a home-indicator's worth of --bg BELOW it. The
+  panel ended where the padding began, so on any phone with an inset there was a strip of
+  page background under the photograph: a gap that no amount of work inside the screen
+  could close, because it was outside the screen.
+
+  The horizontal insets stay. Nothing is full-bleed sideways, and the notch-in-landscape
+  fault they were added for is real.
+
+  What replaces it is what the rest of the app already uses: --safe-bottom, spent by the
+  elements that actually need clearance (.nav-clear, .dock, the bar) rather than by every
+  screen whether it has furniture or not. A screen that wants to paint into the inset now
+  can, and a control that must clear it still does.
 */
 body {
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 body {
@@ -1077,6 +1093,34 @@ summary:focus-visible,
 
 
 /*
+  A SPECIMEN OVER A PHOTOGRAPH, which every intro card now is.
+
+  The sequence used to settle this with the ground: a card showing language sat on sand and
+  took the sand palette — deep indigo ink, azulejo blue for the Portuguese, a hairline
+  border — and only mood cards took a picture. The fix map puts a photograph behind all
+  eight screens, so those three colours would now be doing their work over a Lisbon street:
+  --accent is a mid blue that disappears into dusk, --fg is near-black on a dark scrim, and
+  --line is a warm hairline that is simply not there.
+
+  Rather than fork every branch of Specimen on a ground flag, the tokens are redefined for
+  the subtree — the same move .bar makes for the same reason. White IS the accent on a
+  photograph, which is the rule the rest of the full-bleed product already follows, so the
+  Portuguese stays the loudest thing on the card without needing a second colour.
+
+  Derived from --shown-ink with color-mix rather than written as four hex values, so a
+  future theme change cannot leave three of them agreeing and one behind.
+*/
+.shown-on-photo {
+  --shown-ink: #ffffff;
+
+  --fg: var(--shown-ink);
+  --accent: var(--shown-ink);
+  --muted: color-mix(in srgb, var(--shown-ink) 78%, transparent);
+  --line: color-mix(in srgb, var(--shown-ink) 38%, transparent);
+  --line-strong: color-mix(in srgb, var(--shown-ink) 62%, transparent);
+}
+
+/*
   THE FIVE PILLARS, and the one place in DUB where something is allowed to shout.
 
   VIBES, DROPS, THE FOUR RS, ASK and WITH MATES are what the product IS, and they were
@@ -1152,6 +1196,28 @@ summary:focus-visible,
 .nudge-up { animation: nudge-y 620ms var(--ease-drain, ease-out) infinite; }
 
 /*
+  The rewind, going round — the one promise on the tutorial that is not a direction.
+
+  The other three loops are nudges: a shape travelling the way the thumb should travel,
+  six pixels and back. This one is not telling anybody to swipe, it is saying the card
+  comes back, so a sideways nudge would be a fourth arrow pointing somewhere nobody is
+  being asked to go. It turns instead, which is what a rewind does.
+
+  Slower than the nudges on purpose. 620ms is the rhythm of an instruction being repeated
+  at somebody who has not acted yet; this is a reassurance sitting under a card they are
+  reading, and at that speed it would read as urgency. Two full seconds is a thing
+  quietly going round in the corner of the eye.
+
+  It replaces the toast that used to make the same promise in words — see done() in
+  components/Feed.tsx.
+*/
+@keyframes rewind-turn {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+.rewind-loop { animation: rewind-turn 2000ms linear infinite; }
+
+/*
   And all of it stops for anybody who has asked for less movement.
 
   A looping animation is exactly what that setting exists to switch off, and an instruction
@@ -1163,7 +1229,8 @@ summary:focus-visible,
   .pillar-body,
   .nudge-left,
   .nudge-right,
-  .nudge-up {
+  .nudge-up,
+  .rewind-loop {
     animation: none;
   }
 }
