@@ -39,8 +39,12 @@ import { useLearner } from '@/engine/useLearner'
  * WHAT EARNS A ROW: it has to be a pile of Portuguese this person made. That is the line
  * the cog drew for settings and it is the same line here. BEEN THROUGH is where they have
  * been, PUT ASIDE is what they set by, SAID COLD is what they produced, YOUR WORDS is
- * what they own, and DROPS is what is on — the one that is not a possession, kept because
- * it is the only thing on this screen pegged to a date.
+ * what they own, and NIGHTS OUT is where they took it.
+ *
+ * That last one was WHAT IS ON and listed the entire calendar, which made it the only row
+ * here that was not theirs — twelve evenings identical for every learner, under four piles
+ * of things they had made. It is filtered to finished drops now, and the listings page it
+ * used to be is the button at the foot of the section.
  *
  * WORTH HAVING is not here. It rendered four cards from a hardcoded editorial list, the
  * same four for every learner, while the actual inventory was a link in a drawer. One of
@@ -95,7 +99,8 @@ const SECTIONS: {
     note: PROFILE_COPY.drops_note,
     empty: PROFILE_COPY.drops_empty,
     count: (t) => String(t.length),
-    more: { href: '/drops', label: 'EVERYTHING ON' },
+    /* And the calendar itself, which is a listings page and belongs behind a button. */
+    more: { href: '/drops', label: 'WHAT IS ON NOW' },
   },
 ]
 
@@ -276,15 +281,25 @@ export function Profile() {
           }),
         ),
       /*
-        WHAT IS ON, which is the one row here that is not a possession.
+        THE NIGHTS THIS PERSON ACTUALLY WENT INTO — not the calendar.
 
-        Drops were a link in the drawer and they are the only thing in DUB pegged to a
-        date — a gig three weeks out is a reason to open the app that nothing else on this
-        screen provides. Cards, with their photographs, because that is what they are.
+        This listed every live drop, which made it the only row on the screen that was not
+        theirs: twelve evenings in Lisbon, the same twelve for everybody, sitting under
+        four piles of things they had made. Sam: "this looks lioke ALL drops - shoudl be
+        just ones teh user has completed."
+
+        Filtered on finished_cards, which is what Errand writes when somebody finishes a
+        room — the same record BEEN THROUGH is built from, so the two rows cannot disagree
+        about what has been done.
+
+        A drop's card id IS its first situation's id (see dropsFor), so this matches on
+        exactly the room the tile represents. Somebody who went into a drop and finished
+        its arrival has been to that night as far as DUB can tell; the whole calendar
+        stays one tap away behind EVERYTHING ON.
       */
-      drops: dropsFor(learner.chapter ?? undefined).map(
-        (c): Tile => ({ kind: 'card', id: c.id, card: c }),
-      ),
+      drops: dropsFor(learner.chapter ?? undefined)
+        .filter((c) => finished.includes(c.id))
+        .map((c): Tile => ({ kind: 'card', id: c.id, card: c })),
     }
   }, [
     saved.join('|'),
