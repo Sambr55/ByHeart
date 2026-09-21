@@ -297,8 +297,24 @@ export function Profile() {
         its arrival has been to that night as far as DUB can tell; the whole calendar
         stays one tap away behind EVERYTHING ON.
       */
+      /*
+        ANY ROOM OF THE NIGHT, not only its arrival.
+
+        This matched on the drop's card id, which IS its first situation — the arrival —
+        so a night counted as visited only if you had finished "Finding the venue", and
+        the three rooms after it counted for nothing. Sam's record shows the shape of that
+        exactly: nine finished drop rooms, every one of them a `_where`.
+
+        A drop is an evening with four rooms in it. Doing the ticket or the invitation is
+        being at that night as much as finding the door is, and a screen that says
+        otherwise is telling somebody their work did not happen.
+      */
       drops: dropsFor(learner.chapter ?? undefined)
-        .filter((c) => finished.includes(c.id))
+        .filter(
+          (c) =>
+            c.kind === 'situation' &&
+            (c.drop?.situations ?? []).some((s2) => finished.includes(s2.id)),
+        )
         .map((c): Tile => ({ kind: 'card', id: c.id, card: c })),
     }
   }, [
@@ -459,6 +475,7 @@ export function Profile() {
                 empty={sec.empty}
                 tiles={sets[sec.id]}
                 onOpen={setOpen}
+                finished={finished}
                 open={openSection === sec.id}
                 onToggle={() => setOpenSection(openSection === sec.id ? null : sec.id)}
                 count={sec.count(sets[sec.id], learner)}
@@ -494,6 +511,7 @@ function Section({
   empty,
   tiles,
   onOpen,
+  finished,
   open,
   onToggle,
   count,
@@ -504,6 +522,8 @@ function Section({
   empty: string
   tiles: Tile[]
   onOpen: (c: FeedCard) => void
+  /* Passed through to the tiles: a night opens where the learner left off. */
+  finished: string[]
   open: boolean
   onToggle: () => void
   /*
@@ -573,7 +593,7 @@ function Section({
             /* Two across, three-by-four — the shape of something you scan rather than read. */
             <div className="grid grid-cols-2 gap-3">
               {tiles.map((t) => (
-                <TileView key={t.kind + t.id} tile={t} onOpen={onOpen} />
+                <TileView key={t.kind + t.id} tile={t} onOpen={onOpen} finished={finished} />
               ))}
             </div>
           )}
@@ -600,7 +620,16 @@ function Section({
   )
 }
 
-function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void }) {
+function TileView({
+  tile,
+  onOpen,
+  finished = [],
+}: {
+  tile: Tile
+  onOpen: (c: FeedCard) => void
+  /* What this learner has already been through, so a night can open where they left off. */
+  finished?: string[]
+}) {
   const shell =
     'tap-target relative block aspect-[3/4] w-full overflow-hidden rounded border border-line text-left'
 
@@ -721,9 +750,32 @@ function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void 
     /club, which was true while the feed was the only way in.
   */
   if (drop) {
+    /*
+      WHERE THEY LEFT OFF, not back to the beginning.
+
+      The tile linked to the drop's card id, which is its arrival room — so tapping a
+      night you had already been to reopened the room you had already done. Nine times, in
+      Sam's case: "both the close back to a find teh venue card", "all teh text is all teh
+      same in all venue cards". It was the same room, every time, and the other three
+      never came up.
+
+      So it opens the first room of the evening still outstanding, and falls back to the
+      arrival when the whole night is done — at which point reopening the first room is
+      the right answer rather than an accident.
+    */
+    const next = drop.situations.find((s2) => !finished.includes(s2.id)) ?? drop.situations[0]
+    /*
+      And how much of the night is left, on the tile.
+
+      Four rooms an evening, and nothing said which of them somebody had done — so a night
+      three quarters finished looked exactly like one they had opened once. The count is
+      the same device the concertina rows use, for the same reason: it answers the question
+      somebody is actually asking before they tap.
+    */
+    const doneHere = drop.situations.filter((s2) => finished.includes(s2.id)).length
     return (
       <Link
-        href={'/errand/' + card.id + '?from=yours'}
+        href={'/errand/' + next.id + '?from=yours'}
         data-testid={'tile-' + tile.id}
         className={shell}
       >
@@ -732,7 +784,12 @@ function TileView({ tile, onOpen }: { tile: Tile; onOpen: (c: FeedCard) => void 
         ) : null}
         <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
         <span className="absolute inset-x-0 bottom-0 px-3 pb-3">
-          <span className="eyebrow mb-1 block text-[0.5rem] text-white/80">{onNight(drop.on)}</span>
+          <span className="eyebrow mb-1 flex items-baseline justify-between gap-3 text-[0.5rem] text-white/80">
+            <span className="min-w-0 truncate">{onNight(drop.on)}</span>
+            <span className="shrink-0 tabular-nums">
+              {doneHere} / {drop.situations.length}
+            </span>
+          </span>
           <span className="display block text-xs leading-tight text-white">{title}</span>
           <span className="mt-1 block text-[0.6rem] leading-tight text-white/70">{drop.place.name}</span>
         </span>
