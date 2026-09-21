@@ -338,6 +338,10 @@ export function Journey() {
       return <ProfileStep key={step.which} which={step.which} />
     case 'section-complete':
       return <SectionComplete />
+    case 'legend-open':
+      return <LegendOpen />
+    case 'save':
+      return <SaveStep />
     case 'collision':
       return <CollisionView key={step.collisionId} id={step.collisionId} />
     case 'nocue':
@@ -1183,7 +1187,9 @@ function Picker() {
       {mounted && !shelfLegend.open ? (
         <p data-testid="shelf-legend" className="-mt-3 text-sm text-muted">
           {shelfLegend.toGo > 0
-            ? PICKER.legend_basics(shelfLegend.toGo)
+            ? PICKER.legend_basics(
+                Math.max(0, shelfLegend.sessionsNeeded - shelfLegend.sessionsDone),
+              )
             : PICKER.legend_vibes(
                 Math.max(0, shelfLegend.vibesNeeded - shelfLegend.vibesDone),
               )}
@@ -1476,7 +1482,27 @@ function Picker() {
                           of its roots are untouched, contradicting the same screen that
                           wrote this field.
                         */
-                        <span className={BADGE + ' text-white'}>session done</span>
+                        <span className={BADGE + ' text-white'}>
+                          {/*
+                            AND ON THE BASICS, HOW FAR THE DOOR HAS MOVED.
+
+                            "session done" was true and useless here. It appeared after the
+                            first sitting and never changed again, so the basics tile said
+                            DONE while the line directly above it said five roots remained —
+                            two statements of the same fact, on one screen, disagreeing.
+                            Sam: "where is that communicated? It's totally unclear."
+
+                            Only the basics gets a count, because only the basics is a door.
+                            Every other vibe is a thing somebody chose, and a progress
+                            fraction on one of those would invent a target nobody set.
+                          */}
+                          {f.id === 'the_basics' && !shelfLegend.open && shelfLegend.toGo > 0
+                            ? PICKER.legend_tile(
+                                shelfLegend.sessionsDone,
+                                shelfLegend.sessionsNeeded,
+                              )
+                            : 'session done'}
+                        </span>
                       ) : planLocked ? (
                         <span className={BADGE + ' text-white'}>PRO</span>
                       ) : null}
@@ -3084,6 +3110,122 @@ function LegendOpened({
   )
 }
 
+/**
+ * THE LEGEND IS OPEN — a screen, because it is the biggest moment in the product.
+ *
+ * It was a bordered panel at the foot of the section-complete screen, under a headline, a
+ * sample of questions and whatever else that screen was saying. The one moment the whole
+ * free tier builds towards, rendered as a box somebody could scroll past — and on the
+ * "another vibe" path, never rendered at all. Sam: "I want these screens to interrupt the
+ * flow."
+ *
+ * Two ways on and both are real. START MY LEGEND is what the screen is for; NOT NOW keeps
+ * the rail moving and does not ask again, because a payoff that nags is not a payoff.
+ */
+function LegendOpen() {
+  const { next } = useJourney()
+  const preview = LEGEND_FRAMES.slice(0, 3)
+  return (
+    <Shell stage="CHOICE" nav={false}>
+      <div className="flex flex-1 flex-col justify-center gap-3">
+        <p className="eyebrow text-accent">YOUR LEGEND</p>
+        <h1 className="display text-balance text-3xl">{LEGEND_COPY.offer_head}</h1>
+        <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.offer_body}</p>
+        {/* The questions themselves, because they are the hook — not a count of them. */}
+        <ul className="mt-3 flex flex-col gap-3">
+          {preview.map((f) => (
+            <li key={f.id} className="pt text-base text-accent">
+              {f.ask}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-xs leading-relaxed text-muted">{LEGEND_COPY.offer_repair}</p>
+      </div>
+      <div className="flex flex-col gap-3">
+        <Link
+          href="/legend"
+          data-testid="legend-open-step"
+          onClick={() => {
+            setLegendPrompt('accepted')
+            track('legend_offered', { took: true })
+          }}
+          className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+        >
+          {LEGEND_COPY.offer_cta}
+        </Link>
+        <button
+          type="button"
+          data-testid="legend-open-skip"
+          onClick={() => {
+            /*
+              Declined here means "not now", not "never" — the Legend stays reachable from
+              the bar and from the Club door. What it stops is this screen returning.
+            */
+            setLegendPrompt('declined')
+            track('legend_offered', { took: false })
+            next()
+          }}
+          className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted"
+        >
+          NOT NOW
+        </button>
+      </div>
+    </Shell>
+  )
+}
+
+/**
+ * KEEP THIS WORK — the save ask, as a screen rather than a panel.
+ *
+ * Same ask the shelf and the payoff panel make, at the point where it is worth making:
+ * the basics done, two sittings of chosen vibes in, real work on a device that could be
+ * cleared. It interrupts once and never again.
+ *
+ * It skips itself when accounts are not configured. `signInReady` is a server fact the
+ * queue cannot see, so the step is queued optimistically and steps aside here — a screen
+ * whose only button cannot work is worse than no screen.
+ */
+function SaveStep() {
+  const { next } = useJourney()
+  const access = useEntitlements()
+  const skip = access.known && !access.signInReady
+  useEffect(() => {
+    if (skip) next()
+  }, [skip, next])
+  if (skip) return null
+  return (
+    <Shell stage="CHOICE" nav={false}>
+      <div className="flex flex-1 flex-col justify-center gap-3">
+        <p className="eyebrow text-accent">KEEP THIS</p>
+        <h1 className="display text-balance text-3xl">{LEGEND_COPY.save_head}</h1>
+        <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.save_body}</p>
+      </div>
+      <div className="flex flex-col gap-3">
+        <Link
+          href="/signin"
+          data-testid="save-step-go"
+          onClick={() => track('save_offered', { at: 'step', took: true })}
+          className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+        >
+          {LEGEND_COPY.save_cta}
+        </Link>
+        <button
+          type="button"
+          data-testid="save-step-skip"
+          onClick={() => {
+            setSaveDeclined()
+            track('save_offered', { at: 'step', took: false })
+            next()
+          }}
+          className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted"
+        >
+          {LEGEND_COPY.save_skip}
+        </button>
+      </div>
+    </Shell>
+  )
+}
+
 function SectionComplete() {
   const { finishSection, owned, state } = useJourney()
   /*
@@ -3619,7 +3761,21 @@ function LegendPayoff() {
     they are actually on.
   */
   const vibesLeft = Math.max(0, status.vibesNeeded - status.vibesDone)
-  const toGo = status.toGo > 0 ? status.toGo : vibesLeft
+  /*
+    THE BASICS HALF IS COUNTED IN SESSIONS AND SAID IN ITS OWN WORDS.
+
+    This read `status.toGo` — the count of doorway ROOTS — and then rendered it through
+    LEGEND_COPY.more_to_go, which ends "more vibes and your Legend opens". So somebody one
+    session into the basics was told, on the screen at the end of every sitting, that five
+    more VIBES stood between them and the Legend. The true answer was two more sessions of
+    the vibe they had just finished.
+
+    Two faults in one line: the wrong unit, and prose from the other half of the door.
+    They are separated now — sessions while the basics are open, vibes after.
+  */
+  const sessionsLeft = Math.max(0, status.sessionsNeeded - status.sessionsDone)
+  const onBasics = status.toGo > 0
+  const toGo = onBasics ? sessionsLeft : vibesLeft
 
   /*
     A FLOOR, NOT A WINDOW — and the difference is a bug Sam caught by living it.
@@ -3687,9 +3843,11 @@ function LegendPayoff() {
           ? LEGEND_COPY.offer_head
           : usable
             ? LEGEND_COPY.open_head
-            : toGo === 1
-              ? LEGEND_COPY.one_more
-              : toGo + ' ' + LEGEND_COPY.more_to_go}
+            : onBasics
+              ? PICKER.legend_sitting_done(status.sessionsDone, status.sessionsNeeded)
+              : toGo === 1
+                ? LEGEND_COPY.one_more
+                : toGo + ' ' + LEGEND_COPY.more_to_go}
       </p>
       {!usable && !quiet ? (
         <p className="text-xs leading-relaxed text-muted">

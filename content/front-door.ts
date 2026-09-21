@@ -307,10 +307,31 @@ export const PICKER = {
     It names the half they are ON, not both. Naming the vibes while the basics are
     unfinished is an instruction nobody can act on yet.
   */
+  /*
+    IN SESSIONS, because that is the unit somebody presses.
+
+    It said "5 more lines of the basics" and Sam had just played the whole session he was
+    handed: "I just dont understadn... where is that communicated? It's totally unclear."
+    A line is not a thing anybody can choose to do — you open the basics and the product
+    decides how much of it you get — so the count moved by two while he did one thing,
+    and nothing anywhere named the sitting he had actually completed.
+
+    The number comes from legendStatus.sessionsDone/sessionsNeeded, which derive it from
+    the doorway and the sitting budget. Typing a 3 in here is how "five vibes" survived
+    three rules past being true.
+  */
   legend_basics: (left: number) =>
     left === 1
-      ? 'One more line of the basics, then three vibes of your own, and your Legend opens.'
-      : left + ' more lines of the basics, then three vibes of your own, and your Legend opens.',
+      ? 'One more basics session, then three vibes of your own, and your Legend opens.'
+      : left + ' more basics sessions, then three vibes of your own, and your Legend opens.',
+  /* Where that session put you, said at the end of one — the screen that used to say nothing. */
+  legend_sitting_done: (done: number, need: number) =>
+    done >= need
+      ? "That's the basics done. Now three vibes of your own and your Legend opens."
+      : "That's " + done + ' of ' + need + ' basics sessions. ' +
+        (need - done === 1 ? 'One to go' : need - done + ' to go') + ', then your vibes.',
+  /* The tile's own badge, so it stops saying DONE while the door is still shut. */
+  legend_tile: (done: number, need: number) => 'BASICS · ' + done + ' OF ' + need,
   legend_vibes: (left: number) =>
     left === 1
       ? 'Finish one more vibe and your Legend opens.'

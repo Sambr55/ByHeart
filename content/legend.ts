@@ -1066,6 +1066,25 @@ export function doorwayToGo(rootsPlayed: string[]): number {
 }
 
 /**
+ * The same distance, in sittings — the unit somebody can decide to spend.
+ *
+ * A sitting is capped by SCREENS, not by roots, so what it delivers is not a constant:
+ * the first one spends a slot on the vibe's freebie and lands two doorway roots, and
+ * later ones land two or three. Measured against the real budget, the six roots close in
+ * three sittings.
+ *
+ * DOORWAY_PER_SESSION is therefore the conservative figure rather than the average. A
+ * count that promised two and took three would be the same broken promise in a nicer
+ * unit, and P2 exists to catch exactly that. Rounding up means the number can only ever
+ * come in early, which is the direction a learner forgives.
+ */
+const DOORWAY_PER_SESSION = 2
+
+export function doorwaySessions(rootsLeft: number): number {
+  return Math.ceil(rootsLeft / DOORWAY_PER_SESSION)
+}
+
+/**
  * THE DOORWAY IS WHAT THE CARD NEEDS, not every root in the vibe.
  *
  * A first version counted all 16 basics roots, and that made the entire Legend hang on
@@ -1122,6 +1141,26 @@ export interface LegendStatus {
   */
   vibesDone: number
   vibesNeeded: number
+  /*
+    THE DOORWAY IN THE UNIT SOMEBODY CAN ACTUALLY SPEND.
+
+    Sam, looking at a shelf that said "5 more lines of the basics" after he had played
+    the whole session he was handed: "I just dont understadn... where is that
+    communicated? It's totally unclear."
+
+    He was right, and the fault was the unit. `toGo` counts ROOTS, which nobody chooses
+    — you cannot decide to do five roots. You decide to open the basics, and the product
+    hands you a sitting. So the number moved by two while the learner did one thing, and
+    the only screen that mentioned the door at all was contradicted by a SESSION DONE
+    badge on the tile right underneath it.
+
+    These two say the same fact in sessions: how many more times you press the button.
+    Derived from the doorway and the sitting budget rather than typed, because a "3"
+    written into prose is the exact failure that left "five vibes" in three files two
+    rules after it stopped being true.
+  */
+  sessionsDone: number
+  sessionsNeeded: number
 }
 
 export function legendStatus(opts: {
@@ -1141,11 +1180,14 @@ export function legendStatus(opts: {
 }): LegendStatus {
   const sections = opts.sectionsCompleted
   const open = legendUnlocked(opts.rootsPlayed, sections, opts.sittings ?? 0)
+  const toGo = doorwayToGo(opts.rootsPlayed)
   return {
     open,
-    toGo: doorwayToGo(opts.rootsPlayed),
+    toGo,
     vibesDone: chosenVibesFinished(sections, opts.sittings ?? 0),
     vibesNeeded: VIBES_FOR_LEGEND,
+    sessionsNeeded: doorwaySessions(doorwayRoots().length),
+    sessionsDone: doorwaySessions(doorwayRoots().length) - doorwaySessions(toGo),
     openCards: open ? LEGEND_FRAMES.length : 0,
   }
 }

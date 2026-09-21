@@ -37,7 +37,7 @@ import {
   syncSession,
   rememberSection,
 } from './learner'
-import { doorwayRoots } from '@/content/legend'
+import { doorwayRoots, legendStatus } from '@/content/legend'
 import { chosenPair, setPair } from './pair'
 import { DEFAULT_PAIR } from '@/content/pairs'
 import { useLearner } from './useLearner'
@@ -67,6 +67,24 @@ export type Step =
   | { kind: 'osmosis' }
   | { kind: 'profile'; which: 'gender' | 'age' | 'goal' }
   | { kind: 'section-complete' }
+  /*
+    TWO SCREENS THAT INTERRUPT, because as panels they were missable.
+
+    Both existed as panels: the save offer inside LegendPayoff, the Legend opening as the
+    same panel wearing different copy. A panel renders on a screen somebody may not visit,
+    and can be scrolled past on the screens they do. Sam did five sittings and met neither.
+    "I want these screens to interrupt the flow."
+
+    So they are steps. A step is the whole screen and the only way past it is its own
+    button, which is what interrupting means — and the queue already guarantees ordering,
+    so neither can arrive in the middle of something else.
+
+    `legend-open` fires once, on the sitting that opens the door: the biggest moment in
+    the product, and it had been a bordered box under three other things. `save` fires
+    once, ever, and is an ask rather than a gate — its button says NOT NOW and means it.
+  */
+  | { kind: 'legend-open' }
+  | { kind: 'save' }
   | { kind: 'nocue'; i: number }
   | { kind: 'cansay' }
   | { kind: 'proof' }
@@ -881,7 +899,63 @@ export function JourneyProvider({
         not pressed.
       */
       if (state.family) rememberSection(state.family)
+
+      /*
+        THE TWO INTERRUPTING SCREENS, QUEUED ON BOTH PATHS.
+
+        `another` returns early and jumps to the picker, which is the path a learner takes
+        when they want to keep going — so anything appended below it is skipped by exactly
+        the person most worth talking to. That is how Sam did five sittings and met neither
+        screen.
+
+        Read AFTER rememberSection, so this sitting counts. The door moves on the sitting
+        that opens it, and the screen announcing that has to be able to see it.
+
+        Ordering: the Legend first when both are due. It is the payoff and the save offer
+        is admin, and admin after a payoff reads as a condition on it.
+      */
+      const afterSitting: Step[] = []
+      const me = loadLearner()
+      const status = legendStatus({
+        rootsPlayed: me.roots_played ?? [],
+        sectionsCompleted: me.sections_completed ?? [],
+        sittings: me.sittings ?? 0,
+      })
+      if (status.open && me.legend_prompt === 'unseen') {
+        afterSitting.push({ kind: 'legend-open' })
+      }
+      /*
+        The save ask, on the same floor the panels use: basics done, two chosen sittings
+        in, not signed in, not yet answered. `signInReady` is not checked here because it
+        is a server fact the reducer cannot see — the screen itself checks it and skips
+        instantly when there is no link to send.
+      */
+      if (status.toGo === 0 && status.vibesDone >= 2 && me.save_prompt === 'unseen') {
+        afterSitting.push({ kind: 'save' })
+      }
+
       if (decision === 'another') {
+        if (afterSitting.length) {
+          /*
+            The interrupt happens, and THEN they get the picker.
+
+            Jumping straight to the shelf is what made these missable. The queue holds the
+            screens and the picker sits behind them, so "another vibe" still means another
+            vibe — it just passes through the thing worth stopping for.
+
+            WITH A PICKER OF ITS OWN ON THE END, which is not decoration. `step` clamps to
+            the last entry in the queue, so NOT NOW on the final appended screen re-renders
+            that same screen: the button does nothing and the learner is walled in. That is
+            the same dead end as the Build-your-legend card that could not be swiped out of,
+            and it is worth more here — these two screens exist to be dismissible.
+          */
+          dispatch({
+            type: 'append',
+            steps: [...afterSitting, { kind: 'picker' }],
+            jump: true,
+          })
+          return
+        }
         const picker = state.steps.findIndex((s) => s.kind === 'picker')
         dispatch({ type: 'goto', index: picker < 0 ? 0 : picker })
         return
@@ -917,6 +991,7 @@ export function JourneyProvider({
         Putting "here is what you can now do" first makes the cold prompts what they
         actually are: three more goes, after the point has been made.
       */
+      steps.push(...afterSitting)
       steps.push({ kind: 'cansay' })
       for (let i = 0; i < Math.min(3, answerable); i++) steps.push({ kind: 'nocue', i })
       steps.push({ kind: 'proof' }, { kind: 'close' })
