@@ -830,7 +830,35 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
               loop's clone of the last one, and putting it there would show the hint on
               the card somebody reaches by swiping backwards off the top.
             */
-            hint={stage === 'showcase' && i === 1}
+            /*
+              THE CUE RIDES ON EVERY CARD THAT ADMITS NO OTHER GESTURE.
+
+              It used to be card one only, on the reasoning that the gesture is learned
+              after one swipe and a standing instruction is nagging. That held while card
+              one was the first thing anybody met. It does not now: the first two cards are
+              the gesture tutorial, which draw their own arrows and are LOCKED — so the cue
+              was spent on a card that already told you what to do, and the first card that
+              needed it, VIBES, had nothing. Sam: "add a swipe up instruction."
+
+              So it follows the need rather than the position: shown on the open cards,
+              which have no drawn arrow and no other way on, and never on a locked card,
+              which has one exit and says so in two places already.
+            */
+            hint={stage === 'showcase' && card.kind === 'intro' && !card.intro.exit}
+            /*
+              IS THIS THE CARD SOMEBODY IS LOOKING AT?
+
+              A cascade that runs on mount is a cascade nobody sees. Every card in the rail
+              mounts at once — 42 of them — so the three comigo branches finished fanning
+              in while the person was still on card two, and by the time they scrolled to
+              VIBES the animation was long over. Reported as the animation missing; it was
+              there, it had simply already happened.
+
+              `i` is the looped index and atIndex is the card index, which is the same
+              off-by-one the clone creates everywhere else in this file: looped[0] is a copy
+              of the last card, so the real card n sits at i === n + 1.
+            */
+            onScreen={i === atIndex + 1}
             saved={mounted && (learner.saved ?? []).includes(card.id)}
             liked={mounted && (learner.liked ?? []).includes(card.id)}
             onSaved={(on) => setToast(on ? 'saved' : 'unsaved')}
@@ -958,6 +986,7 @@ export function Card({
   onDone,
   stage = 'member',
   hint = false,
+  onScreen = false,
 }: {
   card: FeedCard
   saved: boolean
@@ -979,6 +1008,8 @@ export function Card({
   stage?: ClubStage
   /** Show the "there is more below" cue. The first showcase card only. */
   hint?: boolean
+  /** The card the learner is actually looking at. Cascades wait for it. */
+  onScreen?: boolean
 }) {
   const pane = useRef<HTMLDivElement>(null)
 
@@ -1758,7 +1789,7 @@ export function Card({
                         product uses. On sand it is left exactly as it was.
                       */
                       <div className={onSand ? undefined : 'shown-on-photo'}>
-                        <Specimen shows={card.intro.shows} />
+                        <Specimen shows={card.intro.shows} onScreen={onScreen} />
                       </div>
                     ) : null}
                     {/*
@@ -2618,7 +2649,20 @@ function Gesture({
  * none of it can quietly become untrue: the Bond line is the Bond line, the drop is whatever
  * is genuinely live, and the Legend questions are the questions the Legend actually asks.
  */
-function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
+function Specimen({
+  shows,
+  onScreen = false,
+}: {
+  shows: NonNullable<IntroCard['shows']>
+  /*
+    Whether the card carrying this specimen is the one being looked at.
+
+    A cascade only means something if somebody is there for it. Every card in the rail
+    mounts together, so an animation keyed on mount has finished before its card is
+    reached — see the note beside `onScreen` in the Card loop.
+  */
+  onScreen?: boolean
+}) {
   const lines = useMemo((): { pt: string; en: string }[] => {
     if (shows.kind === 'lines') return shows.lines
     if (shows.kind === 'exchange') return shows.exchange.map((e) => ({ pt: e.pt, en: e.en }))
@@ -2736,7 +2780,20 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
                 Staggered in at i*70, which is the repo's own rule for a sequence arriving.
                 The three landing one after another IS the fan; all three at once is a list.
               */
-              className="animate-bank flex items-center gap-3"
+              /*
+                HELD UNTIL THE CARD IS REACHED, then fanned.
+
+                `animate-bank` alone runs on mount, and every card in the rail mounts at
+                once — so the fan happened on card two and was over before anybody scrolled
+                to VIBES. Reported as the animation being absent; it had simply already
+                played.
+
+                Invisible rather than un-animated while waiting: an item that pops in at
+                full opacity and then animates would arrive twice.
+              */
+              className={
+                'flex items-center gap-3 ' + (onScreen ? 'animate-bank' : 'opacity-0')
+              }
               style={{ animationDelay: `${i * 70}ms` }}
             >
               <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
@@ -2877,8 +2934,31 @@ function Specimen({ shows }: { shows: NonNullable<IntroCard['shows']> }) {
   if (!lines.length) return null
   return (
     <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-3">
-      {lines.map((l) => (
-        <li key={l.pt} className="flex items-center gap-3">
+      {lines.map((l, i) => (
+        <li
+          key={l.pt}
+          /*
+            ONE BY ONE, which is what the Legend card needed and never had.
+
+            Seven questions arriving together is a list, and a list is read as a quantity
+            — "seven things" — rather than as seven things. Fanned, each one lands as its
+            own question, which is what the card is claiming they are: what a stranger
+            asks you, in the order they ask it.
+
+            Capped at 5 like every other cascade in the repo, so the seventh does not wait
+            420ms on its own: a stagger is meant to read as one hand fanning cards, and
+            past about five steps it becomes a queue. motion-check enforces both the 70ms
+            step and the cap.
+
+            Held invisible until the card is on screen, for the reason given on the unpack
+            above: every card mounts at once, so an unheld cascade is over before anybody
+            arrives.
+          */
+          className={
+            'flex items-center gap-3 ' + (onScreen ? 'animate-rise' : 'opacity-0')
+          }
+          style={{ animationDelay: Math.min(i, 5) * 70 + 'ms' }}
+        >
           <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
           <CopyButton text={l.pt} size="sm" />
           <span className="min-w-0">

@@ -1259,11 +1259,25 @@ summary:focus-visible,
   It replaces the toast that used to make the same promise in words — see done() in
   components/Feed.tsx.
 */
+/*
+  620ms, not 2000 — and the hold is what makes it read as slow.
+
+  I wrote this at 2000ms because a rewind spinning at the nudges' pace looks frantic. That
+  was the right instinct and the wrong fix: 2000 is a fifth duration, and the scale is four
+  because a duration is one number that looks harmless in a diff. npm run motion caught it,
+  which is exactly what that check is for.
+
+  The turn now takes 620ms — the same value the nudge arrows loop at — and then rests for
+  the remaining two thirds of the cycle. A quarter-second of movement followed by a pause
+  reads as something quietly going round rather than a spinner, which is the feeling the
+  slow duration was reaching for, expressed inside the scale instead of outside it.
+*/
 @keyframes rewind-turn {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(-360deg); }
+  0% { transform: rotate(0deg); }
+  34% { transform: rotate(-360deg); }
+  100% { transform: rotate(-360deg); }
 }
-.rewind-loop { animation: rewind-turn 2000ms linear infinite; }
+.rewind-loop { animation: rewind-turn 620ms linear infinite; }
 
 /*
   And all of it stops for anybody who has asked for less movement.
