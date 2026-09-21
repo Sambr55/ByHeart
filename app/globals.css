@@ -754,9 +754,45 @@ body:has(.dock) .nav-clear {
 */
 .card-face {
   max-height: calc(100% - 6rem - var(--safe-top));
+  scrollbar-width: none;
+
+  /*
+    NOT A SCROLLER UNLESS IT HAS TO BE, and this is the whole of "there is no way out of
+    the Build your legend card".
+
+    `overflow-y: auto` with `overscroll-behavior-y: contain` was written for the language
+    selector, where eight rows genuinely overflow the box and a flick has to move the list
+    rather than the rail. On every OTHER card the face is shorter than its cap, so there is
+    nothing to scroll — but `contain` does not care. It stops the scroll chaining to the
+    rail regardless, so a flick that begins inside the face is absorbed by a scroller with
+    nowhere to go, and the card never advances.
+
+    It showed on the Legend first because that card is the tallest: 701px against a 748px
+    cap, so almost any thumb position starts inside the face. VIBES at 652 and ASK at 598
+    leave more room below them, which is why they still moved and the Legend did not.
+
+    `clip` is the honest default: the cap still applies, nothing spills over the header,
+    and the element is not a scroll container at all — so a flick passes straight through
+    to the rail. The scrolling behaviour moves to a modifier the card asks for by name.
+  */
+  overflow-y: clip;
+}
+
+/*
+  The one card that genuinely overflows: the language and city selector.
+
+  Eight rows against a 748px cap, with the last two cities below the fold, so the face has
+  to scroll and has to keep that scroll to itself — the rail is locked on that card anyway,
+  and chaining would fight the lock.
+*/
+.card-face-scrolls {
   overflow-y: auto;
   overscroll-behavior-y: contain;
-  scrollbar-width: none;
+}
+
+.card-face::-webkit-scrollbar,
+.card-face-scrolls::-webkit-scrollbar {
+  display: none;
 }
 
 /*
@@ -777,9 +813,6 @@ body:has(.dock) .nav-clear {
   margin-top: auto;
 }
 
-.card-face::-webkit-scrollbar {
-  display: none;
-}
 
 .dock-slot > .dock {
   position: static;

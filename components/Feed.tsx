@@ -1317,7 +1317,7 @@ export function Card({
         Checked on the element the touch STARTED in rather than on the face's own bounds: a
         drag that begins on a button and travels is still a drag of the list under it.
       */
-      const from = e.target instanceof Element ? e.target.closest('.card-face') : null
+      const from = e.target instanceof Element ? e.target.closest('.card-face-scrolls') : null
       if (from && from.scrollHeight > from.clientHeight) return
       if (e.cancelable) e.preventDefault()
     }
@@ -1718,6 +1718,15 @@ export function Card({
           <div
             className={
               'nav-clear card-face absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 ' +
+              /*
+                Only the set-up card's face is a scroller, and only while it is asking.
+
+                Its selector is eight rows against a 748px cap with the last two cities
+                below the fold, so that face has to scroll. Every other card's face fits,
+                and making them all scrollers cost the Legend its way out — see .card-face
+                in globals.css.
+              */
+              (card.kind === 'setup' && !pairChosen ? 'card-face-scrolls ' : '') +
               (onSand ? 'text-fg' : 'text-white')
             }
           >
@@ -2798,10 +2807,16 @@ function Specimen({
                 sentences are over in 210ms, which is quick enough that nobody reads them
                 arriving, they simply appear. Sam: "too fast."
 
-                190ms is the repo's own number for a stagger meant to be watched
-                (motion-check names it). Three at 190 take about half a second, which is
-                long enough to see each sentence land and short enough that the fan still
-                reads as one gesture.
+                380ms, which is 190 doubled rather than a fourth number.
+
+                190 was the first correction and it was not enough: these three are not a
+                list being read down, they are the PROOF — one line somebody knows becoming
+                one word becoming three sentences they can use. That wants to land like a
+                demonstration rather than a reveal, so each sentence gets long enough to be
+                read before the next arrives. Three at 380 take just over a second.
+
+                The Legend's seven questions stay at 190. They are a list, and seven at 380
+                would be two and a half seconds of waiting.
               */
               /*
                 HELD UNTIL THE CARD IS REACHED, then fanned.
@@ -2817,7 +2832,7 @@ function Specimen({
               className={
                 'flex items-center gap-3 ' + (onScreen ? 'animate-bank' : 'opacity-0')
               }
-              style={{ animationDelay: `${i * 190}ms` }}
+              style={{ animationDelay: `${i * 380}ms` }}
             >
               <AudioButton slug={slugFor(b.target)} text={b.target} size="sm" />
               <span className="min-w-0">

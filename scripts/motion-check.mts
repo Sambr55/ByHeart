@@ -108,6 +108,21 @@ for (const file of files) {
 */
 const CASCADE_MS = 70
 const TEACH_MS = 190
+/*
+  And one slower still, for the unpack.
+
+  The three comigo branches are not a list being read down — they are the PROOF, the whole
+  argument of the product happening in front of somebody: one line they know becoming one
+  word becoming three sentences they can use. At 190ms the three arrive in half a second,
+  which is watchable but still reads as a reveal rather than as a demonstration. Sam, on
+  this card specifically after the first slowdown: "slow the animation on the previous
+  Vibes card (only) further."
+
+  380ms is 190 doubled rather than a new number invented beside it, and it is confined to
+  the unpack — the Legend's seven questions stay at 190, which is why this is a separate
+  constant instead of a change to TEACH_MS.
+*/
+const UNPACK_MS = 380
 for (const file of files) {
   const src = strip(readFileSync(file, 'utf8'))
   src.split('\n').forEach((line, i) => {
@@ -120,10 +135,10 @@ for (const file of files) {
         theirs to CSS. Same intent, same number, and the check should not force the second
         one to lie about which it is.
       */
-      if (ms !== CASCADE_MS && ms !== TEACH_MS) {
+      if (ms !== CASCADE_MS && ms !== TEACH_MS && ms !== UNPACK_MS) {
         fail(
           file + ':' + (i + 1) + ' staggers at ' + ms + 'ms — a cascade is ' + CASCADE_MS +
-            'ms, a watchable stagger is ' + TEACH_MS + 'ms',
+            'ms, a watchable stagger is ' + TEACH_MS + 'ms, the unpack is ' + UNPACK_MS + 'ms',
         )
       }
     }
