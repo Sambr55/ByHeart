@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { LEGEND_COPY, LEGEND_FRAMES, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame } from '@/content/legend'
+import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
@@ -3284,6 +3284,8 @@ function SectionComplete() {
   const inFamily = family ? (ROOTS_BY_FAMILY[family.id] ?? []) : []
   const leftInFamily = inFamily.filter((r) => !state.rootsPlayed.includes(r.root_id)).length
   const vibeFinished = Boolean(family) && inFamily.length > 0 && leftInFamily === 0
+  /* The basics is the only vibe that is also a door, and it is the only one counted. */
+  const isDoorway = state.family === DOORWAY
 
   /*
     WHICH QUESTIONS THIS VIBE JUST MADE ANSWERABLE.
@@ -3466,7 +3468,25 @@ function SectionComplete() {
               how "I did all of it" and "you are a fifth of the way through" came to sit on
               consecutive screens.
             */}
-            There is more in there whenever you want it.
+            {/*
+              AND ON THE BASICS, WHAT ANOTHER SESSION OF IT BUYS.
+
+              "There is more in there whenever you want it" is true of every vibe and asks
+              for nothing. On the basics it is the wrong sentence: this is the screen where
+              somebody decides what to do next, the door is counted in sessions of exactly
+              this vibe, and the only button offered was ANOTHER VIBE — which points away
+              from the thing that opens the Legend.
+
+              Sam, having finished a session and found nothing that said so: "where is that
+              communicated? It's totally unclear."
+
+              So the basics says the number here, in the unit the shelf and the tile use,
+              on the screen where it can be acted on. Every other vibe keeps the open
+              sentence, because no other vibe is a door.
+            */}
+            {isDoorway && legend.toGo > 0
+              ? PICKER.legend_sitting_done(legend.sessionsDone, legend.sessionsNeeded)
+              : 'There is more in there whenever you want it.'}
           </p>
         ) : null}
         {/*

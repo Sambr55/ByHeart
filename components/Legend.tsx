@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES, ROOTS_BY_FAMILY } from '@/content/roots'
-import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, frameReady, nameFor, REPAIR_KIT, cardDone, cardFor, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
+import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, frameReady, nameFor, REPAIR_KIT, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
+import { PICKER } from '@/content/front-door'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
 import { CopyButton } from '@/components/CopyButton'
@@ -92,8 +93,21 @@ export function Legend() {
     mounted &&
     legendStatus({ rootsPlayed: played, sectionsCompleted: sections, sittings: learner.sittings ?? 0 }).open
   const toGo = doorwayToGo(played)
-  /* For the readout below: how long the doorway is, so the line can say N of M. */
-  const basicsTotal = (ROOTS_BY_FAMILY[DOORWAY] ?? []).length
+  /*
+    THE DOORWAY'S OWN LENGTH, not the whole vibe's.
+
+    This was every root in the basics — sixteen — while `toGo` counts only the six that
+    carry the card's vocabulary. So the readout subtracted one set from the other and
+    called the result progress: "11 of 16 of the basics played" to somebody with four
+    doorway roots left, and the two numbers could never meet.
+  */
+  const basicsTotal = doorwayRoots().length
+  /* And the same distance in the unit the shelf and the tile use. */
+  const doorStatus = legendStatus({
+    rootsPlayed: played,
+    sectionsCompleted: sections,
+    sittings: learner.sittings ?? 0,
+  })
   /* The card is the seven at depth 'card'; the deeper frames are a bonus. */
   const myCard = cardFor(learner.purpose ?? null)
   const onCard = answers.filter(
@@ -356,9 +370,14 @@ export function Legend() {
               <p className="text-sm font-semibold">{LEGEND_COPY.locked_head}</p>
               <p className="mt-1 text-xs leading-relaxed text-muted">
                 {/* Lines of the basics, not vibes — the door is the doorway finished. */}
-                {toGo === 1
-                  ? 'One more vibe and these open.'
-                  : toGo + ' more lines of the basics and these open.'}{' '}
+                {/*
+                  In sessions, like every other screen that states this door — see
+                  PICKER.legend_basics. It said "lines of the basics", which counts
+                  something nobody can choose to do.
+                */}
+                {PICKER.legend_basics(
+                  Math.max(0, doorStatus.sessionsNeeded - doorStatus.sessionsDone),
+                )}{' '}
                 {LEGEND_COPY.locked_body}
               </p>
               {/*
@@ -377,7 +396,7 @@ export function Legend() {
               <p className="mt-3 text-xs leading-relaxed text-muted">
                 {toGo === 0
                   ? 'The basics are done.'
-                  : basicsTotal - toGo + ' of ' + basicsTotal + ' of the basics played.'}
+                  : basicsTotal - toGo + ' of ' + basicsTotal + ' doorway lines played.'}
               </p>
               <Link
                 href="/vibes"
@@ -449,7 +468,25 @@ export function Legend() {
                   frameForPurpose(f, learner.purpose ?? null),
               )
               if (!mine.length) return null
-              const doneHere = mine.filter((f) => isAnswered(f, valuesFor(f.id))).length
+              /*
+                COUNTED AGAINST THE CARD, because the card is what the door reads.
+
+                This counted `mine` — every frame in the part — and `mine` does not filter
+                on depth. So the group said "6 OF 8" while the line at the top of the same
+                screen said "6 of 7 on your card": two counts of one fact, on one screen,
+                with different denominators. The eighth is `age`, which is depth 'deeper'
+                and opens nothing.
+
+                Sam, with his Legend built and the Club still shut: "I cant get from here
+                to teh Club even though I ahve done my Legend." The screen had told him he
+                was one of eight away and offered a question that could not be the one.
+
+                The deeper frames stay in the list — they are real questions a stranger
+                asks, and hiding them would make the Legend smaller than it is. What stops
+                is counting them towards a door they have nothing to do with.
+              */
+              const onCardHere = mine.filter((f) => myCard.some((c) => c.id === f.id))
+              const doneHere = onCardHere.filter((f) => isAnswered(f, valuesFor(f.id))).length
               /*
                 THE WORDS THAT BUILT THIS PART, under it. `built_from` already names the
                 pieces every frame needs; this is the first thing to read it as a list
@@ -471,9 +508,15 @@ export function Legend() {
                       {nameFor(part, learner.display_name).toUpperCase()}
                     </h3>
                     <span className="h-px flex-1 bg-line" />
-                    <span className="eyebrow shrink-0 tabular-nums text-muted">
-                      {doneHere + ' of ' + mine.length}
-                    </span>
+                    {/*
+                      A part made entirely of deeper questions has no card count to show —
+                      "0 of 0" is worse than silence. THEM is exactly that part today.
+                    */}
+                    {onCardHere.length ? (
+                      <span className="eyebrow shrink-0 tabular-nums text-muted">
+                        {doneHere + ' of ' + onCardHere.length}
+                      </span>
+                    ) : null}
                   </div>
                   <p className="text-xs leading-relaxed text-muted">{part.what}</p>
                   <ul className="flex flex-col gap-3">
@@ -500,8 +543,34 @@ export function Legend() {
                   >
                     <span className="flex items-baseline justify-between gap-3">
                       <span className="pt min-w-0 text-sm text-accent">{f.ask}</span>
-                      <span className="shrink-0 text-[0.55rem] uppercase tracking-wider text-muted">
-                        {done ? 'yours' : open ? 'ready' : 'not yet'}
+                      {/*
+                        AND WHETHER IT IS ON THE CARD, because the door reads the card.
+
+                        A deeper question sits in this list looking identical to the seven
+                        that open the Club. So somebody one question away can answer it,
+                        watch the Club stay shut, and have nothing on the screen to explain
+                        why — which is exactly what happened: "I cant get from here to teh
+                        Club even though I ahve done my Legend."
+
+                        It rides on the status chip rather than arriving as a second badge.
+                        The chip already answers "where is this one at", and whether it
+                        counts is the same question. An answered extra says `extra` instead
+                        of `yours`: the state that matters about it is not that you have it,
+                        it is that having it changes nothing about the door.
+                      */}
+                      <span
+                        className={
+                          'shrink-0 text-[0.55rem] uppercase tracking-wider ' +
+                          (onCardHere.some((c) => c.id === f.id) ? 'text-muted' : 'text-muted/70')
+                        }
+                      >
+                        {!onCardHere.some((c) => c.id === f.id)
+                          ? 'extra'
+                          : done
+                            ? 'yours'
+                            : open
+                              ? 'ready'
+                              : 'not yet'}
                       </span>
                     </span>
                     <span className="text-xs text-muted">{f.ask_en}</span>
