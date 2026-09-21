@@ -34,7 +34,7 @@ export function AskGate() {
   return (
     <NotYet
       what="ASK"
-      line="Say what you need in English and get it back in Portuguese you can actually use — with the register right for who you are talking to. Point your camera at a menu and it reads it."
+      line="Say what you need in English and get it back in the language you can actually use — with the register right for who you are talking to. Point your camera at a menu and it reads it."
     />
   )
 }

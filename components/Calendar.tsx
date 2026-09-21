@@ -92,7 +92,7 @@ export function Calendar() {
     return (
       <NotYet
         what="WHAT IS ON"
-        line="Drops are pegged to real dates in your city — a market, a match, a festival — and each one opens the Portuguese for being there. They start arriving once you are in the Club."
+        line="Drops are pegged to real dates in your city — a market, a match, a festival — and each one opens the words for being there. They start arriving once you are in the Club."
       />
     )
   }

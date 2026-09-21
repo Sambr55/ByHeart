@@ -9,6 +9,7 @@ import { AudioButton } from '@/components/AudioButton'
 import { Choose } from '@/components/Choose'
 import { CopyButton } from '@/components/CopyButton'
 import { chosenPair } from '@/engine/pair'
+import { labelForLocale } from '@/content/pairs'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
@@ -72,6 +73,14 @@ export type ClubStage = 'showcase' | 'working' | 'member'
 
 export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
   const learner = useLearner()
+  /*
+    The language this learner picked, or null before they have.
+
+    Read after mount like every other device fact in this file: chosenPair() is
+    localStorage, and the server has none of it.
+  */
+  const [chosenLabel, setChosenLabel] = useState<string | null>(null)
+  useEffect(() => setChosenLabel(labelForLocale(chosenPair()?.target_locale)), [learner])
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
@@ -758,11 +767,32 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
           genuinely means UNCHOSEN — so the honest line before a choice names no city at
           all, and the moment one exists the strapline is theirs.
         */}
+        {/*
+          AND IT NAMES NO LANGUAGE UNTIL ONE IS CHOSEN, for the same reason it names no
+          city.
+
+          The block above already got half of this right — a null chapter means UNCHOSEN,
+          so the line does not claim a city. Both branches then went on to claim the
+          LANGUAGE, which nobody had been asked for either: "European Portuguese, and the
+          places you will use it" to somebody on card two of the intro. Reported as
+          assuming Portuguese before the language has been selected.
+
+          Derived from the chosen pair now. Before a choice it is a promise about what the
+          product does rather than a claim about what they picked, and it stays true
+          whichever language they go on to choose.
+        */}
         {stage === 'showcase' ? (
           <p className="text-[0.6rem] leading-tight opacity-85">
-            {learner.chapter
-              ? chapterById(learner.chapter).city + ', and the Portuguese for it.'
-              : 'European Portuguese, and the places you will use it.'}
+            {/*
+              No article before the name. "the European Portuguese for it" reads as a
+              specific quantity of Portuguese; the original line worked because
+              "Portuguese" alone is both the language and the word for its words.
+            */}
+            {learner.chapter && chosenLabel
+              ? chapterById(learner.chapter).city + ', and the ' + chosenLabel + ' you need there.'
+              : chosenLabel
+                ? chosenLabel + ', and the places you will use it.'
+                : 'A language, and the places you will use it.'}
           </p>
         ) : null}
         <span className="flex-1" />

@@ -1148,32 +1148,18 @@ console.log('\nset-up asks who, where and why — and the feed changes because o
         })()`,
       )) as { chapter?: string; purpose?: string; display_name?: string }
       /*
-        AND THE ANSWER PAYS, VISIBLY, which nothing in the product did before.
+        THE ANSWER PAYS IN THE FEED, not on a screen that lists what it bought.
 
-        Purpose filtered the feed in silence: somebody answered "a few days", the Club
-        quietly became a different Club, and no screen ever said so. This asserts the rooms
-        named back are REAL — drawn from roomsFor with the learner's own chapter and purpose,
-        the same call the feed makes — because the failure worth catching is not a missing
-        list, it is a convincing one made of invented topic names that nothing keeps true.
+        There was a confirmation step here — "Rooms you will get because of what you just
+        said" over the real room titles — and it is gone. Sam: "remove this screen, it
+        confuses." It repeated the headline of the card behind it and offered a second
+        OPEN at the moment the deciding was over, so the tap read as having done nothing.
+
+        The claim it was making survives and is asserted below instead: a mover's rooms
+        lead the feed they actually land in. That was always the stronger version — a list
+        of names is a promise about content, the ordered feed IS the content — and it
+        cannot go stale, because it is measured on the same feed the learner sees.
       */
-      const topics = (await page.evaluate(
-        `Array.from(document.querySelectorAll('[data-testid="setup-topics"] li')).map(li => li.textContent.trim())`,
-      )) as string[]
-      ok('the answer names what it bought', topics.length > 0, topics.join(' · ').slice(0, 70))
-      if (topics.length) {
-        const rooms = new Set(
-          (await page.evaluate(
-            `Array.from(document.querySelectorAll('.snap-y > section')).slice(1,-1)
-              .map(s => (s.innerText||'').split(String.fromCharCode(10)).filter(Boolean)[1] || '')`,
-          )) as string[],
-        )
-        const invented = topics.filter((t) => !rooms.has(t))
-        ok(
-          'and every one of them is a room in their own feed',
-          invented.length === 0,
-          invented.length ? 'invented: ' + invented.join(', ') : topics.length + ' real',
-        )
-      }
       ok('where is recorded', saved.chapter === 'lisbon', String(saved.chapter))
       ok('why is recorded', saved.purpose === 'moving', String(saved.purpose))
       ok('who is recorded', saved.display_name === 'Sam', String(saved.display_name))
@@ -1185,7 +1171,14 @@ console.log('\nset-up asks who, where and why — and the feed changes because o
         mover's rooms must lead — ordered rather than filtered, because visiting matches
         four Situations of fifteen and a four-card Club is not tailoring.
       */
-      await page.reload()
+      /*
+        Back to the Club to read the feed, because committing now lands on /vibes.
+
+        The set-up card used to end on its own confirmation screen inside the Club, so a
+        reload stayed put. It navigates to the shelf now — which is the point of the
+        change — so this has to return deliberately rather than reload wherever it ended.
+      */
+      await page.goto(BASE + '/club?in=1')
       await page.waitForTimeout(2600)
       const titles = (await page.evaluate(
         `Array.from(document.querySelectorAll('.snap-y > section'))

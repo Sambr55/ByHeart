@@ -135,3 +135,27 @@ export function pairFor(sourceCulture: string, targetLocale: string): Pair | und
 export function pairId(pair: Pair): string {
   return pair.source_culture + ':' + pair.target_locale
 }
+
+/**
+ * What this learner is learning, in words, for copy that has to name it.
+ *
+ * WHY THIS EXISTS. "Portuguese" was written into the product in a dozen places — the
+ * header strapline, the tutorial card, the copy button's label — from a time when one
+ * language was the only language and naming it was free. It is not free any more: the
+ * language is chosen now, and every one of those lines was asserting an answer before the
+ * question had been put. Reported directly: "you are assuming Portuguese in both tagline
+ * at the top and in the copy before the language has been selected."
+ *
+ * `labelForLocale` takes the locale and gives the name. `THE_LANGUAGE` is the fallback for
+ * the one case that matters — copy shown BEFORE a choice exists, where the honest word is
+ * a generic one rather than a guess.
+ *
+ * A call site that has a pair should pass its locale. A call site that does not should use
+ * THE_LANGUAGE and read as true whatever gets chosen.
+ */
+export const THE_LANGUAGE = 'the language'
+
+export function labelForLocale(locale: string | null | undefined): string | null {
+  if (!locale) return null
+  return PAIRS.find((p) => p.target_locale === locale)?.label ?? null
+}

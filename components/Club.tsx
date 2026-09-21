@@ -255,7 +255,7 @@ export function Club() {
     return (
       <NotYet
         what="THE CLUB"
-        line="Your city, in Portuguese — what is on this week, the rooms you will actually stand in, and the words for being there. It opens when your Legend does."
+        line="Your city, in its own language — what is on this week, the rooms you will actually stand in, and the words for being there. It opens when your Legend does."
       />
     )
   }

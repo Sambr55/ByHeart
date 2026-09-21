@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { setAvatarFromFile } from '@/engine/avatar'
 import { chapterById } from '@/content/chapters'
@@ -77,6 +78,7 @@ import { DEFAULT_PAIR } from '@/content/pairs'
 type Step = 'why' | 'who'
 
 export function SetUp({ onDone }: { onDone?: () => void } = {}) {
+  const router = useRouter()
   /*
     Starts on `choose` unless the pair is already settled.
 
@@ -456,7 +458,24 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             data-testid="setup-commit"
             onClick={() => {
               finish()
-              onDone?.()
+              /*
+                STRAIGHT INTO THE PRODUCT, with no confirmation screen in between.
+
+                Sam, on the screen this used to land on: "remove this screen, it confuses."
+                It showed "Then you start." over a list of room titles under the line
+                "Rooms you will get because of what you just said" and an OPEN button —
+                which reads as another decision at the exact moment the deciding is over.
+                Worse, it repeats the headline of the card the person is already on, so it
+                looks as though the tap did nothing.
+
+                The rooms are not lost. They ARE the feed the learner lands in, which is a
+                better way of showing what the answer bought than a list of their names.
+
+                `onDone` still wins where it exists: inside /vibes the journey owns what
+                happens next and there is nowhere to navigate to.
+              */
+              if (onDone) onDone()
+              else router.push('/vibes')
             }}
             className="tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >

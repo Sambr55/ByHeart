@@ -163,6 +163,20 @@ export interface IntroCard {
       }
 }
 
+/*
+  NO CARD HERE NAMES A LANGUAGE, and that is a rule rather than a style choice.
+
+  Every screen in this list is met BEFORE the language is chosen — the selector is on the
+  set-up card, which is the last of them. So "Inside is the Portuguese", "said in
+  Portuguese" and "the Portuguese they actually speak here" were all asserting an answer
+  to a question nobody had been asked. Reported directly: "you are assuming Portuguese
+  ... before the language has been selected."
+
+  The specimens are a different matter and stay as they are. A card SHOWING "Fala comigo,
+  Goose" is showing what the product does with a real line, and the demonstration has to
+  be in some language to be a demonstration at all. What changes is the copy that
+  describes the product, which should read as true whichever language gets picked.
+*/
 export const INTRO_CARDS: IntroCard[] = [
   {
     /*
@@ -188,7 +202,7 @@ export const INTRO_CARDS: IntroCard[] = [
     exit: 'in',
     eyebrow: "HERE'S HOW IT WORKS",
     headline: 'Tap a card to open it. Or swipe right.',
-    body: 'Inside is the Portuguese: what to say, when to say it, and somebody saying it.',
+    body: 'Inside is the language: what to say, when to say it, and somebody saying it.',
   },
   {
     /*
@@ -252,7 +266,7 @@ export const INTRO_CARDS: IntroCard[] = [
     image: 'intro_arrival',
     eyebrow: 'YOUR LEGEND',
     headline: 'Build your legend out of what you have learned.',
-    body: 'Seven things about yourself, said in Portuguese with nothing on screen. It is what a stranger asks you, in the order they ask it.',
+    body: 'Seven things about yourself, said out loud with nothing on screen. It is what a stranger asks you, in the order they ask it.',
     /*
       Derived from LEGEND_FRAMES rather than typed here.
 
@@ -271,7 +285,7 @@ export const INTRO_CARDS: IntroCard[] = [
     pillar: true,
     eyebrow: 'ASK',
     headline: 'The sentence we have not taught you yet.',
-    body: 'Ask for it, anywhere, any time, and get it back in the Portuguese they actually speak here. It goes into your own library.',
+    body: 'Ask for it, anywhere, any time, and get it back in the words they actually speak here. It goes into your own library.',
     /*
       THE ACT, NOT A LIST OF QUESTIONS.
 

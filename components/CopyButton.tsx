@@ -111,7 +111,15 @@ export function CopyButton({
     <button
       type="button"
       data-testid="copy-pt"
-      aria-label={done ? 'Copied' : (label ?? 'Copy the Portuguese')}
+      /*
+        "Copy the line", not "Copy the Portuguese".
+
+        This button appears on the intro cards, which are met before the language is
+        chosen — so a screen reader announced an answer nobody had given. Every call site
+        that knows better passes its own `label`; this is the fallback, and a fallback
+        should not assert what it cannot know.
+      */
+      aria-label={done ? 'Copied' : (label ?? 'Copy the line')}
       onClick={copy}
       className={
         dim +
