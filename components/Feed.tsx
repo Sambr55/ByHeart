@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { DemoCard } from '@/components/DemoCard'
+import { Choose } from '@/components/Choose'
 import { Destination } from '@/components/Destination'
 import { AudioButton } from '@/components/AudioButton'
 import { CopyButton } from '@/components/CopyButton'
@@ -1201,6 +1202,25 @@ export function Card({
     const el = pane.current
     if (!el || !inHand) return
     const claim = (e: TouchEvent) => {
+      /*
+        EXCEPT WHERE THE CARD ITSELF HAS SOMETHING TO SCROLL.
+
+        This took every touch on a locked card, which is right while the card is a face and
+        a gesture and nothing else. The language selector is not: it is eight rows inside
+        .card-face, taller than the box, and the last two cities are below the fold. A
+        blanket preventDefault made them unreachable — the list could not be scrolled, and
+        the only way to Porto was a row nobody could get to.
+
+        So the claim is given up for touches that begin inside a scrollable face. The card
+        still owns every other touch, which is what stops iOS taking the swipe in a
+        standalone PWA, and the rail is still locked — `overflow-y-hidden` on the feed means
+        letting this one through scrolls the list rather than the sequence.
+
+        Checked on the element the touch STARTED in rather than on the face's own bounds: a
+        drag that begins on a button and travels is still a drag of the list under it.
+      */
+      const from = e.target instanceof Element ? e.target.closest('.card-face') : null
+      if (from && from.scrollHeight > from.clientHeight) return
       if (e.cancelable) e.preventDefault()
     }
     el.addEventListener('touchmove', claim, { passive: false })
@@ -1578,10 +1598,14 @@ export function Card({
               }
             />
           )}
-          {/* nav-clear keeps the rail and the title above the bar rather than under it. */}
+          {/*
+            nav-clear keeps the rail and the title above the bar rather than under it, and
+            card-face stops the other end: a card carrying a list grows upward from
+            bottom-0 and went under the wordmark. See .card-face in globals.css.
+          */}
           <div
             className={
-              'nav-clear absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 ' +
+              'nav-clear card-face absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 ' +
               (onSand ? 'text-fg' : 'text-white')
             }
           >
@@ -1675,6 +1699,18 @@ export function Card({
                     {card.intro.asks === 'where' ? (
                       <div className="mt-6">
                         <Destination onDone={() => onPassed?.(card.id)} />
+                      </div>
+                    ) : null}
+                    {/*
+                      The language and the city, on the face for the same reason.
+
+                      It advances on the CITY rather than on the language, because the city
+                      is the second of two taps and the pair is not settled until both are
+                      in. Choose calls onDone only from the city row.
+                    */}
+                    {card.intro.asks === 'choose' ? (
+                      <div className="mt-6">
+                        <Choose onDone={() => onPassed?.(card.id)} />
                       </div>
                     ) : null}
                   </div>

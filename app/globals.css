@@ -733,6 +733,54 @@ body:has(.dock) .nav-clear {
   padding-top: calc(6rem + var(--safe-top));
 }
 
+/*
+  AND THE SAME CLEARANCE FOR THE CARD'S OWN FACE, which never had it.
+
+  The face is positioned `bottom-0` and grows upward, which is right for a headline and
+  three lines of body and wrong the moment a card carries a list. The Legend shows seven
+  questions and the language selector shows eight rows: both grew straight up under the
+  wordmark, so the eyebrow rendered behind the logo and the headline scrolled off the top
+  of the screen entirely. Reported on the Legend as "the copy overlays the top logo and
+  tagline here, ensure it starts beneath them".
+
+  Same measurement as .card-pane above, for the reason that block already gives: the
+  clearance is the header's own height, so the two cannot drift apart. The face is capped
+  rather than padded — it may not start above this line — and scrolls inside itself when
+  its content is taller, which keeps the bottom edge exactly where every other card puts
+  it while letting a long list be reached.
+
+  overscroll-contain so a flick that runs out of list does not hand the rest of itself to
+  the rail and skip the card underneath.
+*/
+.card-face {
+  max-height: calc(100% - 6rem - var(--safe-top));
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+}
+
+/*
+  AND THE CONTENT SITS AT THE TOP ONCE IT IS TALLER THAN THE BOX.
+
+  The face is `items-end`, which is right for a headline and three lines: they hang off
+  the bottom edge of the card like a caption. Inside a scroller that alignment is a trap —
+  a flex child taller than its container and aligned to the end overflows the TOP, and an
+  overflowing top cannot be scrolled to. That is the clipped first row: it was not merely
+  hidden, it was unreachable.
+
+  `margin-top: auto` on the child does what items-end did for short content — pushes it to
+  the bottom — but collapses to nothing when the content fills the box, so tall content
+  starts at the top and scrolls normally. One rule covering both cases, instead of a
+  breakpoint or a measurement.
+*/
+.card-face > * {
+  margin-top: auto;
+}
+
+.card-face::-webkit-scrollbar {
+  display: none;
+}
+
 .dock-slot > .dock {
   position: static;
   margin-top: 0;

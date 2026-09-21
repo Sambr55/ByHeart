@@ -181,6 +181,16 @@ export type EventName =
   | 'card_rewound'
   | 'purpose_skipped'
   | 'chapter_chosen'
+  /*
+    The language, asked at last and therefore worth counting.
+
+    Separate from chapter_chosen because they are now two taps rather than one: the pair
+    used to travel silently with the city, so choosing Lisbon chose pt-PT and there was
+    nothing to record. The interesting number is how many people pick the language and
+    stop — a row greyed COMING is a roadmap, and which one they reach for is the only
+    honest demand signal the product collects.
+  */
+  | 'language_chosen'
   /* The one Club room given away before anything was earned, and which one it was. */
   | 'room_tasted'
 

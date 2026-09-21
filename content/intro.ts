@@ -64,7 +64,7 @@ export interface IntroCard {
    * The copy is still declared, because the sequence's order should be readable in one list
    * and because a card with no headline cannot be found by a check.
    */
-  asks?: 'where'
+  asks?: 'where' | 'choose'
   /**
    * A slug in IMAGE_BANK, where this card has a photograph.
    *
@@ -303,6 +303,59 @@ export const INTRO_CARDS: IntroCard[] = [
     */
     shows: { kind: 'drop' },
   },
+  {
+    /*
+      WHAT ARE WE LEARNING, AND WHERE — asked at last, and asked before it is needed.
+
+      Sam: "we haven't asked them what language we are learning yet, so how do we know to
+      return the answers in Portuguese. The same goes for the tagline — European
+      Portuguese."
+
+      The question used to be here as WHERE TO and was removed when the sequence went to
+      eight screens; the city became a silent write inside set-up and the language was
+      never asked at all. So every screen before this one shows Portuguese, and the header
+      calls itself "European Portuguese, and the places you will use it", on an assumption
+      the learner was never given a chance to make.
+
+      IT COMES AFTER THE ARGUMENT AND NOT BEFORE IT. The old card sat third, on the
+      reasoning that asking early makes every card after it true of somewhere specific.
+      That reasoning was sound and it cost the thing that matters more: a stranger who has
+      seen nothing yet is being asked to commit to a language. Now they have watched the
+      unpack, read what a Legend is, seen what ASK does and what is on in Lisbon — and
+      then they are asked. The screens before it are a demonstration, which is true of
+      Portuguese whether or not Portuguese is what they pick.
+
+      `asks` rather than `shows`, because the card is answered rather than read.
+      components/Choose.tsx renders it; the copy here keeps the sequence readable as one
+      list and gives the check something to find.
+    */
+    id: 'intro_choose',
+    /*
+      LOCKED TO ITS OWN QUESTION, which lint-content enforces and is right to.
+
+      A card that asks something must be the only way off itself — otherwise the question
+      can be swiped past while everything downstream waits on the answer, which is the
+      exact failure this card exists to fix. `exit: 'choose'` means choosing IS the
+      gesture: Choose calls onDone from the city row and the rail advances on it.
+    */
+    exit: 'choose',
+    /*
+      A café counter, not the calçada — chosen by looking at it rather than by theme.
+
+      Calçada is the most Portuguese surface there is and it is pale limestone in daylight,
+      which is the worst ground in the bank for a card carrying eight rows of white type.
+      Destination's own note already warned about it: greyed has to mean "not available",
+      never "hard to read". On the calçada the COMING rows read as a rendering fault.
+
+      The zinc counter is an interior, it is dark, and it is the one picture in the bank
+      that is about arriving somewhere and ordering — which is what the card is asking.
+    */
+    image: 'cafe_counter',
+    asks: 'choose',
+    eyebrow: 'YOUR LANGUAGE',
+    headline: 'What are we learning, and where?',
+    body: 'Pick the language first — the cities that speak it come with it. One of each is built; the rest are on the way and say so.',
+  },
 ]
 
 /**
@@ -334,4 +387,16 @@ export const INTRO_CARDS: IntroCard[] = [
  * What stops is the splice into the showcase feed.
  */
 export const INTRO_DEMO_AFTER: string | null = null
+/*
+  ONE DECISION follows DROPS, and the language/city selector follows IT.
+
+  The splice in Feed.tsx inserts the set-up card immediately after the card named here, so
+  anchoring it to DROPS puts it between DROPS and the selector — which is the order Sam
+  asked for: "add the Language/City selector as the first screen after Then you
+  start/Open."
+
+  Read as a sequence: DROPS closes the argument, ONE DECISION is the commitment, and the
+  selector is the first thing on the other side of it. What follows the selector is the
+  account screen and the why-are-you-here question, in that order.
+*/
 export const INTRO_SETUP_AFTER = 'intro_drops'
