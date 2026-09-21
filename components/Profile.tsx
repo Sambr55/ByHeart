@@ -14,7 +14,7 @@ import { derivedById } from '@/engine/derive'
 import { CRATES, PIECES, ROOTS, type CultureFamily } from '@/content/roots'
 import { LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
-import { getAvatar, setAvatarFromFile } from '@/engine/avatar'
+import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/avatar'
 import { setDisplayName } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 
@@ -467,7 +467,20 @@ function Identity() {
 
   useEffect(() => {
     setMounted(true)
+    /*
+      The fast copy first, then whatever survived.
+
+      getAvatar is synchronous so the photo is on screen in this render; loadAvatar then
+      checks IndexedDB and puts it back if iOS evicted localStorage, which is what took
+      Sam's picture away between one visit and the next. When nothing was evicted the
+      second call resolves to the same string and setPhoto is a no-op.
+    */
     setPhoto(getAvatar())
+    void loadAvatar().then((p) => {
+      if (p) setPhoto(p)
+    })
+    /* And ask to stop being evicted at all — this screen is the person's things. */
+    void askToKeep()
   }, [])
   useEffect(() => {
     if (mounted) setName(learner.display_name ?? '')
