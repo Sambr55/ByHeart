@@ -137,10 +137,29 @@ const titles = (await page.evaluate(
     first-card check trivially because a gesture card shows nothing by design.
   */
   const firstCard = INTRO_CARDS[0]
+  /*
+    OPENING IS TAUGHT FIRST, rejecting second — asserted as "the tutorial opens the
+    sequence" rather than naming one gesture.
+
+    This read `exit === 'away'`, which pinned the order rather than the rule, and the order
+    changed: tapping a card is the verb the product is made of and the one a stranger tries
+    first, while swiping a card away is what you do once you know what opening gives you.
+    So the two slides swapped, and an assertion naming `away` failed on correct work.
+
+    What matters is that the first card is a GESTURE card at all — that nobody meets an
+    argument before they have been given the grammar — and that both gestures are taught
+    before anything else. Both are checked, and neither cares which comes first.
+  */
   ok(
     'the sequence opens on the gesture tutorial',
-    firstCard?.exit === 'away',
+    firstCard?.exit === 'in' || firstCard?.exit === 'away',
     firstCard ? firstCard.eyebrow + ' exits by ' + (firstCard.exit ?? 'NOTHING') : 'no cards',
+  )
+  ok(
+    'and both gestures are taught before any argument',
+    INTRO_CARDS.slice(0, 2).every((c) => c.exit === 'in' || c.exit === 'away') &&
+      new Set(INTRO_CARDS.slice(0, 2).map((c) => c.exit)).size === 2,
+    INTRO_CARDS.slice(0, 2).map((c) => c.eyebrow + ':' + c.exit).join(' → '),
   )
   ok(
     'and something in it shows Portuguese being built',
@@ -568,16 +587,25 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
       little whichever way it was pushed would be promising doors that are not there, and a
       card that moved not at all would read as broken rather than as waiting.
     */
-    const lift = await held(-20, 0)
-    ok('the card follows the thumb leftward', Boolean(lift && lift.x <= -12), lift ? lift.x + 'px' : 'no card')
+    /*
+      THE CARD FOLLOWS THE THUMB THE ONE WAY IT IS ALLOWED, and refuses every other.
+
+      Screen 2 asks for a tap or a swipe RIGHT since the slides swapped, so right is what
+      it must follow and left is what it must refuse. The pair of assertions is the point
+      rather than the direction: a card that moved a little whichever way it was pushed
+      would be promising doors that are not there, and one that moved not at all would read
+      as broken rather than as waiting.
+    */
+    const lift = await held(20, 0)
+    ok('the card follows the thumb rightward', Boolean(lift && lift.x >= 12), lift ? lift.x + 'px' : 'no card')
     /*
       The lock says no by not moving. A card that gave a little in every direction would be
       promising a door that is not there.
     */
-    const pushed = await held(20, 0)
+    const pushed = await held(-20, 0)
     ok('and will not budge the way it is not allowed', Boolean(pushed && pushed.x === 0), pushed ? pushed.x + 'px' : 'no card')
 
-    ok('the sequence opens on the reject lesson', /NOT THIS ONE/.test(await where()), await where())
+    ok('the sequence opens on the open lesson', /HERE'S HOW IT WORKS/.test(await where()), await where())
     /*
       DOES THE CARD CHANGE MODE UNDER THE FINGER?
 
@@ -593,7 +621,8 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
       So the assertion is made WITH THE POINTER STILL DOWN, after the threshold has been
       crossed. The card must still be refusing the browser.
     */
-    const midway = await inFlight(-120, 0)
+    /* Rightward now: slide one teaches opening since the two swapped. */
+    const midway = await inFlight(120, 0)
     ok(
       'the card is still in hand after the swipe fires',
       midway?.touchAction === 'none',
@@ -605,28 +634,27 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
       'overflow-x ' + (midway?.overflowX ?? '?'),
     )
     ok(
-      'a rejected card leaves to the left',
-      Boolean(midway && midway.x < -40),
+      'an opened card leaves to the right',
+      Boolean(midway && midway.x > 40),
       midway ? midway.x + 'px' : 'no card',
     )
     /*
       THE TWO-SLIDE TUTORIAL, walked in the order it teaches.
 
-      Swipe left lands on slide two — which is the whole reason the pair works, the
-      instruction on the first is performed to reach the second — and swipe right off that
-      one reaches the first thing worth looking at.
+      The tap-or-right lands on slide two — which is the whole reason the pair works, the
+      instruction on the first is performed to reach the second — and the swipe left off
+      that one reaches the first thing worth looking at.
 
-      "HERE'S HOW IT WORKS" rather than "THIS ONE": the eyebrow was renamed, because on the
-      second of two tutorial slides what somebody needs told is what they are being shown
-      rather than which card this is.
+      Opening is taught first and rejecting second: a promise that a card comes back only
+      means something to somebody who knows what a card contains.
 
       And swiping right must ADVANCE. It frees the card and scrolls the rail, and for a
       while it did only the first of those — the lock came off, the rail stayed put, and
       the gesture read as broken because nothing moved. That is what this assertion holds.
     */
-    ok('swipe left reaches the second slide', /HERE'S HOW IT WORKS/.test(await where()), await where())
-    await swipe(120, 0)
-    ok('and swipe right moves on to the vibes claim', /VIBES/.test(await where()), await where())
+    ok('swipe right reaches the second slide', /NOT THIS ONE/.test(await where()), await where())
+    await swipe(-120, 0)
+    ok('and swipe left moves on to the vibes claim', /VIBES/.test(await where()), await where())
   }
 }
 

@@ -1668,9 +1668,15 @@ export function Card({
                         moving
                         /*
                           The rewind rides on slide two of the tutorial and nowhere else:
-                          it answers the swipe the previous card just asked for.
+                          it answers the gesture that card is asking for.
+
+                          It moved with the swap. While NOT THIS ONE was first, the rewind
+                          sat on HERE'S HOW IT WORKS and reassured somebody about a reject
+                          they had already made. Opening is taught first now, so the reject
+                          card is second — and the promise that a card comes back belongs
+                          beside the instruction to send one away, not after it.
                         */
-                        rewind={card.id === 'intro_in'}
+                        rewind={card.id === 'intro_away'}
                       />
                     ) : null}
                     {card.intro.shows ? (

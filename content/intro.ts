@@ -168,38 +168,20 @@ export const INTRO_CARDS: IntroCard[] = [
     /*
       THE GESTURE TUTORIAL IS TWO SLIDES, AND THIS IS THE FIRST OF THEM.
 
-      It opens the sequence now. The splash hands over to it directly — COME IN, and the
-      very next thing is the one gesture nobody arrives knowing.
+      It opens the sequence: COME IN, and the very next thing is how a card is opened.
+
+      OPENING BEFORE REJECTING, which is the order Sam asked for and is the better lesson
+      anyway. The two gestures are not equals. Tapping a card is what somebody does with
+      the thing in front of them — it is the verb the whole product is made of, and it is
+      the one a stranger will try first whether or not they were told to. Swiping a card
+      away is what you do with a card you have decided about, and deciding requires having
+      looked. Teaching reject first asked people to dismiss something before they had any
+      idea what opening one would have given them.
 
       What used to be here was SIXTY SECONDS: the Goose unpack, arguing that you already
-      understand more than you can say. That argument has not been lost, it has been moved
-      to where it belongs — slide 4, VIBES, which now carries the Goose line itself. Two
-      cards making the same demonstration under two eyebrows was the actual fault: the
-      unpack appeared twice in the build, four cards apart, and the second one read as the
-      product repeating itself.
-
-      Left first, because left is the gesture the grammar changed. It used to open a card
-      and now it sends one away, so even somebody who has used DUB before is holding a
-      different product.
-    */
-    id: 'intro_away',
-    image: 'intro_away_card',
-    exit: 'away',
-    eyebrow: 'NOT THIS ONE',
-    headline: 'Swipe left and it goes to the back of the pile.',
-    body: 'Not gone — behind the rest, for later. Change your mind and the rewind arrow brings it straight back.',
-  },
-  {
-    /*
-      AND THE SECOND SLIDE, which is the other half of the same lesson.
-
-      Reached BY the swipe left, which is what makes the pair work: the instruction on the
-      card before it is performed to get here, so the tutorial is never read without being
-      done. Then this one asks for the opposite movement.
-
-      "Here's how it works" rather than THIS ONE. The eyebrow was naming the card — this
-      one, that one — which is the language of a pile rather than of a lesson, and on the
-      second of two tutorial slides what somebody needs told is what they are being shown.
+      understand more than you can say. That argument has not been lost, it moved to slide
+      4, VIBES, which carries the Goose line itself. Two cards making the same
+      demonstration under two eyebrows was the actual fault.
     */
     id: 'intro_in',
     image: 'intro_in_card',
@@ -207,6 +189,30 @@ export const INTRO_CARDS: IntroCard[] = [
     eyebrow: "HERE'S HOW IT WORKS",
     headline: 'Tap a card to open it. Or swipe right.',
     body: 'Inside is the Portuguese: what to say, when to say it, and somebody saying it.',
+  },
+  {
+    /*
+      AND THE SECOND SLIDE, which is the other half of the same lesson.
+
+      Reached BY the tap or the right swipe, which is what makes the pair work: the
+      instruction on the card before it has to be performed to get here, so the tutorial is
+      never read without being done. Then this one asks for the opposite movement.
+
+      It follows opening for a reason beyond order. "Swipe left and it goes to the back of
+      the pile" is a promise about loss, and a promise about loss only means something to
+      somebody who now knows what a card contains. Having just opened one, they do.
+
+      THE REWIND RIDES HERE NOW. It answers the gesture that has just been asked for rather
+      than one made two cards ago — the person has been told a card can be sent away, and
+      the looping arrow beside the instruction says it comes back. See the `rewind` prop in
+      components/Feed.tsx, which keys on this card's id.
+    */
+    id: 'intro_away',
+    image: 'intro_away_card',
+    exit: 'away',
+    eyebrow: 'NOT THIS ONE',
+    headline: 'Swipe left and it goes to the back of the pile.',
+    body: 'Not gone — behind the rest, for later. Change your mind and the rewind arrow brings it straight back.',
   },
   {
     id: 'intro_vibes',
