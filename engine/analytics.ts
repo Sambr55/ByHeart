@@ -214,6 +214,17 @@ export type EventName =
     The number worth having is the ratio: an offer nobody accepts is an interruption, and
     an offer everybody accepts was probably owed earlier. It fires once per learner.
   */
+  /*
+    An invitation minted from a drop, which is the only thing in DUB somebody sends TO a
+    person rather than posts at nobody.
+
+    Distinct from showing_sent, which is the proof card: that is a claim about the sender,
+    and this is an ask addressed to a reader who may not have heard of DUB at all. The
+    interesting number is the ratio against the invite room being finished — a sentence
+    people learn and never send is a nice exercise, and one they send is the product
+    leaving the app.
+  */
+  | 'invite_sent'
   | 'save_offered'
   | 'sheet_tested'
   | 'sheet_dismissed'

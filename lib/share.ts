@@ -16,6 +16,33 @@ export interface Snapshot {
   worlds: number
   lines: { pt: string; en: string }[]
   made_at: string
+  /*
+    AN INVITATION, which is the same object doing a different job.
+
+    A proof card says "here is what I can say"; this says "come to this with me", in
+    Portuguese, about a night that is actually happening. Sam: "this is a perfect
+    oppottyunity to mint an invite card to send to some one (in Portuguse) Do you want to
+    come to this {insert event type} with me?"
+
+    Carried on the snapshot rather than in a table of its own, because a share card is
+    already a frozen JSON blob with a short public id and a page that renders it — and the
+    freezing is exactly as important here. An invitation that quietly restated itself
+    after the night had passed would be worse than one that expires.
+
+    Absent on every card minted so far, which is why the page branches on it rather than
+    on a version number: an old card has no invite and renders as it always did.
+  */
+  invite?: {
+    /** The ask itself, already filled — "Queres vir comigo ao concerto no dia catorze?" */
+    pt: string
+    en: string
+    /** Who is asking, when they have told DUB their name. */
+    from?: string
+    event: string
+    venue: string
+    /** ISO date of the night, so the card can say when without re-deriving it. */
+    on: string
+  }
 }
 
 const ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789'

@@ -415,6 +415,27 @@ export function roomById(id: string, chapter: ChapterId = DEFAULT_CHAPTER, now =
 }
 
 /**
+ * The night a room belongs to, where it belongs to one.
+ *
+ * A room is handed to /errand as a Situation and nothing else, which is right for the
+ * forty-five standing rooms — they are about Lisbon rather than about an evening. A drop
+ * room is different: it exists because something is happening on a date, and the room
+ * that asks somebody to come is useless without knowing what to.
+ *
+ * Undefined for a standing room, which is the honest answer rather than a fallback.
+ */
+export function dropForRoom(
+  id: string,
+  chapter: ChapterId = DEFAULT_CHAPTER,
+  now = new Date(),
+): Drop | undefined {
+  for (const drop of [...DROPS, ...generatedDrops(chapter, now)]) {
+    if (drop.situations.some((s) => s.id === id)) return drop
+  }
+  return undefined
+}
+
+/**
  * Derived cards, as feed cards.
  *
  * Rationed here rather than in the generator, and deliberately: spec-derived-cards §06 is

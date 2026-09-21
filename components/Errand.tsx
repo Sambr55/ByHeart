@@ -10,8 +10,131 @@ import { slugFor } from '@/content/audio-manifest'
 import { piecesIn } from '@/content/roots'
 import { chapterById } from '@/content/chapters'
 import type { Situation } from '@/content/situations'
-import { recordProof, rememberFinishedCard, transferPieces } from '@/engine/learner'
+import { loadLearner, recordProof, rememberFinishedCard, transferPieces } from '@/engine/learner'
+import type { Drop } from '@/content/drops'
 import { track } from '@/engine/analytics'
+
+/**
+ * Turn the ask into something you can actually send.
+ *
+ * The invite room already had the sentence — "Queres vir comigo ao concerto no dia
+ * catorze?" — and it went nowhere. Somebody learned how to ask a person out in Portuguese
+ * and the only thing to do with it was read it. Sam: "this is a perfect oppottyunity to
+ * mint an invite card to send to some one (in Portuguse)".
+ *
+ * It rides the share card that already exists: a frozen JSON snapshot, a short public id,
+ * and a page that renders it. Frozen matters more here than on a proof card — an
+ * invitation that restated itself after the night had passed would be worse than one that
+ * simply expires.
+ *
+ * Only on a room that IS the ask, and only when there is a night to ask about. Offering
+ * this on "Finding the venue" would be a share button looking for a reason.
+ */
+function SendInvite({ situation, drop }: { situation: Situation; drop: Drop }) {
+  const [busy, setBusy] = useState(false)
+  const [link, setLink] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const make = async () => {
+    if (link) return link
+    setBusy(true)
+    setError(null)
+    try {
+      const me = loadLearner()
+      /*
+        THE RECIPIENT'S ENGLISH, not the learner's instruction.
+
+        `release.ask` is a task — "Ask somebody to come with you on the fourth" — which is
+        the right sentence on a screen telling somebody what to do and the wrong one on a
+        card sent to the person being asked. The first line of the room carries the real
+        translation ("Do you want to come to the concert with me?"), because it is the same
+        sentence without the date on it.
+
+        Falls back to the ask rather than to nothing: a card with clumsy English is still
+        readable, and a card with none is only readable by the sender.
+      */
+      const english = situation.lines[0]?.en ?? situation.release.ask
+      const res = await fetch('/api/share', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          /* The card's own line, so an invite link opened by somebody else still reads. */
+          lines: [{ pt: situation.release.answer, en: english }],
+          invite: {
+            pt: situation.release.answer,
+            en: english,
+            from: me.display_name ?? '',
+            event: drop.event,
+            venue: drop.place.name,
+            on: drop.on,
+          },
+        }),
+      })
+      const body = (await res.json()) as { ok: boolean; id?: string; reason?: string }
+      if (!body.ok || !body.id) {
+        setError(body.reason ?? 'Could not make a link just now.')
+        return null
+      }
+      const full = window.location.origin + '/p/' + body.id
+      setLink(full)
+      track('invite_sent', { drop: drop.id, room: situation.id })
+      return full
+    } catch {
+      setError('Could not make a link just now.')
+      return null
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const send = async () => {
+    const url = await make()
+    if (!url) return
+    /*
+      The share sheet where there is one, the clipboard where there is not.
+
+      navigator.share is the whole point on a phone — it puts the card into the thread
+      the person is already in — and it throws on cancel, which is not an error worth
+      showing anybody.
+    */
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title: drop.event, text: situation.release.answer, url })
+        return
+      } catch {
+        return
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+    } catch {
+      setError('Copy the link from the box below.')
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <button
+        type="button"
+        data-testid="errand-invite"
+        disabled={busy}
+        onClick={send}
+        className="tap-target eyebrow w-full rounded border border-accent px-5 py-3 text-center text-accent transition hover:bg-accent hover:text-accent-ink disabled:opacity-50"
+      >
+        {busy ? 'MAKING IT…' : copied ? 'LINK COPIED' : 'SEND THIS TO SOMEBODY'}
+      </button>
+      {/* The link itself once it exists, because a share sheet can be dismissed by accident. */}
+      {link ? (
+        <p className="break-all text-center text-xs text-muted" data-testid="errand-invite-link">
+          {link}
+        </p>
+      ) : null}
+      {error ? <p className="text-center text-xs text-coach">{error}</p> : null}
+    </div>
+  )
+}
 
 /**
  * One Situation, end to end.
@@ -24,9 +147,33 @@ import { track } from '@/engine/analytics'
  * away and say it cold. Nothing here counts, and nothing congratulates — the only thing
  * it does is make being bad at this cost less.
  */
-export function Errand({ situation }: { situation: Situation }) {
+export function Errand({ situation, drop }: { situation: Situation; drop?: Drop }) {
   const chapter = chapterById(situation.chapter)
-  const [stage, setStage] = useState<'read' | 'cold' | 'done'>('read')
+  /*
+    The room that asks somebody out, which is the only one worth minting from.
+
+    Matched on the room id's suffix rather than on its title: the templates name it
+    `invite` and the hand-authored drop calls its room `drop_dd_invite`, while the titles
+    are prose and differ between a concert and a match. `kind: 'moment'` is the other
+    candidate and is wrong — it would catch any reflective room, including ones with
+    nothing to send.
+  */
+  const isInvite = Boolean(drop) && /(^|_)invite$/.test(situation.id)
+  /*
+    A FOURTH STAGE, because I SAID IT walked straight out of the door.
+
+    It banked the proof and assigned /club, so the one thing somebody had just claimed to
+    have said was never shown to them. Sam: "I'm not really getting this I said It with a
+    venue drop. Said what? Show them what to say."
+
+    The rule that produced it is still right and is not being undone: a cold claim can
+    only honestly be made BEFORE the reveal, which is why I SAID IT and OPEN are a fork
+    rather than one screen. What was wrong is that taking the honest path was the only
+    one that never showed you the answer — so the person who did the harder thing got
+    less. `said` is the reveal after the claim, and it cannot bank anything, because the
+    banking already happened on the tap that got here.
+  */
+  const [stage, setStage] = useState<'read' | 'cold' | 'said' | 'done'>('read')
 
   /*
     ONE PLACE THAT BANKS A ROOM, and it is what puts the Club on the ladder.
@@ -166,7 +313,7 @@ export function Errand({ situation }: { situation: Situation }) {
               data-testid="errand-said"
               onClick={() => {
                 bank(true)
-                window.location.assign('/club')
+                setStage('said')
               }}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
             >
@@ -182,6 +329,51 @@ export function Errand({ situation }: { situation: Situation }) {
             >
               OPEN
             </button>
+          </div>
+        </div>
+      ) : null}
+
+      {stage === 'said' ? (
+        <div className="flex flex-1 flex-col justify-center gap-6">
+          {/*
+            WHAT THEY JUST SAID, so the claim has something to be a claim ABOUT.
+
+            Nothing here banks anything — the proof was recorded on the tap that arrived at
+            this stage, and recordProof only ever upgrades `clean`, so a second write would
+            be at best a no-op and at worst the inflation the cold stage's note warns about.
+
+            The audio is the point of the screen as much as the text is. Somebody who said
+            it into the air has no idea whether they said it well, and this is the only
+            moment in the flow where the comparison is free.
+          */}
+          <div className="flex flex-col gap-3">
+            <p className="eyebrow text-accent">YOU SAID</p>
+            <div className="flex items-center gap-3">
+              <AudioButton
+                slug={slugFor(situation.release.answer)}
+                text={situation.release.answer}
+              />
+              <p className="pt text-balance text-2xl text-accent">{situation.release.answer}</p>
+              <CopyButton text={situation.release.answer} />
+            </div>
+            <p className="text-sm text-muted">{situation.release.ask}</p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              data-testid="errand-done"
+              onClick={() => window.location.assign('/club')}
+              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+            >
+              DONE
+            </button>
+            {/*
+              And the ask, made sendable — the moment it is worth offering.
+
+              Right after somebody has said it out loud is when they know it works, and
+              the invitation is the one sentence in a drop that has somewhere to go.
+            */}
+            {isInvite && drop ? <SendInvite situation={situation} drop={drop} /> : null}
           </div>
         </div>
       ) : null}
@@ -227,6 +419,8 @@ export function Errand({ situation }: { situation: Situation }) {
             >
               SHOW ME AGAIN
             </button>
+            {/* Here too: somebody who needed the answer still has somebody to ask. */}
+            {isInvite && drop ? <SendInvite situation={situation} drop={drop} /> : null}
           </div>
         </div>
       ) : null}

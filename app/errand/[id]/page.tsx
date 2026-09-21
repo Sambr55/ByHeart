@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { Errand } from '@/components/Errand'
-import { roomById } from '@/content/feed'
+import { dropForRoom, roomById } from '@/content/feed'
 import { DROP_SITUATIONS } from '@/content/drops'
 import { SITUATIONS, isCurrent } from '@/content/situations'
 
@@ -23,5 +23,12 @@ export default async function ErrandPage({ params }: { params: Promise<{ id: str
   // Past its review date it is hidden rather than wrong: a Club full of things that are
   // no longer true is worse than a Club with less in it.
   if (!situation || !isCurrent(situation)) notFound()
-  return <Errand situation={situation} />
+  /*
+    The night this room belongs to, where it belongs to one.
+
+    Undefined for the forty-five standing rooms, which is correct — they are about Lisbon
+    rather than about an evening, and only a room pegged to a date has an invitation worth
+    sending.
+  */
+  return <Errand situation={situation} drop={dropForRoom(id)} />
 }
