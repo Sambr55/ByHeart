@@ -402,10 +402,32 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     [cards],
   )
 
-  // Start on the real first card, which is index 1 once the clone is in front of it.
+  /*
+    Start on the real first card, which is index 1 once the clone is in front of it.
+
+    ONCE, NOT ON EVERY CHANGE OF LENGTH — and that distinction is a bug reported as
+    "clicking open loads the swipe right instruction card".
+
+    This was keyed on `cards.length`, which reads as "when the feed is built". It is not:
+    the feed is REBUILT whenever the learner record changes, and the length changes with
+    it. Answering "what brings you to Lisbon?" writes a purpose, purpose filters the
+    rooms, and the count drops from 54 to 42 — so this effect fired mid-flow and sent the
+    rail back to the top. The person was on the set-up card at index 7, answered one
+    question, and landed on the tutorial at index 1.
+
+    Measured rather than reasoned about: cards 54 -> 42, idx 7 -> 1, on the tap that
+    answers why.
+
+    `started` latches after the first positioning, so the rail is placed when it first has
+    cards and never moved again by this effect. Everything that SHOULD move it — the wrap,
+    the drop deep-link, passed() — still does, because each of those is somebody's
+    deliberate act rather than a side effect of the list changing underneath them.
+  */
+  const started = useRef(false)
   useEffect(() => {
     const el = rail.current
-    if (!el || cards.length < 2) return
+    if (!el || cards.length < 2 || started.current) return
+    started.current = true
     el.scrollTop = el.clientHeight
   }, [cards.length])
 
