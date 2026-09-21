@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
+import { MiniBuild } from '@/components/Journey'
 import { CopyButton } from '@/components/CopyButton'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
@@ -187,7 +188,7 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
     WHERE THIS ROOM WAS OPENED FROM, because it was always the Club.
 
     Every exit here — the wordmark, DONE and GOT IT — went to /club, which was true while
-    a room could only be reached from the feed. It is not any more: NIGHTS OUT on Yours
+    a room could only be reached from the feed. It is not any more: DROPS on Yours
     lists the evenings somebody has been to, and finishing a room from there dumped them
     on a screen they had not asked for. Sam: "both the close back to a find teh venue card
     in club but we shoudl still be in YOURS."
@@ -357,65 +358,81 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             TAKE IT AWAY
           </button>
 
+          {/*
+            AND A WAY TO ACTUALLY BUY ONE, on the room that is about buying one.
+
+            Sam: "where tickets are available to buy online add a link." Drop has carried a
+            `link` since the hand-authored one and nothing ever rendered it, so the room
+            that teaches "Ainda há bilhetes?" could not sell you a ticket.
+
+            On the ticket room only. A box office link under "Getting to Oriente" is a
+            button looking for a home, and on the invitation it would compete with the one
+            thing that screen is for.
+
+            Under TAKE IT AWAY rather than above it: the language is what somebody came
+            for, and this is the errand the language is about. Outlined, for the same
+            reason — it leaves DUB, and nothing that leaves should outrank what does not.
+          */}
+          {drop?.link && /ticket/.test(situation.id) ? (
+            <a
+              href={drop.link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="drop-tickets"
+              className="tap-target eyebrow mt-3 block w-full rounded border border-accent px-5 py-3 text-center text-accent transition hover:bg-accent hover:text-accent-ink"
+            >
+              {drop.link.label} ↗
+            </a>
+          ) : null}
+
         </>
       ) : null}
 
       {stage === 'cold' ? (
         <div className="flex flex-1 flex-col justify-center gap-6">
-          {/* Nothing on screen to copy from. That is the entire mechanism. */}
-          <p className="eyebrow text-muted">SAY IT</p>
-          <p className="t-ask display text-balance text-2xl">{situation.release.ask}</p>
           {/*
-            THE CLAIM IS MADE HERE, WITH NOTHING ON SCREEN — which is what makes it a claim.
+            YOUR TURN IS THE PROOF NOW, not a softer option beside it.
 
-            I SAID IT used to live on the next stage, under the answer, so `clean: true` was
-            banked by somebody reading the sentence they were claiming to have produced cold.
-            recordProof only ever UPGRADES clean, so that true was permanent and
-            uncorrectable: the one number DUB asks to be judged on was inflated by the
-            easiest tap in the flow.
+            Sam: "teh proof mechanism (cold) is being replaced by Your turn."
 
-            A cold claim can only honestly be made before the reveal. So the fork is here —
-            I said it, or show me — and the screen that shows the answer can no longer claim
-            anything.
+            The old fork was a self-marked claim — I SAID IT, with nothing on screen —
+            and a reveal underneath it. That is honest arithmetic and it is a weak
+            question: the product asked whether you had said something and took your word
+            for it, which is the one measurement in DUB nobody can check, including the
+            person making it.
+
+            Building the sentence is the same claim with evidence. The tiles are the words
+            and nothing else, in the wrong order, with the English above — so producing it
+            means knowing what goes where rather than recognising a sentence you are shown.
+            `clean` still means what it has always meant: right on the FIRST submission,
+            which MiniBuild already tracks and which is exactly the cold claim made
+            checkable.
+
+            This is the vibes' own MiniBuild, unchanged, because a learner meeting two
+            mechanics for one job is how a product starts feeling assembled — and because
+            the reveal is not gone, it is what MiniBuild offers after three failed goes,
+            which is the right moment for it rather than the first one.
           */}
           <div className="flex flex-col gap-3">
-            <button
-              type="button"
-              data-testid="errand-said"
-              onClick={() => {
-                bank(true)
-                setStage('said')
-              }}
-              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-            >
-              I SAID IT
-            </button>
-            {/* Muted, because the trade should be visible before it is made. */}
-            <p className="text-center text-xs text-muted">Banked as proof.</p>
-            {/*
-              SHOW ME, not OPEN, and it says what it costs.
-
-              The fork is the most consequential tap in the room — one banks a cold claim
-              and the other does not — and it read as two unlabelled doors: "I SAID IT"
-              over a bare "OPEN". Sam: "I cant see teh difference between I said it and
-              open." Both now lead to a screen with the sentence on it, which makes the
-              labels the only thing telling them apart, so the labels have to carry it.
-
-              OPEN was a verb from the grammar this file's own note sets out — OPEN
-              reveals, GOT IT spends, I SAID IT claims — and it is still that verb. What it
-              was missing is the object: open WHAT. "Show me the answer" names the thing,
-              and the line under it names the trade, in the same shape as the one above.
-            */}
-            <button
-              type="button"
-              data-testid="errand-show"
-              onClick={() => setStage('done')}
-              className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
-            >
-              SHOW ME THE ANSWER
-            </button>
-            <p className="text-center text-xs text-muted">Not banked — you read it first.</p>
+            <p className="eyebrow text-accent">YOUR TURN</p>
+            <p className="t-ask display text-balance text-2xl">{situation.release.ask}</p>
           </div>
+          <MiniBuild
+            target={situation.release.answer}
+            onSolved={({ clean }) => {
+              bank(clean)
+              setStage('said')
+            }}
+          />
+          {/*
+            NO SECOND ESCAPE HERE, because MiniBuild already has one.
+
+            A first version put SHOW ME THE ANSWER under the builder and it rendered
+            directly beneath MiniBuild's own SHOW ME — two buttons, near-identical labels,
+            one doing rather more than the other. The builder's version is the better one:
+            it lays the sentence out in the tiles rather than printing it, and it marks the
+            line as helped so nothing false is banked.
+          */}
         </div>
       ) : null}
 

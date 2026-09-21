@@ -352,7 +352,7 @@ ok('/legend is on the profile', links.includes('/legend'))
 for (const [section, href] of [
   ['said-cold', '/proof'],
   ['your-words', '/vocab'],
-  ['nights-out', '/drops'],
+  ['drops', '/drops'],
 ] as const) {
   const toggle = await page.$('[data-testid="open-' + section + '"]')
   if (toggle) await toggle.click()

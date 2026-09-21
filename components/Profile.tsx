@@ -39,7 +39,7 @@ import { useLearner } from '@/engine/useLearner'
  * WHAT EARNS A ROW: it has to be a pile of Portuguese this person made. That is the line
  * the cog drew for settings and it is the same line here. BEEN THROUGH is where they have
  * been, PUT ASIDE is what they set by, SAID COLD is what they produced, YOUR WORDS is
- * what they own, and NIGHTS OUT is where they took it.
+ * what they own, and DROPS is where they took it.
  *
  * That last one was WHAT IS ON and listed the entire calendar, which made it the only row
  * here that was not theirs — twelve evenings identical for every learner, under four piles

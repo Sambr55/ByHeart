@@ -55,16 +55,22 @@ export const PROFILE_COPY = {
   words_note: 'Every piece you have banked, the ones you have used most recently first.',
   words_empty: 'Nothing banked yet. Words arrive as you go through a vibe.',
   /*
-    THE NIGHTS YOU WENT TO, not the ones that are on.
+    DROPS, which is what the product calls them everywhere else.
 
-    This said WHAT IS ON and listed the whole calendar — the only row on Yours that was
-    not the learner's own: twelve evenings in Lisbon, identical for everybody, under four
-    piles of things they had made. The label was honest about what it was showing and
-    that was the problem, because the screen is a record rather than a listings page.
+    Two renames in a row, and the second undoes half of the first. WHAT IS ON was wrong
+    because it listed the whole calendar rather than the learner's own — that part stands,
+    and the filter stayed. NIGHTS OUT was wrong for a different reason: it named the
+    content rather than the format, and the format is about to hold more than nights. Sam:
+    "Rename them as DROPS and I am going to ask you to mint Daytime content as well as
+    Annual Content - e.g. halloween, Christmas."
+
+    A Christmas drop is not a night out and a Sunday market is not either. `drop` is the
+    word the code, the Club and the calendar already use for the thing, and it is the one
+    that survives new kinds without lying about any of them.
   */
-  drops_label: 'NIGHTS OUT',
-  drops_note: 'Evenings you went into, and the language you took with you.',
-  drops_empty: 'None yet. Open a drop from the Club and finish a room, and the night lands here.',
+  drops_label: 'DROPS',
+  drops_note: 'Pegged to something really happening, with the language you took to it.',
+  drops_empty: 'None yet. Open a drop from the Club and finish a room, and it lands here.',
   /*
     The Legend, as the hero of this screen rather than a row on it.
 

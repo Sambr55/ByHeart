@@ -91,6 +91,15 @@ export function candidateFor(row: CalendarRow): Candidate | { no: string } {
     venue: { name: row.where.name, area: row.where.area ?? '' },
     station: row.where.station,
     on: row.on,
+    /*
+      The ticket link, where the row has one.
+
+      Carried rather than derived: draftDrop has passed `c.link` through since the
+      hand-authored drop, and nothing ever set it — so every generated drop told somebody
+      about a concert and gave them no way in. Absent stays absent; a venue's listings page
+      is not a ticket for this night and would be worse than no button.
+    */
+    ...(row.tickets ? { link: { href: row.tickets, label: 'TICKETS' } } : {}),
     sources: row.sources.map((href) => ({
       /*
         The row's own claim, carried across as the fact it vouches for.

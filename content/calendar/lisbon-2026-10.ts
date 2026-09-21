@@ -83,6 +83,15 @@ export const LISBON_2026_10: CalendarRow[] = [
     name: 'Gilberto Gil — Amor Azul — at the Coliseu',
     where: { name: 'Coliseu dos Recreios', area: 'Restauradores', station: 'Restauradores' },
     purposes: ['visiting', 'staying', 'moving'],
+    /*
+      Its own source doubles as the box office, which is the only case a link is added.
+
+      Not harvested and not guessed: each of these URLs is already in this row's `sources`
+      because it is where the date was checked, and it happens to be the seller's own page
+      rather than a newspaper's. A row whose sources are all press cuttings gets no link,
+      because "probably on sale somewhere" is not a fact this file is allowed to state.
+    */
+    tickets: 'https://coliseulisboa.com/eventos/gilberto-gil-amor-azul/',
     sources: [
       'https://www.publico.pt/2026/05/01/culturaipsilon/noticia/gilberto-gil-apresenta-espectaculo-amor-azul-coliseu-recreios-outubro-2173228',
       'https://observador.pt/2026/04/30/gilberto-gil-apresenta-espectaculo-amor-azul-no-coliseu-de-lisboa-em-outubro/',
@@ -129,6 +138,15 @@ export const LISBON_2026_10: CalendarRow[] = [
     name: 'Benfica v Celtic — Europa League',
     where: { name: 'Estádio da Luz', area: 'Benfica', station: 'Colégio Militar/Luz' },
     purposes: ['visiting', 'staying', 'moving'],
+    /*
+      Its own source doubles as the box office, which is the only case a link is added.
+
+      Not harvested and not guessed: each of these URLs is already in this row's `sources`
+      because it is where the date was checked, and it happens to be the seller's own page
+      rather than a newspaper's. A row whose sources are all press cuttings gets no link,
+      because "probably on sale somewhere" is not a fact this file is allowed to state.
+    */
+    tickets: 'https://seatpick.com/sl-benfica-vs-celtic-fc-tickets',
     sources: [
       'https://seatpick.com/sl-benfica-vs-celtic-fc-tickets',
       'https://www.espn.com/soccer/team/fixtures/_/id/1929/benfica',
@@ -172,6 +190,15 @@ export const LISBON_2026_10: CalendarRow[] = [
     name: 'The Lemon Twigs at Lisboa Ao Vivo',
     where: { name: 'LAV — Lisboa Ao Vivo', area: 'Alcântara' },
     purposes: ['visiting', 'staying', 'moving'],
+    /*
+      Its own source doubles as the box office, which is the only case a link is added.
+
+      Not harvested and not guessed: each of these URLs is already in this row's `sources`
+      because it is where the date was checked, and it happens to be the seller's own page
+      rather than a newspaper's. A row whose sources are all press cuttings gets no link,
+      because "probably on sale somewhere" is not a fact this file is allowed to state.
+    */
+    tickets: 'https://www.livenation.com/artist/K8vZ9174G87/the-lemon-twigs-events',
     sources: [
       'https://www.livenation.com/artist/K8vZ9174G87/the-lemon-twigs-events',
       'https://www.songkick.com/metro-areas/31802-portugal-lisbon/october-2026',
@@ -211,6 +238,15 @@ export const LISBON_2026_10: CalendarRow[] = [
     name: 'Jungle at the MEO Arena',
     where: { name: 'MEO Arena', area: 'Parque das Nações', station: 'Oriente' },
     purposes: ['visiting', 'staying', 'moving'],
+    /*
+      Its own source doubles as the box office, which is the only case a link is added.
+
+      Not harvested and not guessed: each of these URLs is already in this row's `sources`
+      because it is where the date was checked, and it happens to be the seller's own page
+      rather than a newspaper's. A row whose sources are all press cuttings gets no link,
+      because "probably on sale somewhere" is not a fact this file is allowed to state.
+    */
+    tickets: 'https://arena.meo.pt/en/agenda/jungle_en/16031',
     sources: [
       'https://arena.meo.pt/en/agenda/jungle_en/16031',
       'https://www.songkick.com/concerts/43119787-jungle-at-meo-arena',
@@ -226,6 +262,15 @@ export const LISBON_2026_10: CalendarRow[] = [
     name: 'Anastacia at Campo Pequeno',
     where: { name: 'Sagres Campo Pequeno', area: 'Campo Pequeno', station: 'Campo Pequeno' },
     purposes: ['visiting', 'staying', 'moving'],
+    /*
+      Its own source doubles as the box office, which is the only case a link is added.
+
+      Not harvested and not guessed: each of these URLs is already in this row's `sources`
+      because it is where the date was checked, and it happens to be the seller's own page
+      rather than a newspaper's. A row whose sources are all press cuttings gets no link,
+      because "probably on sale somewhere" is not a fact this file is allowed to state.
+    */
+    tickets: 'https://www.ticketline.pt/en/evento/anastacia-ntktour-2026-98323',
     sources: [
       'https://www.ticketline.pt/en/evento/anastacia-ntktour-2026-98323',
       'https://artesonora.pt/anastacia-em-nome-proprio-no-sagres-campo-pequeno-em-2026-bilhetes/',

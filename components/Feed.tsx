@@ -2347,11 +2347,28 @@ function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
         happened somewhere else. The grammar is four verbs: OPEN reveals, GOT IT spends,
         I SAID IT claims, and anything else is a place. This is a place.
       */}
+      {/*
+        ONE FLOW, TWO DOORS — and this is the Club's door into it.
+
+        Sam: "ensure you update content in both CLUB and YOURS, they shoudl not be
+        duplcated but replicated in both places."
+
+        The Club shows a drop's rooms as swipeable lanes and Yours opens the room sequence
+        directly, which was two ways through the same four rooms with different mechanics
+        — and the sideways one is why the invitation could not be found. The lanes stay,
+        because a feed is a thing you swipe and previewing what is inside a night is worth
+        doing; what changes is that they are PREVIEWS now, each one entering the sequence
+        at its own room rather than being a parallel copy of it.
+
+        So the label names where it lands. A lane that said THE ROOM on every one of four
+        rooms could not tell you which room it meant.
+      */}
       <Link
         href={'/errand/' + s.id}
+        data-testid={'room-in-' + s.id}
         className="tap-target eyebrow mt-3 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
       >
-        THE ROOM
+        {s.title.toUpperCase()}
       </Link>
     </div>
   )

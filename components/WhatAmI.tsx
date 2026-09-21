@@ -35,7 +35,7 @@ export function WhatAmI({ sha, built }: { sha: string; built: string }) {
       /*
         The one that answers "why am I seeing all the events".
 
-        NIGHTS OUT is finished_cards filtered to drop rooms, so a long list here is the
+        DROPS is finished_cards filtered to drop rooms, so a long list here is the
         honest reason a screen looks full — and the only way to tell that apart from a
         broken filter is to read it.
       */

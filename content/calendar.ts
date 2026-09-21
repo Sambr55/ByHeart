@@ -32,6 +32,27 @@ export type CalendarKind =
   | 'deadline'
   /** A strike, roadworks, a closure. The city not working the way it usually does. */
   | 'disruption'
+  /*
+    THE TWO THAT ARE NOT ONE NIGHT, added before there is content for them so the shape
+    is settled once rather than argued about per row.
+
+    Sam: "I am going to ask you to mint Daytime content as well as Annual Content - e.g.
+    halloween, Christmas. They will all follow this format so AVOID HARD-CODING."
+
+    `annual` is the date that comes round — Christmas, Halloween, Santo António. It is not
+    a holiday in the sense above, which is about things being SHUT; an annual is a thing
+    people do, with language for doing it, and it recurs. A learner meets it once a year
+    and the product should not act surprised.
+
+    `daytime` is the afternoon rather than the evening: a market, a match on television in
+    a café, a queue at a pastelaria on a Sunday. Same four-room shape, different hours and
+    a much shorter run-up — nobody plans a Saturday market in March.
+
+    Neither needs a code path. A kind decides how far ahead it opens (DROP_LEAD_DAYS) and
+    a `shape` decides which template teaches it, and both are tables.
+  */
+  | 'annual'
+  | 'daytime'
 
 export interface CalendarRow {
   id: string
@@ -72,6 +93,24 @@ export interface CalendarRow {
    * product puts its claims in a learner's mouth in front of a stranger.
    */
   sources: string[]
+  /*
+    WHERE TO BUY A TICKET, which is not the same as where the fact came from.
+
+    Sam: "where tickets are available to buy online add a link." The Drop type has carried
+    a `link` since the hand-authored one, and no calendar row could fill it — so eleven of
+    twelve generated drops sent somebody to a concert with no way to get in.
+
+    SEPARATE FROM `sources` DELIBERATELY. Sources are provenance: the newspaper pieces and
+    listings that prove the event is real, and the first thing a reviewer reads. Putting
+    one behind a TICKETS button would send a learner to an article about the gig, which is
+    the class of error this whole file exists to prevent — the fact is sourced, the link is
+    an action, and they are not interchangeable.
+
+    Optional, and absent means no button rather than a guessed one. A venue's own listings
+    page is not this either: "tickets for the thing you are looking at" and "everything on
+    at this venue" are different promises.
+  */
+  tickets?: string
   /**
    * Whether a human has looked at it.
    *

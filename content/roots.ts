@@ -525,18 +525,30 @@ export const DROP_WINDOW_DAYS = 21
  *
  *   event       90  you may need a ticket, and tickets sell out
  *   deadline    45  paperwork has a run-up, and Finanças has a queue
+ *   annual      21  Christmas, Halloween: you know it is coming, you plan a fortnight out
  *   holiday     14  you need to know things are shut, not to plan around it
  *   disruption  14  strikes are called late; earlier than this is speculation
+ *   daytime      7  a market, an afternoon. Nobody plans a Saturday in March
  *
  * A Drop can still override with its own `from`, which is what to reach for when a
  * particular thing does not behave like its kind — a festival whose tickets go on sale in
  * February, say.
+ *
+ * THE TWO NEW ONES ARE A NUMBER EACH AND NOTHING ELSE, which is the point. Sam: "They will
+ * all follow this format so AVOID HARD-CODING." An annual and a daytime thing are drops
+ * with a different run-up; the rooms, the flow and the invitation are the same object, so
+ * adding them is an entry here and a template, not a branch anywhere.
  */
-export const DROP_LEAD_DAYS: Record<'event' | 'holiday' | 'deadline' | 'disruption', number> = {
+export const DROP_LEAD_DAYS: Record<
+  'event' | 'holiday' | 'deadline' | 'disruption' | 'annual' | 'daytime',
+  number
+> = {
   event: 90,
   deadline: 45,
+  annual: 21,
   holiday: 14,
   disruption: 14,
+  daytime: 7,
 }
 
 export interface Crate {
