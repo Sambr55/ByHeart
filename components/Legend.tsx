@@ -110,6 +110,16 @@ export function Legend() {
   })
   /* The card is the seven at depth 'card'; the deeper frames are a bonus. */
   const myCard = cardFor(learner.purpose ?? null)
+  /*
+    THE ONES STILL BETWEEN THIS LEARNER AND THE CLUB.
+
+    Not every unanswered frame — only the card ones. A deeper question is unanswered too
+    and opens nothing, which is exactly the confusion the `extra` chip exists to end; a
+    button that counted them would put it straight back.
+  */
+  const cardOpen = myCard.filter(
+    (f) => !answers.some((a) => a.frame_id === f.id && Object.keys(a.values).length > 0),
+  )
   const onCard = answers.filter(
     (a) => Object.keys(a.values).length > 0 && myCard.some((f) => f.id === a.frame_id),
   )
@@ -325,6 +335,43 @@ export function Legend() {
         ) : null}
       </div>
 
+      {/*
+        THE WAY TO THE THING THAT IS ACTUALLY IN THE WAY.
+
+        The count at the top says "6 of 7 on your card" and the seventh is somewhere in a
+        list of eight, below the fold, looking identical to the ones already done. Sam,
+        with his Legend built and the Club shut: "I cant get from here to teh Club even
+        though I ahve done my Legend" — and then, on this screen, asking for a button that
+        finds them.
+
+        It names the count rather than the question. Which one is missing depends on the
+        learner and there can be more than one, so the button takes them to the list and
+        the list — with `extra` on the frames that do not count — says the rest.
+
+        Above RUN IT THROUGH deliberately: rehearsing is what you do with a finished card,
+        and offering it first to somebody who cannot finish theirs is the wrong order.
+      */}
+      {mounted && unlocked && cardOpen.length ? (
+        <button
+          type="button"
+          data-testid="legend-find-missing"
+          onClick={() => {
+            const el = document.querySelector('[data-testid="legend-card-' + cardOpen[0].id + '"]')
+            if (!el) return
+            /* The same courtesy the city selector takes — see components/Choose.tsx. */
+            const still =
+              typeof window !== 'undefined' &&
+              window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            el.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'center' })
+          }}
+          className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+        >
+          {cardOpen.length === 1
+            ? 'FIND YOUR MISSING QUESTION'
+            : 'FIND YOUR ' + cardOpen.length + ' MISSING QUESTIONS'}
+        </button>
+      ) : null}
+
       {mounted && answered.length >= 2 ? (
         <div className="flex flex-col gap-3">
           <button
@@ -334,7 +381,12 @@ export function Legend() {
               track('legend_rehearse', { cards: answered.length })
               setMode('rehearse')
             }}
-            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+            /* Outline while a card question is outstanding, so the two do not compete
+               for the one filled slot — finding the missing one comes first. */
+            className={
+              'tap-target eyebrow w-full rounded px-5 py-3 ' +
+              (cardOpen.length ? 'border border-line text-fg' : 'bg-accent text-accent-ink')
+            }
           >
             RUN IT THROUGH
           </button>
@@ -514,7 +566,17 @@ export function Legend() {
                     */}
                     {onCardHere.length ? (
                       <span className="eyebrow shrink-0 tabular-nums text-muted">
+                        {/*
+                          "ON CARD", because the list under it is longer than the count.
+
+                          Eight rows, seven counted — and without a word saying which, the
+                          header reads as arithmetic that has gone wrong. Sam: "Says 6 of
+                          7 when there are 8." The extras are marked on their own rows;
+                          this says what the number is OF, so the two facts agree instead
+                          of looking like one fact stated twice.
+                        */}
                         {doneHere + ' of ' + onCardHere.length}
+                        {mine.length > onCardHere.length ? ' on card' : ''}
                       </span>
                     ) : null}
                   </div>
@@ -706,14 +768,29 @@ function Missing({ frame, owned }: { frame: LegendFrame; owned: string[] }) {
     </>
   )
   if (!need.crate) return <p className="mt-1 px-4 text-xs text-muted">{line}</p>
+  /*
+    A BUTTON, because it is the only thing on a blocked card that does anything.
+
+    It was an underlined caption in the smallest type on the screen, sitting under a
+    disabled card and reading as a footnote about it. Sam: "Mak eteh Go Get It against
+    unopend questions a clear button."
+
+    The word and its gloss stay above it rather than inside it: they say WHY this card is
+    shut, which is a different sentence from the one the control needs to carry. A button
+    reading "One more word — anos, years old — go and get it" is a paragraph somebody has
+    to parse before they can tap it.
+  */
   return (
-    <Link
-      href={'/vibes?open=' + need.crate}
-      data-testid={'legend-need-' + frame.id}
-      className="tap-target mt-1 block px-4 text-xs text-muted underline decoration-line underline-offset-4 transition hover:text-accent hover:decoration-accent"
-    >
-      {line} — go and get it
-    </Link>
+    <div className="mt-1 flex flex-col gap-1 px-4">
+      <p className="text-xs text-muted">{line}</p>
+      <Link
+        href={'/vibes?open=' + need.crate}
+        data-testid={'legend-need-' + frame.id}
+        className="tap-target eyebrow inline-flex w-full items-center justify-center rounded border border-accent px-4 py-2 text-center text-accent transition hover:bg-accent hover:text-accent-ink"
+      >
+        GO AND GET IT
+      </Link>
+    </div>
   )
 }
 
