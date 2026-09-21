@@ -8,7 +8,6 @@ import { Card } from '@/components/Feed'
 import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Friends } from '@/components/Friends'
-import { PurposeChoice, SoundChoice, ThemeChoice } from '@/components/Theme'
 import { Wordmark } from '@/components/Wordmark'
 import { askedCards, cardById, cardFace, derivedCards, roomsFor, wordCards, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
@@ -251,11 +250,6 @@ export function Profile() {
           >
             START HERE
           </Link>
-          <div className="border-t border-line pt-6">
-            <ThemeChoice />
-            <SoundChoice />
-            <PurposeChoice />
-          </div>
         </div>
       ) : (
         <>
@@ -304,16 +298,15 @@ export function Profile() {
           <Friends />
           <More />
           {/*
-            The dark theme was complete, correct, and only reachable from the burger —
-            which no longer exists. It is a thing about your copy of DUB rather than a
-            destination, so it sits at the foot of the screen that holds your things,
-            under the list, where a setting goes.
+            The theme, the sound and the purpose used to sit here, at the foot of the list.
+
+            That was right while there was nowhere else to put them — the note this comment
+            replaces argued they were "a thing about your copy of DUB rather than a
+            destination", and it was correct. They are now three controls on a screen that
+            is entirely things about your copy of DUB, which is a better version of the
+            same argument: the cog holds appearance, sound and why you are here, and this
+            screen ends on the Portuguese rather than on a preference.
           */}
-          <div className="border-t border-line pt-6">
-            <ThemeChoice />
-            <SoundChoice />
-            <PurposeChoice />
-          </div>
         </>
       )}
       <BottomNavSpace />
@@ -525,6 +518,40 @@ function Identity() {
           className="display mt-1 w-full bg-transparent text-2xl text-fg outline-none placeholder:text-muted"
         />
       </div>
+
+      {/*
+        THE COG, top right, where every phone puts it.
+
+        Yours had membership, the account, the feedback form and three app settings in the
+        same column as the Portuguese somebody had earned — so the screen that says "here
+        is what you built" was also the screen for cancelling a subscription. Sam: "Put
+        everythiung that is not about Language... into a settings section accessible via a
+        cog icon top right in YOURS."
+
+        On the identity row rather than in a header bar of its own: this screen has no
+        sticky bar, and a bar added to carry one control would push the Legend down the
+        page — which is the one thing the ordering note above this component refuses.
+      */}
+      <Link
+        href="/settings"
+        data-testid="yours-settings"
+        aria-label="Settings"
+        className="tap-target -mr-2 flex shrink-0 items-center justify-center self-start p-2 text-muted transition hover:text-accent"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden
+          className="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+      </Link>
     </section>
   )
 }
@@ -673,7 +700,24 @@ function LegendHero() {
       */}
       {mounted && !status.open ? (
         <p className="text-xs text-muted">
-          {PROFILE_COPY.legend_locked.replace('{n}', String(status.toGo))}
+          {/*
+            Which half of the door they are on, said in the unit of that half. Sessions
+            while the basics are open, vibes after — the split legendStatus already makes
+            for the shelf and the section-complete screen.
+          */}
+          {status.toGo > 0
+            ? (() => {
+                const left = Math.max(0, status.sessionsNeeded - status.sessionsDone)
+                return left === 1
+                  ? PROFILE_COPY.legend_locked_one
+                  : PROFILE_COPY.legend_locked.replace('{n}', String(left))
+              })()
+            : (() => {
+                const left = Math.max(0, status.vibesNeeded - status.vibesDone)
+                return left === 1
+                  ? PROFILE_COPY.legend_locked_vibes_one
+                  : PROFILE_COPY.legend_locked_vibes.replace('{n}', String(left))
+              })()}
         </p>
       ) : mounted && ready.length ? (
         <Link
@@ -702,14 +746,16 @@ function LegendHero() {
  *
  * A flat list of eleven where Dub Club and the feedback form were peers. They are not
  * peers — most of these answer "what have I got", and that question has a screen now.
+ *
+ * AND THE THREE THAT ARE NOT ABOUT LANGUAGE HAVE GONE TO SETTINGS. Membership, the
+ * account and feedback were rows in this list, so the drawer under somebody's Legend held
+ * both "every piece you have kept" and "cancel your subscription" as equals. What is left
+ * is three piles of Portuguese, which is what this screen is for — see components/Settings.
  */
 const MORE = [
   { href: '/proof', label: 'Proof', hint: 'The sentences you can say cold' },
   { href: '/vocab', label: 'Vocab library', hint: 'Every piece you have kept' },
   { href: '/drops', label: 'Drops', hint: 'Pegged to something really happening' },
-  { href: '/pro', label: 'Membership', hint: 'What it opens, and what the money is for' },
-  { href: '/account', label: 'Account', hint: 'This device, codes, and your data' },
-  { href: '/feedback', label: 'Feedback', hint: 'Tell us what did not land' },
 ]
 
 function More() {

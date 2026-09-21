@@ -48,7 +48,18 @@ export const PROFILE_COPY = {
     score. scripts/hero-check.mts asserts that in a browser.
   */
   legend_label: 'YOUR LEGEND',
-  legend_locked: 'Opens {n} vibes from here.',
+  /*
+    IN SESSIONS, like every other screen that states this door.
+
+    It said "Opens {n} vibes from here" and was filled with status.toGo — the count of
+    doorway ROOTS. So somebody one session into the basics was told their Legend opened 5
+    VIBES away, when the answer was two more sessions of the vibe they had just finished.
+    The same fault the shelf, the tile and the Legend page all had; see PICKER.legend_basics.
+  */
+  legend_locked: 'Opens {n} basics sessions from here.',
+  legend_locked_one: 'Opens one basics session from here.',
+  legend_locked_vibes: 'Opens {n} vibes from here.',
+  legend_locked_vibes_one: 'Opens one vibe from here.',
   /** The only headline number on the screen, and it is a possession, not a fraction. */
   legend_have_one: 'One thing you can say about yourself.',
   legend_have: '{done} things you can say about yourself.',

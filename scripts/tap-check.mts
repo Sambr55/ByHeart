@@ -90,9 +90,17 @@ const pt = (await page.evaluate(`(() => {
 ok('a learner can still copy a sentence', pt !== 'none', String(pt))
 
 console.log('\nand the sound can be turned off\n')
-await page.goto(BASE + '/profile')
+/*
+  In /settings now, with the theme and the purpose.
+
+  It was at the foot of Yours and this line called that "the screen that holds your
+  things" — which is exactly why it moved: Yours holds the Portuguese somebody earned,
+  and whether taps make a noise is not that. The assertion is unchanged in substance; only
+  the door it knocks on has moved.
+*/
+await page.goto(BASE + '/settings')
 await page.waitForTimeout(1500)
-ok('the choice is on the screen that holds your things', Boolean(await page.$('[data-testid="sound-off"]')))
+ok('the choice is one tap from the screen that holds your things', Boolean(await page.$('[data-testid="sound-off"]')))
 await page.click('[data-testid="sound-off"]')
 await page.waitForTimeout(500)
 const stored = (await page.evaluate(`localStorage.getItem('byheart.sound')`)) as string | null

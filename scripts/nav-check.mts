@@ -324,8 +324,27 @@ console.log('\neverything the burger held is still reachable\n')
 await page.goto(BASE + '/profile')
 await page.waitForTimeout(1200)
 const links = await page.$$eval('main a[href]', (els) => els.map((e) => e.getAttribute('href')))
-for (const href of ['/proof', '/vocab', '/drops', '/pro', '/account', '/feedback', '/legend']) {
+/*
+  THE LANGUAGE ON YOURS, EVERYTHING ELSE BEHIND THE COG.
+
+  This asked for all seven on /profile, which was right while Yours held membership, the
+  account and the feedback form in the same column as somebody's Legend. It does not any
+  more: those three are facts about a customer rather than a speaker, and they live in
+  /settings now — see components/Settings.
+
+  The promise this block makes is unchanged and is the reason it is not simply deleted:
+  nothing the burger held may become unreachable. What changes is that three of them are
+  one hop further, so the check takes the hop.
+*/
+for (const href of ['/proof', '/vocab', '/drops', '/legend']) {
   ok(href + ' is on the profile', links.includes(href))
+}
+ok('and the cog is the way to the rest', links.includes('/settings'))
+await page.goto(BASE + '/settings')
+await page.waitForTimeout(1200)
+const setLinks = await page.$$eval('main a[href]', (els) => els.map((e) => e.getAttribute('href')))
+for (const href of ['/pro', '/account', '/feedback']) {
+  ok(href + ' is in settings', setLinks.includes(href))
 }
 
 console.log('\nno room is a dead end\n')
@@ -334,7 +353,7 @@ console.log('\nno room is a dead end\n')
   out — and it has to be a real one. A page reachable from the profile with nothing but
   the browser's back button is a dead end on a phone opened from a home-screen icon.
 */
-for (const route of ['/proof', '/vocab', '/drops', '/pro', '/account', '/legend', '/feedback']) {
+for (const route of ['/proof', '/vocab', '/drops', '/pro', '/account', '/legend', '/feedback', '/settings']) {
   await page.goto(BASE + route)
   await page.waitForTimeout(900)
   ok(route + ' has a way back', Boolean(await page.$('[data-testid="back"]')))
@@ -346,9 +365,16 @@ for (const route of ['/vibes', '/club', '/line', '/profile', '/proof', '/vocab',
   await page.waitForTimeout(900)
   ok(route + ' has no burger', !(await page.$('[data-testid="menu"]')))
 }
-// The theme switch lived in the burger and nowhere else, so retiring it silently took
-// the dark theme offline.
-await page.goto(BASE + '/profile')
+/*
+  The theme switch lived in the burger and nowhere else, so retiring it silently took the
+  dark theme offline. It then lived at the foot of Yours, and now lives in /settings with
+  the sound and the purpose — appearance is a fact about a copy of the app rather than
+  about the Portuguese somebody has earned.
+
+  Still asserted, because the failure it was written to catch is a move exactly like this
+  one: a control that goes somewhere nobody looks is the same as a control that is gone.
+*/
+await page.goto(BASE + '/settings')
 await page.waitForTimeout(1200)
 ok('the theme switch survived the burger', Boolean(await page.$('[data-testid="theme-dark"], [data-testid="theme"]')))
 
