@@ -1258,12 +1258,27 @@ function Picker() {
               <span className="h-px flex-1 bg-line" />
               <span className="eyebrow shrink-0 tabular-nums text-muted">
                 {/*
-                  UNLIMITED is 1,000,000 — a large finite number, because Infinity does
-                  not survive JSON. It is fine to compare against and absurd to print, and
-                  a comped member was told they had "999999 LEFT".
+                  THE NUMBER BESIDE "OPEN NOW" IS THE LEGEND, not the allowance.
+
+                  It read `allowance - spent + ' left'` — how many vibes a free learner may
+                  have open AT ONCE. Beside a group heading that is indistinguishable from
+                  progress, and the two numbers disagree in the ordinary case: a learner who
+                  had finished the basics and two vibes saw "5 left" (three finished, so no
+                  slots spent) while being one vibe from their Legend. Sam read it as the
+                  second thing, which is the only sensible way to read a countdown on a
+                  shelf.
+
+                  So it counts the thing somebody is actually working towards, from the same
+                  legendStatus the line under the headline reads. Two numbers on one screen
+                  had better be the same number.
+
+                  The allowance has not stopped mattering and has not stopped being said —
+                  the gateway says it at the cap, which is the one moment it decides
+                  anything. What it stops doing is impersonating progress.
                 */}
-                {key === 'open' && access.known && allowance < UNLIMITED && allowance - spent > 0
-                  ? allowance - spent + ' left'
+                {key === 'open' && mounted && !shelfLegend.open && shelfLegend.toGo === 0
+                  ? Math.max(0, shelfLegend.vibesNeeded - shelfLegend.vibesDone) +
+                    ' to open your Legend'
                   : list.length}
               </span>
             </div>
