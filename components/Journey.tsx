@@ -85,6 +85,7 @@ import {
   markSwitchSeen,
   rememberPlayed,
   setLegendPrompt,
+  setSaveDeclined,
   resetLearnerCache,
   setAffinity,
   setProfile,
@@ -3455,6 +3456,14 @@ function LegendNudge({ piece }: { piece: string }) {
  */
 function LegendPayoff() {
   const learner = useLearner()
+  /*
+    Sign-in state, for the save offer below.
+
+    `signInReady` as well as `signedIn`: where accounts are not configured there is no
+    link to send, so offering one would be a button that cannot work. SignIn.tsx already
+    refuses to render its form on the same fact.
+  */
+  const access = useEntitlements()
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
@@ -3489,7 +3498,34 @@ function LegendPayoff() {
   if (!mounted || learner.legend_prompt === 'declined' || !waiting) return null
 
   const usable = status.open
-  const toGo = status.toGo
+  /*
+    HOW FAR OFF THE DOOR IS, counting whichever half is still in the way.
+
+    `status.toGo` is the BASICS half only, and this panel has been quoting it under copy
+    that says "vibes" — so a learner who finished the basics and had three vibes to go
+    was told "0 more vibes and your Legend opens" beside a door that was shut. The door
+    has two halves; the number somebody needs is however many steps are left in the half
+    they are actually on.
+  */
+  const vibesLeft = Math.max(0, status.vibesNeeded - status.vibesDone)
+  const toGo = status.toGo > 0 ? status.toGo : vibesLeft
+
+  /*
+    ONE VIBE OUT, ASKED ONCE, AND ONLY OF SOMEBODY WHO COULD LOSE SOMETHING.
+
+    All four conditions earn their place. The basics done and exactly one chosen vibe left
+    is the moment Sam asked for — near enough the door that keeping the work is obviously
+    worth a tap. `save_prompt === 'unseen'` makes it once-only. And `!signedIn` because
+    somebody whose work is already off the device has nothing to be warned about; offering
+    anyway would be the product not knowing its own state.
+  */
+  const saveOffer =
+    mounted &&
+    access.signInReady &&
+    !access.signedIn &&
+    status.toGo === 0 &&
+    vibesLeft === 1 &&
+    learner.save_prompt === 'unseen'
   const offering = usable && learner.legend_prompt === 'unseen'
   /** The hook is the questions themselves, not a count of them. */
   const preview = LEGEND_FRAMES.slice(0, 3)
@@ -3557,6 +3593,46 @@ function LegendPayoff() {
           <p className="text-xs leading-relaxed text-muted">{LEGEND_COPY.offer_body}</p>
           <p className="text-xs leading-relaxed text-muted">{LEGEND_COPY.offer_repair}</p>
         </>
+      ) : null}
+      {/*
+        THE SOFT GATE: one vibe from the door, and it asks rather than blocks.
+
+        Sam: "would you like to register so you don't lose all your learnings at some
+        point mid-vibes", placed one vibe out. By then there is real work to lose and the
+        Legend is close enough that keeping it is an obvious want rather than an
+        interruption — earlier and it is a toll gate on somebody who has nothing yet.
+
+        `saveOffer` is the whole of the condition: the basics are done, exactly one chosen
+        vibe remains, and they have neither signed in nor said no. Once only — saying it
+        twice is nagging, and the state that records the answer is the same one the
+        Legend offer uses.
+      */}
+      {saveOffer ? (
+        <div className="mt-1 flex flex-col gap-3 border-t border-accent/30 pt-3">
+          <p className="text-sm font-semibold">{LEGEND_COPY.save_head}</p>
+          <p className="text-xs leading-relaxed text-muted">{LEGEND_COPY.save_body}</p>
+          <div className="flex flex-col gap-3">
+            <Link
+              href="/signin"
+              data-testid="soft-save"
+              onClick={() => track('save_offered', { at: 'one_vibe_out', took: true })}
+              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+            >
+              {LEGEND_COPY.save_cta}
+            </Link>
+            <button
+              type="button"
+              data-testid="soft-save-skip"
+              onClick={() => {
+                setSaveDeclined()
+                track('save_offered', { at: 'one_vibe_out', took: false })
+              }}
+              className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted"
+            >
+              {LEGEND_COPY.save_skip}
+            </button>
+          </div>
+        </div>
       ) : null}
       {quiet ? null : (
       <div className="flex flex-wrap gap-3">

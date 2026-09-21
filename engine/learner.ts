@@ -272,6 +272,18 @@ export interface LearnerState {
    */
   legend_prompt: 'unseen' | 'accepted' | 'declined'
   /**
+   * Whether the offer to keep this work off the device has been made, and answered.
+   *
+   * Everything DUB knows lives in localStorage: a cleared browser or a new phone loses
+   * all of it. That is worth saying once, at the moment it would hurt most to discover —
+   * one vibe short of the Legend, with real work behind them. Saying it twice is nagging,
+   * so the answer is recorded and the offer never returns.
+   *
+   * 'declined' is not a refusal of accounts, only of being asked again here. Sign-in
+   * stays reachable from the front door and from Yours.
+   */
+  save_prompt: 'unseen' | 'declined'
+  /**
    * Whether the learner has been told what actually happens when they get it wrong.
    *
    * Once per learner, ever. It is a truth about Portugal rather than a feature, and a
@@ -412,6 +424,7 @@ export function emptyLearner(): LearnerState {
     lines_seen: [],
     legend: [],
     legend_prompt: 'unseen',
+    save_prompt: 'unseen',
     switch_seen_at: null,
     sections_completed: [],
     club_welcomed_at: null,
@@ -576,6 +589,7 @@ export function loadLearner(): LearnerState {
           nocue_done: arr(parsed.nocue_done, []),
           lines_seen: arr(parsed.lines_seen, []),
           legend: arr(parsed.legend, []),
+          save_prompt: parsed.save_prompt === 'declined' ? 'declined' : 'unseen',
           legend_prompt:
             parsed.legend_prompt === 'accepted' || parsed.legend_prompt === 'declined'
               ? parsed.legend_prompt
@@ -795,6 +809,7 @@ export async function syncSession(reason: string): Promise<boolean> {
         lines_seen: s.lines_seen,
         legend: s.legend,
         legend_prompt: s.legend_prompt,
+        save_prompt: s.save_prompt,
         switch_seen_at: s.switch_seen_at,
         deal_accepted_at: s.deal_accepted_at,
         created_at: s.created_at,
@@ -1277,6 +1292,19 @@ export function markSwitchSeen() {
 }
 
 /** Taken up, or turned down. Turned down is a decision and it is respected forever. */
+/**
+ * The save offer has been answered. It never comes back.
+ *
+ * Only 'declined' is recordable: taking the offer means a sign-in, and a signed-in
+ * learner's work is already off the device, so the condition that raises this stops being
+ * true on its own. One state, one direction, nothing to get out of sync.
+ */
+export function setSaveDeclined() {
+  update((s) => {
+    s.save_prompt = 'declined'
+  })
+}
+
 export function setLegendPrompt(value: 'accepted' | 'declined') {
   update((s) => {
     // Accepting is not reversible by a later decline elsewhere: somebody who has built a

@@ -199,6 +199,13 @@ export type EventName =
     is the honest opposite, and it is the more useful of the two — a sheet nobody wants is
     a card taking up a slot in a feed, and the only way to know is to let people say so.
   */
+  /*
+    The soft gate, one vibe from the Legend, and whether it was taken.
+
+    The number worth having is the ratio: an offer nobody accepts is an interruption, and
+    an offer everybody accepts was probably owed earlier. It fires once per learner.
+  */
+  | 'save_offered'
   | 'sheet_tested'
   | 'sheet_dismissed'
   /* The one Club room given away before anything was earned, and which one it was. */

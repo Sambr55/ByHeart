@@ -1465,7 +1465,33 @@ export const LEGEND_COPY = {
   one_more: 'One more vibe and your Legend opens.',
   more_to_go: 'more vibes and your Legend opens.',
   banked_note_one: 'They open after one more vibe.',
-  banked_note_many: 'They open once you have done five vibes.',
+  /*
+    Three, not five, and the number is no longer written into a sentence.
+
+    This said "once you have done five vibes" — which was the rule two rules ago, and was
+    still on screen while the door counted basics roots and then while it counted three
+    chosen vibes. A number in prose is a number that goes stale silently, so the sentence
+    stops naming one and the panel above it says how many are left, from legendStatus.
+  */
+  banked_note_many: 'They open once you have finished a few vibes of your own.',
+  /*
+    THE SOFT GATE, one vibe from the door.
+
+    Sam: "the gateway comes with first a soft — would you like to register so you don't
+    lose all your learnings at some point mid-vibes." Placed at one vibe out rather than
+    earlier: by then there is real work to lose and the Legend is close enough that
+    keeping it is an obvious want rather than an interruption.
+
+    It asks rather than blocks. Everything DUB knows lives in localStorage — a cleared
+    browser or a new phone loses all of it — and that is a true thing worth saying once,
+    at the moment it would hurt most to find out. Saying it twice would be nagging, which
+    is why it is bound to the single vibe before the door.
+  */
+  save_head: 'Keep this, in case of a new phone.',
+  save_body:
+    'Everything you have done lives on this device and nowhere else. One tap on a link we email you and it follows you — no password, and nothing else changes.',
+  save_cta: 'EMAIL ME A LINK',
+  save_skip: 'NOT NOW',
   banked_cta: 'SEE WHAT IS WAITING',
   /**
    * The last step, which did not exist.
