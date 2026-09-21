@@ -53,8 +53,21 @@ const STEPS = doorway.length
  * Per purpose now, through frameForPurpose — the same predicate the deck, the Club counter
  * and cardFor all use.
  */
+/*
+  THE THREE CHOSEN VIBES, granted throughout this file.
+
+  The door is the basics plus three finished vibes now. Every assertion here is about
+  SCREENS AGREEING WITH EACH OTHER — the session screen promising what /legend honours,
+  the door sending somebody somewhere they can act — and none of them is about the
+  threshold itself. Holding the second half constant keeps each of those questions
+  answerable; varying it would test two things at once and tell you neither.
+
+  The threshold has its own assertions at the bottom.
+*/
+const VIBES_DONE = ['top_gun', 'james_bond', 'bridget_jones']
+
 function legendOffers(played: string[], purpose: Purpose | null): number {
-  if (!legendUnlocked(played)) return 0
+  if (!legendUnlocked(played, VIBES_DONE)) return 0
   return LEGEND_FRAMES.filter((f) => frameForPurpose(f, purpose)).length
 }
 
@@ -129,14 +142,37 @@ console.log('\nthe promise\n')
   records the section on mount now, so by the time anything on it speaks the section is
   real and every screen reads the same number.
 */
-const payoffSaysOpen = (rootsPlayed: string[]) => legendStatus({ rootsPlayed }).open
+const payoffSaysOpen = (rootsPlayed: string[]) =>
+  legendStatus({ rootsPlayed, sectionsCompleted: VIBES_DONE }).open
 
 ok(
-  'the last line of the basics opens it',
+  'the last line of the basics opens it, once three vibes are finished',
   payoffSaysOpen(doorway),
   'recorded on mount, so this is the present rather than a prediction',
 )
-ok('one short does not', !payoffSaysOpen(doorway.slice(0, STEPS - 1)))
+ok('one line short does not', !payoffSaysOpen(doorway.slice(0, STEPS - 1)))
+/*
+  AND THE SECOND HALF IS REAL, which is the change this file exists to pin.
+
+  The basics alone used to open the door. They do not: Sam finished several vibes and
+  found it shut, and the honest version of that is that the basics are compulsory and
+  therefore not a choice — the Legend is built out of vibes somebody picked.
+*/
+ok(
+  'the basics alone do not open it',
+  !legendStatus({ rootsPlayed: doorway, sectionsCompleted: ['the_basics'] }).open,
+)
+ok(
+  'two chosen vibes do not open it',
+  !legendStatus({ rootsPlayed: doorway, sectionsCompleted: VIBES_DONE.slice(0, 2) }).open,
+)
+ok(
+  'and the basics do not count as one of the three',
+  !legendStatus({
+    rootsPlayed: doorway,
+    sectionsCompleted: ['the_basics', ...VIBES_DONE.slice(0, 2)],
+  }).open,
+)
 ok(
   'and /legend reads the identical number',
   /*
@@ -169,12 +205,13 @@ console.log('\nwhere each screen sends you\n')
   Both were correct on their own screen. So this checks the join: for every number of
   vibes, where the door sends somebody must be somewhere they can act.
 */
-const doorSends = (done: string[]) => (legendStatus({ rootsPlayed: done }).open ? '/legend' : '/vibes')
+const doorSends = (done: string[]) =>
+  legendStatus({ rootsPlayed: done, sectionsCompleted: VIBES_DONE }).open ? '/legend' : '/vibes'
 
 for (let n = 0; n <= STEPS; n++) {
   const done = doorway.slice(0, n)
   const target = doorSends(done)
-  const legendUsable = legendStatus({ rootsPlayed: done }).open
+  const legendUsable = legendStatus({ rootsPlayed: done, sectionsCompleted: VIBES_DONE }).open
   console.log('  ' + String(n).padStart(2) + ' lines → the door sends you to ' + target)
   ok(
     n + ' lines: the door does not send you to a locked page',

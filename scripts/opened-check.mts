@@ -108,7 +108,15 @@ for (const run of runs) {
       const before = new Set(owned)
       for (const p of sits[i].pieces) owned.add(p)
       played.push(...sits[i].roots)
-      const open = legendStatus({ rootsPlayed: played }).open
+      /*
+        The three chosen vibes granted, because this file tests WHEN AN ANNOUNCEMENT
+        FIRES rather than what the door costs. Varying the second half here would make
+        every assertion below depend on a condition this walk never simulates.
+      */
+      const open = legendStatus({
+        rootsPlayed: played,
+        sectionsCompleted: ['top_gun', 'james_bond', 'bridget_jones'],
+      }).open
       /*
         NOTHING FIRES WHILE THE DOOR IS SHUT. Sam, on a phone at the end of his first vibe:
         "these unlockers shouldn't show while doing the first five vibes where we are

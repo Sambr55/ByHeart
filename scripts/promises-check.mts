@@ -67,17 +67,28 @@ console.log('\n  THE PROMISES, measured\n  ' + '─'.repeat(60))
 
 promise(
   'P1',
-  'Finishing the doorway opens the Legend',
+  'The doorway plus three chosen vibes opens the Legend',
   'HOLDS',
   () => {
     const l = newLearner()
     const sits = playVibe(l, 'the_basics' as CultureFamily)
+    /*
+      And the three chosen vibes, played the same way.
+
+      The promise has two halves now and both have to be measured, or this reports on a
+      learner who does not exist: one who finished the basics and nothing else, which the
+      door no longer opens for.
+    */
+    for (const v of ['top_gun', 'james_bond', 'bridget_jones'] as CultureFamily[]) {
+      playVibe(l, v)
+    }
     const card = cardState(l)
+    const open = legendUnlocked(l.roots_played, l.sections_completed ?? [])
     return {
-      holds: legendUnlocked(l.roots_played) && card.shut.length === 0,
+      holds: open && card.shut.length === 0,
       saw: [
-        `${l.roots_played.length} roots over ${sits.length} sittings`,
-        `card ${card.ready.length}/7, Legend ${legendUnlocked(l.roots_played) ? 'open' : 'shut'}`,
+        `${l.roots_played.length} roots over ${sits.length}+ sittings`,
+        `card ${card.ready.length}/7, Legend ${open ? 'open' : 'shut'}`,
       ],
     }
   },
@@ -96,7 +107,7 @@ promise(
     */
     const l = newLearner()
     for (const v of VIBES) playSitting(l, v)
-    const open = legendUnlocked(l.roots_played)
+    const open = legendUnlocked(l.roots_played, l.sections_completed ?? [])
     const short = doorwayRoots().filter((r) => !l.roots_played.includes(r.root_id))
     return {
       holds: open,

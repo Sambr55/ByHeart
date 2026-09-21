@@ -61,6 +61,14 @@ if (floor > 2) {
   )
 }
 
+/*
+  Three finished vibes, granted, so this file keeps testing the one thing it tests.
+
+  Named rather than inlined so the next reader sees immediately that the second half of
+  the door is being held constant on purpose, not forgotten.
+*/
+const GRANTED = ['top_gun', 'james_bond', 'bridget_jones']
+
 for (const rung of [floor, 3, 4, 5, 6] as const) {
   const played: string[] = []
   let guard = 0
@@ -69,9 +77,18 @@ for (const rung of [floor, 3, 4, 5, 6] as const) {
     const fresh = serve.filter((r) => !played.includes(r.root_id))
     if (!fresh.length) break
     for (const r of fresh) played.push(r.root_id)
-    if (legendUnlocked(played)) break
+    /*
+      THE BASICS HALF ONLY, which is all this file has ever been about.
+
+      The door is the basics plus three chosen vibes now. This walk serves the basics and
+      asks whether its doorway roots are reachable at every rung — a question about
+      content ordering, not about the door's second half, and still exactly the right
+      question. So it asks legendUnlocked with the three vibes granted, which isolates the
+      half being tested rather than failing on a condition this walk never simulates.
+    */
+    if (legendUnlocked(played, GRANTED)) break
   }
-  const open = legendUnlocked(played)
+  const open = legendUnlocked(played, GRANTED)
   note(`  rung ${rung}: ${open ? 'the door closes' : 'DEAD END'} after ${played.length} roots`)
   if (!open) {
     const short = doorway.filter((id) => !played.includes(id))

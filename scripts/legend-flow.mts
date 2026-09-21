@@ -14,7 +14,7 @@
  */
 import { chromium } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
-import { LEGEND_FRAMES } from '../content/legend'
+import { DOORWAY, LEGEND_FRAMES, doorwayRoots } from '../content/legend'
 import { CRATES, ROOTS } from '../content/roots'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -34,8 +34,19 @@ const seed = {
     ? [{ pt: opener.transfer_prompt.answer, en: opener.transfer_prompt.ask, source: 'release', clean: true, at: '1' }]
     : [],
   inventory: Object.fromEntries(ROOTS.flatMap((r) => r.extracts).map((e) => [e.id, 'strong'])),
-  roots_played: [],
-  sections_completed: CRATES.filter((c) => !c.drop).slice(0, 6).map((c) => c.id),
+  /*
+    A LEARNER WHO HAS ACTUALLY OPENED THE DOOR, which this seed did not describe.
+
+    It listed six finished sections and NO roots played — a state nobody can reach, since
+    a section is finished by playing its roots. That went unnoticed while the door was
+    asked about in one place; the door has two halves now, and the basics half reads
+    roots_played, so the seed failed the moment both were checked.
+
+    The doorway roots explicitly rather than every root in the product: this file is about
+    the deck behind the door, so it wants the cheapest honest way through it.
+  */
+  roots_played: doorwayRoots().map((r) => r.root_id),
+  sections_completed: [DOORWAY, ...CRATES.filter((c) => !c.drop && c.id !== DOORWAY).slice(0, 3).map((c) => c.id)],
   legend: [],
   /*
     Past the one question that comes before the seven.

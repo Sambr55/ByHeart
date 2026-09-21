@@ -3044,7 +3044,10 @@ function SectionComplete() {
     cannot reach yet is the exact failure that got per-question unlocking deleted — the
     screen promised something and the destination refused it.
   */
-  const legend = legendStatus({ rootsPlayed: learner.roots_played ?? [] })
+  const legend = legendStatus({
+    rootsPlayed: learner.roots_played ?? [],
+    sectionsCompleted: learner.sections_completed ?? [],
+  })
   /*
     IS THIS THE VIBE THAT OPENED THE DOOR? Asked of the record, not of the clock.
 
@@ -3068,8 +3071,20 @@ function SectionComplete() {
     if (!legend.open) return false
     const here = new Set(state.rootsPlayed)
     const before = (learner.roots_played ?? []).filter((id) => !here.has(id))
-    return !legendStatus({ rootsPlayed: before }).open
-  }, [legend.open, state.rootsPlayed, learner.roots_played])
+    /*
+      THE SECTIONS AS THEY WERE BEFORE THIS VIBE, for the same reason as the roots.
+
+      The door now needs three finished vibes as well as the basics, so "was it already
+      open" has to subtract this sitting from BOTH halves. Subtracting only the roots
+      would answer a question about a learner who had played fewer roots but finished the
+      same vibes — which is nobody, and on the sitting that finishes the third vibe it
+      would say the door was already open and swallow the announcement.
+    */
+    const sectionsBefore = (learner.sections_completed ?? []).filter(
+      (id) => id !== state.family,
+    )
+    return !legendStatus({ rootsPlayed: before, sectionsCompleted: sectionsBefore }).open
+  }, [legend.open, state.rootsPlayed, state.family, learner.roots_played, learner.sections_completed])
 
   /*
     BANKED QUIETLY, ANNOUNCED ONCE — and it took two wrong answers to get here.
@@ -3458,7 +3473,10 @@ function LegendPayoff() {
   */
   // No currentFamily any more: SectionComplete records the section on mount, so this
   // reads the same truth /legend does rather than a prediction of it.
-  const status = legendStatus({ rootsPlayed: learner.roots_played ?? [] })
+  const status = legendStatus({
+    rootsPlayed: learner.roots_played ?? [],
+    sectionsCompleted: learner.sections_completed ?? [],
+  })
   const answered = (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0).length
   const waiting = LEGEND_FRAMES.length - answered
 

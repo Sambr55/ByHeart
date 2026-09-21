@@ -79,6 +79,7 @@ export function Legend() {
     a card teaches them.
   */
   const played = learner.roots_played ?? []
+  const sections = learner.sections_completed ?? []
   /*
     The same function every other screen uses.
 
@@ -87,7 +88,9 @@ export function Legend() {
     finished, one said "your Legend is open, fill them in" and this one, a tap later,
     showed ten dashed cards. Both correct, different questions.
   */
-  const unlocked = mounted && legendStatus({ rootsPlayed: played }).open
+  const unlocked =
+    mounted &&
+    legendStatus({ rootsPlayed: played, sectionsCompleted: sections }).open
   const toGo = doorwayToGo(played)
   /* For the readout below: how long the doorway is, so the line can say N of M. */
   const basicsTotal = (ROOTS_BY_FAMILY[DOORWAY] ?? []).length

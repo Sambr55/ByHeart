@@ -337,7 +337,10 @@ export function Club() {
           ).length,
           purpose: learner.purpose ?? null,
           legendPrompt: learner.legend_prompt ?? 'unseen',
-          legendUnlocked: legendStatus({ rootsPlayed: learner.roots_played ?? [] }).open,
+          legendUnlocked: legendStatus({
+            rootsPlayed: learner.roots_played ?? [],
+            sectionsCompleted: learner.sections_completed ?? [],
+          }).open,
           capped,
           claimed,
         }}

@@ -154,7 +154,7 @@ export function playSitting(l: SimLearner, vibe: CultureFamily, quit: number | n
     that here rather than reporting every frame that crossed the line is the difference
     between "what could be announced" and "what a learner is actually told".
   */
-  const open = legendUnlocked(l.roots_played)
+  const open = legendUnlocked(l.roots_played, l.sections_completed ?? [])
   const opened = open
     ? framesJustOpened({
         before,

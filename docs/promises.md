@@ -43,14 +43,19 @@ Status values: `HOLDS` · `BROKEN` · `NOT YET ENFORCED` · `RETIRED`.
 
 ---
 
-## P1 — Finishing the doorway opens the Legend
+## P1 — The doorway plus three chosen vibes opens the Legend
 
 A learner who plays the basics until there is nothing left has all seven card questions
-answerable, and is told so.
+answerable. The Legend opens once they have also finished three vibes they chose for
+themselves.
 
-**Status: HOLDS.** Measured: 16 roots over 6 sittings, card 7/7, Legend open.
+**Status: HOLDS.** Measured: 16 roots over 6 sittings gives card 7/7; the door opens on
+the third finished vibe.
 
-*Decided 2026-09-15, after five vibes gave 3 of 7 and the Legend opened anyway.*
+*Decided 2026-09-15, after five vibes gave 3 of 7 and the Legend opened anyway. Changed
+2026-09-21: the basics are compulsory, so opening the Legend on them alone asked nothing
+of the learner but compliance. Sam: "Basics are essentially the first vibe and compulsory
+— to which the user then adds a number of vibes in order to open the Legend."*
 
 ## P2 — The road in is impossible to miss
 
@@ -62,7 +67,11 @@ ends with 29 roots played, card 2/7, and the Legend shut — while the shelf rea
 SESSION DONE on the basics with 13 of its 16 roots unplayed. Nothing on that screen
 mentions the doorway.
 
-*This is the bug Sam hit twice. It is the next thing to fix.*
+*This is the bug Sam hit twice, and a third time on 2026-09-21: "I have just done
+multiple vibes but the legend isn't opening." The door now has two halves and
+`legendStatus` carries both as numbers rather than one boolean, so a screen can say which
+half somebody is on — NotYet.tsx does. The remaining half of this promise is the shelf,
+which still says SESSION DONE without saying what is left.*
 
 ## P3 — A vibe ends on its own lines
 

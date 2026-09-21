@@ -994,17 +994,46 @@ export const DOORWAY: CultureFamily = 'the_basics'
  * standing between a learner and a card that was waiting on a basics nobody asked them to
  * finish.
  *
- * Finishing the basics gives 7 of 7 — measured — and leaves the four deeper questions
- * shut behind words that live in Bridget Jones, Duran Duran, Marcus Aurelius and Pulp
- * Fiction. That is the shape the product wants: the basics earns your Legend, and the
- * vibes you chose for pleasure deepen it.
+ * THE DOOR IS THE BASICS PLUS THREE VIBES YOU CHOSE, which is a change.
  *
- * Asked of roots played rather than sections completed, because "finished" and "one
- * sitting done" are different facts and the shelf already draws that distinction
- * (components/Journey.tsx — `finished` vs `sessionDone`).
+ * It was the basics alone. Sam: "Basics are essentially the first vibe and compulsory —
+ * to which the user then adds a number of vibes in order to open the Legend." The basics
+ * are not a choice, so opening the Legend on them alone asked nothing of the learner
+ * except compliance, and the Legend is meant to be built out of things they picked.
+ *
+ * Three FINISHED, not started. `sections_completed` is written on finishing, and the
+ * shelf already frees an allowance slot on the same fact — so a learner who finishes
+ * three has spent none of their five and cannot be stranded. That deadlock is worth
+ * naming because it existed before: "start five, finish three, wander off from two — and
+ * you are at the limit with nothing left to open and no way to reach the Legend",
+ * components/Journey.tsx. Counting finished vibes keeps that road walkable.
+ *
+ * Both halves are required. The basics carry the vocabulary the card is built from — a
+ * Legend with no words in it is not a Legend — and the three chosen vibes are what make
+ * it theirs.
  */
-export function legendUnlocked(rootsPlayed: string[]): boolean {
-  return doorwayToGo(rootsPlayed) === 0
+export const VIBES_FOR_LEGEND = 3
+
+/**
+ * The vibes a learner has FINISHED, not counting the compulsory one.
+ *
+ * `sections_completed` holds vibe ids and is written when a vibe is finished rather than
+ * when a sitting ends — the shelf already relies on that distinction to free an
+ * allowance slot, so the Legend can rely on it too.
+ *
+ * The basics are excluded because they are not a choice. Counting them would mean the
+ * door opens on "the compulsory vibe plus two", which is a different promise from the one
+ * the progress line makes.
+ */
+export function chosenVibesFinished(sectionsCompleted: string[]): number {
+  return new Set(sectionsCompleted.filter((id) => id !== DOORWAY)).size
+}
+
+export function legendUnlocked(rootsPlayed: string[], sectionsCompleted: string[]): boolean {
+  return (
+    doorwayToGo(rootsPlayed) === 0 &&
+    chosenVibesFinished(sectionsCompleted) >= VIBES_FOR_LEGEND
+  )
 }
 
 /**
@@ -1061,17 +1090,42 @@ export function doorwayRoots(): { root_id: string }[] {
  */
 export interface LegendStatus {
   open: boolean
-  /** Roots of the doorway still to play. Zero when open. */
+  /** Roots of the doorway still to play. Zero when the basics are done. */
   toGo: number
   /** Cards that can be built right now — all of them, or none. */
   openCards: number
+  /*
+    THE SECOND HALF OF THE DOOR, so a screen can show a progress line rather than a wall.
+
+    Sam: "we need to do a better job of showing progress towards opening the Legend." A
+    single boolean cannot be shown as progress — every screen that had one could only say
+    open or not, which is why a learner three vibes deep saw the same message as somebody
+    who had just arrived. These two numbers are what a progress line is made of.
+  */
+  vibesDone: number
+  vibesNeeded: number
 }
 
-export function legendStatus(opts: { rootsPlayed: string[] }): LegendStatus {
-  const open = legendUnlocked(opts.rootsPlayed)
+export function legendStatus(opts: {
+  rootsPlayed: string[]
+  /*
+    REQUIRED, not optional, and that is the point of the change.
+
+    An optional second half would compile everywhere and quietly report "0 vibes done" at
+    every call site that had not been updated — which is the same class of fault as the
+    one this rewrite exists to fix, where the Club and the Legend ran different products
+    and neither knew. Making it required turns eight silent wrong answers into eight
+    compiler errors.
+  */
+  sectionsCompleted: string[]
+}): LegendStatus {
+  const sections = opts.sectionsCompleted
+  const open = legendUnlocked(opts.rootsPlayed, sections)
   return {
     open,
     toGo: doorwayToGo(opts.rootsPlayed),
+    vibesDone: chosenVibesFinished(sections),
+    vibesNeeded: VIBES_FOR_LEGEND,
     openCards: open ? LEGEND_FRAMES.length : 0,
   }
 }

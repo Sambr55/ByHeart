@@ -40,7 +40,8 @@ const has = (name: string) => args.includes('--' + name)
 
 const VIBES = CRATES.filter((c) => !c.drop).map((c) => c.id as CultureFamily)
 const NO_CUE_TOTAL = NO_CUE_PROMPTS.length
-const legendOpen = (l: SimLearner) => legendUnlocked(l.roots_played)
+const legendOpen = (l: SimLearner) =>
+  legendUnlocked(l.roots_played, l.sections_completed ?? [])
 
 const line = (s = '') => console.log(s)
 const pad = (s: string, n: number) => String(s).padEnd(n)
