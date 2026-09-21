@@ -68,6 +68,17 @@ export const PROFILE_COPY = {
     word the code, the Club and the calendar already use for the thing, and it is the one
     that survives new kinds without lying about any of them.
   */
+  /*
+    CHEAT SHEETS, kept rather than done.
+
+    Every other row on Yours is a record — where you have been, what you set aside, what
+    you produced, what you own. This one is a reference: counting to ten is not something
+    you finish, it is something you check, and it is the only pile here somebody opens
+    again on purpose.
+  */
+  sheets_label: 'CHEAT SHEETS',
+  sheets_note: 'Groups you kept — the ten of a thing, in one place.',
+  sheets_empty: 'None kept yet. The bookmark on a cheat sheet in the Club puts it here.',
   drops_label: 'DROPS',
   drops_note: 'Pegged to something really happening, with the language you took to it.',
   drops_empty: 'None yet. Open a drop from the Club and finish a room, and it lands here.',

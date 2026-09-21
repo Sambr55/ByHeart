@@ -753,7 +753,20 @@ export function wordCards(): FeedCard[] {
 
 /** Every card that exists, so a saved id can be looked up wherever it came from. */
 export function cardById(id: string): FeedCard | undefined {
-  return [...dropsFor(), ...roomsFor(), ...wordCards()].find((c) => c.id === id)
+  /*
+    CHEAT SHEETS TOO, because they can be saved and could not be found.
+
+    The bookmark on a feed card writes its id to `saved`, and Yours renders a saved id by
+    looking it up here — so saving a sheet wrote the id and nothing on the screen that
+    holds your things could resolve it. The same class of fault as KEEP THIS writing a
+    sentence nothing displayed: a control that records something invisible looks broken
+    while working perfectly.
+
+    `sheetCards([])` rather than a filtered call: dismissing a sheet takes it out of the
+    FEED, and a sheet somebody saved and later dismissed should still resolve on Yours.
+    Those are two different decisions and only one of them is about this list.
+  */
+  return [...dropsFor(), ...roomsFor(), ...wordCards(), ...sheetCards()].find((c) => c.id === id)
 }
 
 export function chapterName(chapter: ChapterId = DEFAULT_CHAPTER): string {

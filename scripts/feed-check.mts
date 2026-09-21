@@ -15,7 +15,7 @@ import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_CARD } from '../content/legend'
 import { PIECES, ROOTS } from '../content/roots'
-import { explainerCards, sheetCards, feedFor, vibeCards } from '../content/feed'
+import { cardById, explainerCards, sheetCards, feedFor, vibeCards } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -90,6 +90,27 @@ const real =
     Nothing dismissed: this learner is seeded fresh, so every sheet is offered.
   */
   sheetCards([]).length
+
+/*
+  A SAVED SHEET CAN BE FOUND AGAIN, which is the half that was missing.
+
+  The bookmark on a feed card writes its id to `saved`, and Yours renders a saved id by
+  looking it up through cardById — which knew about drops, rooms and words and not about
+  sheets. So saving a cheat sheet wrote the id and nothing could resolve it: a control that
+  records something invisible looks broken while working perfectly, which is the same fault
+  KEEP THIS had and the hardest kind to report.
+
+  Checked as data rather than on a screen, because the fault was a lookup and not a layout.
+*/
+{
+  const sheet = sheetCards([])[0]
+  ok(
+    'a saved cheat sheet resolves',
+    Boolean(sheet && cardById(sheet.id)),
+    sheet ? sheet.id : 'no sheets authored',
+  )
+}
+
 const feed = await page.$('[data-testid="feed"]')
 ok('the feed is there', Boolean(feed))
 

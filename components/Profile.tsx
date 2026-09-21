@@ -51,7 +51,7 @@ import { useLearner } from '@/engine/useLearner'
  * those is a shop window and the other is the cupboard; the cupboard has the row now.
  */
 const SECTIONS: {
-  id: 'done' | 'aside' | 'cold' | 'words' | 'drops'
+  id: 'done' | 'aside' | 'cold' | 'words' | 'sheets' | 'drops'
   label: string
   note: string
   empty: string
@@ -92,6 +92,13 @@ const SECTIONS: {
     empty: PROFILE_COPY.words_empty,
     count: (_t, l) => String(Object.keys(l.inventory ?? {}).filter((id) => PIECES[id]).length),
     more: { href: '/vocab', label: 'THE WHOLE LIBRARY' },
+  },
+  {
+    id: 'sheets',
+    label: PROFILE_COPY.sheets_label,
+    note: PROFILE_COPY.sheets_note,
+    empty: PROFILE_COPY.sheets_empty,
+    count: (t) => String(t.length),
   },
   {
     id: 'drops',
@@ -229,7 +236,29 @@ export function Profile() {
 
         Bookmarks first: they are cards with pictures and they make the grid read.
       */
-      aside: [...saved.flatMap((id) => asTile(id) ?? []), ...askedTiles],
+      /*
+        Everything set aside EXCEPT the cheat sheets, which have their own row now.
+
+        A sheet is not a card you bookmarked for one evening — it is a reference you go
+        back to, which is a different relationship to a thing. Sam: "add Chest sheets as
+        anopther section in YOURS - put there by saving them in Club feed."
+      */
+      aside: [
+        ...saved.filter((id) => !id.startsWith('sheet_')).flatMap((id) => asTile(id) ?? []),
+        ...askedTiles,
+      ],
+      /*
+        THE SHEETS SOMEBODY KEPT, saved from the Club feed.
+
+        The bookmark already wrote them; nothing displayed them, because cardById could
+        not resolve a sheet id (fixed in content/feed.ts) and PUT ASIDE would have mixed a
+        reference table in with a night at a concert.
+
+        Its own row because of what a sheet is for: counting to ten is not something you
+        finish, it is something you check. Everything else on this screen is a record of
+        what happened — this is the one pile you open again on purpose.
+      */
+      sheets: saved.filter((id) => id.startsWith('sheet_')).flatMap((id) => asTile(id) ?? []),
       /*
         WHAT THEY HAVE SAID WITH NOTHING ON SCREEN — the product's own measure of itself.
 

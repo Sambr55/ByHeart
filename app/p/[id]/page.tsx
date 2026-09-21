@@ -22,21 +22,31 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     The preview a messaging app shows, which for an invite is the whole point — most
     recipients will read this line and never open the page.
   */
+  /*
+    SET openGraph, NOT JUST title AND description.
+
+    These were set as `title` and `description` alone, which fills the <title> element and
+    the meta description — and leaves og:title and og:description inherited from the root
+    layout. So every card ever shared previewed as "DUB — Find Yourself in Language" with
+    the site's standing blurb, whatever was on it. Measured on the live card before this:
+    both tags were the layout's.
+
+    Everything a thread renders comes from the og:* pair, so an invitation that does not
+    set them is an invitation nobody sees.
+  */
   if (card.invite) {
-    return {
-      title: card.invite.from
-        ? card.invite.from + ' is asking you out — in Portuguese'
-        : 'You are being asked out — in Portuguese',
-      description: [card.invite.pt, card.invite.event].filter(Boolean).join(' · '),
-    }
+    const title = card.invite.from
+      ? card.invite.from + ' is asking you out — in Portuguese'
+      : 'You are being asked out — in Portuguese'
+    const description = [card.invite.pt, card.invite.event].filter(Boolean).join(' · ')
+    return { title, description, openGraph: { title, description }, twitter: { title, description } }
   }
-  return {
-    title: card.count + ' things they can say in Portuguese — DUB',
-    description:
-      'Learned off ' +
-      (card.worlds === 1 ? 'one thing they already knew' : card.worlds + ' completely unrelated things') +
-      '. No streak involved.',
-  }
+  const title = card.count + ' things they can say in Portuguese — DUB'
+  const description =
+    'Learned off ' +
+    (card.worlds === 1 ? 'one thing they already knew' : card.worlds + ' completely unrelated things') +
+    '. No streak involved.'
+  return { title, description, openGraph: { title, description }, twitter: { title, description } }
 }
 
 const MONTHS = [
