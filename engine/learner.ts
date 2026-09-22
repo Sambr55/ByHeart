@@ -304,6 +304,22 @@ export interface LearnerState {
    */
   sheet_got: string[]
   /**
+   * When set-up was finished — the THAT IS ME tap, and nothing else.
+   *
+   * WRITTEN IN ONE PLACE ON PURPOSE. The showcase ends when this question has been
+   * answered, and the first attempt at saying so inferred it from `chapter`: "written in
+   * finish() and nowhere else", which was simply wrong. setChapter has four callers —
+   * both city pickers write it, and so does anything that routes through Destination — so
+   * a learner who had ever chosen a city was marked as having finished a form they had
+   * never seen, and the whole intro sequence vanished out from under them. Sam: "THE FIRST
+   * screen I see now after Open is Count to Ten?! What happened to the log in and vibe
+   * selector??"
+   *
+   * A fact this specific needs its own field. Inferring it from a shared one is how that
+   * happened, and no amount of care about WHICH shared field would have prevented it.
+   */
+  set_up_at: string | null
+  /**
    * Whether the learner has been told what actually happens when they get it wrong.
    *
    * Once per learner, ever. It is a truth about Portugal rather than a feature, and a
@@ -454,6 +470,7 @@ export function emptyLearner(): LearnerState {
     legend_prompt: 'unseen',
     save_prompt: 'unseen',
     sheet_got: [],
+    set_up_at: null,
     switch_seen_at: null,
     sections_completed: [],
     sittings: 0,
@@ -650,6 +667,7 @@ export function loadLearner(): LearnerState {
           liked: arr(parsed.liked, []),
           finished_cards: arr(parsed.finished_cards, []),
           sheet_got: arr(parsed.sheet_got, []),
+          set_up_at: parsed.set_up_at ?? null,
           asked: arr(parsed.asked, []),
           purpose: parsed.purpose ?? null,
           chapter: parsed.chapter ?? null,
@@ -854,6 +872,7 @@ export async function syncSession(reason: string): Promise<boolean> {
         legend_prompt: s.legend_prompt,
         save_prompt: s.save_prompt,
         sheet_got: s.sheet_got,
+        set_up_at: s.set_up_at,
         switch_seen_at: s.switch_seen_at,
         deal_accepted_at: s.deal_accepted_at,
         created_at: s.created_at,
@@ -1248,6 +1267,13 @@ export function resetLearnerCache() {
 export function acceptDeal() {
   update((s) => {
     if (!s.deal_accepted_at) s.deal_accepted_at = new Date().toISOString()
+  })
+}
+
+/** Set-up finished. Called once, from SetUp's own finish(). */
+export function rememberSetUp() {
+  update((s) => {
+    if (!s.set_up_at) s.set_up_at = new Date().toISOString()
   })
 }
 

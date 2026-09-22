@@ -194,6 +194,8 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     learner_id: l.learner_id || r.learner_id,
     created_at: earliest(l.created_at, r.created_at) ?? new Date().toISOString(),
     deal_accepted_at: earliest(l.deal_accepted_at, r.deal_accepted_at),
+    /* Answered once, on whichever device. It never un-answers. */
+    set_up_at: earliest(l.set_up_at, r.set_up_at),
     club_welcomed_at: earliest(l.club_welcomed_at, r.club_welcomed_at),
     // Seen once is seen. A second phone must not decide it has not happened yet.
     switch_seen_at: earliest(l.switch_seen_at, r.switch_seen_at),

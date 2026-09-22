@@ -203,16 +203,20 @@ export function Club() {
     and gave their name was still served the argument again, tailored to nothing, because
     they had not yet opened a vibe.
 
-    `chapter` is the marker, because it is written in `finish()` and nowhere else — the
-    THAT IS ME tap at the end of the form. `purpose` is not: SetUp writes it the instant
-    the reason is tapped, three screens earlier, so keying on it tore the card out from
-    under the person mid-form; and one legitimate answer ("no reason, I just like it")
-    sets no purpose at all, so it would never fire for them.
+    `set_up_at` is the marker, and it exists for exactly this. Two shared fields were tried
+    first and both were wrong: `purpose` is written the instant the reason is tapped, three
+    screens early, so it tore the card out from under the person mid-form; and `chapter`
+    turned out to have four writers — both city pickers among them — so anybody who had
+    ever chosen a city was marked as having finished a form they had never seen, and the
+    entire intro sequence disappeared. Sam: "THE FIRST screen I see now after Open is Count
+    to Ten?! What happened to the log in and vibe selector??"
+
+    A fact this specific gets its own field. See engine/learner.ts.
   */
   const started =
     (learner.sections_completed ?? []).length > 0 ||
     (learner.roots_played ?? []).length > 0 ||
-    Boolean(learner.chapter)
+    Boolean(learner.set_up_at)
   /*
     THE WALL IS THE LEGEND, and the teased state is what sits behind it.
 

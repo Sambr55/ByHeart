@@ -19,6 +19,7 @@ import {
   setDisplayName,
   setProfile,
   setPurpose,
+  rememberSetUp,
 } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
 import { DEFAULT_PAIR } from '@/content/pairs'
@@ -195,6 +196,8 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
       next to the thing it is about.
     */
     acceptDeal()
+    /* And that this form has been answered, which is what ends the showcase. */
+    rememberSetUp()
     setDone(true)
   }
 
