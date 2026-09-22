@@ -1160,7 +1160,34 @@ export function doorwaySessions(rootsLeft: number): number {
  * sixteenth song to the basics can never again move the door.
  */
 export function doorwayRoots(): { root_id: string }[] {
-  const need = new Set(LEGEND_CARD.flatMap((f) => f.built_from))
+  /*
+    EVERY CARD, NOT THE VISITING ONE.
+
+    LEGEND_CARD is cardFor(null), which is the visiting set — so the doorway was computed
+    from one learner's seven and applied to all three. The cards differ in two questions:
+
+      visiting  … um, semana      (how long are you here)
+      staying   … sim, nao        (is it your first time)
+      moving    … dois, anos      (how long have you been here)
+
+    So a learner who said MOVING finished the doorway, was told "Your Legend is open" and
+    "Seven things about you", and found `moved_when` permanently unanswerable — `anos` is
+    taught by tb_six_seven, which is not in the doorway and which the front-loading rule
+    pushes to the back of the basics. Measured against Sam's own record: 6 of 7 openable
+    at the door, and the seventh unreachable without playing the whole vibe.
+
+    The union is the honest set: a door that opens the Legend has to open ALL of it, and
+    which seven that is depends on an answer given before any of this was reached.
+
+    Cheap enough to compute per call — three cards of seven frames against sixteen roots —
+    and the alternative is a second constant that has to be kept in step with cardFor,
+    which is the fault this fixes rather than a different one.
+  */
+  const need = new Set(
+    (['visiting', 'staying', 'moving'] as const).flatMap((p) =>
+      cardFor(p).flatMap((f) => f.built_from),
+    ),
+  )
   return (ROOTS_BY_FAMILY[DOORWAY] ?? []).filter((r) =>
     r.extracts.some((e) => need.has(e.id)),
   )

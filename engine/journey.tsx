@@ -898,7 +898,23 @@ export function JourneyProvider({
         crate stayed shut and the only button that could free them was the one they had
         not pressed.
       */
-      if (state.family) rememberSection(state.family)
+      /*
+        NOT RECORDED HERE ANY MORE — SectionComplete already did it on mount.
+
+        Both were live and rememberSection is not idempotent on the counter: it dedupes
+        `sections_completed` by family and then does `s.sittings = (s.sittings ?? 0) + 1`
+        unconditionally. So every ordinary pass through a vibe added TWO, and the Legend
+        door — which counts sittings — ran at double speed. Sam: "I was still in basics and
+        somehow I managed to open up my legend."
+
+        The mount-time call in components/Journey.tsx is the one that stays, and its own
+        note says why: recording on the button meant a learner who reached that screen and
+        left by any other route had done the work and banked none of it. This call is what
+        that fix replaced and it was never removed.
+
+        The read below still needs the fresh record, and gets it — the effect runs on mount
+        and this runs on a tap, which is strictly later.
+      */
 
       /*
         THE TWO INTERRUPTING SCREENS, QUEUED ON BOTH PATHS.

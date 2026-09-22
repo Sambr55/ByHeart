@@ -288,6 +288,25 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     // Finishing a section is not undoable, and the Club's welcome fired at whichever
     // moment came first — a learner who signs in on a new phone is not new.
     sections_completed: setUnion(l.sections_completed, r.sections_completed),
+    /*
+      AND THE SITTINGS, WHICH THIS FILE HAD NO RULE FOR.
+
+      `sittings` was absent from every branch here, so it fell through the `{...l, ...r}`
+      spread and the REMOTE copy won unconditionally. The remote copy is always stale by
+      construction: engine/journey.tsx fires syncSession on the way out of a sitting and
+      rememberSection increments afterwards, so the server row is a sitting behind at best
+      — and for a learner returning to a device the server never saw, it is at zero.
+
+      Sam, after signing in mid-basics: the Legend he had completed "didn't save and now
+      I'm back to needing three vibes." The door counts sittings; a sync reset the counter
+      and the door with it.
+
+      The higher of the two, because this number only ever rises: it is a count of work
+      done, nothing takes work back, and the rule this file states in its own header is
+      that a merge may only GAIN. Taking the max is that rule applied to a counter, the
+      way setUnion is it applied to a list.
+    */
+    sittings: Math.max(Number(l.sittings ?? 0), Number(r.sittings ?? 0)),
     osmosis_seen: setUnion(l.osmosis_seen, r.osmosis_seen),
     // A save is for the learner and has to survive a sync like anything else they made.
     saved: setUnion(l.saved, r.saved),
