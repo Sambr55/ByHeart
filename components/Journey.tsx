@@ -516,6 +516,21 @@ function Landing() {
         It is still one screen with nothing below it: the content is anchored to the
         bottom by justify-end and the page cannot scroll, so the extra height is
         photograph rather than anything anybody has to reach.
+
+        MEASURED ON BOTH SURFACES, at last, which is the fact this cost a day for want of:
+
+          installed app   window 390x797 · svh 797 · lvh 797 · dvh 797 · gap 0
+          Safari          window 390x699 · svh 699 · lvh 739 · dvh 699 · gap -40
+
+        The installed app does NOT get the whole 844 screen — iOS keeps about 47px for the
+        status bar — so its window is 797 and all three units are equal there, because
+        there is no chrome to retract. A box sized to svh was therefore clipping itself at
+        exactly the height it was supposed to fill, on the one surface where svh, lvh and
+        dvh agree and none of them is wrong.
+
+        In Safari lvh overshoots the window by 40, which is the point: that is the strip
+        the toolbar sits over, and main covering it is what stops the band appearing when
+        the toolbar slides away. `gap -40` is the fix working rather than a fault.
       */
       className="relative flex min-h-lvh w-full flex-col justify-end overflow-hidden on-dark text-white"
     >
@@ -689,20 +704,13 @@ function Measured() {
       /* As above. */
     }
     /*
-      AND ALWAYS IN THE INSTALLED APP, until this is settled.
-
-      The latch works and it arrived after Sam had already added DUB to his home screen,
-      so the app he is testing has no flag in its storage and still shows nothing. Four
-      rounds of this have been me asking for numbers I had made unreachable.
-
-      An installed app is not something a stranger stumbles into — it is a deliberate act
-      by somebody testing this. So it reports unconditionally there, and `?why=0` still
-      silences it. It comes out the moment the band is understood.
+      It reported unconditionally in the installed app while the band was being chased,
+      because that was the one surface whose numbers nobody could get at. The numbers are
+      in the note on `main` above now, so it goes back behind the flag: ?why=1 to turn it
+      on, ?why=0 to clear it, and it follows an installed app because the flag is latched
+      rather than carried on the URL.
     */
-    const installed =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (navigator as unknown as { standalone?: boolean }).standalone === true
-    if (!on && !(installed && q !== '0')) return
+    if (!on) return
     const probe = document.createElement('div')
     probe.style.cssText = 'position:fixed;top:0;left:0;width:1px;pointer-events:none;opacity:0'
     document.body.appendChild(probe)
