@@ -64,7 +64,7 @@ export function NotYet({
   }, [learner.chapter, learner.purpose])
 
   return (
-    <main data-stage="CHOICE" className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-5 pt-6">
+    <main data-stage="CHOICE" className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
       <p className="eyebrow text-accent">{what}</p>
       <h1 className="display text-balance text-3xl">Not yet — this opens with your Legend.</h1>
       <p className="text-sm leading-relaxed text-muted">{line}</p>

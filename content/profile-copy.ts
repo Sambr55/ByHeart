@@ -86,9 +86,17 @@ export const PROFILE_COPY = {
     Portuguese" is a claim no count can make and would be false the moment somebody met a
     doctor; "most of a day" is what the corpus figure actually supports.
   */
+  /*
+    THE NUMBER FROM THE CONSTANT, never typed again.
+
+    This said "the 800" in one branch and read `need` in the other, so the two could
+    disagree the moment WORDS_FOR_MOST_OF_A_DAY moved — the same shape as the free tier
+    saying "three vibes" while FREE_CRATES was five, which is the fault that produced
+    scripts/allowance-check.mts.
+  */
   words_toward: (have: number, need: number) =>
     have >= need
-      ? 'Past the 800 that cover most of a day in Lisbon.'
+      ? 'Past the ' + need + ' that cover most of a day in Lisbon.'
       : have + ' of the ' + need + ' that cover most of a day in Lisbon.',
   drops_label: 'DROPS',
   drops_note: 'Pegged to something really happening, with the language you took to it.',
@@ -135,6 +143,23 @@ export const PROFILE_COPY = {
   */
   legend_ready_one: 'One more is ready to answer.',
   legend_ready: '{n} more are ready to answer.',
+  /*
+    AND WHEN NOTHING IS READY BUT THE CARD IS NOT DONE, which said nothing at all.
+
+    Three things can be true on this screen — the door is shut, a question is waiting, or
+    the card is unfinished and every remaining question is held by a word the learner does
+    not have yet — and only the first two had a line. So somebody who answered everything
+    available arrived at a screen that showed a number and then went quiet, with no way to
+    know that more existed or what opened it. Sam: "We are not doing a good enough job at
+    sign-posting the completion of legend questions and how."
+
+    It names the WORDS as the thing in the way, because they are: every remaining frame is
+    blocked on vocabulary, the Legend page says which word and which vibe hands it over,
+    and this is the sentence that sends somebody there.
+  */
+  legend_held_one: 'One question left on your card, waiting on a word.',
+  legend_held: '{n} questions left on your card, each waiting on a word.',
+  legend_held_cta: 'SEE WHAT OPENS THEM',
   /** Practice, which is the point. The verb is about them, not about the app. */
   legend_practise: 'Say it all, out loud',
   legend_practise_cold: 'Cold, with nothing on screen',

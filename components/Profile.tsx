@@ -12,7 +12,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { askedCards, cardById, cardFace, derivedCards, dropsFor, roomsFor, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
 import { CRATES, PIECES, ROOTS, type CultureFamily } from '@/content/roots'
-import { LEGEND_FRAMES, WORDS_FOR_MOST_OF_A_DAY, askFor, cardFor, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
+import { LEGEND_FRAMES, WORDS_FOR_MOST_OF_A_DAY, askFor, cardFor, cardToGo, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/avatar'
 import { setDisplayName } from '@/engine/learner'
@@ -1174,6 +1174,18 @@ function LegendHero() {
     () => new Set(Object.keys(learner.inventory ?? {}).filter((id) => PIECES[id])),
     [learner.inventory],
   )
+  /*
+    HOW MUCH OF THE CARD IS LEFT, for the case where nothing is ready.
+
+    The seven, filtered by purpose and by the conditions that make a frame apply, minus
+    what has been answered — the same function the Club and the Legend use, so the three
+    screens cannot disagree about how far along somebody is.
+  */
+  const cardLeft = cardToGo(
+    answered.map((a) => a.frame_id),
+    answers,
+    learner.purpose ?? null,
+  )
   const ready = useMemo(
     () =>
       LEGEND_FRAMES.filter(
@@ -1302,6 +1314,34 @@ function LegendHero() {
             <span className="pt mt-1 block text-xs text-accent">
               {askFor(ready[0], learner.profile?.gender ?? null)}
             </span>
+          </span>
+          <span aria-hidden className="shrink-0 text-muted">→</span>
+        </Link>
+      ) : mounted && cardLeft > 0 ? (
+        /*
+          THE THIRD THING THAT CAN BE TRUE, which this screen used to answer with silence.
+
+          Door open, nothing ready, card unfinished — every remaining question held by a
+          word the learner has not met. That is the ordinary state after a few vibes and
+          it rendered nothing at all, so YOURS showed a count and then stopped, with no
+          hint that more questions existed or what would open them.
+
+          It goes to the Legend rather than answering here, because the Legend already
+          knows: each blocked card names the word it wants and links to the vibe that
+          teaches it. Saying it twice is how the two would drift.
+        */
+        <Link
+          href="/legend"
+          data-testid="legend-held"
+          className="tap-target flex items-center gap-3 rounded border border-line px-4 py-3 transition hover:border-accent/50"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm">
+              {cardLeft === 1
+                ? PROFILE_COPY.legend_held_one
+                : PROFILE_COPY.legend_held.replace('{n}', String(cardLeft))}
+            </span>
+            <span className="eyebrow mt-1 block text-accent">{PROFILE_COPY.legend_held_cta}</span>
           </span>
           <span aria-hidden className="shrink-0 text-muted">→</span>
         </Link>
