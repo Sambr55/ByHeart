@@ -236,23 +236,40 @@ body {
 */
 .min-h-svh {
   /*
-    lvh, WHICH IS THE ONE THAT COVERS THE TOOLBAR STRIP.
+    BACK TO svh, AND THE CHROME BAND IS COVERED BY THE CANVAS INSTEAD.
 
-    Measured on Sam's phone: svh 699, lvh 739, dvh 699. dvh EQUALS svh while Safari's
-    toolbar is showing, so a full-bleed screen sized to either stops 40px short of the
-    glass and the ground shows through — the band, on the landing photograph most of all,
-    because there the page IS the picture.
+    Measured on Sam's phone: svh 699, lvh 739, dvh 699 in a 390x844 screen.
 
-    lvh is the viewport with the chrome retracted, which is the largest the page can ever
-    be asked to fill. A full-bleed screen sized to it is never short. It can overflow by
-    40px while the toolbar is out, which for these screens is right: they are pictures
-    with the content anchored to the BOTTOM (justify-end), so the overflow goes off the
-    top, behind a toolbar that is about to retract anyway.
+    Each of the three was tried and each was wrong in its own way. `dvh` EQUALS svh while
+    the toolbar is showing, so it changed nothing. `lvh` is 40px TALLER than the window,
+    which covers the band but makes the page scrollable by exactly 40px — and a landing
+    screen that scrolls puts its own photograph off the top the moment anybody drags it,
+    which is the strip Sam then saw under the status bar. A screen that should not scroll
+    must not be given a height that lets it.
 
-    This is min-height on screens that are deliberately full-bleed. It is not a page
-    height: nothing here forces a document to be taller than its content.
+    So the screen is the window's height, honestly, and the strip the toolbar sits over is
+    the CANVAS's job — which it can do, because the canvas is infinite and does not care
+    how tall the document is. That is what the html-background rule above is for, and with
+    `body` no longer painting its own box over it, it finally works.
+
+    The one thing left is the colour: the canvas is --bg, the sand, and a full-bleed screen
+    is a photograph on a dark ground. See [data-stage] below.
   */
-  min-height: 100lvh;
+  min-height: 100svh;
+}
+
+/*
+  AND THE CANVAS TAKES THE COLOUR OF A FULL-BLEED SCREEN, while one is open.
+
+  A dark photograph on a sand canvas shows a sand band wherever the browser's chrome
+  retracts — which is precisely what Sam photographed. The screens that fill the viewport
+  with an image declare themselves with data-stage, so the root can carry their ground
+  instead of the page's, and the band becomes invisible rather than merely smaller.
+*/
+html:has([data-stage='LANDING']),
+html:has([data-stage='DEMO']),
+html:has([data-stage='ROOT']) {
+  background: #241f1a;
 }
 
 /*
