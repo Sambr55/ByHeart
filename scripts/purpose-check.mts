@@ -335,7 +335,26 @@ ok(
 }
 
 console.log('\nand changeable afterwards, as promised\n')
+/*
+  BEHIND THE COG, because that is where every setting went.
+
+  This looked for the purpose control on /profile. It is on /settings now — "Everything
+  that is not the language goes behind a cog" — so the check had been asserting the
+  pre-cog layout and failing on every run since, which is the fourth time this review has
+  found a gate pinned to a screen the product had already moved past.
+
+  The way in is asserted rather than assumed: Yours must carry the cog, and the cog must
+  land on the settings that hold the purpose. That is the real promise — "changeable
+  afterwards" — and it survives the control moving again.
+*/
 await page.goto(BASE + '/profile')
+await page.waitForTimeout(1600)
+ok(
+  'Yours has a way into the settings',
+  Boolean(await page.$('[data-testid="yours-settings"]')),
+  'a setting nobody can reach is a setting nobody has',
+)
+await page.goto(BASE + '/settings')
 await page.waitForTimeout(1600)
 /*
   And it is reachable by somebody who has NOT answered, which it was not.
@@ -347,7 +366,7 @@ await page.waitForTimeout(1600)
   surfaced.
 */
 ok(
-  'it is in Yours, answered or not',
+  'it is in the settings, answered or not',
   Boolean(await page.$('[data-testid="purpose-set-visiting"]')),
   'the unset state is when a setting is most worth showing',
 )
