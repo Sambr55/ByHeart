@@ -144,9 +144,29 @@
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+/*
+  THE GROUND ON `html` ALONE, so the browser paints it over the whole canvas.
+
+  This set `background` on BOTH html and body, and that is the fault. CSS propagates the
+  root element's background to the canvas — the infinite surface behind everything, which
+  covers the whole screen no matter how tall the document is. But the propagation only
+  happens when the ROOT's own background is the one being used: give `body` a background
+  as well and the body paints its own box, 699px tall, on top of the canvas. Below that
+  box there was nothing of ours at all.
+
+  That is the sand band, and it is why five fixes aimed at the foot of the page could not
+  touch it: every one of them added more paint BELOW a box that was already being drawn
+  over the canvas that would have covered it.
+
+  So only html carries the ground. `color` stays on both — it inherits, and it does not
+  propagate.
+*/
+html {
+  background: var(--bg);
+}
+
 html,
 body {
-  background: var(--bg);
   color: var(--fg);
 }
 
@@ -196,16 +216,11 @@ body {
   min-height: 100dvh;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  /* Past the foot of the largest viewport, so nothing shows under it in any state. */
-  bottom: -25vh;
-  background: var(--bg);
-  z-index: -1;
-  pointer-events: none;
-}
+/*
+  The backdrop that used to be here is gone. It sat at z-index -1, which is BEHIND the
+  body's own background box — so it was hidden by exactly the thing it existed to extend.
+  The canvas does this properly and costs nothing.
+*/
 
 /*
   AND EVERY SCREEN THAT SIZES ITSELF TO THE VIEWPORT, which is thirty of them.
