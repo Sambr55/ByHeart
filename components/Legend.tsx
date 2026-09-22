@@ -319,13 +319,20 @@ export function Legend() {
     empty Legend would render a run-through of nothing at all. Falling back to the deck is
     the honest answer to that: it is the screen that says what to do next.
   */
+  /*
+    ?cold=1 AND ?run=1 ARE THE SAME RUN NOW, and both still work.
+
+    They were two modes describing one thing — see RunThrough. The parameter stays because
+    it has callers outside this page (the Club's move, the daily line, a notification) and
+    a link that has been sent to somebody must not stop working because the screens behind
+    it were merged.
+  */
   if ((mode === 'rehearse' || mode === 'cold') && unlocked && answered.length >= 2) {
     return (
       <Shell>
         <RunThrough
           cards={answered}
           gender={learner.profile?.gender ?? null}
-          cold={mode === 'cold'}
           valuesFor={valuesFor}
           onDone={() => setMode('deck')}
         />
@@ -430,17 +437,12 @@ export function Legend() {
           >
             RUN IT THROUGH
           </button>
-          <button
-            type="button"
-            data-testid="legend-cold"
-            onClick={() => {
-              track('legend_cold_open', { cards: answered.length })
-              setMode('cold')
-            }}
-            className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-muted"
-          >
-            COLD OPEN
-          </button>
+          {/*
+            COLD OPEN was here as a second button and it is gone. It ran a single shuffled
+            card with the I SAID IT claim; RUN IT THROUGH ran all of them with none. Every
+            card, shuffled, with the claim on each is both of those and reads as one thing
+            rather than two names for it — see RunThrough.
+          */}
         </div>
       ) : null}
 
@@ -1585,26 +1587,42 @@ function ColdSay({
 function RunThrough({
   cards,
   gender,
-  cold,
   valuesFor,
   onDone,
 }: {
   cards: LegendFrame[]
   gender: 'm' | 'f' | null
-  cold: boolean
   valuesFor: (id: string) => Record<string, string> | undefined
   onDone: () => void
 }) {
-  // Shuffled once, after mount — a cold open in a fixed order is not cold.
+  /*
+    ONE RUN, WHICH IS WHAT THE TWO BUTTONS WERE ALWAYS DESCRIBING.
+
+    Yours offered SAY IT ALL, OUT LOUD and COLD, WITH NOTHING ON SCREEN, and Sam: "they are
+    almost identical". They read that way because the words are about the same thing — you,
+    out loud, from memory — while the actual difference was never in the words at all:
+
+      SAY IT ALL   every card, in order, SHOW ME each time, nothing recorded
+      COLD         slice(0, 1) — ONE card, shuffled, with the I SAID IT claim
+
+    So one was the whole card and taught nothing, and the other was a single question
+    wearing the name of the harder thing. And the claim the cold run existed to record,
+    `said_cold`, is written and displayed NOWHERE — so the only outcome distinguishing the
+    two was invisible to the person choosing between them.
+
+    The run is now the union of what each was for: every card, shuffled, and the honest
+    fork on every one. Shuffled because a run in the order you built them is a recital of a
+    list; the whole claim is that you can say these things when they are asked, and they
+    are not asked in your order.
+  */
   const order = useMemo(() => {
-    if (!cold) return cards
     const out = [...cards]
     for (let i = out.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
       ;[out[i], out[j]] = [out[j], out[i]]
     }
-    return out.slice(0, 1)
-  }, [cards, cold])
+    return out
+  }, [cards])
 
   const [i, setI] = useState(0)
   const [shown, setShown] = useState(false)
@@ -1614,9 +1632,7 @@ function RunThrough({
     return (
       <div className="flex flex-1 flex-col justify-center gap-3">
         <p className="eyebrow text-accent">DONE</p>
-        <p className="display text-balance text-2xl">
-          {cold ? 'That is the one that counts.' : 'All the way through, out loud.'}
-        </p>
+        <p className="display text-balance text-2xl">All the way through, out loud.</p>
         <Dock>
           <button
             type="button"
@@ -1647,13 +1663,12 @@ function RunThrough({
         */}
         <p className="eyebrow text-muted">
           {i + 1} OF {order.length}
-          {cold ? ' · NO WARNING' : ''}
         </p>
         <div className="flex items-center gap-3">
           <AudioButton slug={slugFor(askFor(frame, gender))} text={askFor(frame, gender)} size="sm" />
           <span className="pt min-w-0 text-xl text-accent">{askFor(frame, gender)}</span>
         </div>
-        {cold && !shown ? (
+        {!shown ? (
           <p className="mt-3 text-sm leading-relaxed text-muted">{LEGEND_COPY.cold_body}</p>
         ) : null}
       </div>
@@ -1706,22 +1721,20 @@ function RunThrough({
               data-testid="legend-reveal"
               onClick={() => {
                 setShown(true)
-                if (cold) rehearsedLegend(frame.id)
+                rehearsedLegend(frame.id)
               }}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
             >
-              {cold ? 'I SAID IT' : 'SHOW ME'}
+              I SAID IT
             </button>
-            {cold ? (
-              <button
-                type="button"
-                data-testid="legend-show"
-                onClick={() => setShown(true)}
-                className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
-              >
-                SHOW ME
-              </button>
-            ) : null}
+            <button
+              type="button"
+              data-testid="legend-show"
+              onClick={() => setShown(true)}
+              className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
+            >
+              SHOW ME
+            </button>
           </div>
         ) : (
           <button

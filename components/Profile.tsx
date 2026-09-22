@@ -1266,6 +1266,18 @@ function LegendHero() {
           what the Legend's own screen requires before it offers a run-through, asked the
           same way here so this cannot offer a button that screen then refuses.
         */}
+        {/*
+          ONE BUTTON, because the two were describing the same thing.
+
+          SAY IT ALL, OUT LOUD sat above COLD, WITH NOTHING ON SCREEN. Sam: "they are
+          almost identical". They were: both are you, out loud, from memory. The real
+          difference was never in the words — one ran every card and recorded nothing, the
+          other ran ONE card and recorded a count the product never displays. Neither was
+          the thing the words promised.
+
+          The run behind it does both jobs now, so the choice is gone and what is left is
+          the sentence that was always true of it.
+        */}
         {mounted && done >= 2 ? (
           <div className="mt-3 flex flex-col gap-3">
             <Link
@@ -1275,13 +1287,6 @@ function LegendHero() {
               className="tap-target eyebrow w-full rounded bg-accent-ink px-5 py-3 text-center text-accent"
             >
               {PROFILE_COPY.legend_practise.toUpperCase()}
-            </Link>
-            <Link
-              href="/legend?cold=1"
-              data-testid="hero-cold"
-              className="tap-target eyebrow w-full rounded border border-accent-ink/40 px-5 py-3 text-center opacity-90"
-            >
-              {PROFILE_COPY.legend_practise_cold.toUpperCase()}
             </Link>
           </div>
         ) : (

@@ -173,8 +173,13 @@ export const PROFILE_COPY = {
   legend_held: '{n} questions left on your card, each waiting on a word.',
   legend_held_cta: 'SEE WHAT OPENS THEM',
   /** Practice, which is the point. The verb is about them, not about the app. */
-  legend_practise: 'Say it all, out loud',
-  legend_practise_cold: 'Cold, with nothing on screen',
+  /*
+    ONE LABEL. This was two — "Say it all, out loud" over "Cold, with nothing on screen" —
+    and they described the same act in different words, which is why they read as
+    duplicates. The run is one run now, and this says what it is: everything on your card,
+    asked in the order a stranger would ask it, with nothing in front of you.
+  */
+  legend_practise: 'Say it all, cold',
   /*
     Everything the burger was holding.
 
