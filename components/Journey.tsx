@@ -501,7 +501,23 @@ function Landing() {
     */
     <main
       data-stage="LANDING"
-      className="relative flex min-h-svh w-full flex-col justify-end overflow-hidden on-dark text-white"
+      /*
+        THE BOX IS lvh, BECAUSE IT CLIPS.
+
+        `overflow-hidden` on a box that is min-h-svh clips everything below svh — so the
+        image hanging past it was never painted, and the band showed in Safari AND in the
+        app. Sam, correcting me when I claimed Safari was clean: "look at the image I sent
+        you again." He was right; it is in both.
+
+        svh is the window with the browser's chrome SHOWING, which is the smallest the
+        viewport ever is. A screen that clips must be the largest — lvh — or it cuts a
+        hole in itself the moment the chrome retracts or the app is installed.
+
+        It is still one screen with nothing below it: the content is anchored to the
+        bottom by justify-end and the page cannot scroll, so the extra height is
+        photograph rather than anything anybody has to reach.
+      */
+      className="relative flex min-h-lvh w-full flex-col justify-end overflow-hidden on-dark text-white"
     >
       {/*
         The photograph, and the page has to work without it.

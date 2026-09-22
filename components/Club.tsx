@@ -470,7 +470,9 @@ function Welcome({ onDone }: { onDone: () => void }) {
         of the stylesheet growing a list of routes to make exceptions for.
       */
       data-ceremony="true"
-      className="relative mx-auto flex min-h-svh w-full max-w-md flex-col justify-end overflow-hidden on-dark text-white"
+      /* lvh, not svh — this box clips, so it has to be the LARGEST viewport or it cuts a
+         hole in itself when the chrome retracts. See the note on the landing in Journey.tsx. */
+      className="relative mx-auto flex min-h-lvh w-full max-w-md flex-col justify-end overflow-hidden on-dark text-white"
     >
       <Image
         src="/hero/club-welcome.jpg"
