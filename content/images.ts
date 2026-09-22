@@ -92,6 +92,20 @@ export const IMAGE_BANK: Record<string, BankImage> = {
     rights_status: 'generated',
     taken_at: '2026-09-04',
   },
+  /*
+    THE QUEUE, for the CHEATS card.
+
+    Already in the product — situations.ts and feed.ts both point a card at it — and never
+    registered in the bank, which is what an intro card reads from. A pastelaria queue is
+    the right ground for "the words nobody teaches you first": it is the most ordinary
+    transaction in Lisbon and the one where not having the plain words is most obvious.
+  */
+  intro_cheats_card: {
+    src: '/lisbon/bakery-queue.jpg',
+    alt: 'A queue at a pastelaria counter in the morning, seen from behind, trays of pastries under glass.',
+    rights_status: 'generated',
+    taken_at: '2026-09-04',
+  },
   intro_revision_card: {
     src: '/lisbon/intro-revision.jpg',
     alt: 'A zinc café counter in morning light with one cup of coffee and a folded newspaper, the street through the open front.',

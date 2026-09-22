@@ -262,6 +262,45 @@ export const INTRO_CARDS: IntroCard[] = [
     shows: { kind: 'unpack', root_id: 'tg_goose' },
   },
   {
+    /*
+      CHEATS — the shortcut past the thing every other app makes you earn.
+
+      Sam: "add a new intro card - Cheats (in big letters) explaining we will short cut
+      them to the foundational words and phrases other apps make impossible to get to /
+      find."
+
+      This is the complaint everybody has about language apps and almost nobody says out
+      loud: the plainest words in the language — the numbers, the days, yes and no, the
+      six things you say at a counter — are behind twelve units of fruit vocabulary. They
+      are not hard. They are simply not offered, because offering them first would make
+      the ladder look short.
+
+      SECOND, AFTER VIBES, because the order is the argument. VIBES says you already know
+      more than you think; CHEATS says the rest of the basics is one tap away rather than
+      a month of taps. Together they are the whole of what makes the first week different
+      here, and putting either of them after the Legend would be leading with the
+      destination instead of the way in.
+
+      The specimen is a counting sheet rather than prose, because the claim is that these
+      are plain and listable and that is what a list demonstrates. Ten numbers on one card
+      is the argument made in its own form.
+    */
+    id: 'intro_cheats',
+    image: 'intro_cheats_card',
+    pillar: true,
+    eyebrow: 'CHEATS',
+    headline: 'The plain words, first — not in month three.',
+    body: 'Counting, the days, yes and no, the six things you say at a counter. Every other app buries them behind units you have to earn. Here they are a card you open, keep, and check whenever you need it.',
+    shows: {
+      kind: 'lines',
+      lines: [
+        { pt: 'um, dois, três…', en: 'Counting to ten, on one card.' },
+        { pt: 'sim, não, talvez', en: 'Yes, no, maybe.' },
+        { pt: 'se faz favor', en: 'The one word that makes any of it polite.' },
+      ],
+    },
+  },
+  {
     id: 'intro_legend',
     image: 'intro_arrival',
     eyebrow: 'YOUR LEGEND',
@@ -335,6 +374,44 @@ export const INTRO_CARDS: IntroCard[] = [
     */
     shows: { kind: 'drop' },
   },
+  {
+    /*
+      REMINDERS — what keeps arriving after the first week.
+
+      Sam: "change it to Reminders in big letters and explain how Club members can access
+      a constant flow of tips, tricks and hacks to navigate their journey in their chosen
+      country and city."
+
+      LAST, AND DELIBERATELY. Every card before it is something the product does to teach
+      you; this is the one about what happens when you are no longer being taught — the
+      thing that arrives on a Tuesday because you live here now. Putting it earlier would
+      make it sound like a notification setting rather than the reason to stay.
+
+      TIPS ABOUT THE PLACE, NOT ABOUT THE APP. The distinction matters and the copy holds
+      it: nothing here reminds somebody to practise. A streak does that, and the whole
+      product is an argument against it. What arrives is the thing a person who lives in
+      Lisbon knows and a person who arrived in March does not — which counter to join,
+      what the sign on the door means, why the pharmacy is shut.
+
+      The specimen is three of them rather than a description of them, for the same reason
+      CHEATS shows a list: the claim is that they are small, concrete and immediately
+      usable, and three small concrete lines are what demonstrates that.
+    */
+    id: 'intro_reminders',
+    image: 'intro_revision_card',
+    pillar: true,
+    eyebrow: 'REMINDERS',
+    headline: 'The things people who live here just know.',
+    body: 'Inside the Club they keep coming — what to say at which counter, when everything shuts, the habit that marks you out as a visitor. Small, useful, about your city rather than about the app.',
+    shows: {
+      kind: 'lines',
+      lines: [
+        { pt: 'Um café, por favor.', en: 'Not a coffee. A coffee is a different drink here.' },
+        { pt: 'Encerrado para férias', en: 'On a door in August. It means a fortnight, not today.' },
+        { pt: 'Está a atender?', en: 'The question that gets you served at a full counter.' },
+      ],
+    },
+  },
 ]
 
 /**
@@ -379,4 +456,15 @@ export const INTRO_DEMO_AFTER: string | null = null
   separate card went. Sam: "move language selector to its logical slot so its dependants
   follow."
 */
-export const INTRO_SETUP_AFTER = 'intro_drops'
+/*
+  AFTER THE LAST PITCH CARD, whichever that now is.
+
+  This named intro_drops because drops were last. REMINDERS is last now, and leaving the
+  anchor where it was would have put the language selector in the middle of the argument —
+  choose your language, then here is one more reason to stay.
+
+  Named rather than computed from the array's end on purpose: which card closes the pitch
+  is an editorial decision, and a constant that quietly follows the last element would
+  change meaning every time somebody appended one.
+*/
+export const INTRO_SETUP_AFTER = 'intro_reminders'
