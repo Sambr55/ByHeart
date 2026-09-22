@@ -235,7 +235,24 @@ body {
   viewport on purpose can still ask for it by writing the unit directly.
 */
 .min-h-svh {
-  min-height: 100dvh;
+  /*
+    lvh, WHICH IS THE ONE THAT COVERS THE TOOLBAR STRIP.
+
+    Measured on Sam's phone: svh 699, lvh 739, dvh 699. dvh EQUALS svh while Safari's
+    toolbar is showing, so a full-bleed screen sized to either stops 40px short of the
+    glass and the ground shows through — the band, on the landing photograph most of all,
+    because there the page IS the picture.
+
+    lvh is the viewport with the chrome retracted, which is the largest the page can ever
+    be asked to fill. A full-bleed screen sized to it is never short. It can overflow by
+    40px while the toolbar is out, which for these screens is right: they are pictures
+    with the content anchored to the BOTTOM (justify-end), so the overflow goes off the
+    top, behind a toolbar that is about to retract anyway.
+
+    This is min-height on screens that are deliberately full-bleed. It is not a page
+    height: nothing here forces a document to be taller than its content.
+  */
+  min-height: 100lvh;
 }
 
 /*

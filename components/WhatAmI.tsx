@@ -42,6 +42,23 @@ export function WhatAmI({ sha, built }: { sha: string; built: string }) {
     }
     const units = { svh: measure('svh'), lvh: measure('lvh'), dvh: measure('dvh') }
     probe.remove()
+    const htmlBg = getComputedStyle(document.documentElement).backgroundColor
+    const bodyBg = getComputedStyle(document.body).backgroundColor
+    const atFoot = document.elementFromPoint(
+      Math.round(window.innerWidth / 2),
+      window.innerHeight - 2,
+    ) as HTMLElement | null
+    /* Walk up until something actually paints, which is what the eye sees. */
+    let painter: HTMLElement | null = atFoot
+    while (painter && getComputedStyle(painter).backgroundColor === 'rgba(0, 0, 0, 0)') {
+      painter = painter.parentElement
+    }
+    const foot = {
+      what:
+        (atFoot?.getAttribute('data-testid') ?? atFoot?.tagName ?? '(nothing)') +
+        (painter && painter !== atFoot ? ' → painted by ' + (painter.getAttribute('data-testid') ?? painter.tagName) : ''),
+      colour: painter ? getComputedStyle(painter).backgroundColor : '(canvas)',
+    }
     setRows([
       { k: 'build', v: sha.slice(0, 7) + (built ? ' — ' + built.split('\n')[0].slice(0, 60) : '') },
       { k: 'name', v: me.display_name ?? '(none)' },
@@ -101,6 +118,19 @@ export function WhatAmI({ sha, built }: { sha: string; built: string }) {
       */
       { k: 'svh / lvh / dvh', v: units.svh + ' / ' + units.lvh + ' / ' + units.dvh },
       { k: 'body height', v: String(Math.round(document.body.getBoundingClientRect().height)) },
+      /*
+        WHAT IS ACTUALLY PAINTED AT THE FOOT OF THE PAGE.
+
+        Every round of this has been me inferring a colour from a photograph of a screen
+        and getting it wrong. The page can say what it is painting, so it should: the
+        element at the bottom edge of the viewport, and the colour it resolves to. If that
+        reads as the ground colour then the band in the screenshot is browser chrome and
+        the page is right; if it reads as anything else, that is the bug, named.
+      */
+      { k: 'at foot of viewport', v: foot.what },
+      { k: '  its colour', v: foot.colour },
+      { k: 'html background', v: htmlBg },
+      { k: 'body background', v: bodyBg },
     ])
   }, [sha, built])
 
