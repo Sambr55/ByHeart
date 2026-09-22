@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { absoluteUrl, consumeLoginToken, ensureDevice, startSession, upsertUser } from '@/lib/auth'
+import { absoluteUrl, consumeLoginToken, ensureDevice, returnTo, startSession, upsertUser } from '@/lib/auth'
 import { claimDevice } from '@/lib/store'
 
 export const runtime = 'nodejs'
@@ -26,5 +26,14 @@ export async function GET(request: Request) {
   const device = await ensureDevice()
   await claimDevice(device, user.id)
 
-  return NextResponse.redirect(absoluteUrl('/account?welcome=1'))
+  /*
+    Back where they were, when the link says so.
+
+    Filtered again on the way out rather than trusted from the URL: this value has been
+    through a mail client, which is outside. returnTo falls back to the account page for
+    anything not on its list, so a mangled or hostile `next` lands exactly where every
+    link used to.
+  */
+  const next = new URL(request.url).searchParams.get('next')
+  return NextResponse.redirect(absoluteUrl(returnTo(next)))
 }

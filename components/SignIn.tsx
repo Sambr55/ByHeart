@@ -49,6 +49,15 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
   const [message, setMessage] = useState<string | null>(null)
   const [debugUrl, setDebugUrl] = useState<string | null>(null)
 
+  /*
+    Read once after mount rather than with useSearchParams, so this page needs no Suspense
+    boundary — the same reason and the same shape as the Legend's ?cold= handling.
+  */
+  const [backTo, setBackTo] = useState<string | null>(null)
+  useEffect(() => {
+    setBackTo(new URLSearchParams(window.location.search).get('next'))
+  }, [])
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setState('sending')
@@ -56,7 +65,18 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
     const res = await fetch('/api/auth/request', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email }),
+      /*
+        WHERE THEY WERE, so the link brings them back to it.
+
+        Sam signed in two vibes from his Legend and landed on the billing page: "it took me
+        back here and I couldn't return to where I was." The link had nowhere else to go —
+        the origin was never sent.
+
+        From ?next= on this page's own URL, which the screens that offer sign-in now set.
+        The server filters it against a fixed list either way (see returnTo in lib/auth),
+        so this is a hint rather than an instruction and a missing one costs nothing.
+      */
+      body: JSON.stringify({ email, next: backTo }),
     })
     const data = (await res.json()) as { ok?: boolean; reason?: string; debug_url?: string; sent?: boolean }
     if (!res.ok || !data.ok) {

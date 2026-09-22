@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { currentUser, deviceId, endSession, ensureDevice, forgetDevice } from '@/lib/auth'
 import { forgetDeviceComp, moveDeviceComp } from '@/lib/comp'
-import { forgetLearnerFor } from '@/lib/store'
+import { forgetAccountLearner, forgetLearnerFor } from '@/lib/store'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -55,7 +55,25 @@ export async function POST(request: Request) {
     )
   }
 
-  if (user) await endSession()
+  /*
+    THE ACCOUNT'S COPY GOES TOO, when the learner signed out to get here.
+
+    Sam reset, signed back in, and was inside the Club with no Legend: "I got into the club
+    even though I have no legend." The door was working. His ACCOUNT row still held
+    club_welcomed_at, mergeLearner takes the earliest of the two timestamps, and clubOpen
+    grandfathers anybody who has one — so signing in handed back the membership the reset
+    had just removed.
+
+    Half a reset is worse than none: it looks like it worked until the next sign-in, and
+    then the thing that undoes it is the sync doing its job. `?signout=1` is the learner
+    saying start again everywhere, so everywhere is what it means.
+
+    Read BEFORE endSession, because after it there is no user to scope the delete to.
+  */
+  if (user) {
+    await forgetAccountLearner(user.id)
+    await endSession()
+  }
 
   const device = await deviceId()
   // Nothing to forget is a success: the caller wanted a clean device and has one.

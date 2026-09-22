@@ -1214,8 +1214,9 @@ function Picker() {
           <p className="text-sm font-semibold">{LEGEND_COPY.save_head}</p>
           <p className="text-xs leading-relaxed text-muted">{LEGEND_COPY.save_body}</p>
           <div className="flex flex-col gap-3">
+            {/* Back to the shelf they were standing on — see the save step's note. */}
             <Link
-              href="/signin"
+              href="/signin?next=%2Fvibes"
               data-testid="shelf-save-go"
               onClick={() => track('save_offered', { at: 'shelf', took: true })}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
@@ -3338,8 +3339,16 @@ function SaveStep() {
         <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.save_body}</p>
       </div>
       <div className="flex flex-col gap-3">
+        {/*
+          BACK TO THE VIBES, not to a billing page.
+
+          This screen interrupts a sitting, so the learner is mid-flow when they take it —
+          Sam was two vibes from his Legend: "it took me back here and I couldn't return to
+          where I was." ?next= travels to /signin, onto the emailed link, and back out of
+          the verify route, filtered against a fixed list at both ends.
+        */}
         <Link
-          href="/signin"
+          href="/signin?next=%2Fvibes"
           data-testid="save-step-go"
           onClick={() => track('save_offered', { at: 'step', took: true })}
           className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
@@ -4095,8 +4104,9 @@ function LegendPayoff() {
           <p className="text-sm font-semibold">{LEGEND_COPY.save_head}</p>
           <p className="text-xs leading-relaxed text-muted">{LEGEND_COPY.save_body}</p>
           <div className="flex flex-col gap-3">
+            {/* Mid-vibe, so back to the vibes — see the save step's note. */}
             <Link
-              href="/signin"
+              href="/signin?next=%2Fvibes"
               data-testid="soft-save"
               onClick={() => track('save_offered', { at: 'one_vibe_out', took: true })}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
@@ -4425,7 +4435,7 @@ function Close() {
           which is the only honest moment to ask anyone for an email address. */}
       <div className="mt-3 flex flex-col items-center gap-3 text-xs text-muted">
         {access.signInReady ? (
-          <Link href="/signin" className="underline underline-offset-4">
+          <Link href="/signin?next=%2Fvibes" className="underline underline-offset-4">
             Keep what you have learned — it lives on this phone until you do.
           </Link>
         ) : null}

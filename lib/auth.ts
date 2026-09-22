@@ -69,7 +69,35 @@ export interface IssuedLink {
   expiresAt: Date
 }
 
-export async function issueLoginToken(emailRaw: string): Promise<IssuedLink | null> {
+/**
+ * Where a sign-in link is allowed to land, and nowhere else.
+ *
+ * Sam signed in two vibes from his Legend and came back to the billing page with no way
+ * forward: "it took me back here and I couldn't return to where I was." The link always
+ * went to /account, because where somebody came from was never captured.
+ *
+ * A LIST RATHER THAN THE PATH ITSELF. /api/auth/request is public and unauthenticated —
+ * anybody can ask it to email a link to any address — so a `next` it will echo into a
+ * redirect is an open redirect with a delivery mechanism attached. What this accepts is a
+ * small set of in-app screens, matched exactly, and everything else falls back to the
+ * account page it used to go to.
+ *
+ * Deliberately not a prefix or a regex. "//evil.example" and "/club@evil.example" both
+ * start with a slash, and a rule clever enough to allow /vibes?open=top_gun is a rule
+ * somebody has to keep being right about.
+ */
+const CAN_RETURN_TO = new Set(['/vibes', '/club', '/profile', '/legend', '/line', '/proof', '/vocab', '/drops'])
+
+export function returnTo(path: string | null | undefined): string {
+  const want = (path ?? '').trim()
+  return CAN_RETURN_TO.has(want) ? want : '/account?welcome=1'
+}
+
+export async function issueLoginToken(
+  emailRaw: string,
+  /** Where to land once the link is spent. Filtered through returnTo, never trusted. */
+  next?: string | null,
+): Promise<IssuedLink | null> {
   const sql = db()
   if (!sql) return null
   const email = emailRaw.trim().toLowerCase()
@@ -81,7 +109,19 @@ export async function issueLoginToken(emailRaw: string): Promise<IssuedLink | nu
     insert into login_tokens (token_hash, email, expires_at, request_ip)
     values (${sha(token)}, ${email}, ${expiresAt}, ${ip})
   `
-  return { token, url: absoluteUrl('/api/auth/verify?token=' + token), expiresAt }
+  /*
+    The destination rides on the link rather than in the row.
+
+    It is filtered before it is written, so what travels is already one of the allowed
+    screens — and carrying it on the URL means it cannot outlive the token or be edited
+    independently of it. The verify route filters again on the way out, because a value
+    that has been through a mail client is a value from outside.
+  */
+  const land = returnTo(next)
+  const url = absoluteUrl(
+    '/api/auth/verify?token=' + token + (land === '/account?welcome=1' ? '' : '&next=' + encodeURIComponent(land)),
+  )
+  return { token, url, expiresAt }
 }
 
 /** Spends the token and returns the email it was issued to. Single use. */

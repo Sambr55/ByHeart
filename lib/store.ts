@@ -531,6 +531,31 @@ export async function forgetLearnerFor(deviceId: string): Promise<Layer> {
   return layer()
 }
 
+/**
+ * The account's own copy, forgotten — which a device reset deliberately does not touch.
+ *
+ * Sam reset, signed back in, and walked into the Club with no Legend: "I got into the club
+ * even though I have no legend." Nothing was broken in the door. His ACCOUNT row still
+ * carried club_welcomed_at from before the reset, mergeLearner takes the earliest of the
+ * two, and clubOpen grandfathers anybody holding that timestamp.
+ *
+ * So the reset was half a reset. It cleared the device and left the durable copy standing,
+ * and the next sign-in put it back — the sync working exactly as designed, undoing the
+ * thing the learner had just asked for.
+ *
+ * SEPARATE FROM forgetLearnerFor, and both are right. That one is scoped to a device on
+ * purpose: a signed-in learner resetting one phone must not lose the account behind it.
+ * This is the other request — start again everywhere — and the reset flow asks which.
+ */
+export async function forgetAccountLearner(userId: string): Promise<Layer> {
+  const sql = db()
+  if (sql) {
+    await sql`delete from learners where user_id = ${userId}`
+    return 'postgres'
+  }
+  return layer()
+}
+
 async function listBlobs(prefix: string): Promise<Record<string, unknown>[]> {
   const store = await blobStore()
   if (!store) return []

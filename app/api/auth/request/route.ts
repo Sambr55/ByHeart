@@ -24,8 +24,12 @@ export async function POST(request: Request) {
   }
 
   let email = ''
+  /* Where the learner was when they asked. Filtered by returnTo, never trusted. */
+  let next: string | null = null
   try {
-    email = String(((await request.json()) as { email?: string }).email ?? '').trim()
+    const body = (await request.json()) as { email?: string; next?: string }
+    email = String(body.email ?? '').trim()
+    next = typeof body.next === 'string' ? body.next : null
   } catch {
     return NextResponse.json({ ok: false, reason: 'invalid json' }, { status: 400 })
   }
@@ -34,7 +38,7 @@ export async function POST(request: Request) {
   }
 
   await ensureDevice()
-  const link = await issueLoginToken(email)
+  const link = await issueLoginToken(email, next)
   if (!link) return NextResponse.json({ ok: false, reason: 'could not issue a link' }, { status: 500 })
 
   const delivered = await sendLoginLink(email, link.url)
