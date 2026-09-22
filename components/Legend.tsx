@@ -1114,7 +1114,7 @@ function BuildCard({
               <p className="eyebrow text-muted">YOU KNOW THESE</p>
               {provenance.map((p) => (
                 <p key={p.piece} className="text-xs leading-relaxed text-fg/85">
-                  <span className="pt text-accent">{p.piece}</span> came out of{' '}
+                  <span className="pt owned">{p.piece}</span> came out of{' '}
                   {CRATES.find((c) => c.id === p.family)?.title ?? 'another vibe'}.
                 </p>
               ))}

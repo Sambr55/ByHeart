@@ -595,13 +595,18 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     see happen.
   */
   /*
-    ARRIVING FROM THE CALENDAR, on the drop you tapped, already opened.
+    ARRIVING FROM THE CALENDAR, on the drop you tapped, at its opening card.
 
-    "Clicking a day opens the relevant cards like a swipe right" — so this does exactly
-    what the swipe does and nothing more: it lands the rail on that drop's card and then
-    scrolls its pane one lane, which is the reveal. Not a different screen, not a modal;
-    the same card the feed would have given you, at the point the gesture would have left
-    it.
+    This used to scroll the pane one lane as well, on the reading that "clicking a day
+    opens the relevant cards like a swipe right" meant performing the swipe for you. What
+    that produced was the opening card appearing for a frame and being whipped away before
+    it could be read — "it flashes up the opening card VERY quickly and then immediately
+    swipes to the content. Needs to be a conscious swipe, not auto."
+
+    Right: the link's job is to put you in front of the card, not to read it for you. The
+    title, the date and the photograph ARE the thing the calendar promised; a reveal you
+    did not ask for skips the only part that answers "what is this". So the rail lands on
+    the card and stops. The lane beneath it is one swipe away, made by a thumb.
 
     ONCE, and only once. `landed` latches because the effect re-runs whenever the feed
     rebuilds — and a feed rebuild is exactly what saving or rejecting causes, so without
@@ -623,17 +628,6 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     if (!el || !el.clientHeight) return
     // Plus one for the leading clone, which is a copy of the last card rather than a card.
     el.scrollTop = (i + 1) * el.clientHeight
-    /*
-      One frame later for the reveal: the card's own effect sets its opening lane on mount,
-      and scrolling the pane before that runs would be overwritten by it.
-    */
-    requestAnimationFrame(() => {
-      const section = el.children[i + 1] as HTMLElement | undefined
-      const pane = section?.querySelector('[data-testid="card-panes"]') as HTMLElement | null
-      if (!pane || !pane.clientWidth) return
-      const face = Math.round(pane.scrollLeft / pane.clientWidth)
-      pane.scrollTo({ left: pane.clientWidth * Math.max(0, face - 1), behavior: 'smooth' })
-    })
   }, [cards, mounted])
 
   const passed = (id: string) => {

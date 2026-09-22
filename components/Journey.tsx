@@ -3021,7 +3021,29 @@ function ProfileStep({ which }: { which: 'gender' | 'age' | 'goal' }) {
           close and the options are a group away. It was four stacked margins. */}
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-accent">{q.eyebrow}</p>
-        <h1 className="display text-balance text-2xl">{q.headline}</h1>
+        {/*
+          IT KNOWS WHO IT IS ASKING, having been told two screens ago.
+
+          The headline was a flat "Are you speaking as a man or a woman?" on a screen that
+          arrives directly after somebody typed their name in — so the product collected
+          the name, used it in the very next sentence it taught, and then asked the most
+          personal question in the flow as though a stranger had walked in. Sam: "this is
+          hard-coded text, it should know the user is called Sam."
+
+          Addressed rather than interpolated mid-sentence: "Sam — are you speaking…" keeps
+          the question's own wording intact, which matters because that wording was argued
+          over (it asks which ending comes out of the mouth, not who somebody is). Falls
+          back to the bare question when there is no name, which is every learner who
+          skipped that field.
+
+          Gender only. Age and goal are asked later and by then the direct address reads as
+          a tic rather than as recognition.
+        */}
+        <h1 className="display text-balance text-2xl">
+          {which === 'gender' && learner.display_name
+            ? learner.display_name + ' — ' + q.headline.charAt(0).toLowerCase() + q.headline.slice(1)
+            : q.headline}
+        </h1>
         <p className="text-sm italic text-muted">{q.askerLine}</p>
         <p className="text-sm leading-relaxed text-muted">{q.why}</p>
       </div>
@@ -3246,13 +3268,28 @@ function LegendOpened({
           of the seven. So the branch was unreachable copy that read as shipped, and it is
           gone. scripts/opened-check.mts measures it and will say if that ever changes.
         */}
-        <p className="pillar text-accent">{door ? 'YOUR LEGEND' : 'ANOTHER PART'}</p>
+        {/*
+          THE SENTENCE FINISHES IN THE HEADLINE, rather than across two type sizes.
+
+          This read "YOUR LEGEND" at pillar size and then, in body text three lines down,
+          "is open. Everything you have learned…" — one sentence broken over a 4x jump in
+          scale, so the eye took the headline as a label and the body as an unrelated
+          paragraph starting mid-clause. Sam, marking the screenshot: "Should read YOUR
+          LEGEND IS OPEN."
+
+          So the verb comes up into the headline where its subject is, and the body starts
+          a sentence of its own. Same for the other branch: a part of a Legend opening is
+          also a whole statement, not a fragment waiting for its predicate below.
+        */}
+        <p className="pillar text-accent">
+          {door ? 'YOUR LEGEND IS OPEN' : 'ANOTHER PART IS OPEN'}
+        </p>
 
         <div className="pillar-body flex flex-col gap-6">
           <p className="text-sm leading-relaxed text-fg/85">
             {door
-              ? 'is open. Everything you have learned so far went into it — here is the first thing you can say.'
-              : 'of your Legend just opened. You have the words for this now.'}
+              ? 'Everything you have learned so far went into it — here is the first thing you can say.'
+              : 'You have the words for this now.'}
           </p>
 
           {/*
@@ -3314,7 +3351,7 @@ function LegendOpened({
                   className="animate-bank text-xs leading-relaxed text-fg/85"
                   style={{ animationDelay: `${i * 70}ms` }}
                 >
-                  <span className="pt text-accent">{p.piece}</span> came out of{' '}
+                  <span className="pt owned">{p.piece}</span> came out of{' '}
                   {CRATES.find((c) => c.id === p.family)?.title ?? 'another vibe'}.
                 </p>
               ))}
@@ -3855,21 +3892,20 @@ function SectionComplete() {
             MORE BASICS
           </button>
         ) : null}
-        {remaining.length ? (
-          <button
-            type="button"
-            data-testid="another-vibe"
-            onClick={() => finishSection('another')}
-            className={
-              'tap-target eyebrow w-full rounded px-5 py-3 ' +
-              (isDoorway && legend.toGo > 0
-                ? 'border border-line text-fg'
-                : 'bg-accent text-accent-ink')
-            }
-          >
-            ANOTHER VIBE
-          </button>
-        ) : null}
+        {/*
+          ANOTHER VIBE IS GONE, and what it was competing with is the reason.
+
+          It sat on both session-done screens as a third row of dock, offering the shelf at
+          the exact moment the screen above had finished explaining what to do next — MORE
+          BASICS while the door is shut, SAY THREE COLD once it is open. A button that
+          points away from the sentence directly above it is not a choice, it is noise, and
+          it was the row that pushed this screen into a scroll. Sam: "remove ANOTHER VIBE
+          CTA" and, on the same sheet, "too much scrolling and hidden elements".
+
+          The shelf has not gone anywhere: /vibes is a route, the Club carries untouched
+          vibes as cards, and the Profile tiles open it. What has gone is a standing
+          invitation to leave, printed under the instruction to stay.
+        */}
       {/*
         SAY WHAT HAPPENS, RATHER THAN DARING SOMEBODY TO DO IT.
 

@@ -314,7 +314,24 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             because the lines underneath are what somebody actually came for.
           */}
           {situation.image ? (
-            <div className="relative -mx-5 aspect-[16/9] overflow-hidden">
+            /*
+              THE TITLE LIVES ON THE PHOTOGRAPH, in the room as well as on the card.
+
+              The image was a bare 16:9 strip and the title sat in ink underneath it, so a
+              room opened with a picture of a place and then, separately, told you where you
+              were. Sam, on the screenshot: "Add big title letters" — the same splash the
+              drop card in the Club already wears, which is what makes the two read as one
+              object seen twice rather than two designs.
+
+              The scrim is a gradient from nothing at the top to near-black at the bottom,
+              which is what lets white letters sit on a photograph whose brightness nobody
+              authored. `drop-shadow` underneath it for the same reason at the pixel level.
+
+              The heading is HERE now rather than below, so the block underneath keeps the
+              dots and the blurb and loses its h1 — see the next comment. One title per
+              room, which was the whole complaint.
+            */
+            <div className="relative -mx-5 aspect-[16/9] overflow-hidden on-dark">
               <Image
                 src={situation.image.src}
                 alt={situation.image.alt}
@@ -322,6 +339,20 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
                 sizes="(max-width: 448px) 100vw, 448px"
                 className="object-cover"
               />
+              <div
+                aria-hidden
+                className="absolute inset-0"
+                style={{
+                  background:
+                    'linear-gradient(to bottom, rgb(0 0 0 / 0) 30%, rgb(0 0 0 / 0.62) 100%)',
+                }}
+              />
+              <h1
+                className="display absolute inset-x-0 bottom-0 text-balance px-5 pb-3 text-3xl text-white"
+                style={{ textShadow: '0 1px 12px rgb(0 0 0 / 0.55)' }}
+              >
+                {situation.title}
+              </h1>
             </div>
           ) : null}
 
@@ -355,7 +386,14 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             ) : (
               <p className="eyebrow text-muted">{chapter.city.toUpperCase()}</p>
             )}
-            <h1 className="display text-balance text-3xl">{situation.title}</h1>
+            {/*
+              Only when the photograph is not already carrying it. A room with an image
+              says its name once, in white, over the picture; a room without one still
+              needs a heading, and this is it.
+            */}
+            {situation.image ? null : (
+              <h1 className="display text-balance text-3xl">{situation.title}</h1>
+            )}
             <p className="text-sm leading-relaxed text-muted">{situation.why}</p>
           </div>
 

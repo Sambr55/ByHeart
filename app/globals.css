@@ -330,6 +330,44 @@ html:has(.on-dark) {
 }
 
 /*
+  A WORD YOU ALREADY OWN, marked the same way everywhere it is claimed.
+
+  The pieces under YOU KNOW THESE were drawing warm — rust against the sand — which put
+  them in the register the product uses for warnings and countdowns rather than for
+  possession, and left the one thing on the card that is YOURS looking like an aside.
+  Sam: "the red/rust learned words should be dark blue with a key line around every
+  learned word."
+
+  A class rather than utilities at the two call sites, because "a word the learner owns"
+  is a thing the product has opinions about and will mark again — the vocab library and
+  the cheat sheets both have the same claim to make. One rule to change when that opinion
+  changes.
+
+  The key line is a real border rather than an underline: it closes around the word, which
+  is what makes a run of them read as a set of things held rather than as emphasis inside
+  a sentence. Padding and a radius so the box belongs to the word and not to the line box,
+  and `inline-block` would break the wrap of a long piece, so it stays inline with the
+  vertical padding kept small enough not to disturb leading.
+*/
+.owned {
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+  border-radius: 0.25rem;
+  padding: 0.05em 0.3em;
+  background-color: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+/*
+  On a photograph the accent is not readable and white is, which is the same argument the
+  icons make above.
+*/
+.on-dark .owned {
+  color: #ffffff;
+  border-color: rgb(255 255 255 / 0.38);
+  background-color: rgb(255 255 255 / 0.12);
+}
+
+/*
   THE STRIP UNDER THE HOME INDICATOR, which is sand on an installed phone.
 
   Reported three times as a "sand gap" under a "double height" bottom bar, and neither
