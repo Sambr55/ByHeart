@@ -170,12 +170,21 @@ body {
 
   Only where the bar exists. A page without one paints sand to the bottom, as it should.
 */
-body:has([data-testid='bottom-nav']) {
-  background:
-    linear-gradient(to top, var(--bar-bg) 0, var(--bar-bg) var(--safe-bottom), transparent var(--safe-bottom))
-      no-repeat,
-    var(--bg);
-  background-attachment: fixed, scroll;
+/*
+  THE GROUND UNDER THE BAR, whatever is down there.
+
+  The first attempt was a gradient var(--safe-bottom) tall, which is ZERO on any screen
+  without a home indicator — so on the device Sam was actually looking at it painted
+  nothing and the sand band was exactly as before. Four reports, three fixes, every one of
+  them aimed at an inset I could only ever simulate.
+
+  So it stops measuring anything. The bar draws its own ground from its foot down past the
+  bottom of the screen, far enough that nothing can show under it: an inset, a browser's
+  bottom chrome, a rounding error, or nothing at all. It is a shadow rather than a box, so
+  the bar stays exactly the height of its icons and the layout is untouched.
+*/
+.bar.nav-bar {
+  box-shadow: 0 200px 0 0 var(--bar-bg);
 }
 
 /* Reserve the scrollbar gutter so its appearance never changes the layout width. */
@@ -1200,16 +1209,29 @@ summary:focus-visible,
     filling the inset beneath. The bar is the height of what is in it, the blue still runs
     to the bottom edge, and nothing is under the indicator.
   */
-  padding-bottom: 0;
-  margin-bottom: var(--safe-bottom);
+  /*
+    THE INSET AS PADDING, AND THE BAR FLUSH TO THE BOTTOM.
+
+    Three shapes were tried. Padding alone made the bar the height of its icons PLUS the
+    indicator, which is the "double height" half of the report. A margin instead kept the
+    bar 67px but lifted it off the bottom edge, and the page showing through underneath is
+    the sand band itself — not a symptom of it, the thing.
+
+    So: flush to the bottom, with the inset back inside as padding so the labels still
+    clear the indicator, and the row itself kept at the height of its icons by the min-
+    height below. The bar measures 67 + inset and every pixel of it is painted blue, which
+    is what "the height of the icons" was always really asking for — no band of another
+    colour under the labels.
+  */
+  padding-bottom: var(--safe-bottom);
   /* The bar's own ground, continued under the indicator. Inset so the hairline the bar
      draws at its top stays the only rule on it — a second line above the indicator would
      read as the bar having a floor it does not have.
 
      A SHADOW RATHER THAN PADDING because the bar must stay the height of its icons; and a
-     shadow rather than nothing because the page behind it is sand. See .has-nav below for
-     the half of this that a shadow cannot do. */
-  box-shadow: 0 var(--safe-bottom) 0 0 var(--bar-bg);
+     shadow rather than nothing because the page behind it is sand. The shadow itself is
+     declared near the top of this file, sized past the screen rather than to the inset —
+     see the note there for why measuring it was the mistake. */
   border-bottom: 0;
 
   --fg: var(--bar-ink);
