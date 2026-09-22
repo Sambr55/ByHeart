@@ -12,7 +12,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { askedCards, cardById, cardFace, derivedCards, dropsFor, roomsFor, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
 import { CRATES, PIECES, ROOTS, type CultureFamily } from '@/content/roots'
-import { LEGEND_FRAMES, WORDS_FOR_MOST_OF_A_DAY, askFor, cardFor, cardToGo, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
+import { LEGEND_FRAMES, askFor, cardFor, cardToGo, nextStage, stageFor, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/avatar'
 import { setDisplayName } from '@/engine/learner'
@@ -733,25 +733,47 @@ function Section({
             progress bar measuring against a number somebody made up is worse than no bar.
           */}
           {showBar ? (
-            <div className="flex flex-col gap-1">
-              <div
-                className="h-2 w-full overflow-hidden rounded-full bg-line"
-                role="img"
-                aria-label={count + ' of ' + WORDS_FOR_MOST_OF_A_DAY + ' words'}
-              >
-                <div
-                  className="h-full rounded-full bg-accent transition-[width] duration-[620ms]"
-                  style={{
-                    width:
-                      Math.min(100, (Number(count) / WORDS_FOR_MOST_OF_A_DAY) * 100).toFixed(1) +
-                      '%',
-                  }}
-                />
-              </div>
-              <p className="text-xs leading-relaxed text-muted">
-                {PROFILE_COPY.words_toward(Number(count) || 0, WORDS_FOR_MOST_OF_A_DAY)}
-              </p>
-            </div>
+            (() => {
+              /*
+                THE STAGE, AND THE DISTANCE TO THE NEXT ONE.
+
+                This was a bar against 800 — see STAGES in content/legend.ts for why that
+                measured the wrong thing. The bar is still here, but it fills between the
+                stage somebody is in and the one ahead, so it is always a distance they can
+                actually close rather than a fraction of a number the library has not
+                reached. At the far end there is nothing left to fill and the bar goes.
+              */
+              const words = Number(count) || 0
+              const here = stageFor(words)
+              const next = nextStage(words)
+              const span = next ? next.at - here.at : 0
+              const done = next ? Math.max(0, Math.min(1, (words - here.at) / span)) : 1
+              return (
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm text-fg">{PROFILE_COPY.words_stage(here.name)}</p>
+                  {next ? (
+                    <div
+                      className="h-2 w-full overflow-hidden rounded-full bg-line"
+                      role="img"
+                      aria-label={here.name + ', ' + (next.at - words) + ' words from ' + next.name}
+                    >
+                      <div
+                        className="h-full rounded-full bg-accent transition-[width] duration-[620ms]"
+                        style={{ width: (done * 100).toFixed(1) + '%' }}
+                      />
+                    </div>
+                  ) : null}
+                  <p className="text-xs leading-relaxed text-muted">
+                    {PROFILE_COPY.words_can(here.can)}
+                  </p>
+                  {next ? (
+                    <p className="text-xs leading-relaxed text-muted">
+                      {PROFILE_COPY.words_next(words, next.at, next.name)}
+                    </p>
+                  ) : null}
+                </div>
+              )
+            })()
           ) : null}
           <p className="text-xs leading-relaxed text-muted">{note}</p>
           {!tiles.length ? (

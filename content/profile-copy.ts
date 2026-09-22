@@ -94,6 +94,18 @@ export const PROFILE_COPY = {
     saying "three vibes" while FREE_CRATES was five, which is the fault that produced
     scripts/allowance-check.mts.
   */
+  /*
+    WHAT THIS MANY WORDS LETS YOU DO, rather than how far off a fixed number they are.
+
+    The old line measured against 800 — a real figure for everyday coverage, and the wrong
+    denominator for a library that grows every month. See STAGES in content/legend.ts.
+  */
+  words_stage: (stage: string) => stage,
+  words_can: (can: string) => can,
+  words_next: (have: number, at: number, name: string) =>
+    at - have === 1
+      ? 'One more word and you are ' + name.toLowerCase() + '.'
+      : at - have + ' more and you are ' + name.toLowerCase() + '.',
   words_toward: (have: number, need: number) =>
     have >= need
       ? 'Past the ' + need + ' that cover most of a day in Lisbon.'

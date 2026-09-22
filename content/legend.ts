@@ -1119,6 +1119,66 @@ export function clubOpen(opts: {
  */
 export const WORDS_FOR_MOST_OF_A_DAY = 800
 
+/**
+ * WHAT YOU CAN DO NOW, which is the thing a bar against 800 could never say.
+ *
+ * Sam: "Just because we only have 178 pieces doesn't mean more will be added. In fact they
+ * WILL be added... This is not about attaining a nominal level of fluency it is about
+ * growth. The user wants to see how much they have learned."
+ *
+ * THE BAR MEASURED THE WRONG THING. 800 is a real figure and it is a destination, not a
+ * denominator — the product holds 178 pieces today and the calendar adds more every month,
+ * so a learner who owned every word in DUB saw a bar 22% full and a fixed target receding
+ * ahead of a growing library. A progress bar whose ceiling is unreachable by construction
+ * is a worse lie than no bar.
+ *
+ * NAMED STAGES INSTEAD, because what changes as somebody learns is not a percentage, it is
+ * what they can DO. The thresholds are measured against the content rather than chosen:
+ *
+ *   BASICS            the first sitting, before anything is finished
+ *   GETTING AROUND    35 — the basics done. Hello, numbers, your name, where you are from
+ *   BEING UNDERSTOOD  90 — the basics and roughly four vibes: the free tier's own shape
+ *   CONVERSING        180 — every word in the product today, and where the Club begins
+ *   LEADING           400 — the far end, reached as the calendar fills
+ *
+ * A stage is reached and never lost, exactly as the count was: it moves when a word is
+ * banked and time does nothing to it. Nobody is told the language is finished at the end —
+ * LEADING is a way of speaking, not a certificate, and the copy says what it covers rather
+ * than what it completes.
+ *
+ * NOT A LEVEL, AND NOT A STREAK. There is no badge, no daily obligation and nothing to
+ * fall out of. The stage is a description of what somebody can already do, which is the
+ * only thing here that is theirs.
+ */
+export interface Stage {
+  id: string
+  name: string
+  /** The count at which this stage begins. */
+  at: number
+  /** What somebody can do here, in their own terms. */
+  can: string
+}
+
+export const STAGES: Stage[] = [
+  { id: 'basics', name: 'Basics', at: 0, can: 'The first words, and the ones you will say every day.' },
+  { id: 'around', name: 'Getting around', at: 35, can: 'Hello, numbers, your name and where you are from — enough to be somewhere.' },
+  { id: 'understood', name: 'Being understood', at: 90, can: 'Enough to be understood in a room, and to say what you actually mean.' },
+  { id: 'conversing', name: 'Conversing', at: 180, can: 'Enough to hold your end of it, and to follow the other end.' },
+  { id: 'leading', name: 'Leading the conversation', at: 400, can: 'Enough to start it, steer it, and be the one who keeps it going.' },
+]
+
+/** The stage a learner is in, by how many words they own. */
+export function stageFor(words: number): Stage {
+  let out = STAGES[0]
+  for (const s of STAGES) if (words >= s.at) out = s
+  return out
+}
+
+/** The stage after this one, or null at the far end. */
+export function nextStage(words: number): Stage | null {
+  return STAGES.find((s) => s.at > words) ?? null
+}
+
 export const FREE_CRATES = 5
 
 /** The vibe every learner is sent through first, and the one the Legend is built from. */
