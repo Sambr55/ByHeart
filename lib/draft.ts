@@ -1,3 +1,4 @@
+import type { Genre } from '@/content/calendar'
 import { DROPS, type Drop, type DropSource } from '@/content/drops'
 import { bankImage } from '@/content/images'
 import {
@@ -35,6 +36,9 @@ export interface Candidate {
   /** Stable across runs, so re-harvesting does not duplicate. */
   id: string
   kind: DropTemplate['kind']
+  /* Carried through to the Drop, where the calendar colours by it and a subscription
+     filters on it. See Genre in content/calendar.ts. */
+  genre?: Genre
   chapter: ChapterId
   /** What is on. */
   event: string
@@ -156,6 +160,9 @@ export function draftDrop(c: Candidate, now: Date = new Date()): DraftResult {
     drop: {
       id: c.id,
       chapter: c.chapter,
+      /* The genre rides all the way through: the two-week view colours by it, and a
+         calendar subscription filters on it. Both read the Drop, not the row. */
+      genre: c.genre,
       event: c.event,
       place: c.venue,
       on: c.on,

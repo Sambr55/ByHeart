@@ -1,4 +1,4 @@
-import type { CalendarKind } from '@/content/calendar'
+import type { CalendarKind, Genre } from '@/content/calendar'
 import type { ChapterId } from '@/content/chapters'
 import type { Situation } from '@/content/situations'
 
@@ -47,6 +47,14 @@ export interface Drop {
    * DROP_LEAD_DAYS: a gig you need a ticket for opens ninety days out, a strike fourteen.
    */
   kind?: CalendarKind
+  /**
+   * What sort of thing it is to somebody deciding whether they care.
+   *
+   * Carried from the calendar row it was drafted from — see Genre in content/calendar.ts.
+   * The two-week view colours by it and a calendar subscription filters on it, and both
+   * read the drop rather than the row, so it has to live here too.
+   */
+  genre?: Genre
   /**
    * When it starts BEING a drop rather than a date in the diary.
    *

@@ -99,6 +99,10 @@ const system = [
   '{"rows": [{',
   '  "id": "short_snake_case",',
   '  "kind": "event" | "holiday" | "deadline" | "disruption",',
+  '  "genre": "rock_pop" | "classical_trad" | "festival" | "annual" | "sport_national" |',
+  '           "sport_local" | "beach_surf"   (omit for a holiday or a deadline — those are',
+  '           not genres, and an unfiled row shows without a colour rather than in the',
+  '           wrong one),',
   '  "on": "YYYY-MM-DD", "until": "YYYY-MM-DD" (only for multi-day),',
   '  "name": "...",',
   '  "where": {"name": "...", "area": "...", "station": "..."} (omit if there is no place),',
@@ -171,6 +175,7 @@ if (open < 0 || close <= open) {
 type Row = {
   id: string
   kind: string
+  genre?: string
   on: string
   until?: string
   name: string
@@ -203,6 +208,7 @@ const body = inWindow
     id: '${city}_${r.id}',
     chapter: '${city}',
     kind: '${r.kind}',
+${r.genre ? `    genre: '${r.genre}',\n` : ''}
     on: '${r.on}',${until}
     name: ${JSON.stringify(r.name)},${where}
     purposes: ${JSON.stringify(r.purposes)},

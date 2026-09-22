@@ -40,6 +40,7 @@ import type { CalendarRow } from '@/content/calendar'
 export const LISBON_2026_10: CalendarRow[] = [
   {
     id: 'lisbon_evanescence',
+    genre: 'rock_pop',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'concert',
@@ -76,6 +77,7 @@ export const LISBON_2026_10: CalendarRow[] = [
       see" then has a much better answer than "Gilberto Gil".
     */
     id: 'lisbon_gilberto_gil',
+    genre: 'classical_trad',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'concert',
@@ -118,6 +120,7 @@ export const LISBON_2026_10: CalendarRow[] = [
       and hearing that difference is worth more than being told about it.
     */
     id: 'lisbon_djavan',
+    genre: 'classical_trad',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'concert',
@@ -131,6 +134,7 @@ export const LISBON_2026_10: CalendarRow[] = [
   {
     // A European night, which is a different city entirely from a league Sunday.
     id: 'lisbon_benfica_celtic',
+    genre: 'sport_national',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'match',
@@ -155,6 +159,7 @@ export const LISBON_2026_10: CalendarRow[] = [
   },
   {
     id: 'lisbon_sporting_lask',
+    genre: 'sport_national',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'match',
@@ -170,6 +175,7 @@ export const LISBON_2026_10: CalendarRow[] = [
   },
   {
     id: 'lisbon_fontaines_dc',
+    genre: 'rock_pop',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'concert',
@@ -183,6 +189,7 @@ export const LISBON_2026_10: CalendarRow[] = [
   {
     // The 22nd, not the 21st. The first pass had this a day early.
     id: 'lisbon_lemon_twigs',
+    genre: 'rock_pop',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'concert',
@@ -207,6 +214,7 @@ export const LISBON_2026_10: CalendarRow[] = [
   },
   {
     id: 'lisbon_laura_pausini',
+    genre: 'rock_pop',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'concert',
@@ -219,6 +227,7 @@ export const LISBON_2026_10: CalendarRow[] = [
   },
   {
     id: 'lisbon_yard_act',
+    genre: 'rock_pop',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'concert',
@@ -231,6 +240,7 @@ export const LISBON_2026_10: CalendarRow[] = [
   },
   {
     id: 'lisbon_jungle',
+    genre: 'rock_pop',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'concert',
@@ -255,6 +265,7 @@ export const LISBON_2026_10: CalendarRow[] = [
   },
   {
     id: 'lisbon_anastacia',
+    genre: 'rock_pop',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'concert',
@@ -280,6 +291,7 @@ export const LISBON_2026_10: CalendarRow[] = [
   {
     // Three nights, which is why it carries `until`. The city notices.
     id: 'lisbon_andre_rieu',
+    genre: 'classical_trad',
     chapter: 'lisbon',
     kind: 'event',
     shape: 'concert',

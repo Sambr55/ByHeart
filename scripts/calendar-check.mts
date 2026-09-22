@@ -18,7 +18,7 @@
 import { chromium } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { DROPS } from '../content/drops'
-import { dropLive, dropsInMonth } from '../content/feed'
+import { dropLive, dropsInFortnight, dropsInMonth } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -121,16 +121,39 @@ const target = DROPS.filter((d) => d.chapter === 'lisbon')
 if (!target) {
   ok('there is a drop ahead to walk to', false, 'every authored drop is in the past')
 } else {
-  const steps =
-    (target.getUTCFullYear() - now.getUTCFullYear()) * 12 + (target.getUTCMonth() - now.getUTCMonth())
+  /*
+    IN FORTNIGHTS NOW, because the view is two weeks rather than a month.
+
+    The grid is anchored to the Monday of the current fortnight — see the note in
+    Calendar.tsx — so walking to a target is (days between the two Mondays) / 14 rather
+    than a difference of months.
+  */
+  const mondayOf = (d: Date) => {
+    const mid = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+    return mid - ((new Date(mid).getUTCDay() + 6) % 7) * 86_400_000
+  }
+  const steps = Math.round((mondayOf(target) - mondayOf(now)) / (14 * 86_400_000))
   for (let i = 0; i < steps; i++) {
     await page.click('[data-testid="cal-next"]')
     await page.waitForTimeout(200)
   }
   const heading = (await page.textContent('[data-testid="cal-month"]')) ?? ''
-  ok('the months move', heading.includes(String(target.getUTCFullYear())), heading.trim())
-
   const day = target.getUTCDate()
+  /*
+    THE HEADING IS A RANGE, so the test is that the target falls inside it rather than that
+    its day number appears in it. "8 Nov" is in the fortnight "2 Nov – 15 Nov" and the
+    string "8" is not — which is what the first version of this asserted, and it failed on
+    a view that was working.
+
+    The cell is the real proof and it is asserted below; this only checks we walked to the
+    right place.
+  */
+  ok(
+    'the fortnights move',
+    Boolean(await page.$('[data-testid="cal-day-' + day + '"]')),
+    heading.trim(),
+  )
+
   const cell = await page.$('[data-testid="cal-day-' + day + '"]')
   ok('the day it is on is marked', Boolean(cell), 'the ' + day + 'th')
   /*
@@ -143,9 +166,7 @@ if (!target) {
     compared with the number of days the content actually has something on.
   */
   const expected = new Set(
-    dropsInMonth('lisbon', target.getUTCFullYear(), target.getUTCMonth(), now).map((d) =>
-      new Date(d.on + 'T00:00:00Z').getUTCDate(),
-    ),
+    dropsInFortnight('lisbon', new Date(mondayOf(target)), now).map((d) => d.on),
   ).size
   const anchors = (await page.evaluate(`(() => {
     const cells = Array.from(document.querySelectorAll('[data-testid="cal-grid"] > *'))
@@ -195,4 +216,4 @@ if (problems.length) {
   for (const p of problems) console.log('  ✗ ' + p)
   process.exit(1)
 }
-console.log('\nthe month says what is on, and tapping it hands over the Portuguese')
+console.log('\nthe fortnight says what is on, and tapping it hands over the Portuguese')

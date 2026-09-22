@@ -310,6 +310,36 @@ export function dropsFor(
  * Generated drops are in as well as authored ones, so the month never disagrees with the
  * feed about what exists.
  */
+/**
+ * A fortnight of drops, from a given day.
+ *
+ * THE MONTH GRID COULD NOT NAME ANYTHING. Thirty-one cells across a phone leaves about
+ * forty pixels a day, which is room for a dot and nothing else — so the calendar could say
+ * that something was happening and never what. Sam: "we will show a biweekly, rather than
+ * monthly view, this giving us space to actually name the Drop events in the calendar."
+ *
+ * Fourteen days is the number because it is two rows of seven on the same Monday-first
+ * grid, so the shape people already read is unchanged and each cell gets a name in it.
+ *
+ * `from` is normalised to midnight UTC, because a drop's date is a calendar date rather
+ * than a moment — an event on the 3rd is on the 3rd wherever the phone thinks it is.
+ */
+export function dropsInFortnight(
+  chapter: ChapterId = DEFAULT_CHAPTER,
+  from: Date,
+  now: Date = new Date(),
+): Drop[] {
+  const start = Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate())
+  const end = start + 14 * 86_400_000
+  return [...DROPS, ...generatedDrops(chapter, now)]
+    .filter((d) => {
+      if (d.chapter !== chapter) return false
+      const on = new Date(d.on + 'T00:00:00Z').getTime()
+      return on >= start && on < end
+    })
+    .sort((a, b) => a.on.localeCompare(b.on))
+}
+
 export function dropsInMonth(
   chapter: ChapterId = DEFAULT_CHAPTER,
   year: number,

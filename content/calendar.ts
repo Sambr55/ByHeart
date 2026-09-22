@@ -54,6 +54,42 @@ export type CalendarKind =
   | 'annual'
   | 'daytime'
 
+/**
+ * The seven things a person might want, and the colour each one wears.
+ *
+ * Authored as a list rather than derived from the rows, because it is a PROMISE about what
+ * the calendar covers: a learner picking what to subscribe to is reading this, and a genre
+ * that only appears once somebody has authored an event in it would make the empty weeks
+ * look like a narrower product than it is.
+ *
+ * The colours are the product's own, not seven new ones. `--accent` is the azulejo blue
+ * reserved for the Portuguese and is deliberately NOT here — a genre chip wearing it would
+ * compete with every Portuguese word on the screen. These are drawn from the same warm
+ * range as the grounds, far enough apart to tell at a glance on a two-week grid.
+ */
+export type Genre =
+  | 'rock_pop'
+  | 'classical_trad'
+  | 'festival'
+  | 'annual'
+  | 'sport_national'
+  | 'sport_local'
+  | 'beach_surf'
+
+export const GENRES: { id: Genre; label: string; colour: string; about: string }[] = [
+  { id: 'rock_pop', label: 'Rock and pop', colour: '#b5482f', about: 'Gigs, tours, the arena and the small rooms.' },
+  { id: 'classical_trad', label: 'Classical and fado', colour: '#6b4a7a', about: 'Concert halls, fado houses, church recitals.' },
+  { id: 'festival', label: 'Festivals and outdoors', colour: '#3f7a4e', about: 'Street parties, markets, everything with no roof.' },
+  { id: 'annual', label: 'The year itself', colour: '#96601a', about: 'Christmas, Carnaval, the saints and their nights.' },
+  { id: 'sport_national', label: 'Football and the big matches', colour: '#2f6a8c', about: 'Benfica, Sporting, the national side.' },
+  { id: 'sport_local', label: 'Local sport', colour: '#4c6a3c', about: 'The rink, the pool, the club down the road.' },
+  { id: 'beach_surf', label: 'Beach and surf', colour: '#8a6529', about: 'Tides, competitions, the days worth the train.' },
+]
+
+export function genreFor(id: Genre | undefined): (typeof GENRES)[number] | null {
+  return GENRES.find((g) => g.id === id) ?? null
+}
+
 export interface CalendarRow {
   id: string
   chapter: ChapterId
@@ -71,6 +107,26 @@ export interface CalendarRow {
    * — "things are shut" is not an evening you go to.
    */
   shape?: 'concert' | 'match' | 'exhibition'
+  /**
+   * What sort of thing it is to somebody deciding whether they care.
+   *
+   * THE THIRD AXIS, and the three answer different questions. `kind` is what the row is to
+   * a DIARY — an event, a holiday, a deadline — and decides how far ahead it opens.
+   * `shape` is what it is to a TEACHER, and decides which template can write its language.
+   * This is what it is to a PERSON: somebody who wants gigs and surf and would rather not
+   * hear about the football.
+   *
+   * It exists because the calendar is becoming something you subscribe to. A colour on a
+   * two-week view is the small version of that; choosing which of these lands in your own
+   * phone's calendar is the whole version, and both need the same field. Sam: "Drop Events
+   * will be categorised as follows with a colour coded key at the top of each biweekly
+   * view."
+   *
+   * Absent means unfiled rather than uninteresting — a holiday or a deadline is not a
+   * genre and should not be forced into one. Those rows still show; they just have no
+   * colour and no subscription of their own.
+   */
+  genre?: Genre
   /** In English, as a person would say it. Not a headline. */
   name: string
   /** Where, if anywhere. Feeds the template's venue and station slots. */

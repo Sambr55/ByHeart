@@ -86,6 +86,9 @@ export function candidateFor(row: CalendarRow): Candidate | { no: string } {
   return {
     id: row.id,
     kind: row.shape,
+    /* The genre travels with the drop, because the calendar colours it and a subscription
+       filters on it — both read the Drop, not the row it was drafted from. */
+    genre: row.genre,
     chapter: row.chapter,
     event: row.name,
     venue: { name: row.where.name, area: row.where.area ?? '' },

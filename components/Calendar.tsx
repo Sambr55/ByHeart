@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { GENRES, genreFor } from '@/content/calendar'
 import { Back } from '@/components/Back'
 import { NotYet } from '@/components/NotYet'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { chapterById } from '@/content/chapters'
 import type { Drop } from '@/content/drops'
-import { dropLive, dropsInMonth } from '@/content/feed'
+import { dropLive, dropsInMonth, dropsInFortnight } from '@/content/feed'
 import { loadLearner } from '@/engine/learner'
 import { useClub } from '@/engine/useClub'
 
@@ -52,14 +53,33 @@ export function Calendar() {
     setChapter(chapterById(loadLearner().chapter))
   }, [])
 
-  /** How many months forward or back of this one we are looking at. */
+  /*
+    TWO WEEKS, NOT A MONTH — and the reason is that the month could not say anything.
+
+    Thirty-one cells across a phone is about forty pixels a day: room for a number and a
+    colour, and not for what is actually on. So the calendar could tell somebody that
+    Tuesday had something and never what, which makes it a thing you tap to find out
+    rather than a thing you read. Sam: "we will show a biweekly, rather than monthly view,
+    this giving us space to actually name the Drop events in the calendar."
+
+    Fourteen days is two rows of the same Monday-first seven, so the shape people already
+    know is unchanged and every cell has room for a name.
+
+    ANCHORED TO THIS MONDAY rather than to today, because a fortnight that starts on a
+    Wednesday has no columns — the weekday headers would be lying, and "the week after
+    next" stops being a thing anybody can point at.
+  */
   const [offset, setOffset] = useState(0)
 
-  const anchor = now ? new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + offset, 1)) : null
-  const year = anchor?.getUTCFullYear() ?? 0
-  const month = anchor?.getUTCMonth() ?? 0
+  const anchor = (() => {
+    if (!now) return null
+    const midnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    /* getUTCDay is Sunday-first; the grid is Monday-first. */
+    const back = (new Date(midnight).getUTCDay() + 6) % 7
+    return new Date(midnight - back * 86_400_000 + offset * 14 * 86_400_000)
+  })()
 
-  const drops = anchor ? dropsInMonth(chapter.id, year, month, now ?? undefined) : []
+  const drops = anchor ? dropsInFortnight(chapter.id, anchor, now ?? undefined) : []
 
   /*
     Which days have something on, as a lookup rather than a search per cell.
@@ -68,17 +88,22 @@ export function Calendar() {
     almost always shorter than the scan — correct, and the kind of thing that stops being
     correct the week a chapter has forty of them.
   */
-  const byDay = new Map<number, Drop[]>()
-  for (const d of drops) {
-    const day = new Date(d.on + 'T00:00:00Z').getUTCDate()
-    byDay.set(day, [...(byDay.get(day) ?? []), d])
-  }
+  /* Keyed by ISO date rather than day-of-month, because a fortnight crosses months. */
+  const byDay = new Map<string, Drop[]>()
+  for (const d of drops) byDay.set(d.on, [...(byDay.get(d.on) ?? []), d])
 
-  const daysInMonth = anchor ? new Date(Date.UTC(year, month + 1, 0)).getUTCDate() : 0
-  /* getUTCDay is Sunday-first; the grid is Monday-first, so Sunday becomes the seventh. */
-  const firstWeekday = anchor ? (new Date(Date.UTC(year, month, 1)).getUTCDay() + 6) % 7 : 0
-  const today =
-    now && now.getUTCFullYear() === year && now.getUTCMonth() === month ? now.getUTCDate() : null
+  const days = anchor
+    ? Array.from({ length: 14 }, (_, i) => new Date(anchor.getTime() + i * 86_400_000))
+    : []
+  const todayIso = now
+    ? new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
+        .toISOString()
+        .slice(0, 10)
+    : null
+
+  /* Only the genres actually on in this fortnight, so the key describes what is on the
+     screen rather than advertising a taxonomy. */
+  const keyed = GENRES.filter((g) => drops.some((d) => d.genre === g.id))
 
   /*
     The calendar is the city with a date on it, so it is behind the same door as the city.
@@ -130,19 +155,27 @@ export function Calendar() {
             <button
               type="button"
               data-testid="cal-prev"
-              aria-label="The month before"
+              aria-label="The fortnight before"
               onClick={() => setOffset((o) => o - 1)}
               className="tap-target eyebrow rounded border border-line px-3 py-3"
             >
               ←
             </button>
-            <h2 data-testid="cal-month" className="display min-w-0 flex-1 text-center text-lg">
-              {anchor ? MONTHS[month] + ' ' + year : ' '}
+            <h2 data-testid="cal-month" className="display min-w-0 flex-1 text-center text-base">
+              {anchor
+                ? anchor.getUTCDate() +
+                  ' ' +
+                  MONTHS[anchor.getUTCMonth()].slice(0, 3) +
+                  ' – ' +
+                  days[13].getUTCDate() +
+                  ' ' +
+                  MONTHS[days[13].getUTCMonth()].slice(0, 3)
+                : ' '}
             </h2>
             <button
               type="button"
               data-testid="cal-next"
-              aria-label="The month after"
+              aria-label="The fortnight after"
               onClick={() => setOffset((o) => o + 1)}
               className="tap-target eyebrow rounded border border-line px-3 py-3"
             >
@@ -159,13 +192,11 @@ export function Calendar() {
           </div>
 
           <div data-testid="cal-grid" className="grid grid-cols-7 gap-1">
-            {Array.from({ length: firstWeekday }).map((_, i) => (
-              <span key={'pad' + i} />
-            ))}
-            {Array.from({ length: daysInMonth }).map((_, i) => {
-              const day = i + 1
-              const on = byDay.get(day) ?? []
-              const isToday = today === day
+            {days.map((d) => {
+              const iso = d.toISOString().slice(0, 10)
+              const on = byDay.get(iso) ?? []
+              const isToday = todayIso === iso
+              const day = d.getUTCDate()
               /*
                 A day with something on is a LINK; a day without is not a control at all.
 
@@ -176,9 +207,9 @@ export function Calendar() {
               if (!on.length) {
                 return (
                   <span
-                    key={day}
+                    key={iso}
                     className={
-                      'flex aspect-square items-center justify-center rounded text-sm tabular-nums ' +
+                      'flex min-h-[3.5rem] flex-col items-center justify-start rounded py-1 text-sm tabular-nums ' +
                       (isToday ? 'border border-line-strong text-fg' : 'text-muted')
                     }
                   >
@@ -186,38 +217,74 @@ export function Calendar() {
                   </span>
                 )
               }
+              const g = genreFor(on[0].genre)
               return (
                 <Link
-                  key={day}
+                  key={iso}
                   href={'/club?drop=' + on[0].id}
                   data-testid={'cal-day-' + day}
-                  aria-label={on.map((d) => d.event).join(', ') + ' on the ' + day + 'th'}
-                  className={
-                    /*
-                      NO tap-target HERE, and that is the opposite of the usual advice.
+                  aria-label={on.map((x) => x.event).join(', ') + ' on the ' + day + 'th'}
+                  /*
+                    NO tap-target HERE, and that is the opposite of the usual advice.
 
-                      .tap-target forces a 44px minimum WIDTH, and these sit in seven grid
-                      tracks that are 36.6px wide on a 320px phone — so adjacent days
-                      physically overlapped and the right-hand edge of one day opened the
-                      next day's drop. aspect-square already gives the cell a real height,
-                      and a day is a cell in a grid rather than a button in a row: the
-                      thing that makes it hittable is the grid, not a minimum.
-                    */
-                    'flex aspect-square flex-col items-center justify-center rounded bg-accent text-sm tabular-nums text-accent-ink ' +
+                    .tap-target forces a 44px minimum WIDTH, and these sit in seven grid
+                    tracks that are 36.6px wide on a 320px phone — so adjacent days
+                    physically overlapped and the right-hand edge of one day opened the
+                    next day's drop. The min-height gives the cell a real target, and a day
+                    is a cell in a grid rather than a button in a row.
+                  */
+                  className={
+                    'flex min-h-[3.5rem] flex-col items-center gap-1 overflow-hidden rounded px-1 py-1 text-white ' +
                     (isToday ? 'ring-1 ring-fg' : '')
                   }
+                  style={{ backgroundColor: g?.colour ?? 'var(--accent)' }}
                 >
-                  {day}
+                  <span className="text-sm tabular-nums">{day}</span>
+                  {/*
+                    THE NAME, WHICH IS THE WHOLE POINT OF THE FORTNIGHT.
+
+                    Clamped to two lines, broken on words. break-all was splitting
+                    "Gilberto G / il" mid-name, which reads as a rendering fault rather
+                    than a truncation — and a column this narrow cannot fit a name anyway,
+                    so the question is only whether the fragment it shows is a word. The
+                    full name is on the aria-label and on the card a tap away.
+                  */}
+                  <span className="line-clamp-2 hyphens-auto break-words text-center text-[0.5rem] leading-tight opacity-95">
+                    {on[0].event}
+                  </span>
                 </Link>
               )
             })}
           </div>
+
+          {/*
+            THE KEY, and only for what is actually on.
+
+            Seven colours listed against a fortnight holding two of them is a taxonomy
+            rather than a legend — it describes the product instead of the screen. This
+            names what somebody is looking at, so the colours mean something the moment
+            they are read.
+          */}
+          {keyed.length ? (
+            <ul data-testid="cal-key" className="flex flex-wrap gap-3">
+              {keyed.map((g) => (
+                <li key={g.id} className="flex items-center gap-1 text-xs text-muted">
+                  <span
+                    aria-hidden
+                    className="h-3 w-3 shrink-0 rounded-full"
+                    style={{ backgroundColor: g.colour }}
+                  />
+                  {g.label}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </section>
 
         <section className="flex flex-col gap-3">
           <div className="flex items-baseline gap-3">
             <h2 className="eyebrow min-w-0 text-accent">
-              {anchor ? MONTHS[month].toUpperCase() : ''}
+              {offset === 0 ? 'NEXT TWO WEEKS' : 'THAT FORTNIGHT'}
             </h2>
             <span className="h-px flex-1 bg-line" />
             <span className="eyebrow shrink-0 tabular-nums text-muted">{drops.length}</span>
