@@ -14,7 +14,7 @@ import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { INTRO_DEMO_AFTER, INTRO_SETUP_AFTER, type IntroCard } from '@/content/intro'
-import { COLLISIONS, CRATES, PIECES, ROOTS, setPieces } from '@/content/roots'
+import { COLLISIONS, CRATES, PIECES, ROOTS, displayForm, setPieces } from '@/content/roots'
 import { askFor, cardFor, STAGES } from '@/content/legend'
 import { mintShowing } from '@/engine/showing'
 import {
@@ -34,13 +34,14 @@ import {
   vibeCards,
   vibeCard,
   feedFor,
+  idiomCards,
   vocabWord,
   type FeedCard,
 } from '@/content/feed'
 import { chapterById } from '@/content/chapters'
 import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
-import { acquirePiece, recordProof, rejectCard, rememberFinishedCard, rememberSheetGot, rewindReject, toggleCard } from '@/engine/learner'
+import { acquirePiece, markIdiom, recordProof, rejectCard, rememberFinishedCard, rememberSheetGot, rewindReject, toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { StatusBar } from '@/components/Native'
 import { SetUp } from '@/components/SetUp'
@@ -441,11 +442,30 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     */
     const sheets = sheetCards(learner.finished_cards ?? [])
 
+    /*
+      THE IDIOMS, on the next beat that collides with nothing.
+
+      Explainers run on 2, vibes on 3, sheets on 5 — and the note on the sheet beat above
+      explains why that mattered: a beat sharing a factor with another buries its cards in
+      the tail instead of weaving them in. Seven is the next number coprime to all three,
+      so an idiom can land beside any of them and never systematically behind one.
+
+      Sam wanted these "interspersed with the other sources", and on a feed of this size a
+      seventh-card beat puts two or three in a sitting — often enough to be a rhythm, rare
+      enough to stay a treat rather than becoming the feed.
+    */
+    const idioms = idiomCards(
+      learner.idioms_got ?? [],
+      learner.idioms_missed ?? [],
+      learner.finished_cards ?? [],
+    )
+
     const withExplainers: FeedCard[] = []
     const rest = [...open.slice(0, AFTER), ...legend, ...mine, ...open.slice(AFTER)]
     let e = 0
     let v = 0
     let sh = 0
+    let id = 0
     rest.forEach((card, i) => {
       withExplainers.push(card)
       if (e < explainers.length && i % 2 === 0) withExplainers.push(explainers[e++])
@@ -464,14 +484,25 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         nine sheets at the bottom of the feed.
       */
       if (sh < sheets.length && i % 5 === 4) withExplainers.push(sheets[sh++])
+      /* Its own `if` for the reason the sheet beat has one — see just above. */
+      if (id < idioms.length && i % 7 === 6) withExplainers.push(idioms[id++])
     })
-    return [...withExplainers, ...explainers.slice(e), ...vibes.slice(v), ...sheets.slice(sh)]
+    return [
+      ...withExplainers,
+      ...explainers.slice(e),
+      ...vibes.slice(v),
+      ...sheets.slice(sh),
+      ...idioms.slice(id),
+    ]
   }, [
     mounted,
     preview,
     stage,
     learner.inventory,
     learner.finished_cards,
+    // The tick reorders the idiom deck, so the feed rebuilds on it.
+    learner.idioms_got,
+    learner.idioms_missed,
     learner.asked,
     learner.roots_played,
     learner.legend,
@@ -820,13 +851,31 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       {/* Over the feed, not in it. The chrome does not scroll away. */}
       {/* safe-top: the feed card is full-bleed by design, so nothing else can clear the
           notch for the controls sitting on top of it. */}
-      {/* The feed is full-bleed photography, so the status bar goes dark with it. */}
-      <StatusBar color="#241f1a" />
+      {/*
+        The status bar follows the card, for the same reason the wordmark does.
+
+        The feed is full-bleed photography and the bar went dark with it — correct on every
+        card that has a picture, and wrong on the sand ones, where iOS was tinting the clock
+        to match a ground that is not there. Same test as the header and the rail: is there
+        an image.
+      */}
+      <StatusBar
+        color={cards[atIndex] && !cardFace(cards[atIndex]).image ? '#efe7d9' : '#241f1a'}
+      />
       <header
         className={
           'safe-top pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6 ' +
-          // White over a photograph, ink over sand. It was white over both.
-          (cards[atIndex]?.kind === 'intro' && !introImage(cards[atIndex]) ? 'text-fg' : 'text-white')
+          /*
+            White over a photograph, ink over sand — decided by whether there IS a
+            photograph, not by which kinds of card happen to lack one.
+
+            This named `intro`, so the mark stayed white on the first imageless card of any
+            other kind and disappeared into the sand. That is the same mistake in the same
+            file as the two above it (see `onSand`, and .on-dark in globals.css), which is
+            three times one rule has been written as a list of members and gone stale the
+            moment somebody added one.
+          */
+          (cards[atIndex] && !cardFace(cards[atIndex]).image ? 'text-fg' : 'text-white')
         }
       >
         {/*
@@ -1733,8 +1782,16 @@ export function Card({
     With a photograph it takes the Club's own language: scrim, white type, the same as every
     room. Without, it stays sand and dark ink and reads perfectly well, which is the property
     that let the whole sequence ship before any of these existed.
+
+    AND IT NOW FOLLOWS THE PICTURE, which is what the paragraph above always claimed. The
+    condition read `kind === 'intro' && !image` — the kind AND the picture — so the first
+    imageless card of any other kind fell through to the photograph treatment and got a
+    full-bleed dark ground with nothing on it, its title stranded at the bottom as a caption
+    to an empty rectangle. The idiom cards are that other kind. This is the third time in
+    this file a rule has been written as a list of members and gone stale the moment one
+    was added; the other two are noted on .on-dark in globals.css.
   */
-  const onSand = card.kind === 'intro' && !image
+  const onSand = !image
   const title = face.title
   /* A drop carries its date; a standing room has none. */
   const when = face.when
@@ -1839,7 +1896,18 @@ export function Card({
             and waiting on a commissioning session.
           */}
           {onSand ? (
-            <span aria-hidden className="absolute inset-0 bg-bg" />
+            /*
+              An idiom gets the washes; everything else imageless gets plain sand.
+
+              The intro cards are arguments and their ground should be quiet behind a
+              pillar of type. An idiom card is a joke with no picture, and plain sand left
+              it as a caption at the bottom of an empty screen — see .idiom-ground, which
+              exists to fill that space without competing with the words in it.
+            */
+            <span
+              aria-hidden
+              className={'absolute inset-0 ' + (card.kind === 'idiom' ? 'idiom-ground' : 'bg-bg')}
+            />
           ) : image ? (
             <Image src={image.src} alt={image.alt} fill sizes="100vw" className="object-cover" />
           ) : (
@@ -1919,7 +1987,22 @@ export function Card({
           */}
           <div
             className={
-              'nav-clear card-face absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 ' +
+              /*
+                AN IDIOM SITS IN THE MIDDLE OF ITS CARD, because it has nothing below it.
+
+                Every other card here pins its text to the bottom, which is right when
+                there is a photograph above: the type sits in the scrim and the picture
+                gets the rest. An idiom card has no picture, so bottom-0 left the phrase as
+                a caption under a screen of empty ground.
+
+                inset-y-0 with items-center instead, so the card is the phrase — which is
+                what somebody is being asked to think about while they guess. The rail of
+                icons still aligns to the bottom, because it is furniture and belongs with
+                the other cards' furniture.
+              */
+              (card.kind === 'idiom'
+                ? 'nav-clear card-face absolute inset-x-0 inset-y-0 flex items-center gap-3 px-5 '
+                : 'nav-clear card-face absolute inset-x-0 bottom-0 flex items-end gap-3 px-5 ') +
               /*
                 Only the set-up card's face is a scroller, and only while it is asking.
 
@@ -2073,7 +2156,11 @@ export function Card({
                 </>
               ) : (
                 <>
-                  <p className="eyebrow text-white/70">{face.eyebrow}</p>
+                  {/* Follows the ground: this branch now serves the imageless idiom card
+                      as well as the rooms, and white on sand is invisible. */}
+                  <p className={'eyebrow ' + (onSand ? 'text-accent' : 'text-white/70')}>
+                    {face.eyebrow}
+                  </p>
                   {/*
                     The event and the clock, on the card that expires.
 
@@ -2125,7 +2212,21 @@ export function Card({
                       <h2
                         className={
                           'display mt-3 text-balance ' +
-                          (card.kind === 'situation' && card.drop ? 'text-4xl' : 'text-3xl')
+                          /*
+                            BIG WORDS ON THE CARD THAT IS ONLY WORDS.
+
+                            Sam asked for "big cards with big words". A drop is 4xl because
+                            the name of the night IS the card; an idiom is 5xl because the
+                            phrase is not merely the subject of the card, it is the entire
+                            contents — there is no photograph underneath it and nothing else
+                            competing for the space. At 3xl it read as a caption on an empty
+                            screen, which is what the first build of this looked like.
+                          */
+                          (card.kind === 'idiom'
+                            ? 'text-5xl'
+                            : card.kind === 'situation' && card.drop
+                              ? 'text-4xl'
+                              : 'text-3xl')
                         }
                       >
                         {title}
@@ -2142,7 +2243,13 @@ export function Card({
                   puts its provenance under the sentence, and a teaching card its note. The
                   shared blurb is for the rooms, which have nothing else. */}
               {card.kind === 'derived' || card.kind === 'intro' || isDemo ? null : (
-                <p className="mt-3 text-sm leading-relaxed text-white/80">{blurb}</p>
+                <p
+                  className={
+                    'mt-3 text-sm leading-relaxed ' + (onSand ? 'text-muted' : 'text-white/80')
+                  }
+                >
+                  {blurb}
+                </p>
               )}
               {/*
                 A collision asks; everything else tells.
@@ -2454,6 +2561,8 @@ export function Card({
               <LegendAsk card={card} />
             ) : card.kind === 'sheet' ? (
               <Sheet card={card} onDone={() => onDone?.()} />
+            ) : card.kind === 'idiom' ? (
+              <IdiomPane card={card} />
             ) : (
               <Word card={card} />
             )}
@@ -3789,6 +3898,157 @@ function Sheet({ card, onDone }: {
   )
 }
 
+/**
+ * AN ENGLISH IDIOM, TAKEN APART IN FOUR BEATS.
+ *
+ * The face asked the question — "Bob's your uncle", and what on earth does Portugal do
+ * with that. This is the answer, and the ORDER of it is the teaching rather than a way of
+ * laying out four facts:
+ *
+ *   1. the literal, which is wrecked on purpose and is the funniest thing on the card
+ *   2. why it is wrecked, in one line
+ *   3. what somebody actually says
+ *   4. the pieces of that worth keeping
+ *
+ * Reversing two and three — leading with the answer and footnoting the literal — turns the
+ * whole thing back into a phrasebook entry. The confusion in the middle is what makes the
+ * third beat land, and it only works if the learner meets it before the answer exists.
+ *
+ * ALL AT ONCE, NOT BEAT BY BEAT. Every other multi-step card in this product gates its
+ * steps, and doing that here would be three taps to read four short lines — the reveal is
+ * the tap, and once it has happened the joke should be on the screen whole. A learner who
+ * wants to dwell on the literal can simply not scroll.
+ */
+function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
+  const learner = useLearner()
+  const i = card.idiom
+  /*
+    What this learner already said about this one, so the answer persists across a rebuild.
+
+    Read from the record rather than held only in state: the feed rebuilds whenever the
+    learner changes, and a tick that vanished on the next save would read as not having
+    registered.
+  */
+  const said = (learner.idioms_got ?? []).includes(i.id)
+    ? 'got'
+    : (learner.idioms_missed ?? []).includes(i.id)
+      ? 'missed'
+      : null
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/*
+        THE WRECKAGE FIRST, at the size the joke deserves.
+
+        This is the beat a flashcard cannot do: the English rendered faithfully into
+        Portuguese and landing on nothing. Big, because it is the punchline of the first
+        half and the setup for the second.
+      */}
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-muted">WORD FOR WORD</p>
+        <p className="pt display text-balance text-3xl">{i.literal}</p>
+        <p className="text-sm leading-relaxed text-muted">{i.wtf}</p>
+      </div>
+
+      {/*
+        What somebody actually says, in the panel the product uses for the thing that is
+        true — the same box WHY IT LANDS gets on a Legend card.
+      */}
+      <div className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+        <p className="eyebrow text-accent">WHAT THEY SAY</p>
+        <div className="mt-3 flex items-center gap-3">
+          <AudioButton slug={slugFor(i.equivalent)} text={i.equivalent} />
+          <p className="pt min-w-0 flex-1 text-xl text-accent">{i.equivalent}</p>
+          <CopyButton text={i.equivalent} label="Copy the line" />
+        </div>
+        <p className="mt-1 text-sm text-fg/80">{i.gloss}</p>
+        {i.note ? (
+          <p className="mt-3 text-xs leading-relaxed text-muted">{i.note}</p>
+        ) : null}
+      </div>
+
+      {/*
+        THE BLOCKS, which are why this is in a language app rather than a joke book.
+
+        Only when there are some. Twenty-two of the thirty teach a whole phrase with no
+        detachable word, and an empty WORTH KEEPING panel on those would be a promise the
+        card cannot honour — see content/idioms.ts, which refuses to invent pieces to pad
+        the number.
+      */}
+      {i.blocks.length ? (
+        <div className="flex flex-col gap-1 rounded border-l-2 border-accent/50 bg-surface px-3 py-3">
+          <p className="eyebrow text-muted">WORTH KEEPING</p>
+          {i.blocks.map((id) => {
+            const piece = PIECES[id]
+            if (!piece) return null
+            return (
+              <p key={id} className="text-xs leading-relaxed text-fg/85">
+                <span className="pt owned">{displayForm(piece)}</span> — {piece.gloss}
+              </p>
+            )
+          })}
+        </div>
+      ) : null}
+
+      {/*
+        DID YOU GET IT, and it is an honesty call.
+
+        Sam: "Simple Did you get it mechanic (tick, cross) adds a tiny point to their score.
+        It's an honesty call obviously." Nothing verifies this and nothing needs to — the
+        argument for why a self-reported tally is allowed on this card and refused on a
+        Legend one is written on `idioms_got` in engine/learner.ts, which is where the
+        content lint sends anybody adding a counter.
+
+        Both buttons stay live after an answer, so changing your mind is one tap rather than
+        a thing you cannot undo. The chosen one fills in; the other stays outlined.
+      */}
+      <div className="mt-auto flex flex-col gap-3">
+        <p className="eyebrow text-muted">DID YOU GET IT</p>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            data-testid="idiom-got"
+            onClick={() => markIdiom(i.id, true)}
+            aria-pressed={said === 'got'}
+            className={
+              'tap-target eyebrow flex-1 rounded px-5 py-3 transition ' +
+              (said === 'got'
+                ? 'bg-correct text-accent-ink'
+                : 'border border-line text-fg')
+            }
+          >
+            GOT IT
+          </button>
+          <button
+            type="button"
+            data-testid="idiom-missed"
+            onClick={() => markIdiom(i.id, false)}
+            aria-pressed={said === 'missed'}
+            className={
+              'tap-target eyebrow flex-1 rounded px-5 py-3 transition ' +
+              (said === 'missed'
+                ? 'bg-accent text-accent-ink'
+                : 'border border-line text-fg')
+            }
+          >
+            MISSED IT
+          </button>
+        </div>
+        {/*
+          A missed one is not a failure, and the line says so rather than leaving somebody
+          to infer it. It also states the mechanic plainly: this is the only thing the
+          cross does.
+        */}
+        {said === 'missed' ? (
+          <p className="text-xs leading-relaxed text-muted">
+            It will come back round. That is all this does.
+          </p>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
 function Word({ card }: { card: Extract<FeedCard, { kind: 'vocab' }> }) {
   return (
     <div className="flex flex-col gap-3">
@@ -3848,7 +4108,24 @@ function Rail({
   const learner = useLearner()
   const btn = 'tap-target flex h-11 w-11 items-center justify-center rounded-full transition'
   return (
-    <div className="flex shrink-0 flex-col items-center gap-3">
+    /*
+      THE RAIL TAKES THE COLOUR OF THE GROUND IT IS ON.
+
+      Every icon here was text-white/85, which is right over a photograph and invisible on
+      sand — and the idiom cards are sand, so the whole rail vanished on them. Set once on
+      the container and inherited, rather than patched onto four buttons that would drift
+      apart the first time a fifth was added.
+
+      An imageless card is the test: face.image is what every other treatment on this card
+      keys off, so the rail keys off the same thing and cannot disagree with the type
+      beside it.
+    */
+    <div
+      className={
+        'flex shrink-0 flex-col items-center gap-3 ' +
+        (cardFace(card).image ? 'text-white/85' : 'text-fg/80')
+      }
+    >
       <button
         type="button"
         aria-label={isLiked ? 'Unlike' : 'Like'}
@@ -3867,7 +4144,7 @@ function Rail({
           everywhere a heart has ever been red, and that is worth more here than
           consistency with a palette that was designed for type on paper.
         */
-        className={btn + (isLiked ? ' text-[#e4574f]' : ' text-white/85')}
+        className={btn + (isLiked ? ' text-[#e4574f]' : '')}
       >
         <svg viewBox="0 0 24 24" className="h-7 w-7" fill={isLiked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7" aria-hidden>
           <path d="M12 20s-7-4.4-7-9.3A4.2 4.2 0 0 1 12 8a4.2 4.2 0 0 1 7 2.7C19 15.6 12 20 12 20Z" />
@@ -3878,7 +4155,7 @@ function Rail({
         href={'/feedback?about=' + card.id}
         aria-label="Tell us about this card"
         data-testid="feed-comment"
-        className={btn + ' text-white/85'}
+        className={btn}
       >
         <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
           <path d="M20 15a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z" />
@@ -3902,7 +4179,7 @@ function Rail({
             if (back) track('card_rewound', { card: back })
             onRewound?.()
           }}
-          className={btn + ' text-white/85'}
+          className={btn}
         >
           <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
             <path d="M9 14 4 9l5-5" />
@@ -3929,7 +4206,7 @@ function Rail({
           track('feed_save', { card: card.id })
         }}
         /* Filled white rather than tinted: over a photograph, fill reads and hue does not. */
-        className={btn + (isSaved ? ' text-white' : ' text-white/85')}
+        className={btn + (isSaved ? ' text-accent' : '')}
       >
         <svg viewBox="0 0 24 24" className="h-7 w-7" fill={isSaved ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.7" aria-hidden>
           <path d="M6 4h12v16l-6-4-6 4Z" />
@@ -3965,7 +4242,7 @@ function Rail({
           else await navigator.clipboard?.writeText(url).catch(() => {})
           if (path) track('showing_sent', {})
         }}
-        className={btn + ' text-white/85'}
+        className={btn}
       >
         <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
           <path d="M12 16V4m0 0L8 8m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />

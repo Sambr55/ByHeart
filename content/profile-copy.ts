@@ -80,6 +80,17 @@ export const PROFILE_COPY = {
   sheets_note: 'Groups you kept — the ten of a thing, in one place.',
   sheets_empty: 'None kept yet. The bookmark on a cheat sheet in the Club puts it here.',
   /*
+    The idioms, counted by what landed rather than by what was met.
+
+    "Guessed right" and not "read" — meeting a card is not an achievement and the product
+    has spent every other screen refusing to treat attendance as progress. A learner who
+    has turned over twenty and got four sees four, which is the honest number and also the
+    one that goes up when they get better.
+  */
+  idioms_label: 'WHAT WE SAY',
+  idioms_note: 'English phrases you knew the Portuguese for.',
+  idioms_empty: 'None yet. They turn up in the Club — guess, then turn the card over.',
+  /*
     The one line on Yours that says where somebody is going rather than where they have been.
 
     Says what the number COVERS rather than what it finishes. "800 words and you speak

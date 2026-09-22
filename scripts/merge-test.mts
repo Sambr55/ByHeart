@@ -464,6 +464,39 @@ console.log('\nwhose copy is it')
   check('and is claimed rather than dropped', old.proof.length === 2, String(old.proof.length))
 }
 
+/*
+  AN IDIOM GOT ON ONE DEVICE AND MISSED ON ANOTHER IS AN IDIOM YOU KNOW.
+
+  The two lists cannot be plain unions of each other: the feed reads `missed` to decide what
+  to bring back round, so an id sitting in both would queue a card the learner has already
+  demonstrated — on the evidence of their own other phone — that they know. Got wins, and
+  missed is whatever survives that.
+*/
+{
+  const phone = { idioms_got: ['piece_of_cake'], idioms_missed: ['bobs_your_uncle'] }
+  const laptop = { idioms_got: ['bobs_your_uncle'], idioms_missed: ['touch_wood'] }
+  for (const [label, m] of [
+    ['phone then laptop', mergeLearner(phone, laptop)],
+    ['laptop then phone', mergeLearner(laptop, phone)],
+  ] as const) {
+    check(
+      label + ': got wins over missed',
+      m.idioms_got.includes('bobs_your_uncle') && !m.idioms_missed.includes('bobs_your_uncle'),
+      m.idioms_missed.join(',') || 'nothing missed',
+    )
+    check(
+      label + ': a genuine miss survives',
+      m.idioms_missed.includes('touch_wood'),
+      m.idioms_missed.join(','),
+    )
+    check(
+      label + ': nothing got is lost',
+      m.idioms_got.includes('piece_of_cake') && m.idioms_got.includes('bobs_your_uncle'),
+      m.idioms_got.join(','),
+    )
+  }
+}
+
 console.log('')
 if (failures) { console.log(failures + ' merge fixture(s) failed'); process.exit(1) }
 console.log('merge fixtures pass: a merge can only ever gain, and two people never merge')

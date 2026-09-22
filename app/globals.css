@@ -568,6 +568,34 @@ body {
   says why it ignores the stage: it is not culture behind a lesson, it is the ground under
   a photograph that has not been taken yet.
 */
+/*
+  THE IDIOM GROUND, which had to be fun without being a photograph.
+
+  Sam: "We need a DUB design style for these which is fun, but doesn't need an image."
+
+  An idiom card cannot have a picture — the joke is the picture, and a stock shot of a
+  Lisbon street behind "Bob's your uncle" would be decoration competing with the gag. But
+  an imageless card in a full-bleed feed is a vast empty rectangle with a caption at the
+  bottom, which is what the first build of this looked like: the type stranded at the foot
+  of a screen of nothing.
+
+  So the ground does the work the photograph would have. Two washes of the product's own
+  colours — azulejo blue and terracotta, the pair the whole palette is built from — thrown
+  large and off-centre so no two cards in a row look identical, over the sand. It is
+  recognisably DUB, it is warm rather than empty, and it costs nothing to author.
+
+  Light, deliberately: 0.13 and 0.10. The type on this card is INK, not white, so the
+  ground has to stay well clear of it — this is a card you read rather than a card you
+  look at, and the moment the washes compete with the words the design has eaten the joke.
+*/
+.idiom-ground {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(31, 93, 140, 0.13) 0, transparent 52%),
+    radial-gradient(circle at 88% 78%, rgba(168, 73, 47, 0.1) 0, transparent 48%),
+    repeating-linear-gradient(45deg, rgba(36, 31, 26, 0.022) 0 1px, transparent 1px 18px);
+}
+
 .card-ground {
   background-color: #241f1a;
   background-image:

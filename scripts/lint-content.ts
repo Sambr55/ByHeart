@@ -11,6 +11,7 @@
  */
 
 import { existsSync, readFileSync } from 'node:fs'
+import { IDIOMS } from '../content/idioms'
 import { INTRO_CARDS } from '../content/intro'
 import { join } from 'node:path'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
@@ -1423,6 +1424,48 @@ for (const e of EXAMPLES) {
   console.log(
     LEGEND_FRAMES.length + ' legend frames · ' + atOne.length + ' reachable at rung 1 · ' +
       families.size + ' crates feed one legend · ' + REPAIR_KIT.length + ' repair lines',
+  )
+}
+
+// --- the idioms ------------------------------------------------------------
+{
+  /*
+    An idiom card is four claims about a language, and three of them are easy to get wrong
+    in a way no type can catch.
+  */
+  const ids = new Set<string>()
+  for (const i of IDIOMS) {
+    if (ids.has(i.id)) fail('idiom id ' + i.id + ' is used twice')
+    ids.add(i.id)
+
+    /*
+      A block must name a word the product actually teaches, or WORTH KEEPING promises
+      vocabulary that leads nowhere. This is the rule the file's own header claims exists,
+      and it did not until now.
+    */
+    for (const b of i.blocks) {
+      if (!PIECES[b]) fail('idiom ' + i.id + ' keeps "' + b + '", which is not a taught piece')
+    }
+
+    /*
+      THE LITERAL AND THE EQUIVALENT MAY NOT BE THE SAME STRING.
+
+      The whole card is the distance between them. Where an idiom genuinely crosses intact
+      — speak of the devil, better late than never — the equivalent still differs, because
+      what makes it native is the small word the literal missed (mais vale, não melhor).
+      If the two ever collapse into one line the card has nothing to reveal and should be
+      cut rather than shipped as a tap that changes nothing.
+    */
+    if (i.literal.trim().toLowerCase() === i.equivalent.trim().toLowerCase()) {
+      fail('idiom ' + i.id + ' has the same literal and equivalent — nothing to reveal')
+    }
+
+    /* A gloss that repeats the English teaches nothing on the way back. */
+    if (!i.gloss.trim()) fail('idiom ' + i.id + ' has no gloss')
+  }
+  console.log(
+    IDIOMS.length + ' idioms · ' + IDIOMS.filter((i) => i.blocks.length).length +
+      ' carry blocks · ' + IDIOMS.filter((i) => i.blue).length + ' are blue',
   )
 }
 

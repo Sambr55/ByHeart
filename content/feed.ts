@@ -4,6 +4,7 @@ import { DROP_LEAD_DAYS, SETS, setPieces, type WordSet } from '@/content/roots'
 import { SITUATIONS, isCurrent, situationById, type Purpose, type Situation } from '@/content/situations'
 import { DROPS, type Drop } from '@/content/drops'
 import { explainersFor, type Explainer } from '@/content/explainers'
+import { IDIOMS, type Idiom } from '@/content/idioms'
 import { INTRO_CARDS, type IntroCard } from '@/content/intro'
 import { cardFor, frameApplies, type LegendFrame } from '@/content/legend'
 import { bankImage } from '@/content/images'
@@ -131,6 +132,22 @@ export type FeedCard =
     the bank does not have. The change of ground IS the rhythm of the sequence.
   */
   | { kind: 'intro'; id: string; intro: IntroCard }
+  /*
+    AN ENGLISH IDIOM, AND WHAT PORTUGAL SAYS INSTEAD — the other card with no photograph.
+
+    Same argument as `intro` above and a different reason. An intro card has no image
+    because it is an argument rather than a place. This one has none because the JOKE is
+    the image: "Bob's your uncle" in enormous letters, and whatever you are picturing while
+    you decide what Portugal says is better than any photograph the bank could offer. A
+    stock shot of a Lisbon street behind it would be decoration competing with the gag.
+
+    Sam: "We need a DUB design style for these which is fun, but doesn't need an image."
+
+    It carries no image field at all rather than an optional one, so the type makes the
+    decision permanent — see cardFace, which returns no image for this kind and therefore
+    routes it to the sand treatment every no-image card already gets.
+  */
+  | { kind: 'idiom'; id: string; idiom: Idiom }
   /*
     A taste of a vibe, for the showcase.
 
@@ -776,6 +793,34 @@ export function sheetCards(dismissed: string[] = []): FeedCard[] {
   }))
 }
 
+/**
+ * The idioms, least-known first.
+ *
+ * ORDERED BY WHAT LANDED, which is the one thing the tick is actually for. An idiom marked
+ * MISSED comes back round before one marked GOT, and an idiom never met comes before
+ * either — so the deck quietly sorts itself towards the jokes that did not land, without
+ * anybody being told they got something wrong. That is the whole reason `missed` is a list
+ * of ids rather than a count: a total could not do this.
+ *
+ * Nothing is removed once it has landed. These are four-line cards you meet in passing,
+ * and meeting "é canja" again six weeks later is reinforcement rather than repetition —
+ * which is the argument the feed's own loop is built on.
+ *
+ * Dismissed ones do drop out: NOT FOR ME writes finished_cards, honoured here as
+ * everywhere else.
+ */
+export function idiomCards(
+  got: string[] = [],
+  missed: string[] = [],
+  dismissed: string[] = [],
+): FeedCard[] {
+  const rank = (i: Idiom) => (missed.includes(i.id) ? 0 : got.includes(i.id) ? 2 : 1)
+  return IDIOMS.filter((i) => !dismissed.includes('idiom_' + i.id))
+    .map((idiom) => ({ idiom, r: rank(idiom) }))
+    .sort((a, b) => a.r - b.r)
+    .map(({ idiom }) => ({ kind: 'idiom' as const, id: 'idiom_' + idiom.id, idiom }))
+}
+
 /** How many of a sheet's members the learner already owns, and which. */
 export function sheetOwned(set: WordSet, inventory: Record<string, unknown>): Set<string> {
   const owned = new Set<string>()
@@ -810,7 +855,16 @@ export function cardById(id: string): FeedCard | undefined {
     FEED, and a sheet somebody saved and later dismissed should still resolve on Yours.
     Those are two different decisions and only one of them is about this list.
   */
-  return [...dropsFor(), ...roomsFor(), ...wordCards(), ...sheetCards()].find((c) => c.id === id)
+  /*
+    Idioms for the same reason as sheets: Yours renders a got idiom by looking its id up
+    here, and an unresolvable id is a row that silently renders nothing. `idiomCards()`
+    with no arguments — the ordering and the dismissals are decisions about the FEED, and
+    an idiom somebody got and later dismissed should still resolve on the screen that
+    holds their things.
+  */
+  return [...dropsFor(), ...roomsFor(), ...wordCards(), ...sheetCards(), ...idiomCards()].find(
+    (c) => c.id === id,
+  )
 }
 
 export function chapterName(chapter: ChapterId = DEFAULT_CHAPTER): string {
@@ -943,6 +997,24 @@ export function cardFace(card: FeedCard): {
       title: 'Then you start.',
       blurb: 'Which language, and what DUB asks of you. It takes one tap and it is the last thing between you and your first three vibes.',
       image: card.image,
+    }
+  }
+  if (card.kind === 'idiom') {
+    /*
+      THE FACE IS THE ENGLISH, because the English is the question.
+
+      Every other card in this feed leads with Portuguese — that is the product. This one
+      leads with the thing you already say, because the card is a guess: you read "Bob's
+      your uncle", you wonder what on earth Portugal does with that, and the answer is
+      behind the tap. Putting the Portuguese on the face would give away the punchline and
+      leave the reveal with nothing to reveal.
+
+      No image, deliberately, and none is offered — see the note on the card kind.
+    */
+    return {
+      eyebrow: card.idiom.blue ? 'NOT SAFE' : 'WHAT WE SAY',
+      title: card.idiom.english,
+      blurb: 'What does Portugal say instead?',
     }
   }
   if (card.kind === 'vibe') {

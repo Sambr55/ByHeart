@@ -374,6 +374,41 @@ export interface LearnerState {
    */
   finished_cards: string[]
   /**
+   * Idioms met, split by whether the punchline landed.
+   *
+   * WHY A TALLY IS ALLOWED HERE AND REFUSED ON A LEGEND CARD, which is the question
+   * scripts/lint-content.ts exists to force somebody to answer before adding one.
+   *
+   * The rule it guards is this: "the moment a number is attached to being put on the spot,
+   * the feature becomes the anxiety it exists to remove." That is exactly right about the
+   * Legend. The Legend is a PERFORMANCE — seven things about yourself, said cold, with
+   * nothing on screen — and counting the attempts turns a rehearsal into an exam.
+   *
+   * An idiom card is not a performance. Nobody is asked to produce anything: the card shows
+   * "Bob's your uncle", you guess what Portugal says instead, and you turn it over. GOT IT
+   * and MISSED record whether a joke landed, which is nearer to turning a page than to
+   * being tested. There is no spot to be put on, so there is nothing for a number to make
+   * anxious. Sam, proposing it: "Simple Did you get it mechanic (tick, cross) adds a tiny
+   * point to their score. It's an honesty call obviously."
+   *
+   * IT IS SELF-CERTIFIED AND THAT IS FINE HERE, which is the other half of the argument,
+   * because `said_cold` was deleted partly for being self-reported. The difference is what
+   * the claim is worth: said_cold asserted "I can produce this sentence cold", which is the
+   * central capability the whole product measures, and taking somebody's word for that
+   * corrupts the thing Proof exists to be honest about. A tick on an idiom asserts "I knew
+   * that one", which nothing else depends on and which nobody has any reason to lie to
+   * themselves about. Cheating it inflates a number by one and teaches you nothing, which
+   * is its own punishment.
+   *
+   * Two lists rather than a count, for the reason every other record here is a list: a
+   * number cannot merge across devices without double-counting, and a set can. `missed`
+   * also tells the feed which idioms are worth bringing round again, which a total never
+   * could — and an idiom moves from missed to got the day it lands, so the pair is not
+   * a permanent record of having been wrong.
+   */
+  idioms_got: string[]
+  idioms_missed: string[]
+  /**
    * Sentences the learner asked the translator for, and chose to keep.
    *
    * Not a translation history — the ones they pressed KEEP on. That gesture is the whole
@@ -471,6 +506,8 @@ export function emptyLearner(): LearnerState {
     nocue_done: [],
     lines_seen: [],
     legend: [],
+    idioms_got: [],
+    idioms_missed: [],
     legend_prompt: 'unseen',
     save_prompt: 'unseen',
     sheet_got: [],
@@ -640,6 +677,9 @@ export function loadLearner(): LearnerState {
           nocue_done: arr(parsed.nocue_done, []),
           lines_seen: arr(parsed.lines_seen, []),
           legend: arr(parsed.legend, []),
+          /* Absent on every record written before idioms existed, which is all of them. */
+          idioms_got: arr(parsed.idioms_got, []),
+          idioms_missed: arr(parsed.idioms_missed, []),
           save_prompt: parsed.save_prompt === 'declined' ? 'declined' : 'unseen',
           legend_prompt:
             parsed.legend_prompt === 'accepted' || parsed.legend_prompt === 'declined'
@@ -910,6 +950,26 @@ export async function syncSession(reason: string): Promise<boolean> {
 export function setDisplayName(name: string) {
   update((s) => {
     s.display_name = name.trim()
+  })
+}
+
+/**
+ * Whether the punchline landed, recorded once per idiom.
+ *
+ * MOVES BETWEEN THE TWO LISTS rather than appending to both. An idiom you missed in
+ * September and got in October is one you know — a permanent record of having been wrong
+ * about a joke would be a grudge, and the feed reads `missed` to decide what to bring back
+ * round, so leaving a stale id there would keep serving a card that has already landed.
+ *
+ * Idempotent, because the card can be turned over more than once and a tally that grows on
+ * re-reading is a tally that rewards scrolling.
+ */
+export function markIdiom(id: string, got: boolean) {
+  update((s) => {
+    s.idioms_got = s.idioms_got.filter((x) => x !== id)
+    s.idioms_missed = s.idioms_missed.filter((x) => x !== id)
+    if (got) s.idioms_got.push(id)
+    else s.idioms_missed.push(id)
   })
 }
 

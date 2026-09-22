@@ -324,6 +324,23 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     saved: setUnion(l.saved, r.saved),
     liked: setUnion(l.liked, r.liked),
     finished_cards: setUnion(l.finished_cards, r.finished_cards),
+    /*
+      GOT BEATS MISSED, which is why this is not two plain unions.
+
+      Union both lists independently and an idiom missed on the phone and got on the laptop
+      ends up in BOTH — counted as known and simultaneously queued to come round again,
+      because the feed reads `missed` to decide what to re-serve. The learner would be shown
+      a card they have demonstrably learned, on the evidence of their own other device.
+
+      So got wins: the union of everything anybody got, and then missed is whatever is left
+      over. That is also the only reading consistent with this file's one rule — a merge may
+      only ever GAIN — since knowing an idiom is the gain and having missed it is the
+      absence of one.
+    */
+    idioms_got: setUnion(l.idioms_got, r.idioms_got),
+    idioms_missed: setUnion(l.idioms_missed, r.idioms_missed).filter(
+      (id) => !setUnion(l.idioms_got, r.idioms_got).includes(id),
+    ),
     /* Answers somebody got on a sheet, on whichever device they sat it. Only ever gains. */
     sheet_got: setUnion(l.sheet_got, r.sheet_got),
     /*

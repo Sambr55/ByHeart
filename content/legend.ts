@@ -1200,6 +1200,9 @@ export const STAGES: Stage[] = [
  *   drops      a night you took it to. Sam: "a completed drop is an achievement" — and he
  *              is right, the calendar expiring does not un-happen the evening.
  *   sheets     a group you can produce end to end, now that every member can be ticked.
+ *   idioms     an English phrase you knew the Portuguese answer to. The lightest thing
+ *              here and weighted accordingly — see below on why a self-reported tick is
+ *              allowed to count at all when said cold was not.
  *
  * WHAT IS OUT, and why:
  *
@@ -1214,6 +1217,20 @@ export const STAGES: Stage[] = [
  * WEIGHTED, because these are not the same size of act. A word is one thing learned; a
  * room is several used together; a drop is an evening. The weights say that plainly rather
  * than pretending a bookmark and a night out are worth the same.
+ *
+ * AND WHY AN IDIOM TICK COUNTS WHEN SAID COLD DID NOT, since that is the obvious objection
+ * and both are self-reported. The difference is what is being claimed. `said_cold` asserted
+ * "I can produce this sentence with nothing on screen" — the central capability this whole
+ * product measures, and the one thing Proof exists to be honest about, so taking somebody's
+ * word for it corrupted the number that matters most. A tick on an idiom claims "I guessed
+ * that one right", which nothing else depends on. It is weight 1, the same as a single
+ * word: thirty idioms perfectly ticked are worth ten banked words, which is about right for
+ * an afternoon of turning cards over, and nowhere near a stage on their own.
+ *
+ * Sam asked for it directly — "adds a tiny point to their score. It's an honesty call
+ * obviously" — and tiny is the operative word. The full argument, including why the content
+ * lint's rule against per-card tallies does not reach this one, is on `idioms_got` in
+ * engine/learner.ts.
  */
 export interface Progress {
   /** The single number the stages are read from. */
@@ -1222,7 +1239,7 @@ export interface Progress {
   parts: { id: string; n: number; each: number; score: number }[]
 }
 
-export const PROGRESS_WEIGHTS = { words: 1, through: 3, legend: 4, drops: 6, sheets: 5 }
+export const PROGRESS_WEIGHTS = { words: 1, through: 3, legend: 4, drops: 6, sheets: 5, idioms: 1 }
 
 export function progressFor(me: {
   words?: number
@@ -1230,6 +1247,7 @@ export function progressFor(me: {
   legend?: number
   drops?: number
   sheets?: number
+  idioms?: number
 }): Progress {
   const parts = (Object.keys(PROGRESS_WEIGHTS) as (keyof typeof PROGRESS_WEIGHTS)[]).map(
     (id) => {

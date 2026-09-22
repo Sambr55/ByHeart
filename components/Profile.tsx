@@ -53,7 +53,7 @@ import { useRestore } from '@/engine/useRestore'
  * those is a shop window and the other is the cupboard; the cupboard has the row now.
  */
 const SECTIONS: {
-  id: 'done' | 'aside' | 'cold' | 'words' | 'sheets' | 'drops'
+  id: 'done' | 'aside' | 'cold' | 'words' | 'sheets' | 'drops' | 'idioms'
   label: string
   note: string
   empty: string
@@ -128,6 +128,22 @@ const SECTIONS: {
     unit: (n) => (n === 1 ? 'piece of Portuguese, banked' : 'pieces of Portuguese, banked'),
     count: (_t, l) => String(Object.keys(l.inventory ?? {}).filter((id) => PIECES[id]).length),
     more: { href: '/vocab', label: 'THE WHOLE LIBRARY' },
+  },
+  {
+    /*
+      The idioms that landed, on a row of their own.
+
+      Not folded into BEEN THROUGH: everything there is a record of somewhere you went,
+      and an idiom is a thing you knew. The count is `idioms_got` rather than everything
+      met, for the reason the copy gives — meeting a card is attendance, and this product
+      does not score attendance.
+    */
+    id: 'idioms',
+    label: PROFILE_COPY.idioms_label,
+    note: PROFILE_COPY.idioms_note,
+    empty: PROFILE_COPY.idioms_empty,
+    unit: (n) => (n === 1 ? 'English phrase you had the answer to' : 'English phrases you had the answer to'),
+    count: (_t, l) => String((l.idioms_got ?? []).length),
   },
   {
     id: 'sheets',
@@ -289,7 +305,10 @@ export function Profile() {
       done: [
         ...vibes,
         ...derivedTiles,
-        ...finished.filter((id) => !id.startsWith('sheet_')).flatMap((id) => asTile(id) ?? []),
+        /* Sheets and idioms have rows of their own; neither is a place you went. */
+        ...finished
+          .filter((id) => !id.startsWith('sheet_') && !id.startsWith('idiom_'))
+          .flatMap((id) => asTile(id) ?? []),
       ],
       /*
         SAVED AND KEPT ARE ONE PILE, because the difference was about which button you
@@ -311,7 +330,9 @@ export function Profile() {
         anopther section in YOURS - put there by saving them in Club feed."
       */
       aside: [
-        ...saved.filter((id) => !id.startsWith('sheet_')).flatMap((id) => asTile(id) ?? []),
+        ...saved
+          .filter((id) => !id.startsWith('sheet_') && !id.startsWith('idiom_'))
+          .flatMap((id) => asTile(id) ?? []),
         ...askedTiles,
       ],
       /*
@@ -326,6 +347,12 @@ export function Profile() {
         what happened — this is the one pile you open again on purpose.
       */
       sheets: saved.filter((id) => id.startsWith('sheet_')).flatMap((id) => asTile(id) ?? []),
+      /*
+        The ones that landed, newest last — which is the order they were got in, and the
+        only order the record carries. cardById resolves an idiom id the same way it
+        resolves a sheet, so these are the same card somebody met in the Club.
+      */
+      idioms: (learner.idioms_got ?? []).flatMap((id) => asTile('idiom_' + id) ?? []),
       /*
         WHAT THEY HAVE SAID WITH NOTHING ON SCREEN — the product's own measure of itself.
 
@@ -1286,12 +1313,22 @@ function LegendHero() {
             ...ROOTS.filter((r) => (learner.roots_played ?? []).includes(r.root_id)).map(
               (r) => r.culture_family,
             ),
-          ]).size + (learner.finished_cards ?? []).filter((id) => !id.startsWith('sheet_')).length,
+            /*
+              Sheets and idioms are counted on their own terms below, so a card dismissed
+              from either deck must not also read as a room somebody went through. The
+              filter listed one prefix and would have quietly absorbed the other.
+            */
+          ]).size +
+          (learner.finished_cards ?? []).filter(
+            (id) => !id.startsWith('sheet_') && !id.startsWith('idiom_'),
+          ).length,
         legend: (learner.legend ?? []).filter((a) => Object.keys(a.values ?? {}).length > 0).length,
         drops: (learner.finished_cards ?? []).filter((id) => /^lisbon_/.test(id)).length,
         sheets: (learner.saved ?? []).filter((id) => id.startsWith('sheet_')).length,
+        /* Only the ones that landed. A missed idiom is a card to bring back, not a score. */
+        idioms: (learner.idioms_got ?? []).length,
       }),
-    [learner.inventory, learner.sections_completed, learner.roots_played, learner.legend, learner.finished_cards, learner.saved],
+    [learner.inventory, learner.sections_completed, learner.roots_played, learner.legend, learner.finished_cards, learner.saved, learner.idioms_got],
   )
   const stage = stageFor(progress.score)
   const onward = nextStage(progress.score)
