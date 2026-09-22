@@ -25,6 +25,33 @@
 import { chromium } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { ROOTS } from '../content/roots'
+import { LEGEND_FRAMES, doorwayRoots } from '../content/legend'
+
+/*
+  THE LEARNER OWNS THE WORDS THE CARD IS BUILT FROM.
+
+  The fixture had `inventory: {}` and leaned on sections_completed alone, which was enough
+  while the Legend opened on crates and nothing else. It is not any more: a card stays shut
+  until the learner has the words in its `built_from`, so the work card was blocked, MAKE
+  IT MINE never rendered, and this check died on a 30-second timeout rather than a failed
+  assertion — the worst way for a gate to break, because it says nothing about what is
+  wrong.
+
+  Derived from the frame rather than typed, so the day `work` is built from a second word
+  this fixture follows it instead of going stale again.
+*/
+const WORK = LEGEND_FRAMES.find((f) => f.id === 'work')!
+const OWNED = Object.fromEntries((WORK.built_from ?? []).map((id) => [id, 'strong']))
+
+/*
+  AND THE DOOR IS ACTUALLY OPEN, which sections_completed alone no longer means.
+
+  The door is two halves — the doorway roots AND the chosen vibes — and this fixture
+  satisfied the second and left the first empty, so legendStatus said toGo: 7 and the whole
+  deck was behind the locked screen. Played rather than asserted: the same list the door
+  counts, so this cannot drift from it.
+*/
+const PLAYED = doorwayRoots().map((r) => r.root_id)
 const BASE = 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
 const b = await chromium.launch()
@@ -35,7 +62,7 @@ await p.addInitScript(([k, pair, v]) => {
   localStorage.setItem(k as string, JSON.stringify(v))
 }, [KEY, DEFAULT_PAIR, {
   version: 1, deal_accepted_at: '2026-08-01T00:00:00.000Z', profile: { goal: 'curious' },
-  inventory: {}, roots_played: [], sections_completed: ['the_basics','top_gun','james_bond','bridget_jones','pulp_fiction'],
+  inventory: OWNED, roots_played: PLAYED, sections_completed: ['the_basics','top_gun','james_bond','bridget_jones','pulp_fiction'],
   finished_cards: [], saved: [], liked: [], asked: [], evidence: [], legend: [],
   club_welcomed_at: '2026-08-20T00:00:00.000Z',
   proof: ROOTS.filter((r) => r.rung <= 2).slice(0, 6).map((r, i) => ({
