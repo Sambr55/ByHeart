@@ -476,8 +476,28 @@ export const PICKER = {
 */
 export const RELEASE = {
   eyebrow: 'LAST TIME',
-  /** Said once, plainly, on the screen where the scaffolding is still standing. */
-  why: 'This is the part you were leaning on. You have taken what you need out of it, so now it goes — and the next sentence is yours, with nothing on screen to copy from.',
+  /*
+    NAMES THE THING ON THE SCREEN, rather than calling it "the part".
+
+    Sam: "I think the word 'part' is what I always struggle with on this screen."
+
+    Fair, and the reason is that "part" had nothing to attach to. The line sat directly
+    under a film title — From Russia with Love — so "this is the part you were leaning on"
+    could be read as part of the title, part of the lesson, or part of some larger thing
+    nobody had named. The one reading it could not easily carry is the intended one: the
+    English cue itself, which is about to drain off the screen a second later.
+
+    So it says what it is. The line above is the scaffolding, the learner has taken the
+    Portuguese out of it, and now the English goes. Three short sentences in the order the
+    thing actually happens, and the word "part" is gone because there was never a part.
+
+    "The line above" rather than "the title", which was the first attempt: only 25 of the
+    98 roots are titles. The other 73 are quotes, sayings and moments, and a screen telling
+    somebody their title is about to go while showing them a line from a film would be a
+    different kind of wrong. What is true of all of them is that it is the English sitting
+    above this sentence, and that it is about to leave.
+  */
+  why: 'That English line above is what you have been leaning on. You have the Portuguese out of it now, so it goes — and the next sentence is yours, with nothing on screen to copy from.',
   cta: 'TAKE IT AWAY',
   /** After the drain, above the build. */
   ask_eyebrow: 'NO CLUES',
