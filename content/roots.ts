@@ -4589,6 +4589,57 @@ export const THE_BASICS: Root[] = [
     next_root_hooks: ['porque'],
   }),
   q({
+    /*
+      THE AGE, IN THE BASICS, because a card on the Legend was waiting on a vibe.
+
+      `anos` lived only in Bridget Jones and `tenho` only in the Duran Duran drop — a
+      SEASONAL crate, which for most of the year does not exist. So `age` was built from
+      two words a learner could not reliably reach, and `moved_when` — one of a mover's
+      seven — was built on the same `anos`. A card on somebody's Legend cannot depend on
+      whether a gig is on this month.
+
+      Same move as `casado` above, for the same reason and with the same consequence:
+      PIECES keeps the LOWEST rung, so this entry replaces the other two and has to carry
+      everything they did. The notes come with them.
+
+      "Quantos anos tens?" is the transfer because it is the question, and the question is
+      what a stranger actually says to you — the answer is the easy half.
+    */
+    root_id: 'tb_age',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The fourth thing anybody asks',
+    source_status: 'needs-review',
+    root_display: 'I have thirty years.',
+    credit: 'Asked across a table, about a minute in',
+    source: 'I am thirty years old.',
+    target: 'Tenho trinta anos.',
+    semantic_bridge:
+      'The one every English speaker gets wrong exactly once. Portuguese does not BE an age, it HAS one — tenho trinta anos, "I have thirty years". Say sou trinta and you have said "I am thirty", which means nothing at all.',
+    subtext: 'Counted, and said without flinching.',
+    extracts: [
+      { id: 'tenho', target: 'tenho', gloss: 'I have', shelf: 'doing', lemma: 'ter', form: 'I', note: 'Portuguese HAS hunger, thirst and cold where English is them. Tenho fome, tenho sede, tenho frio — and tenho trinta anos for your age. One verb, and five things you can suddenly say.' },
+      { id: 'anos', target: 'anos', gloss: 'years old', shelf: 'how_much', note: 'Always with tenho, never with sou. You have your age in Portuguese.' },
+      { id: 'trinta', target: 'trinta', gloss: 'thirty', shelf: 'how_much' },
+    ],
+    branches: [
+      { target: 'Tenho trinta anos.', en: 'I am thirty.', demonstrates: ['tenho', 'anos', 'trinta'] },
+      { target: 'Quantos anos tens?', en: 'How old are you?', demonstrates: ['anos'], address: 'tu', formal: 'Quantos anos tem?' },
+      { target: 'Tenho dois filhos.', en: 'I have two children.', demonstrates: ['tenho'] },
+    ],
+    reinforces: ['dois'],
+    helpers: { 'Quantos': 'how many', 'tens': 'you have', 'filhos': 'children', 'dois': 'two' },
+    transfer_prompt: {
+      context: 'Somebody at a table has just asked, and everyone is listening.',
+      ask: 'How old are you?',
+      answer: 'Quantos anos tens?',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['about-me', 'numbers'],
+    next_root_hooks: ['casado'],
+  }),
+  q({
     root_id: 'tb_four_weddings',
     culture_family: 'the_basics',
     rung: 1,
@@ -4994,7 +5045,20 @@ export const PIECES: Record<string, Piece> = (() => {
       const seen = out[e.id]
       if (!seen || rung < seen.rung) {
         const { id: _id, ...rest } = e
-        out[e.id] = { ...rest, family: seen?.family ?? root.culture_family, rung }
+        /*
+          AND THE FAMILY COMES WITH THE RUNG.
+
+          This was `seen?.family ?? root.culture_family`, which pinned the family to
+          whichever crate was iterated FIRST and then let a lower rung overwrite everything
+          else about the piece. ROOTS lists the basics last, so a word moved into the basics
+          kept saying it came from the vibe it was moved out of: the library rendered
+          "taught in Bridget Jones" for a word a rung-1 learner now meets on day one.
+
+          The rung is the whole claim being made here — "the earliest point a learner could
+          have met it" — so the place has to be the place that rung belongs to. Where two
+          roots tie, the first still wins, which is unchanged.
+        */
+        out[e.id] = { ...rest, family: root.culture_family, rung }
       }
     }
   }
