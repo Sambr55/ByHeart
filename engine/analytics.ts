@@ -158,6 +158,13 @@ export type EventName =
   */
   | 'install_save_first'
   /*
+    Somebody put what is on into their own calendar, with what they chose to see and how
+    much of it they were willing to take. The two numbers are the whole question a feed
+    like this asks — a learner who takes one a week is telling us something different from
+    one who takes seven, and neither is turning up more often than the other.
+  */
+  | 'calendar_subscribed'
+  /*
     The translator, and the one number on it that matters.
 
     translate_ask is traffic. translate_kept is demand — the sentences somebody decided

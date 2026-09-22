@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { GENRES, genreFor } from '@/content/calendar'
 import { Back } from '@/components/Back'
+import { Subscribe } from '@/components/Subscribe'
 import { NotYet } from '@/components/NotYet'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { chapterById } from '@/content/chapters'
@@ -249,7 +250,7 @@ export function Calendar() {
                     so the question is only whether the fragment it shows is a word. The
                     full name is on the aria-label and on the card a tap away.
                   */}
-                  <span className="line-clamp-2 hyphens-auto break-words text-center text-[0.5rem] leading-tight opacity-95">
+                  <span className="line-clamp-2 w-full hyphens-auto break-words text-center text-[0.5rem] leading-tight opacity-95">
                     {on[0].event}
                   </span>
                 </Link>
@@ -338,6 +339,15 @@ export function Calendar() {
             })
           )}
         </section>
+
+        {/*
+          THE SUBSCRIPTION, UNDER THE LIST rather than above it.
+
+          Somebody arriving here wants to know what is on; the offer to put it in their own
+          calendar makes sense once they have seen that there is something worth putting
+          there. An ask that comes first is an ask about a thing they have not looked at.
+        */}
+        <Subscribe city={chapter.city} />
       </div>
 
       <BottomNavSpace />
