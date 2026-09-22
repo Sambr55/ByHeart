@@ -138,6 +138,39 @@ export const LEGEND_PARTS: { id: LegendPart; name: string; what: string; opens: 
  * should not meet a brace, an empty gap, or a nudge to go and fill something in. "You and
  * the city" is true of everybody and reads as deliberate rather than as a fallback.
  */
+/**
+ * The authored stand-in for a learner's own name, and the one place it is written down.
+ *
+ * Two branches introduce somebody — "Chamo-me Ana." on tb_introduce and bj_forgot_name —
+ * and Sam met his own introduction under a stranger's name: "Thus should be Sam not ana,
+ * drawn from my profile."
+ *
+ * WHY THE NAME IS AUTHORED RATHER THAN A BRACE. '{name}' in the branch was the first
+ * attempt and lint-content refused it five times: a branch is not a template. It is a
+ * reviewed Portuguese sentence that goes into the audio manifest, the daily line and the
+ * QA sheet a native speaker reads, and a placeholder in any of those is not language. Ana
+ * has a recording; {name} could never have one.
+ *
+ * So the swap happens on the way to the screen, and this constant is what makes it safe:
+ * one name, stated once, so the renderer is not guessing which words in a sentence are a
+ * person. Changing the authored name means changing it here and in the two branches, and
+ * the check in scripts/lint-content.ts holds them together.
+ */
+export const AUTHORED_NAME = 'Ana'
+
+/**
+ * That sentence, as this learner would say it.
+ *
+ * Returns the line untouched when it does not contain the authored name, so it is safe on
+ * every branch and there is no second list of which sentences are personal. A learner who
+ * declined to give a name keeps Ana rather than meeting a blank — she is a real example
+ * with a real recording, which is what she was always for.
+ */
+export function myName(line: string, displayName?: string | null): string {
+  const who = (displayName ?? '').trim()
+  return who ? line.replaceAll(AUTHORED_NAME, who) : line
+}
+
 export function nameFor(part: { name: string }, displayName?: string | null): string {
   const who = (displayName ?? '').trim()
   return part.name.replace('{name}', who || 'You')

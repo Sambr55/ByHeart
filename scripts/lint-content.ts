@@ -15,7 +15,7 @@ import { INTRO_CARDS } from '../content/intro'
 import { join } from 'node:path'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
 import { DUB, DUB_CLUB, DUB_MARK } from '../content/marks'
-import { LEGEND_FRAMES, REPAIR_KIT, childrenSentence } from '../content/legend'
+import { AUTHORED_NAME, LEGEND_FRAMES, REPAIR_KIT, childrenSentence } from '../content/legend'
 import {
   BLOCK_ORDER,
   EXAMPLES,
@@ -435,6 +435,25 @@ for (const e of EXAMPLES) {
       const worksOut = flat(work) === flat(root.root_display) || flat(root.root_display).includes(flat(work))
       if (worksOut && !root.credit) {
         warn(R + 'source_label credits "' + who + '" and nothing shows it — set credit')
+      }
+    }
+    /*
+      A SENTENCE THAT INTRODUCES SOMEBODY USES THE AUTHORED NAME.
+
+      Two branches say "Chamo-me Ana." and the screen swaps Ana for the learner's own name
+      — see myName in content/legend.ts. That swap is a literal string replacement, which
+      is the only version that keeps a brace out of the audio manifest and the QA sheet,
+      and it means a branch introducing somebody under any OTHER name would silently keep
+      that name on the screen: a learner called Sam meeting "Chamo-me Miguel."
+
+      So the pair is held together here. Chamo-me followed by a capitalised word must be
+      AUTHORED_NAME, and anything else is either a new example nobody wired up or the
+      constant having moved without its branches.
+    */
+    for (const b of root.branches) {
+      const who = b.target.match(/\bChamo-me ([A-ZÁÉÍÓÚÂÊÔÃÕÇ][\wÁ-ÿ]*)/)
+      if (who && who[1] !== AUTHORED_NAME) {
+        fail(R + 'introduces as "' + who[1] + '"; myName only swaps ' + AUTHORED_NAME)
       }
     }
     if (!root.extracts.length || root.extracts.length > 3) {

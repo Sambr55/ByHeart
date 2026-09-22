@@ -1018,7 +1018,19 @@ export const JAMES_BOND: Root[] = [
     subtext: 'A perfect freebie: culturally unmistakable and useful within an hour of landing.',
     extracts: [{ id: 'chamo_me', target: 'chamo-me…', gloss: 'my name is…', shelf: 'just_say' }],
     branches: [
-      { target: 'Chamo-me Sam.', en: 'My name is Sam.' },
+      /*
+        ANA HERE TOO, because the screen only knows how to swap one name.
+
+        This said Sam — a third arbitrary person, after Ana on the two introduction roots.
+        myName does a literal replacement of AUTHORED_NAME, so a learner called anything
+        else met a stranger called Sam in the one sentence that is supposed to be about
+        them, and a learner called Sam met a coincidence.
+
+        Caught by lint-content the moment the rule was written down, which is the argument
+        for writing it down: three branches introduce somebody and they had three different
+        names between them.
+      */
+      { target: 'Chamo-me Ana.', en: 'My name is Ana.' },
       { target: 'E tu, como te chamas?', en: 'And you, what’s your name?', demonstrates: ['chamo_me', 'como_te_chamas'] , address: 'tu', formal: 'E o senhor, como se chama?' },
       { target: 'Como se chama?', en: 'What is it called?', demonstrates: ['chamo_me', 'como_se_chama'] },
     ],
@@ -1510,6 +1522,24 @@ export const BRIDGET_JONES: Root[] = [
     subtext: 'Embarrassing but entirely recoverable. Everyone has done it.',
     extracts: [{ id: 'como_te_chamas', target: 'como te chamas?', gloss: 'what’s your name?', shelf: 'asking', note: 'To somebody your own age. Como se chama? is the polite one.' }],
     branches: [
+      /*
+        ANA IS THE AUTHORED NAME, and the screen swaps in the learner's.
+
+        Sam, on his own introduction: "Thus should be Sam not ana, drawn from my profile."
+        Right — this was the one place the product taught somebody to introduce themselves
+        as a stranger.
+
+        The obvious fix was '{name}' here, the way the Legend's frame does it, and it was
+        wrong at this layer: lint-content refused it five times over ("build uses untaught,
+        unglossed word {name}") and it is correct to. A branch is not a template — it is a
+        reviewed Portuguese sentence, it goes into the audio manifest, the daily line and
+        the QA sheet a native speaker reads, and a brace in any of those is a placeholder
+        pretending to be language.
+
+        So the name stays authored and REAL, with a recording behind it, and the
+        substitution happens where a learner is looking at it. See BranchRow: it swaps a
+        known authored name for display_name and leaves every other line alone.
+      */
       { target: 'Chamo-me Ana.', en: 'My name is Ana.', demonstrates: ['chamo_me'] },
       { target: 'Como te chamas?', en: 'What’s your name?' , address: 'tu', formal: 'Como se chama?' },
       { target: 'Como se chama?', en: 'What is it called?', demonstrates: ['como_se_chama'] },
@@ -4437,6 +4467,24 @@ export const THE_BASICS: Root[] = [
       { id: 'ingles', target: 'inglês', gloss: 'English', shelf: 'describing', note: 'Inglesa if you are a woman. Nationalities take an ending like every other description.' },
     ],
     branches: [
+      /*
+        ANA IS THE AUTHORED NAME, and the screen swaps in the learner's.
+
+        Sam, on his own introduction: "Thus should be Sam not ana, drawn from my profile."
+        Right — this was the one place the product taught somebody to introduce themselves
+        as a stranger.
+
+        The obvious fix was '{name}' here, the way the Legend's frame does it, and it was
+        wrong at this layer: lint-content refused it five times over ("build uses untaught,
+        unglossed word {name}") and it is correct to. A branch is not a template — it is a
+        reviewed Portuguese sentence, it goes into the audio manifest, the daily line and
+        the QA sheet a native speaker reads, and a brace in any of those is a placeholder
+        pretending to be language.
+
+        So the name stays authored and REAL, with a recording behind it, and the
+        substitution happens where a learner is looking at it. See BranchRow: it swaps a
+        known authored name for display_name and leaves every other line alone.
+      */
       { target: 'Chamo-me Ana.', en: 'My name is Ana.', demonstrates: ['chamo_me'] },
       { target: 'Sou inglesa.', en: 'I am English.', demonstrates: ['sou', 'ingles'] },
       { target: 'Sou de Londres.', en: 'I am from London.', demonstrates: ['sou'] },

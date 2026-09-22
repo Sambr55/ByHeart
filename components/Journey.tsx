@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame } from '@/content/legend'
+import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, myName, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
@@ -2051,9 +2051,39 @@ export function MiniBuild({
  * sequence of arrivals.
  */
 function BranchRow({ branch, i, register }: { branch: Branch; i: number; register: Register }) {
-  const shown = branchAt(branch, register)
+  /*
+    A BRANCH ABOUT THE LEARNER USES THE LEARNER'S NAME.
+
+    "Chamo-me Ana." taught somebody to introduce themselves as a stranger. Sam: "Thus
+    should be Sam not ana, drawn from my profile." The Legend has filled '{name}' from
+    display_name since it was written; this is the same brace and the same source, so the
+    introduction a learner practises is the one they will actually say.
+
+    `myName` swaps the authored name for theirs and returns every other line untouched,
+    so there is no list here of which sentences are personal. Somebody who gave no name
+    keeps Ana, who is a real example with a real recording.
+
+    Only the branches that carry a brace are touched. Every other line is returned
+    unchanged, so there is no list here of which sentences are personal.
+  */
+  const learner = useLearner()
+  /*
+    AND A NAME THAT WORKS IN A SENTENCE when they did not give one.
+
+    nameFor falls back to "You", which is right for the Legend part it was written for —
+    "You and the city" reads perfectly. Inside a sentence it does not: "Chamo-me You." is
+    not Portuguese and "My name is You" is nonsense, so the decline case would have been
+    worse than the Ana it replaced.
+
+    A placeholder that looks like a placeholder is the honest answer. Somebody who skipped
+    the name question sees the SHAPE of their own introduction with an obvious blank in it,
+    which is a sentence they can fill in their head — and the Portuguese around it is still
+    exactly right.
+  */
+  const mine = (t: string) => myName(t, learner.display_name)
+  const shown = mine(branchAt(branch, register))
   const other = branch.formal && branch.address === 'tu'
-    ? register === 'formal' ? branch.target : branch.formal
+    ? mine(register === 'formal' ? branch.target : branch.formal)
     : null
   return (
     <li
@@ -2064,7 +2094,7 @@ function BranchRow({ branch, i, register }: { branch: Branch; i: number; registe
       <CopyButton text={shown} size="sm" />
       <span className="min-w-0">
         <span className="pt block text-lg text-accent">{shown}</span>
-        <span className="mt-1 block text-sm text-fg/75">{branch.en}</span>
+        <span className="mt-1 block text-sm text-fg/75">{mine(branch.en)}</span>
         {other ? (
           <span className="pt mt-1 block text-xs text-muted">
             {register === 'formal' ? 'tu: ' : 'formal: '}
@@ -2437,11 +2467,26 @@ function RootBeatView({
 
   if (beat === 'build') {
     const target = buildTargetFor(root)
+    /*
+      And the learner builds their OWN name, not a stranger's.
+
+      buildTargetFor picks a branch, and on the two introduction roots that branch is
+      "Chamo-me {name}." — so without this the tiles would carry a literal brace. Filled
+      here rather than excluded from selection, because assembling your own introduction is
+      the best possible version of this beat: the sentence is true the moment it is built.
+
+      MiniBuild splits the target on spaces, so a filled name becomes its own tile. A name
+      with a space in it is one tile too many, which is the same shape as any multi-word
+      answer this beat already handles.
+    */
+    /* Their own name in their own introduction — see myName. */
+    const en = myName(target.en, learner.display_name)
+    const pt = myName(target.target, learner.display_name)
     return (
       <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         <p className="eyebrow text-muted">YOUR TURN</p>
-        <p className="display mt-3 text-balance text-2xl">“{target.en}”</p>
-        <MiniBuild target={target.target} helpers={root.helpers} onSolved={() => setDone(true)} />
+        <p className="display mt-3 text-balance text-2xl">“{en}”</p>
+        <MiniBuild target={pt} helpers={root.helpers} onSolved={() => setDone(true)} />
         {done ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
       </Shell>
     )
