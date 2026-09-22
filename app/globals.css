@@ -236,26 +236,41 @@ body {
 */
 .min-h-svh {
   /*
-    BACK TO svh, AND THE CHROME BAND IS COVERED BY THE CANVAS INSTEAD.
+    lvh, AND THE OVERFLOW IS CLIPPED RATHER THAN SCROLLED.
 
-    Measured on Sam's phone: svh 699, lvh 739, dvh 699 in a 390x844 screen.
+    Measured on the phone: svh 699, lvh 739, dvh 699 in a 390x844 screen.
 
-    Each of the three was tried and each was wrong in its own way. `dvh` EQUALS svh while
-    the toolbar is showing, so it changed nothing. `lvh` is 40px TALLER than the window,
-    which covers the band but makes the page scrollable by exactly 40px — and a landing
-    screen that scrolls puts its own photograph off the top the moment anybody drags it,
-    which is the strip Sam then saw under the status bar. A screen that should not scroll
-    must not be given a height that lets it.
+    All three heights were tried and the history is worth keeping, because I reverted the
+    one that worked. `dvh` EQUALS svh while the toolbar is showing, so it changed nothing.
+    `lvh` — the viewport with the chrome retracted — filled the screen properly, and Sam
+    said so: the previous fix "showed a full bleed top to bottom image in the desktop app".
 
-    So the screen is the window's height, honestly, and the strip the toolbar sits over is
-    the CANVAS's job — which it can do, because the canvas is infinite and does not care
-    how tall the document is. That is what the html-background rule above is for, and with
-    `body` no longer painting its own box over it, it finally works.
+    Then I took it back, because lvh is 40px taller than the window and that made the page
+    SCROLLABLE by 40px: drag it and the photograph slides off the top. I treated the
+    scroll as proof that lvh was wrong. It was not — the height was right and the scroll
+    was the bug, and reverting traded a working bottom for a broken top.
 
-    The one thing left is the colour: the canvas is --bg, the sand, and a full-bleed screen
-    is a photograph on a dark ground. See [data-stage] below.
+    So: lvh for the height, and overflow-y: clip so the extra 40px can never be dragged
+    into view. The screen fills the glass, nothing scrolls, and the content is anchored to
+    the bottom (justify-end) so what the clip takes is the top of a photograph rather than
+    anything anybody needs to read.
+  */
+  /*
+    lvh FOR THE GROUND, svh FOR THE BOX.
+
+    The screen must PAINT to the bottom of the glass, which is lvh — the viewport with the
+    browser's chrome retracted, and the height Sam confirmed worked: "showed a full bleed
+    top to bottom image". But an element 739 tall in a 699 window makes the page scrollable
+    by 40px, and dragging it slides the photograph off the top. I reverted lvh over that
+    and traded a working bottom for a broken top.
+
+    Both, then. min-height is svh so the BOX is the window and nothing overflows; the
+    ground is painted past it with a shadow, which takes no space and cannot be scrolled
+    to. The image is `fill`, so it covers the box; the shadow covers the strip below it in
+    the same colour, and the two read as one photograph reaching the glass.
   */
   min-height: 100svh;
+  box-shadow: 0 200px 0 0 var(--ground-dark);
 }
 
 /*
