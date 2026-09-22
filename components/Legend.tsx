@@ -17,6 +17,7 @@ import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
 import { answerLegend, recordProof } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
+import { useRestore } from '@/engine/useRestore'
 
 /**
  * Your Legend.
@@ -35,6 +36,8 @@ type Mode = 'deck' | { build: string } | 'rehearse' | 'cold'
 
 export function Legend() {
   const learner = useLearner()
+  /* Signed in on another surface? Pull it back. See useRestore. */
+  useRestore()
   const [mode, setMode] = useState<Mode>('deck')
   const [mounted, setMounted] = useState(false)
   useEffect(() => {

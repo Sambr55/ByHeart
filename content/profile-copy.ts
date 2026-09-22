@@ -146,6 +146,7 @@ export const PROFILE_COPY = {
     and a score is the thing this screen refuses to become — what changes as somebody
     learns is what they can DO, so the line says the next thing they will be able to do.
   */
+  stage_label: 'WHERE YOU ARE',
   stage_next: 'Everything here moves you towards {name}.',
   legend_have_one: 'One thing you can say about yourself.',
   legend_have: '{done} things you can say about yourself.',

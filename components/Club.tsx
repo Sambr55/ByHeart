@@ -33,6 +33,7 @@ import { useEntitlements } from '@/engine/useEntitlements'
 import { track } from '@/engine/analytics'
 import { loadLearner, setPurpose, type LearnerState, welcomeToClub } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
+import { useRestore } from '@/engine/useRestore'
 import { useNowAfterMount } from '@/engine/useNow'
 import { Dock, Framed } from '@/components/Dock'
 import { PURPOSES, type Purpose } from '@/content/situations'
@@ -59,6 +60,8 @@ export function Club() {
   /* Set by the front door's COME IN, and by nothing else. */
   const fromDoor = params.get('in') === '1'
   const learner = useLearner()
+  /* Signed in on another surface? Pull it back. See useRestore. */
+  useRestore()
   const now = useNowAfterMount()
   const mounted = now !== null
 

@@ -12,12 +12,13 @@ import { Wordmark } from '@/components/Wordmark'
 import { askedCards, cardById, cardFace, derivedCards, dropsFor, roomsFor, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
 import { CRATES, PIECES, ROOTS, type CultureFamily } from '@/content/roots'
-import { LEGEND_FRAMES, askFor, cardFor, cardToGo, nextStage, stageFor, frameApplies, frameForPurpose, frameReady, legendStatus, progressFor } from '@/content/legend'
+import { LEGEND_FRAMES, askFor, cardFor, cardToGo, nextStage, stageFor, frameApplies, frameForPurpose, frameReady, legendStatus, progressFor, STAGES } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/avatar'
 import { setDisplayName } from '@/engine/learner'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { useLearner } from '@/engine/useLearner'
+import { useRestore } from '@/engine/useRestore'
 
 /**
  * Your Lisbon, rather than the next thing.
@@ -157,6 +158,8 @@ type Tile =
 export function Profile() {
   const learner = useLearner()
   const access = useEntitlements()
+  /* Signed in on another surface? Pull it back. See useRestore. */
+  useRestore()
   const [mounted, setMounted] = useState(false)
   const [open, setOpen] = useState<FeedCard | null>(null)
   /*
@@ -1325,7 +1328,25 @@ function LegendHero() {
               measuring the whole screen instead of one sixth of it.
             */}
             <div className="mt-3 flex flex-col gap-1 border-t border-accent-ink/20 pt-3">
-              <p className="text-sm font-semibold">{stage.name}</p>
+              {/*
+                SAY THAT IT IS A LADDER, because the name alone does not.
+
+                This was the stage name on its own over a bar. Sam: "I had no idea the
+                being understood was a progress bar to another level." Reasonable — "Being
+                understood" reads as a description of how things are going, not as the
+                third of five rungs, and a bar under a description looks like decoration.
+
+                The eyebrow names what the number IS, and the position says there is a
+                ladder and where on it you stand. Two short lines, and the bar underneath
+                stops being ambiguous.
+              */}
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="eyebrow opacity-70">{PROFILE_COPY.stage_label}</p>
+                <p className="eyebrow opacity-70">
+                  {STAGES.indexOf(stage) + 1} / {STAGES.length}
+                </p>
+              </div>
+              <p className="text-base font-semibold">{stage.name}</p>
               {onward ? (
                 <>
                   <div
