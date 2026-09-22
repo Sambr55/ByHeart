@@ -599,8 +599,78 @@ function Landing() {
             Been here before?
           </Link>
         ) : null}
+        {/*
+          THE NUMBERS, ON THE SCREEN THAT HAS THE FAULT.
+
+          /whatami reports all of this and there is no way to reach it from here — the
+          landing has one button and one link, and an installed app has no address bar.
+          Sam, reasonably: "how am I supposed to give you whatami from within the app?"
+          He could not, and I kept asking.
+
+          So the readout comes to the screen. `?why=1` because this is a measurement rather
+          than a feature: a learner never sees it, and the one person who needs it can put
+          it on the URL before adding DUB to their home screen.
+        */}
+        <Measured />
       </div>
     </main>
+  )
+}
+
+/**
+ * What this screen actually measures, printed on it.
+ *
+ * Every number here decides whether a full-bleed screen reaches the bottom of the glass:
+ * the window against the physical screen, the three viewport units, and what is painted at
+ * the very foot. A band at the bottom is one of these disagreeing, and which one says
+ * which fix is right — none of which can be inferred from a photograph, which is what I
+ * spent a day doing.
+ */
+function Measured() {
+  const [rows, setRows] = useState<string[] | null>(null)
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('why') !== '1') return
+    const probe = document.createElement('div')
+    probe.style.cssText = 'position:fixed;top:0;left:0;width:1px;pointer-events:none;opacity:0'
+    document.body.appendChild(probe)
+    const unit = (u: string) => {
+      probe.style.height = '100' + u
+      return Math.round(probe.getBoundingClientRect().height)
+    }
+    const units = 'svh ' + unit('svh') + ' · lvh ' + unit('lvh') + ' · dvh ' + unit('dvh')
+    probe.remove()
+    const el = document.elementFromPoint(
+      Math.round(window.innerWidth / 2),
+      window.innerHeight - 2,
+    ) as HTMLElement | null
+    let painter: HTMLElement | null = el
+    while (painter && getComputedStyle(painter).backgroundColor === 'rgba(0, 0, 0, 0)') {
+      painter = painter.parentElement
+    }
+    const main = document.querySelector('main')?.getBoundingClientRect()
+    setRows([
+      'window ' + window.innerWidth + '×' + window.innerHeight +
+        ' · screen ' + window.screen.width + '×' + window.screen.height,
+      units,
+      'main ends ' + (main ? Math.round(main.bottom) : '?') +
+        ' · gap ' + (main ? Math.round(window.innerHeight - main.bottom) : '?'),
+      'at foot ' + (painter ? getComputedStyle(painter).backgroundColor : '(canvas)'),
+      (window.matchMedia('(display-mode: standalone)').matches ||
+      (navigator as unknown as { standalone?: boolean }).standalone === true
+        ? 'installed app'
+        : 'browser tab') + ' · inset ' +
+        getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom').trim(),
+    ])
+  }, [])
+  if (!rows) return null
+  return (
+    <div className="mt-3 w-full max-w-sm rounded bg-black/70 px-3 py-3 text-left">
+      {rows.map((r) => (
+        <p key={r} className="font-mono text-[0.6rem] leading-relaxed text-white/90">
+          {r}
+        </p>
+      ))}
+    </div>
   )
 }
 
