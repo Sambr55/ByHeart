@@ -394,10 +394,25 @@ export function Profile() {
           </button>
         </header>
         <div className="h-full">
+          {/*
+            A REJECT HERE HAS TO BE VISIBLE, because it un-saves the card.
+
+            Card's pane scroller calls rejectCard on a left swipe, and rejectCard removes
+            the id from `saved` as well as pushing it to the back of the Club. In the feed
+            that is announced — onRejected raises a toast carrying BRING IT BACK. Yours
+            passed nothing, so a learner opening a card they had deliberately bookmarked
+            and swiping it the way the Club taught them lost it with no message and no
+            undo: the pile they were looking at was one shorter when they closed the view.
+
+            Closing the overlay is the honest minimum. The card has left the pile it was
+            opened from, so staying on it would show a card that is no longer there — and
+            the grid behind is the place that says what is left.
+          */}
           <Card
             card={open}
             saved={saved.includes(open.id)}
             liked={(learner.liked ?? []).includes(open.id)}
+            onRejected={() => setOpen(null)}
           />
         </div>
       </main>

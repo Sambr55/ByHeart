@@ -136,14 +136,44 @@ export function entitlementsFor(
   own gaps is not being honest, it is arguing against itself, and the visitor cannot tell
   the difference between candour and a warning.
 */
+/**
+ * Small numbers as words, because prose says five and not 5.
+ *
+ * Only as far as the allowance can plausibly go. A number past the table falls back to
+ * the digit, which is worse-looking and still true — the alternative is a number-to-words
+ * library for one sentence.
+ */
+const WORDS: Record<number, string> = {
+  1: 'one', 2: 'two', 3: 'three', 4: 'four', 5: 'five',
+  6: 'six', 7: 'seven', 8: 'eight', 9: 'nine', 10: 'ten',
+}
+
 export const PLANS = {
   free: {
     id: 'free' as const,
     name: 'DUB',
     price: null,
-    line: 'Your Legend, three vibes, a line every morning, and everything you make is yours to share.',
+    /*
+      THE NUMBER COMES FROM THE CONSTANT, because typing it let it drift.
+
+      This said "three vibes" while FREE_CRATES is 5 and has been since the door and the
+      allowance were deliberately decoupled — the door became "basics plus three vibes you
+      chose" and the allowance deliberately did NOT move. None of the copy followed. So
+      /pro, /account and the help page all answered a question about a limit that is not
+      the limit, and the gateway fired at five under a headline promising three.
+
+      Sam has never seen a paywall, and this is half of why: he was watching for the third.
+
+      Written from FREE_CRATES so the next time one of these two numbers moves, the copy
+      moves with it. The Legend door's own "three vibes" in front-door.ts is a DIFFERENT
+      three and stays — that one is VIBES_FOR_LEGEND, which really is three.
+    */
+    line:
+      'Your Legend, ' + (WORDS[FREE_CRATES] ?? String(FREE_CRATES)) +
+      ' vibes, a line every morning, and everything you make is yours to share.',
     includes: [
-      'Three vibes, chosen by you and yours for good',
+      (WORDS[FREE_CRATES] ?? String(FREE_CRATES)).replace(/^./, (c) => c.toUpperCase()) +
+        ' vibes, chosen by you and yours for good',
       'The morning line, every day',
       'Every live drop, always — those are never gated',
       'Share anything you can say',

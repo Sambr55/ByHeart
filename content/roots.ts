@@ -1816,7 +1816,24 @@ export const PULP_FICTION: Root[] = [
     subtext: 'The film gives this line menace. Keep the polite version — that is the one you will actually need.',
     extracts: [
       { id: 'diz', target: 'diz', gloss: 'say', shelf: 'doing', lemma: 'dizer', form: 'you, an order' },
-      { id: 'o_que', target: 'o quê?', gloss: 'what?', shelf: 'asking' },
+      /*
+        A DISTINCT ID, because this is a different word from `o que`.
+
+        Both extracts were `o_que` — this one (rung 3, Pulp Fiction) and the relative
+        pronoun in ma_control (rung 6, "o que", that which). The PIECES builder keys by id
+        and keeps the LOWEST rung, so this one won and the rung-6 definition was discarded
+        entirely.
+
+        They are not the same word. `o quê?` is the standalone stressed interrogative —
+        What?! — and `o que` is the unstressed relative, as in "controla o que podes
+        controlar". A learner reading "O que é mais importante?" and tapping the piece
+        behind it was shown a card reading "o quê? — what?", with an accent that does not
+        appear in the sentence in front of them.
+
+        The interrogative takes the new id because it is the odd one: two branches and a
+        `reinforces` already point at `o_que` meaning the relative.
+      */
+      { id: 'o_que_ask', target: 'o quê?', gloss: 'what?', shelf: 'asking' },
     ],
     branches: [
       { target: 'Diz outra vez.', en: 'Say it again.' , address: 'tu', formal: 'Diga outra vez.' },

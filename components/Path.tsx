@@ -25,7 +25,10 @@ interface Step {
 
 export const PATH: Step[] = [
   { id: 'basics', label: 'The basics', note: 'Hello, thank you, yes, no, one to ten.' },
-  { id: 'picking', label: 'Two vibes you pick', note: 'Any two you like. That is the free three.' },
+  /* "the free three" was wrong twice over — FREE_CRATES is 5, and this step is the door's
+     three chosen vibes rather than the allowance. It names neither number now, because
+     the step is about choosing and the counts live where they are enforced. */
+  { id: 'picking', label: 'Vibes you pick', note: 'Any you like, and they stay yours.' },
   { id: 'gate', label: 'Membership', note: 'If you want to carry on.', gate: true },
   // The deal explains the Legend in full just above this, so the map only has to place
   // it. On the shelf, where there is no such block, the label still carries the idea.

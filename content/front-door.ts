@@ -669,8 +669,25 @@ export const CLOSE = {
  * only place in the app that makes one.
  */
 export const GATEWAY = {
-  eyebrow: 'THAT IS THE FREE THREE',
-  headline: 'Basics and two vibes. That is the free part done.',
+  /*
+    THE NUMBER THE CODE ACTUALLY ENFORCES.
+
+    This said "THAT IS THE FREE THREE" over "Basics and two vibes" — and the gateway it
+    titles fires at FREE_CRATES, which is 5. The door and the allowance were deliberately
+    decoupled (the door is the basics plus three vibes you CHOSE; the allowance stayed
+    where it was) and none of the copy moved with it. So the one screen in the product
+    that asks for money named a limit two vibes short of the one it was enforcing.
+
+    Sam has never seen this screen, and this was half the reason — he was watching for the
+    third vibe. The other half is structural and unfixed: `spent` is claimed MINUS
+    finished, so a learner who finishes what they start never reaches the cap at all.
+
+    Eyebrow says nothing countable now. The headline carries the number, because the
+    headline is the sentence somebody reads, and scripts/allowance-check holds it to
+    FREE_CRATES.
+  */
+  eyebrow: 'THAT IS THE FREE PART',
+  headline: 'The basics and five vibes, chosen by you. That is the free tier done.',
   // The picture above it already says where this goes. Repeating it in prose was the
   // longest sentence on the screen and taught nobody anything.
   body: 'Everything you kept stays yours, whatever you decide.',

@@ -33,8 +33,21 @@ export const HELP: HelpItem[] = [
   },
   {
     id: 'three',
-    q: 'Why can I only open three vibes?',
-    a: 'Three vibes is the free tier, and the three you choose stay yours for good — we are never going to take one back. Every live drop is always open on top of that, whatever you are paying, because a drop can be lost by being busy and charging for it would be mean.',
+    /*
+      FIVE, WHICH IS WHAT THE CODE ENFORCES.
+
+      This said three, and the allowance has been FREE_CRATES = 5 since the Legend door and
+      the free tier were decoupled — the door became "basics plus three vibes you chose"
+      and the allowance deliberately stayed where it was. The copy never followed, so this
+      answered a question about a limit that is not the limit, and the gateway fires two
+      vibes after the page says it will.
+
+      Written out rather than interpolated because this is a question somebody reads —
+      and held to FREE_CRATES by scripts/allowance-check.mts, which refuses any copy
+      naming a different number for the same limit.
+    */
+    q: 'Why can I only open five vibes?',
+    a: 'Five vibes is the free tier, and the five you choose stay yours for good — we are never going to take one back. Every live drop is always open on top of that, whatever you are paying, because a drop can be lost by being busy and charging for it would be mean.',
     link: { href: '/pro', label: 'What DUB adds' },
   },
   {

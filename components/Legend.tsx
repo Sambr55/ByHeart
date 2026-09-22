@@ -459,9 +459,23 @@ export function Legend() {
                   PICKER.legend_basics. It said "lines of the basics", which counts
                   something nobody can choose to do.
                 */}
-                {PICKER.legend_basics(
-                  Math.max(0, doorStatus.sessionsNeeded - doorStatus.sessionsDone),
-                )}{' '}
+                {/*
+                  WHICH HALF OF THE DOOR, because there are two and this said only one.
+
+                  It always called legend_basics, so once the basics closed and the three
+                  chosen vibes were what remained it printed "0 more basics sessions, then
+                  three vibes of your own" — a literal zero, directly above "The basics are
+                  done.", with no next step. Journey (onBasics) and Profile both branch on
+                  toGo at exactly this moment; the Legend's own page was the third place
+                  and the one that did not.
+                */}
+                {doorStatus.toGo > 0
+                  ? PICKER.legend_basics(
+                      Math.max(0, doorStatus.sessionsNeeded - doorStatus.sessionsDone),
+                    )
+                  : PICKER.legend_vibes(
+                      Math.max(0, doorStatus.vibesNeeded - doorStatus.vibesDone),
+                    )}{' '}
                 {LEGEND_COPY.locked_body}
               </p>
               {/*
