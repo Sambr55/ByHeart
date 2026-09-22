@@ -672,7 +672,21 @@ function Measured() {
     } catch {
       /* As above. */
     }
-    if (!on) return
+    /*
+      AND ALWAYS IN THE INSTALLED APP, until this is settled.
+
+      The latch works and it arrived after Sam had already added DUB to his home screen,
+      so the app he is testing has no flag in its storage and still shows nothing. Four
+      rounds of this have been me asking for numbers I had made unreachable.
+
+      An installed app is not something a stranger stumbles into — it is a deliberate act
+      by somebody testing this. So it reports unconditionally there, and `?why=0` still
+      silences it. It comes out the moment the band is understood.
+    */
+    const installed =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (navigator as unknown as { standalone?: boolean }).standalone === true
+    if (!on && !(installed && q !== '0')) return
     const probe = document.createElement('div')
     probe.style.cssText = 'position:fixed;top:0;left:0;width:1px;pointer-events:none;opacity:0'
     document.body.appendChild(probe)
