@@ -25,9 +25,9 @@ const ok = (label: string, cond: boolean, detail = '') => {
 
 /** A phone as it was before the fix: answers on file, proof banked with the template. */
 const answers: LegendAnswer[] = [
-  { frame_id: 'name', values: { name: 'Sam' }, said_cold: 0, at: '1' },
-  { frame_id: 'work', values: { thing: 'computadores' }, said_cold: 0, at: '1' },
-  { frame_id: 'age', values: { n: '56' }, said_cold: 0, at: '1' },
+  { frame_id: 'name', values: { name: 'Sam' }, at: '1' },
+  { frame_id: 'work', values: { thing: 'computadores' }, at: '1' },
+  { frame_id: 'age', values: { n: '56' }, at: '1' },
 ]
 const damaged = answers.map((a) => {
   const f = LEGEND_FRAMES.find((x) => x.id === a.frame_id)!

@@ -24,7 +24,7 @@ const base = {
   chapter: 'lisbon',
   purpose: 'moving',
   proof: [{ pt: rung6.transfer_prompt.answer, en: rung6.transfer_prompt.ask, source: 'release', clean: true, at: '1' }],
-  legend: LEGEND_CARD.map((f) => ({ frame_id: f.id, values: { x: 'y' }, said_cold: 0, at: '1' })),
+  legend: LEGEND_CARD.map((f) => ({ frame_id: f.id, values: { x: 'y' }, at: '1' })),
   roots_played: ['fl_f_engracado'],
   sections_completed: [],
 }

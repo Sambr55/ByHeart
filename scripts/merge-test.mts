@@ -184,14 +184,13 @@ function ev(
   sync that undoes it is the product overruling them about their own family.
 */
 {
-  const card = (frame_id: string, values: Record<string, string>, said_cold: number, at: string) => ({
+  const card = (frame_id: string, values: Record<string, string>, at: string) => ({
     frame_id,
     values,
-    said_cold,
     at,
   })
-  const older = card('children', { n: '2', names: 'Ana e Rui' }, 3, '2026-08-01T09:00:00.000Z')
-  const newer = card('children', { n: '3', names: 'Oscar, Tilly e Ted' }, 2, '2026-08-20T09:00:00.000Z')
+  const older = card('children', { n: '2', names: 'Ana e Rui' }, '2026-08-01T09:00:00.000Z')
+  const newer = card('children', { n: '3', names: 'Oscar, Tilly e Ted' }, '2026-08-20T09:00:00.000Z')
 
   for (const [label, m] of [
     ['newer as remote', mergeLearner({ legend: [older] }, { legend: [newer] })],
@@ -199,14 +198,17 @@ function ev(
   ] as const) {
     const got = m.legend.find((a) => a.frame_id === 'children')
     check(label + ': the later edit wins', got?.values.names === 'Oscar, Tilly e Ted', String(got?.values.names))
-    check(label + ': rehearsals add rather than replace', got?.said_cold === 5, String(got?.said_cold))
+    /*
+      The rehearsal count that used to be summed here is gone — see the note on `legend`
+      in engine/learner.ts. What it measured was self-certified, and nothing rendered it.
+    */
   }
 
   check(
     'two different cards both survive',
     mergeLearner(
-      { legend: [card('name', { name: 'Sam' }, 1, '1')] },
-      { legend: [card('age', { n: '56' }, 1, '1')] },
+      { legend: [card('name', { name: 'Sam' }, '1')] },
+      { legend: [card('age', { n: '56' }, '1')] },
     ).legend.length === 2,
   )
   /*
@@ -217,7 +219,7 @@ function ev(
     merge cannot tell "I never answered this" from "I cleared it". An empty row with a
     later timestamp can.
   */
-  const cleared = card('children', {}, 3, '2026-08-25T09:00:00.000Z')
+  const cleared = card('children', {}, '2026-08-25T09:00:00.000Z')
   const stillThere = mergeLearner({ legend: [cleared] }, { legend: [newer] }).legend.find(
     (a) => a.frame_id === 'children',
   )

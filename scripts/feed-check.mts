@@ -39,7 +39,7 @@ await page.evaluate(
       deal_accepted_at: '2026-08-01T00:00:00.000Z',
       proof: [{ pt, en, source: 'release', clean: true, at: '1' }],
       inventory: {}, roots_played: [], sections_completed: ['the_basics'],
-      legend: (frames as string[]).map((id) => ({ frame_id: id, values: { x: 'y' }, said_cold: 0, at: '1' })),
+      legend: (frames as string[]).map((id) => ({ frame_id: id, values: { x: 'y' }, at: '1' })),
       legend_prompt: 'accepted',
       club_welcomed_at: '2026-08-20T00:00:00.000Z',
     }))

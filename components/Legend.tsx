@@ -15,7 +15,7 @@ import { MiniBuild } from '@/components/Journey'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
-import { answerLegend, recordProof, rehearsedLegend } from '@/engine/learner'
+import { answerLegend, recordProof } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 
 /**
@@ -1384,7 +1384,6 @@ function BuildCard({
               re-say. Rows banked before this fix need the one-off repair below.
             */
             recordProof({ pt: sentence, en: fillEnglish(frame, draft), source: 'legend', clean })
-            if (clean) rehearsedLegend(frame.id)
           }}
           onNext={onDone}
         />
@@ -1606,9 +1605,9 @@ function RunThrough({
       COLD         slice(0, 1) — ONE card, shuffled, with the I SAID IT claim
 
     So one was the whole card and taught nothing, and the other was a single question
-    wearing the name of the harder thing. And the claim the cold run existed to record,
-    `said_cold`, is written and displayed NOWHERE — so the only outcome distinguishing the
-    two was invisible to the person choosing between them.
+    wearing the name of the harder thing. And the claim the cold run existed to record —
+    a `said_cold` counter, since deleted — was written and displayed nowhere, so the only
+    outcome distinguishing the two was invisible to the person choosing between them.
 
     The run is now the union of what each was for: every card, shuffled, and the honest
     fork on every one. Shuffled because a run in the order you built them is a recital of a
@@ -1721,7 +1720,6 @@ function RunThrough({
               data-testid="legend-reveal"
               onClick={() => {
                 setShown(true)
-                rehearsedLegend(frame.id)
               }}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
             >

@@ -82,7 +82,7 @@ const base = {
 }
 const rung6Root = ROOTS.find((r) => r.rung === 6)!
 const releaseProof = (r = rung6Root) => [{ pt: r.transfer_prompt.answer, en: r.transfer_prompt.ask, source: 'release', clean: true, at: '1' }]
-const legendDone = LEGEND_CARD.map((f) => ({ frame_id: f.id, values: { x: 'y' }, said_cold: 0, at: '1' }))
+const legendDone = LEGEND_CARD.map((f) => ({ frame_id: f.id, values: { x: 'y' }, at: '1' }))
 
 // 1. The exact shape Sam described: a member who owns `es`.
 await run('member owning es (rung 6)', {

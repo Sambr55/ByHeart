@@ -141,8 +141,7 @@ export interface ProofLine {
 export interface LegendAnswer {
   frame_id: string
   values: Record<string, string>
-  /** Times said cold, with nothing on screen. A rehearsal count, never a score. */
-  said_cold: number
+  /** When this answer was last written. The merge reads it to decide between two edits. */
   at: string
 }
 
@@ -256,10 +255,15 @@ export interface LearnerState {
    * destroyed by account deletion, and it never reaches a share image unless the learner
    * puts it there deliberately.
    *
-   * `said_cold` is a rehearsal count and is never rendered as a score. It exists so the
-   * run-through can offer the cards somebody has practised least, and for nothing else —
-   * the moment a number is attached to being put on the spot, the feature becomes the
-   * anxiety it exists to remove.
+   * THERE IS NO REHEARSAL COUNT HERE ANY MORE. `said_cold` incremented on every I SAID IT
+   * and was never rendered — it was self-certified, which is the whole problem with it:
+   * the learner taps the button and the product records the claim as fact, checking
+   * nothing. Sam: "we have to take their word for it." Its one stated purpose, offering
+   * the cards somebody had practised least, was never built, and the run is shuffled.
+   *
+   * What survives is `proof`, which records a sentence actually produced and is the same
+   * claim from a better source. The retrieval itself — say it before you see it — stays
+   * exactly as it was; only the tally is gone.
    */
   legend: LegendAnswer[]
   /**
@@ -1378,7 +1382,6 @@ export function answerLegend(frameId: string, values: Record<string, string>) {
       {
         frame_id: frameId,
         values: filled,
-        said_cold: before?.said_cold ?? 0,
         // Every write restamps, because the merge decides between two edits by which is
         // later. This is the field that makes clearing a card stick.
         at: new Date().toISOString(),
@@ -1417,14 +1420,6 @@ export function setLegendPrompt(value: 'accepted' | 'declined') {
   })
 }
 
-/** One clean cold delivery. The count drives rehearsal order and is never shown. */
-export function rehearsedLegend(frameId: string) {
-  update((s) => {
-    s.legend = s.legend.map((a) =>
-      a.frame_id === frameId ? { ...a, said_cold: a.said_cold + 1 } : a,
-    )
-  })
-}
 
 /** A daily line shown. Recorded wherever it was shown — the page or a notification. */
 export function rememberLine(id: string) {

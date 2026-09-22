@@ -1399,16 +1399,24 @@ for (const e of EXAMPLES) {
   /*
     And nothing in the feature is scored.
 
-    A rehearsal count exists so the run-through can offer the least-practised card, and
-    for nothing else. The moment a number is attached to being put on the spot, the
-    feature becomes the anxiety it exists to remove — so no surface may render it.
+    The moment a number is attached to being put on the spot, the feature becomes the
+    anxiety it exists to remove. This used to name one field, `said_cold`, which has since
+    been deleted — it was self-certified and nothing rendered it. Naming the field made the
+    rule look like it was about that field; it is about the PRINCIPLE, so it guards the
+    principle instead and survives whatever the next counter is called.
+
+    The learner record is the place a score would come from, so any per-card tally added
+    there has to be argued for here rather than slipping in.
   */
-  for (const file of ['components/Legend.tsx', 'components/Club.tsx']) {
-    const src = readFileSync(file, 'utf8')
-      .replace(/\/\*[\s\S]*?\*\//g, ' ')
-      .replace(/(^|[^:])\/\/[^\n]*/g, ' ')
-    if (/\{[^}]*said_cold[^}]*\}/.test(src)) {
-      fail(file + ' renders said_cold — the rehearsal count is never shown to a learner')
+  {
+    const src = readFileSync('engine/learner.ts', 'utf8')
+    const shape = src.slice(src.indexOf('interface LegendAnswer'), src.indexOf('interface LegendAnswer') + 400)
+    const counters = [...shape.matchAll(/^\s*(\w+): number/gm)].map((m) => m[1])
+    if (counters.length) {
+      fail(
+        'LegendAnswer carries a per-card number (' + counters.join(', ') + ') — a tally on ' +
+          'a Legend card is a score on being put on the spot',
+      )
     }
   }
 

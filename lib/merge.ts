@@ -288,13 +288,14 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
       arr<Rec>(l.legend),
       arr<Rec>(r.legend),
       (a) => String(a.frame_id),
-      (x, y) => {
-        const newer = String(y.at ?? '') > String(x.at ?? '') ? y : x
-        return {
-          ...newer,
-          said_cold: Number(x.said_cold ?? 0) + Number(y.said_cold ?? 0),
-        }
-      },
+      /*
+        The later edit wins, and there is nothing left to add up.
+
+        This also summed `said_cold`, a rehearsal count that is gone — see the note on
+        `legend` in engine/learner.ts. A card is a learner's own words about themselves, so
+        an EDIT is a real intention and the later `at` is the later edit.
+      */
+      (x, y) => (String(y.at ?? '') > String(x.at ?? '') ? y : x),
     ),
     // Finishing a section is not undoable, and the Club's welcome fired at whichever
     // moment came first — a learner who signs in on a new phone is not new.

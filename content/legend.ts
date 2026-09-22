@@ -998,10 +998,10 @@ export const LEGEND_CARD = cardFor(null)
 /**
  * Is the card finished?
  *
- * Deliberately NOT measured with said_cold. That counter is documented as a rehearsal
- * count that is never rendered as a score, because the moment a number is attached to
- * being put on the spot the feature becomes the anxiety it exists to remove — and a gate
- * is the strongest kind of score there is.
+ * Deliberately NOT measured with a rehearsal count. One existed and has been deleted: it
+ * was self-certified, and the moment a number is attached to being put on the spot the
+ * feature becomes the anxiety it exists to remove — and a gate is the strongest kind of
+ * score there is.
  *
  * IT NO LONGER ASKS THE RUNG EITHER, and the reason is worth keeping.
  *
