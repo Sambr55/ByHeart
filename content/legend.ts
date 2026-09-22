@@ -42,10 +42,36 @@ export interface LegendSlot {
   kind: SlotKind
   /** What to show in the empty field. Never a value — a shape. */
   hint: string
-  /** For `pick`: the closed set. Gendered options carry both endings. */
-  options?: { value: string; en: string; f?: string }[]
+  /**
+   * For `pick`: the closed set. Gendered options carry both endings.
+   *
+   * `f_en` FOR WHEN THE ENDING CHANGES WHO IS BEING DESCRIBED.
+   *
+   * `f` normally agrees an adjective with the SPEAKER — solteiro/solteira, casado/casada
+   * — and the English is untouched, because "I am single" is true in either mouth. But
+   * `namorado`/`namorada` is not agreement, it is a different person: the ending names the
+   * PARTNER'S gender, not the speaker's. Rendering the base English against it told a woman
+   * that "Tenho namorada" means "I have a boyfriend", and told anybody who had not given a
+   * gender that the two chips they were choosing between meant the same thing.
+   *
+   * Absent means the English is the same for both forms, which is the usual case.
+   */
+  options?: { value: string; en: string; f?: string; f_en?: string }[]
   /** True when the answer's ending depends on profile.gender. */
   gendered?: boolean
+  /**
+   * Options on this slot whose `f` ending describes somebody OTHER than the speaker.
+   *
+   * A gendered slot filters to the one form that agrees with the learner, which is right
+   * for an adjective about them and wrong for a noun about a third person: knowing a
+   * learner is a woman tells you she says "solteira", and tells you nothing whatsoever
+   * about whether she has a namorado or a namorada. Filtering it anyway took the choice
+   * away and assumed the answer — so an option listed here always offers both forms,
+   * each with its own English.
+   *
+   * Keyed by `value` so it names the option rather than a position in the list.
+   */
+  gendered_names_the_other?: string[]
   /**
    * For `pick`: the list is the common answers, not the only ones.
    *
@@ -171,6 +197,28 @@ export function myName(line: string, displayName?: string | null): string {
   return who ? line.replaceAll(AUTHORED_NAME, who) : line
 }
 
+/**
+ * The question as it would actually be put TO THIS LEARNER.
+ *
+ * `ask` is what a stranger says to you, and a stranger says it with an ending. "És
+ * casado?" is what a man is asked; a woman is asked "És casada?" — so every screen that
+ * showed the bare `ask` was teaching a woman to recognise a question nobody will ask her,
+ * and reading it aloud in the wrong agreement too.
+ *
+ * The frame's own answer has agreed with the speaker since the Legend was built. Only the
+ * question never did, because nothing pointed at it: the slot machinery handles answers.
+ *
+ * Declared per frame via `ask_f` rather than derived — same argument as `address` on a
+ * branch. Portuguese agreement is not a string transform, and the frames that need it are
+ * few enough to write out.
+ */
+export function askFor(
+  frame: { ask: string; ask_f?: string },
+  gender?: string | null,
+): string {
+  return gender === 'f' && frame.ask_f ? frame.ask_f : frame.ask
+}
+
 export function nameFor(part: { name: string }, displayName?: string | null): string {
   const who = (displayName ?? '').trim()
   return part.name.replace('{name}', who || 'You')
@@ -204,6 +252,14 @@ export interface LegendFrame {
   card: number
   /** The Portuguese question you will actually hear. */
   ask: string
+  /**
+   * The same question put to a woman, where the ending changes.
+   *
+   * Absent on most frames because most questions do not agree — "Tens filhos?" and "O que
+   * fazes?" are the same in any mouth. Present only where a stranger's own wording would
+   * differ, and read through `askFor` rather than by any screen directly.
+   */
+  ask_f?: string
   ask_en: string
   /** Authored, lint-checked. `{slot}` marks where the learner's own words go. */
   frame: string
@@ -375,6 +431,8 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     id: 'married',
     card: 4,
     ask: 'És casado?',
+    /* What a woman is actually asked. See askFor. */
+    ask_f: 'És casada?',
     ask_en: 'Are you married?',
     frame: 'Sou {status}.',
     en: 'I am {status}.',
@@ -395,7 +453,13 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     built_from: ['sou', 'casado'],
     depth: 'card',
     teaches:
-      'All three answers are descriptions, so all three take an ending: casado or casada, solteiro or solteira, divorciado or divorciada. And they go with sou rather than estou — Portuguese files this under what you are, not how you are today.'
+      /*
+        FOUR, because there are four. `separado` was added to the options and this line
+        was not, so the card counted three answers, named three pairs, and offered a
+        fourth underneath — on the one screen whose whole job is to be trusted about
+        endings.
+      */
+      'Every answer here is a description, so every one takes an ending: casado or casada, divorciado or divorciada, solteiro or solteira, separado or separada. And they go with sou rather than estou — Portuguese files this under what you are, not how you are today.'
   },
   {
     id: 'children',
@@ -493,9 +557,22 @@ export const LEGEND_FRAMES: LegendFrame[] = [
         kind: 'pick',
         hint: 'whichever is true',
         gendered: true,
+        gendered_names_the_other: ['Tenho namorado.'],
         options: [
           { value: 'Sou solteiro.', en: 'I am single.', f: 'Sou solteira.' },
-          { value: 'Tenho namorado.', en: 'I have a boyfriend.', f: 'Tenho namorada.' },
+          {
+            value: 'Tenho namorado.',
+            en: 'I have a boyfriend.',
+            f: 'Tenho namorada.',
+            /*
+              The one option on this card whose ending is not about the speaker.
+
+              Both forms are offered to everybody rather than filtered by the learner's own
+              gender, because who you are says nothing about who your partner is — see
+              `gendered_names_the_other` below.
+            */
+            f_en: 'I have a girlfriend.',
+          },
           { value: 'Sou casado.', en: 'I am married.', f: 'Sou casada.' },
         ],
       },
@@ -646,7 +723,17 @@ export const LEGEND_FRAMES: LegendFrame[] = [
     depth: 'card',
     helpers: { Porque: 'because' },
     teaches:
-      'Porque without an accent starts an answer; porquê with one asks the question. Two spellings, one sound, and getting it right is the small thing that makes writing look native.'
+      /*
+        NOT ONE SOUND — and in European Portuguese, not even close.
+
+        This said "two spellings, one sound", which is what the accent exists to deny.
+        `porque` ends in the reduced vowel Portuguese puts on almost every unstressed
+        final syllable; `porquê` carries the stress on that syllable and opens it. The
+        accent is not a spelling convention laid over an identical word, it marks the
+        difference a listener actually hears — and telling a learner the two sound alike
+        trains them to say the answer when they mean the question.
+      */
+      'Porque without an accent starts an answer; porquê with one asks the question. And they do not sound the same — porque tails off, porquê lands on the end, which is exactly what the accent is telling you to do.'
   },
   {
     /*

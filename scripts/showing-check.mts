@@ -64,7 +64,24 @@ ok('nothing but the Legend is excluded', showableLines([line('a', 'collision')])
 const publishers = files.filter((f) => read(f).includes("'/api/share'"))
 ok('there are publishers to check', publishers.length > 0, publishers.join(' '))
 for (const f of publishers) {
-  ok(f + ' publishes through showableLines', read(f).includes('showableLines'))
+  /*
+    OR DECLARES ITSELF A PUBLISHER OF AUTHORED CONTENT.
+
+    Errand mints an invite from a room's own sentence — shipped in the build, the same for
+    everybody, never read from the learner record. It has no proof lines to filter, so
+    `showableLines` is the wrong function for it and calling one to satisfy a check would
+    be a lie told to a gate.
+
+    `authoredLine` is how it says so, and the rule is unchanged in substance: every
+    publisher declares which kind it is, in code, and a publisher that declares neither
+    still fails. What is no longer accepted is a publisher that is safe only because
+    somebody read it and decided so.
+  */
+  const src = read(f)
+  ok(
+    f + ' publishes through showableLines',
+    src.includes('showableLines') || src.includes('authoredLine'),
+  )
 }
 
 console.log('\nnothing arbitrary can be written\n')

@@ -41,7 +41,7 @@ export function NotYet({
   const sections = learner.sections_completed ?? []
   const status = legendStatus({ rootsPlayed: played, sectionsCompleted: sections, sittings: learner.sittings ?? 0 })
   const open = status.open
-  const left = status.toGo
+  const left = Math.max(0, status.sessionsNeeded - status.sessionsDone)
   const vibesLeft = Math.max(0, status.vibesNeeded - status.vibesDone)
 
   /*
@@ -75,19 +75,24 @@ export function NotYet({
           The door is the basics plus three vibes you chose, and this said only the first
           half — so somebody who had finished the basics was told "it opens now" by
           arithmetic that no longer decided anything, and somebody three vibes deep was
-          told to play more lines of a vibe they had finished. Sam, having done exactly
+          told to play more of a vibe they had finished. Sam, having done exactly
           that: "I have just done multiple vibes but the legend isn't opening."
 
           One sentence per half, and only the half they are actually on: naming the vibes
           while the basics are unfinished is a second instruction nobody can act on yet.
+
+          Counted in SITTINGS, which is the thing a learner chooses to start. This screen
+          was the last one still counting roots, which is why it could say "5 more lines
+          of the basics" to somebody who had just finished everything they were shown.
         */}
         Your Legend is seven things about yourself, said with nothing on screen.{' '}
         {open
           ? 'It is open now — build it and the Club is yours.'
           : left > 0
-            ? left === 1
-              ? 'One more line of the basics, then three vibes of your own.'
-              : left + ' more lines of the basics, then three vibes of your own.'
+            ? (left === 1
+                ? 'One more sitting of the basics, then '
+                : left + ' more sittings of the basics, then ') +
+              (status.vibesNeeded === 1 ? 'one vibe of your own.' : status.vibesNeeded + ' vibes of your own.')
             : vibesLeft === 1
               ? 'The basics are done. One more vibe finished and it opens.'
               : 'The basics are done. ' + vibesLeft + ' more vibes finished and it opens.'}

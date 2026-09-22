@@ -212,11 +212,28 @@ const BEATS_PER_SESSION = 24
  * If a root here grows, this has to grow with it or the promise silently breaks again.
  * first-session fails when it does, which is the only reason it is safe to hard-code.
  *
+ * AND THE NAME IS NOW IN IT, which is what took it to 30.
+ *
+ * "Chamo-me…" is card 1 of the Legend and the most basic thing the door waits on, and it
+ * was arriving in the SECOND sitting — Sam: "the SIM card seems to come too late for the
+ * most basic word in the legend build." Front-loading it at 27 pushed the numbers out
+ * instead, and first-session said so at once: "the basics teaches no number in its first
+ * session, and its tile promises counting to ten". One promise traded for another.
+ *
+ * Same derivation, with the name in the list it should always have been in:
+ * hello (7) + chamo-me (10) + the first numbers (11) is 28, and 30 leaves the two
+ * screens of headroom the old figure had. Yes and no move to the second sitting — they
+ * are on the tile too, but they are not what the door is waiting on and they are not what
+ * the check guards, and a first sitting cannot hold everything the crate promises.
+ *
+ * Four roots would need 45 screens, which first-session refuses at 40 as "against a
+ * ten-minute promise". It is right to. Three roots is the honest size of ten minutes.
+ *
  * The REST of counting still arrives across later sessions — the cap is per session,
  * not per crate, and what is left over is what brings somebody back.
  */
 const BEATS_BY_FAMILY: Partial<Record<CultureFamily, number>> = {
-  the_basics: 27,
+  the_basics: 30,
 }
 
 interface JourneyState {
@@ -417,12 +434,32 @@ export function sectionRoots(
     the signature type because being able to build the card outranks being on-theme. It
     only applies where a doorway exists, so every other vibe sorts exactly as before.
   */
+  /*
+    AND THE SIGNATURE DOES NOT GET TO RE-SORT THE DOORWAY.
+
+    The doorway rank above front-loads the roots the Legend waits on, and then the
+    signature tiebreak reordered them among themselves — the basics are 12 titles of 16,
+    so the three doorway roots that happen to be song titles jumped the two that are not.
+    Measured: tb_hello_goodbye, tb_1234, tb_eight_days in the first sitting, and
+    tb_introduce — "Chamo-me…", the most basic thing in the whole Legend and the first
+    question on the card — pushed into the second. Sam: "the SIM card seems to come too
+    late for the most basic word in the legend build."
+
+    The signature rule's own note says what it is for: "this only decides which of two
+    equally-hard roots a learner meets". Two doorway roots are not equally-hard-and-
+    otherwise-equal — one of them is load-bearing for the door and the other is too, and
+    being on-theme is not a reason to prefer either. So it abstains where both sides are
+    in the doorway, and is unchanged everywhere else: a vibe with no doorway sorts exactly
+    as before, and inside the basics it still orders the eleven roots that are not.
+  */
   const doorway = new Set(doorwayRoots().map((r) => r.root_id))
   const eligible = (fresh.length ? fresh : replay.length ? replay : lowest).sort(
     (a, b) =>
       Number(Boolean(b.freebie_flag)) - Number(Boolean(a.freebie_flag)) ||
       Number(doorway.has(b.root_id)) - Number(doorway.has(a.root_id)) ||
-      Number(b.root_type === signature) - Number(a.root_type === signature) ||
+      (doorway.has(a.root_id) && doorway.has(b.root_id)
+        ? 0
+        : Number(b.root_type === signature) - Number(a.root_type === signature)) ||
       a.rung - b.rung,
   )
 

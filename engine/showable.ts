@@ -18,3 +18,23 @@ export const SHOWABLE_CAP = 3
 export function showableLines(proof: ProofLine[]): ProofLine[] {
   return [...proof].reverse().filter((p) => p.source !== 'legend').slice(0, SHOWABLE_CAP)
 }
+
+/**
+ * The other kind of publish: a line the PRODUCT wrote, not one the learner earned.
+ *
+ * An invite minted from a room carries that room's own sentence — authored content that
+ * shipped in the build, identical for everybody, and never touched by the learner record.
+ * There is nothing personal in it to filter, so `showableLines` is not merely unnecessary
+ * there, it is the wrong function: it takes proof lines, and handing it a room line would
+ * be a type lie written to satisfy a check.
+ *
+ * But "this publisher is safe because you can read it and see" is exactly the reasoning
+ * the note above rejects. So the claim is made in code instead: a publisher of authored
+ * content says so by calling this, and the gate can then tell the two kinds of publisher
+ * apart rather than trusting a reader to.
+ *
+ * It filters nothing because there is nothing to filter. That is the point of it.
+ */
+export function authoredLine(line: { pt: string; en: string }): { pt: string; en: string } {
+  return { pt: line.pt, en: line.en }
+}

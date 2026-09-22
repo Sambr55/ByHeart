@@ -12,7 +12,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { askedCards, cardById, cardFace, derivedCards, dropsFor, roomsFor, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
 import { CRATES, PIECES, ROOTS, type CultureFamily } from '@/content/roots'
-import { LEGEND_FRAMES, WORDS_FOR_MOST_OF_A_DAY, cardFor, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
+import { LEGEND_FRAMES, WORDS_FOR_MOST_OF_A_DAY, askFor, cardFor, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/avatar'
 import { setDisplayName } from '@/engine/learner'
@@ -206,10 +206,20 @@ export function Profile() {
           family: crate.id,
           title: crate.title,
           tone: crate.tone,
-          // All the way through means every root in it, or the learner said so themselves.
-          through:
-            sections.includes(crate.id) ||
-            (rootsHere.length > 0 && rootsHere.every((r) => played.has(r.root_id))),
+          /*
+            ALL THE WAY THROUGH MEANS EVERY ROOT IN IT, and only that.
+
+            This also accepted `sections_completed`, which does not mean what the name
+            suggests: engine/learner.ts writes it at the end of EVERY sitting and dedupes
+            by vibe, so it records "has been inside this" rather than "has finished it" —
+            its own note says so. The basics hold 16 roots and a sitting serves about
+            four, so one sitting marked the biggest thing in the product complete and the
+            tile dropped its "still in there" marker with three quarters left to do.
+
+            The root test was already here and is the honest one. A learner who genuinely
+            finished every root satisfies it; nobody else does.
+          */
+          through: rootsHere.length > 0 && rootsHere.every((r) => played.has(r.root_id)),
         },
       ]
     })
@@ -244,7 +254,23 @@ export function Profile() {
     )
 
     return {
-      done: [...vibes, ...derivedTiles, ...finished.flatMap((id) => asTile(id) ?? [])],
+      /*
+        AND NOT THE SHEETS, which are not something you get through.
+
+        `finished_cards` is written by NOT FOR ME as well as by finishing — it means
+        "spent", not "achieved" — and cardById now resolves sheet ids, so dismissing a
+        cheat sheet filed it under "vibes and rooms you have been through". Rejecting
+        something is the one thing that should never appear on the shelf of what you did.
+
+        Excluded by kind rather than by which button was pressed, because a sheet does not
+        belong here either way: it is a reference you check, it has its own row below, and
+        "been through counting to ten" is not a claim this screen should make.
+      */
+      done: [
+        ...vibes,
+        ...derivedTiles,
+        ...finished.filter((id) => !id.startsWith('sheet_')).flatMap((id) => asTile(id) ?? []),
+      ],
       /*
         SAVED AND KEPT ARE ONE PILE, because the difference was about which button you
         pressed rather than about the thing.
@@ -413,6 +439,19 @@ export function Profile() {
             saved={saved.includes(open.id)}
             liked={(learner.liked ?? []).includes(open.id)}
             onRejected={() => setOpen(null)}
+            /*
+              AND THE SAME FOR FINISHING IT, which was the other end of the same wire.
+
+              A derived card's GOT IT and a cheat sheet's NOT FOR ME both bank
+              finished_cards and then call onDone. The feed passes one and raises a
+              toast; Yours passed nothing, so the two buttons a learner is most likely
+              to press sat there doing nothing visible at all — the card stayed open,
+              unchanged, exactly as if the tap had missed.
+
+              Closing is the honest answer here for the same reason a reject closes: the
+              card has been spent, so the pile behind is where the result is legible.
+            */
+            onDone={() => setOpen(null)}
           />
         </div>
       </main>
@@ -1260,7 +1299,9 @@ function LegendHero() {
                 : PROFILE_COPY.legend_ready.replace('{n}', String(ready.length))}
             </span>
             {/* The question itself, so the row is an invitation rather than a count. */}
-            <span className="pt mt-1 block text-xs text-accent">{ready[0].ask}</span>
+            <span className="pt mt-1 block text-xs text-accent">
+              {askFor(ready[0], learner.profile?.gender ?? null)}
+            </span>
           </span>
           <span aria-hidden className="shrink-0 text-muted">→</span>
         </Link>

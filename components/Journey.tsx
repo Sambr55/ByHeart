@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, myName, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame } from '@/content/legend'
+import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, myName, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
@@ -1281,7 +1281,15 @@ function Picker() {
         >
           <p className="eyebrow text-accent">{GATEWAY.eyebrow}</p>
           <h2 className="display text-balance text-xl">{GATEWAY.headline}</h2>
-          <Path at={2} className="mt-3" />
+          {/*
+            INDEX 3 IS MEMBERSHIP, and it moved.
+
+            This said 2, which was Membership while the gate sat above the Legend on the
+            map. The two swapped — the Legend opens on the free tier, so drawing it behind
+            the paywall answered "how do I open my Legend" with "pay" — and this marker
+            has to follow. A learner reading this panel is at the cap, which is the gate.
+          */}
+          <Path at={3} className="mt-3" />
           <p className="text-xs leading-relaxed text-muted">{GATEWAY.body}</p>
           <Link
             href="/pro"
@@ -3940,8 +3948,27 @@ function LegendPayoff() {
     sectionsCompleted: learner.sections_completed ?? [],
     sittings: learner.sittings ?? 0,
   })
-  const answered = (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0).length
-  const waiting = LEGEND_FRAMES.length - answered
+  /*
+    AGAINST WHAT THIS LEARNER CAN ACTUALLY ANSWER, not the whole table.
+
+    `waiting` decided whether this panel retires — `if (!waiting) return null` — and it
+    subtracted from LEGEND_FRAMES.length, which is 12. A learner only ever sees the
+    frames their purpose allows, which is 10 for every one of the three. So somebody who
+    answered every question the product will ever put to them still had `waiting === 2`,
+    and the screen selling them the Legend came back after every single sitting, forever,
+    with nothing left to sell.
+
+    Same fault the Club's progress line had against the same table, and the same fix:
+    filter the count the way the deck filters the deck.
+  */
+  const mine = LEGEND_FRAMES.filter(
+    (f) =>
+      frameForPurpose(f, learner.purpose ?? null) && frameApplies(f, learner.legend ?? []),
+  )
+  const answered = (learner.legend ?? [])
+    .filter((a) => Object.keys(a.values).length > 0)
+    .filter((a) => mine.some((f) => f.id === a.frame_id)).length
+  const waiting = mine.length - answered
 
   useEffect(() => {
     if (status.open) track('legend_unlocked', { cards: [] })

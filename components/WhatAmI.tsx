@@ -51,7 +51,7 @@ export function WhatAmI({ sha, built }: { sha: string; built: string }) {
     <main className="safe-top mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 py-10 text-fg">
       <header className="flex items-center gap-3">
         <Back />
-        <p className="eyebrow flex-1 truncate text-right text-muted">WHAT AM I RUNNING</p>
+        <p className="eyebrow flex-1 truncate text-right text-muted">THIS BUILD</p>
       </header>
 
       <h1 className="display text-balance text-2xl">What am I running.</h1>

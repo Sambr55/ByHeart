@@ -29,10 +29,21 @@ export const PATH: Step[] = [
      three chosen vibes rather than the allowance. It names neither number now, because
      the step is about choosing and the counts live where they are enforced. */
   { id: 'picking', label: 'Vibes you pick', note: 'Any you like, and they stay yours.' },
+  /*
+    THE LEGEND BEFORE THE GATE, because that is the order it happens in.
+
+    Membership sat above "Your Legend opens", which drew the door as something you pay
+    your way past — and it is not: the Legend opens on the free tier, off the basics and
+    the vibes somebody has already chosen, and the Club behind it is what membership is
+    for. Drawn the old way, the map answered "how do I open my Legend" with "pay", which
+    is both wrong and the worst possible wrong answer on the one screen selling the thing.
+
+    And the note said "When the basics are done", which is the half-truth that cost Sam a
+    session: the door is the basics AND the vibes. Naming both halves here costs four
+    words and is the whole reason this step is on the map.
+  */
+  { id: 'legend', label: 'Your Legend opens', note: 'Once the basics and your vibes are done.' },
   { id: 'gate', label: 'Membership', note: 'If you want to carry on.', gate: true },
-  // The deal explains the Legend in full just above this, so the map only has to place
-  // it. On the shelf, where there is no such block, the label still carries the idea.
-  { id: 'legend', label: 'Your Legend opens', note: 'When the basics are done.' },
   { id: 'club', label: 'Dub Club', note: 'Where your Legend grows.' },
 ]
 
@@ -43,6 +54,11 @@ export const PATH: Step[] = [
  * a second copy of it would be a second thing that can be wrong.
  */
 export function whereOnPath(s: LearnerState, crates: number, capped: boolean): number {
+  /*
+    INDICES FOLLOW PATH, and PATH changed — the Legend and Membership swapped places, so
+    these two swapped with them. Read against the array above rather than remembered:
+    0 basics · 1 picking · 2 legend · 3 gate · 4 club.
+  */
   const built = (s.legend ?? []).filter((a) => Object.keys(a.values).length > 0).length
   if (built >= 5) return 4
   if (crates >= FREE_CRATES) return 3

@@ -11,7 +11,8 @@ import { slugFor } from '@/content/audio-manifest'
 import { piecesIn } from '@/content/roots'
 import { chapterById } from '@/content/chapters'
 import type { Situation } from '@/content/situations'
-import { loadLearner, recordProof, rememberFinishedCard, transferPieces } from '@/engine/learner'
+import { loadLearner, recordProof, rememberFinishedCard, revealPieces, transferPieces } from '@/engine/learner'
+import { authoredLine } from '@/engine/showable'
 import type { Drop } from '@/content/drops'
 import { track } from '@/engine/analytics'
 
@@ -60,8 +61,15 @@ function SendInvite({ situation, drop }: { situation: Situation; drop: Drop }) {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          /* The card's own line, so an invite link opened by somebody else still reads. */
-          lines: [{ pt: situation.release.answer, en: english }],
+          /*
+            The card's own line, so an invite link opened by somebody else still reads.
+
+            Through `authoredLine` rather than raw, which is a claim rather than a
+            formatting step: this publisher sends a sentence the product wrote and never
+            touches learner proof, so the Legend cannot leak through it. The showing gate
+            reads that call — see engine/showable.ts — instead of taking it on trust.
+          */
+          lines: [authoredLine({ pt: situation.release.answer, en: english })],
           invite: {
             pt: situation.release.answer,
             en: english,
@@ -252,6 +260,13 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
       would bank every `bom` and `um` it happens to contain.
     */
     if (clean) transferPieces(piecesIn(situation.release.answer))
+    /*
+      And the other way, when it had to be shown.
+
+      NEEDS ANOTHER LOOK had no writer anywhere in the product, so the vocab screen's
+      amber half was decoration. The reveal is the one moment the app knows for certain
+      that a word was not there — dropping it meant the library could only ever climb.
+    */ else revealPieces(piecesIn(situation.release.answer))
     rememberFinishedCard(situation.id)
     track('errand_done', { id: situation.id, clean })
   }
@@ -262,9 +277,25 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
       className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
     >
       <header className="flex items-center gap-3">
-        <Link href={back} className="tap-target eyebrow flex shrink-0 items-center gap-1 text-accent">
+        {/*
+          AND THE ARROW SAYS WHICH, because only the destination was fixed.
+
+          `back` learned to point at Yours when the room was opened from there, but this
+          still drew the Club wordmark and announced itself as "Back to the Club" — so
+          somebody who came from DROPS was told, in the one word on the control, that
+          their way out led somewhere they had not been. A door that names the wrong room
+          is worse than a bare arrow.
+        */}
+        <Link
+          href={back}
+          className="tap-target eyebrow flex shrink-0 items-center gap-1 text-accent"
+        >
           <span aria-hidden>←</span>
-          <Wordmark mark="club" className="h-5" title="Back to the Club" />
+          {back === '/profile' ? (
+            <span>YOURS</span>
+          ) : (
+            <Wordmark mark="club" className="h-5" title="Back to the Club" />
+          )}
         </Link>
         <span className="flex-1" />
       </header>

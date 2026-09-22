@@ -103,7 +103,16 @@ export function Calendar() {
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
       <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-3">
-        <Back />
+        {/*
+          BACK TO THE CLUB, because that is what is behind this.
+
+          Back defaults to Yours, and Calendar took the default — but Calendar is a tab
+          of its own on the bottom bar ("On"), so nobody arrives here from Yours. The
+          arrow was pointing at a sibling tab and announcing it as the way back. Drops
+          are Club content and the Club feed is what surfaces them, so that is the one
+          honest answer for a screen that is not itself inside Yours.
+        */}
+        <Back href="/club" label="CLUB" />
         <span className="eyebrow flex-1">{chapter.city}</span>
       </header>
 

@@ -15,8 +15,29 @@ export function slugify(text: string): string {
 
 const byText = new Map(EXAMPLES.map((e) => [e.pt_text, e.audio_asset]))
 
+/**
+ * Phrases whose slug would collide with a DIFFERENT phrase, given their own file.
+ *
+ * `slugify` strips accents on purpose — it is the contract between generation and
+ * playback, and it has to be stable — but that makes `o quê?` and `o que` the same
+ * string. They are not the same thing: `o quê?` is the standalone stressed interrogative
+ * ("What?"), `o que` is the unstressed relative ("that which"), and roots.ts already
+ * separates them as `o_que_ask` and `o_que`. The manifest builds a Map keyed by slug, so
+ * whichever was written second silently took the other's recording and the product read
+ * one of them aloud in the wrong stress.
+ *
+ * Keyed by the exact reviewed string, like `byText` above, so nothing is guessed. Add an
+ * entry only when two genuinely different phrases fold together — a question mark against
+ * a full stop is the same recording and belongs nowhere near this table.
+ */
+const DISTINCT: Record<string, string> = {
+  'o quê?': 'o-que-ask',
+  'O quê?': 'o-que-ask',
+  'Desculpa, o quê?': 'desculpa-o-que-ask',
+}
+
 export function slugFor(text: string): string {
-  return byText.get(text) ?? slugify(text)
+  return byText.get(text) ?? DISTINCT[text] ?? slugify(text)
 }
 
 const bySlug = new Map(EXAMPLES.map((e) => [e.audio_asset, e.pt_text]))

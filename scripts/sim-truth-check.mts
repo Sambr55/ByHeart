@@ -19,9 +19,18 @@
  * liar.
  */
 import { chromium } from 'playwright'
+/*
+  THE SAME PORT EVERY OTHER BROWSER CHECK USES.
+
+  This hardcoded 3210, which nothing in the repo serves — `npm run dev` takes 3111 and
+  every sibling check reads BASE_URL with that default. So the one check standing between
+  a useful simulator and a confident liar could not reach the app at all, and had never
+  run. Same shape as the bug it exists to catch.
+*/
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { newLearner, playSitting } from '../engine/sim'
 import type { CultureFamily } from '../content/roots'
+const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
 const sim = newLearner()
 const s1 = playSitting(sim, 'the_basics' as CultureFamily)
@@ -29,9 +38,9 @@ console.log('SIM  roots:', s1.roots.map(r=>r.id).join(', '), '| pieces:', s1.aft
 
 const b = await chromium.launch()
 const p = await b.newPage({ viewport:{width:390,height:844} })
-await p.goto('http://localhost:3210/vibes',{waitUntil:'networkidle'})
+await p.goto(BASE + '/vibes',{waitUntil:'networkidle'})
 await p.evaluate(()=>localStorage.clear())
-await p.goto('http://localhost:3210/vibes',{waitUntil:'networkidle'}); await p.waitForTimeout(1800)
+await p.goto(BASE + '/vibes',{waitUntil:'networkidle'}); await p.waitForTimeout(1800)
 if (await p.getByTestId('setup-why-curious').isVisible().catch(()=>false)) {
   await p.getByTestId('setup-why-curious').click(); await p.waitForTimeout(900)
   await p.getByTestId('setup-who').fill('Sam')

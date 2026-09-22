@@ -228,6 +228,8 @@ export type EventName =
   | 'save_offered'
   | 'sheet_tested'
   | 'sheet_dismissed'
+  /* A looked-up sentence spent, which is the only thing that clears it from the feed. */
+  | 'asked_done'
   /* The one Club room given away before anything was earned, and which one it was. */
   | 'room_tasted'
 

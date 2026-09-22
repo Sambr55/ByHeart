@@ -436,7 +436,7 @@ export const DROP_TEMPLATES: DropTemplate[] = [
   },
   {
     /*
-      THE MATCH TEMPLATE, which unblocks the two most Portuguese evenings in the calendar.
+      THE MATCH TEMPLATE, which opens up the two most Portuguese evenings in the calendar.
 
       Benfica v Celtic and Sporting v LASK were both refused with "no match template
       exists yet" — correctly, because the alternative was telling somebody to ask "onde é

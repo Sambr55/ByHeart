@@ -1062,6 +1062,39 @@ export function transferPieces(ids: PieceId[]) {
   }
 }
 
+/**
+ * The other half of `transferPieces`: a word the learner had to be shown.
+ *
+ * NEEDS ANOTHER LOOK WAS A STATE NOTHING COULD REACH. Every recordEvidence call in the
+ * product hardcodes `revealed: false, hint_count: 0`, so deriveState's first branch — the
+ * one that catches a fresh failure — was dead, and with it the amber ordering, the shaky
+ * count, the set flag and the coach panel on the vocab screen. The same shape as the bug
+ * the comment above describes, caught one direction later: transfer was wired, reveal
+ * was not, so the ladder could only ever go up.
+ *
+ * A room whose sentence had to be revealed is the honest signal. It says nothing about
+ * what the learner knows in general — only that this time, here, they needed it on the
+ * screen. deriveState reads the LATEST event, so one clean cold delivery clears it.
+ *
+ * Same restraint as transfer: only words already owned. A reveal does not teach.
+ */
+export function revealPieces(ids: PieceId[]) {
+  const owned = getLearner().inventory
+  for (const id of ids) {
+    if (!owned[id]) continue
+    recordEvidence({
+      target_id: id,
+      event_type: 'transfer',
+      correct_first_try: false,
+      hint_count: 0,
+      revealed: true,
+      latency_ms: 0,
+      culture_context: null,
+      mission_id: null,
+    })
+  }
+}
+
 export function itemFor(target: PieceId): InventoryItem | undefined {
   return getLearner().inventory[target]
 }

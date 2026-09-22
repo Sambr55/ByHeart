@@ -15,7 +15,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { INTRO_DEMO_AFTER, INTRO_SETUP_AFTER, type IntroCard } from '@/content/intro'
 import { COLLISIONS, CRATES, PIECES, ROOTS, setPieces } from '@/content/roots'
-import { cardFor } from '@/content/legend'
+import { askFor, cardFor } from '@/content/legend'
 import { mintShowing } from '@/engine/showing'
 import {
   FEED_COPY,
@@ -2331,7 +2331,7 @@ export function Card({
             ) : card.kind === 'derived' ? (
               <Derived card={card} />
             ) : card.kind === 'asked' ? (
-              <Asked card={card} />
+              <Asked card={card} onDone={() => onDone?.()} />
             ) : card.kind === 'explainer' ? (
               <Explains card={card} />
             ) : card.kind === 'vibe' ? (
@@ -2627,13 +2627,23 @@ function Done({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
  * built. A learner who taps it should land on their own card with this question waiting.
  */
 function LegendAsk({ card }: { card: Extract<FeedCard, { kind: 'legend' }> }) {
+  /*
+    IN THE ENDING THEY WILL ACTUALLY HEAR.
+
+    The note above is the whole argument for this: "this side is what they will actually
+    hear somebody say". A stranger asking a woman says "És casada?", so printing the
+    masculine here taught her to listen for a question nobody puts to her — on the one
+    card in the feed whose claim is that it is the real thing said aloud.
+  */
+  const learner = useLearner()
+  const ask = askFor(card.frame, learner.profile?.gender ?? null)
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-accent">WHAT THEY ASK</p>
         <div className="flex items-center gap-3">
-          <AudioButton slug={slugFor(card.frame.ask)} text={card.frame.ask} />
-          <span className="pt display min-w-0 text-balance text-2xl">{card.frame.ask}</span>
+          <AudioButton slug={slugFor(ask)} text={ask} />
+          <span className="pt display min-w-0 text-balance text-2xl">{ask}</span>
         </div>
         <p className="text-sm leading-relaxed text-muted">{card.frame.ask_en}</p>
       </div>
@@ -2642,8 +2652,19 @@ function LegendAsk({ card }: { card: Extract<FeedCard, { kind: 'legend' }> }) {
         <p className="text-sm leading-relaxed text-fg/85">{card.frame.teaches}</p>
       </div>
 
+      {/*
+        AT THE QUESTION IT JUST NAMED, not at the deck.
+
+        This card's own note says it: "A learner who taps it should land on their own card
+        with this question waiting." It linked to a bare /legend, so somebody who had read
+        one specific question, heard it, and tapped ADD TO LEGEND arrived at ten cards and
+        had to find it again — the exact hunt that ?build= was built to prevent, and that
+        the screen at the end of a vibe already avoids.
+
+        A stale or wrong id degrades to the deck on the other side, which is checked there.
+      */}
       <Link
-        href="/legend"
+        href={'/legend?build=' + encodeURIComponent(card.frame.id)}
         data-testid="legend-add"
         className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
       >
@@ -3286,7 +3307,23 @@ function Explains({ card }: { card: Extract<FeedCard, { kind: 'explainer' }> }) 
  * this is DUB returning something that was already needed, and turning that into a quiz
  * would make looking a thing up feel like setting homework for yourself.
  */
-function Asked({ card }: { card: Extract<FeedCard, { kind: 'asked' }> }) {
+/*
+  A SENTENCE YOU ASKED FOR, AND THE WAY OUT OF IT.
+
+  This pane had no action at all. Every other spendable card in the feed banks
+  `finished_cards` and askedCards filters on exactly that id — so the filter was
+  real and nothing on earth could satisfy it. A sentence looked up once sat in the
+  Club feed forever, holding one of the few slots the feed has to offer.
+
+  GOT IT is the same verb the sheet's NOT FOR ME uses: it spends the card, it does
+  not grant the words. The sentence is kept in `asked` either way, which is what
+  YOURS reads with `all` — a record rather than a queue, so nothing is lost by
+  clearing it from the feed.
+*/
+function Asked({ card, onDone }: {
+  card: Extract<FeedCard, { kind: 'asked' }>
+  onDone?: () => void
+}) {
   const when = new Date(card.ask.at)
   const days = Math.max(0, Math.round((Date.now() - when.getTime()) / 86_400_000))
   return (
@@ -3304,6 +3341,18 @@ function Asked({ card }: { card: Extract<FeedCard, { kind: 'asked' }> }) {
       <p className="mt-3 text-xs text-muted">
         {days === 0 ? 'You looked this up today.' : days === 1 ? 'You looked this up yesterday.' : 'You looked this up ' + days + ' days ago.'}
       </p>
+      <button
+        type="button"
+        data-testid="asked-done"
+        onClick={() => {
+          rememberFinishedCard(card.id)
+          track('asked_done', { card: card.id })
+          onDone?.()
+        }}
+        className="tap-target eyebrow mt-3 w-full rounded border border-line px-5 py-3 text-center text-muted"
+      >
+        GOT IT
+      </button>
     </div>
   )
 }

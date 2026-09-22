@@ -2442,7 +2442,16 @@ export const MARCUS_AURELIUS: Root[] = [
     helpers: {
       Controla: 'control, said as an order',
       controlar: 'to control',
-      'O': 'what',
+      /*
+        `o que` IS THE UNIT, and splitting it taught a falsehood.
+
+        This listed 'O' against "what", so a learner reading the helper list under
+        "O que posso fazer?" was told the bare article means "what". It does not — `o`
+        is "the", and it is only "what" in company with `que`. The piece itself has
+        always been glossed correctly as `o que`; the helper contradicted it on the
+        same screen.
+      */
+      'O que': 'what',
       'posso': 'I can',
       'fazer': 'to do',
       'Não': 'not',
@@ -2490,7 +2499,8 @@ export const MARCUS_AURELIUS: Root[] = [
       'posso': 'I can',
       'controlar': 'to control',
       'isso': 'that',
-      'O': 'what',
+      /* Same unit, same reason — see ma_control above. */
+      'O que': 'what',
       'Como': 'how',
 
     },
@@ -4291,6 +4301,120 @@ export const THE_BASICS: Root[] = [
     next_root_hooks: ['sim'],
   }),
   q({
+    root_id: 'tb_introduce',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The sentence everybody says first, in every language',
+    source_status: 'needs-review',
+    root_display: 'My name is — and I am English.',
+    credit: 'The first ten seconds of meeting anybody',
+    source: 'My name is Sam. I am English.',
+    target: 'Chamo-me Sam. Sou inglês.',
+    semantic_bridge:
+      'CHAMO-ME is literally "I call myself", which is how Portuguese introduces people — the verb hangs on you rather than on your name. SOU is the permanent one: what you are and where you are from, the things that do not change by Tuesday.',
+    subtext: 'Not a lesson. The thing you will say more often than anything else you learn.',
+    /*
+      ONE OF THE TWO ROOTS THAT UNTRAP THE CARD.
+
+      Every word the Legend's card needs was taught by exactly one vibe, and five of those
+      words forced three specific vibes. With a free allowance of five there were 792 ways
+      to choose and exactly ONE that let a learner finish their card — so 791 choices, of a
+      learner picking by what they LIKE, opened the Legend and left it unfinishable.
+
+      These are not specialist words. They are your name, your nationality, whether you are
+      married and what you do — the four things a stranger asks first, and the four the card
+      is built from. They belong in the basics on their own merits; that they also make
+      every choice of five vibes viable is the fix.
+
+      SPLIT ACROSS TWO ROOTS because a root teaches 1–3 pieces and I first wrote one with
+      five. The lint refused it, and it was right: five extracts is a vocabulary list, not a
+      line somebody says. Introducing yourself and saying what you are are two moments
+      anyway — you give your name, and then they ask.
+
+      PIECES keeps the lowest rung, so each word files at rung 1 here rather than wherever
+      it was. The vibes that taught them keep teaching them.
+    */
+    extracts: [
+      { id: 'chamo_me', target: 'chamo-me…', gloss: 'my name is', shelf: 'people', note: 'Literally "I call myself". The name goes straight after it, with nothing in between.' },
+      { id: 'sou', target: 'sou', gloss: 'I am', shelf: 'doing', lemma: 'ser', form: 'I', note: 'The permanent one. Sou inglês is for life; estou cansado is for tonight.' },
+      { id: 'ingles', target: 'inglês', gloss: 'English', shelf: 'describing', note: 'Inglesa if you are a woman. Nationalities take an ending like every other description.' },
+    ],
+    branches: [
+      /*
+        ANA IS THE AUTHORED NAME, and the screen swaps in the learner's.
+
+        Sam, on his own introduction: "Thus should be Sam not ana, drawn from my profile."
+        Right — this was the one place the product taught somebody to introduce themselves
+        as a stranger.
+
+        The obvious fix was '{name}' here, the way the Legend's frame does it, and it was
+        wrong at this layer: lint-content refused it five times over ("build uses untaught,
+        unglossed word {name}") and it is correct to. A branch is not a template — it is a
+        reviewed Portuguese sentence, it goes into the audio manifest, the daily line and
+        the QA sheet a native speaker reads, and a brace in any of those is a placeholder
+        pretending to be language.
+
+        So the name stays authored and REAL, with a recording behind it, and the
+        substitution happens where a learner is looking at it. See BranchRow: it swaps a
+        known authored name for display_name and leaves every other line alone.
+      */
+      { target: 'Chamo-me Ana.', en: 'My name is Ana.', demonstrates: ['chamo_me'] },
+      { target: 'Sou inglesa.', en: 'I am English.', demonstrates: ['sou', 'ingles'] },
+      { target: 'Sou de Londres.', en: 'I am from London.', demonstrates: ['sou'] },
+    ],
+    reinforces: ['ola'],
+    helpers: { 'Sam': 'a name', 'de': 'from', 'Londres': 'London', 'inglesa': 'English, said by a woman' },
+    /*
+      A DIFFERENT SENTENCE, from the same words. The release proves the words moved, so it
+      cannot be the line they have just been reading — the lint refuses that, correctly: a
+      release that repeats the root is a memory test wearing a transfer's clothes.
+    */
+    transfer_prompt: {
+      context: 'A woman at the next table has asked where you are from.',
+      ask: 'I am English. I am from London.',
+      answer: 'Sou inglesa. Sou de Londres.',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['first-day', 'introduce'],
+    next_root_hooks: ['casado'],
+  }),
+  q({
+    root_id: 'tb_1234',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    credit: 'Feist',
+    source_label: '1234 — Feist',
+    source_status: 'verified',
+    root_display: '1, 2, 3, 4',
+    source: 'One, two, three, four.',
+    target: 'Um, dois, três, quatro.',
+    semantic_bridge:
+      'A song whose whole hook is counting, which makes it the cheapest four words you will ever learn. Um does double duty — it is the number one AND the word for "a", so um café is both a coffee and one coffee, and Portuguese never bothers to separate them.',
+    subtext: 'Counted out, cheerfully.',
+    extracts: [
+      { id: 'um', target: 'um', gloss: 'one / a', shelf: 'how_much', set: 'numbers_1_10', note: 'Also the word for "a". Um café is one coffee and a coffee at the same time.' },
+      { id: 'dois', target: 'dois', gloss: 'two', shelf: 'how_much', set: 'numbers_1_10' },
+      { id: 'tres', target: 'três', gloss: 'three', shelf: 'how_much', set: 'numbers_1_10' },
+    ],
+    branches: [
+      { target: 'Um café, por favor.', en: 'One coffee, please.', demonstrates: ['um'] },
+      { target: 'Dois cafés, por favor.', en: 'Two coffees, please.', demonstrates: ['dois'] },
+      { target: 'Três dias.', en: 'Three days.', demonstrates: ['tres'] },
+    ],
+    reinforces: ['por_favor'],
+    helpers: { 'quatro': 'four', 'café': 'coffee', 'cafés': 'coffees', 'por favor': 'please', 'dias': 'days' },
+    transfer_prompt: {
+      context: 'Two of you at the counter and it is your round.',
+      ask: 'Two coffees, please.',
+      answer: 'Dois cafés, por favor.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers', 'first-day'],
+    next_root_hooks: ['quatro'],
+  }),
+  q({
     root_id: 'tb_yes_no',
     culture_family: 'the_basics',
     rung: 1,
@@ -4331,41 +4455,6 @@ export const THE_BASICS: Root[] = [
     rights_status: 'title-reference',
     starter_tags: ['yes-no', 'first-day'],
     next_root_hooks: ['obrigado'],
-  }),
-  q({
-    root_id: 'tb_1234',
-    culture_family: 'the_basics',
-    rung: 1,
-    root_type: 'title',
-    credit: 'Feist',
-    source_label: '1234 — Feist',
-    source_status: 'verified',
-    root_display: '1, 2, 3, 4',
-    source: 'One, two, three, four.',
-    target: 'Um, dois, três, quatro.',
-    semantic_bridge:
-      'A song whose whole hook is counting, which makes it the cheapest four words you will ever learn. Um does double duty — it is the number one AND the word for "a", so um café is both a coffee and one coffee, and Portuguese never bothers to separate them.',
-    subtext: 'Counted out, cheerfully.',
-    extracts: [
-      { id: 'um', target: 'um', gloss: 'one / a', shelf: 'how_much', set: 'numbers_1_10', note: 'Also the word for "a". Um café is one coffee and a coffee at the same time.' },
-      { id: 'dois', target: 'dois', gloss: 'two', shelf: 'how_much', set: 'numbers_1_10' },
-      { id: 'tres', target: 'três', gloss: 'three', shelf: 'how_much', set: 'numbers_1_10' },
-    ],
-    branches: [
-      { target: 'Um café, por favor.', en: 'One coffee, please.', demonstrates: ['um'] },
-      { target: 'Dois cafés, por favor.', en: 'Two coffees, please.', demonstrates: ['dois'] },
-      { target: 'Três dias.', en: 'Three days.', demonstrates: ['tres'] },
-    ],
-    reinforces: ['por_favor'],
-    helpers: { 'quatro': 'four', 'café': 'coffee', 'cafés': 'coffees', 'por favor': 'please', 'dias': 'days' },
-    transfer_prompt: {
-      context: 'Two of you at the counter and it is your round.',
-      ask: 'Two coffees, please.',
-      answer: 'Dois cafés, por favor.',
-    },
-    rights_status: 'title-reference',
-    starter_tags: ['numbers', 'first-day'],
-    next_root_hooks: ['quatro'],
   }),
   q({
     root_id: 'tb_thank_you',
@@ -4458,85 +4547,6 @@ export const THE_BASICS: Root[] = [
     rights_status: 'dub-authored',
     starter_tags: ['repair', 'first-day'],
     next_root_hooks: ['porque'],
-  }),
-  q({
-    root_id: 'tb_introduce',
-    culture_family: 'the_basics',
-    rung: 1,
-    root_type: 'other',
-    source_label: 'The sentence everybody says first, in every language',
-    source_status: 'needs-review',
-    root_display: 'My name is — and I am English.',
-    credit: 'The first ten seconds of meeting anybody',
-    source: 'My name is Sam. I am English.',
-    target: 'Chamo-me Sam. Sou inglês.',
-    semantic_bridge:
-      'CHAMO-ME is literally "I call myself", which is how Portuguese introduces people — the verb hangs on you rather than on your name. SOU is the permanent one: what you are and where you are from, the things that do not change by Tuesday.',
-    subtext: 'Not a lesson. The thing you will say more often than anything else you learn.',
-    /*
-      ONE OF THE TWO ROOTS THAT UNTRAP THE CARD.
-
-      Every word the Legend's card needs was taught by exactly one vibe, and five of those
-      words forced three specific vibes. With a free allowance of five there were 792 ways
-      to choose and exactly ONE that let a learner finish their card — so 791 choices, of a
-      learner picking by what they LIKE, opened the Legend and left it unfinishable.
-
-      These are not specialist words. They are your name, your nationality, whether you are
-      married and what you do — the four things a stranger asks first, and the four the card
-      is built from. They belong in the basics on their own merits; that they also make
-      every choice of five vibes viable is the fix.
-
-      SPLIT ACROSS TWO ROOTS because a root teaches 1–3 pieces and I first wrote one with
-      five. The lint refused it, and it was right: five extracts is a vocabulary list, not a
-      line somebody says. Introducing yourself and saying what you are are two moments
-      anyway — you give your name, and then they ask.
-
-      PIECES keeps the lowest rung, so each word files at rung 1 here rather than wherever
-      it was. The vibes that taught them keep teaching them.
-    */
-    extracts: [
-      { id: 'chamo_me', target: 'chamo-me…', gloss: 'my name is', shelf: 'people', note: 'Literally "I call myself". The name goes straight after it, with nothing in between.' },
-      { id: 'sou', target: 'sou', gloss: 'I am', shelf: 'doing', lemma: 'ser', form: 'I', note: 'The permanent one. Sou inglês is for life; estou cansado is for tonight.' },
-      { id: 'ingles', target: 'inglês', gloss: 'English', shelf: 'describing', note: 'Inglesa if you are a woman. Nationalities take an ending like every other description.' },
-    ],
-    branches: [
-      /*
-        ANA IS THE AUTHORED NAME, and the screen swaps in the learner's.
-
-        Sam, on his own introduction: "Thus should be Sam not ana, drawn from my profile."
-        Right — this was the one place the product taught somebody to introduce themselves
-        as a stranger.
-
-        The obvious fix was '{name}' here, the way the Legend's frame does it, and it was
-        wrong at this layer: lint-content refused it five times over ("build uses untaught,
-        unglossed word {name}") and it is correct to. A branch is not a template — it is a
-        reviewed Portuguese sentence, it goes into the audio manifest, the daily line and
-        the QA sheet a native speaker reads, and a brace in any of those is a placeholder
-        pretending to be language.
-
-        So the name stays authored and REAL, with a recording behind it, and the
-        substitution happens where a learner is looking at it. See BranchRow: it swaps a
-        known authored name for display_name and leaves every other line alone.
-      */
-      { target: 'Chamo-me Ana.', en: 'My name is Ana.', demonstrates: ['chamo_me'] },
-      { target: 'Sou inglesa.', en: 'I am English.', demonstrates: ['sou', 'ingles'] },
-      { target: 'Sou de Londres.', en: 'I am from London.', demonstrates: ['sou'] },
-    ],
-    reinforces: ['ola'],
-    helpers: { 'Sam': 'a name', 'de': 'from', 'Londres': 'London', 'inglesa': 'English, said by a woman' },
-    /*
-      A DIFFERENT SENTENCE, from the same words. The release proves the words moved, so it
-      cannot be the line they have just been reading — the lint refuses that, correctly: a
-      release that repeats the root is a memory test wearing a transfer's clothes.
-    */
-    transfer_prompt: {
-      context: 'A woman at the next table has asked where you are from.',
-      ask: 'I am English. I am from London.',
-      answer: 'Sou inglesa. Sou de Londres.',
-    },
-    rights_status: 'dub-authored',
-    starter_tags: ['first-day', 'introduce'],
-    next_root_hooks: ['casado'],
   }),
   q({
     root_id: 'tb_married_work',
@@ -4895,7 +4905,7 @@ export const THE_BASICS: Root[] = [
       'Two spellings, one word, and the accent is the whole difference: porquê with the accent is the question on its own, porque without it starts the answer. Getting this right is a small thing that makes writing look native, and getting it wrong is the most common slip Portuguese people themselves make.',
     subtext: 'Asked, and answered flatly — the answer a parent gives, eventually.',
     extracts: [
-      { id: 'porque', target: 'porque', gloss: 'because', shelf: 'small_words', note: 'Porquê? with the accent asks. Porque without it answers. Two words, one sound.' },
+      { id: 'porque', target: 'porque', gloss: 'because', shelf: 'small_words', note: 'Porquê? with the accent asks. Porque without it answers. And the accent is a sound, not a spelling — porquê lands on the end, porque tails off.' },
       { id: 'ainda', target: 'ainda', gloss: 'still / yet', shelf: 'when' },
       /*
         A SECOND SOURCE FOR `quero`, and it was already here.

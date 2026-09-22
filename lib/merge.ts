@@ -273,6 +273,15 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
         ? 'declined'
         : 'unseen') as LearnerState['legend_prompt'],
 
+    /*
+      The same, one state shorter. NOT NOW is an answer, and an answered
+      offer never comes back — so a device that never saw the offer must not
+      hand back an "unseen" that re-opens it mid-sitting.
+    */
+    save_prompt: ([l.save_prompt, r.save_prompt].includes('declined')
+      ? 'declined'
+      : 'unseen') as LearnerState['save_prompt'],
+
     legend: unionBy(
       arr<Rec>(l.legend),
       arr<Rec>(r.legend),

@@ -319,8 +319,28 @@ export function Club() {
           rung,
           owned: owned.length,
           ownedPieces: owned,
+          /*
+            THE NUMERATOR FILTERED THE SAME WAY AS THE DENOMINATOR, which it was not.
+
+            legendTotal below applies frameForPurpose and frameApplies — see its note —
+            and this counted every answer on file. Purpose is changeable from Yours, so a
+            learner who answered as a visitor and later switched to moving kept answers
+            for questions no longer on their card: the numerator counted frames the
+            denominator had dropped, which reads as "9 of 8" and makes `left` negative,
+            silently removing the move that offers the next question.
+
+            Same two predicates, in the same order, so the two can only ever agree.
+          */
           legendAnswered: (learner.legend ?? [])
             .filter((a) => Object.keys(a.values).length > 0)
+            .filter((a) => {
+              const f = LEGEND_FRAMES.find((x) => x.id === a.frame_id)
+              return (
+                !!f &&
+                frameForPurpose(f, learner.purpose ?? null) &&
+                frameApplies(f, learner.legend ?? [])
+              )
+            })
             .map((a) => a.frame_id),
           /*
             THE LEARNER'S OWN DENOMINATOR, computed here because this is where the purpose

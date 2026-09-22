@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES, ROOTS_BY_FAMILY } from '@/content/roots'
-import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, frameReady, nameFor, REPAIR_KIT, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
+import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, askFor, frameReady, nameFor, REPAIR_KIT, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
 import { PICKER } from '@/content/front-door'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
@@ -275,7 +275,15 @@ export function Legend() {
     best and a loop at worst, and the branch below already declines to draw the card.
   */
   useEffect(() => {
-    if (mounted && !unlocked && typeof mode === 'object') setMode('deck')
+    /*
+      ALL THREE DEEPLINKS, not only ?build=.
+
+      This tested `typeof mode === 'object'`, which is true for {build} and false for the
+      two string modes — so the guard covered one of the three ways in, while the note
+      above it named the other two by name. ?run=1 and ?cold=1 walked straight past it
+      into a run-through of answers given through the back door, with the door still shut.
+    */
+    if (mounted && !unlocked && mode !== 'deck') setMode('deck')
   }, [mounted, unlocked, mode])
 
   if (typeof mode === 'object' && (!mounted || unlocked)) {
@@ -311,7 +319,7 @@ export function Legend() {
     empty Legend would render a run-through of nothing at all. Falling back to the deck is
     the honest answer to that: it is the screen that says what to do next.
   */
-  if ((mode === 'rehearse' || mode === 'cold') && answered.length >= 2) {
+  if ((mode === 'rehearse' || mode === 'cold') && unlocked && answered.length >= 2) {
     return (
       <Shell>
         <RunThrough
@@ -536,7 +544,7 @@ export function Legend() {
                     }
                   >
                     <span className={'pt text-sm ' + (mine ? 'text-accent' : 'text-muted')}>
-                      {f.ask}
+                      {askFor(f, learner.profile?.gender ?? null)}
                     </span>
                     <span className="text-xs text-muted">{f.ask_en}</span>
                     {mine ? <span className="pt mt-1 text-sm text-fg">{mine}</span> : null}
@@ -680,7 +688,9 @@ export function Legend() {
                     }
                   >
                     <span className="flex items-baseline justify-between gap-3">
-                      <span className="pt min-w-0 text-sm text-accent">{f.ask}</span>
+                      <span className="pt min-w-0 text-sm text-accent">
+                        {askFor(f, learner.profile?.gender ?? null)}
+                      </span>
                       {/*
                         AND WHETHER IT IS ON THE CARD, because the door reads the card.
 
@@ -1059,10 +1069,10 @@ function BuildCard({
       <div className="flex flex-col gap-1">
         <p className="eyebrow text-muted">THEY ASK</p>
         <div className="flex items-center gap-3">
-          <AudioButton slug={slugFor(frame.ask)} text={frame.ask} size="sm" />
+          <AudioButton slug={slugFor(askFor(frame, gender))} text={askFor(frame, gender)} size="sm" />
           <span className="min-w-0">
             <span data-testid="legend-ask" className="pt block text-xl text-accent">
-              {frame.ask}
+              {askFor(frame, gender)}
             </span>
             <span className="block text-xs text-muted">{frame.ask_en}</span>
           </span>
@@ -1159,14 +1169,26 @@ function BuildCard({
                       both, and the learner picks the word they would actually say.
                     */}
                     {slot.options?.flatMap((o) => {
+                      /*
+                        AND BOTH ENDINGS ALWAYS, when the ending is about somebody else.
+
+                        The filter above assumes `f` agrees with the speaker. On
+                        `namorado`/`namorada` it does not — it names the partner — so
+                        filtering by the learner's own gender both removed a true answer
+                        and printed the wrong English against the one it left: a woman was
+                        shown "Tenho namorada" labelled "I have a boyfriend".
+                      */
+                      const namesTheOther = slot.gendered_names_the_other?.includes(o.value)
                       const forms =
                         !slot.gendered || !o.f
                           ? [o.value]
-                          : gender === 'f'
-                            ? [o.f]
-                            : gender === 'm'
-                              ? [o.value]
-                              : [o.value, o.f]
+                          : namesTheOther
+                            ? [o.value, o.f]
+                            : gender === 'f'
+                              ? [o.f]
+                              : gender === 'm'
+                                ? [o.value]
+                                : [o.value, o.f]
                       return forms.map((form) => {
                         const on = draft[slot.key] === form
                         return (
@@ -1197,7 +1219,10 @@ function BuildCard({
                             }
                           >
                             <span className="pt">{form}</span>
-                            <span className="text-xs text-muted">{o.en}</span>
+                            {/* The feminine form's own English where it has one. */}
+                            <span className="text-xs text-muted">
+                              {form === o.f && o.f_en ? o.f_en : o.en}
+                            </span>
                           </button>
                         )
                       })
@@ -1322,7 +1347,7 @@ function BuildCard({
 
       {beat === 'cold' ? (
         <ColdSay
-          ask={frame.ask}
+          ask={askFor(frame, gender)}
           answer={sentence}
           english={fillEnglish(frame, draft)}
           /*
@@ -1625,8 +1650,8 @@ function RunThrough({
           {cold ? ' · NO WARNING' : ''}
         </p>
         <div className="flex items-center gap-3">
-          <AudioButton slug={slugFor(frame.ask)} text={frame.ask} size="sm" />
-          <span className="pt min-w-0 text-xl text-accent">{frame.ask}</span>
+          <AudioButton slug={slugFor(askFor(frame, gender))} text={askFor(frame, gender)} size="sm" />
+          <span className="pt min-w-0 text-xl text-accent">{askFor(frame, gender)}</span>
         </div>
         {cold && !shown ? (
           <p className="mt-3 text-sm leading-relaxed text-muted">{LEGEND_COPY.cold_body}</p>
@@ -1694,7 +1719,7 @@ function RunThrough({
                 onClick={() => setShown(true)}
                 className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
               >
-                SHOW ME THE ANSWER
+                SHOW ME
               </button>
             ) : null}
           </div>
