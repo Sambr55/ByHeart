@@ -178,13 +178,39 @@ export function Choose({
                     available", never "hard to read" — a row somebody squints at reads as
                     a rendering fault rather than as a decision.
                   */
+                  /*
+                    A GROUND DARK ENOUGH TO BE A ROW, on the card that sits on a doorway.
+
+                    Sam: "Darken the scrim on this page." The scrim itself was already
+                    doing its job — the setup card takes the heavy inset-0 gradient and the
+                    headline and body are legible on it. What was not legible was the list:
+                    --bg-elev is the palette's lifted surface, tuned for a PAGE, and at 70%
+                    for an unavailable row it let a photograph of a doorway through the
+                    middle of five language names.
+
+                    The note above this component already worked out why the obvious answer
+                    fails: wrapping the selector in .shown-on-photo fixes the label and
+                    turns a selected row white on white. So the ground is stated here
+                    instead of inherited — near-black rather than the palette's slate,
+                    because this surface sits on an image and has no page behind it to
+                    relate to, and at 88% so the picture is faintly present rather than
+                    punched out.
+
+                    THE UNAVAILABLE ROWS ARE 82%, NOT 70%. Greyed has to mean "not
+                    available" and never "hard to read" — Destination's own note, and the
+                    reason those rows are solid at all. At 70% a bright doorway came
+                    through the middle of French, Spanish and Italian, which reads as a
+                    rendering fault rather than as a decision. The distinction between an
+                    open row and a closed one is carried by the ink and the COMING label,
+                    which is where it belongs.
+                  */
                   className={
                     'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-3 text-left transition ' +
                     (!p.available
-                      ? 'border-line/60 bg-bg-elev/70 text-muted'
+                      ? 'border-line/60 text-muted ' + (onSand ? 'bg-bg-elev/70' : 'bg-[rgba(12,14,18,0.82)]')
                       : picked
                         ? 'border-accent bg-accent text-accent-ink'
-                        : 'border-line bg-bg-elev text-fg')
+                        : 'border-line text-fg ' + (onSand ? 'bg-bg-elev' : 'bg-[rgba(12,14,18,0.88)]'))
                   }
                 >
                   <span className="flex min-w-0 items-center gap-3">
@@ -257,13 +283,14 @@ export function Choose({
                     track('chapter_chosen', { chapter: c.id, locale: lang.target_locale })
                     onDone?.()
                   }}
+                  /* Same ground as the languages above — see the note on that row. */
                   className={
                     'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-3 text-left transition ' +
                     (!c.open
-                      ? 'border-line/60 bg-bg-elev/70 text-muted'
+                      ? 'border-line/60 text-muted ' + (onSand ? 'bg-bg-elev/70' : 'bg-[rgba(12,14,18,0.82)]')
                       : city === c.id
                         ? 'border-accent bg-accent text-accent-ink'
-                        : 'border-line bg-bg-elev text-fg')
+                        : 'border-line text-fg ' + (onSand ? 'bg-bg-elev' : 'bg-[rgba(12,14,18,0.88)]'))
                   }
                 >
                   <span className="flex min-w-0 flex-col gap-1">

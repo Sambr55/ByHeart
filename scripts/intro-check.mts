@@ -18,6 +18,7 @@
  * argument would pass firstrun and should not pass this.
  */
 import { chromium, type Page } from 'playwright'
+import { INTRO_CARDS } from '../content/intro'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const problems: string[] = []
@@ -123,7 +124,19 @@ const CLAIMS: { name: string; says: RegExp }[] = [
   */
   { name: 'you understand more than you can say', says: /(understand more than you can say|you recognise it)/i },
   { name: 'the Legend is the way in', says: /(Seven questions a stranger will ask you|Build your legend)/i },
-  { name: 'Lisbon is happening now', says: /(as it is actually happening|actually on in Lisbon)/i },
+  /*
+    THE CLAIM IS THAT IT IS REAL, not that it is Lisbon.
+
+    The pattern matched "actually on in Lisbon" — the city name, on a card met BEFORE the
+    selector. Sam: "We need to remove 'in Lisbon' as we haven't selected it yet." The rule
+    at the top of this file already says no intro card names a language; a city is the same
+    assertion about a question nobody has been asked, and this check was holding the fault
+    in place.
+
+    What the card has to promise is unchanged and is why this line survives rather than
+    being deleted: what is on is genuinely on, with a real date, rather than a sample.
+  */
+  { name: 'what is on is really on', says: /(as it is actually happening|actually on in)/i },
   { name: 'ask for anything', says: /sentence we have not taught you yet/i },
   /*
     One the sequence added, held to the same standard.
@@ -183,6 +196,43 @@ for (let i = 0; i < 4; i++) {
   if (!onward || !(await onward.isEnabled())) break
   await onward.click()
   await page.waitForTimeout(1200)
+}
+
+/*
+  NO INTRO CARD NAMES A LANGUAGE OR A CITY, which content/intro.ts states as a rule and
+  had never been enforced.
+
+  Every card in that file is met before the set-up card, which is where the language and
+  the city are chosen. So copy naming either is asserting an answer to a question nobody
+  has been asked — reported twice, once for the language ("you are assuming Portuguese
+  before the language has been selected") and once for the city ("We need to remove 'in
+  Lisbon' as we haven't selected it yet"). The second was still live in a headline and
+  pinned there by this file's own pattern.
+
+  COPY ONLY, never specimens. A card SHOWING "Onde é o concerto?" is demonstrating what the
+  product does with a real line, and a demonstration has to be in some language to be one
+  at all. That distinction is the rule in intro.ts and it is the rule here.
+*/
+console.log('\nthe corridor assumes nothing it has not asked\n')
+{
+  const ASSUMES = /\b(Lisbon|Portugal|Portuguese|Porto|Algarve|French|Spanish|Italian)\b/
+  const named: string[] = []
+  for (const card of INTRO_CARDS) {
+    for (const [field, value] of [
+      ['eyebrow', card.eyebrow],
+      ['headline', card.headline],
+      ['body', card.body],
+    ] as const) {
+      if (typeof value === 'string' && ASSUMES.test(value)) {
+        named.push(card.id + '.' + field + ': ' + value)
+      }
+    }
+  }
+  ok(
+    'no card names a language or a city',
+    named.length === 0,
+    named.length ? named.join(' / ') : INTRO_CARDS.length + ' cards, none assuming an answer',
+  )
 }
 
 await browser.close()

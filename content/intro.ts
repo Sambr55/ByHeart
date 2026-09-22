@@ -312,7 +312,19 @@ export const INTRO_CARDS: IntroCard[] = [
     image: 'intro_drops_card',
     pillar: true,
     eyebrow: 'DROPS',
-    headline: 'What is actually on in Lisbon, and what to say when you get there.',
+    /*
+      NO CITY HERE, because none has been chosen yet.
+
+      Sam: "We need to remove 'in Lisbon' as we haven't selected it yet." This card is
+      screen six of the intro and the selector is on screen seven, so a stranger was being
+      told what is on in a city they had not picked — the same fault as "Inside is the
+      Portuguese", caught and fixed across the other cards in this file and missed here.
+
+      "Your city" rather than a blank: the card still has to say what a drop is ABOUT, and
+      the possessive is true before the choice and after it. Every other screen reads the
+      chapter and names the place; this one runs before there is a chapter to read.
+    */
+    headline: 'What is actually on in your city, and what to say when you get there.',
     body: 'A gig, a match, a holiday that shuts the city. It arrives when the thing is close and it goes the morning after.',
     /*
       Whatever is genuinely on, with its real date.
