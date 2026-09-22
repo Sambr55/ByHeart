@@ -1349,6 +1349,15 @@ export function Card({
     the moment the threshold is crossed — the fault lives entirely in the travel after
     that, which only a thumb produces. It reproduced on a phone and not once headlessly.
   */
+  /*
+    The last touch position, so the claim can tell which way a finger is travelling.
+
+    A touchmove says where the finger IS, not where it came from. Direction is the whole
+    question at the ends of a scrollable list — up at the bottom is the gesture that would
+    chain to the rail, up in the middle is the list's own — so it is remembered between
+    events and cleared on touchstart.
+  */
+  const lastY = useRef<number | null>(null)
   const inHand = locked || held || flew !== null
 
   /*
@@ -1400,11 +1409,45 @@ export function Card({
         drag that begins on a button and travels is still a drag of the list under it.
       */
       const from = e.target instanceof Element ? e.target.closest('.card-face-scrolls') : null
-      if (from && from.scrollHeight > from.clientHeight) return
+      if (from && from.scrollHeight > from.clientHeight) {
+        /*
+          THE LIST MAY SCROLL. THE RAIL MAY NOT — and those were the same gesture.
+
+          Sam, on the set-up card: "I can still swipe up from open screen." The claim is
+          given up for a touch that begins inside a scrollable face, so the city list can
+          be reached; the cost is that once that list is at its end the browser carries the
+          same gesture on to the feed underneath, which is the one thing the lock exists to
+          stop. overflow-y-hidden does not help: a chained scroll is the scroller's own
+          parent, not a new gesture.
+
+          So the hatch closes at the ends of the list. Anywhere in the middle the touch is
+          the list's and nothing changes; at the top scrolling up and at the bottom
+          scrolling down there is nothing left to give, and that is exactly the moment the
+          browser would hand it over.
+
+          Measured on the face rather than on overscroll-behavior, which is the tidy answer
+          and is not enough on its own: it stops the chain in WebKit for wheel and inertial
+          scrolls, and a finger already in contact keeps going.
+        */
+        const atTop = from.scrollTop <= 0
+        const atEnd = from.scrollTop + from.clientHeight >= from.scrollHeight - 1
+        const y = e.touches[0]?.clientY ?? 0
+        const last = lastY.current
+        lastY.current = y
+        const goingUp = last !== null && y < last
+        if (!((atEnd && goingUp) || (atTop && !goingUp))) return
+      }
       if (e.cancelable) e.preventDefault()
     }
     el.addEventListener('touchmove', claim, { passive: false })
-    return () => el.removeEventListener('touchmove', claim)
+    const reset = () => {
+      lastY.current = null
+    }
+    el.addEventListener('touchstart', reset, { passive: true })
+    return () => {
+      el.removeEventListener('touchmove', claim)
+      el.removeEventListener('touchstart', reset)
+    }
   }, [inHand])
 
   const done = (fly: 'away' | 'in' | null) => {
