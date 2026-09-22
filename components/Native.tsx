@@ -59,6 +59,34 @@ function useKeyboard() {
     if (!vv) return
 
     const root = document.documentElement
+    /*
+      THE KEYBOARD IS READ WHEN IT HAS STOPPED MOVING, not while it is arriving.
+
+      iOS opens the keyboard over several frames AND scrolls the visual viewport to bring
+      the focused field into view, so `resize` and `scroll` fire a handful of times in
+      quick succession with intermediate values — a third of a keyboard, then two thirds,
+      each one written straight to --keyboard and each one relaying the page. What that
+      looks like on a phone is the screen jumping to a wrong layout and then correcting
+      itself. Sam, on the name field: "Every time I enter my name, on the first tap, the
+      screen blips to this. Then I push up and can start again."
+
+      So the measurement is taken on the trailing edge. Each event restarts a short timer
+      and only the last one commits, which is the standard shape for a value that arrives
+      as a burst and matters only at rest. 120ms is the product's own shortest duration —
+      the one already used for things settling — and it is comfortably inside the keyboard
+      animation, so the layout lands once, when the keyboard has.
+
+      CLOSING IS IMMEDIATE, deliberately. A keyboard going away leaves a hole at the bottom
+      of the screen, and waiting 120ms to fill it is a visible gap; a keyboard arriving
+      covers something, and the cost of waiting is nothing at all. So zero is written
+      straight through and only a non-zero height is debounced.
+    */
+    let settle = 0
+    const commit = (keyboard: number) => {
+      root.style.setProperty('--keyboard', keyboard + 'px')
+      if (keyboard) root.setAttribute('data-keyboard', 'on')
+      else root.removeAttribute('data-keyboard')
+    }
     const measure = () => {
       const eaten = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
       /*
@@ -69,15 +97,19 @@ function useKeyboard() {
         keyboard on any phone is under 200px tall.
       */
       const keyboard = eaten > 120 ? eaten : 0
-      root.style.setProperty('--keyboard', keyboard + 'px')
-      if (keyboard) root.setAttribute('data-keyboard', 'on')
-      else root.removeAttribute('data-keyboard')
+      window.clearTimeout(settle)
+      if (!keyboard) {
+        commit(0)
+        return
+      }
+      settle = window.setTimeout(() => commit(keyboard), 120)
     }
 
     measure()
     vv.addEventListener('resize', measure)
     vv.addEventListener('scroll', measure)
     return () => {
+      window.clearTimeout(settle)
       vv.removeEventListener('resize', measure)
       vv.removeEventListener('scroll', measure)
       document.documentElement.removeAttribute('data-keyboard')

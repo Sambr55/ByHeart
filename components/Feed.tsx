@@ -1215,6 +1215,16 @@ export function Card({
   const reveal = () => {
     claim()
     /*
+      The set-up card is freed BY ITS BUTTON, which is the only way off it.
+
+      Choosing the language and the city used to free the rail; now it only draws the
+      button (see the note on <Choose /> below), so the release belongs here — on the one
+      deliberate act that says the person is finished with the question rather than
+      merely past it. Everything beyond this point is the pane, and the pane's own CTA
+      leaves the feed entirely.
+    */
+    if (card.kind === 'setup') onFreed?.(card.id)
+    /*
       The unlock that used to be here could not be reached.
 
       `reveal` is bound to three buttons and to nothing else, and an intro card renders
@@ -2276,21 +2286,23 @@ export function Card({
                 */
                 <div className="mb-3 mt-6">
                   {/*
-                    Choosing the city releases the card as well as advancing it.
+                    CHOOSING ADVANCES THE FACE AND NOTHING ELSE. The button is the exit.
 
-                    The rail is held while this question is unanswered — see lockedNow —
-                    so without this the answer would move the face on and leave the
-                    scroll locked behind it, which is a trap rather than a gate. The
-                    gesture that frees every other intro card is the gesture it asks for;
-                    here the two taps are it.
+                    This called onFreed as well, so the two taps that answered the question
+                    also unlocked the rail — and the Open card that appeared next could be
+                    scrolled straight past, the last card of the intro turning out not to
+                    be a card at all. Sam: "still scrollable — lock it, CTA the only way
+                    out."
+
+                    Which is the right shape for this one card. Everywhere else in the
+                    sequence a gesture frees what a gesture is holding, and the note this
+                    replaces was correct that an answer leaving the scroll locked would be
+                    a trap. It is not a trap here because the thing released IS on screen
+                    and is the only control on it — BUILD YOUR LEGEND, drawn the moment the
+                    question is answered, which is what setPairChosen does. The rail is
+                    freed when that button is pressed; see the handler on it below.
                   */}
-                  <Choose
-                    onSand={onSand}
-                    onDone={() => {
-                      setPairChosen(true)
-                      onFreed?.(card.id)
-                    }}
-                  />
+                  <Choose onSand={onSand} onDone={() => setPairChosen(true)} />
                 </div>
               ) : (
                 <button
@@ -2851,7 +2863,16 @@ function Emphasised({ text }: { text: string }) {
     <>
       {text.split('**').map((part, i) =>
         i % 2 ? (
-          <em key={i} className="font-semibold not-italic">
+          /*
+            Emphasis is weight AND full strength, because the body it sits in is not.
+
+            On a photograph the blurb runs at text-white/80 and on sand at text-muted —
+            both deliberately quiet. A bold run inside quiet text is still quiet, so the
+            one phrase a card wants you to keep was the same grey as the sentence around
+            it. `text-current` at full opacity lifts it to the ink the headline uses,
+            which is what "in bold white" means on a card whose ground is a photograph.
+          */
+          <em key={i} className="font-semibold not-italic text-fg opacity-100 [.on-dark_&]:text-white">
             {part}
           </em>
         ) : (

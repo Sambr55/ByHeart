@@ -1,13 +1,15 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { setAvatarFromFile } from '@/engine/avatar'
 import { chapterById } from '@/content/chapters'
+import { IMAGE_BANK } from '@/content/images'
 import { roomsFor } from '@/content/feed'
 import { CLUB } from '@/content/club'
-import { EXPLAINER_CTA } from '@/content/explainers'
+import { DOOR_CTA, EXPLAINER_CTA } from '@/content/explainers'
 import { PAIR_STEP } from '@/content/front-door'
 import { GOAL_QUESTION } from '@/content/profile'
 import { track } from '@/engine/analytics'
@@ -89,6 +91,23 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     card already gates its whole render on `mounted`, so there is no hydration hazard.
   */
   const [step, setStep] = useState<Step>('why')
+  /*
+    WHICH REASON WAS TAPPED, held for as long as it takes to see it.
+
+    The five reasons were a list of outlined rows that advanced the moment one was pressed,
+    so the answer was never shown to the person who gave it — the screen simply changed.
+    Sam, on the screenshot: the selected button should turn blue and the card should then
+    fire to the next screen on its own.
+
+    Both, in that order, which is the only order in which the first one means anything. The
+    row goes blue, and 260ms later — the product's own settle duration, not a number picked
+    here — the step advances. Long enough to register as acknowledgement, short enough that
+    nobody waits for it.
+
+    Null while nothing is chosen, and it stays set through the transition rather than being
+    cleared, so the row does not flicker back to its outline on the way out.
+  */
+  const [chosenWhy, setChosenWhy] = useState<string | null>(null)
   const [name, setName] = useState('')
   const [photo, setPhoto] = useState<string | null>(null)
   const [done, setDone] = useState(false)
@@ -321,17 +340,19 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
           className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >
           {/*
-            OPEN, because this is the door at the end of the intro.
+            IT NAMES WHAT HAPPENS NEXT, rather than naming the door.
 
-            EXPLAINER_CTA — "IT'S ALL ABOUT BUILDING YOUR LEGEND" — is the right words on an
-            explainer, where the button has to argue its way to the next thing. Here it is
-            the eighth screen of eight and the argument is over: everything the product does
-            has been shown, and what is left is one word that opens it.
+            This said OPEN, on the argument that the eighth screen of eight has finished
+            arguing and one word is enough. What OPEN does not say is what is on the other
+            side — and the other side is the basics, the first rung of the Legend, which is
+            the thing the previous card has just promised gets you into the Club. Sam:
+            change the CTA text to "Build Your Legend".
 
-            The constant still serves every explainer that points at /vibes. It is this one
-            call site, at the end of the sequence, that says OPEN.
+            EXPLAINER_CTA — "IT'S ALL ABOUT BUILDING YOUR LEGEND" — still serves the
+            explainers, where a button has to argue. Here the argument is over and the
+            button is an instruction, so it is the short imperative form of the same idea.
           */}
-          OPEN
+          {DOOR_CTA}
         </Link>
         )}
       </div>
@@ -340,31 +361,76 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3">
-        <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
-        {step === 'why' ? (
-          <>
-            <h2 className="display text-balance text-2xl">{CLUB.welcome.ask_headline(city)}</h2>
-            {/*
-              The orphan's framing, which was the better half of it.
+      {/*
+        THE QUESTION GETS A PICTURE, because it is the one that decides the product.
 
-              "There is no wrong answer, and the last one is a real one" exists because the
-              fifth option is "no reason, I just like it" and somebody scanning five reasons
-              needs telling that one counts. It arrived with the question; it comes with it.
-            */}
-            <p className="text-sm italic leading-relaxed text-muted">{GOAL_QUESTION.askerLine}</p>
-            <p className="text-sm leading-relaxed text-muted">{CLUB.welcome.ask_body}</p>
-          </>
-        ) : (
-          <>
-            <h2 className="display text-balance text-2xl">And what do they call you?</h2>
-            <p className="text-sm leading-relaxed text-muted">
-              The first thing you will say in Portuguese is your own name. This is the answer
-              to it. A photo if you want one.
+        "What brings you to Lisbon?" chooses the purpose that feedFor builds the whole Club
+        from, and it was five rows of text under a small eyebrow — the plainest screen in
+        the intro carrying its largest consequence. Sam: add a header image behind the top
+        section, the headline and the subtext.
+
+        Behind rather than above: the eyebrow, the headline and both lines of body sit ON
+        the photograph, which is what makes it a header rather than a decoration with a
+        question underneath. The scrim is the same gradient the drop rooms use, for the
+        same reason — white letters on a picture whose brightness nobody authored.
+
+        `-mx-5 -mt-6` to reach the edges of the pane, which is padded; the photograph is
+        full-bleed or it is a panel, and a panel would be the decoration again.
+
+        WHY only. The who step is a name field and a photo picker, and a header image over
+        a form is a header image in the way of a form.
+      */}
+      {step === 'why' ? (
+        <div className="relative -mx-5 -mt-6 overflow-hidden on-dark">
+          <Image
+            src={IMAGE_BANK.intro_arrival.src}
+            alt={IMAGE_BANK.intro_arrival.alt}
+            width={896}
+            height={504}
+            sizes="(max-width: 448px) 100vw, 448px"
+            className="h-full w-full object-cover"
+            style={{ position: 'absolute', inset: 0 }}
+            priority
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(to bottom, rgb(0 0 0 / 0.30) 0%, rgb(0 0 0 / 0.68) 100%)',
+            }}
+          />
+          <div
+            className="relative flex flex-col gap-3 px-5 py-6 text-white"
+            style={{ textShadow: '0 1px 12px rgb(0 0 0 / 0.5)' }}
+          >
+            <p className="eyebrow text-white/80">{PAIR_STEP.eyebrow}</p>
+            <h2 className="display text-balance text-2xl">{CLUB.welcome.ask_headline(city)}</h2>
+            <p className="text-sm italic leading-relaxed text-white/85">
+              {GOAL_QUESTION.askerLine}
             </p>
-          </>
-        )}
-      </div>
+            <p className="text-sm leading-relaxed text-white/85">{CLUB.welcome.ask_body}</p>
+          </div>
+        </div>
+      ) : null}
+      {/*
+        The who step keeps the plain heading. Its header is a form, and the photograph
+        above belongs to the question that earns one — see the note on it.
+
+        The orphan's framing that used to sit here — "there is no wrong answer, and the
+        last one is a real one" — has moved onto the photograph with the rest of the why
+        step, where the question it belongs to is.
+      */}
+      {step === 'why' ? null : (
+        <div className="flex flex-col gap-3">
+          <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
+          <h2 className="display text-balance text-2xl">And what do they call you?</h2>
+          <p className="text-sm leading-relaxed text-muted">
+            The first thing you will say in Portuguese is your own name. This is the answer
+            to it. A photo if you want one.
+          </p>
+        </div>
+      )}
 
       {/*
         WHY. The three, described by what they contain rather than by how long somebody is
@@ -380,6 +446,10 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                 data-testid={'setup-why-' + o.id}
                 onClick={() => {
                   /*
+                    The answer is shown before it is acted on — see chosenWhy above.
+                  */
+                  setChosenWhy(o.id)
+                  /*
                     ONE ANSWER, TWO RECORDS, and that is the whole merge.
 
                     `purpose` is what the product runs on — feedFor builds the Club from it,
@@ -394,13 +464,29 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                   if (o.purpose) setPurpose(o.purpose)
                   setProfile('goal', o.id)
                   track('purpose_chosen', { purpose: o.purpose ?? 'none', goal: o.id })
-                  setStep('who')
+                  /*
+                    260ms is the settle on the product's motion scale, so the acknowledgement
+                    lasts exactly as long as every other thing that settles here.
+                  */
+                  window.setTimeout(() => setStep('who'), 260)
                 }}
-                className="tap-target flex w-full flex-col gap-1 rounded border border-line px-4 py-3 text-left transition hover:border-accent/50"
+                className={
+                  'tap-target flex w-full flex-col gap-1 rounded border px-4 py-3 text-left transition ' +
+                  (chosenWhy === o.id
+                    ? 'border-accent bg-accent text-accent-ink'
+                    : 'border-line hover:border-accent/50')
+                }
               >
                 <span className="display text-lg">{o.label}</span>
                 {o.sub ? (
-                  <span className="text-sm leading-relaxed text-muted">{o.sub}</span>
+                  <span
+                    className={
+                      'text-sm leading-relaxed ' +
+                      (chosenWhy === o.id ? 'opacity-80' : 'text-muted')
+                    }
+                  >
+                    {o.sub}
+                  </span>
                 ) : null}
               </button>
             </li>

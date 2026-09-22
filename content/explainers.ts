@@ -66,6 +66,20 @@ export interface Explainer {
  */
 export const EXPLAINER_CTA = 'IT’S ALL ABOUT BUILDING YOUR LEGEND'
 
+/*
+  The last button of the intro, which is an instruction rather than a label.
+
+  It said OPEN. One word, and the wrong one: it names the door instead of what is through
+  it, at the exact moment the card before has promised that a Legend is what gets you into
+  the Club. This says the next thing you will actually do.
+
+  A constant rather than a literal in the JSX because it wears `eyebrow` for its type, and
+  the vocabulary check holds literal eyebrows to fourteen characters — correctly, since an
+  eyebrow is a label. This is a call to action that happens to share the type scale, which
+  is precisely the distinction EXPLAINER_CTA above already relies on.
+*/
+export const DOOR_CTA = 'BUILD YOUR LEGEND'
+
 export const EXPLAINERS: Explainer[] = [
   {
     id: 'how_it_works',

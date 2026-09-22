@@ -313,7 +313,18 @@ export const INTRO_CARDS: IntroCard[] = [
     image: 'intro_arrival',
     eyebrow: 'YOUR LEGEND',
     headline: 'Build your legend out of what you have learned.',
-    body: 'Seven things about yourself, said out loud with nothing on screen. It is what a stranger asks you, in the order they ask it.',
+    /*
+      WHAT THE LEGEND IS FOR, said on the card that introduces it.
+
+      The card explained the mechanic — seven things, said cold — and stopped there, so
+      the Legend read as an exercise rather than as the threshold it is. Every other card
+      in the intro sells the Club; this one built the thing that gets you in and never
+      mentioned it. Sam: add "Once you have your Legend, you're in The DUB Club."
+
+      Kept as the last sentence rather than folded into the first: it is a consequence,
+      and a consequence reads as one when it follows the thing it is a consequence of.
+    */
+    body: "Seven things about yourself, said out loud with nothing on screen. It is what a stranger asks you, in the order they ask it. Once you have your Legend, you're in **DUB Club**.",
     /*
       Derived from LEGEND_FRAMES rather than typed here.
 
@@ -437,7 +448,16 @@ export const INTRO_CARDS: IntroCard[] = [
     pillar: true,
     eyebrow: 'REMINDERS',
     headline: 'The things people who live here just know.',
-    body: 'Inside the Club they keep coming — what to say at which counter, when everything shuts, the habit that marks you out as a visitor. Small, useful, about your city rather than about the app.',
+    /*
+      THE CLUB IS NAMED IN FULL, and marked.
+
+      "Inside the Club" — which club? The card is the last thing somebody reads before
+      deciding whether to open an account, and the thing it is selling had been referred
+      to by a definite article. Sam: the body text should say "DUB Club", in bold white.
+      The ** is the emphasis the intro bodies already understand, lifted to full ink by
+      Emphasised so it reads at the strength of a name rather than of a stressed word.
+    */
+    body: 'Inside **DUB Club** they keep coming — what to say at which counter, when everything shuts, the habit that marks you out as a visitor. Small, useful, about your city rather than about the app.',
     shows: {
       kind: 'lines',
       lines: [

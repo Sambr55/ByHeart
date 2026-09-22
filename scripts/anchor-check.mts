@@ -78,12 +78,33 @@ async function strays(p: Page) {
   })()`) as Promise<string[]>
 }
 
-/* The bar is 4.5rem, and the dock sits on it. Two pixels of slack for rounding. */
-const REST = 72
+/*
+  WHERE A DOCK RESTS IS ASKED OF THE PAGE, not asserted from a constant.
+
+  This was 72 — "the bar is 4.5rem, and the dock sits on it" — which is the same literal
+  the CSS carried, and it went stale in the same way at the same moment: the bar is the
+  height of its icon row, 67px, and every dock correctly moved down to meet it. So the
+  check failed four screens for being right, and would have gone on describing a gap that
+  had just been closed.
+
+  A check that hardcodes the number it is checking cannot tell a regression from a fix. It
+  reads --bar-room, which is what the docks themselves read, so what it verifies now is the
+  thing actually worth verifying: that every dock in the product rests on the bar, wherever
+  the bar happens to be.
+*/
 const seen = new Map<string, number>()
+
+async function restFor(p: Page) {
+  const v = (await p.evaluate(
+    `getComputedStyle(document.documentElement).getPropertyValue('--bar-h').trim()`,
+  )) as string
+  const px = parseFloat(v)
+  return Number.isFinite(px) && px > 0 ? px : 72
+}
 
 async function look(p: Page, where: string) {
   await p.waitForTimeout(900)
+  const REST = await restFor(p)
   for (const d of await docks(p)) {
     seen.set(where + ' — ' + d.label, d.fromBottom)
     ok(

@@ -1,0 +1,102 @@
+
+the front door goes to the Club
+
+  ✓ there is a way in
+  ✓ and it opens the Club, not a corridor   /club
+
+and a stranger can look at all of it
+
+  ✓ there is a feed   18 cards
+  ✓ every argument card is in the feed   0, 1, 2, 3, 4, 5, 6, 7, 8
+  ✓ and in the order the content declares   HERE'S HOW IT WORKS → NOT THIS ONE → VIBES → CHEATS → YOUR LEGEND → ASK → DROPS → WHERE IT GOES → REMINDERS
+  ✓ the sequence opens on the gesture tutorial   HERE'S HOW IT WORKS exits by in
+  ✓ and both gestures are taught before any argument   HERE'S HOW IT WORKS:in → NOT THIS ONE:away
+  ✓ and something in it shows Portuguese being built   VIBES
+  ✓ and set-up follows the card the content anchors it to   REMINDERS 8, set-up 9
+  ✓ every card that claims something shows it   VIBES 3 · CHEATS 3 · YOUR LEGEND 7 · ASK 2 · DROPS 1 · WHERE IT GOES 5 · REMINDERS 3
+  ✓ the vibe specimen is a real root line   tg_goose: Fala comigo, Goose.
+  ✓ and the Legend specimens are the questions it actually asks   5 real questions
+  ✓ the reject lesson holds the thumb   intro_in
+  ✓ and it lands on the card rather than between two   0px off the snap point
+  ✓ and says so with a moving arrow   on the three tutorial cards only — an arrow that loops everywhere stops being read
+
+the intro is a rail, and every gesture is made rather than read
+
+  ✓ the sequence opens on a card that admits one gesture   the tutorial teaches by being swiped
+  ✓ a locked card takes the gesture off the browser   defaultPrevented true
+  ✓ the card is parked with a lane to its left to swipe into   lane 0 of 1
+  ✓ the card follows the thumb rightward   20px
+  ✓ and will not budge the way it is not allowed   0px
+  ✓ the sequence opens on the open lesson   HERE'S HOW IT WORKS
+  ✓ the card is still in hand after the swipe fires   touch-action none
+  ✓ and the browser cannot scroll it out from under the thumb   overflow-x hidden
+  ✓ an opened card leaves to the right   371px
+  ✓ swipe right reaches the second slide   NOT THIS ONE
+  ✓ and swipe left moves on to the vibes claim   VIBES
+
+the five pillars arrive as headlines
+
+  ✓ every pillar lands as one   VIBES · CHEATS · ASK · DROPS · WHERE IT GOES · REMINDERS
+  ✓ and the first card says the feed keeps going   the only instruction on screen used to point sideways
+  ✓ nothing is asked before anything is shown   no form in front of the demonstration
+  ✓ the grammar is taught in the sequence   reject and enter, both said before either is needed
+
+the logo goes back to the front door
+
+  ✓ the logo asks for the door   /?door=1
+  ✓ and the door opens rather than redirecting   /?door=1
+  ✓ and it is the front door, not the Club   /?door=1
+
+the demo plays where a stranger lands
+
+  ✓ the demonstration is in the sequence   VIBES at 3
+  ✓ and it plays rather than pointing sideways   a card that has to be DONE does not send you somewhere else to do it
+  ✓ the familiar line is on the face   recognition, in English, first
+  ✓ and the three sentences it becomes are on the face   3 branches, no tap needed
+  ✓ and says what it gave you   the line, then the word
+  ✓ and it builds three sentences from the one word   Vem comigo / Fica comigo / Podes vir comigo
+  ✓ and there is a way on   a card that ends in nothing wastes the moment it just earned
+
+every explainer points the same way
+
+  ✓ one destination, several reasons   7 cards carry it
+
+the set-up is a card, and it does not block
+
+  ✓ set-up is in the feed   at position 9
+  ✓ and it comes straight after the card it is anchored to   REMINDERS 8, set-up 9
+  ✓ and it can be swiped past   landed on card 10, set-up is 9
+
+saving a card brings it back
+
+  ✓ a card can be saved   The neighbour on the stairs, at 15
+  ✓ and it leads the feed afterwards   The neighbour on the stairs: 15 → 14
+  ✓ and nothing ordinary is in front of it   first among the rooms
+
+one room is given away, and exactly one
+
+  ✓ a room can be opened
+  ✓ and it opens the whole way   a showcase that only describes itself is a brochure
+  ✓ the gift is recorded   lisbon_telemovel
+  ✓ the next one is teased instead   one, ever
+  ✓ and the tease still says what the moment is   withholding capability, not information
+
+set-up asks who, where and why — and the feed changes because of it
+
+  ✓ a stored pair does not skip the question   the pair is written by three things and only one of them is somebody choosing
+  ✓ and the rail is held there   overflow-y is hidden
+  ✓ set-up opens by asking why   the city moved in here with it; what a stranger asks you differs by this
+  ✓ then who   the answer to the first thing you say in Portuguese
+  ✓ where is recorded   lisbon
+  ✓ why is recorded   moving
+  ✓ who is recorded   Sam
+  ✓ the mover content is there   3 of 3 found
+  ✓ and it leads the untagged rooms   moving at 23, all-purpose at 30
+
+the call to action cannot land on a question set-up already asks
+
+  ✓ no language list stands between them and a vibe   the question set-up already asks
+  ✓ set-up is what they get instead   one question, one component, two places
+  ✓ and they are still where they asked to be   /vibes
+
+a stranger is shown the product before being asked for anything

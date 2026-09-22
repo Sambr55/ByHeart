@@ -207,10 +207,12 @@ export function Choose({
                   className={
                     'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-3 text-left transition ' +
                     (!p.available
-                      ? 'border-line/60 text-muted ' + (onSand ? 'bg-bg-elev/70' : 'bg-[rgba(12,14,18,0.82)]')
+                      ? 'border-line/60 ' +
+                        (onSand ? 'text-muted bg-bg-elev/70' : 'text-white/55 bg-[rgba(12,14,18,0.82)]')
                       : picked
                         ? 'border-accent bg-accent text-accent-ink'
-                        : 'border-line text-fg ' + (onSand ? 'bg-bg-elev' : 'bg-[rgba(12,14,18,0.88)]'))
+                        : 'border-line ' +
+                          (onSand ? 'text-fg bg-bg-elev' : 'text-white bg-[rgba(12,14,18,0.88)]'))
                   }
                 >
                   <span className="flex min-w-0 items-center gap-3">
@@ -220,7 +222,12 @@ export function Choose({
                     </span>
                     <span className="flex min-w-0 flex-col gap-1">
                       <span className="display text-lg">{p.label}</span>
-                      <span className={'text-sm ' + (picked ? 'opacity-80' : 'text-muted')}>
+                      <span
+                        className={
+                          'text-sm ' +
+                          (picked ? 'opacity-80' : onSand ? 'text-muted' : 'text-white/70')
+                        }
+                      >
                         {p.native}
                       </span>
                     </span>
@@ -230,7 +237,15 @@ export function Choose({
                     One is a refusal, the other is a roadmap, and Destination already
                     settled on this word.
                   */}
-                  {p.available ? null : <span className="eyebrow shrink-0 text-muted">COMING</span>}
+                  {p.available ? null : (
+                    <span
+                      className={
+                        'eyebrow shrink-0 ' + (onSand ? 'text-muted' : 'text-white/70')
+                      }
+                    >
+                      COMING
+                    </span>
+                  )}
                 </button>
               </li>
             )
@@ -287,19 +302,34 @@ export function Choose({
                   className={
                     'tap-target flex w-full items-center justify-between gap-3 rounded border px-4 py-3 text-left transition ' +
                     (!c.open
-                      ? 'border-line/60 text-muted ' + (onSand ? 'bg-bg-elev/70' : 'bg-[rgba(12,14,18,0.82)]')
+                      ? 'border-line/60 ' +
+                        (onSand ? 'text-muted bg-bg-elev/70' : 'text-white/55 bg-[rgba(12,14,18,0.82)]')
                       : city === c.id
                         ? 'border-accent bg-accent text-accent-ink'
-                        : 'border-line text-fg ' + (onSand ? 'bg-bg-elev' : 'bg-[rgba(12,14,18,0.88)]'))
+                        : 'border-line ' +
+                          (onSand ? 'text-fg bg-bg-elev' : 'text-white bg-[rgba(12,14,18,0.88)]'))
                   }
                 >
                   <span className="flex min-w-0 flex-col gap-1">
                     <span className="display text-lg">{c.city}</span>
-                    <span className={'text-sm ' + (city === c.id ? 'opacity-80' : 'text-muted')}>
+                    <span
+                      className={
+                        'text-sm ' +
+                        (city === c.id ? 'opacity-80' : onSand ? 'text-muted' : 'text-white/70')
+                      }
+                    >
                       {c.country}
                     </span>
                   </span>
-                  {c.open ? null : <span className="eyebrow shrink-0 text-muted">COMING</span>}
+                  {c.open ? null : (
+                    <span
+                      className={
+                        'eyebrow shrink-0 ' + (onSand ? 'text-muted' : 'text-white/70')
+                      }
+                    >
+                      COMING
+                    </span>
+                  )}
                 </button>
               </li>
             ))}

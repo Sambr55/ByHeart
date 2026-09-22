@@ -1,0 +1,57 @@
+  ✓ a saved cheat sheet resolves   sheet_numbers_1_10
+  ✓ the feed is there
+
+  70 cards, 72 rendered, viewport 844px
+
+  ✓ every card fills the screen   60768 / 60768
+  ✓ the list is cloned at both ends so it can loop   72 rendered for 70 cards
+  ✓ it opens on the first real card, not a clone   844
+  ✓ swiping past the end comes back to the beginning   landed at 844, expected 844
+  ✓ and swiping back off the front reaches the end   landed at 59080, expected 59080
+
+  sideways
+
+  ✓ each card has exactly three lanes   1170 / 1170
+
+  the rail
+
+  ✓ like is there and thumb-sized   44×44
+  ✓ save is there and thumb-sized   44×44
+  ✓ share is there and thumb-sized   44×44
+  ✓ comment is there and thumb-sized   44×44
+  ✓ nothing on a card is counted   a number next to a like turns the feed into something that wants feeding
+  ✓ a like is written down   1
+
+yours, on the profile
+
+  ✓ no word cards in the feed
+  ✓ two across in been-through   2
+  ✓ two across in put-aside   2
+  3 tiles
+  ✓ what you finished is here
+  ✓ and what you saved
+  ✓ and the vibes you have been through
+  ✓ every tile is three by four   0.75
+  ✓ the words are here instead   the learner inventory, not the editorial four
+  ✓ a card is three lanes wide   1170 / 390
+  ✓ and opens on the middle one, the face   at 390, face is 390
+  ✓ and the button opens the language, which is now leftward   scrolled to 0
+
+reject sinks a card, and rewind brings it back
+
+  ✓ a half-swipe toward away does nothing   a gesture you can abandon is what makes it cheap
+  ✓ settling on away rejects the card   explainer_ask_anything
+  ✓ and nothing left the feed   70 cards, was 70 — reject sinks, it does not destroy
+  ✓ rewind appears once there is something to bring back
+  ✓ and it undoes the last one   one step, which is the one somebody wants
+
+the loop comes round under a real swipe
+
+  ✓ it wraps rather than stopping at the last card   indices: 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 1 2 3 4 5 6
+
+a card with no photograph still has a ground
+
+  ✓ the drop is first in the feed   A DROPMEO Arena · 13 day
+  ✓ and it has something behind it   a photograph
+
+it loops, it reveals sideways, and it does not keep score

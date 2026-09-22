@@ -1,0 +1,34 @@
+
+████ 320
+
+  ✗ the door has a button
+  ✗ the button label reads on the button   no button
+
+████ 390
+
+  ✗ the door has a button
+  ✗ the button label reads on the button   no button
+
+████ 430
+
+  ✗ the door has a button
+  ✗ the button label reads on the button   no button
+
+████ with the photograph blocked
+
+  ✗ the strapline is still there
+  ✗ the button is still there
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.evaluate: TypeError: Failed to execute 'getComputedStyle' on 'Window': parameter 1 is not of type 'Element'.
+    at eval (eval at evaluate (:311:30), <anonymous>:1:1)
+    at eval (<anonymous>)
+    at UtilityScript.evaluate (<anonymous>:311:30)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at <anonymous> (/Users/admin/Projects/ByHeart/scripts/door-check.mts:156:28) {
+  log: []
+}
+
+Node.js v24.16.0
