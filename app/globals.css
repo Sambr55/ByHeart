@@ -238,8 +238,15 @@ html {
 
     clip, not hidden: `hidden` creates a scroll container and would break position:sticky
     on every header in the app.
+
+    AND overflow-y: visible BESIDE IT, which is not optional. `overflow-x: clip` alone
+    clips on BOTH axes — the y value computes to `clip` too — so the bottom bar's own
+    ground, drawn as a shadow below its box, was being cut off at the foot of the page and
+    the sand behind it showed through. That is the band, and no amount of making the
+    shadow longer could ever have reached past a clip.
   */
   overflow-x: clip;
+  overflow-y: visible;
 }
 
 /*
@@ -1258,13 +1265,14 @@ summary:focus-visible,
     bar 67px but lifted it off the bottom edge, and the page showing through underneath is
     the sand band itself — not a symptom of it, the thing.
 
-    So: flush to the bottom, with the inset back inside as padding so the labels still
-    clear the indicator, and the row itself kept at the height of its icons by the min-
-    height below. The bar measures 67 + inset and every pixel of it is painted blue, which
-    is what "the height of the icons" was always really asking for — no band of another
-    colour under the labels.
+    So: flush to the bottom, and NO INSET PADDING. Adding it made the bar 67 + inset —
+    which is the "double height" Sam has now reported four times, and I added it myself
+    trying to keep the labels off the home indicator. The labels do not need it: the row
+    is 67px against an indicator that occupies roughly 34, the icons sit in the upper two
+    thirds of that row, and the bar's own ground extends below the screen regardless.
+
+    The bar is the height of its icons. Nothing else.
   */
-  padding-bottom: var(--safe-bottom);
   /* The bar's own ground, continued under the indicator. Inset so the hairline the bar
      draws at its top stays the only rule on it — a second line above the indicator would
      read as the bar having a floor it does not have.
