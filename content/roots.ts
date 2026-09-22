@@ -3184,7 +3184,22 @@ export const FLIRTING_M2F: Root[] = [
     ],
     voice_rule:
       'Gostava de puts the want one polite step away from you; dás-me asks for something outright. Portuguese lets you do either, but it notices which one you chose.',
-    transfer_prompt: { context: 'You are at the counter, and the same tense turns out to work on coffee.', ask: 'I’d like a coffee, please.', answer: 'Gostava de um café, por favor.' },
+    /*
+      SAY WHAT CARRIED, because a jump nobody can follow reads as a mistake.
+
+      Sam: "Bit confused by flirting it went from I'd like to see you again straight to
+      ordering a coffee?"
+
+      The jump is the point of this beat — the whole claim is that a piece taken out of a
+      line works somewhere the line has nothing to do with — and this context tried to say
+      so and failed on one word. It said "the same tense", which is a grammar term for a
+      thing the learner knows as two words on a card: Gostava de. Nobody thinks "I have
+      the imperfect now"; they think "I have Gostava de now", and the screen never said it.
+
+      So it names the piece. The distance from a first date to a counter is the argument,
+      not an accident, and it only lands if the bridge is visible.
+    */
+    transfer_prompt: { context: 'Gostava de is not about flirting — it is how you ask for anything. Same two words, at a counter.', ask: 'I’d like a coffee, please.', answer: 'Gostava de um café, por favor.' },
     rights_status: 'dub-authored',
     starter_tags: ['warm', 'closing'],
     next_root_hooks: ['fl_m_vim_aqui'],
@@ -3401,7 +3416,8 @@ export const FLIRTING_F2M: Root[] = [
     ],
     reinforces: ['outra_vez'],
     helpers: { 'ver-te': 'to see you', 'um': 'a', 'café': 'coffee', 'por': 'for', 'favor': 'favour', 'melhor': 'better', 'outra': 'another', 'vez': 'time' },
-    transfer_prompt: { context: 'You are ordering, and the same tense turns out to work off the dance floor too.', ask: 'I’d like a coffee, please.', answer: 'Queria um café, por favor.' },
+    /* Names the piece rather than the grammar — see the note on fl_m_gostava. */
+    transfer_prompt: { context: 'Queria is not about flirting — it is how you ask for anything. Same word, at a counter.', ask: 'I’d like a coffee, please.', answer: 'Queria um café, por favor.' },
     rights_status: 'dub-authored',
     starter_tags: ['warm', 'everyday'],
     next_root_hooks: ['fl_f_engracado'],
