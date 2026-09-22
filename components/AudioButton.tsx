@@ -69,7 +69,7 @@ export function AudioButton({
       }}
       className={
         dim +
-        ' tap-target inline-flex shrink-0 items-center justify-center rounded-full border border-line bg-chip text-accent transition active:scale-95'
+        ' icon-chip tap-target inline-flex shrink-0 items-center justify-center rounded-full border border-line bg-chip text-accent transition active:scale-95'
       }
     >
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true">

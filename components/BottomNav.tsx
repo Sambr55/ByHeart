@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useClub } from '@/engine/useClub'
 
@@ -90,6 +91,28 @@ const TABS = [
 export function BottomNav() {
   const path = usePathname()
   /*
+    THE BAR REPORTS ITS OWN HEIGHT, because everything that clears it was guessing.
+
+    --bar-room was `4.5rem + safe-bottom`, a literal written when the bar happened to be
+    4.5rem tall. It is 67px now — the icon row and nothing else, which was the whole point
+    of the change that made it that. The 5px difference is the sand gap: docks held 72px
+    off the bottom, blue filling 67, ground showing between them on every screen with a bar.
+
+    Measured on mount and on resize rather than declared, so the next time the bar's
+    contents change nothing else has to be told.
+  */
+  const bar = useRef<HTMLElement | null>(null)
+  useEffect(() => {
+    const el = bar.current
+    if (!el) return
+    const publish = () =>
+      document.documentElement.style.setProperty('--bar-h', el.offsetHeight + 'px')
+    publish()
+    const ro = new ResizeObserver(publish)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  /*
     ASK is behind the same door as everywhere else it can be reached from.
 
     The translator opened on any screen, to anybody, including a device that had just been
@@ -122,6 +145,7 @@ export function BottomNav() {
 
   return (
     <nav
+      ref={bar}
       data-testid="bottom-nav"
       aria-label="Where to go"
       /*

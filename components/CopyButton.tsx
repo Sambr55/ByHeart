@@ -123,7 +123,7 @@ export function CopyButton({
       onClick={copy}
       className={
         dim +
-        ' tap-target inline-flex shrink-0 items-center justify-center rounded-full text-muted transition active:scale-95'
+        ' icon-ink tap-target inline-flex shrink-0 items-center justify-center rounded-full text-muted transition active:scale-95'
       }
     >
       {done ? (

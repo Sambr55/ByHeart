@@ -303,6 +303,33 @@ html:has(.on-dark) {
 }
 
 /*
+  ICONS ON THE DARK GROUND, which were drawing themselves in ink.
+
+  AudioButton is `bg-chip text-accent` and CopyButton is `text-muted`. Those are the right
+  colours on sand and the wrong ones on a photograph: chip is pale sand and accent is the
+  deep blue, so on a full-bleed image the speaker rendered as a light disc with dark ink in
+  it while every word around it was white. Reported as "white text on sand background makes
+  the audio icons and other icons black".
+
+  Keyed off .on-dark rather than off the components, for the same reason the canvas rule
+  above is: the ground is the thing that decides, and any screen that adopts it — or any
+  icon added later — is covered without being named. The chip becomes a translucent white
+  disc and the ink becomes white, which is what every other mark on those screens already
+  does.
+
+  Scoped to the icon buttons rather than to all of .on-dark: the CTAs on these screens are
+  solid blue on purpose and must keep their own colours.
+*/
+.on-dark :is(.icon-chip, .icon-ink) {
+  color: #ffffff;
+}
+
+.on-dark .icon-chip {
+  background-color: rgb(255 255 255 / 0.16);
+  border-color: rgb(255 255 255 / 0.28);
+}
+
+/*
   THE STRIP UNDER THE HOME INDICATOR, which is sand on an installed phone.
 
   Reported three times as a "sand gap" under a "double height" bottom bar, and neither
@@ -684,8 +711,24 @@ body {
   */
   --keyboard: 0px;
 
-  /* The room the bottom bar takes, which is none of it while the keyboard is up. */
-  --bar-room: calc(4.5rem + var(--safe-bottom));
+  /*
+    THE ROOM THE BOTTOM BAR TAKES, MEASURED RATHER THAN ASSUMED.
+
+    This was a literal 4.5rem, which was true on the day it was written and stopped being
+    true the moment the bar was rebuilt to be exactly the height of its icon row. The row
+    measures 67px; 4.5rem reserves 72. Those 5px are the sand gap — a strip of ground below
+    every dock and above the blue, on every screen with a bar, reported three times across
+    two days and looked for each time in the photograph rather than in the arithmetic.
+
+    So the bar measures itself into --bar-h on mount and on resize (see BottomNav), and
+    everything that has to clear it reads that. The fallback is the old literal, for the
+    frame or two before the measurement lands and for any render without the component.
+
+    The lesson is the one that keeps recurring here: a constant that describes another
+    element's size is a copy of that size, and copies go stale silently.
+  */
+  --bar-h: 4.5rem;
+  --bar-room: calc(var(--bar-h) + var(--safe-bottom));
 }
 
 /*
@@ -803,7 +846,7 @@ body {
 }
 
 .nav-clear {
-  padding-bottom: calc(4.5rem + var(--safe-bottom));
+  padding-bottom: var(--bar-room);
 }
 
 /*
