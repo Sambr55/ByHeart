@@ -182,8 +182,18 @@ console.log('\nand Yours is empty rather than full of headings over nothing\n')
     those is content — a setting is never empty. Replacing the whole screen took them with
     it, and tap-check found the missing sound toggle. Asserted here so the empty state
     cannot quietly become an empty screen again.
+
+    THROUGH THE COG, because that is where they went. Settings moved off Yours onto
+    /settings behind the cog — Sam: "Put everythiung that is not about Language
+    (membership, account, feedback, etc) into a settings section accessible via a cog icon
+    top right in YOURS" — and this still looked for the sound toggle inline, so it had been
+    asserting a layout the product no longer has. It failed on an empty device and would
+    have failed on a full one too.
+
+    The rule it was written to protect is unchanged: an empty Yours must still be a way
+    into the settings. What changed is that the way in is one tap rather than zero.
   */
-  ok('and the settings are still reachable', Boolean(await p.$('[data-testid="sound-off"]')))
+  ok('and the settings are still reachable', Boolean(await p.$('[data-testid="yours-settings"]')))
   await p.close()
 }
 
