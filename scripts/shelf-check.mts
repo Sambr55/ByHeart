@@ -547,10 +547,24 @@ console.log('\na vibe you have sat through says so\n')
     return out
   })()`)) as Record<string, string>
 
+  /*
+    THE BASICS WEARS THE DOOR'S COUNT, not the generic badge.
+
+    This asserted 'session done' on every marked tile. The basics stopped saying that
+    when the tile became the place the door's distance is shown — PICKER.legend_tile,
+    "BASICS · 1 OF 4" — because a tile reading SESSION DONE above a line saying five
+    roots remain is two statements of one fact disagreeing. Sam: "where is that
+    communicated? It's totally unclear."
+
+    So the check was pinned to a badge the product had already replaced, and it had been
+    failing on every run since. Both shapes are accepted here because both are correct:
+    the door's fraction while the door is shut, the plain badge once it is open.
+  */
+  const basicsBadge = badges['the_basics'] ?? ''
   ok(
     'the basics is marked once a session of it is done',
-    badges['the_basics'] === 'session done',
-    'badge: ' + JSON.stringify(badges['the_basics'] ?? '(none)'),
+    basicsBadge === 'session done' || /^basics · \d+ of \d+$/.test(basicsBadge),
+    'badge: ' + JSON.stringify(basicsBadge || '(none)'),
   )
   if (other) {
     ok(
@@ -563,7 +577,8 @@ console.log('\na vibe you have sat through says so\n')
     And NOT on everything, which is the other way this goes wrong — a badge that is on
     every tile is not information, and this file already had that bug once with BASICS.
   */
-  const marked = Object.values(badges).filter((b) => b === 'session done').length
+  const isMarked = (b: string) => b === 'session done' || /^basics · \d+ of \d+$/.test(b)
+  const marked = Object.values(badges).filter(isMarked).length
   ok(
     'and nothing else claims a session it never had',
     marked === (other ? 2 : 1),
