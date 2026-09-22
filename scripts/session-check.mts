@@ -288,9 +288,25 @@ if (/DONE|COMPLETE/i.test(seen)) {
     assertion survives because what it protects is that the vibe is not silently presented
     as finished; only its wording needed to stop describing a behaviour we removed.
   */
+  /*
+    AND THE BASICS SAYS IT AS THE DOOR'S COUNT, which is more than "there is more".
+
+    This accepted only "more in there". The basics stopped saying that when this screen
+    became the place a sitting of the doorway is counted — "That's 1 of 4 basics sessions.
+    3 to go, then your vibes." — because the generic line asks for nothing on the one vibe
+    that is a door, and this is the screen where somebody decides what to do next. Sam:
+    "where is that communicated? It's totally unclear."
+
+    So the check was pinned to copy the product had already replaced and had been failing
+    on every run since. Both forms satisfy what it actually protects — that a session
+    ending is never presented as the vibe being finished — and the door's fraction says it
+    with a number rather than a reassurance.
+  */
   ok(
     'and says there is more',
-    played >= basics.length || /more in there/i.test(seen),
+    played >= basics.length ||
+      /more in there/i.test(seen) ||
+      /\d+ of \d+ basics sessions/i.test(seen),
     seen.slice(0, 60),
   )
 }
