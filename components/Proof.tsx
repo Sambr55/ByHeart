@@ -305,10 +305,31 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
         something new.
       </p>
 
-      {/* mt-10, not mt-auto: a button sits under the words that earned it rather than at
-          the foot of the screen. See the Cta in Journey.tsx for why. */}
+      {/*
+        THE BUTTONS COME TO THE BOTTOM, because they were below it.
+
+        This was mt-10 — "a button sits under the words that earned it rather than at the
+        foot of the screen" — which is a good rule and was the wrong one here. Measured at
+        390x844 with a seeded learner: TODAY'S LINE sat 31px BELOW the top of the nav and
+        KEEP GOING 87px below it, so the page's only two ways forward were off-screen
+        behind the bar and reachable only by scrolling for them. Sam, twice across two
+        sheets: "too much scrolling and hidden elements. Anchor CTA close to bottom" and
+        "again anchor CTAs just above nav and remove scrolling."
+
+        Sticky rather than the Dock component: a dock needs a Framed ancestor and Proof is
+        a plain column that also renders INSIDE other screens, where it must keep flowing.
+        Sticky gives the standalone page the same resting place — bar-room off the bottom,
+        the same value every dock in the product uses — without changing what the embedded
+        copy does.
+
+        mt-auto so it falls to the foot on a short page instead of floating mid-screen, and
+        the ground behind it so the words it covers do not show through as it passes.
+      */}
       {standalone ? (
-        <div className="mt-10 flex flex-col gap-3">
+        <div
+          className="sticky z-30 mt-auto flex flex-col gap-3 bg-bg pt-3"
+          style={{ bottom: 'calc(var(--bar-room) + var(--keyboard))' }}
+        >
           <Link
             href="/line"
             className="tap-target block w-full rounded-full border border-line px-5 py-3 text-center text-xs tracking-widest"
