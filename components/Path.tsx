@@ -1,7 +1,5 @@
 'use client'
 
-import { DOORWAY, FREE_CRATES } from '@/content/legend'
-import type { LearnerState } from '@/engine/learner'
 
 /**
  * The journey, drawn — where you are and what is next.
@@ -46,28 +44,6 @@ export const PATH: Step[] = [
   { id: 'gate', label: 'Membership', note: 'If you want to carry on.', gate: true },
   { id: 'club', label: 'Dub Club', note: 'Where your Legend grows.' },
 ]
-
-/**
- * Which step somebody is standing on.
- *
- * Deliberately derived rather than stored: it is a view of state that already exists, and
- * a second copy of it would be a second thing that can be wrong.
- */
-export function whereOnPath(s: LearnerState, crates: number, capped: boolean): number {
-  /*
-    INDICES FOLLOW PATH, and PATH changed — the Legend and Membership swapped places, so
-    these two swapped with them. Read against the array above rather than remembered:
-    0 basics · 1 picking · 2 legend · 3 gate · 4 club.
-  */
-  const built = (s.legend ?? []).filter((a) => Object.keys(a.values).length > 0).length
-  if (built >= 5) return 4
-  if (crates >= FREE_CRATES) return 3
-  if (capped) return 2
-  /* DOORWAY, not the string 'basics' — the vibe's id is `the_basics`, so this test had
-     never once been true and the step only ever advanced on `crates > 0`. */
-  if ((s.sections_completed ?? []).includes(DOORWAY) || crates > 0) return 1
-  return 0
-}
 
 export function Path({ at, className = '' }: { at: number; className?: string }) {
   return (

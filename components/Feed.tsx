@@ -40,7 +40,7 @@ import {
 import { chapterById } from '@/content/chapters'
 import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
-import { acquirePiece, recordProof, rejectCard, rememberFinishedCard, rewindReject, toggleCard } from '@/engine/learner'
+import { acquirePiece, recordProof, rejectCard, rememberFinishedCard, rememberSheetGot, rewindReject, toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { StatusBar } from '@/components/Native'
 import { SetUp } from '@/components/SetUp'
@@ -321,7 +321,78 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         if (INTRO_DEMO_AFTER && c.id === INTRO_DEMO_AFTER && demo) lead.push(demo)
         if (c.id === INTRO_SETUP_AFTER && setup) lead.push(setup)
       }
-      return [...lead, ...open]
+      /*
+        AND IT ENDS THERE — the showcase is an argument, not a doorway.
+
+        This returned `[...lead, ...open]`: the intro cards, then EVERY ROOM IN THE CLUB
+        appended behind them. So the sequence made its case, asked for the one decision,
+        and then let a thumb keep going straight into the drops, the rooms, the vibes and
+        the cheat sheets — the whole product, to somebody who has not answered the question
+        the last card is asking. Sam, four times: "a user can still scroll up from the Open
+        screen and enter Club content."
+
+        Every previous attempt at this locked a GESTURE, which was the wrong level: the
+        rail was doing exactly what it was built to do, because the content was there to
+        scroll to. Nothing to scroll to is the only lock that cannot be swiped past.
+
+        The Club is not being withheld — it is one tap away through set-up, which is what
+        the card is for. `open` still builds above because the other two stages use it.
+
+        THE EXPLAINERS STAY, because they are part of the argument rather than part of the
+        Club. They used to ride in on `open`, so the first cut took them with the rooms and
+        firstrun caught it at once: "one destination, several reasons — 0 cards carry it".
+        They are the several reasons. They go after set-up, where somebody who has just
+        been asked to decide can read why.
+      */
+      const why = explainerCards({
+        playedAVibe: false,
+        legendWritten: false,
+        isMember: false,
+        usedTranslator: false,
+        actedOnACard: false,
+      }).filter((c) => c.id !== demo?.id)
+      /*
+        AND ONE ROOM, WHICH IS THE ARGUMENT ITSELF.
+
+        Not zero. This file already states the rule twenty lines down — "a showcase that
+        only describes itself is a brochure, so the first room somebody opens is theirs
+        outright" — and the free room is what makes the sequence a demonstration rather
+        than a pitch. Cutting `open` entirely cut that too, and firstrun said so in its own
+        words.
+
+        TWO, not the thirty-five that were there. The first is given away whole; the second
+        is teased, which is what makes the gift legible as a gift — "one room is given
+        away, and exactly one" needs a second room to be exactly-one about. Two is also
+        the whole demonstration: this is what a room is, and this is what the rest of them
+        look like from outside.
+
+        That is the difference between showing somebody the product and leaving the door
+        to the entire Club open behind a card asking them to choose a language.
+      */
+      /*
+        The rooms LAST, so the sequence ends on the thing rather than on more argument —
+        and so a save from the bottom of the rail is a save of a ROOM, which is what
+        `open` orders saved-first for. Explainers cannot be saved at all, so ending on one
+        left the ordering promise with nothing to demonstrate on.
+
+        Rooms rather than whatever `open` happens to lead with: it leads with the live
+        calendar, and a drop is pegged to a date rather than to the argument this sequence
+        is making. The showcase is about what a ROOM is.
+      */
+      const shown = open.filter((c) => c.kind === 'situation' && !c.drop).slice(0, 2)
+      /*
+        AND THE ROOMS AFTER EVERYTHING ELSE, with nothing between them and the end.
+
+        `why` sat in front of them, so a room saved from the bottom of the rail could only
+        ever reach third — the two explainers ahead of it are not rooms and no reordering
+        of rooms can move them. The feed's promise is that a saved card leads, and it has
+        to be able to keep it here too.
+
+        It also reads in the right order: the argument, the decision, then the thing
+        itself, with the last screen of the sequence being a real room rather than one
+        more paragraph about rooms.
+      */
+      return [...lead, ...why, ...shown]
     }
 
     /*
@@ -3382,10 +3453,24 @@ function Sheet({ card, onDone }: {
   onDone?: () => void
 }) {
   const learner = useLearner()
-  const owned = useMemo(
-    () => sheetOwned(card.set, learner.inventory ?? {}),
-    [card.set, learner.inventory],
-  )
+  /*
+    TICKED BY THE INVENTORY OR BY THE TEST, because four sheets have no pieces at all.
+
+    `sheetOwned` resolves a member through `setPieces`, and pronouns, the ten verbs, the
+    rooms of a house and the directions are listed with nothing behind them — so those
+    tests could be sat perfectly and tick nothing. Sam: "If they do the Your Turn
+    questionairre they should get ticks against all they have done and they should be
+    banked."
+
+    The union, not a replacement: where a piece exists the inventory is still the claim,
+    and it is the stronger one — it means the word was earned somewhere the product
+    teaches. `sheet_got` covers the rest and says exactly what it is.
+  */
+  const owned = useMemo(() => {
+    const byInventory = sheetOwned(card.set, learner.inventory ?? {})
+    const onSheet = new Set(learner.sheet_got ?? [])
+    return new Set([...byInventory, ...card.set.members.filter((m) => onSheet.has(m))])
+  }, [card.set, learner.inventory, learner.sheet_got])
   const covered = useMemo(() => setPieces(card.set), [card.set])
   /* Null until they ask to be tested; then the index of the member being asked. */
   const [asking, setAsking] = useState<number | null>(null)
@@ -3473,14 +3558,25 @@ function Sheet({ card, onDone }: {
               type="button"
               data-testid="sheet-got"
               onClick={() => {
-                if (pieceId && !owned.has(member)) {
-                  /*
-                    The piece's OWN family, not the sheet's id. culture_context becomes
-                    acquired_source — where a word came from — and a set id is not a place
-                    the product teaches; PIECES[id].family is what every other acquire
-                    writes and what the library resolves to a vibe title.
-                  */
-                  acquirePiece(pieceId as never, PIECES[pieceId]?.family ?? card.set.id)
+                if (!owned.has(member)) {
+                  if (pieceId) {
+                    /*
+                      The piece's OWN family, not the sheet's id. culture_context becomes
+                      acquired_source — where a word came from — and a set id is not a place
+                      the product teaches; PIECES[id].family is what every other acquire
+                      writes and what the library resolves to a vibe title.
+                    */
+                    acquirePiece(pieceId as never, PIECES[pieceId]?.family ?? card.set.id)
+                  } else {
+                    /*
+                      And the members no root teaches, which is most of four sheets.
+
+                      Recorded as what it is — an answer on a sheet — rather than forced
+                      into the inventory, which would claim the product had taught a word
+                      it has never once shown anybody.
+                    */
+                    rememberSheetGot(member)
+                  }
                   setJustGot((g) => (g.includes(member) ? g : [...g, member]))
                 }
                 if (last) { setAsking(null); setShown(false); return }

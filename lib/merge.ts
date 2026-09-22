@@ -321,6 +321,8 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     saved: setUnion(l.saved, r.saved),
     liked: setUnion(l.liked, r.liked),
     finished_cards: setUnion(l.finished_cards, r.finished_cards),
+    /* Answers somebody got on a sheet, on whichever device they sat it. Only ever gains. */
+    sheet_got: setUnion(l.sheet_got, r.sheet_got),
     /*
       Kept sentences merge as a union on the Portuguese, oldest timestamp winning.
 

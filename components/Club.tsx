@@ -194,8 +194,25 @@ export function Club() {
     localStorage, and showing a stranger's Club to a member is worse than a moment of
     nothing. Unknown resolves to member, because a member is who is most likely to be here.
   */
+  /*
+    AND ANSWERING SET-UP COUNTS AS HAVING STARTED.
+
+    `started` was "played a root", which is the right test for having used the product and
+    the wrong one for having finished the SEQUENCE. Set-up is the showcase's last card and
+    the whole thing it is asking for — so a mover who chose Lisbon, said why they are here
+    and gave their name was still served the argument again, tailored to nothing, because
+    they had not yet opened a vibe.
+
+    `chapter` is the marker, because it is written in `finish()` and nowhere else — the
+    THAT IS ME tap at the end of the form. `purpose` is not: SetUp writes it the instant
+    the reason is tapped, three screens earlier, so keying on it tore the card out from
+    under the person mid-form; and one legitimate answer ("no reason, I just like it")
+    sets no purpose at all, so it would never fire for them.
+  */
   const started =
-    (learner.sections_completed ?? []).length > 0 || (learner.roots_played ?? []).length > 0
+    (learner.sections_completed ?? []).length > 0 ||
+    (learner.roots_played ?? []).length > 0 ||
+    Boolean(learner.chapter)
   /*
     THE WALL IS THE LEGEND, and the teased state is what sits behind it.
 

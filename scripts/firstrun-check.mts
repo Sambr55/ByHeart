@@ -25,6 +25,7 @@ import { INTRO_CARDS, INTRO_SETUP_AFTER } from '../content/intro'
 import { ROOTS } from '../content/roots'
 import { cardFor } from '../content/legend'
 import { EXPLAINERS, EXPLAINER_CTA } from '../content/explainers'
+import { explainerCards } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -878,8 +879,23 @@ console.log('\nevery explainer points the same way\n')
   hardcoded 7 then reported four argument cards as "ordinary rooms in front of the saved
   one". Taking it from the content means adding a card to the sequence cannot silently
   break a check about something else.
+
+  AND THE EXPLAINERS, which are now part of the sequence rather than part of the Club.
+
+  The showcase used to end by appending the entire Club feed behind set-up — which is how
+  somebody could scroll past ONE DECISION straight into the drops and rooms. It ends at
+  the argument now, and the explainers that used to arrive with that feed are carried in
+  the sequence itself, so the lead is longer by exactly their number. Derived the same way
+  as the rest, for the same reason: this figure has gone stale twice by being written down.
 */
-const LEAD_LENGTH = INTRO_CARDS.length + 2
+const LEAD_EXPLAINERS = explainerCards({
+  playedAVibe: false,
+  legendWritten: false,
+  isMember: false,
+  usedTranslator: false,
+  actedOnACard: false,
+}).length
+const LEAD_LENGTH = INTRO_CARDS.length + 1 + LEAD_EXPLAINERS
 
 console.log('\nthe set-up is a card, and it does not block\n')
 /*

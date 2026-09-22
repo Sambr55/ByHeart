@@ -284,6 +284,26 @@ export interface LearnerState {
    */
   save_prompt: 'unseen' | 'declined'
   /**
+   * Cheat-sheet members the learner said they had, in the sheet's own test.
+   *
+   * THE INVENTORY CANNOT HOLD THESE. A tick on a sheet resolves through `setPieces`, which
+   * maps a member to a piece — and four of the nine sheets list members the product has no
+   * piece for (`eu`, `tu`, `você`, the ten verbs, the rooms of a house, the directions).
+   * That is deliberate: a set names the whole group so the shape of it is legible, and the
+   * gaps are the content brief. But it meant somebody could sit those tests, get every
+   * answer, and watch nothing tick, because there was no key to write.
+   *
+   * Sam: "If they do the Your Turn questionairre they should get ticks against all they
+   * have done and they should be banked."
+   *
+   * So the member string itself is the key. It is NOT an inventory entry and must never be
+   * counted as one — a word nobody has been taught is not a word somebody owns, and every
+   * count in the product would become a lie the moment it was. It is exactly what it says:
+   * the answers they got right on a reference sheet. A member that later gains a piece
+   * goes on being ticked by the inventory, which is the stronger claim of the two.
+   */
+  sheet_got: string[]
+  /**
    * Whether the learner has been told what actually happens when they get it wrong.
    *
    * Once per learner, ever. It is a truth about Portugal rather than a feature, and a
@@ -433,6 +453,7 @@ export function emptyLearner(): LearnerState {
     legend: [],
     legend_prompt: 'unseen',
     save_prompt: 'unseen',
+    sheet_got: [],
     switch_seen_at: null,
     sections_completed: [],
     sittings: 0,
@@ -628,6 +649,7 @@ export function loadLearner(): LearnerState {
           saved: arr(parsed.saved, []),
           liked: arr(parsed.liked, []),
           finished_cards: arr(parsed.finished_cards, []),
+          sheet_got: arr(parsed.sheet_got, []),
           asked: arr(parsed.asked, []),
           purpose: parsed.purpose ?? null,
           chapter: parsed.chapter ?? null,
@@ -831,6 +853,7 @@ export async function syncSession(reason: string): Promise<boolean> {
         legend: s.legend,
         legend_prompt: s.legend_prompt,
         save_prompt: s.save_prompt,
+        sheet_got: s.sheet_got,
         switch_seen_at: s.switch_seen_at,
         deal_accepted_at: s.deal_accepted_at,
         created_at: s.created_at,
@@ -1390,6 +1413,18 @@ export function rememberLine(id: string) {
 export function rememberFinishedCard(id: string) {
   update((s) => {
     if (!s.finished_cards.includes(id)) s.finished_cards = [...s.finished_cards, id]
+  })
+}
+
+/**
+ * A cheat-sheet member the learner got in the sheet's own test.
+ *
+ * For the members no root teaches, which the inventory has no key for — see `sheet_got`.
+ * Append-only and de-duplicated, like every other record of something somebody did.
+ */
+export function rememberSheetGot(member: string) {
+  update((s) => {
+    if (!s.sheet_got.includes(member)) s.sheet_got = [...s.sheet_got, member]
   })
 }
 

@@ -1158,7 +1158,27 @@ summary:focus-visible,
 */
 .bar.nav-bar {
   padding-top: 0;
-  padding-bottom: var(--safe-bottom);
+  /*
+    THE HOME INDICATOR IS CLEARED WITHOUT MAKING THE BAR TALLER.
+
+    This was `padding-bottom: var(--safe-bottom)`, which put the inset INSIDE the bar: the
+    icon row measured 66px and the bar measured 102px, so a third of the blue was dead
+    space under the labels and the tabs sat a thumb's width off the bottom of the screen.
+    Sam, with the screenshot: "stop teh nav being double height of teh icons".
+
+    The clearance is real and still has to be there — the indicator must not sit on the
+    labels. So it becomes the bar's own ground extended below the row rather than padding
+    above it: a border-box of exactly the row's height, plus a box-shadow in the bar colour
+    filling the inset beneath. The bar is the height of what is in it, the blue still runs
+    to the bottom edge, and nothing is under the indicator.
+  */
+  padding-bottom: 0;
+  margin-bottom: var(--safe-bottom);
+  /* The bar's own ground, continued under the indicator. Inset so the hairline the bar
+     draws at its top stays the only rule on it — a second line above the indicator would
+     read as the bar having a floor it does not have. */
+  box-shadow: 0 var(--safe-bottom) 0 0 var(--bar-bg);
+  border-bottom: 0;
 
   --fg: var(--bar-ink);
   /* 80, not the 72 the spec asked for: at 72 the warm bar's muted text measures 4.08
