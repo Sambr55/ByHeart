@@ -22,6 +22,26 @@ export function WhatAmI({ sha, built }: { sha: string; built: string }) {
   useEffect(() => {
     const me = loadLearner()
     const finished = me.finished_cards ?? []
+    const cs = getComputedStyle(document.documentElement)
+    const safeTop = cs.getPropertyValue('--safe-top').trim() || '0px'
+    const safeBottom = cs.getPropertyValue('--safe-bottom').trim() || '0px'
+    const vv = window.visualViewport
+    const standalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (navigator as unknown as { standalone?: boolean }).standalone === true
+    const nav = document
+      .querySelector('[data-testid="bottom-nav"]')
+      ?.getBoundingClientRect()
+    /* The three viewport units, measured rather than assumed. */
+    const probe = document.createElement('div')
+    probe.style.cssText = 'position:fixed;top:0;left:0;width:1px;pointer-events:none;opacity:0'
+    document.body.appendChild(probe)
+    const measure = (unit: string) => {
+      probe.style.height = '100' + unit
+      return Math.round(probe.getBoundingClientRect().height)
+    }
+    const units = { svh: measure('svh'), lvh: measure('lvh'), dvh: measure('dvh') }
+    probe.remove()
     setRows([
       { k: 'build', v: sha.slice(0, 7) + (built ? ' — ' + built.split('\n')[0].slice(0, 60) : '') },
       { k: 'name', v: me.display_name ?? '(none)' },
@@ -44,6 +64,43 @@ export function WhatAmI({ sha, built }: { sha: string; built: string }) {
       { k: '  the drop ones', v: finished.filter((id) => /^lisbon_/.test(id)).join(', ') || '(none)' },
       { k: 'saved', v: String((me.saved ?? []).length) },
       { k: 'photo', v: localStorage.getItem('byheart.avatar.v1') ? 'yes' : 'no' },
+      /*
+        AND WHAT THE SCREEN ACTUALLY IS, because three attempts at the bottom bar were
+        made against a simulated inset in a headless browser and all three were wrong.
+
+        The sand band under the bar has been reported four times. Every fix so far has been
+        aimed at a home-indicator inset, which is a guess about the device — and a guess is
+        what a headless browser can only ever give back, since env(safe-area-inset-*)
+        resolves to 0 there. These are the numbers that decide the layout, read off the
+        phone that has the fault.
+      */
+      { k: '— screen —', v: '' },
+      { k: 'window', v: window.innerWidth + ' x ' + window.innerHeight },
+      { k: 'visual viewport', v: vv ? Math.round(vv.width) + ' x ' + Math.round(vv.height) : '(none)' },
+      { k: 'screen', v: window.screen.width + ' x ' + window.screen.height },
+      { k: 'dpr', v: String(window.devicePixelRatio) },
+      { k: 'safe top/bottom', v: safeTop + ' / ' + safeBottom },
+      { k: 'document height', v: String(document.documentElement.scrollHeight) },
+      { k: 'standalone', v: standalone ? 'yes (installed)' : 'no (browser)' },
+      {
+        k: 'nav bottom vs window',
+        v: nav
+          ? Math.round(nav.bottom) + ' vs ' + window.innerHeight + '  (gap ' + Math.round(window.innerHeight - nav.bottom) + ')'
+          : '(no bar on this page)',
+      },
+      { k: 'nav height', v: nav ? String(Math.round(nav.height)) : '—' },
+      /*
+        THE THREE VIEWPORT UNITS, SIDE BY SIDE.
+
+        This page has no bottom bar, so the nav rows above read "(none)" here — and the
+        band the bar seemed to cause turned out not to be about the bar at all. What
+        decides it is whether the page's height unit matches the screen: svh is the
+        viewport WITH browser chrome, lvh is without it, dvh is what it is right now.
+        Where they disagree is exactly the height of the gap, and no headless browser can
+        show that because all three are equal there.
+      */
+      { k: 'svh / lvh / dvh', v: units.svh + ' / ' + units.lvh + ' / ' + units.dvh },
+      { k: 'body height', v: String(Math.round(document.body.getBoundingClientRect().height)) },
     ])
   }, [sha, built])
 
