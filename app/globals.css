@@ -151,6 +151,47 @@ body {
 }
 
 /*
+  THE PAGE FILLS THE SCREEN, which is where the "sand gap" actually came from.
+
+  Reported five times as a band of sand at the foot of the app, and every fix I aimed at
+  the bottom bar was aimed at the wrong thing. Sam's landing screenshot settled it: that
+  screen has NO bottom bar, only a photograph, and it has the SAME band. A fault that
+  appears with the bar and without it was never about the bar.
+
+  `html { height: 100% }` and `min-h-svh` both resolve against a viewport that EXCLUDES
+  the area the home indicator sits over. Installed to the home screen there is no browser
+  chrome to account for, so the page stops short of the physical screen and the ground
+  behind it — sand — shows through the difference. That is the band, on every screen.
+
+  `100dvh` is the viewport as it actually is right now, chrome or no chrome, so the page
+  reaches the bottom in the browser AND in the installed app. min-height rather than
+  height so a long page still grows past it.
+*/
+html {
+  min-height: 100dvh;
+}
+
+body {
+  min-height: 100dvh;
+}
+
+/*
+  AND EVERY SCREEN THAT SIZES ITSELF TO THE VIEWPORT, which is thirty of them.
+
+  `svh` is the SMALL viewport — the height with the browser's chrome showing. It is the
+  right unit for a page that must not jump when a toolbar slides away, and the wrong one
+  for a full-bleed screen in an installed app, where there is no chrome and the page
+  simply stops short of the glass.
+
+  Redefined once here rather than edited in thirty places: the class keeps its name and
+  its job, and gains the unit that is true in both modes. A screen that wants the small
+  viewport on purpose can still ask for it by writing the unit directly.
+*/
+.min-h-svh {
+  min-height: 100dvh;
+}
+
+/*
   THE STRIP UNDER THE HOME INDICATOR, which is sand on an installed phone.
 
   Reported three times as a "sand gap" under a "double height" bottom bar, and neither
