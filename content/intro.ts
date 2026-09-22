@@ -141,6 +141,14 @@ export interface IntroCard {
     | { kind: 'root'; root_id: string }
     | { kind: 'drop' }
     | { kind: 'legend' }
+    /*
+      THE LADDER, DERIVED FROM STAGES rather than typed.
+
+      Five names written out here drift the moment a stage is renamed or a threshold moves,
+      and this is the card that tells somebody what the whole thing adds up to — a wrong
+      rung is a promise about a product that does not exist. Same argument as `legend`.
+    */
+    | { kind: 'stages' }
     | { kind: 'lines'; lines: { pt: string; en: string }[] }
     | { kind: 'exchange'; exchange: { asked: string; pt: string; en: string }[] }
     /*
@@ -373,6 +381,33 @@ export const INTRO_CARDS: IntroCard[] = [
       is meant to avoid.
     */
     shows: { kind: 'drop' },
+  },
+  {
+    /*
+      WHERE ALL OF IT GOES, which nothing said anywhere.
+
+      The stages — Basics, Getting around, Being understood, Conversing, Leading — existed
+      in exactly one place: the function that computes them. They were never named to a
+      learner, never explained, and the bar on Yours sat under one of them with no
+      indication it was a rung on anything. Sam, looking straight at it: "I had no idea the
+      being understood was a progress bar to another level."
+
+      So this card is the ladder, before anybody starts climbing it. It goes last in the
+      sequence, after the cards that show what there IS to do, because it is the answer to
+      the question those raise: what does any of this add up to?
+
+      THE POINT IS THAT THE FUN IS THE MECHANISM, not a sweetener on top of one. A film
+      quote, a night out, a cheat sheet you keep — every one of them moves the same number,
+      and the number is what you can do rather than how often you turned up. That is the
+      claim this product makes and it has never been made out loud.
+    */
+    id: 'intro_stages',
+    image: 'intro_arrival',
+    pillar: true,
+    eyebrow: 'WHERE IT GOES',
+    headline: 'Everything you do here moves one number.',
+    body: 'Not days in a row, and not a score. Five stages, and you climb them by learning words, going through vibes, building your Legend, keeping a cheat sheet and taking it to a real night out. The fun is how you get there rather than a reward for getting there.',
+    shows: { kind: 'stages' },
   },
   {
     /*

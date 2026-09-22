@@ -15,7 +15,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { INTRO_DEMO_AFTER, INTRO_SETUP_AFTER, type IntroCard } from '@/content/intro'
 import { COLLISIONS, CRATES, PIECES, ROOTS, setPieces } from '@/content/roots'
-import { askFor, cardFor } from '@/content/legend'
+import { askFor, cardFor, STAGES } from '@/content/legend'
 import { mintShowing } from '@/engine/showing'
 import {
   FEED_COPY,
@@ -2993,6 +2993,20 @@ function Specimen({
       */
       return cardFor(null).map((f) => ({ pt: f.ask, en: f.ask_en }))
     }
+    if (shows.kind === 'stages') {
+      /*
+        The five rungs, from STAGES, with what each one lets you do.
+
+        Derived rather than written out for the same reason the Legend's questions are:
+        this is the card that says what the whole product adds up to, and a rung renamed in
+        one place and not the other is a promise about a product that does not exist.
+
+        `can` rather than the threshold. A number of points would turn the ladder into a
+        score, which is the thing this measure exists not to be — what changes as somebody
+        learns is what they can DO.
+      */
+      return STAGES.map((st) => ({ pt: st.name, en: st.can }))
+    }
     /*
       Whatever is genuinely on, and nothing when nothing is.
 
@@ -3239,6 +3253,9 @@ function Specimen({
   }
 
   if (!lines.length) return null
+  /* The stages are the one specimen whose left column is English. */
+  const portuguese = shows.kind !== 'stages'
+
   return (
     <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-3">
       {lines.map((l, i) => (
@@ -3272,10 +3289,33 @@ function Specimen({
           }
           style={{ animationDelay: i * 190 + 'ms' }}
         >
-          <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
-          <CopyButton text={l.pt} size="sm" />
+          {/*
+            AUDIO AND COPY ONLY WHERE THE LINE IS PORTUGUESE.
+
+            Every specimen on this rail is a sentence somebody would say, so the row hangs
+            a play button and a copy button off it and sets the Portuguese face. The stages
+            card is the exception: its rows are Basics, Getting around, Being understood —
+            English names for rungs, which cannot be played, are not worth copying, and
+            must not be dressed as the language being taught.
+
+            Keyed off the card rather than sniffed from the string: `stages` is the only
+            kind whose left column is not Portuguese, and a heuristic on the text would be
+            wrong the first time a stage is named in Portuguese on purpose.
+          */}
+          {portuguese ? (
+            <>
+              <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
+              <CopyButton text={l.pt} size="sm" />
+            </>
+          ) : null}
           <span className="min-w-0">
-            <span className="pt display block text-lg text-accent">{l.pt}</span>
+            <span
+              className={
+                'block text-lg ' + (portuguese ? 'pt display text-accent' : 'font-semibold text-fg')
+              }
+            >
+              {l.pt}
+            </span>
             <span className="block text-xs text-muted">{l.en}</span>
           </span>
         </li>
