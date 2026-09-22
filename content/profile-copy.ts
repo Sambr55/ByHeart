@@ -100,16 +100,12 @@ export const PROFILE_COPY = {
     The old line measured against 800 — a real figure for everyday coverage, and the wrong
     denominator for a library that grows every month. See STAGES in content/legend.ts.
   */
-  words_stage: (stage: string) => stage,
-  words_can: (can: string) => can,
-  words_next: (have: number, at: number, name: string) =>
-    at - have === 1
-      ? 'One more word and you are ' + name.toLowerCase() + '.'
-      : at - have + ' more and you are ' + name.toLowerCase() + '.',
-  words_toward: (have: number, need: number) =>
-    have >= need
-      ? 'Past the ' + need + ' that cover most of a day in Lisbon.'
-      : have + ' of the ' + need + ' that cover most of a day in Lisbon.',
+  /*
+    The stage copy that was here is gone with the bar it served. The stage is on the Legend
+    slab now and reads every section — see progressFor — so a second set of words for it,
+    one screen down and measuring only the vocabulary, would be two answers to one
+    question. PROFILE_COPY.stage_next carries it.
+  */
   drops_label: 'DROPS',
   drops_note: 'Pegged to something really happening, with the language you took to it.',
   drops_empty: 'None yet. Open a drop from the Club and finish a room, and it lands here.',
@@ -145,6 +141,12 @@ export const PROFILE_COPY = {
   legend_locked_vibes: 'Opens {n} vibes from here.',
   legend_locked_vibes_one: 'Opens one vibe from here.',
   /** The only headline number on the screen, and it is a possession, not a fraction. */
+  /*
+    The next stage, named rather than counted. A number of points to go would be a score,
+    and a score is the thing this screen refuses to become — what changes as somebody
+    learns is what they can DO, so the line says the next thing they will be able to do.
+  */
+  stage_next: 'Everything here moves you towards {name}.',
   legend_have_one: 'One thing you can say about yourself.',
   legend_have: '{done} things you can say about yourself.',
   /** Before the first answer there is nothing to count, so it says what this is FOR. */

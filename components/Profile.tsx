@@ -12,7 +12,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { askedCards, cardById, cardFace, derivedCards, dropsFor, roomsFor, type FeedCard } from '@/content/feed'
 import { derivedById } from '@/engine/derive'
 import { CRATES, PIECES, ROOTS, type CultureFamily } from '@/content/roots'
-import { LEGEND_FRAMES, askFor, cardFor, cardToGo, nextStage, stageFor, frameApplies, frameForPurpose, frameReady, legendStatus } from '@/content/legend'
+import { LEGEND_FRAMES, askFor, cardFor, cardToGo, nextStage, stageFor, frameApplies, frameForPurpose, frameReady, legendStatus, progressFor } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/avatar'
 import { setDisplayName } from '@/engine/learner'
@@ -616,7 +616,14 @@ export function Profile() {
             Only one open at a time. Two open sections is two depths on screen and the
             breadth is gone again, which is the thing the concertina exists to protect.
           */}
-          <div className="flex flex-col">
+          {/*
+            A gap between the strips, or six of them read as one blue block.
+
+            Stacked flush the boundaries vanish — the eye sees a single field with numbers
+            floating in it rather than six things you can open. One step of the spacing
+            scale is enough to separate them without breaking the set.
+          */}
+          <div className="flex flex-col gap-3">
             {SECTIONS.map((sec) => (
               <Section
                 key={sec.id}
@@ -630,7 +637,6 @@ export function Profile() {
                 onToggle={() => setOpenSection(openSection === sec.id ? null : sec.id)}
                 count={sec.count(sets[sec.id], learner)}
                 unit={sec.unit}
-                showBar={sec.id === 'words'}
                 more={sec.more}
               />
             ))}
@@ -668,7 +674,6 @@ function Section({
   onToggle,
   count,
   unit,
-  showBar,
   more,
 }: {
   label: string
@@ -691,8 +696,6 @@ function Section({
   count: string
   /** The noun under the big number, agreeing with it. */
   unit: (n: number) => string
-  /** Only the words have a sourced target to measure against. */
-  showBar?: boolean
   /** The room this section is the front of, where one exists. */
   more?: { href: string; label: string }
 }) {
@@ -720,37 +723,46 @@ function Section({
         would be a worse link; a row that says 12 is an answer to the question somebody
         opened this screen with.
       */}
+      {/*
+        A BLUE STRIP, NOT A LINE OF TEXT — and the number at the size it deserves.
+
+        Sam: "I'm a fan of the big blue box and big achievement number. I would like all
+        of the YOURS sections to have their own blue box."
+
+        Six full slabs would flatten the screen: the Legend is the hero BECAUSE it is the
+        only blue thing, and six of them is six heroes, which is none. So the Legend keeps
+        the deep slab and each section gets a strip of the same blue — enough to read as
+        one family, short enough that the hierarchy survives and the six still fit a
+        screen closed, which was the whole point of the concertina.
+
+        The number comes up to the strip rather than sitting small and grey at the end of
+        a line. It is the answer to the question somebody opens this screen with.
+      */}
       <button
         type="button"
         data-testid={'open-' + id}
         aria-expanded={open}
         onClick={onToggle}
-        className="tap-target flex w-full items-center gap-3 border-b border-line py-3 text-left transition"
+        className={
+          'tap-target flex w-full items-center gap-3 bg-accent px-5 py-3 text-left text-accent-ink transition ' +
+          (open ? 'rounded-t' : 'rounded')
+        }
       >
+        <span className="eyebrow min-w-0 flex-1">{label}</span>
+        <span className="shrink-0 text-2xl font-semibold tabular-nums">{count}</span>
         <span
           aria-hidden
           className={
-            'shrink-0 text-muted transition-transform duration-[260ms] ' +
+            'shrink-0 text-sm opacity-70 transition-transform duration-[260ms] ' +
             (open ? 'rotate-90' : '')
           }
         >
           ▸
         </span>
-        <span className="eyebrow min-w-0 flex-1 text-accent">{label}</span>
-        {/*
-          The count on the row, and only while the row is shut.
-
-          Open, the same number sits immediately below at pillar scale — so leaving it here
-          printed it twice, one line apart, in two sizes. The closed row is where it earns
-          its place: it is the whole reason the concertina can be read as a shape.
-        */}
-        {open ? null : (
-          <span className="shrink-0 tabular-nums text-sm text-muted">{count}</span>
-        )}
       </button>
 
       {open ? (
-        <div className="flex flex-col gap-3 py-6">
+        <div className="flex flex-col gap-3 rounded-b border border-t-0 border-line px-5 py-6">
           {/*
             THE NUMBER AT THE SIZE THE LEGEND USES, because it is the same kind of fact.
 
@@ -763,8 +775,12 @@ function Section({
             same clamp, same 620ms landing — so the six sections and the hero cannot drift
             into six sizes of one idea.
           */}
-          <p className="pillar tabular-nums text-accent">{count}</p>
-          <p className="pillar-body text-sm leading-relaxed">{unit(Number(count) || 0)}</p>
+          {/*
+            The number is on the strip above now, at a size that reads. Repeating it here
+            at pillar scale printed it twice, one line apart — which is what it did before
+            the strip existed and the row was a thin grey line.
+          */}
+          <p className="text-sm leading-relaxed">{unit(Number(count) || 0)}</p>
           {/*
             AND ON THE WORDS, HOW FAR THAT IS, because it is the one count with a real bar.
 
@@ -778,49 +794,11 @@ function Section({
             said cold or nights out would be the same gauge with nothing behind it, and a
             progress bar measuring against a number somebody made up is worse than no bar.
           */}
-          {showBar ? (
-            (() => {
-              /*
-                THE STAGE, AND THE DISTANCE TO THE NEXT ONE.
-
-                This was a bar against 800 — see STAGES in content/legend.ts for why that
-                measured the wrong thing. The bar is still here, but it fills between the
-                stage somebody is in and the one ahead, so it is always a distance they can
-                actually close rather than a fraction of a number the library has not
-                reached. At the far end there is nothing left to fill and the bar goes.
-              */
-              const words = Number(count) || 0
-              const here = stageFor(words)
-              const next = nextStage(words)
-              const span = next ? next.at - here.at : 0
-              const done = next ? Math.max(0, Math.min(1, (words - here.at) / span)) : 1
-              return (
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm text-fg">{PROFILE_COPY.words_stage(here.name)}</p>
-                  {next ? (
-                    <div
-                      className="h-2 w-full overflow-hidden rounded-full bg-line"
-                      role="img"
-                      aria-label={here.name + ', ' + (next.at - words) + ' words from ' + next.name}
-                    >
-                      <div
-                        className="h-full rounded-full bg-accent transition-[width] duration-[620ms]"
-                        style={{ width: (done * 100).toFixed(1) + '%' }}
-                      />
-                    </div>
-                  ) : null}
-                  <p className="text-xs leading-relaxed text-muted">
-                    {PROFILE_COPY.words_can(here.can)}
-                  </p>
-                  {next ? (
-                    <p className="text-xs leading-relaxed text-muted">
-                      {PROFILE_COPY.words_next(words, next.at, next.name)}
-                    </p>
-                  ) : null}
-                </div>
-              )
-            })()
-          ) : null}
+          {/*
+            The stage used to be here, against the word count alone. It is on the Legend
+            slab now and reads every section, not just this one — a second bar measuring a
+            sixth of the same idea, one screen apart, is two answers to one question.
+          */}
           <p className="text-xs leading-relaxed text-muted">{note}</p>
           {!tiles.length ? (
             <p className="rounded border border-line bg-bg-elev px-4 py-3 text-sm text-muted">
@@ -1269,6 +1247,37 @@ function LegendHero() {
   /* Server and first paint agree: nothing personal is counted until mounted. */
   const n = mounted ? done : 0
 
+  /*
+    AND HOW FAR ALONG THE WHOLE THING IS, under the one number that is about YOU.
+
+    Sam: "if the big number 8 also had a progress metric against it, that would be great."
+    The 8 is the card — seven questions and the bonus ones — and it is finite by design, so
+    it can never be the measure of everything. What sits under it is: the stage, from every
+    part of Yours that evidences capability. See progressFor.
+
+    Here rather than on the words section because it is not about words. The words strip
+    keeps its own count; this is the roof over all six.
+  */
+  const progress = useMemo(
+    () =>
+      progressFor({
+        words: Object.keys(learner.inventory ?? {}).filter((id) => PIECES[id]).length,
+        through:
+          new Set([
+            ...(learner.sections_completed ?? []),
+            ...ROOTS.filter((r) => (learner.roots_played ?? []).includes(r.root_id)).map(
+              (r) => r.culture_family,
+            ),
+          ]).size + (learner.finished_cards ?? []).filter((id) => !id.startsWith('sheet_')).length,
+        legend: (learner.legend ?? []).filter((a) => Object.keys(a.values ?? {}).length > 0).length,
+        drops: (learner.finished_cards ?? []).filter((id) => /^lisbon_/.test(id)).length,
+        sheets: (learner.saved ?? []).filter((id) => id.startsWith('sheet_')).length,
+      }),
+    [learner.inventory, learner.sections_completed, learner.roots_played, learner.legend, learner.finished_cards, learner.saved],
+  )
+  const stage = stageFor(progress.score)
+  const onward = nextStage(progress.score)
+
   return (
     <section data-testid="legend-hero" className="flex flex-col gap-6">
       <div className="flex items-baseline gap-3">
@@ -1302,6 +1311,52 @@ function LegendHero() {
                 ? PROFILE_COPY.legend_have_one
                 : PROFILE_COPY.legend_have.replace('{done}', String(n))}
             </p>
+            {/*
+              THE STAGE, UNDER THE CARD, because they answer different questions.
+
+              The 8 is "what can I say about myself" and it is finite — seven questions and
+              the extras. This is "how far along am I", and it reads every part of Yours
+              that evidences capability: words owned, vibes and rooms been through, Legend
+              cards, nights taken it to, sheets kept. See progressFor for what is in and
+              what is deliberately out.
+
+              The bar fills between the stage you are in and the next, so the distance is
+              always one you can close — the same shape the words section used, now
+              measuring the whole screen instead of one sixth of it.
+            */}
+            <div className="mt-3 flex flex-col gap-1 border-t border-accent-ink/20 pt-3">
+              <p className="text-sm font-semibold">{stage.name}</p>
+              {onward ? (
+                <>
+                  <div
+                    className="h-2 w-full overflow-hidden rounded-full bg-accent-ink/20"
+                    role="img"
+                    aria-label={stage.name + ', ' + (onward.at - progress.score) + ' to ' + onward.name}
+                  >
+                    <div
+                      className="h-full rounded-full bg-accent-ink transition-[width] duration-[620ms]"
+                      style={{
+                        width:
+                          (
+                            Math.max(
+                              0,
+                              Math.min(
+                                1,
+                                (progress.score - stage.at) / (onward.at - stage.at),
+                              ),
+                            ) * 100
+                          ).toFixed(1) + '%',
+                      }}
+                    />
+                  </div>
+                  <p className="text-xs leading-relaxed opacity-80">
+                    {PROFILE_COPY.stage_next.replace('{name}', onward.name.toLowerCase())}
+                  </p>
+                </>
+              ) : (
+                <p className="text-xs leading-relaxed opacity-80">{stage.can}</p>
+              )}
+            </div>
           </>
         ) : (
           <p className="display text-balance text-xl">{PROFILE_COPY.legend_have_none}</p>

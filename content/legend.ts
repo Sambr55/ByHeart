@@ -1159,15 +1159,89 @@ export interface Stage {
   can: string
 }
 
+/*
+  THE THRESHOLDS, MEASURED AGAINST REAL MILESTONES rather than chosen as round numbers.
+
+  They were word counts; the score is weighted now, so each one is re-derived from what a
+  learner actually holds at that point. Modelled from the content:
+
+      after the basics                            38
+      basics and two vibes                        81
+      the free tier finished                     159
+      a Legend, and one night out                201
+      everything in the product today            317
+
+  So the stages sit just under each: a learner ARRIVES at a stage by doing the thing it
+  describes, rather than grinding past an arbitrary figure. Leading stays beyond today's
+  ceiling on purpose — the calendar adds drops every month, and a far end you can reach by
+  exhausting the library is a finish line on a product that has not finished.
+*/
 export const STAGES: Stage[] = [
   { id: 'basics', name: 'Basics', at: 0, can: 'The first words, and the ones you will say every day.' },
   { id: 'around', name: 'Getting around', at: 35, can: 'Hello, numbers, your name and where you are from — enough to be somewhere.' },
-  { id: 'understood', name: 'Being understood', at: 90, can: 'Enough to be understood in a room, and to say what you actually mean.' },
-  { id: 'conversing', name: 'Conversing', at: 180, can: 'Enough to hold your end of it, and to follow the other end.' },
-  { id: 'leading', name: 'Leading the conversation', at: 400, can: 'Enough to start it, steer it, and be the one who keeps it going.' },
+  { id: 'understood', name: 'Being understood', at: 80, can: 'Enough to be understood in a room, and to say what you actually mean.' },
+  { id: 'conversing', name: 'Conversing', at: 160, can: 'Enough to hold your end of it, and to follow the other end.' },
+  { id: 'leading', name: 'Leading the conversation', at: 320, can: 'Enough to start it, steer it, and be the one who keeps it going.' },
 ]
 
-/** The stage a learner is in, by how many words they own. */
+/**
+ * EVERYTHING THAT COUNTS AS GETTING BETTER, in one number.
+ *
+ * The stage was driven by banked words alone, which made four of the six things on Yours
+ * decorative: you could take a cheat sheet apart, finish three rooms and answer your whole
+ * Legend and the bar would not move. Sam: "I would like progress in each to be somehow
+ * measured towards a collective goal."
+ *
+ * WHAT IS IN, and why each earns its place:
+ *
+ *   words      what you own outright. The base of everything else.
+ *   through    vibes and rooms you have been through — where the words were used.
+ *   legend     cards answered. The only thing here that is about YOU.
+ *   drops      a night you took it to. Sam: "a completed drop is an achievement" — and he
+ *              is right, the calendar expiring does not un-happen the evening.
+ *   sheets     a group you can produce end to end, now that every member can be ticked.
+ *
+ * WHAT IS OUT, and why:
+ *
+ *   said cold  self-certified. The learner taps I SAID IT and the product records it as
+ *              fact; nothing checks. Sam: "we have to take their word for it." The
+ *              retrieval is the most valuable thing in the product and the COUNT adds
+ *              nothing to it, so the mechanic stays and the number does not.
+ *   put aside  a bookmark pile. More is not better — a big one is a backlog, and a score
+ *              that rises when somebody saves things they never open is the exact
+ *              attendance-measuring this product refuses.
+ *
+ * WEIGHTED, because these are not the same size of act. A word is one thing learned; a
+ * room is several used together; a drop is an evening. The weights say that plainly rather
+ * than pretending a bookmark and a night out are worth the same.
+ */
+export interface Progress {
+  /** The single number the stages are read from. */
+  score: number
+  /** What each part contributed, for a screen that wants to show its working. */
+  parts: { id: string; n: number; each: number; score: number }[]
+}
+
+export const PROGRESS_WEIGHTS = { words: 1, through: 3, legend: 4, drops: 6, sheets: 5 }
+
+export function progressFor(me: {
+  words?: number
+  through?: number
+  legend?: number
+  drops?: number
+  sheets?: number
+}): Progress {
+  const parts = (Object.keys(PROGRESS_WEIGHTS) as (keyof typeof PROGRESS_WEIGHTS)[]).map(
+    (id) => {
+      const n = Math.max(0, me[id] ?? 0)
+      const each = PROGRESS_WEIGHTS[id]
+      return { id, n, each, score: n * each }
+    },
+  )
+  return { score: parts.reduce((a, b) => a + b.score, 0), parts }
+}
+
+/** The stage a learner is in, by how far along they are. */
 export function stageFor(words: number): Stage {
   let out = STAGES[0]
   for (const s of STAGES) if (words >= s.at) out = s
