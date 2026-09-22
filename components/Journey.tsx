@@ -512,14 +512,33 @@ function Landing() {
         thing on the first screen anybody ever sees, and a hero that arrives late arrives
         after the tap.
       */}
-      <Image
-        src="/hero/lisbon.jpg"
-        alt={LANDING.hero_alt}
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover"
-      />
+      {/*
+        THE PHOTOGRAPH REACHES PAST THE BOX, because the box is the small viewport.
+
+        `fill` is absolute inset-0 of `main`, so the image ends exactly where main ends —
+        at 100svh, the window WITHOUT the browser's chrome retracted. Installed, or the
+        moment Safari's toolbar slides away, the window is taller than that and what shows
+        below the photograph is whatever is painting the ground: a flat dark band under a
+        picture. Sam has now photographed it four times.
+
+        Every previous fix coloured that band in. Colouring it in was never right — it is
+        a photograph on the other side of that line, and the answer is for the image to
+        cover the whole glass rather than for the ground to impersonate it.
+
+        -bottom: the image hangs below the box by the largest difference the chrome can
+        make. object-cover means the extra is crop rather than distortion, and the content
+        sits at the bottom of the box above it, so nothing is covered.
+      */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 -bottom-[15vh] overflow-hidden">
+        <Image
+          src="/hero/lisbon.jpg"
+          alt={LANDING.hero_alt}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+      </div>
 
       {/*
         The scrim, which is what makes the type legible rather than hopeful.
@@ -629,7 +648,31 @@ function Landing() {
 function Measured() {
   const [rows, setRows] = useState<string[] | null>(null)
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('why') !== '1') return
+    /*
+      REMEMBERED, because the home screen drops the query string.
+
+      `?why=1` works in Safari and is gone the moment the app launches from its icon —
+      iOS stores the manifest's start_url, not the URL that was open. Sam: "the dimensions
+      dont show in teh app only safari." So the flag is latched: set it once in the
+      browser and the installed app reads it back.
+
+      Cleared by ?why=0, and it is a diagnostic rather than a setting, so it lives under
+      its own key and nothing else reads it.
+    */
+    const q = new URLSearchParams(window.location.search).get('why')
+    try {
+      if (q === '1') localStorage.setItem('byheart.why', '1')
+      if (q === '0') localStorage.removeItem('byheart.why')
+    } catch {
+      /* Storage off is not a reason to fail on a diagnostic. */
+    }
+    let on = q === '1'
+    try {
+      on = on || localStorage.getItem('byheart.why') === '1'
+    } catch {
+      /* As above. */
+    }
+    if (!on) return
     const probe = document.createElement('div')
     probe.style.cssText = 'position:fixed;top:0;left:0;width:1px;pointer-events:none;opacity:0'
     document.body.appendChild(probe)
