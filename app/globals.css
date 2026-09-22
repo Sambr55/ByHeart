@@ -167,12 +167,44 @@ body {
   reaches the bottom in the browser AND in the installed app. min-height rather than
   height so a long page still grows past it.
 */
+/*
+  THE GROUND REACHES THE GLASS, without the page pretending to be taller than it is.
+
+  Measured off Sam's phone at last, which is what this should have started with:
+
+      svh / lvh / dvh   699 / 739 / 699
+      window            390 x 699
+      screen            390 x 844
+      safe bottom       0px
+
+  Three things in those numbers. `dvh` EQUALS `svh` while Safari's toolbar is showing, so
+  switching every screen to dvh changed nothing at all. `safe-bottom` is 0, so every fix
+  I aimed at the home-indicator inset was arithmetic on zero. And lvh − dvh is 40px, which
+  is the band exactly: the strip Safari's toolbar occupies, which the page does not paint
+  because the page is correctly 699 tall.
+
+  So the page keeps its honest height — sizing it to lvh would push content under the
+  toolbar — and the GROUND is painted to the full screen instead. A fixed backdrop, behind
+  everything, that cannot be scrolled off and takes no space in the layout. When the
+  toolbar slides away the page grows into ground that was already the right colour.
+*/
 html {
   min-height: 100dvh;
 }
 
 body {
   min-height: 100dvh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  /* Past the foot of the largest viewport, so nothing shows under it in any state. */
+  bottom: -25vh;
+  background: var(--bg);
+  z-index: -1;
+  pointer-events: none;
 }
 
 /*
