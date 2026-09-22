@@ -379,6 +379,20 @@ export function dropLive(d: Drop, now: Date = new Date()): boolean {
 }
 
 /** Whole days left, for the countdown. */
+/**
+ * The date a drop is on, as somebody would say it: "Wed 15 Oct".
+ *
+ * Under the event's own name on the card face, because a night out is a name and a date
+ * and the two are read together. The weekday is there because it is what people actually
+ * plan around — "the 15th" needs a calendar, "Wednesday the 15th" does not.
+ */
+export function dropWhen(d: Drop): string {
+  const on = new Date(d.on + 'T00:00:00Z')
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  return days[on.getUTCDay()] + ' ' + on.getUTCDate() + ' ' + months[on.getUTCMonth()]
+}
+
 export function dropDaysLeft(d: Drop, now: Date = new Date()): number {
   const gone = new Date(d.on + 'T00:00:00Z')
   gone.setUTCDate(gone.getUTCDate() + 1)
@@ -868,13 +882,38 @@ export const FEED_COPY = {
 export function cardFace(card: FeedCard): {
   eyebrow: string
   title: string
+  /** The date, on the cards that have one. A drop is a night; a room is not. */
+  when?: string
   blurb: string
   image?: { src: string; alt: string }
 } {
   if (card.kind === 'situation') {
+    /*
+      A DROP LEADS WITH THE NIGHT ITSELF, not with the errand inside it.
+
+      The event was a subtitle — "Benfica v Celtic · Estádio da Luz · 24 days left" in
+      small type under the room's own title, which is the right shape for a standing room
+      and the wrong one for a night. Somebody scrolling the Club is deciding whether they
+      care about the MATCH; the fact that the first room is about finding the turnstile is
+      what they learn after they have decided. Sam: "I want to make the header image to teh
+      event cards a big splash... in big White letters over the image Benfica Vs Celtic
+      (including teh date)."
+
+      So the title is the event and the date, and the room's own title moves down to the
+      blurb where it says what this particular card teaches. Everything on the face is the
+      same size it was; what changed is which fact is at the top of it.
+    */
+    if (card.drop) {
+      return {
+        eyebrow: 'A DROP',
+        title: card.drop.event,
+        when: dropWhen(card.drop),
+        blurb: card.situation.title + ' — ' + card.situation.why,
+        image: card.situation.image,
+      }
+    }
     return {
-      // A drop says so, because a room that expires is a different offer.
-      eyebrow: card.drop ? 'A DROP' : 'IN LISBON',
+      eyebrow: 'IN LISBON',
       title: card.situation.title,
       blurb: card.situation.why,
       image: card.situation.image,

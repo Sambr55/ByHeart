@@ -1732,6 +1732,8 @@ export function Card({
   */
   const onSand = card.kind === 'intro' && !image
   const title = face.title
+  /* A drop carries its date; a standing room has none. */
+  const when = face.when
   const blurb = face.blurb
 
   return (
@@ -2077,8 +2079,13 @@ export function Card({
                     to something real rather than up from nothing.
                   */}
                   {card.kind === 'situation' && card.drop ? (
+                    /*
+                      The venue and the clock. The EVENT has moved up to the title, where
+                      it is the splash — repeating it here put the same proper noun twice
+                      on one face, three lines apart, in two sizes.
+                    */
                     <p className="mt-1 text-sm text-white/80">
-                      {card.drop.event} · {card.drop.place.name} ·{' '}
+                      {card.drop.place.name} ·{' '}
                       <span className="tabular-nums">
                         {dropDaysLeft(card.drop) <= 1
                           ? 'gone tomorrow'
@@ -2099,7 +2106,31 @@ export function Card({
                     its title for as long as it is on screen, because nothing replaces it.
                   */}
                   {isDemo && demoBeat > 0 ? null : (
-                    <h2 className="display mt-3 text-balance text-3xl">{title}</h2>
+                    <>
+                      {/*
+                        BIGGER ON A DROP, because the name of the night IS the card.
+
+                        A room's title is a description of an errand and sits at 3xl with
+                        the photograph behind it. An event's title is a proper noun that
+                        somebody either wants or does not — "Benfica v Celtic" — and it is
+                        the whole reason to stop scrolling. Sam: "a big splash... in big
+                        White letters over the image."
+
+                        text-balance keeps a two-part name from breaking after "v".
+                      */}
+                      <h2
+                        className={
+                          'display mt-3 text-balance ' +
+                          (card.kind === 'situation' && card.drop ? 'text-4xl' : 'text-3xl')
+                        }
+                      >
+                        {title}
+                      </h2>
+                      {/* The date under the name, read as one thing with it. */}
+                      {when ? (
+                        <p className="mt-1 text-base tabular-nums text-white/90">{when}</p>
+                      ) : null}
+                    </>
                   )}
                 </>
               )}
