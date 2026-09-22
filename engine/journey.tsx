@@ -8,6 +8,7 @@ import {
   useMemo,
   useReducer,
   useRef,
+  useState,
 } from 'react'
 import {
   COLLISIONS,
@@ -734,6 +735,24 @@ export function JourneyProvider({
    * what says whether the deal has been accepted.
    */
   const jumped = useRef(false)
+  /*
+    NOTHING IS PAINTED UNTIL THE JUMP HAS HAPPENED.
+
+    The landing step renders server-side every time and the jump runs after mount — which
+    is correct, and for the reason the note above gives. What it left was one frame of the
+    WRONG SCREEN: arriving at /vibes painted the front door ("Find Yourself in Language,
+    COME IN") and then replaced it with the picker. Sam: "it's doing teh flash of a Club
+    screen before landing on Start here after Open. Same problem we fixed last night."
+
+    Every other screen solves this the same way — Club returns a blank ground until
+    `mounted`, the shelf holds its counts behind `.needs-learner`. A frame of the right
+    colour is invisible; a frame of a DIFFERENT SCREEN is the product changing its mind
+    about where you are.
+
+    Only on /vibes, because only /vibes jumps. The front door renders its own first step
+    and has nothing to wait for, so it starts settled.
+  */
+  const [settled, setSettled] = useState(enter !== 'vibes')
   useEffect(() => {
     if (jumped.current || enter !== 'vibes') return
     jumped.current = true
@@ -787,11 +806,13 @@ export function JourneyProvider({
         setPair(DEFAULT_PAIR)
       } else {
         dispatch({ type: 'jump', kind: 'setup' })
+        setSettled(true)
         return
       }
     }
     loadLearner()
     dispatch({ type: 'jump', kind: hasAcceptedDeal() ? 'picker' : 'theway' })
+    setSettled(true)
   }, [enter])
   /**
    * Keep the journey's idea of what has been played in step with the learner record.
@@ -1086,7 +1107,11 @@ export function JourneyProvider({
     [state, step, root, learner.inventory, chooseFamily, finishSection, goHome],
   )
 
-  return <Ctx.Provider value={api}>{children}</Ctx.Provider>
+  return (
+    <Ctx.Provider value={api}>
+      {settled ? children : <div className="min-h-svh bg-bg" aria-hidden />}
+    </Ctx.Provider>
+  )
 }
 
 export function useJourney(): JourneyApi {

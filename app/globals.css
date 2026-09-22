@@ -150,6 +150,34 @@ body {
   color: var(--fg);
 }
 
+/*
+  THE STRIP UNDER THE HOME INDICATOR, which is sand on an installed phone.
+
+  Reported three times as a "sand gap" under a "double height" bottom bar, and neither
+  half of that was what it looked like. The bar is 67px — the height of its icons, which
+  is right. What sits below it is the PAGE: html and body paint --bg, which is sand, all
+  the way down through the inset that viewport-fit: cover hands us. So the blue bar has a
+  band of sand beneath it, and the two together read as one oversized bar.
+
+  The manifest's background_color is the same sand, so an installed app has no escape from
+  it either — outside the web view iOS paints that colour, and inside it the body does.
+
+  A box-shadow on the bar covers the inset it sits over. It cannot cover the case that
+  matters most on a phone: a page SHORTER than the viewport, where the body's sand shows
+  through beside and below a bar that is only as wide as the screen. So the ground itself
+  goes blue at the foot of any page that carries the bar — a gradient rather than a second
+  element, so nothing is added to the layout and nothing can be scrolled away from.
+
+  Only where the bar exists. A page without one paints sand to the bottom, as it should.
+*/
+body:has([data-testid='bottom-nav']) {
+  background:
+    linear-gradient(to top, var(--bar-bg) 0, var(--bar-bg) var(--safe-bottom), transparent var(--safe-bottom))
+      no-repeat,
+    var(--bg);
+  background-attachment: fixed, scroll;
+}
+
 /* Reserve the scrollbar gutter so its appearance never changes the layout width. */
 html {
   scrollbar-gutter: stable;
@@ -1176,7 +1204,11 @@ summary:focus-visible,
   margin-bottom: var(--safe-bottom);
   /* The bar's own ground, continued under the indicator. Inset so the hairline the bar
      draws at its top stays the only rule on it — a second line above the indicator would
-     read as the bar having a floor it does not have. */
+     read as the bar having a floor it does not have.
+
+     A SHADOW RATHER THAN PADDING because the bar must stay the height of its icons; and a
+     shadow rather than nothing because the page behind it is sand. See .has-nav below for
+     the half of this that a shadow cannot do. */
   box-shadow: 0 var(--safe-bottom) 0 0 var(--bar-bg);
   border-bottom: 0;
 
