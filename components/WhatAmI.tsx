@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Back } from '@/components/Back'
 import { loadLearner } from '@/engine/learner'
+import { useEntitlements } from '@/engine/useEntitlements'
 
 /**
  * What this device is holding, said plainly.
@@ -18,6 +19,7 @@ import { loadLearner } from '@/engine/learner'
  */
 export function WhatAmI({ sha, built }: { sha: string; built: string }) {
   const [rows, setRows] = useState<{ k: string; v: string }[] | null>(null)
+  const access = useEntitlements()
 
   useEffect(() => {
     const me = loadLearner()
@@ -61,6 +63,28 @@ export function WhatAmI({ sha, built }: { sha: string; built: string }) {
     }
     setRows([
       { k: 'build', v: sha.slice(0, 7) + (built ? ' — ' + built.split('\n')[0].slice(0, 60) : '') },
+      /*
+        WHICH COPY OF DUB THIS IS, second only to the build.
+
+        An installed app has its own storage, so the browser and the home-screen app are
+        two devices holding two records. A whole morning went into a report that read as
+        one fault and was partly two containers — the answer to "why is my work missing"
+        and "why am I seeing the intro again" is often just this line, and it belongs where
+        it is read first rather than buried under the screen measurements.
+      */
+      { k: 'where', v: standalone ? 'installed app (its own storage)' : 'browser tab' },
+      {
+        k: 'signed in',
+        v: !access.known
+          ? '(asking)'
+          : access.signedIn
+            ? 'yes — this record follows you'
+            : access.signInReady
+              ? 'no — work is on this device only'
+              : 'no (and no sign-in configured here)',
+      },
+      /* Set-up finished, which is what ends the intro sequence. Written once, in finish(). */
+      { k: 'set up', v: me.set_up_at ? me.set_up_at.slice(0, 16).replace('T', ' ') : '(not yet)' },
       { k: 'name', v: me.display_name ?? '(none)' },
       { k: 'chapter', v: String(me.chapter ?? '(none)') },
       { k: 'sittings', v: String(me.sittings ?? 0) },
@@ -98,7 +122,6 @@ export function WhatAmI({ sha, built }: { sha: string; built: string }) {
       { k: 'dpr', v: String(window.devicePixelRatio) },
       { k: 'safe top/bottom', v: safeTop + ' / ' + safeBottom },
       { k: 'document height', v: String(document.documentElement.scrollHeight) },
-      { k: 'standalone', v: standalone ? 'yes (installed)' : 'no (browser)' },
       {
         k: 'nav bottom vs window',
         v: nav
@@ -132,7 +155,12 @@ export function WhatAmI({ sha, built }: { sha: string; built: string }) {
       { k: 'html background', v: htmlBg },
       { k: 'body background', v: bodyBg },
     ])
-  }, [sha, built])
+    /*
+      access as well, so the sign-in row is not stale: the entitlements arrive after the
+      first paint, and a report that says "(asking)" because it rendered too early is the
+      kind of half-answer this page exists to stop.
+    */
+  }, [sha, built, access.known, access.signedIn, access.signInReady])
 
   return (
     <main className="safe-top mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 py-10 text-fg">
