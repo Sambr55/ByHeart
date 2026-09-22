@@ -4788,12 +4788,31 @@ export const THE_BASICS: Root[] = [
     source_label: 'Why Do Fools Fall in Love',
     source_status: 'verified',
     root_display: 'Why Do Fools Fall in Love',
-    credit: 'The answer a parent gives, eventually',
+    /*
+      WHO MADE IT, which is what this field is for.
+
+      It read "The answer a parent gives, eventually" — a joke about the English line
+      ("Why? Because I want to"), rendered under a song title where the field's own note
+      says attribution goes. Sam: "I don't understand - the answer that parents give,
+      eventually." Nor should he: the screen showed a 1956 song title with a remark about
+      parenting under it and no way to connect the two.
+
+      The line it belongs to is `subtext`, which is where the tone of the delivery lives
+      and where this observation is actually true.
+
+      Frankie Lymon and the Teenagers, because the title alone will not place it. That is
+      the test the field states: "1, 2, 3, 4 is four digits until somebody says Feist."
+
+      No year, to match every other credit in this file. The Beatles, Duran Duran, ABBA
+      and Dolly Parton are all bare names — a date is a fact about the record rather than
+      the thing that makes somebody recognise it.
+    */
+    credit: 'Frankie Lymon and the Teenagers',
     source: 'Why? Because I want to.',
     target: 'Porquê? Porque quero.',
     semantic_bridge:
       'Two spellings, one word, and the accent is the whole difference: porquê with the accent is the question on its own, porque without it starts the answer. Getting this right is a small thing that makes writing look native, and getting it wrong is the most common slip Portuguese people themselves make.',
-    subtext: 'Asked, and answered flatly.',
+    subtext: 'Asked, and answered flatly — the answer a parent gives, eventually.',
     extracts: [
       { id: 'porque', target: 'porque', gloss: 'because', shelf: 'small_words', note: 'Porquê? with the accent asks. Porque without it answers. Two words, one sound.' },
       { id: 'ainda', target: 'ainda', gloss: 'still / yet', shelf: 'when' },

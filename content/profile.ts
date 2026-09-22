@@ -205,7 +205,32 @@ export const AGE_PAYOFF: Record<AgeBand, { headline: string; body: string }> = {
   },
 }
 
-export const AGE_PAIR = { tu: 'Podes repetir?', voce: 'Pode repetir?', en: 'Can you repeat?' }
+/**
+ * The pair that shows the distinction, and an admission that it is a preview.
+ *
+ * Sam: "You talk about voce/tu here then introduce podes which we haven't learned yet."
+ *
+ * He is right and the screen was quietly breaking the product's own rule. Measured: after
+ * the first sitting of the basics a learner owns olá, adeus, um, dois, três, oito and
+ * semana. This screen then taught register with `podes`, which is a piece they do not own,
+ * against `pode`, which is not a piece at all — so a card whose whole job is to make a
+ * distinction feel easy opened with two words the learner had never seen.
+ *
+ * THE PAIR STAYS, because it is the clearest demonstration there is: one verb, one letter
+ * of difference, the same question at two levels of politeness. Nothing else in the basics
+ * can do that — no lemma in the content has both a tu and a você form authored, so the
+ * example cannot be built out of owned vocabulary without new content and a reviewer.
+ *
+ * What changes is that the screen says so. A word shown as a specimen with "you have not
+ * met this yet" under it is a preview; the same word shown as though it were revision is
+ * the product telling somebody they have forgotten something they were never taught.
+ */
+export const AGE_PAIR = {
+  tu: 'Podes repetir?',
+  voce: 'Pode repetir?',
+  en: 'Can you repeat?',
+  note: 'You have not met this verb yet — it is here because the pair shows the difference most clearly.',
+}
 
 /**
  * What stands between the learner and the thing they said they wanted. Every entry maps

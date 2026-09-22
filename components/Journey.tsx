@@ -2085,14 +2085,67 @@ function Highlighted({
   pieces: string[]
   dim?: string
 }) {
+  /*
+    EVERY OCCURRENCE, AND THE ACCENTED FORM TOO.
+
+    This took the FIRST match of each piece and compared with toLowerCase alone, which got
+    "Porquê? Porque quero." exactly wrong: the piece is `porque`, so it matched the second
+    word and left the QUESTION — the whole reason that root exists — dimmed, while `quero`
+    lit up beside it. Sam: "Surely we should highlight the word 'why' in blue here?"
+
+    Both halves of that are worth fixing rather than editing the content around it. A piece
+    that appears twice in a line is the same word twice and should read that way; and
+    Portuguese distinguishes words by accent constantly — porquê/porque, está/esta — so a
+    matcher that treats é and e as different characters will keep finding the wrong one.
+
+    NFD strips the marks for COMPARISON only. The offsets come from the stripped string and
+    index the original, which is safe because normalising to NFD and removing combining
+    marks preserves length for every accented Latin character in this content — an é is one
+    code point in, one out. The line rendered is always `line`, never the folded copy.
+  */
+  const fold = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  const hay = fold(line)
   const spans = pieces
-    .map((p) => {
-      const needle = p.replace(/[…?]/g, '').trim()
-      const at = line.toLowerCase().indexOf(needle.toLowerCase())
-      return at < 0 ? null : { at, len: needle.length }
+    .flatMap((p) => {
+      const needle = fold(p.replace(/[…?]/g, '').trim())
+      if (!needle) return []
+      const found: { at: number; len: number }[] = []
+      for (let at = hay.indexOf(needle); at >= 0; at = hay.indexOf(needle, at + needle.length)) {
+        /*
+          A WORD BOUNDARY IN FRONT, AND AN INFLECTION ALLOWED BEHIND.
+
+          The front is strict because that is the bug: without it `porque` matches inside
+          `porquê` — the folded forms are identical — and the two overlapping spans mean one
+          is dropped, leaving the question dimmed.
+
+          The back cannot be. Portuguese inflects by suffix, and four highlights measured
+          across the content depend on it: `euro` in "cinco euros", `coisa` in "as coisas",
+          `importa` in "importam". A strict boundary there is grammatically tidy and loses
+          the very thing the screen is pointing at.
+
+          So the tail may grow by up to two letters — plural s/es, a verb ending — and no
+          more, which is enough for every case in the content and short of matching a
+          different word. Measured: nothing that highlighted before this stops, and
+          `porque` inside `porquê` still does not match, because ê folds to e and the tail
+          is then empty rather than long.
+        */
+        const before = at === 0 ? '' : hay[at - 1]
+        /*
+          A letter in front means this is the middle of a longer word — except where the
+          piece itself starts with its article. "a escola" inside "uma escola" is the
+          extract genuinely occurring; the `a` of the piece lands on the `a` of `uma`, so
+          the character before it is a letter and a strict test throws it away. Measured as
+          the one case in the content, and the check is on the PIECE rather than the line
+          so it cannot widen into a general licence to match mid-word.
+        */
+        if (/[a-z0-9]/.test(before) && !/^(a|o|as|os|um|uma) /.test(needle)) continue
+        const tail = hay.slice(at + needle.length).match(/^[a-z]*/)![0]
+        if (tail.length > 2) continue
+        found.push({ at, len: needle.length + tail.length })
+      }
+      return found
     })
-    .filter(Boolean)
-    .sort((a, b) => a!.at - b!.at) as { at: number; len: number }[]
+    .sort((a, b) => a.at - b.at)
 
   if (!spans.length) return <span className={dim}>{line}</span>
 
@@ -2207,7 +2260,30 @@ function RootBeatView({
             {root.credit ? <p className="text-sm text-muted">{root.credit}</p> : null}
           </div>
           <div className="flex flex-col gap-3">
-            <p className="pt text-balance text-3xl text-accent">{root.target}</p>
+            {/*
+              THE WORDS THIS ROOT IS FOR, PICKED OUT OF THE LINE IT SITS IN.
+
+              The whole line was one accent colour, so "Porquê? Porque quero." arrived as
+              four words of equal weight and the learner had to read the note underneath to
+              find out which of them the screen was about. Sam: "Surely we should highlight
+              the word 'why' in blue here?"
+
+              Highlighted already exists and does exactly this — the extract beat two
+              screens later uses it — so the pieces are dimmed against the extracts rather
+              than a second mechanism being invented. What changes is that the emphasis
+              starts on the FIRST screen that shows the Portuguese rather than the third.
+
+              `dim` is fg/70 rather than the default muted: this line is the hero of the
+              screen and the unhighlighted half still has to be read as language, not as a
+              caption. On the extract beat the balance is the other way round.
+            */}
+            <p className="pt text-balance text-3xl text-accent">
+              <Highlighted
+                line={root.target}
+                pieces={root.extracts.map((e) => e.target)}
+                dim="text-fg/70"
+              />
+            </p>
             <div>
               <AudioButton slug={slugFor(root.target)} text={root.target} />
               <CopyButton text={root.target} />
@@ -2631,36 +2707,36 @@ function Osmosis() {
     [owned, learner.osmosis_seen, room],
   )
 
-  if (!insights.length) {
-    /*
-      There is no "last time" on somebody's first time.
+  /*
+    NOTHING TO SAY MEANS NOTHING TO SHOW, so this screen stands aside.
 
-      This fallback greeted a brand-new learner — the majority of the people who will
-      ever see it — by referring to a session they have not had. The empty case has two
-      genuinely different meanings and now says both: nothing new to point out yet, or
-      nothing new since the last one.
-    */
-    const returning = (learner.osmosis_seen ?? []).length > 0
-    return (
-      <Shell stage="CHOICE">
-        <div className="flex flex-1 flex-col justify-center gap-3">
-          <p className="eyebrow text-accent">{returning ? 'STILL IN THERE' : 'NOTHING TO EXPLAIN'}</p>
-          <p className="display text-balance text-2xl">
-            {returning
-              ? 'Everything you picked up last time is still holding.'
-              : 'You have picked up the words. The patterns come next.'}
-          </p>
-          {!returning ? (
-            <p className="text-sm leading-relaxed text-muted">
-              This screen shows you the grammar you absorbed without being taught it — and
-              it waits until there is something real to point at rather than inventing one.
-            </p>
-          ) : null}
-        </div>
-        <Cta label="CONTINUE" onClick={next} />
-      </Shell>
-    )
-  }
+    Sam: "I'm not sure this screen makes any sense at all. 'This screen' which screen?"
+    Both halves are fair. The copy referred to itself — "This screen shows you the grammar
+    you absorbed" — on a screen that was showing none of it, so the only thing on it was a
+    description of what it would be if it had anything. And it cost a full screen and a tap
+    to say so.
+
+    Measured: a learner meets it on their FIRST TWO sittings of the basics. Seven pieces
+    banked, then twelve, and the first insight needs seventeen — so the majority of the
+    people who ever see this screen see it saying nothing, twice, before it ever works.
+
+    The earlier fix here was the copy: the fallback used to greet a first-timer by
+    referring to "last time", and splitting it in two was right as far as it went. It kept
+    the screen, which was the actual fault.
+
+    So it skips. The step is queued before the sitting is played — the pieces are not
+    banked until the releases land, so the queue genuinely cannot know — which is why this
+    is a render-time skip rather than a condition on the push. Same shape as SaveStep,
+    which stands aside when there is no sign-in to offer.
+
+    There is no returning-learner case any more either. "Everything you picked up last time
+    is still holding" is a nice sentence and it is the same non-event: nothing new to point
+    at, said at length.
+  */
+  useEffect(() => {
+    if (!insights.length) next()
+  }, [insights.length, next])
+  if (!insights.length) return null
 
   return (
     <Shell stage="CHOICE">
@@ -2844,6 +2920,13 @@ function AgePayoff({ band }: { band: AgeBand }) {
         </div>
       </div>
       <p className="mt-3 text-xs text-muted">Same question. One step apart.</p>
+      {/*
+        And that it is a preview, because it is showing an unowned word.
+
+        The pair uses `podes`, which a learner at this point does not have — see the note
+        on AGE_PAIR. The specimen earns its place; pretending it is revision does not.
+      */}
+      <p className="mt-1 text-xs leading-relaxed text-muted">{AGE_PAIR.note}</p>
     </div>
   )
 }
