@@ -270,6 +270,18 @@ export const WANTED: { slug: string; brief: string; used_by: string }[] = [
     will accept a room whose image is EITHER in the bank or wanted here, so a drop can be
     written before its photographs exist — and will fail if it is in neither.
   */
+  {
+    slug: 'vibe-bobs-your-uncle',
+    brief:
+      'A chipped white enamel mug of black tea, the bag still in it, standing on a blue-and-white azulejo windowsill in Lisbon. Afternoon light across the tiles, a pastel facade out of focus beyond. The mug is plainly not from here.',
+    /*
+      The English thing in the Portuguese room, which is what the shelf does to the
+      language. Deliberately NOT a nice cup of tea in a nice setting: three idioms in this
+      vibe are jokes about the tea metaphor failing to cross, so the picture has to look
+      slightly out of place on purpose.
+    */
+    used_by: "Bob's Your Uncle! — the idioms vibe. VIBE_IMAGES points at the basics' photograph until this exists.",
+  },
 ]
 
 /** Every slug in the bank, for the gate that checks a template does not name a hole. */

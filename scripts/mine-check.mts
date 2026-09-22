@@ -175,7 +175,20 @@ for (const e of acts) {
   somewhere richer, which is a good thing happening, so this is a baseline rather than a
   budget. It still cannot grow without somebody deciding it should.
 */
-const KNOWN_AHEAD = 7
+/*
+  SEVEN BECAME TEN when Bob's Your Uncle landed, by the mechanism this note describes.
+
+  The three new ones are "Muito obrigado.", "Obrigada, é muito simpático." and "Domingo à
+  tarde." — all of them lines the basics already authored, all reachable now because the
+  idioms vibe teaches `muito` and `tarde`, which the basics use and never taught. Nothing
+  was written; two words got a home and three doors opened.
+
+  That is the library's argument working — a word stops belonging to the vibe that taught
+  it — so the baseline moves rather than the content being changed to fit it. It still
+  cannot grow without somebody deciding it should, which is the whole point of the number
+  being here.
+*/
+const KNOWN_AHEAD = 10
 const distinct = [...new Set(strayed.map((x) => x.split(': ')[1]))]
 console.log('  · lines the basics author from words they do not teach: ' + distinct.length)
 for (const d of distinct) console.log('    ' + d)

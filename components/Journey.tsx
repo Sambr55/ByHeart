@@ -1088,6 +1088,8 @@ function Picker() {
   interface Facts {
     crate: Crate
     finished: boolean
+    /** Held back by the doorway rather than by the ladder — which badge to draw. */
+    gatedByBasics: boolean
     /*
       A SESSION OF THIS CRATE HAS BEEN COMPLETED, which is the only sense of "done" a
       learner ever experiences.
@@ -1195,7 +1197,25 @@ function Picker() {
       standing up before they choose, not to hold them in a tutorial for four sittings.
       The rest of the basics stays on the shelf like any other crate.
     */
-    const gatedByBasics = f.id !== 'the_basics' && !f.drop && !basicsStarted
+    /*
+      A CRATE THAT OPENS AT RUNG 1 IS ITS OWN DOORWAY, whatever it is called.
+
+      This named `the_basics` and nothing else, so it was a list of one — and the fourth
+      rule in this session to break the moment something was added beside its single
+      member. Bob's Your Uncle is entirely rung 1 and declares opens_at: 1, which makes it
+      exactly the case this gate exists to ALLOW: the reason for the doorway, written
+      above, is that five crates have nothing at rung 1 and would hand a beginner rung-2
+      Stoic philosophy before they can say hello. A crate whose every root is rung 1 does
+      the opposite of that.
+
+      Sam wanted the idioms pre-Legend, and the argument is the same as the mechanism:
+      somebody who already owns the English half of "hold your horses" is not a person who
+      needs protecting from the content.
+
+      entryRung rather than opens_at directly, so a crate that simply happens to be all
+      rung 1 qualifies too — which is the honest test and needs no second declaration.
+    */
+    const gatedByBasics = entryRung(f) > 1 && !f.drop && !basicsStarted
     const unreached = gatedByBasics || (!f.drop && !started && opensAt > rung)
     // A drop is never plan-locked, and never stage-locked. It can be lost forever by
     // being busy, and charging for the one thing that expires would turn the only real
@@ -1242,6 +1262,13 @@ function Picker() {
       sessionDone,
       waiting,
       unreached,
+      /*
+        Carried so the badge can say WHICH wall this is, rather than recomputing the test
+        and drifting from it. The badge used to ask `f.id !== 'the_basics' && !basicsStarted`
+        — the same condition written a second time, in a second place, which is how it
+        came to disagree with this one.
+      */
+      gatedByBasics,
       planLocked,
       at: waiting ? nextAt : opensAt,
       group,
@@ -1525,7 +1552,7 @@ function Picker() {
                 (key === 'drops' ? 'flex flex-col gap-3' : 'grid grid-cols-2 gap-3')
               }
             >
-              {list.map(({ crate: f, finished, sessionDone, waiting, unreached, planLocked, at, taken, total }) => {
+              {list.map(({ crate: f, finished, sessionDone, waiting, unreached, gatedByBasics, planLocked, at, taken, total }) => {
                 const image = vibeImage(f.id)
                 return f.drop ? (
                   <DropRow key={f.id} crate={f} now={now} onOpen={() => { setEntering(f.id); chooseFamily(f.id) }} />
@@ -1602,7 +1629,7 @@ function Picker() {
                     <span className="absolute inset-x-0 top-0 flex items-start justify-end p-3">
                       {finished ? (
                         <span className={BADGE + ' text-white'}>done</span>
-                      ) : unreached && f.id !== 'the_basics' && !basicsStarted ? (
+                      ) : unreached && gatedByBasics ? (
                         <span className={BADGE + ' text-white'}>basics first</span>
                       ) : unreached ? (
                         /* The capability, not the number — see PICKER.open_stage. A badge reading

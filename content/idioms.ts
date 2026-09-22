@@ -139,7 +139,7 @@ export const IDIOMS: Idiom[] = [
     english: 'A storm in a teacup',
     literal: 'Uma tempestade numa chávena de chá',
     wtf: 'The tea again. It survives translation and still lands on nothing.',
-    equivalent: 'Muito barulho para nada',
+    equivalent: 'É muito barulho para nada',
     gloss: 'A lot of noise for nothing.',
     blocks: [],
   },

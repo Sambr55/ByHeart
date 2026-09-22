@@ -487,12 +487,25 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       /* Its own `if` for the reason the sheet beat has one — see just above. */
       if (id < idioms.length && i % 7 === 6) withExplainers.push(idioms[id++])
     })
+    /*
+      THE IDIOMS DO NOT GET A TAIL, and that is the difference between them and the rest.
+
+      Everything else here appends its leftovers, because a sheet or a vibe the weave could
+      not place is a thing the learner has not been offered at all. Idioms are not in that
+      position: all thirty live in the Bob's Your Uncle vibe, on the shelf, openable at rung
+      1 — so an idiom the Club did not reach today is one swipe away in a place built for
+      it, and will come round in the Club tomorrow when the deck reshuffles.
+
+      Appending them cost 22 cards stacked at the bottom of the feed, which is precisely the
+      failure the sheet beat above documents and fixed for itself: "0, 8, 16, 30, 38, then
+      53, 54, 55, 56, 57 all in a row, which is the opposite of interleaved." Measured here
+      as 103 sections rendered for 71 cards, caught by feed-check.
+    */
     return [
       ...withExplainers,
       ...explainers.slice(e),
       ...vibes.slice(v),
       ...sheets.slice(sh),
-      ...idioms.slice(id),
     ]
   }, [
     mounted,

@@ -29,6 +29,32 @@ export interface Insight {
 
 export const INSIGHTS: Insight[] = [
   /*
+    The idioms vibe, and the thing it teaches without ever saying it.
+
+    Every other insight here names a construction the learner used — a reflexive, a gender
+    agreement, ter for age. This one names something bigger and stranger, and it is the
+    whole reason the Bob's Your Uncle shelf exists: that a phrase means what a language has
+    AGREED it means, not what its words add up to. Somebody who has just watched "hold your
+    horses" fail to cross and "calma" do the same job in one word has understood that
+    already, in their body, before anybody used the word idiom at them.
+
+    Requires `calma` and `pronto`, which are the two shortest and most-used things on the
+    shelf — so this fires for anybody who has been through even part of the vibe rather
+    than only for a completist.
+  */
+  {
+    id: 'a-phrase-is-not-its-words',
+    requires: ['calma', 'pronto'],
+    headline: 'You just worked out that phrases do not add up.',
+    body:
+      'Hold your horses has nothing to do with horses, and you knew that without being told — you have been using English idioms since you were four. Portuguese does the same trick with different pictures, and the moment you stopped translating word by word and reached for calma instead, you were doing the thing that takes most learners a year. Nobody here will test you on it.',
+    evidence: [
+      { pt: 'Calma.', en: 'Hold your horses.' },
+      { pt: 'E pronto.', en: "And Bob's your uncle." },
+    ],
+    proper_name: 'idiomaticity',
+  },
+  /*
     Two that fall out of a person's own Legend, which is the best possible place for
     them: shown after the learner has already said the sentence correctly about
     themselves, and never tested.

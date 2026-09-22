@@ -28,6 +28,27 @@ export interface VibeImage {
 }
 
 export const VIBE_IMAGES: Record<CultureFamily, VibeImage> = {
+  /*
+    BOB'S YOUR UNCLE — the idioms shelf, and the one still life that has to say "England
+    and Portugal at the same time".
+
+    A cup of tea is the obvious answer and the wrong one: three of the idioms in this vibe
+    are jokes ABOUT the tea metaphor failing to travel. So the picture is the opposite —
+    the English thing sitting in the Portuguese room, which is exactly what the shelf does
+    to the language.
+
+    NOT YET GENERATED. The brief is in content/images.ts under WANTED so `npm run images`
+    can produce it. Until then this borrows the café counter from the Club's own bank
+    rather than another vibe's photograph: the shelf shows ten tiles at once and two
+    identical pictures side by side read as a bug, which is exactly what it looked like
+    when this pointed at the basics. The counter is at least the right idea — a cup on a
+    zinc bar in Lisbon — and belongs to no other vibe, so nothing is duplicated.
+  */
+  bobs_your_uncle: {
+    src: '/lisbon/cafe-counter.jpg',
+    alt: 'A zinc café counter in Lisbon with an empty espresso cup on a saucer and a folded newspaper beside it.',
+    rights_status: 'generated',
+  },
   the_basics: {
     src: '/vibes/the-basics.jpg',
     alt: 'A stack of seven-inch records in worn paper sleeves on a dark wooden table, a tiled pillar and a Lisbon street through the window behind.',

@@ -11,6 +11,7 @@
  */
 
 import { existsSync, readFileSync } from 'node:fs'
+import { BOB } from '../content/bob'
 import { IDIOMS } from '../content/idioms'
 import { INTRO_CARDS } from '../content/intro'
 import { join } from 'node:path'
@@ -1463,9 +1464,42 @@ for (const e of EXAMPLES) {
     /* A gloss that repeats the English teaches nothing on the way back. */
     if (!i.gloss.trim()) fail('idiom ' + i.id + ' has no gloss')
   }
+  /*
+    THE CLUB AND THE VIBE MUST NOT TEACH THE SAME IDIOM DIFFERENTLY.
+
+    Twelve of these thirty are also roots in Bob's Your Uncle, where they are taught for
+    real and their words are banked. The Club card and the root are written in two files
+    and drifted the day they were written: the card said "Muito barulho para nada" and the
+    root said "É muito barulho para nada", both correct and not the same sentence. A
+    learner who meets an idiom in the vibe and again in the Club is owed the same
+    Portuguese twice — anything else reads as the product not knowing its own content.
+
+    Matched on `credit`, which is the idiom's English and is the only thing the two files
+    genuinely share. Trailing punctuation is ignored because a root's target is a sentence
+    and a card's equivalent is a phrase.
+  */
+  const strip = (t: string) => t.replace(/[.?!]+$/, '').trim().toLowerCase()
+  const byEnglish = new Map(IDIOMS.map((i) => [i.english.toLowerCase(), i]))
+  let paired = 0
+  for (const r of BOB) {
+    const card = byEnglish.get((r.credit ?? '').toLowerCase())
+    if (!card) {
+      fail('Bob root ' + r.root_id + ' credits "' + r.credit + '", which is not a Club idiom')
+      continue
+    }
+    paired++
+    if (strip(card.equivalent) !== strip(r.target)) {
+      fail(
+        'idiom "' + card.english + '" is taught two ways: the Club says "' +
+          card.equivalent + '" and the vibe says "' + r.target + '"',
+      )
+    }
+  }
+
   console.log(
     IDIOMS.length + ' idioms · ' + IDIOMS.filter((i) => i.blocks.length).length +
-      ' carry blocks · ' + IDIOMS.filter((i) => i.blue).length + ' are blue',
+      ' carry blocks · ' + IDIOMS.filter((i) => i.blue).length + ' are blue · ' +
+      paired + ' also taught in the vibe',
   )
 }
 

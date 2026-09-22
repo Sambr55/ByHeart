@@ -15,7 +15,7 @@ import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_CARD } from '../content/legend'
 import { PIECES, ROOTS } from '../content/roots'
-import { cardById, explainerCards, sheetCards, feedFor, vibeCards } from '../content/feed'
+import { cardById, explainerCards, idiomCards, legendCards, sheetCards, feedFor, vibeCards } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -61,6 +61,16 @@ await page.waitForTimeout(1800)
   short and three assertions about looping went red for a reason that had nothing to do
   with looping.
 */
+/*
+  How many cards the weave walks, and therefore how many idioms its beat can place.
+
+  The component builds `rest` from the rooms, the Legend cards and the learner's own kept
+  things, then walks it pushing an idiom every seventh index. This reproduces that count
+  from the same sources rather than hard-coding it.
+*/
+const IDIOM_WALK = feedFor().length + legendCards([], [], null).length
+const IDIOM_BEAT_PLACES = Math.floor(IDIOM_WALK / 7)
+
 const real =
   feedFor().length +
   vibeCards([]).length +
@@ -89,7 +99,22 @@ const real =
 
     Nothing dismissed: this learner is seeded fresh, so every sheet is offered.
   */
-  sheetCards([]).length
+  sheetCards([]).length +
+  /*
+    AND THE IDIOMS THAT THE WEAVE ACTUALLY REACHES, which is not all of them.
+
+    Every other source here appends its leftovers, so its whole length lands in the feed.
+    Idioms deliberately do not: all thirty live in the Bob's Your Uncle vibe, openable at
+    rung 1, so one the Club did not reach today is one swipe away rather than unoffered —
+    and appending them put 22 in a stack at the bottom of the feed, which is the failure
+    the sheet beat fixed for itself and this check caught here as 103 sections for 71
+    cards.
+
+    So the number is how many the beat places, not how many exist. Derived from the same
+    two facts the component uses — the length of the array being walked and the beat — for
+    the reason every other line in this sum gives: a literal would be right today.
+  */
+  Math.min(IDIOM_BEAT_PLACES, idiomCards([], [], []).length)
 
 /*
   A SAVED SHEET CAN BE FOUND AGAIN, which is the half that was missing.

@@ -1,3 +1,5 @@
+import { BOB } from '@/content/bob'
+
 /**
  * The cultural root — the unit the whole product is built from (spec Appendix A).
  *
@@ -25,6 +27,7 @@ export type CultureFamily =
   | 'duran_duran_lisboa'
   | 'world_of_wizardry'
   | 'the_basics'
+  | 'bobs_your_uncle'
 
 /**
  * The ladder — six rungs, named for what you can do in a room.
@@ -584,6 +587,31 @@ export const CRATES: Crate[] = [
     title: 'The basics, in songs you know',
     blurb: 'Hello, thank you, yes, no and counting to ten — out of records you have heard a hundred times.',
     tone: 'reflective',
+    built: true,
+    opens_at: 1,
+  },
+  {
+    /*
+      THE OTHER PRE-LEGEND DOOR, and it is deliberately beside the basics.
+
+      Sam: "create a pre-legend vibe that is called Bob's Your Uncle! — English idioms you
+      can learn from, that can feed the legend."
+
+      opens_at: 1 puts it alongside the_basics rather than behind a rung, which is the
+      whole argument for it: an idiom is the least intimidating way into a language because
+      the learner already owns the English half. Somebody who has never seen a conjugation
+      can meet "mais vale tarde do que nunca" and walk away with four pieces without once
+      being told they are studying.
+
+      Twelve roots, not thirty. The full set lives in the Club as cards, where the job is
+      the joke and nothing is extracted; this is the subset whose Portuguese genuinely comes
+      apart into words worth having. See content/bob.ts for which twelve and why the other
+      eighteen are Club-only.
+    */
+    id: 'bobs_your_uncle',
+    title: "Bob's Your Uncle!",
+    blurb: 'English idioms, and what Portugal says instead. The phrases are the fun; the words are yours to keep.',
+    tone: 'human',
     built: true,
     opens_at: 1,
   },
@@ -5008,6 +5036,7 @@ export const ROOTS: Root[] = [
   ...DURAN_DURAN,
   ...WIZARDRY,
   ...THE_BASICS,
+  ...BOB,
 ]
 
 export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
@@ -5023,6 +5052,7 @@ export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
   flirting_f2m: FLIRTING_F2M,
   duran_duran_lisboa: DURAN_DURAN,
   world_of_wizardry: WIZARDRY,
+  bobs_your_uncle: BOB,
 }
 
 export function rootById(id: string): Root | undefined {
