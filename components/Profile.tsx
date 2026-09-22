@@ -82,6 +82,21 @@ const SECTIONS: {
     empty: PROFILE_COPY.done_empty,
     unit: (n) => (n === 1 ? 'vibe or room you have been through' : 'vibes and rooms you have been through'),
     count: (t) => String(t.length),
+    /*
+      THE WAY BACK TO THE SHELF, which this screen did not have.
+
+      Three of the six sections carry a door to the room they are the front of — the proof
+      card, the library, what is on — and the one whose subject is VIBES carried none. The
+      shelf is deliberately not a tab (see 6cf244e: "a tab is for somewhere you go from
+      anywhere", and the Club carries vibes in its own feed) and the only link to it from
+      Yours was inside the EMPTY state. So a learner with work done — the only kind who
+      has this section at all — had no route back to pick another one. Sam: "cant get back
+      to vibes via any nav to continue."
+
+      Here rather than in the bar: this is where somebody is looking at what they have been
+      through, which is the moment the question "what next" is actually being asked.
+    */
+    more: { href: '/vibes', label: 'PICK ANOTHER' },
   },
   {
     id: 'aside',
