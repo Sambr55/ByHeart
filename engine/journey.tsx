@@ -38,7 +38,7 @@ import {
   syncSession,
   rememberSection,
 } from './learner'
-import { doorwayRoots, legendStatus } from '@/content/legend'
+import { doorwayRoots, legendStatus, worthSaving } from '@/content/legend'
 import { chosenPair, setPair } from './pair'
 import { DEFAULT_PAIR } from '@/content/pairs'
 import { useLearner } from './useLearner'
@@ -999,12 +999,14 @@ export function JourneyProvider({
         afterSitting.push({ kind: 'legend-open' })
       }
       /*
-        The save ask, on the same floor the panels use: basics done, two chosen sittings
-        in, not signed in, not yet answered. `signInReady` is not checked here because it
-        is a server fact the reducer cannot see — the screen itself checks it and skips
-        instantly when there is no link to send.
+        The save ask, as soon as there is work worth losing rather than eleven sittings in.
+        See worthSaving — an installed app has its own storage, so the old floor meant a
+        learner could add DUB to their home screen and find it empty, having never once
+        been offered the link that would have carried it. `signInReady` is not checked here
+        because it is a server fact the reducer cannot see — the screen itself checks it
+        and skips instantly when there is no link to send.
       */
-      if (status.toGo === 0 && status.vibesDone >= 2 && me.save_prompt === 'unseen') {
+      if (worthSaving(me) && me.save_prompt === 'unseen') {
         afterSitting.push({ kind: 'save' })
       }
 

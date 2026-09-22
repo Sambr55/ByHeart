@@ -16,6 +16,7 @@ import { LEGEND_FRAMES, askFor, cardFor, cardToGo, nextStage, stageFor, frameApp
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/avatar'
 import { setDisplayName } from '@/engine/learner'
+import { useEntitlements } from '@/engine/useEntitlements'
 import { useLearner } from '@/engine/useLearner'
 
 /**
@@ -155,6 +156,7 @@ type Tile =
 
 export function Profile() {
   const learner = useLearner()
+  const access = useEntitlements()
   const [mounted, setMounted] = useState(false)
   const [open, setOpen] = useState<FeedCard | null>(null)
   /*
@@ -505,6 +507,22 @@ export function Profile() {
     found no share control, because this test only counted cards saved and vibes finished.
     Proof is the record at its most literal: things this person has actually said.
   */
+  /*
+    An empty record inside an INSTALLED app, with no account to pull one from.
+
+    That combination has one likely cause — the learner started in the browser, and the
+    app's separate storage means this screen knows nothing about it. Read after mount like
+    everything else that depends on the device.
+  */
+  const standaloneEmpty =
+    mounted &&
+    access.known &&
+    access.signInReady &&
+    !access.signedIn &&
+    typeof window !== 'undefined' &&
+    (window.matchMedia?.('(display-mode: standalone)').matches ||
+      (navigator as unknown as { standalone?: boolean }).standalone === true)
+
   const hasSomething =
     saved.length > 0 ||
     finished.length > 0 ||
@@ -546,6 +564,34 @@ export function Profile() {
           >
             START HERE
           </Link>
+          {/*
+            AND THE WAY BACK, for the one person this screen is a disaster for.
+
+            An installed app has its OWN storage. So somebody who did the basics in Safari,
+            added DUB to their home screen and opened it lands HERE — on a screen that says
+            "nothing here yet" about work they did an hour ago. Nothing is lost, but nothing
+            on the screen says so, and the reasonable conclusion is that the product threw
+            it away.
+
+            Shown only when standalone and not signed in, which is exactly that case: in a
+            browser tab an empty screen really is empty, and somebody signed in has their
+            record on the way already.
+          */}
+          {standaloneEmpty ? (
+            <div className="flex flex-col gap-3 rounded border border-line bg-bg-elev px-4 py-3">
+              <p className="text-sm leading-relaxed text-fg">
+                Did you start in the browser? The app keeps its own copy, so anything you
+                did there is still there — sign in on both and they join up.
+              </p>
+              <Link
+                href="/signin?next=%2Fprofile"
+                data-testid="yours-recover"
+                className="tap-target eyebrow w-full rounded border border-accent px-5 py-3 text-center text-accent"
+              >
+                BRING IT OVER
+              </Link>
+            </div>
+          ) : null}
         </div>
       ) : (
         <>

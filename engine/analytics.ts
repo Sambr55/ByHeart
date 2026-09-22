@@ -152,6 +152,12 @@ export type EventName =
   | 'install_dismissed'
   | 'install_accepted'
   /*
+    Somebody told that installing would start them from nothing, and choosing to save
+    first. The most useful number on the install strip: it measures how many people were
+    one tap from losing their work without knowing it.
+  */
+  | 'install_save_first'
+  /*
     The translator, and the one number on it that matters.
 
     translate_ask is traffic. translate_kept is demand — the sentences somebody decided

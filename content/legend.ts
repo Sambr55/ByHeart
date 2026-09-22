@@ -1181,6 +1181,38 @@ export function nextStage(words: number): Stage | null {
 
 export const FREE_CRATES = 5
 
+/**
+ * When the save offer is worth making, which is as soon as there is something to lose.
+ *
+ * IT USED TO WAIT FOR THE WHOLE BASICS PLUS TWO VIBES — eleven sittings or so. Everything
+ * DUB knows lives in this browser's storage, and an INSTALLED app gets its own: add DUB to
+ * the home screen before the offer has fired and it opens empty, with the work still in
+ * the browser and nothing on screen saying so. Sam, having hit it: "is it correct or a
+ * problem that a downloaded version of the site becomes completely different instances?"
+ * Correct, and a problem — the design assumes a device is a person.
+ *
+ * So the offer moves to the first moment there is real work on the device. A learner who
+ * has answered a Legend card has written something ABOUT THEMSELVES that exists nowhere
+ * else; a learner who has finished a sitting has ten minutes in it. Either is enough to
+ * be worth an email, and both happen long before the old floor.
+ *
+ * NOT AT SET-UP, deliberately. That is the one screen everybody passes through and the
+ * one most optimised for getting out of the way, and an email field there is friction at
+ * the exact point it costs most. This asks when the learner has something of their own,
+ * which is also when they have a reason to say yes.
+ *
+ * Still once only — `save_prompt` records the answer and NOT NOW is an answer — and it
+ * still never blocks.
+ */
+export function worthSaving(me: {
+  legend?: { values: Record<string, string> }[]
+  sittings?: number
+  proof?: unknown[]
+}): boolean {
+  const answered = (me.legend ?? []).filter((a) => Object.keys(a.values ?? {}).length > 0)
+  return answered.length > 0 || (me.sittings ?? 0) > 0 || (me.proof ?? []).length > 0
+}
+
 /** The vibe every learner is sent through first, and the one the Legend is built from. */
 export const DOORWAY: CultureFamily = 'the_basics'
 

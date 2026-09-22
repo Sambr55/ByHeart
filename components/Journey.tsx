@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, myName, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame } from '@/content/legend'
+import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, myName, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame, worthSaving } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
@@ -4024,6 +4024,11 @@ function LegendPayoff() {
     `save_prompt` records the answer and NOT NOW is an answer — and it still never blocks.
     What changes is that finishing a vibe quickly no longer costs somebody the offer.
 
+    AND THEN EARLIER STILL, because that floor was about eleven sittings away. An installed
+    app gets its own storage, so a learner could add DUB to their home screen, find it
+    empty, and never have been offered the link that would have carried their work across.
+    `worthSaving` moves it to the first moment there is anything to lose — see its note.
+
     `!signedIn` because somebody whose work is already off the device has nothing to be
     warned about, and `signInReady` because where accounts are not configured there is no
     link to send and the button could not work.
@@ -4032,8 +4037,7 @@ function LegendPayoff() {
     mounted &&
     access.signInReady &&
     !access.signedIn &&
-    status.toGo === 0 &&
-    status.vibesDone >= 2 &&
+    worthSaving(learner) &&
     learner.save_prompt === 'unseen'
   const offering = usable && learner.legend_prompt === 'unseen'
   /** The hook is the questions themselves, not a count of them. */
