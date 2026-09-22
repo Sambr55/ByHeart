@@ -246,7 +246,39 @@ export function Legend() {
     )
   }
 
-  if (typeof mode === 'object') {
+  /*
+    A BUILD CARD NEEDS THE DOOR OPEN, like every other way into the deck.
+
+    Sam: "I was still in basics and somehow I managed to open up my legend, which I
+    completed, but because somehow I had got in through the back door it didn't save."
+
+    ?build= validated that the frame EXISTS and nothing else — no unlocked check — so any
+    link carrying it rendered a build card whatever the door said. Reproduced from a
+    mid-basics record: door shut, five doorway roots outstanding, and the question opened
+    anyway.
+
+    The note under the run-through branch below describes exactly this fix and was never
+    applied here: "both are now reachable by URL — ?run=1 and ?cold=1 — and a typed or
+    stale link with an empty Legend would render a run-through of nothing at all. Falling
+    back to the deck is the honest answer." Same rule, third deeplink.
+
+    AND THE SAVE DID WORK, which is the half worth saying plainly. answerLegend writes
+    unconditionally, so the answers were kept — they were hidden behind the locked screen,
+    which showed the wall and nothing underneath it. That is fixed separately below.
+  */
+  /*
+    Not a redirect and not an error. The deck is the screen that says how far the door is,
+    which is the question somebody arriving by a stale link actually has — and it shows
+    the answers they already gave, so nothing they did looks lost.
+
+    In an effect rather than during render: setState while rendering is a React warning at
+    best and a loop at worst, and the branch below already declines to draw the card.
+  */
+  useEffect(() => {
+    if (mounted && !unlocked && typeof mode === 'object') setMode('deck')
+  }, [mounted, unlocked, mode])
+
+  if (typeof mode === 'object' && (!mounted || unlocked)) {
     const frame = LEGEND_FRAMES.find((f) => f.id === mode.build)!
     return (
       <Shell>
@@ -457,16 +489,46 @@ export function Legend() {
                 PICK A VIBE
               </Link>
             </div>
+            {/*
+              AND ANYTHING ALREADY ANSWERED IS SHOWN, not hidden behind the wall.
+
+              Sam answered his whole Legend through a deeplink that skipped the door, came
+              back to a locked screen, and reported it as lost: "because somehow I had got
+              in through the back door it didn't save." It did save — answerLegend writes
+              unconditionally and the answers were in his record the whole time. What he
+              was looking at was a list of dashed empty cards, which is what this rendered
+              whether a question had been answered or not.
+
+              Work that exists is never invisible. The door still says how far away it is
+              and nothing here opens it early; what changes is that a learner can see their
+              own sentences rather than being told, in effect, that they never wrote them.
+
+              The back door is closed now, so this is mostly for the people who already
+              went through it — which is the honest reason to keep it rather than to fix
+              the leak and leave their work behind the wall.
+            */}
             <ul className="flex flex-col gap-1">
-              {LEGEND_FRAMES.map((f) => (
-                <li
-                  key={f.id}
-                  className="flex flex-col gap-1 rounded border border-dashed border-line px-4 py-3"
-                >
-                  <span className="pt text-sm text-muted">{f.ask}</span>
-                  <span className="text-xs text-muted">{f.ask_en}</span>
-                </li>
-              ))}
+              {LEGEND_FRAMES.map((f) => {
+                const values = valuesFor(f.id)
+                const mine = isAnswered(f, values)
+                  ? fillFrame(f, values ?? {}, learner.profile?.gender ?? null)
+                  : null
+                return (
+                  <li
+                    key={f.id}
+                    className={
+                      'flex flex-col gap-1 rounded border px-4 py-3 ' +
+                      (mine ? 'border-line bg-bg-elev' : 'border-dashed border-line')
+                    }
+                  >
+                    <span className={'pt text-sm ' + (mine ? 'text-accent' : 'text-muted')}>
+                      {f.ask}
+                    </span>
+                    <span className="text-xs text-muted">{f.ask_en}</span>
+                    {mine ? <span className="pt mt-1 text-sm text-fg">{mine}</span> : null}
+                  </li>
+                )
+              })}
             </ul>
           </div>
         ) : cardDone(answered.map((f) => f.id), answers, learner.purpose ?? null) &&
