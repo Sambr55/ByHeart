@@ -219,7 +219,27 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   */
   const city = chapterById(loadLearner().chapter).city
 
-  if (already || done) {
+  /*
+    `done` NO LONGER RENDERS THIS SCREEN, because nobody is meant to see it.
+
+    Sam: "Just before you enter vibes for the first time an old screen that starts with a
+    phone number that is yours pops up for a second then disappears."
+
+    That is this branch. It is the "Rooms you will get because of what you just said"
+    screen — the one removed from the button because it "reads as another decision at the
+    exact moment the deciding is over" — and removing it from the button is all that
+    happened. finish() still sets `done`, `done` still renders it, and the navigation that
+    follows is a tick later: so the screen somebody asked to be rid of appears for exactly
+    one frame on the way out, titled with whichever room the learner's answer put first.
+    On `moving` that is "A phone number that is yours".
+
+    `already` keeps it and that is a different screen doing a different job: somebody who
+    has answered before meets this card in the feed and needs to be told they are done
+    rather than asked again. Nothing about that flashes, because nothing navigates.
+
+    So the condition loses the half that only ever renders on the way to somewhere else.
+  */
+  if (already) {
     return (
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
