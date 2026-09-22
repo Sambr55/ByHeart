@@ -1109,6 +1109,48 @@ console.log('\nset-up asks who, where and why — and the feed changes because o
     the feed changes because of them, is untouched below — that is the claim this block
     exists for, and it never depended on which card carried the first of them.
   */
+  /*
+    THE QUESTION IS ASKED EVEN WHEN A PAIR IS ALREADY STORED.
+
+    Sam: "check the language selector is properly wired. On safari I got to this screen
+    without seeing it." Reproduced in both engines, and it is not a browser difference: the
+    card tested chosenPair(), and the pair is written in three places of which only one is
+    somebody choosing — SetUp's finish(), Destination, and the repair in engine/journey.tsx
+    that stamps DEFAULT_PAIR on a learner who finished set-up another way. It also outlives
+    paths that clear the rest of a record.
+
+    So a device carrying a pair and nothing else skipped the one question the product asks.
+    The test is the answer now, not the artefact: deal accepted and profile.goal, which is
+    what SetUp itself uses to decide it is finished.
+  */
+  {
+    const stale = await browser.newContext({ viewport: { width: 390, height: 844 } })
+    const sp = await stale.newPage()
+    await sp.goto(BASE + '/club?in=1')
+    await sp.evaluate(
+      `localStorage.clear(); localStorage.setItem('byheart.pair', JSON.stringify({source_culture:'en-GB',target_language:'pt',target_locale:'pt-PT',day_zone:'Europe/Lisbon'}))`,
+    )
+    await sp.goto(BASE + '/club?in=1')
+    await sp.waitForTimeout(1800)
+    ok(
+      'a stored pair does not skip the question',
+      Boolean(await sp.$('[data-testid="choose"]')),
+      'the pair is written by three things and only one of them is somebody choosing',
+    )
+    /*
+      AND THE CARD HOLDS THE RAIL WHILE IT IS UNANSWERED.
+
+      Sam: "Remove the ability to swipe up here, it back doors into club content." The
+      card gated its button and never the scroll, so a stranger with no language and no
+      city could swipe straight past into the rooms, the drops and the Legend pitch.
+    */
+    const held = await sp.evaluate(
+      `(function(){var f=document.querySelector('[data-testid="feed"]'); return f ? getComputedStyle(f).overflowY : ''})()`,
+    )
+    ok('and the rail is held there', held === 'hidden', 'overflow-y is ' + held)
+    await stale.close()
+  }
+
   const why = await page.$('[data-testid="setup-why-moving"]')
   ok(
     'set-up opens by asking why',

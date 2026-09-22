@@ -492,7 +492,26 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
   const [atIndex, setAtIndex] = useState(0)
   const lockedNow = useMemo(() => {
     const card = cards[atIndex]
-    if (!card || card.kind !== 'intro' || !card.intro.exit) return null
+    if (!card) return null
+    /*
+      SET-UP HOLDS THE SCROLL NOW, not just the button.
+
+      Sam: "Remove the ability to swipe up here, it back doors into club content."
+
+      The card's own note in content/feed.ts said "it gates an action, never the scroll",
+      and that was a deliberate choice — the argument being that a card somebody can swipe
+      past is not a wall. It stopped being right when the Club grew things worth walling
+      off: a stranger with no language and no city chosen could swipe straight up into the
+      rooms, the drops and the Legend pitch, which is the whole product before answering
+      the one question it is built around.
+
+      It is not a wall in the sense that mattered either. Every intro card before it holds
+      the rail for one gesture and releases on that gesture; this card releases when the
+      language and the city are picked, which takes two taps. The thing being refused is
+      swiping PAST the only question the product asks, not swiping at all.
+    */
+    if (card.kind === 'setup') return freed.includes(card.id) ? null : card.id
+    if (card.kind !== 'intro' || !card.intro.exit) return null
     return freed.includes(card.id) ? null : card.id
   }, [atIndex, cards, freed])
 
@@ -1271,7 +1290,38 @@ export function Card({
   */
   const [pairChosen, setPairChosen] = useState(true)
   useEffect(() => {
-    if (card.kind === 'setup') setPairChosen(Boolean(chosenPair()))
+    /*
+      A PAIR ON ITS OWN IS NOT AN ANSWER, which is how the question got skipped.
+
+      Sam: "check the language selector is properly wired. On safari I got to this screen
+      without seeing it." Reproduced in both Chromium and WebKit — not a browser
+      difference: a device that HAS a pair but has never been through set-up renders the
+      card with no selector on it, in either engine.
+
+      chosenPair() is not the test. The pair is written in three places and only one of
+      them is somebody choosing: SetUp's own finish(), Destination, and the repair in
+      engine/journey.tsx that stamps DEFAULT_PAIR on a learner who finished set-up by
+      another route. It also survives paths that clear the rest of a record. So "a pair
+      exists" answers "is there a language set", and the question this card asks is "have
+      you chosen one" — two different things, and the second is the one with a screen.
+
+      `goal` is the same test SetUp itself uses to decide it is finished (`already`), and
+      all five WHY answers write it. Not `purpose`: "no reason, I just like it" sets none
+      deliberately, and measuring on it would ask this learner forever.
+    */
+    if (card.kind !== 'setup') return
+    const me = loadLearner()
+    const answered = Boolean(chosenPair()) && Boolean(me.deal_accepted_at) && Boolean(me.profile?.goal)
+    setPairChosen(answered)
+    /*
+      And somebody who answered already is not held.
+
+      The lock exists to stop a stranger swiping past the one question the product asks.
+      A learner who has answered it is not that person — they meet this card in the feed
+      as a record of what they said, and holding the rail there would be a wall with
+      nothing behind it.
+    */
+    if (answered) onFreed?.(card.id)
   }, [card.kind])
 
   const [drag, setDrag] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
@@ -2086,7 +2136,22 @@ export function Card({
                   one card in the sequence that may not be skipped.
                 */
                 <div className="mb-3 mt-6">
-                  <Choose onSand={onSand} onDone={() => setPairChosen(true)} />
+                  {/*
+                    Choosing the city releases the card as well as advancing it.
+
+                    The rail is held while this question is unanswered — see lockedNow —
+                    so without this the answer would move the face on and leave the
+                    scroll locked behind it, which is a trap rather than a gate. The
+                    gesture that frees every other intro card is the gesture it asks for;
+                    here the two taps are it.
+                  */}
+                  <Choose
+                    onSand={onSand}
+                    onDone={() => {
+                      setPairChosen(true)
+                      onFreed?.(card.id)
+                    }}
+                  />
                 </div>
               ) : (
                 <button
