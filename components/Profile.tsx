@@ -428,7 +428,7 @@ export function Profile() {
     /* dvh, not svh: this is the full-bleed card view, and svh stops it short of the
        bottom bar on a phone. Same bug as the Club feed. */
     return (
-      <main data-stage="REAL WORLD" className="relative h-dvh w-full overflow-hidden bg-[#241f1a]">
+      <main data-stage="REAL WORLD" className="relative h-dvh w-full overflow-hidden on-dark">
         <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6">
           <button
             type="button"

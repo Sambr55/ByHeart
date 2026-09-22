@@ -822,7 +822,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     home-indicator inset as its own padding.
   */
   return (
-    <main data-stage="REAL WORLD" className="relative h-dvh w-full overflow-hidden bg-[#241f1a]">
+    <main data-stage="REAL WORLD" className="relative h-dvh w-full overflow-hidden on-dark">
       {/* Over the feed, not in it. The chrome does not scroll away. */}
       {/* safe-top: the feed card is full-bleed by design, so nothing else can clear the
           notch for the controls sitting on top of it. */}

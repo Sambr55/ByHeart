@@ -501,7 +501,7 @@ function Landing() {
     */
     <main
       data-stage="LANDING"
-      className="relative flex min-h-svh w-full flex-col justify-end overflow-hidden bg-[#241f1a] text-white"
+      className="relative flex min-h-svh w-full flex-col justify-end overflow-hidden on-dark text-white"
     >
       {/*
         The photograph, and the page has to work without it.

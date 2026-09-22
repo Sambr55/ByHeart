@@ -266,10 +266,25 @@ body {
   with an image declare themselves with data-stage, so the root can carry their ground
   instead of the page's, and the band becomes invisible rather than merely smaller.
 */
-html:has([data-stage='LANDING']),
-html:has([data-stage='DEMO']),
-html:has([data-stage='ROOT']) {
-  background: #241f1a;
+/*
+  KEYED OFF THE GROUND ITSELF, because naming the screens was a list I got wrong.
+
+  This listed three data-stage values. The Club feed is `REAL WORLD` and the Vibes card
+  inside it is a full-bleed photograph on the same dark ground — not on the list, so the
+  canvas stayed sand and the band came back on exactly the screen Sam photographed next.
+  A rule that has to enumerate its members is a rule that goes stale the first time
+  somebody adds one, and this one went stale immediately.
+
+  `.on-dark` is the ground, declared by the screens that use it instead of a hardcoded hex
+  in six components. Any screen that adds it gets the matching canvas for free, and there
+  is no list to keep up to date.
+*/
+.on-dark {
+  background-color: var(--ground-dark);
+}
+
+html:has(.on-dark) {
+  background: var(--ground-dark);
 }
 
 /*
@@ -631,6 +646,12 @@ body {
   gate can put a 47px notch on a headless browser and measure what lands underneath it.
 */
 :root {
+  /*
+    The ground a full-bleed photograph sits on, taken from the images themselves. A token
+    rather than a hex in six components, so the canvas behind the page can match it — see
+    .on-dark below.
+  */
+  --ground-dark: #241f1a;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 

@@ -217,7 +217,7 @@ export function Lens({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div data-testid="lens" className="fixed inset-0 z-50 flex flex-col bg-[#241f1a] text-white">
+    <div data-testid="lens" className="fixed inset-0 z-50 flex flex-col on-dark text-white">
       <StatusBar color="#241f1a" />
 
       <header className="safe-top flex items-center gap-3 px-5 pt-6">
