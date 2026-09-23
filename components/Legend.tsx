@@ -82,10 +82,19 @@ export function Legend() {
       allowed to differ — the profile is what DUB knows, the card is what they choose to
       say out loud.
     */
-    if (id === 'into' && !given) {
-      const into = learner.profile?.into ?? []
-      if (into.length) return { into: into.join(',') }
-    }
+    /*
+      NO SEEDING HERE ANY MORE, and that is the point.
+
+      This used to fill four frames from the profile so the deck LOOKED answered — and it
+      left a seam, because cardOpen and onCard read `legend` directly. A card showed filled
+      and counted empty, so the header offered to find seven missing questions above two
+      visibly answered ones.
+
+      The lessons write the real answer now (see answerLegendFromLesson), so there is one
+      record of what somebody has said and everything downstream counts it without being
+      told. A display-only seed would now hide the one failure worth seeing: a lesson that
+      collected an answer and did not store it.
+    */
     return given
   }
   /*

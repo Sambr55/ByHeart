@@ -16,6 +16,7 @@ import { GOAL_QUESTION } from '@/content/profile'
 import { track } from '@/engine/analytics'
 import {
   acceptDeal,
+  answerLegendFromLesson,
   loadLearner,
   resetLearnerCache,
   setChapter,
@@ -209,7 +210,18 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
       the learner's work lands in the wrong record.
     */
     resetLearnerCache()
-    if (name.trim()) setDisplayName(name.trim())
+    if (name.trim()) {
+      setDisplayName(name.trim())
+      /*
+        And the Legend's first card, which asks exactly this.
+
+        Sam: "I am now asked my name, where I am from and age twice." The name is collected
+        here, on the set-up screen, and the Legend's `name` frame asked for it again a few
+        sittings later — so the deck opened on a blank where the product already knew the
+        answer. See answerLegendFromLesson, which never overwrites a deliberate edit.
+      */
+      answerLegendFromLesson('name', { name: name.trim() })
+    }
     /*
       And the deal, with the decision it qualifies.
 

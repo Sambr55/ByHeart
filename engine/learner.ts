@@ -1681,6 +1681,41 @@ export function answerLegend(frameId: string, values: Record<string, string>) {
   })
 }
 
+/**
+ * A LESSON ANSWER, WRITTEN STRAIGHT ONTO THE LEGEND CARD IT ANSWERS.
+ *
+ * Sam: "I am now asked my name, where I am from and age twice. They both use separate
+ * mechanics." And, finding the deck: "I think I have stumbled into building my legend. A
+ * lot of which should be pre-populated by now."
+ *
+ * Four frames — name, origin, age, into — ask questions the basics already put to the
+ * learner. Seeding the deck's DISPLAY from the profile fixed how it looked and left a
+ * seam: cardOpen and onCard read `legend` directly, so a card showed filled and counted
+ * empty, and the header said "find your 7 missing questions" above two visibly answered
+ * ones.
+ *
+ * So the lesson writes the answer for real. There is then one record of what somebody has
+ * said, everything downstream counts it without being told, and the Club door opens on the
+ * work they actually did rather than on where they happened to do it.
+ *
+ * NEVER OVERWRITES. A card answered on the deck is a deliberate act — somebody editing
+ * their Legend — and a lesson answered later must not quietly undo it. `answerLegend`
+ * replaces, so this checks first.
+ *
+ * It is also honest about what it is claiming: the learner DID answer this question, in
+ * their own words, in a lesson built around the sentence. The only thing that changes is
+ * that DUB stops asking twice.
+ */
+export function answerLegendFromLesson(frameId: string, values: Record<string, string>) {
+  const filled = Object.fromEntries(Object.entries(values).filter(([, v]) => String(v).trim()))
+  if (!Object.keys(filled).length) return
+  const already = getLearner().legend.find(
+    (a) => a.frame_id === frameId && Object.keys(a.values ?? {}).length > 0,
+  )
+  if (already) return
+  answerLegend(frameId, filled)
+}
+
 /** Shown once, ever. The earliest time is the true one, exactly like the Club welcome. */
 export function markSwitchSeen() {
   update((s) => {

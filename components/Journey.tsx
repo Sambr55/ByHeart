@@ -53,6 +53,7 @@ import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, frameApplies, frameForPur
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
+import { NumberPicker } from '@/components/NumberPicker'
 import { ToLegend } from '@/components/ToLegend'
 import { Tick } from '@/components/Tick'
 import { useScreenIn } from '@/components/Native'
@@ -78,6 +79,7 @@ import {
 import {
   acceptDeal,
   acquirePiece,
+  answerLegendFromLesson,
   setGenres,
   setInto,
   markOsmosisSeen,
@@ -3384,17 +3386,22 @@ function AskAge({
         Say it once and DUB will say it properly for you — in Portuguese you have it rather
         than are it.
       </p>
-      <label className="flex flex-col gap-1">
-        <span className="eyebrow text-muted">HOW OLD</span>
-        <input
-          value={typed}
-          data-testid="ask-age"
-          inputMode="numeric"
-          onChange={(e) => setTyped(e.target.value.replace(/[^\d]/g, '').slice(0, 3))}
-          placeholder="34"
-          className="tap-target w-24 rounded border border-line bg-bg px-4 py-3 text-base tabular-nums"
-        />
-      </label>
+      {/*
+        THE PICKER, not a number field — the same one the Legend card uses.
+
+        Sam, meeting both: "the first age ask is just enter my age, the second is the
+        picker which shows decades and digits. I prefer the second." He is right, and the
+        picker's own note says why it exists: a text box gave "Tenho 56 anos" in digits,
+        which is readable, unpronounceable, and useless on the one question that exists to
+        be said out loud. Tens and units, each with its audio, builds the number in
+        Portuguese while somebody chooses it.
+
+        One mechanic for one question, so the lesson and the card cannot teach the same
+        thing two ways.
+      */}
+      <div data-testid="ask-age">
+        <NumberPicker value={typed} max={100} onChange={(n) => setTyped(n)} />
+      </div>
       {/*
         THE SENTENCE, BUILT AS THEY TYPE, which is the reason this is a number field.
 
@@ -3436,6 +3443,11 @@ function AskAge({
                 never disagree and nobody is asked twice.
               */
               setProfile('age_band', n >= 60 ? '60plus' : n >= 45 ? '45to59' : n >= 30 ? '30to44' : '16to29')
+              /*
+                And the Legend card it answers, so the deck is not asking again — see
+                answerLegendFromLesson, which never overwrites a deliberate edit.
+              */
+              answerLegendFromLesson('age', { n: String(n) })
               track('profile_answer', { question: 'age', answer: String(n), where: 'lesson' })
               onDone()
             }}
@@ -3717,6 +3729,7 @@ function AskInto({
                 const g = genresFromInterests(chosen)
                 if (g.length) setGenres(g)
               }
+              answerLegendFromLesson('into', { into: chosen.join(',') })
               track('profile_answer', { question: 'into', answer: String(chosen.length), where: 'lesson' })
               setConfirmed(true)
               onDone()
@@ -3882,6 +3895,11 @@ function AskOrigin({
             data-testid="ask-origin-done"
             onClick={() => {
               setProfile('from_place', place.trim())
+              /* The Legend's origin card, answered by the lesson that asked it. */
+              answerLegendFromLesson('origin', {
+                nationality: said ?? '',
+                place: place.trim(),
+              })
               onDone()
             }}
             className="tap-target eyebrow rounded bg-accent px-5 py-3 text-accent-ink"
