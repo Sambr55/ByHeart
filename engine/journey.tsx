@@ -453,10 +453,33 @@ export function sectionRoots(
     in the doorway, and is unchanged everywhere else: a vibe with no doorway sorts exactly
     as before, and inside the basics it still orders the eleven roots that are not.
   */
+  /*
+    AND A ROOT THAT ASKS SOMETHING ABOUT THE LEARNER COMES FIRST OF ALL.
+
+    Sam: "we should order the basics so that age and gender are the two first out the trap
+    and we actually ask them to set their age and gender as part of their learning and
+    set-up combined. That way we know their name and gender throughout and tailor content
+    to them."
+
+    The reason it has to be FIRST rather than merely early is that the answers are
+    load-bearing for everything after them. tb_thank_you asks which of obrigado/obrigada is
+    yours; until it has been answered every gendered line in the product is a guess, and
+    the basics teach several. tb_introduce asks where you are from; until that is answered
+    the Legend's own specimen can tell a Glaswegian they are English.
+
+    Ranked below the freebie, because a vibe must still open on the line it is famous for —
+    that rule is about the first thirty seconds being recognisable and it outranks this.
+    Above the doorway, because these two ARE doorway roots and the question is which of the
+    six comes first: the ones that make the other five true.
+
+    Only two roots carry `asks`, so everywhere else this term is zero and the sort is
+    exactly what it was.
+  */
   const doorway = new Set(doorwayRoots().map((r) => r.root_id))
   const eligible = (fresh.length ? fresh : replay.length ? replay : lowest).sort(
     (a, b) =>
       Number(Boolean(b.freebie_flag)) - Number(Boolean(a.freebie_flag)) ||
+      Number(Boolean(b.asks)) - Number(Boolean(a.asks)) ||
       Number(doorway.has(b.root_id)) - Number(doorway.has(a.root_id)) ||
       (doorway.has(a.root_id) && doorway.has(b.root_id)
         ? 0

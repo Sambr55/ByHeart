@@ -203,11 +203,30 @@ if (basics) {
       '\n  numbers in it: ' +
       ([...early].join(', ') || 'NONE'),
   )
-  if (!early.size) {
+  /*
+    ASKED OF THE TILE, not of a sentence written here.
+
+    This asserted unconditionally that the first session teaches a number, on the grounds
+    that the tile said "counting to ten". It does not any more: the two roots that ask
+    something about the learner come first now — gender out of obrigado/obrigada, origin
+    out of Chamo-me — so counting moved to the second sitting and the blurb moved with it.
+
+    The rule this replaces was right about the PRINCIPLE and wrong to hold a quotation of
+    the copy inside a check. What matters is that a tile does not promise a first session
+    it does not deliver, so the check reads the tile and holds it to its own words. Change
+    the blurb and the check changes with it; promise counting and fail to teach it, and it
+    still fails.
+  */
+  const tile = CRATES.find((c) => c.id === 'the_basics')
+  const promisesCounting = /count|number|ten\b/i.test(tile?.blurb ?? '')
+  if (promisesCounting && !early.size) {
     fail(
-      'the basics teaches no number in its first session, and its tile promises counting ' +
-        'to ten — the session cap stops before the counting roots',
+      'the basics tile promises counting and its first session teaches no number — ' +
+        'the session cap stops before the counting roots',
     )
+  }
+  if (!promisesCounting) {
+    console.log('  the tile does not promise counting in the first session, and it does not give one')
   }
 
   const whole = numbersIn(ROOTS_BY_FAMILY['the_basics' as CultureFamily] ?? [])

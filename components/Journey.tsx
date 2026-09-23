@@ -2550,6 +2550,25 @@ function RootBeatView({
             </div>
           </div>
         </div>
+        {/*
+          THE QUESTION THE LESSON RAISES, ABOVE THE FOLD RATHER THAN BELOW IT.
+
+          Sam: "we actually ask them to set their age and gender as part of their learning
+          and set-up combined. That way we know their name and gender throughout and tailor
+          content to them."
+
+          The first build put this after HOW IT FEELS, on the reasoning that WHY IT LANDS
+          explains the question before it is asked. Photographed on a phone, that put it
+          under two panels of body copy and behind the docked CTA: the block rendered, and
+          you could not see it without scrolling past the button that skips it.
+
+          So it sits directly under the Portuguese it is about, which is where the eye
+          already is and which needs no explanation — a learner looking at "Sou inglês" can
+          answer "and you?" without reading a paragraph first. The bridge below still does
+          its job for anybody who wants the why; it simply is not load-bearing for the
+          question any more.
+        */}
+        {root.asks ? <AskInLesson which={root.asks} /> : null}
         <div className="flex flex-col gap-3">
           {/* The bridge is mandatory: the learner must be able to trace root -> Portuguese
               before anything is pulled out of it (§10). */}
@@ -3070,6 +3089,260 @@ function Osmosis() {
  * of these is skippable in one tap, with the skip stated as a loss to them rather than
  * to us, because that is the truth of it.
  */
+/**
+ * A PROFILE QUESTION ASKED BY THE ROOT THAT TEACHES IT.
+ *
+ * The scatter this replaces was real: name came from set-up, gender and age from a
+ * questionnaire between sections, city from any of four screens, why from set-up, and
+ * where-from from nowhere at all — it was a Legend card answer that nothing else read. So
+ * the product asked five things in five places and tailored on two of them.
+ *
+ * Asked here, inside the lesson, it is not an extra screen and it cannot be skipped by
+ * accident: the root has just explained why the answer matters, and the answer is stored
+ * where everything else can read it.
+ *
+ * ANSWERED ONCE AND THEN QUIET. A learner replaying the basics — which the product
+ * encourages — must not be asked their gender every time, so a settled answer renders as a
+ * one-line confirmation with a way to change it rather than as the question again.
+ *
+ * Nothing here is required. Every question in DUB is skippable and this is no different;
+ * skipping records a skip, which is what stops it coming back.
+ */
+function AskInLesson({ which }: { which: 'gender' | 'origin' }) {
+  const learner = useLearner()
+  const profile = learner.profile
+  const [open, setOpen] = useState(false)
+
+  if (which === 'gender') {
+    const said = profile?.gender ?? null
+    const skipped = (profile?.skipped ?? []).includes('gender')
+    if ((said || skipped) && !open) {
+      return (
+        <AskSettled
+          line={
+            said
+              ? 'You say ' + (said === 'f' ? 'obrigada' : 'obrigado') + '.'
+              : 'You asked for both forms.'
+          }
+          onChange={() => setOpen(true)}
+        />
+      )
+    }
+    return (
+      <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+        <p className="eyebrow text-accent">WHICH IS YOURS</p>
+        <p className="text-sm leading-relaxed">
+          It agrees with you, not with the person you are thanking — so DUB needs to know
+          which one to put in your mouth for the rest of this.
+        </p>
+        <div className="flex gap-3">
+          {[
+            { id: 'm', label: 'OBRIGADO', sub: 'said by a man' },
+            { id: 'f', label: 'OBRIGADA', sub: 'said by a woman' },
+          ].map((o) => (
+            <button
+              key={o.id}
+              type="button"
+              data-testid={'ask-gender-' + o.id}
+              onClick={() => {
+                setProfile('gender', o.id)
+                track('profile_answer', { question: 'gender', answer: o.id, where: 'lesson' })
+                setOpen(false)
+              }}
+              className={
+                'tap-target flex flex-1 flex-col gap-1 rounded border px-4 py-3 text-left transition ' +
+                (said === o.id
+                  ? 'border-accent bg-accent text-accent-ink'
+                  : 'border-line hover:border-accent/50')
+              }
+            >
+              <span className="pt text-base">{o.label}</span>
+              <span className={'text-xs ' + (said === o.id ? 'opacity-80' : 'text-muted')}>
+                {o.sub}
+              </span>
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          data-testid="ask-gender-skip"
+          onClick={() => {
+            setProfile('gender', null)
+            setOpen(false)
+          }}
+          className="tap-target self-start text-xs text-muted underline"
+        >
+          Show me both, every time
+        </button>
+      </div>
+    )
+  }
+
+  return <AskOrigin open={open} onOpen={() => setOpen(true)} onDone={() => setOpen(false)} />
+}
+
+/** A question already answered, said in one line with a way back in. */
+function AskSettled({ line, onChange }: { line: string; onChange: () => void }) {
+  return (
+    <div className="flex items-center gap-3 rounded border border-line/70 bg-surface/50 px-4 py-3">
+      <p className="min-w-0 flex-1 text-sm text-muted">{line}</p>
+      <button
+        type="button"
+        onClick={onChange}
+        className="tap-target shrink-0 text-xs text-accent underline"
+      >
+        change
+      </button>
+    </div>
+  )
+}
+
+/**
+ * WHERE THEY ARE FROM — a nationality and a town, because the town is the point.
+ *
+ * Sam: "the I am Sam, I am from London is real. But 'And from the United States' doesn't
+ * get the same." A nationality alone is a form field. A nationality and a town is a person,
+ * and it is what the Legend's origin card has always asked for.
+ *
+ * The nationality options are the Legend frame's own, read from LEGEND_FRAMES rather than
+ * retyped, so the lesson and the card cannot offer different lists. The feminine form is
+ * shown when the learner has said they are a woman — which they have, one root earlier,
+ * which is the whole reason gender is asked first.
+ */
+function AskOrigin({
+  open,
+  onOpen,
+  onDone,
+}: {
+  open: boolean
+  onOpen: () => void
+  onDone: () => void
+}) {
+  const learner = useLearner()
+  const profile = learner.profile
+  const [place, setPlace] = useState(profile?.from_place ?? '')
+  const frame = LEGEND_FRAMES.find((f) => f.id === 'origin')
+  const slot = frame?.slots.find((s2) => s2.key === 'nationality')
+  const options = slot?.options ?? []
+  const female = profile?.gender === 'f'
+  const said = profile?.nationality ?? null
+  const skipped = (profile?.skipped ?? []).includes('nationality')
+
+  /*
+    SETTLED MEANS BOTH HALVES ANSWERED, not just the first one.
+
+    This collapsed to the one-line confirmation the moment a nationality was chosen — so
+    the town field, which only renders once a nationality exists, could never be reached.
+    The answer stored correctly and the question disappeared mid-sentence: "Sou escocês."
+    with nowhere to say Glasgow.
+
+    A skip settles it whatever else is true, because skipping is an answer to the whole
+    question rather than to half of it.
+  */
+  if ((skipped || (said && profile?.from_place)) && !open) {
+    const chosen = options.find((o) => o.value === said)
+    const shown = chosen ? (female && chosen.f ? chosen.f : chosen.value) : null
+    return (
+      <AskSettled
+        line={
+          shown
+            ? 'Sou ' + shown + (profile?.from_place ? '. Sou de ' + profile.from_place + '.' : '.')
+            : 'You skipped this one.'
+        }
+        onChange={onOpen}
+      />
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+      <p className="eyebrow text-accent">AND YOU</p>
+      <p className="text-sm leading-relaxed">
+        The next thing anybody asks. Answer it once and every line DUB builds for you is
+        true.
+      </p>
+      <div className="flex flex-wrap gap-3">
+        {options.map((o) => {
+          const label = female && o.f ? o.f : o.value
+          return (
+            <button
+              key={o.value}
+              type="button"
+              /*
+                An index, not the word. `inglês` in a selector is an accented string that
+                has to survive URL encoding, a shell and a CSS attribute match — three
+                places it can be normalised differently — and a testid exists to be
+                addressable. The English gloss is stable and unique across the five.
+              */
+              data-testid={'ask-nat-' + o.en.toLowerCase()}
+              onClick={() => {
+                setProfile('nationality', o.value)
+                track('profile_answer', { question: 'nationality', answer: o.value, where: 'lesson' })
+              }}
+              className={
+                'tap-target rounded border px-4 py-3 transition ' +
+                (said === o.value
+                  ? 'border-accent bg-accent text-accent-ink'
+                  : 'border-line hover:border-accent/50')
+              }
+            >
+              <span className="pt text-sm">{label}</span>
+            </button>
+          )
+        })}
+      </div>
+      {/*
+        The town, and it only appears once a nationality is chosen.
+
+        Two empty fields at once is a form. One answered question that opens the next is a
+        conversation, which is what this screen is pretending to be and may as well be.
+      */}
+      {said ? (
+        <label className="flex flex-col gap-1">
+          <span className="eyebrow text-muted">AND FROM WHERE</span>
+          <input
+            value={place}
+            data-testid="ask-place"
+            onChange={(e) => setPlace(e.target.value)}
+            onBlur={() => {
+              const clean = place.trim()
+              if (clean) setProfile('from_place', clean)
+            }}
+            placeholder="your town or city"
+            className="tap-target rounded border border-line bg-bg px-4 py-3 text-base"
+          />
+        </label>
+      ) : null}
+      <div className="flex items-center gap-3">
+        {said && place.trim() ? (
+          <button
+            type="button"
+            data-testid="ask-origin-done"
+            onClick={() => {
+              setProfile('from_place', place.trim())
+              onDone()
+            }}
+            className="tap-target eyebrow rounded bg-accent px-5 py-3 text-accent-ink"
+          >
+            THAT IS ME
+          </button>
+        ) : null}
+        <button
+          type="button"
+          data-testid="ask-origin-skip"
+          onClick={() => {
+            setProfile('nationality', null)
+            onDone()
+          }}
+          className="tap-target text-xs text-muted underline"
+        >
+          Not now
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function ProfileStep({ which }: { which: 'gender' | 'age' | 'goal' }) {
   const { next, owned } = useJourney()
   const learner = useLearner()

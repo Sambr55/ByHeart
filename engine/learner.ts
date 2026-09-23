@@ -209,6 +209,29 @@ export interface LearnerState {
     gender: 'm' | 'f' | null
     age_band: string | null
     goal: string | null
+    /**
+     * WHERE THEY ARE FROM, which the product has been teaching and never knowing.
+     *
+     * Sam: "The third thing we should ask is where they are from. So the I am Sam, I am
+     * from London is real. But 'And from the United States' doesn't get the same."
+     *
+     * He is right about the difference and it is the whole reason this is two fields. The
+     * Legend's `origin` card already asks for both — Sou {nationality}. Sou de {place}. —
+     * with gendered options, and it is one of the best cards in the product BECAUSE the
+     * place is a town rather than a country: London, Glasgow, Cork. A nationality alone is
+     * a form field; a nationality and a town is a person.
+     *
+     * Stored rather than left as a card answer, which is what it was. The answer lived in
+     * `legend` as a slot value and nothing else read it, so a learner who had told DUB they
+     * were from Glasgow could be handed "Sou inglês" as a specimen on the next screen.
+     *
+     * `nationality` is the Portuguese masculine form — inglês, escocês — because that is
+     * what the graph stores and what gendering rules operate on; the feminine is derived
+     * where it is shown. Null is honest for both: not everybody has answered, and a person
+     * may give one and not the other.
+     */
+    nationality: string | null
+    from_place: string | null
     skipped: string[]
   }
   created_at: string
@@ -495,7 +518,14 @@ export function emptyLearner(): LearnerState {
     voice_signals: [],
     osmosis_seen: [],
     user_id: null,
-    profile: { gender: null, age_band: null, goal: null, skipped: [] },
+    profile: {
+      gender: null,
+      age_band: null,
+      goal: null,
+      nationality: null,
+      from_place: null,
+      skipped: [],
+    },
     created_at: new Date().toISOString(),
     missions_completed: [],
     mission_completed_at: {},
@@ -842,9 +872,21 @@ export function markOsmosisSeen(ids: string[]) {
   })
 }
 
-export function setProfile(field: 'gender' | 'age_band' | 'goal', value: string | null) {
+export function setProfile(
+  field: 'gender' | 'age_band' | 'goal' | 'nationality' | 'from_place',
+  value: string | null,
+) {
   update((s) => {
-    s.profile = { ...(s.profile ?? { gender: null, age_band: null, goal: null, skipped: [] }) }
+    s.profile = {
+      ...(s.profile ?? {
+        gender: null,
+        age_band: null,
+        goal: null,
+        nationality: null,
+        from_place: null,
+        skipped: [],
+      }),
+    }
     if (value === null) {
       s.profile.skipped = [...new Set([...s.profile.skipped, field])]
     } else {

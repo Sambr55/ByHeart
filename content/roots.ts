@@ -66,6 +66,15 @@ export type SourceStatus =
 
 export type RightsStatus = 'short-quote-review-required' | 'title-reference' | 'dub-authored'
 
+/**
+ * What a root can ask about the learner while it teaches.
+ *
+ * Deliberately a small closed set rather than a free-form question: each of these writes a
+ * field the product already reads, and a root that could ask anything would become a place
+ * to put questions nobody knows what to do with. See `asks` on Root.
+ */
+export type ProfileAsk = 'gender' | 'origin'
+
 export type QaStatus = 'pending-native-review' | 'reviewed'
 
 /**
@@ -468,6 +477,31 @@ export interface Root {
    * thing and there is no wreckage to show.
    */
   wreckage?: { target: string; why: string }
+  /**
+   * A PROFILE QUESTION THIS ROOT ASKS, because the lesson and the question are the same.
+   *
+   * Sam: "we should order the basics so that age and gender are the two first out the trap
+   * and we actually ask them to set their age and gender as part of their learning and
+   * set-up combined. That way we know their name and gender throughout and tailor content
+   * to them."
+   *
+   * The scatter this fixes is real and it was measured before it was changed: gender and
+   * age were asked by ProfileStep, which fires AFTER a completed section — while the basics
+   * teach obrigado and obrigada in the second root. So the product taught a form that
+   * agrees with YOU before it knew which one was yours, and then asked, two screens later,
+   * as a questionnaire between sections.
+   *
+   * Asking inside the root removes the seam. `tb_thank_you` already explains that obrigado
+   * agrees with the speaker; "so which is yours?" is not an extra question on that screen,
+   * it is the screen finishing its own sentence. Same for origin: a root that teaches
+   * "Sou inglês. Sou de Londres." is the natural place to find out that somebody is Scottish
+   * and from Glasgow, and the answer makes every later use of that line true.
+   *
+   * ONE PER ROOT, and only where the question IS the teaching. A root that asks something
+   * it does not teach is a form with a lesson stapled to it, which is the thing this
+   * replaces.
+   */
+  asks?: ProfileAsk
   /** Why this Portuguese is a natural expression of the root. Mandatory (§10). */
   semantic_bridge: string
   /** How it feels in use: direct, dry, warm, apologetic… (§07.2) */
@@ -606,7 +640,19 @@ export const CRATES: Crate[] = [
       that is what the name says, with the source as the reassurance underneath.
     */
     title: 'The basics, in songs you know',
-    blurb: 'Hello, thank you, yes, no and counting to ten — out of records you have heard a hundred times.',
+    /*
+      WHAT THE FIRST SITTING ACTUALLY OPENS WITH, which counting no longer is.
+
+      It promised "hello, thank you, yes, no and counting to ten", and that was true while
+      tb_1234 came third. The two roots that ask something about the learner now come first
+      — gender from obrigado/obrigada, and where you are from from Chamo-me — so counting
+      moved to the second sitting and the tile was selling a session that no longer
+      existed. scripts/first-session.mts caught it, which is exactly what it is for.
+
+      The new line is also the better promise. "Your name, where you are from" is what a
+      first five minutes of a language should be, and it is what somebody gets.
+    */
+    blurb: 'Hello, your name, where you are from and thank you — out of records you have heard a hundred times.',
     tone: 'reflective',
     built: true,
     opens_at: 1,
@@ -4360,6 +4406,16 @@ export const THE_BASICS: Root[] = [
     credit: 'The first ten seconds of meeting anybody',
     source: 'My name is Sam. I am English.',
     target: 'Chamo-me Sam. Sou inglês.',
+    /*
+      And this one asks where they are from, for the same reason.
+
+      It teaches "Chamo-me Sam. Sou inglês." — the name and the nationality in one breath,
+      which is exactly what a stranger asks first. Sam: "the I am Sam, I am from London is
+      real. But 'And from the United States' doesn't get the same." So it takes a town as
+      well as a nationality, and both are stored rather than being a card answer nothing
+      reads.
+    */
+    asks: 'origin',
     semantic_bridge:
       'CHAMO-ME is literally "I call myself", which is how Portuguese introduces people — the verb hangs on you rather than on your name. SOU is the permanent one: what you are and where you are from, the things that do not change by Tuesday.',
     subtext: 'Not a lesson. The thing you will say more often than anything else you learn.',
@@ -4516,6 +4572,15 @@ export const THE_BASICS: Root[] = [
     root_display: 'Thank You for the Music',
     source: 'Thank you for the music.',
     target: 'Obrigado pela música.',
+    /*
+      The lesson IS the question — see `asks` on Root.
+
+      This root already explains that obrigado agrees with the speaker rather than with
+      the person being thanked. "So which is yours?" finishes that sentence; it is not an
+      extra question bolted to the screen. Before this, the product taught both forms here
+      and asked which applied two sections later, from a questionnaire.
+    */
+    asks: 'gender',
     semantic_bridge:
       'The one word in Portuguese that changes depending on who is holding it. Obrigado literally means "obliged", so you are describing yourself — a man says obrigado, a woman says obrigada, and it has nothing to do with who you are thanking. Getting this right is the fastest way to sound like you have been paying attention.',
     subtext: 'Meant, not muttered.',
