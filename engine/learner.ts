@@ -1267,6 +1267,93 @@ export function hydrateFromUrl(): boolean {
   return true
 }
 
+/**
+ * STAND A LEARNER UP AT THE CLUB DOOR, for testing, without playing the whole game.
+ *
+ * Sam: "I need a way of testing club without having to reset and redo the legend."
+ *
+ * The Club opens on `club_welcomed_at` alone — see clubOpen, where it is the first line
+ * and returns true unconditionally. Everything else this writes is there so the Club is
+ * worth LOOKING at once it opens: a feed with no inventory, no proof and no answered
+ * Legend renders every card in its empty state, which tests almost nothing and reads as
+ * broken rather than as new.
+ *
+ * WHAT IT FAKES AND WHAT IT DOES NOT. It writes the shape of somebody who has been
+ * through the doorway: the pair, the deal, a purpose, a chapter, the basics played and
+ * completed, the seven Legend answers, and one proof line. It does NOT invent an
+ * inventory — `words` on the profile counts banked pieces, and a fabricated one would put
+ * a number on the stages screen that no lesson produced, which is the one number in this
+ * product that is supposed to be real. So a skipped learner shows a Club full of content
+ * and a stage of BASICS, which is honest: they have not learned anything, they have just
+ * been let in.
+ *
+ * `answers` are the literal slot values rather than anything clever, because cardDone only
+ * asks whether a frame has any values at all.
+ *
+ * NOT REACHABLE FROM THE PRODUCT. Same rule as /reset: a URL you have to know. This one
+ * writes rather than destroys, so the danger is different and smaller — the worst case is
+ * a tester's own device claiming a Legend they did not build, which /reset undoes.
+ */
+export function fastForward(opts: { name?: string; purpose?: PropertyId | string } = {}) {
+  const name = (opts.name ?? 'Sam').trim() || 'Sam'
+  const now = new Date().toISOString()
+  update((s) => {
+    s.deal_accepted_at = s.deal_accepted_at ?? now
+    s.display_name = s.display_name ?? name
+    s.chapter = s.chapter ?? 'lisbon'
+    s.purpose = (s.purpose ?? opts.purpose ?? 'moving') as LearnerState['purpose']
+    s.profile = { ...s.profile, goal: s.profile?.goal ?? 'moving' }
+    /*
+      The doorway, marked as played AND completed. Both, because they answer different
+      questions — roots_played is what the shelf dims, sections_completed is what the
+      basics gate reads — and a learner with one and not the other is a state no real
+      session produces.
+    */
+    const doorway = (ROOTS_BY_FAMILY_FOR_SEED?.() ?? []).map((r) => r.root_id)
+    if (doorway.length) s.roots_played = [...new Set([...s.roots_played, ...doorway])]
+    s.sections_completed = [...new Set([...s.sections_completed, 'the_basics'])]
+    /*
+      The seven, answered. Only the frames this learner's purpose actually asks for —
+      cardDone measures against their card, not the universal one, so filling the wrong
+      seven would leave the door shut and look like the tool had failed.
+    */
+    const already = new Set(s.legend.map((a) => a.frame_id))
+    for (const f of SEED_CARD_FOR?.(s.purpose ?? null) ?? []) {
+      if (already.has(f.id)) continue
+      const values: Record<string, string> = {}
+      for (const slot of f.slots) values[slot.key] = slot.kind === 'name' ? name : 'x'
+      s.legend.push({ frame_id: f.id, values, at: now })
+    }
+    /* One line of proof, so the proof card and SAID COLD are not empty. */
+    if (!s.proof.length) {
+      s.proof.push({ pt: 'Chamo-me ' + name + '.', en: 'My name is ' + name + '.', source: 'release', clean: true, at: now })
+    }
+    s.legend_prompt = s.legend_prompt === 'unseen' ? 'accepted' : s.legend_prompt
+    /* The line that actually opens the door. Everything above is so it is worth opening. */
+    s.club_welcomed_at = s.club_welcomed_at ?? now
+  })
+}
+
+/*
+  Late-bound so this module does not import the content graph.
+
+  engine/learner.ts is imported by content/roots.ts (for PieceId) and importing it back
+  would be a cycle. The two setters are called once from the page that uses fastForward,
+  which is the only caller and knows both modules already.
+*/
+let ROOTS_BY_FAMILY_FOR_SEED: (() => { root_id: string }[]) | null = null
+let SEED_CARD_FOR:
+  | ((p: string | null) => { id: string; slots: { key: string; kind: string }[] }[])
+  | null = null
+
+export function provideSeedContent(
+  roots: () => { root_id: string }[],
+  card: (p: string | null) => { id: string; slots: { key: string; kind: string }[] }[],
+) {
+  ROOTS_BY_FAMILY_FOR_SEED = roots
+  SEED_CARD_FOR = card
+}
+
 export function resetLearner() {
   state = emptyLearner()
   save()

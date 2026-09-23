@@ -10,7 +10,7 @@
  *   npm run lint:content
  */
 
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { BOB } from '../content/bob'
 import { IDIOMS } from '../content/idioms'
 import { INTRO_CARDS } from '../content/intro'
@@ -1542,6 +1542,62 @@ for (const e of EXAMPLES) {
       ' carry blocks · ' + IDIOMS.filter((i) => i.blue).length + ' are blue · ' +
       paired + ' also taught in the vibe',
   )
+}
+
+// --- the tools stay out of the product --------------------------------------
+{
+  /*
+    /reset AND /skip ARE URLS YOU HAVE TO KNOW, and that is the whole of their safety.
+
+    One wipes the only copy of somebody's progress; the other writes a Legend they did not
+    build. Both are fine as testing tools and neither may ever be one tap from a learner —
+    Reset's own note puts it best: "a one-tap wipe sitting next to Vocab library is a
+    trapdoor."
+
+    Nothing enforced that. The isolation was a convention held up by nobody linking to
+    them, which lasts exactly until somebody adds a debug menu and forgets.
+
+    NOT AN ABSOLUTE BAN, because two existing links are right and the first draft of this
+    rule called them failures. Account.tsx offers /reset in the ORPHAN state only — the
+    merge has refused, somebody else's work is on the device, and wiping it is genuinely
+    one of the two remedies available. WhatAmI is itself a diagnostic page, a sibling of
+    these two rather than a learner surface. Both were argued for where they sit.
+
+    So the rule is about which SURFACE, not about the link: the tools may be named by
+    their own pages, by each other, and by the diagnostic and recovery screens. What may
+    never carry one is an ordinary screen — a feed, a lesson, a profile, a menu.
+  */
+  const TOOLS = ['/reset', '/skip']
+  const allowed =
+    /^(components\/(Reset|Skip|WhatAmI|Account)\.tsx|app\/(reset|skip|whatami)\/page\.tsx)/
+  /* Every .tsx under components and app, which is where a link to one could hide. */
+  const walk = (dir: string): string[] =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+      e.isDirectory()
+        ? walk(dir + '/' + e.name)
+        : e.name.endsWith('.tsx')
+          ? [dir + '/' + e.name]
+          : [],
+    )
+  const offenders: string[] = []
+  for (const file of walk('components').concat(walk('app'))) {
+    if (allowed.test(file)) continue
+    /*
+      Raw source, comments included. A link inside a comment is a link one uncomment away,
+      and this rule is cheap enough to be strict — a file that genuinely needs to mention
+      the route in prose can say "the reset page" instead of pasting the path.
+    */
+    const src = readFileSync(file, 'utf8')
+    for (const t of TOOLS) {
+      if (src.includes("'" + t + "'") || src.includes('"' + t + '"')) {
+        offenders.push(file + ' links to ' + t)
+      }
+    }
+  }
+  for (const o of offenders) {
+    fail(o + ' — the testing tools are URLs you have to know, not links a learner can find')
+  }
+  console.log('the reset and skip tools are reachable only by typing them')
 }
 
 // --- the marks -------------------------------------------------------------
