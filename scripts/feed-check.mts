@@ -535,6 +535,36 @@ console.log('\na card with no photograph still has a ground\n')
   )
 }
 
+/*
+  THE CLUB OPENS ON THE CLUB, not on an explanation of it.
+
+  Sam: "you have mixed up the intro to the club cards with actual club cards, there needs
+  to be a clear delineation."
+
+  Everybody who reaches this feed built a Legend to get in — Club.tsx turns away anybody
+  without one, and the showcase stage returns its own sequence long before the weave. So
+  the explainers here are reference, not an argument: what the translator is, what the
+  Club is, what Pro adds. On a beat of two they were landing at positions 2 and 5, which
+  is the product introducing itself to somebody who has been using it for a month.
+
+  Asserted on the first handful rather than on the whole feed, because the cards are not
+  banned — they are useful and they stay. What may not happen is one of them greeting you.
+*/
+{
+  const opening = await page.evaluate(() =>
+    [...document.querySelectorAll('section')]
+      .slice(0, 8)
+      .map((s) => (s.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 40)),
+  )
+  const EXPLAINER_EYEBROWS = ['ANY MOMENT', 'THIS PLACE', 'THIS MONTH', "HERE'S HOW IT WORKS"]
+  const early = opening.filter((t) => EXPLAINER_EYEBROWS.some((e) => t.startsWith(e)))
+  ok(
+    'no explainer greets a member in the Club',
+    early.length === 0,
+    early.length ? early.join(' / ') : 'the first eight cards are all content',
+  )
+}
+
 await browser.close()
 
 if (problems.length) {

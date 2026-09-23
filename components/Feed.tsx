@@ -468,7 +468,30 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     let id = 0
     rest.forEach((card, i) => {
       withExplainers.push(card)
-      if (e < explainers.length && i % 2 === 0) withExplainers.push(explainers[e++])
+      /*
+        THE EXPLAINERS DO NOT LEAD THE CLUB, because nobody in the Club is new to DUB.
+
+        Sam: "you have mixed up the intro to the club cards with actual club cards, there
+        needs to be a clear delineation." Then, on my first answer: "hang on, how can there
+        be a stranger in the club?"
+
+        He is right twice, and the second correction is the one that matters. I had split
+        this by whether the learner was being onboarded — and NOBODY REACHING THIS LINE IS.
+        Club.tsx refuses entry without a Legend (`if (!inside && !fromDoor)`), and the
+        showcase stage returns its own hand-built sequence 100 lines above and never gets
+        here. The two stages that do — `working` and `member` — are both people who built
+        a Legend to get in. There is no stranger to interleave an argument for.
+
+        So the beat is one rule, not two. These cards are reference: what the translator is,
+        what the Club is, and for a non-Pro learner what Pro adds. On a beat of two they
+        landed at positions 2 and 5 — the first things anybody saw, wedged between two real
+        drops — which reads as the product explaining itself to somebody who has been using
+        it for a month.
+
+        Nine, because it shares no factor with two, three, five or seven and puts the first
+        one deep enough that the room speaks before the signage does.
+      */
+      if (e < explainers.length && i > 0 && i % 9 === 8) withExplainers.push(explainers[e++])
       else if (v < vibes.length && i % 3 === 2) withExplainers.push(vibes[v++])
       /*
         The sheet beat is its OWN `if`, not another `else if`.
