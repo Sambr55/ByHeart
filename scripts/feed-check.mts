@@ -565,6 +565,57 @@ console.log('\na card with no photograph still has a ground\n')
   )
 }
 
+/*
+  A RETURNING LEARNER NEVER MEETS THE INTRO AGAIN.
+
+  Sam: "what happens to a returning user, they shouldn't see the intro cards."
+
+  The routing was already right — app/page.tsx sends a member to /club and a mid-game
+  learner to /vibes, with a blank frame in between so the pitch cannot flash past. What
+  was not guarded is that it STAYS right, and the ways it could break are quiet ones: the
+  redirect is gated on chosenPair(), so any path that loses the pair drops a member back
+  on the landing screen looking like a first-time visitor. That is exactly what the /skip
+  tool did until this was written.
+
+  Checked from the front door and from the Club tab, including with ?in=1 — the parameter
+  that opens the showcase for somebody arriving through the door, and which must not
+  resurrect it for somebody who is already inside.
+*/
+{
+  const INTRO = ['HERE’S HOW IT WORKS', 'NOT THIS ONE', 'SIXTY SECONDS', 'THE WAY IN', 'ONE DECISION']
+  for (const route of ['/', '/club?in=1']) {
+    await page.goto(BASE + route)
+    await page.waitForTimeout(1800)
+    const seen = (await page.evaluate(() =>
+      (document.body.innerText || '').replace(/\s+/g, ' '),
+    )) as string
+    const hits = INTRO.filter((x) => seen.includes(x))
+    const landed = new URL(page.url()).pathname
+    /*
+      THE DESTINATION, not just the absence of intro copy.
+
+      The first version of this only searched for the tutorial cards' words, and it passed
+      with the redirect deliberately broken — because `/` renders the LANDING screen, "Find
+      Yourself in Language" and COME IN, which contains none of those words and is still
+      the last thing a member should ever see. A check that a regression walks straight
+      past is worse than none, because it reports the thing as guarded.
+
+      So both halves: a member ends up in the Club, and nothing in the tutorial sequence is
+      on screen when they get there.
+    */
+    ok(
+      'a member opening ' + route + ' lands in the Club',
+      landed === '/club',
+      'landed at ' + landed,
+    )
+    ok(
+      'and does not get the intro on the way',
+      hits.length === 0,
+      hits.join(', ') || 'no tutorial copy on screen',
+    )
+  }
+}
+
 await browser.close()
 
 if (problems.length) {

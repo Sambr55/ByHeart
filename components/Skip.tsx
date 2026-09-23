@@ -6,6 +6,8 @@ import { cardFor } from '@/content/legend'
 import { ROOTS_BY_FAMILY } from '@/content/roots'
 import { Dock, Framed } from '@/components/Dock'
 import { Wordmark } from '@/components/Wordmark'
+import { DEFAULT_PAIR } from '@/content/pairs'
+import { chosenPair, setPair } from '@/engine/pair'
 import { fastForward, loadLearner, provideSeedContent } from '@/engine/learner'
 
 /**
@@ -128,6 +130,21 @@ export function Skip() {
           type="button"
           data-testid="skip-go"
           onClick={() => {
+            /*
+              THE PAIR FIRST, because without it the front door will not send them on.
+
+              app/page.tsx returns early on `!chosenPair()` before it ever asks whether the
+              learner is returning — the pair decides which learner record is even read, so
+              it is checked first, exactly as the deal gate does it. A skipped learner had
+              every other field and no pair, so reopening the app dropped them on the
+              landing screen with COME IN, as though they had never been here. Found by
+              asking what a returning user sees.
+
+              It is also the honest thing for the tool to write: no real learner reaches the
+              Club without having chosen a language, and this page claims to produce the
+              state somebody has when they arrive there.
+            */
+            if (!chosenPair()) setPair(DEFAULT_PAIR)
             fastForward({ name })
             setState('done')
           }}
