@@ -2,7 +2,8 @@
 
 import { useMemo } from 'react'
 import { useLearner } from '@/engine/useLearner'
-import { doorwayRoots, legendStatus } from '@/content/legend'
+import { legendStatus } from '@/content/legend'
+import { roadProgress } from '@/content/road'
 
 /**
  * HOW FAR TO THE LEGEND, on every screen where somebody is working towards it.
@@ -79,18 +80,27 @@ export function ToLegend() {
     is the property the word count was chosen for in the first place; what changes is that
     reaching the end of it now means the door opens.
   */
-  const total = useMemo(
-    () => doorwayRoots(learner.purpose ?? null).length + status.vibesNeeded,
-    [learner.purpose, status.vibesNeeded],
-  )
-  const left = status.toGo + Math.max(0, status.vibesNeeded - status.vibesDone)
-  const have = Math.max(0, total - left)
+  /*
+    ONE NUMBER, READ FROM THE ROAD.
+
+    This counted doorway roots plus chosen vibes, derived from three functions over
+    overlapping inputs — which is how it came to read 10 of 10 above a sentence saying one
+    more session. The road is a list, so the bar is a position on it and the door is its
+    end: the same number, and nothing to keep in step. See content/road.ts.
+  */
+  const road = roadProgress({
+    rootsPlayed: learner.roots_played ?? [],
+    sectionsCompleted: learner.sections_completed ?? [],
+    purpose: learner.purpose ?? null,
+  })
+  const have = road.done
+  const total = road.total
 
   /*
     Gone once the door is open, for the reason the first version gave: a bar at 100% is a
     decoration that keeps measuring a finished thing.
   */
-  if (status.open) return null
+  if (road.open) return null
   /*
     And nothing before the first word. An empty bar on a first screen measures somebody
     who has not started, which reads as a debt rather than as progress.

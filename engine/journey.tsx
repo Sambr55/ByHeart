@@ -38,7 +38,8 @@ import {
   syncSession,
   rememberSection,
 } from './learner'
-import { doorwayRoots, earlyRoots, legendStatus, worthSaving } from '@/content/legend'
+import { DOORWAY, doorwayRoots, earlyRoots, legendStatus, worthSaving } from '@/content/legend'
+import { roadFor } from '@/content/road'
 import type { Purpose } from '@/content/situations'
 import { chosenPair, setPair } from './pair'
 import { DEFAULT_PAIR } from '@/content/pairs'
@@ -557,6 +558,41 @@ export function sectionRoots(
     Ranking them equally cost a sitting: tb_why is a doorway root and tb_email is not, and
     flattening the two let the email question push the door back to four sittings.
   */
+  /*
+    THE ROAD DECIDES THE BASICS, IN THE ORDER IT IS WRITTEN.
+
+    The five-term sort below — freebie, blocking ask, doorway, early, signature, rung —
+    was how the basics used to be ordered, and its terms disagreed with each other twice
+    in a week: once putting the email question ahead of the door, once pushing the age
+    picker three sittings past it. Every one of those terms was arguing for a sequence
+    somebody could simply have written down.
+
+    So for the doorway it IS written down, in content/road.ts, and this serves it in
+    order. The sort still runs for every other vibe, where there is no authored sequence
+    and ordering by what the crate is famous for is the right answer.
+  */
+  if (family === DOORWAY) {
+    const wanted = roadFor(purpose ?? null)
+      .map((step) => all.find((r) => r.root_id === step.root))
+      .filter((r): r is Root => Boolean(r) && !alreadyPlayed.includes(r!.root_id))
+    /*
+      What is left of the crate once the road is walked, in authored order — the basics
+      hold more than the road needs and a learner who comes back for more should get it.
+    */
+    const rest = all.filter(
+      (r) => !alreadyPlayed.includes(r.root_id) && !wanted.some((w) => w.root_id === r.root_id),
+    )
+    /*
+      THE REST WAITS UNTIL THE ROAD IS WALKED.
+
+      Offering both lists at once let the packer's skip-on-overflow reach past an unplayed
+      road step into the remainder — tb_perhaps arriving before tb_eight_days, so a
+      visitor met a word nothing was waiting for while a card question was still missing.
+      A sitting that cannot fit the next road step should be short, not filled with
+      something the road did not ask for.
+    */
+    return wanted.length ? pack(wanted, family) : pack(rest, family)
+  }
   const doorway = new Set(doorwayRoots(purpose).map((r) => r.root_id))
   const early = new Set(earlyRoots(purpose).map((r) => r.root_id))
   /*
@@ -576,9 +612,20 @@ export function sectionRoots(
       a.rung - b.rung,
   )
 
+  return pack(eligible, family)
+}
+
+/**
+ * As many of these as a sitting holds, in the order given.
+ *
+ * Pulled out of sectionRoots so the road and the sort can share it: one decides WHICH
+ * roots and in what order, this decides how many of them are ten minutes. Two copies of a
+ * budget loop is exactly the kind of pair that drifts.
+ */
+function pack(ordered: Root[], family: CultureFamily): Root[] {
   const out: Root[] = []
   let screens = 0
-  for (const root of eligible) {
+  for (const root of ordered) {
     const cost = beatsFor(root).length
     // Always take the first, however long it is — a section of nothing is worse than a
     // section that runs a little over.

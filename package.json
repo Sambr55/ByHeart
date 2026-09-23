@@ -8,7 +8,7 @@
     "start": "next start",
     "lint:content": "tsx scripts/lint-content.ts",
     "audio:generate": "tsx scripts/generate-audio.ts",
-    "check": "npm run lint:content && npm run carry && npm run line:test && npm run merge:test && npm run first && npm run club && npm run opener && npm run drops && npm run fork && npm run legend && npm run ladder && npm run parts && npm run promises && npm run allowance && npm run doorway && npm run signature && npm run opened && npm run nocue && npm run shelf:group && npm run quiet && npm run panes && npm run viewport && npm run paradigms && npm run derive && npm run showing && next build",
+    "check": "npm run lint:content && npm run carry && npm run road && npm run line:test && npm run merge:test && npm run first && npm run club && npm run opener && npm run drops && npm run fork && npm run legend && npm run ladder && npm run parts && npm run promises && npm run allowance && npm run doorway && npm run signature && npm run opened && npm run nocue && npm run shelf:group && npm run quiet && npm run panes && npm run viewport && npm run paradigms && npm run derive && npm run showing && next build",
     "walkthrough": "tsx scripts/walkthrough.ts",
     "shots": "tsx scripts/screenshots.ts",
     "journey": "tsx scripts/journey-smoke.ts",
@@ -86,7 +86,8 @@
     "promises": "tsx scripts/promises-check.mts",
     "allowance": "tsx scripts/allowance-check.mts",
     "frame": "tsx scripts/frame-check.mts",
-    "carry": "tsx scripts/carry-check.mts"
+    "carry": "tsx scripts/carry-check.mts",
+    "road": "tsx scripts/road-check.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",

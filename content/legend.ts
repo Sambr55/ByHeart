@@ -1,5 +1,6 @@
 import { INTERESTS } from '@/content/interests'
 import { say } from './numbers'
+import { roadProgress } from './road'
 import { PIECES, ROOTS_BY_FAMILY, type CultureFamily, type Rung } from './roots'
 import type { Purpose } from './situations'
 
@@ -1685,15 +1686,28 @@ export function chosenVibesFinished(sectionsCompleted: string[]): number {
   return new Set(sectionsCompleted.filter((id) => id !== DOORWAY)).size
 }
 
+/**
+ * THE DOOR IS THE END OF THE ROAD, and nothing else.
+ *
+ * This was two clauses over two derived quantities — every doorway root played, AND three
+ * chosen vibes finished — and reaching it crossed nine concepts. It disagreed with the
+ * progress bar above it twice in one week, in different units each time.
+ *
+ * The road is an authored list of steps (content/road.ts). Walking it is the whole
+ * condition, the bar reads the same call, and the two are one number read twice.
+ *
+ * THE VIBE TOLL IS GONE. The basics teach the entire card for all three purposes, so
+ * requiring three chosen vibes first was asking for payment in a currency the card does
+ * not accept — measured, and the reason a learner could hold every word their card needed
+ * and still be told to go away. Vibes grow a Legend now rather than unlocking it: the
+ * deeper questions are what they fill in.
+ */
 export function legendUnlocked(
   rootsPlayed: string[],
   sectionsCompleted: string[],
   purpose?: Purpose | null,
 ): boolean {
-  return (
-    doorwayToGo(rootsPlayed, purpose) === 0 &&
-    chosenVibesFinished(sectionsCompleted) >= VIBES_FOR_LEGEND
-  )
+  return roadProgress({ rootsPlayed, sectionsCompleted, purpose: purpose ?? null }).open
 }
 
 /**

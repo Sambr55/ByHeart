@@ -23,6 +23,7 @@
 import { ROOTS_BY_FAMILY } from '../content/roots'
 import { DOORWAY, LEGEND_FRAMES, doorwayToGo, frameForPurpose, legendStatus, legendUnlocked } from '../content/legend'
 import type { Purpose } from '../content/situations'
+import { roadFor } from '../content/road'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -152,25 +153,31 @@ ok(
 )
 ok('one line short does not', !payoffSaysOpen(doorway.slice(0, STEPS - 1)))
 /*
-  AND THE SECOND HALF IS REAL, which is the change this file exists to pin.
+  THE WARM-UP IS REQUIRED, AND NOTHING ELSE IS — which is the change this file now pins.
 
-  The basics alone used to open the door. They do not: Sam finished several vibes and
-  found it shut, and the honest version of that is that the basics are compulsory and
-  therefore not a choice — the Legend is built out of vibes somebody picked.
+  Three assertions here used to defend the vibe toll: the basics alone must not open the
+  door, two chosen vibes must not, and the basics must not count as one of three. All
+  three described a door that no longer exists, and were failing for the right reason —
+  the toll is gone. The basics teach the whole card, so requiring three chosen vibes first
+  was asking for payment in a currency the card does not accept.
+
+  What replaces them is the road's own promise: walking every step opens the Legend, and
+  skipping the warm-up does not. See content/road.ts.
 */
 ok(
-  'the basics alone do not open it',
-  !legendStatus({ rootsPlayed: doorway, sectionsCompleted: ['the_basics'] }).open,
+  'the road without its warm-up does not open it',
+  !legendStatus({ rootsPlayed: doorway, sectionsCompleted: [], purpose: 'visiting' }).open,
 )
 ok(
-  'two chosen vibes do not open it',
-  !legendStatus({ rootsPlayed: doorway, sectionsCompleted: VIBES_DONE.slice(0, 2) }).open,
+  'the warm-up alone does not open it',
+  !legendStatus({ rootsPlayed: [], sectionsCompleted: ['top_gun'], purpose: 'visiting' }).open,
 )
 ok(
-  'and the basics do not count as one of the three',
-  !legendStatus({
-    rootsPlayed: doorway,
-    sectionsCompleted: ['the_basics', ...VIBES_DONE.slice(0, 2)],
+  'the whole road does',
+  legendStatus({
+    rootsPlayed: roadFor('visiting').map((s) => s.root),
+    sectionsCompleted: ['top_gun'],
+    purpose: 'visiting',
   }).open,
 )
 ok(
