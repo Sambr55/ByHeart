@@ -260,7 +260,19 @@ export function Club() {
     here to be shown the product" and "I tapped a tab in a bar". Anybody arriving without
     it and without a Legend gets the explainer, which points at /vibes.
   */
-  if (!mounted) return <div className="min-h-svh bg-bg" aria-hidden />
+  /*
+    THE HOLDING SCREEN IS DARK, because everything on either side of it is.
+
+    Sam: "there is a flash after tapping come in before first screen loads." This was
+    `bg-bg` — sand — and it sits between the landing photograph and the Club's own
+    full-bleed dark feed. So the one frame nobody was meant to notice was the only light
+    thing in the sequence, and it read as the screen blinking white.
+
+    .on-dark is the same ground the feed itself paints, so the hold is now invisible
+    rather than merely short: the page goes from a dark photograph to a dark ground to a
+    dark photograph.
+  */
+  if (!mounted) return <div className="min-h-svh on-dark" aria-hidden />
   /*
     NOT INSIDE IS NOT INSIDE, whatever stage the room is in.
 

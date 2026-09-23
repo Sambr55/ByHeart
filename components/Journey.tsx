@@ -1453,6 +1453,28 @@ function Picker() {
     }
   }
 
+  /*
+    THE WARM-UP IS SHOWN HERE, because this is where a learner actually lands.
+
+    Sam: "Bridget and Top Gun are not being forced." They were not, and the reason is a
+    seam between two paths. The journey has a `warmup` step in its array — correct, and
+    unreachable: COME IN goes to /club, set-up happens inside that feed, and its button
+    links to /vibes. So a real learner never passes through the journey's step list at all
+    and arrived straight at the shelf.
+
+    Gating the SHELF is the fix rather than another step, because the shelf is the thing
+    being replaced: eleven tiles with nine dimmed is what somebody saw instead of the warm
+    up. Shown while nothing has been played, so it is genuinely first and genuinely once —
+    the moment a vibe is finished this is behind them for good.
+
+    The journey's step stays, and is still the right thing for anybody who does reach it.
+  */
+  const nothingPlayed =
+    mounted &&
+    (learner.roots_played ?? []).length === 0 &&
+    (learner.sections_completed ?? []).length === 0
+  if (nothingPlayed) return <WarmUp />
+
   return (
     <Shell stage="CHOICE">
       {/*

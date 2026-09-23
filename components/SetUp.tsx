@@ -564,6 +564,29 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
               data-testid="setup-who"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              /*
+                KEEP THE FIELD ON SCREEN WHEN THE KEYBOARD ARRIVES.
+
+                Sam, with a screenshot of a wall of azulejo and the keyboard: "when I enter
+                my name it pushes up to this half screen."
+
+                iOS opens the keyboard and scrolls the page itself to reveal the focused
+                field — and it is scrolling a page that got a lot taller when the consent
+                block landed above this input, so it overshot and left the form off-screen
+                entirely with the tiled ground filling the gap.
+
+                One frame late on purpose: the browser does its own scroll first, and doing
+                this in the same tick means fighting it rather than correcting it. `center`
+                rather than `nearest` because the visual viewport has just halved and
+                nearest is satisfied by a field at the very bottom edge, under the AutoFill
+                bar.
+              */
+              onFocus={(e) => {
+                const el = e.currentTarget
+                window.setTimeout(() => {
+                  el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+                }, 260)
+              }}
               placeholder="Your name"
               className="tap-target min-w-0 flex-1 rounded border border-line bg-bg-elev px-4 py-3 text-base text-fg placeholder:text-muted"
             />
@@ -598,14 +621,34 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
           <div className="flex flex-col gap-3 rounded border border-line bg-bg-elev p-4">
             <p className="eyebrow text-accent">{CONSENT.eyebrow}</p>
             <p className="text-sm font-semibold">{CONSENT.headline}</p>
-            {CONSENT.body.map((line) => (
-              <p key={line} className="text-xs leading-relaxed text-muted">
-                {line}
-              </p>
-            ))}
-            <p className="text-xs leading-relaxed text-muted">
-              {CONSENT.age(chapter.country, chapter.consent_age)}
-            </p>
+            {/*
+              THE FIRST SENTENCE, AND THE REST BEHIND THE TAP.
+
+              All four paragraphs plus the age line made this block taller than the form it
+              sits under — measured at 300px of scroll on an iPhone 13, with the commit
+              button below the fold before the keyboard was even open. Sam, with a
+              screenshot of a wall of azulejo: "when I enter my name it pushes up to this
+              half screen."
+
+              Consent still has to be informed and given before the thing it permits, and
+              it still is: the headline names what this is about, the first line is the
+              load-bearing fact — nothing leaves the phone until you sign in — and the rest
+              is one tap away on the same screen. An unreadable form is not more informed
+              than a readable one.
+            */}
+            <p className="text-xs leading-relaxed text-muted">{CONSENT.body[0]}</p>
+            {terms ? (
+              <div className="animate-bank flex flex-col gap-3">
+                {CONSENT.body.slice(1).map((line) => (
+                  <p key={line} className="text-xs leading-relaxed text-muted">
+                    {line}
+                  </p>
+                ))}
+                <p className="text-xs leading-relaxed text-muted">
+                  {CONSENT.age(chapter.country, chapter.consent_age)}
+                </p>
+              </div>
+            ) : null}
             {/*
               The longer answer, folded away rather than linked away.
 

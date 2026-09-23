@@ -107,7 +107,14 @@ export default function Page() {
 
   // Deliberately blank for the one frame between deciding and arriving. A returning
   // member seeing the sales pitch flash past is worse than seeing nothing at all.
-  if (leaving) return <div className="min-h-svh bg-bg" aria-hidden />
+  /*
+    Dark, for the reason the Club's own hold is — see components/Club.tsx.
+
+    This is the frame a returning learner sees between the front door and wherever they
+    are sent, and it was sand between two dark screens. The redirect is fast and the flash
+    was the only thing about it anybody could see.
+  */
+  if (leaving) return <div className="min-h-svh on-dark" aria-hidden />
 
   return (
     <JourneyProvider>
