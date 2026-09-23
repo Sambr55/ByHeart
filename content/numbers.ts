@@ -81,6 +81,37 @@ export function tensLabel(t: number): string {
   return TENS[t]
 }
 
+const EN_UNITS = [
+  'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+  'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen',
+  'sixteen', 'seventeen', 'eighteen', 'nineteen',
+]
+const EN_TENS = [
+  '', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety',
+]
+
+/**
+ * The same number, spelled in English.
+ *
+ * Sam: "I told it I was 77 and it told me I was 30 — even the translation!"
+ *
+ * myAge replaced the PORTUGUESE specimen and left the gloss alone, so a learner of
+ * seventy-seven read "Tenho setenta e sete anos" translated as "I am thirty" — which is
+ * the same show-stopper as praia meaning music, in the other half of the same function.
+ * A line that teaches the wrong translation is worse than one that was never
+ * personalised.
+ *
+ * Hyphenated, because that is how the content writes it: "thirty-two", not "thirty two".
+ */
+export function sayEn(n: number): string {
+  if (n < 0 || n > 100 || !Number.isInteger(n)) return String(n)
+  if (n === 100) return 'a hundred'
+  if (n < 20) return EN_UNITS[n]
+  const tens = Math.floor(n / 10)
+  const unit = n % 10
+  return unit ? EN_TENS[tens] + '-' + EN_UNITS[unit] : EN_TENS[tens]
+}
+
 /**
  * Every number word between one and a hundred, as pieces a learner can own.
  *

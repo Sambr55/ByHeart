@@ -24,7 +24,7 @@
 import { ROOTS, PIECES } from '../content/roots'
 import { INTERESTS } from '../content/interests'
 import { personalise, AUTHORED_NAME, AUTHORED_AGES } from '../content/legend'
-import { say } from '../content/numbers'
+import { say, sayEn } from '../content/numbers'
 
 const fail: string[] = []
 const ok = (what: string, good: boolean, saw: string) => {
@@ -101,6 +101,39 @@ for (const interest of INTERESTS) {
       }
       const where = root.root_id + ' @' + interest.id + '/' + age
       const lines = [{ target: p.target, en: p.source }, ...p.branches]
+
+      /*
+        THE AGE, IN BOTH LANGUAGES TOO.
+
+        Sam: "I told it I was 77 and it told me I was 30 — even the translation!" myAge
+        replaced the Portuguese specimen and left the gloss alone, so "Tenho setenta e
+        sete anos" came out translated "I am thirty" — the interests bug again, in the
+        other half of the same pass. Asserted the same way: wherever the Portuguese
+        carries this learner's age, the English must carry it too and must not still be
+        carrying the specimen's.
+      */
+      for (const line of lines) {
+        if (line.target.includes(say(age))) {
+          ok(
+            'the English age follows the Portuguese',
+            line.en.includes(sayEn(age)) || !/\b(thirty|thirty-two)\b/.test(line.en),
+            where + ': "' + line.target + '" glossed "' + line.en + '"',
+          )
+        }
+        for (const specimen of AUTHORED_AGES) {
+          if (specimen === age) continue
+          ok(
+            'no specimen age survives in Portuguese',
+            !line.target.includes(say(specimen)),
+            where + ': ' + line.target,
+          )
+          ok(
+            'no specimen age survives in English',
+            !new RegExp('\\b' + sayEn(specimen) + '\\b').test(line.en),
+            where + ': "' + line.en + '"',
+          )
+        }
+      }
 
       for (const line of lines) {
         /*

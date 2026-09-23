@@ -5027,7 +5027,29 @@ function SectionComplete() {
 /** §11 — pieces from unrelated memories behaving like one language. */
 function CollisionView({ id }: { id: string }) {
   const { next } = useJourney()
-  const collision = COLLISIONS.find((c) => c.id === id)!
+  const learner = useLearner()
+  const raw = COLLISIONS.find((c) => c.id === id)!
+  /*
+    THE COLLISION IN THIS LEARNER'S NAME.
+
+    Sam: "I told it my name was Filip and it still called me Sam in places." Two
+    collisions introduce somebody by name and both rendered raw — no myName anywhere in
+    this component — so a learner called Filip was asked to build "Olá, chamo-me Sam."
+
+    Third place this has been found: root branches, then the cold prompts, now here. The
+    pattern is always the same — a new surface renders authored copy and nobody remembers
+    that names are swapped — which is why scripts/lint-content now tests the OUTPUT of
+    every root rather than matching phrasings. Collisions are not roots, so they were
+    outside even that; the check is widened to cover them in the same pass.
+  */
+  const collision = useMemo(
+    () => ({
+      ...raw,
+      ask: myName(raw.ask, learner.display_name),
+      answer: myName(raw.answer, learner.display_name),
+    }),
+    [raw, learner.display_name],
+  )
   const [done, setDone] = useState(false)
   return (
     <Shell stage="REAL WORLD">

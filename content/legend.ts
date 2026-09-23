@@ -1,5 +1,5 @@
 import { INTERESTS } from '@/content/interests'
-import { say } from './numbers'
+import { say, sayEn } from './numbers'
 import { roadProgress } from './road'
 import { PIECES, ROOTS_BY_FAMILY, type CultureFamily, type Rung } from './roots'
 import type { Purpose } from './situations'
@@ -434,14 +434,28 @@ export function personalise<T extends {
 export function myAge(line: string, age?: number | null): string {
   if (!age || age < 1 || age > 120) return line
   let out = line
-  for (const specimen of AUTHORED_AGES) {
+  /*
+    LONGEST SPELLING FIRST, in both languages.
+
+    "trinta e dois" must be replaced before "trinta" can eat its first word and leave " e
+    dois" stranded, and "thirty-two" before "thirty" for the same reason. Sorting by the
+    spelled length rather than by the number is what makes that true for any pair of
+    specimens, in either language.
+  */
+  const specimens = [...AUTHORED_AGES].sort((a, b) => say(b).length - say(a).length)
+  for (const specimen of specimens) {
     if (specimen === age) continue
-    /*
-      Longest first, so "trinta e dois" is replaced before "trinta" can eat its first word
-      and leave " e dois" stranded. Sorting by the spelled length rather than the number is
-      what makes that true for any pair.
-    */
     out = out.replaceAll(say(specimen), say(age))
+    /*
+      AND THE ENGLISH, which is the half this function forgot.
+
+      Sam: "I told it I was 77 and it told me I was 30 — even the translation!" It did.
+      This replaced the Portuguese and left every gloss saying thirty, so "Tenho setenta e
+      sete anos" was translated "I am thirty" — the same show-stopper as praia meaning
+      music, in the other half of the same personalise pass, and fixed the same way: the
+      two languages move together or neither does.
+    */
+    out = out.replaceAll(sayEn(specimen), sayEn(age))
   }
   return out
 }

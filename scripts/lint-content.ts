@@ -17,7 +17,7 @@ import { INTRO_CARDS } from '../content/intro'
 import { join } from 'node:path'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
 import { DUB, DUB_CLUB, DUB_MARK } from '../content/marks'
-import { AUTHORED_NAME, LEGEND_FRAMES, REPAIR_KIT, childrenSentence, intoSentence, personalise as personaliseRoot } from '../content/legend'
+import { AUTHORED_NAME, LEGEND_FRAMES, REPAIR_KIT, childrenSentence, intoSentence, myName, personalise as personaliseRoot } from '../content/legend'
 import {
   BLOCK_ORDER,
   EXAMPLES,
@@ -2037,6 +2037,26 @@ const screenCount = MISSION_ORDER.reduce((n, m) => n + MISSIONS[m].screens.lengt
         errors.push(
           'root ' + root.root_id + ' still says "' + hit + '" after personalise: "' + line + '"',
         )
+      }
+    }
+  }
+
+  /*
+    AND THE COLLISIONS, which are not roots and so were outside the pass above.
+
+    Two of them introduced somebody as Sam and rendered raw — CollisionView had no myName
+    in it at all. Sam: "I told it my name was Filip and it still called me Sam in places."
+
+    Third surface to be found with this fault, after root branches and the cold prompts,
+    which is the argument for checking every surface that shows authored copy rather than
+    the one that broke. A collision's lines are swapped by myName at render, so the test
+    is the same: what a learner called Fred would read.
+  */
+  for (const c of COLLISIONS) {
+    for (const [what, line] of [['ask', c.ask], ['answer', c.answer], ['provenance', c.provenance]] as const) {
+      for (const hit of myName(line, 'Fred').match(STRANGERS) ?? []) {
+        if (hit === AUTHORED_NAME) continue
+        errors.push('collision ' + c.id + '.' + what + ' still says "' + hit + '": "' + line + '"')
       }
     }
   }

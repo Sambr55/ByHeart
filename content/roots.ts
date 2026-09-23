@@ -5601,8 +5601,8 @@ export const COLLISIONS: Collision[] = [
     id: 'tb_jb_chamo',
     requires: ['ola', 'chamo_me'],
     context: 'Somebody has put out a hand and you have half a second.',
-    ask: 'Hello, my name is Sam.',
-    answer: 'Olá, chamo-me Sam.',
+    ask: 'Hello, my name is Ana.',
+    answer: 'Olá, chamo-me Ana.',
     provenance: 'Hello, Goodbye handling the introduction Bond taught you.',
   },
   {
@@ -5896,8 +5896,8 @@ export const COLLISIONS: Collision[] = [
     id: 'chamo_como_se_chama',
     requires: ['chamo_me', 'como_se_chama'],
     context: 'You are introducing yourself and pointing at something at once.',
-    ask: 'My name is Sam. What is this called?',
-    answer: 'Chamo-me Sam. Como se chama isto?',
+    ask: 'My name is Ana. What is this called?',
+    answer: 'Chamo-me Ana. Como se chama isto?',
     provenance: 'The same Portuguese verb, learned twice from two unrelated films.',
   },
   {
