@@ -39,6 +39,7 @@ import {
   rememberSection,
 } from './learner'
 import { doorwayRoots, legendStatus, worthSaving } from '@/content/legend'
+import type { Purpose } from '@/content/situations'
 import { chosenPair, setPair } from './pair'
 import { DEFAULT_PAIR } from '@/content/pairs'
 import { useLearner } from './useLearner'
@@ -408,6 +409,13 @@ export function sectionRoots(
   family: CultureFamily,
   reached: Rung,
   alreadyPlayed: string[],
+  /**
+   * Which Legend card this learner is building, for the doorway rank below.
+   *
+   * Optional: the checks and the front door both order roots before a purpose exists, and
+   * without one the doorway falls back to the union of all three cards.
+   */
+  purpose?: Purpose | null,
 ): Root[] {
   const all = ROOTS_BY_FAMILY[family] ?? []
   if (!all.length) return []
@@ -515,11 +523,39 @@ export function sectionRoots(
     Only two roots carry `asks`, so everywhere else this term is zero and the sort is
     exactly what it was.
   */
-  const doorway = new Set(doorwayRoots().map((r) => r.root_id))
+  /*
+    EXCEPT THAT IT IS NO LONGER TWO, AND THE DOORWAY PAID FOR IT.
+
+    Three more roots have since learned to ask — tb_thank_you (gender), tb_into (interests)
+    and tb_email — and none of the three carries Legend vocabulary. Ranked above the
+    doorway, they took a whole sitting between the learner and the door: measured, sitting
+    two served tb_thank_you, tb_into and tb_email and advanced the doorway by ZERO roots,
+    which is why the basics took four sittings to finish rather than three. Sam: "I feel
+    four basics sittings is too many."
+
+    That is the same stale-list fault as `onSand` and the header colour before it — a rule
+    written as a statement about how many members a set has, which quietly stopped being
+    true when something was added beside them.
+
+    So the doorway outranks `asks` now, and the rule above keeps what it was actually
+    arguing for. Its case is that an answer must come early when everything after it
+    depends on the answer, and that is true of gender — until obrigado/obrigada is settled
+    every gendered line in the product is a guess. It is not true of what somebody is into
+    or of their email: nothing downstream is wrong while they are unanswered, they are
+    simply not yet known. So gender keeps its place, ahead of everything but the freebie,
+    and the other two sort as ordinary roots — still in the basics, still asked as lessons,
+    just no longer ahead of the door.
+  */
+  const doorway = new Set(doorwayRoots(purpose).map((r) => r.root_id))
+  /*
+    The one ask that genuinely blocks later content. Named rather than counted, so adding
+    a sixth asking root cannot silently re-create the sitting this removes.
+  */
+  const blocking = (r: Root) => r.asks === 'gender'
   const eligible = (fresh.length ? fresh : replay.length ? replay : lowest).sort(
     (a, b) =>
       Number(Boolean(b.freebie_flag)) - Number(Boolean(a.freebie_flag)) ||
-      Number(Boolean(b.asks)) - Number(Boolean(a.asks)) ||
+      Number(blocking(b)) - Number(blocking(a)) ||
       Number(doorway.has(b.root_id)) - Number(doorway.has(a.root_id)) ||
       (doorway.has(a.root_id) && doorway.has(b.root_id)
         ? 0
@@ -956,8 +992,13 @@ export function JourneyProvider({
       // callback's deps, so a section queued after the first release of the session
       // could gate on a stage the learner had already left behind — the ladder running
       // a whole session late.
-      const reached = rungReached(loadLearner().proof)
-      const roots = sectionRoots(family, reached, state.rootsPlayed)
+      const me = loadLearner()
+      const reached = rungReached(me.proof)
+      /*
+        The purpose goes with it, so the front-loading rule front-loads THIS learner's
+        doorway rather than the union of all three cards. See doorwayRoots.
+      */
+      const roots = sectionRoots(family, reached, state.rootsPlayed, me.purpose ?? null)
       const steps: Step[] = []
 
       /**

@@ -123,8 +123,13 @@ export function Legend() {
   */
   const unlocked =
     mounted &&
-    legendStatus({ rootsPlayed: played, sectionsCompleted: sections, sittings: learner.sittings ?? 0 }).open
-  const toGo = doorwayToGo(played)
+    legendStatus({
+      rootsPlayed: played,
+      sectionsCompleted: sections,
+      sittings: learner.sittings ?? 0,
+      purpose: learner.purpose ?? null,
+    }).open
+  const toGo = doorwayToGo(played, learner.purpose ?? null)
   /*
     THE DOORWAY'S OWN LENGTH, not the whole vibe's.
 
@@ -139,6 +144,7 @@ export function Legend() {
     rootsPlayed: played,
     sectionsCompleted: sections,
     sittings: learner.sittings ?? 0,
+    purpose: learner.purpose ?? null,
   })
   /* The card is the seven at depth 'card'; the deeper frames are a bonus. */
   const myCard = cardFor(learner.purpose ?? null)

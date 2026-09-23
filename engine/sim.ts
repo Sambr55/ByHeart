@@ -95,7 +95,15 @@ export function playSitting(l: SimLearner, vibe: CultureFamily, quit: number | n
   const rung = rungReached(l.proof)
   const before = new Set(l.pieces)
 
-  const served = sectionRoots(vibe, rung, l.roots_played).filter(
+  /*
+    THE LEARNER'S OWN PURPOSE, because the component passes it.
+
+    sectionRoots front-loads the doorway, and the doorway is now the card this learner is
+    actually building rather than the union of all three — so a simulator that omitted it
+    would measure a learner the product no longer produces, which is the one thing this
+    file exists not to do.
+  */
+  const served = sectionRoots(vibe, rung, l.roots_played, l.purpose).filter(
     (r) => !l.roots_played.includes(r.root_id),
   )
 
@@ -181,7 +189,7 @@ export function playSitting(l: SimLearner, vibe: CultureFamily, quit: number | n
       pieces: l.pieces.size,
       card: cardFor(l.purpose).filter((f) => frameReady(f, l.pieces)).length,
       legendOpen: open,
-      doorwayToGo: doorwayToGo(l.roots_played),
+      doorwayToGo: doorwayToGo(l.roots_played, l.purpose),
     },
   }
 }

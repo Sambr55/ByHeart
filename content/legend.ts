@@ -1596,9 +1596,13 @@ export function chosenVibesFinished(sectionsCompleted: string[]): number {
   return new Set(sectionsCompleted.filter((id) => id !== DOORWAY)).size
 }
 
-export function legendUnlocked(rootsPlayed: string[], sectionsCompleted: string[]): boolean {
+export function legendUnlocked(
+  rootsPlayed: string[],
+  sectionsCompleted: string[],
+  purpose?: Purpose | null,
+): boolean {
   return (
-    doorwayToGo(rootsPlayed) === 0 &&
+    doorwayToGo(rootsPlayed, purpose) === 0 &&
     chosenVibesFinished(sectionsCompleted) >= VIBES_FOR_LEGEND
   )
 }
@@ -1609,9 +1613,9 @@ export function legendUnlocked(rootsPlayed: string[], sectionsCompleted: string[
  * A truer progress line than a vibe count ever was: it moves every time somebody plays
  * something, rather than once per sitting.
  */
-export function doorwayToGo(rootsPlayed: string[]): number {
+export function doorwayToGo(rootsPlayed: string[], purpose?: Purpose | null): number {
   const played = new Set(rootsPlayed)
-  return doorwayRoots().filter((r) => !played.has(r.root_id)).length
+  return doorwayRoots(purpose).filter((r) => !played.has(r.root_id)).length
 }
 
 /**
@@ -1650,7 +1654,7 @@ export function doorwaySessions(rootsLeft: number): number {
  * that the count is derived from the card rather than from a vibe's length, so adding a
  * sixteenth song to the basics can never again move the door.
  */
-export function doorwayRoots(): { root_id: string }[] {
+export function doorwayRoots(purpose?: Purpose | null): { root_id: string }[] {
   /*
     EVERY CARD, NOT THE VISITING ONE.
 
@@ -1667,18 +1671,35 @@ export function doorwayRoots(): { root_id: string }[] {
     pushes to the back of the basics. Measured against Sam's own record: 6 of 7 openable
     at the door, and the seventh unreachable without playing the whole vibe.
 
-    The union is the honest set: a door that opens the Legend has to open ALL of it, and
-    which seven that is depends on an answer given before any of this was reached.
+    The union is the honest set WHEN NOBODY HAS SAID WHICH CARD IS THEIRS, and that is now
+    what it is used for rather than what everybody pays.
 
-    Cheap enough to compute per call — three cards of seven frames against sixteen roots —
-    and the alternative is a second constant that has to be kept in step with cardFor,
-    which is the fault this fixes rather than a different one.
+    THIS LEARNER'S CARD, WHERE THE LEARNER IS KNOWN. The union is eight roots; a single
+    purpose needs five or six — visiting and moving want `um`/`dois` and staying wants
+    `sim, não`, and no card wants all three. So the union charged every learner two extra
+    sittings to unlock words that two thirds of them would never put on a card, which is
+    the whole of why the basics ran to four sittings. Sam: "I feel four basics sittings is
+    too many."
+
+    The bug the union fixed is real and does not come back. It was a learner who answered
+    MOVING being told their Legend was open with `moved_when` permanently unanswerable —
+    a card naming a word with no way to reach it. What has changed since is that the
+    blocked card now says which word it needs and carries a button to the vibe that
+    teaches it (see Missing, components/Legend.tsx), so a learner who changes their
+    purpose afterwards is one tap from the word rather than stranded. Sam again, arriving
+    at the same place: "then send them back to other vibes if they need to pick up extra
+    words."
+
+    So the door opens on the card somebody actually has, and the rest of the basics stays
+    exactly where it was — still in the crate, still teachable, no longer compulsory
+    before the thing the product is for.
+
+    The union remains the default because the checks and the front door both ask this
+    question before a purpose exists, and answering it with one learner's card would be
+    the original bug in reverse.
   */
-  const need = new Set(
-    (['visiting', 'staying', 'moving'] as const).flatMap((p) =>
-      cardFor(p).flatMap((f) => f.built_from),
-    ),
-  )
+  const purposes = purpose ? ([purpose] as const) : (['visiting', 'staying', 'moving'] as const)
+  const need = new Set(purposes.flatMap((p) => cardFor(p).flatMap((f) => f.built_from)))
   return (ROOTS_BY_FAMILY[DOORWAY] ?? []).filter((r) =>
     r.extracts.some((e) => need.has(e.id)),
   )
@@ -1753,17 +1774,25 @@ export function legendStatus(opts: {
     compiler errors.
   */
   sectionsCompleted: string[]
+  /**
+   * Which card is theirs, so the door is measured against it.
+   *
+   * Optional, and the default is the union of all three — see doorwayRoots. A caller that
+   * knows the purpose should pass it, because the union is two sittings longer than any
+   * single card and nobody's Legend is the union.
+   */
+  purpose?: Purpose | null
 }): LegendStatus {
   const sections = opts.sectionsCompleted
-  const open = legendUnlocked(opts.rootsPlayed, sections)
-  const toGo = doorwayToGo(opts.rootsPlayed)
+  const open = legendUnlocked(opts.rootsPlayed, sections, opts.purpose)
+  const toGo = doorwayToGo(opts.rootsPlayed, opts.purpose)
   return {
     open,
     toGo,
     vibesDone: chosenVibesFinished(sections),
     vibesNeeded: VIBES_FOR_LEGEND,
-    sessionsNeeded: doorwaySessions(doorwayRoots().length),
-    sessionsDone: doorwaySessions(doorwayRoots().length) - doorwaySessions(toGo),
+    sessionsNeeded: doorwaySessions(doorwayRoots(opts.purpose).length),
+    sessionsDone: doorwaySessions(doorwayRoots(opts.purpose).length) - doorwaySessions(toGo),
     openCards: open ? LEGEND_FRAMES.length : 0,
   }
 }

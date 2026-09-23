@@ -32,6 +32,7 @@ export function ToLegend() {
     rootsPlayed: learner.roots_played ?? [],
     sectionsCompleted: learner.sections_completed ?? [],
     sittings: learner.sittings ?? 0,
+    purpose: learner.purpose ?? null,
   })
 
   /*
