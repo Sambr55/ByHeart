@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { useLearner } from '@/engine/useLearner'
-import { cardFor, legendStatus } from '@/content/legend'
+import { doorwayRoots, legendStatus } from '@/content/legend'
 
 /**
  * HOW FAR TO THE LEGEND, on every screen where somebody is working towards it.
@@ -56,9 +56,35 @@ export function ToLegend() {
     measured against semana and a mover against anos, and neither is shown a word the
     other needs.
   */
-  const card = cardFor(learner.purpose ?? null)
-  const need = useMemo(() => [...new Set(card.flatMap((f) => f.built_from))], [card])
-  const have = need.filter((id) => (learner.inventory ?? {})[id]).length
+  /*
+    IT MEASURES THE DOOR, because that is what it is labelled TO YOUR LEGEND.
+
+    Sam, with the most instructive screenshot of the session: "says 10 out of 10 at the
+    top. Says three out of four basics done... and the legend is about to open."
+
+    Both numbers were honest and neither was the door. This counted the ten WORDS the
+    learner's card is built from, and every one of them is taught in the basics — so the
+    bar reached 10 of 10 while the Legend stayed shut, because the door is basics plus
+    three chosen vibes and the warm-up is only the first of those. A bar that says 10 of
+    10 above a sentence saying one more session is not two views of progress, it is the
+    product contradicting itself on one screen.
+
+    So it counts what actually opens the Legend: the doorway roots and the chosen vibes,
+    in one number. The card's vocabulary is a real quantity and it has its own screen —
+    the Legend deck says which questions are answerable — but it is not the distance this
+    bar is named after.
+
+    Words still move it, because the doorway is counted in roots rather than sittings, so
+    a lesson advances the bar as it is played rather than only when the session ends. That
+    is the property the word count was chosen for in the first place; what changes is that
+    reaching the end of it now means the door opens.
+  */
+  const total = useMemo(
+    () => doorwayRoots(learner.purpose ?? null).length + status.vibesNeeded,
+    [learner.purpose, status.vibesNeeded],
+  )
+  const left = status.toGo + Math.max(0, status.vibesNeeded - status.vibesDone)
+  const have = Math.max(0, total - left)
 
   /*
     Gone once the door is open, for the reason the first version gave: a bar at 100% is a
@@ -80,13 +106,13 @@ export function ToLegend() {
           68% is not. tabular-nums so it does not shift as it climbs.
         */}
         <p className="text-xs tabular-nums text-muted">
-          {have} of {need.length}
+          {have} of {total}
         </p>
       </div>
       <span className="h-1 overflow-hidden rounded-full bg-line" aria-hidden>
         <span
           className="block h-full rounded-full bg-accent transition-[width] duration-[420ms]"
-          style={{ width: Math.round((have / need.length) * 100) + '%' }}
+          style={{ width: Math.round((have / Math.max(total, 1)) * 100) + '%' }}
         />
       </span>
     </div>

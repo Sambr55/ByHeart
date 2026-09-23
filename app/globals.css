@@ -1065,11 +1065,63 @@ body:has(.dock) .nav-clear {
   padding-top: var(--safe-top);
 }
 
+/*
+  THE FRAME IS THE SCREEN, AND 100dvh IS NOT THE SCREEN.
+
+  Sam, with a photograph of a CTA floating above a band of blue: "why can you make it
+  single height and remove the large gap beneath the icons?"
+
+  The nav is not double height and never was. Measured in the DOM it is 67px — 12 of
+  padding, a 24 icon, a 4 gap, a 14 label, 12 of padding — with no inset inside it. In
+  Chromium the whole column is exact: content ends at 777, the bar starts at 777, nothing
+  scrolls. Which is why every previous fix changed nothing on the phone.
+
+  The gap is iOS arithmetic. In an installed PWA `100dvh` EXCLUDES the home-indicator
+  inset, so the frame is 34px shorter than the glass — but the bar is `fixed` to the
+  bottom of the glass, outside the frame entirely, and the frame still reserved a whole
+  --bar-room inside its shortened self. Simulated: frame bottom 810, content ending at
+  743, bar top at 777. A 34px band of ground between the last thing on the page and the
+  blue, and 34px of the reservation spent on a bar that is not in the box.
+
+  So the frame is told to be the glass. 100dvh plus the inset is the full height on iOS,
+  and on anything where the inset is 0 it is exactly 100dvh as before — which is why this
+  needs no query and cannot regress the desktop or Android case.
+
+  The padding then lands where it was always meant to: the frame's last 67px sit under a
+  67px bar, the CTA rests on top of it, and there is nothing in between.
+*/
 .app-frame {
+  /*
+    NOTHING MAY BE ADDED TO THE PADDING BELOW, EITHER.
+
+    --bar-room is the bar's measured height and no more (see its own note). The pair of
+    them is the whole contract: the box is the glass, and its last --bar-room sits under a
+    bar of exactly --bar-room. Add an inset to either one and a band of ground appears
+    between the CTA and the blue — which has now been reported, looked for in a
+    photograph, and mis-fixed more than once.
+  */
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding-bottom: calc(var(--bar-room) + var(--keyboard));
+  /*
+    THE ROOM BELOW IS MEASURED FROM THE GLASS, NOT FROM dvh.
+
+    `100dvh` in an installed iOS PWA EXCLUDES the home-indicator inset, so this box is
+    34px shorter than the screen — while the bar is `fixed inset-x-0 bottom-0`, pinned to
+    the glass and outside the frame entirely. Reserving a full --bar-room inside the short
+    box therefore reserved it in the wrong place: the content stopped 34px above the blue,
+    which is the band under the CTA in Sam's photograph, and 34 of the 67 were spent on a
+    bar that is not in this box.
+
+    The distance from the end of the frame to the top of the bar is --safe-bottom, so the
+    padding gives back exactly that. On anything without an inset it is zero and this is
+    the rule it has always been — which is why it needs no media query and cannot regress
+    the desktop or Android case.
+
+    Not `height: calc(100dvh + inset)`, which was tried: dvh already IS the glass where
+    there is no inset, so the sum overshoots the bottom by 34 everywhere else.
+  */
+  padding-bottom: calc(var(--bar-room) + var(--keyboard) - var(--safe-bottom));
 }
 
 .app-scroll {

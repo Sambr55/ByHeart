@@ -583,7 +583,30 @@ export function sectionRoots(
     // Always take the first, however long it is — a section of nothing is worse than a
     // section that runs a little over.
     const budget = BEATS_BY_FAMILY[family] ?? BEATS_PER_SESSION
-    if (out.length && (out.length >= ROOTS_PER_SESSION || screens + cost > budget)) break
+    if (out.length >= ROOTS_PER_SESSION) break
+    /*
+      A ROOT THAT DOES NOT FIT IS SKIPPED, NOT A FULL STOP.
+
+      This was `break`, so the first root too big for what was left of the budget ended the
+      sitting and took the remaining screens with it. For a visiting learner that wasted 10
+      of sitting three's 30 — tb_why is 11 screens and only 10 were left — and pushed the
+      last doorway root into a FOURTH sitting of the basics. Sam: "I thought we were
+      cutting down the number of basics?"
+
+      Skipping lets the next root fill the gap, and the order is unchanged for everything
+      that does fit: the sort above still decides who is offered first, and the freebie,
+      the blocking ask and the doorway still lead. What changes is only that a long root
+      near the end of a budget no longer closes the session behind it.
+
+      It closes the door in three sittings for staying and moving, and visiting still takes
+      four — measured, not assumed. Its card needs `um` and `semana`, which is a seventh
+      doorway root, and seven roots is 70 screens against a 90-screen budget that also has
+      to carry the freebie and the gender question. A further rule reserving the skipped
+      slot for doorway roots was tried and made it worse: it bought nothing for visiting
+      and pushed the gender question out of the first sitting, which everything after it
+      depends on.
+    */
+    if (out.length && screens + cost > budget) continue
     out.push(root)
     screens += cost
   }
