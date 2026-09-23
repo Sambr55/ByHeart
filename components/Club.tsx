@@ -241,8 +241,35 @@ export function Club() {
   */
   const entitled =
     !access.known || !access.billingReady || access.entitlements.plan === 'pro'
+  /*
+    THE FRONT DOOR ALWAYS SHOWS THE FRONT DOOR, whatever the record says.
+
+    Sam: "the home page come in button is loading Club again after a reset."
+
+    Reproduced: with `set_up_at` set — or a single root played — COME IN gave seventy Club
+    cards opening on a drop instead of the eighteen-card intro. `started` is true for
+    anybody who has begun set-up, and it promoted them to `working`, which is the real feed
+    with the Portuguese withheld.
+
+    That is the right answer for the CLUB TAB, where `started` means "you have been here,
+    you do not need the sales pitch". It is the wrong answer for `?in=1`, which is the
+    front door saying "I am sending you to be shown the product" — and a person who taps
+    COME IN is asking for exactly that, however much of a record survived their reset.
+
+    So the door wins over `started`, and only over `started`. Somebody who is genuinely
+    `inside` still gets the Club: they have a Legend, and showing a graduate the tutorial
+    would be worse than the bug being fixed.
+  */
   const stage: ClubStage =
-    !mounted || (inside && entitled) ? 'member' : inside || started ? 'working' : 'showcase'
+    !mounted || (inside && entitled)
+      ? 'member'
+      : inside
+        ? 'working'
+        : fromDoor
+          ? 'showcase'
+          : started
+            ? 'working'
+            : 'showcase'
 
   if (welcome) return <Welcome onDone={finishWelcome} />
 
