@@ -1018,8 +1018,12 @@ function WarmUp() {
   return (
     <Shell stage="CHOICE" eyebrow="WARM UP">
       <div className="flex flex-col gap-3">
-        <p className="eyebrow text-accent">THE FUN BIT</p>
-        <h1 className="display text-balance text-2xl">Pick one you already know.</h1>
+        {/*
+          Sam: "changed the FUN BIT above Top Gun Bridget to Let's get you warmed up." It
+          also names what the screen IS, which THE FUN BIT only implied.
+        */}
+        <p className="eyebrow text-accent">WARMING UP</p>
+        <h1 className="display text-balance text-2xl">Let’s get you warmed up.</h1>
         <p className="text-sm leading-relaxed text-muted">
           Ninety seconds, out of something you have seen a hundred times. This is how DUB
           works — the Portuguese comes out of what is already in your head, and you keep
@@ -4851,14 +4855,34 @@ function SectionComplete() {
           this screen rendered (see the note at the top of this component), so this is
           simply opening the same vibe again — the identical call the shelf makes.
         */}
-        {isDoorway && legend.toGo > 0 ? (
+        {/*
+          THE BASICS ARE THE WAY OUT OF ANY SESSION WITH THE DOOR STILL SHUT.
+
+          Sam, after the forced warm-up: "there is no way out of this screen other than Say
+          three cold, change that to lets do the basics and load basics screen 1."
+
+          He landed on a dead end I built. `isDoorway` meant this button only appeared after
+          a BASICS session — so finishing Top Gun, the vibe DUB made him play, left SAY
+          THREE COLD as the single control on the screen: a cold-recall test offered to
+          somebody four words into their first session, with the basics they actually need
+          nowhere in sight.
+
+          Dropping `isDoorway` is the whole fix. The condition that matters is
+          `legend.toGo > 0` — the doorway is unfinished — and that is true after any
+          session, whichever vibe it was. chooseFamily(DOORWAY) is the same call the shelf
+          makes, so it opens the basics at screen one.
+
+          LET'S DO THE BASICS rather than MORE BASICS, because after a warm-up there has
+          been no basics to have more of.
+        */}
+        {legend.toGo > 0 ? (
           <button
             type="button"
             data-testid="more-basics"
             onClick={() => chooseFamily(DOORWAY)}
             className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
           >
-            MORE BASICS
+            {isDoorway ? 'MORE BASICS' : 'LET’S DO THE BASICS'}
           </button>
         ) : null}
         {/*
@@ -4892,14 +4916,26 @@ function SectionComplete() {
         The testid stays `im-done`: it is the identity of the control, not its wording, and
         renaming it would break the checks for a copy change.
       */}
-        <button
-          type="button"
-          data-testid="im-done"
-          onClick={() => finishSection('done')}
-          className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-fg"
-        >
-          SAY THREE COLD
-        </button>
+        {/*
+          AND NOT BEFORE THERE IS ANYTHING TO SAY COLD.
+
+          Three prompts with nothing on screen is the right test for somebody who has been
+          through a few sittings and the wrong offer four words into a first one — which is
+          exactly where it was the only control on the screen. It is an outline button
+          beside the basics now, and on a first session it is not there at all: the way
+          forward is the doorway, and a cold test is what you do once you have something to
+          be cold about.
+        */}
+        {(learner.sittings ?? 0) > 1 ? (
+          <button
+            type="button"
+            data-testid="im-done"
+            onClick={() => finishSection('done')}
+            className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-fg"
+          >
+            SAY THREE COLD
+          </button>
+        ) : null}
       </Dock>
     </Shell>
   )

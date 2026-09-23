@@ -303,6 +303,43 @@ html:has(.on-dark) {
 }
 
 /*
+  AND THE CANVAS GOES BLUE UNDER ANY PAGE THAT CARRIES THE BAR.
+
+  Sam, with a screenshot of a lesson in the installed app: a band of sand across the very
+  bottom, below the blue nav.
+
+  The cause is `html { background: var(--bg) }` — sand — meeting `.app-frame { height:
+  100dvh }`, which on an installed iOS PWA EXCLUDES the home-indicator inset. So the frame
+  stops 34px short of the screen, the bar sits at its foot, and the canvas paints sand in
+  the gap. The bar's own box-shadow cannot reach it: the shadow hangs below the bar, and
+  what shows is the canvas behind everything.
+
+  `.on-dark` already does exactly this for the photograph screens and the rule is the same
+  shape — keyed off a class the page declares rather than a list of routes, so anything
+  that adopts it is covered and there is nothing to keep up to date. A lesson has no
+  equivalent because its ground IS sand; what it needs is only the last strip blue.
+
+  Scoped to pages with a nav, because a page without one should paint sand to the bottom
+  as it always has. The bar is the thing that touches that edge, so the bar's own colour
+  is what belongs under it.
+*/
+html:has(.nav-bar) {
+  background: #1f5d8c;
+}
+
+/*
+  Except where the ground is a photograph, which wins.
+
+  A Club card is dark to its own edge and the bar sits on top of it; painting the canvas
+  blue there would put a blue strip under a black photograph, which is the same bug with a
+  different colour. `.on-dark` is more specific than the bar and says so here rather than
+  relying on source order.
+*/
+html:has(.on-dark):has(.nav-bar) {
+  background: var(--ground-dark);
+}
+
+/*
   ICONS ON THE DARK GROUND, which were drawing themselves in ink.
 
   AudioButton is `bg-chip text-accent` and CopyButton is `text-muted`. Those are the right

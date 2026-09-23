@@ -1390,8 +1390,25 @@ export function worthSaving(me: {
   sittings?: number
   proof?: unknown[]
 }): boolean {
+  /*
+    NOT AFTER THE FIRST SITTING, which DUB chose for them.
+
+    Sam, landing here straight off the forced warm-up: "when you get to the screen I have
+    shared, don't ask for email here — the first place we should do that is in the learning
+    session where we ask them to enter their email."
+
+    `sittings > 0` was true after one session, so the offer fired on the very first screen
+    a learner reaches: four words banked, ninety seconds in, off a vibe they did not pick.
+    The email is asked properly in tb_email, the root that teaches correio eletrónico, and
+    that is where a person should first meet the question — not in a panel before they have
+    decided whether they want any of this.
+
+    Two sittings rather than a flag, for the same reason the first-run offers use it: by
+    the second, the person came back. An answered Legend card or a line of proof still
+    counts on its own — both mean real work exists whatever the sitting count says.
+  */
   const answered = (me.legend ?? []).filter((a) => Object.keys(a.values ?? {}).length > 0)
-  return answered.length > 0 || (me.sittings ?? 0) > 0 || (me.proof ?? []).length > 0
+  return answered.length > 0 || (me.sittings ?? 0) > 1 || (me.proof ?? []).length > 0
 }
 
 /** The vibe every learner is sent through first, and the one the Legend is built from. */
