@@ -151,18 +151,27 @@ promise(
     for (const c of VIBES) {
       const all = ROOTS_BY_FAMILY[c] ?? []
       if (!all.length) continue
-      const counts = new Map<string, number>()
-      for (const r of all) counts.set(r.root_type, (counts.get(r.root_type) ?? 0) + 1)
-      let kind = ''
-      let top = 0
-      for (const [k, n] of counts) if (n > top) { top = n; kind = k }
-      const share = top / all.length
+      /*
+        READ THE DECLARED SIGNATURE, the same way scripts/signature-check.mts does.
+
+        This measured the dominant root_type instead, which is what that check used to do
+        and is wrong for the same two reasons. It is circular — content that drifts drags
+        the expectation with it — and it has no way to tell a crate named for its SOURCE
+        from the one named for what it TEACHES. the_basics is 60% `title` because counting
+        and the days of the week hang off song lines, so this reported it off-signature for
+        opening on the learner's name and age, which is precisely what it promises.
+
+        A crate with no signature promises no source and is skipped. See Crate.signature.
+      */
+      const crate = CRATES.find((x) => x.id === c)
+      if (!crate?.signature) continue
+      const kind = crate.signature
       const l = newLearner()
       const rest = playSitting(l, c).roots.filter((r) => {
         const root = all.find((x) => x.root_id === r.id)
         return !root?.freebie_flag
       })
-      if (share >= 0.6 && rest.length && !rest.some((r) => r.type === kind)) off.push(c)
+      if (rest.length && !rest.some((r) => r.type === kind)) off.push(c)
     }
     return {
       holds: off.length === 0,

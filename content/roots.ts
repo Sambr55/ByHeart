@@ -654,6 +654,23 @@ export interface Crate {
    * rather than "I am missing my early content".
    */
   opens_at?: Rung
+  /**
+   * What this crate is famous for, when the answer is a source.
+   *
+   * Every crate but one is named for where its lines come from — Top Gun, Bond, Duran
+   * Duran — and that name is a promise about the first sitting: somebody who taps the
+   * Bond tile is owed Bond titles, not two rung-1 roots that merely happen to mention
+   * him. scripts/signature-check.mts holds that promise, and reads this to know which
+   * crates make it.
+   *
+   * ABSENT ON the_basics, and that absence is the whole point of the field. It is named
+   * for what it teaches rather than for where it comes from, so its root_type mix — 60%
+   * `title`, because counting and the days of the week hang off song lines — describes
+   * its bookkeeping and not its promise. A crate opts IN to being held to a source by
+   * naming one, rather than a check carrying a list of exceptions that goes stale the
+   * moment a fourteenth crate arrives.
+   */
+  signature?: Root['root_type']
 }
 
 export const CRATES: Crate[] = [
@@ -709,22 +726,26 @@ export const CRATES: Crate[] = [
     tone: 'human',
     built: true,
     opens_at: 1,
+  /** What the tile promises: see Crate.signature. */
+  signature: 'other',
   },
-  { id: 'top_gun', title: 'Top Gun quotes', blurb: 'Iconic lines. Direct language.', tone: 'kinetic', built: true },
-  { id: 'james_bond', title: 'James Bond film titles', blurb: 'Tiny titles. Surprisingly useful Portuguese.', tone: 'cool', built: true },
-  { id: 'bridget_jones', title: 'Bridget Jones cringe moments', blurb: 'Awkwardness you can actually use.', tone: 'human', built: true },
-  { id: 'pulp_fiction', title: 'Pulp Fiction banger quotes', blurb: 'Punchy lines. Real conversational leverage.', tone: 'sharp', built: true },
-  { id: 'audrey_hepburn', title: 'Audrey Hepburn musings', blurb: 'Elegance, warmth and things worth saying.', tone: 'warm', built: true },
-  { id: 'marcus_aurelius', title: 'Marcus Aurelius wisdom', blurb: 'Ancient ideas. Surprisingly useful modern language.', tone: 'reflective', built: true },
-  { id: 'portuguese_swearing', title: 'How to swear in Portuguese', blurb: 'The subtitles were lying to you. Strong language throughout.', tone: 'blunt', built: true, opens_at: 6 },
-  { id: 'flirting_m2f', title: 'Flirting — him to her', blurb: 'The Love Actually problem. Said properly this time.', tone: 'warm', built: true },
-  { id: 'flirting_f2m', title: 'Flirting — her to him', blurb: 'Warmer, funnier and considerably more effective.', tone: 'warm', built: true },
+  { id: 'top_gun', title: 'Top Gun quotes', blurb: 'Iconic lines. Direct language.', tone: 'kinetic', built: true , signature: 'quote' },
+  { id: 'james_bond', title: 'James Bond film titles', blurb: 'Tiny titles. Surprisingly useful Portuguese.', tone: 'cool', built: true , signature: 'title' },
+  { id: 'bridget_jones', title: 'Bridget Jones cringe moments', blurb: 'Awkwardness you can actually use.', tone: 'human', built: true , signature: 'paraphrased_moment' },
+  { id: 'pulp_fiction', title: 'Pulp Fiction banger quotes', blurb: 'Punchy lines. Real conversational leverage.', tone: 'sharp', built: true , signature: 'quote' },
+  { id: 'audrey_hepburn', title: 'Audrey Hepburn musings', blurb: 'Elegance, warmth and things worth saying.', tone: 'warm', built: true , signature: 'wisdom' },
+  { id: 'marcus_aurelius', title: 'Marcus Aurelius wisdom', blurb: 'Ancient ideas. Surprisingly useful modern language.', tone: 'reflective', built: true , signature: 'wisdom' },
+  { id: 'portuguese_swearing', title: 'How to swear in Portuguese', blurb: 'The subtitles were lying to you. Strong language throughout.', tone: 'blunt', built: true, opens_at: 6 , signature: 'other' },
+  { id: 'flirting_m2f', title: 'Flirting — him to her', blurb: 'The Love Actually problem. Said properly this time.', tone: 'warm', built: true , signature: 'other' },
+  { id: 'flirting_f2m', title: 'Flirting — her to him', blurb: 'Warmer, funnier and considerably more effective.', tone: 'warm', built: true , signature: 'other' },
   {
     id: 'world_of_wizardry',
     title: 'The world of wizardry',
     blurb: 'Every magic word is Latin. So is Portuguese.',
     tone: 'reflective',
     built: true,
+  /** What the tile promises: see Crate.signature. */
+  signature: 'other',
   },
   {
     /*
@@ -760,6 +781,8 @@ export const CRATES: Crate[] = [
     blurb: 'Six song titles, and the words hiding inside them.',
     tone: 'kinetic',
     built: true,
+  /** What the tile promises: see Crate.signature. */
+  signature: 'title',
   },
 ]
 

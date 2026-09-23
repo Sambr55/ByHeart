@@ -1311,10 +1311,12 @@ function Picker() {
     Identical condition on purpose — two screens asking one question, and `save_prompt`
     means answering it on either retires it on both.
   */
+  /* Not if they already gave one in a lesson — see the note on saveOffer. */
   const shelfSaveOffer =
     mounted &&
     access.signInReady &&
     !access.signedIn &&
+    !learner.profile?.email &&
     shelfLegend.toGo === 0 &&
     shelfLegend.vibesDone >= 2 &&
     learner.save_prompt === 'unseen'
@@ -1524,15 +1526,14 @@ function Picker() {
       */}
       <Install />
       {/*
-        HOW FAR TO THE LEGEND, on the screen somebody chooses their next session from.
+        NO BAR HERE EITHER: the Shell carries it, above this whole column.
 
-        Sam: "I also want to show a progress bar as you build towards your legend, it should
-        be ever present until you get there." The shelf is where that question is actually
-        being asked — a person standing here is deciding what to do next, and the distance
-        to the door is the fact that decision needs. It renders nothing once the Legend is
-        open, and nothing before the first sitting; see components/ToLegend.tsx.
+        Sam: "remove the duplicate progress bar." This was written when the bar lived only
+        on the shelf and the session-done screen, and it moved to the Shell when it started
+        counting words — which anchors it under the header on every learning screen, this
+        one included. Two copies of the same number is one of them lying about being
+        different.
       */}
-      <ToLegend />
       {/* "Pick a vibe you connect with" is a promise about choice, and on the first
           visit there is exactly one card on the screen. Say the true thing instead. */}
       <h1 className="display text-balance text-2xl">
@@ -2625,7 +2626,22 @@ function RootBeatView({
   */
   const raw = rootById(rootId)!
   const meLearner = useLearner()
-  const root = useMemo(() => personalise(raw, meLearner), [raw, meLearner.display_name, meLearner.profile?.age])
+  /*
+    EVERY FACT personalise READS IS A DEPENDENCY, including the one that was missing.
+
+    The list named display_name and age but not `into`, so a learner who answered the
+    interests question mid-session kept the authored música until something else happened
+    to invalidate the memo. That is the interests half of the same bug the comment above
+    describes, reintroduced by the fix for it — the substitution was moved to one place
+    and then told to ignore one of the three things it substitutes.
+
+    Keyed off the first interest rather than the array, because personalise only reads
+    `into[0]` and a fresh array identity on every render would rebuild the root constantly.
+  */
+  const root = useMemo(
+    () => personalise(raw, meLearner),
+    [raw, meLearner.display_name, meLearner.profile?.age, meLearner.profile?.into?.[0]],
+  )
   const family = CRATES.find((f) => f.id === root.culture_family)!
   const [done, setDone] = useState(false)
   /**
@@ -4525,7 +4541,13 @@ function LegendOpen() {
 function SaveStep() {
   const { next } = useJourney()
   const access = useEntitlements()
-  const skip = access.known && !access.signInReady
+  const me = useLearner()
+  /*
+    Skipped where there is no sign-in to offer, and where they have already given an
+    address in a lesson — see the note on saveOffer. A whole screen asking for something
+    the learner has handed over is worse than a panel doing it.
+  */
+  const skip = (access.known && !access.signInReady) || Boolean(me.profile?.email)
   useEffect(() => {
     if (skip) next()
   }, [skip, next])
@@ -4857,13 +4879,14 @@ function SectionComplete() {
         */}
         <LegendPayoff />
         {/*
-          And the distance, at the moment somebody has just closed one sitting and is
-          deciding whether to do another. Same component as the shelf — see ToLegend, which
-          renders nothing once the door is open.
+          NO BAR HERE, because the Shell already carries one.
+
+          Sam, on this screen: "remove the email and the duplicate progress bar at the
+          bottom." This was added when the bar lived only on the shelf and the session-done
+          screen — the two places somebody stops and decides. It moved to the Shell when it
+          started counting words, which puts it under the header on every learning screen
+          INCLUDING this one, so the copy at the foot was the same number twice.
         */}
-        <div className="mt-6">
-          <ToLegend />
-        </div>
         {remaining.length ? (
           <p className="mt-6 text-sm text-muted">
             {remaining.length} more {remaining.length === 1 ? 'vibe' : 'vibes'} to raid,
@@ -5263,10 +5286,24 @@ function LegendPayoff() {
     warned about, and `signInReady` because where accounts are not configured there is no
     link to send and the button could not work.
   */
+  /*
+    AND NOT IF THEY HAVE ALREADY GIVEN ONE, which they now do in a lesson.
+
+    Sam, on the screen after two basics sittings: "remove the email — we've already asked."
+    He is right and it is a seam I left: tb_email asks for an address while teaching correio
+    eletrónico, stores it on the profile, and this panel never looked. So somebody who had
+    typed their email into the lesson was asked for it again, two screens later, by a panel
+    explaining why it would be useful.
+
+    `profile.email` rather than `save_prompt`: the prompt records whether THIS panel has
+    been answered, and the point is that the question itself has been. A learner who gave
+    an address has answered it wherever they did so.
+  */
   const saveOffer =
     mounted &&
     access.signInReady &&
     !access.signedIn &&
+    !learner.profile?.email &&
     worthSaving(learner) &&
     learner.save_prompt === 'unseen'
   const offering = usable && learner.legend_prompt === 'unseen'

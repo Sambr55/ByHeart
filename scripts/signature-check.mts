@@ -33,7 +33,17 @@ const dominant = (roots: Root[]): Root['root_type'] | null => {
 for (const c of CRATES) {
   const all = ROOTS.filter((r) => r.culture_family === c.id)
   if (!all.length) continue
-  const kind = dominant(all)
+  /*
+    THE DECLARED SIGNATURE WINS over the measured one.
+
+    dominant() answers "what is this crate mostly made of", which is a fact about the
+    content. `signature` answers "what does the tile promise", which is the thing a
+    learner is actually owed — and using the measurement as the target makes the check
+    circular: content that drifts drags the expectation along with it, so the crate always
+    opens on whatever it happens to be full of. Reading the declaration instead means a
+    crate that quietly fills up with something else FAILS, which is the point.
+  */
+  const kind = c.signature ?? dominant(all)
   const served = sectionRoots(c.id as CultureFamily, 2, [])
   if (!served.length) { note(`${c.id}: nothing served at rung 2`); continue }
 
@@ -56,11 +66,38 @@ for (const c of CRATES) {
     Only asserted where the vibe genuinely IS mostly one thing. A vibe split evenly across
     kinds has no signature to honour, and demanding one would be inventing a promise its
     content does not make.
+
+    AND ONLY WHERE THE TILE MAKES THE PROMISE IN THE FIRST PLACE. the_basics is 60% title
+    by root_type and that number means nothing: tb_1234, tb_six_seven and tb_saturday are
+    counting and days of the week, filed under `title` because the line they hang on came
+    from a song. The crate says so itself — "named for what it teaches, not for where it
+    comes from". This check measures where roots COME FROM, which is the one thing that
+    crate deliberately does not promise, so asserting it here invents a promise and then
+    fails the content for keeping a different one.
+
+    Every other crate on the shelf is named for its source — Top Gun, Bond, Duran Duran —
+    and for those the source IS the promise, which is what this check is for. Keyed off
+    `signature`, so a crate opts in by declaring what it is famous for rather than by not
+    appearing in a list somebody has to remember to update.
   */
-  if (share >= 0.6 && rest.length > 0 && onKind === 0) {
+  if (!c.signature) { note(`${String(c.id).padEnd(21)} — named for what it teaches; no source to honour`); continue }
+
+  /*
+    NO SHARE THRESHOLD ONCE A CRATE HAS DECLARED ITSELF.
+
+    The old guard — assert only where the crate is already ≥60% one kind — belonged to the
+    version that measured the signature instead of reading it, where it stopped the check
+    inventing a promise nobody made. Kept alongside a declaration it becomes an escape
+    hatch that swallows exactly the failure this is for: a crate whose content drifts away
+    from its tile drops below the threshold and stops being checked at the moment it
+    starts being wrong. Declaring a signature IS the opt-in; there is nothing left to
+    guard against.
+  */
+  if (rest.length > 0 && onKind === 0) {
     fail.push(
-      `${c.id} is ${Math.round(share * 100)}% ${kind} and its first sitting serves none — ` +
-        'the tile promises one thing and the session delivers another',
+      `${c.id} promises ${kind} and its first sitting serves none — ` +
+        `the tile says one thing and the session delivers another ` +
+        `(${Math.round(share * 100)}% of the crate is ${kind})`,
     )
   }
 }

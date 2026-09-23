@@ -1539,6 +1539,17 @@ export const DOORWAY: CultureFamily = 'the_basics'
  * Both halves are required. The basics carry the vocabulary the card is built from — a
  * Legend with no words in it is not a Legend — and the three chosen vibes are what make
  * it theirs.
+ *
+ * THE THREE INCLUDE THE FORCED WARM-UP, so in practice it is Top Gun or Bridget Jones
+ * plus two the learner picked freely. Sam, proposing the shape: "warm up vibe + 2 x
+ * basics that capture name and age + 2 vibes opens the legend." The warm-up is still a
+ * vibe — it is chosen from two, it is a real sitting, and its words go into the card —
+ * so it counts; what it is not is the whole requirement.
+ *
+ * This number has always been three. What changed is that it started being true: the old
+ * count read every basics sitting past the first as a chosen vibe, so four sittings of
+ * basics reported three and the door swung open on compliance alone — the exact thing
+ * this constant's own note above says must not happen. See chosenVibesFinished.
  */
 export const VIBES_FOR_LEGEND = 3
 
@@ -1561,24 +1572,34 @@ export const VIBES_FOR_LEGEND = 3
  * The basics ones are subtracted for the reason the old function excluded the basics: it
  * is compulsory, so it is not one of the vibes somebody chose.
  */
-export function chosenVibesFinished(sectionsCompleted: string[], sittings = 0): number {
-  const basicsSat = sectionsCompleted.includes(DOORWAY) ? 1 : 0
+export function chosenVibesFinished(sectionsCompleted: string[]): number {
   /*
-    A floor of the deduped count, so a record written before sittings existed is not
-    punished for it — and never more than the sittings actually taken.
+    DISTINCT VIBES, NOT LEFTOVER SITTINGS, and the arithmetic is why.
+
+    This used to return `max(deduped, sittings - basicsSat)`, subtracting ONE sitting for
+    the basics on the theory that the basics are a sitting and everything else is a vibe.
+    The basics are eight doorway roots — four or five sittings — so from the second one
+    onwards every extra basics sitting was counted as a chosen vibe. Four sittings of
+    basics reported three vibes and opened the door, which is exactly what Sam found:
+    "you seem to have wired it now to hit the legend after completing basics without doing
+    any vibes."
+
+    The subtraction cannot be rescued by subtracting the right number instead, because
+    `sittings` does not say what it was spent on. The names in `sectionsCompleted` do, so
+    that is now the only thing counted: distinct families that are not the doorway. A
+    sitting of Top Gun counts once however long it took, and no amount of basics counts as
+    a vibe, because none of it is one.
+
+    The `sittings` parameter is gone rather than ignored: a parameter that is accepted and
+    not used is an invitation to pass it and believe it did something.
   */
-  const chosen = new Set(sectionsCompleted.filter((id) => id !== DOORWAY)).size
-  return Math.max(chosen, sittings - basicsSat)
+  return new Set(sectionsCompleted.filter((id) => id !== DOORWAY)).size
 }
 
-export function legendUnlocked(
-  rootsPlayed: string[],
-  sectionsCompleted: string[],
-  sittings = 0,
-): boolean {
+export function legendUnlocked(rootsPlayed: string[], sectionsCompleted: string[]): boolean {
   return (
     doorwayToGo(rootsPlayed) === 0 &&
-    chosenVibesFinished(sectionsCompleted, sittings) >= VIBES_FOR_LEGEND
+    chosenVibesFinished(sectionsCompleted) >= VIBES_FOR_LEGEND
   )
 }
 
@@ -1734,12 +1755,12 @@ export function legendStatus(opts: {
   sectionsCompleted: string[]
 }): LegendStatus {
   const sections = opts.sectionsCompleted
-  const open = legendUnlocked(opts.rootsPlayed, sections, opts.sittings ?? 0)
+  const open = legendUnlocked(opts.rootsPlayed, sections)
   const toGo = doorwayToGo(opts.rootsPlayed)
   return {
     open,
     toGo,
-    vibesDone: chosenVibesFinished(sections, opts.sittings ?? 0),
+    vibesDone: chosenVibesFinished(sections),
     vibesNeeded: VIBES_FOR_LEGEND,
     sessionsNeeded: doorwaySessions(doorwayRoots().length),
     sessionsDone: doorwaySessions(doorwayRoots().length) - doorwaySessions(toGo),
