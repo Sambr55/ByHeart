@@ -39,15 +39,46 @@ import type { PieceId } from '@/engine/learner'
  */
 export interface Idiom {
   id: string
-  /** The English, as somebody would actually say it. */
+  /**
+   * The English, as somebody would actually say it.
+   *
+   * THE ANSWER, not the prompt — which is the change. The card used to lead with this and
+   * ask what Portugal says instead; it now leads with the literal Portuguese and asks what
+   * the ENGLISH is. Sam: "we show the literal translation in the destination language on
+   * the card, the user then has to guess what the translation to english is."
+   *
+   * The difference is what the learner is doing. Leading with English made it a quiz about
+   * Portuguese, which is the same thing every other card in the product does. Leading with
+   * nonsense Portuguese makes it a riddle, and the answer is something they have known
+   * since they were four — so the win is recognition rather than recall, and it is
+   * available to somebody on their first day.
+   */
   english: string
   /**
    * Word for word into Portuguese, and it is meant to be wrong.
    *
-   * Not "a bad translation" — a faithful one, which is what makes the joke. The learner
-   * reads it, it does not work, and that is the lesson landing before the answer arrives.
+   * Not "a bad translation" — a faithful one, which is what makes the joke. THE FACE OF THE
+   * CARD now: it is what somebody reads over the clue photograph, in big white letters,
+   * before they have any idea what it is.
    */
   literal: string
+  /**
+   * What the clue picture shows, in a few words.
+   *
+   * Sam: "we need to generate an image that loosely gives a clue so hold your horses would
+   * be an image of a group of horses."
+   *
+   * LOOSELY is the operative word and it is a real constraint on the writing. The picture
+   * illustrates the LITERAL, not the meaning — horses for hold your horses, a teacup for a
+   * storm in a teacup — which is exactly why it is a clue rather than the answer: the
+   * literal is nonsense, so a faithful picture of it is nonsense too, and the gap between
+   * what you can see and what it must mean is the game.
+   *
+   * Kept beside the idiom rather than in the image bank's WANTED list, because it is
+   * content — the thing the card is ABOUT — and a brief that lives in a different file
+   * from the phrase it illustrates is a brief that drifts from it.
+   */
+  clue: string
   /** Why the literal fails, in one line. The WTF, said out loud. */
   wtf: string
   /** What a Portuguese person says in the same moment. */
@@ -90,6 +121,8 @@ export const IDIOMS: Idiom[] = [
     id: 'bobs_your_uncle',
     english: "Bob's your uncle",
     literal: 'O Bob é teu tio',
+    clue:
+      'An empty worn armchair with a folded cardigan over its arm, a framed family photograph on the wall behind.',
     wtf: 'There is no Bob. There has never been a Bob. Portuguese is now waiting to hear about your uncle.',
     equivalent: 'E pronto',
     gloss: 'And there you go.',
@@ -100,6 +133,8 @@ export const IDIOMS: Idiom[] = [
     id: 'not_my_cup_of_tea',
     english: 'Not my cup of tea',
     literal: 'Não é a minha chávena de chá',
+    clue:
+      'A cup of black tea going cold on a windowsill, the bag still in it, nobody coming back for it.',
     wtf: 'Perfectly grammatical, perfectly understood, and nobody has ever said it. Portugal runs on coffee and the metaphor never arrived.',
     equivalent: 'Não faz o meu género',
     gloss: "It's not my sort of thing.",
@@ -109,6 +144,8 @@ export const IDIOMS: Idiom[] = [
     id: 'piece_of_cake',
     english: 'Piece of cake',
     literal: 'Um pedaço de bolo',
+    clue:
+      'A single slice of sponge cake on a plate with a fork beside it, half the light on it.',
     wtf: 'You have ordered dessert.',
     equivalent: 'É canja',
     gloss: "It's chicken soup.",
@@ -119,6 +156,8 @@ export const IDIOMS: Idiom[] = [
     id: 'hold_your_horses',
     english: 'Hold your horses',
     literal: 'Segura os teus cavalos',
+    clue:
+      'Three horses standing in a field behind a wooden fence, one looking off to the side.',
     wtf: 'Nobody has horses. You sound like you are about to sell them some.',
     equivalent: 'Calma',
     gloss: 'Calm.',
@@ -129,6 +168,8 @@ export const IDIOMS: Idiom[] = [
     id: 'keep_your_hair_on',
     english: 'Keep your hair on',
     literal: 'Mantém o teu cabelo posto',
+    clue:
+      'A hairbrush and a comb on a bathroom shelf beside a fogged mirror.',
     wtf: 'You have told a stranger to hang on to their hair.',
     equivalent: 'Não te passes',
     gloss: "Don't lose it.",
@@ -138,6 +179,8 @@ export const IDIOMS: Idiom[] = [
     id: 'storm_in_a_teacup',
     english: 'A storm in a teacup',
     literal: 'Uma tempestade numa chávena de chá',
+    clue:
+      'A teacup on a saucer with the surface of the tea rippling, a window streaming with rain behind it.',
     wtf: 'The tea again. It survives translation and still lands on nothing.',
     equivalent: 'É muito barulho para nada',
     gloss: 'A lot of noise for nothing.',
@@ -147,6 +190,8 @@ export const IDIOMS: Idiom[] = [
     id: 'the_penny_dropped',
     english: 'The penny dropped',
     literal: 'A moeda caiu',
+    clue:
+      'A single small coin mid-air above a tiled floor, caught just before it lands.',
     wtf: 'A coin has fallen. Somebody will look for it.',
     equivalent: 'Caiu a ficha',
     gloss: 'The token dropped.',
@@ -157,6 +202,8 @@ export const IDIOMS: Idiom[] = [
     id: 'plenty_more_fish',
     english: "There's plenty more fish in the sea",
     literal: 'Há muito mais peixe no mar',
+    clue:
+      'Sardines packed in ice on a fishmonger steel tray, early morning.',
     wtf: 'This one nearly works, which is the trap — it is understood and it is not what gets said.',
     equivalent: 'Há mais marés que marinheiros',
     gloss: 'There are more tides than sailors.',
@@ -167,6 +214,8 @@ export const IDIOMS: Idiom[] = [
     id: 'break_a_leg',
     english: 'Break a leg',
     literal: 'Parte uma perna',
+    clue:
+      'A plaster cast propped on a chair with a walking stick leaning against it.',
     wtf: 'You have instructed someone to injure themselves before a performance.',
     equivalent: 'Boa sorte',
     gloss: 'Good luck.',
@@ -177,6 +226,8 @@ export const IDIOMS: Idiom[] = [
     id: 'bite_the_bullet',
     english: 'Bite the bullet',
     literal: 'Morde a bala',
+    clue:
+      'A single brass rifle cartridge standing upright on a worn wooden table.',
     wtf: 'Nobody is being operated on in a field hospital.',
     equivalent: 'Fazer das tripas coração',
     gloss: 'To make a heart out of your guts.',
@@ -187,6 +238,8 @@ export const IDIOMS: Idiom[] = [
     id: 'the_last_straw',
     english: 'The last straw',
     literal: 'A última palha',
+    clue:
+      'A bale of straw with one single stalk lying on the ground in front of it.',
     wtf: 'A stray piece of straw. Nobody can see the camel you are thinking of.',
     equivalent: 'Foi a gota de água',
     gloss: 'It was the drop of water.',
@@ -197,6 +250,8 @@ export const IDIOMS: Idiom[] = [
     id: 'speak_of_the_devil',
     english: 'Speak of the devil',
     literal: 'Fala do diabo',
+    clue:
+      'A carved stone gargoyle on a church wall, lit from below by late sun.',
     wtf: 'This one actually survives, which almost never happens.',
     equivalent: 'Falar no diabo e ele aparece',
     gloss: 'Speak of the devil and he appears.',
@@ -207,6 +262,8 @@ export const IDIOMS: Idiom[] = [
     id: 'elephant_in_the_room',
     english: 'The elephant in the room',
     literal: 'O elefante na sala',
+    clue:
+      'An empty sitting room with a very large grey armchair taking up most of it.',
     wtf: 'Increasingly this one is understood, because it has been imported — but it still reads as translated.',
     equivalent: 'Ninguém quer falar disso',
     gloss: 'Nobody wants to talk about it.',
@@ -217,6 +274,8 @@ export const IDIOMS: Idiom[] = [
     id: 'writings_on_the_wall',
     english: "The writing's on the wall",
     literal: 'A escrita está na parede',
+    clue:
+      'A whitewashed wall with old paint flaking off it in patterns, nothing written.',
     wtf: 'A statement about interior decoration.',
     equivalent: 'Já se via',
     gloss: 'You could already see it coming.',
@@ -226,6 +285,8 @@ export const IDIOMS: Idiom[] = [
     id: 'blessing_in_disguise',
     english: 'A blessing in disguise',
     literal: 'Uma bênção disfarçada',
+    clue:
+      'A church candle burning behind a carnival mask on a shelf.',
     wtf: 'Understandable, and it sounds like a translation, because it is one.',
     equivalent: 'Há males que vêm por bem',
     gloss: 'There are bad things that come for good.',
@@ -235,6 +296,8 @@ export const IDIOMS: Idiom[] = [
     id: 'better_late_than_never',
     english: 'Better late than never',
     literal: 'Melhor tarde do que nunca',
+    clue:
+      'A station clock reading ten past, an empty platform beneath it.',
     wtf: 'Straight through, word for word, and correct. It happens.',
     equivalent: 'Mais vale tarde do que nunca',
     gloss: 'Better late than never.',
@@ -245,6 +308,8 @@ export const IDIOMS: Idiom[] = [
     id: 'it_is_what_it_is',
     english: 'It is what it is',
     literal: 'É o que é',
+    clue:
+      'A single empty chair at a table laid for one, everything as it is.',
     wtf: 'Correct, and said — but Portugal has a better one it reaches for first.',
     equivalent: 'É o que temos',
     gloss: "It's what we've got.",
@@ -255,6 +320,8 @@ export const IDIOMS: Idiom[] = [
     id: 'what_goes_around',
     english: 'What goes around comes around',
     literal: 'O que vai à volta vem à volta',
+    clue:
+      'A carousel at rest in an empty square, its horses still.',
     wtf: 'You have described a roundabout.',
     equivalent: 'Cá se fazem, cá se pagam',
     gloss: 'Here they are done, here they are paid for.',
@@ -264,6 +331,8 @@ export const IDIOMS: Idiom[] = [
     id: 'once_in_a_blue_moon',
     english: 'Once in a blue moon',
     literal: 'Uma vez numa lua azul',
+    clue:
+      'A full moon behind thin cloud over rooftops, the light faintly cold and blue.',
     wtf: 'The moon is not blue and nobody knows what you are waiting for.',
     equivalent: 'De vez em quando',
     gloss: 'Every now and then.',
@@ -274,6 +343,8 @@ export const IDIOMS: Idiom[] = [
     id: 'touch_wood',
     english: 'Touch wood',
     literal: 'Toca madeira',
+    clue:
+      'A hand-worn wooden bannister curving away up a stairwell.',
     wtf: 'This one nearly makes it — the superstition exists, the phrasing does not.',
     equivalent: 'Bate na madeira',
     gloss: 'Knock on the wood.',
@@ -283,6 +354,8 @@ export const IDIOMS: Idiom[] = [
     id: 'fingers_crossed',
     english: 'Fingers crossed',
     literal: 'Dedos cruzados',
+    clue:
+      'Two crossed wooden spoons resting on the edge of a pot.',
     wtf: 'The gesture is the same. The phrase is not the one that gets said.',
     equivalent: 'Tomara',
     gloss: "Let's hope so.",
@@ -293,6 +366,8 @@ export const IDIOMS: Idiom[] = [
     id: 'god_knows',
     english: 'God knows',
     literal: 'Deus sabe',
+    clue:
+      'A small tiled saint set into a wall above a doorway, paint faded.',
     wtf: 'Perfectly fine, and slightly more devout than you intended.',
     equivalent: 'Sabe-se lá',
     gloss: 'Who knows.',
@@ -303,6 +378,8 @@ export const IDIOMS: Idiom[] = [
     id: 'so_far_so_good',
     english: 'So far, so good',
     literal: 'Tão longe, tão bom',
+    clue:
+      'A long straight road running away to the horizon, seen from the roadside.',
     wtf: 'You have said something about distance and quality. Nobody knows what.',
     equivalent: 'Para já, tudo bem',
     gloss: 'For now, all good.',
@@ -312,6 +389,8 @@ export const IDIOMS: Idiom[] = [
     id: 'here_we_go_again',
     english: 'Here we go again',
     literal: 'Aqui vamos nós outra vez',
+    clue:
+      'A revolving door in an old building, caught mid-turn.',
     wtf: 'Understandable, a bit long, and it lands as a translation.',
     equivalent: 'Lá vamos nós',
     gloss: 'There we go.',
@@ -322,6 +401,8 @@ export const IDIOMS: Idiom[] = [
     id: 'shit_happens',
     english: 'Shit happens',
     literal: 'Merda acontece',
+    clue:
+      'A pavement with a puddle and a single dropped ice cream beside it.',
     wtf: 'Understood, imported, and it still sounds translated.',
     equivalent: 'São coisas que acontecem',
     gloss: 'These are things that happen.',
@@ -333,6 +414,8 @@ export const IDIOMS: Idiom[] = [
     id: 'taking_the_piss',
     english: 'Taking the piss',
     literal: 'A tirar o chichi',
+    clue:
+      'An enamel chamber pot on a bathroom floor beside old tiles.',
     wtf: 'You have described a medical procedure.',
     equivalent: 'Estás a gozar comigo?',
     gloss: 'Are you having me on?',
@@ -344,6 +427,8 @@ export const IDIOMS: Idiom[] = [
     id: 'youre_having_a_laugh',
     english: "You're having a laugh",
     literal: 'Estás a ter uma risada',
+    clue:
+      'A theatre comedy mask hanging on a dressing room wall.',
     wtf: 'You have observed that somebody is laughing. They were not.',
     equivalent: 'Estás a brincar',
     gloss: "You're joking.",
@@ -353,6 +438,8 @@ export const IDIOMS: Idiom[] = [
     id: 'for_fucks_sake',
     english: "For fuck's sake",
     literal: 'Pelo amor da foda',
+    clue:
+      'A hammer on a workbench beside a bent nail and a split piece of wood.',
     wtf: 'Grammatically constructed, never uttered, and genuinely baffling.',
     equivalent: 'Foda-se',
     gloss: 'For fuck sake.',
@@ -364,6 +451,8 @@ export const IDIOMS: Idiom[] = [
     id: 'bloody_hell',
     english: 'Bloody hell',
     literal: 'Inferno sangrento',
+    clue:
+      'A church doorway in deep shadow with red evening light on the stone around it.',
     wtf: 'You have named a heavy metal album.',
     equivalent: 'Caramba',
     gloss: 'Blimey.',
@@ -374,6 +463,8 @@ export const IDIOMS: Idiom[] = [
     id: 'over_my_dead_body',
     english: 'Over my dead body',
     literal: 'Sobre o meu cadáver',
+    clue:
+      'A stone tomb slab in a cloister, worn smooth, grass growing at its edge.',
     wtf: 'This one travels, and is just as dramatic in both.',
     equivalent: 'Só por cima do meu cadáver',
     gloss: 'Only over my dead body.',

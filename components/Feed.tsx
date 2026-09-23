@@ -2009,10 +2009,31 @@ export function Card({
               */
               className={
                 'absolute inset-x-0 bg-gradient-to-t to-transparent ' +
+                /*
+                  AN IDIOM GETS A THIRD SCRIM, because neither of the other two is right.
+
+                  Its clue pictures are deliberately bright — horses under a blue sky, a
+                  teacup in daylight — because they are jokes rather than Lisbon interiors
+                  and are meant to feel unlike the learning cards. The 62% version could not
+                  hold WHAT WE SAY at the top of it: photographed on the horses, the eyebrow
+                  was barely legible.
+
+                  The full-frame one fixed that and cost the whole picture. Measured by
+                  looking: the horses went to silhouettes behind a wash, and on this card
+                  the photograph IS the clue — drowning it removes the thing the game is
+                  played with. That gradient is for cards carrying a stack of small type,
+                  which is a different problem from one headline over daylight.
+
+                  So: taller than the standard and lighter than the heavy one. It reaches
+                  78% up the frame, which covers the eyebrow and the title, and its top is
+                  fully transparent so the subject stays a photograph.
+                */
                 (card.kind === 'derived' ||
                 (card.kind === 'intro' && (card.intro.asks || card.intro.shows))
                   ? 'inset-y-0 from-black/95 via-black/85 to-black/45'
-                  : 'bottom-0 h-[62%] from-black/92 via-black/60')
+                  : card.kind === 'idiom'
+                    ? 'bottom-0 h-[78%] from-black/95 via-black/70'
+                    : 'bottom-0 h-[62%] from-black/92 via-black/60')
               }
             />
           )}
@@ -3963,7 +3984,8 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
 
     Read from the record rather than held only in state: the feed rebuilds whenever the
     learner changes, and a tick that vanished on the next save would read as not having
-    registered.
+    registered. It is also what decides whether the third beat is already open — somebody
+    coming back to a card they have played should not have to guess it again.
   */
   const said = (learner.idioms_got ?? []).includes(i.id)
     ? 'got'
@@ -3971,75 +3993,71 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
       ? 'missed'
       : null
 
+  /*
+    THREE BEATS, AND THE TICK IS THE DOOR BETWEEN THE SECOND AND THE THIRD.
+
+    Sam: "the reveal shows the actual language and english translation. The user then says
+    whether they guessed right or wrong (honesty call, tiny point win) and that reveals the
+    (usually) why it doesnt land in the destination language and how the meaning of the
+    phrase can be truly conveyed."
+
+    So the explanation is EARNED rather than printed. The old card put all four facts on one
+    pane and the tick sat at the bottom as an afterthought — which made it a form to fill in
+    at the end of something you had already read. Here it is the only way forward, and the
+    thing it opens is the good part: why the literal fails, and what Portugal actually says.
+
+    `answered` drives the third beat rather than a separate state, so a card met a second
+    time opens fully. The tick can still be changed — pressing the other button rewrites the
+    record — and the explanation simply stays open, because taking it away to punish an
+    honest correction would be absurd.
+  */
+  const answered = said !== null
+
   return (
     <div className="flex flex-col gap-6">
       {/*
-        THE WRECKAGE FIRST, at the size the joke deserves.
+        BEAT ONE — what it actually says, which is the answer to the riddle on the face.
 
-        This is the beat a flashcard cannot do: the English rendered faithfully into
-        Portuguese and landing on nothing. Big, because it is the punchline of the first
-        half and the setup for the second.
+        The face asked "what do we say?" over a field of horses and SEGURA OS TEUS CAVALOS.
+        This is the answer to that, and it is deliberately the first thing here: the reveal
+        is the point of the tap, and making somebody scroll for it would be a card that
+        opens on its own small print.
       */}
       <div className="flex flex-col gap-3">
-        <p className="eyebrow text-muted">WORD FOR WORD</p>
-        <p className="pt display text-balance text-3xl">{i.literal}</p>
-        <p className="text-sm leading-relaxed text-muted">{i.wtf}</p>
+        <p className="eyebrow text-muted">WE SAY</p>
+        <p className="display text-balance text-3xl">{i.english}</p>
       </div>
 
       {/*
-        What somebody actually says, in the panel the product uses for the thing that is
-        true — the same box WHY IT LANDS gets on a Legend card.
+        BEAT TWO — what Portugal says, in the panel the product uses for the true thing.
+
+        Same box as WHY IT LANDS on a Legend card, which is deliberate: this is the one line
+        on the card that is real Portuguese somebody could use, and it should look like
+        every other real line in the product rather than like part of the joke.
       */}
       <div className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
-        <p className="eyebrow text-accent">WHAT THEY SAY</p>
+        <p className="eyebrow text-accent">THEY SAY</p>
         <div className="mt-3 flex items-center gap-3">
           <AudioButton slug={slugFor(i.equivalent)} text={i.equivalent} />
           <p className="pt min-w-0 flex-1 text-xl text-accent">{i.equivalent}</p>
           <CopyButton text={i.equivalent} label="Copy the line" />
         </div>
         <p className="mt-1 text-sm text-fg/80">{i.gloss}</p>
-        {i.note ? (
-          <p className="mt-3 text-xs leading-relaxed text-muted">{i.note}</p>
-        ) : null}
       </div>
 
       {/*
-        THE BLOCKS, which are why this is in a language app rather than a joke book.
+        DID YOU GET IT — the honesty call, and the door to the rest of the card.
 
-        Only when there are some. Twenty-two of the thirty teach a whole phrase with no
-        detachable word, and an empty WORTH KEEPING panel on those would be a promise the
-        card cannot honour — see content/idioms.ts, which refuses to invent pieces to pad
-        the number.
-      */}
-      {i.blocks.length ? (
-        <div className="flex flex-col gap-1 rounded border-l-2 border-accent/50 bg-surface px-3 py-3">
-          <p className="eyebrow text-muted">WORTH KEEPING</p>
-          {i.blocks.map((id) => {
-            const piece = PIECES[id]
-            if (!piece) return null
-            return (
-              <p key={id} className="text-xs leading-relaxed text-fg/85">
-                <span className="pt owned">{displayForm(piece)}</span> — {piece.gloss}
-              </p>
-            )
-          })}
-        </div>
-      ) : null}
-
-      {/*
-        DID YOU GET IT, and it is an honesty call.
-
-        Sam: "Simple Did you get it mechanic (tick, cross) adds a tiny point to their score.
-        It's an honesty call obviously." Nothing verifies this and nothing needs to — the
-        argument for why a self-reported tally is allowed on this card and refused on a
-        Legend one is written on `idioms_got` in engine/learner.ts, which is where the
-        content lint sends anybody adding a counter.
+        Sam: "the user then says whether they guessed right or wrong (honesty call, tiny
+        point win)." Nothing verifies it and nothing needs to; the argument for why a
+        self-reported tally is allowed here and refused on a Legend card is written on
+        `idioms_got` in engine/learner.ts.
 
         Both buttons stay live after an answer, so changing your mind is one tap rather than
-        a thing you cannot undo. The chosen one fills in; the other stays outlined.
+        a thing you cannot undo.
       */}
-      <div className="mt-auto flex flex-col gap-3">
-        <p className="eyebrow text-muted">DID YOU GET IT</p>
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-muted">{answered ? 'YOU SAID' : 'DID YOU GET IT'}</p>
         <div className="flex gap-3">
           <button
             type="button"
@@ -4048,9 +4066,7 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
             aria-pressed={said === 'got'}
             className={
               'tap-target eyebrow flex-1 rounded px-5 py-3 transition ' +
-              (said === 'got'
-                ? 'bg-correct text-accent-ink'
-                : 'border border-line text-fg')
+              (said === 'got' ? 'bg-correct text-accent-ink' : 'border border-line text-fg')
             }
           >
             GOT IT
@@ -4062,25 +4078,79 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
             aria-pressed={said === 'missed'}
             className={
               'tap-target eyebrow flex-1 rounded px-5 py-3 transition ' +
-              (said === 'missed'
-                ? 'bg-accent text-accent-ink'
-                : 'border border-line text-fg')
+              (said === 'missed' ? 'bg-accent text-accent-ink' : 'border border-line text-fg')
             }
           >
             MISSED IT
           </button>
         </div>
         {/*
-          A missed one is not a failure, and the line says so rather than leaving somebody
-          to infer it. It also states the mechanic plainly: this is the only thing the
-          cross does.
+          What the buttons are for, said once and only while it is still a question. After
+          an answer the thing it promised is on screen, so the promise is noise.
         */}
-        {said === 'missed' ? (
+        {answered ? null : (
           <p className="text-xs leading-relaxed text-muted">
-            It will come back round. That is all this does.
+            Say which, and the rest of the card opens.
           </p>
-        ) : null}
+        )}
       </div>
+
+      {/*
+        BEAT THREE — why it does not travel, and how the meaning gets across anyway.
+
+        Held behind the tick on purpose. This is the part worth reading and it is also the
+        part nobody reads when it is printed above a button; putting it after the honesty
+        call makes the call worth making and gives the card somewhere to go.
+
+        animate-bank is the product's own arrival — the same 120ms settle a banked word
+        gets — so the opening reads as something being handed over rather than as a section
+        that was always there and is now scrolled to.
+      */}
+      {answered ? (
+        <div className="animate-bank flex flex-col gap-3">
+          <div className="flex flex-col gap-1 rounded border-l-2 border-accent/50 bg-surface px-3 py-3">
+            <p className="eyebrow text-muted">WHY NOT</p>
+            <p className="text-sm leading-relaxed text-fg/85">{i.wtf}</p>
+            {i.note ? (
+              <p className="mt-3 text-xs leading-relaxed text-muted">{i.note}</p>
+            ) : null}
+          </div>
+
+          {/*
+            THE BLOCKS, which are why this is in a language app rather than a joke book.
+
+            Only when there are some. Twenty-two of the thirty teach a whole phrase with no
+            detachable word, and an empty WORTH KEEPING panel on those would be a promise
+            the card cannot honour — see content/idioms.ts, which refuses to invent pieces
+            to pad the number.
+          */}
+          {i.blocks.length ? (
+            <div className="flex flex-col gap-1 rounded border-l-2 border-accent/50 bg-surface px-3 py-3">
+              <p className="eyebrow text-muted">WORTH KEEPING</p>
+              {i.blocks.map((id) => {
+                const piece = PIECES[id]
+                if (!piece) return null
+                return (
+                  <p key={id} className="text-xs leading-relaxed text-fg/85">
+                    <span className="pt owned">{displayForm(piece)}</span> — {piece.gloss}
+                  </p>
+                )
+              })}
+            </div>
+          ) : null}
+
+          {/*
+            A missed one is not a failure, and the line says so rather than leaving somebody
+            to infer it. It also states the mechanic plainly: this is the only thing the
+            cross does.
+          */}
+          {said === 'missed' ? (
+            <p className="text-xs leading-relaxed text-muted">
+              It will come back round. That is all this does.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   )
 }

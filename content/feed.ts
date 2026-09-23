@@ -809,6 +809,66 @@ export function sheetCards(dismissed: string[] = []): FeedCard[] {
  * Dismissed ones do drop out: NOT FOR ME writes finished_cards, honoured here as
  * everywhere else.
  */
+/**
+ * The clue picture for an idiom, and the sand it falls back to.
+ *
+ * `/idioms/<id>.jpg`, generated from the `clue` brief beside the phrase — see
+ * content/idioms.ts, where the brief lives with the idiom rather than in the image bank,
+ * because it is content about that phrase rather than a slot to fill.
+ *
+ * UNDEFINED WHEN THERE IS NO PICTURE, which is the honest fallback rather than a clever
+ * one. cardFace returning no image is a state the whole feed already understands — it is
+ * what every intro card does — so an idiom without its photograph gets the sand treatment,
+ * the washes, and the literal in big ink instead of big white. The card still works and
+ * still plays; it just loses the clue, which is a graceful way to be missing an asset and
+ * the difference between shipping the writing now and waiting on a generation run.
+ */
+export function idiomImage(idiom: Idiom): { src: string; alt: string } | undefined {
+  return IDIOM_IMAGES.has(idiom.id)
+    ? { src: '/idioms/' + idiom.id + '.jpg', alt: idiom.clue }
+    : undefined
+}
+
+/*
+  Which clue pictures actually exist, listed rather than guessed.
+
+  A <img> pointing at a missing file is a broken card, and the feed cannot ask the
+  filesystem at render time. So this is the manifest, written by the generation script when
+  it succeeds — empty until then, which is exactly what the fallback above is for.
+*/
+export const IDIOM_IMAGES = new Set<string>([
+  'better_late_than_never',
+  'bite_the_bullet',
+  'blessing_in_disguise',
+  'bloody_hell',
+  'bobs_your_uncle',
+  'break_a_leg',
+  'elephant_in_the_room',
+  'fingers_crossed',
+  'for_fucks_sake',
+  'god_knows',
+  'here_we_go_again',
+  'hold_your_horses',
+  'it_is_what_it_is',
+  'keep_your_hair_on',
+  'not_my_cup_of_tea',
+  'once_in_a_blue_moon',
+  'over_my_dead_body',
+  'piece_of_cake',
+  'plenty_more_fish',
+  'shit_happens',
+  'so_far_so_good',
+  'speak_of_the_devil',
+  'storm_in_a_teacup',
+  'taking_the_piss',
+  'the_last_straw',
+  'the_penny_dropped',
+  'touch_wood',
+  'what_goes_around',
+  'writings_on_the_wall',
+  'youre_having_a_laugh',
+])
+
 export function idiomCards(
   got: string[] = [],
   missed: string[] = [],
@@ -1001,20 +1061,35 @@ export function cardFace(card: FeedCard): {
   }
   if (card.kind === 'idiom') {
     /*
-      THE FACE IS THE ENGLISH, because the English is the question.
+      THE FACE IS THE NONSENSE PORTUGUESE, OVER A PICTURE OF IT.
 
-      Every other card in this feed leads with Portuguese — that is the product. This one
-      leads with the thing you already say, because the card is a guess: you read "Bob's
-      your uncle", you wonder what on earth Portugal does with that, and the answer is
-      behind the tap. Putting the Portuguese on the face would give away the punchline and
-      leave the reveal with nothing to reveal.
+      Sam: "we show the literal translation in the destination language on the card, the
+      user then has to guess what the translation to english is... we need to generate an
+      image that loosely gives a clue so hold your horses would be an image of a group of
+      horses. And the literal translation is overlayed on it in big white letters."
 
-      No image, deliberately, and none is offered — see the note on the card kind.
+      This led with the English and asked what Portugal says instead, which made it a quiz
+      about Portuguese — the same thing every other card in the product is. The other way
+      round it is a riddle: SEGURA OS TEUS CAVALOS over a field of horses, and the answer is
+      something the learner has known since they were four. The win is recognition rather
+      than recall, so it is available on somebody's first day, and it is the one card here
+      that a beginner can be CERTAIN about.
+
+      THE PICTURE ILLUSTRATES THE LITERAL, NEVER THE MEANING, which is what keeps it a clue
+      instead of the answer. Horses, a teacup, a coin mid-air — all nonsense, because the
+      literal is nonsense. The gap between what you can see and what it must actually mean
+      is the entire game.
+
+      An image at last, where the previous build argued for none. That argument was right
+      about a card whose face was an English phrase — a photograph behind "Bob's your uncle"
+      would have been decoration. It is wrong about a card whose face is a clue, because
+      then the photograph IS the clue.
     */
     return {
       eyebrow: card.idiom.blue ? 'NOT SAFE' : 'WHAT WE SAY',
-      title: card.idiom.english,
-      blurb: 'What does Portugal say instead?',
+      title: card.idiom.literal,
+      blurb: 'What do we say?',
+      image: idiomImage(card.idiom),
     }
   }
   if (card.kind === 'vibe') {

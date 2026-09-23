@@ -1463,6 +1463,33 @@ for (const e of EXAMPLES) {
 
     /* A gloss that repeats the English teaches nothing on the way back. */
     if (!i.gloss.trim()) fail('idiom ' + i.id + ' has no gloss')
+
+    /*
+      THE CLUE PICTURES THE LITERAL, NOT THE MEANING, and it may not give the game away.
+
+      The card shows the literal Portuguese over the picture and asks what the English is,
+      so a clue that names any word of the English answer is the answer printed on the
+      question. "A bale of straw" is right for the last straw; "the final thing somebody
+      can bear" would be the puzzle solved in the brief.
+
+      Checked on the distinctive words only — the short ones are in every sentence, and
+      "a cup of black tea" for not my cup of tea is a fair picture of the literal rather
+      than a leak.
+    */
+    const tell = i.english
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length > 4)
+    const clue = i.clue.toLowerCase()
+    const leaked = tell.filter((w) => clue.includes(w))
+    if (leaked.length > 1) {
+      fail(
+        'idiom ' + i.id + ' clue gives the answer away (' + leaked.join(', ') +
+          ') — it should picture the literal, not the meaning',
+      )
+    }
+    if (!i.clue.trim()) fail('idiom ' + i.id + ' has no clue brief for its picture')
   }
   /*
     THE CLUB AND THE VIBE MUST NOT TEACH THE SAME IDIOM DIFFERENTLY.

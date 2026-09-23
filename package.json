@@ -51,6 +51,7 @@
     "drops": "tsx scripts/drop-check.mts",
     "pipeline": "tsx scripts/drop-pipeline.mts",
     "images": "tsx scripts/make-images.mts",
+    "idiom-images": "tsx scripts/idiom-images.mts",
     "identity": "tsx scripts/identity-check.mts",
     "anchor": "tsx scripts/anchor-check.mts",
     "session": "tsx scripts/session-check.mts",
