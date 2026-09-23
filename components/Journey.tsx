@@ -49,7 +49,8 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, myAge, myName, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame, worthSaving } from '@/content/legend'
+import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, myAge, myName, personalise, framesJustOpened, legendStatus, metIn,
+  provenanceOf, fillFrame, fillEnglish, type LegendFrame, worthSaving } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
@@ -2589,7 +2590,26 @@ function RootBeatView({
   pieceIndex?: number
 }) {
   const { next, recordVoice } = useJourney()
-  const root = rootById(rootId)!
+  /*
+    THE ROOT, WITH THE LEARNER'S OWN FACTS IN IT — once, here, rather than at nine renders.
+
+    Sam: "i said 56, it then went onto talk about being 30." And on the interests root:
+    "asked me what I liked, I said football, it then persisted through the learning with
+    football."
+
+    Both are the same fault. `mine()` existed and was applied to BRANCHES only, so the
+    root's own target — the big blue line at the top of every beat — rendered raw, along
+    with the audio, the copy button, the build tiles and the cold prompt. Nine call sites,
+    one of which was personalised.
+
+    Substituting where the root is fetched fixes all of them at once and cannot drift: any
+    screen that reads `root` from here gets the learner's version, and a new render added
+    tomorrow is covered without being told. The content stays authored with its specimens,
+    which is what keeps it checkable.
+  */
+  const raw = rootById(rootId)!
+  const meLearner = useLearner()
+  const root = useMemo(() => personalise(raw, meLearner), [raw, meLearner.display_name, meLearner.profile?.age])
   const family = CRATES.find((f) => f.id === root.culture_family)!
   const [done, setDone] = useState(false)
   /**
@@ -4217,7 +4237,9 @@ function LegendOpened({
   */
   const first = frames[0]
   const more = frames.length - 1
-  const provenance = provenanceOf(first)
+  /* Where THIS learner met each word — see provenanceOf, which was naming the crate
+     a word is authored in rather than the one they played. */
+  const provenance = provenanceOf(first, metIn(learner.evidence ?? []))
 
   return (
     <Shell stage="CHOICE" eyebrow="YOUR LEGEND">

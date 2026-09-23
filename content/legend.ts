@@ -199,35 +199,128 @@ export function myName(line: string, displayName?: string | null): string {
 }
 
 /**
- * The age the content was authored with, so the same trick works on it as on the name.
+ * Every age the content is authored with, because there is more than one.
  *
- * tb_age is written around thirty-two — "Tenho trinta e dois anos" — which is right as
- * teaching material and wrong the moment DUB knows better.
+ * tb_age says "Tenho trinta anos" and bj_age says "Tenho trinta e dois anos" — two
+ * specimens, deliberately, because they are different lessons. A single constant could
+ * only ever match one of them, and the first version of this matched NEITHER: I read 32
+ * off bj_age, wrote it here, and the basics root it was supposed to fix says thirty. Sam:
+ * "i said 56, it then went onto talk about being 30."
+ *
+ * So it is a set, and myAge replaces whichever one a line actually contains. Adding a
+ * third specimen means adding it here, which a check enforces — see scripts/lint-content.
  */
-export const AUTHORED_AGE = 32
+export const AUTHORED_AGES = [32, 30]
+
+/*
+  The interest nouns, by id, for the swap above.
+
+  Read from content/interests.ts rather than retyped, so the chips a learner taps and the
+  word the lesson teaches cannot name different things.
+*/
+const INTO_WORDS: Record<string, { id: string; target: string; gloss: string; after_de: string }> =
+  Object.fromEntries(
+    INTERESTS.map((i) => [i.id, { id: i.id, target: i.target, gloss: i.gloss, after_de: i.after_de }]),
+  )
 
 /**
- * THE LEARNER'S OWN AGE, IN THE SENTENCES THEY PRACTISE.
+ * A ROOT WITH THIS LEARNER'S FACTS IN IT, everywhere the root is shown.
  *
- * Sam: "after I have given you my age, that needs to persist. I told it I was 56 and then
- * it got me to practise I am 30."
+ * myName and myAge are line-level, and that was the whole problem: they had to be called
+ * at every render, and they were called at one. So the branch list said "Tenho cinquenta e
+ * seis anos" while the headline above it, the audio, the copy button, the build tiles and
+ * the cold prompt all still said thirty.
  *
- * Exactly the same fault myName was written to fix, on a different field: the root is
- * authored with a specimen age, the learner is asked for theirs one screen earlier, and
- * nothing joined the two — so somebody who said 56 was drilled on a sentence about being
- * thirty-two, and the one number they will actually need was never practised.
+ * Applied to the ROOT instead, once, where it is fetched. Every field a learner can read
+ * goes through it, so nothing can be missed and nothing new has to be remembered.
  *
- * SUBSTITUTED AT RENDER, not stored, for the reason myName is: the content stays authored
- * and checkable, and every screen that shows a line gets the learner's version by calling
- * one function. A learner who skipped the question sees the specimen, which is correct.
- *
- * Both spellings, because "trinta e dois" appears as a phrase and "32" never does — the
- * graph is spelled out. say() is the same speller the age question uses to build the
- * sentence back, so the two cannot disagree.
+ * The extracts are deliberately NOT touched: a piece is a word in the graph, banked by id,
+ * and rewriting `trinta` to `cinquenta e seis` would put a word in the inventory that no
+ * lesson teaches and no check can resolve. The sentences are personal; the vocabulary is
+ * the product's.
  */
+export function personalise<T extends {
+  target: string
+  source: string
+  root_display: string
+  semantic_bridge: string
+  branches: { target: string; en: string; formal?: string }[]
+  transfer_prompt: { context: string; ask: string; answer: string }
+}>(
+  root: T,
+  me: { display_name?: string; profile?: { age?: number | null; into?: string[] } | null },
+): T {
+  /*
+    AND THE THING THEY SAID THEY WERE INTO, on the root that asks.
+
+    Sam: "asked me what I liked, I said football, it then persisted through the learning
+    with football." tb_into is authored around música and drilled it whatever somebody
+    answered — so the sentence they had just built about themselves was replaced by one
+    about music they never said.
+
+    Their FIRST pick, because the root teaches one noun and a list would not fit the
+    sentence it is built around. Every interest is a member of the `into` set, so whichever
+    lands is a word the library can resolve — and the extract is swapped with the sentences
+    so the word taught, the word banked and the word drilled are the same word.
+
+    Nothing happens when they skipped the question or picked música: the authored specimen
+    is a real lesson and stays.
+  */
+  const first = me.profile?.into?.[0]
+  const swap = first && first !== 'musica' ? INTO_WORDS[first] : null
+  const mine = (t: string) =>
+    myAge(
+      myName(swap ? t.replaceAll('de música', swap.after_de).replaceAll('música', swap.target) : t, me.display_name),
+      me.profile?.age,
+    )
+  return {
+    ...root,
+    /*
+      The extract too, so the banked word is the one on the screen. Only where the root
+      actually teaches música — every other root is untouched by this.
+    */
+    ...(swap && 'extracts' in root
+      ? {
+          extracts: (root as unknown as { extracts: { id: string; target: string; gloss: string }[] }).extracts.map(
+            (e) =>
+              e.id === 'musica'
+                ? { ...e, id: swap.id, target: swap.target, gloss: swap.gloss }
+                : e,
+          ),
+        }
+      : {}),
+    target: mine(root.target),
+    source: mine(root.source),
+    root_display: mine(root.root_display),
+    semantic_bridge: mine(root.semantic_bridge),
+    branches: root.branches.map((b) => ({
+      ...b,
+      target: mine(b.target),
+      en: mine(b.en),
+      ...(b.formal ? { formal: mine(b.formal) } : {}),
+    })),
+    transfer_prompt: {
+      ...root.transfer_prompt,
+      context: mine(root.transfer_prompt.context),
+      ask: mine(root.transfer_prompt.ask),
+      answer: mine(root.transfer_prompt.answer),
+    },
+  }
+}
+
 export function myAge(line: string, age?: number | null): string {
-  if (!age || age === AUTHORED_AGE || age < 1 || age > 120) return line
-  return line.replaceAll(say(AUTHORED_AGE), say(age))
+  if (!age || age < 1 || age > 120) return line
+  let out = line
+  for (const specimen of AUTHORED_AGES) {
+    if (specimen === age) continue
+    /*
+      Longest first, so "trinta e dois" is replaced before "trinta" can eat its first word
+      and leave " e dois" stranded. Sorting by the spelled length rather than the number is
+      what makes that true for any pair.
+    */
+    out = out.replaceAll(say(specimen), say(age))
+  }
+  return out
 }
 
 /**
@@ -1714,13 +1807,52 @@ export function framesJustOpened(opts: {
  * Fiction. Neither was ever about you." It writes itself from built_from, and it is the
  * collision mechanic pointed at the learner's own family.
  */
-export function provenanceOf(frame: LegendFrame): { piece: string; family: string }[] {
+export function provenanceOf(
+  frame: LegendFrame,
+  /*
+    WHERE THIS LEARNER ACTUALLY MET THE WORD, which is not where it is authored.
+
+    Sam, having finished the basics and nothing else: "it said I knew Sou because I had
+    done James Bond which I hadn't."
+
+    He is right and it was stated as fact. `piece.family` is the crate a word is AUTHORED
+    in, and PIECES keeps whichever root has the lowest rung — sou, inglês and chamo_me are
+    all taught in both james_bond and the_basics, and James Bond wins that tiebreak. So the
+    one card that exists to say "you already own this, and here is where it came from" was
+    naming a film the learner had never opened.
+
+    The evidence log knows the truth: acquirePiece records the family a word was actually
+    met in, as culture_context. Passing it in rather than reading a global keeps this
+    function pure and lets every caller answer for its own learner.
+
+    Absent falls back to the authored family, which is what every existing caller got and
+    is right for a screen with no learner — the intro's specimen card, and the checks.
+  */
+  met?: Record<string, string>,
+): { piece: string; family: string }[] {
   const out: { piece: string; family: string }[] = []
   for (const id of frame.built_from) {
     const piece = PIECES[id]
     if (!piece) continue
-    if (out.some((o) => o.family === piece.family)) continue
-    out.push({ piece: piece.target, family: piece.family })
+    const family = met?.[id] ?? piece.family
+    if (out.some((o) => o.family === family)) continue
+    out.push({ piece: piece.target, family })
+  }
+  return out
+}
+
+/**
+ * Which crate this learner met each word in, from their own evidence.
+ *
+ * The acquire event carries culture_context — the family the lesson was in — so this is a
+ * record of what happened rather than a guess from the graph. See provenanceOf.
+ */
+export function metIn(evidence: { target_id: string; event_type: string; culture_context?: string | null }[]): Record<string, string> {
+  const out: Record<string, string> = {}
+  for (const e of evidence) {
+    if (e.event_type !== 'acquire' || !e.culture_context) continue
+    /* The first acquire is where they met it; a later one is a re-run of the same vibe. */
+    out[e.target_id] ??= e.culture_context
   }
   return out
 }

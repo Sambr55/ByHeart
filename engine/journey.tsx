@@ -341,11 +341,27 @@ const initial: JourneyState = {
 }
 
 /** Gender first, then age, then why. Skipped counts as answered — we do not re-ask. */
+/**
+ * THE QUESTIONNAIRE IS GONE, because every question on it is asked somewhere better.
+ *
+ * Sam, meeting the age band screen after having already typed 56 in a lesson: "it then
+ * asked me my age again. Remove this screen."
+ *
+ * He had answered it twice by then — three times counting the Legend card — and the three
+ * mechanics disagreed: a number field, a band picker, and a decade-and-digit picker. This
+ * was the band picker, and it is the one with nothing to recommend it. Age is a NUMBER
+ * now, asked by tb_age which teaches tenho and anos, and age_band is derived from it.
+ *
+ * The other two went the same way and for the same reason: gender is asked by the
+ * obrigado/obrigada root that explains why it matters, and goal is asked in set-up on the
+ * card about why you are here. A questionnaire between sections was the last place in the
+ * product that collected something without teaching it.
+ *
+ * Kept as a function returning null rather than deleted, because Osmosis reads it to
+ * decide how many insights it has room for — and "no question is coming" is exactly what
+ * it now always means. The step type and ProfileStep go with it.
+ */
 export function nextProfileQuestion(): 'gender' | 'age' | 'goal' | null {
-  const p = getLearner().profile ?? { gender: null, age_band: null, goal: null, skipped: [] }
-  if (!p.gender && !p.skipped.includes('gender')) return 'gender'
-  if (!p.age_band && !p.skipped.includes('age_band')) return 'age'
-  if (!p.goal && !p.skipped.includes('goal')) return 'goal'
   return null
 }
 

@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES, ROOTS_BY_FAMILY } from '@/content/roots'
-import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, askFor, frameReady, nameFor, REPAIR_KIT, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
+import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, askFor, frameReady, nameFor, REPAIR_KIT, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, metIn,
+  provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
 import { PICKER } from '@/content/front-door'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
@@ -1076,6 +1077,7 @@ function BuildCard({
   /** How many still unanswered, including this one. Said as a sentence, never a score. */
   remaining: number
 }) {
+  const me = useLearner()
   const [draft, setDraft] = useState<Record<string, string>>(values)
   const [beat, setBeat] = useState<'ask' | 'build' | 'cold'>('ask')
 
@@ -1147,7 +1149,9 @@ function BuildCard({
       : draft[s.key]?.trim(),
   )
   const sentence = fillFrame(frame, draft, gender)
-  const provenance = provenanceOf(frame)
+  /* Where THIS learner met each word — see provenanceOf, which was naming the crate
+     a word is authored in rather than the one they played. */
+  const provenance = provenanceOf(frame, metIn(me.evidence ?? []))
   /*
     Did they already have these words, or is this card handing them over?
 
@@ -1213,15 +1217,31 @@ function BuildCard({
             </div>
           ) : null}
 
-          <button
-            type="button"
-            data-testid="legend-make-mine"
-            onClick={() => setBeat('build')}
-            /* mt-10, not mt-auto: under the words that earned it. See Journey's Cta. */
-            className="tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-accent-ink"
-          >
-            MAKE IT MINE
-          </button>
+          {/*
+            DOCKED, because "under the words that earned it" put it mid-screen.
+
+            Sam, with a screenshot of this card: "the CTA buttons need to be anchored to the
+            bottom with a few pixels padding. They are still causing scrolling." The rule
+            this replaces is a good one and it is the third place it has been wrong — the
+            proof card and the session-done screen both gave it up for the same reason. On
+            a card whose body is a pattern, a bridge and a provenance note, the words that
+            earned the button are longer than the screen, so the button floats with dead
+            space under it and the page scrolls past the only control on it.
+
+            Dock is the product's own answer and it is already used three times in this
+            file: sticky at var(--bar-room), which is the measured height of the nav, with
+            the ground behind it so nothing shows through as it passes.
+          */}
+          <Dock>
+            <button
+              type="button"
+              data-testid="legend-make-mine"
+              onClick={() => setBeat('build')}
+              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+            >
+              MAKE IT MINE
+            </button>
+          </Dock>
         </>
       ) : null}
 

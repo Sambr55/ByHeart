@@ -160,6 +160,8 @@ export interface Extract {
 
 export type SetId =
   | 'numbers_1_10'
+  /** What a learner says they are into — see tb_into and content/interests.ts. */
+  | 'into'
   | 'weekdays'
   | 'greetings'
   | 'yes_no'
@@ -214,6 +216,32 @@ export const SETS: WordSet[] = [
     label: 'Counting to ten',
     shelf: 'how_much',
     members: ['um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez'],
+  },
+  {
+    /*
+      The things a person says they like, as a group they can see the shape of.
+
+      Eight nouns that only exist because tb_into asks which of them are true — see
+      content/interests.ts. A set rather than loose vocabulary for the reason every set
+      here exists: four of eight read as four of eight, and loose they read as four words
+      somebody happened to meet.
+    */
+    id: 'into',
+    label: 'What you are into',
+    shelf: 'things',
+    members: ['música', 'futebol', 'praia', 'fado', 'festas', 'filmes', 'livros', 'cozinhar'],
+    /*
+      PARTIAL, AND SAYING SO, because four of the eight are glossed rather than taught.
+
+      música, futebol, praia and festas have roots behind them. fado, filmes, livros and
+      cozinhar appear on the chips and in the sentence a learner builds, and no root
+      unpacks them — so claiming a closed set of eight would be the exact overclaim this
+      flag exists to prevent.
+
+      Worth being strict about rather than padding: four more roots to close it would be
+      four lessons written to satisfy a number, and the set is useful at four.
+    */
+    partial: true,
   },
   {
     id: 'greetings',
@@ -5037,6 +5065,61 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     /*
+      THE OTHER SEVEN THINGS SOMEBODY MIGHT BE INTO, so the set is whole and the answer
+      they give is a word DUB actually teaches.
+
+      tb_into asks which of eight are true and personalise puts their first pick into the
+      sentence — so every one of the eight has to be a real piece, or the lesson banks a
+      word the library cannot resolve. Seven of them live here; música is on tb_into
+      itself, as the authored specimen.
+
+      Three extracts is the limit, so this carries three and the remaining four are
+      glossed. That is honest about what is being claimed: a learner meets all eight on
+      the chips, banks the one they chose, and these three are the ones this root teaches
+      properly.
+    */
+    root_id: 'tb_into_more',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'other',
+    credit: 'The list everybody runs through, ten seconds into meeting somebody',
+    source_label: 'The things people say they like',
+    source_status: 'verified',
+    root_display: 'Football, the beach, and going out.',
+    source: 'Football, the beach and parties.',
+    target: 'Futebol, praia e festas.',
+    semantic_bridge:
+      'Three nouns and no articles, which is how a list works in Portuguese exactly as it does in English. What changes is what happens when you put GOSTO DE in front of them — praia takes its article and becomes da praia, while futebol and festas do not. There is no rule to learn; it is worth knowing that it happens.',
+    subtext: 'Rattled off, not recited.',
+    extracts: [
+      { id: 'futebol', target: 'futebol', gloss: 'football', shelf: 'things', gender: 'm', set: 'into' },
+      { id: 'praia', target: 'praia', gloss: 'beach', shelf: 'things', gender: 'f', set: 'into' },
+      { id: 'festas', target: 'festas', gloss: 'parties', shelf: 'things', gender: 'f', set: 'into' },
+    ],
+    branches: [
+      { target: 'Gosto de futebol.', en: 'I like football.', demonstrates: ['futebol'] },
+      { target: 'Vamos à praia.', en: 'We are going to the beach.', demonstrates: ['praia'] },
+      { target: 'Há festas todo o ano.', en: 'There are festivals all year.', demonstrates: ['festas'] },
+    ],
+    helpers: {
+      'vamos': 'we go',
+      'à': 'to the',
+      'há': 'there are',
+      'todo o ano': 'all year',
+      'fado': 'fado',
+      'filmes': 'films',
+      'livros': 'books',
+      'cozinhar': 'cooking',
+    },
+    transfer_prompt: {
+      context: 'Somebody asks what you do at the weekend.',
+      ask: 'I like football.',
+      answer: 'Gosto de futebol.',
+    },
+    rights_status: 'dub-authored',
+  }),
+  q({
+    /*
       WHAT YOU ARE INTO, and the verb that is missing from the doorway without it.
 
       Sam: "could everyone's legend be different? So someone who loves festivals needs to
@@ -5084,12 +5167,29 @@ export const THE_BASICS: Root[] = [
         shelf: 'doing',
         note: 'The de is not optional and never disappears. Gosto de música, gosto de ti — pleasure FROM a thing rather than of it.',
       },
+      /*
+        THE NOUN IS THE LEARNER'S OWN, swapped in by personalise before this root renders.
+
+        Sam: "asked me what I liked, I said football, it then persisted through the learning
+        with football." The root was authored around música and drilled it whatever somebody
+        answered — so the one sentence they had just built about themselves was replaced by
+        a sentence about music they never said.
+
+        `música` is the authored specimen and stays here, which is what keeps the content
+        checkable and gives a learner who skips the question a real lesson. personalise
+        rewrites both the sentences AND this extract to whichever interest they picked
+        first, so the word taught, the word banked and the word drilled are one word.
+
+        Every one of the eight is a member of the `into` set, so whichever lands is a real
+        piece the library can resolve — see intoPieces below, which declares them.
+      */
       {
         id: 'musica',
         target: 'música',
         gloss: 'music',
         shelf: 'things',
         gender: 'f',
+        set: 'into',
       },
     ],
     branches: [
