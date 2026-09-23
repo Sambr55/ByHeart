@@ -100,6 +100,9 @@ import {
   useJourney,
 } from '@/engine/journey'
 import { chapterById } from '@/content/chapters'
+import { TOO_YOUNG } from '@/content/consent'
+import { say } from '@/content/numbers'
+import type { ProfileAsk } from '@/content/roots'
 import { buzz, nope } from '@/engine/tap'
 import { useLearner } from '@/engine/useLearner'
 import { useEntitlements } from '@/engine/useEntitlements'
@@ -3108,7 +3111,7 @@ function Osmosis() {
  * Nothing here is required. Every question in DUB is skippable and this is no different;
  * skipping records a skip, which is what stops it coming back.
  */
-function AskInLesson({ which }: { which: 'gender' | 'origin' }) {
+function AskInLesson({ which }: { which: ProfileAsk }) {
   const learner = useLearner()
   const profile = learner.profile
   const [open, setOpen] = useState(false)
@@ -3178,7 +3181,239 @@ function AskInLesson({ which }: { which: 'gender' | 'origin' }) {
     )
   }
 
+  if (which === 'age') {
+    return <AskAge open={open} onOpen={() => setOpen(true)} onDone={() => setOpen(false)} />
+  }
+  if (which === 'email') {
+    return <AskEmail open={open} onOpen={() => setOpen(true)} onDone={() => setOpen(false)} />
+  }
+
   return <AskOrigin open={open} onOpen={() => setOpen(true)} onDone={() => setOpen(false)} />
+}
+
+/**
+ * HOW OLD, AS A NUMBER, and the number said back in Portuguese.
+ *
+ * Sam: "We need to ask specific age — not bands because that is part of learning numbers."
+ * The root this sits in teaches tenho, anos and trinta, so typing 34 is not filling a
+ * field — it is being handed "Tenho trinta e quatro anos" and learning two numbers and a
+ * construction at once. A band could never do that.
+ *
+ * It is also the one profile answer with a legal consequence. Under the country's consent
+ * age there is no account, no sync and nothing kept — see content/consent.ts, which
+ * explains why that is a better answer than a wall. The number is checked here and the
+ * consequence is said plainly rather than hidden behind a refused button.
+ */
+function AskAge({
+  open,
+  onOpen,
+  onDone,
+}: {
+  open: boolean
+  onOpen: () => void
+  onDone: () => void
+}) {
+  const learner = useLearner()
+  const [typed, setTyped] = useState(
+    learner.profile?.age != null ? String(learner.profile.age) : '',
+  )
+  const chapter = chapterById(learner.chapter)
+  const said = learner.profile?.age ?? null
+  const skipped = (learner.profile?.skipped ?? []).includes('age')
+  const n = Number(typed)
+  const valid = /^\d{1,3}$/.test(typed) && n >= 1 && n <= 120
+  const tooYoung = valid && n < chapter.consent_age
+
+  if ((said != null || skipped) && !open) {
+    return (
+      <AskSettled
+        line={said != null ? 'Tenho ' + say(said) + ' anos.' : 'You skipped this one.'}
+        onChange={onOpen}
+      />
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+      <p className="eyebrow text-accent">AND YOU</p>
+      <p className="text-sm leading-relaxed">
+        Say it once and DUB will say it properly for you — in Portuguese you have it rather
+        than are it.
+      </p>
+      <label className="flex flex-col gap-1">
+        <span className="eyebrow text-muted">HOW OLD</span>
+        <input
+          value={typed}
+          data-testid="ask-age"
+          inputMode="numeric"
+          onChange={(e) => setTyped(e.target.value.replace(/[^\d]/g, '').slice(0, 3))}
+          placeholder="34"
+          className="tap-target w-24 rounded border border-line bg-bg px-4 py-3 text-base tabular-nums"
+        />
+      </label>
+      {/*
+        THE SENTENCE, BUILT AS THEY TYPE, which is the reason this is a number field.
+
+        It is the lesson happening: 34 becomes trinta e quatro and the learner reads their
+        own age in Portuguese before they have pressed anything.
+      */}
+      {valid ? (
+        <p className="pt text-lg text-accent">Tenho {say(n)} anos.</p>
+      ) : null}
+      {/*
+        And the country's own rule, said as a fact about the country.
+
+        Sam: "obviously yes we block 13 unders — or whatever is specific to the country.
+        Again I see that as part of the learning. In Portugal you must be..." So it is a
+        sentence in Portuguese with a number in it, rather than a refusal.
+      */}
+      {tooYoung ? (
+        <div className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+          <p className="pt text-sm text-accent">
+            Em Portugal, tens de ter {say(chapter.consent_age)} anos.
+          </p>
+          <p className="text-xs leading-relaxed text-muted">
+            {TOO_YOUNG.body}
+          </p>
+        </div>
+      ) : null}
+      <div className="flex items-center gap-3">
+        {valid ? (
+          <button
+            type="button"
+            data-testid="ask-age-done"
+            onClick={() => {
+              setProfile('age', n)
+              /*
+                The band comes with it, derived rather than asked.
+
+                registerFor reads age_band and only cares about 60+, which is the right
+                shape for "how does Portugal speak to you". Deriving it means the two can
+                never disagree and nobody is asked twice.
+              */
+              setProfile('age_band', n >= 60 ? '60plus' : n >= 45 ? '45to59' : n >= 30 ? '30to44' : '16to29')
+              track('profile_answer', { question: 'age', answer: String(n), where: 'lesson' })
+              onDone()
+            }}
+            className="tap-target eyebrow rounded bg-accent px-5 py-3 text-accent-ink"
+          >
+            {tooYoung ? 'KEEP GOING' : 'THAT IS ME'}
+          </button>
+        ) : null}
+        <button
+          type="button"
+          data-testid="ask-age-skip"
+          onClick={() => {
+            setProfile('age', null)
+            onDone()
+          }}
+          className="tap-target text-xs text-muted underline"
+        >
+          Not now
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * THE EMAIL, ASKED BY THE ROOT THAT TEACHES THE WORD FOR IT.
+ *
+ * Sam: "when we collect email — e-mail (or e-posta in Portugal, though e-mail or correio
+ * eletrónico are more common)." The root above has just said that; this is where it is
+ * used for something.
+ *
+ * WHAT IT PROMISES IS WHAT IT DOES. The front door says "nothing here will take your email
+ * and promise to let you know", and that promise is kept — this is not a signup, there is
+ * no newsletter, and the copy says the only thing the address is for. Asking inside a
+ * lesson makes that easier to be honest about rather than harder: there is no offer
+ * attached to it.
+ *
+ * NOT SHOWN AT ALL TO SOMEBODY UNDER THE CONSENT AGE, because there is nowhere to put a
+ * parental authorisation and no way to verify one. The honest answer is to not collect it.
+ */
+function AskEmail({
+  open,
+  onOpen,
+  onDone,
+}: {
+  open: boolean
+  onOpen: () => void
+  onDone: () => void
+}) {
+  const learner = useLearner()
+  const [typed, setTyped] = useState(learner.profile?.email ?? '')
+  const chapter = chapterById(learner.chapter)
+  const age = learner.profile?.age ?? null
+  const said = learner.profile?.email ?? null
+  const skipped = (learner.profile?.skipped ?? []).includes('email')
+  const valid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(typed.trim())
+
+  /* Too young for an account is too young to be asked. Nothing is collected. */
+  if (age != null && age < chapter.consent_age) {
+    return (
+      <AskSettled
+        line={'An account waits until you are ' + chapter.consent_age + '. Everything else is yours.'}
+        onChange={() => {}}
+      />
+    )
+  }
+
+  if ((said || skipped) && !open) {
+    return (
+      <AskSettled line={said ? said : 'You skipped this one.'} onChange={onOpen} />
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+      <p className="eyebrow text-accent">YOURS</p>
+      <p className="text-sm leading-relaxed">
+        This is the only thing that gets your Portuguese onto a new phone. No newsletter,
+        nothing sold, and DUB will not write to you unless you ask it to.
+      </p>
+      <label className="flex flex-col gap-1">
+        <span className="eyebrow text-muted">YOUR E-MAIL</span>
+        <input
+          value={typed}
+          data-testid="ask-email"
+          type="email"
+          inputMode="email"
+          autoComplete="email"
+          onChange={(e) => setTyped(e.target.value)}
+          placeholder="you@somewhere.com"
+          className="tap-target rounded border border-line bg-bg px-4 py-3 text-base"
+        />
+      </label>
+      <div className="flex items-center gap-3">
+        {valid ? (
+          <button
+            type="button"
+            data-testid="ask-email-done"
+            onClick={() => {
+              setProfile('email', typed.trim())
+              track('profile_answer', { question: 'email', answer: 'given', where: 'lesson' })
+              onDone()
+            }}
+            className="tap-target eyebrow rounded bg-accent px-5 py-3 text-accent-ink"
+          >
+            KEEP IT SAFE
+          </button>
+        ) : null}
+        <button
+          type="button"
+          data-testid="ask-email-skip"
+          onClick={() => {
+            setProfile('email', null)
+            onDone()
+          }}
+          className="tap-target text-xs text-muted underline"
+        >
+          Not now
+        </button>
+      </div>
+    </div>
+  )
 }
 
 /** A question already answered, said in one line with a way back in. */

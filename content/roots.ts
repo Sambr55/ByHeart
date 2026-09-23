@@ -73,7 +73,7 @@ export type RightsStatus = 'short-quote-review-required' | 'title-reference' | '
  * field the product already reads, and a root that could ask anything would become a place
  * to put questions nobody knows what to do with. See `asks` on Root.
  */
-export type ProfileAsk = 'gender' | 'origin'
+export type ProfileAsk = 'gender' | 'origin' | 'age' | 'email'
 
 export type QaStatus = 'pending-native-review' | 'reviewed'
 
@@ -4729,6 +4729,19 @@ export const THE_BASICS: Root[] = [
     credit: 'Asked across a table, about a minute in',
     source: 'I am thirty years old.',
     target: 'Tenho trinta anos.',
+    /*
+      And the age, asked as a number rather than as a band.
+
+      Sam: "We need to ask specific age — not bands because that is part of learning
+      numbers." He is right twice. A band teaches nothing and this root already teaches
+      tenho, anos and trinta, so the answer IS the exercise: somebody typing 34 is handed
+      "Tenho trinta e quatro anos" and has learned two numbers and a construction.
+
+      It is also what makes the account rule teachable rather than a checkbox — see
+      content/consent.ts. The number decides whether DUB may keep anything at all, and the
+      screen that says so says it in Portuguese, about Portugal.
+    */
+    asks: 'age',
     semantic_bridge:
       'The one every English speaker gets wrong exactly once. Portuguese does not BE an age, it HAS one — tenho trinta anos, "I have thirty years". Say sou trinta and you have said "I am thirty", which means nothing at all.',
     subtext: 'Counted, and said without flinching.',
@@ -5021,6 +5034,78 @@ export const THE_BASICS: Root[] = [
     rights_status: 'title-reference',
     starter_tags: ['time', 'plans'],
     next_root_hooks: ['ola'],
+  }),
+  q({
+    /*
+      THE EMAIL, WHICH IS A GENUINELY GOOD LESSON AND NOT A FORM.
+
+      Sam: "when we collect email — e-mail (or e-posta in Portugal, though e-mail or
+      correio eletrónico / correio eletrônico are more common). Do you see what I'm
+      getting at?"
+
+      The fact is real and slightly surprising, which is what makes it teachable: Portugal
+      has an official word nobody uses, a formal one used on paperwork, and in a café
+      everybody says e-mail with a Portuguese accent. That is a true thing about how a
+      language absorbs English, and somebody learns it while giving DUB the one piece of
+      information that lets their Portuguese follow them to a new phone.
+
+      LAST OF THE ASKING ROOTS, deliberately. Gender and origin make later lines correct;
+      age decides whether an account is allowed at all. An email is only worth having once
+      all three are settled, and it is the one that carries the most weight, so it is asked
+      by somebody who has already been through four roots rather than on arrival.
+    */
+    root_id: 'tb_email',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'other',
+    credit: 'Every form in Portugal, and every café that wants to send you the receipt',
+    source_label: 'The word Portuguese has three of',
+    source_status: 'verified',
+    root_display: 'What is your email?',
+    source: 'What is your email?',
+    target: 'Qual é o teu e-mail?',
+    asks: 'email',
+    semantic_bridge:
+      'Portuguese has an official word for this and almost nobody says it. CORREIO ELETRÓNICO is what appears on a government form; e-posta exists and you will not hear it. What people actually say is e-mail, with a Portuguese accent on it — which is worth knowing because it happens constantly: a language takes an English word, keeps it, and invents a formal one for paperwork.',
+    subtext: 'Asked at a counter, on a form, and by anybody who wants to send you something.',
+    extracts: [
+      {
+        id: 'qual_e',
+        target: 'qual é',
+        gloss: 'what is',
+        shelf: 'asking',
+        note: 'For choosing between things that exist — qual é o teu e-mail, qual é a tua morada. O que é asks what something IS.',
+      },
+      {
+        id: 'email',
+        target: 'e-mail',
+        gloss: 'email',
+        shelf: 'things',
+        gender: 'm',
+        note: 'Correio eletrónico on a form, e-mail everywhere else. Both are correct; only one is said out loud.',
+      },
+    ],
+    branches: [
+      { target: 'Qual é o teu e-mail?', en: 'What is your email?', demonstrates: ['qual_e', 'email'], address: 'tu', formal: 'Qual é o seu e-mail?' },
+      { target: 'Não tenho e-mail aqui.', en: 'I do not have email here.', demonstrates: ['email'] },
+      { target: 'Qual é a tua morada?', en: 'What is your address?', demonstrates: ['qual_e'], address: 'tu', formal: 'Qual é a sua morada?' },
+    ],
+    helpers: {
+      'o teu': 'your',
+      'o seu': 'your',
+      'não tenho': 'I do not have',
+      'aqui': 'here',
+      'a tua': 'your',
+      'a sua': 'your',
+      'morada': 'address',
+      'correio eletrónico': 'electronic mail',
+    },
+    transfer_prompt: {
+      context: 'Somebody is filling a form in for you and has got to the last line.',
+      ask: 'What is your address?',
+      answer: 'Qual é a tua morada?',
+    },
+    rights_status: 'dub-authored',
   }),
   q({
     root_id: 'tb_why',

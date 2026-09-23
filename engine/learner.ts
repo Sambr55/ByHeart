@@ -232,6 +232,38 @@ export interface LearnerState {
      */
     nationality: string | null
     from_place: string | null
+    /**
+     * HOW OLD THEY ACTUALLY ARE, as a number, because the number is the lesson.
+     *
+     * Sam: "We need to ask specific age — not bands because that is part of learning
+     * numbers." The root that asks it teaches tenho, anos and trinta, so an answer of 34
+     * hands back "Tenho trinta e quatro anos" — two numbers and a construction learned by
+     * answering.
+     *
+     * `age_band` above is kept and still derived from this, because registerFor reads it
+     * and a band is the right shape for that question: what changes at 60 is how Portugal
+     * speaks to you, not the specific year. Two fields for two jobs rather than one field
+     * doing neither well.
+     *
+     * It is also what decides whether an account is permitted at all — see
+     * content/consent.ts and `consent_age` on Chapter. That makes it the one profile field
+     * with a legal consequence, which is the argument for asking it honestly rather than
+     * in a range that could hide a twelve-year-old.
+     */
+    age: number | null
+    /**
+     * Their email, once they have given it, and only ever because they chose to.
+     *
+     * The set-up copy promises "nothing here will take your email and promise to let you
+     * know" — and that promise is kept: this is not a newsletter signup and nothing is
+     * sold. It is how a learner gets their Portuguese back on a new phone, which is the
+     * only thing it is used for and the only thing the screen asking for it claims.
+     *
+     * Stored on the profile as well as on the users row because the two are different
+     * facts: the row is an account, this is something they told DUB while learning the
+     * word for it. Signing in later reconciles them.
+     */
+    email: string | null
     skipped: string[]
   }
   created_at: string
@@ -524,6 +556,8 @@ export function emptyLearner(): LearnerState {
       goal: null,
       nationality: null,
       from_place: null,
+      age: null,
+      email: null,
       skipped: [],
     },
     created_at: new Date().toISOString(),
@@ -873,8 +907,8 @@ export function markOsmosisSeen(ids: string[]) {
 }
 
 export function setProfile(
-  field: 'gender' | 'age_band' | 'goal' | 'nationality' | 'from_place',
-  value: string | null,
+  field: 'gender' | 'age_band' | 'goal' | 'nationality' | 'from_place' | 'age' | 'email',
+  value: string | number | null,
 ) {
   update((s) => {
     s.profile = {
@@ -884,6 +918,8 @@ export function setProfile(
         goal: null,
         nationality: null,
         from_place: null,
+        age: null,
+        email: null,
         skipped: [],
       }),
     }

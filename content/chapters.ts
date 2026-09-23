@@ -35,6 +35,25 @@ export interface Chapter {
    * picker already refuses to do.
    */
   open: boolean
+  /**
+   * THE AGE AT WHICH SOMEBODY MAY CONSENT TO THEIR OWN DATA, in this country.
+   *
+   * GDPR Article 8 sets the default at 16 and lets each member state lower it to 13.
+   * Portugal chose 13; so did the UK and Denmark. Ireland and the Netherlands kept 16.
+   * That variation is the reason this is a property of the place rather than a constant:
+   * a learner in Lisbon and a learner in Amsterdam are owed different answers, and a
+   * hardcoded 16 would lock out thirteen-year-olds who are legally entitled to be here.
+   *
+   * It is ALSO the lesson, which is the whole point of it being content. Sam: "Obviously
+   * yes we block 13 unders — or whatever is specific to the country. Again I see that as
+   * part of the learning. In Portugal you must be..." So the number a learner is told is
+   * a fact about the country they are learning about, said in Portuguese, rather than a
+   * checkbox they tick.
+   *
+   * Not legal advice and not the only rule that applies — see content/consent.ts, which
+   * says what is actually done with it.
+   */
+  consent_age: number
 }
 
 export const CHAPTERS: Chapter[] = [
@@ -46,6 +65,7 @@ export const CHAPTERS: Chapter[] = [
     pair: pairId(DEFAULT_PAIR),
     zone: 'Europe/Lisbon',
     open: true,
+    consent_age: 13,
   },
   /*
     The two that are not open yet, listed and greyed rather than explained.
@@ -65,6 +85,7 @@ export const CHAPTERS: Chapter[] = [
     pair: pairId(DEFAULT_PAIR),
     zone: 'Europe/Lisbon',
     open: false,
+    consent_age: 13,
   },
   {
     id: 'algarve',
@@ -74,6 +95,7 @@ export const CHAPTERS: Chapter[] = [
     pair: pairId(DEFAULT_PAIR),
     zone: 'Europe/Lisbon',
     open: false,
+    consent_age: 13,
   },
 ]
 
