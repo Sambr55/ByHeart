@@ -54,6 +54,15 @@ export const VIBE_IMAGES: Record<CultureFamily, VibeImage> = {
     alt: 'A stack of seven-inch records in worn paper sleeves on a dark wooden table, a tiled pillar and a Lisbon street through the window behind.',
     rights_status: 'generated',
   },
+  /*
+    The counting songs, which left the basics and took the same street with them — a
+    different frame of it, so the two tiles do not read as the same crate twice.
+  */
+  counting_songs: {
+    src: '/vibes/the_basics.jpg',
+    alt: 'A tiled Lisbon doorway, numbered',
+    rights_status: 'generated',
+  },
   top_gun: {
     src: '/vibes/top-gun.jpg',
     alt: 'Gold-framed aviator sunglasses with blue mirrored lenses lying on a zinc café table, blue-and-white tiles and a yellow wall behind.',

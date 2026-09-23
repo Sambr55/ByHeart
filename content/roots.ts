@@ -28,6 +28,21 @@ export type CultureFamily =
   | 'duran_duran_lisboa'
   | 'world_of_wizardry'
   | 'the_basics'
+  /*
+    COUNTING, WHICH LEFT THE BASICS.
+
+    Seven of the twenty basics roots taught numbers and four of them taught nothing the
+    Legend card needs — so the road in spent a whole sitting on counting while somebody
+    was trying to reach their card. Sam: "I am still getting at least a dozen numbers
+    related questions, which I thought we dealt with by adding in the age picker."
+
+    The picker does deal with it: it teaches every number to a hundred on one screen, with
+    audio and its working shown, and banks what is chosen. What the songs add is pleasure
+    rather than vocabulary, which is the definition of a Club vibe rather than a step on
+    the road in. The three the card DOES need — um, dois, anos, semana — stay in the
+    basics where they are load-bearing.
+  */
+  | 'counting_songs'
   | 'bobs_your_uncle'
 
 /**
@@ -1160,10 +1175,23 @@ export const JAMES_BOND: Root[] = [
     branches: [
       { target: 'Sou inglesa, de Londres.', en: 'I am English, from London.', demonstrates: ['inglesa', 'sou'] },
       { target: 'Não sou português.', en: 'I am not Portuguese.', demonstrates: ['sou'] },
-      { target: 'Sou o Sam. Sou inglês.', en: 'I am Sam. I am English.', demonstrates: ['sou', 'ingles'] },
+      /*
+        NO ARTICLE BEFORE THE NAME, because the name is not ours to agree with.
+
+        This was "Sou o Sam" — a hardcoded name, which myName could not swap and which
+        therefore introduced a learner called Fred as somebody else. Swapping it for the
+        authored Ana made it ungrammatical instead: Portuguese says `o` before a man's
+        name and `a` before a woman's, and the name here becomes whatever the learner is
+        called, so no authored article can be right for all of them.
+
+        `Chamo-me` takes no article and is the sentence this root is reinforcing anyway,
+        so it says the same thing, stays true for every learner, and needs nothing to
+        agree with.
+      */
+      { target: 'Chamo-me Ana. Sou inglês.', en: 'My name is Ana. I am English.', demonstrates: ['sou', 'ingles'] },
     ],
     reinforces: ['chamo_me', 'nao'],
-    helpers: { 'de': 'from', 'Londres': 'London', 'Não': 'not', 'português': 'Portuguese', 'o': 'the' },
+    helpers: { 'de': 'from', 'Londres': 'London', 'Não': 'not', 'português': 'Portuguese' },
     transfer_prompt: {
       context: 'Somebody has heard your accent and asked where you are from.',
       ask: 'I am English, from London.',
@@ -1206,13 +1234,13 @@ export const JAMES_BOND: Root[] = [
       { target: 'Como se chama?', en: 'What is it called?', demonstrates: ['chamo_me', 'como_se_chama'] },
     ],
     helpers: {
-      'Sam': 'a name',
+      'Ana': 'a name',
       'tu': 'you',
       'E': 'and',
       'se': 'themselves',
 
     },
-    transfer_prompt: { context: 'You meet someone new.', ask: 'My name is Sam.', answer: 'Chamo-me Sam.' },
+    transfer_prompt: { context: 'You meet someone new.', ask: 'My name is Ana.', answer: 'Chamo-me Ana.' },
     freebie_flag: true,
     rights_status: 'short-quote-review-required',
     starter_tags: ['introduction', 'iconic'],
@@ -2214,7 +2242,7 @@ export const PULP_FICTION: Root[] = [
       { id: 'chamam', target: 'chamam', gloss: 'they call', shelf: 'doing', lemma: 'chamar', form: 'they' },
     ],
     branches: [
-      { target: 'Eles chamam-me Sam.', en: 'They call me Sam.' },
+      { target: 'Eles chamam-me Ana.', en: 'They call me Ana.' },
       { target: 'Eles est\u00e3o aqui.', en: 'They\u2019re here.' },
       { target: 'Como \u00e9 que eles chamam isto?', en: 'What do they call this?' },
     ],
@@ -2232,8 +2260,8 @@ export const PULP_FICTION: Root[] = [
     },
     transfer_prompt: {
       context: 'Somebody asks what your friends call you.',
-      ask: 'They call me Sam.',
-      answer: 'Eles chamam-me Sam.',
+      ask: 'They call me Ana.',
+      answer: 'Eles chamam-me Ana.',
     },
     rights_status: 'short-quote-review-required',
     starter_tags: ['other-people', 'verb-endings'],
@@ -4480,8 +4508,8 @@ export const THE_BASICS: Root[] = [
     source_status: 'needs-review',
     root_display: 'My name is — and I am English.',
     credit: 'The first ten seconds of meeting anybody',
-    source: 'My name is Sam. I am English.',
-    target: 'Chamo-me Sam. Sou inglês.',
+    source: 'My name is Ana. I am English.',
+    target: 'Chamo-me Ana. Sou inglês.',
     /*
       And this one asks where they are from, for the same reason.
 
@@ -4545,7 +4573,7 @@ export const THE_BASICS: Root[] = [
       { target: 'Sou de Londres.', en: 'I am from London.', demonstrates: ['sou'] },
     ],
     reinforces: ['ola'],
-    helpers: { 'Sam': 'a name', 'de': 'from', 'Londres': 'London', 'inglesa': 'English, said by a woman' },
+    helpers: { 'Ana': 'a name', 'de': 'from', 'Londres': 'London', 'inglesa': 'English, said by a woman' },
     /*
       A DIFFERENT SENTENCE, from the same words. The release proves the words moved, so it
       cannot be the line they have just been reading — the lint refuses that, correctly: a
@@ -4844,7 +4872,7 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     root_id: 'tb_four_weddings',
-    culture_family: 'the_basics',
+    culture_family: 'counting_songs',
     rung: 1,
     root_type: 'title',
     source_label: 'Four Weddings and a Funeral',
@@ -4877,7 +4905,7 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     root_id: 'tb_six_seven',
-    culture_family: 'the_basics',
+    culture_family: 'counting_songs',
     rung: 1,
     root_type: 'title',
     source_label: 'Six Days, Seven Nights',
@@ -4946,7 +4974,7 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     root_id: 'tb_ten_things',
-    culture_family: 'the_basics',
+    culture_family: 'counting_songs',
     rung: 1,
     root_type: 'title',
     source_label: '10 Things I Hate About You',
@@ -4979,7 +5007,7 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     root_id: 'tb_nine_five',
-    culture_family: 'the_basics',
+    culture_family: 'counting_songs',
     rung: 1,
     root_type: 'title',
     credit: 'Dolly Parton, 1980 — written on the set, on her acrylic nails',
@@ -5434,7 +5462,14 @@ export const ROOTS: Root[] = [
 ]
 
 export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
-  the_basics: THE_BASICS,
+  /*
+    Filtered by the family each root declares, rather than by which array it is written
+    in. The counting songs moved out of the basics and stayed where they were authored —
+    beside the other basics roots, because that is where a person editing them would look
+    — so the two arrays and the two families are no longer the same split.
+  */
+  the_basics: THE_BASICS.filter((r) => r.culture_family === 'the_basics'),
+  counting_songs: THE_BASICS.filter((r) => r.culture_family === 'counting_songs'),
   top_gun: TOP_GUN,
   james_bond: JAMES_BOND,
   bridget_jones: BRIDGET_JONES,

@@ -312,11 +312,33 @@ export function personalise<T extends {
   const isAgeSpecimen =
     ('asks' in root && (root as { asks?: string }).asks === 'age') ||
     AUTHORED_AGES.some((a) => root.target.includes(say(a) + ' anos'))
-  const mine = (t: string) =>
-    myAge(
-      myName(swap ? t.replaceAll('de música', swap.after_de).replaceAll('música', swap.target) : t, me.display_name),
-      me.profile?.age,
-    )
+  /*
+    BOTH LANGUAGES, OR NEITHER — and getting this wrong was a show-stopper.
+
+    Sam, with the screenshot: "praia is apparently translated as music." It was. This
+    replaced the PORTUGUESE specimen — `de música` → `da praia` — and left every English
+    gloss saying music, so the product taught a learner that "Gosto da praia" means "I
+    like music". A wrong translation is worse than no personalisation at all: the
+    untouched version was at least true.
+
+    The English is swapped in the same pass now, from the same INTERESTS row, so the two
+    halves cannot come apart. Longest first for the same reason myAge sorts its specimens:
+    "de música" must go before "música" can eat its own first word.
+  */
+  const mine = (t: string) => {
+    if (!swap) return myAge(myName(t, me.display_name), me.profile?.age)
+    const swapped = t
+      .replaceAll('de música', swap.after_de)
+      .replaceAll('música', swap.target)
+      /*
+        The gloss, in the two shapes the content writes it: "of music" appears in no line
+        today, but "music" appears in several, and replacing the longer form first keeps
+        this true if one is ever added.
+      */
+      .replaceAll('of music', 'of ' + swap.gloss)
+      .replaceAll('music', swap.gloss)
+    return myAge(myName(swapped, me.display_name), me.profile?.age)
+  }
   return {
     ...root,
     /*
@@ -327,8 +349,25 @@ export function personalise<T extends {
       ? {
           extracts: (root as unknown as { extracts: { id: string; target: string; gloss: string }[] }).extracts.map(
             (e) => {
+              /*
+                ONLY WHERE THE WORD IS REAL, which four of the eight interests are not.
+
+                fado, filmes, livros and cozinhar appear on the chips and in the sentence
+                a learner builds, and no root unpacks them — the `into` set says so itself
+                with partial: true. Swapping the extract for one of them banked an id
+                nothing resolves: a word in somebody's inventory that the library cannot
+                show and no check can explain, which is the fault that put seven dead
+                words in a learner's bank earlier in the week.
+
+                So the SENTENCES still become theirs — that is the part they can read, and
+                it is true — while the banked word stays the one the lesson actually
+                teaches. Author a root for fado and this starts swapping it with no change
+                here, because the condition is "is it a piece", not a list.
+              */
               if (swap && e.id === 'musica') {
-                return { ...e, id: swap.id, target: swap.target, gloss: swap.gloss }
+                return PIECES[swap.id]
+                  ? { ...e, id: swap.id, target: swap.target, gloss: swap.gloss }
+                  : e
               }
               /* The specimen's own number, swapped for theirs. See isAgeSpecimen above. */
               if (ageSwap && isAgeSpecimen && AUTHORED_AGES.some((a) => say(a).split(/\s+/)[0] === e.target)) {

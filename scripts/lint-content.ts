@@ -17,7 +17,7 @@ import { INTRO_CARDS } from '../content/intro'
 import { join } from 'node:path'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
 import { DUB, DUB_CLUB, DUB_MARK } from '../content/marks'
-import { AUTHORED_NAME, LEGEND_FRAMES, REPAIR_KIT, childrenSentence, intoSentence } from '../content/legend'
+import { AUTHORED_NAME, LEGEND_FRAMES, REPAIR_KIT, childrenSentence, intoSentence, personalise as personaliseRoot } from '../content/legend'
 import {
   BLOCK_ORDER,
   EXAMPLES,
@@ -1999,6 +1999,47 @@ const screenCount = MISSION_ORDER.reduce((n, m) => n + MISSIONS[m].screens.lengt
     }
   }
   walk(FRONT_DOOR_COPY as unknown, 'content/front-door')
+}
+
+/*
+  AND NO ROOT SURVIVES PERSONALISATION STILL NAMING SOMEBODY ELSE.
+
+  The guard above matches `Chamo-me <Name>`, which is one of several ways a line
+  introduces a person — "Sou o Sam", "Eles chamam-me Sam" and every English gloss beside
+  them went straight through it. Sam: "there feels a lot of hard-coded Sams, even though I
+  give it a different name."
+
+  So rather than guessing at more patterns, this asks the question the learner asks: run
+  every root through personalise as somebody called Fred, and fail any line that still
+  says a name Fred did not give. That cannot be evaded by a new phrasing, because it tests
+  the OUTPUT rather than the source.
+
+  AUTHORED_NAME is allowed through: a learner who declined to give one keeps Ana, who is a
+  real example with a real recording. Anything else is a person nobody asked for.
+*/
+{
+  const me = { display_name: 'Fred', profile: { age: 56, into: ['praia'] } }
+  const STRANGERS = /\b(Sam|Miguel|João|Maria|Ana)\b/g
+  for (const root of ROOTS) {
+    const p = personaliseRoot(root as never, me) as unknown as {
+      target: string; source: string; root_display: string
+      branches: { target: string; en: string }[]
+      transfer_prompt?: { ask?: string; answer?: string }
+    }
+    const lines = [
+      p.target, p.source, p.root_display,
+      ...p.branches.flatMap((b) => [b.target, b.en]),
+      p.transfer_prompt?.ask ?? '', p.transfer_prompt?.answer ?? '',
+    ]
+    for (const line of lines) {
+      for (const hit of line.match(STRANGERS) ?? []) {
+        if (hit === AUTHORED_NAME) continue
+        errors.push(
+          'root ' + root.root_id + ' still says "' + hit + '" after personalise: "' + line + '"',
+        )
+      }
+    }
+  }
 }
 
 console.log(
