@@ -77,6 +77,8 @@ import {
 import {
   acceptDeal,
   acquirePiece,
+  setGenres,
+  setInto,
   markOsmosisSeen,
   recordProof,
   rememberSection,
@@ -101,6 +103,7 @@ import {
 } from '@/engine/journey'
 import { chapterById } from '@/content/chapters'
 import { TOO_YOUNG } from '@/content/consent'
+import { INTERESTS, genresFromInterests, interestById } from '@/content/interests'
 import { say } from '@/content/numbers'
 import type { ProfileAsk } from '@/content/roots'
 import { buzz, nope } from '@/engine/tap'
@@ -3187,6 +3190,9 @@ function AskInLesson({ which }: { which: ProfileAsk }) {
   if (which === 'email') {
     return <AskEmail open={open} onOpen={() => setOpen(true)} onDone={() => setOpen(false)} />
   }
+  if (which === 'into') {
+    return <AskInto open={open} onOpen={() => setOpen(true)} onDone={() => setOpen(false)} />
+  }
 
   return <AskOrigin open={open} onOpen={() => setOpen(true)} onDone={() => setOpen(false)} />
 }
@@ -3405,6 +3411,166 @@ function AskEmail({
           data-testid="ask-email-skip"
           onClick={() => {
             setProfile('email', null)
+            onDone()
+          }}
+          className="tap-target text-xs text-muted underline"
+        >
+          Not now
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * WHAT YOU ARE INTO — and every tap banks the noun.
+ *
+ * Sam: "only if they are learning from selecting genre and interests. Everything is a
+ * learning exercise." So this is not a preference form with a lesson nearby: the root it
+ * sits in has just taught `gosto de`, and each option here is a piece that goes into the
+ * inventory when it is chosen. Somebody who taps música owns the word for music
+ * afterwards, counts it towards their stage, and can find it in the library.
+ *
+ * That is also what makes it worth asking at all. If nobody downstream ever read
+ * `profile.into`, the question would still have taught three nouns and a construction.
+ *
+ * THE CALENDAR IS SEEDED, NOT DECIDED. Five of the eight lean towards a genre, so saying
+ * you like football pre-ticks the football chip — see genresFromInterests. The calendar
+ * still asks and still wins: an interest is a fact about a person and a genre is a request
+ * about a feed, and inferring one from the other is a convenience rather than an answer.
+ */
+function AskInto({
+  open,
+  onOpen,
+  onDone,
+}: {
+  open: boolean
+  onOpen: () => void
+  onDone: () => void
+}) {
+  const learner = useLearner()
+  const chosen = learner.profile?.into ?? []
+  const skipped = (learner.profile?.skipped ?? []).includes('into')
+  /*
+    SETTLED MEANS CONFIRMED, not "has ticked one thing".
+
+    This read `chosen.length`, so the first tap collapsed the whole question to its
+    one-line summary and a second interest could never be picked — the same fault the
+    origin ask had, where choosing a nationality hid the town field. A multi-select is not
+    finished when it is non-empty; it is finished when the person says it is.
+
+    `confirmed` is the flag THAT IS ME sets, held in state rather than on the record
+    because it is about this reading of the question and not about the learner.
+  */
+  const [confirmed, setConfirmed] = useState(false)
+
+  if ((confirmed || skipped) && !open) {
+    return (
+      <AskSettled
+        line={
+          chosen.length
+            ? 'Gosto ' +
+              chosen
+                .flatMap((id) => interestById(id)?.after_de ?? [])
+                .join(', ')
+                .replace(/,([^,]*)$/, ' e$1') +
+              '.'
+            : 'You skipped this one.'
+        }
+        onChange={onOpen}
+      />
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+      <p className="eyebrow text-accent">AND YOU</p>
+      <p className="text-sm leading-relaxed">
+        Pick as many as are true. Each one is a word you keep, and DUB will use them to
+        decide what turns up in your Club.
+      </p>
+      <div className="flex flex-wrap gap-3">
+        {INTERESTS.map((i) => {
+          const on = chosen.includes(i.id)
+          return (
+            <button
+              key={i.id}
+              type="button"
+              data-testid={'ask-into-' + i.id}
+              onClick={() => {
+                /*
+                  THE PREFERENCE ONLY, because banking here ended the question.
+
+                  acquirePiece advances the lesson — banking a word is what moves a root
+                  on to its next beat — so calling it on every tap unmounted the whole ask
+                  after ONE choice and a learner could never pick two things. Caught by
+                  driving it: música banked, the screen moved on, futebol was gone.
+
+                  So the taps collect, and the words are banked together when the person
+                  says THAT IS ME. That is also the more honest moment: an interest they
+                  ticked and then unticked is not a word they met.
+                */
+                setInto(on ? chosen.filter((x) => x !== i.id) : [...chosen, i.id])
+              }}
+              className={
+                'tap-target flex flex-col gap-1 rounded border px-4 py-3 text-left transition ' +
+                (on ? 'border-accent bg-accent text-accent-ink' : 'border-line hover:border-accent/50')
+              }
+            >
+              <span className="pt text-sm">{i.target}</span>
+              <span className={'text-xs ' + (on ? 'opacity-80' : 'text-muted')}>{i.gloss}</span>
+            </button>
+          )
+        })}
+      </div>
+      {/*
+        The sentence they have built, said back as they build it — the same beat the age
+        question uses. It is the lesson happening rather than a summary of a form.
+      */}
+      {chosen.length ? (
+        <p className="pt text-lg text-accent">
+          Gosto{' '}
+          {chosen
+            .flatMap((id) => interestById(id)?.after_de ?? [])
+            .join(', ')
+            .replace(/,([^,]*)$/, ' e$1')}
+          .
+        </p>
+      ) : null}
+      <div className="flex items-center gap-3">
+        {chosen.length ? (
+          <button
+            type="button"
+            data-testid="ask-into-done"
+            onClick={() => {
+              /*
+                The words, banked together — see the note on the chips above. Each one is a
+                real piece, so it counts towards the stage and turns up in the library.
+              */
+              for (const id of chosen) acquirePiece(id, 'the_basics')
+              /*
+                And the calendar, seeded rather than set. setGenres is what the chips
+                write; this only fills them in before anybody has touched them.
+              */
+              if ((learner.profile?.genres ?? []).length === 0) {
+                const g = genresFromInterests(chosen)
+                if (g.length) setGenres(g)
+              }
+              track('profile_answer', { question: 'into', answer: String(chosen.length), where: 'lesson' })
+              setConfirmed(true)
+              onDone()
+            }}
+            className="tap-target eyebrow rounded bg-accent px-5 py-3 text-accent-ink"
+          >
+            THAT IS ME
+          </button>
+        ) : null}
+        <button
+          type="button"
+          data-testid="ask-into-skip"
+          onClick={() => {
+            setInto([])
+            setProfile('goal', learner.profile?.goal ?? null)
             onDone()
           }}
           className="tap-target text-xs text-muted underline"

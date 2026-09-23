@@ -73,7 +73,7 @@ export type RightsStatus = 'short-quote-review-required' | 'title-reference' | '
  * field the product already reads, and a root that could ask anything would become a place
  * to put questions nobody knows what to do with. See `asks` on Root.
  */
-export type ProfileAsk = 'gender' | 'origin' | 'age' | 'email'
+export type ProfileAsk = 'gender' | 'origin' | 'age' | 'email' | 'into'
 
 export type QaStatus = 'pending-native-review' | 'reviewed'
 
@@ -5034,6 +5034,72 @@ export const THE_BASICS: Root[] = [
     rights_status: 'title-reference',
     starter_tags: ['time', 'plans'],
     next_root_hooks: ['ola'],
+  }),
+  q({
+    /*
+      WHAT YOU ARE INTO, and the verb that is missing from the doorway without it.
+
+      Sam: "could everyone's legend be different? So someone who loves festivals needs to
+      be able to say I love going to festivals." And on how to ask it: "only if they are
+      learning from selecting genre and interests. Everything is a learning exercise."
+
+      GOSTO DE IS WORTH TEACHING ON ITS OWN MERITS, which is the test a root has to pass
+      before it is allowed to carry a question. It is how Portuguese says every preference
+      anybody ever expresses, it takes the `de` that English speakers always drop, and the
+      basics did not teach it — `adoro` exists but comes from Audrey Hepburn, so a learner
+      who never opened that vibe could not build a sentence about what they like.
+
+      The answers are nouns the learner picks, and each one is a piece they keep. That is
+      the difference between this and a preference form: somebody who taps `música` owns
+      the word for music afterwards.
+    */
+    root_id: 'tb_into',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'other',
+    credit: 'The second thing anybody asks, after what you do',
+    source_label: 'What Portuguese does with everything you like',
+    source_status: 'verified',
+    root_display: 'I like music.',
+    source: 'I like music.',
+    target: 'Gosto de música.',
+    asks: 'into',
+    semantic_bridge:
+      'GOSTO DE, always with the de, and English speakers drop it for years. Portuguese does not like a thing — it takes pleasure FROM it, so there is always a de between the liking and the thing: gosto de música, gosto de futebol, gosto de ti. Learn the de now and you will never have to unlearn anything.',
+    subtext: 'Said across a table, about ten seconds after what do you do.',
+    extracts: [
+      {
+        id: 'gosto_de',
+        target: 'gosto de',
+        gloss: 'I like',
+        shelf: 'doing',
+        note: 'The de is not optional and never disappears. Gosto de música, gosto de ti — pleasure FROM a thing rather than of it.',
+      },
+      {
+        id: 'musica',
+        target: 'música',
+        gloss: 'music',
+        shelf: 'things',
+        gender: 'f',
+      },
+    ],
+    branches: [
+      { target: 'Gosto de música.', en: 'I like music.', demonstrates: ['gosto_de', 'musica'] },
+      { target: 'Gosto muito disto.', en: 'I like this a lot.', demonstrates: ['gosto_de'] },
+      { target: 'Não gosto de café.', en: 'I do not like coffee.', demonstrates: ['gosto_de'] },
+    ],
+    helpers: {
+      'muito': 'a lot',
+      'disto': 'of this',
+      'não': 'not',
+      'café': 'coffee',
+    },
+    transfer_prompt: {
+      context: 'Somebody offers you a second one and you have had enough.',
+      ask: 'I do not like coffee.',
+      answer: 'Não gosto de café.',
+    },
+    rights_status: 'dub-authored',
   }),
   q({
     /*

@@ -269,6 +269,23 @@ export interface LearnerState {
      */
     genres: string[]
     /**
+     * WHAT THEY ARE INTO, which is not the same question as which events they want.
+     *
+     * Sam: "could everyone's legend be different? So someone who loves festivals needs to
+     * be able to say I love going to festivals."
+     *
+     * Genre above is a request about a feed — what is on in the city. This is a fact about
+     * a person, and it is what a Legend frame can be built from. A learner can love fado
+     * and still want to know when Benfica play; measured, no crate in the product teaches
+     * a single word about music, football or festivals, so one answer was never going to
+     * serve both.
+     *
+     * Every id here is also a banked piece — see content/interests.ts. Tapping `música`
+     * puts the word in the inventory, so the question pays whether or not anything
+     * downstream ever reads this field.
+     */
+    into: string[]
+    /**
      * Their email, once they have given it, and only ever because they chose to.
      *
      * The set-up copy promises "nothing here will take your email and promise to let you
@@ -576,6 +593,7 @@ export function emptyLearner(): LearnerState {
       age: null,
       email: null,
       genres: [],
+      into: [],
       skipped: [],
     },
     created_at: new Date().toISOString(),
@@ -809,6 +827,7 @@ export function loadLearner(): LearnerState {
             skipped: arr(parsed.profile?.skipped, []),
             /* Absent on every record written before the calendar stored anything. */
             genres: arr(parsed.profile?.genres, []),
+            into: arr(parsed.profile?.into, []),
           },
           affinity: {
             ...obj(parsed.affinity, base.affinity),
@@ -941,6 +960,7 @@ export function setProfile(
         age: null,
         email: null,
         genres: [],
+        into: [],
         skipped: [],
       }),
     }
@@ -962,6 +982,18 @@ export function setProfile(
 export function setGenres(genres: string[]) {
   update((s) => {
     s.profile = { ...s.profile, genres: [...new Set(genres)] }
+  })
+}
+
+/**
+ * What this learner is into, replacing rather than unioning for the same reason.
+ *
+ * Unticking `futebol` has to mean it goes away, which a union could never express — the
+ * opposite of every other list on this record, and worth saying out loud.
+ */
+export function setInto(into: string[]) {
+  update((s) => {
+    s.profile = { ...s.profile, into: [...new Set(into)] }
   })
 }
 
