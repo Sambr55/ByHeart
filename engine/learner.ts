@@ -252,6 +252,23 @@ export interface LearnerState {
      */
     age: number | null
     /**
+     * WHICH KINDS OF NIGHT OUT THEY CARE ABOUT, which the calendar asked and threw away.
+     *
+     * Sam: "I also want to look at how the information we are gathering INCLUDING the
+     * calendar genre preferences (which we need to look at again)... drive the content
+     * that the user sees in the club."
+     *
+     * It was useState in components/Subscribe.tsx, posted to a calendar_feeds row and
+     * never written here — so choosing "football and the big matches" shaped an .ics feed
+     * and nothing else, and reopening the page lost it. The Club went on serving every
+     * drop in the fortnight.
+     *
+     * EMPTY MEANS EVERYTHING, never nothing. Most learners will never open the calendar,
+     * and a Club that empties itself until somebody fills in a form is the exact failure
+     * roomsFor warns about. See dropsFor, which holds the same rule.
+     */
+    genres: string[]
+    /**
      * Their email, once they have given it, and only ever because they chose to.
      *
      * The set-up copy promises "nothing here will take your email and promise to let you
@@ -558,6 +575,7 @@ export function emptyLearner(): LearnerState {
       from_place: null,
       age: null,
       email: null,
+      genres: [],
       skipped: [],
     },
     created_at: new Date().toISOString(),
@@ -789,6 +807,8 @@ export function loadLearner(): LearnerState {
           profile: {
             ...obj(parsed.profile, base.profile),
             skipped: arr(parsed.profile?.skipped, []),
+            /* Absent on every record written before the calendar stored anything. */
+            genres: arr(parsed.profile?.genres, []),
           },
           affinity: {
             ...obj(parsed.affinity, base.affinity),
@@ -920,6 +940,7 @@ export function setProfile(
         from_place: null,
         age: null,
         email: null,
+        genres: [],
         skipped: [],
       }),
     }
@@ -928,6 +949,19 @@ export function setProfile(
     } else {
       ;(s.profile as Record<string, unknown>)[field] = value
     }
+  })
+}
+
+/**
+ * Which kinds of night out this learner wants to hear about.
+ *
+ * Replaces rather than unions, because this is a preference and not a record: unticking
+ * "classical and fado" has to mean it goes away, which a union could never express. That
+ * is the opposite of every list above it, so it is worth saying out loud.
+ */
+export function setGenres(genres: string[]) {
+  update((s) => {
+    s.profile = { ...s.profile, genres: [...new Set(genres)] }
   })
 }
 

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { GENRES, type Genre } from '@/content/calendar'
 import { track } from '@/engine/analytics'
+import { setGenres } from '@/engine/learner'
+import { useLearner } from '@/engine/useLearner'
 
 /**
  * Put what is on into the calendar somebody already looks at.
@@ -24,14 +26,33 @@ import { track } from '@/engine/analytics'
  * "what is on", not for nothing. An empty calendar would read as broken.
  */
 export function Subscribe({ city }: { city: string }) {
-  const [picked, setPicked] = useState<Genre[]>([])
+  /*
+    Seeded from the learner rather than starting blank.
+
+    The choice is stored now — see setGenres — so somebody returning to this page should
+    find their answer still ticked. It was useState from empty, which lost the preference
+    on every unmount and made the page look like it had forgotten them.
+  */
+  const learner = useLearner()
+  const [picked, setPicked] = useState<Genre[]>(
+    ((learner.profile?.genres ?? []) as Genre[]).filter((g) => GENRES.some((x) => x.id === g)),
+  )
   const [perWeek, setPerWeek] = useState(3)
   const [link, setLink] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState<string | null>(null)
 
   const toggle = (g: Genre) =>
-    setPicked((p) => (p.includes(g) ? p.filter((x) => x !== g) : [...p, g]))
+    setPicked((p) => {
+      const next = p.includes(g) ? p.filter((x) => x !== g) : [...p, g]
+      /*
+        Written on the tap rather than on submit, because the Club reads it and somebody
+        may never press the button. The .ics feed needs the POST; the feed they are
+        standing in does not.
+      */
+      setGenres(next)
+      return next
+    })
 
   const subscribe = async () => {
     setBusy(true)

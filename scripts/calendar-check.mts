@@ -199,12 +199,37 @@ if (!target) {
       const s = r.children[i]
       const p = s && s.querySelector('[data-testid="card-panes"]')
       if (!p || !p.clientWidth) return null
-      return { lane: Math.round(p.scrollLeft / p.clientWidth), lanes: Math.round(p.scrollWidth / p.clientWidth) }
-    })()`) as { lane: number; lanes: number } | null
+      /*
+        The face is where the card PARKS, which is not lane zero and not the last lane —
+        a drop has its flow rooms to one side and the language lane to the other, so
+        faceLane is (sides ? 1 : 0) + flow.length. Read from the DOM rather than computed
+        here, so this cannot drift from components/Feed.tsx.
+      */
+      const face = s.querySelector('[data-face]')
+      return {
+        lane: Math.round(p.scrollLeft / p.clientWidth),
+        lanes: Math.round(p.scrollWidth / p.clientWidth),
+        face: face ? Number(face.getAttribute('data-face')) : null,
+      }
+    })()`) as { lane: number; lanes: number; face: number | null } | null
+    /*
+      THE CARD IS THERE AND NOT OPENED FOR YOU, which is the opposite of what this asserted.
+
+      It required the pane to have travelled off the lane it opens on — the auto-swipe the
+      arrival effect used to perform. Sam, on that behaviour: "when I click on an event drop
+      screen from the calendar, it flashes up the opening card VERY quickly and then
+      immediately swipes to the content. Needs to be a conscious swipe, not auto." The
+      effect went; the check that demanded it did not, so it has been failing for the
+      behaviour being right.
+
+      What matters is still worth checking and is what the link actually promises: the rail
+      lands on the drop you tapped, with its lanes intact and its own face showing. The
+      swipe is the person's.
+    */
     ok(
-      'and the card is already open, the way a swipe right leaves it',
-      Boolean(opened && opened.lanes > 1 && opened.lane < opened.lanes - 2),
-      opened ? 'lane ' + opened.lane + ' of ' + opened.lanes : 'no card',
+      'and the card is waiting on its own face, not opened for you',
+      Boolean(opened && opened.lanes > 1 && opened.face !== null && opened.lane === opened.face),
+      opened ? 'lane ' + opened.lane + ' of ' + opened.lanes + ', face is ' + opened.face : 'no card',
     )
   }
 }

@@ -1,3 +1,4 @@
+import type { Genre } from '@/content/calendar'
 import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
 import { generatedDrops } from '@/content/generated'
 import { DROP_LEAD_DAYS, SETS, setPieces, type WordSet } from '@/content/roots'
@@ -260,6 +261,12 @@ export function feedFor(
     most likely to break.
   */
   purpose: Purpose | null = null,
+  /*
+    And which kinds of night they said they wanted, which is the other half of the answer
+    to "what did answering actually buy me". Purpose decides the rooms; genre decides the
+    drops. Empty means everything — see dropsFor.
+  */
+  genres: Genre[] | null = null,
 ): FeedCard[] {
   /*
     Rooms only.
@@ -270,7 +277,10 @@ export function feedFor(
     is where somebody goes looking for what is theirs rather than what is next.
   */
   // Drops first: they expire and nothing else on the screen does.
-  return [...dropsFor(chapter, new Date(), preview), ...roomsFor(chapter, purpose)]
+  return [
+    ...dropsFor(chapter, new Date(), preview, genres),
+    ...roomsFor(chapter, purpose),
+  ]
 }
 
 /**
@@ -283,6 +293,7 @@ export function feedFor(
 export function dropsFor(
   chapter: ChapterId = DEFAULT_CHAPTER,
   now: Date = new Date(),
+  /* See the note on `want` below: empty or absent means everything, never nothing. */
   /*
     Ignore the window.
 
@@ -292,6 +303,7 @@ export function dropsFor(
     shows real content early and hides nothing, so it is safe to leave in.
   */
   preview = false,
+  genres: Genre[] | null = null,
 ): FeedCard[] {
   /*
     Hand-written Drops and generated ones, in one list sorted by date.
@@ -304,9 +316,33 @@ export function dropsFor(
 
     The window still applies to both, and `preview` still bypasses it for both.
   */
+  /*
+    AND WHAT THEY SAID THEY CARE ABOUT, which until now went nowhere.
+
+    Sam: "I also want to look at how the information we are gathering INCLUDING the calendar
+    genre preferences (which we need to look at again) and why you are here drive the
+    content that the user sees in the club."
+
+    Measured before it was changed: purpose does real work on the rooms — 14 of 35 for a
+    visitor, 16 for somebody staying, 23 for a mover — and genre did nothing at all. The
+    drops carry a genre each (six rock_pop, three classical_trad, two sport_national in a
+    live fortnight), the calendar asks which of the seven somebody wants, and the Club then
+    served all twelve regardless. A preference given deliberately and ignored completely.
+
+    AN EMPTY SET MEANS EVERYTHING, deliberately, and it is not the same as a preference for
+    nothing. Most learners will never open the calendar, and a Club that empties itself
+    until somebody has filled in a form is the failure roomsFor's own note warns about —
+    "the first thing purpose ever did would have been making the product emptier".
+
+    A drop with no genre always survives. Untagged means unclassified, not unwanted, and
+    dropping it would hide content because of a gap in the data rather than a choice by the
+    learner.
+  */
+  const want = new Set(genres ?? [])
   const all = [...DROPS, ...generatedDrops(chapter, now)]
   return all
     .filter((d) => d.chapter === chapter && (preview || dropLive(d, now)))
+    .filter((d) => !want.size || !d.genre || want.has(d.genre))
     .sort((a, b) => a.on.localeCompare(b.on))
     .flatMap((d): FeedCard[] => {
       const [first, ...rest] = d.situations

@@ -9,6 +9,7 @@ import { chapterById } from '@/content/chapters'
 import { IMAGE_BANK } from '@/content/images'
 import { roomsFor } from '@/content/feed'
 import { CLUB } from '@/content/club'
+import { CONSENT } from '@/content/consent'
 import { DOOR_CTA, EXPLAINER_CTA } from '@/content/explainers'
 import { PAIR_STEP } from '@/content/front-door'
 import { GOAL_QUESTION } from '@/content/profile'
@@ -91,6 +92,8 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     card already gates its whole render on `mounted`, so there is no hydration hazard.
   */
   const [step, setStep] = useState<Step>('why')
+  /* The longer consent answer, open or folded. Starts folded — see the block that uses it. */
+  const [terms, setTerms] = useState(false)
   /*
     WHICH REASON WAS TAPPED, held for as long as it takes to see it.
 
@@ -239,7 +242,9 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     Read HERE and not at the top, because the top is before mount and reading the record
     during a render the server also performs is the bug this file just fixed.
   */
-  const city = chapterById(loadLearner().chapter).city
+  /* The whole chapter, because consent names the COUNTRY and its own minimum age too. */
+  const chapter = chapterById(loadLearner().chapter)
+  const city = chapter.city
 
   /*
     `done` NO LONGER RENDERS THIS SCREEN, because nobody is meant to see it.
@@ -562,6 +567,60 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             The photo is optional and stays on this phone. It will be useful when you start
             sharing with friends.
           </p>
+        {/*
+            WHAT THE BUTTON BELOW ACTUALLY AGREES TO, said before it is pressed.
+
+            acceptDeal() has always fired inside finish(), and nothing on the screen said so.
+            That is the one part of this that a lesson cannot carry: consent has to be
+            informed and freely given BEFORE the thing it permits (GDPR Article 7), and a
+            permission recorded by a button labelled BUILD YOUR LEGEND is neither.
+
+            Four sentences and a way to read more, rather than a policy. The law asks for
+            intelligible and easily accessible, not exhaustive — and a wall of text is the
+            same as no text, because nobody reads it and everybody clicks through.
+
+            Everything it claims is checked against what the code does: lib/store.ts strips
+            the profile and the Legend on delete rather than orphaning them, and
+            app/api/account/export already returns the lot. See content/consent.ts.
+          */}
+          <div className="flex flex-col gap-3 rounded border border-line bg-bg-elev p-4">
+            <p className="eyebrow text-accent">{CONSENT.eyebrow}</p>
+            <p className="text-sm font-semibold">{CONSENT.headline}</p>
+            {CONSENT.body.map((line) => (
+              <p key={line} className="text-xs leading-relaxed text-muted">
+                {line}
+              </p>
+            ))}
+            <p className="text-xs leading-relaxed text-muted">
+              {CONSENT.age(chapter.country, chapter.consent_age)}
+            </p>
+            {/*
+              The longer answer, folded away rather than linked away.
+
+              A privacy policy behind a link is a page nobody opens and a tab that loses the
+              set-up they were in the middle of. Opened in place it costs one tap and the
+              screen is still there underneath.
+            */}
+            <button
+              type="button"
+              data-testid="consent-more"
+              onClick={() => setTerms((t) => !t)}
+              aria-expanded={terms}
+              className="tap-target self-start text-xs text-accent underline"
+            >
+              {terms ? 'Fold that away' : CONSENT.more}
+            </button>
+            {terms ? (
+              <div className="animate-bank flex flex-col gap-3">
+                {CONSENT.detail.map((d) => (
+                  <div key={d.q} className="flex flex-col gap-1">
+                    <p className="text-xs font-semibold">{d.q}</p>
+                    <p className="text-xs leading-relaxed text-muted">{d.a}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
           <button
             type="button"
             data-testid="setup-commit"

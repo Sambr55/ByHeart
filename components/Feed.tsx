@@ -147,7 +147,12 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       Club built the same feed for everybody however much it knew about them. Both answers
       now come from set-up, before any content is shown.
     */
-    const rooms = feedFor(learner.chapter ?? undefined, preview, learner.purpose ?? null)
+    const rooms = feedFor(
+      learner.chapter ?? undefined,
+      preview,
+      learner.purpose ?? null,
+      (learner.profile?.genres ?? []) as Parameters<typeof feedFor>[3],
+    )
     /*
       NOTHING, rather than the wrong thing, before the browser has read who this is.
 
@@ -548,6 +553,8 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     // Who, where and why: the feed is built from them now, so it rebuilds on them.
     learner.chapter,
     learner.purpose,
+    // Genre now decides which drops are in the feed, so the feed rebuilds on it.
+    learner.profile?.genres,
     // Reject reorders the feed, so the feed rebuilds on it.
     learner.rejected,
     /*
@@ -2043,6 +2050,15 @@ export function Card({
             bottom-0 and went under the wordmark. See .card-face in globals.css.
           */}
           <div
+            /*
+              Which lane the card parks on, published so a check can read it.
+
+              calendar-check asserts that tapping a day lands you on the drop's own face
+              rather than one lane past it, and it was computing that index itself — which
+              is the hard-coded lane arithmetic the note on `sides` warns about. Reading it
+              from the DOM means the check cannot disagree with the component.
+            */
+            data-face={faceLane}
             className={
               /*
                 AN IDIOM SITS IN THE MIDDLE OF ITS CARD, because it has nothing below it.
