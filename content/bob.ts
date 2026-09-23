@@ -87,8 +87,12 @@ export const BOB: Root[] = [
     root_display: 'Hold your horses',
     source: 'Hold your horses.',
     target: 'Calma.',
+    wreckage: {
+      target: 'Segura os teus cavalos.',
+      why: 'Nobody has horses. You sound like you are about to sell them some.',
+    },
     semantic_bridge:
-      'Segura os teus cavalos gets you a baffled look and a question about livestock. Portuguese does the whole job with one word — calma — and it is the most useful word on this shelf: it works on a queue, a driver, a child and an argument, and it is a complete sentence on its own.',
+      'Portuguese does the whole job with one word. Calma is the most useful thing on this shelf: it works on a queue, a driver, a child and an argument, and it is a complete sentence on its own.',
     subtext: 'Four English words, one Portuguese one, and the Portuguese one is better.',
     freebie_flag: true,
     extracts: [
@@ -125,8 +129,12 @@ export const BOB: Root[] = [
     root_display: 'Better late than never',
     source: 'Better late than never.',
     target: 'Mais vale tarde do que nunca.',
+    wreckage: {
+      target: 'Melhor tarde do que nunca.',
+      why: 'This one nearly works, which is the trap — it is correct, and it lands as a translation.',
+    },
     semantic_bridge:
-      'This one nearly translates straight, which is the trap: melhor tarde do que nunca is correct and sounds like a translation. MAIS VALE is what makes it native — literally "more is worth", the Portuguese way of saying one thing beats another. Four pieces here and you will use every one of them for the rest of your life.',
+      'MAIS VALE is what makes it native — literally "worth more", the Portuguese way of saying one thing beats another. Three pieces here and you will use every one of them for the rest of your life.',
     subtext: 'The one on this shelf that comes apart into the most useful parts.',
     extracts: [
       { id: 'mais_vale', target: 'mais vale', gloss: 'better to', shelf: 'small_words', note: 'Literally "worth more". The native way to say one thing beats another.' },
@@ -160,8 +168,12 @@ export const BOB: Root[] = [
     root_display: "Bob's your uncle",
     source: "And Bob's your uncle.",
     target: 'E pronto.',
+    wreckage: {
+      target: 'O Bob é teu tio.',
+      why: 'There is no Bob. There has never been a Bob. Portugal is now waiting to hear about your uncle.',
+    },
     semantic_bridge:
-      'There is no Bob, there has never been a Bob, and o Bob é teu tio leaves a Portuguese person waiting to hear about your uncle. E PRONTO is the equivalent and it is two of the most useful words in the language — it closes an explanation, a story or an argument, and you will hear it forty times a day.',
+      'E PRONTO is the equivalent, and it is two of the most useful words in the language — it closes an explanation, a story or an argument, and you will hear it forty times a day.',
     subtext: 'The name on the door, and the phrase that shuts it.',
     extracts: [
       { id: 'pronto', target: 'pronto', gloss: 'ready', shelf: 'just_say', note: 'On its own it closes a thing: right, done, there you go. You will hear it constantly.' },
@@ -195,8 +207,12 @@ export const BOB: Root[] = [
     root_display: 'So far, so good',
     source: 'So far, so good.',
     target: 'Para já, tudo bem.',
+    wreckage: {
+      target: 'Tão longe, tão bom.',
+      why: 'You have said something about distance and quality. Nobody knows what.',
+    },
     semantic_bridge:
-      'Tão longe, tão bom says something about distance and quality and nothing about how it is going. PARA JÁ is the piece worth having — "for now", the hedge Portuguese puts in front of any answer it is not ready to commit to. TUDO BEM you will meet twenty times a day as a greeting, a question and an answer.',
+      'PARA JÁ is the piece worth having — "for now", the hedge Portuguese puts in front of any answer it is not ready to commit to. TUDO BEM you will meet twenty times a day, as a greeting, a question and an answer.',
     subtext: 'The two phrases Portugal uses to avoid promising anything.',
     extracts: [
       { id: 'para_ja', target: 'para já', gloss: 'for now', shelf: 'when' },
@@ -229,8 +245,12 @@ export const BOB: Root[] = [
     root_display: 'A storm in a teacup',
     source: 'It is a storm in a teacup.',
     target: 'É muito barulho para nada.',
+    wreckage: {
+      target: 'Uma tempestade numa chávena de chá.',
+      why: 'Grammatical, comprehensible, and never said by anybody. Portugal runs on coffee.',
+    },
     semantic_bridge:
-      'Uma tempestade numa chávena de chá is grammatical, comprehensible, and has never been said by anybody — Portugal runs on coffee and the metaphor never arrived. What it says instead gives you MUITO and NADA, the two ends of the scale, which between them cover most of what you will need to say about quantity.',
+      'What Portugal says instead gives you MUITO and NADA, the two ends of the scale, which between them cover most of what you will ever need to say about quantity.',
     subtext: 'A lot of noise for nothing, which is also a fair description of the English.',
     extracts: [
       { id: 'muito', target: 'muito', gloss: 'a lot / very', shelf: 'how_much' },
@@ -263,8 +283,12 @@ export const BOB: Root[] = [
     root_display: 'Here we go again',
     source: 'Here we go again.',
     target: 'Lá vamos nós.',
+    wreckage: {
+      target: 'Aqui vamos nós outra vez.',
+      why: 'Understandable, a bit long, and it lands as a translation rather than a sigh.',
+    },
     semantic_bridge:
-      'Aqui vamos nós outra vez is understandable and lands as a translation. The native version points AWAY from you — lá, there — and that is what carries the weariness: it is happening over there, to us, again. VAMOS is the piece that goes everywhere, and it is how Portugal says both "we go" and "let us go".',
+      'The native version points AWAY from you — lá, there — and that is what carries the weariness: it is happening over there, to us, again. VAMOS goes everywhere, and it is how Portugal says both "we go" and "let us go".',
     subtext: 'Pointing away from yourself is the whole joke.',
     extracts: [
       { id: 'vamos', target: 'vamos', gloss: 'we go / let us go', shelf: 'doing' },
@@ -296,8 +320,12 @@ export const BOB: Root[] = [
     root_display: 'Once in a blue moon',
     source: 'Once in a blue moon.',
     target: 'De vez em quando.',
+    wreckage: {
+      target: 'Uma vez numa lua azul.',
+      why: 'The moon is not blue and nobody knows what you are waiting for.',
+    },
     semantic_bridge:
-      'Uma vez numa lua azul leaves somebody waiting to hear what the moon has to do with it. Portuguese is flatter and far more useful: de vez em quando, every now and then. VEZ is the counting word for occasions — uma vez, outra vez, às vezes — and QUANDO is simply "when", which you will need on your first day.',
+      'Portuguese is flatter and far more useful: de vez em quando, every now and then. VEZ is the counting word for occasions — uma vez, outra vez, às vezes — and QUANDO is simply "when", which you will need on your first day.',
     subtext: 'Less romantic, and you will say it every week.',
     extracts: [
       { id: 'vez', target: 'vez', gloss: 'occasion', shelf: 'when', note: 'The counting word for times something happens: uma vez, outra vez, às vezes.' },
@@ -334,8 +362,12 @@ export const BOB: Root[] = [
     root_display: "You're having a laugh",
     source: 'You are having a laugh.',
     target: 'Estás a brincar.',
+    wreckage: {
+      target: 'Estás a ter uma risada.',
+      why: 'You have observed that somebody is laughing. They were not.',
+    },
     semantic_bridge:
-      'Estás a ter uma risada observes that somebody is laughing, which they were not. BRINCAR is the word — to play, to joke, to mess about — and the construction underneath it is the one that unlocks the whole language: estás a + verb is how Portuguese says you are doing something right now.',
+      'BRINCAR is the word — to play, to joke, to mess about — and the construction underneath it unlocks the whole language: estás a + verb is how Portuguese says you are doing something right now.',
     subtext: 'The joke is a bonus. The construction is the lesson.',
     extracts: [
       { id: 'estas_a', target: 'estás a', gloss: 'you are', shelf: 'doing', note: 'Followed by a verb it makes the right-now tense: estás a brincar, you are joking.' },
@@ -369,8 +401,12 @@ export const BOB: Root[] = [
     root_display: 'It is what it is',
     source: 'It is what it is.',
     target: 'É o que temos.',
+    wreckage: {
+      target: 'É o que é.',
+      why: 'Correct, and said — but flat, and Portugal reaches for a better one first.',
+    },
     semantic_bridge:
-      'É o que é is correct and gets said. What gets reached for first is é o que temos — "it is what we have" — which is resigned, shared and very Portuguese: not a fact about the universe, a fact about what is on the table. TEMOS is the piece, and it is the verb you will use for everything you own, need and have to do.',
+      'What gets reached for first is é o que temos — "it is what we have" — resigned, shared and very Portuguese: not a fact about the universe, a fact about what is on the table. TEMOS is the verb you will use for everything you own, need and have to do.',
     subtext: 'A shrug, with the whole country in it.',
     extracts: [
       { id: 'temos', target: 'temos', gloss: 'we have', shelf: 'doing' },
@@ -404,8 +440,12 @@ export const BOB: Root[] = [
     root_display: 'God knows',
     source: 'God knows.',
     target: 'Sabe-se lá.',
+    wreckage: {
+      target: 'Deus sabe.',
+      why: 'Perfectly fine, and rather more devout than you intended.',
+    },
     semantic_bridge:
-      'Deus sabe is perfectly fine and brings God into a conversation about bus timetables. Sabe-se lá keeps him out of it — literally "it is known there", which is Portuguese for nobody has the faintest idea. SABER is the verb for knowing a fact, and it is one of the two most useful verbs you will learn this month.',
+      'Sabe-se lá keeps God out of it — literally "it is known there", which is Portuguese for nobody has the faintest idea. SABER is the verb for knowing a fact, and one of the two most useful you will learn this month.',
     subtext: 'The shrug that does not involve a deity.',
     extracts: [
       { id: 'sabe', target: 'sabe', gloss: 'knows / do you know', shelf: 'asking' },
@@ -440,8 +480,12 @@ export const BOB: Root[] = [
     root_display: 'The last straw',
     source: 'That was the last straw.',
     target: 'Foi a gota de água.',
+    wreckage: {
+      target: 'A última palha.',
+      why: 'A stray piece of straw. The camel it belongs to is nowhere in the sentence.',
+    },
     semantic_bridge:
-      'A última palha is a stray piece of straw and the camel it belongs to is nowhere in the sentence. Portugal uses the glass that finally overflows instead — the drop of water — which is the better picture and hands you ÁGUA, the first noun anybody needs, and FOI, the past of "to be".',
+      'Portugal uses the glass that finally overflows instead — the drop of water — which is the better picture, and it hands you ÁGUA, the first noun anybody needs.',
     subtext: 'The same moment, drawn better.',
     extracts: [
       { id: 'gota', target: 'gota', gloss: 'drop', shelf: 'things', gender: 'f' },
@@ -477,8 +521,12 @@ export const BOB: Root[] = [
     root_display: 'Speak of the devil',
     source: 'Speak of the devil.',
     target: 'Falar no diabo e ele aparece.',
+    wreckage: {
+      target: 'Fala do diabo.',
+      why: 'Close enough to be understood, and missing the half that makes it the phrase.',
+    },
     semantic_bridge:
-      'This one survives, which almost never happens on this shelf — the superstition is the same and so is the wording. Enjoy it, and take FALAR away with you: it is the verb for talking, the one you will need in order to say that you do not yet speak very much.',
+      'This one nearly survives, which almost never happens on this shelf — the superstition is the same and the sentence only wants its second half back. Take FALAR with you: the verb for talking, and the one you need in order to say you do not yet speak very much.',
     subtext: 'The exception that makes the rest of the shelf make sense.',
     extracts: [
       { id: 'falar', target: 'falar', gloss: 'to speak / to talk', shelf: 'doing' },

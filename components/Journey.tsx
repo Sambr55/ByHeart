@@ -2474,8 +2474,51 @@ function RootBeatView({
             <p className="display text-balance text-2xl">
               {root.root_type === 'quote' ? '“' + root.root_display + '”' : root.root_display}
             </p>
-            {root.credit ? <p className="text-sm text-muted">{root.credit}</p> : null}
+            {/*
+              Not when it would simply say the headline again.
+
+              The credit is a band, a film, a person — "The Beatles", "Pulp Fiction" — and
+              it sits under the display as the reassurance that you already know this from
+              somewhere. On the idioms shelf the thing you already know IS the idiom, so
+              credit and root_display are the same string and the screen printed "Hold your
+              horses" twice, once bold and once grey, for no reader's benefit.
+
+              Compared rather than special-cased by crate: any root whose credit repeats its
+              display has nothing to add, whatever shelf it is on.
+            */}
+            {root.credit && root.credit !== root.root_display ? (
+              <p className="text-sm text-muted">{root.credit}</p>
+            ) : null}
           </div>
+          {/*
+            THE FAILED TRANSLATION, ABOVE THE WORKING ONE, AT THE SIZE OF THE JOKE.
+
+            Sam, on the idioms vibe: "we need to see the Portuguese translation of bob's
+            your uncle and hold your horses — that's the fun part."
+
+            He is right and the first build hid it. Segura os teus cavalos and o Bob é teu
+            tio were prose inside WHY IT LANDS, four lines down in body text — so the beat
+            that makes an idiom worth teaching, watching the English come apart, was
+            something you read ABOUT rather than something you saw happen.
+
+            Struck through, because that is the one piece of typography that means "this is
+            wrong" without a word of explanation, and a learner scanning the screen has to
+            know instantly that this is not the line to memorise. The real answer follows
+            directly underneath at full strength, in the accent, with the audio on it.
+
+            Only on roots that declare wreckage — every other root's display IS the
+            recognisable thing and there is nothing to knock down first. See `wreckage` in
+            content/roots.ts.
+          */}
+          {root.wreckage ? (
+            <div className="flex flex-col gap-1">
+              <p className="eyebrow text-muted">WORD FOR WORD</p>
+              <p className="pt text-balance text-2xl text-muted line-through decoration-from-font">
+                {root.wreckage.target}
+              </p>
+              <p className="text-sm leading-relaxed text-muted">{root.wreckage.why}</p>
+            </div>
+          ) : null}
           <div className="flex flex-col gap-3">
             {/*
               THE WORDS THIS ROOT IS FOR, PICKED OUT OF THE LINE IT SITS IN.

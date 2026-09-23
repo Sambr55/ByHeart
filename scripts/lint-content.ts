@@ -1479,6 +1479,34 @@ for (const e of EXAMPLES) {
     and a card's equivalent is a phrase.
   */
   const strip = (t: string) => t.replace(/[.?!]+$/, '').trim().toLowerCase()
+
+  /*
+    THE WRECKAGE MUST NOT BE THE ANSWER.
+
+    The idioms vibe shows the word-for-word attempt struck through and the real line
+    directly beneath it. If the two ever collapse into the same sentence the screen
+    contradicts itself — a line crossed out as wrong, and the identical line offered as
+    right, one above the other. That is worse than not showing it at all.
+
+    Also refuses an empty `why`: the strike-through says something is wrong and the line
+    underneath is what says why, so a wreckage with no explanation is a joke with no
+    punchline.
+  */
+  for (const r of BOB) {
+    if (!r.wreckage) {
+      fail('Bob root ' + r.root_id + ' has no wreckage — the failed translation is the point')
+      continue
+    }
+    if (strip(r.wreckage.target) === strip(r.target)) {
+      fail(
+        'Bob root ' + r.root_id + ' strikes through "' + r.wreckage.target +
+          '" and then offers the same line as the answer',
+      )
+    }
+    if (!r.wreckage.why.trim()) {
+      fail('Bob root ' + r.root_id + ' crosses a line out without saying why')
+    }
+  }
   const byEnglish = new Map(IDIOMS.map((i) => [i.english.toLowerCase(), i]))
   let paired = 0
   for (const r of BOB) {
@@ -1492,6 +1520,19 @@ for (const e of EXAMPLES) {
       fail(
         'idiom "' + card.english + '" is taught two ways: the Club says "' +
           card.equivalent + '" and the vibe says "' + r.target + '"',
+      )
+    }
+    /*
+      And the same for the failed attempt, which is now in both files too — the card's
+      `literal` and the root's `wreckage.target` are the same joke told twice. They drifted
+      the day the vibe was written (Fala do diabo against Falar do diabo), which is exactly
+      how the equivalents drifted, so the rule covers both halves of the card rather than
+      the punchline alone.
+    */
+    if (r.wreckage && strip(card.literal) !== strip(r.wreckage.target)) {
+      fail(
+        'idiom "' + card.english + '" fails two ways: the Club says "' + card.literal +
+          '" and the vibe says "' + r.wreckage.target + '"',
       )
     }
   }

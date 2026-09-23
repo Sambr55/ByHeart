@@ -447,6 +447,27 @@ export interface Root {
   source: string
   target: string
   literal_note?: string
+  /**
+   * THE ENGLISH RENDERED WORD FOR WORD INTO PORTUGUESE, AND IT IS MEANT TO BE WRONG.
+   *
+   * Not literal_note, which runs the other way: that explains what the Portuguese literally
+   * says ("Literally: I call myself"), in small grey type, as a footnote to an answer that
+   * already works. This is the failed attempt that comes BEFORE the answer, and on the
+   * idioms shelf it is the reason to be there at all.
+   *
+   * Sam: "we need to see the Portuguese translation of bob's your uncle and hold your
+   * horses — that's the fun part."
+   *
+   * He is right, and the first build buried it. `Segura os teus cavalos` and `o Bob é teu
+   * tio` were prose inside the semantic bridge, four lines down in body text, so the beat
+   * that makes an idiom card worth having — watching the English fall apart — was
+   * something you read about rather than something you saw. It gets its own block and its
+   * own size now, above the answer, where the joke is.
+   *
+   * Only the idioms use it. Every other root's root_display already IS the recognisable
+   * thing and there is no wreckage to show.
+   */
+  wreckage?: { target: string; why: string }
   /** Why this Portuguese is a natural expression of the root. Mandatory (§10). */
   semantic_bridge: string
   /** How it feels in use: direct, dry, warm, apologetic… (§07.2) */
