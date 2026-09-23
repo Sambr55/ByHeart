@@ -1143,7 +1143,15 @@ function BuildCard({
     without being marched through a form to do it. Built from the frame's own template so
     the sentence is the one the card teaches rather than a second phrasing of it.
   */
-  const answered = shape.slots.every((s2) => String(values[s2.key] ?? '').trim())
+  /*
+    `every` ON AN EMPTY LIST IS TRUE, which would call a slotless card answered.
+
+    Vacuous truth is the right maths and the wrong answer here: a frame with no slots has
+    nothing to fill, so "every slot is filled" holds trivially and the card would open on
+    a sentence with no learner in it. The length check is the whole guard.
+  */
+  const answered =
+    shape.slots.length > 0 && shape.slots.every((s2) => String(values[s2.key] ?? '').trim())
   const answeredLine = useMemo(() => {
     const put = (t: string) => t.replace(/\{(\w+)\}/g, (_, k: string) => values[k] ?? '___')
     return { pt: put(frame.frame), en: put(frame.en) }

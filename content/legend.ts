@@ -2377,8 +2377,20 @@ export const LEGEND_COPY = {
   what: 'The minute about yourself you can say without thinking.',
   spy: 'An operative learns a legend until it comes out without being assembled — because hesitation is what gives you away. Yours is the same idea and all of it is true.',
   offer_head: 'You have enough Portuguese to start your Legend.',
+  /*
+    IT IS ALREADY PART-WRITTEN, which is the change worth saying out loud.
+
+    This described a form to fill in — "a handful of answers" — and that was true when
+    the Legend was built from scratch on arrival. The road answers cards as it goes now:
+    the name from set-up, where you are from in the lesson that asks it. Sam: "you are
+    literally building the legend as you learn… so the legend part really comes more about
+    learning it, than building it."
+
+    So the offer says what is actually waiting: some of it is already in the learner's own
+    words, and the work left is learning to say it rather than filling it in.
+  */
   offer_body:
-    'Not a form and not a speech — a handful of answers to the questions you will actually be asked. One at a time, and any of them can stay empty.',
+    'Some of it is already written — your name, where you are from, whatever you have told us along the way. The rest is a handful of questions you will actually be asked, one at a time, and any of them can stay empty.',
   offer_repair:
     'It also comes with the four lines that keep a conversation going when you have not understood a word — those are yours straight away, whether or not you fill anything in.',
   offer_cta: 'START MY LEGEND',
@@ -2396,9 +2408,21 @@ export const LEGEND_COPY = {
    */
   /** Progress is counted in vibes, because that is what the Legend actually counts. */
   open_head: 'Your Legend is open.',
-  one_more: 'One more vibe and your Legend opens.',
-  more_to_go: 'more vibes and your Legend opens.',
-  banked_note_one: 'They open after one more vibe.',
+  /*
+    THE ROAD, IN THE UNIT SOMEBODY PRESSES.
+
+    These said "one more vibe and your Legend opens" — the three-vibe toll, which is
+    gone. The basics teach the whole card, so the door is the end of the road
+    (content/road.ts) and nothing else. Copy describing a toll that no longer exists is
+    the same fault as a count derived twice: a screen promising something the product
+    will not do.
+
+    Said in STEPS, because a step is one root and that is what somebody actually presses
+    through. The number comes from roadProgress, so it cannot drift from the bar above.
+  */
+  one_more: 'One more step and your Legend opens.',
+  more_to_go: 'more steps and your Legend opens.',
+  banked_note_one: 'It opens after one more step.',
   /*
     Three, not five, and the number is no longer written into a sentence.
 
@@ -2407,7 +2431,8 @@ export const LEGEND_COPY = {
     chosen vibes. A number in prose is a number that goes stale silently, so the sentence
     stops naming one and the panel above it says how many are left, from legendStatus.
   */
-  banked_note_many: 'They open once you have finished a few vibes of your own.',
+  banked_note_many:
+    'They open as you work through the basics — every step is one more thing you can say.',
   /*
     THE SOFT GATE, one vibe from the door.
 

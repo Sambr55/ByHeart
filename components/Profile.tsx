@@ -1360,13 +1360,24 @@ function LegendHero() {
       <div className="flex flex-col gap-3 rounded bg-accent px-5 py-6 text-accent-ink">
         {mounted && n > 0 ? (
           <>
-            {/* 620ms, the same arrival the end of a vibe uses for the same claim. */}
-            <p className="pillar tabular-nums">{n}</p>
+            {/*
+              620ms, the same arrival the end of a vibe uses for the same claim.
+
+              MARKED, because the rule about it is narrower than the section it sits in.
+              scripts/hero-check asserts that the Legend is never shown as a fraction —
+              the first seven are a start, not a quota somebody is behind on — and the
+              stage block below is a different claim with a different rule: it says where
+              you are on a five-rung ladder and its position IS the number. Without this
+              boundary the check read both and enforced the Legend's rule on the Club's.
+            */}
+            <div data-testid="hero-legend" className="flex flex-col gap-3">
+              <p className="pillar tabular-nums">{n}</p>
             <p className="pillar-body text-sm leading-relaxed opacity-90">
               {n === 1
                 ? PROFILE_COPY.legend_have_one
                 : PROFILE_COPY.legend_have.replace('{done}', String(n))}
             </p>
+            </div>
             {/*
               THE STAGE, UNDER THE CARD, because they answer different questions.
 

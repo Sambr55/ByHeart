@@ -109,6 +109,7 @@ import { chapterById } from '@/content/chapters'
 import { TOO_YOUNG } from '@/content/consent'
 import { INTERESTS, genresFromInterests, interestById } from '@/content/interests'
 import { say, wordsIn } from '@/content/numbers'
+import { roadProgress } from '@/content/road'
 import type { ProfileAsk } from '@/content/roots'
 import { buzz, nope } from '@/engine/tap'
 import { useLearner } from '@/engine/useLearner'
@@ -5314,7 +5315,22 @@ function LegendPayoff({ justFinished }: { justFinished: CultureFamily | null }) 
   */
   const onBasics = status.toGo > 0 && justFinished === DOORWAY
   const afterWarmUp = status.toGo > 0 && justFinished !== DOORWAY && (learner.sittings ?? 0) <= 1
-  const toGo = onBasics ? sessionsLeft : vibesLeft
+  /*
+    HOW FAR, READ FROM THE ROAD — the same call the bar above this screen makes.
+
+    This was `onBasics ? sessionsLeft : vibesLeft`: two derived quantities in two units,
+    chosen by a third condition. It is the pair that produced "10 of 10" above "one more
+    session", and the vibes half was counting a toll that no longer exists.
+
+    roadProgress is the one answer to "how far am I", so the panel and the bar are the
+    same number read twice. See content/road.ts.
+  */
+  const road = roadProgress({
+    rootsPlayed: learner.roots_played ?? [],
+    sectionsCompleted: learner.sections_completed ?? [],
+    purpose: learner.purpose ?? null,
+  })
+  const toGo = Math.max(0, road.total - road.done)
 
   /*
     A FLOOR, NOT A WINDOW — and the difference is a bug Sam caught by living it.

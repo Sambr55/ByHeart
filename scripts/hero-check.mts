@@ -90,10 +90,19 @@ ok('it is on the first screen without scrolling', heroY >= 0 && heroY < 844, `y=
   PRACTICE IS REACHABLE FROM HERE. The whole claim is a daily habit, and a habit behind
   two taps on a second screen is not one.
 */
+/*
+  ONE BUTTON, NOT TWO — which is a decision this check was still arguing with.
+
+  It required `hero-cold` as well as `hero-practise`, and that button is deliberately
+  gone: SAY IT ALL, OUT LOUD and COLD, WITH NOTHING ON SCREEN were the same offer twice.
+  Sam: "they are almost identical." They were — both are you, out loud, from memory — and
+  the run behind the remaining button does both jobs.
+
+  So the assertion is what the rule was always about: saying it out loud is one tap from
+  Yours. Which tap it is belongs to the screen.
+*/
 const practise = p.locator('[data-testid="hero-practise"]')
-const cold = p.locator('[data-testid="hero-cold"]')
 ok('practice out loud is one tap from Yours', (await practise.count()) > 0)
-ok('the cold open is one tap from Yours', (await cold.count()) > 0)
 
 /*
   AND THE TAP ARRIVES. A link to a mode the Legend does not accept is the same bug as a
@@ -114,8 +123,24 @@ ok(
 */
 await p.goto(BASE + '/profile', { waitUntil: 'domcontentloaded' })
 await p.waitForTimeout(process.env.BASE_URL ? 5000 : 2600)
-const heroText = (await hero.first().innerText()).replace(/\s+/g, ' ')
-ok('no fraction in the hero', !/\b\d+\s*(of|\/)\s*\d+\b/i.test(heroText), heroText.slice(0, 80))
+/*
+  THE LEGEND'S OWN PART OF THE HERO, not everything inside the section.
+
+  This read the whole of [data-testid="legend-hero"], which since it was written grew to
+  contain the STAGE block — "WHERE YOU ARE 2 / 5". That fraction is about the Club: it
+  measures words owned, vibes been through, nights taken it to, and its own note argues
+  for the number because a bare bar under a description is ambiguous. Two rules meeting,
+  and the check was enforcing the wrong one.
+
+  The rule is that the LEGEND is not a quota — the first seven are a start, not a target
+  somebody is behind on. So it is asserted where that claim lives, and the stage keeps its
+  position on the ladder.
+*/
+const legendPart = p.locator('[data-testid="legend-hero"] [data-testid="hero-legend"]')
+const heroText = (await (
+  (await legendPart.count()) ? legendPart.first() : hero.first()
+).innerText()).replace(/\s+/g, ' ')
+ok('no fraction in the Legend hero', !/\b\d+\s*(of|\/)\s*\d+\b/i.test(heroText), heroText.slice(0, 80))
 ok('no percentage in the hero', !heroText.includes('%'))
 
 await b.close()
