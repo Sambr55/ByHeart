@@ -831,7 +831,32 @@ body {
     element's size is a copy of that size, and copies go stale silently.
   */
   --bar-h: 4.5rem;
-  --bar-room: calc(var(--bar-h) + var(--safe-bottom));
+  /*
+    THE ROOM THE BAR TAKES IS THE BAR'S HEIGHT. NOTHING IS ADDED TO IT.
+
+    This was `--bar-h + --safe-bottom`, and that addition is the sand strip. The bar used
+    to contain the home-indicator inset as padding, which made it 67 + 34 and is the
+    "double height" half of the report; it was rebuilt to stay exactly the height of its
+    icon row and to carry its own colour under the indicator with a box-shadow instead.
+    The bar stopped containing the inset and this did not, so everything clearing the bar
+    reserved 101px against a bar occupying 67 — and the 34px of ground left between the
+    content and the blue is the strip Sam has photographed: "about 20 pixels of sand bar
+    on top of the bottom nav."
+
+    Measured in a PWA-like frame: nav top 776.6, bottom 844, height 67.4, padding 0. The
+    bar is flush to the bottom edge and is its own height. So the room it needs is its own
+    height, and the inset below it is the bar's ground rather than anybody's padding.
+
+    The same lesson as --bar-h above, one level up: this was a copy of how tall the bar
+    used to be, and the copy went stale silently when the bar changed.
+  */
+  --bar-room: var(--bar-h);
+  /*
+    The gap between the docked CTA and the bar. Sam: "the CTA button needs to be fixed 15
+    pixels above the nav." Named rather than written into .dock, so the one number is
+    readable and the dock's own padding stays about the dock.
+  */
+  --dock-gap: 15px;
 }
 
 /*
@@ -1171,11 +1196,25 @@ body:has(.dock) .nav-clear {
 
 .dock {
   position: sticky;
-  bottom: calc(var(--bar-room) + var(--keyboard));
+  /*
+    FIFTEEN PIXELS FROM THE BUTTON TO THE BAR, which is what Sam asked for and is not the
+    same as fifteen from the dock.
+
+    The dock is a band with the button inside it, so any padding-bottom it carries sits
+    BELOW the button: at 1.5rem the button floated 39px up with a strip of the dock's own
+    sand beneath it, which is the band under the CTA in the photograph. Offsetting the
+    dock by 15 and keeping the padding just moves that strip.
+
+    So the padding below the button goes, and the gap is the offset alone — the dock's
+    bottom edge IS the button's bottom edge, 15px clear of the blue. The 0.75rem above
+    stays: that one separates the button from the words it follows, which is a different
+    relationship and still wants air.
+  */
+  bottom: calc(var(--bar-room) + var(--dock-gap) + var(--keyboard));
   z-index: 30;
   margin-top: auto;
   padding-top: 0.75rem;
-  padding-bottom: 1.5rem;
+  padding-bottom: 0;
   background: var(--bg);
   border-top: 1px solid var(--line);
 }
