@@ -53,6 +53,7 @@ import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, frameApplies, frameForPur
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
+import { ToLegend } from '@/components/ToLegend'
 import { Tick } from '@/components/Tick'
 import { useScreenIn } from '@/components/Native'
 import { SetUp } from '@/components/SetUp'
@@ -327,6 +328,8 @@ export function Journey() {
       return <SetUpStep />
     case 'theway':
       return <TheWay />
+    case 'warmup':
+      return <WarmUp />
     case 'picker':
       return <Picker />
     case 'root':
@@ -974,6 +977,124 @@ function DropRow({
 const BADGE =
   'rounded-full bg-black/55 px-2 py-1 text-[0.5rem] uppercase tracking-wider backdrop-blur-sm'
 
+/**
+ * THE WARM-UP — one vibe, chosen from two, before the basics.
+ *
+ * Sam: "after intro I want to force a user to do either Top Gun or Bridget Jones — give
+ * them the choice of the two before basics. We frame this as a warm up and a bit of fun to
+ * get them going (and get the concept). We then push them through whatever the logic is
+ * now to get to legend, but either Top Gun or Bridget will be banked."
+ *
+ * WHY TWO AND NOT THE SHELF. The shelf was the first thing after set-up: eleven tiles with
+ * nine dimmed and captioned BASICS FIRST, so a person's opening act in DUB was reading a
+ * list of what they could not have. And the basics — hello, thank you, yes, no — is the
+ * right doorway and a poor opening line, because the argument DUB is making is that
+ * Portuguese arrives out of something you already know, and nothing demonstrates that in
+ * ninety seconds better than a Top Gun quote.
+ *
+ * WHY THESE TWO. Between them they cover the room: one is direct and kinetic, the other is
+ * awkward and human, and a person knows immediately which one is theirs. That is the whole
+ * job of the screen — not to teach a preference but to make somebody pick a thing they
+ * like and watch Portuguese fall out of it.
+ *
+ * NOTHING IS SKIPPED BY DOING IT. Whichever they choose is banked like any other vibe, its
+ * words count, and the basics follows exactly as before. The doorway logic is untouched:
+ * this is a session in front of it, not a replacement for it.
+ */
+function WarmUp() {
+  const { chooseFamily } = useJourney()
+  const [going, setGoing] = useState<CultureFamily | null>(null)
+
+  /*
+    Read from CRATES rather than typed here, so the tile says what the vibe says.
+
+    Two ids, and if either is ever renamed this breaks loudly at the filter rather than
+    quietly showing one option.
+  */
+  const offered = CRATES.filter((c) => c.id === 'top_gun' || c.id === 'bridget_jones')
+
+  return (
+    <Shell stage="CHOICE" eyebrow="WARM UP">
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-accent">THE FUN BIT</p>
+        <h1 className="display text-balance text-2xl">Pick one you already know.</h1>
+        <p className="text-sm leading-relaxed text-muted">
+          Ninety seconds, out of something you have seen a hundred times. This is how DUB
+          works — the Portuguese comes out of what is already in your head, and you keep
+          every word of it.
+        </p>
+      </div>
+
+      <ul className="flex flex-col gap-3">
+        {offered.map((c) => {
+          const img = vibeImage(c.id)
+          return (
+          <li key={c.id}>
+            <button
+              type="button"
+              data-testid={'warmup-' + c.id}
+              disabled={going !== null}
+              onClick={() => {
+                /*
+                  Latched, because chooseFamily builds a whole session and the screen stays
+                  up while it does. Two taps would start two.
+                */
+                setGoing(c.id)
+                track('warmup_chosen', { crate: c.id })
+                chooseFamily(c.id)
+              }}
+              className={
+                'tap-target relative flex w-full flex-col gap-1 overflow-hidden rounded border border-line text-left transition hover:border-accent/50 ' +
+                (going === c.id ? 'border-accent' : '')
+              }
+            >
+              {/*
+                The vibe's own photograph, because a vibe is CHOSEN rather than read — the
+                argument content/vibe-images.ts already makes for the shelf.
+              */}
+              <span className="relative block aspect-[16/9] w-full overflow-hidden on-dark">
+                <Image
+                  src={img?.src ?? ''}
+                  alt={img?.alt ?? ''}
+                  fill
+                  sizes="(max-width: 448px) 100vw, 448px"
+                  className="object-cover"
+                />
+                <span
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      'linear-gradient(to bottom, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.72) 100%)',
+                  }}
+                />
+                <span
+                  className="display absolute inset-x-0 bottom-0 px-4 pb-3 text-xl text-white"
+                  style={{ textShadow: '0 1px 12px rgb(0 0 0 / 0.5)' }}
+                >
+                  {c.title}
+                </span>
+              </span>
+              <span className="px-4 py-3 text-sm leading-relaxed text-muted">{c.blurb}</span>
+            </button>
+          </li>
+          )
+        })}
+      </ul>
+
+      {/*
+        No way past, and it says so rather than hiding a skip.
+
+        The step is forced — Sam: "I want to force a user to do either" — and a screen that
+        offers no exit should admit it instead of leaving somebody hunting for one.
+      */}
+      <p className="mt-auto text-xs leading-relaxed text-muted">
+        Either one. The basics come straight after, and whichever you pick is yours to keep.
+      </p>
+    </Shell>
+  )
+}
+
 function Picker() {
   const router = useRouter()
   const { chooseFamily, state } = useJourney()
@@ -1341,6 +1462,16 @@ function Picker() {
         nothing at all once installed, or once waved away.
       */}
       <Install />
+      {/*
+        HOW FAR TO THE LEGEND, on the screen somebody chooses their next session from.
+
+        Sam: "I also want to show a progress bar as you build towards your legend, it should
+        be ever present until you get there." The shelf is where that question is actually
+        being asked — a person standing here is deciding what to do next, and the distance
+        to the door is the fact that decision needs. It renders nothing once the Legend is
+        open, and nothing before the first sitting; see components/ToLegend.tsx.
+      */}
+      <ToLegend />
       {/* "Pick a vibe you connect with" is a promise about choice, and on the first
           visit there is exactly one card on the screen. Say the true thing instead. */}
       <h1 className="display text-balance text-2xl">
@@ -4627,6 +4758,14 @@ function SectionComplete() {
           is quiet reinforcement, and if they declined it never appears again.
         */}
         <LegendPayoff />
+        {/*
+          And the distance, at the moment somebody has just closed one sitting and is
+          deciding whether to do another. Same component as the shelf — see ToLegend, which
+          renders nothing once the door is open.
+        */}
+        <div className="mt-6">
+          <ToLegend />
+        </div>
         {remaining.length ? (
           <p className="mt-6 text-sm text-muted">
             {remaining.length} more {remaining.length === 1 ? 'vibe' : 'vibes'} to raid,

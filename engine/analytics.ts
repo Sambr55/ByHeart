@@ -189,6 +189,8 @@ export type EventName =
     purposes, and the split between them is the answer to "which block of ten do we write".
   */
   | 'purpose_chosen'
+  /** Which of the two warm-up vibes somebody picked before the basics. */
+  | 'warmup_chosen'
   | 'demo_played'
   | 'card_rejected'
   | 'card_rewound'

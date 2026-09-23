@@ -63,6 +63,8 @@ export type Step =
   | { kind: 'setup' }
   | { kind: 'theway' }
   | { kind: 'picker' }
+  /** The forced choice of a first vibe — see the note in the steps array. */
+  | { kind: 'warmup' }
   | { kind: 'root'; rootId: string; beat: RootBeat; pieceIndex?: number }
   | { kind: 'collision'; collisionId: string }
   | { kind: 'osmosis' }
@@ -305,6 +307,28 @@ const initial: JourneyState = {
       than stop them, which is the worst way for a gate to fail.
     */
     { kind: 'setup' },
+    /*
+      A WARM-UP BEFORE THE BASICS, and a choice of exactly two.
+
+      Sam: "after intro I want to force a user to do either Top Gun or Bridget Jones — give
+      them the choice of the two before basics. We frame this as a warm up and a bit of fun
+      to get them going (and get the concept)."
+
+      The shelf was the first thing after set-up, and it is eleven tiles with nine of them
+      dimmed and captioned BASICS FIRST — so a person's first act in DUB was reading a list
+      of things they could not have. The basics is the right doorway and it is a poor
+      opening line: hello, thank you, yes and no is the most useful content in the product
+      and the least surprising.
+
+      Two options and no third, deliberately. The whole argument of DUB is that Portuguese
+      arrives out of something you already know, and that argument is made in ninety seconds
+      by a Top Gun quote — not by a menu. A choice between two is a taste; a choice between
+      eleven is the filing the feed exists to remove.
+
+      IT MUST BE IN THIS ARRAY, not only in the switch — see the note above, which this
+      step is a live example of.
+    */
+    { kind: 'warmup' },
     { kind: 'picker' },
   ],
   index: 0,
