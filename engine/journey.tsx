@@ -38,7 +38,7 @@ import {
   syncSession,
   rememberSection,
 } from './learner'
-import { doorwayRoots, legendStatus, worthSaving } from '@/content/legend'
+import { doorwayRoots, earlyRoots, legendStatus, worthSaving } from '@/content/legend'
 import type { Purpose } from '@/content/situations'
 import { chosenPair, setPair } from './pair'
 import { DEFAULT_PAIR } from '@/content/pairs'
@@ -546,7 +546,19 @@ export function sectionRoots(
     and the other two sort as ordinary roots — still in the basics, still asked as lessons,
     just no longer ahead of the door.
   */
+  /*
+    TWO RANKS, because early and required are different claims.
+
+    `doorway` is what the Legend WAITS ON and has to come first, or the door slips a
+    sitting. `early` is everything worth meeting soon — the doorway plus the roots that
+    ask something about the learner, which the product needs before it can personalise
+    anything but which nothing on the card is waiting for. See earlyRoots.
+
+    Ranking them equally cost a sitting: tb_why is a doorway root and tb_email is not, and
+    flattening the two let the email question push the door back to four sittings.
+  */
   const doorway = new Set(doorwayRoots(purpose).map((r) => r.root_id))
+  const early = new Set(earlyRoots(purpose).map((r) => r.root_id))
   /*
     The one ask that genuinely blocks later content. Named rather than counted, so adding
     a sixth asking root cannot silently re-create the sitting this removes.
@@ -557,6 +569,7 @@ export function sectionRoots(
       Number(Boolean(b.freebie_flag)) - Number(Boolean(a.freebie_flag)) ||
       Number(blocking(b)) - Number(blocking(a)) ||
       Number(doorway.has(b.root_id)) - Number(doorway.has(a.root_id)) ||
+      Number(early.has(b.root_id)) - Number(early.has(a.root_id)) ||
       (doorway.has(a.root_id) && doorway.has(b.root_id)
         ? 0
         : Number(b.root_type === signature) - Number(a.root_type === signature)) ||

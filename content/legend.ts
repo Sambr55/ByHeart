@@ -1750,9 +1750,57 @@ export function doorwayRoots(purpose?: Purpose | null): { root_id: string }[] {
   */
   const purposes = purpose ? ([purpose] as const) : (['visiting', 'staying', 'moving'] as const)
   const need = new Set(purposes.flatMap((p) => cardFor(p).flatMap((f) => f.built_from)))
-  return (ROOTS_BY_FAMILY[DOORWAY] ?? []).filter((r) =>
-    r.extracts.some((e) => need.has(e.id)),
+  /*
+    AND THE ROOT THAT COLLECTS AN AGE, whatever card the learner is building.
+
+    tb_age carries a Legend frame — 'age' — but that frame is depth: 'deeper' and so off
+    the seven, which meant scoping the doorway to one purpose dropped tb_age out of it for
+    visiting and staying. It then landed in the FOURTH sitting for a visitor: one past the
+    open door, so somebody who stops when the Legend opens never meets the age picker at
+    all. Sam: "no age picker (at least I couldn't get to it)."
+
+    Being off the card is a decision about what somebody is asked to say out loud. It was
+    never a decision that the product should stop finding out: the answer personalises
+    every sentence with a number in it, and the deeper frame is still there to be opened.
+
+    Expressed as "the roots that ask" rather than as tb_age, so the rule is the property
+    and not the instance — and it costs the door nothing, because these roots were already
+    in it for at least one purpose and the sort front-loads them either way.
+  */
+  const asking = new Set(
+    (ROOTS_BY_FAMILY[DOORWAY] ?? []).filter((r) => r.asks === 'age').map((r) => r.root_id),
   )
+  return (ROOTS_BY_FAMILY[DOORWAY] ?? []).filter(
+    (r) => asking.has(r.root_id) || r.extracts.some((e) => need.has(e.id)),
+  )
+}
+
+/**
+ * The basics roots that should come EARLY, which is a longer list than the door's.
+ *
+ * TWO DIFFERENT QUESTIONS, and conflating them cost four sittings in both directions.
+ *
+ *   doorwayRoots   what the Legend WAITS ON. A condition. Every one of these must be
+ *                  played before the door opens, so adding to it makes the wait longer.
+ *   earlyRoots     what a learner should MEET SOON. An ordering. Adding to it costs
+ *                  nothing; it only decides which of two rung-1 roots comes first.
+ *
+ * Scoping the doorway to one purpose dropped tb_age out of it for visiting and staying —
+ * the age FRAME is depth: 'deeper', off the seven — so the root that collects an age lost
+ * its front-load and fell to the sixth sitting. Sam: "no age picker (at least I couldn't
+ * get to it)." He could not: it was three sittings past the open door.
+ *
+ * Putting the asking roots back into the DOORWAY fixed the order and broke the count,
+ * because it made three more roots a condition of opening and the basics went back to
+ * four sittings. They are not a condition — nothing on the card needs an email — they are
+ * simply things worth knowing before the product tries to personalise anything.
+ *
+ * So the sort reads this and the door reads doorwayRoots, and each gets the set it is
+ * actually asking about.
+ */
+export function earlyRoots(purpose?: Purpose | null): { root_id: string }[] {
+  const door = new Set(doorwayRoots(purpose).map((r) => r.root_id))
+  return (ROOTS_BY_FAMILY[DOORWAY] ?? []).filter((r) => r.asks || door.has(r.root_id))
 }
 
 /**
