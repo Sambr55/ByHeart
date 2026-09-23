@@ -286,8 +286,31 @@ export function Legend() {
       above it named the other two by name. ?run=1 and ?cold=1 walked straight past it
       into a run-through of answers given through the back door, with the door still shut.
     */
-    if (mounted && !unlocked && mode !== 'deck') setMode('deck')
-  }, [mounted, unlocked, mode])
+    /*
+      MEASURED ON WHAT THEY HAVE, not on what they were required to do to get it.
+
+      This read `!unlocked`, which is legendStatus().open — the doorway plus three vibes —
+      and it is the other half of the RUN IT THROUGH bug: even once the branch below agreed
+      to render, this effect would have reset the mode on the next pass. Two places asking
+      the same wrong question.
+
+      THE TWO MODES ARE GUARDED SEPARATELY, because they need different things.
+
+      The first version of this fix reset ANY non-deck mode on `answered.length < 2`, which
+      broke building: {build} is how you answer your FIRST card, and a learner answering
+      their first card has zero answers by definition. legend-flow caught it immediately —
+      it seeds `legend: []`, clicks a card and waits for the ask beat that never came.
+
+      So: a run-through needs cards to run (two filled ones), and building needs the door
+      to have been walked, which is what `unlocked` legitimately measures and what the
+      branch below already asks. Each mode is held to its own precondition rather than to
+      one test that is wrong for one of them.
+    */
+    if (mounted && mode !== 'deck') {
+      const runnable = mode === 'rehearse' || mode === 'cold'
+      if (runnable ? answered.length < 2 : !unlocked) setMode('deck')
+    }
+  }, [mounted, unlocked, answered.length, mode])
 
   if (typeof mode === 'object' && (!mounted || unlocked)) {
     const frame = LEGEND_FRAMES.find((f) => f.id === mode.build)!
@@ -330,7 +353,30 @@ export function Legend() {
     a link that has been sent to somebody must not stop working because the screens behind
     it were merged.
   */
-  if ((mode === 'rehearse' || mode === 'cold') && unlocked && answered.length >= 2) {
+  /*
+    RUN IT THROUGH DID NOTHING, and the extra test in this condition is why.
+
+    Sam, on the Legend screen inside the Club: "this run it through button doesnt do
+    anything." Reproduced exactly — the button renders, the click fires, setMode('rehearse')
+    lands, and this branch declines to render it.
+
+    `unlocked` is legendStatus().open, which answers "has this learner EARNED the right to
+    start a Legend" — the doorway roots plus three vibes. It is the right question on the
+    deck below, where a locked learner is shown what is behind the door. It is the wrong
+    question here, because `answered.length >= 2` has already settled the only thing that
+    matters: you cannot have two filled cards without having a Legend, however you came by
+    it. So the condition asked one question twice and a different one once, and the
+    different one is the one that failed.
+
+    It is reachable in the product, not only through a testing tool: anybody whose Legend
+    was answered before the doorway rules changed, anybody restored from a server record
+    that predates `sittings`, and anybody who arrives with a merged record from a second
+    device. All of them have a full card and an unusable button.
+
+    The `mode` reset at the top of this component keeps the other half honest — a learner
+    who genuinely has no Legend is bounced back to 'deck' before they can reach this.
+  */
+  if ((mode === 'rehearse' || mode === 'cold') && answered.length >= 2) {
     return (
       <Shell>
         <RunThrough
@@ -401,7 +447,20 @@ export function Legend() {
         Above RUN IT THROUGH deliberately: rehearsing is what you do with a finished card,
         and offering it first to somebody who cannot finish theirs is the wrong order.
       */}
-      {mounted && unlocked && cardOpen.length ? (
+      {/*
+        Shown to anybody with a card to finish, not only to anybody the ladder approves of.
+
+        `unlocked` here was the same wrong question as in the two places above — it asks
+        whether the doorway has been walked, and this button is about whether there is an
+        unanswered card to walk TO. A learner holding a part-built Legend whose record does
+        not satisfy legendStatus (merged from a second device, restored from a row written
+        before `sittings` existed, or opened through the Club) saw a list of cards with no
+        way to find the one in their way, which is the exact complaint that put this button
+        here in the first place.
+
+        `cardOpen.length` is the real precondition and it was already in the condition.
+      */}
+      {mounted && cardOpen.length ? (
         <button
           type="button"
           data-testid="legend-find-missing"

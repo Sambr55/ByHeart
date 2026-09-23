@@ -14,7 +14,7 @@
  */
 import { chromium } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
-import { DOORWAY, LEGEND_FRAMES, doorwayRoots } from '../content/legend'
+import { DOORWAY, LEGEND_CARD, LEGEND_FRAMES, doorwayRoots } from '../content/legend'
 import { CRATES, ROOTS } from '../content/roots'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -232,6 +232,54 @@ ok(
   preview.includes('duas filhas'),
   (preview.match(/Tenho[^.]*\./) ?? ['?'])[0],
 )
+
+/*
+  RUN IT THROUGH ACTUALLY RUNS, for a learner who has a Legend however they got it.
+
+  Sam, on the Legend screen inside the Club: "this run it through button doesnt do
+  anything." It rendered, the click fired, setMode('rehearse') landed — and the branch that
+  draws the run-through declined, because it also asked `unlocked`: legendStatus().open,
+  which measures whether the DOORWAY has been walked. Two different questions, and the
+  screen was asking the one that has nothing to do with having cards to rehearse.
+
+  Reachable without any testing tool: a record merged from a second device, or restored
+  from a row written before `sittings` existed, has a full card and an unusable button.
+
+  Seeded straight past the deck with a finished Legend, because that is the state the
+  complaint came from and it is not the state the rest of this file drives.
+*/
+{
+  const full = {
+    ...seed,
+    club_welcomed_at: '2026-08-20T00:00:00.000Z',
+    /* Deliberately NOT satisfying legendStatus: no sittings, and the doorway left off. */
+    roots_played: [],
+    sections_completed: [],
+    legend: LEGEND_CARD.map((f) => ({
+      frame_id: f.id,
+      values: Object.fromEntries(f.slots.map((s2) => [s2.key, s2.kind === 'name' ? 'Sam' : 'x'])),
+      at: '2026-08-20T00:00:00.000Z',
+    })),
+  }
+  await page.evaluate(
+    ([k, blob]) => localStorage.setItem(k as string, JSON.stringify(blob)),
+    [KEY, full] as const,
+  )
+  await page.goto(BASE + '/legend')
+  await page.waitForTimeout(1500)
+  const there = await page.$('[data-testid="legend-rehearse"]')
+  ok('a finished Legend offers the run-through', Boolean(there))
+  if (there) {
+    await there.click()
+    await page.waitForTimeout(900)
+    const said = ((await page.textContent('body')) ?? '').replace(/\s+/g, ' ')
+    ok(
+      'and pressing it starts one',
+      /\d OF \d/.test(said),
+      (said.match(/\d OF \d/) ?? ['nothing happened'])[0],
+    )
+  }
+}
 
 await browser.close()
 
