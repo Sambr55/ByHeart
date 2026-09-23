@@ -160,6 +160,20 @@ export interface Extract {
 
 export type SetId =
   | 'numbers_1_10'
+  /*
+    AND THE TWO THAT MAKE AN AGE SAYABLE.
+
+    Counting stopped at ten, so the product could spell no age but thirty — and thirty
+    only because it is the specimen in tb_age. Sam: "if we can carry forward
+    music/football, surely we can carry forward age in the same way." A word only exists
+    here if a root teaches it, so the answer was to teach the rest of the numbers.
+
+    Two sets rather than one, because they behave differently and a learner can see that:
+    the teens are irregular and have to be learnt, the tens are a pattern and can be
+    worked out.
+  */
+  | 'numbers_teens'
+  | 'numbers_tens'
   /** What a learner says they are into — see tb_into and content/interests.ts. */
   | 'into'
   | 'weekdays'
@@ -216,6 +230,43 @@ export const SETS: WordSet[] = [
     label: 'Counting to ten',
     shelf: 'how_much',
     members: ['um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez'],
+  },
+  {
+    id: 'numbers_teens',
+    label: 'The teens',
+    shelf: 'how_much',
+    /*
+      Ten is in the list and is taught by tb_ten_things, because the teens are built out
+      of it — dezasseis is dez with seis welded on, and a group that started at treze
+      would hide the one fact that makes the second half of it free.
+    */
+    members: [
+      'dez', 'onze', 'doze', 'treze', 'catorze', 'quinze',
+      'dezasseis', 'dezassete', 'dezoito', 'dezanove',
+    ],
+    /*
+      PARTIAL: onze, doze and dezassete are the shape of the thing and nothing teaches
+      them. They are genuinely the three a learner can infer — eleven and twelve from the
+      pattern either side, seventeen from dezasseis and sete — and declaring the set
+      complete while three of its ten are unreachable is the overclaim this flag prevents.
+    */
+    partial: true,
+  },
+  {
+    id: 'numbers_tens',
+    label: 'Counting in tens',
+    shelf: 'how_much',
+    members: [
+      'dez', 'vinte', 'trinta', 'quarenta', 'cinquenta',
+      'sessenta', 'setenta', 'oitenta', 'noventa', 'cem',
+    ],
+    /*
+      PARTIAL for `cem` alone, which is the honest state: every ten from twenty to ninety
+      now has a root, and a hundred does not. It is in the list because a set that stops
+      at noventa looks finished when it is one word short of the round number everybody
+      reaches for.
+    */
+    partial: true,
   },
   {
     /*
@@ -4984,6 +5035,430 @@ export const THE_BASICS: Root[] = [
     },
     rights_status: 'title-reference',
     starter_tags: ['numbers', 'when'],
+    next_root_hooks: ['talvez'],
+  }),
+  /*
+    THE TENS, because an age has to be sayable.
+
+    Sam: "if we can carry forward music/football, surely we can carry forward age in the
+    same way." It could not, and the reason was not a rule — it was a hole in the content.
+    A word only exists in this product if a root teaches it, so `futebol` could be banked
+    and swapped into a sentence while `cinquenta` could not: no lesson had ever said it.
+    Ages 30–39 were the only ones the product could spell, because trinta was the only
+    tens word in it, and it was there by accident — it is the specimen in tb_age.
+
+    Six roots close the hole. They are ordinary number roots and they are authored like
+    every other one — a title whose number IS the hook, three branches, a release that
+    does not repeat the line. What makes them worth their place is that between them a
+    learner can say any age from thirteen to ninety-nine, which is the first time that has
+    been true.
+
+    Rung 1, with the other numbers. There is nothing harder about sessenta than about
+    seis, and putting the tens behind a rung would recreate the fault they exist to fix —
+    a learner of fifty-six unable to say so.
+
+    They sit at the BACK of the basics on purpose. The doorway sort front-loads the roots
+    the Legend waits on and these are not among them, so they arrive once the door is
+    already open, as the rest of counting always has.
+  */
+  q({
+    root_id: 'tb_twenty',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: '20th Century Fox',
+    source_status: 'verified',
+    root_display: '20th Century Fox',
+    credit: 'The fanfare before every film you have ever seen',
+    source: 'Twenty.',
+    target: 'Vinte.',
+    semantic_bridge:
+      'The first number that is not on your fingers, and the one the rest of counting is built on — every number from twenty-one to twenty-nine is vinte with a word after it, joined by e. Learn the shape here and you have eighty numbers for the price of one.',
+    subtext: 'Announced, with a drumroll.',
+    extracts: [
+      { id: 'vinte', target: 'vinte', gloss: 'twenty', shelf: 'how_much', set: 'numbers_tens' },
+    ],
+    branches: [
+      { target: 'Vinte euros.', en: 'Twenty euros.', demonstrates: ['vinte'] },
+      { target: 'Vinte e um.', en: 'Twenty-one.', demonstrates: ['vinte'] },
+      { target: 'Tenho vinte anos.', en: 'I am twenty years old.', demonstrates: ['vinte'] },
+    ],
+    reinforces: ['um', 'euro', 'tenho', 'anos'],
+    helpers: { 'euros': 'euros', 'e': 'and' },
+    transfer_prompt: {
+      context: 'The taxi driver tells you what is on the meter.',
+      ask: 'Twenty-one euros.',
+      answer: 'Vinte e um euros.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['trinta'],
+  }),
+  q({
+    root_id: 'tb_thirty_nine',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'The 39 Steps — Hitchcock',
+    source_status: 'verified',
+    root_display: 'The 39 Steps',
+    credit: 'Hitchcock, 1935 — the one with the handcuffs',
+    source: 'Thirty-nine steps.',
+    target: 'Trinta e nove degraus.',
+    semantic_bridge:
+      'Thirty and nine, joined by e, exactly as the last root promised. Portuguese builds every two-digit number this way and never makes an exception, so once trinta e nove behaves itself so does noventa e nove.',
+    subtext: 'Counted on the way up, out of breath.',
+    extracts: [
+      { id: 'trinta', target: 'trinta', gloss: 'thirty', shelf: 'how_much', set: 'numbers_tens' },
+    ],
+    branches: [
+      { target: 'Trinta euros.', en: 'Thirty euros.', demonstrates: ['trinta'] },
+      { target: 'Trinta e nove.', en: 'Thirty-nine.', demonstrates: ['trinta'] },
+      { target: 'Trinta minutos.', en: 'Thirty minutes.', demonstrates: ['trinta'] },
+    ],
+    reinforces: ['nove', 'euro'],
+    helpers: { 'degraus': 'steps', 'euros': 'euros', 'minutos': 'minutes', 'e': 'and' },
+    transfer_prompt: {
+      context: 'They ask how long the walk up takes.',
+      ask: 'Thirty minutes.',
+      answer: 'Trinta minutos.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['quarenta'],
+  }),
+  q({
+    root_id: 'tb_forty_two',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'The Hitchhiker’s Guide to the Galaxy — Douglas Adams',
+    source_status: 'verified',
+    root_display: '42',
+    credit: 'Douglas Adams, 1979 — the answer, though nobody checked the question',
+    source: 'Forty-two.',
+    target: 'Quarenta e dois.',
+    semantic_bridge:
+      'The most famous number in science fiction, and in Portuguese it is two words you can already nearly say. Quarenta looks like quatro because it is four’s ten — and that pattern holds the whole way up, which is the useful half of this lesson.',
+    subtext: 'Stated as though it settles everything.',
+    extracts: [
+      { id: 'quarenta', target: 'quarenta', gloss: 'forty', shelf: 'how_much', set: 'numbers_tens' },
+    ],
+    branches: [
+      { target: 'Quarenta euros.', en: 'Forty euros.', demonstrates: ['quarenta'] },
+      { target: 'Quarenta e dois.', en: 'Forty-two.', demonstrates: ['quarenta'] },
+      { target: 'Tenho quarenta anos.', en: 'I am forty years old.', demonstrates: ['quarenta'] },
+    ],
+    reinforces: ['dois', 'quatro', 'euro', 'tenho', 'anos'],
+    helpers: { 'euros': 'euros', 'e': 'and' },
+    transfer_prompt: {
+      context: 'Somebody asks how old you are, and you round down.',
+      ask: 'I am forty years old.',
+      answer: 'Tenho quarenta anos.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['cinquenta'],
+  }),
+  q({
+    root_id: 'tb_fifty_ways',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: '50 Ways to Leave Your Lover — Paul Simon',
+    source_status: 'verified',
+    root_display: '50 Ways to Leave Your Lover',
+    credit: 'Paul Simon, 1975 — he only ever lists five',
+    source: 'Fifty ways.',
+    target: 'Cinquenta maneiras.',
+    semantic_bridge:
+      'Cinquenta is cinco’s ten, the same way quarenta is quatro’s, and the pair of them are where most people’s counting quietly stops. It is also the one you are most likely to need about yourself, which is the real reason it is here.',
+    subtext: 'Offered as advice, unhelpfully.',
+    extracts: [
+      { id: 'cinquenta', target: 'cinquenta', gloss: 'fifty', shelf: 'how_much', set: 'numbers_tens' },
+    ],
+    branches: [
+      { target: 'Cinquenta euros.', en: 'Fifty euros.', demonstrates: ['cinquenta'] },
+      { target: 'Cinquenta e seis.', en: 'Fifty-six.', demonstrates: ['cinquenta'] },
+      { target: 'Tenho cinquenta anos.', en: 'I am fifty years old.', demonstrates: ['cinquenta'] },
+    ],
+    reinforces: ['cinco', 'seis', 'euro', 'tenho', 'anos'],
+    helpers: { 'maneiras': 'ways', 'euros': 'euros', 'e': 'and' },
+    transfer_prompt: {
+      context: 'The number on the price tag, read out loud.',
+      ask: 'Fifty-six euros.',
+      answer: 'Cinquenta e seis euros.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['sessenta'],
+  }),
+  q({
+    root_id: 'tb_sixty_six',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: '(Get Your Kicks on) Route 66',
+    source_status: 'verified',
+    root_display: 'Route 66',
+    credit: 'Bobby Troup, 1946 — later everybody, from Nat King Cole to Chuck Berry',
+    source: 'Sixty-six.',
+    target: 'Sessenta e seis.',
+    semantic_bridge:
+      'Two sixes, and the first is the ten. Sessenta hides sete’s neighbour seis inside it just as clearly as cinquenta hides cinco, so by now the pattern is doing the work and you are only learning a spelling.',
+    subtext: 'Sung out of a car window.',
+    extracts: [
+      { id: 'sessenta', target: 'sessenta', gloss: 'sixty', shelf: 'how_much', set: 'numbers_tens' },
+    ],
+    branches: [
+      { target: 'Sessenta euros.', en: 'Sixty euros.', demonstrates: ['sessenta'] },
+      { target: 'Sessenta minutos.', en: 'Sixty minutes.', demonstrates: ['sessenta'] },
+      { target: 'Tenho sessenta anos.', en: 'I am sixty years old.', demonstrates: ['sessenta'] },
+    ],
+    reinforces: ['seis', 'euro', 'tenho', 'anos'],
+    helpers: { 'euros': 'euros', 'minutos': 'minutes', 'e': 'and' },
+    transfer_prompt: {
+      context: 'You are asked how long the bus takes.',
+      ask: 'Sixty minutes.',
+      answer: 'Sessenta minutos.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['setenta'],
+  }),
+  q({
+    root_id: 'tb_ninety_nine',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: '99 Luftballons — Nena',
+    source_status: 'verified',
+    root_display: '99 Luftballons',
+    credit: 'Nena, 1983 — ninety-nine balloons, one international incident',
+    source: 'Ninety-nine balloons.',
+    target: 'Noventa e nove balões.',
+    semantic_bridge:
+      'The top of the range, and it collects the last three tens on the way: setenta, oitenta, noventa all rhyme with the units they come from. Nine and ninety in one line is the proof that the pattern never breaks — after this there is no age you cannot say.',
+    subtext: 'Released all at once, with consequences.',
+    extracts: [
+      { id: 'noventa', target: 'noventa', gloss: 'ninety', shelf: 'how_much', set: 'numbers_tens' },
+    ],
+    branches: [
+      { target: 'Noventa euros.', en: 'Ninety euros.', demonstrates: ['noventa'] },
+      { target: 'Noventa e nove.', en: 'Ninety-nine.', demonstrates: ['noventa'] },
+      { target: 'Tenho noventa anos.', en: 'I am ninety years old.', demonstrates: ['noventa'] },
+    ],
+    reinforces: ['nove', 'euro', 'tenho', 'anos'],
+    helpers: { 'balões': 'balloons', 'euros': 'euros', 'e': 'and' },
+    transfer_prompt: {
+      context: 'Your grandmother is asked her age and refuses to lie.',
+      ask: 'I am ninety years old.',
+      answer: 'Tenho noventa anos.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['treze'],
+  }),
+  q({
+    root_id: 'tb_thirteen',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: '13 Going on 30',
+    source_status: 'verified',
+    root_display: '13 Going on 30',
+    credit: 'Jennifer Garner, 2004 — wishing very hard at a birthday party',
+    source: 'Thirteen, fourteen, fifteen.',
+    target: 'Treze, catorze, quinze.',
+    semantic_bridge:
+      'The teens are the one stretch that does not follow the rule — treze, catorze, quinze are their own words, and then dezasseis onwards is simply dez with the unit stuck on. Thirteen is also the age this product asks about before it asks anything else.',
+    subtext: 'Said with enormous impatience.',
+    extracts: [
+      { id: 'treze', target: 'treze', gloss: 'thirteen', shelf: 'how_much', set: 'numbers_teens' },
+      { id: 'catorze', target: 'catorze', gloss: 'fourteen', shelf: 'how_much', set: 'numbers_teens' },
+      { id: 'quinze', target: 'quinze', gloss: 'fifteen', shelf: 'how_much', set: 'numbers_teens' },
+    ],
+    branches: [
+      { target: 'Tenho treze anos.', en: 'I am thirteen years old.', demonstrates: ['treze'] },
+      { target: 'Catorze euros.', en: 'Fourteen euros.', demonstrates: ['catorze'] },
+      { target: 'Quinze minutos.', en: 'Fifteen minutes.', demonstrates: ['quinze'] },
+      { target: 'Treze, catorze, quinze.', en: 'Thirteen, fourteen, fifteen.', demonstrates: ['treze', 'catorze', 'quinze'] },
+    ],
+    reinforces: ['tenho', 'anos', 'euro'],
+    helpers: { 'euros': 'euros', 'minutos': 'minutes' },
+    transfer_prompt: {
+      context: 'The waiter asks how long you can wait for a table.',
+      ask: 'Fifteen minutes.',
+      answer: 'Quinze minutos.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['dezoito'],
+  }),
+  q({
+    root_id: 'tb_eighteen',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'I’m Eighteen — Alice Cooper',
+    source_status: 'verified',
+    root_display: 'I’m Eighteen',
+    credit: 'Alice Cooper, 1970 — and he likes it',
+    source: 'I am eighteen.',
+    target: 'Tenho dezoito anos.',
+    semantic_bridge:
+      'From sixteen up the teens go back to behaving: dez with the unit welded on, so dezasseis is literally ten-and-six. Said about yourself it needs tenho, not sou — Portuguese has an age rather than being one.',
+    subtext: 'Announced as a complaint and a boast at once.',
+    extracts: [
+      { id: 'dezoito', target: 'dezoito', gloss: 'eighteen', shelf: 'how_much', set: 'numbers_teens' },
+    ],
+    branches: [
+      { target: 'Tenho dezoito anos.', en: 'I am eighteen years old.', demonstrates: ['dezoito'] },
+      { target: 'Dezoito euros.', en: 'Eighteen euros.', demonstrates: ['dezoito'] },
+      { target: 'Dezoito minutos.', en: 'Eighteen minutes.', demonstrates: ['dezoito'] },
+    ],
+    reinforces: ['dez', 'oito', 'tenho', 'anos', 'euro'],
+    helpers: { 'euros': 'euros', 'minutos': 'minutes' },
+    transfer_prompt: {
+      context: 'Buying a ticket, and they want to know if you are old enough.',
+      ask: 'Eighteen euros.',
+      answer: 'Dezoito euros.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['talvez'],
+  }),
+  q({
+    root_id: 'tb_seventy_eight',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: '78 rpm',
+    source_status: 'verified',
+    root_display: '78 rpm',
+    credit: 'The speed every record turned at, until somebody slowed it down',
+    source: 'Seventy-eight.',
+    target: 'Setenta e oito.',
+    semantic_bridge:
+      'Setenta from sete and oitenta from oito — the two tens that sound most like the units under them, which is why they are easiest to learn as a pair rather than apart.',
+    subtext: 'Read off a label, at speed.',
+    extracts: [
+      { id: 'setenta', target: 'setenta', gloss: 'seventy', shelf: 'how_much', set: 'numbers_tens' },
+    ],
+    branches: [
+      { target: 'Setenta euros.', en: 'Seventy euros.', demonstrates: ['setenta'] },
+      { target: 'Setenta e oito.', en: 'Seventy-eight.', demonstrates: ['setenta'] },
+      { target: 'Tenho setenta anos.', en: 'I am seventy years old.', demonstrates: ['setenta'] },
+    ],
+    reinforces: ['sete', 'oito', 'euro', 'tenho', 'anos'],
+    helpers: { 'euros': 'euros', 'e': 'and' },
+    transfer_prompt: {
+      context: 'Somebody asks your father how old he is.',
+      ask: 'I am seventy years old.',
+      answer: 'Tenho setenta anos.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['oitenta'],
+  }),
+  q({
+    root_id: 'tb_eighty_days',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Around the World in 80 Days — Jules Verne',
+    source_status: 'verified',
+    root_display: 'Around the World in 80 Days',
+    credit: 'Jules Verne, 1873 — Phileas Fogg, and a wager at the Reform Club',
+    source: 'Eighty days.',
+    target: 'Oitenta dias.',
+    semantic_bridge:
+      'Oitenta is oito’s ten, and dias you already have from the very first week of this. Between them they make the one number on the shelf that is a whole journey.',
+    subtext: 'Wagered, and then very nearly lost.',
+    extracts: [
+      { id: 'oitenta', target: 'oitenta', gloss: 'eighty', shelf: 'how_much', set: 'numbers_tens' },
+    ],
+    branches: [
+      { target: 'Oitenta euros.', en: 'Eighty euros.', demonstrates: ['oitenta'] },
+      { target: 'Oitenta dias.', en: 'Eighty days.', demonstrates: ['oitenta'] },
+      { target: 'Tenho oitenta anos.', en: 'I am eighty years old.', demonstrates: ['oitenta'] },
+    ],
+    reinforces: ['oito', 'dia', 'euro', 'tenho', 'anos'],
+    helpers: { 'dias': 'days', 'euros': 'euros' },
+    transfer_prompt: {
+      context: 'Your grandmother is asked her age and refuses to lie.',
+      ask: 'I am eighty years old.',
+      answer: 'Tenho oitenta anos.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['treze'],
+  }),
+  q({
+    root_id: 'tb_sixteen_candles',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Sixteen Candles',
+    source_status: 'verified',
+    root_display: 'Sixteen Candles',
+    credit: 'John Hughes, 1984 — and her family forgot',
+    source: 'Sixteen candles.',
+    target: 'Dezasseis velas.',
+    semantic_bridge:
+      'From sixteen up the teens stop being their own words and go back to arithmetic: dezasseis is dez and seis pushed together, dezassete is dez and sete. Portuguese spells it as one word and says it as two.',
+    subtext: 'Counted on a cake nobody remembered to buy.',
+    extracts: [
+      { id: 'dezasseis', target: 'dezasseis', gloss: 'sixteen', shelf: 'how_much', set: 'numbers_teens' },
+    ],
+    branches: [
+      { target: 'Tenho dezasseis anos.', en: 'I am sixteen years old.', demonstrates: ['dezasseis'] },
+      { target: 'Dezasseis euros.', en: 'Sixteen euros.', demonstrates: ['dezasseis'] },
+      { target: 'Dezasseis minutos.', en: 'Sixteen minutes.', demonstrates: ['dezasseis'] },
+    ],
+    reinforces: ['dez', 'seis', 'tenho', 'anos', 'euro'],
+    helpers: { 'velas': 'candles', 'euros': 'euros', 'minutos': 'minutes' },
+    transfer_prompt: {
+      context: 'A birthday, and somebody asks how old she is now.',
+      ask: 'I am sixteen years old.',
+      answer: 'Tenho dezasseis anos.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
+    next_root_hooks: ['dezassete'],
+  }),
+  q({
+    root_id: 'tb_seventeen',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'quote',
+    source_label: 'I Saw Her Standing There — The Beatles',
+    source_status: 'verified',
+    root_display: 'Well, she was just seventeen',
+    credit: 'The Beatles, 1963 — the first line on the first album',
+    source: 'She was just seventeen.',
+    target: 'Ela tinha dezassete anos.',
+    semantic_bridge:
+      'English says she WAS seventeen and Portuguese says she HAD seventeen years, which is the same trick as tenho and the reason it is worth meeting twice. Dezassete is dez and sete, exactly as dezasseis was dez and seis.',
+    subtext: 'Sung fast, in the first ten seconds of everything.',
+    extracts: [
+      { id: 'dezassete', target: 'dezassete', gloss: 'seventeen', shelf: 'how_much', set: 'numbers_teens' },
+      { id: 'dezanove', target: 'dezanove', gloss: 'nineteen', shelf: 'how_much', set: 'numbers_teens' },
+    ],
+    branches: [
+      { target: 'Ela tinha dezassete anos.', en: 'She was seventeen.', demonstrates: ['dezassete'] },
+      { target: 'Dezassete euros.', en: 'Seventeen euros.', demonstrates: ['dezassete'] },
+      { target: 'Tenho dezanove anos.', en: 'I am nineteen years old.', demonstrates: ['dezanove'] },
+    ],
+    reinforces: ['dez', 'sete', 'nove', 'anos', 'euro', 'tenho'],
+    helpers: { 'Ela': 'she', 'tinha': 'had', 'euros': 'euros' },
+    transfer_prompt: {
+      context: 'Filling in a form for somebody a year older.',
+      ask: 'I am nineteen years old.',
+      answer: 'Tenho dezanove anos.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['numbers'],
     next_root_hooks: ['talvez'],
   }),
   q({
