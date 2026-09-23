@@ -1344,7 +1344,23 @@ function Picker() {
       entryRung rather than opens_at directly, so a crate that simply happens to be all
       rung 1 qualifies too — which is the honest test and needs no second declaration.
     */
-    const gatedByBasics = entryRung(f) > 1 && !f.drop && !basicsStarted
+    /*
+      AND NEVER A CRATE THEY HAVE ALREADY BEEN THROUGH.
+
+      Sam, after finishing the forced warm-up: "it is still available in the vibes selector
+      and should be shown as done." Worse than that — it came back DIMMED, captioned
+      "basics first", because Top Gun opens at rung 2 and the doorway gate gates on the
+      entry rung. So the one vibe DUB made him play was then locked behind the basics.
+
+      The gate is a doorway, not a wall: it exists so somebody choosing Marcus Aurelius
+      first does not meet rung-2 Stoic philosophy before they can say hello. Nobody who has
+      already been through a crate needs protecting from it, and telling them they do is
+      the product forgetting what it just made them do.
+
+      `started` is the same test the ladder lock uses one line below, so this is one fact
+      asked twice rather than a new rule.
+    */
+    const gatedByBasics = entryRung(f) > 1 && !f.drop && !basicsStarted && !started
     const unreached = gatedByBasics || (!f.drop && !started && opensAt > rung)
     // A drop is never plan-locked, and never stage-locked. It can be lost forever by
     // being busy, and charging for the one thing that expires would turn the only real
@@ -5602,21 +5618,37 @@ function Close() {
       >
         {CLOSE.cta}
       </Link>
-      {/* Offered here rather than at the door: there is now something worth keeping,
-          which is the only honest moment to ask anyone for an email address. */}
-      <div className="mt-3 flex flex-col items-center gap-3 text-xs text-muted">
-        {access.signInReady ? (
-          <Link href="/signin?next=%2Fvibes" className="underline underline-offset-4">
-            Keep what you have learned — it lives on this phone until you do.
+      {/*
+        NOT ON THE VERY FIRST SESSION, which is the one DUB forced them into.
+
+        Sam, arriving here straight off the warm-up: "please remove email offer and share
+        offer from this first run."
+
+        The note this replaces said the offer belongs here because "there is now something
+        worth keeping, which is the only honest moment to ask anyone for an email address."
+        That was true when this screen came after a vibe somebody chose. It is not true
+        ninety seconds into a first visit, off the back of a session DUB picked for them —
+        at that point there are four words banked and three links asking for an address, a
+        subscription and feedback, before anybody has decided whether they want any of it.
+
+        One sitting is the test rather than a flag: by the second, the person came back,
+        which is the whole of what makes the offer honest.
+      */}
+      {(learner.sittings ?? 0) > 1 ? (
+        <div className="mt-3 flex flex-col items-center gap-3 text-xs text-muted">
+          {access.signInReady ? (
+            <Link href="/signin?next=%2Fvibes" className="underline underline-offset-4">
+              Keep what you have learned — it lives on this phone until you do.
+            </Link>
+          ) : null}
+          <Link href="/line" className="underline underline-offset-4">
+            Or just take one line a morning.
           </Link>
-        ) : null}
-        <Link href="/line" className="underline underline-offset-4">
-          Or just take one line a morning.
-        </Link>
-        <Link href="/feedback" className="underline underline-offset-4">
-          {CLOSE.feedback}
-        </Link>
-      </div>
+          <Link href="/feedback" className="underline underline-offset-4">
+            {CLOSE.feedback}
+          </Link>
+        </div>
+      ) : null}
     </Shell>
   )
 }
