@@ -108,7 +108,7 @@ import {
 import { chapterById } from '@/content/chapters'
 import { TOO_YOUNG } from '@/content/consent'
 import { INTERESTS, genresFromInterests, interestById } from '@/content/interests'
-import { say } from '@/content/numbers'
+import { say, wordsIn } from '@/content/numbers'
 import type { ProfileAsk } from '@/content/roots'
 import { buzz, nope } from '@/engine/tap'
 import { useLearner } from '@/engine/useLearner'
@@ -3542,6 +3542,24 @@ function AskAge({
                 answerLegendFromLesson, which never overwrites a deliberate edit.
               */
               answerLegendFromLesson('age', { n: String(n) })
+              /*
+                AND THE WORDS THEY JUST BUILT IT OUT OF.
+
+                Sam: "store the selected number as a piece and then carry it through."
+                Choosing fifty-six in the picker is a lesson — the two columns name
+                cinquenta and seis, the audio says them, and the working underneath shows
+                the number coming apart — so the words belong in the inventory like any
+                other word somebody has been taught.
+
+                Both halves, never the `e`: wordsIn returns the number words and drops the
+                join, because a conjunction on the counting shelf is not vocabulary.
+
+                This is what makes the age carry forward the way an interest does. A piece
+                in the inventory is a word personalise can put into a sentence and the
+                library can resolve; without it, `cinquenta` was a string on a screen that
+                no part of the product knew existed.
+              */
+              for (const id of wordsIn(n)) acquirePiece(id, 'the_basics')
               track('profile_answer', { question: 'age', answer: String(n), where: 'lesson' })
               onDone()
             }}

@@ -273,40 +273,27 @@ export function personalise<T extends {
     AND THE NUMBER IN AN AGE, on exactly the same terms as the interest.
 
     Sam: "if we can carry forward music/football, surely we can carry forward age in the
-    same way." It could not, and the blocker was never a rule — it was a hole in the
-    content. A word exists in this product only if a root teaches it, so `futebol` could
-    be banked while `cinquenta` could not: no lesson had ever said it, and swapping it in
-    would have put an id in the inventory that nothing resolves. Thirty was the only
-    spellable age, and only because it is the specimen in tb_age.
+    same way." It could not, because a word exists in this product only if something
+    teaches it — and counting stopped at ten, so `cinquenta` was a string on a screen that
+    no part of the product knew about. Swapping it in would have banked an id nothing
+    resolves.
 
-    The tens and the teens are taught now — see tb_twenty through tb_seventeen — so every
-    age from thirteen to ninety-nine is built from words the learner can actually own, and
-    this can do what the interest swap does.
+    The picker teaches them now, and the words it names are banked when somebody chooses —
+    see NUMBER_WORDS and wordsIn in content/numbers.ts. So this can do what the interest
+    swap does, with the same guarantee: whatever lands is a word the library can resolve.
 
     THE TENS WORD IS THE ONE THAT MOVES, because an age is usually two words and an
-    extract is one. "Cinquenta e seis" carries cinquenta as the thing worth banking: seis
-    is already taught, `e` is not a lesson, and the tens word is the part that was missing.
-    So the specimen's extract becomes the learner's own tens word, and the sentences around
-    it are rewritten by myAge as they always were.
+    extract is one. "Cinquenta e seis" carries cinquenta as the part worth banking — seis
+    is already taught, and `e` is grammar rather than a lesson.
 
-    Guarded on the piece existing rather than on a list of allowed ages. Author a root for
-    `cem` tomorrow and a hundred-year-old is covered without touching this.
+    Guarded on the piece existing rather than on a list of ages, so nothing here needs
+    touching if the range ever changes.
   */
   const ageSwap = (() => {
     const age = me.profile?.age
     if (!age || age < 1 || age > 120) return null
-    /*
-      The word this age hangs on: its tens, or the whole thing when it is one word — a
-      teen, or a round ten. `e` is never it.
-    */
-    const words = say(age).split(/\s+/).filter((w) => w !== 'e')
-    const head = words[0]
+    const head = say(age).split(/\s+/).filter((w) => w !== 'e')[0]
     if (!head) return null
-    /*
-      Only where the SPECIMEN also has a tens word to replace. An age in the units has
-      nothing in "Tenho trinta anos" that corresponds to it, and myAge leaves the line
-      alone too, so the pair stay consistent.
-    */
     const known = Object.entries(PIECES).find(([, piece]) => piece.target === head)
     if (!known) return null
     const [id, piece] = known
@@ -314,8 +301,13 @@ export function personalise<T extends {
   })()
 
   /*
-    A ROOT WHOSE NUMBER IS STANDING IN FOR THE LEARNER'S AGE, rather than one that happens
-    to teach the same word. See the swap below for what went wrong without this.
+    A ROOT WHOSE NUMBER STANDS IN FOR THE LEARNER'S AGE, rather than one that happens to
+    use the same word.
+
+    Matching the WORD alone would be wrong the moment any root teaches `trinta` as
+    counting: a learner of fifty-six would be shown that root's line while banking
+    `cinquenta` from it. A number is a specimen only where it is somebody's stand-in, and
+    that is a fact about the root.
   */
   const isAgeSpecimen =
     ('asks' in root && (root as { asks?: string }).asks === 'age') ||
@@ -331,28 +323,14 @@ export function personalise<T extends {
       The extract too, so the banked word is the one on the screen. Only where the root
       actually teaches música — every other root is untouched by this.
     */
-    ...((swap || ageSwap) && 'extracts' in root
+    ...((swap || (ageSwap && isAgeSpecimen)) && 'extracts' in root
       ? {
           extracts: (root as unknown as { extracts: { id: string; target: string; gloss: string }[] }).extracts.map(
             (e) => {
               if (swap && e.id === 'musica') {
                 return { ...e, id: swap.id, target: swap.target, gloss: swap.gloss }
               }
-              /*
-                The specimen's own number, swapped for this learner's — ON AN AGE ROOT
-                AND NOWHERE ELSE.
-
-                Matching the WORD was wrong and measurably so: tb_thirty_nine teaches
-                `trinta` as counting, from a line that says "Trinta e nove degraus", and a
-                learner of fifty-six was shown that line while banking `cinquenta` from it.
-                A number is a specimen only where it stands in for the learner's own age,
-                and that is a fact about the root, not about the digits.
-
-                `asks === 'age'` is the honest test — it is what makes tb_age the root that
-                collects an age — plus bj_age, which drills one it did not collect. Both
-                are named by the same property the sort already uses, so a third age root
-                is covered by saying what it is rather than by being added to a list here.
-              */
+              /* The specimen's own number, swapped for theirs. See isAgeSpecimen above. */
               if (ageSwap && isAgeSpecimen && AUTHORED_AGES.some((a) => say(a).split(/\s+/)[0] === e.target)) {
                 return { ...e, id: ageSwap.id, target: ageSwap.target, gloss: ageSwap.gloss }
               }

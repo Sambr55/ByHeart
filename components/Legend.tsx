@@ -16,7 +16,8 @@ import { MiniBuild } from '@/components/Journey'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
-import { answerLegend, recordProof } from '@/engine/learner'
+import { acquirePiece, answerLegend, recordProof } from '@/engine/learner'
+import { wordsIn } from '@/content/numbers'
 import { useLearner } from '@/engine/useLearner'
 import { useRestore } from '@/engine/useRestore'
 
@@ -1414,6 +1415,22 @@ function BuildCard({
               disabled={!filled}
               onClick={() => {
                 answerLegend(frame.id, draft)
+                /*
+                  THE NUMBER WORDS TOO, wherever a card was built out of one.
+
+                  The same rule as the age lesson: choosing in the picker names cinquenta
+                  and seis, says them, and shows the number coming apart, so the words are
+                  taught and belong in the inventory. Banked here as well as there because
+                  a learner can meet the picker at either end — the lesson that asks their
+                  age, or the card that asks how long they have been here — and which one
+                  they happened to reach first should not decide whether they own the word.
+                */
+                for (const slot of frame.slots) {
+                  if (slot.kind !== 'number') continue
+                  const n = Number(draft[slot.key])
+                  if (!Number.isFinite(n)) continue
+                  for (const id of wordsIn(n)) acquirePiece(id, 'the_basics')
+                }
                 track('legend_card_answered', { card: frame.id })
                 setBeat('cold')
               }}
