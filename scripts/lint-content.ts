@@ -17,7 +17,7 @@ import { INTRO_CARDS } from '../content/intro'
 import { join } from 'node:path'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
 import { DUB, DUB_CLUB, DUB_MARK } from '../content/marks'
-import { AUTHORED_NAME, LEGEND_FRAMES, REPAIR_KIT, childrenSentence } from '../content/legend'
+import { AUTHORED_NAME, LEGEND_FRAMES, REPAIR_KIT, childrenSentence, intoSentence } from '../content/legend'
 import {
   BLOCK_ORDER,
   EXAMPLES,
@@ -1269,7 +1269,24 @@ for (const e of EXAMPLES) {
       every helper still has to appear in something the learner can actually be shown, and
       a helper for a word no shape produces still fails.
     */
-    const composed = f.slots.some((sl) => sl.kind === 'children')
+    /*
+      AND THE INTERESTS FRAME, which is composed for the same reason.
+
+      "Gosto de música." and "Gosto de música, de futebol e da praia." are not one template
+      with a slot swapped in — the list grows an `e` before its last item and each noun
+      brings its own contraction. So intoSentence builds it, the slot is never written as
+      {into}, and the helpers live in shapes the base frame does not contain.
+
+      Named beside `children` rather than by a flag on the frame: two composed frames is
+      not yet a pattern worth abstracting, and a list of two is honest about that. If a
+      third arrives this should become `sl.kind` driven.
+    */
+    const intoShapes = ['musica', 'futebol', 'praia'].map((_, n) =>
+      intoSentence(['musica', 'futebol', 'praia'].slice(0, n + 1)),
+    )
+    const composed = f.slots.some((sl) => sl.kind === 'into')
+      ? intoShapes.map((c) => c.frame)
+      : f.slots.some((sl) => sl.kind === 'children')
       ? [
           childrenSentence([]),
           childrenSentence([{ name: 'X', g: 'm', age: '8' }]),

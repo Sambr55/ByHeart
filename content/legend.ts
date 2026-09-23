@@ -1,3 +1,4 @@
+import { INTERESTS } from '@/content/interests'
 import { say } from './numbers'
 import { PIECES, ROOTS_BY_FAMILY, type CultureFamily, type Rung } from './roots'
 import type { Purpose } from './situations'
@@ -35,7 +36,7 @@ import type { Purpose } from './situations'
  *   It produces identical robots. So every card is a choice, not a blank.
  */
 
-export type SlotKind = 'name' | 'number' | 'place' | 'pick' | 'children'
+export type SlotKind = 'name' | 'number' | 'place' | 'pick' | 'children' | 'into'
 
 export interface LegendSlot {
   key: string
@@ -460,6 +461,62 @@ export const LEGEND_FRAMES: LegendFrame[] = [
         endings.
       */
       'Every answer here is a description, so every one takes an ending: casado or casada, divorciado or divorciada, solteiro or solteira, separado or separada. And they go with sou rather than estou — Portuguese files this under what you are, not how you are today.'
+  },
+  {
+    /*
+      WHAT YOU ARE INTO — the first frame in the Legend that is about a person rather than
+      about their circumstances.
+
+      Sam: "could everyone's legend be different? So someone who loves festivals needs to
+      be able to say I love going to festivals."
+
+      He is right that the Legend was barely personal. Measured before this: the three
+      purpose cards differ by exactly ONE frame out of seven — staying_for against
+      moved_when against first_time — and that one is a logistics question. Six of the
+      seven are identical for everybody, so nobody's Legend said anything about who they
+      were.
+
+      ADDITIVE, WHICH IS THE WHOLE DESIGN. `depth: 'deeper'` keeps it off the card, so the
+      Club door opens on the same core at the same speed for everybody and nobody is ever
+      behind for having answered a question. Sam chose that shape explicitly over a longer
+      card: the extras are things you earned by caring about something, and they arrive
+      with the Club already open.
+
+      NOT ASKED TWICE. tb_into asks this in the lesson that teaches gosto de, and the
+      answer is already on the profile — so this frame says it back rather than putting
+      the same eight chips up again. The deck seeds the slot from profile.into; see
+      components/Legend.tsx.
+
+      Rung 1, because gosto de and every noun behind it are taught in the basics. A frame
+      whose vocabulary sits in an optional vibe would be a Legend card most people could
+      not build, which is the fault `adoro` would have introduced.
+    */
+    id: 'into',
+    part: 'you',
+    /*
+      Card 9, because who_with already claims 8. The number is the order somebody gets
+      asked, and this belongs after the people in your life rather than before them.
+    */
+    card: 14,
+    ask: 'Do que gostas?',
+    ask_en: 'What are you into?',
+    ask_f: 'Do que gosta?',
+    frame: 'Gosto de música.',
+    en: 'I like music.',
+    slots: [{ key: 'into', kind: 'into', hint: 'what you are into' }],
+    built_from: ['gosto_de', 'musica'],
+    depth: 'deeper',
+    /*
+      The nouns the graph does not teach yet.
+
+      tb_into spends its three extracts on gosto_de and música, so the other seven
+      interests are glossed here rather than claimed as pieces — the learner meets the word
+      on the card and in the sentence they built, and the inventory does not pretend they
+      banked it. See the note in AskInto, which stopped calling acquirePiece on them.
+    */
+    helpers: { futebol: 'football', praia: 'the beach' },
+    teaches:
+      'GOSTO DE, always with the de. Portuguese does not like a thing, it takes pleasure FROM it — so there is a de between the liking and the thing, every time, and it contracts with the article: de música, mas da praia.',
   },
   {
     id: 'children',
@@ -1663,6 +1720,40 @@ function joinEn(xs: string[]): string {
  * with who the children actually are. Two girls is `duas filhas` — feminine on the number
  * as well as the noun, which is the mistake a fixed list of options cannot help making.
  */
+/**
+ * WHAT SOMEBODY IS INTO, as a sentence, from the interests they already gave.
+ *
+ * Composed rather than templated for the same reason childrenSentence is: the shape of the
+ * sentence depends on how many answers there are. One is "Gosto de música."; three is
+ * "Gosto de música, de futebol e da praia." — a list with an `e` before the last item and
+ * a contraction that differs per noun. No template holds that.
+ *
+ * THE ARTICLE IS AUTHORED, NOT DERIVED. Portuguese says gosto DE música and gosto DA
+ * praia, and there is no rule an English speaker can apply from outside — it is idiom. So
+ * content/interests.ts carries `after_de` per noun and this pastes it in.
+ *
+ * NOT ASKED TWICE. The learner answered this in the lesson that taught gosto de, so the
+ * frame reads profile.into rather than putting the same eight chips in front of them
+ * again. That is the whole argument for the frame existing: it is the Legend saying back
+ * something they already told DUB, in a sentence they can now produce.
+ */
+export function intoSentence(ids: string[]): { frame: string; en: string } {
+  const picked = ids.flatMap((id) => INTERESTS.filter((i) => i.id === id))
+  if (!picked.length) return { frame: 'Gosto de música.', en: 'I like music.' }
+  /*
+    The joining word belongs to the language, which the first version forgot: it built both
+    lists with `e` and produced "I like music e football". One helper, two conjunctions.
+  */
+  const list = (parts: string[], and: string) =>
+    parts.length === 1
+      ? parts[0]
+      : parts.slice(0, -1).join(', ') + ' ' + and + ' ' + parts[parts.length - 1]
+  return {
+    frame: 'Gosto ' + list(picked.map((i) => i.after_de), 'e') + '.',
+    en: 'I like ' + list(picked.map((i) => i.gloss), 'and') + '.',
+  }
+}
+
 export function childrenSentence(all: Child[]): { frame: string; en: string } {
   /*
     Filtered here rather than on the way in.
@@ -1782,6 +1873,16 @@ export function frameFor(
   const kids = frame.slots.find((s) => s.kind === 'children')
   if (kids) {
     const { frame: f, en } = childrenSentence(parseChildren(values?.[kids.key]))
+    return { frame: f, en, slots: frame.slots }
+  }
+  /*
+    And the interests, composed the same way and for the same reason — see intoSentence.
+    The value is the comma-joined ids, written when the lesson asked.
+  */
+  const into = frame.slots.find((s) => s.kind === 'into')
+  if (into) {
+    const ids = (values?.[into.key] ?? '').split(',').filter(Boolean)
+    const { frame: f, en } = intoSentence(ids)
     return { frame: f, en, slots: frame.slots }
   }
   const chosen = frame.slots.map((s) => values?.[s.key]).find((v) => v && frame.variants?.[v])

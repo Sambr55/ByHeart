@@ -3544,10 +3544,20 @@ function AskInto({
             data-testid="ask-into-done"
             onClick={() => {
               /*
-                The words, banked together — see the note on the chips above. Each one is a
-                real piece, so it counts towards the stage and turns up in the library.
+                ONLY THE ONES THAT ARE REAL PIECES, which is not all of them.
+
+                The first version banked every chosen id, and seven of the eight are not in
+                the graph — a root may carry at most three extracts and tb_into spends them
+                on gosto_de and música. So acquirePiece was writing inventory keys that
+                PIECES could not resolve: they counted towards the stage and never appeared
+                in the library, which is a number going up for nothing.
+
+                The word is still learned — it is on the card, in the sentence the learner
+                built, and glossed on the frame — but it is not claimed as banked until the
+                graph actually teaches it. Adding the other seven as real pieces is a
+                content job, and inventing the claim is not a substitute for doing it.
               */
-              for (const id of chosen) acquirePiece(id, 'the_basics')
+              for (const id of chosen) if (PIECES[id]) acquirePiece(id, 'the_basics')
               /*
                 And the calendar, seeded rather than set. setGenres is what the chips
                 write; this only fills them in before anybody has touched them.

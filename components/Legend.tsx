@@ -68,7 +68,26 @@ export function Legend() {
     [learner.inventory],
   )
   const answers = learner.legend ?? []
-  const valuesFor = (id: string) => answers.find((a) => a.frame_id === id)?.values
+  const valuesFor = (id: string) => {
+    const given = answers.find((a) => a.frame_id === id)?.values
+    /*
+      THE INTERESTS FRAME IS ALREADY ANSWERED, in the lesson that taught gosto de.
+
+      Asking the same eight chips again on the deck would be the Legend forgetting what the
+      learner just told it — and the whole argument for this frame is the opposite: it says
+      back something they have already said, in a sentence they can now produce.
+
+      Seeded rather than written, so an explicit answer on the deck still wins. Somebody
+      who edits it here is changing their Legend, not their profile, and the two are
+      allowed to differ — the profile is what DUB knows, the card is what they choose to
+      say out loud.
+    */
+    if (id === 'into' && !given) {
+      const into = learner.profile?.into ?? []
+      if (into.length) return { into: into.join(',') }
+    }
+    return given
+  }
   /*
     The Legend opens on crates done, not on owning specific words.
 
