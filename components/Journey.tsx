@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, myName, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame, worthSaving } from '@/content/legend'
+import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, myAge, myName, framesJustOpened, legendStatus, provenanceOf, fillFrame, fillEnglish, type LegendFrame, worthSaving } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
 import { Install } from '@/components/Install'
@@ -2273,7 +2273,14 @@ function BranchRow({ branch, i, register }: { branch: Branch; i: number; registe
     which is a sentence they can fill in their head — and the Portuguese around it is still
     exactly right.
   */
-  const mine = (t: string) => myName(t, learner.display_name)
+  /*
+    Their name AND their age, for the same reason and in the same place.
+
+    Sam: "I told it I was 56 and then it got me to practise I am 30." The age question is
+    one root earlier than the drills that use it, so a specimen age in the content is a
+    sentence the learner is asked to rehearse about somebody else. See myAge.
+  */
+  const mine = (t: string) => myAge(myName(t, learner.display_name), learner.profile?.age)
   const shown = mine(branchAt(branch, register))
   const other = branch.formal && branch.address === 'tu'
     ? mine(register === 'formal' ? branch.target : branch.formal)
@@ -2735,8 +2742,8 @@ function RootBeatView({
       answer this beat already handles.
     */
     /* Their own name in their own introduction — see myName. */
-    const en = myName(target.en, learner.display_name)
-    const pt = myName(target.target, learner.display_name)
+    const en = myAge(myName(target.en, learner.display_name), learner.profile?.age)
+    const pt = myAge(myName(target.target, learner.display_name), learner.profile?.age)
     return (
       <Shell stage={stage} eyebrow={family.title} tone={family.tone}>
         <p className="eyebrow text-muted">YOUR TURN</p>
@@ -3374,9 +3381,22 @@ function AskEmail({
   return (
     <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
       <p className="eyebrow text-accent">YOURS</p>
+      {/*
+        WHAT IT BUYS THEM, first and plainly.
+
+        Sam: "on the email screen explain entering it will allow us to save their
+        progress." The old copy led with what it would NOT do — no newsletter, nothing sold
+        — which is a reassurance about a thing nobody had been offered yet, and never said
+        what the address was actually for. The reassurance is still worth having; it is
+        just the second sentence.
+      */}
       <p className="text-sm leading-relaxed">
-        This is the only thing that gets your Portuguese onto a new phone. No newsletter,
-        nothing sold, and DUB will not write to you unless you ask it to.
+        This saves your progress. Everything you have learned lives on this phone until you
+        give DUB an address — with one, your words, your Legend and your Portuguese come
+        back on any phone you sign in on.
+      </p>
+      <p className="text-xs leading-relaxed text-muted">
+        No newsletter, nothing sold, and DUB will not write to you unless you ask it to.
       </p>
       <label className="flex flex-col gap-1">
         <span className="eyebrow text-muted">YOUR E-MAIL</span>

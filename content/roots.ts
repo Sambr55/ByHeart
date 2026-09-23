@@ -3719,7 +3719,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Hungry Like the Wolf',
     source_status: 'verified',
     root_display: 'Hungry Like the Wolf',
-    credit: 'Duran Duran',
+    credit: 'Duran Duran, 1982 — the video that invented the video',
     source: 'Hungry like the wolf.',
     target: 'Tenho uma fome de lobo.',
     literal_note: 'Literally “I have a hunger of wolf”.',
@@ -3775,7 +3775,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'New Moon on Monday',
     source_status: 'verified',
     root_display: 'New Moon on Monday',
-    credit: 'Duran Duran',
+    credit: 'Duran Duran, 1984 — the band’s own least favourite single',
     source: 'New moon on Monday.',
     target: 'Lua nova na segunda-feira.',
     semantic_bridge:
@@ -3816,7 +3816,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Is There Something I Should Know?',
     source_status: 'verified',
     root_display: 'Is There Something I Should Know?',
-    credit: 'Duran Duran',
+    credit: 'Duran Duran, 1983 — straight in at number one, and they knew it would',
     source: 'Is there something I should know?',
     target: 'Há alguma coisa que eu deva saber?',
     semantic_bridge:
@@ -3874,7 +3874,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Save a Prayer',
     source_status: 'verified',
     root_display: 'Save a Prayer (…till the morning after)',
-    credit: 'Duran Duran',
+    credit: 'Duran Duran, 1982 — written in Sri Lanka, about not going home',
     source: 'Save a prayer for the morning after.',
     target: 'Guarda uma oração para a manhã seguinte.',
     semantic_bridge:
@@ -3918,7 +3918,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'All You Need Is Now',
     source_status: 'verified',
     root_display: 'All You Need Is Now',
-    credit: 'Duran Duran',
+    credit: 'Duran Duran, 2010 — the comeback nobody expected to be good',
     source: 'All you need is now.',
     target: 'Tudo o que precisas é agora.',
     semantic_bridge:
@@ -3975,7 +3975,7 @@ export const DURAN_DURAN: Root[] = [
     source_label: 'Ordinary World',
     source_status: 'verified',
     root_display: 'Ordinary World',
-    credit: 'Duran Duran',
+    credit: 'Duran Duran, 1993 — the one that got them taken seriously',
     source: 'Ordinary world.',
     target: 'Um mundo normal.',
     semantic_bridge:
@@ -4360,7 +4360,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
-    credit: 'The Beatles',
+    credit: 'The Beatles, 1967 — the one Paul wrote to prove a point about opposites',
     source_label: 'Hello, Goodbye — The Beatles',
     source_status: 'verified',
     root_display: 'Hello, Goodbye',
@@ -4489,7 +4489,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
-    credit: 'Feist',
+    credit: 'Feist, 2007 — the one that sold a million iPods',
     source_label: '1234 — Feist',
     source_status: 'verified',
     root_display: '1, 2, 3, 4',
@@ -4566,7 +4566,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
-    credit: 'ABBA',
+    credit: 'ABBA, 1983 — Benny and Björn thanking themselves, really',
     source_label: 'Thank You for the Music — ABBA',
     source_status: 'verified',
     root_display: 'Thank You for the Music',
@@ -4839,7 +4839,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
-    credit: 'The Beatles',
+    credit: 'The Beatles, 1964 — a phrase Ringo made up about working too much',
     source_label: 'Eight Days a Week — The Beatles',
     source_status: 'verified',
     root_display: 'Eight Days a Week',
@@ -4906,7 +4906,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
-    credit: 'Dolly Parton',
+    credit: 'Dolly Parton, 1980 — written on the set, on her acrylic nails',
     source_label: '9 to 5 — Dolly Parton',
     source_status: 'verified',
     root_display: '9 to 5',
@@ -5007,7 +5007,7 @@ export const THE_BASICS: Root[] = [
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
-    credit: 'U2',
+    credit: 'U2, 1983 — the one Bono still introduces as not a rebel song',
     source_label: 'Sunday Bloody Sunday — U2',
     source_status: 'verified',
     root_display: 'Sunday, Bloody Sunday',
@@ -5060,7 +5060,16 @@ export const THE_BASICS: Root[] = [
     credit: 'The second thing anybody asks, after what you do',
     source_label: 'What Portuguese does with everything you like',
     source_status: 'verified',
-    root_display: 'I like music.',
+    /*
+      THE HEADLINE IS THE QUESTION, not one specimen answer.
+
+      Sam: "the genre card starts with a headline about music. Should be generic — what are
+      you into." He is right and it read badly: the screen led with "I like music." above a
+      list of eight things, so it looked like DUB had decided for you and then offered a
+      choice. The root still TEACHES the music sentence — that is the target, and música is
+      the extract — but the thing at the top is what the screen is for.
+    */
+    root_display: 'What are you into?',
     source: 'I like music.',
     target: 'Gosto de música.',
     asks: 'into',
@@ -5214,7 +5223,7 @@ export const THE_BASICS: Root[] = [
       and Dolly Parton are all bare names — a date is a fact about the record rather than
       the thing that makes somebody recognise it.
     */
-    credit: 'Frankie Lymon and the Teenagers',
+    credit: 'Frankie Lymon and the Teenagers, 1956 — he was thirteen',
     source: 'Why? Because I want to.',
     target: 'Porquê? Porque quero.',
     semantic_bridge:

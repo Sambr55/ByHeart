@@ -199,6 +199,38 @@ export function myName(line: string, displayName?: string | null): string {
 }
 
 /**
+ * The age the content was authored with, so the same trick works on it as on the name.
+ *
+ * tb_age is written around thirty-two — "Tenho trinta e dois anos" — which is right as
+ * teaching material and wrong the moment DUB knows better.
+ */
+export const AUTHORED_AGE = 32
+
+/**
+ * THE LEARNER'S OWN AGE, IN THE SENTENCES THEY PRACTISE.
+ *
+ * Sam: "after I have given you my age, that needs to persist. I told it I was 56 and then
+ * it got me to practise I am 30."
+ *
+ * Exactly the same fault myName was written to fix, on a different field: the root is
+ * authored with a specimen age, the learner is asked for theirs one screen earlier, and
+ * nothing joined the two — so somebody who said 56 was drilled on a sentence about being
+ * thirty-two, and the one number they will actually need was never practised.
+ *
+ * SUBSTITUTED AT RENDER, not stored, for the reason myName is: the content stays authored
+ * and checkable, and every screen that shows a line gets the learner's version by calling
+ * one function. A learner who skipped the question sees the specimen, which is correct.
+ *
+ * Both spellings, because "trinta e dois" appears as a phrase and "32" never does — the
+ * graph is spelled out. say() is the same speller the age question uses to build the
+ * sentence back, so the two cannot disagree.
+ */
+export function myAge(line: string, age?: number | null): string {
+  if (!age || age === AUTHORED_AGE || age < 1 || age > 120) return line
+  return line.replaceAll(say(AUTHORED_AGE), say(age))
+}
+
+/**
  * The question as it would actually be put TO THIS LEARNER.
  *
  * `ask` is what a stranger says to you, and a stranger says it with an ending. "És
