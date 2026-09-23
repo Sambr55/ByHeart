@@ -1088,6 +1088,7 @@ function BuildCard({
   const [draft, setDraft] = useState<Record<string, string>>(values)
   const [beat, setBeat] = useState<'ask' | 'build' | 'cold'>('ask')
 
+
   /*
     The word coming back from the translator.
 
@@ -1134,6 +1135,19 @@ function BuildCard({
     are actually building rather than the one this card started as.
   */
   const shape = frameFor(frame, draft)
+  /*
+    THE LINE THIS LEARNER HAS ALREADY EARNED, if they have.
+
+    `values` is whatever the road wrote — see answerLegendFromLesson — so a card whose
+    every slot is filled is one the learner has answered somewhere else, in a lesson,
+    without being marched through a form to do it. Built from the frame's own template so
+    the sentence is the one the card teaches rather than a second phrasing of it.
+  */
+  const answered = shape.slots.every((s2) => String(values[s2.key] ?? '').trim())
+  const answeredLine = useMemo(() => {
+    const put = (t: string) => t.replace(/\{(\w+)\}/g, (_, k: string) => values[k] ?? '___')
+    return { pt: put(frame.frame), en: put(frame.en) }
+  }, [frame, values])
   /*
     FILLED MEANS THE SENTENCE SAYS SOMETHING THEY MEANT, not that the buffer is non-empty.
 
@@ -1184,12 +1198,37 @@ function BuildCard({
 
       {beat === 'ask' ? (
         <>
+          {/*
+            YOUR SENTENCE, WHERE THERE IS ONE, RATHER THAN A PATTERN WITH HOLES IN IT.
+
+            Sam: "you are literally building the legend as you learn, rather than getting
+            to the legend and then building it from scratch. So the legend part really
+            comes more about learning it, than building it."
+
+            The road now answers cards as it goes — the name from set-up, where you are
+            from in the lesson that asks — so a learner reaching this card has in several
+            cases already said the thing. Showing them "Chamo-me ___" at that point is the
+            Legend forgetting, and it turns an arrival into a form.
+
+            So an answered card opens on the finished line, in their own words, with the
+            English under it: this is what you can say, now learn to say it. An unanswered
+            one still shows the pattern, because there the blanks ARE the question.
+          */}
           <div className="flex flex-col gap-3">
-            <p className="eyebrow text-muted">THE PATTERN</p>
+            <p className="eyebrow text-muted">{answered ? 'YOU CAN SAY' : 'THE PATTERN'}</p>
             <p className="pt text-balance text-lg">
-              {frame.frame.replace(/\{(\w+)\}/g, '___')}
+              {answered ? (
+                <>
+                  <AudioButton slug={slugFor(answeredLine.pt)} text={answeredLine.pt} size="sm" />{' '}
+                  {answeredLine.pt}
+                </>
+              ) : (
+                frame.frame.replace(/\{(\w+)\}/g, '___')
+              )}
             </p>
-            <p className="text-xs text-muted">{frame.en.replace(/\{(\w+)\}/g, '___')}</p>
+            <p className="text-xs text-muted">
+              {answered ? answeredLine.en : frame.en.replace(/\{(\w+)\}/g, '___')}
+            </p>
           </div>
 
           {/*
@@ -1243,10 +1282,21 @@ function BuildCard({
             <button
               type="button"
               data-testid="legend-make-mine"
-              onClick={() => setBeat('build')}
+              /*
+                Straight to the cold beat when the line is already theirs: the build beat
+                is a form for assembling a sentence, and there is nothing to assemble.
+                What is left is the part that matters — saying it without the words in
+                front of you.
+              */
+              onClick={() => setBeat(answered ? 'cold' : 'build')}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
             >
-              MAKE IT MINE
+              {/*
+                The button says what happens next. "MAKE IT MINE" is right for a blank
+                card and wrong for one already in the learner's own words — there the work
+                is learning to say it, which is what the Legend is now for.
+              */}
+              {answered ? 'LEARN TO SAY IT' : 'MAKE IT MINE'}
             </button>
           </Dock>
         </>

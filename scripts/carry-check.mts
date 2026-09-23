@@ -40,6 +40,52 @@ const touched = ROOTS.filter(
 )
 console.log('  ' + touched.length + ' roots carry a specimen: ' + touched.map((r) => r.root_id).join(' '))
 
+/*
+  THE FORM THAT AGREES WITH THE SPEAKER, which is the other thing a learner tells us.
+
+  Sam: "if a user selects Obrigado make sure that gender persists. Currently flips quickly
+  to Obrigada." It did — the answer was stored correctly and the CONTENT said otherwise,
+  because tb_thank_you's branches are authored one of each. So this asserts what the
+  learner sees rather than what is saved: having said which form is theirs, no line they
+  are asked to say may use the other one.
+
+  The extracts and the bridge are exempt and are checked separately below: the lesson has
+  to show both forms, or it is not teaching the difference.
+*/
+{
+  const root = ROOTS.find((r) => r.root_id === 'tb_thank_you')
+  if (!root) { console.log('  ✗ tb_thank_you is gone'); fail.push('thank-you root') }
+  else {
+    for (const [gender, mine, theirs] of [['m', 'obrigado', 'obrigada'], ['f', 'obrigada', 'obrigado']] as const) {
+      const p = personalise(root as never, { display_name: 'Fred', profile: { gender, into: [] } }) as unknown as {
+        target: string; branches: { target: string }[]
+        transfer_prompt?: { answer?: string }
+        semantic_bridge: string
+        extracts: { target: string }[]
+      }
+      const spoken = [p.target, ...p.branches.map((b) => b.target), p.transfer_prompt?.answer ?? '']
+      for (const line of spoken) {
+        ok(
+          'gender ' + gender + ': no line says ' + theirs,
+          !new RegExp(theirs, 'i').test(line),
+          '"' + line + '"',
+        )
+      }
+      /* And the lesson still teaches the pair. */
+      ok(
+        'gender ' + gender + ': the bridge still shows both forms',
+        /obrigado/i.test(p.semantic_bridge) && /obrigada/i.test(p.semantic_bridge),
+        p.semantic_bridge.slice(0, 80),
+      )
+      ok(
+        'gender ' + gender + ': both forms are still banked',
+        p.extracts.some((e) => e.target === 'obrigado') && p.extracts.some((e) => e.target === 'obrigada'),
+        p.extracts.map((e) => e.target).join(' '),
+      )
+    }
+  }
+}
+
 const NAME = 'Fred'
 for (const interest of INTERESTS) {
   for (const age of [17, 30, 56, 78]) {

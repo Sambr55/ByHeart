@@ -1092,9 +1092,23 @@ export async function syncSession(reason: string): Promise<boolean> {
 }
 
 export function setDisplayName(name: string) {
+  const clean = name.trim()
   update((s) => {
-    s.display_name = name.trim()
+    s.display_name = clean
   })
+  /*
+    AND THE LEGEND'S FIRST CARD, because it has just been answered.
+
+    Sam: "you are literally building the legend as you learn, rather than getting to the
+    legend and then building it from scratch." Card 1 is "Chamo-me ___" and the name was
+    on the profile from the front door — so a learner reached their Legend and was asked
+    for the one thing the product had known longest. The Legend forgetting is worse than
+    the Legend being empty.
+
+    answerLegendFromLesson never overwrites a deliberate edit, so somebody who changes the
+    name on the card keeps their version.
+  */
+  if (clean) answerLegendFromLesson('name', { name: clean })
 }
 
 /**

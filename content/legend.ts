@@ -249,7 +249,7 @@ export function personalise<T extends {
   transfer_prompt: { context: string; ask: string; answer: string }
 }>(
   root: T,
-  me: { display_name?: string; profile?: { age?: number | null; into?: string[] } | null },
+  me: { display_name?: string; profile?: { age?: number | null; into?: string[]; gender?: string | null } | null },
 ): T {
   /*
     AND THE THING THEY SAID THEY WERE INTO, on the root that asks.
@@ -326,8 +326,34 @@ export function personalise<T extends {
     halves cannot come apart. Longest first for the same reason myAge sorts its specimens:
     "de música" must go before "música" can eat its own first word.
   */
+  /*
+    AND THE FORM THAT AGREES WITH THE SPEAKER.
+
+    Sam: "if a user selects Obrigado make sure that gender persists. Currently flips
+    quickly to Obrigada."
+
+    It did, and the answer was being stored correctly the whole time — the flip is in the
+    CONTENT. tb_thank_you teaches both forms, as it must, and its branches are authored
+    with one each: "Muito obrigado", then "Obrigada, é muito simpático". So a man taps
+    OBRIGADO and the very next line of the same lesson says obrigada, which reads as the
+    product immediately forgetting.
+
+    The lesson is the one place both forms have to appear — that is what it is teaching —
+    so the root's own target and its extracts are left alone. What is bent is every OTHER
+    line: a branch, a release or a build that uses the word incidentally should use the
+    learner's own form, because there it is not the lesson, it is the learner speaking.
+
+    Nothing happens when gender was skipped: a learner who declined sees both forms as
+    authored, which is exactly what they asked for.
+  */
+  const g = me.profile?.gender
+  const myForm = (t: string) =>
+    g === 'm' ? t.replaceAll('Obrigada', 'Obrigado').replaceAll('obrigada', 'obrigado')
+    : g === 'f' ? t.replaceAll('Obrigado', 'Obrigada').replaceAll('obrigado', 'obrigada')
+    : t
+
   const mine = (t: string) => {
-    if (!swap) return myAge(myName(t, me.display_name), me.profile?.age)
+    if (!swap) return myForm(myAge(myName(t, me.display_name), me.profile?.age))
     const swapped = t
       .replaceAll('de música', swap.after_de)
       .replaceAll('música', swap.target)
@@ -338,7 +364,7 @@ export function personalise<T extends {
       */
       .replaceAll('of music', 'of ' + swap.gloss)
       .replaceAll('music', swap.gloss)
-    return myAge(myName(swapped, me.display_name), me.profile?.age)
+    return myForm(myAge(myName(swapped, me.display_name), me.profile?.age))
   }
   return {
     ...root,
@@ -382,7 +408,14 @@ export function personalise<T extends {
     target: mine(root.target),
     source: mine(root.source),
     root_display: mine(root.root_display),
-    semantic_bridge: mine(root.semantic_bridge),
+    /*
+      THE BRIDGE IS NOT BENT, because it is the sentence explaining the bend.
+
+      "A man says obrigado, a woman says obrigada" has to keep both words or it stops
+      being an explanation and becomes a tautology. Everything else on the screen is the
+      learner speaking; this one paragraph is the product teaching.
+    */
+    semantic_bridge: root.semantic_bridge,
     branches: root.branches.map((b) => ({
       ...b,
       target: mine(b.target),
