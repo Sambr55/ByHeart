@@ -238,6 +238,22 @@ function Shell({
         it and lands outside the scroller by portal, so a summary taller than the phone
         scrolls its own words WITHIN the region rather than behind the thing to press.
       */}
+      {/*
+        THE DISTANCE TO THE LEGEND, under the header and outside the scroller.
+
+        Sam: "my intention was that the progress bar would be anchored at the top of every
+        page and every time I bank a word for my legend it progresses."
+
+        Outside Framed rather than inside it, so it is anchored rather than merely first:
+        a bar that scrolls away is not on the screen when somebody banks the word that
+        moves it, which is the one moment it exists for. It renders nothing once the
+        Legend is open and nothing before the first word — see components/ToLegend.tsx.
+      */}
+      {nav ? (
+        <div className="mx-auto w-full max-w-md px-5 pt-3">
+          <ToLegend />
+        </div>
+      ) : null}
       <Framed className="flex flex-col">
         {/*
           Beats arrive rather than being swapped. See useScreenIn — the element stays

@@ -1,33 +1,30 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useLearner } from '@/engine/useLearner'
-import { legendStatus } from '@/content/legend'
+import { cardFor, legendStatus } from '@/content/legend'
 
 /**
- * HOW FAR TO THE LEGEND, on every screen until you get there.
+ * HOW FAR TO THE LEGEND, on every screen where somebody is working towards it.
  *
- * Sam: "I also want to show a progress bar as you build towards your legend, it should be
- * ever present until you get there."
+ * Sam: "I want to show a progress bar as you build towards your legend, it should be ever
+ * present until you get there", and then, on the first version: "every time I bank a word
+ * for my legend it progresses. This may be too subtle, but that was my intent."
  *
- * The distance was knowable and never shown. legendStatus has always reported both halves
- * — the doorway sittings and the three vibes — and the only places that rendered them were
- * the session-done screen and the Legend deck, which are the two places somebody has
- * already arrived. In between, a learner doing their fourth vibe had no way to tell whether
- * they were nearly there or nowhere.
+ * IT COUNTS WORDS, NOT SITTINGS, and the difference is whether it can move while somebody
+ * is looking at it. The first version measured the door — the basics plus three vibes —
+ * which is the right answer to "when does the Club open" and the wrong thing to put above
+ * a lesson: you bank four words, the bar sits still, and then it jumps a quarter when the
+ * session ends. A bar that only moves when you are not watching is a scoreboard.
  *
- * TWO HALVES, ONE BAR, because that is what the door actually asks for. The basics and
- * three vibes of your own are AND, not OR, so a single percentage would average two things
- * that cannot substitute for each other — somebody who has done five vibes and no basics is
- * not five-eighths of the way in. The bar is split, each half fills on its own, and the
- * door opens when both are full.
+ * The ten words this learner's card is built from are a real, fixed, knowable distance,
+ * and every KEPT moves it. Full means the card can be built.
  *
- * IT LEAVES WHEN IT IS DONE, which is the whole of "until you get there". A progress bar
- * that stays at 100% is a decoration, and worse, it keeps measuring somebody against a
- * thing they have finished. Once the Legend is open this renders nothing at all.
+ * IT LEAVES WHEN IT IS DONE. A progress bar at 100% is a decoration, and worse, it keeps
+ * measuring somebody against a thing they have finished.
  *
- * NOT A STREAK AND NOT A SCORE. It counts sittings towards a door, and the door is a fixed
- * distance that does not move — which is the opposite of the counters this product refuses.
- * There is nothing to lose by stopping, and nothing here goes down.
+ * NOT A STREAK AND NOT A SCORE. The distance is fixed and nothing here ever goes down —
+ * which is the opposite of the counters this product refuses.
  */
 export function ToLegend() {
   const learner = useLearner()
@@ -37,74 +34,60 @@ export function ToLegend() {
     sittings: learner.sittings ?? 0,
   })
 
-  /* Arrived. See the note above: a finished bar is a decoration. */
-  if (status.open) return null
+  /*
+    THE WORDS THE CARD NEEDS, not the sittings it takes to get them.
+
+    Sam: "every time I bank a word for my legend it progresses. This may be too subtle, but
+    that was my intent."
+
+    The first version counted sittings, which is the shape of the DOOR — the basics plus
+    three vibes — and it is right about what opens the Club. It is the wrong thing to put
+    in front of somebody mid-lesson, because it cannot move: you bank four words, the bar
+    sits still, and then it jumps a quarter when the session ends. A bar that only moves
+    when you are not looking at it is a scoreboard.
+
+    This counts the ten words this learner's card is built from — chamo_me, sou, trabalho
+    and the rest — against what is in their inventory. So it moves on every KEPT, inside
+    the lesson, which is what Sam meant and what makes it worth having at the top of the
+    screen at all.
+
+    THE TEN ARE THEIRS, not a universal set. cardFor filters by purpose, so a visitor is
+    measured against semana and a mover against anos, and neither is shown a word the
+    other needs.
+  */
+  const card = cardFor(learner.purpose ?? null)
+  const need = useMemo(() => [...new Set(card.flatMap((f) => f.built_from))], [card])
+  const have = need.filter((id) => (learner.inventory ?? {})[id]).length
 
   /*
-    Nothing at all before the first sitting.
-
-    An empty bar on the very first screen is a measurement of somebody who has not started,
-    which reads as a debt rather than as progress. It appears once there is something in it.
+    Gone once the door is open, for the reason the first version gave: a bar at 100% is a
+    decoration that keeps measuring a finished thing.
   */
-  const doorway = Math.min(status.sessionsDone, status.sessionsNeeded)
-  const vibes = Math.min(status.vibesDone, status.vibesNeeded)
-  if (doorway === 0 && vibes === 0) return null
-
-  const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0)
+  if (status.open) return null
+  /*
+    And nothing before the first word. An empty bar on a first screen measures somebody
+    who has not started, which reads as a debt rather than as progress.
+  */
+  if (have === 0) return null
 
   return (
-    <div
-      data-testid="to-legend"
-      className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3"
-    >
+    <div data-testid="to-legend" className="flex flex-col gap-1">
       <div className="flex items-baseline gap-3">
         <p className="eyebrow min-w-0 flex-1 truncate text-muted">TO YOUR LEGEND</p>
         {/*
-          The number that is actually left, rather than a percentage.
-
-          "Two more sittings" is a thing somebody can decide about this evening; "68%" is
-          not. tabular-nums so it does not shift as it counts down.
+          The count rather than a percentage. "14 of 22" is a thing somebody can hold;
+          68% is not. tabular-nums so it does not shift as it climbs.
         */}
         <p className="text-xs tabular-nums text-muted">
-          {status.sessionsNeeded - doorway + Math.max(0, status.vibesNeeded - vibes)} to go
+          {have} of {need.length}
         </p>
       </div>
-      {/*
-        Two bars, because the two halves are AND and cannot substitute for each other —
-        see the note above. Sized by what each half is worth so the whole reads as one
-        distance rather than as two unrelated meters.
-      */}
-      <div className="mt-1 flex gap-1" aria-hidden>
+      <span className="h-1 overflow-hidden rounded-full bg-line" aria-hidden>
         <span
-          className="h-1 overflow-hidden rounded-full bg-line"
-          style={{ flex: status.sessionsNeeded }}
-        >
-          <span
-            className="block h-full rounded-full bg-accent transition-[width] duration-[420ms]"
-            style={{ width: pct(doorway, status.sessionsNeeded) + '%' }}
-          />
-        </span>
-        <span
-          className="h-1 overflow-hidden rounded-full bg-line"
-          style={{ flex: status.vibesNeeded }}
-        >
-          <span
-            className="block h-full rounded-full bg-accent transition-[width] duration-[420ms]"
-            style={{ width: pct(vibes, status.vibesNeeded) + '%' }}
-          />
-        </span>
-      </div>
-      {/*
-        What the two halves ARE, said once and quietly.
-
-        A split bar with no labels is a puzzle. This is the one line that makes it legible,
-        and it is also the answer to "what do I actually have to do" — which is the question
-        the whole component exists to stop somebody having to ask.
-      */}
-      <p className="mt-1 text-xs leading-relaxed text-muted">
-        The basics {doorway} of {status.sessionsNeeded}, then {vibes} of {status.vibesNeeded}{' '}
-        vibes of your own.
-      </p>
+          className="block h-full rounded-full bg-accent transition-[width] duration-[420ms]"
+          style={{ width: Math.round((have / need.length) * 100) + '%' }}
+        />
+      </span>
     </div>
   )
 }
