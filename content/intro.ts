@@ -383,7 +383,13 @@ export const INTRO_CARDS: IntroCard[] = [
       chapter and names the place; this one runs before there is a chapter to read.
     */
     headline: 'What is actually on in your city, and what to say when you get there.',
-    body: 'A gig, a match, a holiday that shuts the city. It arrives when the thing is close and it goes the morning after.',
+    /*
+      Sam's wording. The old line described the drop's LIFECYCLE — when it arrives and
+      when it goes — which is a fact about the feed rather than a reason to want one.
+      This says what it is for: the thing is on, you learn from it, and the night is
+      better for it.
+    */
+    body: "A gig, a match, a holiday that shuts down the city. We drop what's on in your calendar, you learn from it and enjoy it even more.",
     /*
       Whatever is genuinely on, with its real date.
 
@@ -415,9 +421,18 @@ export const INTRO_CARDS: IntroCard[] = [
     id: 'intro_stages',
     image: 'intro_arrival',
     pillar: true,
-    eyebrow: 'WHERE IT GOES',
-    headline: 'Everything you do here moves one number.',
-    body: 'Not days in a row, and not a score. Five stages, and you climb them by learning words, going through vibes, building your Legend, keeping a cheat sheet and taking it to a real night out. The fun is how you get there rather than a reward for getting there.',
+    /*
+      Sam's own words, on all three lines.
+
+      "WHERE IT GOES" and "everything you do here moves one number" described the
+      MECHANISM — the stage count — and led with the thing the screen is least interested
+      in. What somebody wants at this point is what they get and how they learn, so that
+      is what the eyebrow and the headline now say, and the number is left to the list
+      underneath, which shows it rather than announcing it.
+    */
+    eyebrow: 'WHAT YOU GET',
+    headline: 'And how you learn.',
+    body: 'Not days in a row, streaks and endless repetition. You learn as you live, relating to vibes, building your Legend, keeping cheat sheets and taking it on a real night out. The reward is getting there, not a load of emojis.',
     shows: { kind: 'stages' },
   },
   {

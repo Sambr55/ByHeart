@@ -1968,6 +1968,39 @@ const screenCount = MISSION_ORDER.reduce((n, m) => n + MISSIONS[m].screens.lengt
   }
 }
 
+/*
+  AND NO LINE ANYWHERE INTRODUCES SOMEBODY UNDER A NAME myName CANNOT SWAP.
+
+  The guard above holds this for root branches and was written for exactly this bug. It
+  did not cover the cold prompts, which live in content/front-door.ts — and two of them
+  said "Chamo-me Sam", a literal left in from testing, so a learner called Fred was asked
+  to say a sentence about the person who built the app. Sam: "you are calling me Sam even
+  though a few screens before I told you I was called Fred."
+
+  A rule that holds in one file and not the next is the shape of fault this codebase keeps
+  finding, so it is asserted across every string the content modules export rather than
+  per file. Anything introducing itself as somebody other than AUTHORED_NAME fails here,
+  wherever it is written.
+*/
+{
+  const walk = (v: unknown, where: string): void => {
+    if (typeof v === 'string') {
+      const who = v.match(/\bChamo-me ([A-ZÁÉÍÓÚÂÊÔÃÕÇ][\wÁ-ÿ]*)/)
+      if (who && who[1] !== AUTHORED_NAME) {
+        errors.push(
+          where + ' introduces as "' + who[1] + '"; myName only swaps ' + AUTHORED_NAME,
+        )
+      }
+      return
+    }
+    if (Array.isArray(v)) { v.forEach((x, i) => walk(x, where + '[' + i + ']')); return }
+    if (v && typeof v === 'object') {
+      for (const [k, x] of Object.entries(v)) walk(x, where + '.' + k)
+    }
+  }
+  walk(FRONT_DOOR_COPY as unknown, 'content/front-door')
+}
+
 console.log(
   MISSION_ORDER.length +
     ' missions · ' +

@@ -324,6 +324,16 @@ export const PICKER = {
     left === 1
       ? 'One more basics session, then three vibes of your own, and your Legend opens.'
       : left + ' more basics sessions, then three vibes of your own, and your Legend opens.',
+  /*
+    The end of the warm-up, which is not the end of a basics session.
+
+    Sam wrote this one: "that's you warmed up. Now we'll get into the basics and after
+    that, the vibes." It replaces a count of basics sessions that was landing here at 0 of
+    4 — the first thing anybody finishes, answered with a tally of what they had not done.
+
+    It names what happens next in the order it happens, and counts nothing.
+  */
+  warmed_up: "That's you warmed up. Now we'll get into the basics, and after that, the vibes.",
   /* Where that session put you, said at the end of one — the screen that used to say nothing. */
   legend_sitting_done: (done: number, need: number) =>
     done >= need
@@ -587,8 +597,8 @@ export const NO_CUE_PROMPTS = [
   },
   {
     context: 'Somebody has put out a hand and you have half a second.',
-    ask: 'Hello, my name is Sam.',
-    answer: 'Olá, chamo-me Sam.',
+    ask: 'Hello, my name is Ana.',
+    answer: 'Olá, chamo-me Ana.',
     requires: 'chamo_me',
   },
   {
@@ -629,8 +639,8 @@ export const NO_CUE_PROMPTS = [
   },
   {
     context: 'You meet someone new.',
-    ask: 'My name is Sam.',
-    answer: 'Chamo-me Sam.',
+    ask: 'My name is Ana.',
+    answer: 'Chamo-me Ana.',
     requires: 'chamo_me',
   },
   {

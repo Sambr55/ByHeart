@@ -3445,13 +3445,27 @@ function Specimen({
       /* A list, because it is two ways in rather than one thing with a caption. */
       <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-6">
         <li className="flex flex-col gap-3">
-          {/* The field, as it looks the moment before it is sent. */}
-          <div className="flex items-center gap-3 rounded-xl border border-line bg-bg/80 px-3 py-3">
+          {/*
+            The field, as it looks the moment before it is sent.
+
+            INK ON IT, NOT THE PAGE'S INK. Sam: "make How do I ask text black."
+
+            The card sits on a photograph, so .shown-on-photo remaps --fg to white for the
+            whole subtree — correct for the headline and the body over a dark street, and
+            wrong inside this one element, which is a pale chip standing in for a text
+            field. White on sand read as a placeholder nobody had typed yet.
+
+            So the field names its own two colours rather than inheriting the ground's: a
+            light ground and dark ink, which is what a text field looks like everywhere
+            and is what makes it read as something you type into. --ink-on-light is the sand theme’s own ink under a name nothing
+            remaps, so this tracks a palette change rather than freezing one shade.
+          */}
+          <div className="flex items-center gap-3 rounded-xl border border-line bg-[var(--bg)] px-3 py-3 text-[var(--ink-on-light)]">
             {/* A speech mark, drawn the way every other icon in this file is drawn. */}
-            <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-muted" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+            <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 opacity-60" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
               <path d="M20 15a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z" />
             </svg>
-            <span className="min-w-0 flex-1 text-sm text-fg/90">{shows.typed.asked}</span>
+            <span className="min-w-0 flex-1 text-sm">{shows.typed.asked}</span>
             <span aria-hidden className="h-4 w-px shrink-0 bg-accent" />
           </div>
           <span className="flex items-center gap-3 pl-1">

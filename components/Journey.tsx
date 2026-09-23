@@ -4895,7 +4895,7 @@ function SectionComplete() {
           your Legend" to somebody who has never seen one is meaningless. After that it
           is quiet reinforcement, and if they declined it never appears again.
         */}
-        <LegendPayoff />
+        <LegendPayoff justFinished={state.family} />
         {/*
           NO BAR HERE, because the Shell already carries one.
 
@@ -4905,12 +4905,15 @@ function SectionComplete() {
           started counting words, which puts it under the header on every learning screen
           INCLUDING this one, so the copy at the foot was the same number twice.
         */}
-        {remaining.length ? (
-          <p className="mt-6 text-sm text-muted">
-            {remaining.length} more {remaining.length === 1 ? 'vibe' : 'vibes'} to raid,
-            whenever you want them.
-          </p>
-        ) : null}
+        {/*
+          NO RAID COUNT. Sam: "remove 12 more vibes to raid."
+
+          It was a tally of what somebody had not done yet, on the screen that exists to
+          say what they just did — the same fault as the 0-of-4 above it, in a different
+          unit. The shelf is where the rest of the vibes are chosen and it shows them all;
+          naming the number here only makes a finished session look like a small fraction
+          of an unfinished list.
+        */}
       </div>
 
       <Dock>
@@ -5099,7 +5102,32 @@ function NoCueView({ i }: { i: number }) {
     const elsewhere = pool.filter((p) => !mine.has(p.requires))
     return [...here, ...elsewhere]
   }, [owned, learner.nocue_done, state.family])
-  const prompt = prompts[i % Math.max(prompts.length, 1)]
+  const raw = prompts[i % Math.max(prompts.length, 1)]
+  /*
+    THE PROMPT IN THIS LEARNER'S NAME.
+
+    Sam, with a screenshot: "you are calling me Sam even though a few screens before I told
+    you I was called Fred." Two cold prompts introduce somebody by name and both were
+    authored with a literal "Sam" — my own name, left in the content from testing — so the
+    product asked a learner called Fred to say a sentence about me.
+
+    Two faults, and the content one was the dangerous half: scripts/lint-content guards
+    `Chamo-me <Name>` inside ROOT BRANCHES against exactly this, but the cold prompts live
+    in content/front-door.ts and no check read them. The name is now the authored Ana, so
+    the guard has something true to hold, and the check has been widened to cover these
+    lines too.
+
+    The other half is here: a sentence that introduces somebody has to arrive in the
+    learner's own name, the way every branch already does. Same myName, same replacement,
+    applied where the prompt is read rather than at each of the three places it renders.
+  */
+  const prompt = useMemo(
+    () =>
+      raw
+        ? { ...raw, ask: myName(raw.ask, learner.display_name), answer: myName(raw.answer, learner.display_name) }
+        : raw,
+    [raw, learner.display_name],
+  )
   const [done, setDone] = useState(false)
 
   if (!prompt) {
@@ -5186,7 +5214,7 @@ function LegendNudge({ piece }: { piece: string }) {
  * have not been offered it and have not yet reached enough cards to make the offer
  * honest. A goal you did not choose is a nag.
  */
-function LegendPayoff() {
+function LegendPayoff({ justFinished }: { justFinished: CultureFamily | null }) {
   const learner = useLearner()
   /*
     Sign-in state, for the save offer below.
@@ -5273,7 +5301,19 @@ function LegendPayoff() {
     They are separated now — sessions while the basics are open, vibes after.
   */
   const sessionsLeft = Math.max(0, status.sessionsNeeded - status.sessionsDone)
-  const onBasics = status.toGo > 0
+  /*
+    THE BASICS ARE UNFINISHED, WHICH IS NOT THE SAME AS BEING IN THEM.
+
+    `status.toGo > 0` means "the door is still shut", and it was being read as "this
+    learner is doing the basics" — so the panel counted basics sessions at the end of the
+    WARM-UP, which is the first thing anybody does and is not the basics at all. Sam, with
+    the screenshot: "that's 0 of 4 basics sessions" landing at the end of the warm-up.
+
+    Zero of four is also the worst possible thing to say there. Somebody has just finished
+    their first session and the product answers with a count of what they have not done.
+  */
+  const onBasics = status.toGo > 0 && justFinished === DOORWAY
+  const afterWarmUp = status.toGo > 0 && justFinished !== DOORWAY && (learner.sittings ?? 0) <= 1
   const toGo = onBasics ? sessionsLeft : vibesLeft
 
   /*
@@ -5317,11 +5357,25 @@ function LegendPayoff() {
     been answered, and the point is that the question itself has been. A learner who gave
     an address has answered it wherever they did so.
   */
+  /*
+    AND NOT AT THE END OF THE WARM-UP. Sam: "remove the email ask."
+
+    worthSaving is `sittings > 1`, which is the right question — "is there enough here to
+    be worth losing?" — and the warm-up is the moment it first becomes true. That put a
+    panel about losing your progress on a phone directly under a count of the basics
+    nobody had started, at the end of somebody's first ninety seconds with the product.
+
+    The email is asked properly inside a lesson of its own (tb_email), which is where
+    everything else about a person is asked. This panel exists for the learner who has
+    built something and might lose it, so it waits until they have — the basics, not the
+    warm-up.
+  */
   const saveOffer =
     mounted &&
     access.signInReady &&
     !access.signedIn &&
     !learner.profile?.email &&
+    !afterWarmUp &&
     worthSaving(learner) &&
     learner.save_prompt === 'unseen'
   const offering = usable && learner.legend_prompt === 'unseen'

@@ -42,6 +42,19 @@
   --line: #d3c7b1;        /* visible without drawing attention to itself */
   --line-strong: #8a7c62; /* where the border is the only thing saying "control" */
   --fg: #1a2430;          /* deep indigo, never pure black */
+  /*
+    The same ink, under a name nothing remaps.
+
+    --fg is a ROLE — "ink on the current ground" — so .shown-on-photo and .bar both
+    reassign it to white, which is right for anything sitting on their ground. An element
+    that carries its OWN pale ground inside one of those subtrees needs the dark ink back,
+    and reading --fg there gives it white on sand: the ASK intro's text field, which Sam
+    photographed reading as an empty placeholder.
+
+    So this is the colour rather than the role, for the few places that supply their own
+    background and must not follow the surrounding theme.
+  */
+  --ink-on-light: #1a2430;
   --muted: #635c50;       /* darkened for the warmer ground */
   --accent: #1f5d8c;      /* azulejo. The header, the CTA, and always the Portuguese */
   --accent-ink: #ffffff;
