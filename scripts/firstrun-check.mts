@@ -889,6 +889,7 @@ console.log('\nevery explainer points the same way\n')
   as the rest, for the same reason: this figure has gone stale twice by being written down.
 */
 const LEAD_EXPLAINERS = explainerCards({
+  usedTheCalendar: false,
   playedAVibe: false,
   legendWritten: false,
   isMember: false,

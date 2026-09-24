@@ -45,6 +45,8 @@ export interface Explainer {
     | 'legend-written'
     | 'is-member'
     | 'used-translator'
+    /** Subscribed to the calendar, or picked what they are into on it. */
+    | 'used-the-calendar'
     /*
       Retired by DOING the thing it describes, which is the only honest trigger for a card
       that explains a gesture. Saving or rejecting anything means the grammar has landed.
@@ -188,6 +190,107 @@ export const EXPLAINERS: Explainer[] = [
     },
     retires: 'acted-on-a-card',
   },
+  /*
+    THE CALENDAR, WHICH NOTHING EXPLAINED.
+
+    Sam: "build a new card that explains how the calendar works... explain that we will
+    tailor their content to the dates of their trip and also the preferences they select
+    for events."
+
+    The ON tab shows what is happening in Lisbon and offers to put it in the calendar
+    somebody already looks at — which is the most concrete thing DUB does and the least
+    obvious from the outside. A learner who never opens that tab never finds out, and one
+    who does meets a list of genre chips with no statement of what ticking them buys.
+
+    It says the two things that are true and neither of them was said anywhere: the dates
+    decide what is worth showing, and the genres decide which of it arrives.
+
+    Retires on the calendar being used, which is the same shape as every other explainer
+    here: the card goes when the thing it describes has been done.
+  */
+  {
+    id: 'how_the_calendar_works',
+    eyebrow: 'WHAT IS ON',
+    title: 'What is happening here, in the calendar you already keep.',
+    blurb:
+      'Concerts, matches, the holidays that shut the city. Tap one and it opens the Portuguese for being there.',
+    detail: {
+      heading: 'Why these and not everything',
+      body: 'Two things decide what you get. Your dates, so a week in October is not filled with things happening in March — and if you live here, nothing is out of range. And what you say you are into: tick football and the big matches arrive, leave it blank and you get all of it. Both are yours to change whenever, and the whole thing subscribes to the calendar on your phone rather than living in another app.',
+    },
+    image: {
+      src: '/lisbon/intro-drops.jpg',
+      alt: 'A Lisbon street at night, a crowd spilling out of a doorway under strung lights.',
+    },
+    retires: 'used-the-calendar',
+  },
+  /*
+    WHERE THEY ARE NOW, AND WHAT THE REST OF IT LOOKS LIKE.
+
+    Sam: "in the main intro we explain about learning the basics, getting around etc.
+    Explain where they are now by getting to their legend and what happens next in terms
+    of the content we will serve them and how they will grow their knowledge and
+    confidence."
+
+    The five stages are on the WHAT YOU GET intro card, which is the product's argument to
+    somebody who has not started. A new member has just finished the first of them and has
+    been told nothing about the other four — so the ladder is named here, with their own
+    position on it stated rather than implied, and the next rung described in the only
+    terms that matter: what they will be able to say.
+
+    It says what grows the number too, because every other product answers that with days
+    in a row. This one answers it with words owned, rooms been through, nights taken it
+    to — which is the claim the whole product is built on and the one place it is worth
+    repeating.
+  */
+  {
+    id: 'where_you_are_now',
+    eyebrow: 'FROM HERE',
+    title: 'You have the first of five. Here is what the other four are.',
+    blurb:
+      'The basics are the rung you just finished. Getting around, being understood, conversing, and leading it.',
+    detail: {
+      heading: 'What happens from here',
+      body: 'Your Legend was the basics: your name, where you are from, what you do — enough to be somebody rather than a tourist. Getting around is next, and then being understood in a room, holding your end of a conversation, and starting one. Every rung is a thing you can DO, not a score: the number moves when you own a word, go through a room, take a sheet out with you. Nothing counts days, and nothing goes down.',
+    },
+    image: {
+      src: '/lisbon/intro-arrival.jpg',
+      alt: 'A Lisbon street climbing away from the river in the early evening.',
+    },
+    retires: 'acted-on-a-card',
+  },
+  /*
+    AND THE ONE THING IN HERE THAT NEEDS SOMEBODY ELSE.
+
+    Sam: "recommend a friend mechanic and how they can share content, drop events and
+    progress between them."
+
+    The mechanic exists and nothing points at it: Yours can mint a SHOWING — a card of the
+    sentences you have said cold, with nothing on screen — and send it. It is reciprocal
+    by design: they show you theirs back, and the row says BOTH rather than ONE when they
+    have.
+
+    Written to what it DOES rather than to what a referral card usually promises. There is
+    no reward, no code and no discount, and claiming any of those here would be the one
+    card in the Club that lies. What it offers is the thing that actually happens: the
+    person you send it to can see what you can say, and you can see what they can.
+  */
+  {
+    id: 'bring_somebody',
+    eyebrow: 'WITH SOMEBODY',
+    title: 'Send somebody what you can say. They send theirs back.',
+    blurb:
+      'A card of the sentences you have said cold, with nothing on screen. Not a score — the actual sentences.',
+    detail: {
+      heading: 'Showing somebody',
+      body: 'In Yours you can make a showing: the lines you have produced from memory, as a card you can send to anybody. They see what you can say. If they are in here too, they show you theirs back and you both end up with the other. It is the one part of DUB that needs another person, and it is the part that makes a night out worth planning — you already know what they can order.',
+    },
+    image: {
+      src: '/lisbon/cafe-counter.jpg',
+      alt: 'Two people at a café counter in Lisbon, mid-conversation.',
+    },
+    retires: 'acted-on-a-card',
+  },
 ]
 
 /**
@@ -203,6 +306,8 @@ export function explainersFor(state: {
   usedTranslator: boolean
   /** Saved or rejected anything. The Club explainer retires on the gesture it teaches. */
   actedOnACard: boolean
+  /** Subscribed to the calendar, or said which kinds of night out they want. */
+  usedTheCalendar: boolean
 }): Explainer[] {
   /*
     A MEMBER IS DONE BEING SOLD TO. THEY ARE NOT DONE BEING SHOWN HOW THINGS WORK.
@@ -228,6 +333,13 @@ export function explainersFor(state: {
     if (e.retires === 'legend-written') return !state.legendWritten
     if (e.retires === 'is-member') return !state.isMember
     if (e.retires === 'acted-on-a-card') return !state.actedOnACard
+    /*
+      The calendar card goes once the calendar has been used — subscribed, or told what
+      they are into. Named rather than falling through to the translator's clause, which
+      is what the `return` below is: a default that was fine while there was one card left
+      and silently wrong the moment a second arrived.
+    */
+    if (e.retires === 'used-the-calendar') return !state.usedTheCalendar
     return !state.usedTranslator
   })
 }

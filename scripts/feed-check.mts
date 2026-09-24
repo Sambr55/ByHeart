@@ -89,6 +89,7 @@ const real =
     isMember: true,
     usedTranslator: false,
     actedOnACard: false,
+    usedTheCalendar: false,
   }).length +
   /*
     And the cheat sheets, for the reason the block above gives.

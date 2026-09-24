@@ -782,6 +782,7 @@ export function explainerCards(state: {
   isMember: boolean
   usedTranslator: boolean
   actedOnACard: boolean
+  usedTheCalendar: boolean
 }): FeedCard[] {
   return explainersFor(state).map((e) => ({
     kind: 'explainer' as const,

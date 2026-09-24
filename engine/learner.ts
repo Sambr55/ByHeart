@@ -252,6 +252,31 @@ export interface LearnerState {
      */
     age: number | null
     /**
+     * WHEN THEY WILL ACTUALLY BE HERE, which decides what is worth showing them.
+     *
+     * Sam: "I suggest we precede with a when will you be here ask? with a date picker or
+     * option to say I am moving here permanently or I don't yet… explain that we will
+     * tailor their content to the dates of their trip and also the preferences they
+     * select for events."
+     *
+     * THREE ANSWERS, NOT TWO, because "I don't know yet" is a real state and the common
+     * one: somebody learning the language before they have booked anything. Forcing a
+     * date there would put a guess in the record and tailor a month of drops to it.
+     *
+     *   dates      from and to, ISO days. A trip.
+     *   'living'   here for good, so everything is in range and nothing expires.
+     *   null       not said. Same as living for what is SHOWN — the whole calendar —
+     *              and different for what is said about it, because the product should
+     *              not tell somebody their dates are covered when it has none.
+     *
+     * Stored as days rather than timestamps: a trip is a range of dates, and an hour
+     * either side is not a fact anybody typed.
+     */
+    here_from: string | null
+    here_to: string | null
+    /** True when they said they live here rather than giving dates. See here_from. */
+    here_for_good: boolean
+    /**
      * WHICH KINDS OF NIGHT OUT THEY CARE ABOUT, which the calendar asked and threw away.
      *
      * Sam: "I also want to look at how the information we are gathering INCLUDING the
@@ -591,6 +616,9 @@ export function emptyLearner(): LearnerState {
       nationality: null,
       from_place: null,
       age: null,
+      here_from: null,
+      here_to: null,
+      here_for_good: false,
       email: null,
       genres: [],
       into: [],
@@ -979,6 +1007,24 @@ export function setProfile(
  * "classical and fado" has to mean it goes away, which a union could never express. That
  * is the opposite of every list above it, so it is worth saying out loud.
  */
+/**
+ * When they will be here, which decides what the calendar is worth showing them.
+ *
+ * Three shapes, because "I don't know yet" is a real answer and the common one — see the
+ * note on here_from. Passing null for both clears it back to unsaid, which is what the
+ * `change` link on a settled answer needs.
+ */
+export function setWhenHere(opts: { from?: string | null; to?: string | null; forGood?: boolean }) {
+  update((s) => {
+    s.profile = {
+      ...s.profile,
+      here_from: opts.forGood ? null : (opts.from ?? null),
+      here_to: opts.forGood ? null : (opts.to ?? null),
+      here_for_good: Boolean(opts.forGood),
+    }
+  })
+}
+
 export function setGenres(genres: string[]) {
   update((s) => {
     s.profile = { ...s.profile, genres: [...new Set(genres)] }

@@ -47,7 +47,7 @@ import { StatusBar } from '@/components/Native'
 import { SetUp } from '@/components/SetUp'
 import { EXPLAINER_CTA } from '@/content/explainers'
 import { cardDone } from '@/content/legend'
-import { loadLearner, tasteRoom } from '@/engine/learner'
+import { loadLearner, setWhenHere, tasteRoom } from '@/engine/learner'
 
 /**
  * The Club as a feed.
@@ -265,6 +265,12 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         and is gone the next time, which is what "it has done its job" actually means.
       */
       actedOnACard: actedAtEntry,
+      /*
+        Used means told it something. Subscribing writes genres, and so does ticking what
+        you are into on the ON tab — either is somebody who has met the calendar and does
+        not need the card explaining it.
+      */
+      usedTheCalendar: (learner.profile?.genres ?? []).length > 0,
     })
 
     /*
@@ -315,6 +321,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         isMember: false,
         usedTranslator: false,
         actedOnACard: false,
+        usedTheCalendar: false,
       }).find((c) => c.kind === 'explainer' && c.explainer.id === 'how_it_works')
       const setup = setUpCard(
         Boolean(learner.deal_accepted_at),
@@ -356,6 +363,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         isMember: false,
         usedTranslator: false,
         actedOnACard: false,
+        usedTheCalendar: false,
       }).filter((c) => c.id !== demo?.id)
       /*
         AND ONE ROOM, WHICH IS THE ARGUMENT ITSELF.
@@ -526,12 +534,44 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     const welcomedAt = learner.club_welcomed_at ? Date.parse(learner.club_welcomed_at) : 0
     const firstVisit =
       welcomedAt > 0 && Number.isFinite(welcomedAt) && Date.now() - welcomedAt < 60_000
-    const leadExplainer = firstVisit
-      ? explainers.find((c) => c.id === 'explainer_how_the_club_works')
-      : undefined
-    const laterExplainers = leadExplainer ? explainers.filter((c) => c !== leadExplainer) : explainers
+    /*
+      THE THREE THAT SAY HOW THE PLACE WORKS, IN ORDER, ON THE FIRST VISIT.
 
-    const withExplainers: FeedCard[] = leadExplainer ? [leadExplainer] : []
+      Sam: "lead with both, bring up the ASK anything card to no.3."
+
+      One explainer led and the other two sat on the ninth beat, which meant a new member
+      met the room and never found out that the translator exists or that the calendar can
+      be subscribed to — measured, ask_anything was not in the first twelve cards.
+
+      Five, in the order somebody needs them: what a room is and how to swipe it, what is
+      on and how the dates and the genres shape it, the tool for the sentence nobody
+      taught you, where they are on the ladder and what the next rung is, and the one part
+      of DUB that needs another person. After that the feed is the feed.
+
+      Five is a lot of signage and it is bounded: they are the whole of what a member has
+      never been told, they appear once, and they are gone the moment anything is swiped.
+      The alternative is what was there before — the room first and the instructions eight
+      cards down, where measurement said nobody found them.
+
+      Named rather than sliced, so adding a fourth explainer does not silently join the
+      opening — a card leads because it is listed here, which is a decision somebody makes
+      rather than one that happens.
+    */
+    const LEAD_ORDER = [
+      'explainer_how_the_club_works',
+      'explainer_how_the_calendar_works',
+      'explainer_ask_anything',
+      'explainer_where_you_are_now',
+      'explainer_bring_somebody',
+    ]
+    const leading = firstVisit
+      ? LEAD_ORDER.map((id) => explainers.find((c) => c.id === id)).filter(
+          (c): c is FeedCard => Boolean(c),
+        )
+      : []
+    const laterExplainers = explainers.filter((c) => !leading.includes(c))
+
+    const withExplainers: FeedCard[] = [...leading]
     const rest = [...open.slice(0, AFTER), ...legend, ...mine, ...open.slice(AFTER)]
     let e = 0
     let v = 0
@@ -3685,6 +3725,100 @@ function IntroPane({ card }: { card: Extract<FeedCard, { kind: 'intro' }> }) {
   )
 }
 
+/**
+ * WHEN WILL YOU BE HERE — three answers, because two would be a lie.
+ *
+ * Sam: "a date picker or option to say I am moving here permanently or I don't yet."
+ *
+ * The third is the important one. Somebody learning Portuguese before they have booked
+ * anything is the common case, and forcing a date there would put a guess in the record
+ * and tailor a month of drops to it. Unsaid shows everything, which is the honest default
+ * and exactly what the calendar already does with no genres ticked.
+ *
+ * The answer changes what the calendar is worth showing, so it is asked on the card that
+ * says so. It writes to the profile and nothing else — see setWhenHere.
+ */
+function WhenHere() {
+  const learner = useLearner()
+  const p = learner.profile
+  const [open, setOpen] = useState(false)
+  const said = Boolean(p?.here_for_good || p?.here_from)
+
+  if (said && !open) {
+    return (
+      <div className="flex items-center gap-3 rounded border border-line/70 bg-surface/50 px-4 py-3">
+        <p className="min-w-0 flex-1 text-sm text-muted">
+          {p?.here_for_good
+            ? 'You live here, so nothing is out of range.'
+            : 'You are here ' + (p?.here_from ?? '') + (p?.here_to ? ' to ' + p.here_to : '') + '.'}
+        </p>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="tap-target shrink-0 text-xs text-accent underline"
+        >
+          change
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+      <p className="eyebrow text-accent">WHEN</p>
+      <p className="text-sm leading-relaxed">
+        When will you be here? It decides which of this is worth showing you.
+      </p>
+      <div className="flex flex-col gap-3">
+        <label className="flex flex-col gap-1">
+          <span className="text-xs text-muted">Arriving</span>
+          <input
+            type="date"
+            data-testid="when-here-from"
+            defaultValue={p?.here_from ?? ''}
+            onChange={(ev) => setWhenHere({ from: ev.target.value, to: p?.here_to ?? null })}
+            className="tap-target rounded border border-line bg-bg px-4 py-3 text-base"
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs text-muted">Leaving</span>
+          <input
+            type="date"
+            data-testid="when-here-to"
+            defaultValue={p?.here_to ?? ''}
+            onChange={(ev) => setWhenHere({ from: p?.here_from ?? null, to: ev.target.value })}
+            className="tap-target rounded border border-line bg-bg px-4 py-3 text-base"
+          />
+        </label>
+      </div>
+      <div className="flex flex-wrap gap-1">
+        <button
+          type="button"
+          data-testid="when-here-living"
+          onClick={() => {
+            setWhenHere({ forGood: true })
+            setOpen(false)
+          }}
+          className="tap-target rounded border border-line px-3 py-3 text-sm transition hover:border-accent/50"
+        >
+          I live here
+        </button>
+        <button
+          type="button"
+          data-testid="when-here-unknown"
+          onClick={() => {
+            setWhenHere({})
+            setOpen(false)
+          }}
+          className="tap-target rounded border border-line px-3 py-3 text-sm transition hover:border-accent/50"
+        >
+          I do not know yet
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function Explains({ card }: { card: Extract<FeedCard, { kind: 'explainer' }> }) {
   const e = card.explainer
   return (
@@ -3694,6 +3828,18 @@ function Explains({ card }: { card: Extract<FeedCard, { kind: 'explainer' }> }) 
         <h2 className="display text-balance text-2xl">{e.detail.heading}</h2>
         <p className="text-sm leading-relaxed text-fg/85">{e.detail.body}</p>
       </div>
+
+      {/*
+        THE QUESTION THE CARD IS ABOUT, ON THE CARD.
+
+        Sam: "I suggest we precede with a when will you be here ask? with a date picker or
+        option to say I am moving here permanently or I don't yet."
+
+        A screen of its own was the other shape and it is the one this product keeps
+        removing — the explainer already says the dates decide what you get, so the place
+        to ask for them is the sentence that makes the claim rather than a form after it.
+      */}
+      {e.id === 'how_the_calendar_works' ? <WhenHere /> : null}
 
       {e.say ? (
         <div className="border-t border-line pt-6">
