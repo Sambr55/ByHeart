@@ -211,9 +211,16 @@ export const EXPLAINERS: Explainer[] = [
   {
     id: 'how_the_calendar_works',
     eyebrow: 'WHAT IS ON',
-    title: 'What is happening here, in the calendar you already keep.',
+    /*
+      THE FACE ASKS; THE DETAIL EXPLAINS. Sam: "tell us when you'll be here and then
+      explain why."
+
+      It led with what the calendar IS and kept the question behind a swipe, which is the
+      wrong way round for the one intro card that wants an answer rather than a read.
+    */
+    title: 'When will you be here?',
     blurb:
-      'Concerts, matches, the holidays that shut the city. Tap one and it opens the Portuguese for being there.',
+      'It decides which of Lisbon is worth showing you — concerts, matches, the holidays that shut the city.',
     detail: {
       heading: 'Why these and not everything',
       body: 'Two things decide what you get. Your dates, so a week in October is not filled with things happening in March — and if you live here, nothing is out of range. And what you say you are into: tick football and the big matches arrive, leave it blank and you get all of it. Both are yours to change whenever, and the whole thing subscribes to the calendar on your phone rather than living in another app.',

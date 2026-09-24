@@ -56,9 +56,28 @@ export const CLUB = {
   welcome: {
     eyebrow: 'YOU ARE IN',
     headline: 'Welcome to Dub Club — Lisbon.',
-    body: 'You can introduce yourself in Portuguese without reading it off a screen. That is the whole membership test, and it is the thing most people never get to. This is your way in from now on — no front door, no pitch, no starting again.',
-    body_two: 'Nothing here counts days or asks where you have been. It just shows you what you can say and what is worth doing next.',
-    cta: 'GOOD',
+    /*
+      Sam's own wording, and it turns the screen forward.
+
+      It said what had just been proved and stopped there — "that is the whole membership
+      test, and it is the thing most people never get to" — which is a compliment about
+      the past on the screen that opens the future. He wrote the fix: "now, with your
+      Legend you can introduce yourself in Portuguese without reading it off a screen. Now
+      we are going to help you grow your Legend."
+    */
+    body: 'Now, with your Legend you can introduce yourself in Portuguese without reading it off a screen.',
+    body_two: 'Now we are going to help you grow your Legend. This is your way in from now on — there is a lot to do and discover.',
+    /*
+      NOT A BUTTON. Sam: "remove CTA, add: Swipe ↑ to continue."
+
+      The Club's whole grammar is the swipe, and this is the screen immediately before the
+      five cards that teach it. A button here is the product doing the gesture for
+      somebody on the way into the one place that asks for it.
+
+      Kept as a string rather than deleted because the ceremony still needs a way out for
+      anybody who taps rather than swipes — see the handler, which is unchanged.
+    */
+    cta: 'Swipe ↑ to continue',
     /*
       The one question, asked once, on the way in.
 

@@ -1395,6 +1395,19 @@ export function Card({
     different is only that its front plays instead of pointing sideways.
   */
   const isDemo = card.kind === 'explainer' && card.explainer.id === 'how_it_works'
+  /*
+    The five that open a new member's Club — see LEAD_ORDER. They teach the deck's own
+    grammar, so they name the gesture instead of offering a button that performs it.
+  */
+  const INTRO_EXPLAINERS = [
+    'how_the_club_works',
+    'how_the_calendar_works',
+    'ask_anything',
+    'where_you_are_now',
+    'bring_somebody',
+  ]
+  const introExplainer =
+    card.kind === 'explainer' && INTRO_EXPLAINERS.includes(card.explainer.id)
   /** Which beat the demo is on, so the card can stop repeating the claim it is proving. */
   const [demoBeat, setDemoBeat] = useState(0)
 
@@ -2590,6 +2603,48 @@ export function Card({
                   */}
                   <Choose onSand={onSand} onDone={() => setPairChosen(true)} />
                 </div>
+              ) : card.kind === 'explainer' && card.explainer.id === 'how_the_calendar_works' ? (
+                /*
+                  THE QUESTION ON THE FACE, because it is what the card is for.
+
+                  Sam: "I want this to be the main card in the flow (you don't swipe right
+                  to see it). So we are asking the user: tell us when you'll be here and
+                  then explain why."
+
+                  It was on the detail pane, behind a swipe — which is the right place for
+                  an explanation and the wrong one for a question, because a question
+                  nobody is shown is a question nobody answers. The explanation stays
+                  behind the swipe, where "See more" now points.
+                */
+                <div className="mb-3 mt-6">
+                  <WhenHere />
+                </div>
+              ) : introExplainer ? (
+                /*
+                  THE INTRO CARDS SAY THE GESTURE RATHER THAN OFFERING A BUTTON.
+
+                  Sam, over the five: "remove CTA, add: Swipe ↑ to continue", "remove the
+                  open CTA, replace with See more →", "replace with Next ↑".
+
+                  These five run once, in order, and their job is to teach the deck's own
+                  grammar — right opens, left sends back, up is the next one. A blue button
+                  in the middle of that is the product doing the gesture FOR somebody on
+                  the one card that exists to teach it.
+
+                  The hint says which gesture and what it does, in the same two words each
+                  time. Tapping still works: the whole face is the reveal target, so
+                  nobody who reaches for a button is stranded — see the handler above.
+                */
+                <p
+                  data-testid="card-swipe-hint"
+                  className={
+                    'mb-3 mt-6 text-sm ' + (onSand ? 'text-muted' : 'text-white/80')
+                  }
+                >
+                  {card.kind === 'explainer' && card.explainer.detail
+                    ? 'See more →'
+                    : 'Swipe ↑ to continue'}
+                </p>
               ) : (
                 <button
                   type="button"
@@ -3829,17 +3884,6 @@ function Explains({ card }: { card: Extract<FeedCard, { kind: 'explainer' }> }) 
         <p className="text-sm leading-relaxed text-fg/85">{e.detail.body}</p>
       </div>
 
-      {/*
-        THE QUESTION THE CARD IS ABOUT, ON THE CARD.
-
-        Sam: "I suggest we precede with a when will you be here ask? with a date picker or
-        option to say I am moving here permanently or I don't yet."
-
-        A screen of its own was the other shape and it is the one this product keeps
-        removing — the explainer already says the dates decide what you get, so the place
-        to ask for them is the sentence that makes the claim rather than a form after it.
-      */}
-      {e.id === 'how_the_calendar_works' ? <WhenHere /> : null}
 
       {e.say ? (
         <div className="border-t border-line pt-6">

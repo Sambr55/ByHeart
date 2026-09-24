@@ -570,11 +570,22 @@ function Welcome({ onDone }: { onDone: () => void }) {
         <h1 className="display text-balance text-3xl">{CLUB.welcome.headline}</h1>
         <p className="text-sm leading-relaxed text-white/80">{CLUB.welcome.body}</p>
         <p className="text-sm leading-relaxed text-white/80">{CLUB.welcome.body_two}</p>
+        {/*
+          THE GESTURE, NOT A BUTTON. Sam: "remove CTA, add: Swipe ↑ to continue."
+
+          This is the screen immediately before the five cards that teach the deck's
+          grammar, and the Club's whole grammar is the swipe. A blue button here does the
+          gesture for somebody on the way into the one place that asks for it.
+
+          It is still a button, because a hint nobody can press is a dead end for anybody
+          who reaches for one — and because the ceremony must be dismissible however it is
+          met. What changes is that it looks like the instruction it is.
+        */}
         <button
           type="button"
           data-testid="club-welcome-cta"
           onClick={onDone}
-          className="tap-target eyebrow mt-3 w-full rounded bg-[#1f5d8c] px-5 py-3 text-white"
+          className="tap-target mt-3 w-full px-5 py-3 text-left text-sm text-white/80"
         >
           {CLUB.welcome.cta}
         </button>
