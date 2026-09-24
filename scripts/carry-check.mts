@@ -59,19 +59,60 @@ console.log('  ' + touched.length + ' roots carry a specimen: ' + touched.map((r
   else {
     for (const [gender, mine, theirs] of [['m', 'obrigado', 'obrigada'], ['f', 'obrigada', 'obrigado']] as const) {
       const p = personalise(root as never, { display_name: 'Fred', profile: { gender, into: [] } }) as unknown as {
-        target: string; branches: { target: string }[]
+        target: string; branches: { target: string; demonstrates?: string[] }[]
         transfer_prompt?: { answer?: string }
         semantic_bridge: string
-        extracts: { target: string }[]
+        extracts: { id: string; target: string }[]
       }
-      const spoken = [p.target, ...p.branches.map((b) => b.target), p.transfer_prompt?.answer ?? '']
+      /*
+        THE LINE THE LEARNER IS HANDED, not every line on the root.
+
+        This asserted that NO line says the other form, and that was too strong: this root
+        teaches the pair, so one branch exists precisely to show the other ending. Holding
+        it to "no obrigada anywhere" forced every branch to bend, which starved the other
+        piece — its screen read "0 things you can say with it", which Sam then reported.
+
+        What must be true is narrower and is the actual promise: the sentence at the top
+        of the screen, and the one the learner is asked to produce, use their own form. A
+        branch tagged as demonstrating the other ending is the example beside it.
+      */
+      const spoken = [p.target, p.transfer_prompt?.answer ?? '']
       for (const line of spoken) {
         ok(
-          'gender ' + gender + ': no line says ' + theirs,
+          'gender ' + gender + ': the line they say uses ' + mine,
           !new RegExp(theirs, 'i').test(line),
           '"' + line + '"',
         )
       }
+      /* And every branch NOT teaching the contrast is theirs too. */
+      for (const b of p.branches) {
+        if ((b.demonstrates ?? []).includes(theirs)) continue
+        ok(
+          'gender ' + gender + ': branch uses ' + mine,
+          !new RegExp(theirs, 'i').test(b.target),
+          '"' + b.target + '"',
+        )
+      }
+      /*
+        AND EVERY PIECE HAS SOMETHING TO SAY WITH IT.
+
+        Sam: "apparently there are 0 things she can say with it." A piece screen lists the
+        branches tagged to that extract, so a bend that retags or rewrites every branch
+        leaves one of the pair with none — and the screen says so, in those words. Both of
+        my first two attempts did exactly that, in opposite directions.
+
+        Asserted per extract rather than per root, because the failure is always one
+        starved piece beside a healthy one.
+      */
+      for (const e of p.extracts) {
+        const own = p.branches.filter((b) => (b.demonstrates ?? []).includes(e.id))
+        ok(
+          'gender ' + gender + ': ' + e.target + ' has something to say with it',
+          own.length > 0,
+          '0 branches tagged ' + e.id,
+        )
+      }
+
       /* And the lesson still teaches the pair. */
       ok(
         'gender ' + gender + ': the bridge still shows both forms',

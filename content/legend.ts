@@ -245,7 +245,7 @@ export function personalise<T extends {
   source: string
   root_display: string
   semantic_bridge: string
-  branches: { target: string; en: string; formal?: string }[]
+  branches: { target: string; en: string; formal?: string; demonstrates?: string[] }[]
   transfer_prompt: { context: string; ask: string; answer: string }
 }>(
   root: T,
@@ -440,6 +440,15 @@ export function personalise<T extends {
     return out
   }
 
+  /*
+    Is this branch the one demonstrating the pair's other ending? If so it is an example
+    of the contrast rather than a line the learner is being handed, so myForm leaves it
+    alone. See the note at the branches below.
+  */
+  const otherForm = g === 'f' ? 'obrigado' : 'obrigada'
+  const showsOtherForm = (b: { target: string; demonstrates?: string[] }) =>
+    (g === 'm' || g === 'f') && (b.demonstrates ?? []).includes(otherForm)
+
   const mine = (t: string) => {
     /*
       ORIGIN BEFORE FORM, because the form has to bend what is finally on the line.
@@ -468,7 +477,7 @@ export function personalise<T extends {
       The extract too, so the banked word is the one on the screen. Only where the root
       actually teaches música — every other root is untouched by this.
     */
-    ...((swap || (ageSwap && isAgeSpecimen)) && 'extracts' in root
+    ...((swap || (ageSwap && isAgeSpecimen) || chosen || g === 'm' || g === 'f') && 'extracts' in root
       ? {
           extracts: (root as unknown as { extracts: { id: string; target: string; gloss: string }[] }).extracts.map(
             (e) => {
@@ -492,13 +501,70 @@ export function personalise<T extends {
                   ? { ...e, id: swap.id, target: swap.target, gloss: swap.gloss }
                   : e
               }
+              /*
+                THE NATIONALITY THE LEARNER CHOSE, shown rather than banked.
+
+                Sam: "Jane has told us she is Scottish then we ask show English audio."
+                The line above the extract already said "Sou escocesa" — personalise
+                rewrote the sentence — while the extract beneath it still taught inglês,
+                so the screen contradicted itself and read the wrong word aloud.
+
+                THE ID DOES NOT MOVE, because only inglês/inglesa are pieces. escocês,
+                galês, irlandês and americano appear on the chips and in the learner's own
+                sentence, and no root unpacks them — so swapping the id would bank a word
+                nothing resolves, which is the dead-word fault that has already been
+                unpicked twice this week. The same compromise the interests use: the
+                learner reads their own word, the inventory keeps a real one.
+
+                Both extracts move together — the masculine and the feminine — so the pair
+                still teaches the agreement, and myForm has already bent the sentence.
+              */
+              if (chosen && chosen.value !== 'inglês' && (e.id === 'ingles' || e.id === 'inglesa')) {
+                /*
+                  AND IT AGREES WITH THE SPEAKER, which the extract's own id cannot say.
+
+                  tb_introduce carries only `ingles`, the masculine, because its line is
+                  "Sou inglês" — so keying the form off the id gave Jane `escocês` under a
+                  sentence reading "Sou escocesa". Where the root teaches BOTH (jb_english
+                  does) each keeps its own side, so the pair still shows the contrast.
+                */
+                const both = (root as unknown as { extracts: { id: string }[] }).extracts
+                const teachesPair = both.some((x) => x.id === 'inglesa')
+                const feminine = teachesPair ? e.id === 'inglesa' : g === 'f'
+                const mineWord = feminine ? (chosen.f ?? chosen.value) : chosen.value
+                return { ...e, target: mineWord, gloss: chosen.en ?? e.gloss }
+              }
               /* The specimen's own number, swapped for theirs. See isAgeSpecimen above. */
               if (ageSwap && isAgeSpecimen && AUTHORED_AGES.some((a) => say(a).split(/\s+/)[0] === e.target)) {
                 return { ...e, id: ageSwap.id, target: ageSwap.target, gloss: ageSwap.gloss }
               }
               return e
             },
-          ),
+          ).sort((a, b) => {
+            /*
+              THE LEARNER'S OWN FORM FIRST, where a root teaches a gendered pair.
+
+              Sam: "obrigada selected flips to obrigado." tb_thank_you teaches both forms
+              as separate extracts and the beats walk them in authored order — obrigado
+              first — so a woman who had just chosen OBRIGADA met a screen saying
+              obrigado, read it aloud, and was asked "what does obrigado give me?" under a
+              line reading Obrigada pela música.
+
+              REORDERED, NOT REPLACED. Making both extracts say her form was tried and was
+              worse in two ways: it printed the same word twice, and it broke branchesFor,
+              which matches branches by extract id against the word — so the next screen
+              said "0 things you can say with it." Sam saw both. Teaching the pair is the
+              whole point of this root; which one comes first is not.
+
+              Only the thank-you pair sorts, because it is the only root whose two
+              extracts are one word in two genders. Everything else keeps its authored
+              order, and a learner who has not said which is theirs keeps it too.
+            */
+            if (g !== 'm' && g !== 'f') return 0
+            const rank = (id: string) =>
+              id === 'obrigado' ? (g === 'm' ? 0 : 1) : id === 'obrigada' ? (g === 'f' ? 0 : 1) : 0
+            return rank(a.id) - rank(b.id)
+          }),
         }
       : {}),
     target: mine(root.target),
@@ -512,10 +578,52 @@ export function personalise<T extends {
       learner speaking; this one paragraph is the product teaching.
     */
     semantic_bridge: root.semantic_bridge,
+    /*
+      AND THE BRANCH BELONGS TO THE FORM IT NOW SHOWS.
+
+      myForm bends every branch to the speaker, so for a woman all three thank-you
+      branches read "Obrigada…" — while their `demonstrates` still named the form they
+      were authored in. branchesFor matches on that tag, so the second piece screen found
+      none of them and said "0 things you can say with it." Sam saw exactly that.
+
+      Retagged rather than left: a branch that SAYS obrigada demonstrates obrigada. The
+      pair is the only case, so everything else keeps the tags it was authored with.
+    */
     branches: root.branches.map((b) => ({
       ...b,
-      target: mine(b.target),
-      en: mine(b.en),
+      /*
+        A BRANCH THAT IS TEACHING THE OTHER FORM KEEPS IT.
+
+        tb_thank_you teaches obrigado and obrigada as two pieces, and each piece's screen
+        shows the branches tagged to it. myForm bends every line to the speaker, which is
+        right for a sentence somebody is about to say and wrong for the one line whose JOB
+        is to show the other ending: bent, all three branches became hers, the second
+        piece had none, and the screen said "0 things you can say with it." Sam saw it.
+
+        So a branch demonstrating the pair is left as authored — it is the example, not
+        the learner speaking — and everything else bends. The root still teaches both, in
+        the learner's own order, with each form keeping a line to show.
+      */
+      /*
+        HER LINES BEND; THE ONE SHOWING THE CONTRAST DOES NOT.
+
+        tb_thank_you teaches obrigado and obrigada as two pieces, and each piece screen
+        shows the branches tagged to it. Bending all three made every line hers, so the
+        other piece had none and the screen read "0 things you can say with it." Leaving
+        all three alone put "Muito obrigado" back in front of a woman, which is where this
+        started.
+
+        The branch that DEMONSTRATES the other ending is the example — it exists to show
+        the contrast the bridge describes — so it stays as authored. Every other branch is
+        the learner speaking and bends. Each form keeps a line, and nothing puts the wrong
+        ending in her mouth.
+
+        Everywhere outside this pair, `showsOtherForm` is false and this is exactly the
+        bend it has always been.
+      */
+      ...(showsOtherForm(b)
+        ? { target: myName(b.target, me.display_name), en: b.en }
+        : { target: mine(b.target), en: mine(b.en) }),
       ...(b.formal ? { formal: mine(b.formal) } : {}),
     })),
     transfer_prompt: {
