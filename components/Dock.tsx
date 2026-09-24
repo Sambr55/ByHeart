@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 /**
@@ -28,7 +28,46 @@ const Slot = createContext<HTMLElement | null>(null)
 /** The room the dock lands in. Rendered by a shell, after its scrolling region. */
 export function DockSlot() {
   const el = useContext(SlotSetter)
-  return <div ref={el} className="dock-slot" />
+  const [h, setH] = useState(0)
+  const node = useRef<HTMLDivElement | null>(null)
+  /*
+    THE SLOT IS FIXED TO THE GLASS, SO THE FLOW GETS ITS HEIGHT BACK.
+
+    The dock is positioned against the viewport rather than against .app-frame — the frame
+    is 100dvh, which means different things in Safari and in the installed PWA, while the
+    nav is fixed to the glass and means the same in both. That is what finally put the
+    button --dock-gap above the bar in BOTH, after four reports.
+
+    A fixed element is out of the flow, though, and this file exists because of what that
+    costs: content scrolling behind the one thing you can press. Measured after the
+    change, 42px of the last paragraph sat under the button.
+
+    So the slot leaves a spacer of exactly its own measured height. Measured rather than
+    guessed, because a dock is one button on most screens and two plus a line of copy on
+    others, and a constant would be a copy of a height that goes stale — the fault this
+    codebase keeps finding.
+  */
+  useEffect(() => {
+    const el2 = node.current
+    if (!el2) return
+    const ro = new ResizeObserver(() => setH(el2.getBoundingClientRect().height))
+    ro.observe(el2)
+    setH(el2.getBoundingClientRect().height)
+    return () => ro.disconnect()
+  }, [])
+  return (
+    <>
+      {/* The room the dock would have taken, so nothing scrolls behind it. */}
+      <div aria-hidden className="shrink-0" style={{ height: h }} />
+      <div
+        ref={(n) => {
+          node.current = n
+          el?.(n)
+        }}
+        className="dock-slot"
+      />
+    </>
+  )
 }
 
 const SlotSetter = createContext<((node: HTMLDivElement | null) => void) | null>(null)

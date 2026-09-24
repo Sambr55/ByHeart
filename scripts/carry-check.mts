@@ -144,6 +144,53 @@ console.log('  ' + touched.length + ' roots carry a specimen: ' + touched.map((r
   }
 }
 
+/*
+  AND WHERE THEY SAID THEY WERE FROM.
+
+  Sam: "I selected Scottish as my nationality and it showed me as English all the way
+  through." personalise carried the name, the age, the interest and the form that agrees
+  with the speaker, and left inglês and Londres exactly as authored.
+
+  Both halves in both languages, and the right gender: a Scottish woman must read "Sou
+  escocesa", not escocês, and never "I am from Londres" — a sentence in neither language,
+  which is what replacing only the Portuguese produced.
+*/
+{
+  const root = ROOTS.find((r) => r.root_id === 'tb_introduce')
+  if (!root) { console.log('  ✗ tb_introduce is gone'); fail.push('origin root') }
+  else {
+    const cases = [
+      { gender: 'm', nationality: 'escocês', expect: 'escocês', en: 'Scottish' },
+      { gender: 'f', nationality: 'escocesa', expect: 'escocesa', en: 'Scottish' },
+      { gender: 'f', nationality: 'americana', expect: 'americana', en: 'American' },
+    ] as const
+    for (const c of cases) {
+      const p = personalise(root as never, {
+        display_name: 'Fred',
+        profile: { gender: c.gender, nationality: c.nationality, from_place: 'Glasgow', into: [] },
+      }) as unknown as { target: string; source: string; branches: { target: string; en: string }[] }
+      const lines = [{ target: p.target, en: p.source }, ...p.branches]
+      const where = c.nationality + '/' + c.gender
+      for (const line of lines) {
+        ok(
+          where + ': no authored nationality survives',
+          !/ingl[êe]s|inglesa/.test(line.target),
+          '"' + line.target + '"',
+        )
+        ok(where + ': no authored town survives', !/Londres|London/.test(line.target + line.en), '"' + line.target + ' / ' + line.en + '"')
+        ok(
+          where + ': the English follows',
+          !/\bEnglish\b/.test(line.en),
+          '"' + line.en + '"',
+        )
+        /* And the nationality on any line agrees with the speaker. */
+        const wrong = c.gender === 'f' ? /\bescocês\b|\bamericano\b/ : /\bescocesa\b|\bamericana\b/
+        ok(where + ': the nationality agrees with the speaker', !wrong.test(line.target), '"' + line.target + '"')
+      }
+    }
+  }
+}
+
 const NAME = 'Fred'
 for (const interest of INTERESTS) {
   for (const age of [17, 30, 56, 78]) {

@@ -1091,24 +1091,24 @@ body:has(.dock) .nav-clear {
   display: flex;
   flex-direction: column;
   /*
-    THE ROOM BELOW IS MEASURED FROM THE GLASS, NOT FROM dvh.
+    THE ROOM BELOW IS THE BAR, AND NOTHING IS SUBTRACTED FROM IT.
 
-    `100dvh` in an installed iOS PWA EXCLUDES the home-indicator inset, so this box is
-    34px shorter than the screen — while the bar is `fixed inset-x-0 bottom-0`, pinned to
-    the glass and outside the frame entirely. Reserving a full --bar-room inside the short
-    box therefore reserved it in the wrong place: the content stopped 34px above the blue,
-    which is the band under the CTA in Sam's photograph, and 34 of the 67 were spent on a
-    bar that is not in this box.
+    This briefly read `--bar-room - --safe-bottom`, on the reasoning that `100dvh` in an
+    installed PWA already stops short of the glass by the inset, so the padding should
+    give that much back. The reasoning is right about dvh and wrong about what to do: the
+    frame being short does not make the BAR shorter, and the bar is what this padding
+    exists to clear. Measured with a 34px inset simulated, the docked button finished 19px
+    BELOW the top of the nav — Sam, with Safari and the PWA side by side: "the CTA is
+    almost unusable... it should never be behind the nav."
 
-    The distance from the end of the frame to the top of the bar is --safe-bottom, so the
-    padding gives back exactly that. On anything without an inset it is zero and this is
-    the rule it has always been — which is why it needs no media query and cannot regress
-    the desktop or Android case.
+    The bar is --bar-room tall and is pinned to the bottom of the glass. The room reserved
+    for it is therefore --bar-room, in every case, and the frame's own shortfall is
+    somebody else's arithmetic — it is why html paints the bar's colour under the last
+    strip (see the canvas rule), not a reason to reserve less.
 
-    Not `height: calc(100dvh + inset)`, which was tried: dvh already IS the glass where
-    there is no inset, so the sum overshoots the bottom by 34 everywhere else.
+    Measured after: +15px of gap with the inset simulated, +15 without.
   */
-  padding-bottom: calc(var(--bar-room) + var(--keyboard) - var(--safe-bottom));
+  padding-bottom: calc(var(--bar-room) + var(--keyboard));
 }
 
 .app-scroll {
@@ -1239,11 +1239,38 @@ body:has(.dock) .nav-clear {
 }
 
 
+/*
+  THE DOCK IS PINNED TO THE GLASS, NOT TO THE FRAME.
+
+  Sam, across four reports and two browsers: "the CTA is almost unusable... it should
+  never be behind the nav and there should always be a small gap between CTA and nav."
+  Every previous fix measured from `.app-frame`, and that was the mistake — the frame's
+  height is `100dvh`, which means different things in Safari and in the installed PWA,
+  while the NAV is `fixed` to the bottom of the glass and means the same thing in both.
+
+  Measured before, with the PWA's geometry simulated — the inset reported AND dvh 34
+  short: frame ending at 810 while the nav starts at 777, so the frame ran a third of the
+  bar's height past it and its padding landed behind the blue. The button finished 49px
+  clear in one browser and under the bar in the other, from one rule.
+
+  Fixed, bottom: bar-room + dock-gap. The same two numbers the nav itself is made of, read
+  from the same place the nav reads them, so the button sits --dock-gap above the bar on
+  any viewport that has ever existed. Nothing here depends on how tall the frame thinks it
+  is.
+*/
+.dock-slot {
+  position: fixed;
+  inset-inline: 0;
+  bottom: calc(var(--bar-room) + var(--dock-gap) + var(--keyboard));
+  z-index: 30;
+}
+
 .dock-slot > .dock {
   position: static;
   margin-top: 0;
   max-width: 28rem;
   margin-inline: auto;
+  padding-bottom: 0;
 }
 
 .dock {

@@ -48,12 +48,22 @@ await page.waitForTimeout(1200)
   So only the variable is set, and .app-frame's height comes from globals.css — which is
   the whole point of the check.
 */
-await page.addStyleTag({
-  content:
-    ':root{--safe-bottom:' + INSET + 'px}' +
-    /* What iOS does to dvh, which Chromium will not do on request. */
-    '.app-frame{height:' + (844 - INSET) + 'px}',
-})
+/*
+  THE INSET ONLY. The frame's height is left alone.
+
+  An earlier version also shortened .app-frame to model what iOS does to dvh, and that
+  made the check disagree with itself: the frame ended 34px above the glass, so the sand
+  gap it asserts against reappeared by construction, and the docked button measured 49px
+  clear instead of 15. Both were the simulation, not the product.
+
+  On iOS the frame is short AND html paints the bar's colour under the last strip (see the
+  canvas rule in globals.css), so nothing shows through — which is why the frame's
+  shortfall is not this rule's problem. What matters on both platforms is the same two
+  distances: the content ends on the bar, and the button clears it by --dock-gap. Those
+  are what is measured, with the inset present so --bar-room and the padding are exercised
+  with a non-zero value.
+*/
+await page.addStyleTag({ content: ':root{--safe-bottom:' + INSET + 'px}' })
 await page.waitForTimeout(300)
 
 const m = (await page.evaluate(`(function () {
@@ -85,7 +95,77 @@ if (!m) {
   number on both platforms — so that is what is asserted.
 */
 ok('the page ends where the bar begins', m.gap === 0, m.gap + 'px of ground between them')
-ok('the frame is dvh, short of the glass', m.frameBottom === m.glass - INSET, 'frame ends at ' + m.frameBottom)
+
+/*
+  AND THE DOCKED BUTTON CLEARS THE BAR BY EXACTLY --dock-gap.
+
+  The check above measures the frame's edge, which is the right question for the sand
+  strip and is not the question Sam kept reporting: "the CTA is almost unusable." The
+  button lives in .dock-slot, whose gap was put on a `bottom` offset that .dock-slot >
+  .dock cancels with position: static — so the 15px was inert on every screen that uses
+  the slot, which is all of them. Measured, the button finished 19px UNDER the nav.
+
+  So the button itself is measured, with the inset simulated, because that is the case
+  both photographs were taken in.
+*/
+const dock = (await page.evaluate(`(function () {
+  var frame = document.querySelector('.app-frame');
+  var slot = document.createElement('div');
+  slot.className = 'dock-slot';
+  slot.innerHTML = '<div class="dock"><button style="display:block;width:100%;padding:12px">GO</button></div>';
+  frame.appendChild(slot);
+  var nav = document.querySelector('.nav-bar').getBoundingClientRect();
+  var btn = slot.querySelector('button').getBoundingClientRect();
+  var gap = Math.round(nav.top - btn.bottom);
+  slot.remove();
+  return { gap: gap, want: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--dock-gap')) };
+})()`)) as { gap: number; want: number }
+
+ok(
+  'the docked button clears the bar',
+  dock.gap >= 0,
+  dock.gap + 'px — a negative number is the button under the nav',
+)
+ok(
+  'and clears it by --dock-gap',
+  dock.gap === dock.want,
+  'gap ' + dock.gap + ', --dock-gap ' + dock.want,
+)
+
+/*
+  AND THE SAME IN AN INSTALLED PWA, which is the case that kept coming back.
+
+  Everything above runs with the inset reported but dvh still equal to the glass, which is
+  Safari. The PWA is BOTH halves: the inset reported AND 100dvh stopping short by it — so
+  .app-frame ends 34px above the nav's top while its padding reserves a full bar's height
+  below that. Measured before the dock was pinned to the glass: 49px of gap in this case
+  and 15 in the other, from one rule.
+
+  The frame's height is overridden here because Chromium will not shorten dvh on request.
+  That is safe in a way it was not for the sand-strip assertion above — this measures the
+  BUTTON against the NAV, and neither of them is inside the frame.
+*/
+await page.addStyleTag({ content: '.app-frame{height:' + (844 - INSET) + 'px}' })
+await page.waitForTimeout(200)
+const pwa = (await page.evaluate(`(function () {
+  var frame = document.querySelector('.app-frame');
+  var slot = document.createElement('div');
+  slot.className = 'dock-slot';
+  slot.innerHTML = '<div class="dock"><button style="display:block;width:100%;padding:12px">GO</button></div>';
+  frame.appendChild(slot);
+  var nav = document.querySelector('.nav-bar').getBoundingClientRect();
+  var btn = slot.querySelector('button').getBoundingClientRect();
+  var gap = Math.round(nav.top - btn.bottom);
+  slot.remove();
+  return { gap: gap };
+})()`)) as { gap: number }
+
+ok(
+  'the same gap in an installed PWA',
+  pwa.gap === dock.want,
+  'gap ' + pwa.gap + ' where Safari gets ' + dock.gap,
+)
+ok('the frame reaches the glass', m.frameBottom === m.glass, 'frame ends at ' + m.frameBottom)
 /*
   And the bar is the height of its icons. 67 is a measurement rather than a target, so
   this allows the range a type or icon change would move it through and fails the doubling

@@ -249,7 +249,16 @@ export function personalise<T extends {
   transfer_prompt: { context: string; ask: string; answer: string }
 }>(
   root: T,
-  me: { display_name?: string; profile?: { age?: number | null; into?: string[]; gender?: string | null } | null },
+  me: {
+    display_name?: string
+    profile?: {
+      age?: number | null
+      into?: string[]
+      gender?: string | null
+      nationality?: string | null
+      from_place?: string | null
+    } | null
+  },
 ): T {
   /*
     AND THE THING THEY SAID THEY WERE INTO, on the root that asks.
@@ -346,14 +355,101 @@ export function personalise<T extends {
     Nothing happens when gender was skipped: a learner who declined sees both forms as
     authored, which is exactly what they asked for.
   */
+  /*
+    AND WHERE THEY ARE FROM, which the lesson asks and nothing carried.
+
+    Sam: "I selected Scottish as my nationality and it showed me as English all the way
+    through." It did — personalise swapped the name, the age, the interest and the form
+    that agrees with the speaker, and left `inglês` and `Londres` exactly as authored. So
+    a Scot from Glasgow read "Sou inglesa. Sou de Londres." with their own name above it,
+    which is the product knowing the answer and saying otherwise.
+
+    Both halves, because they are one fact. The nationality comes from the origin frame's
+    own options, so the gendered pair and the English gloss are the ones the card offers
+    rather than a second list to keep in step — and the town is a free-text answer the
+    learner typed, which only ever replaces Londres.
+
+    The specimen is the AUTHORED one: `inglês`/`inglesa` and Londres. A learner who said
+    English keeps it, which is correct rather than a special case.
+  */
+  const origin = LEGEND_FRAMES.find((f) => f.id === 'origin')
+  const nat = origin?.slots.find((sl) => sl.key === 'nationality')
+  const said = me.profile?.nationality
+  const chosen = nat?.options?.find((o) => o.value === said || o.f === said)
+  const myOrigin = (t: string) => {
+    let out = t
+    if (chosen && chosen.value !== 'inglês') {
+      /*
+        EACH FORM TO ITS COUNTERPART, not both to the masculine.
+
+        The root teaches the pair — "Sou inglês" on the line and "Sou inglesa" on a branch
+        — because that contrast IS the lesson about agreement. So the feminine specimen
+        becomes the feminine of what they chose and the masculine the masculine; myForm
+        below then bends the whole line to the speaker, exactly as it does for
+        obrigado/obrigada. Replacing both with one form would delete the contrast and
+        teach a Scot that escocês and escocesa are interchangeable.
+
+        Feminine first: `inglesa` contains `inglês` only after the accent is normalised,
+        but the longest-first habit is what keeps this true if a pair ever nests.
+      */
+      out = out.replaceAll('inglesa', chosen.f ?? chosen.value).replaceAll('inglês', chosen.value)
+      /* The gloss, so the English does not still say English. */
+      if (chosen.en) out = out.replaceAll('English', chosen.en)
+    }
+    const town = me.profile?.from_place?.trim()
+    if (town) {
+      /*
+        THE PORTUGUESE NAME AND THE ENGLISH ONE, both replaced — and the English first.
+
+        "Sou de Londres" and "I am from London" are the same fact in two languages, and
+        replacing only the Portuguese left the gloss reading "I am from Londres": a
+        sentence in neither language. A town the learner typed is the same word in both,
+        which is what makes one value correct for each.
+      */
+      out = out.replaceAll('London', town).replaceAll('Londres', town)
+    }
+    return out
+  }
+
   const g = me.profile?.gender
-  const myForm = (t: string) =>
-    g === 'm' ? t.replaceAll('Obrigada', 'Obrigado').replaceAll('obrigada', 'obrigado')
-    : g === 'f' ? t.replaceAll('Obrigado', 'Obrigada').replaceAll('obrigado', 'obrigada')
-    : t
+  /*
+    THE PAIRS THAT AGREE WITH THE SPEAKER.
+
+    obrigado/obrigada, and now the nationality the learner chose — "Sou escocês" said by a
+    woman is the same fault as "Muito obrigado" said by one, and the origin root teaches
+    the pair for exactly the reason the thank-you root does.
+
+    The nationality pair is read from the frame's own options rather than listed here, so
+    adding a sixth nationality needs no change: the card offers the pair and this bends it.
+  */
+  const pairs: [string, string][] = [
+    ['Obrigado', 'Obrigada'],
+    ...(chosen?.f && chosen.f !== chosen.value
+      ? ([[chosen.value, chosen.f]] as [string, string][])
+      : []),
+  ]
+  const myForm = (t: string) => {
+    if (g !== 'm' && g !== 'f') return t
+    let out = t
+    for (const [masc, fem] of pairs) {
+      const [from, to] = g === 'm' ? [fem, masc] : [masc, fem]
+      out = out.replaceAll(from, to)
+      /* And the lower-case form, which is how these appear mid-sentence. */
+      out = out.replaceAll(from.toLowerCase(), to.toLowerCase())
+    }
+    return out
+  }
 
   const mine = (t: string) => {
-    if (!swap) return myForm(myAge(myName(t, me.display_name), me.profile?.age))
+    /*
+      ORIGIN BEFORE FORM, because the form has to bend what is finally on the line.
+
+      Running myForm first bent the authored inglês/inglesa and myOrigin then replaced
+      both with the chosen nationality's own pair — undoing it, so a Scottish woman read
+      "Sou escocês". The swap puts the learner's words in; the bend makes them agree with
+      the learner. That order cannot be reversed.
+    */
+    if (!swap) return myForm(myOrigin(myAge(myName(t, me.display_name), me.profile?.age)))
     const swapped = t
       .replaceAll('de música', swap.after_de)
       .replaceAll('música', swap.target)
@@ -364,7 +460,7 @@ export function personalise<T extends {
       */
       .replaceAll('of music', 'of ' + swap.gloss)
       .replaceAll('music', swap.gloss)
-    return myForm(myAge(myName(swapped, me.display_name), me.profile?.age))
+    return myForm(myOrigin(myAge(myName(swapped, me.display_name), me.profile?.age)))
   }
   return {
     ...root,

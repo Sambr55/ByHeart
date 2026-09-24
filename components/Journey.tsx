@@ -250,8 +250,22 @@ function Shell({
         moves it, which is the one moment it exists for. It renders nothing once the
         Legend is open and nothing before the first word — see components/ToLegend.tsx.
       */}
+      {/*
+        AND NOTHING WHEN THERE IS NO BAR TO SHOW.
+
+        Sam, on Safari: "there is a dark bar under the nav the title slips behind." This
+        wrapper rendered its padding whether or not ToLegend returned anything — and
+        ToLegend renders nothing once the Legend is open, or before the first word. So a
+        learner past the door got a twelve-pixel strip of ground between the azulejo band
+        and the top of the scroller: chrome-coloured, immovable, and exactly the shape of
+        a bar the title appears to slide under.
+
+        `has-[*]:` rather than a second copy of ToLegend's own conditions, which would be
+        two rules deciding one thing and is how every drift this week started. The padding
+        exists only when the div has something in it.
+      */}
       {nav ? (
-        <div className="mx-auto w-full max-w-md px-5 pt-3">
+        <div className="mx-auto w-full max-w-md px-5 empty:hidden has-[div]:pt-3">
           <ToLegend />
         </div>
       ) : null}
@@ -260,9 +274,22 @@ function Shell({
           Beats arrive rather than being swapped. See useScreenIn — the element stays
           mounted, so a half-built line survives a re-render that is only a re-render.
         */}
+        {/*
+          LESS AIR ABOVE THE FIRST WORD. Sam: "there is also some space above main title
+          to be won back."
+
+          The stack above a headline was the azulejo band (24), the progress bar's own
+          pt-3 (12) and this pt-6 (24) — sixty pixels before anything is read, on a screen
+          whose CTA is being clipped at the other end. The band is the product's mark and
+          stays; the bar is only there while the Legend is shut. This one is the padding
+          that exists purely to separate content from chrome, and half of it does that.
+
+          pb-6 stays: that one is the gap between the last words and the dock's own rule,
+          and shortening it puts a button against a sentence.
+        */}
         <div
           ref={arriving}
-          className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-5 pb-6 pt-6"
+          className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-5 pb-6 pt-3"
         >
           {children}
         </div>
@@ -2778,17 +2805,34 @@ function RootBeatView({
               screen and the unhighlighted half still has to be read as language, not as a
               caption. On the extract beat the balance is the other way round.
             */}
+            {/*
+              THE ICONS BESIDE THE LINE, NOT UNDER IT.
+
+              Sam: "surely if we put audio and copy icons next to learning item that would
+              buy us some space." They were a row of their own below the sentence — a full
+              tap-target's height of nothing but two buttons — on the screen whose CTA is
+              being clipped by the nav.
+
+              Floated into the text rather than set beside it in a flex row, because the
+              line wraps to two or three lines and a flex row would centre the icons
+              against the whole block, leaving a hole beside the short last line. `float`
+              puts them on the first line and lets the words run under them, which is what
+              the space was for.
+
+              Read order is unchanged: they follow the sentence in the DOM, so a screen
+              reader still meets the words before the controls.
+            */}
             <p className="pt text-balance text-3xl text-accent">
+              <span className="float-right ml-3 flex items-center gap-1">
+                <AudioButton slug={slugFor(root.target)} text={root.target} />
+                <CopyButton text={root.target} />
+              </span>
               <Highlighted
                 line={root.target}
                 pieces={root.extracts.map((e) => e.target)}
                 dim="text-fg/70"
               />
             </p>
-            <div>
-              <AudioButton slug={slugFor(root.target)} text={root.target} />
-              <CopyButton text={root.target} />
-            </div>
           </div>
         </div>
         {/*
@@ -3595,17 +3639,6 @@ function AskAge({
             {tooYoung ? 'KEEP GOING' : 'THAT IS ME'}
           </button>
         ) : null}
-        <button
-          type="button"
-          data-testid="ask-age-skip"
-          onClick={() => {
-            setProfile('age', null)
-            onDone()
-          }}
-          className="tap-target text-xs text-muted underline"
-        >
-          Not now
-        </button>
       </div>
     </div>
   )
@@ -3708,17 +3741,6 @@ function AskEmail({
             KEEP IT SAFE
           </button>
         ) : null}
-        <button
-          type="button"
-          data-testid="ask-email-skip"
-          onClick={() => {
-            setProfile('email', null)
-            onDone()
-          }}
-          className="tap-target text-xs text-muted underline"
-        >
-          Not now
-        </button>
       </div>
     </div>
   )
@@ -3878,18 +3900,6 @@ function AskInto({
             THAT IS ME
           </button>
         ) : null}
-        <button
-          type="button"
-          data-testid="ask-into-skip"
-          onClick={() => {
-            setInto([])
-            setProfile('goal', learner.profile?.goal ?? null)
-            onDone()
-          }}
-          className="tap-target text-xs text-muted underline"
-        >
-          Not now
-        </button>
       </div>
     </div>
   )
@@ -4046,17 +4056,6 @@ function AskOrigin({
             THAT IS ME
           </button>
         ) : null}
-        <button
-          type="button"
-          data-testid="ask-origin-skip"
-          onClick={() => {
-            setProfile('nationality', null)
-            onDone()
-          }}
-          className="tap-target text-xs text-muted underline"
-        >
-          Not now
-        </button>
       </div>
     </div>
   )
