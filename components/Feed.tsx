@@ -465,7 +465,73 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       learner.finished_cards ?? [],
     )
 
-    const withExplainers: FeedCard[] = []
+    /*
+      THE CARD THAT EXPLAINS THE CLUB GOES FIRST, ON THE FIRST VISIT ONLY.
+
+      Sam: "it currently opens with live content, not introduction content... we have to
+      tell them how the Club works." It did. The beat below puts explainers every ninth
+      card, on the argument that "the room speaks before the signage does" — which is
+      right for somebody who has been in here for a month and exactly wrong for somebody
+      who has just walked through the door. A new member met eight rooms before anything
+      told them what a room was, or that swiping left does not lose it.
+
+      `actedAtEntry` is already the signal and is already latched: false for somebody who
+      has never saved or sent away a card, true for ever after. So this is the first visit
+      and no other, which is the one visit the instructions are for.
+
+      Only how_the_club_works leads. The others stay on the ninth beat — the translator
+      explainer is a tool somebody may never reach for, and hoisting all of them would put
+      three pieces of signage in front of the room, which is what the beat was written to
+      prevent.
+    */
+    /*
+      READ FROM THE RECORD, NOT FROM actedAtEntry.
+
+      actedAtEntry starts false and is set by an effect, which is right for its own job —
+      it latches the value at entry so the Club explainer does not vanish mid-scroll on
+      somebody's first reject. It is wrong here: the deck is built on the first render,
+      when the flag is still false for everybody, so leading on it would greet a member of
+      six months with the signage. feed-check caught exactly that.
+
+      The record itself has no such lag. Somebody who has saved or sent away a single card
+      has been here before, and that is the whole question this asks.
+    */
+    /*
+      NOBODY HAS DONE ANYTHING IN HERE YET.
+
+      Three tests were tried before this one and each failed on a real learner:
+
+        actedAtEntry     starts false and is set by an effect, so the deck — built on the
+                         first render — reads false for everybody, member of six months
+                         included. feed-check caught it.
+        saved/rejected   a member can read the Club for a week without swiping anything,
+                         which is feed-check's own fixture: welcomed weeks ago, greeted
+                         with the signage.
+        club_welcomed_at written on the way OUT of the ceremony, which is the screen
+                         immediately before this feed — so it is already set by the time
+                         the room renders, and the one visit it is meant to catch is the
+                         one visit it misses.
+
+      `club_welcomed_at` is the right one, read as a TIME rather than as a flag. It is
+      written on the way out of the ceremony — the screen immediately before this feed —
+      so it is already set when the room first renders, and asking "is it set" therefore
+      misses the very visit it exists to catch.
+
+      Asking how long ago separates the two states nothing else can: welcomed a moment
+      ago is somebody walking in now; welcomed weeks ago is feed-check's own fixture, a
+      member who has been in and swiped nothing, and they get the room rather than the
+      signage. A minute is generous for "the screen before this one" and far short of any
+      return visit.
+    */
+    const welcomedAt = learner.club_welcomed_at ? Date.parse(learner.club_welcomed_at) : 0
+    const firstVisit =
+      welcomedAt > 0 && Number.isFinite(welcomedAt) && Date.now() - welcomedAt < 60_000
+    const leadExplainer = firstVisit
+      ? explainers.find((c) => c.id === 'explainer_how_the_club_works')
+      : undefined
+    const laterExplainers = leadExplainer ? explainers.filter((c) => c !== leadExplainer) : explainers
+
+    const withExplainers: FeedCard[] = leadExplainer ? [leadExplainer] : []
     const rest = [...open.slice(0, AFTER), ...legend, ...mine, ...open.slice(AFTER)]
     let e = 0
     let v = 0
@@ -496,7 +562,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         Nine, because it shares no factor with two, three, five or seven and puts the first
         one deep enough that the room speaks before the signage does.
       */
-      if (e < explainers.length && i > 0 && i % 9 === 8) withExplainers.push(explainers[e++])
+      if (e < laterExplainers.length && i > 0 && i % 9 === 8) withExplainers.push(laterExplainers[e++])
       else if (v < vibes.length && i % 3 === 2) withExplainers.push(vibes[v++])
       /*
         The sheet beat is its OWN `if`, not another `else if`.
@@ -531,7 +597,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     */
     return [
       ...withExplainers,
-      ...explainers.slice(e),
+      ...laterExplainers.slice(e),
       ...vibes.slice(v),
       ...sheets.slice(sh),
     ]
