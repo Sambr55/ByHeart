@@ -5,7 +5,10 @@ import Link from 'next/link'
 import { useLearner } from '@/engine/useLearner'
 import { SLOTS, collected, grid, type CollectedCard } from '@/content/collection'
 import { progressFor, stageFor } from '@/content/legend'
-import { PIECES } from '@/content/roots'
+import Image from 'next/image'
+import { PIECES, type CultureFamily } from '@/content/roots'
+import { vibeImage } from '@/content/vibe-images'
+import { sheetImage } from '@/content/feed'
 
 /**
  * THE GRID — five levels, nine slots each, filled by what has been finished.
@@ -119,6 +122,24 @@ export function Collection() {
           ) : null}
         </div>
       ))}
+      {/*
+        THE WAY BACK TO THE SHELF, carried over from BEEN THROUGH.
+
+        That section was removed because the grid holds the same vibes — but it carried
+        the only route from Yours to the vibe shelf, added after Sam: "cant get back to
+        vibes via any nav to continue." The shelf is deliberately not a tab, so losing
+        this link would have re-made a dead end that took a report to find.
+
+        Here for the same reason it was there: this is where somebody is looking at what
+        they have finished, which is the moment "what next" is actually being asked.
+      */}
+      <Link
+        href="/vibes"
+        data-testid="collection-more"
+        className="tap-target eyebrow inline-flex items-center text-accent underline underline-offset-4"
+      >
+        PICK ANOTHER
+      </Link>
     </section>
   )
 }
@@ -131,28 +152,77 @@ export function Collection() {
  * Sam: "completed cards that the user can revisit, practise and share."
  */
 function Filled({ card }: { card: CollectedCard }) {
-  const href =
+  /*
+    REVISION, NOT THE LESSON. Sam: "clicking on a panel should be a revision of what has
+    been learned, not the original walk through cards."
+
+    These used to point at the thing itself — /vibes?open= replays the whole sitting — and
+    that is right the first time and wrong every time after. One route for all three
+    kinds, because revising is one act whatever was collected. See /revise.
+  */
+  const href = '/revise?kind=' + card.kind + '&id=' + card.id
+
+  /*
+    THE PICTURE THE CARD ALREADY HAS. Sam: "we will need to put an image into each
+    completed panel."
+
+    Read from the same place the card itself reads it — vibeImage for a crate, sheetImage
+    for a set — rather than chosen here, because two answers to "what does this look like"
+    is how a card and its shelf come to disagree about the same thing.
+
+    A Legend frame has no photograph and should not borrow one: it is the learner's own
+    sentence, and the product's answer to that everywhere else is the accent slab. So a
+    frame panel is azulejo blue with its question on it, which also makes the three kinds
+    tellable apart at grid size without reading a word.
+  */
+  const image =
     card.kind === 'vibe'
-      ? '/vibes?open=' + card.id
-      : card.kind === 'frame'
-        ? '/legend?build=' + card.id
-        : '/profile#sheets'
+      ? vibeImage(card.id as CultureFamily)
+      : card.kind === 'sheet'
+        ? sheetImage(card.id)
+        : null
 
   return (
     <Link
       href={href}
       data-testid={'collected-' + card.kind + '-' + card.id}
-      className="tap-target flex aspect-[3/4] flex-col justify-between rounded border border-line bg-bg-elev p-3 transition hover:border-accent/50"
+      className={
+        'tap-target relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded border border-line p-3 transition hover:border-accent/50 ' +
+        (image ? 'text-white' : 'bg-accent text-accent-ink')
+      }
     >
-      {/*
-        The kind, small, because three kinds on one shelf need telling apart at a glance
-        and the label alone does not do it — "Counting to ten" and "The basics, in songs
-        you know" are a sheet and a vibe and read the same way.
-      */}
-      <span className="eyebrow text-[0.5rem] text-muted">
-        {card.kind === 'sheet' ? 'SHEET' : card.kind === 'vibe' ? 'VIBE' : 'LEGEND'}
+      {image ? (
+        <>
+          <Image
+            src={image.src}
+            alt=""
+            fill
+            sizes="33vw"
+            className="object-cover"
+            aria-hidden
+          />
+          {/*
+            The scrim, so type never sits on the photograph itself — the same construction
+            the door and the welcome use, and the reason white on an image is legible here
+            and nowhere it is not done.
+          */}
+          <span
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent"
+          />
+        </>
+      ) : null}
+      <span className="relative flex flex-col gap-1">
+        {/*
+          The kind, small, because three kinds on one shelf need telling apart and the
+          label alone does not do it — "Counting to ten" and "The basics, in songs you
+          know" are a sheet and a vibe and read the same way.
+        */}
+        <span className={'eyebrow text-[0.5rem] ' + (image ? 'text-white/75' : 'opacity-75')}>
+          {card.kind === 'sheet' ? 'SHEET' : card.kind === 'vibe' ? 'VIBE' : 'LEGEND'}
+        </span>
+        <span className="text-xs leading-tight">{card.label}</span>
       </span>
-      <span className="text-xs leading-tight text-fg">{card.label}</span>
     </Link>
   )
 }

@@ -809,6 +809,17 @@ export function explainerCards(state: {
   anywhere. Azulejo for the closed sets that feel like tiling — numbers, pronouns — and the
   calçada for directions, which is literally the surface you are being told to walk along.
 */
+/**
+ * A sheet's ground, for anything that needs to draw one.
+ *
+ * Exported because the grid draws the same sheets and must not pick its own texture —
+ * two answers to "what does this sheet look like" is how a card and its shelf come to
+ * disagree about the same thing. See components/Collection.tsx.
+ */
+export function sheetImage(id: string): { src: string; alt: string } {
+  return TEXTURE[SHEET_GROUND[id] ?? 'azulejo']
+}
+
 const SHEET_GROUND: Record<string, keyof typeof TEXTURE> = {
   numbers_1_10: 'azulejo',
   pronouns: 'azulejo',
@@ -826,7 +837,7 @@ export function sheetCards(dismissed: string[] = []): FeedCard[] {
     kind: 'sheet' as const,
     id: 'sheet_' + set.id,
     set,
-    image: TEXTURE[SHEET_GROUND[set.id] ?? 'azulejo'],
+    image: sheetImage(set.id),
   }))
 }
 

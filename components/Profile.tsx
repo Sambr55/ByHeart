@@ -54,7 +54,21 @@ import { useRestore } from '@/engine/useRestore'
  * those is a shop window and the other is the cupboard; the cupboard has the row now.
  */
 const SECTIONS: {
-  id: 'done' | 'aside' | 'cold' | 'words' | 'sheets' | 'drops' | 'idioms'
+  /*
+    'done' and 'sheets' are gone: the grid holds both.
+
+    Sam: "we also need to decide if this fully replaces the blue bars above. What can we
+    fully discard of those?" Two of the seven, and only two. BEEN THROUGH was the same 13
+    vibes and CHEAT SHEETS the same 11 sets, now shelved by the level they were finished
+    at — so keeping them would be the same fact in two places, which is the drift this
+    codebase keeps finding.
+
+    The other five stay because they are different facts rather than a different view of
+    one: YOUR WORDS is 219 pieces against 45 slots, SAID COLD is what was produced rather
+    than what was completed, PUT ASIDE is bookmarks nothing has finished, DROPS expire and
+    are deliberately not cards, and idioms are not a card kind.
+  */
+  id: 'aside' | 'cold' | 'words' | 'drops' | 'idioms'
   label: string
   note: string
   empty: string
@@ -76,29 +90,6 @@ const SECTIONS: {
   unit: (n: number) => string
   more?: { href: string; label: string }
 }[] = [
-  {
-    id: 'done',
-    label: PROFILE_COPY.done_label,
-    note: PROFILE_COPY.done_note,
-    empty: PROFILE_COPY.done_empty,
-    unit: (n) => (n === 1 ? 'vibe or room you have been through' : 'vibes and rooms you have been through'),
-    count: (t) => String(t.length),
-    /*
-      THE WAY BACK TO THE SHELF, which this screen did not have.
-
-      Three of the six sections carry a door to the room they are the front of — the proof
-      card, the library, what is on — and the one whose subject is VIBES carried none. The
-      shelf is deliberately not a tab (see 6cf244e: "a tab is for somewhere you go from
-      anywhere", and the Club carries vibes in its own feed) and the only link to it from
-      Yours was inside the EMPTY state. So a learner with work done — the only kind who
-      has this section at all — had no route back to pick another one. Sam: "cant get back
-      to vibes via any nav to continue."
-
-      Here rather than in the bar: this is where somebody is looking at what they have been
-      through, which is the moment the question "what next" is actually being asked.
-    */
-    more: { href: '/vibes', label: 'PICK ANOTHER' },
-  },
   {
     id: 'aside',
     label: PROFILE_COPY.aside_label,
@@ -145,14 +136,6 @@ const SECTIONS: {
     empty: PROFILE_COPY.idioms_empty,
     unit: (n) => (n === 1 ? 'English phrase you had the answer to' : 'English phrases you had the answer to'),
     count: (_t, l) => String((l.idioms_got ?? []).length),
-  },
-  {
-    id: 'sheets',
-    label: PROFILE_COPY.sheets_label,
-    note: PROFILE_COPY.sheets_note,
-    empty: PROFILE_COPY.sheets_empty,
-    unit: (n) => (n === 1 ? 'group you kept to check' : 'groups you kept to check'),
-    count: (t) => String(t.length),
   },
   {
     id: 'drops',
