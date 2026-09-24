@@ -64,7 +64,17 @@ export const INSIGHTS: Insight[] = [
     requires: ['anos'],
     headline: 'You have your age in Portuguese. You are not it.',
     body:
-      'English says I AM fifty-six. Portuguese says tenho cinquenta e seis anos — I HAVE fifty-six years — and it is the same verb you first met in a song about being hungry. Every English speaker says sou fifty-six exactly once, and never again after somebody points at it. You have already used it the other way round.',
+      /*
+        THE SPECIMEN AGE, so this line becomes the learner's own.
+
+        It was written with fifty-six hardcoded — a number that happened to be Sam's while
+        he was testing — so a learner of seventy-seven read a paragraph about being
+        fifty-six directly above evidence saying thirty. Two wrong ages on one card.
+
+        `trinta` is one of AUTHORED_AGES, so myAge swaps it wherever this is rendered
+        through personalise, in both languages. See myAge, and scripts/carry-check.
+      */
+      'English says I AM thirty. Portuguese says tenho trinta anos — I HAVE thirty years — and it is the same verb you first met in a song about being hungry. Every English speaker says sou thirty exactly once, and never again after somebody points at it. You have already used it the other way round.',
     evidence: [
       { pt: 'Tenho trinta anos.', en: 'I am thirty.' },
       { pt: 'Quantos anos tens?', en: 'How old are you?' },

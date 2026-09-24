@@ -23,7 +23,8 @@
  */
 import { ROOTS, PIECES } from '../content/roots'
 import { INTERESTS } from '../content/interests'
-import { personalise, AUTHORED_NAME, AUTHORED_AGES } from '../content/legend'
+import { INSIGHTS } from '../content/osmosis'
+import { personalise, myAge, myName, AUTHORED_NAME, AUTHORED_AGES } from '../content/legend'
 import { say, sayEn } from '../content/numbers'
 
 const fail: string[] = []
@@ -82,6 +83,63 @@ console.log('  ' + touched.length + ' roots carry a specimen: ' + touched.map((r
         p.extracts.some((e) => e.target === 'obrigado') && p.extracts.some((e) => e.target === 'obrigada'),
         p.extracts.map((e) => e.target).join(' '),
       )
+    }
+  }
+}
+
+/*
+  AND THE OSMOSIS INSIGHTS, which are a fourth surface showing authored specimens.
+
+  The age insight's body was written with fifty-six hardcoded — a number that happened to
+  be Sam's while he was testing — above evidence reading "Tenho trinta anos. I am thirty."
+  Two different wrong ages on one card, on a card about the learner's age.
+
+  Same test as the roots and the collisions: what somebody called Fred, aged 77, actually
+  reads. A specimen surviving anywhere on it is the fault.
+*/
+{
+  const mine = (t: string) => myAge(myName(t, 'Fred'), 77)
+  for (const insight of INSIGHTS) {
+    const lines = [
+      insight.headline,
+      insight.body,
+      ...insight.evidence.flatMap((e) => [e.pt, e.en]),
+    ].map(mine)
+    for (const line of lines) {
+      for (const specimen of AUTHORED_AGES) {
+        ok(
+          'insight ' + insight.id + ': no specimen age survives',
+          !line.includes(say(specimen)) && !new RegExp('\\b' + sayEn(specimen) + '\\b').test(line),
+          '"' + line.slice(0, 90) + '"',
+        )
+      }
+      ok(
+        'insight ' + insight.id + ': the name is the learner\'s',
+        !line.includes(AUTHORED_NAME),
+        '"' + line.slice(0, 90) + '"',
+      )
+      /*
+        AND NO OTHER AGE HARDCODED. fifty-six is not one of AUTHORED_AGES, so no swap ever
+        reached it and no check was looking for it — which is exactly how it survived in
+        the body of a card about the learner's own age.
+
+        Every spelled age on a personalised line should now be the learner's. Anything
+        else is a number somebody typed, which is the fault.
+      */
+      if (insight.id.includes('age')) {
+        for (const other of [30, 32, 40, 50, 56, 60, 70, 80, 90]) {
+          if (other === 77) continue
+          /*
+            NOT FOLLOWED BY A HYPHEN, because "seventy" is inside "seventy-seven" and the
+            learner's own age must not trip a check looking for somebody else's.
+          */
+          ok(
+            'insight ' + insight.id + ': "' + sayEn(other) + '" is not hardcoded',
+            !new RegExp('\\b' + sayEn(other) + '\\b(?!-)').test(line),
+            '"' + line.slice(0, 90) + '"',
+          )
+        }
+      }
     }
   }
 }

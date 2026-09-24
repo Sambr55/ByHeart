@@ -3237,9 +3237,35 @@ function Osmosis() {
   // A question is coming too. Three insights plus a question is more between-sections
   // than section, so the interstitial gives way rather than the question.
   const room = nextProfileQuestion() ? 2 : 3
-  const insights = useMemo(
+  /*
+    IN THIS LEARNER'S OWN FACTS, like every other screen that shows a specimen.
+
+    Sam, on the age insight: the body said "I AM fifty-six" — a number hardcoded while he
+    was testing — directly above evidence reading "Tenho trinta anos. I am thirty." Two
+    different wrong ages on one card, and the card's whole subject is the learner's age.
+
+    The insights are authored with the same specimens the roots use — trinta for an age,
+    Ana for a name — so the same three swaps apply: myName, myAge in both languages, and
+    the form that agrees with the speaker. Applied where the list is built rather than at
+    each of the four places a field is rendered, which is the lesson personalise already
+    records: a swap applied per render site is a swap that gets missed.
+  */
+  const rawInsights = useMemo(
     () => insightsFor(owned, learner.osmosis_seen ?? [], room),
     [owned, learner.osmosis_seen, room],
+  )
+  const insights = useMemo(
+    () =>
+      rawInsights.map((i) => {
+        const mine = (t: string) => myAge(myName(t, learner.display_name), learner.profile?.age)
+        return {
+          ...i,
+          headline: mine(i.headline),
+          body: mine(i.body),
+          evidence: i.evidence.map((e) => ({ ...e, pt: mine(e.pt), en: mine(e.en) })),
+        }
+      }),
+    [rawInsights, learner.display_name, learner.profile?.age],
   )
 
   /*
