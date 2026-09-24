@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, myAge, myName, personalise, framesJustOpened, legendStatus, metIn,
+import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, askFor, cardFor, frameApplies, frameForPurpose, myAge, myName, personalise, framesJustOpened, legendStatus, metIn,
   provenanceOf, fillFrame, fillEnglish, type LegendFrame, worthSaving } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
@@ -2674,16 +2674,35 @@ function RootBeatView({
     rather than assumed — `origin` writes a nationality and a town, `into` writes an array
     — because assuming would strand a learner on either.
   */
-  const askField = raw.asks
+  const asksHere = useMemo(
+    () => (Array.isArray(raw.asks) ? raw.asks : raw.asks ? [raw.asks] : []),
+    [raw.asks],
+  )
   const pr = meLearner.profile
-  const askSettled =
-    Boolean(askField) &&
-    ((pr?.skipped ?? []).includes(askField as string) ||
-      (askField === 'origin'
-        ? Boolean(pr?.nationality) && Boolean(pr?.from_place?.trim())
-        : askField === 'into'
-          ? Boolean(pr?.into?.length)
-          : Boolean((pr as Record<string, unknown> | null | undefined)?.[askField as string])))
+  /*
+    IS ONE OF THIS ROOT'S QUESTIONS ANSWERED, wherever that answer lives?
+
+    The profile facts are on the profile. The card questions are on the LEGEND — they are
+    frames, answered by answerLegendFromLesson — so asking the profile for `married` would
+    say no for ever and the beat would never offer its CTA.
+
+    The field each one writes is named rather than assumed, because two of them do not
+    match their own name: `origin` writes a nationality and a town, and `into` writes an
+    array.
+  */
+  const CARD_ASKS = ['married', 'work', 'why_here', 'staying_for', 'first_time', 'moved_when', 'portuguese']
+  const oneSettled = (which: string) => {
+    if ((pr?.skipped ?? []).includes(which)) return true
+    if (CARD_ASKS.includes(which)) {
+      const a = (meLearner.legend ?? []).find((x) => x.frame_id === which)
+      return Boolean(a && Object.keys(a.values ?? {}).length > 0)
+    }
+    if (which === 'origin') return Boolean(pr?.nationality) && Boolean(pr?.from_place?.trim())
+    if (which === 'into') return Boolean(pr?.into?.length)
+    return Boolean((pr as Record<string, unknown> | null | undefined)?.[which])
+  }
+  /* Settled means EVERY question this root asks, not the first of them. */
+  const askSettled = asksHere.length > 0 && asksHere.every(oneSettled)
 
   const root = useMemo(
     () => personalise(raw, meLearner),
@@ -2872,7 +2891,22 @@ function RootBeatView({
           its job for anybody who wants the why; it simply is not load-bearing for the
           question any more.
         */}
-        {root.asks ? <AskInLesson which={root.asks} onAnswered={next} /> : null}
+        {/*
+          EVERY QUESTION THIS ROOT ASKS, in the order it asks them.
+
+          tb_married_work teaches casado and trabalho in one line and they are two things
+          a stranger asks separately — Sam: "married and work are separate" — so `asks`
+          takes a list. The beat advances when the LAST one is answered, which is what
+          `next` on the final ask means: a root asking two questions is not finished after
+          one of them.
+        */}
+        {asksHere.map((which, i) => (
+          <AskInLesson
+            key={which}
+            which={which}
+            onAnswered={i === asksHere.length - 1 ? next : () => {}}
+          />
+        ))}
         <div className="flex flex-col gap-3">
           {/* The bridge is mandatory: the learner must be able to trace root -> Portuguese
               before anything is pulled out of it (§10). */}
@@ -3491,6 +3525,85 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
   const settle = () => {
     setOpen(false)
     onAnswered()
+  }
+
+  /*
+    A LEGEND QUESTION, ASKED BY THE LESSON THAT TEACHES ITS WORDS.
+
+    Sam: "the legend build being a learning exercise which is populated with any
+    information we have already collated… it needs to become a lesson in practising the
+    legend and completing any missing questions."
+
+    Five of the seven card questions were asked COLD on the Legend — a form, at the end —
+    while the words for every one of them are taught by a lesson on the road. So the
+    lesson that teaches `casado` asks whether you are, and the answer goes onto the card.
+    What is left on the Legend is what nobody has asked yet.
+
+    The chips are the FRAME'S OWN options, read from LEGEND_FRAMES rather than retyped, so
+    the question here and the question there cannot offer different answers — and the
+    gendered ones agree with the speaker, which is what askFor and the `f` forms are for.
+  */
+  const CARD_ASKS = ['married', 'work', 'why_here', 'staying_for', 'first_time', 'moved_when', 'portuguese']
+  if (CARD_ASKS.includes(which)) {
+    const frame = LEGEND_FRAMES.find((f) => f.id === which)
+    const slot = frame?.slots[0]
+    if (!frame || !slot?.options) return null
+    /*
+      AND ONLY IF IT IS ON THIS LEARNER'S CARD.
+
+      tb_1234 is on the visiting road AND the moving one, and it carries `moved_when` —
+      which is a moving question. Without this a visitor would be asked how long they had
+      been here, under a lesson about counting, for a card that has no such question on
+      it. The three cards differ in exactly one frame and this is it.
+
+      frameForPurpose is the same test cardFor uses, so the question asked here and the
+      card it writes to cannot disagree about whose it is.
+    */
+    if (!frameForPurpose(frame, learner.purpose ?? null)) return null
+    const gender = profile?.gender ?? null
+    const answer = (learner.legend ?? []).find((a) => a.frame_id === which)
+    const said = answer && Object.keys(answer.values ?? {}).length > 0 ? answer.values[slot.key] : null
+    if (said && !open) {
+      return <AskSettled line={fillFrame(frame, answer?.values ?? {}, gender)} onChange={() => setOpen(true)} />
+    }
+    return (
+      <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+        <p className="eyebrow text-accent">AND YOU</p>
+        <p className="pt text-base text-accent">{askFor(frame, gender)}</p>
+        <p className="text-sm leading-relaxed text-muted">{frame.ask_en}</p>
+        <div className="flex flex-wrap gap-1">
+          {slot.options.map((o) => {
+            /* The ending that agrees with the speaker, where the option has two. */
+            const word = gender === 'f' && o.f ? o.f : o.value
+            return (
+              <button
+                key={o.value}
+                type="button"
+                data-testid={'ask-' + which + '-' + o.value}
+                onClick={() => {
+                  answerLegendFromLesson(which, { [slot.key]: word })
+                  track('profile_answer', { question: which, answer: word, where: 'lesson' })
+                  settle()
+                }}
+                className={
+                  'tap-target rounded border px-3 py-3 text-left transition ' +
+                  (said === word
+                    ? 'border-accent bg-accent text-accent-ink'
+                    : 'border-line hover:border-accent/50')
+                }
+              >
+                <span className="pt text-sm">{word}</span>
+                {o.en ? (
+                  <span className={'ml-2 text-xs ' + (said === word ? 'opacity-80' : 'text-muted')}>
+                    {o.en}
+                  </span>
+                ) : null}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    )
   }
 
   if (which === 'gender') {

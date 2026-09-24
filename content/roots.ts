@@ -89,7 +89,32 @@ export type RightsStatus = 'short-quote-review-required' | 'title-reference' | '
  * field the product already reads, and a root that could ask anything would become a place
  * to put questions nobody knows what to do with. See `asks` on Root.
  */
-export type ProfileAsk = 'gender' | 'origin' | 'age' | 'email' | 'into'
+/*
+  WHAT A ROOT CAN ASK, which is now the Legend's own questions as well.
+
+  The first five are profile facts — gender decides what goes in somebody's mouth, origin
+  and age personalise every line that carries them. The rest are the card's: five of the
+  seven were being asked COLD on the Legend, as a form, while the words for them were
+  taught by a lesson the learner had already sat through. Sam: "the legend build being a
+  learning exercise which is populated with any information we have already collated… it
+  needs to become a lesson in practising the legend and completing any missing questions."
+
+  So the lesson that teaches `casado` is the lesson that asks whether you are, and the
+  answer goes straight onto the card. What is left on the Legend is what nobody asked.
+*/
+export type ProfileAsk =
+  | 'gender'
+  | 'origin'
+  | 'age'
+  | 'email'
+  | 'into'
+  | 'married'
+  | 'work'
+  | 'why_here'
+  | 'staying_for'
+  | 'first_time'
+  | 'moved_when'
+  | 'portuguese'
 
 export type QaStatus = 'pending-native-review' | 'reviewed'
 
@@ -569,7 +594,13 @@ export interface Root {
    * it does not teach is a form with a lesson stapled to it, which is the thing this
    * replaces.
    */
-  asks?: ProfileAsk
+  /*
+    One or more. A root asking two questions is not a form with a lesson stapled to it so
+    long as the lesson teaches both — tb_married_work teaches `casado` and `trabalho` in
+    one line, and they are two different things a stranger asks. Sam: "married and work
+    are separate."
+  */
+  asks?: ProfileAsk | ProfileAsk[]
   /** Why this Portuguese is a natural expression of the root. Mandatory (§10). */
   semantic_bridge: string
   /** How it feels in use: direct, dry, warm, apologetic… (§07.2) */
@@ -4602,6 +4633,7 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     root_id: 'tb_1234',
+    asks: 'moved_when',
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
@@ -4637,6 +4669,7 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     root_id: 'tb_yes_no',
+    asks: 'first_time',
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'quote',
@@ -4746,6 +4779,7 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     root_id: 'tb_patience',
+    asks: 'portuguese',
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'other',
@@ -4780,6 +4814,7 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     root_id: 'tb_married_work',
+    asks: ['married', 'work'],
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'other',
@@ -4952,6 +4987,7 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     root_id: 'tb_eight_days',
+    asks: 'staying_for',
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'title',
@@ -5372,6 +5408,7 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     root_id: 'tb_why',
+    asks: 'why_here',
     culture_family: 'the_basics',
     /*
       RUNG 1, NOT 2, AND THE ACCENT IS NOT THE DIFFICULTY.
