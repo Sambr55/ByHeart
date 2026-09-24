@@ -540,7 +540,35 @@ export function personalise<T extends {
               }
               return e
             },
-          ).sort((a, b) => {
+          )
+          /*
+            AND THE OTHER ENDING IS NOT TAUGHT AS A SECOND PIECE.
+
+            Sam: "the second part of the obrigado session still flips to obrigado if
+            obrigada selected. In fact EVERYTHING after obrigado or obrigada selection
+            should be gender specific."
+
+            That is the rule, and it is simpler than what was here. tb_thank_you teaches
+            both forms as two pieces, so a woman finished her own piece and walked into a
+            second one titled obrigado with two masculine branches under it. Three
+            attempts tried to keep both pieces honest — reordering them, retagging the
+            branches, exempting the contrast line — and every one left the other form
+            somewhere in her session.
+
+            The pair is still TAUGHT: the line, the bridge and the AND YOU question are
+            all about the difference, and the bridge names both words. What goes is the
+            second drill, which is the product asking her to practise a word she will
+            never say.
+
+            Dropped only once she has said which is hers. A learner who has not is shown
+            both, exactly as authored.
+          */
+          .filter((e) =>
+            (g === 'm' || g === 'f') && (e.id === 'obrigado' || e.id === 'obrigada')
+              ? e.id === (g === 'f' ? 'obrigada' : 'obrigado')
+              : true,
+          )
+          .sort((a, b) => {
             /*
               THE LEARNER'S OWN FORM FIRST, where a root teaches a gendered pair.
 
@@ -604,26 +632,8 @@ export function personalise<T extends {
         the learner speaking — and everything else bends. The root still teaches both, in
         the learner's own order, with each form keeping a line to show.
       */
-      /*
-        HER LINES BEND; THE ONE SHOWING THE CONTRAST DOES NOT.
-
-        tb_thank_you teaches obrigado and obrigada as two pieces, and each piece screen
-        shows the branches tagged to it. Bending all three made every line hers, so the
-        other piece had none and the screen read "0 things you can say with it." Leaving
-        all three alone put "Muito obrigado" back in front of a woman, which is where this
-        started.
-
-        The branch that DEMONSTRATES the other ending is the example — it exists to show
-        the contrast the bridge describes — so it stays as authored. Every other branch is
-        the learner speaking and bends. Each form keeps a line, and nothing puts the wrong
-        ending in her mouth.
-
-        Everywhere outside this pair, `showsOtherForm` is false and this is exactly the
-        bend it has always been.
-      */
-      ...(showsOtherForm(b)
-        ? { target: myName(b.target, me.display_name), en: b.en }
-        : { target: mine(b.target), en: mine(b.en) }),
+      target: mine(b.target),
+      en: mine(b.en),
       ...(b.formal ? { formal: mine(b.formal) } : {}),
     })),
     transfer_prompt: {

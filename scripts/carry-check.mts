@@ -119,9 +119,20 @@ console.log('  ' + touched.length + ' roots carry a specimen: ' + touched.map((r
         /obrigado/i.test(p.semantic_bridge) && /obrigada/i.test(p.semantic_bridge),
         p.semantic_bridge.slice(0, 80),
       )
+      /*
+        ONLY THEIR OWN FORM IS DRILLED, which is the rule Sam set after three attempts to
+        keep both: "EVERYTHING after obrigado or obrigada selection should be gender
+        specific."
+
+        This used to assert that both forms are banked, and that assertion is what kept
+        the other ending in her session — a second piece screen titled obrigado with two
+        masculine branches under it. The pair is still TAUGHT: the line, the bridge and
+        the question are all about the difference, and the bridge is checked above for
+        naming both words. What is no longer drilled is a word she will never say.
+      */
       ok(
-        'gender ' + gender + ': both forms are still banked',
-        p.extracts.some((e) => e.target === 'obrigado') && p.extracts.some((e) => e.target === 'obrigada'),
+        'gender ' + gender + ': only their own form is drilled',
+        p.extracts.every((e) => e.target !== (gender === 'f' ? 'obrigado' : 'obrigada')),
         p.extracts.map((e) => e.target).join(' '),
       )
     }

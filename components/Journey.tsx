@@ -109,7 +109,7 @@ import { chapterById } from '@/content/chapters'
 import { TOO_YOUNG } from '@/content/consent'
 import { INTERESTS, genresFromInterests, interestById } from '@/content/interests'
 import { say, wordsIn } from '@/content/numbers'
-import { roadProgress } from '@/content/road'
+import { WARM_UP, roadProgress } from '@/content/road'
 import type { ProfileAsk } from '@/content/roots'
 import { buzz, nope } from '@/engine/tap'
 import { useLearner } from '@/engine/useLearner'
@@ -4918,8 +4918,25 @@ function SectionComplete() {
         fold"; this is the half of that which was a bug rather than a length.
       */}
       <div className="flex flex-1 flex-col">
+        {/*
+          THE WARM-UP SAYS WHAT IT WAS. Sam: "change top text to warm-up session done."
+
+          A generic A SESSION DONE at the end of the first thing anybody plays tells them
+          nothing about where they are — the warm-up is a named step on the road, and
+          naming it is the difference between "a session" and "the one you were asked to
+          do first".
+
+          Only while it IS the warm-up, which is the first road step and nothing else:
+          somebody who comes back to Top Gun later has finished an ordinary vibe and the
+          screen should say so. `road.done === 1` is that test — the warm-up is walked and
+          no basics step is, which is true exactly once.
+        */}
         <p className="eyebrow text-accent">
-          {vibeFinished && family ? family.title + ' — DONE' : 'A SESSION DONE'}
+          {road.warmedUp && road.done === 1 && state.family && WARM_UP.includes(state.family)
+            ? 'WARM-UP SESSION DONE'
+            : vibeFinished && family
+              ? family.title + ' — DONE'
+              : 'A SESSION DONE'}
         </p>
         {/*
           The capability sentence is not here any more.
