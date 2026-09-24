@@ -1337,13 +1337,22 @@ function BuildCard({
                 ) : slot.kind === 'pick' ? (
                   <div className="flex flex-wrap items-start gap-1">
                     {/*
-                      Both endings when the profile question was skipped.
+                      Both endings while the gender is not yet known.
 
-                      A gendered adjective has to agree with the speaker, and DUB asks for
-                      gender but lets people decline — so guessing masculine would put the
-                      wrong word in somebody's mouth every time they said it. Where it is
-                      known, one chip per option in the right ending; where it is not,
-                      both, and the learner picks the word they would actually say.
+                      A gendered adjective has to agree with the speaker, so guessing
+                      masculine would put the wrong word in somebody's mouth every time
+                      they said it. Where it is known, one chip per option in the right
+                      ending; where it is not, both, and the learner picks the word they
+                      would actually say.
+
+                      IT IS NO LONGER SKIPPABLE, and this branch is still load-bearing.
+                      "Show me both, every time" is gone — it promised something only this
+                      one screen delivered, while every other surface fell back to the
+                      masculine, which is the exact harm it claimed to prevent. But the
+                      answer is collected at step 3 of the road, so the first two steps run
+                      without it, and a record written before the skip was removed can
+                      still carry a null. Both are real learners, and neither should be
+                      handed a word that does not agree with them.
                     */}
                     {slot.options?.flatMap((o) => {
                       /*

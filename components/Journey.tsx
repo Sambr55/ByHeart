@@ -2666,6 +2666,30 @@ function RootBeatView({
     Keyed off the first interest rather than the array, because personalise only reads
     `into[0]` and a fresh array identity on every render would rebuild the root constantly.
   */
+  /*
+    HAS THE QUESTION THIS ROOT ASKS BEEN ANSWERED?
+
+    A root that asks something holds the beat until it has the answer — see the note on
+    the CTA below. Reads the profile rather than this screen's own state, so somebody who
+    answered on a previous visit is not asked to do it again, and `skipped` counts as
+    answered for records written before the skips were removed.
+  */
+  /*
+    The field each ask actually writes, which is not always its own name: `origin` writes
+    a nationality and a town, and `into` writes an array. Named here rather than assumed,
+    because assuming would have let both of those through unanswered.
+  */
+  const askField = raw.asks
+  const p = meLearner.profile
+  const answeredAsk =
+    !askField ||
+    (p?.skipped ?? []).includes(askField) ||
+    (askField === 'origin'
+      ? Boolean(p?.nationality)
+      : askField === 'into'
+        ? Boolean(p?.into?.length)
+        : Boolean((p as Record<string, unknown> | null | undefined)?.[askField]))
+
   const root = useMemo(
     () => personalise(raw, meLearner),
     [raw, meLearner.display_name, meLearner.profile?.age, meLearner.profile?.into?.[0]],
@@ -2869,7 +2893,20 @@ function RootBeatView({
             <p className="text-sm leading-relaxed text-muted">{root.subtext}</p>
           </div>
         </div>
-        <Cta label="TAKE THE USEFUL BIT" onClick={next} />
+        {/*
+          AND IT WAITS FOR THE ANSWER, now that the answer cannot be skipped.
+
+          The asking roots collect gender, origin and age, and each of those decides what
+          the product puts in the learner's mouth from that screen onwards. The skips are
+          gone — Sam: "make this and all other legend choice selectors compulsory" — but
+          removing a skip means nothing while the main CTA walks past the question
+          regardless, which is what it did: the block sat above an enabled button.
+
+          Disabled rather than hidden, so the screen still shows where it is going. A
+          learner who has already answered, in this session or a previous one, sees it
+          enabled as before — `answered` reads the profile, not this render.
+        */}
+        <Cta label="TAKE THE USEFUL BIT" onClick={next} disabled={!answeredAsk} />
       </Shell>
     )
   }
@@ -3474,17 +3511,6 @@ function AskInLesson({ which }: { which: ProfileAsk }) {
             </button>
           ))}
         </div>
-        <button
-          type="button"
-          data-testid="ask-gender-skip"
-          onClick={() => {
-            setProfile('gender', null)
-            setOpen(false)
-          }}
-          className="tap-target self-start text-xs text-muted underline"
-        >
-          Show me both, every time
-        </button>
       </div>
     )
   }
