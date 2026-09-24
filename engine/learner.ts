@@ -18,6 +18,7 @@ import { BLOCK_ORDER, TARGETS } from '@/content/targets'
  * graph mints pieces from content, so this is deliberately open.
  */
 import { DEFAULT_PAIR, pairId, type Pair } from '@/content/pairs'
+import { progressFor, stageFor } from '@/content/legend'
 import { mergeLearner, mergeOwner } from '@/lib/merge'
 import { LEGEND_FRAMES, fillEnglish, fillFrame } from '@/content/legend'
 import { currentPair } from './pair'
@@ -455,6 +456,20 @@ export interface LearnerState {
    * A set, not a count. Finishing Bond twice is one section finished, and a number that
    * can be inflated by repetition is the beginning of a streak.
    */
+  /**
+   * WHICH LEVEL EACH COLLECTED CARD WAS COMPLETED AT.
+   *
+   * Sam's grid: five levels, each with nine slots, filled by the cheat sheets, vibes and
+   * Legend cards somebody has finished. A card belongs to the level they were at WHEN
+   * they finished it — see content/collection.ts for why that rather than deriving it
+   * from the content's own rung, which is a different axis entirely.
+   *
+   * Keyed 'kind:id' — 'sheet:weekdays', 'vibe:top_gun', 'frame:origin' — so the three
+   * kinds cannot collide on a shared name, and written once: a card does not move levels
+   * later because the learner kept going, which is exactly what any derived answer would
+   * do to a shelf somebody has already looked at.
+   */
+  card_levels: Record<string, string>
   sections_completed: string[]
   /**
    * How many sittings this learner has done, in total, across every vibe.
@@ -641,6 +656,7 @@ export function emptyLearner(): LearnerState {
     sheet_got: [],
     set_up_at: null,
     switch_seen_at: null,
+    card_levels: {},
     sections_completed: [],
     sittings: 0,
     club_welcomed_at: null,
@@ -822,6 +838,8 @@ export function loadLearner(): LearnerState {
           */
           user_id: typeof parsed.user_id === 'string' && parsed.user_id ? parsed.user_id : null,
           switch_seen_at: parsed.switch_seen_at ?? null,
+          /* Empty for a record written before the grid existed — see collected(). */
+          card_levels: (parsed.card_levels as Record<string, string>) ?? {},
           sections_completed: arr(parsed.sections_completed, []),
           /*
             Back-filled from sections_completed for anybody who has one and no count.
@@ -1738,6 +1756,15 @@ export function answerLegend(frameId: string, values: Record<string, string>) {
         at: new Date().toISOString(),
       },
     ]
+    /*
+      And the shelf it lands on, but only for an ANSWER.
+
+      answerLegend is also how a card is cleared — Legend.tsx calls it with {} — and a
+      cleared card is not a collected one. Stamping on the write regardless would put an
+      empty question on somebody's grid and leave it there, since the stamp is written
+      once. See content/collection.ts, which counts a frame as collected on the same test.
+    */
+    if (Object.keys(filled).length) stampLevel(s, 'frame', frameId, levelNow(s))
   })
 }
 
@@ -1829,10 +1856,68 @@ export function rememberFinishedCard(id: string) {
  * For the members no root teaches, which the inventory has no key for — see `sheet_got`.
  * Append-only and de-duplicated, like every other record of something somebody did.
  */
-export function rememberSheetGot(member: string) {
+export function rememberSheetGot(member: string, sheetId?: string) {
   update((s) => {
     if (!s.sheet_got.includes(member)) s.sheet_got = [...s.sheet_got, member]
+    /*
+      And the shelf it lands on. The sheet counts as collected at the level the learner
+      was at when they kept it — see content/collection.ts — and the level is read from
+      this same record rather than passed in, so it cannot be stale.
+    */
+    if (sheetId) stampLevel(s, 'sheet', sheetId, levelNow(s))
   })
+}
+
+/**
+ * Stamp a collected card with the level the learner is at right now.
+ *
+ * Called by whatever marks the thing complete — see content/collection.ts. Written ONCE:
+ * a card does not move between levels later because the learner kept going, and the
+ * second call for the same card is the learner revisiting it rather than collecting it
+ * again.
+ */
+export function rememberCardLevel(kind: 'sheet' | 'vibe' | 'frame', id: string, level: string) {
+  update((s) => stampLevel(s, kind, id, level))
+}
+
+/**
+ * The same stamp, applied INSIDE another update rather than as a second one.
+ *
+ * A card's level is recorded at the moment it is completed, and the completion is already
+ * a write — so doing it in the same transaction means the two cannot come apart, and a
+ * caller cannot mark something finished and forget to say where. The three writers below
+ * each call this; nothing else needs to know the grid exists.
+ *
+ * Written once. A second call for the same card is the learner revisiting it, not
+ * collecting it again, and moving it would shuffle a shelf they have already looked at.
+ */
+function stampLevel(
+  s: LearnerState,
+  kind: 'sheet' | 'vibe' | 'frame',
+  id: string,
+  level: string,
+) {
+  const key = kind + ':' + id
+  if (s.card_levels[key]) return
+  s.card_levels = { ...s.card_levels, [key]: level }
+}
+
+/**
+ * The level this record is at, computed from the record itself.
+ *
+ * Read here rather than passed in, so a caller marking something complete does not have
+ * to know how a level is worked out — and cannot pass a stale one.
+ */
+function levelNow(s: LearnerState): string {
+  return stageFor(
+    progressFor({
+      words: Object.keys(s.inventory ?? {}).length,
+      through: (s.sections_completed ?? []).length,
+      legend: (s.legend ?? []).filter((a) => Object.keys(a.values ?? {}).length).length,
+      sheets: (s.sheet_got ?? []).length,
+      idioms: (s.idioms_got ?? []).length,
+    }).score,
+  ).id
 }
 
 /**
@@ -1931,6 +2016,8 @@ export function rememberSection(family: string) {
   update((s) => {
     if (!s.sections_completed.includes(family)) {
       s.sections_completed = [...s.sections_completed, family]
+      /* The shelf it lands on — see content/collection.ts. */
+      stampLevel(s, 'vibe', family, levelNow(s))
     }
     /*
       AND THE SITTING ITSELF, counted separately, because the two are not the same fact.

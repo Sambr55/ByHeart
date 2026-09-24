@@ -4121,7 +4121,7 @@ function Sheet({ card, onDone }: {
                       into the inventory, which would claim the product had taught a word
                       it has never once shown anybody.
                     */
-                    rememberSheetGot(member)
+                    rememberSheetGot(member, card.set.id)
                   }
                   setJustGot((g) => (g.includes(member) ? g : [...g, member]))
                 }

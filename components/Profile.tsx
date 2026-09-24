@@ -7,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '@/components/Feed'
 import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { Collection } from '@/components/Collection'
 import { Friends } from '@/components/Friends'
 import { Wordmark } from '@/components/Wordmark'
 import { askedCards, cardById, cardFace, derivedCards, dropsFor, roomsFor, type FeedCard } from '@/content/feed'
@@ -686,6 +687,17 @@ export function Profile() {
               />
             ))}
           </div>
+          {/*
+            THE GRID, ABOVE THE FRIEND AND BELOW THE SECTIONS.
+
+            Sam: "the idea is to organise their memory and learning." The sections above
+            are the lists — every word, every sheet, every night — and the grid is what
+            those lists add up to: five levels, nine slots, the cards somebody has
+            actually finished. It sits after them because it is the summary of them, and
+            before Friends because a collection is a thing you have and showing somebody
+            is what you do with it.
+          */}
+          <Collection />
           {/*
             Above More rather than below it, because a friend is a thing you have and More
             is the drawer for everything else.
