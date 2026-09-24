@@ -165,6 +165,37 @@ ok(
   pwa.gap === dock.want,
   'gap ' + pwa.gap + ' where Safari gets ' + dock.gap,
 )
+
+/*
+  AND THE OTHER WAY A SCREEN CLEARS THE BAR.
+
+  Not every screen uses Dock. The set-up cards are full-bleed panes running their own
+  layout — the documented fallback in components/Dock.tsx — and they clear the bar with
+  .nav-clear instead. Every dock fix this week missed them, which is why the CTA was
+  reported behind the nav again after the dock was finally right. Sam: "it must never be
+  behind the nav."
+
+  The two paths are asserted to agree, rather than the second being left to drift 15px
+  behind the first.
+*/
+const clear = (await page.evaluate(`(function () {
+  var probe = document.createElement('div');
+  probe.className = 'nav-clear';
+  document.body.appendChild(probe);
+  var pad = parseFloat(getComputedStyle(probe).paddingBottom);
+  probe.remove();
+  var cs = getComputedStyle(document.documentElement);
+  return {
+    pad: Math.round(pad),
+    want: Math.round(parseFloat(cs.getPropertyValue('--bar-h')) + parseFloat(cs.getPropertyValue('--dock-gap'))),
+  };
+})()`)) as { pad: number; want: number }
+
+ok(
+  'nav-clear leaves the same gap as the dock',
+  clear.pad === clear.want,
+  'nav-clear reserves ' + clear.pad + ', the dock leaves ' + clear.want,
+)
 ok('the frame reaches the glass', m.frameBottom === m.glass, 'frame ends at ' + m.frameBottom)
 /*
   And the bar is the height of its icons. 67 is a measurement rather than a target, so

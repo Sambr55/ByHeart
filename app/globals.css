@@ -973,8 +973,23 @@ body {
   }
 }
 
+/*
+  CLEARING THE BAR MEANS CLEARING IT WITH ROOM TO SPARE.
+
+  Sam: "now the CTA on Safari is behind the nav. It must never be behind the nav." The
+  set-up cards do not use Dock — they are full-bleed panes running their own layout, which
+  is the documented fallback in components/Dock.tsx — so every fix made to the dock this
+  week missed them entirely. What they use is this, and this reserved exactly --bar-room:
+  the bar's own height and not a pixel more.
+
+  Exactly enough is not enough. A button whose last row ends on the same line the blue
+  begins has no gap at all, and anything that shifts the two by a pixel — a different
+  viewport, a rounded sub-pixel height, Safari's URL bar — puts it under. The dock already
+  answers this with --dock-gap; the same number belongs here, so the two ways a screen can
+  clear the bar agree rather than one being 15px more generous than the other.
+*/
 .nav-clear {
-  padding-bottom: var(--bar-room);
+  padding-bottom: calc(var(--bar-room) + var(--dock-gap));
 }
 
 /*
