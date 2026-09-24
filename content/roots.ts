@@ -4506,7 +4506,19 @@ export const THE_BASICS: Root[] = [
     root_type: 'other',
     source_label: 'The sentence everybody says first, in every language',
     source_status: 'needs-review',
-    root_display: 'My name is — and I am English.',
+    /*
+      THE HEADLINE DOES NOT ANSWER THE QUESTION THE SCREEN IS ASKING.
+
+      Sam: "rather than the title saying I am English, say: I am ... and then they make
+      their selection." It said "My name is — and I am English." above five chips offering
+      escocês, galês, irlandês and americano — so the screen announced an answer and then
+      asked for one, and a Scot read a headline about being English before they had a
+      chance to say otherwise.
+
+      The dash does the same work in both halves now: this is the shape of the sentence,
+      and the two blanks are what the learner is about to fill.
+    */
+    root_display: 'My name is — and I am —',
     credit: 'The first ten seconds of meeting anybody',
     source: 'My name is Ana. I am English.',
     target: 'Chamo-me Ana. Sou inglês.',

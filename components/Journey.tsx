@@ -2667,28 +2667,23 @@ function RootBeatView({
     `into[0]` and a fresh array identity on every render would rebuild the root constantly.
   */
   /*
-    HAS THE QUESTION THIS ROOT ASKS BEEN ANSWERED?
+    Is this root's question already answered, in this session or a previous one?
 
-    A root that asks something holds the beat until it has the answer — see the note on
-    the CTA below. Reads the profile rather than this screen's own state, so somebody who
-    answered on a previous visit is not asked to do it again, and `skipped` counts as
-    answered for records written before the skips were removed.
-  */
-  /*
-    The field each ask actually writes, which is not always its own name: `origin` writes
-    a nationality and a town, and `into` writes an array. Named here rather than assumed,
-    because assuming would have let both of those through unanswered.
+    Decides whether the beat shows a CTA: a live question advances on its own confirm, a
+    settled one shows AskSettled and needs a way on. The field each ask writes is named
+    rather than assumed — `origin` writes a nationality and a town, `into` writes an array
+    — because assuming would strand a learner on either.
   */
   const askField = raw.asks
-  const p = meLearner.profile
-  const answeredAsk =
-    !askField ||
-    (p?.skipped ?? []).includes(askField) ||
-    (askField === 'origin'
-      ? Boolean(p?.nationality)
-      : askField === 'into'
-        ? Boolean(p?.into?.length)
-        : Boolean((p as Record<string, unknown> | null | undefined)?.[askField]))
+  const pr = meLearner.profile
+  const askSettled =
+    Boolean(askField) &&
+    ((pr?.skipped ?? []).includes(askField as string) ||
+      (askField === 'origin'
+        ? Boolean(pr?.nationality) && Boolean(pr?.from_place?.trim())
+        : askField === 'into'
+          ? Boolean(pr?.into?.length)
+          : Boolean((pr as Record<string, unknown> | null | undefined)?.[askField as string])))
 
   const root = useMemo(
     () => personalise(raw, meLearner),
@@ -2877,7 +2872,7 @@ function RootBeatView({
           its job for anybody who wants the why; it simply is not load-bearing for the
           question any more.
         */}
-        {root.asks ? <AskInLesson which={root.asks} /> : null}
+        {root.asks ? <AskInLesson which={root.asks} onAnswered={next} /> : null}
         <div className="flex flex-col gap-3">
           {/* The bridge is mandatory: the learner must be able to trace root -> Portuguese
               before anything is pulled out of it (§10). */}
@@ -2906,7 +2901,28 @@ function RootBeatView({
           learner who has already answered, in this session or a previous one, sees it
           enabled as before — `answered` reads the profile, not this render.
         */}
-        <Cta label="TAKE THE USEFUL BIT" onClick={next} disabled={!answeredAsk} />
+        {/*
+          NO SECOND BUTTON ON A SCREEN THAT ASKS SOMETHING.
+
+          The question carries its own confirm and now advances the beat, so a CTA under
+          it was a second way forward that did not answer anything — and with the skips
+          removed, the one thing it could do was walk past the question. Every other beat
+          keeps it.
+        */}
+        {/*
+          THE CTA GOES ONLY WHILE THE QUESTION IS STILL OPEN.
+
+          A root that asks something carries its own confirm and that confirm now advances
+          the beat, so a second button under it was a way forward that did not answer
+          anything. But an ask whose answer already exists renders AskSettled — one line
+          and a `change` link — and with no CTA that screen had nothing to press at all.
+          A returning learner would have been stranded on the one screen they had already
+          finished.
+
+          So the button is removed where the question is live, and kept where it is
+          settled, which is the only state it was ever needed in.
+        */}
+        {root.asks && !askSettled ? null : <Cta label="TAKE THE USEFUL BIT" onClick={next} />}
       </Shell>
     )
   }
@@ -3456,10 +3472,26 @@ function Osmosis() {
  * Nothing here is required. Every question in DUB is skippable and this is no different;
  * skipping records a skip, which is what stops it coming back.
  */
-function AskInLesson({ which }: { which: ProfileAsk }) {
+/*
+  ANSWERING IS THE WAY ON, so the beat needs no second button under it.
+
+  Sam: "remove take the useful bit" — from the origin screen and from the age picker. It
+  was a second CTA under a question that already had its own confirm, so the screen
+  offered two ways forward and only one of them was the answer. With the skips gone the
+  question is the whole of the step, and confirming it should simply move.
+
+  `onAnswered` fires where each ask already reports itself finished. A learner re-opening
+  a settled answer to change it still gets the same call when they confirm again, which is
+  the behaviour they would expect: you changed it, you carry on.
+*/
+function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () => void }) {
   const learner = useLearner()
   const profile = learner.profile
   const [open, setOpen] = useState(false)
+  const settle = () => {
+    setOpen(false)
+    onAnswered()
+  }
 
   if (which === 'gender') {
     const said = profile?.gender ?? null
@@ -3495,7 +3527,7 @@ function AskInLesson({ which }: { which: ProfileAsk }) {
               onClick={() => {
                 setProfile('gender', o.id)
                 track('profile_answer', { question: 'gender', answer: o.id, where: 'lesson' })
-                setOpen(false)
+                settle()
               }}
               className={
                 'tap-target flex flex-1 flex-col gap-1 rounded border px-4 py-3 text-left transition ' +
@@ -3516,16 +3548,16 @@ function AskInLesson({ which }: { which: ProfileAsk }) {
   }
 
   if (which === 'age') {
-    return <AskAge open={open} onOpen={() => setOpen(true)} onDone={() => setOpen(false)} />
+    return <AskAge open={open} onOpen={() => setOpen(true)} onDone={settle} />
   }
   if (which === 'email') {
-    return <AskEmail open={open} onOpen={() => setOpen(true)} onDone={() => setOpen(false)} />
+    return <AskEmail open={open} onOpen={() => setOpen(true)} onDone={settle} />
   }
   if (which === 'into') {
-    return <AskInto open={open} onOpen={() => setOpen(true)} onDone={() => setOpen(false)} />
+    return <AskInto open={open} onOpen={() => setOpen(true)} onDone={settle} />
   }
 
-  return <AskOrigin open={open} onOpen={() => setOpen(true)} onDone={() => setOpen(false)} />
+  return <AskOrigin open={open} onOpen={() => setOpen(true)} onDone={settle} />
 }
 
 /**
