@@ -331,7 +331,27 @@ export function Club() {
     different question and looks like the same one. `stage` is about what the room shows to
     somebody who is in it. `inside` is about whether they are. Only one of those is a door.
   */
-  if (!inside && !fromDoor) {
+  /*
+    EXCEPT THAT THE SHOWCASE IS NOT THE VENUE.
+
+    Sam: "fix it so first time learners enter the showcase they see the intro and
+    returning users don't." Making `started` mean set_up_at was necessary and not
+    sufficient — this line runs BEFORE the stage is used, so /club without ?in=1 returned
+    NotYet for everybody and the showcase branch was unreachable from the CLUB tab at all.
+    Measured: a brand new learner tapping CLUB got the explainer, not the intro.
+
+    The door's own argument is right and stays: `inside` answers "are you a member", and
+    somebody who is not must not walk into the venue. But the nine intro cards are the
+    ARGUMENT for joining — they end at the set-up card and they contain no Club content,
+    which is what the note further up means by "the showcase is an argument, not a
+    doorway". Turning them away sends a first-timer to an explainer about a thing they
+    have not been told about yet.
+
+    So the door refuses anybody who is not inside AND has already been through the
+    sequence. A first-timer sees the intro; a returning learner without a Legend sees the
+    explainer, exactly as before.
+  */
+  if (!inside && !fromDoor && started) {
     return (
       <NotYet
         what="THE CLUB"

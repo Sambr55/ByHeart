@@ -27,8 +27,18 @@ import { ROOTS } from '../content/roots'
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
 
+/*
+  A learner who has been through set-up, because every real one has.
+
+  `set_up_at` was missing here, and once the Club stopped turning first-timers away at the
+  door that made this fixture a person who had never seen the intro — so /club correctly
+  showed them the nine-card sequence and two assertions failed for being out of date
+  rather than for being broken. There is no such learner: set-up is how anybody gets past
+  the front door, and the check for the person who has NOT done it is intro-check's.
+*/
 const base = {
   version: 1, deal_accepted_at: '2026-08-01T00:00:00.000Z', profile: { goal: 'curious' },
+  set_up_at: '2026-08-01T00:00:00.000Z',
   inventory: {}, proof: [], roots_played: [], sections_completed: [],
   legend: [], saved: [], liked: [], finished_cards: [], asked: [], evidence: [],
 }

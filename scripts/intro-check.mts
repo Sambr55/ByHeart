@@ -268,6 +268,26 @@ console.log('\nthe corridor assumes nothing it has not asked\n')
   const readsSetUp = /set_up_at/.test(decision)
   console.log((readsSetUp ? '  ✓ ' : '  ✗ ') + 'it is decided by having been through set-up')
   if (!readsSetUp) problems.push('Club.tsx no longer tests set_up_at, so the showcase may never end')
+
+  /*
+    AND THE DOOR LETS A FIRST-TIMER REACH IT.
+
+    Fixing the stage was necessary and not sufficient: the NotYet guard runs BEFORE the
+    stage is used, so while it refused everybody who was not `inside`, the showcase branch
+    was unreachable from the CLUB tab whatever the stage said. Measured at the time: a
+    brand new learner tapping CLUB got the explainer.
+
+    Both halves are asserted because either alone leaves the intro hidden. The guard must
+    still refuse — a learner who has been through set-up and has no Legend sees the
+    explainer, which is the bug the comment beside it records — so it is `started` that
+    belongs in the condition, and nothing else.
+  */
+  const guard = club.slice(club.indexOf('if (!inside && !fromDoor'), club.indexOf('if (!inside && !fromDoor') + 60)
+  const letsFirstTimersIn = /&& started\b/.test(guard)
+  console.log((letsFirstTimersIn ? '  ✓ ' : '  ✗ ') + 'a first-timer reaches the showcase through the CLUB tab')
+  if (!letsFirstTimersIn) {
+    problems.push('Club.tsx turns a first-timer away before the showcase is ever chosen')
+  }
 }
 
 await browser.close()
