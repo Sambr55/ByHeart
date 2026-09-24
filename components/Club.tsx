@@ -216,10 +216,27 @@ export function Club() {
 
     A fact this specific gets its own field. See engine/learner.ts.
   */
-  const started =
-    (learner.sections_completed ?? []).length > 0 ||
-    (learner.roots_played ?? []).length > 0 ||
-    Boolean(learner.set_up_at)
+  /*
+    AND IT IS set_up_at ALONE, which is what the note above already argued for.
+
+    Sam: "what has happened to the Club intro screens?" They had become unreachable. This
+    read `sections_completed` and `roots_played` as well — "you have played something, so
+    you have been here" — and that was true until a forced warm-up was added in front of
+    everything. From then on `roots_played` was non-empty before anybody had ever tapped
+    CLUB, so the tab always resolved to `working` and the nine-card sequence was only
+    reachable from the front door's COME IN.
+
+    The note above this one names the same failure from the other direction, when a field
+    with four writers marked people as having finished a form they had never seen: "THE
+    FIRST screen I see now after Open is Count to Ten?! What happened to the log in and
+    vibe selector??" It ends "a fact this specific gets its own field", and then two more
+    facts were ORed onto it.
+
+    So it is the one field again. The showcase ends at the set-up card — INTRO_SETUP_AFTER
+    puts it after the last intro card — so `set_up_at` means precisely "has been through
+    the sequence", which is the question being asked here and the only one.
+  */
+  const started = Boolean(learner.set_up_at)
   /*
     THE WALL IS THE LEGEND, and the teased state is what sits behind it.
 

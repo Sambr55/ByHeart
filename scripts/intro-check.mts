@@ -18,6 +18,7 @@
  * argument would pass firstrun and should not pass this.
  */
 import { chromium, type Page } from 'playwright'
+import { readFileSync } from 'node:fs'
 import { INTRO_CARDS } from '../content/intro'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -233,6 +234,40 @@ console.log('\nthe corridor assumes nothing it has not asked\n')
     named.length === 0,
     named.length ? named.join(' / ') : INTRO_CARDS.length + ' cards, none assuming an answer',
   )
+}
+
+/*
+  AND THE SEQUENCE IS STILL REACHABLE FROM THE CLUB TAB.
+
+  Sam: "what has happened to the Club intro screens?" They had become unreachable — not
+  deleted, not broken, simply never chosen. Club.tsx decides between showcase, working and
+  member, and its `started` test read roots_played as "you have been here before". A
+  forced warm-up now runs in front of everything, so that was true before anybody had
+  tapped CLUB, and the nine cards were only reachable from the front door's COME IN.
+
+  The same failure happened once before with a different field, and Club.tsx carries the
+  report: "THE FIRST screen I see now after Open is Count to Ten?! What happened to the
+  log in and vibe selector??" Twice is a pattern, so it is asserted here rather than left
+  to the next person to notice.
+
+  Read from the source, because the alternative is driving the whole warm-up in a browser
+  to reach the state. What must hold is narrow and precise: the stage decision may test
+  set_up_at, and it may not read what somebody has PLAYED — those are different questions,
+  and the second one is always true by the time the Club is first opened.
+*/
+{
+  const club = readFileSync('components/Club.tsx', 'utf8')
+  const decision = club.slice(club.indexOf('const started ='), club.indexOf('const stage: ClubStage'))
+  const readsPlay = /roots_played|sections_completed/.test(decision)
+  console.log((readsPlay ? '  ✗ ' : '  ✓ ') + 'the showcase is not skipped for having played something')
+  if (readsPlay) {
+    problems.push(
+      'Club.tsx decides the stage from what has been played, so the warm-up hides the intro',
+    )
+  }
+  const readsSetUp = /set_up_at/.test(decision)
+  console.log((readsSetUp ? '  ✓ ' : '  ✗ ') + 'it is decided by having been through set-up')
+  if (!readsSetUp) problems.push('Club.tsx no longer tests set_up_at, so the showcase may never end')
 }
 
 await browser.close()
