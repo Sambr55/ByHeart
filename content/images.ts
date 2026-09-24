@@ -243,6 +243,93 @@ export const IMAGE_BANK: Record<string, BankImage> = {
     alt: 'Empty seats in a stadium stand, rows running away in the late afternoon.',
     rights_status: 'generated',
   },
+  /*
+    THE THIRTEEN LEGEND QUESTIONS, generated 2026-09-24 for the collection grid.
+
+    Sam, with a screenshot of Basics as seven identical blue rectangles: "let's add the
+    images." Each is the MOMENT the question gets asked rather than an illustration of the
+    answer — a portrait of somebody married would be a stranger's face, and the picture
+    has to work for a learner whose answer is the opposite of whatever is in frame.
+
+    Converted to jpeg at 1024 wide on the way in: the model returns PNGs at ~2.6MB and the
+    rest of this bank averages 300KB, so thirteen of them would have been 42MB of the
+    product's weight for a grid of thumbnails. Same conversion the idiom images needed,
+    for the same reason.
+  */
+  /*
+    Bob's Your Uncle — the idioms vibe, which had been wanted since the crate was written
+    and pointed at the basics' photograph in the meantime. Generated in the same batch.
+  */
+  'vibe-bobs-your-uncle': {
+    src: '/bank/vibe-bobs-your-uncle.jpg',
+    alt: 'A chipped white enamel mug of tea on a blue and white azulejo windowsill, a pastel facade out of focus beyond.',
+    rights_status: 'generated',
+  },
+  'frame-name': {
+    src: '/bank/frame-name.jpg',
+    alt: 'Two hands meeting in a handshake at a café table in Lisbon, faces out of frame.',
+    rights_status: 'generated',
+  },
+  'frame-origin': {
+    src: '/bank/frame-origin.jpg',
+    alt: 'A departures board in an airport hall, city names blurred beyond reading.',
+    rights_status: 'generated',
+  },
+  'frame-age': {
+    src: '/bank/frame-age.jpg',
+    alt: 'A row of lit candles on a tiled windowsill, a Lisbon street out of focus beyond.',
+    rights_status: 'generated',
+  },
+  'frame-married': {
+    src: '/bank/frame-married.jpg',
+    alt: 'Two coffee cups on a café table in Lisbon, a hand resting beside each.',
+    rights_status: 'generated',
+  },
+  'frame-into': {
+    src: '/bank/frame-into.jpg',
+    alt: 'A kiosk in a Lisbon square from behind, its racks turned away from the camera.',
+    rights_status: 'generated',
+  },
+  'frame-children': {
+    src: '/bank/frame-children.jpg',
+    alt: 'A small pair of shoes left by a doorway on a tiled Lisbon landing.',
+    rights_status: 'generated',
+  },
+  'frame-who-with': {
+    src: '/bank/frame-who-with.jpg',
+    alt: 'Two chairs at a small table outside a Lisbon café, one pushed back, both empty.',
+    rights_status: 'generated',
+  },
+  'frame-work': {
+    src: '/bank/frame-work.jpg',
+    alt: 'A worn workbench in a Lisbon workshop, tools laid down mid-job, the door open onto the street.',
+    rights_status: 'generated',
+  },
+  'frame-why-here': {
+    src: '/bank/frame-why-here.jpg',
+    alt: 'A Lisbon street climbing away from the Tagus at golden hour, the river bright at the foot of it.',
+    rights_status: 'generated',
+  },
+  'frame-staying-for': {
+    src: '/bank/frame-staying-for.jpg',
+    alt: 'A packed suitcase open on a bed in a rented Lisbon room, shutters half closed.',
+    rights_status: 'generated',
+  },
+  'frame-first-time': {
+    src: '/bank/frame-first-time.jpg',
+    alt: 'A tram stop sign in Lisbon seen from below against a pale sky.',
+    rights_status: 'generated',
+  },
+  'frame-moved-when': {
+    src: '/bank/frame-moved-when.jpg',
+    alt: 'A row of brass letterboxes in a Lisbon hallway, one card newer than the rest.',
+    rights_status: 'generated',
+  },
+  'frame-portuguese': {
+    src: '/bank/frame-portuguese.jpg',
+    alt: 'A chalk menu board outside a Lisbon tasca, half rubbed out, nobody reading it.',
+    rights_status: 'generated',
+  },
 }
 
 /**
@@ -270,18 +357,22 @@ export const WANTED: { slug: string; brief: string; used_by: string }[] = [
     will accept a room whose image is EITHER in the bank or wanted here, so a drop can be
     written before its photographs exist — and will fail if it is in neither.
   */
-  {
-    slug: 'vibe-bobs-your-uncle',
-    brief:
-      'A chipped white enamel mug of black tea, the bag still in it, standing on a blue-and-white azulejo windowsill in Lisbon. Afternoon light across the tiles, a pastel facade out of focus beyond. The mug is plainly not from here.',
-    /*
-      The English thing in the Portuguese room, which is what the shelf does to the
-      language. Deliberately NOT a nice cup of tea in a nice setting: three idioms in this
-      vibe are jokes about the tea metaphor failing to cross, so the picture has to look
-      slightly out of place on purpose.
-    */
-    used_by: "Bob's Your Uncle! — the idioms vibe. VIBE_IMAGES points at the basics' photograph until this exists.",
-  },
+  /*
+    THE THIRTEEN LEGEND QUESTIONS, for the grid.
+
+    Sam, with a screenshot of a level made entirely of blue panels: "let's add the
+    images." A Legend frame had no photograph and I gave it the accent slab, reasoning
+    that the learner's own sentence should look like the product's answer to that
+    everywhere else. That is fine for one card among nine and wrong for seven in a row —
+    the whole of Basics rendered as identical blue rectangles, which is a wall rather than
+    a shelf.
+
+    EACH ONE IS THE MOMENT THE QUESTION GETS ASKED, not an illustration of the answer. A
+    portrait of somebody married would be a stock photograph of a stranger; the doorway
+    where you are asked is a place in Lisbon, which is what every other picture in this
+    bank is. Nobody's face is the subject and no answer is depicted — the pictures must
+    work for a learner whose answer is the opposite of whatever is in frame.
+  */
 ]
 
 /** Every slug in the bank, for the gate that checks a template does not name a hole. */

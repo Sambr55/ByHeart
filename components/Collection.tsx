@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { PIECES, type CultureFamily } from '@/content/roots'
 import { vibeImage } from '@/content/vibe-images'
 import { sheetImage } from '@/content/feed'
+import { IMAGE_BANK } from '@/content/images'
 
 /**
  * THE GRID — five levels, nine slots each, filled by what has been finished.
@@ -180,7 +181,18 @@ function Filled({ card }: { card: CollectedCard }) {
       ? vibeImage(card.id as CultureFamily)
       : card.kind === 'sheet'
         ? sheetImage(card.id)
-        : null
+        : /*
+             A Legend frame's own picture, once the bank has it.
+
+             Sam, with a screenshot of Basics rendered as seven identical blue rectangles:
+             "let's add the images." The accent slab was right for one frame among nine
+             and wrong for a level made of them — a wall rather than a shelf.
+
+             Falls back to the slab when the picture is not there yet, so the grid is
+             never broken by an image that has not been generated: the briefs are in
+             content/images.ts and the panels pick them up the moment the files land.
+           */
+          (IMAGE_BANK['frame-' + card.id.replace(/_/g, '-')] ?? null)
 
   return (
     <Link

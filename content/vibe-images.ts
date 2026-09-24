@@ -44,9 +44,14 @@ export const VIBE_IMAGES: Record<CultureFamily, VibeImage> = {
     when this pointed at the basics. The counter is at least the right idea — a cup on a
     zinc bar in Lisbon — and belongs to no other vibe, so nothing is duplicated.
   */
+  /*
+    Its own picture at last. This borrowed the café counter while the brief sat in WANTED
+    — the mug of tea on an azulejo windowsill, plainly not from here, which is the whole
+    joke of an English-idioms vibe taught in Portuguese.
+  */
   bobs_your_uncle: {
-    src: '/lisbon/cafe-counter.jpg',
-    alt: 'A zinc café counter in Lisbon with an empty espresso cup on a saucer and a folded newspaper beside it.',
+    src: '/bank/vibe-bobs-your-uncle.jpg',
+    alt: 'A chipped white enamel mug of tea on a blue and white azulejo windowsill, a pastel facade out of focus beyond.',
     rights_status: 'generated',
   },
   the_basics: {
