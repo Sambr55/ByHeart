@@ -3,7 +3,7 @@
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CRATES,
   PIECES,
@@ -511,6 +511,37 @@ function throughLine(n: number): string {
  */
 function Welcome({ onDone }: { onDone: () => void }) {
   /*
+    THE SWIPE THE SCREEN ASKS FOR, which it did not accept.
+
+    Sam: "that's a bit disappointing. Can't swipe up on the first screen of the club!" He
+    is right and it was mine — I changed the label from GOOD to "Swipe ↑ to continue" and
+    did not make the gesture work, so the one screen that names a gesture was the one
+    screen that ignored it.
+
+    A touch handler rather than scroll-snap, which is what the feed behind this uses: snap
+    needs something to scroll, and this is a single full-bleed screen with nothing below
+    it. Adding a scrollable second panel to get the gesture for free would be building a
+    page out of a ceremony.
+
+    Forty pixels, upward, and it ends there. Short enough that a real swipe always lands,
+    long enough that a thumb resting on the photograph does not dismiss the biggest moment
+    in the product by accident.
+  */
+  const from = useRef<number | null>(null)
+  const swipe = {
+    onTouchStart: (e: React.TouchEvent) => {
+      from.current = e.touches[0]?.clientY ?? null
+    },
+    onTouchEnd: (e: React.TouchEvent) => {
+      const start = from.current
+      from.current = null
+      if (start === null) return
+      const end = e.changedTouches[0]?.clientY ?? start
+      if (start - end > 40) onDone()
+    },
+  }
+
+  /*
     The welcome asks nothing.
 
     It used to run a second beat asking why somebody was in Lisbon, which was the wrong
@@ -547,6 +578,7 @@ function Welcome({ onDone }: { onDone: () => void }) {
         of the stylesheet growing a list of routes to make exceptions for.
       */
       data-ceremony="true"
+      {...swipe}
       /* lvh, not svh — this box clips, so it has to be the LARGEST viewport or it cuts a
          hole in itself when the chrome retracts. See the note on the landing in Journey.tsx. */
       className="relative mx-auto flex min-h-lvh w-full max-w-md flex-col justify-end overflow-hidden on-dark text-white"
