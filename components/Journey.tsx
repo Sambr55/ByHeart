@@ -4771,6 +4771,27 @@ function SectionComplete() {
     rootsPlayed: learner.roots_played ?? [],
     sectionsCompleted: learner.sections_completed ?? [],
     sittings: learner.sittings ?? 0,
+    /*
+      THIS LEARNER'S CARD, which this call was not passing.
+
+      Without it legendStatus falls back to the visiting set, so somebody staying or
+      moving was measured against somebody else's door — and read "3 of 4 basics sessions"
+      on a screen whose own progress bar said 9 of 9. Sam: "we get to 9 from 9, we get the
+      summary screen, but the only way out is more basics."
+    */
+    purpose: learner.purpose ?? null,
+  })
+  /*
+    HOW FAR ALONG THE ROAD, which is the one answer to that question.
+
+    The sentence and the buttons below read this rather than legendStatus's session count.
+    Two numbers for one fact is what put "3 of 4" under a bar reading 9 of 9, and it is
+    the same fault this whole week has been about — see content/road.ts.
+  */
+  const road = roadProgress({
+    rootsPlayed: learner.roots_played ?? [],
+    sectionsCompleted: learner.sections_completed ?? [],
+    purpose: learner.purpose ?? null,
   })
   /*
     IS THIS THE VIBE THAT OPENED THE DOOR? Asked of the record, not of the clock.
@@ -4953,9 +4974,11 @@ function SectionComplete() {
               on the screen where it can be acted on. Every other vibe keeps the open
               sentence, because no other vibe is a door.
             */}
-            {isDoorway && legend.toGo > 0
-              ? PICKER.legend_sitting_done(legend.sessionsDone, legend.sessionsNeeded)
-              : 'There is more in there whenever you want it.'}
+            {road.open
+              ? LEGEND_COPY.open_head
+              : isDoorway
+                ? PICKER.legend_sitting_done(road.done, road.total)
+                : 'There is more in there whenever you want it.'}
           </p>
         ) : null}
         {/*
@@ -5041,7 +5064,30 @@ function SectionComplete() {
           LET'S DO THE BASICS rather than MORE BASICS, because after a warm-up there has
           been no basics to have more of.
         */}
-        {legend.toGo > 0 ? (
+        {/*
+          AND WHEN THE ROAD IS WALKED, THE WAY OUT IS THE LEGEND.
+
+          Sam: "the only way out is more basics — which takes us to the long list of
+          numbers questions with no progress bar, when it should take me to the open
+          legend."
+
+          It did. This offered MORE BASICS on `legend.toGo > 0`, a count of doorway ROOTS,
+          while the bar above it counts road STEPS — so a learner who had finished the
+          road was sent back into the crate's remainder, which is counting songs and
+          whatever else the basics still hold. Nothing there moves the door, and the bar
+          is gone by then because the door is open, so the screen looked broken.
+
+          The road knows. Walked, and the button is the thing it was walked for.
+        */}
+        {road.open ? (
+          <Link
+            href="/legend"
+            data-testid="to-legend-now"
+            className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            {LEGEND_COPY.banked_cta}
+          </Link>
+        ) : (
           <button
             type="button"
             data-testid="more-basics"
@@ -5050,7 +5096,7 @@ function SectionComplete() {
           >
             {isDoorway ? 'MORE BASICS' : 'LET’S DO THE BASICS'}
           </button>
-        ) : null}
+        )}
         {/*
           ANOTHER VIBE IS GONE, and what it was competing with is the reason.
 
@@ -5544,7 +5590,8 @@ function LegendPayoff({ justFinished }: { justFinished: CultureFamily | null }) 
           : usable
             ? LEGEND_COPY.open_head
             : onBasics
-              ? PICKER.legend_sitting_done(status.sessionsDone, status.sessionsNeeded)
+              ? /* Steps, from the same roadProgress the bar reads — see legend_sitting_done. */
+                PICKER.legend_sitting_done(road.done, road.total)
               : toGo === 1
                 ? LEGEND_COPY.one_more
                 : toGo + ' ' + LEGEND_COPY.more_to_go}

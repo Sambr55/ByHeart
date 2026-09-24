@@ -335,11 +335,25 @@ export const PICKER = {
   */
   warmed_up: "That's you warmed up. Now we'll get into the basics, and after that, the vibes.",
   /* Where that session put you, said at the end of one — the screen that used to say nothing. */
+  /*
+    IN STEPS, AND WITH NO TOLL AT THE END OF IT.
+
+    This said "basics sessions" and ended "then your vibes" — two things that stopped
+    being true. The number now comes from roadProgress, which counts STEPS: one root
+    apiece, the unit the bar above this sentence uses, so the two cannot say different
+    things. And the three-vibe toll is gone, so what follows the basics is the Legend
+    itself rather than a price.
+
+    The done case is unreachable from the session-done screen, which shows open_head
+    instead — it is kept for any caller that reaches it another way, saying the true
+    thing.
+  */
   legend_sitting_done: (done: number, need: number) =>
     done >= need
-      ? "That's the basics done. Now three vibes of your own and your Legend opens."
-      : "That's " + done + ' of ' + need + ' basics sessions. ' +
-        (need - done === 1 ? 'One to go' : need - done + ' to go') + ', then your vibes.',
+      ? "That's the basics done, and your Legend is open."
+      : "That's " + done + ' of ' + need + '. ' +
+        (need - done === 1 ? 'One more step' : need - done + ' more steps') +
+        ' and your Legend opens.',
   /* The tile's own badge, so it stops saying DONE while the door is still shut. */
   legend_tile: (done: number, need: number) => 'BASICS · ' + done + ' OF ' + need,
   legend_vibes: (left: number) =>
