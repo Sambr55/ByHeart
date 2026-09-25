@@ -2522,6 +2522,25 @@ export function Card({
                 </p>
               )}
               {/*
+                AN EXPLAINER'S OWN SPECIMEN, drawn by the intro's renderer.
+
+                Sam: "wire the asking specimen into the member card." ASK was the only
+                pillar a member met as a sentence rather than as the act, and the act
+                already existed a few hundred lines away — so this is a call, not a
+                second renderer.
+
+                Same palette rule as the intro's: Specimen draws in the sand colours, and
+                every explainer carries a photograph, so on a photo the subtree takes the
+                white-is-the-accent palette. Keeping the two in step matters more than it
+                looks — an explainer and an intro card showing the same specimen in two
+                palettes is exactly the drift this field exists to prevent.
+              */}
+              {card.kind === 'explainer' && card.explainer.shows ? (
+                <div className={onSand ? undefined : 'shown-on-photo'}>
+                  <Specimen shows={card.explainer.shows} onScreen={onScreen} />
+                </div>
+              ) : null}
+              {/*
                 A collision asks; everything else tells.
 
                 So the collision gets the cold fork — say it now, or be shown — and the two

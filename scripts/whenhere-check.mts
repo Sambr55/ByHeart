@@ -35,6 +35,8 @@
  * bugs that only exist once the thing is drawn.
  */
 import { chromium, type Page } from 'playwright'
+import { EXPLAINERS } from '../content/explainers'
+import { INTRO_CARDS } from '../content/intro'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const problems: string[] = []
@@ -99,6 +101,28 @@ async function reachTheCard(page: Page): Promise<boolean> {
     (await page.$('[data-testid="when-here-from"]')) ||
       (await page.$('[data-testid="when-here-unknown"]')),
   )
+}
+
+/*
+  THE TWO CARDS THAT MAKE ONE PROMISE, kept identical.
+
+  ASK is shown twice — once to a stranger in the intro, once to a member in their front
+  door deck — and Sam asked for the member's to BE the intro's rather than to resemble it.
+  Two hand-maintained copies of the same specimen is the drift this product keeps paying
+  for, so the specimen is compared rather than eyeballed: a change to one that is not made
+  to the other fails here, on the day it is made.
+*/
+console.log('\nask is the same promise on both cards\n')
+{
+  const member = EXPLAINERS.find((e) => e.id === 'ask_anything')
+  const stranger = INTRO_CARDS.find((c) => c.id === 'intro_ask')
+  ok('both cards exist', Boolean(member && stranger))
+  ok('the member card carries a specimen', Boolean(member?.shows), member?.shows?.kind ?? '(none)')
+  ok(
+    'and it is the same specimen the intro shows',
+    JSON.stringify(member?.shows) === JSON.stringify(stranger?.shows),
+  )
+  ok('the blurb matches too', member?.blurb === stranger?.body, member?.blurb?.slice(0, 40))
 }
 
 const browser = await chromium.launch()

@@ -14,6 +14,7 @@
  * AND THEY RETIRE. Each one goes for good once its thing has been used, and never returns.
  * An explainer a member is still being shown is an advert.
  */
+import type { IntroCard } from '@/content/intro'
 import type { CultureFamily } from '@/content/roots'
 
 export interface Explainer {
@@ -33,6 +34,22 @@ export interface Explainer {
    * than you can say.
    */
   say?: { pt: string; en: string; note: string }
+  /**
+   * A worked specimen on the face, rendered by the same component the intro uses.
+   *
+   * Sam: "wire the asking specimen into the member card." ASK was making its promise in a
+   * sentence where the intro makes it as an ACT — a phrase being typed, a sign being
+   * photographed, the European Portuguese coming back underneath. A member has more
+   * reason to be shown that than a stranger does: they are the one who will be standing
+   * in front of a menu they cannot order from.
+   *
+   * TYPED AS IntroCard['shows'] RATHER THAN RE-DECLARED, which is the whole reason this
+   * is one line instead of a second renderer. Every kind the intro can show — unpack,
+   * collision, legend, stages, asking — is available here the moment an explainer wants
+   * it, and a new kind added to the intro cannot half-arrive: it either works on both or
+   * fails to compile on both.
+   */
+  shows?: IntroCard['shows']
   image: { src: string; alt: string }
   /**
    * When this card has done its job and should never be seen again.
@@ -162,6 +179,24 @@ export const EXPLAINERS: Explainer[] = [
     title: 'The sentence we have not taught you yet.',
     blurb:
       'Ask for it, anywhere, any time, and get it back in the words they actually speak here. It goes into your own library.',
+    /*
+      THE ACT, NOT THE DESCRIPTION OF IT — and deliberately the same specimen intro_ask
+      carries, down to the phrase and the sign.
+
+      Two cards making one promise should make it identically or not twice. The pair of
+      them is the split-the-bill question and the closed-for-holidays door, which between
+      them are the two ways into ASK: something you want to say, and something you cannot
+      read. No list of example questions puts somebody in that moment; one of each does.
+    */
+    shows: {
+      kind: 'asking',
+      typed: { asked: 'How do I ask them to split the bill?', pt: 'Pode partir a conta em dois?' },
+      shot: {
+        caption: 'Or photograph what you cannot read.',
+        pt: 'Encerrado para férias',
+        en: 'Closed for holidays',
+      },
+    },
     detail: {
       heading: 'Why not just use Google',
       body: 'Because the internet’s Portuguese is Brazilian. Ask Google for a bus and you will be handed ônibus, say it in Lisbon, and watch the conversation switch to English. Everything here is European Portuguese, in the register you are being taught.',
