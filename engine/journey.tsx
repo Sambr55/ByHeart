@@ -417,6 +417,24 @@ export function sectionRoots(
    * without one the doorway falls back to the union of all three cards.
    */
   purpose?: Purpose | null,
+  /*
+    THE ROOT THE LEARNER WAS SENT FOR, hoisted before the sitting is packed.
+
+    Sam: "when I click gosto de which is a missing word in my legend it takes me to a
+    session that has nothing to do with learning gosto de." gosto de is taught by tb_into,
+    which is the FOURTEENTH of the basics' sixteen roots — and a sitting is capped at
+    ROOTS_PER_SESSION, so it was not merely late in the queue, it was not in the sitting
+    at all. Thirteen roots away, with nothing on screen saying so.
+
+    Hoisted HERE rather than after the fact, because pack() is what drops it: reordering
+    the packed result can only shuffle three roots that were already chosen. The errand's
+    root has to be a candidate before the budget is spent.
+
+    Still subject to the ladder. A root above the learner's rung is not in `eligible` and
+    nothing here puts it there — the honest outcome is the ordinary sitting, because the
+    alternative is teaching a lesson the ladder says they are not ready for.
+  */
+  wantRoot?: string | null,
 ): Root[] {
   const all = ROOTS_BY_FAMILY[family] ?? []
   if (!all.length) return []
@@ -591,6 +609,27 @@ export function sectionRoots(
       A sitting that cannot fit the next road step should be short, not filled with
       something the road did not ask for.
     */
+    /*
+      AND THE ERRAND JUMPS THE ROAD, which is the whole point of an errand.
+
+      The basics run on an authored road — see content/road.ts — and the road is what
+      makes three sittings reach the Legend. But a learner who taps GO AND GET IT on a
+      missing word has been sent by the Legend ITSELF, for one word, and telling them to
+      walk the road to reach it is the dead end Sam hit: gosto de is the fourteenth of
+      sixteen, so it was not in the sitting at all.
+
+      Taken from wherever it is — the road's remainder as well as the road — because the
+      Legend only ever points at a word it is actually waiting for, and the ladder has
+      already decided the learner can have it. The rest of the sitting is unchanged
+      underneath, so this is the ordinary session with the reason for coming first.
+    */
+    const errand = wantRoot
+      ? [...wanted, ...rest].find((r) => r.root_id === wantRoot) ?? null
+      : null
+    if (errand) {
+      const others = [...wanted, ...rest].filter((r) => r.root_id !== errand.root_id)
+      return pack([errand, ...others], family)
+    }
     return wanted.length ? pack(wanted, family) : pack(rest, family)
   }
   const doorway = new Set(doorwayRoots(purpose).map((r) => r.root_id))
@@ -612,7 +651,13 @@ export function sectionRoots(
       a.rung - b.rung,
   )
 
-  return pack(eligible, family)
+  /*
+    The errand first, if the ladder allows it at all. Everything else keeps its order, so
+    the sitting is the ordinary one with the reason for coming at the front of it.
+  */
+  const at = wantRoot ? eligible.findIndex((r) => r.root_id === wantRoot) : -1
+  const ordered = at > 0 ? [eligible[at], ...eligible.filter((_, i) => i !== at)] : eligible
+  return pack(ordered, family)
 }
 
 /**
@@ -880,7 +925,7 @@ interface JourneyApi {
   back: () => void
   goHome: () => void
   canGoBack: boolean
-  chooseFamily: (family: CultureFamily) => void
+  chooseFamily: (family: CultureFamily, wantRoot?: string | null) => void
   finishSection: (decision: 'another' | 'done') => void
   answer: (key: string, value: unknown) => void
   recordVoice: (signal: string, pt: string) => void
@@ -1054,7 +1099,23 @@ export function JourneyProvider({
   }, [state.index, step])
 
   const chooseFamily = useCallback(
-    (family: CultureFamily) => {
+    (
+      family: CultureFamily,
+      /*
+        THE ROOT THE LEARNER WAS SENT FOR, where they were sent for one.
+
+        Sam, tapping GO AND GET IT on a missing word: "it takes me to a session that has
+        nothing to do with learning gosto de." A crate is six to fourteen roots and the
+        word that sent them could be anywhere in it, so opening the crate is not the same
+        as fetching the word.
+
+        Named rather than filtered: the whole sitting still happens, in its own order,
+        with this root moved to the front. An errand that played ONLY the one root would
+        be a different product — the queue is what makes a sitting a sitting — and one
+        that dropped the learner mid-queue would have no beginning.
+      */
+      wantRoot?: string | null,
+    ) => {
       dispatch({ type: 'choose-family', family })
       setAffinity({ next_world_pre: family })
       track('culture_start_choice', { family, offered: Object.keys(ROOTS_BY_FAMILY) })
@@ -1081,7 +1142,7 @@ export function JourneyProvider({
         The purpose goes with it, so the front-loading rule front-loads THIS learner's
         doorway rather than the union of all three cards. See doorwayRoots.
       */
-      const roots = sectionRoots(family, reached, state.rootsPlayed, me.purpose ?? null)
+      const roots = sectionRoots(family, reached, state.rootsPlayed, me.purpose ?? null, wantRoot)
       const steps: Step[] = []
 
       /**

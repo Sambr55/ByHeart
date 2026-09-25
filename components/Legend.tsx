@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { CRATES, PIECES, ROOTS_BY_FAMILY } from '@/content/roots'
+import { CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '@/content/roots'
 import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, askFor, frameReady, nameFor, REPAIR_KIT, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, metIn,
   provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
 import { PICKER } from '@/content/front-door'
@@ -989,7 +989,12 @@ function Missing({ frame, owned }: { frame: LegendFrame; owned: string[] }) {
           is in the URL rather than in state for the reason ?door=1 is: it survives a
           reload, it is honest in a shared link, and it cannot get stuck on.
         */
-        href={'/vibes?open=' + need.crate + '&from=legend'}
+        href={
+          '/vibes?open=' +
+          need.crate +
+          (need.root ? '&root=' + need.root : '') +
+          '&from=legend'
+        }
         data-testid={'legend-need-' + frame.id}
         className="tap-target eyebrow inline-flex w-full items-center justify-center rounded border border-accent px-4 py-3 text-center text-accent transition hover:bg-accent hover:text-accent-ink"
       >
@@ -1024,7 +1029,7 @@ function Missing({ frame, owned }: { frame: LegendFrame; owned: string[] }) {
 function missingFrom(
   frame: LegendFrame,
   owned: string[],
-): { word: string; gloss: string; crate: string | null } | null {
+): { word: string; gloss: string; crate: string | null; root: string | null } | null {
   const have = new Set(owned)
   const short = frame.built_from.filter((p) => !have.has(p))
   if (!short.length) return null
@@ -1040,6 +1045,19 @@ function missingFrom(
     word: piece.target,
     gloss: piece.gloss,
     crate: CRATES.find((c) => c.id === piece.family)?.id ?? null,
+    /*
+      WHICH ROOT ACTUALLY TEACHES IT, not just which crate holds it.
+
+      Sam: "when I click gosto de which is a missing word in my legend it takes me to a
+      session that has nothing to do with learning gosto de." It did. This returned the
+      CRATE and threw the root away, so GO AND GET IT opened the basics at its first root
+      — counting, or hello — and the word that sent them there was five sittings down the
+      queue with nothing on screen saying so.
+
+      A crate is a place; a root is the lesson. The errand is about one word, so it has to
+      name the lesson that hands it over.
+    */
+    root: ROOTS.find((r) => r.extracts.some((e) => e.id === short[0]))?.root_id ?? null,
   }
 }
 

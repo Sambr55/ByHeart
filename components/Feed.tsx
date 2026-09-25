@@ -1665,8 +1665,47 @@ export function Card({
     */
     if (card.kind !== 'setup') return
     const me = loadLearner()
-    const answered = Boolean(chosenPair()) && Boolean(me.deal_accepted_at) && Boolean(me.profile?.goal)
+    const pair = Boolean(chosenPair())
+    const deal = Boolean(me.deal_accepted_at)
+    const goal = Boolean(me.profile?.goal)
+    const answered = pair && deal && goal
     setPairChosen(answered)
+    /*
+      AND WHY, WHEN THE ANSWER IS NO — because this has now been reported twice and I have
+      twice failed to reproduce it.
+
+      Sam: "at the end beginning of the legend builder I am being asked AGAIN for my
+      language and city." Three things have to be true for this card to stay quiet and any
+      one of them being false brings the selector back; the screen says which, and the
+      record keeps it, so the next report carries its own diagnosis.
+
+      Written where the crash panel already reads from — see app/error.tsx and the WHAT
+      BROKE section in Settings — so there is one place to look rather than two.
+    */
+    if (!answered) {
+      try {
+        const missing = [!pair && 'pair', !deal && 'deal', !goal && 'goal']
+          .filter(Boolean)
+          .join(' ')
+        const prior = JSON.parse(localStorage.getItem('byheart.crashes') ?? '[]')
+        localStorage.setItem(
+          'byheart.crashes',
+          JSON.stringify(
+            [
+              {
+                at: new Date().toISOString(),
+                where: window.location.pathname,
+                message: 'set-up card re-asked. missing: ' + missing,
+                digest: null,
+              },
+              ...(Array.isArray(prior) ? prior : []),
+            ].slice(0, 5),
+          ),
+        )
+      } catch {
+        /* Storage unavailable, which is not itself worth reporting. */
+      }
+    }
     /*
       And somebody who answered already is not held.
 
@@ -1676,7 +1715,22 @@ export function Card({
       nothing behind it.
     */
     if (answered) onFreed?.(card.id)
-  }, [card.kind])
+    /*
+      RE-RUN WHEN THE RECORD CHANGES, not only when the card mounts.
+
+      This was `[card.kind]`, so the three tests above ran once and latched. A learner who
+      met this card before finishing set-up — which is the ordinary order, since the card
+      IS set-up — kept whatever answer was true at mount for the rest of the session.
+
+      That is not the reported fault (the deck rebuilds when the learner changes, so the
+      card usually remounts anyway) but it is the same class, and a latched "no" here is
+      exactly a selector that will not go away.
+
+      Keyed on this card's own props rather than on the record, because the record is not
+      in scope here and the props change whenever the deck is rebuilt — which is what a
+      completed set-up causes.
+    */
+  }, [card.kind, saved, liked])
 
   const [drag, setDrag] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const [flew, setFlew] = useState<'away' | 'in' | null>(null)

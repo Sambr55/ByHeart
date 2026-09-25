@@ -302,20 +302,49 @@ console.log('\nan errand can get back to what sent it\n')
 {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const pg = await ctx.newPage()
-  await pg.goto(BASE + '/vibes?open=the_basics&from=legend')
-  await pg.waitForTimeout(2600)
-  const why = await pg.$('[data-testid="setup-why-trip"]')
-  if (why) {
-    await why.click()
-    await pg.waitForTimeout(700)
-    const commit = await pg.$('[data-testid="setup-commit"]')
-    if (commit) {
-      await commit.click()
-      await pg.waitForTimeout(1600)
-    }
-  }
+  /*
+    SEEDED PAST THE WARM-UP, because that is where a learner sent by the Legend actually
+    is. The warm-up gate stands in front of the basics and is correct to — the first
+    version of this check hit it and reported the errand broken when it was the fixture
+    that was wrong.
+  */
+  await pg.goto(BASE + '/')
+  await pg.evaluate(
+    `localStorage.setItem('byheart.pair', JSON.stringify(${JSON.stringify(DEFAULT_PAIR)}))`,
+  )
+  await pg.goto(BASE + '/vibes')
+  await pg.waitForTimeout(1800)
+  await pg.evaluate(`(() => {
+    const raw = localStorage.getItem(${JSON.stringify(KEY)})
+    const s = raw ? JSON.parse(raw) : {}
+    s.deal_accepted_at = '2026-09-25T09:00:00Z'
+    s.set_up_at = '2026-09-25T09:00:00Z'
+    s.chapter = 'lisbon'
+    s.purpose = 'visiting'
+    s.profile = { ...(s.profile || {}), goal: 'trip', gender: 'm' }
+    s.sections_completed = ['top_gun', 'bridget_jones']
+    localStorage.setItem(${JSON.stringify(KEY)}, JSON.stringify(s))
+  })()`)
+  await pg.goto(BASE + '/vibes?open=the_basics&root=tb_into&from=legend')
+  await pg.waitForTimeout(3000)
   const door = await pg.$('[data-testid="home-legend"]')
   ok('an errand shows the way back to the Legend', Boolean(door))
+  /*
+    AND IT OPENS ON THE LESSON IT WAS SENT FOR. Sam: "when I click gosto de which is a
+    missing word in my legend it takes me to a session that has nothing to do with
+    learning gosto de."
+
+    gosto_de is taught by tb_into, the FOURTEENTH of the basics' sixteen roots, and a
+    sitting is capped — so it was not merely late in the queue, it was not in the sitting
+    at all. Asserted on what is on screen rather than on the queue, because the queue was
+    right about the crate the whole time.
+  */
+  const first = ((await pg.textContent('main')) ?? '').replace(/\s+/g, ' ')
+  ok(
+    'and opens on the lesson it was sent for',
+    /What are you into|gosto/i.test(first),
+    first.slice(0, 60),
+  )
   if (door) {
     await door.click()
     await pg.waitForTimeout(2200)

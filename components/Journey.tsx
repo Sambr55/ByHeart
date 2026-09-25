@@ -1303,7 +1303,12 @@ function Picker() {
     const capped = !crate.drop && atLimit && !claimed.has(crate.id)
     if (!openable || capped) return
     setEntering(crate.id)
-    chooseFamily(crate.id)
+    /*
+      ?root= says which lesson the learner was actually sent for — see the GO AND GET IT
+      link in components/Legend.tsx. Absent for a vibe picked off the shelf, which is the
+      common case and unchanged.
+    */
+    chooseFamily(crate.id, params.get('root'))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wanted, mounted, access.known, atLimit, rung])
 
