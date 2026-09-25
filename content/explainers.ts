@@ -146,10 +146,22 @@ export const EXPLAINERS: Explainer[] = [
   },
   {
     id: 'ask_anything',
-    eyebrow: 'ANY MOMENT',
+    /*
+      THE SAME SCREEN THE INTRO ALREADY SHOWS. Sam: "replace this screen with this
+      screen", the second being intro_ask in content/intro.ts.
+
+      Two cards were making the same promise in two voices — this one in a sentence, the
+      intro's in a worked exchange — and the thinner of the two was the one a MEMBER saw.
+      A member has more reason to be shown the act than a stranger does: they are the one
+      who will be standing in front of a sign they cannot read.
+
+      Copy matched to intro_ask so the two cannot drift, and the eyebrow with it: ASK is
+      the tab this points at, which "ANY MOMENT" never said.
+    */
+    eyebrow: 'ASK',
     title: 'The sentence we have not taught you yet.',
     blurb:
-      'Ask for it, anywhere in the app, and get it back in the Portuguese they actually speak here.',
+      'Ask for it, anywhere, any time, and get it back in the words they actually speak here. It goes into your own library.',
     detail: {
       heading: 'Why not just use Google',
       body: 'Because the internet’s Portuguese is Brazilian. Ask Google for a bus and you will be handed ônibus, say it in Lisbon, and watch the conversation switch to English. Everything here is European Portuguese, in the register you are being taught.',
@@ -277,13 +289,23 @@ export const EXPLAINERS: Explainer[] = [
   */
   {
     id: 'where_you_are_now',
-    eyebrow: 'FROM HERE',
-    title: 'You have the first of five. Here is what the other four are.',
+    /*
+      THE DECK, NOT THE LADDER. Sam replaced this screen wholesale — "SEE WHATS ON THE
+      CARDS" — and the change is a change of subject rather than of wording.
+
+      It used to name the five rungs and say which one you were on, which is the ladder
+      talking about itself: true, abstract, and impossible to act on. What a new member
+      can actually do the moment they finish their Legend is go and LOOK at it, and
+      nothing anywhere told them where it had gone. So the card now points at the deck,
+      names the tab that opens it, and says what filling one is worth.
+    */
+    eyebrow: 'SEE WHATS ON THE',
+    title: 'CARDS',
     blurb:
-      'The basics are the rung you just finished. Getting around, being understood, conversing, and leading it.',
+      'Everything you have learned so far is safely stored in your first card deck. Just tap on YOURS in the bottom menu and remind yourself of your Legend.',
     detail: {
-      heading: 'What happens from here',
-      body: 'Your Legend was the basics: your name, where you are from, what you do — enough to be somebody rather than a tourist. Getting around is next, and then being understood in a room, holding your end of a conversation, and starting one. Every rung is a thing you can DO, not a score: the number moves when you own a word, go through a room, take a sheet out with you. Nothing counts days, and nothing goes down.',
+      heading: 'What each deck is worth',
+      body: 'Each Card you complete in the Club will be stored here. Each deck you complete will open up greater learning opportunities and more fun.',
     },
     image: {
       src: '/lisbon/intro-arrival.jpg',

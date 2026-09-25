@@ -2678,7 +2678,22 @@ export function Card({
                     to the same question — what do I do now — and two hints stacked read as
                     two instructions to follow in order.
                   */}
-                  {card.kind === 'explainer' && card.explainer.detail
+                  {card.kind === 'explainer' &&
+                  card.explainer.detail &&
+                  /*
+                    EXCEPT THE ONE THAT HAS NOWHERE TO SEND YOU. Sam, on the CARDS screen:
+                    "Replace CTA with Swipe Up (arrow)."
+
+                    This card's job is to point at the YOURS tab, which is on the nav and
+                    not behind a swipe — so "See more →" would send somebody sideways into
+                    a detail pane that only elaborates, when the thing being pointed at is
+                    a tap away at the bottom of the screen. Up is the only gesture this
+                    card wants.
+
+                    Named rather than keyed on "has no detail", because the detail is real
+                    and worth keeping for anybody who swipes anyway.
+                  */
+                  card.explainer.id !== 'where_you_are_now'
                     ? 'See more → or swipe ↑'
                     : 'Swipe ↑ to continue'}
                 </p>
