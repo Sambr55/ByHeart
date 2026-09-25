@@ -44,8 +44,10 @@ export function Revise() {
         gender: learner.profile?.gender ?? null,
         /* The words deck asks only for what this learner owns — see revisionFor. */
         inventory: learner.inventory ?? {},
+        /* And the asked deck's content lives on the record and nowhere else. */
+        asked: learner.asked ?? [],
       }),
-    [kind, id, learner.legend, learner.profile?.gender, learner.inventory],
+    [kind, id, learner.legend, learner.profile?.gender, learner.inventory, learner.asked],
   )
   const line = lines[at]
 

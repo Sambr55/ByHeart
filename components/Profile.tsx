@@ -10,9 +10,8 @@ import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Collection } from '@/components/Collection'
 import { Friends } from '@/components/Friends'
 import { Wordmark } from '@/components/Wordmark'
-import { askedCards, cardById, cardFace, derivedCards, dropsFor, roomsFor, type FeedCard } from '@/content/feed'
-import { derivedById } from '@/engine/derive'
-import { CRATES, PIECES, ROOTS, type CultureFamily } from '@/content/roots'
+import { cardFace, type FeedCard } from '@/content/feed'
+import { PIECES, ROOTS, type CultureFamily } from '@/content/roots'
 import { LEGEND_FRAMES, askFor, cardFor, cardToGo, nextStage, stageFor, frameApplies, frameForPurpose, frameReady, legendStatus, progressFor, STAGES } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/avatar'
@@ -55,20 +54,32 @@ import { useRestore } from '@/engine/useRestore'
  */
 const SECTIONS: {
   /*
-    'done' and 'sheets' are gone: the grid holds both.
+    ONE STRIP LEFT, and the library holds everything else.
 
-    Sam: "we also need to decide if this fully replaces the blue bars above. What can we
-    fully discard of those?" Two of the seven, and only two. BEEN THROUGH was the same 13
-    vibes and CHEAT SHEETS the same 11 sets, now shelved by the level they were finished
-    at — so keeping them would be the same fact in two places, which is the drift this
-    codebase keeps finding.
+    Sam: "for my money we don't need the blue boxes above the grids anymore." This list
+    was seven, then five, and is now one — each removal made when the library grew a deck
+    that held the same fact better.
 
-    The other five stay because they are different facts rather than a different view of
-    one: YOUR WORDS is 219 pieces against 45 slots, SAID COLD is what was produced rather
-    than what was completed, PUT ASIDE is bookmarks nothing has finished, DROPS expire and
-    are deliberately not cards, and idioms are not a card kind.
+    What went, and why each reason expired:
+
+      BEEN THROUGH, CHEAT SHEETS  the same 13 vibes and 11 sets the decks now hold.
+      YOUR WORDS    kept because "219 pieces against 45 slots" — untrue since the WORDS
+                    deck took all 219 across nine living cards.
+      DROPS         kept because they "expire and are deliberately not cards" — untrue
+                    since a night you mark as gone to stops expiring and becomes one.
+      WHAT WE SAY   kept because "idioms are not a card kind" — they are now, and Sam
+                    asked for the better name while we were at it: LOST IN TRANSLATION.
+      PUT ASIDE     Sam: "I'm not really fussed about Put aside." It held two piles, and
+                    the sentences somebody asked for could not simply be dropped — the
+                    ASK card promises they go into your library, so they became the deck
+                    that promise describes. Bookmarks are reachable from the feed itself.
+
+    SAID COLD STAYS, and it is the only one that could. Everything in the library is a
+    thing COMPLETED; this is a thing PRODUCED — Portuguese said with nothing on screen to
+    copy from, which is the one number this product claims is real. It is not a view of
+    the decks, it is the measure of whether they worked.
   */
-  id: 'aside' | 'cold' | 'words' | 'drops' | 'idioms'
+  id: 'cold'
   label: string
   note: string
   empty: string
@@ -91,14 +102,6 @@ const SECTIONS: {
   more?: { href: string; label: string }
 }[] = [
   {
-    id: 'aside',
-    label: PROFILE_COPY.aside_label,
-    note: PROFILE_COPY.aside_note,
-    empty: PROFILE_COPY.aside_empty,
-    unit: (n) => (n === 1 ? 'thing you put by for later' : 'things you put by for later'),
-    count: (t) => String(t.length),
-  },
-  {
     id: 'cold',
     label: PROFILE_COPY.cold_label,
     note: PROFILE_COPY.cold_note,
@@ -111,41 +114,6 @@ const SECTIONS: {
     unit: (n) => (n === 1 ? 'sentence said with nothing on screen' : 'sentences said with nothing on screen'),
     count: (_t, l) => String((l.proof ?? []).length),
     more: { href: '/proof', label: 'THE PROOF CARD' },
-  },
-  {
-    id: 'words',
-    label: PROFILE_COPY.words_label,
-    note: PROFILE_COPY.words_note,
-    empty: PROFILE_COPY.words_empty,
-    unit: (n) => (n === 1 ? 'piece of Portuguese, banked' : 'pieces of Portuguese, banked'),
-    count: (_t, l) => String(Object.keys(l.inventory ?? {}).filter((id) => PIECES[id]).length),
-    more: { href: '/vocab', label: 'THE WHOLE LIBRARY' },
-  },
-  {
-    /*
-      The idioms that landed, on a row of their own.
-
-      Not folded into BEEN THROUGH: everything there is a record of somewhere you went,
-      and an idiom is a thing you knew. The count is `idioms_got` rather than everything
-      met, for the reason the copy gives — meeting a card is attendance, and this product
-      does not score attendance.
-    */
-    id: 'idioms',
-    label: PROFILE_COPY.idioms_label,
-    note: PROFILE_COPY.idioms_note,
-    empty: PROFILE_COPY.idioms_empty,
-    unit: (n) => (n === 1 ? 'English phrase you had the answer to' : 'English phrases you had the answer to'),
-    count: (_t, l) => String((l.idioms_got ?? []).length),
-  },
-  {
-    id: 'drops',
-    label: PROFILE_COPY.drops_label,
-    note: PROFILE_COPY.drops_note,
-    empty: PROFILE_COPY.drops_empty,
-    unit: (n) => (n === 1 ? 'night you took it to' : 'nights you took it to'),
-    count: (t) => String(t.length),
-    /* And the calendar itself, which is a listings page and belongs behind a button. */
-    more: { href: '/drops', label: 'WHAT IS ON NOW' },
   },
 ]
 
@@ -192,159 +160,18 @@ export function Profile() {
   const finished = learner.finished_cards ?? []
   const sections = learner.sections_completed ?? []
 
-  const sets = useMemo(() => {
-    const asTile = (id: string): Tile | null => {
-      const card = cardById(id)
-      return card ? { kind: 'card', id, card } : null
-    }
-    /*
-      Every vibe they have actually been into, not only the ones they signed out of.
+  /*
+    THE ONE PILE THIS SCREEN STILL BUILDS ITSELF.
 
-      sections_completed is written in exactly one place: the two buttons on the
-      end-of-session screen. That was sound while a lesson was a held sequence with no way
-      out — and it stopped being sound the moment the bottom bar went onto the beats, which
-      it did deliberately. Leaving a vibe part-way is now the ordinary thing to do, and
-      doing the ordinary thing recorded nothing: somebody could work through four vibes and
-      find this shelf empty, which reads as the product having lost their week.
+    This computed six: bookmarks, sheets, idioms, words, drops and the proof. Five of them
+    are decks now — see content/collection.ts — and a screen that builds a list nothing
+    renders is how dead code becomes a bug report, so they went with the strips.
 
-      roots_played is the honest record — it is written at each release, by the tap that
-      banks a sentence, and nothing else touches it. So the shelf is built from that, and
-      the union with sections_completed keeps anybody who did sign out properly.
-    */
-    const played = new Set(learner.roots_played ?? [])
-    const been = new Set<string>(sections)
-    for (const root of ROOTS) if (played.has(root.root_id)) been.add(root.culture_family)
-
-    const vibes: Tile[] = [...been].flatMap((f) => {
-      const crate = CRATES.find((c) => c.id === f)
-      if (!crate) return []
-      const rootsHere = ROOTS.filter((r) => r.culture_family === crate.id)
-      return [
-        {
-          kind: 'vibe' as const,
-          id: crate.id,
-          family: crate.id,
-          title: crate.title,
-          tone: crate.tone,
-          /*
-            ALL THE WAY THROUGH MEANS EVERY ROOT IN IT, and only that.
-
-            This also accepted `sections_completed`, which does not mean what the name
-            suggests: engine/learner.ts writes it at the end of EVERY sitting and dedupes
-            by vibe, so it records "has been inside this" rather than "has finished it" —
-            its own note says so. The basics hold 16 roots and a sitting serves about
-            four, so one sitting marked the biggest thing in the product complete and the
-            tile dropped its "still in there" marker with three quarters left to do.
-
-            The root test was already here and is the honest one. A learner who genuinely
-            finished every root satisfies it; nobody else does.
-          */
-          through: rootsHere.length > 0 && rootsHere.every((r) => played.has(r.root_id)),
-        },
-      ]
-    })
-    /*
-      A finished derived card, recovered.
-
-      These leave the feed by id, and `cardById` only knows about rooms and words — so
-      without this a collision somebody said cold vanished from their history the moment
-      they said it, which is the exact opposite of what finishing one should do.
-    */
-    const derivedTiles: Tile[] = finished
-      .filter((id) => id.startsWith('derived_'))
-      .flatMap((id) => {
-        const card = derivedById(id, learner.inventory ?? {})
-        if (!card) return []
-        const feedCard = derivedCards([card])[0]
-        return feedCard ? [{ kind: 'card' as const, id, card: feedCard }] : []
-      })
-
-    /*
-      The sentences somebody asked for, which had nowhere to be.
-
-      keepAsk writes them to the learner and the feed offers them back as practice — but
-      Yours never rendered them, so KEEP THIS was a button that appeared to do nothing. The
-      record was right the whole time; the screen that holds your things did not hold these.
-
-      `all` because this is a record rather than a queue: a sentence should not vanish from
-      your own history the moment you have said it.
-    */
-    const askedTiles: Tile[] = askedCards(learner.asked ?? [], finished, true).map(
-      (c): Tile => ({ kind: 'card', id: c.id, card: c }),
-    )
-
-    return {
-      /*
-        AND NOT THE SHEETS, which are not something you get through.
-
-        `finished_cards` is written by NOT FOR ME as well as by finishing — it means
-        "spent", not "achieved" — and cardById now resolves sheet ids, so dismissing a
-        cheat sheet filed it under "vibes and rooms you have been through". Rejecting
-        something is the one thing that should never appear on the shelf of what you did.
-
-        Excluded by kind rather than by which button was pressed, because a sheet does not
-        belong here either way: it is a reference you check, it has its own row below, and
-        "been through counting to ten" is not a claim this screen should make.
-      */
-      done: [
-        ...vibes,
-        ...derivedTiles,
-        /* Sheets and idioms have rows of their own; neither is a place you went. */
-        ...finished
-          .filter((id) => !id.startsWith('sheet_') && !id.startsWith('idiom_'))
-          .flatMap((id) => asTile(id) ?? []),
-      ],
-      /*
-        SAVED AND KEPT ARE ONE PILE, because the difference was about which button you
-        pressed rather than about the thing.
-
-        Two sections sat next to each other — "the ones you put by for the night before
-        you need them" and "sentences you asked for" — and both answer "I wanted this
-        later". A learner looking for something they put aside had to remember whether
-        they had bookmarked it or asked for it, which is a fact about the product rather
-        than about them.
-
-        Bookmarks first: they are cards with pictures and they make the grid read.
-      */
-      /*
-        Everything set aside EXCEPT the cheat sheets, which have their own row now.
-
-        A sheet is not a card you bookmarked for one evening — it is a reference you go
-        back to, which is a different relationship to a thing. Sam: "add Chest sheets as
-        anopther section in YOURS - put there by saving them in Club feed."
-      */
-      aside: [
-        ...saved
-          .filter((id) => !id.startsWith('sheet_') && !id.startsWith('idiom_'))
-          .flatMap((id) => asTile(id) ?? []),
-        ...askedTiles,
-      ],
-      /*
-        THE SHEETS SOMEBODY KEPT, saved from the Club feed.
-
-        The bookmark already wrote them; nothing displayed them, because cardById could
-        not resolve a sheet id (fixed in content/feed.ts) and PUT ASIDE would have mixed a
-        reference table in with a night at a concert.
-
-        Its own row because of what a sheet is for: counting to ten is not something you
-        finish, it is something you check. Everything else on this screen is a record of
-        what happened — this is the one pile you open again on purpose.
-      */
-      sheets: saved.filter((id) => id.startsWith('sheet_')).flatMap((id) => asTile(id) ?? []),
-      /*
-        The ones that landed, newest last — which is the order they were got in, and the
-        only order the record carries. cardById resolves an idiom id the same way it
-        resolves a sheet, so these are the same card somebody met in the Club.
-      */
-      idioms: (learner.idioms_got ?? []).flatMap((id) => asTile('idiom_' + id) ?? []),
-      /*
-        WHAT THEY HAVE SAID WITH NOTHING ON SCREEN — the product's own measure of itself.
-
-        This was a row in a drawer at the foot of the page pointing at /proof, which is
-        the one number DUB claims is real. Newest first and six of them: the section is a
-        window onto the proof card rather than a copy of it, and the button at the bottom
-        goes to the whole thing.
-      */
+    What is left is the proof, and it is the one pile that was never a collection: every
+    deck holds things COMPLETED, and this holds things PRODUCED.
+  */
+  const sets = useMemo(
+    () => ({
       cold: [...(learner.proof ?? [])]
         .reverse()
         .slice(0, 6)
@@ -357,83 +184,10 @@ export function Profile() {
             note: l.clean ? 'first go' : undefined,
           }),
         ),
-      /*
-        AND THE WORDS THEY ACTUALLY OWN, which is what WORTH HAVING was pretending to be.
-
-        WORTH HAVING rendered four editorial cards from a hardcoded list — the same four
-        for every learner, on the screen that is supposed to be theirs. The real inventory
-        was a drawer row pointing at the library. So the teaser is gone and the inventory
-        takes its place: these are pieces this person banked, newest first.
-      */
-      words: Object.entries(learner.inventory ?? {})
-        .filter(([id]) => PIECES[id])
-        /*
-          Newest first where there is a date to sort on.
-
-          InventoryItem carries latest_recall_at and no acquisition date — a gap worth
-          naming rather than papering over, since "newest first" is the obvious ordering
-          for a pile somebody is adding to. Items never recalled sort last, which puts the
-          ones they have actually used in front, and that is a defensible second-best.
-        */
-        .sort((a, b) =>
-          String(b[1]?.latest_recall_at ?? '').localeCompare(String(a[1]?.latest_recall_at ?? '')),
-        )
-        .slice(0, 6)
-        .map(
-          ([id]): Tile => ({
-            kind: 'line',
-            id: 'piece_' + id,
-            pt: PIECES[id].target,
-            en: PIECES[id].gloss ?? '',
-          }),
-        ),
-      /*
-        THE NIGHTS THIS PERSON ACTUALLY WENT INTO — not the calendar.
-
-        This listed every live drop, which made it the only row on the screen that was not
-        theirs: twelve evenings in Lisbon, the same twelve for everybody, sitting under
-        four piles of things they had made. Sam: "this looks lioke ALL drops - shoudl be
-        just ones teh user has completed."
-
-        Filtered on finished_cards, which is what Errand writes when somebody finishes a
-        room — the same record BEEN THROUGH is built from, so the two rows cannot disagree
-        about what has been done.
-
-        A drop's card id IS its first situation's id (see dropsFor), so this matches on
-        exactly the room the tile represents. Somebody who went into a drop and finished
-        its arrival has been to that night as far as DUB can tell; the whole calendar
-        stays one tap away behind EVERYTHING ON.
-      */
-      /*
-        ANY ROOM OF THE NIGHT, not only its arrival.
-
-        This matched on the drop's card id, which IS its first situation — the arrival —
-        so a night counted as visited only if you had finished "Finding the venue", and
-        the three rooms after it counted for nothing. Sam's record shows the shape of that
-        exactly: nine finished drop rooms, every one of them a `_where`.
-
-        A drop is an evening with four rooms in it. Doing the ticket or the invitation is
-        being at that night as much as finding the door is, and a screen that says
-        otherwise is telling somebody their work did not happen.
-      */
-      drops: dropsFor(learner.chapter ?? undefined)
-        .filter(
-          (c) =>
-            c.kind === 'situation' &&
-            (c.drop?.situations ?? []).some((s2) => finished.includes(s2.id)),
-        )
-        .map((c): Tile => ({ kind: 'card', id: c.id, card: c })),
-    }
-  }, [
-    saved.join('|'),
-    finished.join('|'),
-    sections.join('|'),
-    (learner.roots_played ?? []).join('|'),
-    learner.inventory,
-    /* SAID COLD reads the proof, so it has to recompute when a sentence lands. */
-    (learner.proof ?? []).length,
-    learner.asked,
-  ])
+    }),
+    /* Recomputes when a sentence lands, which is the only thing that changes it. */
+    [learner.proof],
+  )
 
   if (open) {
     /* dvh, not svh: this is the full-bleed card view, and svh stops it short of the
@@ -671,13 +425,14 @@ export function Profile() {
             ))}
           </div>
           {/*
-            THE GRID, ABOVE THE FRIEND AND BELOW THE SECTIONS.
+            THE LIBRARY, which is now most of this screen rather than a summary of it.
 
-            Sam: "the idea is to organise their memory and learning." The sections above
-            are the lists — every word, every sheet, every night — and the grid is what
-            those lists add up to: five levels, nine slots, the cards somebody has
-            actually finished. It sits after them because it is the summary of them, and
-            before Friends because a collection is a thing you have and showing somebody
+            Sam: "the idea is to organise their memory and learning." It sat below six
+            strips that listed the same things a different way; those are gone, and what
+            is above it now is the Legend and the one pile the decks cannot hold — the
+            proof, which is what was PRODUCED rather than what was completed.
+
+            Before Friends, because a collection is a thing you have and showing somebody
             is what you do with it.
           */}
           <Collection />

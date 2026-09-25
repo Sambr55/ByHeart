@@ -75,6 +75,8 @@ export function Collection() {
         sections_completed: learner.sections_completed ?? [],
         legend: learner.legend ?? [],
         drops_done: learner.drops_done ?? [],
+        idioms_got: learner.idioms_got ?? [],
+        asked: learner.asked ?? [],
         inventory: learner.inventory ?? {},
         card_levels: learner.card_levels ?? {},
         stageNow,
@@ -84,6 +86,8 @@ export function Collection() {
       learner.sections_completed,
       learner.legend,
       learner.drops_done,
+      learner.idioms_got,
+      learner.asked,
       learner.inventory,
       learner.card_levels,
       stageNow,
@@ -158,7 +162,8 @@ function DeckDrawer({
   const count =
     deck.total !== undefined
       ? deck.cards.length + ' of ' + deck.total
-      : deck.cards.length + (deck.id === 'drops' ? ' saved' : ' started')
+      : deck.cards.length +
+        (deck.id === 'drops' ? ' saved' : deck.id === 'asked' ? ' kept' : ' started')
 
   return (
     <div className="flex flex-col gap-3 border-b border-line pb-3">
@@ -235,9 +240,19 @@ function Filled({ card }: { card: CollectedCard }) {
   const image =
     card.kind === 'vibe'
       ? vibeImage(card.id as CultureFamily)
-      : card.kind === 'sheet' || card.kind === 'drop' || card.kind === 'words'
-        ? sheetImage(card.id)
-        : (IMAGE_BANK['frame-' + card.id.replace(/_/g, '-')] ?? null)
+      : card.kind === 'idiom'
+        ? /*
+             An idiom has its own clue photograph, which is the whole card — the picture is
+             the hint you get before the punchline. Falls back to a texture, so a newly
+             authored idiom is never a blank rectangle.
+           */
+          (IMAGE_BANK['vibe-' + card.id.replace(/_/g, '-')] ?? sheetImage(card.id))
+        : card.kind === 'sheet' ||
+            card.kind === 'drop' ||
+            card.kind === 'words' ||
+            card.kind === 'asked'
+          ? sheetImage(card.id)
+          : (IMAGE_BANK['frame-' + card.id.replace(/_/g, '-')] ?? null)
 
   /*
     WHAT THE CARD SAYS UNDER ITS NAME, which is different for the two living kinds.
@@ -251,7 +266,10 @@ function Filled({ card }: { card: CollectedCard }) {
       ? card.holds + (card.holds === 1 ? ' word' : ' words')
       : card.kind === 'drop'
         ? (card.on ?? '')
-        : levelLabel(card.level)
+        : card.kind === 'asked'
+          ? /* The day you wanted it, which is the only fact this card has about itself. */
+            (card.on ?? '').slice(0, 10)
+          : levelLabel(card.level)
 
   return (
     <Link

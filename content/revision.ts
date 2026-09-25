@@ -29,6 +29,10 @@
  *   words  the words on that shelf that this learner actually owns. The one kind whose
  *          revision GROWS: a shelf asked at thirty words asks more than it did at ten,
  *          which is what a living card is for.
+ *   idiom  the English, asked from the literal Portuguese. Deliberately the way round the
+ *          card teaches it — the riddle is the face and the answer is what you had.
+ *   asked  the sentence you asked for, asked back from your own English. The only content
+ *          in the product the learner wrote the brief for.
  *
  * NOTHING HERE IS SCORED. It reports clean or not for the proof card, exactly as a first
  * release does, and a wrong answer costs nothing — the card stays collected. Revision
@@ -45,6 +49,7 @@ import {
 } from '@/content/roots'
 import { LEGEND_FRAMES, fillFrame, fillEnglish } from '@/content/legend'
 import { DROPS } from '@/content/drops'
+import { IDIOMS } from '@/content/idioms'
 import type { CardKind } from '@/content/collection'
 
 export interface RevisionLine {
@@ -71,6 +76,8 @@ export function revisionFor(
     gender?: 'm' | 'f' | null
     /** Needed by the words branch, which asks only for what this learner owns. */
     inventory?: Record<string, unknown>
+    /** The asked branch's only source — this content lives nowhere else. */
+    asked?: { pt: string; en: string; note: string; at: string }[]
   },
 ): RevisionLine[] {
   if (kind === 'vibe') {
@@ -120,6 +127,18 @@ export function revisionFor(
       .map((sit) => ({ ask: sit.release.ask, answer: sit.release.answer }))
   }
 
+  if (kind === 'idiom') {
+    /*
+      ASKED THE WAY THE CARD ASKS IT: the nonsense Portuguese is the prompt and the English
+      is the answer, because that is the direction the joke runs. Reversing it — English in,
+      Portuguese out — would be testing somebody's memory of a translation this product
+      openly calls wrong.
+    */
+    const idiom = IDIOMS.find((i) => i.id === id)
+    if (!idiom) return []
+    return [{ ask: idiom.literal, answer: idiom.english }]
+  }
+
   if (kind === 'words') {
     /*
       A SHELF ASKS FOR THE WORDS ON IT THAT ARE YOURS.
@@ -136,6 +155,21 @@ export function revisionFor(
     return Object.entries(PIECES)
       .filter(([pieceId, piece]) => piece.shelf === (id as Shelf) && owned.has(pieceId))
       .map(([, piece]) => ({ ask: piece.gloss, answer: piece.target }))
+  }
+
+  if (kind === 'asked') {
+    /*
+      THE SENTENCE THEY WANTED, asked back from their own English.
+
+      Matched on the slug rather than looked up in a table, because there is no table:
+      this content was written by the learner and lives only on their record. The slug is
+      built the same way collected() and askedCards() build it, so the three agree.
+    */
+    const slug = (pt: string) =>
+      pt.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    const ask = (me.asked ?? []).find((a) => a?.pt && slug(a.pt) === id)
+    if (!ask) return []
+    return [{ ask: ask.en || ask.pt, answer: ask.pt }]
   }
 
   /*
@@ -162,5 +196,8 @@ export function revisionTitle(kind: CardKind, id: string): string {
   /* A night is called what happened, and a shelf what it holds. */
   if (kind === 'drop') return DROPS.find((d) => d.id === id)?.event ?? id
   if (kind === 'words') return SHELVES.find((sh) => sh.id === id)?.label ?? id
+  /* An idiom is called by its answer; an asked sentence has no name but itself. */
+  if (kind === 'idiom') return IDIOMS.find((i) => i.id === id)?.english ?? id
+  if (kind === 'asked') return 'A sentence you asked for'
   return LEGEND_FRAMES.find((f) => f.id === id)?.ask_en ?? id
 }

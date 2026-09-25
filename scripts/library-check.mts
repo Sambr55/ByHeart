@@ -39,6 +39,8 @@ import { collected, decks, everyCard, type CardKind } from '../content/collectio
 import { revisionFor } from '../content/revision'
 import { DROPS } from '../content/drops'
 import { SHELVES, PIECES } from '../content/roots'
+import { IDIOMS } from '../content/idioms'
+import { PROFILE_COPY } from '../content/profile-copy'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -61,6 +63,8 @@ console.log('\nevery kind has a drawer\n')
     sections_completed: ['top_gun'],
     legend: [{ frame_id: 'name', values: { name: 'Jane' } }],
     drops_done: DROPS.map((d) => d.id),
+    idioms_got: IDIOMS.map((i) => i.id),
+    asked: [{ pt: 'Pode partir a conta?', en: 'Can you split the bill?', note: '', at: '2026-09-20' }],
     inventory: Object.fromEntries(Object.keys(PIECES).slice(0, 40).map((id) => [id, {}])),
     card_levels: {},
     stageNow: 'basics',
@@ -75,6 +79,13 @@ console.log('\nthe open-ended decks do not invent a total\n')
   const byId = Object.fromEntries(ds.map((d) => [d.id, d]))
   ok('nights has no total', byId.drops?.total === undefined, String(byId.drops?.total))
   ok('words has no total', byId.words?.total === undefined, String(byId.words?.total))
+  /*
+    ASKED is the one deck whose content this product did not author — it is whatever the
+    learner typed — so a total here would be a claim about somebody else's sentences.
+  */
+  ok('asked has no total', byId.asked?.total === undefined, String(byId.asked?.total))
+  /* Idioms ARE closed: thirty authored, so this one reads as a collection to finish. */
+  ok('lost in translation has one', byId.idioms?.total === IDIOMS.length, String(byId.idioms?.total))
   /* And the closed ones do, because "4 of 13" is the whole point of a closed deck. */
   ok('legend has one', typeof byId.legend?.total === 'number', String(byId.legend?.total))
   ok('rooms has one', typeof byId.vibes?.total === 'number', String(byId.vibes?.total))
@@ -133,11 +144,16 @@ console.log('\nevery kind can be revised\n')
     legend: [{ frame_id: 'name', values: { name: 'Jane' } }],
     gender: 'f' as const,
     inventory: Object.fromEntries(Object.keys(PIECES).slice(0, 60).map((id) => [id, {}])),
+    asked: [
+      { pt: 'Pode partir a conta?', en: 'Can you split the bill?', note: '', at: '2026-09-20' },
+    ],
   }
   const cases: [CardKind, string][] = [
     ['frame', 'name'],
     ['drop', DROPS[0].id],
     ['words', PIECES[Object.keys(me.inventory)[0]].shelf],
+    ['idiom', IDIOMS[0].id],
+    ['asked', 'pode-partir-a-conta'],
   ]
   for (const [kind, id] of cases) {
     const lines = revisionFor(kind, id, me)
@@ -170,7 +186,15 @@ await page.waitForTimeout(2500)
 const drawers = (await page.evaluate(
   `Array.from(document.querySelectorAll('[data-testid^="deck-"]')).map(e=>e.getAttribute('data-testid'))`,
 )) as string[]
-for (const id of ['deck-legend', 'deck-vibes', 'deck-sheets', 'deck-drops', 'deck-words']) {
+for (const id of [
+  'deck-legend',
+  'deck-vibes',
+  'deck-sheets',
+  'deck-drops',
+  'deck-words',
+  'deck-idioms',
+  'deck-asked',
+]) {
   ok(id + ' is drawn', drawers.includes(id))
 }
 
@@ -199,6 +223,29 @@ if (nights) {
   ok('the kept night is on the shelf', Boolean(has))
 }
 
+/*
+  AND THE STRIPS ARE GONE. Sam: "for my money we don't need the blue boxes above the
+  grids anymore."
+
+  Asserted on the rendered screen rather than on the SECTIONS array, because the failure
+  worth catching is a strip coming BACK — somebody restoring a list that the library
+  already holds, which is the exact drift that made five of these redundant one at a
+  time. SAID COLD is named as the one that stays, so removing it also fails here.
+*/
+console.log('\nthe strips are gone, except the one that is not a collection\n')
+{
+  const text = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
+  for (const label of [
+    PROFILE_COPY.aside_label,
+    PROFILE_COPY.words_label,
+    PROFILE_COPY.idioms_label,
+    PROFILE_COPY.drops_label,
+  ]) {
+    ok(label + ' is not a strip any more', !text.includes(label))
+  }
+  ok(PROFILE_COPY.cold_label + ' stays', text.includes(PROFILE_COPY.cold_label))
+}
+
 await browser.close()
 
 console.log('')
@@ -207,4 +254,4 @@ if (problems.length) {
   for (const p of problems) console.log('  - ' + p)
   process.exit(1)
 }
-console.log('five decks, everything filed, nothing evicted')
+console.log('seven decks, everything filed, nothing evicted')

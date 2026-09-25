@@ -21,17 +21,22 @@
  *     happened rather than anything about the learner.
  *
  * SO THE DECK IS THE KIND, and the level moves to being something a card SAYS rather than
- * the drawer it lives in. Five decks, each collapsible, each with its own count — which is
- * what Sam asked for directly, and which also fixes the capacity problem by construction:
- * a deck is as big as its content and does not pretend to a fixed size it cannot keep.
+ * the drawer it lives in. Seven decks, each collapsible, each with its own count — which
+ * is what Sam asked for directly, and which also fixes the capacity problem by
+ * construction: a deck is as big as its content and does not pretend to a fixed size it
+ * cannot keep.
  *
- * THE FIVE DECKS:
+ * THE SEVEN DECKS:
  *
  *   legend   the questions about yourself, answered. Closed: thirteen of thirteen.
  *   vibes    rooms been through. Closed, and grows when rooms are authored.
  *   sheets   closed sets kept from the feed.
  *   drops    nights taken. OPEN-ENDED, and the only deck whose cards have a date.
  *   words    the nine shelves, each a living card that grows. Never full — see below.
+ *   idioms   the English phrases you had the answer to. A closed set of thirty, so this
+ *            deck has a real total and reads as a collection to finish.
+ *   asked    sentences you asked for and kept. Open-ended by definition: it is whatever
+ *            this learner wanted to say, which nothing in the content can predict.
  *
  * A LIVING CARD IS STILL A CARD. Sam chose that a word shelf is collected the moment it
  * has its first word and stays, showing what it holds rather than how near the end it is.
@@ -45,11 +50,12 @@
 import { SETS, CRATES, PIECES, SHELVES, type Shelf, type CultureFamily } from '@/content/roots'
 import { LEGEND_FRAMES, STAGES, type Stage } from '@/content/legend'
 import { DROPS } from '@/content/drops'
+import { IDIOMS } from '@/content/idioms'
 
-export type CardKind = 'sheet' | 'vibe' | 'frame' | 'drop' | 'words'
+export type CardKind = 'sheet' | 'vibe' | 'frame' | 'drop' | 'words' | 'idiom' | 'asked'
 
 /** The five drawers, in the order they are shown. */
-export type DeckId = 'legend' | 'vibes' | 'sheets' | 'drops' | 'words'
+export type DeckId = 'legend' | 'vibes' | 'sheets' | 'drops' | 'words' | 'idioms' | 'asked'
 
 export interface CollectedCard {
   kind: CardKind
@@ -124,6 +130,11 @@ export function everyCard(): { kind: CardKind; id: string; label: string }[] {
     ...LEGEND_FRAMES.map((f) => ({ kind: 'frame' as const, id: f.id, label: f.ask_en })),
     ...DROPS.map((d) => ({ kind: 'drop' as const, id: d.id, label: d.event })),
     ...SHELVES.map((s) => ({ kind: 'words' as const, id: s.id, label: s.label })),
+    ...IDIOMS.map((i) => ({ kind: 'idiom' as const, id: i.id, label: i.english })),
+    /*
+      ASKED has no authored universe — the cards are whatever this learner typed — so
+      there is nothing to list here. That absence is the reason its deck has no total.
+    */
   ]
 }
 
@@ -151,6 +162,8 @@ export function collected(me: {
   sections_completed?: string[]
   legend?: { frame_id: string; values: Record<string, string> }[]
   drops_done?: string[]
+  idioms_got?: string[]
+  asked?: { pt: string; en: string; note: string; at: string }[]
   inventory?: Record<string, unknown>
   card_levels?: Record<string, Stage['id']>
   stageNow: Stage['id']
@@ -223,6 +236,45 @@ export function collected(me: {
     out.push({ kind: 'words', id: s.id, label: s.label, holds: counts[s.id] })
   }
 
+  /*
+    AN IDIOM IS ONE YOU HAD THE ANSWER TO, which is `idioms_got` rather than every idiom
+    met. Meeting a card is attendance and this product does not score attendance — the
+    same rule the strip this replaces was written with.
+
+    Labelled with the ENGLISH, because that is the answer and therefore the thing being
+    collected. The literal Portuguese is the riddle, and a shelf of unsolved riddles would
+    be a list of jokes with the punchlines removed.
+  */
+  const got = new Set(me.idioms_got ?? [])
+  for (const i of IDIOMS) {
+    if (!got.has(i.id)) continue
+    out.push({ kind: 'idiom', id: i.id, label: i.english, level: levelOf('idiom:' + i.id) })
+  }
+
+  /*
+    A SENTENCE YOU ASKED FOR AND KEPT.
+
+    The one deck whose content this product did not author — it is whatever somebody
+    wanted to say, which is a better record of what they are learning than anything DUB
+    can infer from what it chose to teach.
+
+    Keyed on the Portuguese, the same way askedCards keys its feed cards, so a sentence is
+    one card however many times it was asked for. Labelled with the English, because that
+    is what somebody scanning for a sentence they kept will be looking for.
+
+    No level: these arrive whenever somebody needed them, which is a fact about the moment
+    rather than about how far along they were.
+  */
+  for (const a of me.asked ?? []) {
+    if (!a?.pt) continue
+    out.push({
+      kind: 'asked',
+      id: a.pt.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+      label: a.en || a.pt,
+      on: a.at,
+    })
+  }
+
   return out
 }
 
@@ -233,6 +285,8 @@ const DECK_OF: Record<CardKind, DeckId> = {
   sheet: 'sheets',
   drop: 'drops',
   words: 'words',
+  idiom: 'idioms',
+  asked: 'asked',
 }
 
 const DECKS: { id: DeckId; label: string; holds: string }[] = [
@@ -241,6 +295,16 @@ const DECKS: { id: DeckId; label: string; holds: string }[] = [
   { id: 'sheets', label: 'CHEAT SHEETS', holds: 'Closed sets, kept for when you need them.' },
   { id: 'drops', label: 'NIGHTS', holds: 'What you went to, and the language for it.' },
   { id: 'words', label: 'WORDS', holds: 'Everything you own, by what sort of word it is.' },
+  /*
+    LOST IN TRANSLATION, which is what Sam asked for over WHAT WE SAY: "the only thing
+    missing from the grids is the what we say (which we need a better, funny title for)".
+
+    The card is an English idiom rendered faithfully and uselessly into Portuguese — "Bob
+    é o teu tio" — and the joke is exactly the thing the name says. It is also the one
+    label here that describes the gag rather than the mechanic.
+  */
+  { id: 'idioms', label: 'LOST IN TRANSLATION', holds: 'English that makes no sense anywhere else.' },
+  { id: 'asked', label: 'YOU ASKED FOR', holds: 'Sentences you wanted, kept for next time.' },
 ]
 
 /**
@@ -255,7 +319,9 @@ export function decks(all: CollectedCard[]): Deck[] {
     legend: LEGEND_FRAMES.length,
     vibes: CRATES.filter((c) => !c.drop).length,
     sheets: SETS.length,
-    /* drops and words have no total — see the note on Deck.total. */
+    /* Thirty authored, and a closed set — so this one reads as a collection to finish. */
+    idioms: IDIOMS.length,
+    /* drops, words and asked have no total — see the note on Deck.total. */
   }
   return DECKS.map((d) => {
     const cards = all.filter((c) => DECK_OF[c.kind] === d.id)
@@ -264,7 +330,9 @@ export function decks(all: CollectedCard[]): Deck[] {
       was. Everything else keeps collection order, which is the order they were finished
       in and the only order the learner had any part in choosing.
     */
-    if (d.id === 'drops') cards.sort((a, b) => (b.on ?? '').localeCompare(a.on ?? ''))
+    if (d.id === 'drops' || d.id === 'asked') {
+      cards.sort((a, b) => (b.on ?? '').localeCompare(a.on ?? ''))
+    }
     return { ...d, cards, total: totals[d.id] }
   })
 }
