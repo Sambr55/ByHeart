@@ -65,8 +65,15 @@ export const CLUB = {
       Legend you can introduce yourself in Portuguese without reading it off a screen. Now
       we are going to help you grow your Legend."
     */
-    body: 'Now, with your Legend you can introduce yourself in Portuguese without reading it off a screen.',
-    body_two: 'Now we are going to help you grow your Legend. This is your way in from now on — there is a lot to do and discover.',
+    body: 'You can now introduce yourself in Portuguese with your Legend without reading it off a screen.',
+    /*
+      "Front door to Lisboa", which is a bigger claim than "your way in".
+
+      Sam's wording, and the Portuguese spelling of the city is deliberate: this is the
+      one screen where somebody has just proved they can introduce themselves in
+      Portuguese, so the city gets its own name back.
+    */
+    body_two: 'Being in the Dub Club will help you grow your Legend. This is the front door to Lisboa from now on — there is a lot to do and discover.',
     /*
       NOT A BUTTON. Sam: "remove CTA, add: Swipe ↑ to continue."
 
