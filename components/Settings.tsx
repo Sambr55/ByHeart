@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Back } from '@/components/Back'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
@@ -106,8 +107,85 @@ export function Settings() {
           <SoundChoice />
           <PurposeChoice />
         </section>
+
+        <Crashes />
       </div>
       <BottomNavSpace />
     </main>
+  )
+}
+
+/**
+ * What broke, if anything did — the only place a crash on this device is readable.
+ *
+ * Sam hit the error screen mid-run and it showed nothing identifiable: `digest` is a
+ * SERVER fact, and a client render throw has none, so the screenshot carried no evidence
+ * at all. Four attempts to reproduce it from the outside found nothing, which is the cost
+ * of an error screen that records nothing.
+ *
+ * app/error.tsx writes the last five here. This reads them back, and only appears when
+ * there is something to show — an empty "no crashes" panel on a settings screen is an
+ * invitation to worry about a thing that has not happened.
+ *
+ * Not sent anywhere. It is on the device, exactly like everything else about this
+ * learner, and a photograph of it is enough to find the fault.
+ */
+function Crashes() {
+  const [rows, setRows] = useState<
+    { at: string; where: string; message: string; digest: string | null; stack?: string }[]
+  >([])
+
+  useEffect(() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem('byheart.crashes') ?? '[]')
+      setRows(Array.isArray(raw) ? raw : [])
+    } catch {
+      /* Storage unavailable, which is not itself worth reporting. */
+    }
+  }, [])
+
+  if (!rows.length) return null
+
+  return (
+    <section
+      data-testid="settings-crashes"
+      className="flex flex-col gap-3 border-t border-line pt-6"
+    >
+      <div className="flex items-baseline gap-3">
+        <h2 className="eyebrow min-w-0 flex-1 text-accent">WHAT BROKE</h2>
+        <button
+          type="button"
+          data-testid="crashes-clear"
+          onClick={() => {
+            try {
+              localStorage.removeItem('byheart.crashes')
+            } catch {
+              /* As above. */
+            }
+            setRows([])
+          }}
+          className="tap-target shrink-0 text-xs text-muted underline"
+        >
+          clear
+        </button>
+      </div>
+      <p className="text-xs leading-relaxed text-muted">
+        The last few times a screen failed to draw. Nothing here was sent anywhere — show
+        this to whoever is fixing it.
+      </p>
+      <ul className="flex flex-col gap-3">
+        {rows.map((r, i) => (
+          <li key={i} className="flex flex-col gap-1 rounded border border-line p-3">
+            <span className="eyebrow text-[0.6rem] text-muted">
+              {r.at.slice(0, 16).replace('T', ' ')} · {r.where}
+            </span>
+            <span className="pt text-xs leading-relaxed">{r.message}</span>
+            {r.digest ? (
+              <span className="text-[0.6rem] text-muted">{r.digest}</span>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }

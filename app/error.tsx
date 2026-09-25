@@ -36,6 +36,37 @@ export default function Error({
       screen that already knows something is wrong.
     */
     console.error('[dub] render failed', error.digest ?? '', error)
+    /*
+      AND ONTO THE RECORD, because the console is not reachable from a phone.
+
+      Sam hit this screen mid-run and the only thing it showed was the apology — no
+      digest, because a digest is a SERVER fact and this was a client render. So the crash
+      could not be retraced at all: not from the screenshot, not from the device, not
+      afterwards. Four separate attempts to reproduce it from the outside found nothing,
+      which is the cost of an error screen that records nothing.
+
+      Written where everything else about this learner already lives, and capped at the
+      last five so a crash loop cannot fill the record. Wrapped in try/catch because
+      storage throws in private mode, and an error handler that throws is the one bug
+      nobody can see.
+    */
+    try {
+      const KEY = 'byheart.crashes'
+      const prior = JSON.parse(localStorage.getItem(KEY) ?? '[]')
+      const next = [
+        {
+          at: new Date().toISOString(),
+          where: window.location.pathname + window.location.search,
+          message: String(error?.message ?? error).slice(0, 300),
+          digest: error?.digest ?? null,
+          stack: String(error?.stack ?? '').slice(0, 900),
+        },
+        ...(Array.isArray(prior) ? prior : []),
+      ].slice(0, 5)
+      localStorage.setItem(KEY, JSON.stringify(next))
+    } catch {
+      /* Storage is unavailable. The console line above is still there. */
+    }
   }, [error])
 
   return (
@@ -73,9 +104,21 @@ export default function Error({
         the server recorded, and asking for it later is asking somebody to reproduce a
         crash they cannot reproduce.
       */}
-      {error.digest ? (
+      {/*
+        WHAT BROKE, ON THE SCREEN.
+
+        This showed `digest` and nothing else, so a client-side throw — which has no
+        digest — left a screen with no identifying mark on it whatsoever. That is the
+        difference between a bug report and a screenshot of an apology.
+
+        Small and last, because somebody in a café needs the way out first and the
+        diagnosis never. But it is THERE, so a photograph of this screen is enough to find
+        the fault, which is how this one should have been caught.
+      */}
+      {error.digest || error.message ? (
         <p className="pt text-center text-xs text-muted" data-testid="error-digest">
-          {error.digest}
+          {error.digest ? error.digest + ' · ' : ''}
+          {error.message ? error.message.slice(0, 140) : ''}
         </p>
       ) : null}
     </main>
