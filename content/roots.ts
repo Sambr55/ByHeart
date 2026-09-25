@@ -914,7 +914,7 @@ export const TOP_GUN: Root[] = [
     source: 'This is a school. You are here to work.',
     target: 'Isto é uma escola. Estás aqui para trabalhar.',
     semantic_bridge:
-      'The whole film is set at a school, which is easy to forget under the jets. Escola covers every kind — the one your children go to, the one you learn Portuguese at, a flight school full of people shouting. And trabalho does double duty: the noun for your work and, with one letter changed, the verb for doing it.',
+      'The whole film is set at a school, which is easy to forget under the jets. Escola covers every kind — the one you learn Portuguese at, the one down your street, a flight school full of people shouting. And trabalho does double duty: the noun for your work and, with one letter changed, the verb for doing it.',
     subtext: 'Said flatly, to people who thought they had arrived.',
     extracts: [
       { id: 'escola', target: 'a escola', gloss: 'school', shelf: 'things', gender: 'f' },
@@ -922,11 +922,33 @@ export const TOP_GUN: Root[] = [
     ],
     branches: [
       { target: 'Trabalho em Lisboa.', en: 'I work in Lisbon.', demonstrates: ['trabalho'] },
-      { target: 'Os meus filhos andam na escola.', en: 'My children are at school.', demonstrates: ['escola'] },
+      /*
+        THE SCHOOL YOU ARE AT, not the one your children are at.
+
+        Sam: "remove the children are at school part of Top Gun vibe and replace with
+        something else. I suspect my audiences will be younger."
+
+        The old branch was "Os meus filhos andam na escola" — a sentence only a parent can
+        say, on the warm-up vibe, which is the first Portuguese anybody in this product
+        ever produces. A learner who does not have children was being handed a sentence
+        about a life that is not theirs on day one, and the point of a branch is that it
+        is a thing YOU could say.
+
+        This one is also closer to what the bridge above already claims escola covers —
+        "the one you learn Portuguese at" — so the example now demonstrates the reading
+        the lesson leads with rather than the one it mentions in passing. And `ando` is
+        the same verb the old sentence used in its third person (andam), so nothing about
+        the grammar on show has been made easier.
+      */
+      { target: 'Ando numa escola de português.', en: 'I go to a Portuguese school.', demonstrates: ['escola'] },
       { target: 'Trabalho com coisas criativas.', en: 'I work with creative things.', demonstrates: ['trabalho'] },
     ],
-    reinforces: ['o_meu', 'filhos', 'coisa'],
-    helpers: { 'Isto': 'this', 'é': 'is', 'uma': 'a', 'Estás': 'you are', 'aqui': 'here', 'para': 'to', 'trabalhar': 'to work', 'em': 'in', 'meus': 'my (more than one)', 'andam': 'go', 'na': 'at the', 'com': 'with', 'coisas': 'things', 'criativas': 'creative' },
+    /*
+      `filhos` went with the branch that used it — a root should only claim to strengthen
+      words it actually puts in front of somebody, and nothing here says children any more.
+    */
+    reinforces: ['o_meu', 'coisa'],
+    helpers: { 'Isto': 'this', 'é': 'is', 'uma': 'a', 'Estás': 'you are', 'aqui': 'here', 'para': 'to', 'trabalhar': 'to work', 'em': 'in', 'Ando': 'I go', 'numa': 'at a', 'de': 'of', 'português': 'Portuguese', 'com': 'with', 'coisas': 'things', 'criativas': 'creative' },
     transfer_prompt: {
       context: 'Somebody has asked what you do, and you would rather keep it short.',
       ask: 'I work in Lisbon.',
