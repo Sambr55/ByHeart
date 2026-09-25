@@ -2437,7 +2437,7 @@ export function Card({
                           data-testid="drop-kept"
                           className="eyebrow text-[0.6rem] text-white/70"
                         >
-                          IN YOUR LIBRARY
+                          KEPT
                         </span>
                       ) : (
                         <button

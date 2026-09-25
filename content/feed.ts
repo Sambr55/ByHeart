@@ -1238,7 +1238,12 @@ export function cardFace(card: FeedCard): {
       then the photograph IS the clue.
     */
     return {
-      eyebrow: card.idiom.blue ? 'NOT SAFE' : 'WHAT WE SAY',
+      /*
+        LOST IN TRANSLATION is the deck's name and too long for an eyebrow at fourteen
+        characters, so the card keeps a short form of the same idea rather than the old
+        WHAT WE SAY — which now names nothing, the strip it belonged to having gone.
+      */
+      eyebrow: card.idiom.blue ? 'NOT SAFE' : 'LOST IN TRANS.',
       title: card.idiom.literal,
       blurb: 'What do we say?',
       image: idiomImage(card.idiom),

@@ -235,15 +235,21 @@ if (nights) {
 console.log('\nthe strips are gone, except the one that is not a collection\n')
 {
   const text = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
-  for (const label of [
-    PROFILE_COPY.aside_label,
-    PROFILE_COPY.words_label,
-    PROFILE_COPY.idioms_label,
-    PROFILE_COPY.drops_label,
-  ]) {
+  /*
+    NAMED LITERALLY, not read from PROFILE_COPY.
+
+    The first version of this asserted against PROFILE_COPY.aside_label and its three
+    neighbours — which nothing renders any more, so renaming one of those constants would
+    have quietly changed what this check was looking for and passed either way. A check
+    that cannot fail is worse than no check, because it reads like cover.
+
+    These four strings are what a learner would SEE if a strip came back, which is the
+    thing being defended.
+  */
+  for (const label of ['PUT ASIDE', 'YOUR WORDS', 'WHAT WE SAY', 'DROPS']) {
     ok(label + ' is not a strip any more', !text.includes(label))
   }
-  ok(PROFILE_COPY.cold_label + ' stays', text.includes(PROFILE_COPY.cold_label))
+  ok('SAID COLD stays', text.includes(PROFILE_COPY.cold_label))
 }
 
 await browser.close()

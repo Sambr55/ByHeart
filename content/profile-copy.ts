@@ -30,9 +30,6 @@ export const PROFILE_COPY = {
     product rather than about the learner: somebody hunting for a thing they set aside had
     to remember whether they had bookmarked it or asked for it.
   */
-  aside_label: 'PUT ASIDE',
-  aside_note: 'Cards you bookmarked and sentences you asked for, kept for when you need them.',
-  aside_empty: 'Nothing here yet. The bookmark on any card, or KEEP THIS on a sentence you asked for.',
   /*
     THE PROOF, AS A SECTION RATHER THAN A LINK IN A DRAWER.
 
@@ -51,9 +48,6 @@ export const PROFILE_COPY = {
     link called "Vocab library". One is a shop window and the other is the cupboard, and
     the shop window had the better position.
   */
-  words_label: 'YOUR WORDS',
-  words_note: 'Every piece you have banked, the ones you have used most recently first.',
-  words_empty: 'Nothing banked yet. Words arrive as you go through a vibe.',
   /*
     DROPS, which is what the product calls them everywhere else.
 
@@ -87,9 +81,6 @@ export const PROFILE_COPY = {
     has turned over twenty and got four sees four, which is the honest number and also the
     one that goes up when they get better.
   */
-  idioms_label: 'WHAT WE SAY',
-  idioms_note: 'English phrases you knew the Portuguese for.',
-  idioms_empty: 'None yet. They turn up in the Club — guess, then turn the card over.',
   /*
     The one line on Yours that says where somebody is going rather than where they have been.
 
@@ -117,9 +108,6 @@ export const PROFILE_COPY = {
     one screen down and measuring only the vocabulary, would be two answers to one
     question. PROFILE_COPY.stage_next carries it.
   */
-  drops_label: 'DROPS',
-  drops_note: 'Pegged to something really happening, with the language you took to it.',
-  drops_empty: 'None yet. Open a drop from the Club and finish a room, and it lands here.',
   /*
     The Legend, as the hero of this screen rather than a row on it.
 
