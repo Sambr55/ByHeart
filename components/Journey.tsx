@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, askFor, cardFor, frameApplies, frameForPurpose, myAge, myName, personalise, framesJustOpened, legendStatus, metIn,
+import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, askFor, cardFor, frameApplies, knownValues, readableFrame, frameForPurpose, myAge, myName, personalise, framesJustOpened, legendStatus, metIn,
   provenanceOf, fillFrame, fillEnglish, type LegendFrame, worthSaving } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
@@ -4587,6 +4587,15 @@ function LegendOpened({
   /* Where THIS learner met each word — see provenanceOf, which was naming the crate
      a word is authored in rather than the one they played. */
   const provenance = provenanceOf(first, metIn(learner.evidence ?? []))
+  /*
+    What the record already knows about this frame, and whether that is all of it.
+
+    An answer the learner has actually given wins over the profile — they may have edited
+    it on the card — so the saved values go on top of what knownValues derives.
+  */
+  const answered = (learner.legend ?? []).find((a) => a.frame_id === first.id)
+  const known = { ...knownValues(first, learner), ...(answered?.values ?? {}) }
+  const sayable = readableFrame(first, known)
 
   return (
     <Shell stage="CHOICE" eyebrow="YOUR LEGEND">
@@ -4664,10 +4673,40 @@ function LegendOpened({
           */}
           <div className="flex flex-col gap-3">
             <p className="eyebrow text-muted">YOU SAY</p>
-            <p data-testid="opened-say" className="pt t-said text-accent">
-              {fillFrame(first, {}, learner.profile?.gender ?? null)}
-            </p>
-            <p className="text-sm text-muted">{fillEnglish(first, {})}</p>
+            {/*
+              THEIR OWN SENTENCE, NOT THE TEMPLATE.
+
+              Sam: "fix this screen so sou nationality isn't in large script and picks up
+              actual nationality."
+
+              This was fillFrame(first, {}) — an empty values object — so every slot came
+              out as its authored brace and the screen shouted "Sou {nationality}." at
+              3.5rem, wrapping off the side of a phone. The empty object was deliberate:
+              the frame is one the learner has just UNLOCKED rather than answered, and the
+              screen means to show the shape.
+
+              But the shape is the part already known. `origin` wants a nationality and a
+              town, and both are on the profile before this screen can exist — the lesson
+              that banks the words is the same lesson that asks the question. So the
+              sentence is theirs, and the claim above it ("here is the first thing you can
+              say") becomes literally true rather than a promise about a template.
+
+              WHERE IT CANNOT BE FILLED, the English question carries the screen instead.
+              A half-filled frame is worse than none — "Sou escocês. Sou de {place}." reads
+              as a bug — and a brace at this size is not a sentence in any language.
+            */}
+            {sayable ? (
+              <>
+                <p data-testid="opened-say" className="pt t-said text-accent">
+                  {fillFrame(first, known, learner.profile?.gender ?? null)}
+                </p>
+                <p className="text-sm text-muted">{fillEnglish(first, known)}</p>
+              </>
+            ) : (
+              <p data-testid="opened-say" className="t-said text-accent">
+                {first.ask_en}
+              </p>
+            )}
           </div>
 
           {/*

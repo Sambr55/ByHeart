@@ -820,6 +820,65 @@ export function statusOf(me: {
 }
 
 /**
+ * What this learner's record already knows about a frame, as slot values.
+ *
+ * Sam, on the Legend-open screen: "fix this screen so sou nationality isn't in large
+ * script and picks up actual nationality. Probably similar problem to above."
+ *
+ * It rendered `fillFrame(frame, {}, gender)` — an empty values object — so every slot came
+ * out as its authored brace and the screen shouted "Sou {nationality}." at 3.5rem, which
+ * overflows a phone and is not Portuguese. The screen is showing a question the learner
+ * has just UNLOCKED rather than answered, so the empty object was deliberate: it shows the
+ * shape. The trouble is that the shape is the one thing already known.
+ *
+ * `origin` asks for a nationality and a town, and both are on the profile the moment the
+ * origin question is answered in a lesson — which happens before this screen can appear,
+ * because that lesson is what banks the words that open the frame. So the sentence can be
+ * theirs rather than a template.
+ *
+ * ONLY WHAT IS ACTUALLY KNOWN. A slot with nothing behind it is left out, and the caller
+ * decides what to do about it — see readableFrame. Guessing a value would put a sentence
+ * in somebody's mouth that is not true of them, which is the fault this whole file spends
+ * its length avoiding.
+ */
+export function knownValues(
+  frame: LegendFrame,
+  me: {
+    display_name?: string | null
+    profile?: {
+      nationality?: string | null
+      from_place?: string | null
+      age?: number | null
+    } | null
+  },
+): Record<string, string> {
+  const out: Record<string, string> = {}
+  const put = (key: string, v: string | null | undefined) => {
+    const t = (v ?? '').toString().trim()
+    if (t) out[key] = t
+  }
+  for (const slot of frame.slots) {
+    if (slot.key === 'nationality') put(slot.key, me.profile?.nationality)
+    else if (slot.key === 'place') put(slot.key, me.profile?.from_place)
+    else if (slot.kind === 'name') put(slot.key, me.display_name)
+    else if (slot.kind === 'number' && me.profile?.age) put(slot.key, say(me.profile.age))
+  }
+  return out
+}
+
+/**
+ * Whether a frame can be shown as a finished sentence at all.
+ *
+ * True only when EVERY slot has a value, because a half-filled frame is worse than an
+ * empty one: "Sou escocês. Sou de {place}." reads as a bug rather than as a shape. A
+ * caller with a false here should show the English question instead of the Portuguese
+ * pattern — see the Legend-open screen.
+ */
+export function readableFrame(frame: LegendFrame, values: Record<string, string>): boolean {
+  return frame.slots.every((slot) => Boolean(values[slot.key]))
+}
+
+/**
  * The question as it would actually be put TO THIS LEARNER.
  *
  * `ask` is what a stranger says to you, and a stranger says it with an ending. "És

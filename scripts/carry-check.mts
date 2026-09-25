@@ -24,7 +24,7 @@
 import { ROOTS, PIECES } from '../content/roots'
 import { INTERESTS } from '../content/interests'
 import { INSIGHTS } from '../content/osmosis'
-import { personalise, myAge, myName, AUTHORED_NAME, AUTHORED_AGES } from '../content/legend'
+import { personalise, myAge, myName, AUTHORED_NAME, AUTHORED_AGES, LEGEND_FRAMES, knownValues, readableFrame, fillFrame, fillEnglish } from '../content/legend'
 import { say, sayEn } from '../content/numbers'
 
 const fail: string[] = []
@@ -410,6 +410,58 @@ console.log('\nhow things stand, carried into the root that asked\n')
     /* Unanswered changes nothing, which is what makes this safe for a new learner. */
     const untouched = personalise(raw, { profile: {} })
     ok('an unanswered card leaves the root alone', untouched.target === raw.target, untouched.target)
+  }
+}
+
+/*
+  NO SCREEN SHOWS A LEARNER A BRACE.
+
+  Sam, on the Legend-open screen: "fix this screen so sou nationality isn't in large script
+  and picks up actual nationality." It rendered fillFrame(frame, {}) — an empty values
+  object — so the authored `{nationality}` came out verbatim at 3.5rem and wrapped off the
+  side of a phone.
+
+  Asserted as the property rather than on that one screen: a frame is shown filled or it is
+  not shown as Portuguese at all. readableFrame is the test both sides use, so a frame that
+  cannot be completed from the record can never reach the hero slot.
+*/
+console.log('\nno frame reaches a screen with its braces still in it\n')
+{
+  const jane = {
+    display_name: 'Jane',
+    profile: { nationality: 'escocês', from_place: 'Glasgow', age: 30, gender: 'f' as const },
+  }
+  for (const frame of LEGEND_FRAMES) {
+    const known = knownValues(frame, jane)
+    /*
+      Either every slot is filled, or the caller must not render the Portuguese. What is
+      forbidden is the third case: a sentence that is PART template, which is what put a
+      brace on Sam's screen.
+    */
+    if (!readableFrame(frame, known)) continue
+    const said = fillFrame(frame, known, 'f')
+    const glossed = fillEnglish(frame, known)
+    ok('no brace survives in ' + frame.id, !/[{}]/.test(said), said)
+    ok('nor in its gloss for ' + frame.id, !/[{}]/.test(glossed), glossed)
+  }
+
+  /* And the frame Sam actually hit fills from the profile alone. */
+  const origin = LEGEND_FRAMES.find((f) => f.id === 'origin')
+  ok('the origin frame exists', Boolean(origin), 'origin')
+  if (origin) {
+    const known = knownValues(origin, jane)
+    ok('origin fills from the profile', readableFrame(origin, known), JSON.stringify(known))
+    ok(
+      'and it agrees with the speaker',
+      fillFrame(origin, known, 'f').includes('escocesa'),
+      fillFrame(origin, known, 'f'),
+    )
+    /* A record that knows nothing must NOT be readable — that is what forces the fallback. */
+    ok(
+      'an empty record is not sayable',
+      !readableFrame(origin, knownValues(origin, { profile: {} })),
+      'origin with nothing known',
+    )
   }
 }
 
