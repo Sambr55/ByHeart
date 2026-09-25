@@ -59,7 +59,11 @@ export default function Error({
           where: window.location.pathname + window.location.search,
           message: String(error?.message ?? error).slice(0, 300),
           digest: error?.digest ?? null,
-          stack: String(error?.stack ?? '').slice(0, 900),
+          /*
+            The whole stack, not a summary. With sourcemaps served this names files and
+            lines, and truncating it would cut exactly the frames that say which of them.
+          */
+          stack: String(error?.stack ?? '').slice(0, 2000),
         },
         ...(Array.isArray(prior) ? prior : []),
       ].slice(0, 5)

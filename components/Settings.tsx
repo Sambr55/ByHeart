@@ -183,6 +183,23 @@ function Crashes() {
             {r.digest ? (
               <span className="text-[0.6rem] text-muted">{r.digest}</span>
             ) : null}
+            {/*
+              THE STACK, WHICH IS THE ONLY PART THAT NAMES A FILE.
+
+              "undefined is not an object (evaluating 'e.target')" is true of every
+              minified handler in the bundle and identifies none of them — Sam's
+              screenshot carried exactly that and it took four failed searches to admit
+              the message alone is not a diagnosis.
+
+              With productionBrowserSourceMaps on, this resolves to real file names, so a
+              photograph of this block is an address rather than a symptom. Small, wrapped
+              and scrollable, because it is for whoever is fixing it and nobody else.
+            */}
+            {r.stack ? (
+              <pre className="max-h-28 overflow-auto whitespace-pre-wrap break-all text-[0.55rem] leading-relaxed text-muted">
+                {r.stack}
+              </pre>
+            ) : null}
           </li>
         ))}
       </ul>
