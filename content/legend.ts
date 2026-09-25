@@ -258,6 +258,8 @@ export function personalise<T extends {
       nationality?: string | null
       from_place?: string | null
     } | null
+    /** The Legend answers, which is where a CARD_ASK lands — see statusOf. */
+    legend?: { frame_id: string; values: Record<string, string> }[]
   },
 ): T {
   /*
@@ -422,14 +424,37 @@ export function personalise<T extends {
     The nationality pair is read from the frame's own options rather than listed here, so
     adding a sixth nationality needs no change: the card offers the pair and this bends it.
   */
+  /*
+    AND THE STATUS PAIR, for the same reason the other two are here.
+
+    "Sou solteiro" said by a woman is the escocês fault again — myStatus puts her own word
+    on the line and something has to bend its ending. Added as a pair rather than handled
+    inside myStatus so there is ONE place that owns agreement: doing it twice is exactly
+    how the obrigado/obrigada flip happened.
+
+    Only the pair she actually chose, so a line demonstrating the contrast — "Sou casada"
+    next to "Sou casado" — is not flattened into one word before that beat can teach it.
+  */
+  const statusPair = AUTHORED_STATUS.find((x) => x.pt === (statusOf(me) ?? ''))
   const pairs: [string, string][] = [
     ['Obrigado', 'Obrigada'],
     ...(chosen?.f && chosen.f !== chosen.value
       ? ([[chosen.value, chosen.f]] as [string, string][])
       : []),
+    ...(statusPair ? ([[statusPair.pt, statusPair.f]] as [string, string][]) : []),
   ]
   const myForm = (t: string) => {
     if (g !== 'm' && g !== 'f') return t
+    /*
+      NOT A SENTENCE ABOUT SOMEBODY ELSE — see aboutSomebodyElse.
+
+      This is the bend and only the bend. The swaps above still apply to a third-person
+      line, because "Ela não é casada" for somebody who said divorciado should become
+      "Ela não é divorciada" in BOTH languages — the same word the learner is working on,
+      said about another person. What must not happen is the ENDING following the speaker,
+      which produced "Ela não é casado" for a married man.
+    */
+    if (aboutSomebodyElse(t)) return t
     let out = t
     for (const [masc, fem] of pairs) {
       const [from, to] = g === 'm' ? [fem, masc] : [masc, fem]
@@ -441,13 +466,25 @@ export function personalise<T extends {
   }
 
   /*
-    Is this branch the one demonstrating the pair's other ending? If so it is an example
-    of the contrast rather than a line the learner is being handed, so myForm leaves it
-    alone. See the note at the branches below.
+    A SENTENCE ABOUT SOMEBODY ELSE DOES NOT AGREE WITH THE SPEAKER.
+
+    myForm bends every gendered pair on a line to the learner, which is right for "Sou
+    casada" and wrong for "Ela não é casada" — that produced "Ela não é casado" for a
+    married man: a sentence about HER, bent to HIM. The same class of fault as "Sou
+    escocês" said by a woman, in the other direction.
+
+    Agreement follows the subject, and the only subject myForm can know about is the
+    learner. So a line whose subject is a third person is left exactly as authored, and
+    the content owns its own agreement there — which it must, because no transform can
+    tell from a string who ela is.
+
+    Detected on the subject pronoun rather than declared per branch: a line starting Ela,
+    Ele or one of the plurals is not about the speaker, and that is a property of the
+    sentence rather than a flag somebody has to remember to set. The replaced helper —
+    showsOtherForm — was the declared version of this idea and had been dead since the
+    obrigado pass stopped shipping the other form at all.
   */
-  const otherForm = g === 'f' ? 'obrigado' : 'obrigada'
-  const showsOtherForm = (b: { target: string; demonstrates?: string[] }) =>
-    (g === 'm' || g === 'f') && (b.demonstrates ?? []).includes(otherForm)
+  const aboutSomebodyElse = (t: string) => /^(Ela|Ele|Eles|Elas)\b/.test(t.trim())
 
   const mine = (t: string) => {
     /*
@@ -458,7 +495,16 @@ export function personalise<T extends {
       "Sou escocês". The swap puts the learner's words in; the bend makes them agree with
       the learner. That order cannot be reversed.
     */
-    if (!swap) return myForm(myOrigin(myAge(myName(t, me.display_name), me.profile?.age)))
+    /*
+      STATUS BEFORE FORM, for exactly the reason origin is.
+
+      myStatus puts the learner's own word in — casado, solteiro — and myForm then bends
+      whatever is finally on the line to the speaker. Bending first and swapping after
+      would hand a woman "Sou solteiro", which is the escocês bug in a different pair.
+    */
+    const status = statusOf(me)
+    if (!swap)
+      return myForm(myOrigin(myStatus(myAge(myName(t, me.display_name), me.profile?.age), status)))
     const swapped = t
       .replaceAll('de música', swap.after_de)
       .replaceAll('música', swap.target)
@@ -469,7 +515,7 @@ export function personalise<T extends {
       */
       .replaceAll('of music', 'of ' + swap.gloss)
       .replaceAll('music', swap.gloss)
-    return myForm(myOrigin(myAge(myName(swapped, me.display_name), me.profile?.age)))
+    return myForm(myOrigin(myStatus(myAge(myName(swapped, me.display_name), me.profile?.age), status)))
   }
   return {
     ...root,
@@ -499,6 +545,33 @@ export function personalise<T extends {
               if (swap && e.id === 'musica') {
                 return PIECES[swap.id]
                   ? { ...e, id: swap.id, target: swap.target, gloss: swap.gloss }
+                  : e
+              }
+              /*
+                THE STATUS THEY GAVE, shown AND banked where it is a real word.
+
+                The sentence above already says "Sou solteira" — myStatus rewrote it —
+                while the extract beneath still taught `casado`, so the screen taught one
+                word and drilled another. Exactly the escocesa/inglês contradiction, one
+                pair over.
+
+                casado, solteiro and divorciado are all pieces, so here the id DOES move
+                and the learner banks the word they actually use. `separado` is not one,
+                so it follows the rule the two swaps above already set: the sentences
+                become theirs, the banked word stays one the library can resolve.
+
+                The note goes with it. "Casada if you are a woman" under `solteiro` is a
+                sentence about a word that is no longer on the card.
+              */
+              if (statusPair && e.id === 'casado' && statusPair.pt !== 'casado') {
+                return PIECES[statusPair.pt]
+                  ? {
+                      ...e,
+                      id: statusPair.pt,
+                      target: statusPair.pt,
+                      gloss: statusPair.en,
+                      ...('note' in e ? { note: capitalise(statusPair.f) + ' if you are a woman.' } : {}),
+                    }
                   : e
               }
               /*
@@ -672,6 +745,78 @@ export function myAge(line: string, age?: number | null): string {
     out = out.replaceAll(sayEn(specimen), sayEn(age))
   }
   return out
+}
+
+/**
+ * How things stand, carried into the lesson that asked.
+ *
+ * Sam: "whether you select married or not married it then goes through to I am not
+ * married. Please carry that through like the others."
+ *
+ * tb_married_work ASKS whether you are married and then teaches, verbatim and whatever
+ * you said: "Sou casado", "Não sou casado", "Sou casada" — a root whose specimen line is
+ * married, whose branch is NOT married, and whose cold prompt asks a learner to produce
+ * "I am not married" about themselves. Somebody who answered `solteiro` met neither of
+ * their own words, and somebody who answered `casado` was still drilled on the negative.
+ *
+ * SAME SHAPE AS myAge AND THE INTEREST SWAP, deliberately: the authored specimens are
+ * replaced wherever they appear, in BOTH languages, and every other line comes back
+ * untouched. That is the rule this product keeps relearning — praia rendered as music
+ * and "I am 77" glossed "I am thirty" were both one language moving without the other.
+ *
+ * THE NEGATIVE IS NOT INVERTED, and that is the one interesting decision here. "Não sou
+ * casado" becomes "Não sou solteiro" for somebody single, which is true of them and is
+ * still a sentence they might say — being asked to deny the wrong status is the bug.
+ * Turning the negative into a positive instead would silently delete the `não` the branch
+ * exists to teach, and `não` is one of two words this root reinforces.
+ *
+ * Gender is left alone. myForm already bends every ending to the speaker afterwards, and
+ * doing it twice is how the obrigado/obrigada flip happened — so this swaps the STATUS
+ * and lets the existing pass own the ending.
+ */
+/** First letter up, for a note that starts with a Portuguese word. */
+function capitalise(w: string): string {
+  return w.charAt(0).toUpperCase() + w.slice(1)
+}
+
+const AUTHORED_STATUS: { pt: string; f: string; en: string }[] = [
+  { pt: 'casado', f: 'casada', en: 'married' },
+  { pt: 'solteiro', f: 'solteira', en: 'single' },
+  { pt: 'divorciado', f: 'divorciada', en: 'divorced' },
+  { pt: 'separado', f: 'separada', en: 'separated' },
+]
+
+export function myStatus(line: string, status?: string | null): string {
+  const want = AUTHORED_STATUS.find((s) => s.pt === (status ?? '').trim())
+  if (!want) return line
+  let out = line
+  for (const specimen of AUTHORED_STATUS) {
+    if (specimen.pt === want.pt) continue
+    /*
+      Feminine first. `casada` contains `casado` only up to its last letter, so replacing
+      the masculine first would leave "casadaa" — the longest-first habit that myAge uses
+      for the same reason, and the one that keeps this true if a pair ever nests.
+    */
+    out = out.replaceAll(specimen.f, want.f).replaceAll(specimen.pt, want.pt)
+    /* And the gloss, so the English does not still say married. */
+    out = out.replaceAll(specimen.en, want.en)
+  }
+  return out
+}
+
+/**
+ * The status this learner gave, from the Legend card that asked it.
+ *
+ * Read from `legend` rather than from `profile` because that is where a CARD_ASK lands —
+ * see CARD_ASKS in components/Journey.tsx. Returns null when unanswered, which is what
+ * makes myStatus a no-op for somebody who has not said.
+ */
+export function statusOf(me: {
+  legend?: { frame_id: string; values: Record<string, string> }[]
+}): string | null {
+  const a = (me.legend ?? []).find((x) => x.frame_id === 'married')
+  const v = a?.values?.status
+  return v ? String(v) : null
 }
 
 /**

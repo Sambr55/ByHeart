@@ -4860,16 +4860,51 @@ export const THE_BASICS: Root[] = [
       { id: 'trabalho', target: 'trabalho', gloss: 'I work', shelf: 'doing', lemma: 'trabalhar', form: 'I', note: 'Also the noun — o trabalho, the work.' },
     ],
     branches: [
-      { target: 'Não sou casado.', en: 'I am not married.', demonstrates: ['casado'] },
+      /*
+        THE NEGATIVE IS ABOUT SOMEBODY ELSE, so it cannot contradict the learner.
+
+        This was "Não sou casado" — and once the status carries through it became "Não sou
+        solteira" for a single woman, one line under "Sou solteira". The lesson agreed
+        with her and then denied it, which is worse than the hardcoded version it
+        replaced.
+
+        `não` still has to be taught: it is one of two words this root reinforces and the
+        commonest word in the language after sim. So the negative moves to the third
+        person, where it is a fact about a friend rather than a denial of the answer the
+        learner just gave, and the pair reads as one conversation.
+      */
+      { target: 'Ela não é casada.', en: 'She is not married.', demonstrates: ['casado'] },
       { target: 'Trabalho aqui.', en: 'I work here.', demonstrates: ['trabalho'] },
-      { target: 'Sou casada.', en: 'I am married.', demonstrates: ['casado'] },
+      /*
+        THE THIRD BRANCH TAUGHT THE ENDING, and the ending is now taught by the learner's
+        own answer — see myStatus.
+
+        It was "Sou casada. / I am married." sitting under "Não sou casado. / I am not
+        married": the same English twice, with the feminine as the only difference. That
+        was the best available way to show the pair while every line here was hardcoded
+        masculine. Now the status carries through and bends to the speaker, so a woman
+        reads "Sou solteira" on the line above it — and this branch became the same
+        sentence a third time.
+
+        Replaced with what the pair actually needs said out loud: that BOTH answers use
+        sou. A learner who has just chosen one of four adjectives does not need a fourth
+        repetition of it; they need to know which verb it takes, which is the thing
+        English speakers get wrong here and the thing the Legend card also teaches.
+      */
+      { target: 'Sou solteiro, e estou bem assim.', en: 'I am single, and I am fine like that.', demonstrates: ['casado'] },
     ],
     reinforces: ['sou', 'nao'],
-    helpers: { 'aqui': 'here', 'não': 'not', 'casada': 'married, said by a woman' },
+    helpers: { 'aqui': 'here', 'não': 'not', 'casada': 'married, said by a woman', 'solteiro': 'single', 'Ela': 'she', 'é': 'is', 'e': 'and', 'estou': 'I am (right now)', 'bem': 'fine', 'assim': 'like that' },
     transfer_prompt: {
       context: 'They have asked what you do, and the answer is nothing complicated.',
-      ask: 'I work here. I am not married.',
-      answer: 'Trabalho aqui. Não sou casado.',
+      /*
+        The cold prompt asked a learner to produce "I am not married" about themselves,
+        which for a married one was a lie and for a single one became "I am not single"
+        once the status carried. It asks for their own answer now — which is the sentence
+        this root exists to make sayable — plus the one word it teaches alongside it.
+      */
+      ask: 'I work here. I am married.',
+      answer: 'Trabalho aqui. Sou casado.',
     },
     rights_status: 'dub-authored',
     starter_tags: ['first-day', 'introduce'],

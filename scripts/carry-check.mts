@@ -330,6 +330,89 @@ for (const interest of INTERESTS) {
   }
 }
 
+/*
+  AND HOW THINGS STAND, which is the answer that used to be thrown away entirely.
+
+  Sam: "whether you select married or not married it then goes through to I am not
+  married." tb_married_work ASKS the question and then taught, whatever anybody said, a
+  married specimen line, a NOT-married branch and a cold prompt demanding "I am not
+  married" — so one of the two answers was always contradicted and the other was drilled
+  on its own negation.
+
+  Every status is asserted rather than the interesting one, because the fault was not in
+  any single word: it was that the answer was not read at all.
+*/
+console.log('\nhow things stand, carried into the root that asked\n')
+{
+  const raw = ROOTS.find((r) => r.root_id === 'tb_married_work')
+  ok('the root that asks about marriage is there', Boolean(raw))
+  if (raw) {
+    for (const [status, fem, en] of [
+      ['casado', 'casada', 'married'],
+      ['solteiro', 'solteira', 'single'],
+      ['divorciado', 'divorciada', 'divorced'],
+    ] as [string, string, string][]) {
+      for (const g of ['m', 'f'] as const) {
+        const p = personalise(raw, {
+          profile: { gender: g },
+          legend: [{ frame_id: 'married', values: { status } }],
+        })
+        const want = g === 'f' ? fem : status
+        const where = status + '/' + g
+        /* The line they read is about them, in their own word and their own ending. */
+        ok('the specimen says what they said', p.target.includes(want), where + ': ' + p.target)
+        ok('and its gloss agrees', p.source.includes(en), where + ': ' + p.source)
+        /*
+          THE COLD PROMPT IS THE ONE THAT MATTERED MOST. It is the sentence a learner is
+          asked to produce with nothing on screen, so a wrong one is not a bad example —
+          it is being made to say something untrue about themselves.
+        */
+        ok(
+          'the cold prompt asks for their own answer',
+          p.transfer_prompt.answer.includes(want),
+          where + ': ' + p.transfer_prompt.answer,
+        )
+        ok(
+          'and asks for it in English too',
+          p.transfer_prompt.ask.includes(en),
+          where + ': ' + p.transfer_prompt.ask,
+        )
+        /* No other status survives anywhere on the card, in either language. */
+        for (const [other, otherF, otherEn] of [
+          ['casado', 'casada', 'married'],
+          ['solteiro', 'solteira', 'single'],
+          ['divorciado', 'divorciada', 'divorced'],
+        ] as [string, string, string][]) {
+          if (other === status) continue
+          const all = [p.target, p.source, p.transfer_prompt.answer, p.transfer_prompt.ask].join(' ')
+          ok(
+            'no other status survives',
+            !all.includes(other) && !all.includes(otherF) && !all.includes(otherEn),
+            where + ' still mentions ' + other,
+          )
+        }
+        /*
+          AND A SENTENCE ABOUT SOMEBODY ELSE KEEPS ITS OWN ENDING. myForm bends gendered
+          pairs to the speaker, which produced "Ela não é casado" for a married man — her
+          sentence, his ending.
+        */
+        for (const b of p.branches) {
+          if (!/^(Ela|Ele|Eles|Elas)\b/.test(b.target.trim())) continue
+          ok(
+            'a third-person line is not bent to the speaker',
+            !b.target.includes(' é ' + status) || status === fem,
+            where + ': ' + b.target,
+          )
+          ok('she is she in both languages', /\bShe\b/.test(b.en), where + ': ' + b.en)
+        }
+      }
+    }
+    /* Unanswered changes nothing, which is what makes this safe for a new learner. */
+    const untouched = personalise(raw, { profile: {} })
+    ok('an unanswered card leaves the root alone', untouched.target === raw.target, untouched.target)
+  }
+}
+
 if (fail.length) {
   console.log('\n' + new Set(fail).size + ' distinct failure(s), ' + fail.length + ' case(s)')
   process.exit(1)
