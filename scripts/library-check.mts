@@ -34,6 +34,7 @@
  *      that collects but cannot be revised has half a feature.
  */
 import { chromium, type Page } from 'playwright'
+import { readFileSync } from 'node:fs'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { collected, decks, everyCard, type CardKind } from '../content/collection'
 import { revisionFor } from '../content/revision'
@@ -268,6 +269,79 @@ console.log('\nthe strips are gone, except the one that is not a collection\n')
   Asserted on the SCREEN rather than on the record, because the record was never the
   complaint: what a learner sees is whether the question comes back.
 */
+/*
+  CHOOSING A LANGUAGE MUST NOT BLANK THE RECORD.
+
+  Sam, twice: "at the beginning of the legend builder I am being asked AGAIN for my
+  language and city." The diagnostic named it — "set-up card re-asked. missing: deal
+  goal", with the PAIR present, which is a device that has chosen a language and whose
+  learner record reads as empty.
+
+  The learner module caches the record in a module variable keyed by the current pair.
+  Choose called setPair and then setChapter without dropping that cache, so the write
+  landed in the new key carrying the outgoing record — and every later read got the cached
+  object rather than what was stored. SetUp's finish() has called resetLearnerCache since
+  it was written; Choose never did.
+
+  Asserted at the moment it broke: right after the city is picked, before any other screen
+  can paper over it. A record that has lost its chapter here is a record that will read as
+  never having been set up.
+*/
+console.log('\nchoosing a language keeps the record\n')
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  const pg = await ctx.newPage()
+  await pg.goto(BASE + '/')
+  await pg.waitForTimeout(2000)
+  const door = await pg.$('[data-testid="landing-cta"]')
+  if (door) {
+    await door.click()
+    await pg.waitForTimeout(2000)
+  }
+  for (let i = 0; i < 25; i++) {
+    if (await pg.$('[data-testid="choose"]')) break
+    const c = await pg.$('[data-testid="card-continue"]')
+    if (c) await c.click()
+    else await pg.mouse.wheel(0, 800)
+    await pg.waitForTimeout(420)
+  }
+  ok('the selector is reachable on a fresh device', Boolean(await pg.$('[data-testid="choose"]')))
+  await pg.click('[data-testid="lang-pt-PT"]')
+  await pg.waitForTimeout(700)
+  await pg.click('[data-testid="city-lisbon"]')
+  await pg.waitForTimeout(1800)
+
+  const after = (await pg.evaluate(`(() => {
+    const s = JSON.parse(localStorage.getItem(${JSON.stringify(KEY)}) || 'null')
+    return JSON.stringify({ pair: !!localStorage.getItem('byheart.pair'), chapter: s ? s.chapter : null })
+  })()`)) as string
+  const v = JSON.parse(after)
+  ok('the pair is written', v.pair === true)
+  ok('and the chapter reaches the record for that pair', v.chapter === 'lisbon', String(v.chapter))
+  /*
+    AND THE CACHE IS DROPPED, asked of the source rather than of the screen.
+
+    ON A FRESH DEVICE THE BEHAVIOUR IS IDENTICAL EITHER WAY, which I found by removing the
+    fix and watching this pass regardless: both the outgoing and incoming keys are empty,
+    so a stale cache carries nothing and getLearner reloads to the same nothing. The
+    assertion above is worth keeping — it proves the write lands — but it cannot prove the
+    thing it was written for, and a check that cannot fail is cover rather than defence.
+
+    What IS checkable is that the call is there, next to the setPair it belongs to. Crude,
+    and it is the honest version: the fault was a missing line, and this notices the line
+    going missing again.
+  */
+  const src = readFileSync('components/Choose.tsx', 'utf8')
+  const at = src.indexOf('setPair({')
+  const near = at < 0 ? '' : src.slice(at, at + 1800)
+  ok(
+    'choosing a pair drops the cached record',
+    /resetLearnerCache\(\)/.test(near),
+    at < 0 ? '(no setPair call)' : '',
+  )
+  await ctx.close()
+}
+
 console.log('\na settled device is not asked to settle again\n')
 for (const route of ['/club-member', '/club-ret']) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })

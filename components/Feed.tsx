@@ -1682,7 +1682,17 @@ export function Card({
       Written where the crash panel already reads from — see app/error.tsx and the WHAT
       BROKE section in Settings — so there is one place to look rather than two.
     */
-    if (!answered) {
+    /*
+      ONLY WHEN IT IS SURPRISING, which a brand-new learner is not.
+
+      The first version of this recorded every unanswered set-up card, so a genuine first
+      visit — nothing chosen, nothing accepted — filed two entries before the learner had
+      done anything wrong. That is noise in the one panel that exists to carry signal.
+
+      A pair with no record behind it is the surprising state and the one Sam hit: a device
+      that HAS chosen a language and whose learner reads as empty.
+    */
+    if (!answered && pair) {
       try {
         const missing = [!pair && 'pair', !deal && 'deal', !goal && 'goal']
           .filter(Boolean)

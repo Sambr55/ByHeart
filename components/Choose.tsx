@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CHAPTERS } from '@/content/chapters'
 import { PAIRS, pairId, type Pair } from '@/content/pairs'
 import { track } from '@/engine/analytics'
-import { setChapter } from '@/engine/learner'
+import { resetLearnerCache, setChapter } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
 
 /**
@@ -293,6 +293,29 @@ export function Choose({
                       target_locale: lang.target_locale,
                       day_zone: lang.day_zone,
                     })
+                    /*
+                      AND THE CACHED RECORD GOES, which is what makes the ordering above
+                      actually true.
+
+                      Sam, twice: "at the beginning of the legend builder I am being asked
+                      AGAIN for my language and city." The diagnostic finally named it —
+                      "set-up card re-asked. missing: deal goal", with the pair present —
+                      which is a device that HAS chosen a language and whose learner record
+                      reads as empty.
+
+                      This is how. The learner module caches the record in a module
+                      variable keyed by the CURRENT pair; setPair changes which key that
+                      is, and the stale object is still in memory. So setChapter below
+                      wrote the outgoing record into the incoming key, and every later read
+                      got whatever was cached rather than what was stored.
+
+                      The note above reasons carefully about writing the pair first
+                      "because the pair decides WHICH learner record is read" — and that is
+                      only true once the cache is dropped. SetUp's finish() has done this
+                      since it was written, one line after its own setPair. This did not,
+                      and the two have been out of step ever since.
+                    */
+                    resetLearnerCache()
                     setChapter(c.id)
                     setCity(c.id)
                     track('chapter_chosen', { chapter: c.id, locale: lang.target_locale })
