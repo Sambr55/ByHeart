@@ -278,6 +278,20 @@ export interface LearnerState {
     /** True when they said they live here rather than giving dates. See here_from. */
     here_for_good: boolean
     /**
+     * That the question was ANSWERED, which is not the same as the answer having content.
+     *
+     * The third answer above — "I don't know yet" — writes no dates and no flag, so
+     * nothing on the record distinguished it from never having been asked. The card read
+     * `here_for_good || here_from` to decide whether it had been answered, so that tap
+     * did nothing visible and looked broken: Sam, "Nothing happens if you tap I dont know
+     * yet."
+     *
+     * Set on all three paths. What is SHOWN is still driven by the dates themselves — an
+     * unknown answer shows the whole calendar exactly as an unasked one does — and this
+     * only decides whether the card keeps asking.
+     */
+    here_said: boolean
+    /**
      * WHICH KINDS OF NIGHT OUT THEY CARE ABOUT, which the calendar asked and threw away.
      *
      * Sam: "I also want to look at how the information we are gathering INCLUDING the
@@ -634,6 +648,7 @@ export function emptyLearner(): LearnerState {
       here_from: null,
       here_to: null,
       here_for_good: false,
+      here_said: false,
       email: null,
       genres: [],
       into: [],
@@ -1032,13 +1047,25 @@ export function setProfile(
  * note on here_from. Passing null for both clears it back to unsaid, which is what the
  * `change` link on a settled answer needs.
  */
-export function setWhenHere(opts: { from?: string | null; to?: string | null; forGood?: boolean }) {
+export function setWhenHere(opts: {
+  from?: string | null
+  to?: string | null
+  forGood?: boolean
+  /** "I don't know yet" — answered, with nothing in it. See here_said. */
+  unknown?: boolean
+}) {
   update((s) => {
     s.profile = {
       ...s.profile,
-      here_from: opts.forGood ? null : (opts.from ?? null),
-      here_to: opts.forGood ? null : (opts.to ?? null),
+      here_from: opts.forGood || opts.unknown ? null : (opts.from ?? null),
+      here_to: opts.forGood || opts.unknown ? null : (opts.to ?? null),
       here_for_good: Boolean(opts.forGood),
+      /*
+        Answered on all three paths — including the empty one, which is the whole point
+        of the flag. A bare setWhenHere({}) still clears it, which is what a `change`
+        link needs to put the question back.
+      */
+      here_said: Boolean(opts.forGood || opts.unknown || opts.from || opts.to),
     }
   })
 }

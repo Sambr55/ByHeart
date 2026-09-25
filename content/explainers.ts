@@ -237,8 +237,15 @@ export const EXPLAINERS: Explainer[] = [
       wrong way round for the one intro card that wants an answer rather than a read.
     */
     title: 'When will you be here?',
+    /*
+      Sam's words, verbatim. The old line said what the dates DECIDE; this says what they
+      are FOR, which is the thing somebody weighs before handing over their travel dates.
+      It is also why the panel below no longer repeats the question — the face asks it in
+      the title and answers "why" here, so asking again four words lower was the card
+      talking over itself.
+    */
     blurb:
-      'It decides which of Lisbon is worth showing you — concerts, matches, the holidays that shut the city.',
+      "Tell us your dates or if you're moving here and we'll help you build your language skills around the gigs, matches or events we think you'd love to attend.",
     detail: {
       heading: 'Why these and not everything',
       body: 'Two things decide what you get. Your dates, so a week in October is not filled with things happening in March — and if you live here, nothing is out of range. And what you say you are into: tick football and the big matches arrive, leave it blank and you get all of it. Both are yours to change whenever, and the whole thing subscribes to the calendar on your phone rather than living in another app.',

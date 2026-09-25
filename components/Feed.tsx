@@ -2641,7 +2641,7 @@ export function Card({
                   behind the swipe, where "See more" now points.
                 */
                 <div className="mb-3 mt-6">
-                  <WhenHere />
+                  <WhenHere onSand={onSand} />
                 </div>
               ) : introExplainer ? (
                 /*
@@ -3887,24 +3887,77 @@ function IntroPane({ card }: { card: Extract<FeedCard, { kind: 'intro' }> }) {
  * The answer changes what the calendar is worth showing, so it is asked on the card that
  * says so. It writes to the profile and nothing else — see setWhenHere.
  */
-function WhenHere() {
+function WhenHere({ onSand }: { onSand: boolean }) {
   const learner = useLearner()
   const p = learner.profile
   const [open, setOpen] = useState(false)
-  const said = Boolean(p?.here_for_good || p?.here_from)
 
-  if (said && !open) {
+  /*
+    WHAT COUNTS AS ANSWERED, and the reason "I do not know yet" used to do nothing.
+
+    This read `here_for_good || here_from`, and the unknown button writes neither — it
+    calls setWhenHere({}), which is all nulls and false. So the panel re-rendered exactly
+    as it was and the tap looked ignored. Sam: "Nothing happens if you tap I dont know
+    yet."
+
+    The fix is a record of having ANSWERED rather than of the answer, because "I don't
+    know yet" is a real answer and the common one: somebody learning before they have
+    booked anything. `here_said` is that flag — see setWhenHere, which now sets it on all
+    three paths.
+  */
+  const said = Boolean(p?.here_said || p?.here_for_good || p?.here_from)
+
+  /*
+    SETTLING IS NOT THE SAME AS ANSWERING, and conflating them is the other half of the
+    flash-and-close.
+
+    `said` was used directly to swap the question for the summary, so typing an ARRIVAL
+    date settled the card instantly — the leaving field was removed from under the thumb
+    before it could be used, and the answer became a one-way trip: enter a from, lose the
+    to. On a phone that reads exactly as Sam described it, the panel replacing itself the
+    moment the picker is touched.
+
+    The two buttons are complete answers and settle at once; a pair of dates is not
+    complete until the second one, and a trip with no end is still being typed. So dates
+    keep the question open for as long as the card is being used, and `settled` is what
+    the render asks.
+
+    A reopened card (`open`) also stays open, which is what `change` is for.
+  */
+  const typing = Boolean(p?.here_from && !p?.here_to)
+  const settled = said && !typing
+
+  /* White on the photograph, ink on sand. The keyline too — see the note on the panel. */
+  const ink = onSand ? 'text-fg' : 'text-white'
+  const dim = onSand ? 'text-muted' : 'text-white/80'
+  const line = onSand ? 'border-accent/40' : 'border-white/60'
+
+  if (settled && !open) {
     return (
-      <div className="flex items-center gap-3 rounded border border-line/70 bg-surface/50 px-4 py-3">
-        <p className="min-w-0 flex-1 text-sm text-muted">
+      <div
+        data-testid="when-here-said"
+        className={'flex items-center gap-3 rounded border px-4 py-3 ' + line}
+      >
+        {/*
+          LEGIBLE ON THE PHOTOGRAPH. Sam: "when user clicks I live here the panel that
+          comes up is illegible."
+
+          It was bg-surface/50 and text-muted — a pale grey panel and grey type, which is
+          fine on sand and invisible on a dark image. This card has a picture, so the
+          settled state gets the same treatment as the question above it.
+        */}
+        <p className={'min-w-0 flex-1 text-sm ' + ink}>
           {p?.here_for_good
             ? 'You live here, so nothing is out of range.'
-            : 'You are here ' + (p?.here_from ?? '') + (p?.here_to ? ' to ' + p.here_to : '') + '.'}
+            : p?.here_from
+              ? 'You are here ' + p.here_from + (p?.here_to ? ' to ' + p.here_to : '') + '.'
+              : /* The third answer, said back. Silence here is what made the tap look lost. */
+                'No dates yet. You will see everything until you have some.'}
         </p>
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="tap-target shrink-0 text-xs text-accent underline"
+          className={'tap-target shrink-0 text-xs underline ' + ink}
         >
           change
         </button>
@@ -3913,30 +3966,65 @@ function WhenHere() {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
-      <p className="eyebrow text-accent">WHEN</p>
-      <p className="text-sm leading-relaxed">
-        When will you be here? It decides which of this is worth showing you.
-      </p>
+    /*
+      THE KEYLINE IS WHITE ON THE IMAGE. Sam: "Make the blue keyline and text white."
+
+      The blue was accent-on-accent — a blue border and a blue wash on a card whose
+      picture is already dark — so the panel had no edge and the type inside it fought the
+      photograph. White keyline, white type, and no fill: the scrim behind the card is
+      doing the contrast work already, and a wash on top of it only muddies the picture.
+    */
+    <div className={'flex flex-col gap-3 rounded border p-4 ' + line}>
+      <p className={'eyebrow ' + (onSand ? 'text-accent' : 'text-white')}>WHEN</p>
+      {/*
+        ONE QUESTION, ASKED ONCE. Sam: "remove the second instance of When will you be
+        here? It decides..."
+
+        The card's own headline already asks it. This line asked it again, four words
+        lower, and then answered a question nobody had — what the dates are FOR is now the
+        body copy on the face, in Sam's words.
+      */}
       <div className="flex flex-col gap-3">
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-muted">Arriving</span>
+          <span className={'text-xs ' + dim}>Arriving</span>
           <input
             type="date"
             data-testid="when-here-from"
-            defaultValue={p?.here_from ?? ''}
+            /*
+              CONTROLLED, WHICH IS WHY THE PICKER USED TO CLOSE ITSELF.
+
+              Sam: "tapping the from date flashes and closes the first time." This was
+              defaultValue + onChange — an UNCONTROLLED input whose defaultValue changes
+              when the store writes. React remounts an input whose key inputs shift like
+              that, and iOS dismisses the native date sheet the instant its input is
+              replaced. The first tap opened the picker, the store wrote, the input was
+              rebuilt underneath it, and the sheet vanished.
+
+              value + onChange keeps one input alive across every write, so the sheet stays
+              up. The ?? '' matters: swapping undefined for a string mid-life is the other
+              way to remount one of these.
+            */
+            value={p?.here_from ?? ''}
             onChange={(ev) => setWhenHere({ from: ev.target.value, to: p?.here_to ?? null })}
-            className="tap-target rounded border border-line bg-bg px-4 py-3 text-base"
+            /*
+              BLACK TYPE ON THE PICKER. Sam: "Make the text on the calendar picker black."
+
+              The input is a white field whichever side of the card it is on, so it takes
+              ink rather than the panel's white — inheriting white here is what made the
+              typed date invisible. [color-scheme:light] tells the native control to draw
+              its own glyphs dark too, which no class of ours can reach.
+            */
+            className="tap-target rounded border border-line bg-white px-4 py-3 text-base text-black [color-scheme:light]"
           />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-xs text-muted">Leaving</span>
+          <span className={'text-xs ' + dim}>Leaving</span>
           <input
             type="date"
             data-testid="when-here-to"
-            defaultValue={p?.here_to ?? ''}
+            value={p?.here_to ?? ''}
             onChange={(ev) => setWhenHere({ from: p?.here_from ?? null, to: ev.target.value })}
-            className="tap-target rounded border border-line bg-bg px-4 py-3 text-base"
+            className="tap-target rounded border border-line bg-white px-4 py-3 text-base text-black [color-scheme:light]"
           />
         </label>
       </div>
@@ -3948,7 +4036,7 @@ function WhenHere() {
             setWhenHere({ forGood: true })
             setOpen(false)
           }}
-          className="tap-target rounded border border-line px-3 py-3 text-sm transition hover:border-accent/50"
+          className={'tap-target rounded border px-3 py-3 text-sm transition ' + line + ' ' + ink}
         >
           I live here
         </button>
@@ -3956,10 +4044,11 @@ function WhenHere() {
           type="button"
           data-testid="when-here-unknown"
           onClick={() => {
-            setWhenHere({})
+            /* Recorded as an answer, not as an absence — see `said` above. */
+            setWhenHere({ unknown: true })
             setOpen(false)
           }}
-          className="tap-target rounded border border-line px-3 py-3 text-sm transition hover:border-accent/50"
+          className={'tap-target rounded border px-3 py-3 text-sm transition ' + line + ' ' + ink}
         >
           I do not know yet
         </button>
