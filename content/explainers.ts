@@ -178,11 +178,29 @@ export const EXPLAINERS: Explainer[] = [
     id: 'how_the_club_works',
     eyebrow: 'THIS PLACE',
     title: 'Everything here is a moment you will actually be in.',
+    /*
+      Sam's wording, and the change is not only length.
+
+      "Your answers" was true and vague — it named the set-up form. "Your interests and
+      your learning so far" names the two things that actually shape the feed, and the
+      second is the one nothing anywhere had said: the rooms move as the learner does.
+
+      The gestures are spelled out the same way for the same reason. "Send it back" is
+      what happens; "send it to the back" is where it goes, which is the promise the away
+      lane actually makes.
+    */
     blurb:
-      'The rooms come from your city and your answers. Swipe right to open one, left to send it back, up for the next.',
+      'The rooms you will enter come from your city, your interests and your learning so far. Swipe right to open one, left to send it to the back, up for the next.',
     detail: {
       heading: 'Why this card and not another',
-      body: 'What you said at set-up decides which rooms you get — a few days in Lisbon and a life in it need different Portuguese. Anything pegged to a date comes first, because it expires and the rest does not. Nothing you send away is lost: it goes to the back and comes round again, so you can swipe freely.',
+      /*
+        Widened to match the face, which now promises three things rather than one.
+
+        "What you said at set-up" was the whole story when the feed keyed on purpose
+        alone. The face now says city, interests and learning so far, and a detail pane
+        narrower than the claim above it is the product explaining a different product.
+      */
+      body: 'Three things decide which rooms you get. Why you are here — a few days in Lisbon and a life in it need different Portuguese. What you have said you are into, which is what turns a feed into yours. And what you have learned so far, because a room you could not have used last week is worth offering this one. Anything pegged to a date comes first, since it expires and the rest does not. Nothing you send away is lost: it goes to the back and comes round again, so you can swipe freely.',
     },
     image: {
       src: '/lisbon/calcada.jpg',

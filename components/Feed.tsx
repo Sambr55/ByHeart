@@ -2665,8 +2665,21 @@ export function Card({
                     'mb-3 mt-6 text-sm ' + (onSand ? 'text-muted' : 'text-white/80')
                   }
                 >
+                  {/*
+                    BOTH GESTURES ON THE CARD THAT HAS A DETAIL PANE. Sam: "next to see
+                    more (arrow) add or swipe up."
+
+                    This was the one card of the five that named right and never named up.
+                    The other four say "Swipe ↑ to continue" and teach it; this one sent
+                    everybody sideways into the detail and left the way onward unsaid, so
+                    the deck's own grammar had a hole exactly where the longest card sits.
+
+                    "or swipe up" rather than a second line, because it is an alternative
+                    to the same question — what do I do now — and two hints stacked read as
+                    two instructions to follow in order.
+                  */}
                   {card.kind === 'explainer' && card.explainer.detail
-                    ? 'See more →'
+                    ? 'See more → or swipe ↑'
                     : 'Swipe ↑ to continue'}
                 </p>
               ) : (
