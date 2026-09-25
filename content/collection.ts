@@ -21,12 +21,12 @@
  *     happened rather than anything about the learner.
  *
  * SO THE DECK IS THE KIND, and the level moves to being something a card SAYS rather than
- * the drawer it lives in. Seven decks, each collapsible, each with its own count — which
+ * the drawer it lives in. Eight decks, each collapsible, each with its own count — which
  * is what Sam asked for directly, and which also fixes the capacity problem by
  * construction: a deck is as big as its content and does not pretend to a fixed size it
  * cannot keep.
  *
- * THE SEVEN DECKS:
+ * THE EIGHT DECKS:
  *
  *   legend   the questions about yourself, answered. Closed: thirteen of thirteen.
  *   vibes    rooms been through. Closed, and grows when rooms are authored.
@@ -37,6 +37,9 @@
  *            deck has a real total and reads as a collection to finish.
  *   asked    sentences you asked for and kept. Open-ended by definition: it is whatever
  *            this learner wanted to say, which nothing in the content can predict.
+ *   cheats   the mechanisms — cheats, hacks and bluffs. A closed set of twenty-four, and
+ *            the only deck whose cards are EARNED TWICE: once by owning the words a shape
+ *            needs, and again by saying one of its sentences cold.
  *
  * A LIVING CARD IS STILL A CARD. Sam chose that a word shelf is collected the moment it
  * has its first word and stays, showing what it holds rather than how near the end it is.
@@ -51,11 +54,12 @@ import { SETS, CRATES, PIECES, SHELVES, type Shelf, type CultureFamily } from '@
 import { LEGEND_FRAMES, STAGES, type Stage } from '@/content/legend'
 import { DROPS } from '@/content/drops'
 import { IDIOMS } from '@/content/idioms'
+import { CHEATS } from '@/content/cheats'
 
-export type CardKind = 'sheet' | 'vibe' | 'frame' | 'drop' | 'words' | 'idiom' | 'asked'
+export type CardKind = 'sheet' | 'vibe' | 'frame' | 'drop' | 'words' | 'idiom' | 'asked' | 'cheat'
 
 /** The five drawers, in the order they are shown. */
-export type DeckId = 'legend' | 'vibes' | 'sheets' | 'drops' | 'words' | 'idioms' | 'asked'
+export type DeckId = 'legend' | 'vibes' | 'sheets' | 'drops' | 'words' | 'idioms' | 'asked' | 'cheats'
 
 export interface CollectedCard {
   kind: CardKind
@@ -131,6 +135,7 @@ export function everyCard(): { kind: CardKind; id: string; label: string }[] {
     ...DROPS.map((d) => ({ kind: 'drop' as const, id: d.id, label: d.event })),
     ...SHELVES.map((s) => ({ kind: 'words' as const, id: s.id, label: s.label })),
     ...IDIOMS.map((i) => ({ kind: 'idiom' as const, id: i.id, label: i.english })),
+    ...CHEATS.map((c) => ({ kind: 'cheat' as const, id: c.id, label: c.shape })),
     /*
       ASKED has no authored universe — the cards are whatever this learner typed — so
       there is nothing to list here. That absence is the reason its deck has no total.
@@ -162,6 +167,7 @@ export function collected(me: {
   sections_completed?: string[]
   legend?: { frame_id: string; values: Record<string, string> }[]
   drops_done?: string[]
+  cheats_used?: string[]
   idioms_got?: string[]
   asked?: { pt: string; en: string; note: string; at: string }[]
   inventory?: Record<string, unknown>
@@ -245,6 +251,23 @@ export function collected(me: {
     collected. The literal Portuguese is the riddle, and a shelf of unsolved riddles would
     be a list of jokes with the punchlines removed.
   */
+  /*
+    A CHEAT IS USED, NOT MET. The card opens when the learner owns the words its shape
+    needs — that is `cheatUnlocked`, and it is what makes the deck a reward for vocabulary
+    already paid for rather than a new pile of things to learn. It is COLLECTED when they
+    have said one of its three sentences with nothing on screen.
+
+    Read from `cheats_used` rather than derived from the proof, because the proof records
+    a sentence and not which shape it was an example of — deriving it would mean matching
+    strings, and a learner who says "Não quero" with a different verb has still used the
+    shape.
+  */
+  const used = new Set(me.cheats_used ?? [])
+  for (const c of CHEATS) {
+    if (!used.has(c.id)) continue
+    out.push({ kind: 'cheat', id: c.id, label: c.shape, level: levelOf('cheat:' + c.id) })
+  }
+
   const got = new Set(me.idioms_got ?? [])
   for (const i of IDIOMS) {
     if (!got.has(i.id)) continue
@@ -287,6 +310,7 @@ const DECK_OF: Record<CardKind, DeckId> = {
   words: 'words',
   idiom: 'idioms',
   asked: 'asked',
+  cheat: 'cheats',
 }
 
 const DECKS: { id: DeckId; label: string; holds: string }[] = [
@@ -303,6 +327,12 @@ const DECKS: { id: DeckId; label: string; holds: string }[] = [
     é o teu tio" — and the joke is exactly the thing the name says. It is also the one
     label here that describes the gag rather than the mechanic.
   */
+  /*
+    THE MECHANISMS, one drawer for all three kinds. Sam: "I'm not sure what grid they
+    should appear in or their own?" — their own, because a cheat is not a word, a sheet or
+    a room, and tagged by kind on the card rather than split into three counts.
+  */
+  { id: 'cheats', label: 'THE CHEATS', holds: 'Shapes you can pour your own words into.' },
   { id: 'idioms', label: 'LOST IN TRANSLATION', holds: 'English that makes no sense anywhere else.' },
   { id: 'asked', label: 'YOU ASKED FOR', holds: 'Sentences you wanted, kept for next time.' },
 ]
@@ -321,6 +351,8 @@ export function decks(all: CollectedCard[]): Deck[] {
     sheets: SETS.length,
     /* Thirty authored, and a closed set — so this one reads as a collection to finish. */
     idioms: IDIOMS.length,
+    /* Twenty-four authored, so this deck can be finished. */
+    cheats: CHEATS.length,
     /* drops, words and asked have no total — see the note on Deck.total. */
   }
   return DECKS.map((d) => {

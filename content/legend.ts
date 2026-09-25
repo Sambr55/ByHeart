@@ -1917,7 +1917,21 @@ export interface Progress {
   parts: { id: string; n: number; each: number; score: number }[]
 }
 
-export const PROGRESS_WEIGHTS = { words: 1, through: 3, legend: 4, drops: 6, sheets: 5, idioms: 1 }
+/*
+  A CHEAT IS WORTH MORE THAN A WORD AND LESS THAN A NIGHT OUT.
+
+  Four, alongside a Legend answer, because that is honestly what it is: a shape somebody
+  can pour their own vocabulary into, earned by owning the words AND saying one of them
+  cold. An idiom is 1 because recognising a joke is recognition; a cheat is production,
+  and it multiplies every word already owned rather than adding one.
+
+  It has to score at all, which is the point Sam raised: "these are all fun bits of
+  content we can seed into the Club, but it feels we need a bit more organisation now,
+  particularly how they feed into grids and the self-perception of progress." Content that
+  fills a deck and moves no number is a collectable; content that moves the number is
+  learning. These are learning.
+*/
+export const PROGRESS_WEIGHTS = { words: 1, through: 3, legend: 4, drops: 6, sheets: 5, idioms: 1, cheats: 4 }
 
 export function progressFor(me: {
   words?: number
@@ -1926,6 +1940,7 @@ export function progressFor(me: {
   drops?: number
   sheets?: number
   idioms?: number
+  cheats?: number
 }): Progress {
   const parts = (Object.keys(PROGRESS_WEIGHTS) as (keyof typeof PROGRESS_WEIGHTS)[]).map(
     (id) => {

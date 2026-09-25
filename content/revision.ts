@@ -33,6 +33,8 @@
  *          card teaches it — the riddle is the face and the answer is what you had.
  *   asked  the sentence you asked for, asked back from your own English. The only content
  *          in the product the learner wrote the brief for.
+ *   cheat  the three sentences that ARE the shape. Revising a mechanism means producing
+ *          it again, which is the same act that collected it in the first place.
  *
  * NOTHING HERE IS SCORED. It reports clean or not for the proof card, exactly as a first
  * release does, and a wrong answer costs nothing — the card stays collected. Revision
@@ -50,6 +52,7 @@ import {
 import { LEGEND_FRAMES, fillFrame, fillEnglish } from '@/content/legend'
 import { DROPS } from '@/content/drops'
 import { IDIOMS } from '@/content/idioms'
+import { CHEATS } from '@/content/cheats'
 import type { CardKind } from '@/content/collection'
 
 export interface RevisionLine {
@@ -127,6 +130,17 @@ export function revisionFor(
       .map((sit) => ({ ask: sit.release.ask, answer: sit.release.answer }))
   }
 
+  if (kind === 'cheat') {
+    /*
+      All three, because a shape is not one sentence — it is the thing those three have in
+      common. Asking for one would be revising a sentence; asking for all three is
+      revising the pattern, which is what the card is for.
+    */
+    const cheat = CHEATS.find((c) => c.id === id)
+    if (!cheat) return []
+    return cheat.says.map((l) => ({ ask: l.en, answer: l.pt }))
+  }
+
   if (kind === 'idiom') {
     /*
       ASKED THE WAY THE CARD ASKS IT: the nonsense Portuguese is the prompt and the English
@@ -198,6 +212,8 @@ export function revisionTitle(kind: CardKind, id: string): string {
   if (kind === 'words') return SHELVES.find((sh) => sh.id === id)?.label ?? id
   /* An idiom is called by its answer; an asked sentence has no name but itself. */
   if (kind === 'idiom') return IDIOMS.find((i) => i.id === id)?.english ?? id
+  /* A shape is called by its shape — NÃO + VERB is the name and the lesson. */
+  if (kind === 'cheat') return CHEATS.find((c) => c.id === id)?.shape ?? id
   if (kind === 'asked') return 'A sentence you asked for'
   return LEGEND_FRAMES.find((f) => f.id === id)?.ask_en ?? id
 }

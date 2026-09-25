@@ -497,6 +497,18 @@ export interface LearnerState {
    * can be seen — see collected(), which reads DROPS by id.
    */
   drops_done: string[]
+  /**
+   * Shapes this learner has actually used — see content/cheats.ts.
+   *
+   * A cheat is not met, it is USED: the card opens when they own the words it needs and
+   * fills when they have said one of its sentences with nothing on screen. This is the
+   * record of the second half.
+   *
+   * Its own list rather than derived from `proof`, because the proof holds a sentence and
+   * not which shape it was an instance of — and "Não quero" and "Não posso" are the same
+   * shape with different verbs, which no string match could tell you.
+   */
+  cheats_used: string[]
   sections_completed: string[]
   /**
    * How many sittings this learner has done, in total, across every vibe.
@@ -686,6 +698,7 @@ export function emptyLearner(): LearnerState {
     switch_seen_at: null,
     card_levels: {},
     drops_done: [],
+    cheats_used: [],
     sections_completed: [],
     sittings: 0,
     club_welcomed_at: null,
@@ -870,6 +883,7 @@ export function loadLearner(): LearnerState {
           /* Empty for a record written before the grid existed — see collected(). */
           card_levels: (parsed.card_levels as Record<string, string>) ?? {},
           drops_done: arr(parsed.drops_done, []),
+          cheats_used: arr(parsed.cheats_used, []),
           sections_completed: arr(parsed.sections_completed, []),
           /*
             Back-filled from sections_completed for anybody who has one and no count.
@@ -1982,6 +1996,20 @@ export function markDropDone(id: string) {
   })
 }
 
+/**
+ * Mark a shape as one this learner has used.
+ *
+ * Called when they say one of a cheat's three sentences cold. Idempotent, and there is no
+ * way to un-use one: a thing you have done stays done, which is the same rule the rest of
+ * the library follows.
+ */
+export function useCheat(id: string) {
+  update((s) => {
+    if (s.cheats_used.includes(id)) return
+    s.cheats_used = [...s.cheats_used, id]
+  })
+}
+
 /** Whether a night is already in the library, for anything drawing the control. */
 export function dropIsDone(id: string): boolean {
   return (getLearner().drops_done ?? []).includes(id)
@@ -2023,6 +2051,7 @@ function levelNow(s: LearnerState): string {
       legend: (s.legend ?? []).filter((a) => Object.keys(a.values ?? {}).length).length,
       sheets: (s.sheet_got ?? []).length,
       idioms: (s.idioms_got ?? []).length,
+      cheats: (s.cheats_used ?? []).length,
     }).score,
   ).id
 }

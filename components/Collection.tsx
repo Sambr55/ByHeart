@@ -63,6 +63,7 @@ export function Collection() {
           legend: (learner.legend ?? []).filter((a) => Object.keys(a.values ?? {}).length).length,
           sheets: (learner.sheet_got ?? []).length,
           idioms: (learner.idioms_got ?? []).length,
+          cheats: (learner.cheats_used ?? []).length,
         }).score,
       ).id,
     [owned.length, learner.sections_completed, learner.legend, learner.sheet_got, learner.idioms_got],
@@ -75,6 +76,7 @@ export function Collection() {
         sections_completed: learner.sections_completed ?? [],
         legend: learner.legend ?? [],
         drops_done: learner.drops_done ?? [],
+        cheats_used: learner.cheats_used ?? [],
         idioms_got: learner.idioms_got ?? [],
         asked: learner.asked ?? [],
         inventory: learner.inventory ?? {},
@@ -86,6 +88,7 @@ export function Collection() {
       learner.sections_completed,
       learner.legend,
       learner.drops_done,
+      learner.cheats_used,
       learner.idioms_got,
       learner.asked,
       learner.inventory,
@@ -250,7 +253,8 @@ function Filled({ card }: { card: CollectedCard }) {
         : card.kind === 'sheet' ||
             card.kind === 'drop' ||
             card.kind === 'words' ||
-            card.kind === 'asked'
+            card.kind === 'asked' ||
+            card.kind === 'cheat'
           ? sheetImage(card.id)
           : (IMAGE_BANK['frame-' + card.id.replace(/_/g, '-')] ?? null)
 

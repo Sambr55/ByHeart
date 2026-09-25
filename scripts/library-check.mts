@@ -40,6 +40,7 @@ import { revisionFor } from '../content/revision'
 import { DROPS } from '../content/drops'
 import { SHELVES, PIECES } from '../content/roots'
 import { IDIOMS } from '../content/idioms'
+import { CHEATS } from '../content/cheats'
 import { PROFILE_COPY } from '../content/profile-copy'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -64,6 +65,7 @@ console.log('\nevery kind has a drawer\n')
     legend: [{ frame_id: 'name', values: { name: 'Jane' } }],
     drops_done: DROPS.map((d) => d.id),
     idioms_got: IDIOMS.map((i) => i.id),
+    cheats_used: CHEATS.map((c) => c.id),
     asked: [{ pt: 'Pode partir a conta?', en: 'Can you split the bill?', note: '', at: '2026-09-20' }],
     inventory: Object.fromEntries(Object.keys(PIECES).slice(0, 40).map((id) => [id, {}])),
     card_levels: {},
@@ -336,4 +338,4 @@ if (problems.length) {
   for (const p of problems) console.log('  - ' + p)
   process.exit(1)
 }
-console.log('seven decks, everything filed, nothing evicted')
+console.log('eight decks, everything filed, nothing evicted')

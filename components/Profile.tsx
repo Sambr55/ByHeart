@@ -1078,6 +1078,7 @@ function LegendHero() {
         sheets: (learner.saved ?? []).filter((id) => id.startsWith('sheet_')).length,
         /* Only the ones that landed. A missed idiom is a card to bring back, not a score. */
         idioms: (learner.idioms_got ?? []).length,
+        cheats: (learner.cheats_used ?? []).length,
       }),
     [learner.inventory, learner.sections_completed, learner.roots_played, learner.legend, learner.finished_cards, learner.saved, learner.idioms_got],
   )
