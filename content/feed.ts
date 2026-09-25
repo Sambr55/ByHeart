@@ -6,6 +6,7 @@ import { SITUATIONS, isCurrent, situationById, type Purpose, type Situation } fr
 import { DROPS, type Drop } from '@/content/drops'
 import { explainersFor, type Explainer } from '@/content/explainers'
 import { IDIOMS, type Idiom } from '@/content/idioms'
+import { CHEATS, cheatUnlocked, type Cheat } from '@/content/cheats'
 import { INTRO_CARDS, type IntroCard } from '@/content/intro'
 import { LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, type LegendFrame } from '@/content/legend'
 import { fluentFor, type Fluent } from '@/content/fluency'
@@ -168,6 +169,11 @@ export type FeedCard =
     routes it to the sand treatment every no-image card already gets.
   */
   | { kind: 'idiom'; id: string; idiom: Idiom }
+  /*
+    A SHAPE, not a word. See content/cheats.ts — the card names a pattern and shows three
+    sentences that are that pattern, and the learner fills it by saying one of them cold.
+  */
+  | { kind: 'cheat'; id: string; cheat: Cheat }
   /*
     A taste of a vibe, for the showcase.
 
@@ -1021,6 +1027,31 @@ export const IDIOM_IMAGES = new Set<string>([
   'youre_having_a_laugh',
 ])
 
+/**
+ * The shapes this learner can already use, as cards in the Club.
+ *
+ * Sam: "add cheat cards to feed."
+ *
+ * ONLY THE UNLOCKED ONES, which is the whole difference between this and every other
+ * source in the feed. A sheet or an idiom is offered to anybody; a cheat is a claim about
+ * what the learner can do RIGHT NOW — "you own não and quero, so you can say Não quero" —
+ * and that claim is false for somebody who owns neither. Offering it anyway would turn
+ * the one card that says "look what you can already do" into another thing to learn.
+ *
+ * Unused first, because a card already in the library is revision and the feed is for the
+ * next thing. Same ranking idiomCards uses, for the same reason.
+ */
+export function cheatCards(
+  inventory: Record<string, unknown> = {},
+  used: string[] = [],
+  dismissed: string[] = [],
+): FeedCard[] {
+  return CHEATS.filter((c) => !dismissed.includes('cheat_' + c.id))
+    .filter((c) => cheatUnlocked(c, inventory))
+    .sort((a, b) => Number(used.includes(a.id)) - Number(used.includes(b.id)))
+    .map((cheat) => ({ kind: 'cheat' as const, id: 'cheat_' + cheat.id, cheat }))
+}
+
 export function idiomCards(
   got: string[] = [],
   missed: string[] = [],
@@ -1360,6 +1391,23 @@ export function cardFace(card: FeedCard): {
       blurb: 'You can already answer this. Here is the way somebody who lives here answers it.',
       image: card.image,
     }
+  }
+  if (card.kind === 'cheat') {
+    /*
+      THE SHAPE IS THE FACE, in the same way an idiom's literal is.
+
+      No image, and for the idiom card's reason: what is worth looking at here is the
+      pattern — NÃO + VERB — not a photograph of Lisbon behind it. The shape is short and
+      strange enough to carry a card on its own, which is the test that decided the idiom
+      cards too.
+
+      The eyebrow says which of the three kinds it is, because a Cheat, a Hack and a Bluff
+      ask different things of the reader: one explains the machinery, one stretches what
+      you own, one buys you time in a conversation.
+    */
+    const kind =
+      card.cheat.kind === 'cheat' ? 'CHEAT' : card.cheat.kind === 'hack' ? 'HACK' : 'BLUFF'
+    return { eyebrow: kind, title: card.cheat.shape, blurb: card.cheat.does }
   }
   return {
     eyebrow: 'WORTH HAVING',

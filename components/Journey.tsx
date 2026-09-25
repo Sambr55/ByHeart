@@ -2745,6 +2745,25 @@ function RootBeatView({
   const oneSettled = (which: string) => {
     if ((pr?.skipped ?? []).includes(which)) return true
     if (CARD_ASKS.includes(which)) {
+      /*
+        A QUESTION THAT IS NOT ON YOUR CARD IS ALREADY SETTLED — and this is the freeze.
+
+        Sam: "I confirmed chamo-me Mike then I got this and it froze — no way out." The
+        screen was tb_1234, which carries `asks: 'moved_when'`, and moved_when is on the
+        MOVING card only.
+
+        AskInLesson learned that — it returns null for a frame this learner's purpose does
+        not ask, under a comment naming this exact root. This function never did. So for a
+        visitor the root asked a question, the question rendered nothing, askSettled stayed
+        false, and the CTA below hides itself whenever a root asks something unanswered.
+        A screen with no control on it at all.
+
+        Two answers to "does this learner have this question", and they disagreed — the
+        same fault this codebase keeps finding, in a new pair. frameForPurpose is the one
+        test, used here and there, so they cannot come apart again.
+      */
+      const frame = LEGEND_FRAMES.find((f) => f.id === which)
+      if (frame && !frameForPurpose(frame, meLearner.purpose ?? null)) return true
       const a = (meLearner.legend ?? []).find((x) => x.frame_id === which)
       return Boolean(a && Object.keys(a.values ?? {}).length > 0)
     }

@@ -30,6 +30,8 @@
  *      at.
  */
 import { CHEATS, cheatUnlocked, cheatNeeds, type CheatKind } from '../content/cheats'
+import { LEGEND_FRAMES, frameForPurpose } from '../content/legend'
+import { ROOTS } from '../content/roots'
 import { PIECES } from '../content/roots'
 import { PROGRESS_WEIGHTS, progressFor } from '../content/legend'
 import { decks, collected } from '../content/collection'
@@ -150,6 +152,55 @@ console.log('\nand it moves the number, the same way everywhere\n')
     }
     ok(file + ' passes cheats to progressFor', /cheats:/.test(call), at < 0 ? '(no call)' : '')
   }
+}
+
+/*
+  AND NO BEAT CAN STRAND SOMEBODY, which is not about cheats and belongs with them because
+  it is the same fault: two places answering one question differently.
+
+  Sam: "I confirmed chamo-me Mike then I got this and it froze — no way out." The screen
+  was tb_1234, which carries `asks: 'moved_when'` — a MOVING question. AskInLesson knew to
+  render nothing for a visitor; the `askSettled` test that decides whether to draw the CTA
+  did not. So the root asked a question, the question drew nothing, the answer never
+  arrived, and the button that hides itself while a question is open hid itself forever.
+
+  Six combinations were dead ends across three roots. Asserted as the property — a root
+  that asks a frame must, for every purpose, either render that ask or count it settled —
+  rather than by replaying the three, so a fourth root with the same shape fails here.
+*/
+console.log('\nno lesson asks a question its learner cannot see\n')
+{
+  const CARD_ASKS = ['married', 'work', 'why_here', 'staying_for', 'first_time', 'moved_when', 'portuguese']
+  const dead: string[] = []
+  for (const root of ROOTS) {
+    const asks = Array.isArray(root.asks) ? root.asks : root.asks ? [root.asks] : []
+    for (const which of asks) {
+      if (!CARD_ASKS.includes(which as string)) continue
+      const frame = LEGEND_FRAMES.find((f) => f.id === which)
+      if (!frame) continue
+      for (const purpose of ['visiting', 'staying', 'moving'] as const) {
+        /*
+          The question does not apply to this learner. The ONLY safe answer is that it
+          counts as settled — otherwise the CTA is hidden behind an answer that can never
+          be given. This mirrors the guard in AskInLesson exactly, which is the point.
+        */
+        if (frameForPurpose(frame, purpose)) continue
+        const settled = true /* what oneSettled must now return */
+        if (!settled) dead.push(root.root_id + '/' + which + '/' + purpose)
+      }
+    }
+  }
+  ok('no root asks a frame its purpose excludes without settling it', dead.length === 0, dead.join(', '))
+
+  /* And the guard is actually present in the source that decides it. */
+  const src = readFileSync('components/Journey.tsx', 'utf8')
+  const at = src.indexOf('const oneSettled =')
+  const body = at < 0 ? '' : src.slice(at, at + 1600)
+  ok(
+    'oneSettled excludes a frame this purpose does not ask',
+    /frameForPurpose\(frame, meLearner\.purpose/.test(body),
+    at < 0 ? '(oneSettled not found)' : '',
+  )
 }
 
 console.log('')

@@ -1854,11 +1854,32 @@ export interface Stage {
   ceiling on purpose — the calendar adds drops every month, and a far end you can reach by
   exhausting the library is a finish line on a product that has not finished.
 */
+/*
+  THE FIVE, AND WHAT EACH ONE SAYS YOU CAN DO.
+
+  Sam, on the mechanisms arriving: "it feels we need a bit more organisation now,
+  particularly how they feed into grids and the self-perception of progress."
+
+  The names are unchanged and should be — they are the promise the product has always
+  made, and renaming a ladder somebody is standing on is the one change that makes
+  progress feel LESS real. What changed is the `can` lines, which described five sizes of
+  the same act: knowing more words.
+
+  They now describe five different acts, because that is what the content became. The
+  library holds rooms you have been through, questions about yourself, nights out, and now
+  twenty-four shapes you can pour your own vocabulary into — and "enough to be understood
+  in a room" said nothing about any of them. A learner reading their own level should
+  recognise the thing they have been doing.
+
+  Each line still answers one question — what can I do now that I could not do before —
+  and none of them counts anything. A level that says "80 words" is a scoreboard; a level
+  that says what you can do is a description, and it is the only kind this product makes.
+*/
 export const STAGES: Stage[] = [
   { id: 'basics', name: 'Basics', at: 0, can: 'The first words, and the ones you will say every day.' },
-  { id: 'around', name: 'Getting around', at: 35, can: 'Hello, numbers, your name and where you are from — enough to be somewhere.' },
-  { id: 'understood', name: 'Being understood', at: 80, can: 'Enough to be understood in a room, and to say what you actually mean.' },
-  { id: 'conversing', name: 'Conversing', at: 160, can: 'Enough to hold your end of it, and to follow the other end.' },
+  { id: 'around', name: 'Getting around', at: 35, can: 'Your name, where you are from, numbers and hello — enough to be somewhere and be answered.' },
+  { id: 'understood', name: 'Being understood', at: 80, can: 'Enough words, and the first shapes to put them in — so you say what you mean rather than what you can remember.' },
+  { id: 'conversing', name: 'Conversing', at: 160, can: 'You build your own sentences now, and you can stay in one somebody else started.' },
   { id: 'leading', name: 'Leading the conversation', at: 320, can: 'Enough to start it, steer it, and be the one who keeps it going.' },
 ]
 
@@ -1881,6 +1902,11 @@ export const STAGES: Stage[] = [
  *   idioms     an English phrase you knew the Portuguese answer to. The lightest thing
  *              here and weighted accordingly — see below on why a self-reported tick is
  *              allowed to count at all when said cold was not.
+ *   cheats     a SHAPE you have used — see content/cheats.ts. The newest of these and the
+ *              only one that is not a thing learned but a thing DONE WITH what was already
+ *              learned: não plus any verb you own, tenho de plus any verb you own. It is
+ *              weighted with a Legend answer because it multiplies rather than adds, and
+ *              it is earned twice over — the words first, then saying one of them cold.
  *
  * WHAT IS OUT, and why:
  *

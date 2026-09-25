@@ -35,6 +35,7 @@ import {
   vibeCards,
   vibeCard,
   feedFor,
+  cheatCards,
   idiomCards,
   vocabWord,
   type FeedCard,
@@ -48,7 +49,7 @@ import { StatusBar } from '@/components/Native'
 import { SetUp } from '@/components/SetUp'
 import { EXPLAINER_CTA } from '@/content/explainers'
 import { cardDone } from '@/content/legend'
-import { loadLearner, markDropDone, setWhenHere, tasteRoom } from '@/engine/learner'
+import { loadLearner, markDropDone, setWhenHere, tasteRoom, useCheat } from '@/engine/learner'
 
 /**
  * The Club as a feed.
@@ -493,6 +494,25 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     )
 
     /*
+      THE SHAPES THIS LEARNER CAN ALREADY USE. Sam: "add cheat cards to feed."
+
+      Only the unlocked ones — see cheatCards. Every other source here is offered to
+      anybody, and a cheat is not: it is a claim about what somebody can do right now, and
+      a locked one would turn the card that says "look what you can already do" into
+      another thing to learn.
+
+      That also makes this the one source whose size grows with the learner. A first-day
+      feed carries the handful that need nothing; by the time the basics are done there
+      are a dozen, and they arrive as a consequence of vocabulary already earned rather
+      than as new content appearing from nowhere.
+    */
+    const cheats = cheatCards(
+      learner.inventory ?? {},
+      learner.cheats_used ?? [],
+      learner.finished_cards ?? [],
+    )
+
+    /*
       THE CARD THAT EXPLAINS THE CLUB GOES FIRST, ON THE FIRST VISIT ONLY.
 
       Sam: "it currently opens with live content, not introduction content... we have to
@@ -601,6 +621,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     let v = 0
     let sh = 0
     let id = 0
+    let ch = 0
     rest.forEach((card, i) => {
       withExplainers.push(card)
       /*
@@ -644,6 +665,19 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       if (sh < sheets.length && i % 5 === 4) withExplainers.push(sheets[sh++])
       /* Its own `if` for the reason the sheet beat has one — see just above. */
       if (id < idioms.length && i % 7 === 6) withExplainers.push(idioms[id++])
+      /*
+        ELEVEN, because two, three, five, seven and nine are taken.
+
+        Coprime to all of them for the reason the others are: a beat sharing a factor with
+        another lands on the same indices every time and the two sources compete for the
+        same slots, which is what buried five of the nine sheets in the tail before the
+        sheet beat got its own `if`.
+
+        The rarest beat in the feed, deliberately. There are at most a couple of dozen of
+        these and they are the pay-off for vocabulary already earned — a cheat every
+        eleventh card is a pleasant surprise, and one every third would be a syllabus.
+      */
+      if (ch < cheats.length && i % 11 === 10) withExplainers.push(cheats[ch++])
     })
     /*
       THE IDIOMS DO NOT GET A TAIL, and that is the difference between them and the rest.
@@ -2920,6 +2954,8 @@ export function Card({
               <LegendAsk card={card} />
             ) : card.kind === 'sheet' ? (
               <Sheet card={card} onDone={() => onDone?.()} />
+            ) : card.kind === 'cheat' ? (
+              <CheatPane card={card} />
             ) : card.kind === 'idiom' ? (
               <IdiomPane card={card} />
             ) : card.kind === 'fluent' ? (
@@ -4541,6 +4577,75 @@ function Sheet({ card, onDone }: {
  * the tap, and once it has happened the joke should be on the screen whole. A learner who
  * wants to dwell on the literal can simply not scroll.
  */
+/**
+ * A shape, and the three sentences that are it.
+ *
+ * Sam: "Each of the seven have their own card and three sentence picker examples behind."
+ *
+ * The three are the whole content of this pane, because the shape is not a fact to be
+ * read — it is a pattern, and a pattern needs more than one instance to be visible. One
+ * would be a specimen and a list would be a reference table; three is the fewest that
+ * shows the thing repeating.
+ *
+ * AND IT ASKS WHETHER YOU USED IT, which is what fills the card in the library. A cheat
+ * is earned twice — once by owning the words, which is why this card is on screen at all,
+ * and again by saying one of these cold. Meeting it is not enough, for the reason nothing
+ * else in this product scores attendance.
+ *
+ * The claim is the learner's own. There is no way to check from here whether somebody
+ * really said "Não quero" to a waiter, and inventing a test would be worse than trusting
+ * them: the same honesty call the idiom card already makes, and Sam settled that argument
+ * there.
+ */
+function CheatPane({ card }: { card: Extract<FeedCard, { kind: 'cheat' }> }) {
+  const learner = useLearner()
+  const c = card.cheat
+  const used = (learner.cheats_used ?? []).includes(c.id)
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-accent">{c.shape}</p>
+        <h2 className="display text-balance text-2xl">{c.does}</h2>
+      </div>
+
+      <ul className="flex flex-col gap-3 border-t border-line pt-6">
+        {c.says.map((line) => (
+          <li
+            key={line.pt}
+            className="flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3"
+          >
+            <AudioButton slug={slugFor(line.pt)} text={line.pt} size="sm" />
+            <CopyButton text={line.pt} size="sm" />
+            <span className="min-w-0">
+              <span className="pt block text-lg text-accent">{line.pt}</span>
+              <span className="mt-1 block text-sm text-fg/75">{line.en}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {/* The one thing worth knowing that the shape itself does not say. */}
+      {c.note ? <p className="text-sm leading-relaxed text-muted">{c.note}</p> : null}
+
+      {used ? (
+        <p data-testid="cheat-used" className="eyebrow text-muted">
+          KEPT
+        </p>
+      ) : (
+        <button
+          type="button"
+          data-testid="cheat-use"
+          onClick={() => useCheat(c.id)}
+          className="tap-target eyebrow w-full rounded border border-accent px-4 py-3 text-center text-accent transition hover:bg-accent hover:text-accent-ink"
+        >
+          I SAID ONE
+        </button>
+      )}
+    </div>
+  )
+}
+
 function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
   const learner = useLearner()
   const i = card.idiom
