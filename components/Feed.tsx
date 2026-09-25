@@ -15,7 +15,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { INTRO_DEMO_AFTER, INTRO_SETUP_AFTER, type IntroCard } from '@/content/intro'
 import { COLLISIONS, CRATES, PIECES, ROOTS, displayForm, setPieces } from '@/content/roots'
-import { askFor, cardFor, STAGES } from '@/content/legend'
+import { askFor, cardFor, fillFrame, STAGES } from '@/content/legend'
 import { mintShowing } from '@/engine/showing'
 import {
   FEED_COPY,
@@ -26,6 +26,7 @@ import {
   derivedCards,
   dropsFor,
   explainerCards,
+  fluentCards,
   introCards,
   legendCards,
   setUpCard,
@@ -446,6 +447,19 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     )
 
     /*
+      AND THE LONGER WAY TO SAY ONE OF THEM.
+
+      Sam: "advanced legend — same seven said better." Offered from the answers rather
+      than from a queue: only a question already answered can have a better answer, and
+      `finished_cards` is what the feed already uses to mean "seen and spent".
+    */
+    const fluent = fluentCards(
+      learner.legend ?? [],
+      learner.purpose ?? null,
+      learner.finished_cards ?? [],
+    )
+
+    /*
       THE CHEAT SHEETS, on a beat of their own.
 
       Sam asked for these "randomly into the Club feed", and a fixed beat is the version of
@@ -577,7 +591,12 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     const laterExplainers = explainers.filter((c) => !leading.includes(c))
 
     const withExplainers: FeedCard[] = [...leading]
-    const rest = [...open.slice(0, AFTER), ...legend, ...mine, ...open.slice(AFTER)]
+    /*
+      The fluent card sits with the Legend one, because it is the same subject — and after
+      it, because a question still outstanding outranks a better way of saying one that is
+      not. A learner mid-card sees the question; a learner past it sees the improvement.
+    */
+    const rest = [...open.slice(0, AFTER), ...legend, ...fluent, ...mine, ...open.slice(AFTER)]
     let e = 0
     let v = 0
     let sh = 0
@@ -2802,6 +2821,8 @@ export function Card({
               <Sheet card={card} onDone={() => onDone?.()} />
             ) : card.kind === 'idiom' ? (
               <IdiomPane card={card} />
+            ) : card.kind === 'fluent' ? (
+              <SayItBetter card={card} />
             ) : (
               <Word card={card} />
             )}
@@ -3082,6 +3103,61 @@ function Done({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
  * that must not, because it is not selling the product, it is a piece of the thing being
  * built. A learner who taps it should land on their own card with this question waiting.
  */
+/**
+ * THE SAME ANSWER, SAID BETTER.
+ *
+ * Sam: "advanced legend — same seven said better." Not a new question: the sentence this
+ * learner already gives, beside the longer one somebody who lives here would give, and
+ * the one word that is the difference between them.
+ *
+ * BOTH SENTENCES ARE THEIRS. The short one is filled from their own answer and the long
+ * one from the same values, so this is not a specimen to memorise — it is their Legend
+ * with more in it. A learner who reads this and does nothing keeps the first; the door
+ * does not move and nothing here is outstanding.
+ *
+ * THE HINGE IS THE LESSON. `mas`, `há`, `até agora` — the words that turn two facts into
+ * a sentence are the content, and they are exactly what a beginner never reaches for
+ * because nothing has ever asked them to. Named on the card, with what it does.
+ */
+function SayItBetter({ card }: { card: Extract<FeedCard, { kind: 'fluent' }> }) {
+  const learner = useLearner()
+  const answer = (learner.legend ?? []).find((a) => a.frame_id === card.frame.id)
+  const values = answer?.values ?? {}
+  const gender = learner.profile?.gender ?? null
+  const put = (t: string) => t.replace(/\{(\w+)\}/g, (_, k: string) => values[k] ?? '…')
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3">
+        <p className="eyebrow text-muted">YOU SAY</p>
+        <p className="pt text-lg text-muted">{fillFrame(card.frame, values, gender)}</p>
+      </div>
+
+      <div className="flex flex-col gap-3 border-t border-line pt-6">
+        <p className="eyebrow text-accent">BETTER</p>
+        <div className="flex items-center gap-3">
+          <AudioButton slug={slugFor(put(card.fluent.frame_pt))} text={put(card.fluent.frame_pt)} />
+          <span className="pt display min-w-0 flex-1 text-xl text-accent">
+            {put(card.fluent.frame_pt)}
+          </span>
+          <CopyButton text={put(card.fluent.frame_pt)} />
+        </div>
+        <p className="text-sm leading-relaxed text-muted">{put(card.fluent.en)}</p>
+      </div>
+
+      {/*
+        The word that does the work, because it is the thing being taught. The vocabulary
+        in these sentences is incidental — the join is not, and nothing else in the
+        product ever points at one.
+      */}
+      <div className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+        <p className="eyebrow text-accent">{card.fluent.hinge.pt.toUpperCase().slice(0, 14)}</p>
+        <p className="text-sm leading-relaxed">{card.fluent.hinge.note}</p>
+      </div>
+    </div>
+  )
+}
+
 function LegendAsk({ card }: { card: Extract<FeedCard, { kind: 'legend' }> }) {
   /*
     IN THE ENDING THEY WILL ACTUALLY HEAR.

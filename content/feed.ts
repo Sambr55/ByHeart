@@ -8,6 +8,7 @@ import { explainersFor, type Explainer } from '@/content/explainers'
 import { IDIOMS, type Idiom } from '@/content/idioms'
 import { INTRO_CARDS, type IntroCard } from '@/content/intro'
 import { LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, type LegendFrame } from '@/content/legend'
+import { fluentFor, type Fluent } from '@/content/fluency'
 import { bankImage } from '@/content/images'
 import { VIBE_IMAGES } from '@/content/vibe-images'
 import {
@@ -122,6 +123,24 @@ export type FeedCard =
       frame: LegendFrame
       /** How many of this learner's seven are still outstanding, this one included. */
       toGo: number
+      image: { src: string; alt: string }
+    }
+  /*
+    THE SAME ANSWER, SAID BETTER — its own kind rather than a flag on the one above.
+
+    Sam: "advanced legend — same seven said better." A legend card asks a question the
+    learner has not answered; this one shows them an answer they HAVE and offers a longer
+    way to say it. Those are different acts and the screens are different screens, so
+    folding the second into the first would have meant a card whose every line branched on
+    which of two things it was.
+
+    See content/fluency.ts for the seven longer sentences and what each one is teaching.
+  */
+  | {
+      kind: 'fluent'
+      id: string
+      frame: LegendFrame
+      fluent: Fluent
       image: { src: string; alt: string }
     }
   /*
@@ -802,6 +821,47 @@ export function legendCards(
   ]
 }
 
+/**
+ * The same answer, said better — offered once the answer exists.
+ *
+ * Sam: "advanced legend — same seven said better." One at a time, like the Legend card
+ * above it, and only for a question this learner has ALREADY answered: the whole premise
+ * is "here is your sentence with more in it", and there is no sentence to improve until
+ * they have given one.
+ *
+ * NOTHING IS OUTSTANDING HERE. These do not open the door, do not count towards the seven
+ * and do not expire — a learner who reads one and does nothing has lost nothing. So this
+ * returns the first unseen rather than tracking a queue: the feed will come back round,
+ * and the card is a suggestion rather than a task.
+ */
+export function fluentCards(
+  answers: { frame_id: string; values: Record<string, string> }[],
+  purpose: Purpose | null,
+  seen: string[],
+): FeedCard[] {
+  const answered = answers.filter((a) => Object.keys(a.values ?? {}).length > 0)
+  const done = new Set(seen)
+  for (const a of answered) {
+    const fluent = fluentFor(a.frame_id)
+    if (!fluent || done.has('fluent_' + a.frame_id)) continue
+    const frame = cardFor(purpose).find((f) => f.id === a.frame_id)
+    if (!frame) continue
+    return [
+      {
+        kind: 'fluent',
+        id: 'fluent_' + a.frame_id,
+        frame,
+        fluent,
+        image: {
+          src: '/lisbon/cafe-counter.jpg',
+          alt: 'A zinc café counter in Lisbon with an empty espresso cup and a folded newspaper.',
+        },
+      },
+    ]
+  }
+  return []
+}
+
 export function setUpCard(dealAccepted: boolean, started = false): FeedCard | null {
   if (dealAccepted && started) return null
   return {
@@ -1278,6 +1338,21 @@ export function cardFace(card: FeedCard): {
       blurb:
         card.set.members.length +
         ' of them, on one card. Study it, test yourself, or keep it for later.',
+      image: card.image,
+    }
+  }
+  /*
+    THE LONGER WAY TO SAY SOMETHING THEY ALREADY SAY.
+
+    Named rather than left to the fall-through below, which assumed vocab — the compiler
+    caught it the moment a second kind reached here, which is the argument for the union
+    being discriminated at all.
+  */
+  if (card.kind === 'fluent') {
+    return {
+      eyebrow: 'SAY IT BETTER',
+      title: card.frame.ask_en,
+      blurb: 'You can already answer this. Here is the way somebody who lives here answers it.',
       image: card.image,
     }
   }
