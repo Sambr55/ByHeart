@@ -7,7 +7,7 @@ import { DROPS, type Drop } from '@/content/drops'
 import { explainersFor, type Explainer } from '@/content/explainers'
 import { IDIOMS, type Idiom } from '@/content/idioms'
 import { INTRO_CARDS, type IntroCard } from '@/content/intro'
-import { cardFor, frameApplies, type LegendFrame } from '@/content/legend'
+import { LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, type LegendFrame } from '@/content/legend'
 import { bankImage } from '@/content/images'
 import { VIBE_IMAGES } from '@/content/vibe-images'
 import {
@@ -737,11 +737,55 @@ export function legendCards(
   answeredFrameIds: string[],
   answers: { frame_id: string; values: Record<string, string> }[],
   purpose: Purpose | null,
+  /**
+   * The pieces this learner owns, for the deeper questions.
+   *
+   * The seven need no check — the road teaches every word of them before the door opens.
+   * The deeper four are not on the road at all, so asking one of a learner who does not
+   * have `filhos` would be a question they cannot answer. Absent means "only ask the
+   * seven", which is what every caller did before the deeper ones were offered here.
+   */
+  owned?: string[],
 ): FeedCard[] {
   const done = new Set(answeredFrameIds)
-  const outstanding = cardFor(purpose).filter(
-    (f) => frameApplies(f, answers) && !done.has(f.id),
-  )
+  /*
+    AND THE DEEPER QUESTIONS, once the seven are done.
+
+    Sam: "I note what you are into isn't in there (festivals etc). I also feel there could
+    be an advanced legend where you learn more things to say about yourself."
+
+    Four frames — age, into, children, who_with — have existed since the Legend was
+    written, are buildable from words the product already teaches, and are asked NOWHERE:
+    this card offered cardFor(purpose), which is the seven by definition, so the other
+    four could only ever be found by somebody who went looking on the deck. `into` is the
+    one Sam noticed, and the lesson that teaches gosto de already collects the answer for
+    the profile without ever writing the card.
+
+    Eleven frames against nine grid slots is the right shape: the road fills eight, the
+    Club offers the rest, and a learner who answers them all overflows the level — which
+    the grid already says out loud rather than hiding.
+
+    AFTER the seven, not among them. The card is the door and the deeper ones are not;
+    offering "do you have children" to somebody two questions from the Club would be the
+    product changing the subject at the worst moment.
+  */
+  const card = cardFor(purpose)
+  const cardDoneAlready = card.every((f) => done.has(f.id) || !frameApplies(f, answers))
+  const have = new Set(owned ?? [])
+  const deeper = cardDoneAlready && owned
+    ? LEGEND_FRAMES.filter(
+        (f) =>
+          f.depth === 'deeper' &&
+          frameForPurpose(f, purpose) &&
+          frameApplies(f, answers) &&
+          !done.has(f.id) &&
+          f.built_from.every((w) => have.has(w)),
+      )
+    : []
+  const outstanding = [
+    ...card.filter((f) => frameApplies(f, answers) && !done.has(f.id)),
+    ...deeper,
+  ]
   const next = outstanding[0]
   if (!next) return []
   return [
@@ -1196,13 +1240,26 @@ export function cardFace(card: FeedCard): {
       person rather than of their Portuguese. The Portuguese is on the far side, with the
       button — a card that opened in a language you cannot yet answer in would be a test.
     */
+    /*
+      THE SEVEN AND THE REST ARE DIFFERENT PROMISES.
+
+      "3 of your seven still to go" was true while this card only ever offered the seven.
+      It now offers the deeper questions once the card is done — age, into, children,
+      who_with — and counting those into "your seven" would be the product claiming the
+      door had moved.
+
+      So a card question says how far the door is, and a deeper one says what it actually
+      is: something more to say about yourself, with nothing waiting on it.
+    */
     return {
       eyebrow: 'YOUR LEGEND',
       title: card.frame.ask_en,
       blurb:
-        card.toGo === 1
-          ? 'The last one on your card. Answer it and the Legend is yours.'
-          : card.toGo + ' of your seven still to go. This is the next one.',
+        card.frame.depth === 'deeper'
+          ? 'One more thing you can say about yourself. Nothing is waiting on this one.'
+          : card.toGo === 1
+            ? 'The last one on your card. Answer it and the Legend is yours.'
+            : card.toGo + ' of your seven still to go. This is the next one.',
       image: card.image,
     }
   }

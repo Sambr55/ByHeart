@@ -438,6 +438,11 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       (learner.legend ?? []).filter((a) => Object.keys(a.values).length > 0).map((a) => a.frame_id),
       learner.legend ?? [],
       learner.purpose ?? null,
+      /*
+        For the deeper questions, which are not on the road and so cannot assume the
+        words. See legendCards — the seven need no check, these four do.
+      */
+      Object.keys(learner.inventory ?? {}),
     )
 
     /*
