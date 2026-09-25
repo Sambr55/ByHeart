@@ -50,6 +50,33 @@ export default function Error({
       storage throws in private mode, and an error handler that throws is the one bug
       nobody can see.
     */
+    /*
+      WHAT WAS ON SCREEN, which is the part a minified stack cannot tell us.
+
+      Sourcemaps are emitted but Vercel answers 403 to every .map request, so the stack
+      stays minified on the device AND in devtools — I checked rather than assumed, having
+      already claimed once that maps would solve this.
+
+      So the record takes a description of the screen instead: the route, and the testids
+      present when it died. "ask-gender-f was on screen" locates a crash far better than
+      "a variable called e was undefined", and unlike a stack it cannot be minified away.
+    */
+    let onScreen = ''
+    let pressed = ''
+    try {
+      /*
+        Read from the LAST PRESS rather than from the DOM, which by now is this error
+        screen — a first attempt recorded "error-retry error-out error-digest", perfectly
+        accurate and describing the apology rather than the fault. See components/Tap.tsx,
+        where every press in the product already passes through one listener.
+      */
+      const last = JSON.parse(sessionStorage.getItem('byheart.lastpress') ?? '{}')
+      onScreen = String(last.onScreen ?? '')
+      pressed = [last.testid, last.label].filter(Boolean).join(' · ')
+    } catch {
+      /* No record of a press, which is itself worth knowing — the field stays empty. */
+    }
+
     try {
       const KEY = 'byheart.crashes'
       const prior = JSON.parse(localStorage.getItem(KEY) ?? '[]')
@@ -64,6 +91,8 @@ export default function Error({
             lines, and truncating it would cut exactly the frames that say which of them.
           */
           stack: String(error?.stack ?? '').slice(0, 2000),
+          onScreen,
+          pressed,
         },
         ...(Array.isArray(prior) ? prior : []),
       ].slice(0, 5)

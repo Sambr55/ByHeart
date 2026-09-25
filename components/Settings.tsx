@@ -132,7 +132,15 @@ export function Settings() {
  */
 function Crashes() {
   const [rows, setRows] = useState<
-    { at: string; where: string; message: string; digest: string | null; stack?: string }[]
+    {
+      at: string
+      where: string
+      message: string
+      digest: string | null
+      stack?: string
+      onScreen?: string
+      pressed?: string
+    }[]
   >([])
 
   useEffect(() => {
@@ -195,6 +203,16 @@ function Crashes() {
               photograph of this block is an address rather than a symptom. Small, wrapped
               and scrollable, because it is for whoever is fixing it and nobody else.
             */}
+            {/*
+              WHAT WAS ON SCREEN. The stack is minified and Vercel will not serve the
+              sourcemaps, so this is often the line that actually identifies the card.
+            */}
+            {r.pressed ? (
+              <span className="text-[0.6rem] text-muted">last press: {r.pressed}</span>
+            ) : null}
+            {r.onScreen ? (
+              <span className="text-[0.55rem] leading-relaxed text-muted">{r.onScreen}</span>
+            ) : null}
             {r.stack ? (
               <pre className="max-h-28 overflow-auto whitespace-pre-wrap break-all text-[0.55rem] leading-relaxed text-muted">
                 {r.stack}

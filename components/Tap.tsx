@@ -29,6 +29,37 @@ export function Tap() {
       // A disabled control did not do anything, so it should not sound as though it did.
       if (el.matches('[disabled], [aria-disabled="true"]')) return
       if (el.closest('[data-testid="audio"]')) return
+      /*
+        WHAT WAS ON SCREEN WHEN THE LAST THING WAS PRESSED.
+
+        A crash record written from app/error.tsx sees the DOM AFTER the boundary has
+        already replaced the card — it captured "error-retry error-out error-digest",
+        which describes the error screen and not the fault. By then the evidence is gone.
+
+        So the last press is remembered here, on the one listener that already runs for
+        every tap in the product. A crash almost always follows a press, so this is the
+        screen that broke and the control that broke it — and unlike a stack it cannot be
+        minified away, which matters because Vercel answers 403 to every sourcemap.
+
+        Cheap: two attribute reads and a sessionStorage write per tap, and the whole thing
+        is in a try/catch because a diagnostic that throws is the one bug nobody can see.
+      */
+      try {
+        sessionStorage.setItem(
+          'byheart.lastpress',
+          JSON.stringify({
+            testid: el.getAttribute('data-testid') ?? '',
+            label: (el.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 40),
+            onScreen: Array.from(document.querySelectorAll('[data-testid]'))
+              .map((n) => n.getAttribute('data-testid'))
+              .filter(Boolean)
+              .slice(0, 30)
+              .join(' '),
+          }),
+        )
+      } catch {
+        /* Storage unavailable. The sound below still happens, which is the job here. */
+      }
       tap()
       buzz()
     }
