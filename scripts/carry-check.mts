@@ -345,7 +345,7 @@ for (const interest of INTERESTS) {
 console.log('\nhow things stand, carried into the root that asked\n')
 {
   const raw = ROOTS.find((r) => r.root_id === 'tb_married_work')
-  ok('the root that asks about marriage is there', Boolean(raw))
+  ok('the root that asks about marriage is there', Boolean(raw), 'tb_married_work')
   if (raw) {
     for (const [status, fem, en] of [
       ['casado', 'casada', 'married'],
