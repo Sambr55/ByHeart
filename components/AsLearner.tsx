@@ -3,13 +3,15 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  acceptDeal,
   answerLegend,
-  rememberSetUp,
+  markSetUpComplete,
   resetLearner,
+  resetLearnerCache,
   setDisplayName,
   setPurpose,
 } from '@/engine/learner'
+import { setPair } from '@/engine/pair'
+import { DEFAULT_PAIR } from '@/content/pairs'
 import { cardFor } from '@/content/legend'
 
 /**
@@ -41,6 +43,23 @@ export function AsLearner({ mode }: { mode: 'new' | 'returning' | 'member' }) {
   const router = useRouter()
   useEffect(() => {
     resetLearner()
+    /*
+      THE PAIR AND THE REST OF SET-UP, on every route including 'new'.
+
+      Sam reached the Legend and was asked for a language and city again, while everything
+      else he had answered was still there. The Club's set-up card asks the record for
+      three things — a pair, the deal and a goal — and these routes wrote only the deal,
+      so the card came back on a device whose Legend was full.
+
+      'new' gets the pair too. A first-timer on a real device has already chosen one at
+      the front door before they ever reach the Club, so a test route that omits it is
+      not reproducing a new learner — it is reproducing a state no learner is ever in.
+
+      The cache goes with it, exactly as SetUp's finish() does: the pair decides WHICH
+      learner record is read, so a stale cached one lands the work in the wrong place.
+    */
+    setPair(DEFAULT_PAIR)
+    resetLearnerCache()
     if (mode === 'member') {
       /*
         A COMPLETE CARD, built from the frames themselves.
@@ -51,8 +70,7 @@ export function AsLearner({ mode }: { mode: 'new' | 'returning' | 'member' }) {
         the Legend screen calls, so this cannot drift from what a real member's record
         looks like.
       */
-      acceptDeal()
-      rememberSetUp()
+      markSetUpComplete({ goal: 'visiting' })
       setPurpose('visiting')
       setDisplayName('Jane')
       for (const frame of cardFor('visiting')) {
@@ -70,12 +88,12 @@ export function AsLearner({ mode }: { mode: 'new' | 'returning' | 'member' }) {
     }
     if (mode === 'returning') {
       /*
-        The two facts that end the showcase, written the way set-up writes them — see
-        SetUp's finish(). Anything less is a learner who has not been through it, which is
-        the other route.
+        Everything that ends the showcase, asked for rather than assembled — see
+        markSetUpComplete. This used to be two calls under a comment claiming they were
+        what set-up writes; they were two of the four, and the card that reads all four
+        kept re-asking.
       */
-      acceptDeal()
-      rememberSetUp()
+      markSetUpComplete()
     }
     /*
       No ?in=1. The front door's marker forces the showcase whatever the record says, so

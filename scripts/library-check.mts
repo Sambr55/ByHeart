@@ -252,6 +252,82 @@ console.log('\nthe strips are gone, except the one that is not a collection\n')
   ok('SAID COLD stays', text.includes(PROFILE_COPY.cold_label))
 }
 
+/*
+  A DEVICE THAT LOOKS SET-UP IS NOT ASKED TO SET UP AGAIN.
+
+  Sam, arriving at the Legend: "it got me to select my language and city again, but then
+  everything else I had pre-selected was populated in my legend."
+
+  The Club's set-up card asks the record for a pair, the deal and a goal, and shows the
+  selector if any is missing. The test routes wrote two of those under a comment claiming
+  they wrote what set-up writes — so the card re-asked on a device whose Legend was full,
+  and only that one screen came back, which is why it read as a glitch rather than a wipe.
+
+  Asserted on the SCREEN rather than on the record, because the record was never the
+  complaint: what a learner sees is whether the question comes back.
+*/
+console.log('\na settled device is not asked to settle again\n')
+for (const route of ['/club-member', '/club-ret']) {
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  const pg = await ctx.newPage()
+  await pg.goto(BASE + route)
+  await pg.waitForTimeout(3000)
+  for (let i = 0; i < 8; i++) {
+    const c = await pg.$('[data-testid="club-welcome-cta"]')
+    if (!c) break
+    await c.click()
+    await pg.waitForTimeout(900)
+  }
+  const langs = (await pg.evaluate(
+    `document.querySelectorAll('[data-testid^="lang-"]').length`,
+  )) as number
+  ok(route + ' does not re-ask for a language', langs === 0, langs + ' tiles')
+  const pair = (await pg.evaluate(`localStorage.getItem('byheart.pair')`)) as string | null
+  ok(route + ' has a pair on the device', Boolean(pair))
+  await ctx.close()
+}
+
+/*
+  AND AN ERRAND HAS A DOOR BACK. Sam: "I tried to select a missing word — Gosto — and it
+  linked me through to this screen, with no way out."
+
+  Both controls in the vibe header stay inside /vibes, which is right for a vibe somebody
+  chose and a dead end for one they were sent to. The errand carries ?from=legend and the
+  header answers it; a chosen vibe must NOT get that door, or the shelf becomes
+  unreachable from the one screen that reaches it.
+*/
+console.log('\nan errand can get back to what sent it\n')
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  const pg = await ctx.newPage()
+  await pg.goto(BASE + '/vibes?open=the_basics&from=legend')
+  await pg.waitForTimeout(2600)
+  const why = await pg.$('[data-testid="setup-why-trip"]')
+  if (why) {
+    await why.click()
+    await pg.waitForTimeout(700)
+    const commit = await pg.$('[data-testid="setup-commit"]')
+    if (commit) {
+      await commit.click()
+      await pg.waitForTimeout(1600)
+    }
+  }
+  const door = await pg.$('[data-testid="home-legend"]')
+  ok('an errand shows the way back to the Legend', Boolean(door))
+  if (door) {
+    await door.click()
+    await pg.waitForTimeout(2200)
+    ok('and it lands there', new URL(pg.url()).pathname === '/legend', new URL(pg.url()).pathname)
+  }
+  await pg.goto(BASE + '/vibes?open=the_basics')
+  await pg.waitForTimeout(2600)
+  ok(
+    'a vibe picked off the shelf does not',
+    !(await pg.$('[data-testid="home-legend"]')),
+  )
+  await ctx.close()
+}
+
 await browser.close()
 
 console.log('')

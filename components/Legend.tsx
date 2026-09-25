@@ -975,7 +975,21 @@ function Missing({ frame, owned }: { frame: LegendFrame; owned: string[] }) {
     <div className="mt-1 flex flex-col gap-1 px-4">
       <p className="text-xs text-muted">{line}</p>
       <Link
-        href={'/vibes?open=' + need.crate}
+        /*
+          AND IT SAYS WHERE IT CAME FROM, so there is a door back.
+
+          Sam: "I tried to select a missing word — Gosto — and it linked me through to
+          this screen, with no way out." The screenshot showed the vibe's own header,
+          which has a back arrow and a VIBES link — and neither leaves /vibes: `back`
+          steps within the sitting and `goHome` jumps to the picker inside it. Both are
+          right for somebody who chose a vibe and wrong for somebody sent on an errand,
+          because an errand has a place it is supposed to return to.
+
+          `from=legend` is that place, read by the journey's header — see useJourney. It
+          is in the URL rather than in state for the reason ?door=1 is: it survives a
+          reload, it is honest in a shared link, and it cannot get stuck on.
+        */
+        href={'/vibes?open=' + need.crate + '&from=legend'}
         data-testid={'legend-need-' + frame.id}
         className="tap-target eyebrow inline-flex w-full items-center justify-center rounded border border-accent px-4 py-3 text-center text-accent transition hover:bg-accent hover:text-accent-ink"
       >

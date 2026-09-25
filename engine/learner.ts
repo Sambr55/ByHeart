@@ -1692,6 +1692,46 @@ export function rememberSetUp() {
   })
 }
 
+/**
+ * Everything "set-up is finished" means, in one place.
+ *
+ * Sam, having reached the Legend: "it got me to select my language and city again, but
+ * then everything else I had pre-selected was populated in my legend."
+ *
+ * The Club's set-up card asks three things of the record — a chosen pair, the deal, and a
+ * `goal` — and shows the language and city selector if ANY of them is missing. The test
+ * routes (/club-new, /club-ret, /club-member) wrote two of the three: acceptDeal and
+ * rememberSetUp, under a comment claiming they were written "the way set-up writes them".
+ * That was true of the two it named and false of the rest, so the card re-asked for a
+ * language on a device whose Legend was already full — which is exactly the shape of what
+ * Sam saw, and why only that one screen came back.
+ *
+ * The real fault is that "set-up is done" was a list of calls rather than a thing you can
+ * ask for. A list gets copied, and a copy goes stale the moment the definition gains a
+ * fourth member — which it did, twice, when goal and chapter were added.
+ *
+ * So this is the definition, and SetUp's own finish() is the other caller. Anything that
+ * needs a device to look set-up calls this rather than assembling it again.
+ *
+ * Does not touch the pair: that lives in its own store for load-order reasons — you have
+ * to know the pair before you can read a learner record — so the caller sets it, and the
+ * one line of doing so is named in SetUp's finish() and in AsLearner.
+ */
+export function markSetUpComplete(opts: { goal?: string; chapter?: string } = {}) {
+  update((s) => {
+    const now = new Date().toISOString()
+    s.deal_accepted_at = s.deal_accepted_at ?? now
+    s.set_up_at = s.set_up_at ?? now
+    /* The answer to WHY, which all five set-up answers write and nothing else does. */
+    s.profile = { ...s.profile, goal: s.profile?.goal ?? opts.goal ?? 'moving' }
+    /*
+      And the city. A null chapter is not a crash — chapterById falls back to Lisbon — it
+      is worse: correct for the only open city and silently wrong the day a second opens.
+    */
+    s.chapter = (s.chapter ?? opts.chapter ?? 'lisbon') as LearnerState['chapter']
+  })
+}
+
 export function hasAcceptedDeal(): boolean {
   return Boolean(getLearner().deal_accepted_at)
 }

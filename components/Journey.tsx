@@ -151,6 +151,22 @@ function Shell({
 }) {
   const { back, goHome, canGoBack, owned, step } = useJourney()
   /*
+    AN ERRAND HAS SOMEWHERE TO GO BACK TO, and a chosen vibe does not.
+
+    Sam, on being sent here by a blocked Legend card: "I tried to select a missing word —
+    Gosto — and it linked me through to this screen, with no way out." Both controls in
+    this header stay inside /vibes: `back` steps within the sitting and `goHome` jumps to
+    the picker. That is correct for somebody who picked a vibe off the shelf, and a dead
+    end for somebody who was sent to fetch one word.
+
+    So the errand carries its origin — see the GO AND GET IT link in components/Legend.tsx
+    — and this header answers it with a door that says where it goes. It replaces the
+    VIBES link rather than sitting beside it: two ways out is a choice nobody sent on an
+    errand wants to make, and the shelf is still one tap further on from the Legend.
+  */
+  const cameFrom = useSearchParams().get('from')
+  const errand = cameFrom === 'legend'
+  /*
     A token that changes exactly when the screen does.
 
     The step's kind and beat rather than an index: the index moves when a section is
@@ -201,7 +217,20 @@ function Shell({
                 {kept} kept
               </span>
             ) : null}
-            {nav && canGoBack ? (
+            {nav && errand ? (
+              /*
+                The way back to the card that sent them, drawn whether or not canGoBack —
+                which is false on the FIRST screen of a vibe opened by ?open=, and the
+                first screen is exactly where an errand lands.
+              */
+              <Link
+                href="/legend"
+                data-testid="home-legend"
+                className="tap-target text-[0.6rem] uppercase tracking-wider opacity-80 transition hover:opacity-100"
+              >
+                Legend
+              </Link>
+            ) : nav && canGoBack ? (
               <button
                 type="button"
                 data-testid="home"
