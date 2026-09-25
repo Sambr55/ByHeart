@@ -38,8 +38,14 @@ export function Revise() {
   const [done, setDone] = useState(false)
 
   const lines = useMemo(
-    () => revisionFor(kind, id, { legend: learner.legend ?? [], gender: learner.profile?.gender ?? null }),
-    [kind, id, learner.legend, learner.profile?.gender],
+    () =>
+      revisionFor(kind, id, {
+        legend: learner.legend ?? [],
+        gender: learner.profile?.gender ?? null,
+        /* The words deck asks only for what this learner owns — see revisionFor. */
+        inventory: learner.inventory ?? {},
+      }),
+    [kind, id, learner.legend, learner.profile?.gender, learner.inventory],
   )
   const line = lines[at]
 

@@ -1,9 +1,17 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useLearner } from '@/engine/useLearner'
-import { SLOTS, collected, grid, type CollectedCard } from '@/content/collection'
+import {
+  SLOTS,
+  collected,
+  decks,
+  openAtFirst,
+  levelLabel,
+  type CollectedCard,
+  type Deck,
+} from '@/content/collection'
 import { progressFor, stageFor } from '@/content/legend'
 import Image from 'next/image'
 import { PIECES, type CultureFamily } from '@/content/roots'
@@ -12,24 +20,25 @@ import { sheetImage } from '@/content/feed'
 import { IMAGE_BANK } from '@/content/images'
 
 /**
- * THE GRID — five levels, nine slots each, filled by what has been finished.
+ * THE LIBRARY — five decks, collapsible, holding everything finished.
  *
- * Sam: "the 'game' is to fill the grid with completed cards that the user can revisit,
- * practise and share. The idea is to organise their memory and learning."
+ * Sam: "essentially I want everything to be cards and everything completed to be saved
+ * into decks... The decks will need to be collapsible or there will be too many. The cards
+ * become your library where you can retry or remind."
  *
- * The three kinds sit together on purpose — a kept cheat sheet, a vibe been through, a
- * Legend question answered. Each is somewhere in the product already and each is in a
- * list of its own, so the one thing nothing says is that they belong to each other. A
- * level is what you could do at the time, and these are what you did.
+ * This replaced a grid of five LEVELS with nine slots each, which was the right shape for
+ * three kinds of card and could not hold five — forty-five slots against a card universe
+ * that was already at forty-seven. See content/collection.ts for the whole argument; the
+ * short version is that a level is now something a card SAYS rather than the drawer it
+ * lives in, and the drawer is the kind.
  *
- * AN EMPTY SLOT IS THE INVITATION, which is why the grid is fixed at nine rather than
- * growing with the content: a shelf that grows can never be filled, and a counter that
- * only goes up is the thing this product refuses everywhere else. A level with nothing in
- * it still renders, for the same reason.
+ * ONE DECK IS OPEN AT A TIME, which is what makes this readable at five decks and still
+ * readable at eight. The one that opens first is the one with room left in it — see
+ * openAtFirst — because that is where the next card lands.
  *
- * NO SCORE ON IT. The count under each level is "4 of 9", which is a position rather than
- * a mark — the same shape as the Legend's own "3 of 7" — and nothing here counts days,
- * ranks levels against each other, or says a level is late.
+ * NO SCORE ON IT. A deck says "4 of 13", which is a position rather than a mark, and the
+ * two open-ended decks say what they hold instead, because there is no honest denominator
+ * for nights out or for words.
  */
 export function Collection() {
   const learner = useLearner()
@@ -42,9 +51,8 @@ export function Collection() {
   /*
     The level they are in NOW, which is where an unstamped card lands.
 
-    Records written before the grid existed have no level on them, and dropping those
-    cards would show somebody who kept nine sheets last week an empty shelf. See
-    collected().
+    Records written before the library existed have no level on them, and dropping those
+    cards would show somebody who kept nine sheets last week an empty shelf.
   */
   const stageNow = useMemo(
     () =>
@@ -60,49 +68,133 @@ export function Collection() {
     [owned.length, learner.sections_completed, learner.legend, learner.sheet_got, learner.idioms_got],
   )
 
-  const rows = useMemo(
+  const all = useMemo(
     () =>
-      grid(
-        collected({
-          sheet_got: learner.sheet_got ?? [],
-          sections_completed: learner.sections_completed ?? [],
-          legend: learner.legend ?? [],
-          card_levels: learner.card_levels ?? {},
-          stageNow,
-        }),
-      ),
-    [learner.sheet_got, learner.sections_completed, learner.legend, learner.card_levels, stageNow],
+      collected({
+        sheet_got: learner.sheet_got ?? [],
+        sections_completed: learner.sections_completed ?? [],
+        legend: learner.legend ?? [],
+        drops_done: learner.drops_done ?? [],
+        inventory: learner.inventory ?? {},
+        card_levels: learner.card_levels ?? {},
+        stageNow,
+      }),
+    [
+      learner.sheet_got,
+      learner.sections_completed,
+      learner.legend,
+      learner.drops_done,
+      learner.inventory,
+      learner.card_levels,
+      stageNow,
+    ],
   )
 
+  const rows = useMemo(() => decks(all), [all])
+
+  /*
+    WHICH DRAWER IS OPEN, held here rather than per-deck so only one ever is.
+
+    null means "not chosen yet", which is different from "all shut": the first render
+    opens whichever deck has room, and once somebody has touched one, their choice stands
+    even if a card lands somewhere else.
+  */
+  const [opened, setOpened] = useState<string | null>(null)
+  const openId = opened ?? openAtFirst(all)
+
   return (
-    <section data-testid="collection" className="flex flex-col gap-10">
-      {rows.map(({ stage, cards }) => (
-        <div key={stage.id} className="flex flex-col gap-3">
-          <div className="flex items-baseline gap-3">
-            <h3 className="eyebrow min-w-0 text-accent">{stage.name.toUpperCase()}</h3>
-            <span className="h-px flex-1 bg-line" />
-            {/*
-              A position, not a mark. "4 of 9" says where somebody is on this shelf; a
-              percentage or a tick would say whether they have passed it, and there is
-              nothing here to pass.
-            */}
-            <span className="eyebrow shrink-0 tabular-nums text-muted">
-              {Math.min(cards.length, SLOTS)} of {SLOTS}
-            </span>
-          </div>
-          <p className="text-xs leading-relaxed text-muted">{stage.can}</p>
+    <section data-testid="collection" className="flex flex-col gap-3">
+      {rows.map((deck) => (
+        <DeckDrawer
+          key={deck.id}
+          deck={deck}
+          open={deck.id === openId}
+          onToggle={() => setOpened(deck.id === openId ? '' : deck.id)}
+        />
+      ))}
+      {/*
+        THE WAY BACK TO THE SHELF, carried over from BEEN THROUGH.
+
+        That section was removed because the library holds the same vibes — but it carried
+        the only route from Yours to the vibe shelf, added after Sam: "cant get back to
+        vibes via any nav to continue." The shelf is deliberately not a tab, so losing this
+        link would have re-made a dead end that took a report to find.
+      */}
+      <Link
+        href="/vibes"
+        data-testid="collection-more"
+        className="tap-target eyebrow mt-6 inline-flex items-center text-accent underline underline-offset-4"
+      >
+        PICK ANOTHER
+      </Link>
+    </section>
+  )
+}
+
+/**
+ * One drawer: a head you can always read, and a grid you can shut.
+ *
+ * The head is a button rather than a heading with a button in it, because the whole row is
+ * the target — a chevron alone is a 24px hit area on a phone, and this is the control the
+ * entire screen is built on.
+ */
+function DeckDrawer({
+  deck,
+  open,
+  onToggle,
+}: {
+  deck: Deck
+  open: boolean
+  onToggle: () => void
+}) {
+  /*
+    WHAT THE COUNT SAYS, and the two decks that cannot say it.
+
+    "4 of 13" is a position on a closed deck. NIGHTS and WORDS have no denominator — the
+    first because the content pipeline decides how many drops ever exist, the second
+    because a shelf is never finished — so they report what they hold. "6 nights" is true;
+    "6 of 1" would be a lie about the product, and "6 of 9" a lie about the learner.
+  */
+  const count =
+    deck.total !== undefined
+      ? deck.cards.length + ' of ' + deck.total
+      : deck.cards.length + (deck.id === 'drops' ? ' saved' : ' started')
+
+  return (
+    <div className="flex flex-col gap-3 border-b border-line pb-3">
+      <button
+        type="button"
+        data-testid={'deck-' + deck.id}
+        aria-expanded={open}
+        onClick={onToggle}
+        className="tap-target flex w-full items-center gap-3 py-1 text-left"
+      >
+        <span
+          aria-hidden
+          className={'text-xs text-muted transition-transform ' + (open ? 'rotate-90' : '')}
+        >
+          ▶
+        </span>
+        <span className="eyebrow min-w-0 flex-1 text-accent">{deck.label}</span>
+        <span className="eyebrow shrink-0 tabular-nums text-muted">{count}</span>
+      </button>
+      {open ? (
+        <div className="flex flex-col gap-3">
+          <p className="text-xs leading-relaxed text-muted">{deck.holds}</p>
           <ul className="grid grid-cols-3 gap-1">
-            {Array.from({ length: SLOTS }).map((_, i) => {
-              const card = cards[i]
+            {/*
+              NINE IS A FLOOR NOW, NOT A CEILING. A deck draws every card it holds, and
+              pads out to nine with empty slots when it has fewer — so the invitation is
+              still there on a new deck, and a full one is not forced to hide its overflow
+              in a footnote the way the fixed grid had to.
+            */}
+            {Array.from({ length: Math.max(SLOTS, deck.cards.length) }).map((_, i) => {
+              const card = deck.cards[i]
               return (
                 <li key={i}>
                   {card ? (
                     <Filled card={card} />
                   ) : (
-                    /*
-                      The empty slot, drawn rather than left out: it is the whole of the
-                      invitation, and a grid that shows only what is in it is a list.
-                    */
                     <span
                       aria-hidden
                       className="block aspect-[3/4] rounded border border-dashed border-line/60 bg-surface/30"
@@ -112,87 +204,54 @@ export function Collection() {
               )
             })}
           </ul>
-          {/*
-            Over nine is a good problem and the extra is still theirs. Said plainly rather
-            than by growing the grid, which would make it unfillable.
-          */}
-          {cards.length > SLOTS ? (
-            <p className="text-xs text-muted">
-              And {cards.length - SLOTS} more in this level.
-            </p>
-          ) : null}
         </div>
-      ))}
-      {/*
-        THE WAY BACK TO THE SHELF, carried over from BEEN THROUGH.
-
-        That section was removed because the grid holds the same vibes — but it carried
-        the only route from Yours to the vibe shelf, added after Sam: "cant get back to
-        vibes via any nav to continue." The shelf is deliberately not a tab, so losing
-        this link would have re-made a dead end that took a report to find.
-
-        Here for the same reason it was there: this is where somebody is looking at what
-        they have finished, which is the moment "what next" is actually being asked.
-      */}
-      <Link
-        href="/vibes"
-        data-testid="collection-more"
-        className="tap-target eyebrow inline-flex items-center text-accent underline underline-offset-4"
-      >
-        PICK ANOTHER
-      </Link>
-    </section>
+      ) : null}
+    </div>
   )
 }
 
 /**
  * One collected card.
  *
- * It links to the thing itself, because the point of the grid is revisiting: a sheet
- * opens its sheet, a vibe opens the vibe, a Legend question opens the card it answers.
- * Sam: "completed cards that the user can revisit, practise and share."
+ * It links to a REVISION of what it holds rather than to the lesson that taught it. Sam:
+ * "clicking on a panel should be a revision of what has been learned, not the original
+ * walk through cards" — and now, "the cards become your library where you can retry or
+ * remind."
  */
 function Filled({ card }: { card: CollectedCard }) {
-  /*
-    REVISION, NOT THE LESSON. Sam: "clicking on a panel should be a revision of what has
-    been learned, not the original walk through cards."
-
-    These used to point at the thing itself — /vibes?open= replays the whole sitting — and
-    that is right the first time and wrong every time after. One route for all three
-    kinds, because revising is one act whatever was collected. See /revise.
-  */
   const href = '/revise?kind=' + card.kind + '&id=' + card.id
 
   /*
-    THE PICTURE THE CARD ALREADY HAS. Sam: "we will need to put an image into each
-    completed panel."
+    THE PICTURE THE CARD ALREADY HAS.
 
     Read from the same place the card itself reads it — vibeImage for a crate, sheetImage
     for a set — rather than chosen here, because two answers to "what does this look like"
     is how a card and its shelf come to disagree about the same thing.
 
-    A Legend frame has no photograph and should not borrow one: it is the learner's own
-    sentence, and the product's answer to that everywhere else is the accent slab. So a
-    frame panel is azulejo blue with its question on it, which also makes the three kinds
-    tellable apart at grid size without reading a word.
+    Drops and word shelves have no art of their own, so they take a texture keyed on their
+    id. sheetImage falls back to azulejo for an id it does not know, which means a new drop
+    or a new shelf gets a ground rather than a blue rectangle on the day it is authored.
   */
   const image =
     card.kind === 'vibe'
       ? vibeImage(card.id as CultureFamily)
-      : card.kind === 'sheet'
+      : card.kind === 'sheet' || card.kind === 'drop' || card.kind === 'words'
         ? sheetImage(card.id)
-        : /*
-             A Legend frame's own picture, once the bank has it.
+        : (IMAGE_BANK['frame-' + card.id.replace(/_/g, '-')] ?? null)
 
-             Sam, with a screenshot of Basics rendered as seven identical blue rectangles:
-             "let's add the images." The accent slab was right for one frame among nine
-             and wrong for a level made of them — a wall rather than a shelf.
+  /*
+    WHAT THE CARD SAYS UNDER ITS NAME, which is different for the two living kinds.
 
-             Falls back to the slab when the picture is not there yet, so the grid is
-             never broken by an image that has not been generated: the briefs are in
-             content/images.ts and the panels pick them up the moment the files land.
-           */
-          (IMAGE_BANK['frame-' + card.id.replace(/_/g, '-')] ?? null)
+    A words card reports what it holds, because it is never finished and a level would be
+    a fact about the past. A night reports its date. Everything else reports the level the
+    learner was at when they finished it, which is the only place levels appear now.
+  */
+  const foot =
+    card.kind === 'words'
+      ? card.holds + (card.holds === 1 ? ' word' : ' words')
+      : card.kind === 'drop'
+        ? (card.on ?? '')
+        : levelLabel(card.level)
 
   return (
     <Link
@@ -205,18 +264,10 @@ function Filled({ card }: { card: CollectedCard }) {
     >
       {image ? (
         <>
-          <Image
-            src={image.src}
-            alt=""
-            fill
-            sizes="33vw"
-            className="object-cover"
-            aria-hidden
-          />
+          <Image src={image.src} alt="" fill sizes="33vw" className="object-cover" aria-hidden />
           {/*
             The scrim, so type never sits on the photograph itself — the same construction
-            the door and the welcome use, and the reason white on an image is legible here
-            and nowhere it is not done.
+            the door and the welcome use.
           */}
           <span
             aria-hidden
@@ -225,15 +276,12 @@ function Filled({ card }: { card: CollectedCard }) {
         </>
       ) : null}
       <span className="relative flex flex-col gap-1">
-        {/*
-          The kind, small, because three kinds on one shelf need telling apart and the
-          label alone does not do it — "Counting to ten" and "The basics, in songs you
-          know" are a sheet and a vibe and read the same way.
-        */}
-        <span className={'eyebrow text-[0.5rem] ' + (image ? 'text-white/75' : 'opacity-75')}>
-          {card.kind === 'sheet' ? 'SHEET' : card.kind === 'vibe' ? 'VIBE' : 'LEGEND'}
-        </span>
         <span className="text-xs leading-tight">{card.label}</span>
+        {foot ? (
+          <span className={'eyebrow text-[0.5rem] ' + (image ? 'text-white/75' : 'opacity-75')}>
+            {foot}
+          </span>
+        ) : null}
       </span>
     </Link>
   )

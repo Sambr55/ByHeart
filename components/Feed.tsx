@@ -48,7 +48,7 @@ import { StatusBar } from '@/components/Native'
 import { SetUp } from '@/components/SetUp'
 import { EXPLAINER_CTA } from '@/content/explainers'
 import { cardDone } from '@/content/legend'
-import { loadLearner, setWhenHere, tasteRoom } from '@/engine/learner'
+import { loadLearner, markDropDone, setWhenHere, tasteRoom } from '@/engine/learner'
 
 /**
  * The Club as a feed.
@@ -1418,6 +1418,16 @@ export function Card({
     first vibe played, and the check that counts four explainers all still apply. What is
     different is only that its front plays instead of pointing sideways.
   */
+  /*
+    Whether this night is already in the library, subscribed rather than read once.
+
+    dropIsDone() off the store would be a snapshot, and the label has to flip the instant
+    somebody taps I WENT — on the card under their thumb, with no navigation.
+  */
+  const doneDrops = useLearner().drops_done
+  const dropDone = Boolean(
+    card.kind === 'situation' && card.drop && (doneDrops ?? []).includes(card.drop.id),
+  )
   const isDemo = card.kind === 'explainer' && card.explainer.id === 'how_it_works'
   /*
     The five that open a new member's Club — see LEAD_ORDER. They teach the deck's own
@@ -2391,14 +2401,58 @@ export function Card({
                       it is the splash — repeating it here put the same proper noun twice
                       on one face, three lines apart, in two sizes.
                     */
-                    <p className="mt-1 text-sm text-white/80">
-                      {card.drop.place.name} ·{' '}
-                      <span className="tabular-nums">
-                        {dropDaysLeft(card.drop) <= 1
-                          ? 'gone tomorrow'
-                          : dropDaysLeft(card.drop) + ' days left'}
-                      </span>
-                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <p className="text-sm text-white/80">
+                        {card.drop.place.name} ·{' '}
+                        <span className="tabular-nums">
+                          {/*
+                            A NIGHT THAT IS IN THE LIBRARY HAS STOPPED COUNTING DOWN.
+
+                            Sam: "if they are marked done they don't expire but get saved
+                            into a grid." A countdown on a card somebody has told us they
+                            went to is the product arguing with the learner about whether
+                            the evening happened.
+                          */}
+                          {dropDone
+                            ? 'kept'
+                            : dropDaysLeft(card.drop) <= 1
+                              ? 'gone tomorrow'
+                              : dropDaysLeft(card.drop) + ' days left'}
+                        </span>
+                      </p>
+                      {/*
+                        THE ONLY CARD YOU TELL US ABOUT, rather than the other way round.
+
+                        Every other kind is collected by being finished — a room played
+                        through, a word owned, a question answered. A gig happens whether
+                        or not anybody goes, so going is a fact only the learner has, and
+                        this is where they say it.
+
+                        No way to un-say it from here, deliberately: the cost of a stray
+                        tap is a card nobody needed, and the cost of the opposite is a
+                        night lost out of a library. See markDropDone.
+                      */}
+                      {dropDone ? (
+                        <span
+                          data-testid="drop-kept"
+                          className="eyebrow text-[0.6rem] text-white/70"
+                        >
+                          IN YOUR LIBRARY
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          data-testid="drop-done"
+                          onClick={(ev) => {
+                            ev.stopPropagation()
+                            markDropDone(card.drop!.id)
+                          }}
+                          className="tap-target eyebrow rounded border border-white/60 px-3 py-1 text-[0.6rem] text-white"
+                        >
+                          I WENT
+                        </button>
+                      )}
+                    </div>
                   ) : null}
                   {/*
                     The claim is made once, and then the demo makes it instead.

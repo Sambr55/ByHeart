@@ -24,13 +24,27 @@
  *   frame  the learner's OWN answer, filled with their own values. Revising "Sou
  *          escocesa. Sou de Glasgow." is revising the only sentence on the card that is
  *          true about them.
+ *   drop   the release of each situation in the night. A drop is a cluster of errands
+ *          ending in an invitation, and the invitation is the sentence worth having back.
+ *   words  the words on that shelf that this learner actually owns. The one kind whose
+ *          revision GROWS: a shelf asked at thirty words asks more than it did at ten,
+ *          which is what a living card is for.
  *
  * NOTHING HERE IS SCORED. It reports clean or not for the proof card, exactly as a first
  * release does, and a wrong answer costs nothing — the card stays collected. Revision
  * that can take a card off your shelf would make the grid a thing to be afraid of.
  */
-import { CRATES, ROOTS_BY_FAMILY, SETS, PIECES, type CultureFamily } from '@/content/roots'
+import {
+  CRATES,
+  ROOTS_BY_FAMILY,
+  SETS,
+  SHELVES,
+  PIECES,
+  type CultureFamily,
+  type Shelf,
+} from '@/content/roots'
 import { LEGEND_FRAMES, fillFrame, fillEnglish } from '@/content/legend'
+import { DROPS } from '@/content/drops'
 import type { CardKind } from '@/content/collection'
 
 export interface RevisionLine {
@@ -52,7 +66,12 @@ export interface RevisionLine {
 export function revisionFor(
   kind: CardKind,
   id: string,
-  me: { legend?: { frame_id: string; values: Record<string, string> }[]; gender?: 'm' | 'f' | null },
+  me: {
+    legend?: { frame_id: string; values: Record<string, string> }[]
+    gender?: 'm' | 'f' | null
+    /** Needed by the words branch, which asks only for what this learner owns. */
+    inventory?: Record<string, unknown>
+  },
 ): RevisionLine[] {
   if (kind === 'vibe') {
     /*
@@ -85,6 +104,40 @@ export function revisionFor(
       .map(({ m, piece }) => ({ ask: piece.gloss, answer: m }))
   }
 
+  if (kind === 'drop') {
+    /*
+      A NIGHT IS REVISED BY WHAT YOU HAD TO SAY TO GET THROUGH IT.
+
+      Each situation in a drop ends in a release — the thing you must be able to say cold
+      — and the last one is the invitation, which is the point of the whole cluster. So
+      the night asks back exactly what it taught, in the order it taught it, and the
+      sentence somebody said to another person about an evening comes last.
+    */
+    const drop = DROPS.find((d) => d.id === id)
+    if (!drop) return []
+    return drop.situations
+      .filter((sit) => sit.release?.ask && sit.release?.answer)
+      .map((sit) => ({ ask: sit.release.ask, answer: sit.release.answer }))
+  }
+
+  if (kind === 'words') {
+    /*
+      A SHELF ASKS FOR THE WORDS ON IT THAT ARE YOURS.
+
+      Only the ones owned. A shelf is a grouping of everything this product teaches, and
+      asking for a word nobody has met is a test on language that has never been shown —
+      the same rule the sheet branch above follows, for the same reason.
+
+      This is the revision that gets better rather than running out: the card is never
+      finished, so the thing it asks grows every time a word lands on it.
+    */
+    if (!SHELVES.some((sh) => sh.id === id)) return []
+    const owned = new Set(Object.keys(me.inventory ?? {}))
+    return Object.entries(PIECES)
+      .filter(([pieceId, piece]) => piece.shelf === (id as Shelf) && owned.has(pieceId))
+      .map(([, piece]) => ({ ask: piece.gloss, answer: piece.target }))
+  }
+
   /*
     A frame asks for the learner's OWN sentence, filled with their own values. An
     unanswered frame is not on the grid, so there is always something to fill it with —
@@ -106,5 +159,8 @@ export function revisionTitle(kind: CardKind, id: string): string {
   /* A vibe is a crate and a sheet is a set. Looking a vibe up in SETS never matches. */
   if (kind === 'vibe') return CRATES.find((c) => c.id === id)?.title ?? id
   if (kind === 'sheet') return SETS.find((s) => s.id === id)?.label ?? id
+  /* A night is called what happened, and a shelf what it holds. */
+  if (kind === 'drop') return DROPS.find((d) => d.id === id)?.event ?? id
+  if (kind === 'words') return SHELVES.find((sh) => sh.id === id)?.label ?? id
   return LEGEND_FRAMES.find((f) => f.id === id)?.ask_en ?? id
 }

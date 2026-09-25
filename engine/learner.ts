@@ -484,6 +484,19 @@ export interface LearnerState {
    * do to a shelf somebody has already looked at.
    */
   card_levels: Record<string, string>
+  /**
+   * Drops the learner has marked as done, which is what stops them expiring.
+   *
+   * Sam: "including drops, if they are marked done they don't expire but get saved into a
+   * grid." Every other kind of card is collected as a BY-PRODUCT of finishing it — a vibe
+   * played through, a frame answered, a word owned. A night out is not: the gig happens
+   * whether or not anybody went, so going is a thing only the learner can report.
+   *
+   * Hence a list of its own rather than a flag derived from anything. Once an id is in
+   * here the drop is in the library for good, and dropLive no longer governs whether it
+   * can be seen — see collected(), which reads DROPS by id.
+   */
+  drops_done: string[]
   sections_completed: string[]
   /**
    * How many sittings this learner has done, in total, across every vibe.
@@ -672,6 +685,7 @@ export function emptyLearner(): LearnerState {
     set_up_at: null,
     switch_seen_at: null,
     card_levels: {},
+    drops_done: [],
     sections_completed: [],
     sittings: 0,
     club_welcomed_at: null,
@@ -855,6 +869,7 @@ export function loadLearner(): LearnerState {
           switch_seen_at: parsed.switch_seen_at ?? null,
           /* Empty for a record written before the grid existed — see collected(). */
           card_levels: (parsed.card_levels as Record<string, string>) ?? {},
+          drops_done: arr(parsed.drops_done, []),
           sections_completed: arr(parsed.sections_completed, []),
           /*
             Back-filled from sections_completed for anybody who has one and no count.
@@ -1905,6 +1920,31 @@ export function rememberSheetGot(member: string, sheetId?: string) {
  */
 export function rememberCardLevel(kind: 'sheet' | 'vibe' | 'frame', id: string, level: string) {
   update((s) => stampLevel(s, kind, id, level))
+}
+
+/**
+ * Mark a night as one you went to, which puts it in the library and stops it expiring.
+ *
+ * Sam: "if they are marked done they don't expire but get saved into a grid."
+ *
+ * The one card in the product whose collection is a decision rather than a consequence.
+ * Everything else is collected by being finished — a room played through, a word owned —
+ * and a gig happens whether or not anybody goes, so only the learner can say.
+ *
+ * Idempotent, and there is deliberately no way to un-mark one from here. A library you
+ * can be evicted from is not a library, and the failure mode of an accidental tap is a
+ * card you did not need, which is cheaper than losing one you did.
+ */
+export function markDropDone(id: string) {
+  update((s) => {
+    if (s.drops_done.includes(id)) return
+    s.drops_done = [...s.drops_done, id]
+  })
+}
+
+/** Whether a night is already in the library, for anything drawing the control. */
+export function dropIsDone(id: string): boolean {
+  return (getLearner().drops_done ?? []).includes(id)
 }
 
 /**
