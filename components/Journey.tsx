@@ -333,6 +333,28 @@ function Cta({
   )
 }
 
+/**
+ * A step with nothing behind it any more, stepped over.
+ *
+ * The queue is built from the content when a sitting starts and the content is read again
+ * on every render; a deploy between those two moments can leave an index pointing past
+ * the end of an array that has since got shorter. That is not preventable — the queue is
+ * in memory and the content is in the bundle — so what matters is that it is survivable.
+ *
+ * Advances on mount rather than rendering a message. There is nothing to tell the learner:
+ * a beat they were about to see no longer exists, which is an event in the deployment and
+ * not in their lesson. The alternative was the error screen, which is what Sam got.
+ *
+ * Dark and empty for the one frame, the same as the front door's own hold — a flash of
+ * sand between two dark screens is the only part of this anybody could otherwise see.
+ */
+function Skip({ onMount }: { onMount: () => void }) {
+  useEffect(() => {
+    onMount()
+  }, [onMount])
+  return <div className="min-h-svh on-dark" aria-hidden />
+}
+
 /** A piece, rendered the same way in every cultural world (§16 extraction). */
 function Piece({ pt, gloss }: { pt: string; gloss: string }) {
   return (
@@ -2990,6 +3012,29 @@ function RootBeatView({
   // skimmed, and the second is often the better one.
   if (beat === 'piece' && pieceIndex !== undefined) {
     const e = root.extracts[pieceIndex]
+    /*
+      THE INDEX CAN OUTLIVE THE ROOT IT WAS BUILT FOR.
+
+      Sam's crash, found by the diagnostic rather than by reading: "/VIBES · last press:
+      continue · PUT THEM BACK TOGETHER", and the minified frame decoded to this exact
+      block — `e.target` where `e` is an EXTRACT, not an event. The message said
+      "evaluating 'e.target'" and every search for an event handler was therefore looking
+      for the wrong thing entirely.
+
+      `pieceIndex` comes from beatsFor(root), which walks root.extracts — so the queue is
+      consistent with the root it was built from and inconsistent with any later one. The
+      queue is built once when a sitting starts and the root is looked up again on every
+      render, and those are the same object only while the content stands still. It did
+      not: a deploy landed mid-sitting that removed a branch from tg_school, the open tab
+      kept its queue, and an index that had been valid pointed past the end.
+
+      Guarded rather than prevented, because prevention is not available here. The content
+      is a module in the bundle and the queue is in memory; no amount of care in either
+      stops a deploy separating them. What CAN be guaranteed is that the separation is
+      survivable — so a step that no longer has a piece behind it moves on instead of
+      taking the screen down, and a learner sees the next beat rather than an apology.
+    */
+    if (!e) return <Skip onMount={next} />
     const total = root.extracts.length
     const last = pieceIndex === total - 1
     const reinforced = root.reinforces.filter((r) => PIECES[r])
@@ -3035,6 +3080,8 @@ function RootBeatView({
 
   if (beat === 'piece-branch' && pieceIndex !== undefined) {
     const e = root.extracts[pieceIndex]
+    /* Same queue, same staleness, same answer — see the note on the 'piece' beat. */
+    if (!e) return <Skip onMount={next} />
     const own = branchesFor(root, e.id)
     const more = pieceIndex < root.extracts.length - 1
     return (

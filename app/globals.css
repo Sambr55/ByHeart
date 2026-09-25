@@ -496,6 +496,31 @@ body {
   overscroll-behavior-y: none;
 }
 
+/*
+  AND ON THE ELEMENT THAT ACTUALLY SCROLLS, which is html and not body.
+
+  Sam: "fix the flash that happens on both safari and pwa when the very first screen
+  (home) is swiped."
+
+  `body { overscroll-behavior-y: none }` above has been there for a while and does
+  nothing for this, because the viewport's scrolling element is documentElement —
+  measured, not assumed: document.scrollingElement is html, its computed
+  overscroll-behavior-y was `auto`, and the body's `none` was landing on an element that
+  never scrolls the page. The declaration read as covered and was not.
+
+  What that bought was a rubber-band on a page exactly one viewport tall. The landing
+  carries .on-dark, so html paints --ground-dark, and the hero hangs below the fold to
+  cover the chrome gap — pull the page and the strip revealed is that flat dark tone,
+  release and it snaps back. A dark flat band appearing under a photograph and vanishing,
+  on both surfaces, which is exactly what was reported.
+
+  `none` rather than `contain`: contain only stops the scroll CHAINING to a parent, and
+  there is no parent here — the bounce itself is the thing to stop.
+*/
+html {
+  overscroll-behavior-y: none;
+}
+
 /* Portuguese is the hero on every screen it appears. */
 .pt {
   font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
