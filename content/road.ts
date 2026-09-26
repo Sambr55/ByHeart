@@ -194,6 +194,38 @@ export const ROAD: RoadStep[] = [
     because: 'Sim and não, for whether this is your first time.',
     only: ['staying'],
   },
+  /*
+    THE LAST TWO ASKING ROOTS, which were the only ones NOT on the road.
+
+    Sam: "the two questions I have to go back for contain the email capture and the
+    interests selector. So I think we should break the 7 question rule and just complete
+    the lot in one run, and take away any confusion."
+
+    tb_into and tb_email were in the basics' remainder — reachable only once the road was
+    walked — so a learner finished the road, opened their Legend, and then found two more
+    questions waiting behind it. The road's own promise is that walking it is enough, and
+    two questions outside it made that false.
+
+    They are not filler. tb_into teaches gosto de, which is the shape half the Club's
+    interest content is built on, and tb_into's answer decides what the feed offers.
+    tb_email is how the work survives a lost phone, which is the one thing this product
+    cannot recover for somebody.
+
+    THE COST IS A FOURTH SITTING, and that is the trade Sam took: 85 screens to 103 for a
+    visiting learner against a 30-screen sitting. What pays for it is the break itself —
+    see BREAKS below, which turns the gap between sittings into the one place the product
+    teaches something it has nowhere else to put.
+  */
+  {
+    root: 'tb_into',
+    family: 'the_basics',
+    because: 'Gosto de, and what they are into — which decides what the Club offers them.',
+  },
+  {
+    root: 'tb_email',
+    family: 'the_basics',
+    because: 'Qual é, and somewhere to send the work if the phone is lost.',
+  },
 ]
 
 /*

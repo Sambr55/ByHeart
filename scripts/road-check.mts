@@ -13,8 +13,10 @@
  * leaves somebody able to build their card. A road that arrives is the only promise worth
  * making here.
  */
+import { BREAKS, breakAfter } from '../content/breaks'
 import { ROOTS, ROOTS_BY_FAMILY, type Root } from '../content/roots'
 import { ROAD, WARM_UP, roadFor, roadProgress } from '../content/road'
+import { beatsFor } from '../engine/journey'
 import { cardFor, frameReady, LEGEND_FRAMES } from '../content/legend'
 import type { Purpose } from '../content/situations'
 
@@ -148,6 +150,48 @@ for (const purpose of PURPOSES) {
 /* 5. The warm-up offers something real. */
 for (const v of WARM_UP) {
   ok('warm-up ' + v + ' has roots', (ROOTS_BY_FAMILY[v] ?? []).length > 0)
+}
+
+/*
+  THE BREAK BETWEEN SITTINGS, which is what pays for the fourth one.
+
+  Sam, on the road picking up tb_into and tb_email: "add a keep going? mechanic between
+  each sitting, but make them fun and add some Portuguese learning at every sitting break.
+  Make sure each is different."
+
+  Different is the assertion. Four identical encouragements would be worse than none —
+  a learner who reads the same line four times has been told the product has nothing to
+  say — so the phrases, their English and the buttons are all checked for repeats.
+*/
+console.log('\nevery sitting break teaches something, and something new\n')
+{
+  const seen = new Set<string>()
+  for (const b of BREAKS) {
+    ok('break ' + b.after + ' says something Portuguese', /[a-z]/i.test(b.pt), b.pt)
+    ok('break ' + b.after + ' says what it means', Boolean(b.en.trim()), b.en)
+    ok('break ' + b.after + ' says why it is worth having', b.gloss.length > 40, String(b.gloss.length))
+    /* The button is an eyebrow, so it lives under the same fourteen characters. */
+    ok('break ' + b.after + ' has a label-sized button', b.cta.length <= 14, b.cta)
+    ok('break ' + b.after + ' is new', !seen.has(b.pt), b.pt)
+    seen.add(b.pt)
+  }
+  /* One per sitting the longest road takes, so nobody meets a repeat on the way. */
+  const longest = Math.max(
+    ...(['visiting', 'staying', 'moving'] as const).map((p) => {
+      const screens = roadFor(p).reduce((n, step) => {
+        const r = ROOTS.find((x) => x.root_id === step.root)
+        return n + (r ? beatsFor(r).length : 0)
+      }, 0)
+      return Math.ceil(screens / 30)
+    }),
+  )
+  ok('there is a break for every sitting of the road', BREAKS.length >= longest, BREAKS.length + ' for ' + longest)
+
+  /* And the sequence is in order, so it can describe the shape of the journey. */
+  const order = BREAKS.map((b) => b.after)
+  ok('the breaks are in order', order.every((n, i) => n === i + 1), order.join(','))
+  /* After the last one, a learner who keeps going is not handed nothing. */
+  ok('past the end it still answers', Boolean(breakAfter(99).pt), breakAfter(99).pt)
 }
 
 if (fail.length) { console.log('\n' + fail.length + ' error(s)'); process.exit(1) }

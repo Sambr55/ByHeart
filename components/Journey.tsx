@@ -49,6 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
+import { BREAKS, breakAfter } from '@/content/breaks'
 import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, askFor, cardFor, frameApplies, knownValues, readableFrame, frameForPurpose, myAge, myName, personalise, framesJustOpened, legendStatus, metIn,
   provenanceOf, fillFrame, fillEnglish, type LegendFrame, worthSaving } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
@@ -4947,6 +4948,44 @@ function SaveStep() {
   )
 }
 
+/**
+ * One expression, at the moment it is true.
+ *
+ * See content/breaks.ts for what these are and why they are here rather than in a lesson.
+ * The card is deliberately quiet: a phrase, its English, and one line about what it is
+ * doing. Nothing is counted and nothing is tested — a learner who reads it and carries
+ * straight on has lost nothing, which is the only way a break can be optional and still
+ * worth putting on the screen.
+ */
+function SittingBreakCard({ sittings, open }: { sittings: number; open: boolean }) {
+  /*
+    The break for the sitting just finished. `sittings` is incremented before this screen
+    renders, so a learner who has done one is on break one.
+
+    Once the road is open the last break is the right one whatever the count says: Já está
+    is true of somebody whose Legend is finished, and a "falta pouco" on that screen would
+    be the product contradicting the headline above it.
+  */
+  const b = open ? BREAKS[BREAKS.length - 1] : breakAfter(sittings)
+  return (
+    <div
+      data-testid="sitting-break"
+      className="mt-6 flex flex-col gap-3 rounded border-l-2 border-accent/50 bg-surface px-4 py-4"
+    >
+      <p className="eyebrow text-muted">{b.where}</p>
+      <div className="flex items-center gap-3">
+        <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
+        <CopyButton text={b.pt} size="sm" />
+        <span className="min-w-0">
+          <span className="pt block text-2xl text-accent">{b.pt}</span>
+          <span className="mt-1 block text-sm text-fg/75">{b.en}</span>
+        </span>
+      </div>
+      <p className="text-xs leading-relaxed text-muted">{b.gloss}</p>
+    </div>
+  )
+}
+
 function SectionComplete() {
   const { chooseFamily, finishSection, owned, state } = useJourney()
   /*
@@ -5292,6 +5331,24 @@ function SectionComplete() {
         */}
       </div>
 
+      {/*
+        THE BREAK ITSELF, TAUGHT RATHER THAN SPENT.
+
+        Sam, on the road growing to four sittings: "add a keep going? mechanic between
+        each sitting, but make them fun and add some Portuguese learning at every sitting
+        break. Make sure each is different... obvious place to teach vamos-la."
+
+        A fourth stopping point is a fourth chance to leave, and the answer is not to hide
+        the break but to make it worth arriving at. One expression, of the kind nothing
+        else in the product has a home for — Vamos lá, Falta pouco, Quase, Já está — and
+        each is about the moment it appears in. A learner reading "falta pouco" halfway
+        through has been taught it by the situation rather than by a card.
+
+        Only while the road is still being walked. Once the Legend is open this screen is
+        a finish rather than a pause, and the fourth break — Já está — is what it says.
+      */}
+      <SittingBreakCard sittings={learner.sittings ?? 0} open={road.open} />
+
       <Dock>
         {/*
           MORE BASICS, WHILE THE BASICS ARE THE DOOR.
@@ -5363,7 +5420,19 @@ function SectionComplete() {
             onClick={() => chooseFamily(DOORWAY)}
             className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
           >
-            {isDoorway ? 'MORE BASICS' : 'LET’S DO THE BASICS'}
+            {/*
+              THE BUTTON SAYS THE PHRASE THE BREAK JUST TAUGHT.
+
+              Sam: "add a keep going? mechanic between each sitting." The mechanic is this
+              button and it already existed — what it lacked was a reason to press rather
+              than an instruction. "MORE BASICS" names the chore; "VAMOS LÁ" is the thing
+              they learned four lines above, used for the thing it is actually for.
+
+              Only where the break card is showing, which is the doorway. A learner being
+              offered the basics for the first time has not met the phrase yet and gets
+              the plain label.
+            */}
+            {isDoorway ? breakAfter(learner.sittings ?? 0).cta : 'LET’S DO THE BASICS'}
           </button>
         )}
         {/*
