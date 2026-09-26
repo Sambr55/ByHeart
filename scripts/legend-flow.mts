@@ -12,6 +12,7 @@
  * Needs the dev server. Everything else about the Legend is checked without a browser;
  * this is about what it is like to use, which is not visible in the data.
  */
+import { roadFor } from '../content/road'
 import { chromium } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { DOORWAY, LEGEND_CARD, LEGEND_FRAMES, doorwayRoots } from '../content/legend'
@@ -42,10 +43,18 @@ const seed = {
     asked about in one place; the door has two halves now, and the basics half reads
     roots_played, so the seed failed the moment both were checked.
 
-    The doorway roots explicitly rather than every root in the product: this file is about
-    the deck behind the door, so it wants the cheapest honest way through it.
+    SEEDED FROM THE ROAD, which is what the door actually reads.
+
+    This said doorwayRoots() — a shorter, different list — and the door moved to
+    roadProgress without the fixture following. It supplied eight of the road's eleven
+    steps for a mover, so the Legend stayed locked, every card rendered `disabled`, and
+    this check timed out clicking one rather than reporting anything. A stale fixture, not
+    a broken product.
+
+    roadFor takes the purpose because the road differs by it: a mover's road is not a
+    visitor's. Seeded from the same function the door calls, so the two cannot drift again.
   */
-  roots_played: doorwayRoots().map((r) => r.root_id),
+  roots_played: roadFor('moving').map((s) => s.root),
   sections_completed: [DOORWAY, ...CRATES.filter((c) => !c.drop && c.id !== DOORWAY).slice(0, 3).map((c) => c.id)],
   legend: [],
   /*

@@ -22,6 +22,7 @@
  * The word is dispatched rather than translated for real: the API costs money per call and
  * the thing under test is the plumbing, not the model.
  */
+import { roadFor } from '../content/road'
 import { chromium } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { ROOTS } from '../content/roots'
@@ -44,14 +45,21 @@ const WORK = LEGEND_FRAMES.find((f) => f.id === 'work')!
 const OWNED = Object.fromEntries((WORK.built_from ?? []).map((id) => [id, 'strong']))
 
 /*
-  AND THE DOOR IS ACTUALLY OPEN, which sections_completed alone no longer means.
+  AND THE DOOR IS ACTUALLY OPEN, READ FROM THE THING THAT OPENS IT.
 
-  The door is two halves — the doorway roots AND the chosen vibes — and this fixture
-  satisfied the second and left the first empty, so legendStatus said toGo: 7 and the whole
-  deck was behind the locked screen. Played rather than asserted: the same list the door
-  counts, so this cannot drift from it.
+  This seeded doorwayRoots() under a comment promising "the same list the door counts, so
+  this cannot drift from it". It drifted: the door is roadProgress now — an authored list
+  in content/road.ts — and doorwayRoots is a different, shorter set. The fixture supplied
+  eight of the twelve steps the road wants, the Legend stayed locked, and every card in
+  the deck rendered `disabled`. The check then timed out clicking one, which is why it has
+  been failing rather than reporting.
+
+  That is the whole failure, and it was a stale fixture rather than a broken product — so
+  the fix is to seed from the road, with a purpose, because the road differs by purpose.
+  Now the promise the old comment made is actually true: this list IS what the door reads.
 */
-const PLAYED = doorwayRoots().map((r) => r.root_id)
+const PURPOSE = 'visiting' as const
+const PLAYED = roadFor(PURPOSE).map((s) => s.root)
 const BASE = 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
 const b = await chromium.launch()
@@ -61,7 +69,8 @@ await p.addInitScript(([k, pair, v]) => {
   localStorage.setItem('byheart.pair', JSON.stringify(pair))
   localStorage.setItem(k as string, JSON.stringify(v))
 }, [KEY, DEFAULT_PAIR, {
-  version: 1, deal_accepted_at: '2026-08-01T00:00:00.000Z', profile: { goal: 'curious' },
+  version: 1, deal_accepted_at: '2026-08-01T00:00:00.000Z', set_up_at: '2026-08-01T00:00:00.000Z',
+  chapter: 'lisbon', purpose: PURPOSE, profile: { goal: 'trip' },
   inventory: OWNED, roots_played: PLAYED, sections_completed: ['the_basics','top_gun','james_bond','bridget_jones','pulp_fiction'],
   finished_cards: [], saved: [], liked: [], asked: [], evidence: [], legend: [],
   club_welcomed_at: '2026-08-20T00:00:00.000Z',

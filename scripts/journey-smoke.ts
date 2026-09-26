@@ -176,6 +176,58 @@ async function main() {
   const stage = async () =>
     (await page.evaluate(() => document.querySelector('[data-stage]')?.getAttribute('data-stage'))) ?? '?'
 
+  /*
+    THE WARM-UP STANDS WHERE THE PICKER USED TO, and this walk predates it.
+
+    Set-up lands on a gate offering two warm-up vibes rather than on the crate list — see
+    WARM_UP in content/road.ts. So the picker's copy was read against the warm-up screen
+    and every assertion about it failed: a wrong headline, no group labels, and all
+    thirteen crates "missing". Sixteen problems, one cause, none of them a fault in the
+    product.
+
+    The picker is still real and still worth checking; it is simply not the screen
+    immediately after set-up any more. /vibes with the warm-up already behind them is
+    where a learner meets it, so that is where these assertions belong — and `warmed`
+    records whether the gate was there at all, because a check that silently skips its own
+    subject is the thing this whole exercise is about.
+  */
+  const warmGate = page.locator('[data-testid^="warmup-"]').first()
+  const warmed = await warmGate.isVisible().catch(() => false)
+  if (!warmed) problems.push('the warm-up gate did not greet a new learner')
+
+  /*
+    THE PICKER IS READ AFTER THE WARM-UP, which is where it now appears.
+
+    /vibes shows the warm-up gate to a learner with nothing behind them and the crate list
+    to everybody else — so this walk, which read the picker's copy straight after set-up,
+    was asserting against the gate. Sixteen problems: a wrong headline, no group labels,
+    and all thirteen crates "missing". One cause, and not one of them a fault in the
+    product.
+
+    Taken rather than seeded, because taking it is what a learner does and this file's job
+    is to be the ordinary path. The warm-up is one sitting; pressing through it is the
+    same loop the walk runs below, so it is done there and the picker is read on the way
+    back out.
+  */
+  if (warmed) {
+    await press(warmGate, 'take the warm-up')
+    await page.waitForTimeout(1500)
+    /* Through the sitting, however many beats it is. The loop below does the real walk. */
+    for (let i = 0; i < 40; i++) {
+      const brk = page.getByTestId('break-go')
+      if (await brk.isVisible().catch(() => false)) {
+        await press(brk, 'past the warm-up break')
+        break
+      }
+      const cont = page.getByTestId('continue')
+      if (!(await cont.isVisible().catch(() => false))) break
+      await cont.click().catch(() => {})
+      await page.waitForTimeout(260)
+    }
+    await page.waitForTimeout(900)
+  }
+  await page.goto(BASE + '/vibes', { waitUntil: 'networkidle' })
+  await page.waitForTimeout(1400)
   const b2 = await page.evaluate(() => document.body.innerText)
   /*
     Read from the copy rather than restated here, and BOTH headlines are legitimate: the
@@ -415,6 +467,25 @@ async function main() {
       }
       unlocks++
       await press(page.getByTestId('opened-later'), 'past the unlock screen')
+      await page.waitForTimeout(900)
+      continue
+    }
+
+    /*
+      THE BREAK BETWEEN SITTINGS, which is a screen now and was a panel.
+
+      It sits between the last root and section-complete, and it deliberately has no
+      `continue` — its button carries the Portuguese it just taught (VAMOS LÁ, FALTA
+      POUCO). So this walk stalled there waiting for a control that screen does not have,
+      and timed out one step from the end.
+
+      Pressed by testid rather than by label for exactly that reason: the label is content
+      and changes with the sitting, and a walk that hard-codes it breaks the next time a
+      phrase is authored.
+    */
+    const onBreak = page.getByTestId('break-go')
+    if (await onBreak.isVisible().catch(() => false)) {
+      await press(onBreak, 'past the sitting break')
       await page.waitForTimeout(900)
       continue
     }
