@@ -440,6 +440,8 @@ export function Journey() {
           pieceIndex={step.pieceIndex}
         />
       )
+    case 'sitting-break':
+      return <SittingBreakStep />
     case 'osmosis':
       return <Osmosis />
     case 'profile':
@@ -4893,6 +4895,120 @@ function LegendOpen() {
  * queue cannot see, so the step is queued optimistically and steps aside here — a screen
  * whose only button cannot work is worse than no screen.
  */
+/**
+ * THE BREAK, AS A SCREEN AND A DECISION.
+ *
+ * Sam: "the keep going gates are very soft and tbh hard to spot. They need to be
+ * standalone screens with clear intent and signposting to continue or save their way
+ * out."
+ *
+ * It was a panel on section-complete, and his screenshot showed why that failed: a
+ * progress bar, the save offer overlapping it, this card, then two buttons — the one
+ * screen asking somebody to carry on was the fifth thing on it, halfway down a scroll.
+ * Soft is the right word. A decision needs a screen.
+ *
+ * THREE THINGS AND NOTHING ELSE. Where they are, what they just learned, and the two ways
+ * out. `nav={false}` for the same reason SaveStep uses it — a screen that asks a question
+ * should not also offer four tabs.
+ *
+ * THE PORTUGUESE IS THE POINT, not decoration on a gate. Each break teaches the phrase
+ * for the moment it appears in — Vamos lá to start, Falta pouco halfway, Já está at the
+ * end — so the screen that interrupts is also the screen that teaches, and the button
+ * carries the phrase rather than an instruction. See content/breaks.ts.
+ *
+ * SAVING IS THE OTHER WAY OUT, said plainly. Sam: "obvs if they choose to come back later
+ * they will have to give us their email to save progress." Somebody stopping here loses
+ * the work if the phone goes, and this is the honest moment to say so — not as a wall,
+ * which it never is, but as the thing the second button actually does.
+ */
+function SittingBreakStep() {
+  const { next } = useJourney()
+  const learner = useLearner()
+  const road = roadProgress({
+    rootsPlayed: learner.roots_played ?? [],
+    sectionsCompleted: learner.sections_completed ?? [],
+    purpose: learner.purpose ?? null,
+  })
+  /*
+    The break for the sitting just finished — rememberSection has already counted it by
+    the time this renders. Once the road is open the last one is right whatever the count
+    says: Já está is true of a finished Legend, and "falta pouco" there would contradict
+    the screen after it.
+  */
+  const b = road.open ? BREAKS[BREAKS.length - 1] : breakAfter(learner.sittings ?? 0)
+  /* Already saved, or already said no — then there is one way out, not two. */
+  const offerSave = learner.save_prompt === 'unseen' && !learner.profile?.email
+
+  return (
+    <Shell stage="CHOICE" nav={false}>
+      <div className="flex flex-1 flex-col justify-center gap-6">
+        <div className="flex flex-col gap-3">
+          <p className="eyebrow text-accent">{b.where.toUpperCase().slice(0, 14)}</p>
+          {/*
+            THE PHRASE IS THE HEADLINE, at the size the product reserves for produced
+            language. On the old panel it sat at text-2xl under three other things; here
+            it is the screen.
+          */}
+          <h1 data-testid="break-phrase" className="pt t-said text-accent">
+            {b.pt}
+          </h1>
+          <p className="text-lg text-fg/85">{b.en}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
+          <CopyButton text={b.pt} size="sm" />
+        </div>
+        <p className="text-sm leading-relaxed text-muted">{b.gloss}</p>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {/*
+          CARRYING ON IS THE PRIMARY, in the words just taught. The whole reason this
+          screen exists is that stopping was easier to find than continuing.
+        */}
+        <button
+          type="button"
+          data-testid="break-go"
+          onClick={() => {
+            track('section_decision', { decision: 'another', roots: b.after })
+            next()
+          }}
+          className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+        >
+          {b.cta}
+        </button>
+        {/*
+          AND THE WAY OUT SAYS WHAT IT COSTS. "Not now" tells somebody nothing; this says
+          the work is on the phone and an email is how it survives. Still never a wall —
+          declining is one tap and nothing is withheld.
+        */}
+        {offerSave ? (
+          <Link
+            href="/signin?next=%2Fvibes"
+            data-testid="break-save"
+            onClick={() => track('save_offered', { at: 'break', took: true })}
+            className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted"
+          >
+            SAVE MY PLACE
+          </Link>
+        ) : (
+          <button
+            type="button"
+            data-testid="break-stop"
+            onClick={() => {
+              track('section_decision', { decision: 'done', roots: b.after })
+              next()
+            }}
+            className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted"
+          >
+            STOP HERE
+          </button>
+        )}
+      </div>
+    </Shell>
+  )
+}
+
 function SaveStep() {
   const { next } = useJourney()
   const access = useEntitlements()
@@ -4945,44 +5061,6 @@ function SaveStep() {
         </button>
       </div>
     </Shell>
-  )
-}
-
-/**
- * One expression, at the moment it is true.
- *
- * See content/breaks.ts for what these are and why they are here rather than in a lesson.
- * The card is deliberately quiet: a phrase, its English, and one line about what it is
- * doing. Nothing is counted and nothing is tested — a learner who reads it and carries
- * straight on has lost nothing, which is the only way a break can be optional and still
- * worth putting on the screen.
- */
-function SittingBreakCard({ sittings, open }: { sittings: number; open: boolean }) {
-  /*
-    The break for the sitting just finished. `sittings` is incremented before this screen
-    renders, so a learner who has done one is on break one.
-
-    Once the road is open the last break is the right one whatever the count says: Já está
-    is true of somebody whose Legend is finished, and a "falta pouco" on that screen would
-    be the product contradicting the headline above it.
-  */
-  const b = open ? BREAKS[BREAKS.length - 1] : breakAfter(sittings)
-  return (
-    <div
-      data-testid="sitting-break"
-      className="mt-6 flex flex-col gap-3 rounded border-l-2 border-accent/50 bg-surface px-4 py-4"
-    >
-      <p className="eyebrow text-muted">{b.where}</p>
-      <div className="flex items-center gap-3">
-        <AudioButton slug={slugFor(b.pt)} text={b.pt} size="sm" />
-        <CopyButton text={b.pt} size="sm" />
-        <span className="min-w-0">
-          <span className="pt block text-2xl text-accent">{b.pt}</span>
-          <span className="mt-1 block text-sm text-fg/75">{b.en}</span>
-        </span>
-      </div>
-      <p className="text-xs leading-relaxed text-muted">{b.gloss}</p>
-    </div>
   )
 }
 
@@ -5332,22 +5410,11 @@ function SectionComplete() {
       </div>
 
       {/*
-        THE BREAK ITSELF, TAUGHT RATHER THAN SPENT.
-
-        Sam, on the road growing to four sittings: "add a keep going? mechanic between
-        each sitting, but make them fun and add some Portuguese learning at every sitting
-        break. Make sure each is different... obvious place to teach vamos-la."
-
-        A fourth stopping point is a fourth chance to leave, and the answer is not to hide
-        the break but to make it worth arriving at. One expression, of the kind nothing
-        else in the product has a home for — Vamos lá, Falta pouco, Quase, Já está — and
-        each is about the moment it appears in. A learner reading "falta pouco" halfway
-        through has been taught it by the situation rather than by a card.
-
-        Only while the road is still being walked. Once the Legend is open this screen is
-        a finish rather than a pause, and the fourth break — Já está — is what it says.
+        THE BREAK HAS ITS OWN SCREEN NOW — see SittingBreakStep, which runs immediately
+        before this one. It was a panel here, and Sam's screenshot showed why that could
+        not work: it was the fifth thing on a screen that already carries a headline, a
+        payoff, a progress bar and the save offer.
       */}
-      <SittingBreakCard sittings={learner.sittings ?? 0} open={road.open} />
 
       <Dock>
         {/*

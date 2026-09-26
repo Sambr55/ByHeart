@@ -13,6 +13,7 @@
  * leaves somebody able to build their card. A road that arrives is the only promise worth
  * making here.
  */
+import { readFileSync } from 'node:fs'
 import { BREAKS, breakAfter } from '../content/breaks'
 import { ROOTS, ROOTS_BY_FAMILY, type Root } from '../content/roots'
 import { ROAD, WARM_UP, roadFor, roadProgress } from '../content/road'
@@ -192,6 +193,39 @@ console.log('\nevery sitting break teaches something, and something new\n')
   ok('the breaks are in order', order.every((n, i) => n === i + 1), order.join(','))
   /* After the last one, a learner who keeps going is not handed nothing. */
   ok('past the end it still answers', Boolean(breakAfter(99).pt), breakAfter(99).pt)
+
+  /*
+    AND IT IS A SCREEN, NOT A PANEL.
+
+    Sam, on the first attempt: "the keep going gates are very soft and tbh hard to spot.
+    They need to be standalone screens with clear intent and signposting to continue or
+    save their way out." It was a card on section-complete, which already carries a
+    headline, a payoff, a progress bar, the save offer and two buttons — so the one screen
+    asking somebody to carry on was the fifth thing on it.
+
+    Asserted on the step queue rather than on the rendered screen, because that is where
+    "standalone" is decided: a break that is not its own step cannot be its own screen,
+    and putting the panel back would silently pass a check that only read the DOM.
+  */
+  const src = readFileSync('engine/journey.tsx', 'utf8')
+  ok(
+    'a sitting break is a step of its own',
+    /kind: 'sitting-break'/.test(src),
+    'engine/journey.tsx',
+  )
+  /* Before the summary, because the break is the decision and the summary is the receipt. */
+  const atBreak = src.indexOf("steps.push({ kind: 'sitting-break' })")
+  const atSummary = src.indexOf("steps.push({ kind: 'section-complete' })")
+  ok(
+    'and it comes before the summary',
+    atBreak > 0 && atSummary > atBreak,
+    atBreak + ' then ' + atSummary,
+  )
+
+  const ui = readFileSync('components/Journey.tsx', 'utf8')
+  /* Both ways out, named. A screen with one button is not a decision. */
+  ok('the break offers a way on', /data-testid="break-go"/.test(ui))
+  ok('and a way out that saves', /data-testid="break-save"/.test(ui))
 }
 
 if (fail.length) { console.log('\n' + fail.length + ' error(s)'); process.exit(1) }

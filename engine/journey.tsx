@@ -71,6 +71,18 @@ export type Step =
   | { kind: 'collision'; collisionId: string }
   | { kind: 'osmosis' }
   | { kind: 'profile'; which: 'gender' | 'age' | 'goal' }
+  /*
+    THE BREAK BETWEEN SITTINGS, as a screen of its own.
+
+    Sam: "the keep going gates are very soft and tbh hard to spot. They need to be
+    standalone screens with clear intent and signposting to continue or save their way
+    out."
+
+    It was a panel on section-complete, which already carries a headline, a payoff, a
+    progress bar, the save offer and two buttons — so the one screen that asks somebody to
+    carry on was the fifth thing on it, mid-scroll. A decision needs a screen.
+  */
+  | { kind: 'sitting-break' }
   | { kind: 'section-complete' }
   /*
     TWO SCREENS THAT INTERRUPT, because as panels they were missable.
@@ -1177,6 +1189,12 @@ export function JourneyProvider({
       // something to show for the time they have given us.
       const due = nextProfileQuestion()
       if (due) steps.push({ kind: 'profile', which: due })
+      /*
+        The break comes BEFORE the summary, because it is the decision and the summary is
+        the receipt. Asking "carry on?" after showing somebody the door is the wrong way
+        round — see the SittingBreak screen.
+      */
+      steps.push({ kind: 'sitting-break' })
       steps.push({ kind: 'section-complete' })
       dispatch({
         type: 'append',
