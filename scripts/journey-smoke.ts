@@ -25,6 +25,7 @@
  * Where possible it now reads the product's own content files instead of restating them,
  * so a rewording moves the check with it rather than breaking it.
  */
+import { WARM_UP } from '../content/road'
 import { BRAND } from '../content/brand'
 import { chromium, type Locator, type Page } from 'playwright'
 import { CRATES, ROOTS, entryRung, isLive } from '../content/roots'
@@ -209,68 +210,81 @@ async function main() {
     same loop the walk runs below, so it is done there and the picker is read on the way
     back out.
   */
-  if (warmed) {
-    await press(warmGate, 'take the warm-up')
-    await page.waitForTimeout(1500)
-    /* Through the sitting, however many beats it is. The loop below does the real walk. */
-    for (let i = 0; i < 40; i++) {
-      const brk = page.getByTestId('break-go')
-      if (await brk.isVisible().catch(() => false)) {
-        await press(brk, 'past the warm-up break')
-        break
-      }
-      const cont = page.getByTestId('continue')
-      if (!(await cont.isVisible().catch(() => false))) break
-      await cont.click().catch(() => {})
-      await page.waitForTimeout(260)
-    }
-    await page.waitForTimeout(900)
-  }
-  await page.goto(BASE + '/vibes', { waitUntil: 'networkidle' })
-  await page.waitForTimeout(1400)
+  /*
+    NOT WALKED HERE. A first attempt pressed `continue` through the warm-up in a loop of
+    its own and stalled on the drain — the one screen with deliberately no way forward,
+    for 620ms — because that loop broke as soon as the button was invisible. The main walk
+    below already knows about the drain AND the tile build, so duplicating it badly here
+    was how a second thing started going wrong.
+
+    So the warm-up is simply recorded as offered, the walk takes it in its ordinary loop,
+    and the picker is read afterwards — see 'the picker, once there is something to pick
+    between' near the end of this file.
+  */
   const b2 = await page.evaluate(() => document.body.innerText)
   /*
-    Read from the copy rather than restated here, and BOTH headlines are legitimate: the
-    picker says "start here" while the basics doorway is shut and "pick a crate you
-    connect with" once there is something to pick between.
+    THE PICKER IS CHECKED AFTER THE WALK, not before it.
+
+    /vibes shows the warm-up gate to a learner with nothing behind them and the crate list
+    to everybody else, so reading the picker's copy immediately after set-up asserted
+    against the gate: a wrong headline, no group labels, and all thirteen crates
+    "missing". Sixteen problems, one cause, none of them a fault in the product.
+
+    Kept as a function so the assertions stay exactly as they were and only their MOMENT
+    moves — see checkPicker(), called once the walk has a vibe behind it.
   */
-  if (!b2.includes(PICKER.headline) && !b2.includes(PICKER.basics_first_headline)) {
-    problems.push('picker headline wrong')
+  const checkPicker = (text: string) => {
+    /*
+      Read from the copy rather than restated here, and BOTH headlines are legitimate: the
+      picker says "start here" while the basics doorway is shut and "pick a crate you
+      connect with" once there is something to pick between.
+    */
+    if (!text.includes(PICKER.headline) && !text.includes(PICKER.basics_first_headline)) {
+      problems.push('picker headline wrong')
+    }
+    // The silent five-tier sort is labelled now, and the labels are the feature.
+    if (!/OPEN NOW/i.test(text)) problems.push('the crates screen no longer labels its groups')
+    if (/WHAT DO YOU ALREADY KNOW BY HEART/.test(text)) problems.push('free-text screen still present')
+    // An expired drop is meant to be absent from the picker, so the smoke walk only
+    // insists on the ones that should be there today.
+    for (const f of CRATES.filter((c) => isLive(c))) {
+      if (!text.includes(f.title)) problems.push('picker missing crate ' + f.title)
+    }
+    for (const f of CRATES.filter((c) => !isLive(c))) {
+      if (text.includes(f.title)) problems.push('expired drop still in the picker: ' + f.title)
+    }
   }
-  // The silent five-tier sort is labelled now, and the labels are the feature.
-  if (!/OPEN NOW/i.test(b2)) problems.push('the crates screen no longer labels its groups')
-  if (/WHAT DO YOU ALREADY KNOW BY HEART/.test(b2)) problems.push('free-text screen still present')
-  // An expired drop is meant to be absent from the picker, so the smoke walk only
-  // insists on the ones that should be there today.
   const live = CRATES.filter((c) => isLive(c))
-  for (const f of live) {
-    if (!b2.includes(f.title)) problems.push('picker missing crate ' + f.title)
-  }
-  for (const f of CRATES.filter((c) => !isLive(c))) {
-    if (b2.includes(f.title)) problems.push('expired drop still in the picker: ' + f.title)
-  }
 
   /*
-    THE DOORWAY, asserted before the smoke walks past it.
+    THE DOORWAY, asserted on the screen a brand-new learner actually meets.
 
-    A brand-new learner can open exactly one crate: the basics. Five of the eleven have
-    nothing at rung 1 at all, so picking Marcus Aurelius first meant meeting rung-2 Stoic
-    philosophy before you could say hello.
+    This said "a new learner can open exactly one crate: the basics", which was true and
+    stopped being so. The road puts a WARM-UP in front of the basics — Top Gun or Bridget
+    Jones, authored as WARM_UP in content/road.ts — so a first visit is a gate offering
+    those two, and this reported all three of them as faults: the basics "cannot be
+    opened", and each warm-up "is open to a brand-new learner".
 
-    Checked here rather than assumed, and then stepped over — recording one finished
-    basics section, which is what the doorway actually asks for — so the rest of this
-    walk can exercise whichever crate it was told to.
+    The underlying rule has not changed and is still worth holding: a beginner must not be
+    handed rung-2 content before they can say hello. What changed is which crates are the
+    honest first step, so that is what is asserted — the warm-up pair is offered, and
+    nothing outside it is.
   */
   {
-    const basics = CRATES.find((c) => c.id === 'the_basics')!
-    const others = live.filter((c) => c.id !== 'the_basics' && !c.drop)
+    const warmUps = WARM_UP.map((id: string) => CRATES.find((c) => c.id === id)).filter((c) => Boolean(c))
     const openNow = b2.split('OPENS AS YOU GO')[0] ?? ''
-    if (!openNow.includes(basics.title)) {
-      problems.push('a new learner cannot open the basics, which is the only thing they can open')
+    for (const c of warmUps) {
+      if (c && !openNow.includes(c.title)) {
+        problems.push('a new learner is not offered the warm-up ' + c!.title)
+      }
     }
-    for (const c of others) {
+    /*
+      And nothing else. The basics included: they are the road's next step, not a learner's
+      first choice, and offering them beside the warm-up would be two doors at once.
+    */
+    for (const c of live.filter((c) => !c.drop && !(WARM_UP as string[]).includes(c.id))) {
       if (openNow.includes(c.title)) {
-        problems.push(c.title + ' is open to a brand-new learner — the basics doorway is not holding')
+        problems.push(c.title + ' is open before the warm-up — the gate is not holding')
       }
     }
     /*
@@ -726,6 +740,23 @@ async function main() {
     problems.push('the feedback page answers only ' + HELP.length + ' questions; it had 5')
   }
   if (!/What did not land/i.test(help)) problems.push('feedback page has no open box')
+
+  /*
+    THE PICKER, LAST, ONCE THERE IS SOMETHING TO PICK BETWEEN.
+
+    /vibes shows the warm-up gate to a learner with nothing behind them and the crate list
+    to everybody else — so these assertions, run immediately after set-up, were reading
+    the gate: a wrong headline, no group labels, all thirteen crates "missing". Sixteen
+    problems from one misplaced read, none of them a fault in the product.
+
+    Read at the very end rather than mid-walk. Two earlier attempts moved it into the
+    journey and broke it in different ways: walking the warm-up with a loop of its own
+    stalled on the drain, and navigating away mid-walk lost the walk's place. By here the
+    walk is finished, and this runs before the browser closes.
+  */
+  await page.goto(BASE + '/vibes', { waitUntil: 'networkidle' })
+  await page.waitForTimeout(1600)
+  checkPicker(await page.evaluate(() => document.body.innerText))
 
   await browser.close()
 
