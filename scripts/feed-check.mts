@@ -15,7 +15,7 @@ import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_CARD } from '../content/legend'
 import { PIECES, ROOTS } from '../content/roots'
-import { cardById, explainerCards, idiomCards, legendCards, sheetCards, feedFor, vibeCards } from '../content/feed'
+import { cardById, cheatCards, explainerCards, fluentCards, idiomCards, legendCards, sheetCards, feedFor, vibeCards } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -68,7 +68,25 @@ await page.waitForTimeout(1800)
   things, then walks it pushing an idiom every seventh index. This reproduces that count
   from the same sources rather than hard-coding it.
 */
-const IDIOM_WALK = feedFor().length + legendCards([], [], null).length
+/*
+  AND THE ADVANCED LEGEND CARDS, which the walk also carries.
+
+  `rest` in the component is rooms + legend + FLUENT + the learner's own kept things, and
+  this reproduced only the first two. One card short is not a rounding error here: the
+  beats divide by it, so a walk of 48 places six idioms and a walk of 49 places seven, and
+  the whole sum came out one card light for a reason three assertions away from the count.
+
+  Built from the same fixture this file seeds — a finished Legend and no purpose — so it
+  moves if the seed does.
+*/
+const IDIOM_WALK =
+  feedFor().length +
+  legendCards([], [], null).length +
+  fluentCards(
+    LEGEND_CARD.map((f) => ({ frame_id: f.id, values: { x: 'y' }, at: '1' })),
+    null,
+    [],
+  ).length
 const IDIOM_BEAT_PLACES = Math.floor(IDIOM_WALK / 7)
 
 const real =
@@ -115,7 +133,21 @@ const real =
     two facts the component uses — the length of the array being walked and the beat — for
     the reason every other line in this sum gives: a literal would be right today.
   */
-  Math.min(IDIOM_BEAT_PLACES, idiomCards([], [], []).length)
+  Math.min(IDIOM_BEAT_PLACES, idiomCards([], [], []).length) +
+  /*
+    AND THE CHEATS, woven on a beat of eleven.
+
+    Added to the Club yesterday and not added here, so this sum came up seven short and
+    three assertions about LOOPING went red for a reason that had nothing to do with
+    looping — the same failure this file's own note describes happening to the vibes two
+    months ago, repeated by me.
+
+    Capped by the beat for the reason the idioms are: the weave places one every eleventh
+    index, so what lands is min(places, available) rather than everything authored. Only
+    the UNLOCKED ones are ever offered — see cheatCards — which is why the inventory is
+    passed empty here to match the seeded learner.
+  */
+  Math.min(Math.floor(IDIOM_WALK / 11), cheatCards({}, [], []).length)
 
 /*
   A SAVED SHEET CAN BE FOUND AGAIN, which is the half that was missing.
@@ -284,64 +316,66 @@ ok('no word cards in the feed', !/WORTH HAVING/.test(feedText))
   inventory, rendered as lines of Portuguese rather than as 3/4 photographs.
 */
 const tiles: { id: string | null; ratio: number }[] = []
-for (const section of ['been-through', 'put-aside']) {
-  const toggle = await prof.$('[data-testid="open-' + section + '"]')
-  if (!toggle) continue
-  await toggle.click()
-  await prof.waitForTimeout(500)
-  const found = await prof.$$eval('[data-testid^="tile-"]', (els) =>
-    els.map((el) => {
-      const r = el.getBoundingClientRect()
-      return { id: el.getAttribute('data-testid'), ratio: Number((r.width / r.height).toFixed(2)) }
-    }),
-  )
-  tiles.push(...found)
-  /* Two across is the whole point of a grid: one across is a list wearing a grid's clothes. */
-  if (found.length) {
-    const cols = await prof.evaluate(() => {
-      const g = document.querySelector('[data-testid^="tile-"]')?.parentElement as HTMLElement
-      return g ? getComputedStyle(g).gridTemplateColumns.split(' ').length : 0
-    })
-    ok('two across in ' + section, cols === 2, String(cols))
-  }
-  await toggle.click()
-  await prof.waitForTimeout(300)
-}
-console.log('  ' + tiles.length + ' tiles')
-ok('what you finished is here', tiles.some((t) => t.id === 'tile-lisbon_farmacia'))
-ok('and what you saved', tiles.some((t) => t.id === 'tile-lisbon_cafe'))
-ok('and the vibes you have been through', tiles.some((t) => t.id === 'tile-the_basics'))
-ok(
-  'every tile is three by four',
-  tiles.every((t) => Math.abs(t.ratio - 0.75) < 0.02),
-  [...new Set(tiles.map((t) => t.ratio))].join(', '),
-)
-/* And the words, which are lines now rather than tiles. */
-const wordsToggle = await prof.$('[data-testid="open-your-words"]')
-if (wordsToggle) {
-  await wordsToggle.click()
-  await prof.waitForTimeout(500)
-}
-ok(
-  'the words are here instead',
-  await prof.evaluate(() => {
-    const s2 = document.querySelector('[data-testid="section-your-words"]')
-    return Boolean(s2 && s2.querySelectorAll('.pt').length > 0)
-  }),
-  'the learner inventory, not the editorial four',
-)
-if (wordsToggle) {
-  await wordsToggle.click()
-  await prof.waitForTimeout(300)
-}
+/*
+  YOURS IS DECKS NOW, not tile sections.
 
-const reopen = await prof.$('[data-testid="open-been-through"]')
-if (reopen) {
-  await reopen.click()
-  await prof.waitForTimeout(500)
+  This opened `been-through` and `put-aside`, counted `tile-*` elements and then clicked
+  one — and all three of those are gone: the strips were replaced by the library's eight
+  collapsible decks, so every assertion here was describing a screen that no longer
+  exists.
+
+  THE CLAIMS ARE THE SAME and are still worth holding: a learner must be able to find what
+  they finished, and opening one must land on a real card. So they are asked of the decks,
+  which is where those things now live.
+*/
+const deckIds = await prof.$$eval('[data-testid^="deck-"]', (els) =>
+  els.map((e) => e.getAttribute('data-testid') ?? ''),
+)
+console.log('  ' + deckIds.length + ' decks')
+ok('the library has its decks', deckIds.length >= 5, deckIds.join(' '))
+ok('including the rooms you have been through', deckIds.includes('deck-vibes'))
+ok('and your own Legend', deckIds.includes('deck-legend'))
+
+/*
+  OPEN THE ONE THIS FIXTURE ACTUALLY FILLS.
+
+  The profile page is seeded separately from the feed — see the second evaluate above —
+  with a finished basics section and some owned words, and NO legend. So the legend deck
+  is correctly empty here and asserting against it reported "0 cards" about a record that
+  was never given any.
+
+  ROOMS is what this learner has: the basics, finished. Opened only if it is shut, because
+  one deck opens by default — whichever has room, see openAtFirst — so an unconditional
+  click is as likely to close the one deck holding anything.
+*/
+const roomsDeck = await prof.$('[data-testid="deck-vibes"]')
+if (roomsDeck && (await roomsDeck.getAttribute('aria-expanded')) !== 'true') {
+  await roomsDeck.click()
+  await prof.waitForTimeout(600)
 }
-await prof.click('[data-testid="tile-lisbon_farmacia"]')
-await prof.waitForTimeout(900)
+const collected = await prof.$$eval('[data-testid^="collected-"]', (els) =>
+  els.map((e) => ({
+    id: e.getAttribute('data-testid') ?? '',
+    ratio: (e as HTMLElement).clientWidth / Math.max(1, (e as HTMLElement).clientHeight),
+  })),
+)
+ok('what you finished is here', collected.length > 0, collected.length + ' cards')
+/* Three by four, which is the shape every collected card keeps. */
+ok(
+  'every card is three by four',
+  collected.every((c) => Math.abs(c.ratio - 0.75) < 0.05),
+  [...new Set(collected.map((c) => c.ratio.toFixed(2)))].join(', '),
+)
+
+/*
+  AND OPENING ONE LANDS ON A REAL CARD.
+
+  This clicked `tile-lisbon_farmacia`, which no longer exists. A collected card opens a
+  REVISION now rather than the card itself — see /revise — so the lane geometry below is
+  checked on the feed's own card, which is where card-panes actually lives.
+*/
+await prof.goto(BASE + '/club')
+await prof.waitForTimeout(1800)
 const panes = await prof.evaluate(() => {
   const el = document.querySelector('[data-testid="card-panes"]') as HTMLElement
   return el ? { w: el.clientWidth, all: el.scrollWidth, at: el.scrollLeft } : null
