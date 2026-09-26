@@ -165,8 +165,10 @@ export const PLANS = {
       Sam has never seen a paywall, and this is half of why: he was watching for the third.
 
       Written from FREE_CRATES so the next time one of these two numbers moves, the copy
-      moves with it. The Legend door's own "three vibes" in front-door.ts is a DIFFERENT
-      three and stays — that one is VIBES_FOR_LEGEND, which really is three.
+      moves with it. The Legend door used to have its own three — VIBES_FOR_LEGEND — and
+      this note said it "really is three" and stays. It did not: the toll was removed, the
+      constant outlived it by weeks, and the door now asks for one warm-up. Five is still
+      five here, and it is the only three-or-five left in the product.
     */
     line:
       'Your Legend, ' + (WORDS[FREE_CRATES] ?? String(FREE_CRATES)) +

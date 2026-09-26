@@ -94,13 +94,23 @@ export function NotYet({
         {open
           ? 'It is open now — build it and the Club is yours.'
           : left > 0
-            ? (left === 1
-                ? 'One more sitting of the basics, then '
-                : left + ' more sittings of the basics, then ') +
-              (status.vibesNeeded === 1 ? 'one vibe of your own.' : status.vibesNeeded + ' vibes of your own.')
-            : vibesLeft === 1
-              ? 'The basics are done. One more vibe finished and it opens.'
-              : 'The basics are done. ' + vibesLeft + ' more vibes finished and it opens.'}
+            ? /*
+                THE BASICS, AND THE WARM-UP ONLY IF IT IS STILL OWED.
+
+                This said "then N vibes of your own" against a toll of three that had
+                already been removed, so the locked door asked for two things the product
+                was not going to check. And a learner who had warmed up was still told to
+                do it: the clause was unconditional.
+
+                Named rather than counted, for the reason legend_vibes is: the warm-up is
+                Top Gun or Bridget Jones, not any vibe off the shelf, and "one vibe of
+                your own" sends somebody to pick the wrong thing.
+              */
+              (left === 1
+                ? 'One more sitting of the basics'
+                : left + ' more sittings of the basics') +
+              (vibesLeft > 0 ? ', and a warm-up vibe.' : '.')
+            : 'The basics are done. Take a warm-up vibe and it opens.'}
       </p>
 
       {/*

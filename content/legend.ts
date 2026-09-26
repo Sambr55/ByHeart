@@ -2103,51 +2103,20 @@ export function worthSaving(me: {
 /** The vibe every learner is sent through first, and the one the Legend is built from. */
 export const DOORWAY: CultureFamily = 'the_basics'
 
-/**
- * THE DOOR: the basics, finished. Not five vibes, visited.
- *
- * It counted five distinct `sections_completed`, and a section is recorded after ONE
- * SITTING of 2–4 roots. So the gate measured turning up five times while the card needed
- * ten specific words, and those two never met. Measured on a real five-vibe run: 23
- * pieces owned and 3 of 7 questions answerable, which is exactly what Sam hit — the
- * Legend opened and could not be finished.
- *
- * Worse, the four other vibes were not helping. Every word the card needs is taught in
- * the basics (a fix for the five-vibe trap, which was real), so the other seven of twelve
- * vibes contribute NOTHING to the card. The requirement was four vibes of unrelated words
- * standing between a learner and a card that was waiting on a basics nobody asked them to
- * finish.
- *
- * THE DOOR IS THE BASICS PLUS THREE VIBES YOU CHOSE, which is a change.
- *
- * It was the basics alone. Sam: "Basics are essentially the first vibe and compulsory —
- * to which the user then adds a number of vibes in order to open the Legend." The basics
- * are not a choice, so opening the Legend on them alone asked nothing of the learner
- * except compliance, and the Legend is meant to be built out of things they picked.
- *
- * Three FINISHED, not started. `sections_completed` is written on finishing, and the
- * shelf already frees an allowance slot on the same fact — so a learner who finishes
- * three has spent none of their five and cannot be stranded. That deadlock is worth
- * naming because it existed before: "start five, finish three, wander off from two — and
- * you are at the limit with nothing left to open and no way to reach the Legend",
- * components/Journey.tsx. Counting finished vibes keeps that road walkable.
- *
- * Both halves are required. The basics carry the vocabulary the card is built from — a
- * Legend with no words in it is not a Legend — and the three chosen vibes are what make
- * it theirs.
- *
- * THE THREE INCLUDE THE FORCED WARM-UP, so in practice it is Top Gun or Bridget Jones
- * plus two the learner picked freely. Sam, proposing the shape: "warm up vibe + 2 x
- * basics that capture name and age + 2 vibes opens the legend." The warm-up is still a
- * vibe — it is chosen from two, it is a real sitting, and its words go into the card —
- * so it counts; what it is not is the whole requirement.
- *
- * This number has always been three. What changed is that it started being true: the old
- * count read every basics sitting past the first as a chosen vibe, so four sittings of
- * basics reported three and the door swung open on compliance alone — the exact thing
- * this constant's own note above says must not happen. See chosenVibesFinished.
- */
-export const VIBES_FOR_LEGEND = 3
+/*
+  VIBES_FOR_LEGEND IS GONE, and its note is the reason it had to go.
+
+  It read "this number has always been three" and explained at length why three was right
+  — written when the door was the road AND a toll of three chosen vibes. The toll was
+  removed; the constant was not, so five screens went on telling learners to finish two
+  more vibes after the door had opened. Sam, reading the picker: "three vibes of your own"
+  on a screen that was already letting him in.
+
+  The requirement now is one warm-up, counted as a step of the road like any other, so
+  there is nothing left for a constant to hold. legendStatus derives it from
+  roadProgress().warmedUp — see below — which means the next time this rule moves, every
+  screen moves with it instead of one of them being edited.
+*/
 
 /**
  * SITTINGS OF VIBES THE LEARNER CHOSE, which is not the same as vibes finished.
@@ -2446,8 +2415,32 @@ export function legendStatus(opts: {
   return {
     open,
     toGo,
-    vibesDone: chosenVibesFinished(sections),
-    vibesNeeded: VIBES_FOR_LEGEND,
+    /*
+      THE WARM-UP, WHICH IS THE WHOLE VIBE REQUIREMENT NOW.
+
+      These reported "1 of 3" long after the toll was removed, so five screens told a
+      learner to finish two more vibes when the door was already open — the locked-door
+      screen among them. Sam saw the picker promising "three vibes of your own" and asked
+      for it fixed.
+
+      The door is roadProgress and nothing else. The road counts ONE warm-up as one of its
+      steps — see WARM_UP in content/road.ts — so the honest pair is "have you warmed up"
+      expressed in the same shape the callers already read. `vibesNeeded` is 1 because one
+      is what is needed; it stays derived rather than typed, so the next time this rule
+      moves the number moves with it.
+
+      VIBES_FOR_LEGEND is gone rather than set to 1. A constant whose own note explains
+      that it "has always been three" cannot be quietly redefined, and keeping it would
+      leave the next reader with two answers to one question.
+    */
+    vibesDone: roadProgress({
+      rootsPlayed: opts.rootsPlayed,
+      sectionsCompleted: sections,
+      purpose: opts.purpose ?? null,
+    }).warmedUp
+      ? 1
+      : 0,
+    vibesNeeded: 1,
     sessionsNeeded: doorwaySessions(doorwayRoots(opts.purpose).length),
     sessionsDone: doorwaySessions(doorwayRoots(opts.purpose).length) - doorwaySessions(toGo),
     openCards: open ? LEGEND_FRAMES.length : 0,

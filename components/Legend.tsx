@@ -581,9 +581,7 @@ export function Legend() {
                   ? PICKER.legend_basics(
                       Math.max(0, doorStatus.sessionsNeeded - doorStatus.sessionsDone),
                     )
-                  : PICKER.legend_vibes(
-                      Math.max(0, doorStatus.vibesNeeded - doorStatus.vibesDone),
-                    )}{' '}
+                  : PICKER.legend_vibes()}{' '}
                 {LEGEND_COPY.locked_body}
               </p>
               {/*

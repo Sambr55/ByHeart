@@ -320,10 +320,21 @@ export const PICKER = {
     the doorway and the sitting budget. Typing a 3 in here is how "five vibes" survived
     three rules past being true.
   */
+  /*
+    AND THE BASICS COUNT, with the toll taken out of it.
+
+    "then three vibes of your own" was typed here and outlived the rule it described by
+    weeks — which is precisely what the note above warns about: "typing a 3 in here is how
+    five vibes survived three rules past being true." It happened again, to the same line.
+
+    Nothing replaces it. The warm-up is one of the road's own steps, so a learner part-way
+    through the basics has nothing else pending and the sentence should not invent
+    something. When the warm-up IS what is outstanding, legend_vibes says so.
+  */
   legend_basics: (left: number) =>
     left === 1
-      ? 'One more basics session, then three vibes of your own, and your Legend opens.'
-      : left + ' more basics sessions, then three vibes of your own, and your Legend opens.',
+      ? 'One more basics session and your Legend opens.'
+      : left + ' more basics sessions and your Legend opens.',
   /*
     The end of the warm-up, which is not the end of a basics session.
 
@@ -356,10 +367,20 @@ export const PICKER = {
         ' and your Legend opens.',
   /* The tile's own badge, so it stops saying DONE while the door is still shut. */
   legend_tile: (done: number, need: number) => 'BASICS · ' + done + ' OF ' + need,
-  legend_vibes: (left: number) =>
-    left === 1
-      ? 'Finish one more vibe and your Legend opens.'
-      : 'Finish ' + left + ' more vibes and your Legend opens.',
+  /*
+    THE WARM-UP, WHICH IS THE WHOLE OF WHAT IS LEFT.
+
+    This said "Finish N more vibes" against a toll of three that had already been removed,
+    so a learner with the road walked was told to do two more of something the door was no
+    longer asking for. Sam found it on the picker: "three vibes of your own."
+
+    One now, and named rather than counted: the thing outstanding is the warm-up, which is
+    a specific pair — Top Gun or Bridget Jones — and not any vibe off the shelf. "One more
+    vibe" would send somebody to the shelf to pick the wrong thing. The plural branch is
+    gone because the number cannot exceed one; a branch that cannot run is a promise this
+    copy might start making again.
+  */
+  legend_vibes: () => 'Take a warm-up vibe and your Legend opens.',
   legend_open: 'Your Legend is open — build it and the Club is yours.',
   /*
     Why the rest of the shelf is dimmed on somebody's first visit.
@@ -465,11 +486,16 @@ export const PICKER = {
     'The dimmed ones are not gone. Each says what opens it — and it opens by saying something cold, with nothing on screen to copy from, not by turning up.',
   /** The affordance on the stage band, which used to be a number with no explanation. */
   stages_toggle: 'all six',
-  /**
-   * Said once, quietly, under the list. Not a banner and not a countdown — the three
-   * crates are a real product, and somebody a fortnight in has not run out of anything.
-   */
-  plan_note: 'Three vibes are yours for good, and every drop is always open.',
+  /*
+    plan_note is gone. It said "Three vibes are yours for good" while FREE_CRATES was
+    five — understating the free plan by two — and nothing rendered it: defined here and
+    read nowhere. Found while fixing the Legend door's own stale three, which is a
+    different number with the same cause.
+
+    Deleted rather than corrected. Copy no screen shows cannot be wrong in front of
+    anybody, and keeping it accurate is a maintenance cost with no reader; the allowance
+    line that IS shown is built from FREE_CRATES in lib/entitlements.ts.
+  */
   plan_cta: 'What DUB adds',
   cta: 'START HERE',
 } as const
@@ -698,8 +724,8 @@ export const GATEWAY = {
 
     This said "THAT IS THE FREE THREE" over "Basics and two vibes" — and the gateway it
     titles fires at FREE_CRATES, which is 5. The door and the allowance were deliberately
-    decoupled (the door is the basics plus three vibes you CHOSE; the allowance stayed
-    where it was) and none of the copy moved with it. So the one screen in the product
+    decoupled (the door was the basics plus three vibes you CHOSE — one warm-up now; the
+    allowance stayed where it was) and none of the copy moved with it. So the one screen in the product
     that asks for money named a limit two vibes short of the one it was enforcing.
 
     Sam has never seen this screen, and this was half the reason — he was watching for the

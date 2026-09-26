@@ -18,7 +18,7 @@ import { BREAKS, breakAfter } from '../content/breaks'
 import { ROOTS, ROOTS_BY_FAMILY, type Root } from '../content/roots'
 import { ROAD, WARM_UP, roadFor, roadProgress } from '../content/road'
 import { beatsFor } from '../engine/journey'
-import { cardFor, frameReady, LEGEND_FRAMES } from '../content/legend'
+import { cardFor, frameReady, legendStatus, DOORWAY, LEGEND_FRAMES } from '../content/legend'
 import type { Purpose } from '../content/situations'
 
 const fail: string[] = []
@@ -226,6 +226,69 @@ console.log('\nevery sitting break teaches something, and something new\n')
   /* Both ways out, named. A screen with one button is not a decision. */
   ok('the break offers a way on', /data-testid="break-go"/.test(ui))
   ok('and a way out that saves', /data-testid="break-save"/.test(ui))
+}
+
+/*
+  WHAT THE DOOR ASKS FOR IS WHAT THE SCREENS SAY IT ASKS FOR.
+
+  Sam, reading the picker: it promised "three vibes of your own" while the door was
+  already open. The vibe toll was removed weeks ago and VIBES_FOR_LEGEND stayed at three,
+  so five screens went on counting against a rule nothing enforced — including NotYet,
+  which is the locked door itself.
+
+  The note above that constant had warned about this exact failure in its own words:
+  "typing a 3 in here is how five vibes survived three rules past being true." It then
+  happened to the same line. So the numbers are derived now, and this asserts the
+  agreement rather than the number: a learner the road calls done must never be told to
+  finish anything, and one it calls unfinished must never be told they are done.
+*/
+console.log('\nthe door and the copy agree\n')
+{
+  for (const purpose of ['visiting', 'staying', 'moving'] as const) {
+    const all = roadFor(purpose).map((step) => step.root)
+    /* Road walked AND warmed up — the door is open, so nothing may ask for more. */
+    const done = legendStatus({
+      rootsPlayed: all,
+      sectionsCompleted: [DOORWAY, WARM_UP[0]],
+      sittings: 9,
+      purpose,
+    })
+    ok(purpose + ': a walked road opens the door', done.open, JSON.stringify(done))
+    ok(
+      purpose + ': and asks for nothing more',
+      done.vibesNeeded - done.vibesDone <= 0,
+      done.vibesDone + ' of ' + done.vibesNeeded,
+    )
+    /* Road walked, no warm-up — one thing outstanding, and exactly one. */
+    const cold = legendStatus({
+      rootsPlayed: all,
+      sectionsCompleted: [DOORWAY],
+      sittings: 9,
+      purpose,
+    })
+    ok(purpose + ': without a warm-up it stays shut', !cold.open)
+    ok(
+      purpose + ': and asks for exactly one',
+      cold.vibesNeeded - cold.vibesDone === 1,
+      cold.vibesDone + ' of ' + cold.vibesNeeded,
+    )
+  }
+  /*
+    AND NO SCREEN TYPES THE OLD NUMBER. The fault was a literal three in copy, so this
+    looks for one where it did the damage rather than trusting the derivation alone.
+  */
+  /*
+    COMMENTS STRIPPED FIRST. The first version of this matched its own documentation —
+    the notes explaining what the old copy said contain the old copy — and reported two
+    failures against files that were already correct. What is being defended is what a
+    learner reads, so only the strings a learner can read are searched.
+  */
+  const strip = (src: string) =>
+    src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+  const copy = strip(readFileSync('content/front-door.ts', 'utf8'))
+  ok('the picker no longer promises three vibes', !/three vibes/i.test(copy))
+  const notYet = strip(readFileSync('components/NotYet.tsx', 'utf8'))
+  ok('nor does the locked door', !/vibes of your own/i.test(notYet))
 }
 
 if (fail.length) { console.log('\n' + fail.length + ' error(s)'); process.exit(1) }

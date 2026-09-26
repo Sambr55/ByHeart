@@ -1405,7 +1405,18 @@ function Picker() {
     !access.signedIn &&
     !learner.profile?.email &&
     shelfLegend.toGo === 0 &&
-    shelfLegend.vibesDone >= 2 &&
+    /*
+      WARMED UP, not "two vibes in".
+
+      This read `vibesDone >= 2` against a count that used to run to three. It now runs to
+      one — the warm-up is the whole vibe requirement — so the condition became
+      unsatisfiable and would have taken the shelf's save offer off the screen silently.
+      Nothing would have failed; the offer would simply never have appeared again.
+
+      The intent was "somebody far enough in to have something worth losing", and with the
+      basics behind them (toGo === 0) and a warm-up done, they are.
+    */
+    shelfLegend.vibesDone >= 1 &&
     learner.save_prompt === 'unseen'
 
   const facts = (f: Crate): Facts => {
@@ -1655,7 +1666,6 @@ function Picker() {
                 Math.max(0, shelfLegend.sessionsNeeded - shelfLegend.sessionsDone),
               )
             : PICKER.legend_vibes(
-                Math.max(0, shelfLegend.vibesNeeded - shelfLegend.vibesDone),
               )}
         </p>
       ) : null}
