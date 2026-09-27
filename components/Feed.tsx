@@ -1925,10 +1925,21 @@ export function Card({
   }
 
   const onDown = (e: React.PointerEvent) => {
-    if (!locked) return
+    /*
+      ORDINARY CARDS DRAG TOO, which is the whole of what was missing.
+
+      This returned unless the card was LOCKED, so the drag — translate, tilt, fly off,
+      all of it already written and working — ran on the five intro cards and nowhere
+      else. Every other card had no pointer handling at all: the native scroller moved the
+      lane under your finger, and a tilt applied to that lane is invisible against its own
+      motion. Sam, twice: "sluggish and gets stuck", then "there is no drag motion at all".
+
+      Both reports were the same fault seen from different sides, and neither was about
+      the tilt. The card was never being dragged.
+    */
     from.current = { x: e.clientX, y: e.clientY }
     fired.current = false
-    setHeld(true)
+    if (locked) setHeld(true)
   }
 
   /* The finger has gone, whatever it did. Always clear, or the card never comes back. */
@@ -1951,10 +1962,27 @@ export function Card({
   */
   const MIN = 24
   const onMove = (e: React.PointerEvent) => {
-    if (!locked || !from.current || fired.current) return
+    if (!from.current || fired.current) return
     const dx = e.clientX - from.current.x
     const dy = e.clientY - from.current.y
     const sideways = Math.abs(dx) > Math.abs(dy)
+    if (!locked) {
+      /*
+        AN UNLOCKED CARD IS DRAGGED LEFT AND ONLY LEFT.
+
+        Right is the language reveal and it stays a scroll: a pane sliding in is what
+        reading looks like, it snaps, it half-opens and falls back, and ten call sites read
+        the lane arithmetic that makes it work. Left is a THROW, and a throw has to be
+        carried by the hand — which is the difference Sam photographed.
+
+        The card follows the finger exactly. No threshold on the movement itself, so a
+        half-drag leans halfway and letting go unwinds it; the decision to actually reject
+        happens on release, below.
+      */
+      if (sideways && dx < 0) setDrag({ x: dx, y: 0 })
+      else if (drag.x) setDrag({ x: 0, y: 0 })
+      return
+    }
     // The permitted direction, and nothing else, is transferred to the card.
     if (gate === 'up') setDrag({ x: 0, y: !sideways && dy < 0 ? dy : 0 })
     if (gate === 'away') setDrag({ x: sideways && dx < 0 ? dx : 0, y: 0 })
@@ -1975,6 +2003,42 @@ export function Card({
     if (!from.current) return
     const dx = e.clientX - from.current.x
     const dy = e.clientY - from.current.y
+    if (!locked) {
+      /*
+        LET GO, AND IT EITHER GOES OR COMES BACK.
+
+        A third of the screen is the commitment. Past it the card flies off and is
+        rejected; short of it the transform is cleared and the card springs home, which is
+        what makes the gesture cheap enough to start and abandon — the same property the
+        lane's half-swipe had and the reason that note exists.
+
+        Measured against the width rather than a fixed number of pixels, so it is the same
+        proportion of the thumb's travel on every phone.
+      */
+      const enough = Math.abs(dx) > Math.abs(dy) && dx < -window.innerWidth / 3
+      from.current = null
+      if (enough) {
+        /*
+          THE REJECT IS EXPLICIT; THE ANIMATION IS BORROWED.
+
+          done('away') carries the fly-off and the 620ms cleanup — the card leaves under
+          its own momentum and the transform is dropped only once the rail has settled, so
+          a card coming back round does not arrive holding the position it left in.
+
+          What it does NOT do for an ordinary card is reject it: its reject is inside
+          `if (gate === 'away')`, and gate is null off the intro cards. A first version
+          called done() alone and the card flew away without leaving the feed — animation
+          without consequence, which is worse than neither.
+        */
+        rejectCard(card.id)
+        track('card_rejected', { card: card.id })
+        onRejected?.()
+        done('away')
+      } else if (drag.x) {
+        setDrag({ x: 0, y: 0 })
+      }
+      return
+    }
     // A tap, which counts only where tapping is the taught gesture.
     const tap = !fired.current && Math.max(Math.abs(dx), Math.abs(dy)) < MIN && gate === 'in'
     release()
@@ -1984,6 +2048,20 @@ export function Card({
   // A cancelled pointer is the browser taking the gesture, not the person abandoning it.
   const onCancel = () => {
     if (!from.current) return
+    /*
+      A CANCELLED DRAG SPRINGS BACK, and this is the stuck card.
+
+      The browser sends pointercancel and no pointerup when it takes a gesture — scrolling
+      the feed vertically mid-drag does it, and so does the system edge-swipe. Without
+      this the card keeps the last transform it was given and simply stays there, tilted,
+      which is precisely what Sam photographed: a card frozen at an angle with the lane
+      behind it showing.
+    */
+    if (!locked) {
+      from.current = null
+      if (drag.x || drag.y) setDrag({ x: 0, y: 0 })
+      return
+    }
     release()
   }
 
@@ -2005,91 +2083,10 @@ export function Card({
     tilts and lifts as it goes, driven from the scroll position that is already being
     read. No new listener, no new state, and nothing to keep in step.
   */
-  const faceEl = useRef<HTMLDivElement | null>(null)
-  const paint = (el: HTMLElement) => {
-    const face = faceEl.current
-    if (!face) return
-    /*
-      How far off the face we are, as a fraction of one lane. Negative going into the
-      language, positive going away — so one number carries both directions and the card
-      leans the way the thumb is pulling.
-    */
-    const t = (el.scrollLeft - el.clientWidth * faceLane) / Math.max(1, el.clientWidth)
-    const away = Math.max(0, t)
-    if (Math.abs(t) < 0.004) {
-      /*
-        Home. Everything cleared, including the layer hint — a card at rest should cost
-        nothing, and a hint left on is the 63-layer problem in slow motion.
-      */
-      face.style.transform = ''
-      face.style.opacity = ''
-      face.style.willChange = ''
-      return
-    }
-    /* Moving, so this one card gets a layer. One at a time, for as long as it is moving. */
-    if (!face.style.willChange) face.style.willChange = 'transform'
-    /*
-      EIGHT DEGREES AT A FULL LANE, which is the number Tinder's own feel lives around —
-      enough to read as a physical card, little enough that text stays readable mid-drag.
-      Scaled by the fraction, so a half-swipe is half the tilt and an abandoned one
-      unwinds exactly as it came.
 
-      Lifted slightly as it leaves, because a thing being thrown away comes off the
-      surface. Only on the away side: the language lane is a reveal, not a discard, and
-      tilting INTO it would say the same thing about two opposite acts.
-    */
-    /*
-      SIX DEGREES, AND NO FADE.
-
-      The fade was the expensive half: animating opacity on a full-bleed photograph forces
-      the whole layer to recomposite every frame, and it bought very little — the card is
-      already leaving, which the tilt says on its own. Dropping it is most of the reason
-      this now keeps up with a thumb.
-
-      Eight degrees became six for the same reason the fade went: at eight the corner of a
-      390-wide card swings far enough to show the lane behind it, which is what Sam
-      photographed — a steep card with the next screen visible down the side. Six reads as
-      physical and stays inside its own bounds.
-    */
-    const deg = t * 6
-    const lift = away * 10
-    face.style.transform =
-      'translate3d(0,' + (-lift).toFixed(1) + 'px,0) rotate(' + deg.toFixed(2) + 'deg)'
-  }
-
-  /*
-    PAINTED ON A FRAME, not on the scroll event.
-
-    A scroll listener runs synchronously and iOS fires it many times per frame during a
-    drag, so writing a style in it makes the browser do the work again and again for one
-    painted result — which is felt as lag and, when the writes queue up behind the
-    compositor, as the drag sticking. Sam: "it's a bit sluggish and gets stuck."
-
-    Coalesced into one rAF instead: however many events arrive between frames, the
-    transform is written once, from the position the scroller is actually at. The ref
-    holds the pending frame so a second event does not queue a second one.
-  */
-  const frame = useRef(0)
-  /*
-    And cancelled when the card goes. A pending frame on an unmounted card would paint a
-    ref that React has already pointed elsewhere — which in a recycling feed means the
-    wrong card wearing a tilt.
-  */
-  useEffect(
-    () => () => {
-      if (frame.current) cancelAnimationFrame(frame.current)
-    },
-    [],
-  )
   const onPaneScroll = () => {
     const el = pane.current
     if (!el) return
-    if (!frame.current) {
-      frame.current = requestAnimationFrame(() => {
-        frame.current = 0
-        if (pane.current) paint(pane.current)
-      })
-    }
     const away = el.scrollLeft >= el.clientWidth * (faceLane + 0.5)
     if (away && !wentAway.current) {
       wentAway.current = true
@@ -2100,19 +2097,6 @@ export function Card({
       onRejected?.()
       // Back to the face, so the card that takes this one's place is not showing its lane.
       el.scrollTo({ left: el.clientWidth * faceLane, behavior: 'auto' })
-      /*
-        AND THE TILT GOES WITH IT.
-
-        The scroll above is instant, so no scroll event follows it and paint() never runs
-        — which would leave the NEXT card wearing the tilt of the one just thrown away.
-        Cleared here rather than in an effect, because this is the moment the card changes
-        and an effect would fire a frame later, in view.
-      */
-      if (faceEl.current) {
-        faceEl.current.style.transform = ''
-        faceEl.current.style.opacity = ''
-        faceEl.current.style.willChange = ''
-      }
     }
     if (!away) wentAway.current = false
     /*
@@ -2254,10 +2238,26 @@ export function Card({
           touchAction: inHand ? 'none' : undefined,
           /* Nothing may hand a leftover gesture to an ancestor, or to the system. */
           overscrollBehavior: inHand ? 'none' : undefined,
+          /*
+            AND IT LEANS AS IT GOES.
+
+            Sam, with a Tinder screenshot: "you get a far more satisfying swipe left/right
+            motion where you see/feel a card being moved."
+
+            The translate was already here and already correct; what it lacked was the
+            rotation that makes a moving rectangle read as a CARD rather than a panel.
+            Twelve degrees at a full screen width, scaled by how far the thumb has gone,
+            so a half-drag is half the lean and letting go unwinds exactly as it came.
+
+            On the horizontal drag only. A card being pulled UP is the next-card gesture
+            and tilting it would say the same thing about two different acts — the same
+            reason the away lane and the language lane are drawn differently.
+          */
           transform: flew
-            ? `translate3d(${flew === 'away' ? '-100%' : '100%'}, 0, 0)`
+            ? `translate3d(${flew === 'away' ? '-100%' : '100%'}, 0, 0) rotate(${flew === 'away' ? -12 : 12}deg)`
             : drag.x || drag.y
-              ? `translate3d(${drag.x}px, ${drag.y}px, 0)`
+              ? `translate3d(${drag.x}px, ${drag.y}px, 0)` +
+                (drag.x ? ` rotate(${((drag.x / 390) * 12).toFixed(2)}deg)` : '')
               : undefined,
           opacity: flew ? 0 : undefined,
           /*
@@ -2291,23 +2291,7 @@ export function Card({
           a pane quietly loses a wrapper. Flex order changes layout, scroll-snap works on
           layout, so the lanes land where the grammar needs them and the markup stays put.
         */}
-        <div
-          ref={faceEl}
-          /*
-            THE THING THAT MOVES, and it does NOT advertise that permanently.
-
-            This carried `will-change-transform` in its class list, which put every card
-            in the feed on its own GPU layer for the whole session — measured at 63 of
-            them at once. Sam: "it's a bit sluggish and gets stuck." That is what 63 live
-            composited layers feel like on a phone, and will-change is documented as a
-            last resort for exactly this reason.
-
-            Promoted by paint() when a drag starts and released the moment the card is
-            home — see below. origin-bottom stays: the card pivots about the thumb rather
-            than its middle, which is what makes it read as pushed rather than spun.
-          */
-          className="relative order-2 h-full w-full shrink-0 origin-bottom snap-start"
-        >
+        <div className="relative order-2 h-full w-full shrink-0 snap-start">
           {/*
             An argument card has no photograph, and does not borrow one.
 

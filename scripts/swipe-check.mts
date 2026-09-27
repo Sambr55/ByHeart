@@ -1,33 +1,32 @@
 /**
- * The card moves when you push it.
+ * The card follows the thumb.
  *
  *   npm run swipe
  *
  * Sam, with a Tinder screenshot: "you get a far more satisfying swipe left/right motion
- * where you see/feel a card being moved. Let's replicate that."
+ * where you see/feel a card being moved." Then, twice, on attempts that missed: "it's a
+ * bit sluggish and gets stuck", and "there is no drag motion at all".
  *
- * WHY IT FELT INERT. The lanes are a native scroller — three panes, CSS snap — and the
- * note above them argues that native snap "keeps the gesture feeling like the phone rather
- * than like JavaScript". True of the SCROLL, and exactly why the card felt nailed down:
- * what moved was the viewport, so the world slid past a card that never budged.
+ * WHAT THOSE TWO REPORTS WERE. The first two attempts tilted a lane INSIDE the horizontal
+ * scroller. That lane is the thing the scroller translates, so a six-degree lean on
+ * something already sliding 117px under a finger is invisible — measured, applied
+ * correctly, and impossible to see. The card was never being dragged at all.
  *
- * WHAT IS ASSERTED, and each is a way the feel could quietly go:
+ * The drag itself already existed, written for the five locked intro cards and gated off
+ * everywhere else: `if (!locked) return` at the top of the pointer handlers. Ordinary
+ * cards had no pointer handling, so the native scroller owned every gesture. Opening that
+ * gate is the whole change.
  *
- *   it tilts at all.  A transform on the face lane, proportional to how far off centre the
- *      scroller is. Zero at rest, because a resting card wearing a rotation is a bug
- *      nobody would think to look for.
+ * WHAT IS ASSERTED, and each is a way the feel could go without anything failing:
  *
- *   the two directions differ.  Away lifts and fades; the language lane leans and does
- *      neither. They are opposite acts — discarding and revealing — and one treatment for
- *      both would say they are the same thing.
- *
- *   it comes home.  Back at the face, the transform is CLEARED rather than set to zero, so
- *      a card at rest carries none at all.
- *
- * MEASURED WITH SNAP OFF. A scroll-snap container refuses programmatic scrollLeft — it
- * pulls straight back — so the first three attempts at this measured a card that had never
- * moved and reported no tilt on a feature that worked. Snap is disabled for the
- * measurement only; what is being checked is paint(), not the browser's snapping.
+ *   it moves with the finger.  The transform tracks the pointer one-to-one — not a
+ *      threshold that snaps, which is what a scroller does and what this replaced.
+ *   it leans.  Rotation proportional to distance, so a rectangle reads as a card.
+ *   a short drag springs home.  The gesture stays cheap to start and abandon.
+ *   a long drag throws it.  And the card is actually REJECTED, not merely animated —
+ *      a version of this flew the card away without recording anything, because the
+ *      existing done() keeps its reject inside `if (gate === 'away')` and gate is null
+ *      off the intro cards.
  */
 import { chromium } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
@@ -41,7 +40,12 @@ const ok = (label: string, cond: boolean, detail = '') => {
 }
 
 const browser = await chromium.launch()
-const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
+const ctx = await browser.newContext({
+  viewport: { width: 390, height: 844 },
+  hasTouch: true,
+  isMobile: true,
+})
+const page = await ctx.newPage()
 await page.goto(BASE + '/')
 await page.evaluate(
   ([k, pair]) => {
@@ -74,41 +78,21 @@ for (let i = 0; i < 6; i++) {
   await page.waitForTimeout(800)
 }
 
-/**
- * The face lane's inline transform, at a given position in lanes.
- *
- * WAITS A FRAME, because paint() is coalesced into a requestAnimationFrame — one write
- * per painted frame however many scroll events arrive, which is what stopped it sticking.
- * A read taken in the same tick as the scroll therefore sees the PREVIOUS value, which
- * had this reporting "no tilt" on a card that tilts correctly.
- */
-const at = async (lanes: number | null) => {
-  const out = JSON.parse(
-    (await page.evaluate(`(async () => {
-      const el = document.querySelector('[data-testid="card-panes"]')
-      if (!el) return JSON.stringify({ missing: true })
-      ${'' /* The face lane. Identified by its order, not by will-change: that hint is
-              added while dragging and removed at rest, which is the point of it. */}
-      const face = el.querySelector('.order-2')
-      if (!face) return JSON.stringify({ missing: true })
-      ${'' /* null means leave it where it is — the resting read */}
-      const want = ${lanes === null ? 'null' : lanes}
-      if (want !== null) {
-        el.style.scrollSnapType = 'none'
-        el.scrollLeft = el.clientWidth * want
-        el.dispatchEvent(new Event('scroll'))
-      }
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
-      return JSON.stringify({
-        transform: face.style.transform || '',
-        opacity: face.style.opacity || '',
-        willChange: face.style.willChange || '',
-      })
-    })()`)) as string,
-  ) as { transform: string; opacity: string; willChange: string; missing?: boolean }
-  return out
-}
+/** The transform on whichever card is actually in view. */
+const shown = async () =>
+  (await page.evaluate(`(() => {
+    const all = Array.from(document.querySelectorAll('[data-testid="card-panes"]'))
+    const vis = all.find((e) => {
+      const b = e.getBoundingClientRect()
+      return b.top > -50 && b.top < 200
+    })
+    return vis ? vis.style.transform || '' : ''
+  })()`)) as string
 
+const px = (t: string) => {
+  const m = t.match(/translate3d\((-?[\d.]+)px/)
+  return m ? Number(m[1]) : 0
+}
 const deg = (t: string) => {
   const m = t.match(/rotate\((-?[\d.]+)deg\)/)
   return m ? Number(m[1]) : 0
@@ -116,66 +100,79 @@ const deg = (t: string) => {
 
 console.log('\nat rest it carries nothing\n')
 {
-  const home = await at(null)
-  ok('the face lane is there', !home.missing)
-  ok('and wears no transform', home.transform === '', home.transform || '(none)')
+  /*
+    Read once. Calling shown() twice — once for the condition, once for the detail —
+    prints a second, later reading beside the first, so a passing line could show the
+    detail of a state it did not test. Cosmetic until it is not.
+  */
+  const rest = await shown()
+  ok('no transform', rest === '', rest === '' ? 'none' : rest)
 }
 
-console.log('\npushed away, it tilts and lifts\n')
+console.log('\nit follows the finger\n')
 {
-  const away = await at(1.3)
-  ok('it tilts', deg(away.transform) > 1, away.transform || '(none)')
-  /* Matched on the Y term alone: the browser normalises 0 to 0px and spaces the args. */
-  ok('it lifts off the surface', /translate3d\([^,]+, *-[\d.]+px/.test(away.transform), away.transform)
-  /*
-    THE FADE IS GONE, and its absence is asserted rather than merely unchecked.
+  await page.mouse.move(320, 420)
+  await page.mouse.down()
+  await page.mouse.move(250, 424, { steps: 5 })
+  await page.waitForTimeout(160)
+  const near = await shown()
+  await page.mouse.move(180, 428, { steps: 5 })
+  await page.waitForTimeout(160)
+  const far = await shown()
 
-    Animating opacity on a full-bleed photograph recomposites the whole layer every frame
-    — the expensive half of the first version, and most of why it felt sluggish. The tilt
-    already says the card is leaving. A fade coming back would be a regression in feel,
-    not an improvement, so this notices it.
-  */
-  ok('and does not fade', away.opacity === '', away.opacity || '(none)')
+  ok('it moves at all', px(near) < -10, near || '(none)')
   /*
-    FURTHER OUT TILTS FURTHER — the lean tracks the thumb rather than switching on.
-
-    Measured at 1.45 rather than 1.7, and the reason is worth keeping: past the halfway
-    mark the card is REJECTED, which clears the transform on purpose so the next card does
-    not inherit it. A first version read at 1.7, found zero, and reported "no tilt" about
-    the throw completing correctly.
+    ONE-TO-ONE, which is what separates a drag from a scroll. 70px of thumb is 70px of
+    card, within a few pixels of pointer quantisation — a threshold that snapped would
+    pass "it moves" and feel nothing like this.
   */
-  const further = await at(1.45)
+  ok('and by roughly what the thumb moved', Math.abs(px(near) + 70) < 12, String(px(near)))
+  ok('further is further', px(far) < px(near), px(near) + ' → ' + px(far))
+  ok('it leans as it goes', deg(near) < -1, near)
+  ok('and leans further with it', deg(far) < deg(near), deg(near) + ' → ' + deg(far))
+}
+
+console.log('\na short drag springs home\n')
+{
+  await page.mouse.up()
+  await page.waitForTimeout(700)
+  const home = await shown()
+  ok('the card comes back', home === '', home === '' ? 'cleared' : home)
+}
+
+console.log('\na long one throws it\n')
+{
+  const rejectedBefore = (await page.evaluate(`(() => {
+    const k = Object.keys(localStorage).find((x) => x.indexOf('byheart.learner') === 0)
+    return k ? (JSON.parse(localStorage.getItem(k)).rejected || []).length : 0
+  })()`)) as number
+
+  await page.mouse.move(340, 420)
+  await page.mouse.down()
+  await page.mouse.move(110, 426, { steps: 8 })
+  await page.waitForTimeout(180)
+  const held = await shown()
+  ok('it is well out of place', px(held) < -180, held)
+  await page.mouse.up()
+  await page.waitForTimeout(1100)
+
+  /*
+    AND IT WAS ACTUALLY REJECTED. The animation is borrowed from done(), whose own reject
+    is inside `if (gate === 'away')` — null off the intro cards — so a version of this
+    flew the card away and recorded nothing. Animation without consequence is worse than
+    neither, and nothing on screen would have said so.
+  */
+  const rejectedAfter = (await page.evaluate(`(() => {
+    const k = Object.keys(localStorage).find((x) => x.indexOf('byheart.learner') === 0)
+    return k ? (JSON.parse(localStorage.getItem(k)).rejected || []).length : 0
+  })()`)) as number
   ok(
-    'and further out tilts further',
-    deg(further.transform) > deg(away.transform),
-    deg(away.transform) + ' → ' + deg(further.transform),
+    'the card is sent to the back',
+    rejectedAfter > rejectedBefore,
+    rejectedBefore + ' → ' + rejectedAfter,
   )
-}
-
-console.log('\npulled toward the language, it leans the other way\n')
-{
-  const into = await at(0.7)
-  ok('it tilts the opposite way', deg(into.transform) < -1, into.transform || '(none)')
-  /*
-    AND IT DOES NOT LIFT. Revealing is not discarding, and giving both the same treatment
-    would tell a learner the two gestures do the same thing.
-  */
-  ok('and does not lift', !/translate3d\([^,]+, *-[\d.]+px/.test(into.transform), into.transform)
-  ok('nor fade', into.opacity === '' || Number(into.opacity) === 1, into.opacity || '(none)')
-}
-
-console.log('\nand back home it clears\n')
-{
-  const home = await at(1)
-  ok('the transform is gone', home.transform === '', home.transform || '(none)')
-  ok('and so is the fade', home.opacity === '', home.opacity || '(none)')
-  /*
-    AND THE LAYER HINT WITH IT. will-change was in the class list, so all 63 cards in the
-    feed held a composited layer for the whole session — which is what "sluggish" was.
-    It is added while a card moves and removed here, and a resting card carrying one is
-    that bug returning.
-  */
-  ok('and the layer hint is released', home.willChange === '', home.willChange || '(none)')
+  const after = await shown()
+  ok('and the transform is cleared', after === '', after === '' ? 'cleared' : after)
 }
 
 await browser.close()
@@ -186,4 +183,4 @@ if (problems.length) {
   for (const p of problems) console.log('  - ' + p)
   process.exit(1)
 }
-console.log('the card leans where it is pushed, and lifts only when thrown')
+console.log('the card follows the thumb, leans as it goes, and is thrown when you let go')
