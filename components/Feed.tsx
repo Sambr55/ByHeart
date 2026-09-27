@@ -2017,11 +2017,17 @@ export function Card({
     const t = (el.scrollLeft - el.clientWidth * faceLane) / Math.max(1, el.clientWidth)
     const away = Math.max(0, t)
     if (Math.abs(t) < 0.004) {
-      /* Home. Cleared rather than set to zero, so the resting card carries no transform. */
+      /*
+        Home. Everything cleared, including the layer hint — a card at rest should cost
+        nothing, and a hint left on is the 63-layer problem in slow motion.
+      */
       face.style.transform = ''
       face.style.opacity = ''
+      face.style.willChange = ''
       return
     }
+    /* Moving, so this one card gets a layer. One at a time, for as long as it is moving. */
+    if (!face.style.willChange) face.style.willChange = 'transform'
     /*
       EIGHT DEGREES AT A FULL LANE, which is the number Tinder's own feel lives around —
       enough to read as a physical card, little enough that text stays readable mid-drag.
@@ -2032,17 +2038,58 @@ export function Card({
       surface. Only on the away side: the language lane is a reveal, not a discard, and
       tilting INTO it would say the same thing about two opposite acts.
     */
-    const deg = t * 8
-    const lift = away * 14
-    face.style.transform = 'rotate(' + deg.toFixed(2) + 'deg) translateY(' + (-lift).toFixed(1) + 'px)'
-    /* And it fades as it goes, so the card underneath is arriving rather than revealed. */
-    face.style.opacity = String(Math.max(0.35, 1 - away * 0.55))
+    /*
+      SIX DEGREES, AND NO FADE.
+
+      The fade was the expensive half: animating opacity on a full-bleed photograph forces
+      the whole layer to recomposite every frame, and it bought very little — the card is
+      already leaving, which the tilt says on its own. Dropping it is most of the reason
+      this now keeps up with a thumb.
+
+      Eight degrees became six for the same reason the fade went: at eight the corner of a
+      390-wide card swings far enough to show the lane behind it, which is what Sam
+      photographed — a steep card with the next screen visible down the side. Six reads as
+      physical and stays inside its own bounds.
+    */
+    const deg = t * 6
+    const lift = away * 10
+    face.style.transform =
+      'translate3d(0,' + (-lift).toFixed(1) + 'px,0) rotate(' + deg.toFixed(2) + 'deg)'
   }
 
+  /*
+    PAINTED ON A FRAME, not on the scroll event.
+
+    A scroll listener runs synchronously and iOS fires it many times per frame during a
+    drag, so writing a style in it makes the browser do the work again and again for one
+    painted result — which is felt as lag and, when the writes queue up behind the
+    compositor, as the drag sticking. Sam: "it's a bit sluggish and gets stuck."
+
+    Coalesced into one rAF instead: however many events arrive between frames, the
+    transform is written once, from the position the scroller is actually at. The ref
+    holds the pending frame so a second event does not queue a second one.
+  */
+  const frame = useRef(0)
+  /*
+    And cancelled when the card goes. A pending frame on an unmounted card would paint a
+    ref that React has already pointed elsewhere — which in a recycling feed means the
+    wrong card wearing a tilt.
+  */
+  useEffect(
+    () => () => {
+      if (frame.current) cancelAnimationFrame(frame.current)
+    },
+    [],
+  )
   const onPaneScroll = () => {
     const el = pane.current
     if (!el) return
-    paint(el)
+    if (!frame.current) {
+      frame.current = requestAnimationFrame(() => {
+        frame.current = 0
+        if (pane.current) paint(pane.current)
+      })
+    }
     const away = el.scrollLeft >= el.clientWidth * (faceLane + 0.5)
     if (away && !wentAway.current) {
       wentAway.current = true
@@ -2064,6 +2111,7 @@ export function Card({
       if (faceEl.current) {
         faceEl.current.style.transform = ''
         faceEl.current.style.opacity = ''
+        faceEl.current.style.willChange = ''
       }
     }
     if (!away) wentAway.current = false
@@ -2246,12 +2294,19 @@ export function Card({
         <div
           ref={faceEl}
           /*
-            THE THING THAT MOVES. transform-gpu so the tilt is composited rather than
-            re-laid-out on every scroll frame, and origin-bottom so the card pivots about
-            the thumb rather than about its own middle — which is what makes it read as
-            being pushed rather than spun.
+            THE THING THAT MOVES, and it does NOT advertise that permanently.
+
+            This carried `will-change-transform` in its class list, which put every card
+            in the feed on its own GPU layer for the whole session — measured at 63 of
+            them at once. Sam: "it's a bit sluggish and gets stuck." That is what 63 live
+            composited layers feel like on a phone, and will-change is documented as a
+            last resort for exactly this reason.
+
+            Promoted by paint() when a drag starts and released the moment the card is
+            home — see below. origin-bottom stays: the card pivots about the thumb rather
+            than its middle, which is what makes it read as pushed rather than spun.
           */
-          className="relative order-2 h-full w-full shrink-0 origin-bottom snap-start transform-gpu will-change-transform"
+          className="relative order-2 h-full w-full shrink-0 origin-bottom snap-start"
         >
           {/*
             An argument card has no photograph, and does not borrow one.

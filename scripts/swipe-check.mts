@@ -74,13 +74,22 @@ for (let i = 0; i < 6; i++) {
   await page.waitForTimeout(800)
 }
 
-/** The face lane's inline transform, at a given position in lanes. */
-const at = async (lanes: number | null) =>
-  JSON.parse(
-    (await page.evaluate(`(() => {
+/**
+ * The face lane's inline transform, at a given position in lanes.
+ *
+ * WAITS A FRAME, because paint() is coalesced into a requestAnimationFrame — one write
+ * per painted frame however many scroll events arrive, which is what stopped it sticking.
+ * A read taken in the same tick as the scroll therefore sees the PREVIOUS value, which
+ * had this reporting "no tilt" on a card that tilts correctly.
+ */
+const at = async (lanes: number | null) => {
+  const out = JSON.parse(
+    (await page.evaluate(`(async () => {
       const el = document.querySelector('[data-testid="card-panes"]')
       if (!el) return JSON.stringify({ missing: true })
-      const face = el.querySelector('.will-change-transform')
+      ${'' /* The face lane. Identified by its order, not by will-change: that hint is
+              added while dragging and removed at rest, which is the point of it. */}
+      const face = el.querySelector('.order-2')
       if (!face) return JSON.stringify({ missing: true })
       ${'' /* null means leave it where it is — the resting read */}
       const want = ${lanes === null ? 'null' : lanes}
@@ -89,12 +98,16 @@ const at = async (lanes: number | null) =>
         el.scrollLeft = el.clientWidth * want
         el.dispatchEvent(new Event('scroll'))
       }
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
       return JSON.stringify({
         transform: face.style.transform || '',
         opacity: face.style.opacity || '',
+        willChange: face.style.willChange || '',
       })
     })()`)) as string,
-  ) as { transform: string; opacity: string; missing?: boolean }
+  ) as { transform: string; opacity: string; willChange: string; missing?: boolean }
+  return out
+}
 
 const deg = (t: string) => {
   const m = t.match(/rotate\((-?[\d.]+)deg\)/)
@@ -112,8 +125,17 @@ console.log('\npushed away, it tilts and lifts\n')
 {
   const away = await at(1.3)
   ok('it tilts', deg(away.transform) > 1, away.transform || '(none)')
-  ok('it lifts off the surface', /translateY\(-[\d.]+px\)/.test(away.transform), away.transform)
-  ok('and it fades', away.opacity !== '' && Number(away.opacity) < 1, away.opacity || '(none)')
+  /* Matched on the Y term alone: the browser normalises 0 to 0px and spaces the args. */
+  ok('it lifts off the surface', /translate3d\([^,]+, *-[\d.]+px/.test(away.transform), away.transform)
+  /*
+    THE FADE IS GONE, and its absence is asserted rather than merely unchecked.
+
+    Animating opacity on a full-bleed photograph recomposites the whole layer every frame
+    — the expensive half of the first version, and most of why it felt sluggish. The tilt
+    already says the card is leaving. A fade coming back would be a regression in feel,
+    not an improvement, so this notices it.
+  */
+  ok('and does not fade', away.opacity === '', away.opacity || '(none)')
   /*
     FURTHER OUT TILTS FURTHER — the lean tracks the thumb rather than switching on.
 
@@ -138,7 +160,7 @@ console.log('\npulled toward the language, it leans the other way\n')
     AND IT DOES NOT LIFT. Revealing is not discarding, and giving both the same treatment
     would tell a learner the two gestures do the same thing.
   */
-  ok('and does not lift', !/translateY\(-[\d.]+px\)/.test(into.transform), into.transform)
+  ok('and does not lift', !/translate3d\([^,]+, *-[\d.]+px/.test(into.transform), into.transform)
   ok('nor fade', into.opacity === '' || Number(into.opacity) === 1, into.opacity || '(none)')
 }
 
@@ -147,6 +169,13 @@ console.log('\nand back home it clears\n')
   const home = await at(1)
   ok('the transform is gone', home.transform === '', home.transform || '(none)')
   ok('and so is the fade', home.opacity === '', home.opacity || '(none)')
+  /*
+    AND THE LAYER HINT WITH IT. will-change was in the class list, so all 63 cards in the
+    feed held a composited layer for the whole session — which is what "sluggish" was.
+    It is added while a card moves and removed here, and a resting card carrying one is
+    that bug returning.
+  */
+  ok('and the layer hint is released', home.willChange === '', home.willChange || '(none)')
 }
 
 await browser.close()
