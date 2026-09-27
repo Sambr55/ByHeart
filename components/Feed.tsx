@@ -1988,9 +1988,61 @@ export function Card({
   }
 
   const wentAway = useRef(false)
+  /*
+    THE CARD ITSELF MOVES, which is what makes a swipe feel like a swipe.
+
+    Sam, with a Tinder screenshot: "you get a far more satisfying swipe left/right motion
+    where you see/feel a card being moved. Let's replicate that."
+
+    He is right and the reason is worth naming. The lanes are a native scroller — three
+    panes, CSS snap — and the note above them argues that native snap "keeps the gesture
+    feeling like the phone rather than like JavaScript". That is true of the SCROLL and it
+    is exactly why the card feels inert: what moves is the viewport, so the card stays
+    nailed to the glass while the world slides past it. Tinder moves the card.
+
+    So the scroller stays — it owns the gesture, the snap, the abandon-halfway and the
+    threshold, all of which work — and this adds the thing it cannot express: the face
+    tilts and lifts as it goes, driven from the scroll position that is already being
+    read. No new listener, no new state, and nothing to keep in step.
+  */
+  const faceEl = useRef<HTMLDivElement | null>(null)
+  const paint = (el: HTMLElement) => {
+    const face = faceEl.current
+    if (!face) return
+    /*
+      How far off the face we are, as a fraction of one lane. Negative going into the
+      language, positive going away — so one number carries both directions and the card
+      leans the way the thumb is pulling.
+    */
+    const t = (el.scrollLeft - el.clientWidth * faceLane) / Math.max(1, el.clientWidth)
+    const away = Math.max(0, t)
+    if (Math.abs(t) < 0.004) {
+      /* Home. Cleared rather than set to zero, so the resting card carries no transform. */
+      face.style.transform = ''
+      face.style.opacity = ''
+      return
+    }
+    /*
+      EIGHT DEGREES AT A FULL LANE, which is the number Tinder's own feel lives around —
+      enough to read as a physical card, little enough that text stays readable mid-drag.
+      Scaled by the fraction, so a half-swipe is half the tilt and an abandoned one
+      unwinds exactly as it came.
+
+      Lifted slightly as it leaves, because a thing being thrown away comes off the
+      surface. Only on the away side: the language lane is a reveal, not a discard, and
+      tilting INTO it would say the same thing about two opposite acts.
+    */
+    const deg = t * 8
+    const lift = away * 14
+    face.style.transform = 'rotate(' + deg.toFixed(2) + 'deg) translateY(' + (-lift).toFixed(1) + 'px)'
+    /* And it fades as it goes, so the card underneath is arriving rather than revealed. */
+    face.style.opacity = String(Math.max(0.35, 1 - away * 0.55))
+  }
+
   const onPaneScroll = () => {
     const el = pane.current
     if (!el) return
+    paint(el)
     const away = el.scrollLeft >= el.clientWidth * (faceLane + 0.5)
     if (away && !wentAway.current) {
       wentAway.current = true
@@ -2001,6 +2053,18 @@ export function Card({
       onRejected?.()
       // Back to the face, so the card that takes this one's place is not showing its lane.
       el.scrollTo({ left: el.clientWidth * faceLane, behavior: 'auto' })
+      /*
+        AND THE TILT GOES WITH IT.
+
+        The scroll above is instant, so no scroll event follows it and paint() never runs
+        — which would leave the NEXT card wearing the tilt of the one just thrown away.
+        Cleared here rather than in an effect, because this is the moment the card changes
+        and an effect would fire a frame later, in view.
+      */
+      if (faceEl.current) {
+        faceEl.current.style.transform = ''
+        faceEl.current.style.opacity = ''
+      }
     }
     if (!away) wentAway.current = false
     /*
@@ -2179,7 +2243,16 @@ export function Card({
           a pane quietly loses a wrapper. Flex order changes layout, scroll-snap works on
           layout, so the lanes land where the grammar needs them and the markup stays put.
         */}
-        <div className="relative order-2 h-full w-full shrink-0 snap-start">
+        <div
+          ref={faceEl}
+          /*
+            THE THING THAT MOVES. transform-gpu so the tilt is composited rather than
+            re-laid-out on every scroll frame, and origin-bottom so the card pivots about
+            the thumb rather than about its own middle — which is what makes it read as
+            being pushed rather than spun.
+          */
+          className="relative order-2 h-full w-full shrink-0 origin-bottom snap-start transform-gpu will-change-transform"
+        >
           {/*
             An argument card has no photograph, and does not borrow one.
 
