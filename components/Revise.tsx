@@ -1,5 +1,6 @@
 'use client'
 
+import { SayButton, useCanListen } from '@/components/SayButton'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -36,6 +37,8 @@ export function Revise() {
   const id = params.get('id') ?? ''
   const [at, setAt] = useState(0)
   const [done, setDone] = useState(false)
+  /* Hidden entirely where the device cannot listen — see useCanListen. */
+  const canSay = useCanListen()
 
   const lines = useMemo(
     () =>
@@ -107,6 +110,36 @@ export function Revise() {
         </span>
       </div>
       <p className="display text-balance text-2xl">“{line.ask}”</p>
+      {/*
+        SAY IT, WHICH IS WHAT THE HEADING ALREADY ASKS FOR.
+
+        Sam: "let's look at building that into our say it cold routes." This screen says
+        SAY IT BACK and then hands somebody a tile puzzle — which teaches, and is a
+        different act from producing the sentence. Tapping tiles in order proves you can
+        recognise the words; saying it proves you can say it.
+
+        Above the build rather than instead of it. Recognition is approximate and absent
+        on some browsers, and the tiles are the path that always works — so speaking is
+        offered first and the build is what it falls back to. A close match advances
+        exactly as a solved build does, and records the same proof: it IS a sentence
+        produced with nothing on screen to copy from, which is the whole definition.
+      */}
+      {canSay ? (
+      <div className="flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3">
+        <SayButton
+          want={line.answer}
+          onHeard={(h) => {
+            if (!h.close) return
+            recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
+            if (at + 1 < lines.length) setAt(at + 1)
+            else setDone(true)
+          }}
+        />
+        <span className="min-w-0 flex-1 text-sm text-muted">
+          Say it out loud, or build it below.
+        </span>
+      </div>
+      ) : null}
       <MiniBuild
         key={line.answer}
         target={line.answer}

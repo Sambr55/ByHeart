@@ -241,6 +241,12 @@ export type EventName =
   */
   | 'invite_sent'
   | 'save_offered'
+  /*
+    A sentence said out loud and judged on the device — see engine/listen.ts. Carries
+    whether it was close and a rough score, and never what was said: the transcript is a
+    recording of somebody's voice in text form and has no business leaving the phone.
+  */
+  | 'said_aloud'
   | 'sheet_tested'
   | 'sheet_dismissed'
   /* A looked-up sentence spent, which is the only thing that clears it from the feed. */

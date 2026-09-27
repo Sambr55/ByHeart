@@ -1,5 +1,6 @@
 'use client'
 
+import { SayButton, useCanListen } from '@/components/SayButton'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '@/content/roots'
@@ -1855,6 +1856,8 @@ function RunThrough({
 
   const [i, setI] = useState(0)
   const [shown, setShown] = useState(false)
+  /* Hidden where the device cannot listen — see useCanListen. */
+  const canSay = useCanListen()
   const frame = order[i]
 
   if (!frame) {
@@ -1918,6 +1921,8 @@ function RunThrough({
             <AudioButton slug={slugFor(answer)} text={answer} size="sm" />
             <p className="pt min-w-0 flex-1 text-base text-accent">{answer}</p>
             <CopyButton text={answer} size="sm" />
+            {/* Listen, copy, say — see components/SayButton.tsx. */}
+            <SayButton want={answer} size="sm" />
           </div>
         </div>
       ) : null}
@@ -1945,6 +1950,38 @@ function RunThrough({
             a cold claim can only honestly be made before the reveal.
           */
           <div className="flex w-full flex-col gap-3">
+            {/*
+              SAY IT, AND THE PRODUCT LISTENS.
+
+              Sam, on the call-and-response apps: "let's look at building that into our say
+              it cold routes." This is the route that needed it most — the note below
+              records that I SAID IT is a claim the tap cannot check, and that somebody who
+              could not remember a word pressed the same button as somebody who said it
+              perfectly.
+
+              Now there is a control that can tell the difference. It sits ABOVE the claim
+              rather than replacing it: recognition is approximate, it is absent on some
+              browsers, and a learner who says the sentence to a device that mishears it
+              must still be able to say so. So speaking is the better path and the claim is
+              the one that always works.
+
+              A close match reveals the card the same way I SAID IT does, because the
+              sentence has been produced and that is what the reveal is for.
+            */}
+            <div className="flex items-center justify-center gap-3">
+              <SayButton
+                want={answer}
+                onHeard={(h) => {
+                  if (h.close) setShown(true)
+                }}
+              />
+              {/*
+                The caption is the button's, so it goes when the button does. A sentence
+                telling somebody to say it out loud, beside nothing they can press, is
+                worse than silence.
+              */}
+              {canSay ? <span className="text-sm text-muted">Say it out loud</span> : null}
+            </div>
             <button
               type="button"
               data-testid="legend-reveal"
