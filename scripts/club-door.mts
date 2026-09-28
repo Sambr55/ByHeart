@@ -197,6 +197,74 @@ ok(
   cardToGo(cardIds, answeredCard.map((a, i) => (i === 0 ? ans(a.frame_id, {}) : a))) === 1,
 )
 
+/*
+  THE LEGEND IS A GATE, NOT A SOFT OPTION.
+
+  Sam: "this is about completing and rehearsing the legend, which has now become a soft
+  option, not a gate."
+
+  The road answers all seven card questions as a learner walks it — by design — so
+  cardDone was true the moment the basics finished, and the door opened on a card that had
+  been written and never spoken. Measured at the time: eleven sentences said cold on the
+  way in, not one of them their own Legend.
+
+  So the door now reads `proof`: seven Legend sentences, clean, said with nothing on
+  screen. Answering builds the card; saying it opens the Club.
+*/
+console.log('\nthe Legend has to be said, not just answered\n')
+{
+  const seven = LEGEND_CARD.map((f) => f.id)
+  const answers = seven.map((id) => ans(id, { x: 'y' }))
+  const said = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({ pt: 'legend' + i, source: 'legend', clean: true }))
+
+  ok(
+    'a written card alone does not open it',
+    !clubOpen({ answeredFrameIds: seven, answers, proof: [] }),
+    'seven answered, none said',
+  )
+  ok(
+    'nor does most of it',
+    !clubOpen({ answeredFrameIds: seven, answers, proof: said(seven.length - 1) }),
+    seven.length - 1 + ' of ' + seven.length,
+  )
+  ok(
+    'saying all seven does',
+    clubOpen({ answeredFrameIds: seven, answers, proof: said(seven.length) }),
+    seven.length + ' of ' + seven.length,
+  )
+  /*
+    AND A PREVIOUS WELCOME DOES NOT EXCUSE IT. welcomedAt latches the door open, which is
+    right for somebody who earned it and wrong as a way past the new rule — Sam chose to
+    re-gate everybody, so a learner welcomed under the old one rehearses like anybody else.
+  */
+  ok(
+    'and a previous welcome does not excuse it',
+    !clubOpen({ answeredFrameIds: seven, answers, proof: [], welcomedAt: '2026-01-01' }),
+    'welcomed, none said',
+  )
+  /*
+    A caller with no proof to hand keeps the old answer. Not every one has the record, and
+    a door that slams shut because an argument was omitted is worse than the hole it
+    replaces — so the omission is deliberate and asserted rather than left to chance.
+  */
+  ok(
+    'a caller that supplies no proof is unchanged',
+    clubOpen({ answeredFrameIds: seven, answers }),
+    'no proof argument',
+  )
+  /* Sentences said cold that are NOT the Legend do not count toward it. */
+  ok(
+    'other cold sentences do not count',
+    !clubOpen({
+      answeredFrameIds: seven,
+      answers,
+      proof: Array.from({ length: 11 }, (_, i) => ({ pt: 'r' + i, source: 'release', clean: true })),
+    }),
+    'eleven releases, no Legend',
+  )
+}
+
 console.log('\nnumbers are words\n')
 ok('an age reads as Portuguese, not digits', fillFrame(F('age'), { n: '56' }, 'm').includes('cinquenta e seis'),
   fillFrame(F('age'), { n: '56' }, 'm'))

@@ -1833,7 +1833,43 @@ export function clubOpen(opts: {
   /** The answers themselves, because a card can be conditional on another card's. */
   answers?: { frame_id: string; values: Record<string, string> }[]
   welcomedAt?: string | null
+  /*
+    WHAT THEY HAVE SAID WITH NOTHING ON SCREEN.
+
+    The card being written is not the same as being able to say it, and until now the door
+    could not tell the difference — see the note below.
+  */
+  proof?: { pt: string; source: string; clean: boolean }[]
 }): boolean {
+  /*
+    THE LEGEND HAS TO BE SAID, NOT JUST ANSWERED.
+
+    Sam: "this is about completing and rehearsing the legend, which has now become a soft
+    option, not a gate."
+
+    He is right, and the measurement is stark. The road answers all seven card questions
+    as a learner walks it — by design, and his own instruction — so `cardDone` was true the
+    moment the basics finished. A learner arrived at the Club having said ELEVEN sentences
+    cold and not one of them their own Legend: they had a written card they had never used.
+
+    The rehearsal existed the whole time and nothing required it. So the door now asks for
+    the thing the Legend is FOR: seven sentences about yourself, produced with nothing on
+    screen to copy from. Answering in a lesson builds the card; saying it is what opens the
+    Club.
+
+    Counted from `proof` with source 'legend' and clean, which is the same record the proof
+    card and SAID COLD already read — one number, three screens, no second definition of
+    what counts.
+
+    A LEARNER WITH NO PROOF SUPPLIED KEEPS THE OLD ANSWER. Not every caller has the record
+    to hand, and a door that slams shut because an argument was omitted would be worse than
+    the hole it replaces. The callers that decide entry pass it; see components/Club.tsx.
+  */
+  const needed = cardFor(opts.purpose ?? null).filter((f) =>
+    frameApplies(f, opts.answers ?? []),
+  ).length
+  const said = (opts.proof ?? []).filter((p) => p.source === 'legend' && p.clean).length
+  if (opts.proof && said < needed) return false
   if (opts.welcomedAt) return true
   return cardDone(opts.answeredFrameIds, opts.answers ?? [], opts.purpose ?? null)
 }

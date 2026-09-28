@@ -66,6 +66,8 @@ function isMember(s: LearnerState): boolean {
     answeredFrameIds: answers.filter((a) => Object.keys(a.values).length > 0).map((a) => a.frame_id),
     answers,
     welcomedAt: s.club_welcomed_at,
+    /* Said cold, which is what the door now asks for — see clubOpen. */
+    proof: s.proof ?? [],
     purpose: s.purpose ?? null,
   })
 }

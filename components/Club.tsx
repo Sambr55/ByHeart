@@ -131,6 +131,8 @@ export function Club() {
         answeredFrameIds: answered,
         answers: state.legend ?? [],
         purpose: state.purpose ?? null,
+        /* The ceremony waits for the same thing the door does. */
+        proof: state.proof ?? [],
       })
     )
       return
@@ -183,6 +185,8 @@ export function Club() {
       // Measured against THIS learner's seven — see cardFor. Somebody being checked against
       // another purpose's card would find the door opening early or never.
       purpose: learner.purpose ?? null,
+      /* Said cold, which is what the door now asks for — see clubOpen. */
+      proof: learner.proof ?? [],
     })
 
   /*

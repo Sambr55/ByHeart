@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useMemo } from 'react'
 import { CLUB } from '@/content/club'
 import { dropsFor, roomsFor } from '@/content/feed'
-import { legendStatus } from '@/content/legend'
+import { cardFor, frameApplies, legendStatus } from '@/content/legend'
 import { useLearner } from '@/engine/useLearner'
 
 /**
@@ -50,6 +50,24 @@ export function NotYet({
   const vibesLeft = Math.max(0, status.vibesNeeded - status.vibesDone)
 
   /*
+    AND HOW MUCH OF THE LEGEND HAS ACTUALLY BEEN SAID.
+
+    Sam: "this is about completing and rehearsing the legend, which has now become a soft
+    option, not a gate." The road answers all seven as a learner walks it, so the card is
+    written before they get here — and this screen said "It is open now, build it" to
+    somebody whose card was already built and never spoken.
+
+    What is outstanding is the rehearsal, so that is what the screen names. Counted from
+    the same proof record the door reads, so the sentence here and the lock cannot
+    disagree about what is left.
+  */
+  const saidCold = (learner.proof ?? []).filter((p) => p.source === 'legend' && p.clean).length
+  const cardSize = cardFor(learner.purpose ?? null).filter((f) =>
+    frameApplies(f, learner.legend ?? []),
+  ).length
+  const toSay = Math.max(0, cardSize - saidCold)
+
+  /*
     The three things the Club actually holds, counted from the content it would serve.
 
     Read after mount like everything else that comes out of the learner record — the
@@ -92,7 +110,21 @@ export function NotYet({
         */}
         Your Legend is seven things about yourself, said with nothing on screen.{' '}
         {open
-          ? 'It is open now — build it and the Club is yours.'
+          ? toSay === 0
+            ? 'It is open now — the Club is yours.'
+            : /*
+                THE CARD IS WRITTEN; SAYING IT IS THE DOOR.
+
+                "Build it" was right when the deck was where the Legend got filled in. The
+                lessons fill it now, so by the time somebody reads this the card is
+                complete and untouched — and the thing between them and the Club is having
+                said it out loud with nothing on screen.
+              */
+              toSay === 1
+              ? 'Your Legend is written. Say the last one out loud and the Club is yours.'
+              : 'Your Legend is written. Say all ' +
+                toSay +
+                ' out loud, with nothing on screen, and the Club is yours.'
           : left > 0
             ? /*
                 THE BASICS, AND THE WARM-UP ONLY IF IT IS STILL OWED.
@@ -145,12 +177,21 @@ export function NotYet({
       </div>
 
       <div className="mt-3 flex flex-col gap-3">
+        {/*
+          THE BUTTON GOES WHERE THE WORK IS.
+
+          It always sent people to the shelf, which is right while there are still basics
+          to play and wrong the moment the card is written and unspoken: the shelf has no
+          Legend on it. ?run=1 is the run-through the deck's own button starts — see
+          components/Legend.tsx — so the one thing standing between them and the Club is
+          one tap away rather than somewhere they have to go and find.
+        */}
         <Link
-          href="/vibes"
+          href={open && toSay > 0 ? '/legend?run=1' : '/vibes'}
           data-testid="notyet-go"
           className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >
-          GET GOING
+          {open && toSay > 0 ? 'SAY IT OUT LOUD' : 'GET GOING'}
         </Link>
         {/*
           Back, and it is a real back — router.back() returns the screen they came from

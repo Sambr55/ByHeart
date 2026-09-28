@@ -47,8 +47,10 @@ export function useClub(): { open: boolean; mounted: boolean } {
         welcomedAt: learner.club_welcomed_at,
         /* Measured against THIS learner's seven — see cardFor. */
         purpose: learner.purpose ?? null,
+        /* Said cold, which is what the door now asks for — see clubOpen. */
+        proof: learner.proof ?? [],
       }),
-    [mounted, answeredIds, learner.legend, learner.club_welcomed_at, learner.purpose],
+    [mounted, answeredIds, learner.legend, learner.club_welcomed_at, learner.purpose, learner.proof],
   )
 
   return { open, mounted }
