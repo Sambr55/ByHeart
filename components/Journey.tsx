@@ -4247,6 +4247,32 @@ function AskOrigin({
     A skip settles it whatever else is true, because skipping is an answer to the whole
     question rather than to half of it.
   */
+  /*
+    AND THE LEGEND IS WRITTEN EVEN WHEN THE QUESTION IS ALREADY SETTLED.
+
+    Sam: "the first question of the legend is still coming through not populated when the
+    user has already asked these questions."
+
+    This is why. The branch below collapses to a one-line confirmation as soon as the
+    PROFILE holds a nationality and a town — which set-up can fill before this lesson is
+    ever reached — so THAT IS ME never renders, and THAT IS ME is the only thing that
+    calls answerLegendFromLesson. The profile was answered and the Legend never was, so
+    the card came up blank on a question the learner had demonstrably answered.
+
+    Backfilled here rather than by moving the write into the settled branch's render: an
+    effect is the only place a write belongs, and answerLegendFromLesson already refuses
+    to overwrite a real answer, so this is safe to run on every mount.
+
+    The same seam exists for age, into and portuguese — each has a profile field that can
+    be filled before its lesson — and all three go through AskInLesson, which writes the
+    legend on the tap. Origin is the one with its own component and its own settled
+    branch, which is how it drifted.
+  */
+  useEffect(() => {
+    if (!said || !profile?.from_place) return
+    answerLegendFromLesson('origin', { nationality: said, place: profile.from_place })
+  }, [said, profile?.from_place])
+
   if ((skipped || (said && profile?.from_place)) && !open) {
     const chosen = options.find((o) => o.value === said)
     const shown = chosen ? (female && chosen.f ? chosen.f : chosen.value) : null

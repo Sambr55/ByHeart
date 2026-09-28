@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '@/content/roots'
 import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, askFor, frameReady, nameFor, REPAIR_KIT, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, metIn,
-  provenanceOf, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
+  provenanceOf, knownValues, readableFrame, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
 import { PICKER } from '@/content/front-door'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { AudioButton } from '@/components/AudioButton'
@@ -17,7 +17,7 @@ import { MiniBuild } from '@/components/Journey'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
-import { acquirePiece, answerLegend, recordProof } from '@/engine/learner'
+import { acquirePiece, answerLegend, answerLegendFromLesson, recordProof } from '@/engine/learner'
 import { wordsIn } from '@/content/numbers'
 import { useLearner } from '@/engine/useLearner'
 import { useRestore } from '@/engine/useRestore'
@@ -71,6 +71,37 @@ export function Legend() {
     [learner.inventory],
   )
   const answers = learner.legend ?? []
+
+  /*
+    WHAT THE LESSONS ALREADY LEARNED, WRITTEN ONTO THE CARD.
+
+    Sam: "the first question of the legend is still coming through not populated when the
+    user has already asked these questions." His screenshot is the origin card, blank,
+    with both halves of the answer sitting on his profile.
+
+    The lessons DO write the Legend — answerLegendFromLesson, on the tap that answers —
+    but only when the tap happens. AskOrigin collapses to a one-line confirmation the
+    moment the profile holds a nationality and a town, which set-up can fill before that
+    lesson is ever reached, so the button that writes is never drawn. The profile is
+    answered and the card is not.
+
+    That is fixed in the lesson too, and this is the half that matters to somebody
+    standing in front of the card today: a learner who already walked past it does not get
+    their answer back by being sent to walk it again.
+
+    ONLY WHAT THE RECORD ACTUALLY HOLDS, and only where the card is empty —
+    answerLegendFromLesson refuses to overwrite a real answer, so an edited card stands.
+    knownValues is the same reader the Legend-open screen uses, so the two cannot disagree
+    about what is known.
+  */
+  useEffect(() => {
+    for (const frame of LEGEND_FRAMES) {
+      const known = knownValues(frame, learner)
+      if (!readableFrame(frame, known)) continue
+      answerLegendFromLesson(frame.id, known)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [learner.profile?.nationality, learner.profile?.from_place, learner.profile?.age, learner.display_name])
   const valuesFor = (id: string) => {
     const given = answers.find((a) => a.frame_id === id)?.values
     /*

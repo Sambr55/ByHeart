@@ -21,6 +21,7 @@
  *   - the name is theirs
  *   - whatever is banked resolves to a real piece
  */
+import { readFileSync } from 'node:fs'
 import { ROOTS, PIECES } from '../content/roots'
 import { INTERESTS } from '../content/interests'
 import { INSIGHTS } from '../content/osmosis'
@@ -463,6 +464,65 @@ console.log('\nno frame reaches a screen with its braces still in it\n')
       'origin with nothing known',
     )
   }
+}
+
+/*
+  WHAT THE PROFILE KNOWS IS ON THE CARD.
+
+  Sam: "the first question of the legend is still coming through not populated when the
+  user has already asked these questions." His screenshot was the origin card, blank, with
+  both halves of the answer on his profile.
+
+  The lessons write the Legend on the tap that answers — but AskOrigin collapses to a
+  one-line confirmation as soon as the profile holds a nationality and a town, which
+  set-up fills before that lesson is reached. So the button that writes was never drawn:
+  profile answered, card empty.
+
+  Asserted as the property rather than on the screen — every frame knownValues can fill
+  must be fillable from a record that holds only profile fields — so a fourth frame with a
+  profile field behind it is covered without being named here.
+*/
+console.log('\nwhat the profile knows reaches the card\n')
+{
+  const jane = {
+    display_name: 'Jane',
+    profile: { nationality: 'escocesa', from_place: 'Glasgow', age: 40, gender: 'f' as const },
+  }
+  let filled = 0
+  for (const frame of LEGEND_FRAMES) {
+    const known = knownValues(frame, jane)
+    if (!Object.keys(known).length) continue
+    filled += 1
+    /*
+      Every value knownValues produces must be a real answer for that slot — an empty
+      string would be written, counted as answered, and render a card with a blank in it.
+    */
+    for (const [key, v] of Object.entries(known)) {
+      ok(frame.id + '.' + key + ' is a real answer', Boolean(String(v).trim()), JSON.stringify(v))
+    }
+  }
+  ok('the profile fills at least the first three cards', filled >= 3, filled + ' frames')
+
+  /* And origin specifically, which is the one that was reported. */
+  const origin = LEGEND_FRAMES.find((f) => f.id === 'origin')
+  ok(
+    'origin is one of them',
+    Boolean(origin && readableFrame(origin, knownValues(origin, jane))),
+    'origin',
+  )
+
+  /*
+    AND THE DECK WRITES THEM. The reader existing is not the fix — the Legend has to put
+    them on the record, or every screen that counts answers still counts none. Checked in
+    the source because the alternative is driving a browser to a state this file has no
+    other reason to build.
+  */
+  const src = readFileSync('components/Legend.tsx', 'utf8')
+  ok(
+    'the deck backfills what the profile knows',
+    /knownValues\(frame, learner\)/.test(src) && /answerLegendFromLesson\(frame\.id, known\)/.test(src),
+    'components/Legend.tsx',
+  )
 }
 
 if (fail.length) {
