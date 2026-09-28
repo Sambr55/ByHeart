@@ -18,7 +18,7 @@ import { BREAKS, breakAfter } from '../content/breaks'
 import { ROOTS, ROOTS_BY_FAMILY, type Root } from '../content/roots'
 import { ROAD, WARM_UP, roadFor, roadProgress } from '../content/road'
 import { beatsFor } from '../engine/journey'
-import { cardFor, frameReady, legendStatus, DOORWAY, LEGEND_FRAMES } from '../content/legend'
+import { cardFor, cardToGo, clubOpen, frameReady, legendStatus, DOORWAY, LEGEND_FRAMES } from '../content/legend'
 import type { Purpose } from '../content/situations'
 
 const fail: string[] = []
@@ -242,6 +242,44 @@ console.log('\nevery sitting break teaches something, and something new\n')
   agreement rather than the number: a learner the road calls done must never be told to
   finish anything, and one it calls unfinished must never be told they are done.
 */
+/*
+  AN EMPTY CARD DOES NOT OPEN THE CLUB.
+
+  Sam: "I completed the basics but it allowed me into the club without completing the
+  legend." Walking the basics DOES answer all seven — that is the design, and his own
+  words are quoted at the top of content/road.ts: "you are literally building the legend
+  as you learn." So the Club opening on a finished road is correct.
+
+  What was not correct is what happens to a SKIPPED one. Clearing or skipping a card
+  writes `values: {}`, and cardToGo took the caller's word for which ids were answered —
+  so an empty card counted as done, and four outstanding became three. All four callers
+  filter the empties first, in four separate places; the fifth to forget would have opened
+  the Club to somebody who had answered nothing.
+
+  Asserted on cardToGo rather than on the callers, because that is where it is now decided
+  and a new caller inherits it for free.
+*/
+console.log('\nan empty card is not an answered one\n')
+{
+  for (const purpose of ['visiting', 'staying', 'moving'] as const) {
+    const all = cardFor(purpose).map((f) => f.id)
+    const real = all.map((id) => ({ frame_id: id, values: { x: 'y' } }))
+    ok(purpose + ': seven real answers open it', clubOpen({ answeredFrameIds: all, answers: real, purpose }))
+    /* One of them cleared — the id is still listed, the values are gone. */
+    const skipped = real.map((a, i) => (i === 0 ? { ...a, values: {} } : a))
+    ok(
+      purpose + ': one skipped keeps it shut',
+      !clubOpen({ answeredFrameIds: all, answers: skipped, purpose }),
+      'cleared ' + all[0],
+    )
+    ok(
+      purpose + ': and it is counted as outstanding',
+      cardToGo(all, skipped, purpose) === 1,
+      String(cardToGo(all, skipped, purpose)),
+    )
+  }
+}
+
 console.log('\nthe door and the copy agree\n')
 {
   for (const purpose of ['visiting', 'staying', 'moving'] as const) {

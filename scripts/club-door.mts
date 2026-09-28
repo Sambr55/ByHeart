@@ -176,10 +176,25 @@ ok(
 
 console.log('\nthe count the Club shows\n')
 const cardIds = LEGEND_CARD.map((f) => f.id)
+/*
+  ANSWERED MEANS ANSWERED, and this used to fake it with `ans(id, {})`.
+
+  Empty values are what CLEARING a card writes, and cardToGo counted them as done — so
+  this asserted "answering every card" against seven cards that had been answered with
+  nothing. It passed for the wrong reason and went red the moment that hole was closed.
+
+  Real values now, which is what the assertion always meant to describe.
+*/
+const answeredCard = cardIds.map((id) => ans(id, { x: 'y' }))
 ok(
   'answering every card leaves nothing outstanding',
-  cardToGo(cardIds, cardIds.map((id) => ans(id, {}))) === 0,
-  String(cardToGo(cardIds, cardIds.map((id) => ans(id, {})))),
+  cardToGo(cardIds, answeredCard) === 0,
+  String(cardToGo(cardIds, answeredCard)),
+)
+/* And clearing one puts it back, which is the behaviour that hole was hiding. */
+ok(
+  'and clearing one puts it back',
+  cardToGo(cardIds, answeredCard.map((a, i) => (i === 0 ? ans(a.frame_id, {}) : a))) === 1,
 )
 
 console.log('\nnumbers are words\n')

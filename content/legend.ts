@@ -1787,7 +1787,27 @@ export function cardToGo(
   answers: { frame_id: string; values: Record<string, string> }[] = [],
   purpose: Purpose | null = null,
 ): number {
-  const done = new Set(answeredFrameIds)
+  /*
+    AN EMPTY CARD IS NOT AN ANSWERED ONE, and this used to take the caller's word for it.
+
+    `answeredFrameIds` is a list of ids, so a frame with `values: {}` — which is what
+    clearing or skipping a card writes — counted as done if its id was in the list.
+    Measured: four outstanding became three. Every caller today filters the empties out
+    first, four times, in four places; the fifth one to forget would open the Club to
+    somebody who had answered nothing, and nothing would fail.
+
+    So the filter moves here, where the question is actually decided. Callers may keep
+    theirs — passing an already-filtered list through this changes nothing — and the ones
+    that forget are now correct anyway.
+
+    Only where the answers are supplied. A caller passing ids alone still gets the old
+    behaviour, because there is nothing to check them against and refusing them all would
+    be worse than trusting them.
+  */
+  const empty = new Set(
+    answers.filter((a) => !Object.keys(a.values ?? {}).length).map((a) => a.frame_id),
+  )
+  const done = new Set(answeredFrameIds.filter((id) => !empty.has(id)))
   return cardFor(purpose).filter((f) => frameApplies(f, answers) && !done.has(f.id)).length
 }
 
