@@ -3702,7 +3702,7 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
                   'tap-target rounded border px-3 py-3 text-left transition ' +
                   (said === word
                     ? 'border-accent bg-accent text-accent-ink'
-                    : 'border-line hover:border-accent/50')
+                    : 'border-line bg-bg hover:border-accent/50')
                 }
               >
                 <span className="pt text-sm">{word}</span>
@@ -3759,7 +3759,7 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
                 'tap-target flex flex-1 flex-col gap-1 rounded border px-4 py-3 text-left transition ' +
                 (said === o.id
                   ? 'border-accent bg-accent text-accent-ink'
-                  : 'border-line hover:border-accent/50')
+                  : 'border-line bg-bg hover:border-accent/50')
               }
             >
               <span className="pt text-base">{o.label}</span>
@@ -4122,7 +4122,7 @@ function AskInto({
               }}
               className={
                 'tap-target flex flex-col gap-1 rounded border px-4 py-3 text-left transition ' +
-                (on ? 'border-accent bg-accent text-accent-ink' : 'border-line hover:border-accent/50')
+                (on ? 'border-accent bg-accent text-accent-ink' : 'border-line bg-bg hover:border-accent/50')
               }
             >
               <span className="pt text-sm">{i.target}</span>
@@ -4317,7 +4317,7 @@ function AskOrigin({
                 'tap-target rounded border px-4 py-3 transition ' +
                 (said === o.value
                   ? 'border-accent bg-accent text-accent-ink'
-                  : 'border-line hover:border-accent/50')
+                  : 'border-line bg-bg hover:border-accent/50')
               }
             >
               <span className="pt text-sm">{label}</span>
