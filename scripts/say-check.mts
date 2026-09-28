@@ -30,6 +30,7 @@
  *      drawn and neither is the sentence beside it — a caption telling somebody to speak,
  *      next to nothing they can press, is worse than silence.
  */
+import { readFileSync } from 'node:fs'
 import { chromium } from 'playwright'
 import { near, CLOSE_ENOUGH } from '../engine/listen'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
@@ -76,6 +77,73 @@ console.log('\nand something else does not\n')
     const s = near(said, want)
     ok('fails on ' + why, s < CLOSE_ENOUGH, s.toFixed(2) + '  "' + said + '"')
   }
+}
+
+/*
+  A RESULT THAT ARRIVES LATE IS STILL A RESULT.
+
+  Sam: "when I speak into the phone there is no resolution. I say something and there is
+  no response."
+
+  `onend` fires on every session close, including the one that follows a good transcript,
+  and it settled the promise with null. The two events have no guaranteed order — so on any
+  build where the session closes as the transcript is delivered, a correct answer was
+  thrown away and the control fell back to idle having heard the learner perfectly.
+
+  Asserted on the settle logic rather than through a browser, because the ordering is the
+  whole bug and no headless run reproduces a real recogniser's timing. Both orders, and the
+  late arrival that the grace window exists for.
+*/
+console.log('\na result is not lost to the session closing\n')
+{
+  /* The shape of listenFor's promise, reduced to what decides the answer. */
+  const settle = (events: string[], lateResultMs = -1) => {
+    let settled = false
+    let held: string | null = null
+    let out: string | null = 'never settled'
+    const done = (h: string | null) => {
+      if (settled) return
+      settled = true
+      out = h
+    }
+    let waiting = false
+    for (const e of events) {
+      if (e === 'result') {
+        held = 'HEARD'
+        done(held)
+      }
+      if (e === 'end') {
+        if (held) done(held)
+        else waiting = true
+      }
+      if (e === 'error') done(held)
+    }
+    /* The transcript lands inside the grace window rather than after it. */
+    if (waiting && lateResultMs >= 0 && lateResultMs <= 250) {
+      held = 'HEARD'
+      done(held)
+    }
+    if (!settled) done(held)
+    return out
+  }
+
+  ok('a result before the close is kept', settle(['result', 'end']) === 'HEARD', String(settle(['result', 'end'])))
+  ok(
+    'a result just after the close is kept',
+    settle(['end'], 40) === 'HEARD',
+    String(settle(['end'], 40)),
+  )
+  ok('and silence still answers', settle(['end'], -1) === null, String(settle(['end'], -1)))
+  ok(
+    'an error after a result keeps the result',
+    settle(['result', 'error']) === 'HEARD',
+    String(settle(['result', 'error'])),
+  )
+
+  /* And the source says so, because the logic above is a model of it rather than the thing. */
+  const src = readFileSync('engine/listen.ts', 'utf8')
+  ok('onend does not discard a held result', /rec\.onend = \(\) => \{[\s\S]{0,200}if \(held\) return done\(held\)/.test(src))
+  ok('and gives a late one a window', /window\.setTimeout\(\(\) => done\(held\), 250\)/.test(src))
 }
 
 console.log('\nthe control is on the routes that ask for it\n')

@@ -55,7 +55,7 @@ interface Recogniser {
   interimResults: boolean
   maxAlternatives: number
   onresult: ((e: SpokenEvent) => void) | null
-  onerror: (() => void) | null
+  onerror: ((e: { error?: string }) => void) | null
   onend: (() => void) | null
   start(): void
   stop(): void
@@ -86,6 +86,14 @@ export function canListen(): boolean {
 export interface Heard {
   /** What the browser thought it heard, for showing back. */
   said: string
+  /**
+   * Why nothing came back, where that is knowable and worth saying.
+   *
+   * 'blocked' is the microphone being refused — a fact about the device that the learner
+   * can act on, and the one case where "we did not catch it" would be a lie. Absent means
+   * the ordinary outcome: it listened and heard nothing it could use.
+   */
+  why?: 'blocked'
   /** Whether it is close enough to count — never a score. See `near`. */
   close: boolean
   /** 0–1, for deciding how warmly to respond. Not shown as a number. */
@@ -250,6 +258,23 @@ export function listenFor(want: string, opts: { lang?: string } = {}): Promise<H
     */
     rec.maxAlternatives = 3
 
+    /*
+      HELD, NOT SETTLED, because onend can beat onresult to the finish.
+
+      Sam: "when I speak into the phone there is no resolution. I say something and there
+      is no response." This is why. `onend` fires on every session close — including the
+      one that follows a perfectly good result — and it called done(null). The two are
+      separate events with no guaranteed order, so on any build where the session closes as
+      the transcript is delivered, the answer was thrown away and the control fell back to
+      idle having heard the learner correctly.
+
+      Traced by running the settle order both ways: result-then-end returns the answer,
+      end-then-result returns null. On iOS the second is common.
+
+      So the result is kept here and the promise is settled by whichever event is last. A
+      transcript that arrives at all is used, whenever it arrives.
+    */
+    let held: Heard | null = null
     rec.onresult = (e: SpokenEvent) => {
       const first = e.results[0]
       const alts: string[] = []
@@ -263,12 +288,46 @@ export function listenFor(want: string, opts: { lang?: string } = {}): Promise<H
           best = a
         }
       }
-      const heard = { said: (best || alts[0] || '').trim(), close: score >= CLOSE_ENOUGH, score }
-      track('said_aloud', { close: heard.close, score: Math.round(score * 100) })
-      done(heard)
+      held = { said: (best || alts[0] || '').trim(), close: score >= CLOSE_ENOUGH, score }
+      track('said_aloud', { close: held.close, score: Math.round(score * 100) })
+      /*
+        Settled here too, so a session that never ends — which happens when the tab is
+        backgrounded mid-utterance — still answers the moment it has something to say.
+      */
+      done(held)
     }
-    rec.onerror = () => done(null)
-    rec.onend = () => done(null)
+    /*
+      A REFUSED MICROPHONE IS NOT SILENCE.
+
+      The error was discarded, so a learner who had denied permission — or never been asked,
+      which is what an iOS install does until the first prompt — saw exactly what somebody
+      who mumbled saw. Nothing to act on, and the product apparently ignoring them.
+
+      Only the two that mean "the device said no" are reported. 'no-speech' and 'aborted'
+      are ordinary and stay quiet; inventing a reason for those would be worse than none.
+    */
+    rec.onerror = (e: { error?: string }) => {
+      if (held) return done(held)
+      const why = e?.error === 'not-allowed' || e?.error === 'service-not-allowed'
+      done(why ? { said: '', close: false, score: 0, why: 'blocked' } : null)
+    }
+    /*
+      END WAITS A BEAT FOR A RESULT THAT IS STILL COMING.
+
+      Settling on `end` with whatever is held fixes result-then-end and does nothing for
+      end-then-result — measured, and the second is the ordering that produces "I say
+      something and there is no response". The session closes, the transcript is delivered
+      a tick later, and by then the promise has already answered null.
+
+      So a session that ends with nothing held gives the transcript one more frame to
+      arrive before giving up. 250ms is imperceptible to somebody who has just stopped
+      talking and long enough for a result already in flight; if nothing comes, the answer
+      is the same null it would have been.
+    */
+    rec.onend = () => {
+      if (held) return done(held)
+      window.setTimeout(() => done(held), 250)
+    }
 
     try {
       rec.start()
@@ -290,7 +349,7 @@ export function listenFor(want: string, opts: { lang?: string } = {}): Promise<H
       } catch {
         /* Already stopped. */
       }
-      done(null)
+      done(held)
     }, 6000)
   })
 }

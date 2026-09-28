@@ -49,7 +49,9 @@ export function SayButton({
   onHeard?: (h: Heard) => void
 }) {
   const [able, setAble] = useState(false)
-  const [state, setState] = useState<'idle' | 'listening' | 'close' | 'missed'>('idle')
+  const [state, setState] = useState<'idle' | 'listening' | 'close' | 'missed' | 'blocked'>(
+    'idle',
+  )
   const alive = useRef(true)
 
   /*
@@ -72,7 +74,16 @@ export function SayButton({
     <button
       type="button"
       data-testid="say-it"
-      aria-label={state === 'listening' ? 'Listening' : 'Say it'}
+      aria-label={
+        state === 'listening'
+          ? 'Listening'
+          : state === 'blocked'
+            ? 'The microphone is blocked'
+            : state === 'missed'
+              ? 'Not caught — try again'
+              : 'Say it'
+      }
+      title={state === 'blocked' ? 'DUB cannot hear the microphone. Allow it in your browser settings.' : undefined}
       disabled={state === 'listening'}
       onClick={() => {
         setState('listening')
@@ -81,13 +92,25 @@ export function SayButton({
           if (!alive.current) return
           if (!h) {
             setState('missed')
+          } else if (h.why === 'blocked') {
+            /*
+              The device refused the microphone, which is a different thing from not
+              hearing anything — and the only one the learner can do something about. Not
+              passed to onHeard: nothing was said, so nothing should be recorded.
+            */
+            setState('blocked')
           } else {
             setState(h.close ? 'close' : 'missed')
             onHeard?.(h)
           }
+          /*
+            Held long enough to be read. 1600ms was tuned for a tick, which is instantly
+            legible; a miss has to be noticed AND understood before it clears, or it reads
+            as a flicker.
+          */
           window.setTimeout(() => {
             if (alive.current) setState('idle')
-          }, 1600)
+          }, 2600)
         })
       }}
       className={
@@ -97,7 +120,7 @@ export function SayButton({
           ? ' animate-pulse border-accent bg-accent/15 text-accent'
           : state === 'close'
             ? ' border-accent bg-accent text-accent-ink'
-            : state === 'missed'
+            : state === 'missed' || state === 'blocked'
               ? ' border-line-strong text-muted'
               : ' border-line text-muted hover:border-accent/50')
       }
@@ -106,6 +129,24 @@ export function SayButton({
         /* A tick, for the one outcome worth marking. */
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
           <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ) : state === 'missed' || state === 'blocked' ? (
+        /*
+          AND A MISS LOOKS LIKE SOMETHING.
+
+          Sam: "when I speak into the phone there is no resolution. I say something and
+          there is no response." Half of that was a real bug in the recogniser; the other
+          half is this — `missed` drew the same microphone as `idle`, tinted, so a miss was
+          indistinguishable from nothing having happened at all.
+
+          An ear with a line through it: the product did not catch it, which is the honest
+          claim. Never a cross, because a cross says the learner was wrong and the browser
+          is the unreliable half here.
+        */
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+          <rect x="9" y="3" width="6" height="11" rx="3" />
+          <path d="M5 11a7 7 0 0 0 14 0" strokeLinecap="round" />
+          <path d="M4 4l16 16" strokeLinecap="round" />
         </svg>
       ) : (
         /* A microphone, which is the same shape whether it is idle or listening. */
