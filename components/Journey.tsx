@@ -3680,7 +3680,7 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
       return <AskSettled line={fillFrame(frame, answer?.values ?? {}, gender)} onChange={() => setOpen(true)} />
     }
     return (
-      <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+      <div className="flex flex-col gap-3 rounded border border-accent/40 bg-bg-elev p-4">
         <p className="eyebrow text-accent">AND YOU</p>
         <p className="pt text-base text-accent">{askFor(frame, gender)}</p>
         <p className="text-sm leading-relaxed text-muted">{frame.ask_en}</p>
@@ -3735,7 +3735,7 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
       )
     }
     return (
-      <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+      <div className="flex flex-col gap-3 rounded border border-accent/40 bg-bg-elev p-4">
         <p className="eyebrow text-accent">WHICH IS YOURS</p>
         <p className="text-sm leading-relaxed">
           It agrees with you, not with the person you are thanking — so DUB needs to know
@@ -3829,7 +3829,7 @@ function AskAge({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-bg-elev p-4">
       <p className="eyebrow text-accent">AND YOU</p>
       <p className="text-sm leading-relaxed">
         Say it once and DUB will say it properly for you — in Portuguese you have it rather
@@ -3978,7 +3978,7 @@ function AskEmail({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-bg-elev p-4">
       <p className="eyebrow text-accent">YOURS</p>
       {/*
         WHAT IT BUYS THEM, first and plainly.
@@ -4091,7 +4091,7 @@ function AskInto({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-bg-elev p-4">
       <p className="eyebrow text-accent">AND YOU</p>
       <p className="text-sm leading-relaxed">
         Pick as many as are true. Each one is a word you keep, and DUB will use them to
@@ -4263,7 +4263,7 @@ function AskOrigin({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-accent/[0.05] p-4">
+    <div className="flex flex-col gap-3 rounded border border-accent/40 bg-bg-elev p-4">
       <p className="eyebrow text-accent">AND YOU</p>
       <p className="text-sm leading-relaxed">
         The next thing anybody asks. Answer it once and every line DUB builds for you is

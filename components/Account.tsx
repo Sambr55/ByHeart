@@ -203,7 +203,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
         ) : null}
 
         {comped ? (
-          <p className="mt-6 rounded border border-accent/40 bg-accent/[0.06] px-4 py-3 text-sm text-fg/85">
+          <p className="mt-6 rounded border border-accent/40 bg-bg-elev px-4 py-3 text-sm text-fg/85">
             You are in on the house
             {subscription?.current_period_end ? ', until the date above' : ', permanently'}. Nothing
             to pay and nothing to manage.

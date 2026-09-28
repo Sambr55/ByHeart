@@ -129,7 +129,7 @@ export function NotYet({
         things because there ARE fewer things. A number somebody can check is worth more
         than an adjective they cannot.
       */}
-      <div className="mt-3 flex flex-col gap-3 rounded border border-accent/40 bg-accent/5 px-4 py-6">
+      <div className="mt-3 flex flex-col gap-3 rounded border border-accent/40 bg-bg-elev px-4 py-6">
         <p className="eyebrow text-accent">INSIDE</p>
         <p className="text-sm leading-relaxed text-fg/85">{CLUB.door.inside}</p>
         <ul className="mt-1 flex flex-col gap-3">
