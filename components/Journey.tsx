@@ -4979,7 +4979,13 @@ function SittingBreakStep() {
     <Shell stage="CHOICE" nav={false}>
       <div className="flex flex-1 flex-col justify-center gap-6">
         <div className="flex flex-col gap-3">
-          <p className="eyebrow text-accent">{b.where.toUpperCase().slice(0, 14)}</p>
+          {/*
+            NOT SLICED. This used to be `.slice(0, 14)`, which cut "One sitting down."
+            to ONE SITTING DO — Sam read it off the screen. The eyebrow limit is a rule
+            about AUTHORING a short line, so the lines are short in content/breaks.ts and
+            this renders what was written.
+          */}
+          <p className="eyebrow text-accent">{b.where}</p>
           {/*
             THE PHRASE IS THE HEADLINE, at the size the product reserves for produced
             language. On the old panel it sat at text-2xl under three other things; here
@@ -4998,6 +5004,18 @@ function SittingBreakStep() {
       </div>
 
       <div className="flex flex-col gap-3">
+        {/*
+          WHAT THE DECISION IS, IN ENGLISH, before either button.
+
+          Sam: "It is not at all clear that this is a gate where they can save or keep
+          going, but assumes that is what the user reads into Vamos la." The primary
+          button carries the Portuguese phrase because teaching it is the point of the
+          screen — but that means the button cannot also carry the instruction, so it
+          goes here.
+        */}
+        <p data-testid="break-choice" className="text-sm leading-relaxed text-fg/85">
+          {b.choice}
+        </p>
         {/*
           CARRYING ON IS THE PRIMARY, in the words just taught. The whole reason this
           screen exists is that stopping was easier to find than continuing.

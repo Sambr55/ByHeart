@@ -445,10 +445,27 @@ export function Legend() {
     who genuinely has no Legend is bounced back to 'deck' before they can reach this.
   */
   if ((mode === 'rehearse' || mode === 'cold') && answered.length >= 2) {
+    /*
+      THE RUN IS THE CARD, NOT EVERY FRAME EVER ANSWERED.
+
+      `answered` filters all of LEGEND_FRAMES, so a learner who had grown a deeper card in
+      a vibe — age, into, children, who_with — got a run LONGER than seven. Meanwhile both
+      the gate (clubOpen) and the screen that counts it down (NotYet) size the card with
+      cardFor(purpose), which is the seven. Three places, two different definitions of "the
+      Legend", and the run was the odd one out: it could ask for ten sentences while the
+      door was waiting for seven, or shuffle a deeper frame into the first position — which
+      is exactly what Sam saw. "Legend just opened with are you with somebody? That is
+      wrong."
+
+      Narrowed here rather than in `answered` itself, because the deck view above genuinely
+      does want every answered frame — the deeper cards are real and belong on the card.
+      What they are not is part of the gate.
+    */
+    const runCards = answered.filter((f) => f.depth === 'card')
     return (
       <Shell>
         <RunThrough
-          cards={answered}
+          cards={runCards.length >= 2 ? runCards : answered}
           gender={learner.profile?.gender ?? null}
           valuesFor={valuesFor}
           onDone={() => setMode('deck')}
@@ -1882,6 +1899,21 @@ function RunThrough({
       const j = Math.floor(Math.random() * (i + 1))
       ;[out[i], out[j]] = [out[j], out[i]]
     }
+    /*
+      THE NAME GOES FIRST, and the rest stays shuffled.
+
+      Sam: "Legend just opened with are you with somebody? That is wrong... Should start
+      with como te chamas."
+
+      He is right, and it does not cost the shuffle anything. The argument for shuffling is
+      that a run in the order you built them is a recital of a list — but that is an
+      argument about the SEQUENCE, not about the opening. Every real conversation this
+      rehearses starts with a name, so opening on one is not a cue that helps you cheat; it
+      is the thing that makes the next six feel like being asked rather than being tested.
+      Questions two onwards remain in random order, which is where the claim actually lives.
+    */
+    const n = out.findIndex((f) => f.id === 'name')
+    if (n > 0) out.unshift(out.splice(n, 1)[0])
     return out
   }, [cards])
 
@@ -1931,6 +1963,20 @@ function RunThrough({
           <AudioButton slug={slugFor(askFor(frame, gender))} text={askFor(frame, gender)} size="sm" />
           <span className="pt min-w-0 text-xl text-accent">{askFor(frame, gender)}</span>
         </div>
+        {/*
+          WHAT THE QUESTION MEANS, under the question.
+
+          Sam: "We need to include the english translation of the sentence underneath the
+          portuguese, so the user understands what they are asking."
+
+          Without it this is a memory test with the question taken out — a learner who
+          cannot parse `Falas português?` cannot answer it, and their failure is about
+          reading rather than about producing their own line. ColdSay already argued this
+          and already renders the English (see the sibling component); the fix was applied
+          there and never here, which is the same one-question-two-answers split that has
+          caused most of the dead ends in this product.
+        */}
+        <p className="text-sm leading-relaxed text-muted">{frame.ask_en}</p>
         {!shown ? (
           <p className="mt-3 text-sm leading-relaxed text-muted">{LEGEND_COPY.cold_body}</p>
         ) : null}
@@ -2013,16 +2059,42 @@ function RunThrough({
               */}
               {canSay ? <span className="text-sm text-muted">Say it out loud</span> : null}
             </div>
+            {/*
+              I SAID IT IS THE ONE THAT COUNTS, and until now it did not count anything.
+
+              Sam: "Clicking say it loud on Como te chamas froze the screen and gave no
+              response." The screen was not frozen — it was inert. Both buttons here ran
+              exactly `setShown(true)` and nothing else: no recordProof, no track, nothing
+              written anywhere. So the CTA that sends a learner here, SAY IT OUT LOUD, led
+              to the one screen that could never satisfy the gate it was driving. clubOpen
+              counts proof rows with source 'legend' and clean true (see content/legend.ts),
+              and this screen wrote none of them, so saying all seven perfectly moved the
+              counter by zero and the Club stayed shut for ever.
+
+              That is the same fault as the frozen lesson cards: two places answering one
+              question differently. ColdSay banks its proof; RunThrough did not.
+            */}
             <button
               type="button"
               data-testid="legend-reveal"
               onClick={() => {
+                recordProof({
+                  pt: answer,
+                  en: fillEnglish(frame, valuesFor(frame.id) ?? {}),
+                  source: 'legend',
+                  clean: true,
+                })
                 setShown(true)
               }}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
             >
               I SAID IT
             </button>
+            {/*
+              AND SHOW ME STAYS HONEST: it reveals and records nothing, which is the whole
+              point of having two buttons. Somebody who could not remember it has not said
+              it cold, and the gate should not believe otherwise.
+            */}
             <button
               type="button"
               data-testid="legend-show"
@@ -2045,12 +2117,20 @@ function RunThrough({
             {i + 1 < order.length ? 'NEXT' : 'DONE'}
           </button>
         )}
+        {/*
+          THE WAY OUT, NAMED — and testable, which it was not.
+
+          Sam: "I can now not exit this screen." The exit existed, but it was the only
+          control on the run without a data-testid, so no check could ever have caught it
+          going missing, and "Stop here" does not say where here goes. It says it now.
+        */}
         <button
           type="button"
+          data-testid="legend-run-stop"
           onClick={onDone}
           className="tap-target text-center text-xs text-muted underline underline-offset-4"
         >
-          Stop here
+          Stop here — back to your Legend
         </button>
       </Dock>
     </div>

@@ -96,6 +96,16 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   /* The longer consent answer, open or folded. Starts folded — see the block that uses it. */
   const [terms, setTerms] = useState(false)
   /*
+    THE CONSENT TICK, and it starts false because that is the whole point.
+
+    Sam: "There is no actual positive consent action." GDPR recital 32 rules out silence,
+    inactivity and PRE-TICKED boxes, so this can never be initialised true and can never be
+    set by anything but the learner's own tap.
+  */
+  const [agreed, setAgreed] = useState(false)
+  /* Shown only after somebody presses commit without ticking — never pre-emptively. */
+  const [nudge, setNudge] = useState(false)
+  /*
     WHICH REASON WAS TAPPED, held for as long as it takes to see it.
 
     The five reasons were a list of outlined rows that advanced the moment one was pressed,
@@ -675,11 +685,55 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                 ))}
               </div>
             ) : null}
+            {/*
+              THE AFFIRMATIVE ACT ITSELF.
+
+              Sam: "There is no actual positive consent action." Before this, acceptDeal()
+              fired inside finish() — so the permission was recorded by a button that says
+              THAT IS ME, which is an affirmative act about the learner's NAME and not about
+              their data. GDPR Article 4(11) wants a statement or a clear affirmative
+              action, and recital 32 rules out silence, inactivity and pre-ticked boxes.
+
+              A real checkbox, unticked, that the commit button waits for. It sits INSIDE
+              the consent block rather than next to the button, so what is being agreed to
+              is the thing directly above it.
+            */}
+            <label className="tap-target flex cursor-pointer items-start gap-3 pt-1">
+              <input
+                type="checkbox"
+                data-testid="consent-tick"
+                checked={agreed}
+                onChange={(e) => {
+                  setAgreed(e.target.checked)
+                  if (e.target.checked) setNudge(false)
+                }}
+                className="mt-0.5 h-5 w-5 shrink-0 accent-accent"
+              />
+              <span className="text-xs leading-relaxed">{CONSENT.tick}</span>
+            </label>
           </div>
+          {/*
+            SAID ONLY AFTER A REFUSED PRESS. A message that appears before anybody has done
+            anything wrong is an error message about nothing.
+          */}
+          {nudge && !agreed ? (
+            <p data-testid="consent-nudge" className="animate-bank text-xs text-accent">
+              {CONSENT.untickedNudge}
+            </p>
+          ) : null}
           <button
             type="button"
             data-testid="setup-commit"
+            aria-disabled={!agreed}
             onClick={() => {
+              /*
+                The tick is the gate. Pressing without it says what is missing rather than
+                doing nothing, because a dead button teaches nobody anything.
+              */
+              if (!agreed) {
+                setNudge(true)
+                return
+              }
               finish()
               /*
                 STRAIGHT INTO THE PRODUCT, with no confirmation screen in between.
@@ -700,7 +754,11 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
               if (onDone) onDone()
               else router.push('/vibes')
             }}
-            className="tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+            className={
+              'tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink transition-opacity ' +
+              /* Dimmed, not disabled: it still takes the press and says what is missing. */
+              (agreed ? '' : 'opacity-50')
+            }
           >
             THAT IS ME
           </button>

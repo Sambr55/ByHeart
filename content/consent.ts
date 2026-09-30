@@ -43,7 +43,21 @@ export const CONSENT = {
     whether they can take it away — so those are the sentences.
   */
   body: [
-    'Everything you learn lives on this phone. Nothing leaves it until you sign in.',
+    /*
+      WHAT IT USED TO SAY, and why it did not make sense.
+
+      "Everything you learn lives on this phone. Nothing leaves it until you sign in." Sam:
+      "doesnt make sense." He is right, and the fault is that it answers a question nobody
+      asked. "Nothing leaves it" sounds like a promise about privacy, but signing in is the
+      thing DUB is about to ask for — so the sentence reads as a warning about the product's
+      own next step, and a person who has not signed in yet cannot tell whether that is good
+      news or a catch.
+
+      What they actually want to know is simpler: the work is on this phone, and this phone
+      alone, so losing the phone loses the work. That is the true fact, it is the one with
+      a consequence, and it sets up the email ask rather than muddying it.
+    */
+    'Right now your Portuguese is saved on this phone only — so if you lose the phone, you lose it. Give DUB an email address and it follows you to any device.',
     'Sign in and it follows you — your words, your Legend, and the few things you tell DUB about yourself so the Portuguese it builds for you is true.',
     'You can download all of it, or delete all of it, from Yours. Deleting takes your name, your Legend and everything you said out of DUB for good.',
   ],
@@ -55,7 +69,25 @@ export const CONSENT = {
   */
   age: (country: string, years: number) =>
     'You need to be ' + years + ' or over to have a DUB account. That is the rule in ' + country + '.',
-  yes: 'THAT IS FINE',
+  /**
+   * THE AFFIRMATIVE ACT, which the screen was missing entirely.
+   *
+   * Sam: "There is no actual positive consent action."
+   *
+   * He is describing a real GDPR problem, not a copy one. Consent has to be a statement or
+   * "a clear affirmative action" (Article 4(11)), and recital 32 rules out silence,
+   * pre-ticked boxes and inactivity. What the screen did was record consent inside
+   * finish(), fired by a button labelled THAT IS ME — which is an affirmative act about
+   * the NAME, not about the data. Bundling the two means neither is freely given, because
+   * there is no way to do the first without the second.
+   *
+   * So: an unticked box, which the learner ticks, and the commit button does not work
+   * until they do. That is the whole of the fix — the box is the act, and it is separate
+   * from the name.
+   */
+  tick: 'I have read this, and DUB can keep what I learn.',
+  /** Said only when somebody presses commit without ticking. Never pre-emptive. */
+  untickedNudge: 'Tick the box above and your Legend starts.',
   more: 'What exactly?',
   /** The longer answer, for anybody who taps. Still not a wall. */
   detail: [

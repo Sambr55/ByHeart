@@ -39,9 +39,36 @@ export interface SittingBreak {
   gloss: string
   /** Where it belongs in the library, for the learner who keeps it. */
   shelf: Shelf
-  /** The line above it, which is about the journey rather than the phrase. */
+  /**
+   * The line above it, which is about the journey rather than the phrase.
+   *
+   * FOURTEEN CHARACTERS, because that is what an eyebrow is. The screen used to
+   * truncate this with slice(0, 14) and Sam read the result: "the eyebrow reads ONE
+   * SITTING DO". A cut word is not a shorter line, it is a broken one — so these are
+   * authored to fit and the screen no longer cuts them.
+   */
   where: string
-  /** What the button says. Portuguese, because by now they can read it. */
+  /**
+   * WHAT THE DECISION IS, said in English before either button.
+   *
+   * Sam: "It is not at all clear that this is a gate where they can save or keep going,
+   * but assumes that is what the user reads into Vamos la. Needs to be much clearer
+   * sign-posting."
+   *
+   * He is right, and the reason is structural: the primary button carries the Portuguese
+   * phrase this screen just taught, which is the point of the screen — but a button whose
+   * label is a lesson cannot also be the instruction. So the instruction goes here, in
+   * plain English, directly above the two ways out.
+   */
+  choice: string
+  /**
+   * What the button says. Portuguese, because it is the phrase just taught.
+   *
+   * IT MUST BE THE PHRASE ON THE CARD, not a longer relative of it. The third break
+   * taught `Quase.` and its button said QUASE LÁ — a construction the learner has met
+   * nowhere, on the one screen whose job is to teach the thing it says. Sam: "the CTA is
+   * QUASE LA - we have no idea what that means at this stage."
+   */
   cta: string
 }
 
@@ -60,7 +87,8 @@ export const BREAKS: SittingBreak[] = [
     gloss:
       'You already have vamos. Add lá and it stops being “we go” and becomes what somebody says to get a thing started — a meal, a walk, a difficult conversation.',
     shelf: 'just_say',
-    where: 'One sitting down.',
+    where: 'ONE DOWN',
+    choice: 'Carry on to the next sitting, or save your place and come back to it.',
     cta: 'VAMOS LÁ',
   },
   {
@@ -75,7 +103,8 @@ export const BREAKS: SittingBreak[] = [
     gloss:
       'Faltar is the verb for something being missing, and Portuguese counts what is LEFT rather than what is done. Falta pouco — little is missing. You will hear it about a journey, a queue and a deadline.',
     shelf: 'small_words',
-    where: 'Halfway.',
+    where: 'HALFWAY',
+    choice: 'Two sittings left. Carry on now, or save your place and come back to it.',
     cta: 'FALTA POUCO',
   },
   {
@@ -88,10 +117,11 @@ export const BREAKS: SittingBreak[] = [
     pt: 'Quase.',
     en: 'Almost.',
     gloss:
-      'One word, and it does everything English needs three for. Quase pronto — almost ready. Quase lá — nearly there. Said on its own it is a whole answer.',
+      'One word, and it does everything English needs three for. Quase pronto — almost ready. Quase uma hora — nearly an hour. Said on its own it is a whole answer.',
     shelf: 'small_words',
-    where: 'One to go.',
-    cta: 'QUASE LÁ',
+    where: 'ONE TO GO',
+    choice: 'One sitting and your Legend is written. Carry on, or save your place.',
+    cta: 'QUASE',
   },
   {
     after: 4,
@@ -106,7 +136,8 @@ export const BREAKS: SittingBreak[] = [
     gloss:
       'Já is “already” and está is “it is” — together they are what somebody says the second a thing is finished. You will hear it from every waiter, every shopkeeper and every friend who has just fixed something.',
     shelf: 'just_say',
-    where: 'Your Legend is finished.',
+    where: 'THAT IS IT',
+    choice: 'Your Legend is written. Next you say it out loud — that is what opens the Club.',
     cta: 'JÁ ESTÁ',
   },
 ]
