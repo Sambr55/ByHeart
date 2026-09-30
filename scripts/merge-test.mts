@@ -539,6 +539,24 @@ console.log('the reset can reach the account copy')
     /useState\(true\)[^\n]*$|const \[dropAccount, setDropAccount\] = useState\(true\)/m.test(screen),
     'somebody on /reset wants a clean run',
   )
+  /*
+    AND THE LEARNER CAN SEE WHICH STATE THEY ARE IN.
+
+    Sam: "You keep on saying while I am signed out. How do I know if I am signed out when I
+    am just looking at the home page?" He could not. `signedIn` was read in nine components
+    and every one used it to HIDE something — a save prompt, a redeem link, a sign-out
+    button — so the state that decides whether a reset sticks and whether the work survives
+    the phone was never once displayed.
+
+    Asserted on Yours, because that is the screen with the identity row and the one
+    somebody checks to find out what the product knows about them.
+  */
+  const yours = strip(readFileSync('components/Profile.tsx', 'utf8'))
+  check(
+    'Yours says whether you are signed in',
+    /profile-account/.test(yours) && /account_out/.test(yours),
+    'nine reads of signedIn and not one of them showed it',
+  )
   check(
     'and the route still reads it',
     /signout'\) === '1'|signout"\) === "1"/.test(route) && /forgetAccountLearner/.test(route),

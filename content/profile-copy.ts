@@ -7,6 +7,27 @@
  */
 export const PROFILE_COPY = {
   eyebrow: 'YOURS',
+  /**
+   * WHETHER THIS IS SAVED ANYWHERE BUT HERE — and until now nothing said.
+   *
+   * Sam: "You keep on saying while I am signed out. How do I know if I am signed out when
+   * I am just looking at the home page?"
+   *
+   * He could not. `signedIn` is read in nine places across the product and every one of
+   * them uses it to HIDE something — a save prompt, a redeem link, a sign-out button.
+   * Not one displays it. So the state that decides whether a reset sticks, whether the
+   * work survives the phone, and which of two things a screen is about was invisible to
+   * the person it is about.
+   *
+   * It goes on the identity row in Yours, under the name, because that is the row that
+   * already answers "who is this" and the only place a status line is not an interruption.
+   * Two short phrases rather than a badge: an address is the proof somebody actually wants
+   * — it says WHICH account, which matters the moment there is more than one — and the
+   * signed-out line says the consequence rather than the state, because "signed out" is
+   * jargon for a fact that is really about losing things.
+   */
+  account_out: 'Not signed in — this phone is the only copy',
+  account_in: (email: string) => 'Signed in as ' + email,
   headline: 'Your Lisbon.',
   name_hint: 'Your name',
   add_photo: 'ADD A PHOTO',

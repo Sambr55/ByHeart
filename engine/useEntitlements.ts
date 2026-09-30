@@ -6,6 +6,8 @@ import { FREE_ENTITLEMENTS, type Entitlements } from '@/lib/entitlements'
 export interface Access {
   entitlements: Entitlements
   signedIn: boolean
+  /** Which account, when there is one. Null when signed out — see PROFILE_COPY.account_in. */
+  email: string | null
   comped: boolean
   billingReady: boolean
   /**
@@ -24,6 +26,7 @@ export interface Access {
 const ASSUME: Access = {
   entitlements: FREE_ENTITLEMENTS,
   signedIn: false,
+  email: null,
   comped: false,
   billingReady: false,
   // Assumed FALSE, so a dead sign-in link never flashes up before the server answers.
@@ -43,6 +46,7 @@ async function fetchAccess(): Promise<Access> {
     return {
       entitlements: body.entitlements ?? FREE_ENTITLEMENTS,
       signedIn: Boolean(body.signedIn),
+      email: typeof body.email === 'string' ? body.email : null,
       comped: Boolean(body.comped),
       billingReady: Boolean(body.billingReady),
       signInReady: Boolean(body.signInReady),

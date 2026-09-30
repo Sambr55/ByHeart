@@ -36,6 +36,19 @@ export async function GET() {
   return NextResponse.json({
     entitlements,
     signedIn: Boolean(user),
+    /*
+      THE ADDRESS, so the product can say WHICH account rather than only that there is one.
+
+      Sam: "How do I know if I am signed out when I am just looking at the home page?" The
+      answer was that he could not — `signedIn` was read in nine places and every one of
+      them used it to hide a control. Yours now says it on the identity row, and an address
+      is the half that makes it useful: "signed in" is a state, "signed in as sam@…" is
+      proof, and it is the only form that helps somebody with two accounts.
+
+      Already public to this caller: it is their own session, and /account has shown it on
+      screen for as long as it has existed.
+    */
+    email: user?.email ?? null,
     comped: sub?.source === 'comp' || Boolean(comped),
     billingReady: billingConfigured(),
     signInReady: sendable(),

@@ -855,6 +855,8 @@ function onNight(on: string): string {
  */
 function Identity() {
   const learner = useLearner()
+  /* Whether this is saved anywhere but here — see PROFILE_COPY.account_out. */
+  const access = useEntitlements()
   const [mounted, setMounted] = useState(false)
   const [name, setName] = useState('')
   const [photo, setPhoto] = useState<string | null>(null)
@@ -925,6 +927,33 @@ function Identity() {
           data-testid="profile-name"
           className="display mt-1 w-full bg-transparent text-2xl text-fg outline-none placeholder:text-muted"
         />
+        {/*
+          WHETHER ANY OF THIS IS SAVED ANYWHERE BUT HERE.
+
+          Sam: "How do I know if I am signed out when I am just looking at the home page?"
+          He could not — signedIn was read in nine places and every one used it to hide a
+          control, never to show the state. It decides whether a reset sticks and whether
+          the work survives the phone, and it was invisible to the person it is about.
+
+          Only once `access.known`, so it never says "not signed in" to somebody who is,
+          in the moment before the server answers. Not a link: the cog two inches to the
+          right already goes to Settings, and a second route to the same place on the same
+          row is noise.
+        */}
+        {access.known ? (
+          <p
+            data-testid="profile-account"
+            className={
+              'mt-1 truncate text-xs ' + (access.signedIn ? 'text-muted' : 'text-accent')
+            }
+          >
+            {access.signedIn && access.email
+              ? PROFILE_COPY.account_in(access.email)
+              : access.signedIn
+                ? 'Signed in'
+                : PROFILE_COPY.account_out}
+          </p>
+        ) : null}
       </div>
 
       {/*
