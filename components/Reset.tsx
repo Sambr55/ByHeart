@@ -57,11 +57,27 @@ export function Reset() {
     comp came along every time.
   */
   const [dropComp, setDropComp] = useState(false)
+  /*
+    AND WHETHER THE ACCOUNT GOES TOO.
+
+    ?signout=1 is what the route reads to mean "start again everywhere" — it deletes the
+    learner row keyed to the ACCOUNT and ends the session, which is the only way to stop a
+    later sign-in restoring everything. This screen never sent it, so the account copy was
+    unreachable from the one page whose whole job is starting again.
+
+    Default ON, because somebody on /reset wants a clean run and the account copy is the
+    one that silently undoes it. Turning it off keeps the old behaviour for anybody who
+    genuinely wants only this device cleared.
+  */
+  const [dropAccount, setDropAccount] = useState(true)
 
   async function wipe() {
     setState('wiping')
     try {
-      const res = await fetch('/api/reset' + (dropComp ? '?comp=drop' : ''), { method: 'POST' })
+      const q = [dropComp ? 'comp=drop' : '', dropAccount ? 'signout=1' : '']
+        .filter(Boolean)
+        .join('&')
+      const res = await fetch('/api/reset' + (q ? '?' + q : ''), { method: 'POST' })
       const body = (await res.json()) as { ok?: boolean; signed_in?: boolean }
       if (!body.ok && body.signed_in) {
         setState('signedin')
@@ -132,10 +148,20 @@ export function Reset() {
         <div className="flex flex-1 flex-col justify-center gap-3">
           <p className="eyebrow text-accent">GONE</p>
           <h1 className="display text-balance text-3xl">This device is empty.</h1>
+          {/*
+            WHAT IS ACTUALLY GONE, which depends on what was asked for.
+
+            "Nothing will come back" was unconditionally true of the device and
+            unconditionally false of an account, and the learner could not tell which they
+            had. It now says which.
+          */}
           <p className="text-sm leading-relaxed text-muted">
             Everything DUB had stored here is gone — pieces, sentences, sections, your
             Legend and the language pair — and so is the copy the server was holding for
-            this device. Nothing will come back.
+            this device.{' '}
+            {dropAccount
+              ? 'Your account copy is gone too, and you are signed out. Nothing will come back.'
+              : 'Your ACCOUNT copy is untouched, so signing back in will restore it over the top of this.'}
           </p>
         </div>
         <Dock>
@@ -158,9 +184,30 @@ export function Reset() {
         <p className="eyebrow text-accent">START AGAIN</p>
         <h1 className="display text-balance text-2xl">Wipe DUB from this device.</h1>
         <p className="text-sm leading-relaxed text-muted">
-          For testing a clean first run. It deletes what is stored in this browser and
-          nothing else — no account is touched, and if you have signed in on another
-          device that copy is untouched too.
+          For testing a clean first run. It deletes what is stored in this browser and the
+          copy the server holds for this device.
+        </p>
+        {/*
+          THE ACCOUNT IS THE COPY THIS SCREEN COULD NOT SEE, and saying "no account is
+          touched" made that sound like a feature.
+
+          Sam: "I went to /reset and clicked delete all", then took SAVE IT FOR LATER on the
+          first break, and the emailed link "brought me back in saying I had done 10 out of
+          12 when I had done 1."
+
+          Both halves of the wipe worked. What neither could reach is the row keyed to his
+          ACCOUNT, from runs before the reset — and an account row is only deleted when the
+          caller also signs out, which this screen never asked for. So the reset was honest
+          about the device and silent about the durable copy, and the next sign-in merged
+          the old progress back. mergeLearner may only ever GAIN, which is what makes sync
+          safe and what makes a partial wipe come undone.
+
+          A reset that a sign-in can undo is worse than no reset: it looks like it worked.
+        */}
+        <p className="text-sm leading-relaxed text-muted">
+          If you have ever signed in, your account holds a third copy — and signing back in
+          merges it over the top of a clean device. Use the second option below to clear
+          that too.
         </p>
       </div>
 
@@ -227,6 +274,32 @@ export function Reset() {
             Give up any code redeemed on this device too. Without this a comp follows the
             reset — right for a tester, wrong if you are trying to see what somebody new
             sees.
+          </span>
+        </button>
+
+        {/*
+          THE ACCOUNT TOGGLE, beside the comp one and above the button.
+
+          Same construction as the comp chip for the same reason: it modifies the wipe
+          rather than being a second destructive button, and a 16px checkbox is a 16px
+          target.
+        */}
+        <button
+          type="button"
+          data-testid="reset-drop-account"
+          aria-pressed={dropAccount}
+          onClick={() => setDropAccount(!dropAccount)}
+          className={
+            'tap-target flex w-full items-start gap-3 rounded border px-4 py-3 text-left text-xs leading-relaxed transition ' +
+            (dropAccount ? 'border-accent bg-accent/10 text-fg' : 'border-line text-muted')
+          }
+        >
+          <span aria-hidden className="mt-px shrink-0 font-semibold">
+            {dropAccount ? '✓' : '·'}
+          </span>
+          <span>
+            Sign out and delete the copy your account is holding. Without this, signing back
+            in puts your old progress straight back over the clean device.
           </span>
         </button>
 

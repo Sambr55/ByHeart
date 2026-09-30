@@ -18,6 +18,7 @@
  * So: no `as never`. If a fixture will not typecheck, the fixture is wrong about the
  * product, and that is exactly the thing worth being told.
  */
+import { readFileSync } from 'node:fs'
 import { mergeLearner } from '../lib/merge'
 import type { InventoryItem, LearnerState, LearningEvidence, ProofLine } from '../engine/learner'
 
@@ -495,6 +496,54 @@ console.log('\nwhose copy is it')
       m.idioms_got.join(','),
     )
   }
+}
+
+/*
+  THE RESET HAS TO REACH THE COPY THAT UNDOES IT.
+
+  Sam wiped at /reset, took SAVE IT FOR LATER on the first break, and the emailed link
+  "brought me back in saying I had done 10 out of 12 when I had done 1."
+
+  Both halves of the wipe worked. What neither reached is the learner row keyed to his
+  ACCOUNT, from runs before the reset — and the route only deletes that when the caller
+  also signs out. Reset.tsx posted `/api/reset` with at most `?comp=drop`, never
+  `signout=1`, so the durable copy was unreachable from the one page whose whole job is
+  starting again. The next sign-in merged it back, and mergeLearner may only ever GAIN —
+  which is what makes sync safe and what makes a partial wipe come undone.
+
+  A reset a sign-in can undo is worse than no reset, because it looks like it worked. This
+  asserts at the source that the screen can ask for the account copy and that the route
+  reads it, since the alternative is a browser check against a signed-in account.
+*/
+console.log('')
+console.log('the reset can reach the account copy')
+{
+  /*
+    COMMENTS STRIPPED FIRST, or the check matches its own explanation.
+
+    The notes above the fix quote the flag it adds, so a first version passed happily with
+    the flag deleted from the code — the same fault road-check hit once already. Only the
+    code is searched.
+  */
+  const strip = (src: string) =>
+    src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+  const screen = strip(readFileSync('components/Reset.tsx', 'utf8'))
+  const route = strip(readFileSync('app/api/reset/route.ts', 'utf8'))
+  check(
+    'the reset screen can ask for the account copy',
+    /signout=1/.test(screen),
+    'without it a sign-in restores everything the wipe removed',
+  )
+  check(
+    'and it is on by default',
+    /useState\(true\)[^\n]*$|const \[dropAccount, setDropAccount\] = useState\(true\)/m.test(screen),
+    'somebody on /reset wants a clean run',
+  )
+  check(
+    'and the route still reads it',
+    /signout'\) === '1'|signout"\) === "1"/.test(route) && /forgetAccountLearner/.test(route),
+    'the flag is only worth sending if it still deletes the account row',
+  )
 }
 
 console.log('')
