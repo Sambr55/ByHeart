@@ -1,6 +1,7 @@
 'use client'
 
 import { SayButton, useCanListen } from '@/components/SayButton'
+import type { Heard } from '@/engine/listen'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '@/content/roots'
@@ -1934,6 +1935,23 @@ function RunThrough({
 
   const [i, setI] = useState(0)
   const [shown, setShown] = useState(false)
+  /*
+    WHAT THE MICROPHONE HEARD, AND HOW IT WENT.
+
+    Sam: "I click say it out loud, the mic opens, but there is no call and response
+    mechanic that says it has registered or checked what I have said. just a I said it
+    button. It needs to mark my work."
+
+    listenFor already returns all of this — the words it caught, whether they are close
+    enough, and a score — and the screen threw the whole object away, keeping only
+    `if (h.close) setShown(true)`. So the one part of the product that CAN check the
+    learner's work silently declined to tell them the answer.
+
+    Held here rather than inside SayButton because it is the screen's to render: the button
+    is a 40px control that can afford a tick, and marking somebody's Portuguese needs the
+    sentence they said, the sentence they meant, and a verdict in words.
+  */
+  const [heard, setHeard] = useState<Heard | null>(null)
   /* Hidden where the device cannot listen — see useCanListen. */
   const canSay = useCanListen()
   const frame = order[i]
@@ -2018,6 +2036,8 @@ function RunThrough({
             data-testid="run-next"
             onClick={() => {
               setShown(false)
+              /* Last question's verdict must not survive onto the next one. */
+              setHeard(null)
               setI((n) => n + 1)
             }}
             className={
@@ -2139,7 +2159,35 @@ function RunThrough({
               <SayButton
                 want={answer}
                 onHeard={(h) => {
-                  if (h.close) setShown(true)
+                  /*
+                    THE MICROPHONE MARKS THE WORK, which is what it was for.
+
+                    A close hearing is a produced sentence — the same claim I SAID IT makes,
+                    with evidence behind it — so it banks the proof itself rather than
+                    leaving the learner to press a second button and claim it by hand. A
+                    miss records nothing and says so; it is never counted against them,
+                    because the recogniser is the unreliable half.
+                  */
+                  setHeard(h)
+                  /*
+                    A NEAR MISS SHOWS THE CARD, because comparing is the lesson.
+
+                    "Not quite" beside nothing to compare against is a mark without a
+                    correction — the learner knows they were wrong and still does not know
+                    what right was. Revealing costs nothing here: the proof is not recorded
+                    on a miss, so seeing the answer cannot buy them a sentence they did not
+                    say.
+                  */
+                  if (h.said) setShown(true)
+                  if (h.close) {
+                    recordProof({
+                      pt: answer,
+                      en: fillEnglish(frame, valuesFor(frame.id) ?? {}),
+                      source: 'legend',
+                      clean: true,
+                    })
+                    setShown(true)
+                  }
                 }}
               />
               {/*
@@ -2149,6 +2197,56 @@ function RunThrough({
               */}
               {canSay ? <span className="text-sm text-muted">Say it out loud</span> : null}
             </div>
+            {/*
+              THE RESPONSE HALF OF CALL AND RESPONSE.
+
+              Sam: "there is no call and response mechanic that says it has registered or
+              checked what I have said... It needs to mark my work."
+
+              Three outcomes and each says a different true thing:
+
+                heard it       what it caught, and that it is banked. The words are shown
+                               because a learner who said it right wants to see that the
+                               product agrees, and one who was lucky learns what it
+                               actually accepted.
+                nearly         the words it caught, next to nothing else — no verdict. It
+                               reveals the card so they can compare for themselves, which
+                               is a better teacher than a score.
+                did not catch  said as a fact about the microphone, never about them. The
+                               recogniser is the unreliable half and the claim button is
+                               right underneath.
+
+              Never a number. `score` decides the wording and is not shown: a learner told
+              they were 0.62 correct has been given a grade, and this is a rehearsal.
+            */}
+            {heard ? (
+              <div
+                data-testid="run-heard"
+                className={
+                  'animate-bank rounded border px-4 py-3 ' +
+                  (heard.close ? 'border-accent bg-accent/10' : 'border-line bg-bg-elev')
+                }
+              >
+                <p className={'eyebrow ' + (heard.close ? 'text-accent' : 'text-muted')}>
+                  {heard.close ? 'THAT IS IT' : heard.said ? 'NOT QUITE' : 'DID NOT CATCH IT'}
+                </p>
+                {heard.said ? (
+                  <p className="pt mt-1 text-base text-fg">“{heard.said}”</p>
+                ) : (
+                  <p className="mt-1 text-sm leading-relaxed text-muted">
+                    Nothing came through — say it again, or press I SAID IT if you know you
+                    said it.
+                  </p>
+                )}
+                {heard.close ? (
+                  <p className="mt-1 text-xs text-muted">Banked. That is one of your seven.</p>
+                ) : heard.said ? (
+                  <p className="mt-1 text-xs text-muted">
+                    Have a look at yours below and try it once more.
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
             {/*
               I SAID IT IS THE ONE THAT COUNTS, and until now it did not count anything.
 
@@ -2200,6 +2298,7 @@ function RunThrough({
             data-testid="legend-next"
             onClick={() => {
               setShown(false)
+              setHeard(null)
               setI(i + 1)
             }}
             className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
