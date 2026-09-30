@@ -195,6 +195,60 @@ console.log('\nevery sitting break teaches something, and something new\n')
   ok('past the end it still answers', Boolean(breakAfter(99).pt), breakAfter(99).pt)
 
   /*
+    EVERY BREAK IS ACTUALLY MET, WHICH IS NOT THE SAME AS EXISTING.
+
+    Sam: "Vamos las appears twice identically." Four distinct breaks were authored and the
+    checks above all passed — they test the CONTENT. What nothing tested was the sequence a
+    learner walks, and the screen read `sittings` one short: it renders immediately before
+    SectionComplete, which is where rememberSection increments. So sitting 1 and sitting 2
+    both read the same number, Math.max(1, n) clamped them to the same break, and Já está
+    was unreachable.
+
+    This walks the real order and requires four different screens.
+  */
+  const met = [1, 2, 3, 4].map((n) => breakAfter(n).pt)
+  ok('four sittings meet four different breaks', new Set(met).size === 4, met.join(' / '))
+  ok('and the last one is the one that celebrates', met[3] === BREAKS[3].pt, met[3])
+
+  /*
+    AND THE SCREEN READS THE SITTING IT IS CLOSING, not the one before it.
+
+    The two assertions above test breakAfter, which was always correct — the bug was in
+    the CALLER, which passed a count that had not been incremented yet. So this asserts
+    against the source: the break screen must add one to `sittings`, because
+    rememberSection fires on the NEXT step. Source-level because the alternative is
+    booting a browser to count four screens, and a check nobody runs is worse than a
+    blunt one.
+  */
+  const journeySrc = readFileSync('components/Journey.tsx', 'utf8')
+  ok(
+    'the break screen counts the sitting it closes',
+    /breakAfter\(\(learner\.sittings \?\? 0\) \+ 1\)/.test(journeySrc),
+    'it renders before rememberSection increments',
+  )
+
+  /*
+    AND NO BREAK LEANS ON A WORD DUB HAS NOT TAUGHT.
+
+    Sam: "it is still assuming way too much. just because we have learned Vem (comigo)
+    doesnt mean we understand vamos."
+
+    He is right and the premise was wrong everywhere, not in one sentence. Break 1 said
+    "You already have vamos" — vamos and lá are taught by bob_here_we_go, a Bob Marley
+    vibe that is not on the road, so a learner who took Bridget Jones had neither. falta,
+    pouco, quase and já are taught NOWHERE in the product.
+
+    A break has ten seconds and no lesson behind it, so the rule is not "only use taught
+    words" — that would delete three of the four. It is that the gloss may not CLAIM prior
+    knowledge: no "you already have", no "add X to the Y you know". It teaches from
+    nothing, every time, because it cannot know what the reader has.
+  */
+  for (const b of BREAKS) {
+    const claims = /you already (have|know)|already on your|the \w+ you (have|know|own)/i.test(b.gloss)
+    ok('break ' + b.after + ' assumes no vocabulary', !claims, b.gloss.slice(0, 60))
+  }
+
+  /*
     AND IT IS A SCREEN, NOT A PANEL.
 
     Sam, on the first attempt: "the keep going gates are very soft and tbh hard to spot.

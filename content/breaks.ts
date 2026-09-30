@@ -78,14 +78,22 @@ export const BREAKS: SittingBreak[] = [
     /*
       THE ONE SAM NAMED, and it is first because it is what you say at a beginning.
 
-      "Vamos lá" is vamos — already taught, and already on this learner's shelf — with a
-      lá on the end that turns "we go" into "come on then". That is the cheapest possible
-      lesson: one new word, attached to one they own, at the moment it is true.
+      IT NO LONGER CLAIMS THEY ALREADY HAVE VAMOS. This said "You already have vamos. Add
+      lá and it stops being we go" — and that was false for most learners who read it.
+      `vamos` and `lá` are taught by bob_here_we_go, a Bob Marley vibe, which is not on the
+      road at all. Sam took Bridget Jones and met the screen anyway: "just because we have
+      learned Vem (comigo) doesnt mean we understand vamos."
+
+      He is right, and the fault is the whole authoring premise of these screens rather
+      than one sentence. A break has ten seconds and no lesson behind it, so it cannot
+      assume ANY vocabulary — the learner reading it might be four roots into the basics
+      and nothing else. So the gloss now teaches the phrase from nothing: what each word is,
+      then what the two do together.
     */
     pt: 'Vamos lá.',
     en: 'Come on then. / Let’s go.',
     gloss:
-      'You already have vamos. Add lá and it stops being “we go” and becomes what somebody says to get a thing started — a meal, a walk, a difficult conversation.',
+      'Vamos is “we go” and lá is “there”. Together they stop meaning either: vamos lá is what somebody says to get a thing started — a meal, a walk, a difficult conversation. Closest to “come on then”.',
     shelf: 'just_say',
     where: 'ONE DOWN',
     choice: 'Carry on to the next sitting, or save your place and come back to it.',
@@ -101,7 +109,7 @@ export const BREAKS: SittingBreak[] = [
     pt: 'Falta pouco.',
     en: 'Not far now.',
     gloss:
-      'Faltar is the verb for something being missing, and Portuguese counts what is LEFT rather than what is done. Falta pouco — little is missing. You will hear it about a journey, a queue and a deadline.',
+      'Two words, both new. Falta is “is missing” and pouco is “little” — so falta pouco is literally “little is missing”. Portuguese counts what is LEFT where English counts what is done, and you will hear it about a journey, a queue and a deadline.',
     shelf: 'small_words',
     where: 'HALFWAY',
     choice: 'Two sittings left. Carry on now, or save your place and come back to it.',
@@ -117,7 +125,7 @@ export const BREAKS: SittingBreak[] = [
     pt: 'Quase.',
     en: 'Almost.',
     gloss:
-      'One word, and it does everything English needs three for. Quase pronto — almost ready. Quase uma hora — nearly an hour. Said on its own it is a whole answer.',
+      'One word: quase, “almost”. It does everything English needs three for and it goes in front of whatever it is hedging — quase pronto, almost ready. Said on its own, it is a whole answer.',
     shelf: 'small_words',
     where: 'ONE TO GO',
     choice: 'One sitting and your Legend is written. Carry on, or save your place.',
@@ -134,7 +142,7 @@ export const BREAKS: SittingBreak[] = [
     pt: 'Já está.',
     en: 'That’s it. / Done.',
     gloss:
-      'Já is “already” and está is “it is” — together they are what somebody says the second a thing is finished. You will hear it from every waiter, every shopkeeper and every friend who has just fixed something.',
+      'Já is “already” and está is “it is”. Neither is worth much alone; together they are what somebody says the second a thing is finished — you will hear it from every waiter, every shopkeeper and every friend who has just fixed something.',
     shelf: 'just_say',
     where: 'THAT IS IT',
     choice: 'Your Legend is written. Next you say it out loud — that is what opens the Club.',

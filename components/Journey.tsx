@@ -5004,12 +5004,31 @@ function SittingBreakStep() {
     purpose: learner.purpose ?? null,
   })
   /*
-    The break for the sitting just finished — rememberSection has already counted it by
-    the time this renders. Once the road is open the last one is right whatever the count
-    says: Já está is true of a finished Legend, and "falta pouco" there would contradict
-    the screen after it.
+    THE SITTING JUST FINISHED IS THE COUNT PLUS ONE, and reading it without the plus one
+    is why Sam met Vamos lá twice.
+
+    The comment here used to say "rememberSection has already counted it by the time this
+    renders". It has not. rememberSection fires on the mount of SectionComplete, and this
+    screen is queued immediately BEFORE that one — see engine/journey.tsx, which pushes
+    'sitting-break' and then 'section-complete'. So the break always read the count as it
+    stood at the START of the sitting it is closing.
+
+    The effect, simulated against the real sequence:
+
+      sitting 1 → read 0 → Vamos lá       (Math.max(1, 0) clamps to break 1)
+      sitting 2 → read 1 → Vamos lá       ← the duplicate
+      sitting 3 → read 2 → Falta pouco
+      sitting 4 → read 3 → Quase
+                                          ← Já está never appeared at all
+
+    Two screens identical, and the one that celebrates finishing the Legend unreachable.
+    Sam: "Vamos las appears twice identically."
+
+    Fixed at the read rather than by moving the screen, because the ORDER is deliberate —
+    the break is the decision and the summary is the receipt, and asking "carry on?" after
+    showing somebody the door is the wrong way round.
   */
-  const b = road.open ? BREAKS[BREAKS.length - 1] : breakAfter(learner.sittings ?? 0)
+  const b = road.open ? BREAKS[BREAKS.length - 1] : breakAfter((learner.sittings ?? 0) + 1)
   /* Already saved, or already said no — then there is one way out, not two. */
   const offerSave = learner.save_prompt === 'unseen' && !learner.profile?.email
 
