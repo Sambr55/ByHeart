@@ -223,8 +223,30 @@ console.log('\nevery sitting break teaches something, and something new\n')
   const journeySrc = readFileSync('components/Journey.tsx', 'utf8')
   ok(
     'the break screen counts the sitting it closes',
-    /breakAfter\(\(learner\.sittings \?\? 0\) \+ 1\)/.test(journeySrc),
+    /const sittingNow = \(learner\.sittings \?\? 0\) \+ 1/.test(journeySrc) &&
+      /breakAfter\(sittingNow\)/.test(journeySrc),
     'it renders before rememberSection increments',
+  )
+
+  /*
+    AND IT STOPS AFTER THE LAST ONE, rather than repeating it for ever.
+
+    Sam: "Ja Esta progress gateway is now duplicated." The previous check stopped at
+    sitting 4, so it modelled the road and nothing past it — and past it was where the
+    fault lived. Two clamps both saturated on BREAKS[last]: `road.open` short-circuits
+    there and never consults the count, and breakAfter falls through there for any sitting
+    with no entry. A fifth sitting is easy to reach — the basics hold more roots than the
+    road needs and SectionComplete's own MORE BASICS queues another — so Já está landed on
+    sitting 4, then 5, then 6, each time telling a learner their Legend was finished.
+
+    Asserted at the source, because the behaviour is a guard in the component rather than
+    a value breakAfter can return: past the last break the screen stands aside.
+  */
+  ok(
+    'the break stands aside past the last one',
+    /const pastTheEnd = sittingNow > BREAKS\.length/.test(journeySrc) &&
+      /if \(pastTheEnd\) return null/.test(journeySrc),
+    'road.open and breakAfter both saturate on the final break',
   )
 
   /*

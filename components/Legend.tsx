@@ -444,34 +444,50 @@ export function Legend() {
     The `mode` reset at the top of this component keeps the other half honest — a learner
     who genuinely has no Legend is bounced back to 'deck' before they can reach this.
   */
-  if ((mode === 'rehearse' || mode === 'cold') && answered.length >= 2) {
+  if (mode === 'rehearse' || mode === 'cold') {
     /*
-      THE RUN IS THE CARD, NOT EVERY FRAME EVER ANSWERED.
+      THE RUN IS THE WHOLE CARD, IN ORDER, ANSWERED OR NOT.
 
-      `answered` filters all of LEGEND_FRAMES, so a learner who had grown a deeper card in
-      a vibe — age, into, children, who_with — got a run LONGER than seven. Meanwhile both
-      the gate (clubOpen) and the screen that counts it down (NotYet) size the card with
-      cardFor(purpose), which is the seven. Three places, two different definitions of "the
-      Legend", and the run was the odd one out: it could ask for ten sentences while the
-      door was waiting for seven, or shuffle a deeper frame into the first position — which
-      is exactly what Sam saw. "Legend just opened with are you with somebody? That is
-      wrong."
+      Sam: "The legend run through needs to run through from the top (chamo-te) and step
+      the user through each question and when it is not pre-populated to go and get the
+      word or words required."
 
-      Narrowed here rather than in `answered` itself, because the deck view above genuinely
-      does want every answered frame — the deeper cards are real and belong on the card.
-      What they are not is part of the gate.
+      THIS IS A REDESIGN, NOT ANOTHER FILTER, and the filters are why we were going in
+      circles. The run took `answered` — the frames with values on them — which made three
+      faults inevitable and I fixed them one at a time:
+
+        · it could include a DEEPER frame, so the run opened on "Are you with somebody?"
+        · I filtered to depth 'card', which needed a fallback when fewer than two were
+          answered — and the fallback put the deeper frames straight back. Sam then met
+          "Gostas" first, which is the same bug wearing my fix.
+        · and a frame with no answer was simply ABSENT, so the run could never be the
+          seven, could never step somebody through their card, and had nothing to say
+          about the questions that were actually holding them up.
+
+      Every one of those is the same root cause: the run was assembled from what had been
+      answered rather than from what the card IS. So it is now cardFor(purpose) — the
+      identical call the gate and the countdown make — and a frame with no answer is a
+      STEP in the run rather than a hole in it.
+
+      No shuffle any more either. The shuffle argued that a fixed order is a recital, and
+      that is true of a rehearsal you have already earned; it is wrong for a walk-through
+      whose job is to take somebody from the top and show them what is missing. Sam asked
+      for the top, and the card's own order starts at the name.
     */
-    const runCards = answered.filter((f) => f.depth === 'card')
-    return (
-      <Shell>
-        <RunThrough
-          cards={runCards.length >= 2 ? runCards : answered}
-          gender={learner.profile?.gender ?? null}
-          valuesFor={valuesFor}
-          onDone={() => setMode('deck')}
-        />
-      </Shell>
-    )
+    const run = cardFor(learner.purpose ?? null).filter((f) => frameApplies(f, answers))
+    if (run.length) {
+      return (
+        <Shell>
+          <RunThrough
+            cards={run}
+            gender={learner.profile?.gender ?? null}
+            valuesFor={valuesFor}
+            owned={owned}
+            onDone={() => setMode('deck')}
+          />
+        </Shell>
+      )
+    }
   }
 
   /*
@@ -1866,11 +1882,14 @@ function RunThrough({
   cards,
   gender,
   valuesFor,
+  owned,
   onDone,
 }: {
   cards: LegendFrame[]
   gender: 'm' | 'f' | null
   valuesFor: (id: string) => Record<string, string> | undefined
+  /** The pieces this learner has, so an unanswered card can say what it needs. */
+  owned: string[]
   onDone: () => void
 }) {
   /*
@@ -1893,29 +1912,25 @@ function RunThrough({
     list; the whole claim is that you can say these things when they are asked, and they
     are not asked in your order.
   */
-  const order = useMemo(() => {
-    const out = [...cards]
-    for (let i = out.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[out[i], out[j]] = [out[j], out[i]]
-    }
-    /*
-      THE NAME GOES FIRST, and the rest stays shuffled.
+  /*
+    THE CARD'S OWN ORDER, FROM THE TOP.
 
-      Sam: "Legend just opened with are you with somebody? That is wrong... Should start
-      with como te chamas."
+    Sam: "The legend run through needs to run through from the top (chamo-te) and step the
+    user through each question."
 
-      He is right, and it does not cost the shuffle anything. The argument for shuffling is
-      that a run in the order you built them is a recital of a list — but that is an
-      argument about the SEQUENCE, not about the opening. Every real conversation this
-      rehearses starts with a name, so opening on one is not a cue that helps you cheat; it
-      is the thing that makes the next six feel like being asked rather than being tested.
-      Questions two onwards remain in random order, which is where the claim actually lives.
-    */
-    const n = out.findIndex((f) => f.id === 'name')
-    if (n > 0) out.unshift(out.splice(n, 1)[0])
-    return out
-  }, [cards])
+    This shuffled, and the argument was that a run in the order you built them is a recital
+    of a list. That argument is right about a REHEARSAL — somebody who has their seven and
+    wants to prove it should be asked out of order, because a stranger will. It is wrong
+    about the thing this screen actually has to be first: a walk through your card that
+    shows you what is done and what is missing. You cannot step somebody through their
+    Legend in a random order and call it stepping through.
+
+    So the order is cardFor's, which starts at the name because that is how the card is
+    authored and how every conversation this rehearses opens. Shuffling is worth bringing
+    back as a SECOND mode once the card is complete — a "test me" to the walk-through's
+    "show me" — but not at the cost of the walk, and not before the walk exists.
+  */
+  const order = cards
 
   const [i, setI] = useState(0)
   const [shown, setShown] = useState(false)
@@ -1941,7 +1956,82 @@ function RunThrough({
     )
   }
 
-  const answer = fillFrame(frame, valuesFor(frame.id) ?? {}, gender)
+  /*
+    IS THIS ONE ANSWERED, and if not, what is holding it up?
+
+    The run used to contain only answered frames, so neither question could arise. Now the
+    card is walked whole and an unanswered step is the POINT of walking it — Sam: "when it
+    is not pre-populated to go and get the word or words required."
+
+    Two different reasons a frame can be unanswered, and they need different screens:
+      · the words are not owned yet → Missing says which word and links to the vibe that
+        teaches it, which is the GO AND GET IT that already exists on the deck
+      · the words are owned, nobody has answered → it is answerable now, so the screen
+        sends them to the card to answer it
+  */
+  const values = valuesFor(frame.id)
+  const isDone = isAnswered(frame, values)
+  const answer = fillFrame(frame, values ?? {}, gender)
+
+  if (!isDone) {
+    const ready = frameReady(frame, owned)
+    return (
+      <div className="flex flex-1 flex-col gap-6">
+        <div className="flex flex-1 flex-col justify-center gap-3">
+          <p className="eyebrow text-muted">
+            {i + 1} OF {order.length}
+          </p>
+          <div className="flex items-center gap-3">
+            <AudioButton
+              slug={slugFor(askFor(frame, gender))}
+              text={askFor(frame, gender)}
+              size="sm"
+            />
+            <span className="pt min-w-0 text-xl text-accent">{askFor(frame, gender)}</span>
+          </div>
+          <p className="text-sm leading-relaxed text-muted">{frame.ask_en}</p>
+          {/*
+            NOT SILENTLY SKIPPED. A question the learner cannot yet answer is the most
+            useful screen in the run — it is the only one that tells them what to do next.
+          */}
+          <p data-testid="run-unanswered" className="mt-2 text-sm leading-relaxed text-fg/85">
+            {ready
+              ? 'You have the words for this one. It just has not been answered yet.'
+              : 'This one is not open yet — here is what it needs.'}
+          </p>
+          {!ready ? <Missing frame={frame} owned={owned} /> : null}
+        </div>
+        <Dock>
+          {ready ? (
+            <button
+              type="button"
+              data-testid="run-answer-it"
+              onClick={onDone}
+              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+            >
+              ANSWER IT
+            </button>
+          ) : null}
+          {/* The walk continues either way: a blocked card does not end the run. */}
+          <button
+            type="button"
+            data-testid="run-next"
+            onClick={() => {
+              setShown(false)
+              setI((n) => n + 1)
+            }}
+            className={
+              'tap-target eyebrow w-full rounded px-5 py-3 text-center ' +
+              (ready ? 'border border-line text-muted' : 'bg-accent text-accent-ink')
+            }
+          >
+            {i + 1 < order.length ? 'NEXT QUESTION' : 'THAT IS THE CARD'}
+          </button>
+        </Dock>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-1 flex-col gap-6">
       <div className="flex flex-col gap-1">

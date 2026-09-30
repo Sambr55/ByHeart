@@ -5028,7 +5028,50 @@ function SittingBreakStep() {
     the break is the decision and the summary is the receipt, and asking "carry on?" after
     showing somebody the door is the wrong way round.
   */
-  const b = road.open ? BREAKS[BREAKS.length - 1] : breakAfter((learner.sittings ?? 0) + 1)
+  /*
+    THE BREAK IS FOR THE ROAD, AND THE ROAD ENDS.
+
+    Sam: "Ja Esta progress gateway is now duplicated."
+
+    Two independent clamps both pinned to the last break, so it repeated for ever:
+
+      · `road.open` short-circuits to BREAKS[last] and NEVER consults the count. open is
+        derived from roots_played, which is permanent — so once the road is walked, every
+        break from then on is Já está.
+      · breakAfter falls through to BREAKS[last] for any sitting past the fourth, which is
+        deliberate for its own callers but compounds this one.
+
+    And a fifth sitting is easy to reach: the basics hold sixteen roots while the road needs
+    thirteen, sectionRoots always yields something via its replay/lowest fallback, and
+    SectionComplete's own MORE BASICS button queues another sitting. So Já está appeared on
+    sitting four (correct), then again on five, six and so on — still promising "Your Legend
+    is written. Next you say it out loud" to somebody who had already done that.
+
+    The answer is not a fifth break. These four describe the shape of ONE journey — let's
+    go, not far now, nearly there, done — and that journey is over. A learner taking extra
+    basics after their Legend is open is in a different situation, so the screen steps
+    aside rather than repeating its ending.
+  */
+  const sittingNow = (learner.sittings ?? 0) + 1
+  /*
+    PAST THE LAST BREAK, THE SCREEN STANDS ASIDE.
+
+    No new record needed: `sittings` already says how many of these a learner has met, and
+    there are four. The fifth sitting of the basics is past the end of the sequence, so the
+    break steps out of the way rather than repeating its own ending — the summary behind it
+    still lands, and a learner taking extra basics is not interrupted by a screen telling
+    them their Legend is finished for the second time.
+
+    Deliberately `sittings` rather than `road.open`: the two clamps failed because they
+    both answered "have they finished" when the question the screen asks is "which of the
+    four is this". Counting is the honest answer to that and it cannot saturate.
+  */
+  const pastTheEnd = sittingNow > BREAKS.length
+  const b = road.open ? BREAKS[BREAKS.length - 1] : breakAfter(sittingNow)
+  useEffect(() => {
+    if (pastTheEnd) next()
+  }, [pastTheEnd, next])
+  if (pastTheEnd) return null
   /* Already saved, or already said no — then there is one way out, not two. */
   const offerSave = learner.save_prompt === 'unseen' && !learner.profile?.email
 
