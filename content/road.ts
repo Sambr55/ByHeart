@@ -110,8 +110,14 @@ export const WARM_UP: CultureFamily[] = ['top_gun', 'bridget_jones']
  *      product is a guess, and the basics teach several.
  *   4. Then the rest of the card, in the order the questions come up in a real
  *      conversation: what you do, how old you are, how long you are here.
- *   5. The two remaining asks — what you are into, your email — last, because nothing
- *      downstream is wrong while they are unanswered. They are simply not yet known.
+ *   5. What you are into last, because nothing downstream is wrong while it is unanswered.
+ *      It is simply not yet known.
+ *
+ * THE ONE DELIBERATE EXCEPTION IS EMAIL, which sits at step three rather than last. It is
+ * not a card question and by the rule above it should be at the end — but the rule is about
+ * what the ROAD is for, and email is about what happens if the road is abandoned. Asked
+ * last it protects nothing that came before it, and the learner likeliest to lose work is
+ * the one who never reaches the end. See the note on the step itself.
  */
 export const ROAD: RoadStep[] = [
   {
@@ -124,6 +130,38 @@ export const ROAD: RoadStep[] = [
     root: 'tb_introduce',
     family: 'the_basics',
     because: 'Your name and where you are from — two card questions, and the answer every later line needs.',
+  },
+  /*
+    EMAIL SECOND, WHICH IS EARLIER THAN THE RULE ABOVE WOULD PUT IT.
+
+    Sam: "I think email should be moved up to position 1a after name and then if they give
+    us their email, we should then remove the downstream reminders. But explain they run
+    the risk of losing their data if they dont supply their email."
+
+    THIS BREAKS THE ROAD'S OWN RULE ON PURPOSE. The rule is that the road carries only what
+    builds the card, and email is not a frame at all — it is a profile field. It was last
+    for a defensible reason: ask once there is something worth not losing.
+
+    What that reasoning missed is what the LATENESS costs. An address given at step twelve
+    protects nothing that happened in steps one to eleven, which is the entire road — so
+    the learner most likely to lose work, the one who stops early, is exactly the one never
+    asked. And because it was unanswered for the whole walk, every sitting break had to
+    carry a save prompt, so the ask arrived four times in softer and softer forms rather
+    than once, plainly.
+
+    Asked here it is a worse conversion and a better product: some people will decline, and
+    a decline at step two is one clear no instead of four nudges. Those who give it are
+    covered for the whole road and never asked again — see offerSave in Journey.tsx, which
+    already skips the break prompt when profile.email exists.
+
+    IT IS STILL NOT A GATE. Declining costs nothing and the road carries on. What the screen
+    owes somebody who declines is the honest consequence, which the break copy now states:
+    the work is on this phone, so losing the phone loses it.
+  */
+  {
+    root: 'tb_email',
+    family: 'the_basics',
+    because: 'Qual é, and somewhere to send the work before there is a road of it to lose.',
   },
   {
     root: 'tb_thank_you',
@@ -221,28 +259,27 @@ export const ROAD: RoadStep[] = [
     family: 'the_basics',
     because: 'Gosto de, and what they are into — which decides what the Club offers them.',
   },
-  {
-    root: 'tb_email',
-    family: 'the_basics',
-    because: 'Qual é, and somewhere to send the work if the phone is lost.',
-  },
 ]
 
 /*
-  WHAT IS DELIBERATELY NOT ON THE ROAD, and why that is the same decision twice.
+  THE TWO STEPS THAT ARE NOT CARD QUESTIONS, and why each earns its place anyway.
 
-  tb_into and tb_email were the last two steps and they made the difference between three
-  sittings and four. Neither is on the seven-card Legend: `into` is a depth 'deeper' frame
-  and email is not a frame at all, it is a profile field. So both were being asked for
-  BEFORE the door by a road whose only job is to reach it.
+  Neither tb_into nor tb_email is on the seven-card Legend: `into` is a depth 'deeper'
+  frame and email is not a frame at all, it is a profile field. By the road's own rule —
+  if it is not needed to build the card, it is not on the road in — both would be cut.
 
-  They have not been dropped. Interests are the first thing a Club learner is asked — it
-  is what drives their feed and it fills a deeper question, which is precisely the work
-  Sam wants vibes to do. The email is offered where it has always been most honest: once
-  somebody has built something worth not losing.
+  They stay, for two different reasons, and the reasons decide where they sit.
 
-  The rule this follows, and the one the road is for: if it is not needed to build the
-  card, it is not on the road in. It belongs to the Club.
+  tb_into is LAST because it is about what comes after the door: gosto de is the shape half
+  the Club's interest content is built on, and the answer decides what the feed offers. It
+  costs nothing to be unanswered until the road is walked, so it waits.
+
+  tb_email is THIRD because it is about what happens if the road is never walked. It is the
+  only step whose value is entirely in being answered EARLY — an address given at the end
+  protects none of the work that came before it. See the note on the step.
+
+  The rule still holds for everything else, which is the point of writing the exceptions
+  down rather than quietly widening it.
 */
 
 /** The steps this learner takes, which is the road minus the other cards' questions. */

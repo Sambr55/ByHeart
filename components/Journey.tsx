@@ -4010,7 +4010,7 @@ function AskEmail({
           className="tap-target rounded border border-line bg-bg px-4 py-3 text-base"
         />
       </label>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         {valid ? (
           <button
             type="button"
@@ -4025,7 +4025,45 @@ function AskEmail({
             KEEP IT SAFE
           </button>
         ) : null}
+        {/*
+          THE WAY PAST, WHICH DID NOT EXIST.
+
+          There was no skip button at all: `skipped` was read three lines up and nothing in
+          this component ever set it, so a learner with no address to give — or no wish to
+          give one — had exactly one control on the screen, and it only appeared once the
+          field validated. That was survivable at step twelve, where the road was already
+          walked. At step three it is a wall in front of the whole product.
+
+          Moving the ask earlier is what makes this non-negotiable rather than tidy: the
+          earlier something is asked, the more certain it must be that declining costs
+          nothing. So the decline is explicit, it is recorded, and the road carries on.
+        */}
+        <button
+          type="button"
+          data-testid="ask-email-skip"
+          onClick={() => {
+            /* null is how this record says "asked and declined" — see setProfile. */
+            setProfile('email', null)
+            track('profile_answer', { question: 'email', answer: 'skipped', where: 'lesson' })
+            onDone()
+          }}
+          className="tap-target eyebrow rounded border border-line px-5 py-3 text-muted"
+        >
+          NOT NOW
+        </button>
       </div>
+      {/*
+        WHAT DECLINING COSTS, said before they decline rather than after.
+
+        Sam: "explain they run the risk of losing their data if they dont supply their
+        email." It is the honest half of asking early — somebody saying no here should know
+        what they are saying no to, and the answer is not abstract: this phone is the only
+        copy.
+      */}
+      <p className="text-xs leading-relaxed text-muted">
+        Skip it and nothing is lost today — your Portuguese just lives on this phone alone.
+        If the phone goes, so does it. You can add an address any time from Yours.
+      </p>
     </div>
   )
 }

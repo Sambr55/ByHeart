@@ -5405,10 +5405,19 @@ export const THE_BASICS: Root[] = [
       language absorbs English, and somebody learns it while giving DUB the one piece of
       information that lets their Portuguese follow them to a new phone.
 
-      LAST OF THE ASKING ROOTS, deliberately. Gender and origin make later lines correct;
-      age decides whether an account is allowed at all. An email is only worth having once
-      all three are settled, and it is the one that carries the most weight, so it is asked
-      by somebody who has already been through four roots rather than on arrival.
+      THIRD ON THE ROAD, WHICH IT DID NOT USED TO BE. This was last of the asking roots,
+      argued as "an email is only worth having once gender, origin and age are settled".
+      That is true about CORRECTNESS and irrelevant to what an address is for: none of those
+      three make an email more useful, they make the sentences around it more accurate.
+
+      What being last actually did was protect nothing. An address given at step twelve
+      covers none of the eleven steps before it, so the learner who stops halfway — the only
+      learner who ever needed this — was never asked. Sam: "email should be moved up to
+      position 1a after name and then if they give us their email, we should then remove the
+      downstream reminders."
+
+      So it is asked once, early, with the consequence stated plainly, and never nudged
+      again. See content/road.ts for the full argument and the rule it deliberately breaks.
     */
     root_id: 'tb_email',
     culture_family: 'the_basics',
