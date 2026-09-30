@@ -525,6 +525,68 @@ console.log('\nwhat the profile knows reaches the card\n')
   )
 }
 
+/*
+  AND A ROOT THAT ASKS A FACT DOES NOT ASSERT IT FIRST.
+
+  Sam: "it also assumed I was Ingles before I told it. So the headline on the
+  Chamo-me/Sou ingles page already said Ingles."
+
+  Everything above this checks that an answer IS carried through. This checks the
+  opposite and equally important half: that nothing is carried through before it is
+  given. tb_introduce asks where you are from and its specimen is "Chamo-me Ana. Sou
+  inglês." — personalise swapped the NAME on sight, so the screen about to ask the
+  question already read "Chamo-me Sam. Sou inglês." The learner's own name is what turns
+  a specimen into a claim about them.
+
+  Asserted for every asking root, not just the one that broke, because the rule is
+  general: a lesson may not show an answer it has not been told.
+*/
+console.log('\nand nothing is claimed before it is answered\n')
+{
+  const blank = {
+    display_name: 'Sam',
+    profile: { nationality: null, from_place: null, gender: null, age: null, into: [] },
+    legend: [],
+  }
+  for (const r of ROOTS) {
+    const asks = (r as { asks?: unknown }).asks
+    if (!asks) continue
+    const shown = personalise(r, blank as Parameters<typeof personalise>[1])
+    /*
+      THE FACT BEING ASKED FOR MUST NOT APPEAR AS AN ANSWER. Checked against the authored
+      specimen's own values — inglês, English, Londres, London — because those are exactly
+      what a learner would misread as their own.
+    */
+    for (const claim of ['inglês', 'inglesa', 'Londres']) {
+      if (!r.target.includes(claim)) continue
+      ok(
+        r.root_id + ' does not state ' + claim + ' before it is answered',
+        !shown.target.includes(claim),
+        shown.target,
+      )
+    }
+    for (const claim of ['English', 'London']) {
+      if (!r.source.includes(claim)) continue
+      ok(
+        r.root_id + ' does not state ' + claim + ' before it is answered',
+        !shown.source.includes(claim),
+        shown.source,
+      )
+    }
+    /* And the branches, which are on the same screen and were read the same way. */
+    for (const br of shown.branches) {
+      for (const claim of ['inglês', 'inglesa']) {
+        if (!r.branches.some((b) => b.target.includes(claim))) continue
+        ok(
+          r.root_id + ' branch does not state ' + claim + ' before it is answered',
+          !br.target.includes(claim),
+          br.target,
+        )
+      }
+    }
+  }
+}
+
 if (fail.length) {
   console.log('\n' + new Set(fail).size + ' distinct failure(s), ' + fail.length + ' case(s)')
   process.exit(1)

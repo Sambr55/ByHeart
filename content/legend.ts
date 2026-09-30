@@ -378,6 +378,49 @@ export function personalise<T extends {
   const nat = origin?.slots.find((sl) => sl.key === 'nationality')
   const said = me.profile?.nationality
   const chosen = nat?.options?.find((o) => o.value === said || o.f === said)
+
+  /*
+    A ROOT THAT ASKS A FACT MUST NOT ASSERT IT FIRST.
+
+    Sam: "it also assumed I was Ingles before I told it. So the headline on the
+    Chamo-me/Sou ingles page already said Ingles."
+
+    tb_introduce is the lesson that ASKS where you are from, and its specimen is "Chamo-me
+    Ana. Sou inglês." Everything above swaps a fact once the learner has given it — which
+    is right everywhere except here, because here the swap has nothing to swap in yet. So
+    the screen read "Chamo-me Sam. Sou inglês.": the learner's real name, welded to a
+    nationality they had never been asked for, on the screen about to ask them.
+
+    The name swap is what makes it a lie rather than a specimen. Put the reader's own name
+    in the first half and the second half reads as a claim about them.
+
+    THE NAME STILL CARRIES, THE UNANSWERED HALF GOES BLANK. Sam chose this over holding
+    the whole specimen, and he is right: the name was given at set-up, so showing it is
+    honest and it is the one fact this lesson is NOT asking for. What the screen must not
+    do is fill in the half it is about to ask about — so that half becomes the same dash
+    root_display already uses for a blank, which reads as "this is what you are about to
+    fill" rather than as somebody else's fact.
+
+    The moment they answer, every swap above applies as it always did. Same rule the
+    Legend pre-fill needed: the product may not show an answer it has not been told.
+  */
+  const asksOrigin = 'asks' in root && (root as { asks?: unknown }).asks === 'origin'
+  const unanswered = !said || !me.profile?.from_place?.trim()
+  const blankOrigin = asksOrigin && unanswered
+  /*
+    THE BLANK ITSELF, in both languages and for both the nationality and the town.
+
+    An em dash rather than an empty string, because "Sou ." is a typo and "Sou —." is a
+    gap somebody is about to close. It matches root_display, which already writes the
+    shape of this sentence as "My name is — and I am —".
+  */
+  const blankFacts = (t: string) =>
+    t
+      .replaceAll('inglesa', '—')
+      .replaceAll('inglês', '—')
+      .replaceAll('English', '—')
+      .replaceAll('Londres', '—')
+      .replaceAll('London', '—')
   const myOrigin = (t: string) => {
     let out = t
     if (chosen && chosen.value !== 'inglês') {
@@ -503,6 +546,12 @@ export function personalise<T extends {
       would hand a woman "Sou solteiro", which is the escocês bug in a different pair.
     */
     const status = statusOf(me)
+    /*
+      THE NAME LANDS, THE UNASKED FACT DOES NOT — see blankOrigin. myName still runs, so
+      the learner reads their own name; the nationality and town become dashes rather than
+      Ana's, which is the line Sam objected to.
+    */
+    if (blankOrigin) return blankFacts(myName(t, me.display_name))
     if (!swap)
       return myForm(myOrigin(myStatus(myAge(myName(t, me.display_name), me.profile?.age), status)))
     const swapped = t
