@@ -717,14 +717,33 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             anything wrong is an error message about nothing.
           */}
           {nudge && !agreed ? (
-            <p data-testid="consent-nudge" className="animate-bank text-xs text-accent">
+            <p
+              id="consent-wait"
+              data-testid="consent-nudge"
+              role="status"
+              className="animate-bank text-xs text-accent"
+            >
               {CONSENT.untickedNudge}
             </p>
           ) : null}
           <button
             type="button"
             data-testid="setup-commit"
-            aria-disabled={!agreed}
+            /*
+              NOT aria-disabled, WHICH MADE THIS A WALL.
+
+              aria-disabled="true" was here to say "not yet" to a screen reader, and the
+              intent was the comment below: dimmed, not disabled, so the press still lands
+              and still explains itself. But browsers and assistive tech treat
+              aria-disabled as disabled — the click never reached the handler, so the
+              nudge never rendered and the button was simply dead. A learner who had not
+              spotted the tick box had no way off the name screen at all, which is worse
+              than the missing consent it was added to fix.
+
+              aria-describedby instead: the button is real, it works, and the reason it is
+              waiting is announced with it.
+            */
+            aria-describedby={agreed ? undefined : 'consent-wait'}
             onClick={() => {
               /*
                 The tick is the gate. Pressing without it says what is missing rather than
