@@ -1180,7 +1180,63 @@ console.log('\nset-up asks who, where and why — and the feed changes because o
       await page.waitForTimeout(400)
       const who = await page.$('[data-testid="setup-who"]')
       ok('then who', Boolean(who), 'the answer to the first thing you say in Portuguese')
+      /*
+        NEITHER HALF LETS YOU THROUGH ALONE, which is what this presses first.
+
+        Two faults shipped here in one day and each hid behind the other. The consent tick
+        arrived with aria-disabled on the commit button, which browsers treat as disabled —
+        so the press never reached the handler and the screen was a wall. Then, with that
+        fixed, the NAME turned out never to have been gated at all: finish() wrote it only
+        `if (name.trim())` and let an empty one straight through. Sam: "I ticked the box,
+        but didnt enter a name and it let me through."
+
+        A nameless learner is not a cosmetic gap. display_name is "" and the Legend's first
+        card is never written, so myName falls back to the authored specimen and every
+        Legend sentence shows somebody else's name as though it were theirs.
+
+        So this presses commit with each half missing and requires the screen to hold AND to
+        say which half. A gate that cannot be failed loudly is the wall we just removed.
+      */
+      const tick = await page.$('[data-testid="consent-tick"]')
+      ok('and the consent tick', Boolean(tick), 'a positive act, not a bundled one')
+
+      /*
+        ONE HALF MISSING AT A TIME, or neither assertion can fail.
+
+        The first version of this pressed commit with BOTH missing, which the consent gate
+        blocks on its own — so it passed happily with the name requirement deleted. A check
+        that cannot fail is the thing it is here to prevent, and I have shipped one before.
+        Each half is now isolated against the other being satisfied.
+      */
+
+      /* TICKED, NAMELESS. Only the name is missing, so only the name can hold it. */
+      if (tick) await tick.check()
+      const commitNameless = await page.$('[data-testid="setup-commit"]')
+      if (commitNameless) await commitNameless.click()
+      await page.waitForTimeout(400)
+      ok(
+        'set-up holds without a name',
+        Boolean(await page.$('[data-testid="setup-who"]')),
+        'an empty name writes an empty Legend and borrows the specimen name',
+      )
+      ok(
+        'and says what is missing',
+        Boolean(await page.$('[data-testid="consent-nudge"]')),
+        'a dead button teaches nobody anything',
+      )
+
+      /* NAMED, UNTICKED. The mirror: only consent is missing. */
+      if (tick) await tick.uncheck()
       if (who) await who.fill('Sam')
+      const commitUnticked = await page.$('[data-testid="setup-commit"]')
+      if (commitUnticked) await commitUnticked.click()
+      await page.waitForTimeout(400)
+      ok(
+        'set-up holds without the tick',
+        Boolean(await page.$('[data-testid="setup-who"]')),
+        'consent has to be a positive act',
+      )
+      if (tick) await tick.check()
       const commit = await page.$('[data-testid="setup-commit"]')
       if (commit) await commit.click()
       await page.waitForTimeout(1200)

@@ -103,7 +103,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     set by anything but the learner's own tap.
   */
   const [agreed, setAgreed] = useState(false)
-  /* Shown only after somebody presses commit without ticking — never pre-emptively. */
+  /* Shown only after somebody presses commit with something missing — never pre-emptively. */
   const [nudge, setNudge] = useState(false)
   /*
     WHICH REASON WAS TAPPED, held for as long as it takes to see it.
@@ -123,6 +123,12 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   */
   const [chosenWhy, setChosenWhy] = useState<string | null>(null)
   const [name, setName] = useState('')
+  /*
+    THE TWO THINGS THIS SCREEN ACTUALLY NEEDS, named once so the button, the dimming and
+    the message cannot disagree about what is outstanding.
+  */
+  const named = name.trim().length > 0
+  const ready = named && agreed
   const [photo, setPhoto] = useState<string | null>(null)
   const [done, setDone] = useState(false)
 
@@ -573,7 +579,11 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
               autoComplete="given-name"
               data-testid="setup-who"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value)
+                /* Typing answers the complaint, so the complaint goes. */
+                if (e.target.value.trim()) setNudge(false)
+              }}
               /*
                 KEEP THE FIELD ON SCREEN WHEN THE KEYBOARD ARRIVES.
 
@@ -705,7 +715,8 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                 checked={agreed}
                 onChange={(e) => {
                   setAgreed(e.target.checked)
-                  if (e.target.checked) setNudge(false)
+                  /* Only clears the complaint if it was the LAST thing outstanding. */
+                  if (e.target.checked && named) setNudge(false)
                 }}
                 className="mt-0.5 h-5 w-5 shrink-0 accent-accent"
               />
@@ -716,14 +727,19 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             SAID ONLY AFTER A REFUSED PRESS. A message that appears before anybody has done
             anything wrong is an error message about nothing.
           */}
-          {nudge && !agreed ? (
+          {nudge && !ready ? (
             <p
               id="consent-wait"
               data-testid="consent-nudge"
               role="status"
               className="animate-bank text-xs text-accent"
             >
-              {CONSENT.untickedNudge}
+              {/* Which one is missing, rather than a single message for two faults. */}
+              {!named && !agreed
+                ? CONSENT.bothNudge
+                : !named
+                  ? CONSENT.namelessNudge
+                  : CONSENT.untickedNudge}
             </p>
           ) : null}
           <button
@@ -743,13 +759,17 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
               aria-describedby instead: the button is real, it works, and the reason it is
               waiting is announced with it.
             */
-            aria-describedby={agreed ? undefined : 'consent-wait'}
+            aria-describedby={ready ? undefined : 'consent-wait'}
             onClick={() => {
               /*
-                The tick is the gate. Pressing without it says what is missing rather than
-                doing nothing, because a dead button teaches nobody anything.
+                TWO GATES, NOT ONE. Pressing with either missing says which, rather than
+                doing nothing — a dead button teaches nobody anything.
+
+                The name was never gated at all: finish() wrote it only `if (name.trim())`
+                and let an empty one straight through, so a learner arrived with
+                display_name "" and an empty legend. See CONSENT.namelessNudge.
               */
-              if (!agreed) {
+              if (!ready) {
                 setNudge(true)
                 return
               }
@@ -776,7 +796,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             className={
               'tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink transition-opacity ' +
               /* Dimmed, not disabled: it still takes the press and says what is missing. */
-              (agreed ? '' : 'opacity-50')
+              (ready ? '' : 'opacity-50')
             }
           >
             THAT IS ME

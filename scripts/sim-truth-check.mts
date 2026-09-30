@@ -44,6 +44,8 @@ await p.goto(BASE + '/vibes',{waitUntil:'networkidle'}); await p.waitForTimeout(
 if (await p.getByTestId('setup-why-curious').isVisible().catch(()=>false)) {
   await p.getByTestId('setup-why-curious').click(); await p.waitForTimeout(900)
   await p.getByTestId('setup-who').fill('Sam')
+  /* The consent tick is a real gate now — set-up does not commit without it. */
+  await p.getByTestId('consent-tick').check()
   await p.getByTestId('setup-commit').click(); await p.waitForTimeout(1800)
 }
 await p.getByTestId('vibe-the_basics').first().click(); await p.waitForTimeout(900)

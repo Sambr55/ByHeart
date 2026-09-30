@@ -86,8 +86,32 @@ export const CONSENT = {
    * from the name.
    */
   tick: 'I have read this, and DUB can keep what I learn.',
-  /** Said only when somebody presses commit without ticking. Never pre-emptive. */
+  /**
+   * Said only when somebody presses commit with something still missing. Never pre-emptive.
+   *
+   * THREE MESSAGES, BECAUSE TWO THINGS CAN BE MISSING. A single "you cannot continue"
+   * sends somebody hunting for which of the two it meant, and the tick is easy to miss
+   * while the empty name field is easy to walk past — so the screen says which.
+   */
   untickedNudge: 'Tick the box above and your Legend starts.',
+  /**
+   * THE NAME IS NOT OPTIONAL, though the screen let it be.
+   *
+   * Sam: "I ticked the box, but didnt enter a name and it let me through."
+   *
+   * finish() wrote the name only `if (name.trim())` and nothing stopped an empty one, so a
+   * nameless learner got display_name: "" and an EMPTY legend — the first card was never
+   * written. That is not a cosmetic gap: myName falls back to the authored specimen when
+   * there is no display name, so every Legend sentence then shows somebody else's name as
+   * though it were theirs. "Chamo-me Ana" handed to a learner called Sam.
+   *
+   * It is also the one answer the whole product is built on. The first thing anybody says
+   * in Portuguese is their own name, the Legend opens on it, and the road's second lesson
+   * teaches the sentence that carries it.
+   */
+  namelessNudge: 'Your Legend starts with your name — it is the first thing you will say.',
+  /** Both missing, so the screen asks for both rather than one at a time. */
+  bothNudge: 'Add your name and tick the box, and your Legend starts.',
   more: 'What exactly?',
   /** The longer answer, for anybody who taps. Still not a wall. */
   detail: [

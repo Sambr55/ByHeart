@@ -137,6 +137,8 @@ async function main() {
   if (!/There is no wrong answer/i.test(why)) problems.push('set-up no longer says the last answer is real')
   await press(page.getByTestId('setup-why-curious'), 'why: just curious')
   await page.getByTestId('setup-who').fill('Sam')
+  /* The consent tick is a real gate now — set-up does not commit without it. */
+  await page.getByTestId('consent-tick').check()
   await press(page.getByTestId('setup-commit'), 'finish set-up')
   await page.waitForTimeout(1500)
 
