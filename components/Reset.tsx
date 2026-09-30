@@ -125,18 +125,34 @@ export function Reset() {
         <div className="flex flex-1 flex-col justify-center gap-3">
           <p className="eyebrow text-accent">NOT YET</p>
           <h1 className="display text-balance text-2xl">You are signed in.</h1>
+          {/*
+            REACHED ONLY WHEN THE ACCOUNT TOGGLE IS OFF, now that it defaults on — the
+            route refuses a signed-in caller who did not ask to sign out. So the message
+            names the toggle rather than only the remedy: somebody who wanted a clean run
+            should be told they can have one from the screen they are already on.
+          */}
           <p className="text-sm leading-relaxed text-muted">
             So this device is not the only copy — your account holds it too, and would
-            put it straight back. Sign out first and the reset will stick.
+            put it straight back. Either sign out here, or go back and tick “sign out and
+            delete the copy your account is holding”.
           </p>
         </div>
         <Dock>
           <a
             href="/api/auth/logout"
+            data-testid="reset-signout"
             className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
             SIGN OUT
           </a>
+          <button
+            type="button"
+            data-testid="reset-back"
+            onClick={() => setState('ready')}
+            className="tap-target text-center text-xs text-muted underline underline-offset-4"
+          >
+            Back — I will tick the box instead
+          </button>
         </Dock>
       </Frame>
     )

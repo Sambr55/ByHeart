@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Back } from '@/components/Back'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { PurposeChoice, SoundChoice, ThemeChoice } from '@/components/Theme'
+import { useEntitlements } from '@/engine/useEntitlements'
 
 /**
  * Everything that is not the language.
@@ -37,11 +38,27 @@ import { PurposeChoice, SoundChoice, ThemeChoice } from '@/components/Theme'
  */
 const ROWS = [
   { href: '/pro', label: 'Membership', hint: 'What it opens, and what the money is for' },
-  { href: '/account', label: 'Account', hint: 'This device, codes, and your data' },
+  /*
+    THE HINT NAMES SIGNING OUT, because nothing else in the product did.
+
+    Sam: "the reset message told me to sign out. I have never seen a way to sign out."
+
+    There WAS one — this row leads to /account, which has had a SIGN OUT link in its header
+    all along. What there was not is any way to know that. The row said "This device, codes,
+    and your data", which is true and describes none of the three things somebody arrives
+    at this screen wanting, and /reset told people to do something the product never showed
+    them how to do.
+
+    So the hint says it, and there is a direct control below for the one case where being
+    sent through a row is wrong: somebody who has just been told by /reset to sign out
+    wants a button, not a page about codes.
+  */
+  { href: '/account', label: 'Account', hint: 'Sign out, codes, your data, and deleting it all' },
   { href: '/feedback', label: 'Feedback', hint: 'Tell us what did not land' },
 ]
 
 export function Settings() {
+  const access = useEntitlements()
   return (
     /*
       A PLAIN PAGE, like the three it links to.
@@ -93,6 +110,38 @@ export function Settings() {
             </Link>
           ))}
         </section>
+
+        {/*
+          AND SIGNING OUT, AS A CONTROL RATHER THAN A DESTINATION.
+
+          Sam: "I have never seen a way to sign out. We need to add that."
+
+          The row above now names it, which fixes the discovery problem for somebody
+          browsing. This is for the other case, which is the one that actually happened:
+          /reset refuses a signed-in learner and tells them to sign out first, and being
+          told to do a thing and then handed a page about redeeming codes is how a product
+          loses somebody. One tap, from the screen the cog already reaches.
+
+          Only when there is a session to end. A SIGN OUT sitting under the settings of a
+          learner who has never signed in is an invitation to worry about an account they
+          do not have — and `access.known` keeps it off the screen entirely until the
+          answer is in, rather than flashing it and taking it away.
+        */}
+        {access.known && access.signedIn ? (
+          <section className="flex flex-col gap-3 border-t border-line pt-6">
+            <a
+              href="/api/auth/logout"
+              data-testid="settings-signout"
+              className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted transition hover:border-accent hover:text-accent"
+            >
+              SIGN OUT
+            </a>
+            <p className="text-xs leading-relaxed text-muted">
+              Your Portuguese stays on this phone and in your account. Signing back in puts
+              the two together again.
+            </p>
+          </section>
+        ) : null}
 
         {/*
           APPEARANCE AND THE REST, under the rows rather than above them.
