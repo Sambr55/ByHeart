@@ -224,6 +224,39 @@ console.log('\nno lesson asks a question its learner cannot see\n')
     /frameForPurpose\(frame, meLearner\.purpose/.test(body),
     at < 0 ? '(oneSettled not found)' : '',
   )
+
+  /*
+    AND EVERY ASK WITH ITS OWN SETTLED BRANCH BACKFILLS THE LEGEND.
+
+    Sam: "Now I have thirty years is a block - no way out of the screen."
+
+    The deadlock has one shape and it has now happened twice. A lesson's ask collapses to
+    AskSettled — one line and a "change" link, no confirm — on a PROFILE field. The beat
+    suppresses its own CTA while the ask is unsettled, and oneSettled measures a card
+    question on the LEGEND. So a learner whose profile holds the answer and whose Legend
+    does not gets a screen with nothing on it that advances.
+
+    AskOrigin hit it first and fixed it with a backfill effect, and the comment on that fix
+    predicted the rest: "The same seam exists for age, into and portuguese — each has a
+    profile field that can be filled before its lesson." It was right and nothing enforced
+    it, so promoting `age` to the card made it bite.
+
+    The rule: a component that can render AskSettled off a profile field must also write
+    the Legend from that field. Matched at the source, because the alternative is walking a
+    learner with a half-filled record to the sixth screen of a lesson.
+  */
+  for (const [who, field] of [
+    ['AskAge', 'age'],
+    ['AskOrigin', 'origin'],
+  ] as const) {
+    const start = src.indexOf('function ' + who + '(')
+    const chunk = start < 0 ? '' : src.slice(start, start + 4000)
+    ok(
+      who + ' writes the Legend from the profile it settles on',
+      new RegExp("answerLegendFromLesson\\('" + field + "'").test(chunk),
+      start < 0 ? '(' + who + ' not found)' : 'a settled line with no confirm is a dead end',
+    )
+  }
 }
 
 console.log('')

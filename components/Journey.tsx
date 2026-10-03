@@ -3841,6 +3841,30 @@ function AskAge({
   const chapter = chapterById(learner.chapter)
   const said = learner.profile?.age ?? null
   const skipped = (learner.profile?.skipped ?? []).includes('age')
+  /*
+    THE LEGEND IS WRITTEN EVEN WHEN THE QUESTION IS ALREADY SETTLED.
+
+    Sam: "Now I have thirty years is a block - no way out of the screen."
+
+    The deadlock, exactly: this component collapses to AskSettled — one line and a "change"
+    link — as soon as the PROFILE holds an age. oneSettled routes `age` through the LEGEND,
+    because I promoted it to a card question when the road changed. So a learner carrying a
+    profile.age with no Legend row behind it got a settled line with no confirm, and a beat
+    whose CTA is suppressed while the ask is unsettled. Nothing on the screen advanced.
+
+    AskOrigin had this exact bug and fixed it with a backfill effect — and the comment on
+    that fix names age as having the same seam: "The same seam exists for age, into and
+    portuguese — each has a profile field that can be filled before its lesson." It was
+    right, and promoting age to the card is what made it bite.
+
+    Same fix, for the same reason: an effect is where a write belongs, and
+    answerLegendFromLesson refuses to overwrite a real answer, so this is safe on every
+    mount.
+  */
+  useEffect(() => {
+    if (said == null) return
+    answerLegendFromLesson('age', { n: String(said) })
+  }, [said])
   const n = Number(typed)
   const valid = /^\d{1,3}$/.test(typed) && n >= 1 && n <= 120
   const tooYoung = valid && n < chapter.consent_age
