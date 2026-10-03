@@ -44,7 +44,13 @@ export function SayButton({
 }: {
   /** The sentence they are being asked to say. */
   want: string
-  size?: 'sm' | 'md'
+  /*
+    `lg` is the run-through, where the microphone is the control rather than an ornament
+    beside one. Sam: "the say it loud gives no indication it is listening or has heard" —
+    half of that was feedback and half was that a 44px circle next to a full-width button
+    does not read as the thing you are meant to press.
+  */
+  size?: 'sm' | 'md' | 'lg'
   /** Told what happened, so the beat around it can record or move on. */
   onHeard?: (h: Heard) => void
 }) {
@@ -68,7 +74,9 @@ export function SayButton({
 
   if (!able) return null
 
-  const dim = size === 'sm' ? 'h-11 w-11' : 'h-12 w-12'
+  const dim = size === 'sm' ? 'h-11 w-11' : size === 'lg' ? 'h-24 w-24' : 'h-12 w-12'
+  /* The glyph follows the button, or `lg` is a small microphone in a large circle. */
+  const glyph = size === 'lg' ? 'h-10 w-10' : 'h-5 w-5'
 
   return (
     <button
@@ -127,7 +135,7 @@ export function SayButton({
     >
       {state === 'close' ? (
         /* A tick, for the one outcome worth marking. */
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
+        <svg viewBox="0 0 24 24" className={glyph} fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden>
           <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ) : state === 'missed' || state === 'blocked' ? (
@@ -143,14 +151,14 @@ export function SayButton({
           claim. Never a cross, because a cross says the learner was wrong and the browser
           is the unreliable half here.
         */
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+        <svg viewBox="0 0 24 24" className={glyph} fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
           <rect x="9" y="3" width="6" height="11" rx="3" />
           <path d="M5 11a7 7 0 0 0 14 0" strokeLinecap="round" />
           <path d="M4 4l16 16" strokeLinecap="round" />
         </svg>
       ) : (
         /* A microphone, which is the same shape whether it is idle or listening. */
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+        <svg viewBox="0 0 24 24" className={glyph} fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
           <rect x="9" y="3" width="6" height="11" rx="3" />
           <path d="M5 11a7 7 0 0 0 14 0" strokeLinecap="round" />
           <path d="M12 18v3" strokeLinecap="round" />

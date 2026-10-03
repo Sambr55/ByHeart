@@ -96,8 +96,19 @@ async function into(): Promise<string> {
   return ask
 }
 
+/*
+  REACHED BY URL, NOT BY TAPPING A LIST THAT NO LONGER EXISTS.
+
+  Legend Practise used to list every card; Sam: "this entire screen is redundant other than
+  the practise run... remove everything on this screen other than run it through." The cards
+  live on the Legend Board in Yours now and open through /legend?build=<id>, which is the
+  same route the board's tiles and the feed's legend card already use.
+
+  So the check drives the route rather than a tile. What it is testing — that a frame opens,
+  takes an answer and writes the card — is unchanged.
+*/
 const first = LEGEND_FRAMES[0].id
-await page.click('[data-testid="legend-card-' + first + '"]')
+await page.goto(BASE + '/legend?build=' + first, { waitUntil: 'domcontentloaded' })
 const one = await into()
 ok('a card opens', Boolean(one), one)
 
@@ -131,9 +142,15 @@ const stop = ((await page.textContent('[data-testid="legend-stop"]')) ?? '').tri
 ok('said as a sentence, not a tally', !/\d+\s*\/\s*\d+/.test(stop), stop)
 await page.click('[data-testid="legend-stop"]')
 await page.waitForTimeout(1200)
+/*
+  STOPPING LEAVES THE BUILD, which is what it is for. It asserted a card tile on the Legend
+  page, and those moved to the Legend Board — so the thing to check is that the build beat
+  is gone and the run offer is back, not that a list redrew itself.
+*/
 ok(
-  'stopping goes back to the deck',
-  Boolean(await page.$('[data-testid="legend-card-' + first + '"]')),
+  'stopping leaves the build',
+  !(await page.$('[data-testid="legend-ask"]')),
+  'the build beat is still on screen',
 )
 
 /*
@@ -217,7 +234,7 @@ console.log('\nyour children are children, not a count\n')
 */
 await page.goto(BASE + '/legend')
 await page.waitForTimeout(1500)
-await page.click('[data-testid="legend-card-children"]')
+await page.goto(BASE + '/legend?build=children', { waitUntil: 'domcontentloaded' })
 await page.waitForTimeout(1200)
 // The ask beat comes first; the build beat is where the rows live.
 const build = await page.$('[data-testid="legend-make-mine"]')

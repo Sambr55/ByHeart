@@ -1752,132 +1752,98 @@ function RunThrough({
     )
   }
 
+  /*
+    ONE CARD, THREE STATES — which is what Sam asked for after looking at Hinge.
+
+    Sam: "This first screen is very confusing and there is no visible relationship between
+    say it loud and said it. The say it loud gives no indication it is listening or has
+    heard or has any feedback. Then when you click I said it, everything looks clearer and
+    I think maybe the first card completely redundant."
+
+    He is right on all three. It was TWO screens — an ask with a tiny mic and two buttons,
+    then a reveal — and the first did nothing the second could not do better. The mic was a
+    40px circle beside a full-width button called I SAID IT, so the thing that can actually
+    check your Portuguese looked like a decoration next to the thing that merely claims you
+    said it.
+
+    Now: the question at the size Hinge gives a question, a microphone that IS the control
+    rather than an ornament beside one, and the answer revealed on the same card. No second
+    screen, so there is nothing for the relationship between them to be unclear about.
+
+    AND NOT EVERYBODY WANTS TO SPEAK. Sam: "bearing in mind a user may not want to say it
+    loud but just see the correct response." SHOW ME is always there and always one tap. It
+    reveals without recording, which is the honest trade — the microphone marks your work,
+    this just shows you the answer.
+  */
   return (
     <div className="flex flex-1 flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        {/*
-          A COLD RUN STILL SAYS WHERE YOU ARE IN IT.
-
-          NO WARNING is the right idea and it was the only thing on the line, so a shuffled
-          run had no position marker at all — question three looked exactly like question
-          one, and after a reveal the next screen read as an unrelated card rather than as
-          the next of seven. Half of "shows something completely different" was this.
-
-          Both, then: the count places you, and the phrase still says what kind of run it
-          is. The shuffle stays, because a cold open in a fixed order is not cold.
-        */}
-        <p className="eyebrow text-muted">
-          {i + 1} OF {order.length}
-        </p>
-        <div className="flex items-center gap-3">
-          <AudioButton slug={slugFor(askFor(frame, gender))} text={askFor(frame, gender)} size="sm" />
-          <span className="pt min-w-0 text-xl text-accent">{askFor(frame, gender)}</span>
-        </div>
-        {/*
-          WHAT THE QUESTION MEANS, under the question.
-
-          Sam: "We need to include the english translation of the sentence underneath the
-          portuguese, so the user understands what they are asking."
-
-          Without it this is a memory test with the question taken out — a learner who
-          cannot parse `Falas português?` cannot answer it, and their failure is about
-          reading rather than about producing their own line. ColdSay already argued this
-          and already renders the English (see the sibling component); the fix was applied
-          there and never here, which is the same one-question-two-answers split that has
-          caused most of the dead ends in this product.
-        */}
-        <p className="text-sm leading-relaxed text-muted">{frame.ask_en}</p>
-        {!shown ? (
-          <p className="mt-3 text-sm leading-relaxed text-muted">{LEGEND_COPY.cold_body}</p>
-        ) : null}
-      </div>
+      <p className="eyebrow text-muted">
+        {i + 1} OF {order.length}
+      </p>
 
       {/*
-        Their own sentence, with the button that says it.
-
-        The QUESTION had audio and the answer did not, which is the wrong way round on this
-        screen: the ask is a prompt somebody is about to answer, and the answer is the thing
-        they are trying to learn to say. Every other answer in DUB — the build beats, the
-        collision, the translator — comes back in a row with its audio on it, and this was
-        the one place a learner could not hear the sentence that is actually about them.
+        THE QUESTION, AT THE SIZE A QUESTION DESERVES. `t-ask` is 2.5rem and has been in
+        globals.css since before today; this screen asked at text-xl, which is a caption.
       */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start gap-3">
+          <AudioButton
+            slug={slugFor(askFor(frame, gender))}
+            text={askFor(frame, gender)}
+            size="sm"
+          />
+          <h1 className="pt t-ask min-w-0 flex-1 text-accent">{askFor(frame, gender)}</h1>
+        </div>
+        <p className="text-base leading-relaxed text-muted">{frame.ask_en}</p>
+      </div>
+
       {shown ? (
-        <div className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+        /* The answer, in place, at the scale this product reserves for produced language. */
+        <div className="animate-bank flex flex-col gap-3">
           <p className="eyebrow text-muted">YOURS</p>
+          <p className="pt t-said">{answer}</p>
+          {/*
+            LISTEN, COPY, SAY — all three, on the answer too.
+
+            Sam: "dont forget listen and copy - still totally valid routes." They are, and
+            the say button was disappearing the moment the answer showed: a learner who
+            tapped SHOW ME to see it, then wanted to try saying it, had nothing to press.
+            Revealing is not a decision to stop speaking.
+
+            Still marks the work. Saying it correctly after looking records the proof the
+            same way — the gate asks for the sentence produced, and producing it with the
+            answer on screen a moment ago is what rehearsal IS.
+          */}
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(answer)} text={answer} size="sm" />
-            <p className="pt min-w-0 flex-1 text-base text-accent">{answer}</p>
             <CopyButton text={answer} size="sm" />
-            {/* Listen, copy, say — see components/SayButton.tsx. */}
-            <SayButton want={answer} size="sm" />
-          </div>
-        </div>
-      ) : null}
-
-      {/* The same dock as everywhere else — see .dock in globals.css. */}
-      <Dock>
-        {!shown ? (
-          /*
-            TWO BUTTONS ON A COLD RUN, because one was making two claims at once.
-
-            It read SAID IT — SHOW ME and did both on one tap: recorded that the learner
-            produced the sentence, and then showed it to them. Sam: "the cold with nothing
-            on screen makes no sense. You get a phrase, click said it show means out shows
-            something completely different."
-
-            Two things were wrong and they compounded. The label claimed something the tap
-            could not know — somebody who could not remember it at all pressed the same
-            button as somebody who said it perfectly, and both were counted as having said
-            it cold. And because a cold run is SHUFFLED, the screen after it looked
-            unrelated to the one before: a different question, in a different order, with
-            no number to place it.
-
-            So the fork is the one the rest of the product uses — I SAID IT claims and
-            records, SHOW ME reveals and records nothing. Same rule as the Errand's note:
-            a cold claim can only honestly be made before the reveal.
-          */
-          <div className="flex w-full flex-col gap-3">
-            {/*
-              SAY IT, AND THE PRODUCT LISTENS.
-
-              Sam, on the call-and-response apps: "let's look at building that into our say
-              it cold routes." This is the route that needed it most — the note below
-              records that I SAID IT is a claim the tap cannot check, and that somebody who
-              could not remember a word pressed the same button as somebody who said it
-              perfectly.
-
-              Now there is a control that can tell the difference. It sits ABOVE the claim
-              rather than replacing it: recognition is approximate, it is absent on some
-              browsers, and a learner who says the sentence to a device that mishears it
-              must still be able to say so. So speaking is the better path and the claim is
-              the one that always works.
-
-              A close match reveals the card the same way I SAID IT does, because the
-              sentence has been produced and that is what the reveal is for.
-            */}
-            <div className="flex items-center justify-center gap-3">
+            {canSay ? (
               <SayButton
                 want={answer}
                 onHeard={(h) => {
-                  /*
-                    THE MICROPHONE MARKS THE WORK, which is what it was for.
-
-                    A close hearing is a produced sentence — the same claim I SAID IT makes,
-                    with evidence behind it — so it banks the proof itself rather than
-                    leaving the learner to press a second button and claim it by hand. A
-                    miss records nothing and says so; it is never counted against them,
-                    because the recogniser is the unreliable half.
-                  */
                   setHeard(h)
-                  /*
-                    A NEAR MISS SHOWS THE CARD, because comparing is the lesson.
-
-                    "Not quite" beside nothing to compare against is a mark without a
-                    correction — the learner knows they were wrong and still does not know
-                    what right was. Revealing costs nothing here: the proof is not recorded
-                    on a miss, so seeing the answer cannot buy them a sentence they did not
-                    say.
-                  */
+                  if (h.close) {
+                    recordProof({
+                      pt: answer,
+                      en: fillEnglish(frame, valuesFor(frame.id) ?? {}),
+                      source: 'legend',
+                      clean: true,
+                    })
+                  }
+                }}
+              />
+            ) : null}
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3">
+          {canSay ? (
+            <>
+              <SayButton
+                want={answer}
+                size="lg"
+                onHeard={(h) => {
+                  setHeard(h)
                   if (h.said) setShown(true)
                   if (h.close) {
                     recordProof({
@@ -1886,113 +1852,43 @@ function RunThrough({
                       source: 'legend',
                       clean: true,
                     })
-                    setShown(true)
                   }
                 }}
               />
-              {/*
-                The caption is the button's, so it goes when the button does. A sentence
-                telling somebody to say it out loud, beside nothing they can press, is
-                worse than silence.
-              */}
-              {canSay ? <span className="text-sm text-muted">Say it out loud</span> : null}
-            </div>
-            {/*
-              THE RESPONSE HALF OF CALL AND RESPONSE.
+              <p className="text-base text-muted">{LEGEND_COPY.run_say}</p>
+            </>
+          ) : (
+            <p className="text-base leading-relaxed text-muted">{LEGEND_COPY.run_no_mic}</p>
+          )}
+        </div>
+      )}
 
-              Sam: "there is no call and response mechanic that says it has registered or
-              checked what I have said... It needs to mark my work."
+      {/*
+        WHAT IT HEARD — the feedback that did not exist. Sam tapped the microphone and
+        nothing on the page changed. Never a score: the words it caught, and whether that
+        counted.
+      */}
+      {heard ? (
+        <div
+          data-testid="run-heard"
+          className={
+            'animate-bank rounded border px-4 py-3 ' +
+            (heard.close ? 'border-accent bg-accent/10' : 'border-line bg-bg-elev')
+          }
+        >
+          <p className={'eyebrow ' + (heard.close ? 'text-accent' : 'text-muted')}>
+            {heard.close
+              ? LEGEND_COPY.run_got_it
+              : heard.said
+                ? LEGEND_COPY.run_not_quite
+                : LEGEND_COPY.run_missed}
+          </p>
+          {heard.said ? <p className="pt mt-1 text-lg text-fg">“{heard.said}”</p> : null}
+        </div>
+      ) : null}
 
-              Three outcomes and each says a different true thing:
-
-                heard it       what it caught, and that it is banked. The words are shown
-                               because a learner who said it right wants to see that the
-                               product agrees, and one who was lucky learns what it
-                               actually accepted.
-                nearly         the words it caught, next to nothing else — no verdict. It
-                               reveals the card so they can compare for themselves, which
-                               is a better teacher than a score.
-                did not catch  said as a fact about the microphone, never about them. The
-                               recogniser is the unreliable half and the claim button is
-                               right underneath.
-
-              Never a number. `score` decides the wording and is not shown: a learner told
-              they were 0.62 correct has been given a grade, and this is a rehearsal.
-            */}
-            {heard ? (
-              <div
-                data-testid="run-heard"
-                className={
-                  'animate-bank rounded border px-4 py-3 ' +
-                  (heard.close ? 'border-accent bg-accent/10' : 'border-line bg-bg-elev')
-                }
-              >
-                <p className={'eyebrow ' + (heard.close ? 'text-accent' : 'text-muted')}>
-                  {heard.close ? 'THAT IS IT' : heard.said ? 'NOT QUITE' : 'DID NOT CATCH IT'}
-                </p>
-                {heard.said ? (
-                  <p className="pt mt-1 text-base text-fg">“{heard.said}”</p>
-                ) : (
-                  <p className="mt-1 text-sm leading-relaxed text-muted">
-                    Nothing came through — say it again, or press I SAID IT if you know you
-                    said it.
-                  </p>
-                )}
-                {heard.close ? (
-                  <p className="mt-1 text-xs text-muted">Banked. That is one of your seven.</p>
-                ) : heard.said ? (
-                  <p className="mt-1 text-xs text-muted">
-                    Have a look at yours below and try it once more.
-                  </p>
-                ) : null}
-              </div>
-            ) : null}
-            {/*
-              I SAID IT IS THE ONE THAT COUNTS, and until now it did not count anything.
-
-              Sam: "Clicking say it loud on Como te chamas froze the screen and gave no
-              response." The screen was not frozen — it was inert. Both buttons here ran
-              exactly `setShown(true)` and nothing else: no recordProof, no track, nothing
-              written anywhere. So the CTA that sends a learner here, SAY IT OUT LOUD, led
-              to the one screen that could never satisfy the gate it was driving. clubOpen
-              counts proof rows with source 'legend' and clean true (see content/legend.ts),
-              and this screen wrote none of them, so saying all seven perfectly moved the
-              counter by zero and the Club stayed shut for ever.
-
-              That is the same fault as the frozen lesson cards: two places answering one
-              question differently. ColdSay banks its proof; RunThrough did not.
-            */}
-            <button
-              type="button"
-              data-testid="legend-reveal"
-              onClick={() => {
-                recordProof({
-                  pt: answer,
-                  en: fillEnglish(frame, valuesFor(frame.id) ?? {}),
-                  source: 'legend',
-                  clean: true,
-                })
-                setShown(true)
-              }}
-              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
-            >
-              I SAID IT
-            </button>
-            {/*
-              AND SHOW ME STAYS HONEST: it reveals and records nothing, which is the whole
-              point of having two buttons. Somebody who could not remember it has not said
-              it cold, and the gate should not believe otherwise.
-            */}
-            <button
-              type="button"
-              data-testid="legend-show"
-              onClick={() => setShown(true)}
-              className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
-            >
-              SHOW ME
-            </button>
-          </div>
-        ) : (
+      <Dock>
+        {shown ? (
           <button
             type="button"
             data-testid="legend-next"
@@ -2003,16 +1899,18 @@ function RunThrough({
             }}
             className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
           >
-            {i + 1 < order.length ? 'NEXT' : 'DONE'}
+            {i + 1 < order.length ? LEGEND_COPY.run_next : LEGEND_COPY.run_last}
+          </button>
+        ) : (
+          <button
+            type="button"
+            data-testid="legend-show"
+            onClick={() => setShown(true)}
+            className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
+          >
+            {LEGEND_COPY.run_show}
           </button>
         )}
-        {/*
-          THE WAY OUT, NAMED — and testable, which it was not.
-
-          Sam: "I can now not exit this screen." The exit existed, but it was the only
-          control on the run without a data-testid, so no check could ever have caught it
-          going missing, and "Stop here" does not say where here goes. It says it now.
-        */}
         <button
           type="button"
           data-testid="legend-run-stop"

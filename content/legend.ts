@@ -3253,6 +3253,35 @@ export const LEGEND_COPY = {
   cold_head: 'No warning.',
   cold_body: 'One question, and a beat of silence. That silence is the thing you are practising.',
   /*
+    THE RUN-THROUGH, SAID IN AS FEW WORDS AS IT TAKES.
+
+    Sam, on the old screen: "much of our text, especially the explanatory text is too small
+    and perhaps too detailed." The card this replaces carried a paragraph about silence
+    above a tiny microphone — an explanation of the exercise, on the screen where somebody
+    is trying to do the exercise. The question is the instruction now, and these are the
+    only other words on it.
+  */
+  /** Under the microphone. Three words, because the microphone says the rest. */
+  run_say: 'Say it out loud',
+  /** When the device cannot listen at all — see useCanListen. Never an apology. */
+  run_no_mic: 'Say it out loud, then show yourself the answer.',
+  /*
+    WHAT IT HEARD, in three words each. These sit above the words it caught, which are the
+    actual feedback — a verdict with the evidence under it rather than instead of it.
+  */
+  run_got_it: 'THAT IS IT',
+  run_not_quite: 'NOT QUITE',
+  run_missed: 'DID NOT CATCH IT',
+  /** Forward. The last one says so, because a run that just stops is a run that broke. */
+  run_next: 'NEXT',
+  run_last: 'THAT IS THE LOT',
+  /*
+    THE WAY PAST WITHOUT SPEAKING. Sam: "bearing in mind a user may not want to say it loud
+    but just see the correct response." It reveals and records nothing, which is the whole
+    difference between it and the microphone.
+  */
+  run_show: 'SHOW ME',
+  /*
     No number. It said "Ten questions" against a table of eleven, and it will be wrong
     again the moment a frame is added — which is the point of the parts. A count that has
     to be maintained by hand is a count that will lie.
