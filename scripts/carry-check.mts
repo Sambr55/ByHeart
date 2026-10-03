@@ -633,13 +633,37 @@ console.log('\nand nothing is claimed before it is answered\n')
       So the assertion is about the borrowed fact, not the name: an unanswered root must not
       state the specimen's nationality or town as though it were the learner's.
     */
-    const stillSpecimen =
-      /\bingl(ês|esa)\b/.test(shown.target) && !/\//.test(shown.target)
-    ok(
-      r.root_id + ' does not state a nationality nobody gave',
-      !stillSpecimen,
-      shown.target,
-    )
+    /*
+      THE SPECIMEN AGREES WITH THE READER, which is what actually went wrong.
+
+      This asserted that the authored `inglês` must not survive, and that rule produced two
+      bad screens: a dash, and then a slash menu. Sam, on the menu: "remove the
+      /escoes/galles - you correctly highlighted the selected language so you dont need the
+      forward slash options."
+
+      He is right, and the diagnosis underneath it is the one that matters: the specimen was
+      never a lie about WHERE somebody is from — it is plainly an example — it was a lie
+      about WHO they are, because tb_introduce authors the feminine and a man read it. Gender
+      is settled one step earlier now and myForm bends the authored pair from the first
+      screen, so the example is correct for the person reading it.
+
+      So the assertion is agreement, not absence: a man never meets `inglesa`, a woman never
+      meets `inglês`.
+    */
+    for (const g of ['m', 'f'] as const) {
+      const seen = personalise(r, {
+        display_name: 'Sam',
+        profile: { nationality: null, from_place: null, gender: g, age: null, into: [] },
+        legend: [],
+      } as Parameters<typeof personalise>[1])
+      const wrong = g === 'f' ? /\binglês\b/ : /\binglesa\b/
+      const lines = [seen.target, ...seen.branches.map((b) => b.target)]
+      ok(
+        r.root_id + ' agrees with a reader who is ' + (g === 'f' ? 'a woman' : 'a man'),
+        !lines.some((l) => wrong.test(l)),
+        lines.join(' / '),
+      )
+    }
     ok(
       r.root_id + ' does not state a town nobody gave',
       !shown.target.includes('Londres') && !shown.source.includes('London'),

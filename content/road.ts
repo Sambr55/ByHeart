@@ -131,15 +131,32 @@ export const ROAD: RoadStep[] = [
     family: 'the_basics',
     because: 'Your name and where you are from — the answer every later line needs.',
   },
-  {
-    root: 'tb_email',
-    family: 'the_basics',
-    because: 'Qual é, and somewhere to send the work before there is a road of it to lose.',
-  },
+  /*
+    OBRIGADO/OBRIGADA SECOND, BECAUSE EVERY GENDERED LINE AFTER IT IS A GUESS.
+
+    Sam: "move the Obrigado/Obrigada section right up to the top after name - as the gender
+    needs to carry through - specifically to I am__ I am from__ - If I am male, I dont want
+    the feminine - Inglesa."
+
+    He is right and the sequencing was the whole fault. tb_introduce teaches "Sou inglesa."
+    on a branch — the feminine, because the root has to show the pair somewhere — and
+    myForm bends it to the speaker only once gender is known. Gender was settled by
+    tb_thank_you, which came two steps LATER, so a man met the feminine on the one screen
+    that teaches him how to say where he is from.
+
+    Nothing else wants to be this early: it asks a question with no Legend card behind it
+    and teaches two words. It is here purely so that everything downstream can agree with
+    the person reading it.
+  */
   {
     root: 'tb_thank_you',
     family: 'the_basics',
     because: 'Which of obrigado/obrigada is yours. Until this is answered every gendered line is a guess.',
+  },
+  {
+    root: 'tb_email',
+    family: 'the_basics',
+    because: 'Qual é, and somewhere to send the work before there is a road of it to lose.',
   },
   {
     root: 'tb_married_work',

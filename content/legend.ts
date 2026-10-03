@@ -458,60 +458,15 @@ export function personalise<T extends {
   */
   const unanswered = asksOrigin && !said
   /*
-    THE CHOICE, NOT A BORROWED FACT — and this is the third shape this line has taken.
+    NO MENU ON THE HEADLINE EITHER. Sam: "remove the /escoes/galles - you correctly
+    highlighted the selected language so you dont need the forward slash options."
 
-    I have been wrong about it twice in opposite directions. First "Chamo-me Sam. Sou
-    inglês." told Sam he was English before he had said. Then I held the whole specimen —
-    "Chamo-me Ana. Sou inglês." — which stops the claim and throws away the name he gave at
-    set-up: "Now youve regressed to first name Ana, not pulling through the entered name."
-
-    Both are the same mistake, which is treating one line as one decision. There are two
-    facts in it and they are in different states: the name is KNOWN and the nationality is
-    being ASKED FOR, on this very screen. So the name lands, and the nationality shows as
-    the choice on offer rather than as one option pretending to be the answer.
-
-    Sam chose this shape: "Sou inglês / escocês / irlandês?" The options come from the
-    origin frame's own slot, so this is the same list the question below it offers — the
-    specimen and the ask cannot drift, and a sixth nationality needs no change here.
-
-    It still teaches the shape, which the dash did not: `sou` is followed by a word of this
-    kind, and here are three of them.
+    The menu was my answer to a specimen that claimed something. It is not needed any more,
+    because the thing that made the claim was never the nationality — it was the authored
+    FEMININE standing while a man read it, which myForm now bends from the first screen.
+    "Chamo-me Golly. Sou inglês." is a complete sentence, it agrees with the reader, and
+    the chips directly below it are where the choosing happens.
   */
-  const offered = (nat?.options ?? []).slice(0, 3)
-  const choiceLine = (t: string, pick: (o: { value: string; f?: string; en?: string }) => string) =>
-    offered.length >= 2 ? offered.map(pick).join(' / ') : null
-  /*
-    Applied last, so it only ever sees a specimen myOrigin did NOT replace — which is the
-    definition of unanswered, arrived at by the substitution rather than by a second
-    condition agreeing with it. Both languages, because a Portuguese choice under an
-    English statement would be two different sentences.
-  */
-  const offerChoice = (t: string) => {
-    if (!unanswered) return t
-    const pt = choiceLine(t, (o) => o.value)
-    const en = choiceLine(t, (o) => o.en ?? o.value)
-    /*
-      ONE PASS, OR THE REPLACEMENT EATS ITSELF.
-
-      Chained replaceAll doubled it: `inglesa` became "inglês / escocês / galês", and the
-      second call then found the `inglês` INSIDE that and expanded it again — "Sou inglês /
-      escocês / galês / escocês / galês." A single regex over both forms cannot match its
-      own output, because the output contains no bare specimen to match.
-    */
-    let out = t
-    if (pt) out = out.replace(/\bingl(ês|esa)\b/g, pt)
-    if (en) out = out.replace(/\bEnglish\b/g, en)
-    /*
-      AND THE TOWN, which is the same claim one branch further down: "Sou de Londres." says
-      where somebody is from before they have said. It has no option list to offer — a town
-      is free text — so it asks the question instead, which is what the screen is doing
-      anyway and is a sentence the learner will need to understand when it is put to them.
-    */
-    out = out
-      .replace(/\bSou de Londres\b\.?/g, 'De onde és?')
-      .replace(/\bI am from London\b\.?/g, 'Where are you from?')
-    return out
-  }
   /*
     THE BLANK ITSELF, in both languages and for both the nationality and the town.
 
@@ -583,6 +538,24 @@ export function personalise<T extends {
     ...(chosen?.f && chosen.f !== chosen.value
       ? ([[chosen.value, chosen.f]] as [string, string][])
       : []),
+    /*
+      AND THE AUTHORED NATIONALITY, WHICH ONLY BENT ONCE ONE WAS CHOSEN.
+
+      Sam: "If I am male, I dont want the feminine - Inglesa."
+
+      `chosen` is the nationality the learner PICKED, so before they answer there was no
+      pair here and the specimen stood as authored — and tb_introduce authors its branch
+      as "Sou inglesa.", the feminine, because the root has to show the pair somewhere. A
+      man met the feminine on the one screen that teaches him how to say where he is from.
+
+      The authored pair is always available: it is on the origin frame's own options, which
+      is where `chosen` is looked up. Added unconditionally so the specimen agrees with the
+      reader from the first screen, whether or not they have chosen yet.
+    */
+    ...(() => {
+      const ing = nat?.options?.find((o) => o.value === 'inglês')
+      return ing?.f ? ([[ing.value, ing.f]] as [string, string][]) : []
+    })(),
     ...(statusPair ? ([[statusPair.pt, statusPair.f]] as [string, string][]) : []),
   ]
   const myForm = (t: string) => {
@@ -839,9 +812,9 @@ export function personalise<T extends {
       not, so it keeps the authored specimen — which is what it is for: one example of the
       piece doing its job.
     */
-    target: offerChoice(mine(root.target)),
-    source: offerChoice(mine(root.source)),
-    root_display: offerChoice(mine(root.root_display)),
+    target: mine(root.target),
+    source: mine(root.source),
+    root_display: mine(root.root_display),
     /*
       THE BRIDGE IS NOT BENT, because it is the sentence explaining the bend.
 

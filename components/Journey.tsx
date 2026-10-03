@@ -3683,8 +3683,31 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
   */
   /* The card's questions, derived — see the long note on the other CARD_ASKS above. */
   const CARD_ASKS = cardFor(null).map((f) => f.id)
-  if (CARD_ASKS.includes(which)) {
-    const frame = LEGEND_FRAMES.find((f) => f.id === which)
+  /*
+    THE CHIP BRANCH IS FOR CHIP QUESTIONS, and it was swallowing the ones that are not.
+
+    Sam: "still broken, still frozen/no way out" — the age lesson, with no ask panel and no
+    CTA on it at all.
+
+    This block renders a frame's own options as chips, and bailed with `return null` when a
+    frame had none. That was harmless while CARD_ASKS was a hand-written list of pick
+    questions. It is derived from cardFor now, so it picked up `age` and `into` — and both
+    have purpose-built components a hundred lines below that NEVER GET REACHED, because
+    this branch returns first. age is a number picker and into is a multi-select; neither
+    has options and neither should.
+
+    Nothing rendered, and the beat suppresses its own CTA while an ask is unsettled — so
+    the screen had the lesson on it and nothing to press. Same deadlock as yesterday, one
+    layer up, and the same root cause: I widened what CARD_ASKS means without checking what
+    read it.
+
+    So the branch now claims only the questions it can actually draw, and everything else
+    falls through to the component written for it.
+  */
+  const frameHere = LEGEND_FRAMES.find((f) => f.id === which)
+  const hasChips = Boolean(frameHere?.slots[0]?.options)
+  if (CARD_ASKS.includes(which) && hasChips) {
+    const frame = frameHere
     const slot = frame?.slots[0]
     if (!frame || !slot?.options) return null
     /*

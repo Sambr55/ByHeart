@@ -245,6 +245,32 @@ console.log('\nno lesson asks a question its learner cannot see\n')
     the Legend from that field. Matched at the source, because the alternative is walking a
     learner with a half-filled record to the sixth screen of a lesson.
   */
+  /*
+    AND THE CHIP BRANCH ONLY CLAIMS QUESTIONS IT CAN DRAW.
+
+    Sam, on the age lesson: "still broken, still frozen/no way out." AskInLesson renders a
+    frame's options as chips and bailed with `return null` when a frame had none — harmless
+    while CARD_ASKS was a hand-written list of pick questions, and a dead end the moment it
+    was derived from cardFor, because that picked up `age` and `into`. Both have
+    purpose-built components below that branch which could never be reached, so the screen
+    rendered the lesson and nothing to press.
+
+    The guard is `hasChips`. Asserted at the source because the alternative is walking a
+    browser to the seventh screen of the basics.
+  */
+  {
+    /*
+      Matched over the whole file rather than near a CARD_ASKS declaration: there are two of
+      those and the first is nine hundred lines from the branch this guards, which is how a
+      first version of this check failed against correct code.
+    */
+    ok(
+      'the chip branch only claims questions that have chips',
+      /CARD_ASKS\.includes\(which\) && hasChips/.test(src),
+      'age and into have their own components below it',
+    )
+  }
+
   for (const [who, field] of [
     ['AskAge', 'age'],
     ['AskOrigin', 'origin'],
