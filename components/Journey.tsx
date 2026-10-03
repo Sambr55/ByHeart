@@ -5971,9 +5971,29 @@ function LegendPayoff({ justFinished }: { justFinished: CultureFamily | null }) 
     Same fault the Club's progress line had against the same table, and the same fix:
     filter the count the way the deck filters the deck.
   */
-  const mine = LEGEND_FRAMES.filter(
-    (f) =>
-      frameForPurpose(f, learner.purpose ?? null) && frameApplies(f, learner.legend ?? []),
+  /*
+    THE CARD, NOT EVERY FRAME THE PURPOSE ALLOWS.
+
+    Sam: "it wouldnt allow me into club despite showing and saying I have completed 7/7 it
+    wanted me to go and complete kids and single status question which wiould make it 9/7."
+
+    This filtered LEGEND_FRAMES by purpose and by `requires`, and stopped there — so the
+    four DEEPER frames (age, into, children, who_with) were counted as outstanding work.
+    Measured, for a visiting learner with every card question answered:
+
+      the card (cardFor)      7
+      what this counted      11
+      answered                7
+      "waiting"               4   ← age, into, children, who_with
+
+    Seven of seven and four still demanded, which is where 9/7 comes from: the screen adds
+    deeper questions to a total that is defined as the card. The deeper four are real and
+    belong on the card, but they are NEVER required — see cardFor, which is the one
+    definition the gate and the countdown already share. This is now the third place to
+    have disagreed with it, and the fix each time is the same: ask cardFor.
+  */
+  const mine = cardFor(learner.purpose ?? null).filter((f) =>
+    frameApplies(f, learner.legend ?? []),
   )
   const answered = (learner.legend ?? [])
     .filter((a) => Object.keys(a.values).length > 0)

@@ -21,7 +21,7 @@
  * not honour, and it must count the vibe being finished right now.
  */
 import { ROOTS_BY_FAMILY } from '../content/roots'
-import { DOORWAY, LEGEND_FRAMES, doorwayToGo, frameForPurpose, legendStatus, legendUnlocked } from '../content/legend'
+import { DOORWAY, LEGEND_FRAMES, cardFor, doorwayToGo, frameApplies, frameForPurpose, legendStatus, legendUnlocked } from '../content/legend'
 import type { Purpose } from '../content/situations'
 import { roadFor } from '../content/road'
 
@@ -257,6 +257,56 @@ ok(
   !/currentFamily/.test(readFileSync('content/legend.ts', 'utf8')),
   'a per-caller flag is how the two disagreed in the first place',
 )
+
+/*
+  NOTHING COUNTS A DEEPER FRAME AGAINST THE CARD.
+
+  Sam, with 7/7 answered: "it wouldnt allow me into club despite showing and saying I have
+  completed 7/7 it wanted me to go and complete kids and single status question which
+  wiould make it 9/7."
+
+  The screen filtered LEGEND_FRAMES by purpose and by `requires` and stopped there, so the
+  four DEEPER frames — age, into, children, who_with — were counted as outstanding work
+  against a total defined as the card. Seven of seven, four still demanded, and the
+  arithmetic Sam did on screen was 9 of 7.
+
+  This is the THIRD screen to compute the Legend's size for itself and disagree with
+  cardFor: the run-through did it, the gate did it, and now the sell panel. cardFor is the
+  one definition — the gate, the countdown and the deck all read it — so the rule asserted
+  here is that nothing else may reimplement it over the whole table.
+*/
+console.log('\nthe card is the card, wherever it is counted\n')
+{
+  const strip = (src: string) =>
+    src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+  const journey = strip(readFileSync('components/Journey.tsx', 'utf8'))
+  /*
+    The specific shape that caused it: LEGEND_FRAMES.filter(... frameForPurpose ...) used
+    as a denominator. Matched on the source rather than by running the screen, because the
+    alternative is a browser walk to the fourth sitting of the basics.
+  */
+  const counted = /const mine = LEGEND_FRAMES\.filter/.test(journey)
+  ok(
+    'the sell panel sizes the Legend with cardFor',
+    !counted && /const mine = cardFor\(/.test(journey),
+    counted ? 'it counts every frame the purpose allows, which is 11 against a card of 7' : '',
+  )
+
+  const everyPurpose: ('visiting' | 'moving' | 'staying')[] = ['visiting', 'moving', 'staying']
+  for (const purpose of everyPurpose) {
+    const card = cardFor(purpose)
+    const answers = card.map((f) => ({
+      frame_id: f.id,
+      values: Object.fromEntries((f.slots ?? []).map((sl) => [sl.key, 'x'])),
+    }))
+    const mine = cardFor(purpose).filter((f) => frameApplies(f, answers))
+    ok(
+      purpose + ': a full card leaves nothing waiting',
+      mine.length - answers.filter((a) => mine.some((f) => f.id === a.frame_id)).length === 0,
+      mine.length + ' counted against ' + card.length + ' answered',
+    )
+  }
+}
 
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)\n')

@@ -531,6 +531,28 @@ export function Legend() {
             {onCard.length} of {myCard.length} on your card
           </p>
         ) : null}
+        {/*
+          AND WHAT IS STILL IN THE WAY, WHEN THE CARD IS FULL AND THE DOOR IS NOT.
+
+          Sam: "I got to Esta La (all done - 7/7) it then took me to two more numbers
+          questions 1,2,3,4 etc before opening my legend."
+
+          Both facts were true and the screen only ever said one of them. A visiting
+          learner's card completes on sitting three — measured — while the doorway needs
+          four, because tb_1234 teaches the numbers `oito dias` is built from and answers
+          no card question itself. So the product said 7 of 7, the learner reasonably
+          concluded they were finished, and the next screen asked them to count to four.
+
+          The road is not wrong and the count is not wrong. What was missing is the
+          sentence that reconciles them, so the one remaining sitting reads as the last
+          step of something rather than as a door that moved.
+        */}
+        {mounted && !cardOpen.length && !doorStatus.open ? (
+          <p data-testid="card-full-road-left" className="text-xs leading-relaxed text-accent">
+            Your card is written. {doorStatus.toGo === 1 ? 'One more basics step' : doorStatus.toGo + ' more basics steps'}{' '}
+            and the words behind it are yours too — then your Legend opens.
+          </p>
+        ) : null}
       </div>
 
       {/*
