@@ -31,6 +31,20 @@ export type EventName =
      ignored — and whether anybody does it twice. None of these is ever shown back to a
      learner as a total. */
   | 'showing_sent'
+  /*
+    BRINGING SOMEBODY IN — three events, because three different things can happen and
+    only one of them is worth anything.
+
+    invite_sent is the ask. invite_opened is somebody following the link, which is the only
+    one of the three that happens on a different person's phone. invite_accepted is them
+    choosing to start. None of the three pays: the reward lands when the person brought in
+    says their Legend cold, which is measured on the server from the proof rows — see
+    lib/invites.ts. These are here to answer "does this mechanic work at all", which is a
+    question about the funnel rather than about any individual.
+  */
+  | 'invite_sent'
+  | 'invite_opened'
+  | 'invite_accepted'
   | 'showing_opened'
   | 'showing_returned'
   /* Derived cards. `derived_said` is the one that matters — it is a collision produced

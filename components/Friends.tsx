@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { track } from '@/engine/analytics'
+import { INVITE, INVITE_TEXT } from '@/content/invite'
 import { mintShowing } from '@/engine/showing'
 import { useLearner } from '@/engine/useLearner'
 
@@ -29,14 +30,38 @@ interface Mine {
   returned: boolean
 }
 
+/** One invitation, and what became of it. Never a count — see the note on the component. */
+interface Invited {
+  code: string
+  accepted_at: string | null
+  landed_at: string | null
+}
+
 export function Friends() {
   const learner = useLearner()
   const [mine, setMine] = useState<Mine[] | null>(null)
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState<string | null>(null)
+  /*
+    THE PEOPLE YOU HAVE BROUGHT IN, which is a different thing from the people you have
+    shown something to.
+
+    Showing is one card, once — the mechanic this component was built for. An invitation is
+    an ask to come and learn the language of the city you are both in, and it is the half
+    Sam is after: "We need to BUILD communities around language and cities."
+  */
+  const [invites, setInvites] = useState<Invited[] | null>(null)
 
   useEffect(() => {
     let live = true
+    fetch('/api/invite')
+      .then((r) => r.json())
+      .then((b: { ok: boolean; invites?: Invited[] }) => {
+        if (live) setInvites(b.ok ? (b.invites ?? []) : [])
+      })
+      .catch(() => {
+        if (live) setInvites([])
+      })
     fetch('/api/showing')
       .then((r) => r.json())
       .then((b: { ok: boolean; showings?: Mine[] }) => {
@@ -66,6 +91,45 @@ export function Friends() {
     } else {
       await navigator.clipboard?.writeText(url).catch(() => {})
       setNote('Link copied.')
+    }
+    setBusy(false)
+  }
+
+  /*
+    BRING SOMEBODY, through the operating system's own share sheet.
+
+    Sam chose this over reading the phone book, and it is the right call twice: iOS already
+    shows the sender their contacts in a UI they trust, and DUB never sees a phone number —
+    which is a ceiling on what this feature can become rather than a first version. The
+    consent screen promises the work stays on the phone; an app that then uploads the
+    address book would be contradicting it.
+  */
+  async function bring() {
+    setBusy(true)
+    setNote(null)
+    try {
+      const res = await fetch('/api/invite', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ chapter: learner.chapter ?? null }),
+      })
+      const body = (await res.json()) as { ok: boolean; invite?: Invited & { code: string }; reason?: string }
+      if (!body.ok || !body.invite) {
+        setNote(body.reason ?? 'Could not make an invitation.')
+        setBusy(false)
+        return
+      }
+      const url = window.location.origin + '/come/' + body.invite.code
+      track('invite_sent', {})
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({ title: 'DUB', text: INVITE_TEXT, url }).catch(() => {})
+      } else {
+        await navigator.clipboard?.writeText(url).catch(() => {})
+        setNote('Link copied.')
+      }
+      setInvites((old) => [body.invite as Invited, ...(old ?? [])])
+    } catch {
+      setNote('Could not make an invitation.')
     }
     setBusy(false)
   }
@@ -115,6 +179,72 @@ export function Friends() {
       >
         {busy ? 'MAKING A LINK' : 'SHOW SOMEBODY'}
       </button>
+
+      {/*
+        AND THE PEOPLE YOU HAVE BROUGHT IN, which is the other half of community.
+
+        Showing is one card handed to somebody who is already here. This is asking somebody
+        who is not — and in an expat city those are different acts with different stakes.
+        Kept in the same section because they are both "the part of DUB that needs another
+        person", and separated by a rule because conflating them would make the invitation
+        read as a share.
+
+        A LIST AND NEVER A COUNT, the rule this component already holds: three states, none
+        of them a position. "How many people have you recruited" is a leaderboard with extra
+        steps and DUB exists because scores are the wrong fuel.
+      */}
+      <div className="mt-3 flex flex-col gap-3 border-t border-line pt-6">
+        <div className="flex flex-col gap-1">
+          <p className="eyebrow text-muted">{INVITE.eyebrow}</p>
+          <p className="text-sm leading-relaxed text-muted">
+            {invites?.length ? INVITE.some : INVITE.empty}
+          </p>
+        </div>
+
+        {invites?.length ? (
+          <ul className="flex flex-col gap-1">
+            {invites.map((i) => (
+              <li
+                key={i.code}
+                data-testid={'invite-' + i.code}
+                className={
+                  'flex items-center justify-between gap-3 rounded border px-4 py-3 ' +
+                  (i.landed_at ? 'border-accent bg-accent/10' : 'border-line bg-bg-elev')
+                }
+              >
+                <span className="text-sm">
+                  {i.landed_at
+                    ? INVITE.state.landed
+                    : i.accepted_at
+                      ? INVITE.state.accepted
+                      : INVITE.state.waiting}
+                </span>
+                <span className={'eyebrow shrink-0 ' + (i.landed_at ? 'text-accent' : 'text-muted')}>
+                  {i.landed_at ? 'LANDED' : i.accepted_at ? 'STARTED' : 'SENT'}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        <button
+          type="button"
+          data-testid="friends-bring"
+          onClick={bring}
+          disabled={busy}
+          className="tap-target eyebrow rounded bg-accent px-5 py-3 text-center text-accent-ink disabled:opacity-60"
+        >
+          {busy ? 'MAKING A LINK' : INVITE.cta}
+        </button>
+
+        {/*
+          What it earns, last and small. It is the second reason to do this and must not
+          become the first — a screen that leads on free months is a referral scheme, and a
+          referral scheme is how somebody ends up sending twenty links to people who will
+          never open them.
+        */}
+        <p className="text-xs leading-relaxed text-muted">{INVITE.reward}</p>
+      </div>
 
       {/*
         The reason, when there is one, in the words the engine gave — which for a new

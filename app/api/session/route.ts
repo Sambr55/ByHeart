@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { clubOpen } from '@/content/legend'
+import { landInvite } from '@/lib/invites'
 import { adminKeyValid, currentUser, ensureDevice } from '@/lib/auth'
 import {
   layer,
@@ -51,6 +53,43 @@ export async function POST(request: Request) {
     for (const s of held) merged = mergeLearner(merged as never, s as never) as never
     await saveLearner(device, merged, user?.id ?? null)
     if (user?.id) await writeAllFor(user.id, merged)
+    /*
+      AND THE INVITATION THAT BROUGHT THEM HERE, IF IT HAS LANDED.
+
+      Sam asked for a financial advantage to the recommender, and chose the trigger: the
+      person brought in says their Legend cold. That is the one event in DUB meaning
+      somebody has LEARNED something rather than installed something, and it is what makes
+      this unspammable without a single fraud check — a fake account earns nothing, because
+      a fake account cannot speak Portuguese.
+
+      Measured here rather than on the client because the client is the party with the
+      incentive to lie. The proof rows are already on the merged state, and `clubOpen` is
+      the same function the Club door reads — so the thing being paid for is exactly the
+      thing the product already calls finished, rather than a second definition that could
+      drift from it.
+
+      Idempotent all the way down: landInvite claims the payment inside the statement that
+      makes it, so this firing on every sync costs one indexed read and pays once.
+    */
+    try {
+      const legend = (merged.legend ?? []) as { frame_id: string; values: Record<string, string> }[]
+      const proof = (merged.proof ?? []) as { pt: string; source: string; clean: boolean }[]
+      const answered = legend
+        .filter((a) => Object.keys(a.values ?? {}).length > 0)
+        .map((a) => a.frame_id)
+      if (
+        clubOpen({
+          answeredFrameIds: answered,
+          answers: legend,
+          purpose: (merged.purpose ?? null) as never,
+          proof,
+        })
+      ) {
+        await landInvite({ userId: user?.id ?? null, device })
+      }
+    } catch {
+      /* An invitation that cannot be paid must never cost somebody their sync. */
+    }
   } catch {
     // A merge that refuses is doing its job. The session record is already saved and
     // the device's own copy is untouched, so nothing is lost by not writing.
