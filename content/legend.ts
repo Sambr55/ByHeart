@@ -1,7 +1,7 @@
 import { INTERESTS } from '@/content/interests'
 import { say, sayEn } from './numbers'
-import { roadProgress } from './road'
-import { PIECES, ROOTS_BY_FAMILY, type CultureFamily, type Rung } from './roots'
+import { ROAD, roadProgress } from './road'
+import { PIECES, ROOTS, ROOTS_BY_FAMILY, type CultureFamily, type Rung } from './roots'
 import type { Purpose } from './situations'
 
 /**
@@ -1752,8 +1752,18 @@ export const REPAIR_KIT: { pt: string; en: string; why: string; built_from: stri
  * The seven are the card you hand somebody. The other three are what you build once you
  * are inside.
  */
-/** Seven, everywhere, for everybody. See LegendFrame.purposes. */
-export const CARD_SIZE = 7
+/**
+ * How many questions are on the card — DERIVED, not declared.
+ *
+ * This was `= 7`, a literal, and it was the second copy of a fact the road already holds:
+ * change the road and the constant said seven while cardFor said something else, which is
+ * precisely the disagreement Sam asked to have removed. Two checks asserted against it and
+ * both went red the moment the road changed, which is a check failing because content
+ * moved rather than because the product broke.
+ *
+ * Read from cardFor, so there is one answer and it follows the road.
+ */
+export const CARD_SIZE = cardFor(null).length
 
 /** Applies to this learner: untagged frames are for everybody, as most of them are. */
 export function frameForPurpose(f: LegendFrame, purpose: Purpose | null): boolean {
@@ -1774,8 +1784,45 @@ export function frameForPurpose(f: LegendFrame, purpose: Purpose | null): boolea
  * arrived — and it is replaced the moment they say otherwise.
  */
 export function cardFor(purpose: Purpose | null): LegendFrame[] {
-  const use = purpose ?? 'visiting'
-  return LEGEND_FRAMES.filter((f) => f.depth === 'card' && frameForPurpose(f, use))
+  /*
+    THE CARD IS WHAT THE ROAD ANSWERS. One definition, derived, not two kept in step.
+
+    Sam: "yes remove disagreement."
+
+    Every Legend fault this week was the same shape — two places computing the card and
+    getting different answers. The run-through took every answered frame while the gate
+    took depth 'card'. The sell panel took every frame the purpose allowed, which is
+    eleven against a seven, and asked a learner with 7/7 to answer two more. The door
+    waited on the whole road while the card finished a sitting earlier.
+
+    Each of those was fixed by pointing the offender at cardFor. That stops being enough
+    the moment the ROAD changes, because cardFor read a `depth` flag that somebody has to
+    remember to keep in step with it — and the flag is exactly the kind of second copy
+    this product keeps being bitten by.
+
+    So the card is now derived: a frame is on it if a step of the road asks for it, plus
+    `name`, which set-up asks before the road starts. Add a step and the card grows; take
+    one away and it shrinks; nothing to remember and nothing that can drift.
+
+    `purpose` stays in the signature and is ignored. The road is one road now — Sam: "I
+    dont care about sessions I just want a straight mapping" — so every purpose gets the
+    same card, and the parameter is kept rather than removed from forty call sites that
+    are all still asking the right question.
+  */
+  void purpose
+  const asked = new Set<string>(['name'])
+  for (const step of ROAD) {
+    const root = ROOTS.find((r) => r.root_id === step.root)
+    const a = (root as { asks?: string | string[] } | undefined)?.asks
+    if (!a) continue
+    for (const one of Array.isArray(a) ? a : [a]) asked.add(one)
+  }
+  /*
+    In LEGEND_FRAMES order rather than road order, so the deck reads the way it is
+    authored — the name first, then where you are from. The road decides membership; the
+    content file decides sequence.
+  */
+  return LEGEND_FRAMES.filter((f) => asked.has(f.id))
 }
 
 /** The universal seven, for the places that ask before a purpose exists. */

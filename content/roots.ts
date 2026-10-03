@@ -4836,19 +4836,33 @@ export const THE_BASICS: Root[] = [
   }),
   q({
     root_id: 'tb_married_work',
-    asks: ['married', 'work'],
+    /*
+      STATUS ONLY NOW — the work half is tb_work, immediately below.
+
+      Sam: "What's your relationship status (this needs to be split from work - makes no
+      sense to say I am divorced and I work)."
+
+      He is right and the line said it out loud: "Sou casado. Trabalho." is "I am married.
+      I work." — two unrelated facts in one breath, joined by nothing but the fact that a
+      stranger asks both. Read back by somebody who chose `divorciado` it was worse: "I am
+      divorced. I work." reads as a sentence about coping.
+
+      The id stays tb_married_work so no learner's roots_played is invalidated by the
+      split; what changed is what it asks and what it teaches.
+    */
+    asks: 'married',
     culture_family: 'the_basics',
     rung: 1,
     root_type: 'other',
     source_label: 'The second and third things anybody asks',
     source_status: 'needs-review',
-    root_display: 'I am married, and I work.',
+    root_display: 'I am married.',
     credit: 'About a minute into meeting anybody',
-    source: 'I am married. I work.',
-    target: 'Sou casado. Trabalho.',
+    source: 'I am married.',
+    target: 'Sou casado.',
     semantic_bridge:
-      'Two answers and no extra words. TRABALHO is both "I work" and "the work" — Portuguese leaves context to sort it out, and context always does.',
-    subtext: 'The two questions that follow your name, in the order they come.',
+      'SOU is the permanent one — what you ARE rather than how you are today. Married, single, divorced and separated all take it, and all four change their ending with the speaker: casado if you are a man, casada if you are a woman.',
+    subtext: 'The first question that follows your name.',
     /*
       The other half of the introduction — see tb_introduce above for why these words are
       in the basics at all. Separated because a root teaches 1–3 pieces, and because your
@@ -4857,7 +4871,6 @@ export const THE_BASICS: Root[] = [
     extracts: [
       /* lemma so the agreement paradigm still has an owner — PIECES keeps the lowest rung, so this entry replaces Bridget Jones's and must carry everything it did. */
       { id: 'casado', target: 'casado', gloss: 'married', shelf: 'describing', lemma: 'casado', note: 'Casada if you are a woman.' },
-      { id: 'trabalho', target: 'trabalho', gloss: 'I work', shelf: 'doing', lemma: 'trabalhar', form: 'I', note: 'Also the noun — o trabalho, the work.' },
     ],
     branches: [
       /*
@@ -4874,7 +4887,15 @@ export const THE_BASICS: Root[] = [
         learner just gave, and the pair reads as one conversation.
       */
       { target: 'Ela não é casada.', en: 'She is not married.', demonstrates: ['casado'] },
-      { target: 'Trabalho aqui.', en: 'I work here.', demonstrates: ['trabalho'] },
+      /*
+        THE THIRD BRANCH, after the work half moved to tb_work and took one with it.
+
+        It teaches the pair the ending actually turns on — a woman reads "Sou casada" on
+        her own line, and this is where she sees the masculine beside it without either
+        being a denial of her answer. The question back is the useful half: `és` is the
+        tu form of the same verb she has just used about herself.
+      */
+      { target: 'E tu, és casado?', en: 'And you, are you married?', demonstrates: ['casado'], address: 'tu', formal: 'E o senhor, é casado?' },
       /*
         THE THIRD BRANCH TAUGHT THE ENDING, and the ending is now taught by the learner's
         own answer — see myStatus.
@@ -4894,17 +4915,67 @@ export const THE_BASICS: Root[] = [
       { target: 'Sou solteiro, e estou bem assim.', en: 'I am single, and I am fine like that.', demonstrates: ['casado'] },
     ],
     reinforces: ['sou', 'nao'],
-    helpers: { 'aqui': 'here', 'não': 'not', 'casada': 'married, said by a woman', 'solteiro': 'single', 'Ela': 'she', 'é': 'is', 'e': 'and', 'estou': 'I am (right now)', 'bem': 'fine', 'assim': 'like that' },
+    helpers: { 'não': 'not', 'casada': 'married, said by a woman', 'solteiro': 'single', 'Ela': 'she', 'é': 'is', 'és': 'are you', 'e': 'and', 'tu': 'you', 'estou': 'I am (right now)', 'bem': 'fine', 'assim': 'like that' },
     transfer_prompt: {
-      context: 'They have asked what you do, and the answer is nothing complicated.',
+      context: 'They have asked, the way everybody does, about a minute in.',
       /*
         The cold prompt asked a learner to produce "I am not married" about themselves,
         which for a married one was a lie and for a single one became "I am not single"
         once the status carried. It asks for their own answer now — which is the sentence
         this root exists to make sayable — plus the one word it teaches alongside it.
       */
-      ask: 'I work here. I am married.',
-      answer: 'Trabalho aqui. Sou casado.',
+      ask: 'And you, are you married?',
+      answer: 'E tu, és casado?',
+    },
+    rights_status: 'dub-authored',
+    starter_tags: ['first-day', 'introduce'],
+    next_root_hooks: ['porque'],
+  }),
+  q({
+    /*
+      WHAT YOU DO, SPLIT OUT OF THE STATUS ROOT.
+
+      Sam: "What's your relationship status (this needs to be split from work - makes no
+      sense to say I am divorced and I work)."
+
+      The two were one line — "Sou casado. Trabalho." — because a stranger asks both within
+      a minute of your name. That is true about the conversation and false about the
+      sentence: nothing joins them, and a learner who answered `divorciado` read "I am
+      divorced. I work." back at themselves.
+
+      So this carries trabalho and the words around it, and the status root keeps sou. Both
+      are still in the basics and still adjacent, which is the only part of the original
+      argument that was actually about the learner.
+    */
+    root_id: 'tb_work',
+    asks: 'work',
+    culture_family: 'the_basics',
+    rung: 1,
+    root_type: 'other',
+    source_label: 'The third thing anybody asks',
+    source_status: 'needs-review',
+    root_display: 'I work with —',
+    credit: 'About a minute into meeting anybody',
+    source: 'I work with computers.',
+    target: 'Trabalho com computadores.',
+    semantic_bridge:
+      'TRABALHO is both "I work" and "the work" — Portuguese leaves context to sort it out, and context always does. COM is "with", and Portuguese says you work WITH a thing where English says you work IN a field.',
+    subtext: 'The answer that stops the conversation being about your name.',
+    extracts: [
+      { id: 'trabalho', target: 'trabalho', gloss: 'I work', shelf: 'doing', lemma: 'trabalhar', form: 'I', note: 'Also the noun — o trabalho, the work.' },
+      { id: 'com', target: 'com', gloss: 'with', shelf: 'small_words' },
+    ],
+    branches: [
+      { target: 'Trabalho aqui.', en: 'I work here.', demonstrates: ['trabalho'] },
+      { target: 'Trabalho com computadores.', en: 'I work with computers.', demonstrates: ['trabalho', 'com'] },
+      { target: 'Vens comigo?', en: 'Are you coming with me?', demonstrates: ['com'] },
+    ],
+    reinforces: ['sou'],
+    helpers: { 'aqui': 'here', 'computadores': 'computers', 'Vens': 'are you coming', 'comigo': 'with me' },
+    transfer_prompt: {
+      context: 'They have asked what you do, and the answer is nothing complicated.',
+      ask: 'I work here.',
+      answer: 'Trabalho aqui.',
     },
     rights_status: 'dub-authored',
     starter_tags: ['first-day', 'introduce'],

@@ -24,6 +24,8 @@ import {
   frameApplies,
   isAnswered,
 } from '../content/legend'
+import { ROAD } from '../content/road'
+import { ROOTS } from '../content/roots'
 import { say } from '../content/numbers'
 
 const problems: string[] = []
@@ -36,8 +38,48 @@ const all = LEGEND_CARD.map((f) => f.id)
 const harder = LEGEND_FRAMES.filter((f) => f.depth === 'deeper').map((f) => f.id)
 
 console.log('\nthe card\n')
-ok('is the seven questions a stranger asks', LEGEND_CARD.length === 7, String(LEGEND_CARD.length))
-ok('is entirely card-depth frames', LEGEND_CARD.every((f) => f.depth === 'card'))
+/*
+  THE CARD IS WHAT THE ROAD ANSWERS — derived, not counted.
+
+  This asserted `length === 7` and `every depth === 'card'`, and both are the fault the
+  comment below already names: a bare count of content fails when the content changes
+  rather than when the product breaks, and `depth` was a second copy of the card's
+  membership that somebody had to keep in step with the road by hand.
+
+  Sam, after a week of the two disagreeing: "yes remove disagreement." cardFor derives the
+  card from ROAD now, so the thing worth asserting is that the derivation HOLDS — every
+  question the road asks is on the card, and nothing is on the card that the road does not
+  ask. Change the road and this follows it; break the link and it goes red.
+*/
+{
+  const asked = new Set<string>(['name'])
+  for (const step of ROAD) {
+    const root = ROOTS.find((r) => r.root_id === step.root)
+    const a = (root as { asks?: string | string[] } | undefined)?.asks
+    if (!a) continue
+    for (const one of Array.isArray(a) ? a : [a]) asked.add(one)
+  }
+  /*
+    NOT EVERYTHING THE ROAD ASKS IS A LEGEND FRAME. `email` and `gender` are profile
+    fields — the address the work is sent to, and which of obrigado/obrigada is yours —
+    and neither is a thing you say about yourself on a card. So the claim is over the
+    road's questions that ARE frames, which is what cardFor filters on.
+  */
+  const frameIds = new Set(LEGEND_FRAMES.map((f) => f.id))
+  const askedFrames = [...asked].filter((id) => frameIds.has(id))
+  ok(
+    'is exactly what the road asks, plus the name',
+    all.length === askedFrames.length && all.every((id) => askedFrames.includes(id)),
+    all.length + ' on the card against ' + askedFrames.length + ' asked as frames',
+  )
+  /*
+    AND THE ROAD ANSWERS ALL OF IT. The mirror of the line above: a card question no step
+    asks is one a learner could never answer by walking the road, which is the dead end
+    this whole rewrite is removing.
+  */
+  const unanswerable = askedFrames.filter((id) => id !== 'name' && !all.includes(id))
+  ok('and every road question lands on it', unanswerable.length === 0, unanswerable.join(', '))
+}
 /*
   THE PROPERTY, NOT THE COUNT.
 
@@ -52,10 +94,18 @@ ok('is entirely card-depth frames', LEGEND_CARD.every((f) => f.depth === 'card')
   mean the Legend has no inside left, and a harder frame appearing on the card would mean the
   door is gated on something the ladder has not reached.
 */
+/*
+  AND SOMETHING IS STILL HELD BACK. `age` and `into` moved onto the card when the road
+  picked them up — Sam put both on his ten — so the held-back set is smaller than it was,
+  and the property is unchanged: there IS an inside to the Legend, and none of it gates the
+  door. Measured against the card rather than against `depth`, which is no longer what
+  decides membership.
+*/
+const held = LEGEND_FRAMES.filter((f) => !all.includes(f.id)).map((f) => f.id)
 ok(
   'holds the harder ones back for inside',
-  harder.length > 0 && harder.every((id) => !all.includes(id)),
-  harder.join(', ') || 'nothing held back',
+  held.length > 0,
+  held.join(', ') || 'nothing held back',
 )
 
 console.log('\nthe door\n')
@@ -88,7 +138,8 @@ ok(
 )
 
 console.log('\ncounting down\n')
-ok('an empty card has seven to go', cardToGo([]) === 7, String(cardToGo([])))
+/* The whole card, whatever size the road makes it — see the derivation note above. */
+ok('an empty card has the whole card to go', cardToGo([]) === all.length, String(cardToGo([])))
 ok('a full card has none to go', cardToGo(all) === 0)
 ok('cardDone agrees with cardToGo', cardDone(all) && !cardDone(all.slice(0, 6)))
 

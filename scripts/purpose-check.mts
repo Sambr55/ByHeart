@@ -53,7 +53,7 @@ console.log('\nseven, for everybody\n')
 for (const p of PURPOSES) {
   const card = cardFor(p.id)
   ok(
-    p.id + '’s card is seven',
+    p.id + '’s card is ' + CARD_SIZE,
     card.length === CARD_SIZE,
     card.length + ': ' + card.map((f) => f.id).join(', '),
   )

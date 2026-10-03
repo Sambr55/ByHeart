@@ -129,35 +129,8 @@ export const ROAD: RoadStep[] = [
   {
     root: 'tb_introduce',
     family: 'the_basics',
-    because: 'Your name and where you are from — two card questions, and the answer every later line needs.',
+    because: 'Your name and where you are from — the answer every later line needs.',
   },
-  /*
-    EMAIL SECOND, WHICH IS EARLIER THAN THE RULE ABOVE WOULD PUT IT.
-
-    Sam: "I think email should be moved up to position 1a after name and then if they give
-    us their email, we should then remove the downstream reminders. But explain they run
-    the risk of losing their data if they dont supply their email."
-
-    THIS BREAKS THE ROAD'S OWN RULE ON PURPOSE. The rule is that the road carries only what
-    builds the card, and email is not a frame at all — it is a profile field. It was last
-    for a defensible reason: ask once there is something worth not losing.
-
-    What that reasoning missed is what the LATENESS costs. An address given at step twelve
-    protects nothing that happened in steps one to eleven, which is the entire road — so
-    the learner most likely to lose work, the one who stops early, is exactly the one never
-    asked. And because it was unanswered for the whole walk, every sitting break had to
-    carry a save prompt, so the ask arrived four times in softer and softer forms rather
-    than once, plainly.
-
-    Asked here it is a worse conversion and a better product: some people will decline, and
-    a decline at step two is one clear no instead of four nudges. Those who give it are
-    covered for the whole road and never asked again — see offerSave in Journey.tsx, which
-    already skips the break prompt when profile.email exists.
-
-    IT IS STILL NOT A GATE. Declining costs nothing and the road carries on. What the screen
-    owes somebody who declines is the honest consequence, which the break copy now states:
-    the work is on this phone, so losing the phone loses it.
-  */
   {
     root: 'tb_email',
     family: 'the_basics',
@@ -171,89 +144,28 @@ export const ROAD: RoadStep[] = [
   {
     root: 'tb_married_work',
     family: 'the_basics',
-    because: 'What you do and whether you are married — the two questions a stranger asks third.',
+    because: 'Your status — sou, and the ending that agrees with you.',
+  },
+  {
+    root: 'tb_work',
+    family: 'the_basics',
+    because: 'What you do, which is the question that follows it and has nothing to do with it.',
   },
   {
     root: 'tb_age',
     family: 'the_basics',
-    because: 'How old you are, on the picker that teaches every number to a hundred at once.',
+    because: 'Tenho and anos, and the number that is yours.',
   },
   {
     root: 'tb_why',
     family: 'the_basics',
-    because: 'Why you are here, which is the card question people most want to answer.',
+    because: 'Porque — why you are here at all.',
   },
-  /*
-    tb_patience AFTER tb_why, WHICH IS A PACKING DECISION AND SAYS SO.
-
-    Both are card roots and neither depends on the other, so the order between them is
-    free — and a sitting holds thirty screens. tb_age and tb_why are the two eleven-screen
-    roots on the road; with them adjacent, a visitor's third sitting took 22 and had eight
-    left, one short of the nine tb_eight_days needs, which spilled a single root into a
-    fourth sitting. Separating them closes the road in three.
-
-    This is the thing an authored list can do that a sort could not: the old five-term
-    sort had no way to express "these two are interchangeable, so put the short one where
-    it fits". Here it is one line moved, with the reason beside it.
-
-    IT DID NOT BUY THE FOURTH SITTING BACK, and the order is kept anyway because it is the
-    better sequence — why you are here is a more interesting question than the one about
-    patience, and it belongs earlier. Visiting's road is 86 screens against a 90-screen
-    budget and its third sitting lands on 22 with nine still to place, one screen over. A
-    visitor takes the warm-up and four short sittings; staying and moving take three. The
-    honest fix for that is a shorter root, not a longer session.
-  */
   {
     root: 'tb_patience',
     family: 'the_basics',
-    because: 'The sentence that buys you time, and the card question about your Portuguese.',
+    because: 'Bear with me, I am learning. The sentence that keeps a conversation alive.',
   },
-  /*
-    THE THREE THAT DEPEND ON THE ANSWER, and this is the whole of the difference between
-    the cards. A visitor is asked how long they are here, somebody staying whether it is
-    their first time, somebody moving how long it has been — and none of the three wants
-    the other two. Everybody used to take all three.
-  */
-  {
-    root: 'tb_1234',
-    family: 'the_basics',
-    because: 'Um and dois — how long you are here, or how long it has been.',
-    only: ['visiting', 'moving'],
-  },
-  {
-    root: 'tb_eight_days',
-    family: 'the_basics',
-    because: 'Semana, for saying how long the trip is.',
-    only: ['visiting'],
-  },
-  {
-    root: 'tb_yes_no',
-    family: 'the_basics',
-    because: 'Sim and não, for whether this is your first time.',
-    only: ['staying'],
-  },
-  /*
-    THE LAST TWO ASKING ROOTS, which were the only ones NOT on the road.
-
-    Sam: "the two questions I have to go back for contain the email capture and the
-    interests selector. So I think we should break the 7 question rule and just complete
-    the lot in one run, and take away any confusion."
-
-    tb_into and tb_email were in the basics' remainder — reachable only once the road was
-    walked — so a learner finished the road, opened their Legend, and then found two more
-    questions waiting behind it. The road's own promise is that walking it is enough, and
-    two questions outside it made that false.
-
-    They are not filler. tb_into teaches gosto de, which is the shape half the Club's
-    interest content is built on, and tb_into's answer decides what the feed offers.
-    tb_email is how the work survives a lost phone, which is the one thing this product
-    cannot recover for somebody.
-
-    THE COST IS A FOURTH SITTING, and that is the trade Sam took: 85 screens to 103 for a
-    visiting learner against a 30-screen sitting. What pays for it is the break itself —
-    see BREAKS below, which turns the gap between sittings into the one place the product
-    teaches something it has nowhere else to put.
-  */
   {
     root: 'tb_into',
     family: 'the_basics',
