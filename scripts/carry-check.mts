@@ -617,31 +617,34 @@ console.log('\nand nothing is claimed before it is answered\n')
       what a learner would misread as their own.
     */
     /*
-      THE RULE IS NOT "NEVER SAY INGLÊS" — it is never say it ABOUT THEM.
+      A FACT NOBODY GAVE IS NEVER STATED — and the NAME is not one of those facts.
 
-      This asserted that the specimen's own words must not survive, and that was too
-      strong. "Chamo-me Ana. Sou inglês." is the sentence tb_introduce exists to teach; a
-      learner reading it is reading an example, and blanking it produced "Sou —.", which is
-      a shape with the word that explains it taken out. Sam, with the screenshot: "No its
-      not pulling through country."
+      This line has had three wrong rules in two days, and each produced a real complaint:
 
-      What makes a specimen a claim is the NAME. Ana's sentence is plainly Ana's; put the
-      reader's own name in the first half and every word after it is about them. So the
-      assertion is that an unanswered root does not carry the learner's name — which holds
-      the original fault shut without emptying the lesson.
+        name + Ana's nationality   told Sam he was English
+        hold everything            "regressed to first name Ana, not pulling through"
+        name + a dash              "Sou —." — the shape with its own lesson removed
+
+      All three are the same mistake: treating one sentence as one decision. It holds two
+      facts in different states. The NAME was given at set-up and is not what this screen is
+      asking about, so it lands. The NATIONALITY is being asked for right below, so it shows
+      as the choice on offer rather than as one option pretending to be the answer.
+
+      So the assertion is about the borrowed fact, not the name: an unanswered root must not
+      state the specimen's nationality or town as though it were the learner's.
     */
+    const stillSpecimen =
+      /\bingl(ês|esa)\b/.test(shown.target) && !/\//.test(shown.target)
     ok(
-      r.root_id + ' does not put the learner in an unanswered line',
-      !shown.target.includes('Sam') && !shown.source.includes('Sam'),
+      r.root_id + ' does not state a nationality nobody gave',
+      !stillSpecimen,
       shown.target,
     )
-    for (const br of shown.branches) {
-      ok(
-        r.root_id + ' branch does not put the learner in an unanswered line',
-        !br.target.includes('Sam'),
-        br.target,
-      )
-    }
+    ok(
+      r.root_id + ' does not state a town nobody gave',
+      !shown.target.includes('Londres') && !shown.source.includes('London'),
+      shown.target,
+    )
     /*
       AND IT IS STILL A SENTENCE. The fix for the fault above was a dash — "Sou —." — which
       is a shape with the word that explains it removed, on the one screen whose job is to
