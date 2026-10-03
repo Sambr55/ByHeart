@@ -657,8 +657,8 @@ export function personalise<T extends {
       on the same line.
     */
     if (!swap)
-      return offerChoice(
-        myForm(myOrigin(myStatus(myAge(myName(t, me.display_name), me.profile?.age), status))),
+      return myForm(
+        myOrigin(myStatus(myAge(myName(t, me.display_name), me.profile?.age), status)),
       )
     const swapped = t
       .replaceAll('de música', swap.after_de)
@@ -670,10 +670,8 @@ export function personalise<T extends {
       */
       .replaceAll('of music', 'of ' + swap.gloss)
       .replaceAll('music', swap.gloss)
-    return offerChoice(
-      myForm(
-        myOrigin(myStatus(myAge(myName(swapped, me.display_name), me.profile?.age), status)),
-      ),
+    return myForm(
+      myOrigin(myStatus(myAge(myName(swapped, me.display_name), me.profile?.age), status)),
     )
   }
   return {
@@ -827,9 +825,23 @@ export function personalise<T extends {
           }),
         }
       : {}),
-    target: mine(root.target),
-    source: mine(root.source),
-    root_display: mine(root.root_display),
+    /*
+      THE CHOICE IS OFFERED ON THE HEADLINE ONLY — and that is the whole of what went wrong
+      last time.
+
+      offerChoice turns an unanswered `inglês` into "inglês / escocês / galês", which reads
+      correctly under a name — "Chamo-me Golly. Sou inglês / escocês / galês." is plainly a
+      menu. It does NOT read correctly alone: the piece-branch beat shows one branch on its
+      own, with no name and no context, and Sam got a screen saying "Sou inglês / escocês /
+      galês. / I am English / Scottish / Welsh." as though he were from three countries.
+
+      The headline carries the name, so the menu has something to belong to. A branch does
+      not, so it keeps the authored specimen — which is what it is for: one example of the
+      piece doing its job.
+    */
+    target: offerChoice(mine(root.target)),
+    source: offerChoice(mine(root.source)),
+    root_display: offerChoice(mine(root.root_display)),
     /*
       THE BRIDGE IS NOT BENT, because it is the sentence explaining the bend.
 

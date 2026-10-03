@@ -646,6 +646,25 @@ console.log('\nand nothing is claimed before it is answered\n')
       shown.target,
     )
     /*
+      AND THE MENU NEVER REACHES A BRANCH.
+
+      Sam, with a screenshot of the piece-branch beat: "Now says user is from
+      england/scotland/wales ???" The choice line — "Sou inglês / escocês / galês" — reads
+      as a menu under a name, which is where it belongs, and as a claim about three
+      countries when a branch is shown on its own with no name and no context. That beat
+      shows exactly one branch, full screen.
+
+      So the headline offers the choice and the branches keep the authored specimen, which
+      is what a branch is for: one example of the piece doing its job.
+    */
+    for (const br of shown.branches) {
+      ok(
+        r.root_id + ' branch is one example, not a menu',
+        !br.target.includes(' / ') && !br.en.includes(' / '),
+        br.target,
+      )
+    }
+    /*
       AND IT IS STILL A SENTENCE. The fix for the fault above was a dash — "Sou —." — which
       is a shape with the word that explains it removed, on the one screen whose job is to
       teach that shape. Sam read it off his phone. A specimen that has been emptied is not
