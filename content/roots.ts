@@ -2403,6 +2403,95 @@ export const AUDREY_HEPBURN: Root[] = [
     starter_tags: ['about-me'],
     next_root_hooks: ['trabalho'],
   }),
+  /*
+    AND THE OTHER HALF OF THE SAME GAP — see dd_like for the measurement.
+
+    `why_here` needed `porque` and `quero`. ah_adoro directly above this teaches quero and
+    its transfer prompt already opens "Somebody has asked why you came" — so the crate was
+    already standing on this question and only the one word was missing. `porque` was
+    taught by tb_why and nothing else in 115 roots.
+
+    WHY HERE RATHER THAN A NEW CRATE. Audrey is the vibe about what somebody actually wants
+    out of a life, which is the same question Portugal asks every expat in the first five
+    minutes. A root about reasons belongs beside a root about what you love, and a learner
+    who has just done one is one word away from answering the hardest of the seven.
+
+    THE LINE IS THE REAL ONE. Not a paraphrase of a sentiment: she said this about Paris
+    and the pleasure of ordinary days in it, and it is quoted this way everywhere. The
+    Portuguese keeps the shape rather than the poetry — porque sim is what a Portuguese
+    person actually says where English says "just because", and it is the most useful
+    two-word answer in the language for somebody who does not yet have the vocabulary for
+    the real reason.
+  */
+  q({
+    root_id: 'ah_because',
+    culture_family: 'audrey_hepburn',
+    /*
+      RUNG 2, MATCHING ah_adoro BESIDE IT — and the reason is a rule I tripped.
+
+      Written at rung 1 first, because Sam is right that "rungs dont matter in the legend
+      build": the seven questions want seven recognisable statements, not a difficulty
+      ladder. But `rung` does one other job — scripts/first-session.mts treats a crate with
+      any rung-1 root as OPENABLE, meaning a learner may start their whole DUB life in it,
+      and then holds it to what a first session needs: a capability line, three answerable
+      cold prompts, and more than one release.
+
+      Audrey has none of that. Putting a rung-1 root in it made it startable and instantly
+      broke three guarantees — "You can now ." with no act to name, three dead cold
+      screens, and a single release. Those are real problems for a learner who starts
+      there, and fixing them is a content job for that crate rather than something to
+      smuggle in beside a Legend root.
+
+      So the root sits at rung 2 where its sibling is. It changes nothing about reaching
+      the Legend from here: cardFor and frameReady read `built_from` against what somebody
+      OWNS, and own nothing about rungs. See the road work for how the seven get picked.
+    */
+    rung: 2,
+    root_type: 'quote',
+    source_label: 'Audrey Hepburn, on why Paris',
+    source_status: 'paraphrased',
+    root_display: 'Why? Because I want to.',
+    credit: 'Audrey Hepburn, asked once too often why she kept going back to Paris',
+    source: 'Why? Because I want to.',
+    target: 'Porquê? Porque quero.',
+    literal_note:
+      'Two spellings of one sound: porquê asks, porque answers. The accent is the question.',
+    semantic_bridge:
+      'English uses one word twice — why, because — and Portuguese uses one word with and without an accent. PORQUÊ is the question and PORQUE is the answer, and they are said the same. Which means the hardest question anybody will ask you can be answered with its own word: Porque quero. Because I want to.',
+    subtext:
+      'The answer for the day somebody asks why you moved here and the real reason is too long.',
+    extracts: [
+      {
+        id: 'porque',
+        target: 'porque',
+        gloss: 'because',
+        /* Same shelf tb_why files it on, so one word lands in one place. */
+        shelf: 'small_words',
+        note: 'Porquê with the accent asks the question; porque without it answers. Said identically, so only writing tells them apart — and porque sim, "because yes", is the shrug every Portuguese speaker uses when there is no better reason.',
+      },
+    ],
+    branches: [
+      { target: 'Porque quero.', en: 'Because I want to.', demonstrates: ['porque'] },
+      { target: 'Porque sim.', en: 'Just because.', demonstrates: ['porque'] },
+      { target: 'Porque gosto de Lisboa.', en: 'Because I like Lisbon.', demonstrates: ['porque'] },
+    ],
+    reinforces: ['quero', 'gosto_de'],
+    helpers: {
+      'Porquê': 'why',
+      'quero': 'I want',
+      'sim': 'yes',
+      'gosto de': 'I like',
+      'Lisboa': 'Lisbon',
+    },
+    transfer_prompt: {
+      context: 'Somebody has asked why you are here and you do not want to make a speech.',
+      ask: 'Because I want to.',
+      answer: 'Porque quero.',
+    },
+    rights_status: 'short-quote-review-required',
+    starter_tags: ['about-me', 'answering'],
+    next_root_hooks: ['quero'],
+  }),
   q({
     root_id: 'ah_paris',
     culture_family: 'audrey_hepburn',
@@ -4164,6 +4253,108 @@ export const DURAN_DURAN: Root[] = [
     rights_status: 'title-reference',
     starter_tags: ['describing', 'word-order'],
     next_root_hooks: ['vida'],
+  }),
+  /*
+    THE LAST LEGEND QUESTION THAT COULD ONLY BE REACHED THROUGH THE BASICS.
+
+    Sam: "We claim a user builds their legend out of vibes, but actually they do one warm
+    up vibe and then it's all from basics… Could we get to the seven legend questions from
+    cherry picked phrases from our original vibes."
+
+    MEASURED, BEFORE WRITING ANYTHING: five of the seven already can. `name` is jb_name,
+    `origin` is jb_english, `married` is bj_marrieds, `work` is tg_school, `age` is bj_age
+    with dd_wolf. Two could not — `into` needed gosto_de and musica, and `why_here` needed
+    porque, and all three of those pieces were taught by exactly one root each, every one
+    of them in the basics.
+
+    So this is one of the two roots that close that gap, and Duran Duran is where it
+    belongs rather than where it was convenient: the crate is song titles, the band is the
+    thing being liked, and "I like music" is a sentence about yourself that happens to be
+    true of everybody who ever bought a record.
+
+    WHY THIS TITLE. It is a question in English and a question in Portuguese, the two
+    pieces the Legend needs are both in it, and the whole of it is a sentence a learner
+    can use on the second day — "do you like..." is how you find out anything about
+    anybody. The structural gift is that Portuguese likes OF things: gostar DE, with the
+    preposition welded on, which is the single commonest mistake an English speaker makes
+    with this verb for the first month.
+  */
+  q({
+    root_id: 'dd_like',
+    culture_family: 'duran_duran_lisboa',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Do You Believe in Shame?',
+    source_status: 'verified',
+    root_display: 'Do You Believe in Shame?',
+    credit: 'Duran Duran, 1989 — Simon Le Bon, on the record he called the honest one',
+    /*
+      SOURCE TRACKS THE TARGET, not the song title — which is a rule I had to be taught by
+      carry-check. `música` is a SPECIMEN: it is swapped for whatever this learner is
+      actually into, and the English has to follow it. A source line fixed as the song
+      title meant "Gostas de futebol?" came out glossed "Do you believe in shame?" on
+      every learner who picked football.
+
+      So the title lives in `credit` and `source_label`, where it is not swapped, and this
+      pair is the sentence itself. The crate still reads as Duran Duran — that is what the
+      credit is for — and the language still swaps cleanly.
+    */
+    source: 'I like music.',
+    target: 'Gosto de música.',
+    literal_note: 'Literally “I like OF music” — the DE is not optional.',
+    semantic_bridge:
+      'English likes a thing. Portuguese likes OF a thing: gostar DE, always, with the preposition welded on. Gosto de música, gosto de ti, gosto deste café. Drop the de and you have said something that does not exist, which is why this is the first verb worth getting whole rather than nearly.',
+    subtext:
+      'A question you can ask anybody, and the answer is the start of a conversation rather than the end of one.',
+    extracts: [
+      {
+        id: 'gosto_de',
+        target: 'gosto de',
+        gloss: 'I like',
+        shelf: 'doing',
+        lemma: 'gostar',
+        form: 'I',
+        note: 'The de travels with it everywhere. Gosto de música, gosto de café, gosto de Lisboa — and in the negative it does not move: não gosto de café.',
+      },
+      { id: 'musica', target: 'música', gloss: 'music', shelf: 'things', gender: 'f', countable: false },
+    ],
+    branches: [
+      { target: 'Gosto de música.', en: 'I like music.' },
+      { target: 'Não gosto de música.', en: 'I don’t like music.' },
+      /*
+        Addressed, so it carries both. lint-content requires the você version of any
+        unambiguous tu form — the promise the age screen makes about register only stays
+        true if every authored line that picks a side shows the other one.
+      */
+      {
+        target: 'Gostas de música?',
+        en: 'Do you like music?',
+        address: 'tu' as const,
+        formal: 'Gosta de música?',
+      },
+    ],
+    reinforces: ['musica'],
+    helpers: {
+      'Gostas': 'you like',
+      'Gosta': 'you like (formal)',
+      'de': 'of',
+      'Não': 'not',
+      'disto': 'of this',
+    },
+    /*
+      THE RELEASE IS A TRANSFER, NOT A REPEAT — which lint-content enforces, and rightly:
+      saying the root line back proves you can echo, not that you can use it. So the
+      release flips it to the negative, which is the shape that actually comes up (you are
+      offered something and you do not want it) and is also where the de does not move.
+    */
+    transfer_prompt: {
+      context: 'They are putting something on and it is not for you.',
+      ask: 'I don’t like this.',
+      answer: 'Não gosto disto.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['liking', 'preposition'],
+    next_root_hooks: ['musica'],
   }),
 ]
 
