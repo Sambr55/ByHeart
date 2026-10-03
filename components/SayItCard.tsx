@@ -44,12 +44,31 @@ export function SayItCard({
   onClose,
   onShown,
   reveal = true,
+  askIsPortuguese = true,
   children,
 }: {
   /** The question, in whichever language this beat asks in. */
   ask: string
   /** The gloss under it, where the ask is Portuguese. Omitted where the ask is English. */
   askEn?: string
+  /**
+   * WHETHER THE QUESTION CAN BE HEARD, which depends on what language it is in.
+   *
+   * The Legend asks in Portuguese — "Como te chamas?" — so the question has audio and a
+   * listen button beside it. The lesson's transfer prompt asks in ENGLISH ("Come with
+   * me.") and the answer is the Portuguese. Drawing a listen button there would hand
+   * slugFor an English string, which falls through to slugify and asks the speech engine
+   * to read English in a Portuguese voice.
+   *
+   * It also decides the FACE. --accent is the Portuguese colour everywhere in this
+   * product, and on the release beat the English cue is the thing being taken away — so
+   * colouring it like the language would say the cue is what to learn.
+   *
+   * A prop rather than a guess: nothing here can reliably detect the language of a
+   * string, and a heuristic that got it wrong would mispronounce the question on one beat
+   * in twenty. Asserted in scripts/say-check.mts.
+   */
+  askIsPortuguese?: boolean
   /** What they are being asked to say. */
   answer: string
   /** For the proof row the caller writes, and nothing else here. */
@@ -133,8 +152,13 @@ export function SayItCard({
       {/* The question, at the size a question deserves rather than at caption size. */}
       <div className="flex flex-col gap-3">
         <div className="flex items-start gap-3">
-          <AudioButton slug={slugFor(ask)} text={ask} size="sm" />
-          <h1 data-testid="say-ask" className="pt t-ask min-w-0 flex-1 text-accent">
+          {askIsPortuguese ? <AudioButton slug={slugFor(ask)} text={ask} size="sm" /> : null}
+          <h1
+            data-testid="say-ask"
+            className={
+              't-ask min-w-0 flex-1 ' + (askIsPortuguese ? 'pt text-accent' : 'text-fg')
+            }
+          >
             {ask}
           </h1>
         </div>

@@ -433,6 +433,197 @@ console.log('\nand where the browser cannot listen, nothing is offered\n')
   await ctx.close()
 }
 
+/*
+  AND THE LESSON'S OWN COLD BEAT, which had no microphone at all.
+
+  Sam: "now do the transfer prompt in journey."
+
+  THE SCREEN PROMISED THIS IN WORDS. RELEASE.why says "the next sentence is yours, with
+  nothing on screen to copy from" — and the beat then offered tiles, which are something
+  on screen to copy from. It is the beat that moves the ladder and writes a line to the
+  proof card, and Journey.tsx imported no microphone on any beat: the file somebody spends
+  nearly all their time in had no say-it-aloud route anywhere.
+
+  WHAT IS ASSERTED, walked in a real lesson rather than seeded:
+
+    the question is English and is NOT dressed as Portuguese. The Legend asks in
+       Portuguese and gets the accent, the `pt` face and a listen button; this asks "Come
+       with me." and must get none of them — a listen button here would hand slugFor an
+       English string and ask the speech engine to read it in a Portuguese voice.
+
+    a miss leaves the beat alone. The tiles must still be there and nothing may be
+       recorded: this is the one beat where a false positive would mark a root played and
+       move the ladder on a sentence nobody said.
+
+    a success records CLEAN proof and marks the root played. Clean because a sentence said
+       into a microphone with no answer on screen has nothing to copy from by definition —
+       unlike the build below it, where `clean` means first attempt and no help.
+*/
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  await ctx.addInitScript(`
+    function FakeRec() {
+      this.lang = ''
+      this.continuous = false
+      this.interimResults = false
+      this.maxAlternatives = 1
+      this.onresult = null
+      this.onerror = null
+      this.onend = null
+    }
+    FakeRec.prototype.start = function () {
+      var self = this
+      var said = window.__SAY || 'zzz nothing like it at all'
+      setTimeout(function () {
+        if (self.onresult) self.onresult({ results: { length: 1, 0: { length: 1, 0: { transcript: said } } } })
+        if (self.onend) self.onend()
+      }, 50)
+    }
+    FakeRec.prototype.stop = function () {}
+    window.SpeechRecognition = FakeRec
+    window.webkitSpeechRecognition = FakeRec
+  `)
+  const page = await ctx.newPage()
+  await page.goto(BASE)
+  await page.evaluate(
+    ([k]) =>
+      localStorage.setItem(
+        k as string,
+        JSON.stringify({
+          version: 1,
+          deal_accepted_at: '2026-08-01T00:00:00.000Z',
+          proof: [],
+          inventory: {},
+          roots_played: [],
+          sections_completed: [],
+          legend: [],
+          evidence: [],
+        }),
+      ),
+    [KEY] as const,
+  )
+  await page.goto(BASE + '/vibes')
+  await page.waitForTimeout(1600)
+  /* Through set-up: why, a name (required — see the consent note in SetUp), then commit. */
+  await page.click('[data-testid="setup-why-moving"]').catch(() => {})
+  await page.waitForTimeout(800)
+  await page.fill('[data-testid="setup-who"]', 'Sam').catch(() => {})
+  await page.click('[data-testid="consent-tick"]').catch(() => {})
+  await page.click('[data-testid="setup-commit"]').catch(() => {})
+  await page.waitForTimeout(1600)
+
+  /* Forward to the beat that has both a question and a build: the transfer prompt. */
+  let reached = false
+  for (let i = 0; i < 60; i++) {
+    if ((await page.$('[data-testid="say-ask"]')) && (await page.$('[data-testid="tile-pool"]'))) {
+      reached = true
+      break
+    }
+    const choice = await page.$('[data-testid^="warmup-"]')
+    if (choice) {
+      await choice.click().catch(() => {})
+      await page.waitForTimeout(800)
+      continue
+    }
+    const cont = await page.$('[data-testid="continue"]:not([disabled])')
+    if (cont) {
+      await cont.click().catch(() => {})
+      await page.waitForTimeout(600)
+      continue
+    }
+    /* A build beat before this one: tap it out to get past. */
+    const tiles = await page.$$('[data-testid="tile-pool"] button')
+    if (tiles.length) {
+      for (const t of tiles) {
+        await t.click().catch(() => {})
+        await page.waitForTimeout(130)
+      }
+      continue
+    }
+    await page.waitForTimeout(500)
+  }
+  ok('the lesson reaches a sayable release', reached)
+
+  if (reached) {
+    const look = (await page.evaluate(`(() => {
+      const e = document.querySelector('[data-testid="say-ask"]')
+      const cs = getComputedStyle(e)
+      return {
+        px: parseFloat(cs.fontSize),
+        colour: cs.color,
+        listen: !!(e.parentElement && e.parentElement.querySelector('[data-testid="audio"]')),
+        mic: (() => { const m = document.querySelector('[data-testid="say-it"]'); return m ? Math.round(m.getBoundingClientRect().width) : 0 })(),
+      }
+    })()`)) as { px: number; colour: string; listen: boolean; mic: number }
+
+    ok('it asks at the display size', look.px >= 28, Math.round(look.px) + 'px')
+    ok('the microphone is the control', look.mic >= 80, look.mic + 'px')
+    /*
+      THE ENGLISH CUE IS NOT DRESSED AS PORTUGUESE. --accent is the Portuguese colour
+      everywhere in this product, and the cue is the thing being taken AWAY.
+    */
+    ok('the English cue is not in the Portuguese colour', look.colour !== 'rgb(31, 93, 140)', look.colour)
+    ok('and has no listen button, having no audio', !look.listen)
+
+    /* A MISS CHANGES NOTHING BUT THE PANEL. */
+    await page.click('[data-testid="say-it"]')
+    await page.waitForTimeout(900)
+    const missPanel = ((await page.textContent('[data-testid="say-heard"]').catch(() => '')) ?? '')
+      .replace(/\s+/g, ' ')
+      .trim()
+    ok('a miss is marked', missPanel.length > 0, missPanel || 'nothing on screen')
+    ok('and the build is still there', Boolean(await page.$('[data-testid="tile-pool"]')))
+    const afterMiss = (await page.evaluate(
+      ([k]) => {
+        const st = JSON.parse(localStorage.getItem(k as string) || '{}')
+        return { proof: (st.proof || []).length, played: (st.roots_played || []).length }
+      },
+      [KEY] as const,
+    )) as { proof: number; played: number }
+    ok('a miss records nothing', afterMiss.proof === 0 && afterMiss.played === 0, JSON.stringify(afterMiss))
+
+    /* AND A SUCCESS MOVES THE LADDER. */
+    const want = (await page.evaluate(
+      `(() => { const e = document.querySelector('[data-testid="say-ask"]'); return e ? e.textContent : '' })()`,
+    )) as string
+    void want
+    /*
+      Fed the answer the beat is asking for, taken from the tiles — the pool holds exactly
+      the words of it, so joining them in any order is close enough for `near`, which
+      scores by word overlap rather than sequence.
+    */
+    const pool = (await page.evaluate(
+      `[...document.querySelectorAll('[data-testid="tile-pool"] button')].map(b => b.textContent.trim()).join(' ')`,
+    )) as string
+    await page.evaluate((w) => {
+      ;(window as unknown as { __SAY: string }).__SAY = w
+    }, pool)
+    await page.click('[data-testid="say-it"]')
+    await page.waitForTimeout(1200)
+    const hit = ((await page.textContent('[data-testid="say-heard"]').catch(() => '')) ?? '').replace(
+      /\s+/g,
+      ' ',
+    )
+    ok('saying it is marked right', /THAT IS IT/.test(hit), hit)
+
+    const after = (await page.evaluate(
+      ([k]) => {
+        const st = JSON.parse(localStorage.getItem(k as string) || '{}')
+        return {
+          proof: (st.proof || []).map((p: { pt: string; source: string; clean: boolean }) => p.source + '/' + p.clean),
+          played: (st.roots_played || []).length,
+        }
+      },
+      [KEY] as const,
+    )) as { proof: string[]; played: number }
+    ok('and records a clean release', after.proof.includes('release/true'), JSON.stringify(after.proof))
+    ok('and the root counts as played', after.played > 0, String(after.played))
+    ok('and the beat lets you on', Boolean(await page.$('[data-testid="continue"]:not([disabled])')))
+  }
+
+  await ctx.close()
+}
+
 await browser.close()
 
 console.log('')

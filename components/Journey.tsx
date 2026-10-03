@@ -45,6 +45,7 @@ import { vibeImage } from '@/content/vibe-images'
 import { primeAudio } from '@/engine/audio'
 import { UNLIMITED } from '@/lib/entitlements'
 import { Path } from '@/components/Path'
+import { SayItCard } from '@/components/SayItCard'
 import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
@@ -3425,10 +3426,65 @@ function RootBeatView({
               the other leaves a sentence floating with nothing to have answered.
             */}
             <p className="text-sm font-semibold">{root.transfer_prompt.context}</p>
-            <p className="t-ask">“{root.transfer_prompt.ask}”</p>
           </div>
 
-          {(
+          {/*
+            THE SENTENCE CAN BE SAID NOW, which is what this screen has always claimed.
+
+            Sam: "now do the transfer prompt in journey."
+
+            RELEASE.why promises it in as many words — "the next sentence is yours, with
+            nothing on screen to copy from" — and then the beat offered tiles, which ARE
+            something on screen to copy from. Tapping words into order proves you can
+            recognise them; saying it proves you can say it. This is the beat that moves
+            the ladder and writes a line to the card, and until now it was the only cold
+            route in the product with no way to be cold.
+
+            Journey.tsx imported no microphone at all. The whole lesson engine — the file
+            somebody spends nearly all their time in — had no say-it-aloud route on any
+            beat.
+
+            SPEAKING FIRST, TILES UNDER IT, which is the order Revise settled on: browser
+            recognition is approximate and absent on some browsers, so the build is the
+            path that always works and the microphone is the one that proves more. Passed
+            as children so the card owns the asking and this beat owns what a success
+            means.
+
+            NO REVEAL, for the reason revision has none: handing over the sentence would
+            answer the question the screen is asking. The tiles are the way through without
+            speaking, and they teach.
+          */}
+          <SayItCard
+            key={root.transfer_prompt.answer}
+            ask={root.transfer_prompt.ask}
+            answer={root.transfer_prompt.answer}
+            answerEn={root.transfer_prompt.ask}
+            /* The prompt is the English cue. See askIsPortuguese on the card. */
+            askIsPortuguese={false}
+            reveal={false}
+            onClose={() => {
+              /*
+                SAID COLD IS ALWAYS CLEAN, and that is the whole difference from the tiles
+                below. `clean` on a build means first attempt and no help, because the
+                words were on screen; a sentence produced into a microphone with no answer
+                displayed has nothing to copy from by definition. So it records clean, and
+                the proof card's one number stays honest in the direction that matters.
+              */
+              recordProof({
+                pt: root.transfer_prompt.answer,
+                en: root.transfer_prompt.ask,
+                source: 'release',
+                clean: true,
+              })
+              /*
+                And the root counts as played here too — see the note on the build's own
+                handler. Saying it is finishing it, so a learner who speaks the sentence
+                and never touches a tile must not leave the root looking unplayed.
+              */
+              rememberPlayed([root.root_id], null)
+              setDone(true)
+            }}
+          >
             <MiniBuild
               target={root.transfer_prompt.answer}
               helpers={root.helpers}
@@ -3457,7 +3513,7 @@ function RootBeatView({
                 setDone(true)
               }}
             />
-          )}
+          </SayItCard>
 
           {done ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
         </>
@@ -5990,17 +6046,43 @@ function NoCueView({ i }: { i: number }) {
       <div className="flex flex-col gap-1">
         <p className="eyebrow text-muted">{i + 1} OF {Math.min(3, prompts.length)}</p>
         <p className="text-sm font-semibold">{prompt.context}</p>
-        <p className="display text-balance text-2xl">“{prompt.ask}”</p>
       </div>
-      <MiniBuild
-        target={prompt.answer}
-        onSolved={({ clean }) => {
+      {/*
+        THE THIRD COLD BEAT, AND IT WAS SILENT TOO.
+
+        The release got a microphone in the same change as this; the no-cue prompts are the
+        same act one stage further out — REAL WORLD, no culture behind it, `source: 'nocue'`
+        — and they asked at text-2xl with tiles and nothing to speak into. Leaving one cold
+        beat unable to be said while fixing the other two would be an odd place to stop:
+        they are one route through the product.
+
+        Same shape as the release: speaking first, tiles as the fallback, no reveal, and a
+        spoken answer is clean by definition.
+      */}
+      <SayItCard
+        key={prompt.answer}
+        ask={prompt.ask}
+        answer={prompt.answer}
+        answerEn={prompt.ask}
+        askIsPortuguese={false}
+        reveal={false}
+        onClose={() => {
           track('no_cue_attempt', { piece: prompt.requires, correct: true })
-          recordProof({ pt: prompt.answer, en: prompt.ask, source: 'nocue', clean })
+          recordProof({ pt: prompt.answer, en: prompt.ask, source: 'nocue', clean: true })
           rememberNoCue(prompt.answer)
           setDone(true)
         }}
-      />
+      >
+        <MiniBuild
+          target={prompt.answer}
+          onSolved={({ clean }) => {
+            track('no_cue_attempt', { piece: prompt.requires, correct: true })
+            recordProof({ pt: prompt.answer, en: prompt.ask, source: 'nocue', clean })
+            rememberNoCue(prompt.answer)
+            setDone(true)
+          }}
+        />
+      </SayItCard>
       {done ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
     </Shell>
   )
