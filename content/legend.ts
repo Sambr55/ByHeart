@@ -3355,7 +3355,28 @@ export const LEGEND_COPY = {
     write the sentence down as one to come back to — see `rough` in engine/learner.ts — so
     "again later" is a promise the product keeps rather than a thing it says.
   */
-  run_enough_head: 'Leave this one for now',
+  /*
+    THE THIRD GO, WHICH IS WHERE SOMEBODY DECIDES WHETHER THIS IS WORTH IT.
+
+    Sam: "as soon as they get to their third attempt they need some encouraging text, and
+    if they get to five fails - never mind we'll come back to this one later."
+
+    Five goes already had a line and the middle of the run had nothing — so attempts three
+    and four were the same silent repetition as attempt one, which is exactly where a
+    learner concludes the microphone is broken or they cannot do it. Two misses is bad
+    luck; three is the point at which the product has to say something.
+
+    IT NAMES THE INSTRUMENT, NOT THE LEARNER. Browser recognition of a beginner's accent
+    is a rough instrument and the product knows it — see the note at the top of
+    engine/listen.ts — so the encouragement is a true statement about the situation rather
+    than a pep talk. "Keep going" with nothing behind it is what every app says; this says
+    why continuing is reasonable.
+  */
+  run_third_head: 'This one is stubborn',
+  run_third_body:
+    'The microphone mishears accents for a living, and yours is new to it. Try once more — slower helps more than louder.',
+  /* Sam's own words: "never mind we'll come back to this one later." */
+  run_enough_head: 'Never mind — we will come back to this one',
   run_enough_body:
     'Five goes is plenty. This is often the room or the microphone rather than you — it is saved, and it will come round again.',
   /** On the card, afterwards, so the sentence is findable rather than just promised. */

@@ -268,9 +268,50 @@ const browser = await chromium.launch()
   await page.goto(BASE + '/revise?kind=frame&id=name')
   await page.waitForTimeout(2200)
   const n = (await page.evaluate(`document.querySelectorAll('[data-testid="say-it"]').length`)) as number
-  ok('revision offers it', n > 0, String(n))
+  /*
+    THE MICROPHONE IS EARNED NOW, NOT GIVEN. Sam: "reverse these so they do the word picker
+    first, when that is successful it reveals the Say it loud mechanic."
+
+    So this asserts the opposite of what it used to: nothing to say into on arrival, and
+    nothing on screen TELLING somebody to speak — an instruction to do something that is
+    not yet possible is the same fault as offering a control that fails when pressed, which
+    is the rule the no-recognition case below exists to keep.
+  */
+  ok('the picker comes first, with no microphone yet', n === 0, String(n))
   const text = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
-  ok('and says what to do', /say it out loud/i.test(text))
+  ok('and nothing asks for speech before it is possible', !/say it out loud/i.test(text))
+  ok('the picker is there to be solved', Boolean(await page.$('[data-testid="tile-pool"]')))
+
+  /*
+    AND SOLVING IT HANDS OVER THE MICROPHONE WITHOUT TAKING ANYTHING AWAY.
+
+    Sam: "but dont drop the word picker or copy / listen." Re-queried each tap because the
+    pool re-renders — held handles go stale, which is how a first version of this test
+    "solved" a three-word sentence with one tap and concluded the reveal was broken.
+  */
+  for (let k = 0; k < 12; k++) {
+    const btns = await page.$$('[data-testid="tile-pool"] button')
+    if (!btns.length) break
+    await btns[0].click().catch(() => {})
+    await page.waitForTimeout(180)
+  }
+  await page.waitForTimeout(800)
+  const after = (await page.evaluate(`(() => {
+    const mic = document.querySelector('[data-testid="say-it"]')
+    return {
+      mic: mic ? Math.round(mic.getBoundingClientRect().width) : 0,
+      line: !!document.querySelector('[data-testid="tile-line"]'),
+      listen: !!document.querySelector('[data-testid="audio"]'),
+      copy: !!document.querySelector('[data-testid="copy-pt"]'),
+      arrow: !!document.querySelector('[data-testid="say-next"]'),
+      cta: !!document.querySelector('[data-testid="continue"]'),
+    }
+  })()`)) as { mic: number; line: boolean; listen: boolean; copy: boolean; arrow: boolean; cta: boolean }
+
+  ok('solving it reveals the microphone', after.mic >= 80, after.mic + 'px')
+  ok('and the picker is still there', after.line)
+  ok('and listen and copy came with it', after.listen && after.copy, after.listen + '/' + after.copy)
+  ok('the way on is the arrow, not a CONTINUE bar', after.arrow && !after.cta, 'arrow ' + after.arrow + ', cta ' + after.cta)
   await ctx.close()
 }
 
@@ -355,10 +396,17 @@ console.log('\nand where the browser cannot listen, nothing is offered\n')
       this.onerror = null
       this.onend = null
     }
+    /*
+      WHAT IT "HEARS" IS SET BY THE TEST, never scraped off the page.
+
+      A first version read [data-testid="say-answer"] — fine while nothing displayed the
+      answer, and wrong the moment the picker started revealing it: every attempt became a
+      perfect success, which silently advanced the card and made the miss assertions look
+      like a broken microphone. The test says what was said.
+    */
     FakeRec.prototype.start = function () {
       var self = this
-      var el = document.querySelector('[data-testid="say-answer"]')
-      var said = el ? el.textContent : 'zzz nothing like it at all'
+      var said = window.__SAY || 'zzz nothing like it at all'
       setTimeout(function () {
         if (self.onresult) self.onresult({ results: { length: 1, 0: { length: 1, 0: { transcript: said } } } })
         if (self.onend) self.onend()
@@ -409,10 +457,11 @@ console.log('\nand where the browser cannot listen, nothing is offered\n')
   })()`)) as { bg: string; page: string; lifted: boolean } | null
   ok('on its own card, lifted off the ground', Boolean(lifted?.lifted), lifted ? lifted.bg + ' on ' + lifted.page : 'no card')
 
-  const mic = (await page.evaluate(
-    `(() => { const e = document.querySelector('[data-testid="say-it"]'); return e ? Math.round(e.getBoundingClientRect().width) : 0 })()`,
-  )) as number
-  ok('the microphone is the control, not an ornament', mic >= 80, mic + 'px')
+  /*
+    No microphone on arrival any more — it is revealed by the picker, which the block above
+    walks in full. What matters here is that the picker IS the first thing offered.
+  */
+  ok('the picker is the first thing offered', Boolean(await page.$('[data-testid="tile-pool"]')))
 
   /*
     THE SENTENCE IS NOT GIVEN AWAY. A revision asks whether you still have it, so there is
@@ -421,7 +470,17 @@ console.log('\nand where the browser cannot listen, nothing is offered\n')
   ok('no reveal on a revision', !(await page.$('[data-testid="say-show"]')))
   ok('and the tiles are still the fallback', Boolean(await page.$('[data-testid="tile-pool"]')))
 
-  /* THE MISS THAT USED TO BE SILENT. */
+  /*
+    THE MISS THAT USED TO BE SILENT — after earning the microphone, which is the reversal.
+    Re-queried each tap because the pool re-renders; a held handle goes stale.
+  */
+  for (let k = 0; k < 12; k++) {
+    const btns = await page.$$('[data-testid="tile-pool"] button')
+    if (!btns.length) break
+    await btns[0].click().catch(() => {})
+    await page.waitForTimeout(180)
+  }
+  await page.waitForTimeout(800)
   await page.click('[data-testid="say-it"]')
   await page.waitForTimeout(900)
   const panel = ((await page.textContent('[data-testid="say-heard"]').catch(() => '')) ?? '')
@@ -429,6 +488,31 @@ console.log('\nand where the browser cannot listen, nothing is offered\n')
     .trim()
   ok('a miss says something now', panel.length > 0, panel || 'nothing on screen')
   ok('and shows what it heard', /zzz/.test(panel), panel)
+
+  /*
+    THE THIRD GO AND THE FIFTH, which had nothing between them. Sam: "as soon as they get
+    to their third attempt they need some encouraging text, and if they get to five fails -
+    never mind we'll come back to this one later."
+
+    Driven by missing on purpose: the fake reads the revealed answer, and nothing is
+    revealed on a revision, so every attempt here is a genuine miss.
+  */
+  await page.click('[data-testid="say-it"]')
+  await page.waitForTimeout(800)
+  await page.click('[data-testid="say-it"]')
+  await page.waitForTimeout(800)
+  const third = ((await page.textContent('[data-testid="say-stubborn"]').catch(() => '')) ?? '').replace(/\s+/g, ' ')
+  ok('the third go is encouraged', third.length > 0, third.slice(0, 48) || 'nothing')
+  ok('and it blames the instrument, not the learner', /microphone/i.test(third), third.slice(0, 48))
+
+  for (let k = 0; k < 2; k++) {
+    await page.click('[data-testid="say-it"]')
+    await page.waitForTimeout(800)
+  }
+  const fifth = ((await page.textContent('[data-testid="say-enough"]').catch(() => '')) ?? '').replace(/\s+/g, ' ')
+  ok('five goes is let go of', /never mind/i.test(fifth), fifth.slice(0, 52) || 'nothing')
+  /* And the encouragement gives way rather than stacking with it. */
+  ok('and the third-go note steps aside', !(await page.$('[data-testid="say-stubborn"]')))
 
   await ctx.close()
 }
@@ -557,7 +641,11 @@ console.log('\nand where the browser cannot listen, nothing is offered\n')
     })()`)) as { px: number; colour: string; listen: boolean; mic: number }
 
     ok('it asks at the display size', look.px >= 28, Math.round(look.px) + 'px')
-    ok('the microphone is the control', look.mic >= 80, look.mic + 'px')
+    /*
+      THE PICKER FIRST HERE TOO, so there is no microphone until it is solved. That is the
+      reversal — see buildFirst in components/SayItCard.tsx.
+    */
+    ok('no microphone before the picker is solved', look.mic === 0, look.mic + 'px')
     /*
       THE ENGLISH CUE IS NOT DRESSED AS PORTUGUESE. --accent is the Portuguese colour
       everywhere in this product, and the cue is the thing being taken AWAY.
@@ -565,22 +653,49 @@ console.log('\nand where the browser cannot listen, nothing is offered\n')
     ok('the English cue is not in the Portuguese colour', look.colour !== 'rgb(31, 93, 140)', look.colour)
     ok('and has no listen button, having no audio', !look.listen)
 
+    /* Earn the microphone: solve the picker, re-querying each tap as the pool re-renders. */
+    for (let k = 0; k < 12; k++) {
+      const btns = await page.$$('[data-testid="tile-pool"] button')
+      if (!btns.length) break
+      await btns[0].click().catch(() => {})
+      await page.waitForTimeout(180)
+    }
+    await page.waitForTimeout(800)
+    const revealed = (await page.evaluate(
+      `(() => { const m = document.querySelector('[data-testid="say-it"]'); return m ? Math.round(m.getBoundingClientRect().width) : 0 })()`,
+    )) as number
+    ok('solving it reveals the microphone', revealed >= 80, revealed + 'px')
+    ok('and the picker stays on screen', Boolean(await page.$('[data-testid="tile-line"]')))
+
     /* A MISS CHANGES NOTHING BUT THE PANEL. */
+    await page.evaluate(() => {
+      ;(window as unknown as { __SAY: string }).__SAY = 'zzz nothing like it at all'
+    })
     await page.click('[data-testid="say-it"]')
     await page.waitForTimeout(900)
     const missPanel = ((await page.textContent('[data-testid="say-heard"]').catch(() => '')) ?? '')
       .replace(/\s+/g, ' ')
       .trim()
     ok('a miss is marked', missPanel.length > 0, missPanel || 'nothing on screen')
-    ok('and the build is still there', Boolean(await page.$('[data-testid="tile-pool"]')))
+    ok('and the picker is still there', Boolean(await page.$('[data-testid="tile-line"]')))
+    /*
+      A MISS DOES NOT MOVE THE BEAT ON, which is what matters here now.
+
+      This used to assert that a miss recorded NOTHING, and that was right while the
+      microphone came first — nothing had happened yet. Under the reversal the picker is
+      solved before the microphone exists, so a proof row and a played root are already
+      there and correctly so: the learner did build the sentence. What a miss must not do
+      is add a SECOND row or carry the card away, so that is what is measured.
+    */
     const afterMiss = (await page.evaluate(
       ([k]) => {
         const st = JSON.parse(localStorage.getItem(k as string) || '{}')
-        return { proof: (st.proof || []).length, played: (st.roots_played || []).length }
+        return { proof: (st.proof || []).length, step: document.body.innerText.slice(0, 80) }
       },
       [KEY] as const,
-    )) as { proof: number; played: number }
-    ok('a miss records nothing', afterMiss.proof === 0 && afterMiss.played === 0, JSON.stringify(afterMiss))
+    )) as { proof: number; step: string }
+    ok('a miss adds no second row', afterMiss.proof === 1, String(afterMiss.proof))
+    ok('and does not carry the card away', Boolean(await page.$('[data-testid="say-it"]')))
 
     /* AND A SUCCESS MOVES THE LADDER. */
     const want = (await page.evaluate(
@@ -592,12 +707,12 @@ console.log('\nand where the browser cannot listen, nothing is offered\n')
       the words of it, so joining them in any order is close enough for `near`, which
       scores by word overlap rather than sequence.
     */
-    const pool = (await page.evaluate(
-      `[...document.querySelectorAll('[data-testid="tile-pool"] button')].map(b => b.textContent.trim()).join(' ')`,
+    const built = (await page.evaluate(
+      `(() => { const l = document.querySelector('[data-testid="tile-line"]'); return l ? l.innerText.replace(/\\s+/g, ' ').trim() : '' })()`,
     )) as string
     await page.evaluate((w) => {
       ;(window as unknown as { __SAY: string }).__SAY = w
-    }, pool)
+    }, built)
     await page.click('[data-testid="say-it"]')
     await page.waitForTimeout(1200)
     const hit = ((await page.textContent('[data-testid="say-heard"]').catch(() => '')) ?? '').replace(
@@ -618,7 +733,22 @@ console.log('\nand where the browser cannot listen, nothing is offered\n')
     )) as { proof: string[]; played: number }
     ok('and records a clean release', after.proof.includes('release/true'), JSON.stringify(after.proof))
     ok('and the root counts as played', after.played > 0, String(after.played))
-    ok('and the beat lets you on', Boolean(await page.$('[data-testid="continue"]:not([disabled])')))
+    /*
+      THE WAY ON IS THE ARROW. Sam: "removing continue CTA's." And it goes green and nudges
+      while the two seconds run, which is the override signal — see the dock in SayItCard.
+    */
+    const onward = (await page.evaluate(`(() => {
+      const a = document.querySelector('[data-testid="say-next"]')
+      return {
+        there: !!a,
+        green: a ? getComputedStyle(a).backgroundColor : '',
+        nudging: !!document.querySelector('[data-testid="say-next"] .nudge-right'),
+        cta: !!document.querySelector('[data-testid="continue"]'),
+      }
+    })()`)) as { there: boolean; green: string; nudging: boolean; cta: boolean }
+    ok('the arrow is the way on', onward.there && !onward.cta, 'arrow ' + onward.there + ', cta ' + onward.cta)
+    ok('it goes green on a success', onward.green === 'rgb(44, 107, 74)', onward.green)
+    ok('and nudges while the clock runs', onward.nudging)
   }
 
   await ctx.close()

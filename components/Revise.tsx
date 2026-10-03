@@ -143,6 +143,26 @@ export function Revise() {
         answer={line.answer}
         answerEn={line.ask}
         reveal={false}
+        /*
+          PICKER FIRST HERE TOO. Sam: "reverse these so they do the word picker first, when
+          that is successful it reveals the Say it loud mechanic."
+
+          Revision is asking whether you still have a sentence you met some time ago, which
+          is exactly the case where being handed a microphone and nothing else is a wall:
+          a learner who cannot remember it had no way to find out what it was except by
+          missing five times. The tiles remind, and then saying it proves something.
+        */
+        buildFirst
+        /*
+          And the dock rather than a CONTINUE — Sam: "removing continue CTA's." A revision
+          advances on its own when a line is done, so the arrow is the override and `at`
+          is what moves.
+        */
+        onNext={() => {
+          if (at + 1 < lines.length) setAt(at + 1)
+          else setDone(true)
+        }}
+        onBack={at > 0 ? () => setAt(at - 1) : undefined}
         onClose={() => {
           /*
             Recorded exactly as a first release is. The proof card counts sentences
@@ -153,22 +173,29 @@ export function Revise() {
           else setDone(true)
         }}
       >
-        <MiniBuild
-          key={line.answer}
-          target={line.answer}
-          helpers={line.helpers}
-          onSolved={({ clean }) => {
-            /*
-              Only when it was cold: a helped answer teaches and proves nothing, which is
-              what `clean` already means everywhere else.
-            */
-            if (clean) {
-              recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
-            }
-            if (at + 1 < lines.length) setAt(at + 1)
-            else setDone(true)
-          }}
-        />
+        {({ solved }) => (
+          <MiniBuild
+            key={line.answer}
+            target={line.answer}
+            helpers={line.helpers}
+            onSolved={({ clean }) => {
+              /*
+                Only when it was cold: a helped answer teaches and proves nothing, which is
+                what `clean` already means everywhere else.
+              */
+              if (clean) {
+                recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
+              }
+              /*
+                AND IT NO LONGER JUMPS. Solving the picker used to advance the card
+                immediately, which is what made the microphone unreachable on this screen:
+                the line it belonged to was already gone. Now the picker hands over the
+                microphone and the learner decides — say it, or press on with the arrow.
+              */
+              solved()
+            }}
+          />
+        )}
       </SayItCard>
     </Shell>
   )

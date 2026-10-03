@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
+import { Dock } from '@/components/Dock'
 import { CopyButton } from '@/components/CopyButton'
 import { SayButton, useCanListen } from '@/components/SayButton'
 import { bandFor, missedWords, type Heard } from '@/engine/listen'
@@ -43,8 +44,11 @@ export function SayItCard({
   answerEn,
   onClose,
   onShown,
+  onNext,
+  onBack,
   reveal = true,
   askIsPortuguese = true,
+  buildFirst = false,
   children,
 }: {
   /** The question, in whichever language this beat asks in. */
@@ -85,12 +89,59 @@ export function SayItCard({
    * tile build in revision is the fallback, so the sentence is still reachable there.
    */
   reveal?: boolean
-  /** Anything the beat puts under the card: a tile build, a link, a second route. */
-  children?: React.ReactNode
+  /**
+   * THE WORD PICKER FIRST, AND THE MICROPHONE AS THE REWARD FOR IT.
+   *
+   * Sam: "I think we need to reverse these so they do the word picker first, when that is
+   * successful it reveals the Say it loud mechanic."
+   *
+   * WHY THE REVERSAL IS RIGHT ON A LESSON AND WRONG ON THE LEGEND. On the Legend you
+   * already know the sentence — it is about you, you wrote it — so the microphone is the
+   * whole point and tiles would be busywork. On a release beat you have just met the
+   * words, and being asked to produce them from nothing is a wall: the learner who cannot
+   * do it has no way to find out what they were supposed to say except by failing at the
+   * microphone five times. The tiles teach it, and THEN saying it means something.
+   *
+   * It also fixes what the old order did to the proof number. Mic-first meant a learner
+   * could say it correctly having never seen it, which is the best outcome — but the
+   * common path was five misses and then tiles, so the beat's record of "said cold" was
+   * mostly built out of tile taps. Build first, say second: the proof row is written by
+   * somebody who has just demonstrated they know the sentence.
+   */
+  buildFirst?: boolean
+  /**
+   * The way on, once this sentence is done — and what the two-second wait calls.
+   *
+   * Absent means the beat has its own CONTINUE and this card draws no dock. Present means
+   * the card owns the whole footer: back, the way on, and the arrow that overrides the
+   * wait. See the dock below.
+   */
+  onNext?: () => void
+  /** Back, where there is anywhere to go. Hidden rather than disabled when absent. */
+  onBack?: () => void
+  /**
+   * Anything the beat puts under the card: a tile build, a link, a second route.
+   *
+   * On a buildFirst beat this is where the word picker goes, and it STAYS there after it
+   * is solved — see `built`. The caller tells this card the picker succeeded by calling
+   * the function it is handed.
+   */
+  children?: React.ReactNode | ((api: { solved: () => void; built: boolean }) => React.ReactNode)
 }) {
   const [shown, setShown] = useState(false)
   const [heard, setHeard] = useState<Heard | null>(null)
   const [goes, setGoes] = useState(0)
+  /*
+    WHETHER THE WORD PICKER HAS BEEN SOLVED, where it comes first.
+
+    Sam: "when that is successful it reveals the Say it loud mechanic." So on a buildFirst
+    beat the microphone does not exist until this is true — and once it is, it stays true:
+    NOTHING IS TAKEN AWAY. Sam, immediately after: "but dont drop the word picker or copy
+    / listen." The tiles stay on screen with the sentence they built still in them, and
+    the listen and copy controls arrive alongside the microphone rather than instead of
+    anything. The card only ever gains.
+  */
+  const [built, setBuilt] = useState(false)
   const canSay = useCanListen()
 
   /*
@@ -102,7 +153,29 @@ export function SayItCard({
     setShown(false)
     setHeard(null)
     setGoes(0)
+    setBuilt(false)
   }, [answer])
+
+  /*
+    TWO SECONDS AFTER A TICK, IT MOVES ON — the Legend run's behaviour, in the one place
+    both screens read it from. Sam: "same two seconds swipe right after success or swipe
+    right override if they are quicker, removing continue CTA's."
+
+    The reading pause is deliberately NOT on the 120/260/420/620 motion scale: those are
+    durations of movement and this is time to look at what you produced. The longest step
+    is 620ms, which would take the card away before the eye had finished with it.
+
+    Cancelled by any manual move, because `onNext` identity changes with the beat and the
+    cleanup clears the timer — without that a learner who taps the arrow is advanced
+    twice, once by the tap and once by the timer still running.
+  */
+  const closed = heard?.close ?? false
+  useEffect(() => {
+    if (!closed || !onNext) return
+    const t = window.setTimeout(() => onNext(), 2000)
+    return () => window.clearTimeout(t)
+    /* eslint-disable-next-line react-hooks/exhaustive-deps -- onNext is per-beat */
+  }, [closed, answer])
 
   const band = heard ? bandFor(heard) : null
   const verdict =
@@ -124,6 +197,22 @@ export function SayItCard({
       ? missedWords(heard.said, answer)
       : []
   const enough = goes >= ENOUGH_GOES && !heard?.close
+  /*
+    THE THIRD GO, where somebody decides whether this is worth continuing.
+
+    Sam: "as soon as they get to their third attempt they need some encouraging text." Five
+    had a line and the middle had nothing, so attempts three and four were the same silent
+    repetition as attempt one — which is exactly where a learner concludes the microphone
+    is broken. Shown FROM the third until the fifth takes over, rather than on three alone:
+    a notice that appears and vanishes while the situation has not changed reads as a
+    glitch. See LEGEND_COPY.run_third_head.
+  */
+  const stubborn = goes >= 3 && goes < ENOUGH_GOES && !heard?.close
+  /*
+    IS THE MICROPHONE OFFERED YET? On a buildFirst beat, not until the tiles are solved —
+    that is the reversal. Everywhere else, immediately.
+  */
+  const sayable = canSay && (!buildFirst || built)
 
   const took = (h: Heard, reveals: boolean) => {
     setHeard(h)
@@ -165,31 +254,66 @@ export function SayItCard({
         {askEn ? <p className="text-base leading-relaxed text-muted">{askEn}</p> : null}
       </div>
 
-      {shown ? (
-        /* The answer, in place, at the scale reserved for produced language. */
+      {shown || built ? (
+        /*
+          THE SENTENCE, AND EVERY ROUTE THROUGH IT — nothing replaced.
+
+          Sam: "but dont drop the word picker or copy / listen." So this block is additive:
+          it appears when the answer is revealed OR when the tiles have been solved, and in
+          the buildFirst case the tiles themselves are still below with the sentence the
+          learner assembled still in them. Listen, copy and the microphone sit together,
+          which is the "listen, copy or say" triple the product has offered since the
+          feature was asked for.
+
+          `t-said` only where the learner has not built it, because on a buildFirst beat
+          the sentence is already large in the tiles and printing it again at 2.975rem
+          directly above them is the same words twice in two sizes.
+        */
         <div className="animate-bank flex flex-col gap-3">
-          <p className="eyebrow text-muted">THE ANSWER</p>
-          <p data-testid="say-answer" className="pt t-said">
-            {answer}
-          </p>
-          {/*
-            LISTEN, COPY, SAY — all three, on the answer too. Sam: "dont forget listen and
-            copy - still totally valid routes." Revealing is not a decision to stop
-            speaking, and saying it after looking still marks the work.
-          */}
+          <p className="eyebrow text-muted">{built && !shown ? 'YOU BUILT IT' : 'THE ANSWER'}</p>
+          {shown ? (
+            <p data-testid="say-answer" className="pt t-said">
+              {answer}
+            </p>
+          ) : (
+            <p data-testid="say-answer" className="pt text-2xl">
+              {answer}
+            </p>
+          )}
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(answer)} text={answer} size="sm" />
             <CopyButton text={answer} size="sm" />
-            {canSay ? <SayButton want={answer} onHeard={(h) => took(h, false)} /> : null}
+            {/*
+              THE MICROPHONE, AT FULL SIZE WHERE IT IS THE POINT.
+
+              On a buildFirst beat this is the moment it arrives — Sam: "when that is
+              successful it reveals the Say it loud mechanic" — so it is the large control
+              rather than a 48px circle in a row of three, with the words under it. On a
+              reveal it stays small, because there the learner has already had the big one.
+            */}
+            {sayable && shown ? <SayButton want={answer} onHeard={(h) => took(h, false)} /> : null}
           </div>
+          {sayable && !shown ? (
+            <div className="flex flex-col items-center gap-3 pt-2">
+              <SayButton want={answer} size="lg" onHeard={(h) => took(h, false)} />
+              <p className="text-base text-muted">{LEGEND_COPY.run_say}</p>
+            </div>
+          ) : null}
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center gap-3">
-          {canSay ? (
+          {sayable ? (
             <>
               <SayButton want={answer} size="lg" onHeard={(h) => took(h, true)} />
               <p className="text-base text-muted">{LEGEND_COPY.run_say}</p>
             </>
+          ) : buildFirst ? (
+            /*
+              BEFORE THE TILES ARE SOLVED, nothing is said about speaking at all — the
+              microphone is not yet earned and naming it here would be an instruction to
+              do something impossible. The tiles below are the whole screen at this point.
+            */
+            null
           ) : (
             /*
               WHAT A LEARNER WITH NO MICROPHONE IS TOLD, and it depends on whether this
@@ -224,6 +348,21 @@ export function SayItCard({
       ) : null}
 
       {/*
+        THE THIRD GO. Sam: "as soon as they get to their third attempt they need some
+        encouraging text." It names the instrument rather than the learner — see
+        run_third_head — and gives way to the five-goes notice rather than stacking with it.
+      */}
+      {stubborn ? (
+        <div
+          data-testid="say-stubborn"
+          className="animate-bank flex flex-col gap-1 rounded-xl border border-line bg-surface px-4 py-3"
+        >
+          <p className="eyebrow text-fg">{LEGEND_COPY.run_third_head}</p>
+          <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.run_third_body}</p>
+        </div>
+      ) : null}
+
+      {/*
         Five goes and the screen stops asking. Nothing is withheld by it — the microphone,
         the reveal and whatever the caller puts below all still work. See run_enough_head.
       */}
@@ -237,8 +376,12 @@ export function SayItCard({
         </div>
       ) : null}
 
-      {/* SHOW ME, for anybody who does not want to speak. */}
-      {reveal && !shown ? (
+      {/*
+        SHOW ME, for anybody who does not want to speak — and only where this card has no
+        dock. With a dock it moves into it, beside the arrow, exactly as the Legend run
+        has it.
+      */}
+      {reveal && !shown && !onNext ? (
         <button
           type="button"
           data-testid="say-show"
@@ -252,7 +395,87 @@ export function SayItCard({
         </button>
       ) : null}
 
-      {children}
+      {typeof children === 'function' ? children({ solved: () => setBuilt(true), built }) : children}
+
+      {/*
+        THE DOCK, AND IT IS THE LEGEND RUN'S DOCK. Sam: "use what we built in legend as
+        your template… same two seconds swipe right after success or swipe right override
+        if they are quicker, removing continue CTA's."
+
+        ONE ROW: back at one edge, the way on at the other, and the only worded control in
+        the middle. Three stacked full-width buttons is the scrolling the Legend redesign
+        existed to remove, and a CONTINUE bar under a card that has just grown a question,
+        an answer, a verdict panel and sometimes two notices is what pushes it over.
+
+        Drawn only where the beat hands over `onNext`. A beat that keeps its own CONTINUE
+        gets no dock from here, because two docks portal into one slot and the second wins.
+      */}
+      {onNext ? (
+        <Dock>
+          <div className="flex items-center gap-3">
+            {onBack ? (
+              <button
+                type="button"
+                data-testid="say-back"
+                aria-label="Back to the one before"
+                onClick={onBack}
+                className="tap-target flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line text-muted"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                  <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            ) : (
+              /* Holds the arrow at the edge, so it does not jump inwards on the first one. */
+              <span className="h-12 w-12 shrink-0" />
+            )}
+
+            {reveal && !shown ? (
+              <button
+                type="button"
+                data-testid="say-show"
+                onClick={() => {
+                  setShown(true)
+                  onShown?.()
+                }}
+                className="tap-target eyebrow flex-1 rounded border border-line-strong px-4 py-3 text-center"
+              >
+                {LEGEND_COPY.run_show}
+              </button>
+            ) : (
+              <span className="flex-1" />
+            )}
+
+            {/*
+              FORWARD, NUDGING WHILE THE CLOCK RUNS. The animation is the override signal:
+              it moves only during the two seconds, so it reads as "or now, if you like"
+              rather than as decoration. Green at that moment because it is continuing a
+              success; outlined otherwise, when it is just the way on.
+            */}
+            <button
+              type="button"
+              data-testid="say-next"
+              aria-label="Next"
+              onClick={onNext}
+              className={
+                'tap-target flex h-12 w-12 shrink-0 items-center justify-center rounded-full border ' +
+                (closed ? 'border-correct bg-correct text-correct-ink' : 'border-line text-muted')
+              }
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className={'h-5 w-5' + (closed ? ' nudge-right' : '')}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden
+              >
+                <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
+        </Dock>
+      ) : null}
     </div>
   )
 }

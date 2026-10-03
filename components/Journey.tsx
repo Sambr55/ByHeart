@@ -3462,6 +3462,20 @@ function RootBeatView({
             /* The prompt is the English cue. See askIsPortuguese on the card. */
             askIsPortuguese={false}
             reveal={false}
+            /*
+              THE WORD PICKER FIRST. Sam: "I think we need to reverse these so they do the
+              word picker first, when that is successful it reveals the Say it loud
+              mechanic." See buildFirst on the card for why that is right here and wrong on
+              the Legend.
+            */
+            buildFirst
+            /*
+              AND NO CONTINUE. Sam: "removing continue CTA's." The dock the card draws is
+              the Legend run's — back, and the arrow that nudges while the two seconds run.
+              `done` still gates whether there is anywhere to go: the arrow calls this, and
+              this is the beat's own `next`.
+            */
+            onNext={done ? next : undefined}
             onClose={() => {
               /*
                 SAID COLD IS ALWAYS CLEAN, and that is the whole difference from the tiles
@@ -3485,37 +3499,43 @@ function RootBeatView({
               setDone(true)
             }}
           >
-            <MiniBuild
-              target={root.transfer_prompt.answer}
-              helpers={root.helpers}
-              onStuck={() => {
-                // Once per learner, ever, and only here. Read fresh rather than off the
-                // snapshot, because the store may not have loaded when this beat mounted.
-                if (loadLearner().switch_seen_at) return
-                markSwitchSeen()
-                track('switch_shown', { root: root.root_id })
-                setSwitched(true)
-              }}
-              onSolved={({ clean }) => {
-                recordProof({
-                  pt: root.transfer_prompt.answer,
-                  en: root.transfer_prompt.ask,
-                  source: 'release',
-                  clean,
-                })
-                /*
-                  HERE is where a root counts as played — at its release, not when the
-                  section queued it. Recording it at queue time meant entering a crate
-                  consumed it: tap in, see one screen, leave, and the picker said
-                  "everything here is done" while the Club would never offer to resume it.
-                */
-                rememberPlayed([root.root_id], null)
-                setDone(true)
-              }}
-            />
+            {({ solved }) => (
+              <MiniBuild
+                target={root.transfer_prompt.answer}
+                helpers={root.helpers}
+                onStuck={() => {
+                  // Once per learner, ever, and only here. Read fresh rather than off the
+                  // snapshot, because the store may not have loaded when this beat mounted.
+                  if (loadLearner().switch_seen_at) return
+                  markSwitchSeen()
+                  track('switch_shown', { root: root.root_id })
+                  setSwitched(true)
+                }}
+                onSolved={({ clean }) => {
+                  recordProof({
+                    pt: root.transfer_prompt.answer,
+                    en: root.transfer_prompt.ask,
+                    source: 'release',
+                    clean,
+                  })
+                  /*
+                    HERE is where a root counts as played — at its release, not when the
+                    section queued it. Recording it at queue time meant entering a crate
+                    consumed it: tap in, see one screen, leave, and the picker said
+                    "everything here is done" while the Club would never offer to resume it.
+                  */
+                  rememberPlayed([root.root_id], null)
+                  setDone(true)
+                  /*
+                    And this is what hands over the microphone. The picker stays on screen
+                    with the sentence still in it — Sam: "dont drop the word picker" — and
+                    saying it out loud becomes available above.
+                  */
+                  solved()
+                }}
+              />
+            )}
           </SayItCard>
-
-          {done ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
         </>
       )}
     </Shell>
@@ -6066,6 +6086,9 @@ function NoCueView({ i }: { i: number }) {
         answerEn={prompt.ask}
         askIsPortuguese={false}
         reveal={false}
+        /* Picker first here too — same reasoning as the release. See buildFirst. */
+        buildFirst
+        onNext={done ? next : undefined}
         onClose={() => {
           track('no_cue_attempt', { piece: prompt.requires, correct: true })
           recordProof({ pt: prompt.answer, en: prompt.ask, source: 'nocue', clean: true })
@@ -6073,17 +6096,19 @@ function NoCueView({ i }: { i: number }) {
           setDone(true)
         }}
       >
-        <MiniBuild
-          target={prompt.answer}
-          onSolved={({ clean }) => {
-            track('no_cue_attempt', { piece: prompt.requires, correct: true })
-            recordProof({ pt: prompt.answer, en: prompt.ask, source: 'nocue', clean })
-            rememberNoCue(prompt.answer)
-            setDone(true)
-          }}
-        />
+        {({ solved }) => (
+          <MiniBuild
+            target={prompt.answer}
+            onSolved={({ clean }) => {
+              track('no_cue_attempt', { piece: prompt.requires, correct: true })
+              recordProof({ pt: prompt.answer, en: prompt.ask, source: 'nocue', clean })
+              rememberNoCue(prompt.answer)
+              setDone(true)
+              solved()
+            }}
+          />
+        )}
       </SayItCard>
-      {done ? <Cta label="CONTINUE" onClick={next} /> : <div className="mt-auto" />}
     </Shell>
   )
 }
