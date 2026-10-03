@@ -25,7 +25,7 @@ import { INTRO_CARDS, INTRO_SETUP_AFTER } from '../content/intro'
 import { ROOTS } from '../content/roots'
 import { cardFor } from '../content/legend'
 import { EXPLAINERS, EXPLAINER_CTA } from '../content/explainers'
-import { explainerCards } from '../content/feed'
+import { cardFace, explainerCards, setUpCard } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -178,7 +178,23 @@ const titles = (await page.evaluate(
     work. Taking the anchor from INTRO_SETUP_AFTER means moving it again is a content edit
     rather than a content edit plus a test edit.
   */
-  const setupAt = got.findIndex((g) => /ONE DECISION/.test(g))
+  /*
+    THE EYEBROW IS READ FROM THE CONTENT, not typed here.
+
+    This matched /ONE DECISION/, which is exactly the brittleness the note above set out to
+    remove and only half removed: the POSITION was taken from INTRO_SETUP_AFTER while the
+    card's own identity stayed hardcoded. So rewording the face broke a check about
+    ordering — Sam asked for that copy to change ("it should only be the language / city
+    selector") and this failed on correct work, naming a card that was in the right place.
+
+    cardFace is the one function that decides what this card says, so asking it is the only
+    version of this that cannot drift.
+  */
+  const setupFace = (() => {
+    const card = setUpCard(false, false)
+    return card ? cardFace(card).eyebrow : ''
+  })()
+  const setupAt = got.findIndex((g) => g === setupFace)
   const afterEyebrow = INTRO_CARDS.find((c) => c.id === INTRO_SETUP_AFTER)?.eyebrow ?? ''
   const anchorAt = got.indexOf(afterEyebrow)
   ok(
@@ -909,10 +925,15 @@ console.log('\nthe set-up is a card, and it does not block\n')
 */
 {
   // Clones off, so this index means the same thing as every other index in this file.
+  /* The eyebrow from cardFace, for the reason given where setupFace is built above. */
+  const setupEyebrow = (() => {
+    const card = setUpCard(false, false)
+    return card ? cardFace(card).eyebrow : ''
+  })()
   const set = (await page.evaluate(
     `Array.from(document.querySelectorAll('.snap-y > section'))
       .slice(1, -1)
-      .findIndex(s => (s.innerText || '').startsWith('ONE DECISION'))`,
+      .findIndex(s => (s.innerText || '').startsWith(${JSON.stringify(setupEyebrow)}))`,
   )) as number
   ok('set-up is in the feed', set >= 0, 'at position ' + set)
   /*

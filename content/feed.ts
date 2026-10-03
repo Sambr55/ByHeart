@@ -1302,10 +1302,36 @@ export function cardFace(card: FeedCard): {
     }
   }
   if (card.kind === 'setup') {
+    /*
+      TWO SCREENS SAID "THEN YOU START", AND ONLY ONE OF THEM WAS A SCREEN.
+
+      Sam: "I've just realised we have two 'then you start' screens. It should only be the
+      language / city selector, which then loads the 'why are you here' screen."
+
+      THE FACE WAS ANSWERING A QUESTION IT DOES NOT ASK. This card does one thing: it
+      carries the language and city selector, on the face, because nothing else on it can
+      be acted on until the pair exists. But the copy was written when the card closed the
+      intro — ONE DECISION over "Then you start." over a sentence about what DUB asks of
+      you — so a learner met a heading announcing the start of the product, then a
+      selector, and then, behind OPEN, a SECOND screen whose own `already` branch also
+      says "Then you start." (see components/SetUp.tsx). Two starts, one of them a
+      preamble.
+
+      WHY THE COPY IS THE FIX RATHER THAN THE CARD. The card is right: components/Choose.tsx
+      deliberately renders no heading of its own, and the note there records this exact
+      fault being fixed once already inside the selector — "the eyebrow said YOUR LANGUAGE,
+      the headline asked what we are learning, and then a third line repeated WHAT ARE WE
+      LEARNING". The face is the one place the question belongs, so the face asks it.
+
+      And it no longer promises what comes next. "The last thing between you and your first
+      three vibes" was false the moment the why question moved behind OPEN — there are two
+      more steps after this one, and a card that undercounts them is a card that makes the
+      next screen feel like a delay.
+    */
     return {
-      eyebrow: 'ONE DECISION',
-      title: 'Then you start.',
-      blurb: 'Which language, and what DUB asks of you. It takes one tap and it is the last thing between you and your first three vibes.',
+      eyebrow: 'YOUR LANGUAGE',
+      title: 'What are we learning, and where?',
+      blurb: 'Pick the pair and the city. Everything DUB shows you comes from these two.',
       image: card.image,
     }
   }

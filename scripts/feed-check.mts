@@ -15,7 +15,7 @@ import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_CARD } from '../content/legend'
 import { PIECES, ROOTS } from '../content/roots'
-import { cardById, cheatCards, explainerCards, fluentCards, idiomCards, legendCards, sheetCards, feedFor, vibeCards } from '../content/feed'
+import { cardById, cardFace, setUpCard, cheatCards, explainerCards, fluentCards, idiomCards, legendCards, sheetCards, feedFor, vibeCards } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -617,7 +617,16 @@ console.log('\na card with no photograph still has a ground\n')
   resurrect it for somebody who is already inside.
 */
 {
-  const INTRO = ['HERE’S HOW IT WORKS', 'NOT THIS ONE', 'SIXTY SECONDS', 'THE WAY IN', 'ONE DECISION']
+  /*
+    The set-up card's eyebrow comes from cardFace rather than being typed, for the reason
+    recorded in scripts/firstrun-check.mts: rewording the face is a content edit and should
+    not break a check about which cards are in the intro.
+  */
+  const setupEyebrow = (() => {
+    const card = setUpCard(false, false)
+    return card ? cardFace(card).eyebrow : ''
+  })()
+  const INTRO = ['HERE’S HOW IT WORKS', 'NOT THIS ONE', 'SIXTY SECONDS', 'THE WAY IN', setupEyebrow]
   for (const route of ['/', '/club?in=1']) {
     await page.goto(BASE + route)
     await page.waitForTimeout(1800)
