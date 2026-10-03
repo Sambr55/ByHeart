@@ -338,6 +338,28 @@ export interface LearnerState {
      * word for it. Signing in later reconciles them.
      */
     email: string | null
+    /*
+      THE FOUR THE LEGEND ASKS AND THE PROFILE HAD NO FIELD FOR.
+
+      Sam: "logically speaking the profile comes before the legend and populates it."
+
+      He is right and the profile was two thirds of the way there: it already held gender,
+      nationality, from_place, age, email and into, and had nothing for married, work,
+      why_here or children. So four of the Legend's questions had nowhere to be except the
+      Legend itself — which made the Legend a SECOND store rather than a view of this one,
+      and every screen then had to pick which to read.
+
+      That is the whole of today's bug list. Picking Welsh wrote the Legend while the
+      lessons read the profile. AskAge read the profile while the gate read the Legend.
+      Gosto settled on the profile and the card checked the Legend. Four faults, one shape.
+
+      With these four here, every Legend answer has a profile field behind it, and
+      answerLegend keeps the two in step from one place — see PROFILE_OF below.
+    */
+    married: string | null
+    work: string | null
+    why_here: string | null
+    children: string | null
     skipped: string[]
   }
   created_at: string
@@ -677,6 +699,10 @@ export function emptyLearner(): LearnerState {
       email: null,
       genres: [],
       into: [],
+      married: null,
+      work: null,
+      why_here: null,
+      children: null,
       skipped: [],
     },
     created_at: new Date().toISOString(),
@@ -1838,8 +1864,71 @@ export function rememberNoCue(id: string) {
  * not say why they left. Clearing every slot removes the card from the record entirely,
  * so it drops out of the run-through without ever appearing as a gap to be filled.
  */
+/**
+ * WHICH PROFILE FIELD EACH LEGEND ANSWER BELONGS IN.
+ *
+ * Sam: "logically speaking the profile comes before the legend and populates it."
+ *
+ * The profile is the record of what somebody has told DUB about themselves. The Legend is
+ * those answers arranged as sentences — a VIEW of the profile rather than a second copy of
+ * it. Both existed and neither was authoritative, so every screen picked one and they
+ * drifted: picking Welsh wrote the Legend while the lessons read the profile; AskAge read
+ * the profile while the gate read the Legend. Four bugs in one day, all this shape.
+ *
+ * One table, so a frame's answer has exactly one home. A frame absent from it — `name`,
+ * which is display_name, or the three trip-shape questions — keeps living on the Legend
+ * alone, and that is fine: nothing else reads them, so there is nothing to disagree with.
+ *
+ * `slot` is which of the frame's values carries the answer. Only the single-slot frames
+ * are here; `origin` writes two fields and is handled beside them.
+ */
+const PROFILE_OF: Record<string, { field: string; slot: string }> = {
+  married: { field: 'married', slot: 'status' },
+  work: { field: 'work', slot: 'thing' },
+  why_here: { field: 'why_here', slot: 'reason' },
+  children: { field: 'children', slot: 'kids' },
+}
+
+/*
+  AGE AND INTO ARE DELIBERATELY NOT IN THAT TABLE, and the reason is their TYPE.
+
+  Every Legend value is a string — the slots are what a sentence is filled with. profile.age
+  is a number and profile.into is an array of interest ids, because the product does
+  arithmetic on one and set membership on the other. Mirroring a string into either would
+  corrupt the field that already works: `say(profile.age)` on "30" is not the same as on 30,
+  and `into.length` on a comma-joined string is a character count.
+
+  Both already write their profile field at the point they are answered — AskAge calls
+  setProfile('age', n) and AskInto calls setProfile with the chosen ids — so they are not
+  missing a mirror, they have the right one for their shape. What they needed was for
+  nothing else to read a SECOND copy, which is what this refactor fixes everywhere.
+*/
+
 export function answerLegend(frameId: string, values: Record<string, string>) {
   update((s) => {
+    /*
+      THE PROFILE IS KEPT IN STEP HERE, at the one place the Legend is ever written.
+
+      Every caller already goes through this function — answerLegend and
+      answerLegendFromLesson, thirteen call sites — so mirroring here is the only change
+      that cannot be forgotten by the next question somebody adds. Doing it at the call
+      sites is what produced the Welsh bug: one of them wrote the Legend and nothing else.
+
+      Clearing a card clears the field with it: a learner who empties a Legend answer has
+      withdrawn the fact, and leaving it on the profile would mean the lessons kept saying
+      something the card no longer claims.
+    */
+    const filledNow = Object.fromEntries(Object.entries(values).filter(([, v]) => v.trim()))
+    const map = PROFILE_OF[frameId]
+    if (map) {
+      const v = filledNow[map.slot]
+      ;(s.profile as unknown as Record<string, unknown>)[map.field] = v ?? null
+    }
+    /* Origin is the one frame that fills two fields, so it is named rather than tabled. */
+    if (frameId === 'origin') {
+      s.profile.nationality = filledNow.nationality ?? null
+      s.profile.from_place = filledNow.place ?? null
+    }
     const before = s.legend.find((a) => a.frame_id === frameId)
     const filled = Object.fromEntries(Object.entries(values).filter(([, v]) => v.trim()))
     s.legend = [

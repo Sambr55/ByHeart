@@ -257,8 +257,15 @@ export function personalise<T extends {
       gender?: string | null
       nationality?: string | null
       from_place?: string | null
+      /* Mirrored from the Legend by answerLegend — see PROFILE_OF in engine/learner.ts. */
+      married?: string | null
     } | null
-    /** The Legend answers, which is where a CARD_ASK lands — see statusOf. */
+    /**
+     * The Legend answers.
+     *
+     * Still read, as the fallback for records written before the profile held every
+     * answer — see statusOf. The profile is authoritative now.
+     */
     legend?: { frame_id: string; values: Record<string, string> }[]
   },
 ): T {
@@ -956,8 +963,23 @@ export function myStatus(line: string, status?: string | null): string {
  * makes myStatus a no-op for somebody who has not said.
  */
 export function statusOf(me: {
+  profile?: { married?: string | null } | null
   legend?: { frame_id: string; values: Record<string, string> }[]
 }): string | null {
+  /*
+    THE PROFILE FIRST, because that is where an answer lives now.
+
+    This read the Legend alone, and it was the one place in personalise that did — every
+    other swap reads me.profile. That split is the shape of every bug this week: two stores,
+    each screen picking one. answerLegend now mirrors into the profile at the single point
+    the Legend is written, so the profile is authoritative and this reads it.
+
+    The Legend stays as a fallback for records written before the mirror existed. It costs
+    one find on a list of thirteen and means nobody's status silently disappears on the
+    first load after this ships.
+  */
+  const fromProfile = me.profile?.married
+  if (fromProfile) return String(fromProfile)
   const a = (me.legend ?? []).find((x) => x.frame_id === 'married')
   const v = a?.values?.status
   return v ? String(v) : null

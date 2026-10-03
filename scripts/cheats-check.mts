@@ -284,10 +284,31 @@ console.log('\nno lesson asks a question its learner cannot see\n')
     rather than a second copy. Until that lands, this holds the one chip whose answer the
     lessons actually read.
   */
+  /*
+    THE PROFILE IS KEPT IN STEP AT THE ONE PLACE THE LEGEND IS WRITTEN.
+
+    This asserted that the nationality chip calls setProfile — a patch added when Sam picked
+    Welsh and the lesson carried on in English, because the chip wrote the Legend while
+    personalise read the profile. The patch was right and the shape was wrong: it put the
+    obligation on one call site out of thirteen, so the next question added would have had
+    to remember it.
+
+    answerLegend mirrors now, which no caller can bypass. So the rule is about the mirror
+    rather than about any chip.
+  */
+  const learnerSrc = readFileSync('engine/learner.ts', 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '')
   ok(
-    'the nationality chip writes the profile the lessons read',
-    /which === 'origin'\) setProfile\('nationality', word\)/.test(src),
-    'personalise reads me.profile.nationality',
+    'answerLegend mirrors the Legend into the profile',
+    /const PROFILE_OF/.test(learnerSrc) && /PROFILE_OF\[frameId\]/.test(learnerSrc),
+    'otherwise a lesson can file an answer where the lessons do not read it',
+  )
+  ok(
+    'and origin fills both of its fields',
+    /s\.profile\.nationality = filledNow\.nationality/.test(learnerSrc) &&
+      /s\.profile\.from_place = filledNow\.place/.test(learnerSrc),
+    'origin is the one frame with two profile fields behind it',
   )
 
   for (const [who, field] of [

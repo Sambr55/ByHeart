@@ -3744,22 +3744,16 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
                 data-testid={'ask-' + which + '-' + o.value}
                 onClick={() => {
                   /*
-                    THE PROFILE IS WHAT THE LESSONS READ, so the chip has to write it.
+                    ONE WRITE. answerLegend mirrors into the profile at the single point the
+                    Legend is written — see PROFILE_OF in engine/learner.ts — so this no
+                    longer needs its own setProfile call.
 
-                    Sam: "i selected wales as a Language and it progressed with English."
-
-                    It did. This wrote the LEGEND and nothing else, while personalise — the
-                    function that builds every sentence in every lesson — reads
-                    me.profile.nationality. So picking galês filed the answer somewhere the
-                    lessons never look, and the next screen still said Sou inglês.
-
-                    The profile comes first and populates the Legend, which is the order Sam
-                    named: "logically speaking the profile comes before the legend and
-                    populates it." Both are written here for now; the standing job is to make
-                    the Legend a view of the profile rather than a second copy of it, so a
-                    question like this one cannot file an answer in the wrong place again.
+                    It had one for two commits, added after Sam picked Welsh and the lesson
+                    carried on in English: this wrote the Legend while personalise read the
+                    profile. That patch worked and was the wrong shape — the next question
+                    somebody adds would have had to remember it. The mirror cannot be
+                    forgotten, because every caller already goes through answerLegend.
                   */
-                  if (which === 'origin') setProfile('nationality', word)
                   answerLegendFromLesson(which, { [slot.key]: word })
                   track('profile_answer', { question: which, answer: word, where: 'lesson' })
                   settle()
