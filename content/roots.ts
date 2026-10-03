@@ -951,8 +951,19 @@ export const TOP_GUN: Root[] = [
     helpers: { 'Isto': 'this', 'é': 'is', 'uma': 'a', 'Estás': 'you are', 'aqui': 'here', 'para': 'to', 'trabalhar': 'to work', 'em': 'in', 'Ando': 'I go', 'numa': 'at a', 'de': 'of', 'português': 'Portuguese', 'com': 'with', 'coisas': 'things', 'criativas': 'creative' },
     transfer_prompt: {
       context: 'Somebody has asked what you do, and you would rather keep it short.',
-      ask: 'I work in Lisbon.',
-      answer: 'Trabalho em Lisboa.',
+      /*
+        COM, NOT EM — the shape the card uses. The Legend's work frame builds "Trabalho com
+        música", "Trabalho com tecnologia": the sector you work WITH. This released
+        "Trabalho em Lisboa", the place you work IN, which is a different sentence teaching
+        a different preposition on the beat that is supposed to hand over the card's
+        answer.
+
+        The sector varies per learner so there is no single sentence to match, only the
+        shape — and `com coisas criativas` is already a branch above, so this is the one
+        the frame would most often produce.
+      */
+      ask: 'I work with creative things.',
+      answer: 'Trabalho com coisas criativas.',
     },
     rights_status: 'dub-authored',
     starter_tags: ['about-me', 'work'],
@@ -1043,7 +1054,7 @@ export const TOP_GUN: Root[] = [
     rung: 3,
     source_label: 'Top Gun',
     root_display: 'What were you thinking?',
-    credit: 'Asked after somebody does something reckless',
+    credit: 'Stinger to Maverick, after the flyby — Top Gun, 1986',
     source: 'What was going through your head?',
     target: 'Em que estavas a pensar?',
     literal_note: 'Literally “in what were you thinking?”',
@@ -1214,7 +1225,7 @@ export const JAMES_BOND: Root[] = [
     source_label: 'Bond introducing himself, in every film',
     source_status: 'paraphrased',
     root_display: 'Bond. James Bond. English.',
-    credit: 'Said at a border, or a first day',
+    credit: 'Bond, to anyone who asks — surname, full name, nationality, in that order',
     source: 'I am English.',
     target: 'Sou inglês.',
     semantic_bridge:
@@ -1247,8 +1258,17 @@ export const JAMES_BOND: Root[] = [
     helpers: { 'de': 'from', 'Londres': 'London', 'Não': 'not', 'português': 'Portuguese' },
     transfer_prompt: {
       context: 'Somebody has heard your accent and asked where you are from.',
-      ask: 'I am English, from London.',
-      answer: 'Sou inglesa, de Londres.',
+      /*
+        TWO SENTENCES, LIKE THE CARD. The frame builds "Sou inglesa. Sou de Londres." and
+        this released "Sou inglesa, de Londres." — the same words in one sentence with a
+        comma, which is the shape a native writes and NOT the shape the learner's Legend
+        holds. Converged on the card, because the card is what they keep and practise.
+
+        Also the more useful habit for a beginner: two short sentences you can say
+        separately beat one you have to get the pause right in.
+      */
+      ask: 'I am English. I am from London.',
+      answer: 'Sou inglesa. Sou de Londres.',
     },
     rights_status: 'title-reference',
     starter_tags: ['about-me', 'first-day'],
@@ -1259,9 +1279,30 @@ export const JAMES_BOND: Root[] = [
     culture_family: 'james_bond',
     rung: 1,
     root_type: 'quote',
+    /*
+      WHO SAID IT, TO WHOM, IN WHAT. Sam: "We need to be very clear the source of each fun
+      vibe question, who said it to whom in what film etc. That literally is the VIBE of
+      Dub."
+
+      `credit` is the only one of the three sourcing fields a learner ever sees — the
+      render in Journey sits it straight under the display line, and the comment there has
+      always said what it is for: "a band, a film, a person". But on the roots that reach
+      the Legend, five of nine had been filled with a USAGE NOTE instead: "How you
+      introduce yourself, anywhere" where tg_school next door says "Viper, to the new
+      class, day one". One tells you when to say it, which the context line already does;
+      the other is the reason you recognised the line in the first place.
+
+      `source_label` was carrying real sourcing on several of these and is rendered
+      NOWHERE, which is why the good material was invisible. Rather than wire up a second
+      field and print two grey lines, the credit becomes the thing worth reading and the
+      label stays as the editorial record.
+
+      Reported by scripts/vibe-legend.mts, which names any Legend-reaching root whose
+      credit opens like a usage note.
+    */
     source_label: 'James Bond',
     root_display: 'My name is… James Bond.',
-    credit: 'How you introduce yourself, anywhere',
+    credit: 'Sean Connery, Dr. No, 1962 — the pause before the surname is the character',
     source: 'The most famous introduction in film.',
     target: 'Chamo-me… James Bond.',
     literal_note: 'Literally “I call myself”.',
@@ -1357,7 +1398,7 @@ export const JAMES_BOND: Root[] = [
     source_label: 'From Russia with Love',
     source_status: 'verified',
     root_display: 'From Russia with Love',
-    credit: 'How a postcard or a parcel is signed off',
+    credit: 'From Russia with Love, 1963 — the second Bond, and the title is the whole joke',
     source: 'From Russia, with love.',
     target: 'Da Rússia com amor.',
     semantic_bridge:
@@ -1433,7 +1474,18 @@ export const JAMES_BOND: Root[] = [
       'mais': 'more / again',
 
     },
-    transfer_prompt: { context: 'You did not hear the waiter.', ask: 'Can you say it again?', answer: 'Podes dizer outra vez?' },
+    /*
+      NOT "Podes dizer outra vez?" — pf_say_what releases that word for word, so the same
+      sentence was produced at the same beat in two crates. Checked across the library now
+      by scripts/vibe-legend.mts.
+
+      "Nunca mais" was the first answer and bob_better_late already releases it — a
+      collision swapped for a collision, which is what happens when you reach for the
+      obvious line without checking. So it takes the piece this root actually TEACHES:
+      nao_digas, which no other release uses, and which is the sentence the title is
+      really about — telling somebody not to say a thing.
+    */
+    transfer_prompt: { context: 'Somebody has said the quiet part out loud at a family lunch.', ask: 'Don’t say that.', answer: 'Não digas isso.' },
     rights_status: 'title-reference',
     starter_tags: ['survival', 'repair'],
     next_root_hooks: ['desculpa'],
@@ -1523,7 +1575,7 @@ export const JAMES_BOND: Root[] = [
     source_label: 'Quantum of Solace',
     source_status: 'verified',
     root_display: 'Quantum of Solace',
-    credit: 'Asked at a market stall in Portugal',
+    credit: 'Quantum of Solace, 2008 — a title nobody could explain, and it means a small mercy',
     source: 'A quantum is an amount \u2014 a measure of how much.',
     target: 'Quanto custa?',
     semantic_bridge:
@@ -1568,7 +1620,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'The diary, which opens on the statistics',
     source_status: 'paraphrased',
     root_display: 'Thirty-two years old. Weight: unchanged.',
-    credit: 'Counted once a year, reluctantly',
+    credit: 'Bridget, to her own diary, first page — the stats before the story',
     source: 'I am thirty-two years old.',
     target: 'Tenho trinta e dois anos.',
     semantic_bridge:
@@ -1585,10 +1637,33 @@ export const BRIDGET_JONES: Root[] = [
     ],
     reinforces: ['tenho', 'cinco'],
     helpers: { 'e': 'and', 'dois': 'two', 'Quantos': 'how many', 'tens': 'you have', 'Ele': 'he', 'tem': 'has' },
+    /*
+      THE RELEASE IS THE LEGEND ANSWER, in shape and in wording.
+
+      Sam: "Then its the next question - which might be rooted in Bridget or Audrey."
+      Which only works if the sentence somebody produces at the release is the sentence
+      their Legend card then holds. Measured across the nine Legend-reaching roots: one
+      matched, six differed, and this one's release was a QUESTION — "Quantos anos tens?" —
+      on the beat that is supposed to hand over an answer about yourself.
+
+      Converged on the frame's own output rather than the other way round, because the
+      frame is what the learner keeps. Where a frame's answer varies — a sector, a status,
+      a reason — the release matches the SHAPE and picks the commonest filling, since there
+      is no single sentence to converge on. See fillFrame in content/legend.ts.
+
+      The question does not disappear: it is still a branch above, which is where a form
+      somebody needs to RECOGNISE belongs. The release is for what they PRODUCE.
+
+      AND IT WAS A WORD-FOR-WORD DUPLICATE OF tb_age's. Same context, same ask, same
+      answer, in two different crates — so a learner who did the basics and then Bridget
+      said the identical sentence at the identical beat twice. Exactly the repetition Sam
+      reported, from a second cause: scripts/vibe-legend.mts now fails on any two roots
+      sharing a release.
+    */
     transfer_prompt: {
       context: 'Somebody at a table has just asked, and everyone is listening.',
-      ask: 'How old are you?',
-      answer: 'Quantos anos tens?',
+      ask: 'I am thirty years old.',
+      answer: 'Tenho trinta anos.',
     },
     rights_status: 'title-reference',
     starter_tags: ['about-me', 'numbers'],
@@ -1602,7 +1677,7 @@ export const BRIDGET_JONES: Root[] = [
     source_label: 'Smug Marrieds, at a dinner party',
     source_status: 'paraphrased',
     root_display: 'So — why are you still single?',
-    credit: 'Asked lightly, by someone who is married',
+    credit: 'The Smug Marrieds to Bridget, across a dinner table, Bridget Jones’s Diary',
     source: 'Are you married?',
     target: 'És casada?',
     semantic_bridge:
@@ -2377,7 +2452,7 @@ export const AUDREY_HEPBURN: Root[] = [
     source_label: 'Audrey Hepburn, on what she actually liked',
     source_status: 'paraphrased',
     root_display: 'I love people who make me laugh.',
-    credit: 'Explaining why you like someone',
+    credit: 'Audrey Hepburn, asked what she looked for in people — laughing, first',
     source: 'I love people who make me laugh.',
     target: 'Adoro pessoas que me fazem rir.',
     semantic_bridge:
@@ -4299,9 +4374,25 @@ export const DURAN_DURAN: Root[] = [
       pair is the sentence itself. The crate still reads as Duran Duran — that is what the
       credit is for — and the language still swaps cleanly.
     */
-    source: 'I like music.',
-    target: 'Gosto de música.',
-    literal_note: 'Literally “I like OF music” — the DE is not optional.',
+    /*
+      THE ROOT ASKS AND THE RELEASE ANSWERS, which took two goes to get right.
+
+      First draft: root line "Gosto de música.", release flipped to the negative "Não gosto
+      disto." — because lint-content forbids a release that repeats the root line, and
+      rightly so: saying it back proves you can echo, not use.
+
+      But the Legend's into frame builds "Gosto de X", so the release was converging on the
+      wrong shape to avoid a rule. The fix is the other way round: the root line is the
+      QUESTION somebody asks you, and the release is the answer your card keeps. Different
+      sentences, no rule bent, and the beat now runs the way the conversation actually goes.
+
+      `source` tracks the target rather than the song title, because `música` is a specimen
+      that gets swapped for whatever this learner is into and the English must follow it —
+      see carry-check. The title lives in `credit`, which is not swapped.
+    */
+    source: 'Do you like music?',
+    target: 'Gostas de música?',
+    literal_note: 'Literally “do you like OF music?” — the DE is not optional.',
     semantic_bridge:
       'English likes a thing. Portuguese likes OF a thing: gostar DE, always, with the preposition welded on. Gosto de música, gosto de ti, gosto deste café. Drop the de and you have said something that does not exist, which is why this is the first verb worth getting whole rather than nearly.',
     subtext:
@@ -4341,16 +4432,11 @@ export const DURAN_DURAN: Root[] = [
       'Não': 'not',
       'disto': 'of this',
     },
-    /*
-      THE RELEASE IS A TRANSFER, NOT A REPEAT — which lint-content enforces, and rightly:
-      saying the root line back proves you can echo, not that you can use it. So the
-      release flips it to the negative, which is the shape that actually comes up (you are
-      offered something and you do not want it) and is also where the de does not move.
-    */
+    /* The card's own sentence — see the note on the target for why this is the answer. */
     transfer_prompt: {
-      context: 'They are putting something on and it is not for you.',
-      ask: 'I don’t like this.',
-      answer: 'Não gosto disto.',
+      context: 'Somebody has just asked what you are into, and you want to answer properly.',
+      ask: 'I like music.',
+      answer: 'Gosto de música.',
     },
     rights_status: 'title-reference',
     starter_tags: ['liking', 'preposition'],
@@ -4846,9 +4932,20 @@ export const THE_BASICS: Root[] = [
       release that repeats the root is a memory test wearing a transfer's clothes.
     */
     transfer_prompt: {
-      context: 'A woman at the next table has asked where you are from.',
-      ask: 'I am English. I am from London.',
-      answer: 'Sou inglesa. Sou de Londres.',
+      /*
+        THE VIBE OWNS THIS SENTENCE NOW — jb_english releases "Sou inglesa. Sou de
+        Londres.", converged on what the origin frame builds, and two roots releasing one
+        sentence is the duplication Sam reported.
+
+        The basics keep teaching chamo_me, sou and ingles — nothing moves — and release the
+        HALF of it the vibe does not: the city rather than the country, which is the answer
+        a Portuguese person actually wants when they ask where you are from. Asking
+        somebody their name was the first attempt and bj_forgot_name already releases it;
+        the check caught that before it shipped.
+      */
+      context: 'Somebody has asked where you are from, and the country is not the answer they want.',
+      ask: 'I am from London.',
+      answer: 'Sou de Londres.',
     },
     rights_status: 'dub-authored',
     starter_tags: ['first-day', 'introduce'],
@@ -5237,8 +5334,16 @@ export const THE_BASICS: Root[] = [
     ],
     reinforces: ['dois'],
     helpers: { 'Quantos': 'how many', 'tens': 'you have', 'filhos': 'children', 'dois': 'two' },
+    /*
+      ASKING, where bj_age now ANSWERS — see the note there on the duplicate.
+
+      The basics teach both directions of this and the Legend only needs one, so the two
+      roots split it: Bridget hands over the sentence about yourself that the card keeps,
+      and the basics keep the question you will be asked. Both are useful and neither is
+      the other's echo.
+    */
     transfer_prompt: {
-      context: 'Somebody at a table has just asked, and everyone is listening.',
+      context: 'You are the one asking, and you have decided it is fine to ask.',
       ask: 'How old are you?',
       answer: 'Quantos anos tens?',
     },
@@ -5822,9 +5927,21 @@ export const THE_BASICS: Root[] = [
     reinforces: ['quero', 'aprender', 'nao_percebi'],
     helpers: { 'Porquê': 'why', 'quero': 'I want', 'estou a aprender': 'I am learning', 'não': 'not' },
     transfer_prompt: {
-      context: 'They have asked why Portugal, and you are not going to explain the whole thing.',
-      ask: 'Because I want to.',
-      answer: 'Porque quero.',
+      /*
+        "Porque quero." IS THE LEGEND ANSWER AND ah_because OWNS IT.
+
+        Both released it, and that collision is mine: ah_because was written to put
+        `porque` in a vibe so why_here could be reached without the basics, and it
+        converged on the frame's own sentence. Two roots releasing one sentence is the
+        duplication Sam reported, so the basics keep teaching the piece and hand the
+        sentence over.
+
+        This releases the other true answer instead — the honest one for somebody who has
+        not worked it out yet, which is most people in their first month.
+      */
+      context: 'They have asked why Portugal, and the real answer is that you are still finding out.',
+      ask: 'Because I still have not worked it out.',
+      answer: 'Porque ainda não percebi.',
     },
     rights_status: 'title-reference',
     starter_tags: ['about-me'],

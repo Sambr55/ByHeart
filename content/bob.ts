@@ -267,9 +267,18 @@ export const BOB: Root[] = [
       'obrigado': 'thank you',
     },
     transfer_prompt: {
-      context: 'Somebody has just carried your bag up three flights of stairs.',
-      ask: 'Thank you very much.',
-      answer: 'Muito obrigado.',
+      /*
+        THANKS BELONGS TO tb_thank_you, which is step two of the road and the place gender
+        settles. This released the identical sentence — same context, same ask, same
+        answer — so the same thanks was produced twice in two crates.
+
+        It takes its own branch instead: "Não é nada", the reply to being thanked, which is
+        the half nobody teaches and exactly the half you need the first time a Portuguese
+        person thanks YOU.
+      */
+      context: 'Somebody is thanking you for something that cost you nothing.',
+      ask: 'It is nothing.',
+      answer: 'Não é nada.',
     },
   }),
   idiom({
