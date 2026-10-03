@@ -70,12 +70,12 @@ async function SignedOut() {
       <section>
         <p className="eyebrow text-muted">THIS DEVICE</p>
         <h1 className="display mt-3 text-balance text-2xl">
-          {comped ? 'Every vibe is open on this device.' : 'You are on the free three.'}
+          {comped ? 'Every vibe is open on this device.' : 'You are on the free five.'}
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted">
           {comped
             ? 'A code has been redeemed here. It stays with this device — including if you start again from /reset.'
-            : 'The basics and two vibes you pick. If somebody gave you a code, this is where it goes — you do not need an account.'}
+            : 'The basics and four vibes you pick. If somebody gave you a code, this is where it goes — you do not need an account.'}
         </p>
       </section>
 

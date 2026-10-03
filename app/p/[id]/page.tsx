@@ -14,10 +14,32 @@ export const dynamic = 'force-dynamic'
  * sign-up wall, no email box. The claim is doing the work: these are sentences a person
  * produced with nothing on screen to copy from, which is not a claim any streak can make.
  */
+/*
+  NOT INDEXED, AND IT SHOULD HAVE BEEN FROM THE START.
+
+  `/s/[id]` next door sets `robots: { index: false }` and this did not. There is no
+  app/robots.ts and no public/robots.txt to inherit from, so every card minted here was a
+  permanently crawlable public page.
+
+  WHAT THAT PUBLISHED. An invite card's title is "<FirstName> is asking you out — in
+  Portuguese" and its description is the Portuguese line plus the event — so a venue and a
+  night. First name, venue, date, in one city, for an expat community where people are
+  identifiable from very little. A proof card publishes a count of sentences and the vibes
+  they came from, which is milder and still nobody's business.
+
+  Found the night before Sam took the product to a festival to sign up strangers, which is
+  exactly when it would have started mattering.
+
+  THE SHARE LOOP IS UNTOUCHED. WhatsApp, iMessage and Signal read og:* tags and ignore
+  robots directives — the preview still renders for the person the link was actually sent
+  to. What changes is that a search engine does not keep a copy.
+*/
+const PRIVATE = { index: false, follow: false } as const
+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const card = await getShareCard(id)
-  if (!card) return { title: 'DUB' }
+  if (!card) return { title: 'DUB', robots: PRIVATE }
   /*
     The preview a messaging app shows, which for an invite is the whole point — most
     recipients will read this line and never open the page.
@@ -35,18 +57,36 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     set them is an invitation nobody sees.
   */
   if (card.invite) {
-    const title = card.invite.from
-      ? card.invite.from + ' is asking you out — in Portuguese'
-      : 'You are being asked out — in Portuguese'
+    /*
+      THE NAME IS NOT IN THE PREVIEW.
+
+      This read "<FirstName> is asking you out — in Portuguese", which is a lovely line for
+      the one person it was sent to and a liability on anything forwarded: a group chat, a
+      screenshot, a link pasted somewhere else. The name is still on the PAGE, where the
+      person who opened it can see it. It is out of the thing that travels.
+    */
+    const title = 'Somebody is asking you out — in Portuguese'
     const description = [card.invite.pt, card.invite.event].filter(Boolean).join(' · ')
-    return { title, description, openGraph: { title, description }, twitter: { title, description } }
+    return {
+      title,
+      description,
+      openGraph: { title, description },
+      twitter: { title, description },
+      robots: PRIVATE,
+    }
   }
   const title = card.count + ' things they can say in Portuguese — DUB'
   const description =
     'Learned off ' +
     (card.worlds === 1 ? 'one thing they already knew' : card.worlds + ' completely unrelated things') +
     '. No streak involved.'
-  return { title, description, openGraph: { title, description }, twitter: { title, description } }
+  return {
+    title,
+    description,
+    openGraph: { title, description },
+    twitter: { title, description },
+    robots: PRIVATE,
+  }
 }
 
 const MONTHS = [

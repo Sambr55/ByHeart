@@ -43,6 +43,18 @@ const ALLOWANCE = [
   new RegExp('free ' + NUM + ' are gone', 'gi'),
 ]
 
+/*
+  AND app/ IS SCANNED NOW, which is why a stale number survived in it.
+
+  This listed only content/ and components/ paths, so app/account/page.tsx — the page a
+  learner lands on when they redeem a code, and therefore one of the first pages a new
+  tester sees — sat there saying "You are on the free three" and "two vibes you pick"
+  while FREE_CRATES was 5. Live on thisisdub.club, found the night before DUB went to a
+  festival to hand out codes.
+
+  A check with a hand-maintained file list will always be exactly as good as somebody's
+  memory of where copy lives. The app/ routes are copy too.
+*/
 const FILES = [
   'content/help.ts',
   'content/front-door.ts',
@@ -51,6 +63,7 @@ const FILES = [
   'components/Pro.tsx',
   'components/Path.tsx',
   'components/Account.tsx',
+  'app/account/page.tsx',
 ]
 
 console.log('\nthe free allowance, said the same everywhere\n')

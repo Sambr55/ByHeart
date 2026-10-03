@@ -1157,7 +1157,24 @@ function Picker() {
     [learner.sections_completed],
   )
   const spent = [...claimed].filter((id) => !finished.has(id)).length
-  const atLimit = access.known && spent >= allowance
+  /*
+    NO WALL IN FRONT OF A SHUT SHOP.
+
+    This was `access.known && spent >= allowance`, with no check on whether there is
+    anything to buy. components/Club.tsx:264 asks `access.billingReady` for exactly this
+    case and this did not, so with Stripe unconfigured — which is the state today, live
+    /api/entitlements returns billingReady: false — a learner who opened five vibes and
+    abandoned them met a gateway pointing at /pro, and /pro says "Memberships are not open
+    yet. Nothing here is for sale today."
+
+    A dead end dressed as a paywall, and the one place it would bite is a stranger who
+    tried the product properly and wandered between vibes. Which is the whole population at
+    a festival.
+
+    It reverts to a real cap on its own the day billing is configured, so this is a guard
+    rather than a removal.
+  */
+  const atLimit = access.known && access.billingReady && spent >= allowance
   const anyLocked = shown.some((c) => entryRung(c) > rung)
 
   /**

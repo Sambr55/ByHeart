@@ -8,7 +8,7 @@ import { Back } from '@/components/Back'
 import { useEntitlements } from '@/engine/useEntitlements'
 
 /**
- * The page you land on when a crate is beyond the free three.
+ * The page you land on when a crate is beyond the free five.
  *
  * Written to be read rather than to convert — but it does have to make the case.
  *
@@ -99,7 +99,7 @@ export function Pro() {
                 Club where it keeps growing. Real Lisbon voices read it back to you.
               </p>
               <p className="mt-3 text-sm leading-relaxed text-muted">
-                Your three free vibes stay yours either way, and every drop stays open.
+                Your five free vibes stay yours either way, and every drop stays open.
                 There is no hurry here and there is no countdown — a product built on the
                 argument that deadlines do not produce speakers would look ridiculous
                 inventing one at the till.
