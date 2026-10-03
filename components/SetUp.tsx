@@ -24,6 +24,7 @@ import {
   setProfile,
   setPurpose,
   rememberSetUp,
+  syncSession,
 } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
 import { DEFAULT_PAIR } from '@/content/pairs'
@@ -848,6 +849,26 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                 `onDone` still wins where it exists: inside /vibes the journey owns what
                 happens next and there is nowhere to navigate to.
               */
+              /*
+                AND THE SERVER FINDS OUT SOMEBODY STARTED.
+
+                Sam: "My real concern is that they see value in the ongoing club content."
+                You cannot answer that without knowing who came back, and you cannot know
+                who came back without knowing who arrived.
+
+                MEASURED: this component had NO syncSession call at all. `set_up_at` was
+                written to the phone by finish() and reached Postgres only if the learner
+                later tapped into a vibe — engine/journey.tsx fires culture_chosen there.
+                So the drop-off that matters most, the people who finish set-up and never
+                start, was the one population invisible to the server. A hundred strangers
+                at a festival could finish this screen and the record would show nothing.
+
+                `void` and not awaited, for the same reason every other call site does it:
+                this runs on the tap that leaves the screen, and a learner must never wait
+                on a network round trip to start learning. It fails silently offline, which
+                is correct — the blob syncs again on the next beat that calls this.
+              */
+              void syncSession('set_up')
               if (onDone) onDone()
               else router.push('/vibes')
             }}
