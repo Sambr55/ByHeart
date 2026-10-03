@@ -51,7 +51,7 @@
  * done. A library you can be evicted from is not a library.
  */
 import { SETS, CRATES, PIECES, SHELVES, type Shelf, type CultureFamily } from '@/content/roots'
-import { LEGEND_FRAMES, STAGES, type Stage } from '@/content/legend'
+import { LEGEND_FRAMES, STAGES, cardFor, type Stage } from '@/content/legend'
 import { DROPS } from '@/content/drops'
 import { IDIOMS } from '@/content/idioms'
 import { CHEATS } from '@/content/cheats'
@@ -408,7 +408,19 @@ const DECKS: { id: DeckId; label: string; holds: string; rail?: boolean }[] = [
  */
 export function decks(all: CollectedCard[]): Deck[] {
   const totals: Partial<Record<DeckId, number>> = {
-    legend: LEGEND_FRAMES.length,
+    /*
+      THE CARD, NOT EVERY FRAME. Sam's board said "7 OF 13" with his Legend complete.
+
+      LEGEND_FRAMES is thirteen — the seven on the card plus the six that are addable
+      extras — so the board was measuring a finished Legend against a total nobody is asked
+      to reach. The unopened cards below the grid are the honest way to show those six:
+      they are things you CAN add, and counting them into the denominator turns a finished
+      card into "nearly there" for ever.
+
+      cardFor is the same call the door and the countdown make, so the board now agrees
+      with them about how big a Legend is.
+    */
+    legend: cardFor(null).length,
     vibes: CRATES.filter((c) => !c.drop).length,
     sheets: SETS.length,
     /* Thirty authored, and a closed set — so this one reads as a collection to finish. */
