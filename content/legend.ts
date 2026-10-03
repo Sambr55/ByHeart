@@ -3266,6 +3266,21 @@ export const LEGEND_COPY = {
   /** When the device cannot listen at all — see useCanListen. Never an apology. */
   run_no_mic: 'Say it out loud, then show yourself the answer.',
   /*
+    AND THE SAME, WHERE THERE IS NOTHING TO SHOW.
+
+    run_no_mic sends somebody to SHOW ME, which exists on the Legend run and NOT on a
+    revision — a revision asks whether you still have the sentence, and handing it over
+    would answer its own question. So on a browser without recognition that line told
+    somebody to do two things, one of them impossible.
+
+    Caught by scripts/say-check.mts, which asserts that a device with no microphone is
+    never told to speak — a check written for exactly this fault the first time it
+    happened, and it fired the moment the shared card carried the wrong sentence in.
+
+    This one points at the tiles, which are what that learner actually has.
+  */
+  run_no_mic_build: 'Build it below from the pieces.',
+  /*
     WHAT IT HEARD — and it used to be three verdicts for a scorer that returns a number.
 
     Sam: "Is there any way we can get the feedback a bit more advanced on the audio? At the

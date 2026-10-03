@@ -1599,6 +1599,24 @@ function ColdSay({
  */
 const ENOUGH_GOES = 5
 
+/*
+  AND THIS SCREEN IS THE ONE STILL HOLDING ITS OWN COPY.
+
+  components/SayItCard.tsx is this card, extracted so revision could have it — same
+  question at t-ask, same four bands, same words-to-aim-at, same five-goes notice, same
+  listen/copy/say on the reveal. The run-through has NOT been converted to it yet, so the
+  band logic and the rough flagging below exist twice in the product.
+
+  That is a known debt rather than an oversight, and it is small: both read `bandFor` and
+  `missedWords` from engine/listen, so the VERDICTS cannot drift — only the layout around
+  them can. What stopped the conversion is that this screen carries four things the shared
+  card does not know about: the two-second auto-advance, the back/arrow dock, the
+  unanswered-frame branch, and the `run-answer` testid scripts/legend-flow.mts drives.
+  Twenty-eight touch points, on the screen Sam was mid-test on.
+
+  When it is converted, delete this note and the duplicated derivation below with it.
+*/
+
 function RunThrough({
   cards,
   gender,

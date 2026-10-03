@@ -1,6 +1,6 @@
 'use client'
 
-import { SayButton, useCanListen } from '@/components/SayButton'
+import { SayItCard } from '@/components/SayItCard'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -37,8 +37,10 @@ export function Revise() {
   const id = params.get('id') ?? ''
   const [at, setAt] = useState(0)
   const [done, setDone] = useState(false)
-  /* Hidden entirely where the device cannot listen — see useCanListen. */
-  const canSay = useCanListen()
+  /*
+    Whether the device can listen is SayItCard's business now, not this screen's — it
+    draws the microphone or the line that replaces it. See components/SayItCard.tsx.
+  */
 
   const lines = useMemo(
     () =>
@@ -109,55 +111,65 @@ export function Revise() {
           {at + 1} of {lines.length}
         </span>
       </div>
-      <p className="display text-balance text-2xl">“{line.ask}”</p>
       {/*
-        SAY IT, WHICH IS WHAT THE HEADING ALREADY ASKS FOR.
+        THE HINGE CARD, ON THE OTHER COLD BEAT. Sam: "do revise first."
 
-        Sam: "let's look at building that into our say it cold routes." This screen says
-        SAY IT BACK and then hands somebody a tile puzzle — which teaches, and is a
-        different act from producing the sentence. Tapping tiles in order proves you can
-        recognise the words; saying it proves you can say it.
+        WHAT THIS SCREEN WAS. The question at text-2xl — a caption, on the screen whose
+        whole job is to ask it — then a 48px microphone beside a line of small grey text
+        reading "Say it out loud, or build it below", then the tiles. And the marking was
+        `if (!h.close) return`: a miss changed NOTHING on screen. Which is the exact fault
+        Sam reported on the run-through before it was rebuilt — "the say it loud gives no
+        indication it is listening or has heard or has any feedback" — still live here,
+        on the same act, a day after being fixed there.
 
-        Above the build rather than instead of it. Recognition is approximate and absent
-        on some browsers, and the tiles are the path that always works — so speaking is
-        offered first and the build is what it falls back to. A close match advances
-        exactly as a solved build does, and records the same proof: it IS a sentence
-        produced with nothing on screen to copy from, which is the whole definition.
+        So it is the same card now: the question at t-ask with a listen button, a 96px
+        microphone, four verdict bands with the words to aim at, the green tick, the ping,
+        the five-goes limit, and listen/copy/say on the answer once it is shown.
+
+        THE TILES STAY, AND STAY BELOW. Recognition is approximate and absent on some
+        browsers, so the build is the path that always works — speaking is offered first
+        and the tiles are what it falls back to. Passed as children so the card owns the
+        asking and this screen owns what follows.
+
+        AND SHOW ME IS OFF HERE, which is the one real difference from the run-through. The
+        Legend is yours and you may simply look at it; a revision is asking whether you
+        still have the sentence, and handing it over on a tap would answer its own
+        question. The tiles are the way through without speaking — they teach, which is
+        what someone who cannot produce it needs.
       */}
-      {canSay ? (
-      <div className="flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3">
-        <SayButton
-          want={line.answer}
-          onHeard={(h) => {
-            if (!h.close) return
-            recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
+      <SayItCard
+        key={line.answer}
+        ask={line.ask}
+        answer={line.answer}
+        answerEn={line.ask}
+        reveal={false}
+        onClose={() => {
+          /*
+            Recorded exactly as a first release is. The proof card counts sentences
+            produced with nothing on screen, and a revision said cold is one of those.
+          */
+          recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
+          if (at + 1 < lines.length) setAt(at + 1)
+          else setDone(true)
+        }}
+      >
+        <MiniBuild
+          key={line.answer}
+          target={line.answer}
+          helpers={line.helpers}
+          onSolved={({ clean }) => {
+            /*
+              Only when it was cold: a helped answer teaches and proves nothing, which is
+              what `clean` already means everywhere else.
+            */
+            if (clean) {
+              recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
+            }
             if (at + 1 < lines.length) setAt(at + 1)
             else setDone(true)
           }}
         />
-        <span className="min-w-0 flex-1 text-sm text-muted">
-          Say it out loud, or build it below.
-        </span>
-      </div>
-      ) : null}
-      <MiniBuild
-        key={line.answer}
-        target={line.answer}
-        helpers={line.helpers}
-        onSolved={({ clean }) => {
-          /*
-            Recorded exactly as a first release is, and only when it was cold: the proof
-            card counts sentences produced with nothing on screen, and a revision said
-            cold is one of those. A helped answer teaches and proves nothing, which is
-            what `clean` already means everywhere else.
-          */
-          if (clean) {
-            recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
-          }
-          if (at + 1 < lines.length) setAt(at + 1)
-          else setDone(true)
-        }}
-      />
+      </SayItCard>
     </Shell>
   )
 }

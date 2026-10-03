@@ -35,6 +35,7 @@ import { chromium } from 'playwright'
 import { near, bandFor, missedWords, CLOSE_ENOUGH } from '../engine/listen'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_CARD } from '../content/legend'
+import { ROOTS } from '../content/roots'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
@@ -320,6 +321,115 @@ console.log('\nand where the browser cannot listen, nothing is offered\n')
   ok('and nothing asks them to speak', !/say it out loud/i.test(text))
   /* The tile build is still there, so the screen still works. */
   ok('the build is still offered', /tap the pieces/i.test(text))
+  await ctx.close()
+}
+
+/*
+  AND REVISION MARKS THE WORK, which it did not.
+
+  Sam: "do revise first." The other cold beat asked its question at caption size, put a
+  48px microphone beside a line of small grey text, and marked a miss with
+  `if (!h.close) return` — so saying something wrong changed NOTHING on screen. That is the
+  exact fault reported on the run-through ("the say it loud gives no indication it is
+  listening or has heard or has any feedback"), still live on the same act a day after
+  being fixed there.
+
+  THE MISS IS WHAT IS ASSERTED, deliberately. A success was always visible — it advanced
+  the card — so the regression that matters is the silent failure. The fake recogniser
+  reads the revealed answer off the page, and revision does not reveal it, so what it hands
+  back is gibberish: exactly the case that used to produce nothing.
+
+  Also asserted: the question is at the display size and the card is its own surface. Those
+  were the two halves of "much of our text is too small", and a token change is all it
+  takes to lose them.
+*/
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  await ctx.addInitScript(`
+    function FakeRec() {
+      this.lang = ''
+      this.continuous = false
+      this.interimResults = false
+      this.maxAlternatives = 1
+      this.onresult = null
+      this.onerror = null
+      this.onend = null
+    }
+    FakeRec.prototype.start = function () {
+      var self = this
+      var el = document.querySelector('[data-testid="say-answer"]')
+      var said = el ? el.textContent : 'zzz nothing like it at all'
+      setTimeout(function () {
+        if (self.onresult) self.onresult({ results: { length: 1, 0: { length: 1, 0: { transcript: said } } } })
+        if (self.onend) self.onend()
+      }, 50)
+    }
+    FakeRec.prototype.stop = function () {}
+    window.SpeechRecognition = FakeRec
+    window.webkitSpeechRecognition = FakeRec
+  `)
+  const page = await ctx.newPage()
+  await page.goto(BASE)
+  await page.evaluate(
+    ([k, blob]) => localStorage.setItem(k as string, JSON.stringify(blob)),
+    [
+      KEY,
+      {
+        version: 1,
+        learner_id: 'say',
+        created_at: '2026-08-20T00:00:00.000Z',
+        pair: DEFAULT_PAIR,
+        deal_accepted_at: '2026-08-01T00:00:00.000Z',
+        inventory: Object.fromEntries(
+          ROOTS.flatMap((r) => r.extracts).map((e) => [e.id, 'strong']),
+        ),
+      },
+    ] as const,
+  )
+  await page.goto(BASE + '/revise?kind=vibe&id=the_basics')
+  await page.waitForTimeout(1800)
+
+  const askPx = (await page.evaluate(
+    `(() => { const e = document.querySelector('[data-testid="say-ask"]'); return e ? parseFloat(getComputedStyle(e).fontSize) : 0 })()`,
+  )) as number
+  ok('revision asks at the display size', askPx >= 28, Math.round(askPx) + 'px')
+
+  const lifted = (await page.evaluate(`(() => {
+    const e = document.querySelector('[data-testid="say-ask"]')
+    const card = e && e.closest('[class*="bg-bg-elev"]')
+    if (!card) return null
+    const lum = (c) => {
+      const [r, g, b] = (c.match(/\\d+/g) || []).slice(0, 3).map(Number)
+      const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4) }
+      return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+    }
+    const bg = getComputedStyle(card).backgroundColor
+    const page = getComputedStyle(document.querySelector('.app-frame') || document.body).backgroundColor
+    return { bg, page, lifted: lum(bg) > lum(page) }
+  })()`)) as { bg: string; page: string; lifted: boolean } | null
+  ok('on its own card, lifted off the ground', Boolean(lifted?.lifted), lifted ? lifted.bg + ' on ' + lifted.page : 'no card')
+
+  const mic = (await page.evaluate(
+    `(() => { const e = document.querySelector('[data-testid="say-it"]'); return e ? Math.round(e.getBoundingClientRect().width) : 0 })()`,
+  )) as number
+  ok('the microphone is the control, not an ornament', mic >= 80, mic + 'px')
+
+  /*
+    THE SENTENCE IS NOT GIVEN AWAY. A revision asks whether you still have it, so there is
+    no reveal — the tiles are the way through without speaking, and they teach.
+  */
+  ok('no reveal on a revision', !(await page.$('[data-testid="say-show"]')))
+  ok('and the tiles are still the fallback', Boolean(await page.$('[data-testid="tile-pool"]')))
+
+  /* THE MISS THAT USED TO BE SILENT. */
+  await page.click('[data-testid="say-it"]')
+  await page.waitForTimeout(900)
+  const panel = ((await page.textContent('[data-testid="say-heard"]').catch(() => '')) ?? '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  ok('a miss says something now', panel.length > 0, panel || 'nothing on screen')
+  ok('and shows what it heard', /zzz/.test(panel), panel)
+
   await ctx.close()
 }
 
