@@ -101,17 +101,76 @@ ok(
   Legend depends on cannot be left off, which is how tb_age once came to arrive three
   sittings past the open door.
 */
-const cardFrameWords = new Set(
-  PURPOSES.flatMap((p) => cardFor(p).flatMap((f) => f.built_from)),
-)
-for (const root of ROOTS_BY_FAMILY.the_basics) {
-  if (!root.asks) continue
-  const feedsCard = root.extracts.some((e) => cardFrameWords.has(e.id))
-  if (!feedsCard) continue
+/*
+  ASKED OF THE CARD, NOT OF THE BASICS — and the old version was asking the wrong thing.
+
+  This walked ROOTS_BY_FAMILY.the_basics and required every basics root that asks a card
+  question to be ON the road. True while the basics were the only road, and false the
+  moment the road became vibes: Sam asked for "seven fun, recognisable statements leading
+  to seven legend answers", so jb_english asks origin and tb_introduce still asks it too.
+  Both are correct content; the check failed six times on a road that was right.
+
+  The promise this file's own comment states is narrower and is the one that matters: a
+  question the SEVEN-CARD Legend depends on cannot be left off. So that is what is
+  measured — every frame on the card has a step on the road that asks it — whatever crate
+  the step comes from, and however many other roots ask the same question elsewhere.
+*/
+for (const purpose of PURPOSES) {
+  const asked = new Set<string>()
+  for (const step of roadFor(purpose)) {
+    const root = ROOTS.find((r) => r.root_id === step.root)
+    const a = (root as { asks?: string | string[] } | undefined)?.asks
+    if (!a) continue
+    for (const one of Array.isArray(a) ? a : [a]) asked.add(one)
+  }
+  for (const frame of cardFor(purpose)) {
+    /* `name` is answered in set-up, before the road starts — see cardFor. */
+    if (frame.id === 'name') continue
+    ok(
+      'the road asks ' + frame.id,
+      asked.has(frame.id),
+      frame.id + ' is on the card and no road step asks it',
+    )
+  }
+}
+
+/*
+  THE WARM-UP ASKS NOTHING, which is the one thing it is for.
+
+  "Somebody should find out what DUB IS — that the Portuguese falls out of something
+  already in their head — before being asked for anything about themselves." A warm-up
+  crate carrying a road step breaks that on the first screen of the product, and it broke
+  silently: Top Gun and Bridget Jones were the authored pair, both picked up a Legend
+  question when the road became vibes, and the warm-up started asking what you do for a
+  living three beats in. Found by walking a lesson in a browser, not by reading.
+
+  Gender is the second half of it. obrigado/obrigada settles at road step two, so anything
+  asked before that is asked without knowing which ending is the learner's — the fault Sam
+  has reported twice.
+
+  AND THE SCREEN READS THE SAME CONSTANT. components/Journey.tsx typed the two ids itself
+  while this file declared them, so one decision lived in two places and drifted the moment
+  the road moved.
+*/
+for (const fam of WARM_UP) {
   ok(
-    'the road asks ' + root.asks,
-    ROAD.some((s) => s.root === root.root_id),
-    root.root_id + ' asks ' + root.asks + ', feeds the card, and is not on the road',
+    'the warm-up ' + fam + ' is not on the road',
+    !ROAD.some((step) => step.family === fam),
+    fam + ' carries a road step, so warming up there asks a Legend question',
+  )
+  const asking = (ROOTS_BY_FAMILY[fam] ?? []).filter((r) => r.asks)
+  ok(
+    'and asks nothing about the learner',
+    asking.length === 0,
+    asking.map((r) => r.root_id + ' asks ' + r.asks).join(', '),
+  )
+}
+{
+  const src = readFileSync('components/Journey.tsx', 'utf8')
+  ok(
+    'the warm-up screen reads WARM_UP rather than naming crates',
+    /CRATES\.filter\(\(c\) => \(WARM_UP as string\[\]\)\.includes\(c\.id\)\)/.test(src),
+    'the chooser types its own ids, so it can disagree with content/road.ts',
   )
 }
 

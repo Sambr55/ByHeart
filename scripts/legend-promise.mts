@@ -23,7 +23,7 @@
 import { ROOTS_BY_FAMILY } from '../content/roots'
 import { DOORWAY, LEGEND_FRAMES, cardFor, doorwayToGo, frameApplies, frameForPurpose, legendStatus, legendUnlocked } from '../content/legend'
 import type { Purpose } from '../content/situations'
-import { roadFor } from '../content/road'
+import { WARM_UP, roadFor } from '../content/road'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -38,7 +38,19 @@ const ok = (label: string, cond: boolean, detail = '') => {
   basics finished now, so the axis is that vibe's roots: index n means "n lines of the
   basics played". Every assertion below is unchanged in meaning — only the unit moved.
 */
-const doorway = (ROOTS_BY_FAMILY[DOORWAY] ?? []).map((r) => r.root_id)
+/*
+  WALKED FROM THE ROAD, not from the basics crate.
+
+  This was every root in ROOTS_BY_FAMILY[DOORWAY] — right while the road was the basics,
+  and wrong the moment it became vibes: Sam asked for "seven fun, recognisable statements
+  leading to seven legend answers", so the road now names jb_name, bj_marrieds, tg_school
+  and the rest. Playing the whole basics crate no longer finishes it, and this failed on a
+  road that was correct.
+
+  The road is the one list that answers "how far am I" — see content/road.ts — so the
+  fixture reads it rather than modelling it. A step added or moved needs no edit here.
+*/
+const doorway = roadFor(null).map((step) => step.root)
 const STEPS = doorway.length
 
 /** What /legend will actually do with this many vibes finished. */
@@ -65,7 +77,11 @@ const STEPS = doorway.length
 
   The threshold has its own assertions at the bottom.
 */
-const VIBES_DONE = ['top_gun', 'james_bond', 'bridget_jones']
+/*
+  The warm-up plus the crates the road now runs through, because roadProgress counts the
+  warm-up from sectionsCompleted and legendStatus asks the same question.
+*/
+const VIBES_DONE = [WARM_UP[0], 'james_bond', 'bridget_jones']
 
 function legendOffers(played: string[], purpose: Purpose | null): number {
   if (!legendUnlocked(played, VIBES_DONE)) return 0
@@ -170,13 +186,13 @@ ok(
 )
 ok(
   'the warm-up alone does not open it',
-  !legendStatus({ rootsPlayed: [], sectionsCompleted: ['top_gun'], purpose: 'visiting' }).open,
+  !legendStatus({ rootsPlayed: [], sectionsCompleted: [WARM_UP[0]], purpose: 'visiting' }).open,
 )
 ok(
   'the whole road does',
   legendStatus({
     rootsPlayed: roadFor('visiting').map((s) => s.root),
-    sectionsCompleted: ['top_gun'],
+    sectionsCompleted: [WARM_UP[0]],
     purpose: 'visiting',
   }).open,
 )

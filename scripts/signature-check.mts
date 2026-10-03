@@ -17,6 +17,7 @@
  */
 import { ROOTS, CRATES, type CultureFamily, type Root } from '../content/roots'
 import { sectionRoots } from '../engine/journey'
+import { ROAD } from '../content/road'
 
 const fail: string[] = []
 const note = (s: string) => console.log('  ' + s)
@@ -81,6 +82,25 @@ for (const c of CRATES) {
     appearing in a list somebody has to remember to update.
   */
   if (!c.signature) { note(`${String(c.id).padEnd(21)} — named for what it teaches; no source to honour`); continue }
+  /*
+    AND NOT WHERE THE ROAD LEADS, which is the same ruling P4 takes.
+
+    The road is vibes now — one recognisable line per Legend question — and a road step is
+    served FIRST, which is what makes a sitting reach the next question. So a crate
+    carrying a step opens on that root rather than on whatever its signature promises:
+    bridget_jones declares `paraphrased_moment` and bj_marrieds is honestly a `quote`, so
+    relabelling it would be lying about what it is.
+
+    Sam settled which rule wins: "rungs dont matter in the legend build. We just want seven
+    fun, recognisable statements leading to seven legend answers. Everything else is noise.
+    Once we're in the Club we can expand the vibes into wider learning and rungs." The
+    promise still holds for every crate entered on its own terms, which is what the Club
+    does; the road-led ones are reported by scripts/first-session.mts instead.
+  */
+  if (ROAD.some((step) => step.family === c.id)) {
+    note(`${String(c.id).padEnd(21)} — the road opens this one; signature applies in the Club`)
+    continue
+  }
 
   /*
     NO SHARE THRESHOLD ONCE A CRATE HAS DECLARED ITSELF.

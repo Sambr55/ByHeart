@@ -90,7 +90,24 @@ export interface RoadStep {
  * It is a real vibe and counts as one: its words go into the inventory and into the Club's
  * reckoning like any other. What it is not is a toll.
  */
-export const WARM_UP: CultureFamily[] = ['top_gun', 'bridget_jones']
+/*
+  AND THE TWO ON OFFER CHANGED, because the road moved under them.
+
+  It was Top Gun and Bridget Jones, chosen when they were ordinary vibes. Both now carry a
+  road step — tg_school asks `work`, bj_marrieds asks `married` — so warming up in either
+  one asked a Legend question on the first screen of the product, which is the opposite of
+  what the paragraph above promises. Worse, it asked before obrigado/obrigada has settled
+  gender, which is the fault Sam has reported twice.
+
+  Found by walking a lesson in a browser: the warm-up stalled on an ask-work chip screen,
+  three beats in, on a learner who had not yet been told what DUB was.
+
+  Pulp Fiction and Bob's Your Uncle ask nothing at all — checked, not assumed — and both
+  are rung-1 rich, so a beginner meets a real vibe rather than a thin one. Neither is on
+  the road, which is now the rule: the warm-up is the one step that must not be a Legend
+  question, so it cannot be a crate the road is using.
+*/
+export const WARM_UP: CultureFamily[] = ['pulp_fiction', 'bobs_your_uncle']
 
 /**
  * THE BASICS, in the order they are met.
@@ -120,6 +137,47 @@ export const WARM_UP: CultureFamily[] = ['top_gun', 'bridget_jones']
  * the one who never reaches the end. See the note on the step itself.
  */
 export const ROAD: RoadStep[] = [
+  /*
+    THE ROAD IS VIBES NOW, ONE PER QUESTION.
+
+    Sam, having an existential crisis about the claim: "We claim a user builds their legend
+    out of vibes, but actually they do one warm up vibe and then it's all from basics."
+    Then: "Could we get to the seven legend questions from cherry picked phrases from our
+    original vibes… rather than doing a whole bond section, could we just pick that one,
+    see what you can build out of it, then the payoff and audio test is just for that one
+    legend question. Then its the next question - which might be rooted in Bridget or
+    Audrey." And: "wire it up."
+
+    So the road is nine steps and seven of them are a film, a band or a person. Each one
+    teaches the words for exactly one Legend question, asks that question, and releases the
+    sentence the card then holds — the three converged in the previous commit, which is
+    what makes a step feel like one thing rather than three.
+
+    WHAT IS LEFT OF THE BASICS, and why only this. Two steps, and neither is a card
+    question:
+
+      tb_hello_goodbye — the ten-second wink. The first screen of the product should be
+        something somebody can already say, and no film owns olá.
+      tb_thank_you — gender. This has to come before the question that draws gendered
+        chips, and Sam has reported that bug twice: "it needs to feed the language selector
+        so we get ingles/inglesa for the right gender." Nothing in the vibes settles it.
+
+    RUNGS ARE NOT CONSULTED, which is Sam's instruction and worth stating because the
+    sequence looks like it ignores difficulty: "rungs dont matter in the legend build. We
+    just want seven fun, recognisable statements leading to seven legend answers.
+    Everything else is noise. Once we're in the Club we can expand the vibes into wider
+    learning and rungs."
+
+    THE ORDER IS CONVERSATIONAL, not pedagogical. It is the order a stranger in a bar
+    actually asks: name, where from, married, what you do, how old, why here, what you are
+    into. The one departure is gender at the top, for the reason above.
+
+    EMAIL CAME OFF. It was on the old road at step three, justified as protection against
+    abandonment rather than as a card question — and that argument was about a sixteen-step
+    basics road where somebody might leave halfway. This road is nine steps of recognisable
+    culture, and set-up already takes an address. A step that admits it is not for the card
+    needs a stronger reason than it now has.
+  */
   {
     root: 'tb_hello_goodbye',
     family: 'the_basics',
@@ -127,67 +185,91 @@ export const ROAD: RoadStep[] = [
     not_for_the_card: true,
   },
   /*
-    OBRIGADO/OBRIGADA FIRST OF THE ASKING ROOTS, because every gendered line after it is a
-    guess — and the very next one is gendered.
+    GENDER BEFORE ANYTHING GENDERED, which Sam has had to say twice.
 
-    Sam: "move the Obrigado/Obrigada section right up to the top after name - as the gender
-    needs to carry through." Then, when it landed third: "if it did move it's in the wrong
-    place, as it needs to feed the language selector so we get ingles/inglesa for the right
-    gender."
+    "Move the Obrigado/Obrigada section right up to the top after name - as the gender needs
+    to carry through - specifically to I am__ i am from__ - If I am male, I dont want the
+    feminine - Inglesa."
 
-    Both are the same instruction and I only did half of it. I put thank_you third, behind
-    tb_introduce — which is the root that ASKS where you are from and draws the nationality
-    chips. So the chips were still being drawn before DUB knew which ending was the
-    learner's, which is the exact thing moving it was supposed to fix.
-
-    It has no Legend card behind it and teaches two words. It is this early for one reason:
-    so that everything downstream can agree with the person reading it.
+    The very next step asks where you are from and draws inglês/inglesa. No vibe settles
+    gender, so this is one of the two basics steps that stay.
   */
   {
     root: 'tb_thank_you',
     family: 'the_basics',
     because: 'Which of obrigado/obrigada is yours. Until this is answered every gendered line is a guess.',
   },
-  {
-    root: 'tb_introduce',
-    family: 'the_basics',
-    because: 'Your name and where you are from — the answer every later line needs.',
-  },
-  {
-    root: 'tb_email',
-    family: 'the_basics',
-    because: 'Qual é, and somewhere to send the work before there is a road of it to lose.',
-  },
-  {
-    root: 'tb_married_work',
-    family: 'the_basics',
-    because: 'Your status — sou, and the ending that agrees with you.',
-  },
-  {
-    root: 'tb_work',
-    family: 'the_basics',
-    because: 'What you do, which is the question that follows it and has nothing to do with it.',
-  },
-  {
-    root: 'tb_age',
-    family: 'the_basics',
-    because: 'Tenho and anos, and the number that is yours.',
-  },
-  {
-    root: 'tb_why',
-    family: 'the_basics',
-    because: 'Porque — why you are here at all.',
-  },
   /*
-    tb_patience IS NOT HERE — see the note below the road.
+    NAME, and it is Bond. Sam: "Obviously we have My name is Bond, so rather than doing a
+    whole bond section, could we just pick that one."
 
-    Sam: "remove bear with me I am learning - and make a note to add it to the Repair Kit
-    which we are going to move into cheats/hacks later."
+    jb_name teaches chamo_me and nothing else, releases "Chamo-me Ana." — which is exactly
+    what the name frame builds — and its credit now says Sean Connery, Dr. No, 1962. One
+    root, one question, one sentence.
+
+    `name` itself is answered in set-up rather than here, so this step teaches the words
+    for a sentence the learner can already fill in. That is the right way round: the
+    question they have answered is the one they should first hear in Portuguese.
   */
   {
-    root: 'tb_into',
-    family: 'the_basics',
-    because: 'Gosto de, and what they are into — which decides what the Club offers them.',
+    root: 'jb_name',
+    family: 'james_bond',
+    because: 'Chamo-me — the most famous introduction in film, and the first Legend sentence.',
+  },
+  {
+    root: 'jb_english',
+    family: 'james_bond',
+    because: 'Sou and inglês/inglesa. Bond gives his surname, his full name and his nationality in that order.',
+  },
+  {
+    root: 'bj_marrieds',
+    family: 'bridget_jones',
+    because: 'Casado, solteiro, divorciado — the question the Smug Marrieds ask across a dinner table.',
+  },
+  {
+    root: 'tg_school',
+    family: 'top_gun',
+    because: 'Trabalho. Viper tells the new class what Top Gun actually is: a school, and you are here to work.',
+  },
+  /*
+    AGE TAKES TWO ROOTS, because the sentence takes two words.
+
+    "Tenho trinta anos" needs tenho and anos. dd_wolf has tenho — Portuguese HAS hunger
+    where English IS hungry, the swap that also carries your age — and bow_golden_years has
+    anos, which is the whole reason that crate exists. They are adjacent so both halves
+    land in one sitting.
+
+    THE SECOND ROOT USED TO BE bj_age, and moving it is the fix for a real fault. `anos`
+    was taught by nothing outside the basics except Bridget, so Bridget carried TWO road
+    steps — married and age — and a crate with two steps opens on a road root instead of
+    its own material: three first-session guarantees and a documented promise, broken.
+    Sam: "Remember we can build a new vibe if we need it - dont force it." See
+    bowie_golden_years in content/roots.ts.
+  */
+  {
+    root: 'dd_wolf',
+    family: 'duran_duran_lisboa',
+    because: 'Tenho. Portuguese HAS hunger where English IS hungry — and the same verb carries your age.',
+  },
+  {
+    root: 'bow_golden_years',
+    family: 'bowie_golden_years',
+    because: 'Anos. Golden Years, and years is the word your age lives in: tenho trinta anos.',
+  },
+  /*
+    ONE AUDREY STEP, NOT TWO. ah_adoro now teaches adoro, quero AND porque — see the merge
+    note on it. Two steps in one crate is the fault described above, and Audrey had it for
+    the same reason Bridget did.
+  */
+  {
+    root: 'ah_adoro',
+    family: 'audrey_hepburn',
+    because: 'Porque and quero. Why? Because I want to — which is most people’s real answer.',
+  },
+  {
+    root: 'dd_like',
+    family: 'duran_duran_lisboa',
+    because: 'Gosto de and música — what you are into, which decides what the Club offers you.',
   },
 ]
 

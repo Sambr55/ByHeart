@@ -132,6 +132,24 @@ export const VIBE_IMAGES: Record<CultureFamily, VibeImage> = {
     alt: 'Wet cobbles at night reflecting floodlights, a torn ticket stub on the ground beside a tiled wall.',
     rights_status: 'generated',
   },
+  /*
+    GOLDEN YEARS, and the tile is the hour rather than the man.
+
+    No likeness and no album art, which is the rule every tile here follows: a place you
+    could be standing in, not the property the crate is named after. The gold is the only
+    reference it makes.
+
+    Delivered as a 2.2MB PNG and converted to JPEG at 1050px wide — the dimensions every
+    sibling uses — which took it to 362KB, inside the existing range rather than seven
+    times the next heaviest. The PNG is not kept here: everything under public/ is served,
+    so a 2.2MB master nothing references is 2.2MB anybody can download by guessing the
+    name.
+  */
+  bowie_golden_years: {
+    src: '/vibes/bowie-golden-years.jpg',
+    alt: 'Sunset over the Tejo from a tiled Lisbon balcony: shutters open, a table laid for one, the bridge in the distance.',
+    rights_status: 'generated',
+  },
 }
 
 export function vibeImage(id: CultureFamily): VibeImage | null {

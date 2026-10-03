@@ -115,8 +115,33 @@ export const BREAKS: SittingBreak[] = [
     choice: 'Two sittings left. Carry on now, or save your place and come back to it.',
     cta: 'FALTA POUCO',
   },
+  /*
+    A FOURTH BREAK, BECAUSE THE ROAD GREW A SITTING.
+
+    The road is vibes now — one recognisable line per Legend question, see content/road.ts
+    — and that is eleven steps where the basics road was nine, which packs into four
+    sittings rather than three. road-check caught it: "there is a break for every sitting
+    of the road — 3 for 4", and without this the third and fourth sittings would both have
+    closed on "Quase", which promises one to go and then does not deliver.
+
+    `devagar` is the word to spend a break on at this point: it is what a learner actually
+    needs to SAY out loud in week one — mais devagar, por favor — and it is the one request
+    that gets a Portuguese speaker to slow down rather than switch to English, which is the
+    whole problem THE_SWITCH exists for.
+  */
   {
     after: 3,
+    pt: 'Devagar.',
+    en: 'Slowly.',
+    gloss:
+      'One word, devagar, “slowly”. Say it on its own and it is a whole request; add mais and por favor — mais devagar, por favor — and it is the sentence that keeps somebody speaking Portuguese to you instead of giving up and switching to English.',
+    shelf: 'small_words',
+    where: 'NEARLY THERE',
+    choice: 'Two sittings and your Legend is written. Carry on, or save your place.',
+    cta: 'DEVAGAR',
+  },
+  {
+    after: 4,
     /*
       THE ONE THAT IS ALMOST THERE. `quase` is the word this product has been missing —
       it turns every adjective into a hedge and it is one of the first words anybody

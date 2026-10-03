@@ -140,8 +140,10 @@ if (thin.length) {
     ['jb_english', 'origin', { nationality: 'inglesa', place: 'Londres' }],
     ['bj_marrieds', 'married', { status: 'casado' }],
     ['tg_school', 'work', { thing: 'música' }],
-    ['bj_age', 'age', { n: 'trinta' }],
-    ['ah_because', 'why_here', { reason: 'quero fazer o que adoro' }],
+    /* Bowie, not Bridget — see the note on the age step in content/road.ts. */
+    ['bow_golden_years', 'age', { n: 'trinta' }],
+    /* ah_adoro, since the two Audrey roots merged — see the note on its extracts. */
+    ['ah_adoro', 'why_here', { reason: 'quero fazer o que adoro' }],
     ['dd_like', 'into', { into: 'música' }],
   ]
   /*

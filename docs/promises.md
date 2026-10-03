@@ -49,13 +49,35 @@ A learner who plays the basics until there is nothing left has all seven card qu
 answerable. The Legend opens once they have also finished three vibes they chose for
 themselves.
 
-**Status: HOLDS.** Measured: 16 roots over 6 sittings gives card 7/7; the door opens on
-the third finished vibe.
+**Status: SUPERSEDED 2026-10-03.** The door no longer counts vibes and the basics no
+longer carry the road. Replaced by P1a below.
 
 *Decided 2026-09-15, after five vibes gave 3 of 7 and the Legend opened anyway. Changed
 2026-09-21: the basics are compulsory, so opening the Legend on them alone asked nothing
 of the learner but compliance. Sam: "Basics are essentially the first vibe and compulsory
 — to which the user then adds a number of vibes in order to open the Legend."*
+
+## P1a — The road is vibes, one recognisable line per Legend question
+
+Each of the seven card questions is taught, asked and answered by a step on an authored
+road, and seven of those steps are a film, a band or a person. The Legend opens when the
+road is walked — there is no separate vibe toll, because the road IS vibes.
+
+**Status: HOLDS.** Measured by `npm run vibes:legend`: every card frame has a road step
+that asks it, every piece it is built from has a source outside the basics, and each
+Legend-reaching release matches the sentence its frame builds.
+
+*Decided 2026-10-03. Sam, on the claim the product had been making: "We claim a user
+builds their legend out of vibes, but actually they do one warm up vibe and then it's all
+from basics." Five of seven questions already could come from a cherry-picked vibe root;
+two could not, and `anos` could only come from Bridget — which forced one crate to carry
+two road steps and broke P4 for it. Sam: "Remember we can build a new vibe if we need it -
+dont force it." Hence bowie_golden_years, and the Audrey merge, so every crate carries
+exactly one step.*
+
+*Two basics steps remain and neither is a card question: the opening wink (olá/adeus, so
+the first screen is something you can already say) and obrigado/obrigada, because gender
+has to settle before anything gendered is drawn and no vibe settles it.*
 
 ## P2 — The road in is impossible to miss
 
@@ -111,8 +133,17 @@ sitting, so it exhausts and vibes share leftovers.
 
 The first sitting of a vibe serves the kind of thing its tile promises.
 
-**Status: HOLDS.** Measured per vibe by `npm run signature`; james_bond now opens on
-*From Russia with Love* and *Bond. 007.* rather than on two Bond quotes.
+**Status: HOLDS, with one named content gap.** Measured per vibe by `npm run signature`;
+james_bond opens on *From Russia with Love* and *Bond. 007.* rather than on two Bond
+quotes.
+
+*audrey_hepburn cannot satisfy this by any route and never could: its banger
+(`ah_paris` — "Paris is always a good idea.") is authored at rung 4 and the crate has NO
+rung-1 roots at all, so a beginner has never opened on it. Measured against main before
+the vibe road existed, so this is a pre-existing authoring gap rather than a regression.
+The fix is content — a rung-1 Audrey root worth opening on, or moving ah_paris down — and
+`npm run first` reports it rather than failing, because failing would assert the opposite
+of what the road is for. See the note in scripts/first-session.mts.*
 
 ## P5 — No path strands a learner
 

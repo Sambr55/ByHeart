@@ -1,6 +1,6 @@
 # DUB — European Portuguese recording script
 
-**705 lines.** 671 either voice, 24 a man, 10 a woman.
+**726 lines.** 690 either voice, 26 a man, 10 a woman.
 
 European Portuguese only. A Brazilian delivery fails the product: the whole point is
 that a learner arrives in Lisbon and recognises what they hear.
@@ -67,9 +67,6 @@ that a learner arrives in Lisbon and recognises what they hear.
 - `sou-de-londres` — **Sou de Londres.**  
   _I am from London._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
-- `sou-inglesa-sou-de-londres` **[WOMAN]** — **Sou inglesa. Sou de Londres.**  
-  _I am English. I am from London._  
-  → Said cold, with no film behind it: a woman at the next table has asked where you are from.
 
 ### tb_1234
 
@@ -781,6 +778,9 @@ that a learner arrives in Lisbon and recognises what they hear.
 - `nao-sou-portugues` — **Não sou português.**  
   _I am not Portuguese._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `sou-inglesa-sou-de-londres` **[WOMAN]** — **Sou inglesa. Sou de Londres.**  
+  _I am English. I am from London._  
+  → Said cold, with no film behind it: somebody has heard your accent and asked where you are from.
 
 ### jb_name
 
@@ -1252,8 +1252,8 @@ that a learner arrives in Lisbon and recognises what they hear.
 - `adoro-lisboa` — **Adoro Lisboa.**  
   _I love Lisbon._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
-- `quero-fazer-as-coisas-que-adoro` — **Quero fazer as coisas que adoro.**  
-  _I want to do the things I love._  
+- `porque-sim` — **Porque sim.**  
+  _Just because._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
 - `quero-um-cafe-por-favor` — **Quero um café, por favor.**  
   _I want a coffee, please._  
@@ -2279,6 +2279,93 @@ that a learner arrives in Lisbon and recognises what they hear.
   _That’s the world for you._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
+### dd_like
+
+- `gostas-de-musica` — **Gostas de música?**  
+  _Do you like music?_  
+  → A question you can ask anybody, and the answer is the start of a conversation rather than the end of one.
+- `nao-gosto-de-musica` — **Não gosto de música.**  
+  _I don’t like music._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+## Bowie song titles
+
+
+### bow_golden_years
+
+- `anos-dourados` — **Anos dourados.**  
+  _Golden years._  
+  → A title everybody half-knows, carrying the one word you cannot answer "how old are you" without.
+- `dourados` — **dourados**  
+  _golden_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `dois-anos` — **Dois anos.**  
+  _Two years._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bow_heroes
+
+- `so-por-um-dia` — **Só por um dia.**  
+  _Just for one day._  
+  → The hedge that makes an ask harmless. Half of politeness in Portugal is this word.
+- `so` — **só**  
+  _only / just_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `um-dia` — **um dia**  
+  _one day_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `so-um-cafe` — **Só um café.**  
+  _Just a coffee._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `so-isto` — **Só isto.**  
+  _Just this._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `so-isto-obrigado` **[MAN]** — **Só isto, obrigado.**  
+  _Just this, thank you._  
+  → Said cold, with no film behind it: the waiter is waiting and you want one thing, not a list.
+
+### bow_lets_dance
+
+- `vamos-dancar` — **Vamos dançar.**  
+  _Let us dance._  
+  → A suggestion rather than a question. It is also how a Portuguese person says come on.
+- `dancar` — **dançar**  
+  _to dance_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `vamos-ver` — **Vamos ver.**  
+  _Let’s see._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bow_starman
+
+- `a-espera` — **À espera.**  
+  _Waiting in the sky._  
+  → Patient rather than impatient. It is the answer to being asked why you are standing there.
+- `ceu` — **céu**  
+  _sky_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `estou-a-espera` — **Estou à espera.**  
+  _I’m waiting._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `a-espera-de-ti` — **À espera de ti.**  
+  _Waiting for you._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `no-ceu` — **No céu.**  
+  _In the sky._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bow_changes
+
+- `tudo-muda` — **Tudo muda.**  
+  _Changes._  
+  → A shrug and a truth. Also the first half of the commonest greeting in Portugal.
+- `muda` — **muda**  
+  _changes_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `tudo-bem-obrigado` **[MAN]** — **Tudo bem, obrigado.**  
+  _All good, thank you._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
 ## Speaking as a man or a woman
 
 - `estou-cansado` **[MAN]** — **Estou cansado.**  
@@ -2470,9 +2557,6 @@ that a learner arrives in Lisbon and recognises what they hear.
 - `nem-tudo-dura-sempre` — **Nem tudo dura sempre.**  
   _Not everything lasts forever._  
   → Neutral. The gig is over, and so is the drop it came in.
-- `tudo-muda` — **Tudo muda.**  
-  _Everything changes._  
-  → Neutral. He is annoyed that the drop has gone from his picker.
 - `foda-se-tenho-uma-fome-de-lobo` — **Foda-se, tenho uma fome de lobo.**  
   _For fuck’s sake, I’m starving._  
   → Neutral. Four hours in the queue and not one food stall has opened.

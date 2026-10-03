@@ -44,6 +44,24 @@ export type CultureFamily =
   */
   | 'counting_songs'
   | 'bobs_your_uncle'
+  /*
+    GOLDEN YEARS, AND IT EXISTS BECAUSE ONE WORD HAD NOWHERE GOOD TO LIVE.
+
+    Sam asked whether the seven Legend questions could come from vibes rather than the
+    basics. Six could. `anos` could not: bj_age was the only root outside the basics
+    teaching it, which forced Bridget Jones to carry TWO road steps — married and age — and
+    that broke three first-session guarantees and a documented promise, because Bridget
+    then opened on a rung-2 road root instead of its own material.
+
+    I said so rather than widening the budget again, and Sam: "Remember we can build a new
+    vibe if we need it - dont force it. What are the words you are struggling with?" Then,
+    with the answer: a Bowie crate, Golden Years, where years IS anos.
+
+    That is the whole argument for the crate. The association is in the title — golden
+    YEARS, anos — so the banger teaches the word the Legend has been waiting for, at rung 1,
+    in a crate whose first job it can be without displacing anything.
+  */
+  | 'bowie_golden_years'
 
 /**
  * The ladder — six rungs, named for what you can do in a room.
@@ -855,6 +873,26 @@ export const CRATES: Crate[] = [
   /** What the tile promises: see Crate.signature. */
   signature: 'title',
   },
+  {
+    /*
+      THE CRATE THAT EXISTS FOR ONE WORD — see the note on the family id for why.
+
+      Small on purpose: five roots, all rung 1, all song titles with a number or a span of
+      time in them. Five rather than four because §17.4 counts STRONG roots and excludes
+      the banger, which is worth knowing when sizing a new vibe. It is a road crate, so its first job is handing over `anos`, and the
+      banger IS that root rather than something better saved for later. That is the fault
+      Bridget and Audrey have, and the reason this crate was written instead of forcing
+      a third step onto them.
+    */
+    id: 'bowie_golden_years',
+    title: 'Bowie song titles',
+    /* Five, not three — the count grew with §17.4 and the blurb had to follow it. */
+    blurb: 'Five titles, and the time hiding in them.',
+    tone: 'reflective',
+    built: true,
+    /** What the tile promises: see Crate.signature. */
+    signature: 'title',
+  },
 ]
 
 /** Live now. A drop is gone the morning after the thing it was pegged to. */
@@ -913,6 +951,7 @@ export const TOP_GUN: Root[] = [
     credit: 'Viper, to the new class, day one',
     source: 'This is a school. You are here to work.',
     target: 'Isto é uma escola. Estás aqui para trabalhar.',
+    asks: 'work',
     semantic_bridge:
       'The whole film is set at a school, which is easy to forget under the jets. Escola covers every kind — the one you learn Portuguese at, the one down your street, a flight school full of people shouting. And trabalho does double duty: the noun for your work and, with one letter changed, the verb for doing it.',
     subtext: 'Said flatly, to people who thought they had arrived.',
@@ -1228,6 +1267,27 @@ export const JAMES_BOND: Root[] = [
     credit: 'Bond, to anyone who asks — surname, full name, nationality, in that order',
     source: 'I am English.',
     target: 'Sou inglês.',
+    /*
+      THE VIBE ASKS THE QUESTION, which is what wires Sam's flow up.
+
+      Sam: "rather than doing a whole bond section, could we just pick that one, see what
+      you can build out of it, then the payoff and audio test is just for that one legend
+      question. Then its the next question - which might be rooted in Bridget or Audrey."
+
+      `asks` is the field that writes an answer onto the Legend card — see
+      answerLegendFromLesson — and cardFor DERIVES the card from the asks on road steps.
+      So a road made of vibe roots with no `asks` would have produced an empty card: the
+      words would be taught and nothing would be written down.
+
+      It was only ever on the basics because the road was only ever basics. Each of these
+      roots already releases the exact sentence its frame builds — converged in the last
+      commit — so asking the question here is the sentence and the answer arriving
+      together, which is the whole point of the per-question flow.
+
+      The basics keep their asks too. Both roads work; see content/road.ts for which one a
+      learner walks.
+    */
+    asks: 'origin',
     semantic_bridge:
       'The most famous self-introduction in film, and the second half is the sentence you will say most often in Portugal. Sou is the permanent one — what you are and where you are from, the things that do not change by Tuesday — and nationalities take an ending like everything else: inglês if you are a man, inglesa if you are a woman.',
     subtext: 'Stated, not explained.',
@@ -1660,10 +1720,19 @@ export const BRIDGET_JONES: Root[] = [
       reported, from a second cause: scripts/vibe-legend.mts now fails on any two roots
       sharing a release.
     */
+    /*
+      AND IT IS NOT THE AGE STEP ANY MORE, so it hands that sentence over.
+
+      bow_golden_years carries `age` on the road — written because `anos` had nowhere else
+      to live and Bridget was carrying two steps, which broke P4 for it. This root keeps
+      teaching anos and trinta, and releases the line only it offers: somebody ELSE's age,
+      which is the half of the pattern the card never needs and a conversation constantly
+      does.
+    */
     transfer_prompt: {
-      context: 'Somebody at a table has just asked, and everyone is listening.',
-      ask: 'I am thirty years old.',
-      answer: 'Tenho trinta anos.',
+      context: 'Somebody is guessing how old a mutual friend is and getting it wrong.',
+      ask: 'He is thirty-five.',
+      answer: 'Ele tem trinta e cinco.',
     },
     rights_status: 'title-reference',
     starter_tags: ['about-me', 'numbers'],
@@ -1680,6 +1749,7 @@ export const BRIDGET_JONES: Root[] = [
     credit: 'The Smug Marrieds to Bridget, across a dinner table, Bridget Jones’s Diary',
     source: 'Are you married?',
     target: 'És casada?',
+    asks: 'married',
     semantic_bridge:
       'The question every Smug Married asks across a dinner table, and the one you will be asked within a week of arriving. All three answers are adjectives, so all three take an ending: casado or casada, solteiro or solteira, divorciado or divorciada. Nobody in Portugal considers any of the three a difficult subject.',
     subtext: 'Asked lightly. Received otherwise.',
@@ -2458,84 +2528,24 @@ export const AUDREY_HEPBURN: Root[] = [
     semantic_bridge:
       'Portuguese has adorar sitting where English keeps two words apart. Adoro is warmer than gosto and nowhere near as heavy as amo — it is the word for a food, a city, a kind of person, and using it about a person you have just met is friendly rather than alarming. Quero is its blunter cousin: not liking, wanting.',
     subtext: 'Warm, and specific about it.',
+    /*
+      THREE PIECES, ONE ROOT — the Audrey merge.
+
+      `porque` lived in a second Audrey root, ah_because, written to get why_here reachable
+      from a vibe. It worked and it cost too much: two road steps in one crate meant Audrey
+      opened on a rung-2 road root rather than its own material, which broke a documented
+      promise, and the same shape forced Bridget's budget wider. Sam: "merge the Audrey
+      roots."
+
+      They merge cleanly because they were always the same thought. `quero` and `porque`
+      are the two halves of one sentence — Porque quero, because I want to — and this root
+      already taught one of them and released the other's sentence. One root now teaches
+      adoro, quero and porque, releases the card's own answer, and is the only Audrey step
+      on the road.
+    */
     extracts: [
       { id: 'adoro', target: 'adoro', gloss: 'I love', shelf: 'doing', lemma: 'adorar', form: 'I', note: 'Stronger than gosto, lighter than amo. Safe about things, food and cities; friendly about people.' },
       { id: 'quero', target: 'quero', gloss: 'I want', shelf: 'doing', lemma: 'querer', form: 'I' },
-    ],
-    branches: [
-      { target: 'Adoro Lisboa.', en: 'I love Lisbon.', demonstrates: ['adoro'] },
-      { target: 'Quero fazer as coisas que adoro.', en: 'I want to do the things I love.', demonstrates: ['quero', 'adoro'] },
-      { target: 'Quero um café, por favor.', en: 'I want a coffee, please.', demonstrates: ['quero'] },
-    ],
-    reinforces: ['coisa', 'por_favor'],
-    helpers: { 'pessoas': 'people', 'que': 'who / that', 'me': 'me', 'fazem': 'make', 'rir': 'laugh', 'Lisboa': 'Lisbon', 'fazer': 'to do', 'as': 'the', 'coisas': 'things', 'um': 'a', 'café': 'coffee' },
-    transfer_prompt: {
-      context: 'Somebody has asked why you came, and you have decided to answer honestly.',
-      ask: 'I want to do the things I love.',
-      answer: 'Quero fazer as coisas que adoro.',
-    },
-    rights_status: 'short-quote-review-required',
-    starter_tags: ['about-me'],
-    next_root_hooks: ['trabalho'],
-  }),
-  /*
-    AND THE OTHER HALF OF THE SAME GAP — see dd_like for the measurement.
-
-    `why_here` needed `porque` and `quero`. ah_adoro directly above this teaches quero and
-    its transfer prompt already opens "Somebody has asked why you came" — so the crate was
-    already standing on this question and only the one word was missing. `porque` was
-    taught by tb_why and nothing else in 115 roots.
-
-    WHY HERE RATHER THAN A NEW CRATE. Audrey is the vibe about what somebody actually wants
-    out of a life, which is the same question Portugal asks every expat in the first five
-    minutes. A root about reasons belongs beside a root about what you love, and a learner
-    who has just done one is one word away from answering the hardest of the seven.
-
-    THE LINE IS THE REAL ONE. Not a paraphrase of a sentiment: she said this about Paris
-    and the pleasure of ordinary days in it, and it is quoted this way everywhere. The
-    Portuguese keeps the shape rather than the poetry — porque sim is what a Portuguese
-    person actually says where English says "just because", and it is the most useful
-    two-word answer in the language for somebody who does not yet have the vocabulary for
-    the real reason.
-  */
-  q({
-    root_id: 'ah_because',
-    culture_family: 'audrey_hepburn',
-    /*
-      RUNG 2, MATCHING ah_adoro BESIDE IT — and the reason is a rule I tripped.
-
-      Written at rung 1 first, because Sam is right that "rungs dont matter in the legend
-      build": the seven questions want seven recognisable statements, not a difficulty
-      ladder. But `rung` does one other job — scripts/first-session.mts treats a crate with
-      any rung-1 root as OPENABLE, meaning a learner may start their whole DUB life in it,
-      and then holds it to what a first session needs: a capability line, three answerable
-      cold prompts, and more than one release.
-
-      Audrey has none of that. Putting a rung-1 root in it made it startable and instantly
-      broke three guarantees — "You can now ." with no act to name, three dead cold
-      screens, and a single release. Those are real problems for a learner who starts
-      there, and fixing them is a content job for that crate rather than something to
-      smuggle in beside a Legend root.
-
-      So the root sits at rung 2 where its sibling is. It changes nothing about reaching
-      the Legend from here: cardFor and frameReady read `built_from` against what somebody
-      OWNS, and own nothing about rungs. See the road work for how the seven get picked.
-    */
-    rung: 2,
-    root_type: 'quote',
-    source_label: 'Audrey Hepburn, on why Paris',
-    source_status: 'paraphrased',
-    root_display: 'Why? Because I want to.',
-    credit: 'Audrey Hepburn, asked once too often why she kept going back to Paris',
-    source: 'Why? Because I want to.',
-    target: 'Porquê? Porque quero.',
-    literal_note:
-      'Two spellings of one sound: porquê asks, porque answers. The accent is the question.',
-    semantic_bridge:
-      'English uses one word twice — why, because — and Portuguese uses one word with and without an accent. PORQUÊ is the question and PORQUE is the answer, and they are said the same. Which means the hardest question anybody will ask you can be answered with its own word: Porque quero. Because I want to.',
-    subtext:
-      'The answer for the day somebody asks why you moved here and the real reason is too long.',
-    extracts: [
       {
         id: 'porque',
         target: 'porque',
@@ -2546,26 +2556,27 @@ export const AUDREY_HEPBURN: Root[] = [
       },
     ],
     branches: [
-      { target: 'Porque quero.', en: 'Because I want to.', demonstrates: ['porque'] },
+      { target: 'Adoro Lisboa.', en: 'I love Lisbon.', demonstrates: ['adoro'] },
+      { target: 'Porque quero.', en: 'Because I want to.', demonstrates: ['porque', 'quero'] },
       { target: 'Porque sim.', en: 'Just because.', demonstrates: ['porque'] },
-      { target: 'Porque gosto de Lisboa.', en: 'Because I like Lisbon.', demonstrates: ['porque'] },
+      { target: 'Quero um café, por favor.', en: 'I want a coffee, please.', demonstrates: ['quero'] },
     ],
-    reinforces: ['quero', 'gosto_de'],
-    helpers: {
-      'Porquê': 'why',
-      'quero': 'I want',
-      'sim': 'yes',
-      'gosto de': 'I like',
-      'Lisboa': 'Lisbon',
-    },
+    reinforces: ['coisa', 'por_favor'],
+    helpers: { 'pessoas': 'people', 'que': 'who / that', 'me': 'me', 'fazem': 'make', 'rir': 'laugh', 'Lisboa': 'Lisbon', 'fazer': 'to do', 'as': 'the', 'coisas': 'things', 'um': 'a', 'café': 'coffee', 'Porquê': 'why', 'sim': 'yes' },
+    /*
+      THE QUESTION ah_because WAS CARRYING, now asked here. `asks` is what writes an answer
+      onto the Legend card and cardFor derives the card from the asks on road steps — see
+      the note on jb_english.
+    */
+    asks: 'why_here',
     transfer_prompt: {
-      context: 'Somebody has asked why you are here and you do not want to make a speech.',
+      context: 'They have asked why Portugal and you are not going to make a speech.',
       ask: 'Because I want to.',
       answer: 'Porque quero.',
     },
     rights_status: 'short-quote-review-required',
-    starter_tags: ['about-me', 'answering'],
-    next_root_hooks: ['quero'],
+    starter_tags: ['about-me'],
+    next_root_hooks: ['trabalho'],
   }),
   q({
     root_id: 'ah_paris',
@@ -4359,10 +4370,25 @@ export const DURAN_DURAN: Root[] = [
     culture_family: 'duran_duran_lisboa',
     rung: 1,
     root_type: 'title',
-    source_label: 'Do You Believe in Shame?',
+    /*
+      THE TITLE HAD TO CHANGE, because it was not doing the job a root line does.
+
+      It was "Do You Believe in Shame?" and the Portuguese is "Gostas de música?" — no
+      shared word, no association, nothing for the learner to recognise. Every other root
+      in this product works because the title CARRIES the language: hungry/fome,
+      years/anos, ordinary world/mundo normal. Printed on screen beside each other, that
+      pair was two unrelated sentences and a learner would have been right to wonder what
+      one had to do with the other.
+
+      "My Own Way" carries it. Gostar is the verb, and the title is about liking something
+      a particular way — so the question the root asks ("do you like...?") and the title are
+      the same thought. It is also 1981 and the band's first top-twenty single, which is a
+      better credit than a 1989 album track.
+    */
+    source_label: 'My Own Way',
     source_status: 'verified',
-    root_display: 'Do You Believe in Shame?',
-    credit: 'Duran Duran, 1989 — Simon Le Bon, on the record he called the honest one',
+    root_display: 'My Own Way',
+    credit: 'Duran Duran, 1981 — their first top-twenty single, and the one they played to get signed',
     /*
       SOURCE TRACKS THE TARGET, not the song title — which is a rule I had to be taught by
       carry-check. `música` is a SPECIMEN: it is swapped for whatever this learner is
@@ -4393,8 +4419,9 @@ export const DURAN_DURAN: Root[] = [
     source: 'Do you like music?',
     target: 'Gostas de música?',
     literal_note: 'Literally “do you like OF music?” — the DE is not optional.',
+    asks: 'into',
     semantic_bridge:
-      'English likes a thing. Portuguese likes OF a thing: gostar DE, always, with the preposition welded on. Gosto de música, gosto de ti, gosto deste café. Drop the de and you have said something that does not exist, which is why this is the first verb worth getting whole rather than nearly.',
+      'My own way — the way I like it. English likes a thing; Portuguese likes OF a thing: gostar DE, always, with the preposition welded on. Gosto de música, gosto de ti, gosto deste café. Drop the de and you have said something that does not exist, which is why this is the first verb worth getting whole rather than nearly.',
     subtext:
       'A question you can ask anybody, and the answer is the start of a conversation rather than the end of one.',
     extracts: [
@@ -4464,6 +4491,297 @@ export const DURAN_DURAN: Root[] = [
 // graph did not have — água, luz, noite, porta, comboio, plataforma, silêncio —
 // and every one is arrival-critical.
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// GOLDEN YEARS — the crate that exists for one word.
+//
+// Sam: "Remember we can buiuld a new vibe if we need it - dont force it. What are the
+// words you ar stuggling with?" The answer was `anos`: bj_age was the only root outside
+// the basics that taught it, which made Bridget Jones carry two Legend steps and broke
+// three first-session guarantees plus a documented promise. Sam's answer was Bowie, and
+// the association is right there in the title — golden YEARS, anos.
+//
+// Five roots, all rung 1, all song titles with time in them. Small on purpose: it is a
+// road crate whose first job is handing over `anos`, so the banger IS that root rather
+// than something better saved for later. That is exactly the fault it was written to fix
+// elsewhere.
+//
+// RIGHTS: song titles, used as titles. The same footing as the Duran Duran crate — a
+// title is not a lyric and the crate quotes none.
+// ---------------------------------------------------------------------------
+
+export const BOWIE: Root[] = [
+  q({
+    root_id: 'bow_golden_years',
+    culture_family: 'bowie_golden_years',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Golden Years',
+    source_status: 'verified',
+    root_display: 'Golden Years',
+    credit: 'David Bowie, 1975 — written for Station to Station, and reportedly for his wife',
+    source: 'Golden years.',
+    target: 'Anos dourados.',
+    literal_note: 'Literally “years golden” — Portuguese puts the description behind.',
+    semantic_bridge:
+      'ANOS is years, and it is the word Portuguese uses for your age: not "I am thirty" but tenho trinta anos, I HAVE thirty years. The title also shows the word order English gets backwards — anos dourados, not dourados anos, because the describing word goes behind the thing in Portuguese almost every time.',
+    subtext:
+      'A title everybody half-knows, carrying the one word you cannot answer "how old are you" without.',
+    extracts: [
+      {
+        id: 'anos',
+        target: 'anos',
+        gloss: 'years',
+        shelf: 'things',
+        gender: 'm',
+        note: 'Your age lives in this word. Portuguese HAS years where English IS a number of them: tenho trinta anos, tenho quarenta anos. Said on its own it is just years — dois anos, two years.',
+      },
+      /*
+        AUTHORED PLURAL, because the only place it appears is "Anos dourados" and the lint
+        is right to insist: a build whose tiles say dourados cannot be satisfied by a piece
+        that says dourado. The singular is in the helpers, where a word somebody is shown
+        rather than tested belongs.
+      */
+      { id: 'dourado', target: 'dourados', gloss: 'golden', shelf: 'describing' },
+    ],
+    branches: [
+      { target: 'Tenho trinta anos.', en: 'I am thirty years old.', demonstrates: ['anos'] },
+      { target: 'Dois anos.', en: 'Two years.', demonstrates: ['anos'] },
+      { target: 'Anos dourados.', en: 'Golden years.', demonstrates: ['anos', 'dourado'] },
+    ],
+    reinforces: ['tenho', 'trinta', 'dois'],
+    helpers: {
+      'Tenho': 'I have',
+      'trinta': 'thirty',
+      'Dois': 'two',
+    },
+    /*
+      THE AGE QUESTION, ASKED HERE. See the note on jb_english for why the vibe asks
+      rather than the basics: `asks` is what writes an answer onto the Legend card, and
+      cardFor derives the card from the asks on road steps.
+    */
+    asks: 'age',
+    transfer_prompt: {
+      context: 'Somebody has asked your age and you are going to tell them.',
+      ask: 'I am thirty years old.',
+      answer: 'Tenho trinta anos.',
+    },
+    rights_status: 'title-reference',
+    freebie_flag: true,
+    starter_tags: ['about-me', 'numbers'],
+    next_root_hooks: ['tenho'],
+  }),
+  q({
+    root_id: 'bow_heroes',
+    culture_family: 'bowie_golden_years',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Heroes',
+    source_status: 'verified',
+    root_display: 'Heroes — just for one day',
+    credit: 'David Bowie, 1977 — recorded in Berlin, beside the Wall he was singing about',
+    source: 'Just for one day.',
+    target: 'Só por um dia.',
+    literal_note: 'Literally “only for one day”.',
+    semantic_bridge:
+      'SÓ is the smallest useful word in Portuguese: only, just, nothing more than. It goes in front of whatever it is limiting — só um café, só por um dia, só isto — and it is how you make any request smaller and therefore easier to say yes to.',
+    subtext: 'The hedge that makes an ask harmless. Half of politeness in Portugal is this word.',
+    extracts: [
+      {
+        id: 'so',
+        target: 'só',
+        gloss: 'only / just',
+        shelf: 'small_words',
+        note: 'Goes in front of the thing it shrinks. Só um café, just a coffee. Só isto, just this. It is also the word for being alone, which is the same idea.',
+      },
+      { id: 'dia_um', target: 'um dia', gloss: 'one day', shelf: 'when' },
+    ],
+    branches: [
+      { target: 'Só um café.', en: 'Just a coffee.', demonstrates: ['so'] },
+      { target: 'Só por um dia.', en: 'Just for one day.', demonstrates: ['so', 'dia_um'] },
+      { target: 'Só isto.', en: 'Just this.', demonstrates: ['so'] },
+    ],
+    /* Only ids some root actually teaches — lint-content checks this, and cafe is not one. */
+    reinforces: ['isto'],
+    helpers: {
+      'um': 'a / one',
+      'café': 'coffee',
+      'por': 'for',
+      'isto': 'this',
+    },
+    transfer_prompt: {
+      context: 'The waiter is waiting and you want one thing, not a list.',
+      ask: 'Just this, thank you.',
+      answer: 'Só isto, obrigado.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['ordering', 'small-words'],
+    next_root_hooks: ['isto'],
+  }),
+  /*
+    THE FOURTH ROOT, because §17.4 requires four strong roots in a crate and three is not a
+    vibe. It is also the one that makes the crate about something: three titles about time
+    passing, and this is the one about tonight.
+  */
+  q({
+    root_id: 'bow_lets_dance',
+    culture_family: 'bowie_golden_years',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Let’s Dance',
+    source_status: 'verified',
+    root_display: 'Let’s Dance',
+    credit: 'David Bowie, 1983 — the one that made him enormous, produced by Nile Rodgers',
+    source: 'Let us dance.',
+    target: 'Vamos dançar.',
+    literal_note: 'Literally “we go to dance” — Portuguese says let us do a thing with vamos.',
+    semantic_bridge:
+      'VAMOS is how Portuguese suggests anything: vamos dançar, vamos comer, vamos embora. Literally "we go", and then whatever you are going to do, unchanged — no conjugation to get wrong, which makes it the fastest way to propose something out loud in your first week.',
+    subtext: 'A suggestion rather than a question. It is also how a Portuguese person says come on.',
+    extracts: [
+      {
+        id: 'vamos',
+        target: 'vamos',
+        gloss: 'let’s / we go',
+        shelf: 'doing',
+        lemma: 'ir',
+        form: 'we',
+        note: 'Put anything after it and it stays as it is: vamos dançar, vamos comer, vamos ver. The second verb never changes, which is why this is the cheapest sentence shape in the language.',
+      },
+      /*
+        NO `lemma`, deliberately. Declaring one asks paradigm-check for the whole verb
+        table — "every lemma the content teaches has a paradigm, so a piece can never be
+        picked for a card whose other forms nobody has vouched for" — and this root does
+        not teach the verb. It teaches the SHAPE: vamos plus an infinitive that never
+        changes. The infinitive is the only form here, so there is no paradigm to vouch
+        for and claiming one would be asking somebody to write a table for a word this
+        crate never conjugates.
+      */
+      { id: 'dancar', target: 'dançar', gloss: 'to dance', shelf: 'doing' },
+    ],
+    branches: [
+      { target: 'Vamos dançar.', en: 'Let’s dance.', demonstrates: ['vamos', 'dancar'] },
+      { target: 'Vamos embora.', en: 'Let’s go.', demonstrates: ['vamos'] },
+      { target: 'Vamos ver.', en: 'Let’s see.', demonstrates: ['vamos'] },
+    ],
+    reinforces: ['obrigado'],
+    helpers: {
+      'embora': 'away / off',
+      'ver': 'to see',
+    },
+    transfer_prompt: {
+      context: 'It is late, the bill is paid, and somebody is waiting for you to decide.',
+      ask: 'Let’s go.',
+      answer: 'Vamos embora.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['suggesting'],
+    next_root_hooks: ['dancar'],
+  }),
+  /*
+    AND A FIFTH, because §17.4 counts STRONG roots and the banger is excluded — a crate
+    needs four besides its freebie. Worth knowing when sizing a new vibe: four roots reads
+    like enough and is one short.
+  */
+  q({
+    root_id: 'bow_starman',
+    culture_family: 'bowie_golden_years',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Starman',
+    source_status: 'verified',
+    root_display: 'Starman — waiting in the sky',
+    credit: 'David Bowie, 1972 — the Top of the Pops performance that changed British music',
+    source: 'Waiting in the sky.',
+    target: 'À espera.',
+    literal_note: 'Literally “at the wait” — Portuguese waits AT rather than being waiting.',
+    semantic_bridge:
+      'Portuguese does not say I am waiting, it says estou À ESPERA — I am at the wait. The phrase is fixed and you will use it constantly: à espera do autocarro, à espera de ti, or on its own when somebody asks what you are doing in a doorway.',
+    subtext: 'Patient rather than impatient. It is the answer to being asked why you are standing there.',
+    extracts: [
+      {
+        id: 'a_espera',
+        target: 'à espera',
+        gloss: 'waiting',
+        shelf: 'doing',
+        note: 'A fixed phrase, and the à carries the accent — à espera, never a espera. Add de for what you are waiting for: à espera do café.',
+      },
+      { id: 'ceu', target: 'céu', gloss: 'sky', shelf: 'things', gender: 'm' },
+    ],
+    branches: [
+      { target: 'Estou à espera.', en: 'I’m waiting.', demonstrates: ['a_espera'] },
+      /* `ti` is unambiguously tu, so it carries the formal version — see lint-content. */
+      {
+        target: 'À espera de ti.',
+        en: 'Waiting for you.',
+        demonstrates: ['a_espera'],
+        address: 'tu' as const,
+        formal: 'À espera de si.',
+      },
+      { target: 'No céu.', en: 'In the sky.', demonstrates: ['ceu'] },
+    ],
+    reinforces: ['obrigado'],
+    helpers: {
+      'Estou': 'I am',
+      'de': 'for / of',
+      'ti': 'you',
+      'si': 'you (formal)',
+      'No': 'in the',
+    },
+    transfer_prompt: {
+      context: 'Somebody has found you standing outside a shop and wants to know why.',
+      ask: 'I’m waiting.',
+      answer: 'Estou à espera.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['explaining'],
+    next_root_hooks: ['a_espera'],
+  }),
+  q({
+    root_id: 'bow_changes',
+    culture_family: 'bowie_golden_years',
+    rung: 1,
+    root_type: 'title',
+    source_label: 'Changes',
+    source_status: 'verified',
+    root_display: 'Changes',
+    credit: 'David Bowie, 1971 — the one that announced he would never stay the same',
+    source: 'Changes.',
+    target: 'Tudo muda.',
+    literal_note: 'Literally “everything changes” — the title is one word, the sentence needs two.',
+    semantic_bridge:
+      'TUDO is everything, and it is the subject here: Portuguese says tudo muda where English says things change. It pairs with nada, nothing, and between them they cover an enormous amount of ordinary conversation — tudo bem, nada mal, tudo pronto.',
+    subtext: 'A shrug and a truth. Also the first half of the commonest greeting in Portugal.',
+    extracts: [
+      {
+        id: 'tudo',
+        target: 'tudo',
+        gloss: 'everything',
+        shelf: 'small_words',
+        note: 'Tudo bem is how Portugal says hello and how it asks if you are all right — literally "everything well". You will hear it more than olá.',
+      },
+      { id: 'muda', target: 'muda', gloss: 'changes', shelf: 'doing', lemma: 'mudar', form: 'it' },
+    ],
+    branches: [
+      { target: 'Tudo bem?', en: 'All good? / How are you?', demonstrates: ['tudo'] },
+      { target: 'Tudo muda.', en: 'Everything changes.', demonstrates: ['tudo', 'muda'] },
+      { target: 'Tudo bem, obrigado.', en: 'All good, thank you.', demonstrates: ['tudo'] },
+    ],
+    reinforces: ['obrigado'],
+    helpers: {
+      'bem': 'well / fine',
+      'obrigado': 'thank you',
+    },
+    transfer_prompt: {
+      context: 'Somebody you half-know has just asked how you are.',
+      ask: 'All good, thank you.',
+      answer: 'Tudo bem, obrigado.',
+    },
+    rights_status: 'title-reference',
+    starter_tags: ['greeting', 'small-words'],
+    next_root_hooks: ['bem'],
+  }),
+]
 
 export const WIZARDRY: Root[] = [
   q({
@@ -5960,6 +6278,7 @@ export const ROOTS: Root[] = [
   ...FLIRTING_M2F,
   ...FLIRTING_F2M,
   ...DURAN_DURAN,
+  ...BOWIE,
   ...WIZARDRY,
   ...THE_BASICS,
   ...BOB,
@@ -5984,6 +6303,7 @@ export const ROOTS_BY_FAMILY: Record<CultureFamily, Root[]> = {
   flirting_m2f: FLIRTING_M2F,
   flirting_f2m: FLIRTING_F2M,
   duran_duran_lisboa: DURAN_DURAN,
+  bowie_golden_years: BOWIE,
   world_of_wizardry: WIZARDRY,
   bobs_your_uncle: BOB,
 }

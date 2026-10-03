@@ -22,6 +22,7 @@
 import { doorwayRoots, legendUnlocked, LEGEND_CARD } from '../content/legend'
 import { ROOTS, type CultureFamily, type Rung } from '../content/roots'
 import { sectionRoots } from '../engine/journey'
+import { WARM_UP, roadFor } from '../content/road'
 
 const fail: string[] = []
 const note = (s: string) => console.log('  ' + s)
@@ -67,31 +68,50 @@ if (floor > 2) {
   Named rather than inlined so the next reader sees immediately that the second half of
   the door is being held constant on purpose, not forgotten.
 */
-const GRANTED = ['top_gun', 'james_bond', 'bridget_jones']
+/*
+  THE WARM-UP, GRANTED, so this file keeps testing the one thing it tests.
+
+  roadProgress counts the warm-up as a step and reads it from sectionsCompleted, which this
+  walk does not simulate. Named rather than inlined so the next reader sees immediately
+  that it is held constant on purpose rather than forgotten.
+*/
+const GRANTED = [WARM_UP[0]]
+
+/*
+  WALKED ACROSS THE ROAD'S CRATES, not inside one.
+
+  This served `fam` — the family of the first doorway root, so in practice the basics — and
+  asked whether the door opened. True while the basics WERE the road; false now that the
+  road is vibes, one recognisable line per Legend question. The walk could never finish,
+  and the failure it printed named no missing root because none was missing: the door was
+  simply waiting on steps in other crates that this loop never visited.
+
+  So it walks the crates the road passes through, in road order, which is what a learner
+  does. The question is unchanged and is still the right one: at every rung, is the whole
+  road actually SERVED — or does the ladder hide a step somebody can never reach?
+*/
+const ROAD_CRATES: CultureFamily[] = []
+for (const step of roadFor(null)) {
+  if (!ROAD_CRATES.includes(step.family)) ROAD_CRATES.push(step.family)
+}
 
 for (const rung of [floor, 3, 4, 5, 6] as const) {
   const played: string[] = []
-  let guard = 0
-  while (guard++ < 40) {
-    const serve = sectionRoots(fam, rung as Rung, played)
-    const fresh = serve.filter((r) => !played.includes(r.root_id))
-    if (!fresh.length) break
-    for (const r of fresh) played.push(r.root_id)
-    /*
-      THE BASICS HALF ONLY, which is all this file has ever been about.
-
-      The door is the basics plus three chosen vibes now. This walk serves the basics and
-      asks whether its doorway roots are reachable at every rung — a question about
-      content ordering, not about the door's second half, and still exactly the right
-      question. So it asks legendUnlocked with the three vibes granted, which isolates the
-      half being tested rather than failing on a condition this walk never simulates.
-    */
+  for (const crate of ROAD_CRATES) {
+    let guard = 0
+    while (guard++ < 40) {
+      const serve = sectionRoots(crate, rung as Rung, played)
+      const fresh = serve.filter((r) => !played.includes(r.root_id))
+      if (!fresh.length) break
+      for (const r of fresh) played.push(r.root_id)
+    }
     if (legendUnlocked(played, GRANTED)) break
   }
   const open = legendUnlocked(played, GRANTED)
   note(`  rung ${rung}: ${open ? 'the door closes' : 'DEAD END'} after ${played.length} roots`)
   if (!open) {
-    const short = doorway.filter((id) => !played.includes(id))
+    /* The ROAD's steps, since that is what the door now waits on. */
+    const short = roadFor(null).map((st) => st.root).filter((id) => !played.includes(id))
     fail.push(
       `a learner at rung ${rung} can never open their Legend — ` +
         `${short.join(', ')} ${short.length === 1 ? 'is' : 'are'} never served`,

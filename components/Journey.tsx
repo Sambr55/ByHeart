@@ -1108,12 +1108,18 @@ function WarmUp() {
   const [going, setGoing] = useState<CultureFamily | null>(null)
 
   /*
-    Read from CRATES rather than typed here, so the tile says what the vibe says.
+    READ FROM WARM_UP, which is the one place that decides this.
 
-    Two ids, and if either is ever renamed this breaks loudly at the filter rather than
-    quietly showing one option.
+    The ids were typed here — 'top_gun' || 'bridget_jones' — while content/road.ts also
+    declared WARM_UP, so one decision lived in two files. They drifted the moment the road
+    moved: both of those crates picked up a road step that asks a Legend question, WARM_UP
+    was changed to two crates that ask nothing, and this screen carried on offering the old
+    pair. A learner would have met the right constant in every check and the wrong one on
+    the actual screen.
+
+    Still read through CRATES so the tile says what the vibe says.
   */
-  const offered = CRATES.filter((c) => c.id === 'top_gun' || c.id === 'bridget_jones')
+  const offered = CRATES.filter((c) => (WARM_UP as string[]).includes(c.id))
 
   return (
     <Shell stage="CHOICE" eyebrow="WARM UP">

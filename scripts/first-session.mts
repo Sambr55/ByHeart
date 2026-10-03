@@ -25,6 +25,7 @@ import {
 } from '../content/roots'
 import { NO_CUE_PROMPTS } from '../content/front-door'
 import { INSIGHTS } from '../content/osmosis'
+import { ROAD } from '../content/road'
 import { beatsFor, capabilities, sectionRoots } from '../engine/journey'
 
 const problems: string[] = []
@@ -255,7 +256,28 @@ if (basics) {
   best line is written at rung 6.
 */
 {
+  /*
+    EXCEPT WHERE THE ROAD HAS FIRST CLAIM ON THE CRATE.
+
+    The road is vibes now — one recognisable line per Legend question — so four crates have
+    a road step in them, and a road step is deliberately served first: that is what makes
+    a sitting reach the next Legend question rather than wherever the crate's own ordering
+    leads. See the `onRoad` branch in engine/journey.tsx.
+
+    Those two rules genuinely conflict, and Sam settled which wins: "rungs dont matter in
+    the legend build. We just want seven fun, recognisable statements leading to seven
+    legend answers. Everything else is noise. Once we're in the Club we can expand the
+    vibes into wider learning and rungs."
+
+    So the banger rule holds for every crate the road does not touch, and for the
+    road-touched ones it becomes a note rather than a failure: the banger is still the
+    right opener once the Legend is written and the crate is entered on its own terms,
+    which is what the Club does. Failing here would be asserting the opposite of the
+    product's own sequence.
+  */
+  const roadCrates = new Set(ROAD.map((step) => step.family))
   const outOfReach: string[] = []
+  const roadFirst: string[] = []
   for (const crate of CRATES.filter((c) => c.built !== false && !c.drop)) {
     const all = ROOTS_BY_FAMILY[crate.id] ?? []
     const banger = all.find((r) => r.freebie_flag)
@@ -266,12 +288,19 @@ if (basics) {
     // At the rung the banger itself sits on, it must be what the vibe opens with.
     const served = sectionRoots(crate.id, banger.rung, [])
     if (served[0]?.root_id !== banger.root_id) {
-      fail(
+      const line =
         crate.id + ' opens on "' + served[0]?.root_display + '" at rung ' + banger.rung +
-          ' — the banger "' + banger.root_display + '" is reachable and should be first',
-      )
+        ' — the banger "' + banger.root_display + '" is reachable and should be first'
+      if (roadCrates.has(crate.id)) roadFirst.push(line)
+      else fail(line)
     }
     if (banger.rung > 2) outOfReach.push(crate.id + ' (rung ' + banger.rung + ')')
+  }
+  if (roadFirst.length) {
+    console.log(
+      '\n  ' + roadFirst.length + ' crate(s) open on a road step rather than their banger, ' +
+        'which is the road doing its job:\n    ' + roadFirst.join('\n    '),
+    )
   }
   if (outOfReach.length) {
     console.log(

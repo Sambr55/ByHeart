@@ -20,6 +20,7 @@ import { framesJustOpened, legendStatus, cardFor, CARD_SIZE } from '../content/l
 import { ROOTS, CRATES, type CultureFamily, type Rung } from '../content/roots'
 import { sectionRoots } from '../engine/journey'
 import { FREE_ENTITLEMENTS } from '../lib/entitlements'
+import { WARM_UP, roadFor } from '../content/road'
 
 const fail: string[] = []
 const note = (s: string) => console.log('  ' + s)
@@ -64,18 +65,55 @@ const sittingsOf = (fam: CultureFamily, reached: Rung = 6): Sitting[] => {
   return out
 }
 
+/**
+ * The sittings a learner takes on the ROAD through a crate: its road steps, nothing more.
+ *
+ * One sitting per step, because a step is what the road serves first and the rest of the
+ * sitting is the crate filling in behind it — which teaches more but is not what decides
+ * whether a FRAME opens. See the note at the call site.
+ */
+const sittingsOfSteps = (fam: CultureFamily): Sitting[] =>
+  roadFor(null)
+    .filter((step) => step.family === fam)
+    .map((step) => {
+      const root = ROOTS.find((r) => r.root_id === step.root)
+      return { roots: root ? [root.root_id] : [], pieces: root ? root.extracts.map((e) => e.id) : [] }
+    })
+
 const BASICS = 'the_basics'
-const others = CRATES.map((c) => c.id).filter((id) => id !== BASICS)
+/*
+  THE ROAD IS WALKED FIRST, THEN THE FREE CHOICES — which is what a learner actually does
+  and what the old fixture could not express.
+
+  It built every 5-crate combination and asked whether an unlock screen ever fired. That
+  was right while the road was one forced crate plus any four: the Legend opened inside
+  every run. The road is vibes now and spans seven crates, so no five-crate run completes
+  it, nothing ever opened, and the check reported 715 of 715 runs silent — a true statement
+  about a learner who does not exist.
+
+  WORTH SAYING PLAINLY, BECAUSE I GOT IT WRONG FIRST: this is not a free-tier deadlock. The
+  allowance counts crates OPEN AT ONCE, not crates ever touched, and finishing one frees
+  its slot — see the note on `spent` in components/Journey.tsx, written after exactly that
+  trap was found. Walking the road and finishing each crate holds one slot at a time, so
+  the road is walkable on the free tier with four slots to spare.
+
+  So a run is the road in order, then free choices on top, which is the shape of a real
+  first month.
+*/
+const ROAD_CRATES: string[] = []
+for (const step of roadFor(null)) {
+  if (!ROAD_CRATES.includes(step.family)) ROAD_CRATES.push(step.family)
+}
+const others = CRATES.map((c) => c.id).filter((id) => !ROAD_CRATES.includes(id))
 const free = FREE_ENTITLEMENTS.crates
 
 /*
-  Every way to spend the free tier: the basics, which is forced, plus every combination of
-  the rest. Order inside a run does not change what a run OPENS in total, but it does
-  change when — so each run is walked in sequence, exactly as a learner walks it.
+  Every way to spend the free choices that follow the road. Order inside a run does not
+  change what it OPENS in total, but it does change when — so each is walked in sequence.
 */
 const runs: string[][] = []
 const pick = (start: number, acc: string[]) => {
-  if (acc.length === free - 1) return void runs.push([BASICS, ...acc])
+  if (acc.length === free - 1) return void runs.push([...ROAD_CRATES, ...acc])
   for (let i = start; i < others.length; i++) pick(i + 1, [...acc, others[i]])
 }
 pick(0, [])
@@ -103,7 +141,22 @@ for (const run of runs) {
   let wasOpen = false
   let fires = 0
   for (const fam of run) {
-    const sits = SITTINGS.get(fam) ?? []
+    /*
+      A ROAD CRATE IS WALKED AS FAR AS THE ROAD GOES, not exhausted.
+
+      SITTINGS plays a crate to the end, which is what a learner does when they CHOOSE one.
+      On the road they do not: they take the step and move to the next crate, which is the
+      whole point of "rather than doing a whole bond section, could we just pick that one".
+
+      Measured, the difference decides whether this check passes. Exhausting all seven road
+      crates teaches 110 pieces and opens every deeper frame but `children` — so nothing is
+      left for a later vibe to announce and the unlock screen can never fire. Walking the
+      STEPS leaves five deeper frames shut, which is the headroom the announcement needs
+      and the state a real learner is actually in.
+    */
+    const onRoad = ROAD_CRATES.includes(fam)
+    const full = SITTINGS.get(fam) ?? []
+    const sits = onRoad ? sittingsOfSteps(fam as CultureFamily) : full
     for (let i = 0; i < sits.length; i++) {
       const before = new Set(owned)
       for (const p of sits[i].pieces) owned.add(p)
@@ -113,9 +166,14 @@ for (const run of runs) {
         FIRES rather than what the door costs. Varying the second half here would make
         every assertion below depend on a condition this walk never simulates.
       */
+      /*
+        The warm-up granted, because roadProgress counts it from sectionsCompleted and this
+        walk does not simulate choosing one. Everything else the door needs is the road,
+        which this run actually plays.
+      */
       const open = legendStatus({
         rootsPlayed: played,
-        sectionsCompleted: ['top_gun', 'james_bond', 'bridget_jones'],
+        sectionsCompleted: [WARM_UP[0]],
       }).open
       /*
         NOTHING FIRES WHILE THE DOOR IS SHUT. Sam, on a phone at the end of his first vibe:

@@ -691,6 +691,21 @@ export const NO_CUE_PROMPTS = [
     The larger cause was the filter, not the content — see NoCueView, where a sentence
     already said at a release was not remembered here.
   */
+  /*
+    FOR GOLDEN YEARS, which had none — first-session fails a crate whose three cold screens
+    cannot be filled, and a road crate reaches them like any other.
+
+    Keyed on `vamos` rather than `anos`: the age sentence is the crate's release and its
+    Legend answer, and asking for it a third time at the cold beat is exactly the
+    repetition Sam reported. This is the other thing the crate teaches, and it is a
+    sentence somebody uses within a day of landing.
+  */
+  {
+    context: 'The bill is paid and everybody is waiting for somebody to say it.',
+    ask: 'Let’s go.',
+    answer: 'Vamos embora.',
+    requires: 'vamos',
+  },
   {
     context: 'A friend is panicking.',
     ask: 'Easy.',

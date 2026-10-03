@@ -1,7 +1,7 @@
 {
   "locale": "pt-PT",
   "generated_from": "content/roots.ts",
-  "count": 705,
+  "count": 726,
   "lines": [
     {
       "pt": "Olá, adeus.",
@@ -132,16 +132,6 @@
       "role": "branch",
       "slug": "sou-de-londres",
       "speaker": "any"
-    },
-    {
-      "pt": "Sou inglesa. Sou de Londres.",
-      "en": "I am English. I am from London.",
-      "direction": "Said cold, with no film behind it: a woman at the next table has asked where you are from.",
-      "crate": "The basics, in songs you know",
-      "root": "tb_introduce",
-      "role": "release",
-      "slug": "sou-inglesa-sou-de-londres",
-      "speaker": "woman"
     },
     {
       "pt": "Um, dois, três, quatro.",
@@ -2134,6 +2124,16 @@
       "speaker": "any"
     },
     {
+      "pt": "Sou inglesa. Sou de Londres.",
+      "en": "I am English. I am from London.",
+      "direction": "Said cold, with no film behind it: somebody has heard your accent and asked where you are from.",
+      "crate": "James Bond film titles",
+      "root": "jb_english",
+      "role": "release",
+      "slug": "sou-inglesa-sou-de-londres",
+      "speaker": "woman"
+    },
+    {
       "pt": "Chamo-me… James Bond.",
       "en": "The most famous introduction in film.",
       "direction": "A perfect freebie: culturally unmistakable and useful within an hour of landing.",
@@ -3414,13 +3414,13 @@
       "speaker": "any"
     },
     {
-      "pt": "Quero fazer as coisas que adoro.",
-      "en": "I want to do the things I love.",
+      "pt": "Porque sim.",
+      "en": "Just because.",
       "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
       "crate": "Audrey Hepburn musings",
       "root": "ah_adoro",
       "role": "branch",
-      "slug": "quero-fazer-as-coisas-que-adoro",
+      "slug": "porque-sim",
       "speaker": "any"
     },
     {
@@ -6304,6 +6304,226 @@
       "speaker": "any"
     },
     {
+      "pt": "Gostas de música?",
+      "en": "Do you like music?",
+      "direction": "A question you can ask anybody, and the answer is the start of a conversation rather than the end of one.",
+      "crate": "Duran Duran song titles",
+      "root": "dd_like",
+      "role": "recognise",
+      "slug": "gostas-de-musica",
+      "speaker": "any"
+    },
+    {
+      "pt": "Não gosto de música.",
+      "en": "I don’t like music.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "Duran Duran song titles",
+      "root": "dd_like",
+      "role": "branch",
+      "slug": "nao-gosto-de-musica",
+      "speaker": "any"
+    },
+    {
+      "pt": "Anos dourados.",
+      "en": "Golden years.",
+      "direction": "A title everybody half-knows, carrying the one word you cannot answer \"how old are you\" without.",
+      "crate": "Bowie song titles",
+      "root": "bow_golden_years",
+      "role": "recognise",
+      "slug": "anos-dourados",
+      "speaker": "any"
+    },
+    {
+      "pt": "dourados",
+      "en": "golden",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "Bowie song titles",
+      "root": "bow_golden_years",
+      "role": "piece",
+      "slug": "dourados",
+      "speaker": "any"
+    },
+    {
+      "pt": "Dois anos.",
+      "en": "Two years.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "Bowie song titles",
+      "root": "bow_golden_years",
+      "role": "branch",
+      "slug": "dois-anos",
+      "speaker": "any"
+    },
+    {
+      "pt": "Só por um dia.",
+      "en": "Just for one day.",
+      "direction": "The hedge that makes an ask harmless. Half of politeness in Portugal is this word.",
+      "crate": "Bowie song titles",
+      "root": "bow_heroes",
+      "role": "recognise",
+      "slug": "so-por-um-dia",
+      "speaker": "any"
+    },
+    {
+      "pt": "só",
+      "en": "only / just",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "Bowie song titles",
+      "root": "bow_heroes",
+      "role": "piece",
+      "slug": "so",
+      "speaker": "any"
+    },
+    {
+      "pt": "um dia",
+      "en": "one day",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "Bowie song titles",
+      "root": "bow_heroes",
+      "role": "piece",
+      "slug": "um-dia",
+      "speaker": "any"
+    },
+    {
+      "pt": "Só um café.",
+      "en": "Just a coffee.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "Bowie song titles",
+      "root": "bow_heroes",
+      "role": "branch",
+      "slug": "so-um-cafe",
+      "speaker": "any"
+    },
+    {
+      "pt": "Só isto.",
+      "en": "Just this.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "Bowie song titles",
+      "root": "bow_heroes",
+      "role": "branch",
+      "slug": "so-isto",
+      "speaker": "any"
+    },
+    {
+      "pt": "Só isto, obrigado.",
+      "en": "Just this, thank you.",
+      "direction": "Said cold, with no film behind it: the waiter is waiting and you want one thing, not a list.",
+      "crate": "Bowie song titles",
+      "root": "bow_heroes",
+      "role": "release",
+      "slug": "so-isto-obrigado",
+      "speaker": "man"
+    },
+    {
+      "pt": "Vamos dançar.",
+      "en": "Let us dance.",
+      "direction": "A suggestion rather than a question. It is also how a Portuguese person says come on.",
+      "crate": "Bowie song titles",
+      "root": "bow_lets_dance",
+      "role": "recognise",
+      "slug": "vamos-dancar",
+      "speaker": "any"
+    },
+    {
+      "pt": "dançar",
+      "en": "to dance",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "Bowie song titles",
+      "root": "bow_lets_dance",
+      "role": "piece",
+      "slug": "dancar",
+      "speaker": "any"
+    },
+    {
+      "pt": "Vamos ver.",
+      "en": "Let’s see.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "Bowie song titles",
+      "root": "bow_lets_dance",
+      "role": "branch",
+      "slug": "vamos-ver",
+      "speaker": "any"
+    },
+    {
+      "pt": "À espera.",
+      "en": "Waiting in the sky.",
+      "direction": "Patient rather than impatient. It is the answer to being asked why you are standing there.",
+      "crate": "Bowie song titles",
+      "root": "bow_starman",
+      "role": "recognise",
+      "slug": "a-espera",
+      "speaker": "any"
+    },
+    {
+      "pt": "céu",
+      "en": "sky",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "Bowie song titles",
+      "root": "bow_starman",
+      "role": "piece",
+      "slug": "ceu",
+      "speaker": "any"
+    },
+    {
+      "pt": "Estou à espera.",
+      "en": "I’m waiting.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "Bowie song titles",
+      "root": "bow_starman",
+      "role": "branch",
+      "slug": "estou-a-espera",
+      "speaker": "any"
+    },
+    {
+      "pt": "À espera de ti.",
+      "en": "Waiting for you.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "Bowie song titles",
+      "root": "bow_starman",
+      "role": "branch",
+      "slug": "a-espera-de-ti",
+      "speaker": "any"
+    },
+    {
+      "pt": "No céu.",
+      "en": "In the sky.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "Bowie song titles",
+      "root": "bow_starman",
+      "role": "branch",
+      "slug": "no-ceu",
+      "speaker": "any"
+    },
+    {
+      "pt": "Tudo muda.",
+      "en": "Changes.",
+      "direction": "A shrug and a truth. Also the first half of the commonest greeting in Portugal.",
+      "crate": "Bowie song titles",
+      "root": "bow_changes",
+      "role": "recognise",
+      "slug": "tudo-muda",
+      "speaker": "any"
+    },
+    {
+      "pt": "muda",
+      "en": "changes",
+      "direction": "Isolated, unhurried. This is the piece being handed over — clear enough to copy.",
+      "crate": "Bowie song titles",
+      "root": "bow_changes",
+      "role": "piece",
+      "slug": "muda",
+      "speaker": "any"
+    },
+    {
+      "pt": "Tudo bem, obrigado.",
+      "en": "All good, thank you.",
+      "direction": "Ordinary conversational pace. This is the learner hearing what they are about to say.",
+      "crate": "Bowie song titles",
+      "root": "bow_changes",
+      "role": "branch",
+      "slug": "tudo-bem-obrigado",
+      "speaker": "man"
+    },
+    {
       "pt": "Estou cansado.",
       "en": "I’m tired.",
       "direction": "Said about yourself, unremarkably. The man’s form of the same sentence.",
@@ -6901,16 +7121,6 @@
       "root": null,
       "role": "collision",
       "slug": "nem-tudo-dura-sempre",
-      "speaker": "any"
-    },
-    {
-      "pt": "Tudo muda.",
-      "en": "Everything changes.",
-      "direction": "Neutral. He is annoyed that the drop has gone from his picker.",
-      "crate": "Collisions",
-      "root": null,
-      "role": "collision",
-      "slug": "tudo-muda",
       "speaker": "any"
     },
     {

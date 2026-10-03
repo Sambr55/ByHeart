@@ -39,7 +39,7 @@ import {
   rememberSection,
 } from './learner'
 import { DOORWAY, doorwayRoots, earlyRoots, legendStatus, worthSaving } from '@/content/legend'
-import { roadFor } from '@/content/road'
+import { ROAD, roadFor } from '@/content/road'
 import type { Purpose } from '@/content/situations'
 import { chosenPair, setPair } from './pair'
 import { DEFAULT_PAIR } from '@/content/pairs'
@@ -249,9 +249,30 @@ const BEATS_PER_SESSION = 24
  * The REST of counting still arrives across later sessions — the cap is per session,
  * not per crate, and what is left over is what brings somebody back.
  */
+/*
+  A LONGER SITTING WHERE THE ROAD RUNS, which is no longer only the basics.
+
+  The basics have had 30 beats against the usual 24 since the road was authored, for the
+  obvious reason: a sitting carrying a Legend step has a question, an answer and a card
+  write in it as well as the lesson, and squeezing that into a standard budget pushed
+  steps into extra sittings.
+
+  The road is vibes now, so that reason applies to them too — and measured, it has to.
+  Bridget carries two road steps (married at 10 beats, age at 9) and a 24-beat budget was
+  filled by exactly those two: a rung-1 learner who picked Bridget Jones got no rung-1
+  content at all, no capability line and no answerable cold prompt, all caught by
+  first-session.
+
+  Keyed off the road rather than listed by name, so a crate that gains or loses a road step
+  gets the right budget without anybody remembering to edit this. The basics keep 30
+  explicitly because they carry two steps and the longest roots in the product.
+*/
+const ROAD_FAMILIES = new Set(ROAD.map((step) => step.family))
 const BEATS_BY_FAMILY: Partial<Record<CultureFamily, number>> = {
   the_basics: 30,
 }
+const beatsBudget = (family: CultureFamily): number =>
+  BEATS_BY_FAMILY[family] ?? (ROAD_FAMILIES.has(family) ? 30 : BEATS_PER_SESSION)
 
 interface JourneyState {
   steps: Step[]
@@ -601,16 +622,73 @@ export function sectionRoots(
     order. The sort still runs for every other vibe, where there is no authored sequence
     and ordering by what the crate is famous for is the right answer.
   */
-  if (family === DOORWAY) {
-    const wanted = roadFor(purpose ?? null)
+  /*
+    THE ROAD SERVES WHATEVER CRATE IT NAMES, not only the basics.
+
+    Sam: "Could we get to the seven legend questions from cherry picked phrases from our
+    original vibes… rather than doing a whole bond section, could we just pick that one."
+    Then: "wire it up."
+
+    This read `family === DOORWAY` and DOORWAY is the string 'the_basics', so the authored
+    road was only ever consulted inside one crate. A road step naming jb_name would have
+    been ignored the moment somebody opened James Bond: the sort below would run, order
+    Bond by what Bond is famous for, and the step the Legend was waiting on would arrive
+    whenever it happened to arrive.
+
+    So the question becomes the right one — does the road have anything to say about THIS
+    crate — and the answer is a filter rather than an equality. The basics behave exactly
+    as before, because every basics step still names the basics.
+
+    `onRoad` is the steps for this crate; `all` is already this crate's roots, so a step
+    naming another family simply finds nothing and drops out.
+  */
+  const onRoad = roadFor(purpose ?? null).filter((step) => step.family === family)
+  if (onRoad.length) {
+    const wanted = onRoad
       .map((step) => all.find((r) => r.root_id === step.root))
       .filter((r): r is Root => Boolean(r) && !alreadyPlayed.includes(r!.root_id))
     /*
       What is left of the crate once the road is walked, in authored order — the basics
       hold more than the road needs and a learner who comes back for more should get it.
     */
+    /*
+      THE REMAINDER IS STILL SUBJECT TO THE LADDER, even though the road is not.
+
+      Sam: "rungs dont matter in the legend build." Right, and it is the ROAD he means —
+      the seven questions are picked for being recognisable, not for being easy, and
+      gating them on rungs is what made the Legend unreachable from vibes in the first
+      place. So `wanted` ignores rungs deliberately.
+
+      What follows it must not. Both of Bridget's road roots are rung 2, and with no filter
+      here a rung-1 learner who picked Bridget Jones got a sitting of two rung-2 roots and
+      nothing else — no capability line ("You can now ."), no answerable cold prompt, both
+      caught by first-session. The crate's own rung-1 material was there the whole time and
+      was being passed over.
+
+      So the road leads regardless of rung, and the crate fills in behind it from what the
+      learner can actually reach.
+    */
+    /*
+      THE REMAINDER REACHES AS HIGH AS THE ROAD DOES, which is the consistent rule.
+
+      First written as `r.rung <= reached` — the ordinary ladder — and that was half right.
+      The road ignores rungs deliberately (Sam: "rungs dont matter in the legend build"),
+      so a rung-1 learner is handed tg_school at rung 2 and ah_adoro at rung 2; filtering
+      what FOLLOWS to rung 1 then left Top Gun with nothing to offer behind its step,
+      because Top Gun has no rung-1 roots at all. Measured: a one-root sitting, and
+      say-check's walk could not reach a release.
+
+      So the ceiling is whichever is higher — what the learner has reached, or what the
+      road has just handed them. A road step at rung 2 is DUB saying this person can have
+      rung-2 material; the rest of that crate's rung-2 material is then not a stretch, it
+      is the sitting the step belongs to.
+    */
+    const roadCeiling = Math.max(reached, ...wanted.map((r) => r.rung))
     const rest = all.filter(
-      (r) => !alreadyPlayed.includes(r.root_id) && !wanted.some((w) => w.root_id === r.root_id),
+      (r) =>
+        r.rung <= roadCeiling &&
+        !alreadyPlayed.includes(r.root_id) &&
+        !wanted.some((w) => w.root_id === r.root_id),
     )
     /*
       THE REST WAITS UNTIL THE ROAD IS WALKED.
@@ -642,7 +720,26 @@ export function sectionRoots(
       const others = [...wanted, ...rest].filter((r) => r.root_id !== errand.root_id)
       return pack([errand, ...others], family)
     }
-    return wanted.length ? pack(wanted, family) : pack(rest, family)
+    /*
+      THE ROAD FIRST, THEN THE CRATE — and withholding the remainder is only right where
+      the road IS the crate.
+
+      The basics hold sixteen roots and the road takes nine of them, so serving only the
+      road there is serving most of the crate: a sitting is full either way. A vibe is
+      different. The road takes one or two of seven, and `pack(wanted)` served Bridget a
+      sitting of exactly two roots and Top Gun a sitting of one — which broke a real
+      promise measured by first-session: collisions reachable from a learner's second
+      section fell from 14 pairings to 8, because the words that combine were no longer in
+      the sitting at all.
+
+      So the road leads and the crate follows it in authored order. The reason the
+      remainder was held back in the first place still holds and is still served: the
+      packer's skip-on-overflow could reach past an unplayed road step into the remainder,
+      so the road steps go FIRST in the list rather than being the only thing in it. A
+      sitting that fills up stops at the road step; one with room carries on into the vibe
+      it came from, which is what somebody who picked Bridget Jones actually wanted.
+    */
+    return pack([...wanted, ...rest], family)
   }
   const doorway = new Set(doorwayRoots(purpose).map((r) => r.root_id))
   const early = new Set(earlyRoots(purpose).map((r) => r.root_id))
@@ -686,7 +783,7 @@ function pack(ordered: Root[], family: CultureFamily): Root[] {
     const cost = beatsFor(root).length
     // Always take the first, however long it is — a section of nothing is worse than a
     // section that runs a little over.
-    const budget = BEATS_BY_FAMILY[family] ?? BEATS_PER_SESSION
+    const budget = beatsBudget(family)
     if (out.length >= ROOTS_PER_SESSION) break
     /*
       A ROOT THAT DOES NOT FIT IS SKIPPED, NOT A FULL STOP.
@@ -839,6 +936,17 @@ export function availableCollision(played: string[], done: string[]): Collision 
   Written as verbs a person would use about themselves, never as grammar.
 */
 const SPEECH_ACTS: Record<string, string> = {
+  /*
+    GOLDEN YEARS. A road crate needs these for the same reason any first crate does: the
+    capability screen renders "You can now {acts}." and a crate whose pieces map to nothing
+    prints an empty sentence. first-session catches it, and it caught this one on the crate
+    I had just written.
+  */
+  anos: 'say how old you are',
+  vamos: 'suggest doing something',
+  so: 'ask for just one thing',
+  tudo: 'say how you are, and ask',
+  a_espera: 'say what you are waiting for',
   // The basics, and the everyday pieces a first section actually hands over.
   ola: 'say hello to anybody',
   adeus: 'say goodbye',

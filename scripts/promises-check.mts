@@ -28,6 +28,7 @@ import { cardState, newLearner, playSitting, playVibe } from '../engine/sim'
 import { doorwayRoots, doorwayToGo, legendUnlocked } from '../content/legend'
 import { NO_CUE_PROMPTS } from '../content/front-door'
 import { CRATES, ROOTS_BY_FAMILY, type CultureFamily } from '../content/roots'
+import { ROAD, WARM_UP, roadFor } from '../content/road'
 
 type Status = 'HOLDS' | 'BROKEN' | 'NOT YET ENFORCED'
 
@@ -65,29 +66,48 @@ function promise(
 
 console.log('\n  THE PROMISES, measured\n  ' + '─'.repeat(60))
 
+/*
+  P1 BECAME P1a. The door no longer counts vibes and the basics no longer carry the road —
+  the road IS vibes, one recognisable line per Legend question. See docs/promises.md, where
+  the old promise is recorded as superseded rather than deleted.
+
+  Measured against the road itself rather than against a crate, so moving a step needs no
+  edit here.
+*/
 promise(
-  'P1',
-  'The doorway plus three chosen vibes opens the Legend',
+  'P1a',
+  'The road is vibes, one recognisable line per Legend question',
   'HOLDS',
   () => {
-    const l = newLearner()
-    const sits = playVibe(l, 'the_basics' as CultureFamily)
     /*
-      And the three chosen vibes, played the same way.
+      WALKED AS THE ROAD IS AUTHORED, crate by crate, which is what a learner does.
 
-      The promise has two halves now and both have to be measured, or this reports on a
-      learner who does not exist: one who finished the basics and nothing else, which the
-      door no longer opens for.
+      The old body played the basics and then three named vibes, because that was the
+      model. Now it plays every crate the road passes through, in road order — so the
+      fixture follows the content rather than describing a sequence that has changed twice.
     */
-    for (const v of ['top_gun', 'james_bond', 'bridget_jones'] as CultureFamily[]) {
-      playVibe(l, v)
+    const l = newLearner()
+    /*
+      THE WARM-UP FIRST, because it is a step of the road that names no root.
+
+      roadProgress counts it from sectionsCompleted and the road's crate list does not
+      contain it — the warm-up is deliberately a crate the road does NOT use, so that the
+      first screen of the product asks nothing about the learner. See WARM_UP.
+    */
+    const crates: CultureFamily[] = [WARM_UP[0]]
+    for (const step of roadFor(null)) {
+      if (!crates.includes(step.family)) crates.push(step.family)
     }
+    let sittings = 0
+    for (const c of crates) sittings += playVibe(l, c).length
     const card = cardState(l)
     const open = legendUnlocked(l.roots_played, l.sections_completed ?? [])
+    /* And the seven come from vibes rather than from the basics, which is the claim. */
+    const fromVibes = crates.filter((c) => c !== 'the_basics').length
     return {
       holds: open && card.shut.length === 0,
       saw: [
-        `${l.roots_played.length} roots over ${sits.length}+ sittings`,
+        `${crates.length} crates over ${sittings} sittings, ${fromVibes} of them vibes`,
         `card ${card.ready.length}/7, Legend ${open ? 'open' : 'shut'}`,
       ],
     }
@@ -165,6 +185,22 @@ promise(
       */
       const crate = CRATES.find((x) => x.id === c)
       if (!crate?.signature) continue
+      /*
+        EXCEPT WHERE THE ROAD LEADS, which is the conflict Sam settled.
+
+        The road serves its step first — that is what makes a sitting reach the next Legend
+        question — so a crate carrying a road step opens on that root rather than on
+        whatever its signature promises. audrey_hepburn is the one case: its signature is
+        `wisdom` and ah_adoro is honestly a `quote`, so relabelling it would be lying about
+        what it is.
+
+        Sam: "rungs dont matter in the legend build. We just want seven fun, recognisable
+        statements leading to seven legend answers. Everything else is noise. Once we're in
+        the Club we can expand the vibes into wider learning and rungs." So the promise
+        holds for every crate entered on its own terms, which is what the Club does, and
+        the road-led ones are reported by scripts/first-session.mts instead.
+      */
+      if (ROAD.some((step) => step.family === c)) continue
       const kind = crate.signature
       const l = newLearner()
       const rest = playSitting(l, c).roots.filter((r) => {
