@@ -5294,6 +5294,28 @@ function SaveStep() {
   )
 }
 
+/**
+ * A crate title dropped into the middle of a sentence.
+ *
+ * The titles are written as titles — "The basics, in songs you know", "The world of
+ * wizardry" — and the session-done headline puts one after "That is ", which produced
+ * "That is The basics, in songs you know, for today." Sam read that capital off the
+ * screen.
+ *
+ * ONLY THE ARTICLE IS TOUCHED, and only when it is the first word. Lowercasing
+ * indiscriminately would give "that is top gun quotes" and "bob's your uncle!" — the
+ * titles that start with a proper noun are already correct mid-sentence, and they are the
+ * majority. "The" and "A" are the only words that are capitalised here purely because
+ * they begin a title, so they are the only ones that have to come back down.
+ *
+ * Done at the point of use rather than by re-authoring the titles: the shelf, the crate
+ * cover and every eyebrow want "The basics, in songs you know" with its capital, and
+ * there is exactly one place in the product that sets one mid-sentence.
+ */
+function midSentence(title: string): string {
+  return title.replace(/^(The|A|An) /, (m) => m.toLowerCase())
+}
+
 function SectionComplete() {
   const { chooseFamily, finishSection, owned, state } = useJourney()
   /*
@@ -5548,7 +5570,7 @@ function SectionComplete() {
             reasonably concludes the shelf is broken. Say what is true instead — the
             session is done, and whether there is more in there.
           */}
-          {family ? 'That is ' + family.title + ', for today.' : 'That vibe is done for today.'}
+          {family ? 'That is ' + midSentence(family.title) + ', for today.' : 'That vibe is done for today.'}
         </p>
         {/*
           And how much of it is left, said here rather than discovered on the shelf.
@@ -5597,7 +5619,7 @@ function SectionComplete() {
           about what just happened.
         */}
         <div className="mt-6">
-          <Shelves owned={new Set(owned)} pool={justGained} highlight={justGained} />
+          <Shelves owned={new Set(owned)} pool={justGained} highlight={justGained} rows />
         </div>
 
         {/*
@@ -6521,7 +6543,7 @@ function CanSay() {
             owns, and naming the language here would be the last hardcoded assumption in
             a screen they reach after choosing one. */}
         <p className="text-xs uppercase tracking-wider text-muted">Yours so far</p>
-        <Shelves owned={new Set(owned)} pool={new Set(owned)} />
+        <Shelves owned={new Set(owned)} pool={new Set(owned)} rows />
       </div>
 
       <p className="text-sm text-muted">
