@@ -7,10 +7,10 @@ import {
   SLOTS,
   collected,
   decks,
-  openAtFirst,
   levelLabel,
   type CollectedCard,
   type Deck,
+  type DeckId,
 } from '@/content/collection'
 import { progressFor, stageFor } from '@/content/legend'
 import Image from 'next/image'
@@ -20,25 +20,28 @@ import { sheetImage } from '@/content/feed'
 import { IMAGE_BANK } from '@/content/images'
 
 /**
- * THE LIBRARY — five decks, collapsible, holding everything finished.
+ * THE BOARDS — a rail of icons and one grid, the way a profile works.
  *
- * Sam: "essentially I want everything to be cards and everything completed to be saved
- * into decks... The decks will need to be collapsible or there will be too many. The cards
- * become your library where you can retry or remind."
+ * Sam, with his own Instagram and TikTok profiles beside Yours: "I want to make the Yours
+ * section much more akin to Instagram/TikTok profiles... remove the 9 things you can say
+ * and say it cold block and load the boards under the profile. The default board should be
+ * Your Legend."
  *
- * This replaced a grid of five LEVELS with nine slots each, which was the right shape for
- * three kinds of card and could not hold five — forty-five slots against a card universe
- * that was already at forty-seven. See content/collection.ts for the whole argument; the
- * short version is that a level is now something a card SAYS rather than the drawer it
- * lives in, and the drawer is the kind.
+ * WHAT THIS REPLACES. Ten collapsible drawers stacked down the page, one open at a time,
+ * each with a count on the right. That shape came from "there will be too many" and it
+ * answered the wrong half of the problem: it made ten decks fit, and it made every one of
+ * them look like an administrative row. A profile does the opposite — the boards are a rail
+ * of icons and the grid below is whichever is selected, so the content is the screen and
+ * the navigation is one line of it.
  *
- * ONE DECK IS OPEN AT A TIME, which is what makes this readable at five decks and still
- * readable at eight. The one that opens first is the one with room left in it — see
- * openAtFirst — because that is where the next card lands.
+ * FOUR IN THE RAIL, THE REST BEHIND MORE. Sam set the ceiling from the apps themselves —
+ * three icons on Instagram, four on TikTok. See DECKS in content/collection.ts for which
+ * four and why.
  *
- * NO SCORE ON IT. A deck says "4 of 13", which is a position rather than a mark, and the
- * two open-ended decks say what they hold instead, because there is no honest denominator
- * for nights out or for words.
+ * THE LEGEND IS THE DEFAULT, always, rather than whichever deck has room. openAtFirst
+ * picked the deck where the next card would land, which is a sensible answer to "what is
+ * this person working on" and the wrong answer to "what is this screen about". It is about
+ * the Legend, and the first card on it is the one that practises it.
  */
 export function Collection() {
   const learner = useLearner()
@@ -98,27 +101,79 @@ export function Collection() {
   )
 
   const rows = useMemo(() => decks(all), [all])
+  const rail = rows.filter((d) => d.rail)
+  const more = rows.filter((d) => !d.rail)
 
-  /*
-    WHICH DRAWER IS OPEN, held here rather than per-deck so only one ever is.
-
-    null means "not chosen yet", which is different from "all shut": the first render
-    opens whichever deck has room, and once somebody has touched one, their choice stands
-    even if a card lands somewhere else.
-  */
-  const [opened, setOpened] = useState<string | null>(null)
-  const openId = opened ?? openAtFirst(all)
+  /* The Legend, always — see the note above. */
+  const [open, setOpen] = useState<DeckId>('legend')
+  const [drawer, setDrawer] = useState(false)
+  const showing = rows.find((d) => d.id === open) ?? rows[0]
 
   return (
-    <section data-testid="collection" className="flex flex-col gap-3">
-      {rows.map((deck) => (
-        <DeckDrawer
-          key={deck.id}
-          deck={deck}
-          open={deck.id === openId}
-          onToggle={() => setOpened(deck.id === openId ? '' : deck.id)}
-        />
-      ))}
+    <section data-testid="collection" className="flex flex-col gap-6">
+      {/*
+        THE RAIL. Four boards, a MORE toggle, and a rule under the selected one — which is
+        the whole of how a profile says which grid you are looking at.
+      */}
+      <div className="flex items-stretch border-b border-line">
+        {rail.map((d) => (
+          <RailTab
+            key={d.id}
+            deck={d}
+            on={d.id === open && !drawer}
+            onPick={() => {
+              setOpen(d.id)
+              setDrawer(false)
+            }}
+          />
+        ))}
+        <button
+          type="button"
+          data-testid="rail-more"
+          aria-expanded={drawer}
+          onClick={() => setDrawer((v) => !v)}
+          className={
+            'tap-target flex flex-1 flex-col items-center gap-1 border-b-2 pb-2 pt-1 transition ' +
+            (drawer ? 'border-accent text-accent' : 'border-transparent text-muted')
+          }
+        >
+          <span aria-hidden className="text-lg leading-none">
+            {drawer ? '\u25b4' : '\u25be'}
+          </span>
+          <span className="eyebrow text-[0.5rem]">MORE</span>
+        </button>
+      </div>
+
+      {/*
+        THE DRAWER, open in place rather than as a screen of its own. Six boards that are
+        real but rarely the reason somebody came here — see DECKS.
+      */}
+      {drawer ? (
+        <ul data-testid="rail-drawer" className="animate-bank flex flex-col">
+          {more.map((d) => (
+            <li key={d.id}>
+              <button
+                type="button"
+                data-testid={'drawer-' + d.id}
+                onClick={() => {
+                  setOpen(d.id)
+                  setDrawer(false)
+                }}
+                className="tap-target flex w-full items-baseline justify-between gap-3 border-b border-line/60 py-3 text-left transition hover:text-accent"
+              >
+                <span className="min-w-0">
+                  <span className="eyebrow block text-accent">{d.label}</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-muted">{d.holds}</span>
+                </span>
+                <span className="eyebrow shrink-0 tabular-nums text-muted">{count(d)}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {showing ? <Board deck={showing} /> : null}
+
       {/*
         THE WAY BACK TO THE SHELF, carried over from BEEN THROUGH.
 
@@ -130,7 +185,7 @@ export function Collection() {
       <Link
         href="/vibes"
         data-testid="collection-more"
-        className="tap-target eyebrow mt-6 inline-flex items-center text-accent underline underline-offset-4"
+        className="tap-target eyebrow inline-flex items-center text-accent underline underline-offset-4"
       >
         PICK ANOTHER
       </Link>
@@ -139,82 +194,171 @@ export function Collection() {
 }
 
 /**
- * One drawer: a head you can always read, and a grid you can shut.
+ * What the count says, and the decks that cannot say it.
  *
- * The head is a button rather than a heading with a button in it, because the whole row is
- * the target — a chevron alone is a 24px hit area on a phone, and this is the control the
- * entire screen is built on.
+ * "4 of 13" is a position on a closed deck. DROPS, WORDS and YOU ASKED FOR have no
+ * denominator — the first because the content pipeline decides how many drops ever exist,
+ * the second because a shelf is never finished — so they report what they hold.
  */
-function DeckDrawer({
-  deck,
-  open,
-  onToggle,
-}: {
-  deck: Deck
-  open: boolean
-  onToggle: () => void
-}) {
-  /*
-    WHAT THE COUNT SAYS, and the two decks that cannot say it.
-
-    "4 of 13" is a position on a closed deck. NIGHTS and WORDS have no denominator — the
-    first because the content pipeline decides how many drops ever exist, the second
-    because a shelf is never finished — so they report what they hold. "6 nights" is true;
-    "6 of 1" would be a lie about the product, and "6 of 9" a lie about the learner.
-  */
-  const count =
-    deck.total !== undefined
-      ? deck.cards.length + ' of ' + deck.total
-      : deck.cards.length +
-        (deck.id === 'drops' ? ' saved' : deck.id === 'asked' ? ' kept' : ' started')
-
+function count(deck: Deck): string {
+  if (deck.total !== undefined) return deck.cards.length + ' of ' + deck.total
   return (
-    <div className="flex flex-col gap-3 border-b border-line pb-3">
-      <button
-        type="button"
-        data-testid={'deck-' + deck.id}
-        aria-expanded={open}
-        onClick={onToggle}
-        className="tap-target flex w-full items-center gap-3 py-1 text-left"
-      >
-        <span
-          aria-hidden
-          className={'text-xs text-muted transition-transform ' + (open ? 'rotate-90' : '')}
-        >
-          ▶
-        </span>
-        <span className="eyebrow min-w-0 flex-1 text-accent">{deck.label}</span>
-        <span className="eyebrow shrink-0 tabular-nums text-muted">{count}</span>
-      </button>
-      {open ? (
-        <div className="flex flex-col gap-3">
-          <p className="text-xs leading-relaxed text-muted">{deck.holds}</p>
-          <ul className="grid grid-cols-3 gap-1">
-            {/*
-              NINE IS A FLOOR NOW, NOT A CEILING. A deck draws every card it holds, and
-              pads out to nine with empty slots when it has fewer — so the invitation is
-              still there on a new deck, and a full one is not forced to hide its overflow
-              in a footnote the way the fixed grid had to.
-            */}
-            {Array.from({ length: Math.max(SLOTS, deck.cards.length) }).map((_, i) => {
-              const card = deck.cards[i]
-              return (
-                <li key={i}>
-                  {card ? (
-                    <Filled card={card} />
-                  ) : (
-                    <span
-                      aria-hidden
-                      className="block aspect-[3/4] rounded border border-dashed border-line/60 bg-surface/30"
-                    />
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-      ) : null}
+    deck.cards.length +
+    (deck.id === 'drops' ? ' saved' : deck.id === 'asked' ? ' kept' : ' started')
+  )
+}
+
+/**
+ * One icon in the rail.
+ *
+ * A GLYPH AND A WORD, not a glyph alone. Instagram can use a bare grid icon because
+ * everybody already knows what it means; four boards called Legend, Vibes, Cheats and
+ * Drops are this product's own idea and an unlabelled icon for one of them is a puzzle.
+ * The word is an eyebrow, which is the size this product gives to labels.
+ */
+function RailTab({ deck, on, onPick }: { deck: Deck; on: boolean; onPick: () => void }) {
+  return (
+    <button
+      type="button"
+      data-testid={'rail-' + deck.id}
+      aria-pressed={on}
+      onClick={onPick}
+      className={
+        'tap-target flex flex-1 flex-col items-center gap-1 border-b-2 pb-2 pt-1 transition ' +
+        (on ? 'border-accent text-accent' : 'border-transparent text-muted')
+      }
+    >
+      <RailIcon id={deck.id} />
+      <span className="eyebrow text-[0.5rem]">{deck.label.replace('YOUR ', '')}</span>
+    </button>
+  )
+}
+
+/** The four marks. Line art at one weight, so the rail reads as one row. */
+function RailIcon({ id }: { id: DeckId }) {
+  const common = {
+    viewBox: '0 0 24 24',
+    className: 'h-5 w-5',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.6,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true,
+  }
+  /* A card with a line on it — the Legend is a card you carry. */
+  if (id === 'legend')
+    return (
+      <svg {...common}>
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M7 10h6M7 14h4" />
+      </svg>
+    )
+  /* The grid, for the rooms somebody has been through. */
+  if (id === 'vibes')
+    return (
+      <svg {...common}>
+        <rect x="3" y="3" width="7" height="7" rx="1" />
+        <rect x="14" y="3" width="7" height="7" rx="1" />
+        <rect x="3" y="14" width="7" height="7" rx="1" />
+        <rect x="14" y="14" width="7" height="7" rx="1" />
+      </svg>
+    )
+  /* A key: a cheat opens something you could not otherwise say. */
+  if (id === 'cheats')
+    return (
+      <svg {...common}>
+        <circle cx="8" cy="12" r="4" />
+        <path d="M12 12h9M18 12v4M15 12v3" />
+      </svg>
+    )
+  /* A ticket, for what is on. */
+  return (
+    <svg {...common}>
+      <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4z" />
+      <path d="M12 6v8" strokeDasharray="2 2" />
+    </svg>
+  )
+}
+
+/**
+ * One board: what it holds, and the cards.
+ *
+ * NINE IS A FLOOR, NOT A CEILING. A board draws every card it holds and pads to nine with
+ * empty slots when it has fewer — so the invitation is still there on a new board, and a
+ * full one is not forced to hide its overflow in a footnote.
+ */
+function Board({ deck }: { deck: Deck }) {
+  return (
+    <div data-testid={'board-' + deck.id} className="flex flex-col gap-3">
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="text-xs leading-relaxed text-muted">{deck.holds}</p>
+        <span className="eyebrow shrink-0 tabular-nums text-muted">{count(deck)}</span>
+      </div>
+      <ul className="grid grid-cols-3 gap-1">
+        {deck.id === 'legend' ? (
+          <li>
+            <PractiseCard />
+          </li>
+        ) : null}
+        {Array.from({
+          length: Math.max(SLOTS - (deck.id === 'legend' ? 1 : 0), deck.cards.length),
+        }).map((_, i) => {
+          const card = deck.cards[i]
+          return (
+            <li key={i}>
+              {card ? (
+                <Filled card={card} />
+              ) : (
+                <span
+                  aria-hidden
+                  className="block aspect-[3/4] rounded border border-dashed border-line/60 bg-surface/30"
+                />
+              )}
+            </li>
+          )
+        })}
+      </ul>
     </div>
+  )
+}
+
+/**
+ * PRACTISE YOUR LEGEND — pinned to the top of its own board.
+ *
+ * Sam: "the first card pinned to the top being a PRACTISE YOUR LEGEND card, which would
+ * open up the current say it loud / run it through functionality."
+ *
+ * It carries the work the blue slab used to carry. That block — the number, the level bar
+ * and SAY IT ALL, COLD — was the top third of Yours and said four things at once; this
+ * says one, in the place somebody is already looking, and it is the only card on the grid
+ * that is a verb rather than a thing collected.
+ *
+ * ?run=1 is the run-through — see components/Legend.tsx, which walks the whole card in
+ * order and offers GO AND GET IT on anything not answered yet.
+ */
+function PractiseCard() {
+  return (
+    <Link
+      href="/legend?run=1"
+      data-testid="practise-legend"
+      className="tap-target flex aspect-[3/4] flex-col justify-between rounded bg-accent p-3 text-accent-ink transition hover:opacity-90"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="9" y="3" width="6" height="11" rx="3" />
+        <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+      </svg>
+      <span className="text-xs leading-tight">Practise your Legend</span>
+    </Link>
   )
 }
 

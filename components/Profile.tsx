@@ -322,7 +322,19 @@ export function Profile() {
       made every vibe tile render as an empty rectangle, which is the pattern working
       exactly as specified on a screen that had no business claiming that stage.
     */
-    <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg">
+    /*
+      safe-top, WHICH THIS SCREEN WAS THE ONLY ONE MISSING.
+
+      Sam: "the current DUB logo in YOURS overlaps the time on my phone - fix this." It
+      did — the screenshot shows the wordmark struck through 08:30. Yours had `pt-6` and
+      nothing else, so on a notched phone the header started above the status bar; Lens,
+      Settings and Account all carry safe-top for exactly this and Yours never did,
+      because it is the one full page with no `.bar` to clear the notch for it.
+
+      It adds to the padding rather than replacing it — see .safe-top in globals.css — so
+      pt-6 still holds on a phone with no inset.
+    */
+    <main className="safe-top mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg">
       <header className="flex items-center gap-3">
         <Wordmark mark="club" className="h-6" title="DUB Club" />
       </header>
@@ -379,51 +391,23 @@ export function Profile() {
       ) : (
         <>
           {/*
-            THE LEGEND GOES FIRST, and everything else on this screen is what built it.
+            THE BLUE SLAB AND THE SAID COLD STRIP ARE GONE.
 
-            It was fifth, under three grids of cards. The order of this page is an argument
-            about what DUB is for: a screen that opens on saved cards says the product is a
-            collection, and one that opens on the Legend says it is a thing you are making.
-            The vibes, the words and the cards below are the raw material — they read as
-            provenance under it rather than as rivals to it.
+            Sam, with his Instagram and TikTok profiles beside this screen: "remove the 9
+            things you can say and say it cold block and load the boards under the profile."
+
+            What they said was true and the shape was wrong for a profile. The hero carried
+            four claims at once — a count, a sentence, a level bar and a CTA — and took the
+            top third of the screen before any of the learner's own material appeared. The
+            SAID COLD strip under it was a fifth number in the same blue. Between them, a
+            person opening Yours met two slabs of statistics before one card.
+
+            Nothing is lost. The count lives on the Legend board, which says "9 of 13" in
+            the same place every other board says its count. The level belongs to the whole
+            product rather than this screen, and SAY IT ALL, COLD is now PRACTISE YOUR
+            LEGEND — the first card on the default board, which is where somebody looking
+            for it will already be looking. See components/Collection.tsx.
           */}
-          <LegendHero />
-          {/*
-            FIVE ROWS, ONE DEVICE, CLOSED ON ARRIVAL.
-
-            Seven things ran down this page in one column — four grids and a drawer of
-            three links — so what somebody owned was a scroll rather than a shape. Closed,
-            these fit under the Legend on one screen, and the page's first statement is
-            how much there is of each.
-
-            Only one open at a time. Two open sections is two depths on screen and the
-            breadth is gone again, which is the thing the concertina exists to protect.
-          */}
-          {/*
-            A gap between the strips, or six of them read as one blue block.
-
-            Stacked flush the boundaries vanish — the eye sees a single field with numbers
-            floating in it rather than six things you can open. One step of the spacing
-            scale is enough to separate them without breaking the set.
-          */}
-          <div className="flex flex-col gap-3">
-            {SECTIONS.map((sec) => (
-              <Section
-                key={sec.id}
-                label={sec.label}
-                note={sec.note}
-                empty={sec.empty}
-                tiles={sets[sec.id]}
-                onOpen={setOpen}
-                finished={finished}
-                open={openSection === sec.id}
-                onToggle={() => setOpenSection(openSection === sec.id ? null : sec.id)}
-                count={sec.count(sets[sec.id], learner)}
-                unit={sec.unit}
-                more={sec.more}
-              />
-            ))}
-          </div>
           {/*
             THE LIBRARY, which is now most of this screen rather than a summary of it.
 

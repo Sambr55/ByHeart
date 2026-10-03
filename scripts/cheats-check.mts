@@ -85,9 +85,31 @@ console.log('\nthe content is the shape it claims to be\n')
 
 console.log('\nthe deck can be finished\n')
 {
-  const deck = decks([]).find((d) => d.id === 'cheats')
-  ok('there is a cheats deck', Boolean(deck))
-  ok('and it has a real total', deck?.total === CHEATS.length, String(deck?.total))
+  /*
+    THREE BOARDS, ONE PER MECHANISM — and the sum has to be the whole set.
+
+    This asserted one deck holding all 24, which was my own merge: Sam handed over three
+    lists and I folded them into a single drawer tagged by kind. Sam: "you decided to merge
+    Cheats, Hacks and Bluffs which I prefer as seperate and would prefer they have their
+    own boards."
+
+    The sum is the load-bearing half. Three totals that add to fewer than CHEATS.length
+    means a mechanism is authored and unreachable — a card nobody can collect because no
+    board claims it — which is exactly the failure a single deck could never have.
+  */
+  const boards = (['cheats', 'hacks', 'bluffs'] as const).map((id) =>
+    decks([]).find((d) => d.id === id),
+  )
+  for (const [i, id] of (['cheats', 'hacks', 'bluffs'] as const).entries()) {
+    const want = CHEATS.filter((c) => c.kind === id.replace(/s$/, '')).length
+    ok('there is a ' + id + ' board', Boolean(boards[i]))
+    ok('and it counts its own kind', boards[i]?.total === want, String(boards[i]?.total) + ' of ' + want)
+  }
+  ok(
+    'and the three boards hold every mechanism',
+    boards.reduce((n, b) => n + (b?.total ?? 0), 0) === CHEATS.length,
+    boards.map((b) => b?.total ?? 0).join('+') + ' against ' + CHEATS.length,
+  )
 
   /* Using one puts exactly one card on the shelf. */
   const one = collected({

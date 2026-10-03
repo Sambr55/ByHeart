@@ -59,7 +59,33 @@ import { CHEATS } from '@/content/cheats'
 export type CardKind = 'sheet' | 'vibe' | 'frame' | 'drop' | 'words' | 'idiom' | 'asked' | 'cheat'
 
 /** The five drawers, in the order they are shown. */
-export type DeckId = 'legend' | 'vibes' | 'sheets' | 'drops' | 'words' | 'idioms' | 'asked' | 'cheats'
+export type DeckId =
+  | 'legend'
+  | 'vibes'
+  | 'sheets'
+  | 'drops'
+  | 'words'
+  | 'idioms'
+  | 'asked'
+  /*
+    THREE MECHANISM DECKS, NOT ONE — and splitting them is Sam correcting me.
+
+    I merged cheats, hacks and bluffs into a single drawer when he handed me the three
+    lists, and wrote a comment arguing for it: "their own, because a cheat is not a word,
+    a sheet or a room, and tagged by kind on the card rather than split into three
+    counts." Sam: "you decided to merge Cheats, Hacks and Bluffs which I prefer as
+    seperate and would prefer they have their own boards."
+
+    He is right, and the data never agreed with me anyway — content/cheats.ts has carried
+    `kind: 'cheat' | 'hack' | 'bluff'` since the day it was authored, because the three do
+    different jobs. A cheat is a sentence shape you pour your own words into. A hack is a
+    rule for converting a word you already own. A bluff is a thing to say when you have
+    run out of Portuguese. Three counts is three finishable collections; one count was a
+    pile of 24 with a tag nobody filtered on.
+  */
+  | 'cheats'
+  | 'hacks'
+  | 'bluffs'
 
 export interface CollectedCard {
   kind: CardKind
@@ -91,6 +117,14 @@ export interface Deck {
   label: string
   /** One line on the drawer, said when it is shut. */
   holds: string
+  /**
+   * Whether this board is one of the four in the rail, or lives behind MORE.
+   *
+   * The rail is the Instagram/TikTok row of icons under the profile — see the note on
+   * DECKS. Four is the ceiling Sam set and it is also what fits a phone without the
+   * icons becoming a scroll of their own.
+   */
+  rail?: boolean
   cards: CollectedCard[]
   /**
    * How many cards this deck could ever hold, where that is a knowable number.
@@ -301,8 +335,15 @@ export function collected(me: {
   return out
 }
 
-/** The deck a kind belongs to. One drawer per kind, which is the whole model. */
-const DECK_OF: Record<CardKind, DeckId> = {
+/**
+ * The deck a card belongs to.
+ *
+ * A FUNCTION RATHER THAN A TABLE, because one kind now lands in three drawers. Every
+ * CardKind except `cheat` maps straight across; a cheat card asks content/cheats.ts which
+ * of the three mechanisms it is, because that is where the fact lives and a second copy
+ * of it here is exactly the kind of pair that drifts.
+ */
+const DECK_OF_KIND: Record<Exclude<CardKind, 'cheat'>, DeckId> = {
   frame: 'legend',
   vibe: 'vibes',
   sheet: 'sheets',
@@ -310,29 +351,50 @@ const DECK_OF: Record<CardKind, DeckId> = {
   words: 'words',
   idiom: 'idioms',
   asked: 'asked',
-  cheat: 'cheats',
 }
 
-const DECKS: { id: DeckId; label: string; holds: string }[] = [
-  { id: 'legend', label: 'YOUR LEGEND', holds: 'The things you can say about yourself.' },
-  { id: 'vibes', label: 'ROOMS', holds: 'Sittings you have been through.' },
+function deckOf(card: { kind: CardKind; id: string }): DeckId {
+  if (card.kind !== 'cheat') return DECK_OF_KIND[card.kind]
+  const mech = CHEATS.find((c) => c.id === card.id)?.kind
+  return mech === 'hack' ? 'hacks' : mech === 'bluff' ? 'bluffs' : 'cheats'
+}
+
+/**
+ * THE BOARDS, IN RAIL ORDER.
+ *
+ * Sam, with Instagram and TikTok profiles beside Yours: "I want to make the Yours section
+ * much more akin to Instagram/TikTok profiles... That leaves three icons (insta) or four
+ * icons (tiktok) in the rail."
+ *
+ * So the first four are the rail and the rest live behind MORE — `rail` says which. The
+ * order is the order of the icons, and the order of the icons is how often somebody comes
+ * back to them: the Legend is the product's whole point, vibes are where the Portuguese
+ * came from, cheats are the shortcuts, drops are what is on.
+ *
+ * THE RENAMES ARE SAM'S AND THEY ARE BETTER. "Vibes (including basics) not Rooms" — ROOMS
+ * was a word only this codebase used. "Drops (not Nights)" — the content is called a drop
+ * everywhere else in the product, and NIGHTS described half of them.
+ */
+const DECKS: { id: DeckId; label: string; holds: string; rail?: boolean }[] = [
+  { id: 'legend', label: 'YOUR LEGEND', holds: 'The things you can say about yourself.', rail: true },
+  { id: 'vibes', label: 'VIBES', holds: 'Sittings you have been through, basics included.', rail: true },
+  /*
+    THE THREE MECHANISMS, THREE BOARDS. See the note on DeckId: I merged them and Sam
+    separated them again, and the data had carried the distinction all along.
+  */
+  { id: 'cheats', label: 'CHEATS', holds: 'Shapes you can pour your own words into.', rail: true },
+  { id: 'drops', label: 'DROPS', holds: 'What you went to, and the language for it.', rail: true },
+  { id: 'hacks', label: 'HACKS', holds: 'Rules that turn a word you own into one you do not.' },
+  { id: 'bluffs', label: 'BLUFFS', holds: 'What to say when the Portuguese runs out.' },
   { id: 'sheets', label: 'CHEAT SHEETS', holds: 'Closed sets, kept for when you need them.' },
-  { id: 'drops', label: 'NIGHTS', holds: 'What you went to, and the language for it.' },
   { id: 'words', label: 'WORDS', holds: 'Everything you own, by what sort of word it is.' },
   /*
     LOST IN TRANSLATION, which is what Sam asked for over WHAT WE SAY: "the only thing
     missing from the grids is the what we say (which we need a better, funny title for)".
 
     The card is an English idiom rendered faithfully and uselessly into Portuguese — "Bob
-    é o teu tio" — and the joke is exactly the thing the name says. It is also the one
-    label here that describes the gag rather than the mechanic.
+    é o teu tio" — and the joke is exactly the thing the name says.
   */
-  /*
-    THE MECHANISMS, one drawer for all three kinds. Sam: "I'm not sure what grid they
-    should appear in or their own?" — their own, because a cheat is not a word, a sheet or
-    a room, and tagged by kind on the card rather than split into three counts.
-  */
-  { id: 'cheats', label: 'THE CHEATS', holds: 'Shapes you can pour your own words into.' },
   { id: 'idioms', label: 'LOST IN TRANSLATION', holds: 'English that makes no sense anywhere else.' },
   { id: 'asked', label: 'YOU ASKED FOR', holds: 'Sentences you wanted, kept for next time.' },
 ]
@@ -351,12 +413,14 @@ export function decks(all: CollectedCard[]): Deck[] {
     sheets: SETS.length,
     /* Thirty authored, and a closed set — so this one reads as a collection to finish. */
     idioms: IDIOMS.length,
-    /* Twenty-four authored, so this deck can be finished. */
-    cheats: CHEATS.length,
+    /* Each mechanism is its own finishable set — see the note on DeckId. */
+    cheats: CHEATS.filter((c) => c.kind === 'cheat').length,
+    hacks: CHEATS.filter((c) => c.kind === 'hack').length,
+    bluffs: CHEATS.filter((c) => c.kind === 'bluff').length,
     /* drops, words and asked have no total — see the note on Deck.total. */
   }
   return DECKS.map((d) => {
-    const cards = all.filter((c) => DECK_OF[c.kind] === d.id)
+    const cards = all.filter((c) => deckOf(c) === d.id)
     /*
       Nights in date order, newest first, because a night out is remembered by when it
       was. Everything else keeps collection order, which is the order they were finished
