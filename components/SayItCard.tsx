@@ -344,6 +344,17 @@ export function SayItCard({
               {LEGEND_COPY.run_aim(aim)}
             </p>
           ) : null}
+          {/*
+            THE WAY BACK IN. Sam: "add a try again message to failed spoken audio." The
+            verdict diagnosed and stopped; this names the control to press. Hidden once
+            five goes have been reached, where the screen has deliberately stopped asking
+            — see run_try_again.
+          */}
+          {!heard.close && !enough ? (
+            <p data-testid="say-again" className="eyebrow mt-2 text-accent">
+              {LEGEND_COPY.run_try_again}
+            </p>
+          ) : null}
         </div>
       ) : null}
 

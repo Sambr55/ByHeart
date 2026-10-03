@@ -6006,9 +6006,55 @@ function NoCueView({ i }: { i: number }) {
    */
   const prompts = useMemo(() => {
     const able = NO_CUE_PROMPTS.filter((p) => owned.includes(p.requires))
-    const seen = new Set(learner.nocue_done ?? [])
-    const fresh = able.filter((p) => !seen.has(p.answer))
-    const pool = fresh.length ? fresh : able
+    /*
+      ALREADY SAID IS ALREADY SAID, WHEREVER IT WAS SAID.
+
+      Sam: "the questions, particularly towards the end pre-legend open are just
+      reiterating, I suddenly got vem comigo again and chamo-me sam multiple times."
+
+      MEASURED: 15 of the 20 no-cue prompts are word-for-word the release sentence of some
+      root — "Vem comigo." is tg_goose, "Chamo-me Ana." is jb_name, "Calma." is pf_be_cool.
+      That overlap is deliberate in the content and fine in itself: the same sentence, once
+      with a film behind it and once out in the world, is the whole point of the beat.
+
+      What was missing is the memory. This filtered on `nocue_done` — sentences said at a
+      NO-CUE beat — and nothing consulted `proof`, which holds every release. So saying
+      "Vem comigo" at the release did not stop the no-cue beat asking for it again three
+      screens later, and a learner walking the road to their Legend met the same handful of
+      sentences over and over.
+
+      Keyed on the sentence rather than the piece, because that is what the learner
+      experiences: two prompts for `chamo_me` are two different sentences and may both be
+      asked, while one sentence asked twice is the repetition being fixed. Compared bare —
+      accents and punctuation off — because "Amanhã." and "Amanha" are the same ask.
+    */
+    const bare = (t: string) =>
+      t
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+    const seen = new Set([
+      ...(learner.nocue_done ?? []).map(bare),
+      ...(learner.proof ?? []).map((pr) => bare(pr.pt)),
+    ])
+    /*
+      AND NO FALLBACK TO THE OLD POOL, which was the half-measure.
+
+      A first version kept `fresh.length ? fresh : able`, reasoning that a repeat beats an
+      empty screen. Measured against the case Sam actually hit — a learner who has just
+      played Top Gun — BOTH its answerable prompts repeat its own releases, so `fresh` is
+      empty and the fallback served "Vem comigo." again. The bug survived its own fix.
+
+      It is not a choice between a repeat and nothing, because this beat already has a
+      screen for nothing: see the `if (!prompt)` branch, which says "Out in the world.
+      Nothing here needs where it came from any more." That is a true sentence and a
+      finished-looking screen, and it is a better answer than asking somebody for a
+      sentence they said four screens ago.
+    */
+    const pool = able.filter((p) => !seen.has(bare(p.answer)))
     /* Which pieces this vibe actually teaches, so "its own" means taught HERE. */
     const mine = new Set(
       (ROOTS_BY_FAMILY[state.family as CultureFamily] ?? []).flatMap((r) =>
@@ -6018,7 +6064,7 @@ function NoCueView({ i }: { i: number }) {
     const here = pool.filter((p) => mine.has(p.requires))
     const elsewhere = pool.filter((p) => !mine.has(p.requires))
     return [...here, ...elsewhere]
-  }, [owned, learner.nocue_done, state.family])
+  }, [owned, learner.nocue_done, learner.proof, state.family])
   const raw = prompts[i % Math.max(prompts.length, 1)]
   /*
     THE PROMPT IN THIS LEARNER'S NAME.

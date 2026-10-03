@@ -677,12 +677,20 @@ export const NO_CUE_PROMPTS = [
     answer: 'Amanhã.',
     requires: 'amanha',
   },
-  {
-    context: 'You meet someone new.',
-    ask: 'My name is Ana.',
-    answer: 'Chamo-me Ana.',
-    requires: 'chamo_me',
-  },
+  /*
+    THE SECOND chamo_me PROMPT IS GONE, and it was the thinner of the two.
+
+    Sam: "I suddenly got vem comigo again and chamo-me sam multiple times." The repetition
+    had two causes and this is the smaller one: `chamo_me` was the only piece in this list
+    with two prompts, and they were nearly the same sentence — "Olá, chamo-me Ana." against
+    "Chamo-me Ana." — behind contexts of very different quality. "Somebody has put out a
+    hand and you have half a second" is a moment; "You meet someone new" is a stage
+    direction. So the weaker one goes rather than being rewritten into a near-twin of the
+    one above it.
+
+    The larger cause was the filter, not the content — see NoCueView, where a sentence
+    already said at a release was not remembered here.
+  */
   {
     context: 'A friend is panicking.',
     ask: 'Easy.',

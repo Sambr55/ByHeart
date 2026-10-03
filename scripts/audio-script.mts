@@ -24,6 +24,7 @@ import { join } from 'node:path'
 import { COLLISIONS, CRATES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
 import { NO_CUE_PROMPTS } from '../content/front-door'
 import { AGE_PAIR, GENDER_PAYOFF } from '../content/profile'
+import { askFor, cardFor } from '../content/legend'
 import { slugFor } from '../content/audio-manifest'
 
 type Speaker = 'any' | 'man' | 'woman'
@@ -165,6 +166,43 @@ add({
   root: null,
   role: 'profile',
 })
+
+/**
+ * THE SEVEN QUESTIONS A STRANGER ASKS, which were not on this list at all.
+ *
+ * Sam: "These are the ones we get the audio playback feature on right? Well, they should
+ * be."
+ *
+ * They should, and the button has been there since the run-through was rebuilt — but
+ * measured against AUDIO_MANIFEST, none of the seven has a recorded asset, so every one
+ * of them falls through to speech synthesis in engine/audio. It works and it is `pt-PT`,
+ * which is why nobody noticed; it is also a robot reading the most important questions in
+ * the product.
+ *
+ * They were never going to be recorded, because this script walks roots, profile pairs,
+ * collisions and no-cue prompts and the Legend card is none of those. The questions live
+ * in content/legend.ts and nothing here had ever looked there.
+ *
+ * ASKED, NOT ANSWERED. Only the questions are recorded: the answers are the learner's own
+ * sentences, built out of their name, their city and their job, and there is no fixed
+ * string to record. The run-through reads those back with synthesis by necessity and
+ * always will.
+ *
+ * The `tu` form, because that is what askFor returns with no gender set and it is the form
+ * a stranger in a bar actually uses.
+ */
+for (const frame of cardFor(null)) {
+  add({
+    pt: askFor(frame, null),
+    en: frame.ask_en,
+    direction:
+      'A stranger asking, friendly and unhurried — the question itself, not an exam. ' +
+      'This is one of the seven on the Legend card.',
+    crate: 'The seven questions',
+    root: null,
+    role: 'legend',
+  })
+}
 
 for (const c of COLLISIONS) {
   add({

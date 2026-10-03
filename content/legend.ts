@@ -3315,6 +3315,25 @@ export const LEGEND_COPY = {
   */
   run_aim: (words: string[]) => 'Aim for ' + words.join(' · '),
   /*
+    AND AN INVITATION TO GO AGAIN. Sam: "add a try again message to failed spoken audio."
+
+    The verdict said what happened — NOT THIS ONE, DID NOT CATCH IT — and then stopped.
+    Four words of diagnosis with no next move, on a screen where the next move is the
+    whole point: the microphone is still right there and nothing said to use it. A learner
+    who has just been told the product could not make them out has to work out for
+    themselves that pressing it again is allowed.
+
+    TRY AGAIN rather than TAP TO TRY AGAIN, which was the first draft at 16 characters
+    against the 14 an eyebrow gets. The vocabulary gate reads JSX string literals and not
+    copy constants, so it did not catch it — but the limit is not about where a string
+    lives, it is about an all-caps line staying one line on a 390px phone.
+
+    Not shown on a success, and not shown once five goes have been reached: there the
+    screen has deliberately stopped asking, and inviting a sixth would contradict the line
+    directly above it.
+  */
+  run_try_again: 'TRY AGAIN',
+  /*
     NEXT AND THAT IS THE LOT ARE GONE WITH THE BUTTON THEY LABELLED.
 
     Sam: "remove the next CTA button thus opening up more real estate and removing

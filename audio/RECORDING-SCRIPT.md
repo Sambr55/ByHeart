@@ -1,6 +1,6 @@
 # DUB — European Portuguese recording script
 
-**320 lines.** 303 either voice, 12 a man, 5 a woman.
+**705 lines.** 671 either voice, 24 a man, 10 a woman.
 
 European Portuguese only. A Brazilian delivery fails the product: the whole point is
 that a learner arrives in Lisbon and recognises what they hear.
@@ -20,8 +20,617 @@ that a learner arrives in Lisbon and recognises what they hear.
   `public/audio/pt-PT/`. Anything already there is never overwritten by the generator.
 
 
-## TOP GUN QUOTES
+## The basics, in songs you know
 
+
+### tb_hello_goodbye
+
+- `ola-adeus` — **Olá, adeus.**  
+  _Hello, goodbye._  
+  → A doorway, in both directions.
+- `ola` — **olá**  
+  _hello_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `adeus` — **adeus**  
+  _goodbye_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `ola-bom-dia` — **Olá, bom dia.**  
+  _Hello, good morning._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `ola-tudo-bem` — **Olá, tudo bem?**  
+  _Hello, all good?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `adeus-ate-logo` — **Adeus, até logo.**  
+  _Goodbye, see you later._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_introduce
+
+- `chamo-me-ana-sou-ingles` **[MAN]** — **Chamo-me Ana. Sou inglês.**  
+  _My name is Ana. I am English._  
+  → Not a lesson. The thing you will say more often than anything else you learn.
+- `chamo-me` — **chamo-me…**  
+  _my name is_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `sou` — **sou**  
+  _I am_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `ingles` **[MAN]** — **inglês**  
+  _English_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `como-te-chamas` — **Como te chamas?**  
+  _What are you called?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `sou-inglesa` **[WOMAN]** — **Sou inglesa.**  
+  _I am English._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `sou-de-londres` — **Sou de Londres.**  
+  _I am from London._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `sou-inglesa-sou-de-londres` **[WOMAN]** — **Sou inglesa. Sou de Londres.**  
+  _I am English. I am from London._  
+  → Said cold, with no film behind it: a woman at the next table has asked where you are from.
+
+### tb_1234
+
+- `um-dois-tres-quatro` — **Um, dois, três, quatro.**  
+  _One, two, three, four._  
+  → Counted out, cheerfully.
+- `um` — **um**  
+  _one / a_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `dois` — **dois**  
+  _two_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `tres` — **três**  
+  _three_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `um-cafe-por-favor` — **Um café, por favor.**  
+  _One coffee, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `dois-cafes-por-favor` — **Dois cafés, por favor.**  
+  _Two coffees, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `tres-dias` — **Três dias.**  
+  _Three days._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_yes_no
+
+- `tu-dizes-sim-eu-digo-nao` — **Tu dizes sim, eu digo não.**  
+  _You say yes, I say no._  
+  → Disagreeing, cheerfully.
+- `sim` — **sim**  
+  _yes_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nao` — **não**  
+  _no / not_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `sim-por-favor` — **Sim, por favor.**  
+  _Yes, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-obrigado` **[MAN]** — **Não, obrigado.**  
+  _No, thank you._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `sim-ou-nao` — **Sim ou não?**  
+  _Yes or no?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_thank_you
+
+- `obrigado-pela-musica` **[MAN]** — **Obrigado pela música.**  
+  _Thank you for the music._  
+  → Meant, not muttered.
+- `obrigado` **[MAN]** — **obrigado**  
+  _thank you_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `obrigada` **[WOMAN]** — **obrigada**  
+  _thank you_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `muito-obrigado` **[MAN]** — **Muito obrigado.**  
+  _Thank you very much._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `obrigada-e-muito-simpatico` **[WOMAN]** — **Obrigada, é muito simpático.**  
+  _Thank you, that is very kind._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `obrigado-pelo-cafe` **[MAN]** — **Obrigado pelo café.**  
+  _Thanks for the coffee._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_patience
+
+- `estou-a-aprender-tenha-paciencia` — **Estou a aprender. Tenha paciência.**  
+  _I am learning. Bear with me._  
+  → Honest, and disarming.
+- `estou-a-aprender` — **estou a aprender**  
+  _I am learning_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `paciencia` — **paciência**  
+  _patience_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `estou-a-aprender-portugues` — **Estou a aprender português.**  
+  _I am learning Portuguese._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `tenha-paciencia-por-favor` — **Tenha paciência, por favor.**  
+  _Bear with me, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `falo-pouco-mas-estou-a-tentar` — **Falo pouco, mas estou a tentar.**  
+  _I speak little, but I am trying._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_married_work
+
+- `sou-casado` — **Sou casado.**  
+  _I am married._  
+  → The first question that follows your name.
+- `casado` — **casado**  
+  _married_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `ela-nao-e-casada` — **Ela não é casada.**  
+  _She is not married._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `e-tu-es-casado` — **E tu, és casado?**  
+  _And you, are you married?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `sou-solteiro-e-estou-bem-assim` — **Sou solteiro, e estou bem assim.**  
+  _I am single, and I am fine like that._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_work
+
+- `trabalho-com-computadores` — **Trabalho com computadores.**  
+  _I work with computers._  
+  → The answer that stops the conversation being about your name.
+- `trabalho` — **trabalho**  
+  _I work_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `com` — **com**  
+  _with_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `trabalho-aqui` — **Trabalho aqui.**  
+  _I work here._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `vens-comigo` — **Vens comigo?**  
+  _Are you coming with me?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_age
+
+- `tenho-trinta-anos` — **Tenho trinta anos.**  
+  _I am thirty years old._  
+  → Counted, and said without flinching.
+- `tenho` — **tenho**  
+  _I have_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `anos` — **anos**  
+  _years old_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `trinta` — **trinta**  
+  _thirty_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `quantos-anos-tens` — **Quantos anos tens?**  
+  _How old are you?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `tenho-dois-filhos` — **Tenho dois filhos.**  
+  _I have two children._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_eight_days
+
+- `oito-dias-por-semana` — **Oito dias por semana.**  
+  _Eight days a week._  
+  → More than there is time for.
+- `oito` — **oito**  
+  _eight_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `a-semana` — **a semana**  
+  _week_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `duas-vezes-por-semana` — **Duas vezes por semana.**  
+  _Twice a week._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `oito-euros` — **Oito euros.**  
+  _Eight euros._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `uma-semana-em-lisboa` — **Uma semana em Lisboa.**  
+  _A week in Lisbon._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_perhaps
+
+- `talvez-talvez-talvez` — **Talvez, talvez, talvez.**  
+  _Perhaps, perhaps, perhaps._  
+  → Non-committal, and charming about it.
+- `talvez` — **talvez**  
+  _maybe_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `talvez-amanha` — **Talvez amanhã.**  
+  _Maybe tomorrow._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `talvez-sim-talvez-nao` — **Talvez sim, talvez não.**  
+  _Maybe yes, maybe no._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `talvez-um-cafe` — **Talvez um café?**  
+  _Maybe a coffee?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_saturday
+
+- `febre-de-sabado-a-noite` — **Febre de Sábado à Noite.**  
+  _Saturday Night Fever_  
+  → The weekend, named.
+- `sabado` — **sábado**  
+  _Saturday_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `a-noite` — **a noite**  
+  _night_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `sabado-a-noite` — **Sábado à noite.**  
+  _Saturday night._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `talvez-no-sabado` — **Talvez no sábado.**  
+  _Maybe on Saturday._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `boa-noite` — **Boa noite.**  
+  _Good night._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_sunday
+
+- `domingo-maldito-domingo` — **Domingo, maldito domingo.**  
+  _Sunday, bloody Sunday._  
+  → Heavy, and hard to miss.
+- `domingo` — **domingo**  
+  _Sunday_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `domingo-a-tarde` — **Domingo à tarde.**  
+  _Sunday afternoon._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `sabado-ou-domingo` — **Sábado ou domingo?**  
+  _Saturday or Sunday?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-no-domingo-nao` — **Não, no domingo não.**  
+  _No, not on Sunday._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_into_more
+
+- `futebol-praia-e-festas` — **Futebol, praia e festas.**  
+  _Football, the beach and parties._  
+  → Rattled off, not recited.
+- `futebol` — **futebol**  
+  _football_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `praia` — **praia**  
+  _beach_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `festas` — **festas**  
+  _parties_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `gosto-de-futebol` — **Gosto de futebol.**  
+  _I like football._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `vamos-a-praia` — **Vamos à praia.**  
+  _We are going to the beach._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `ha-festas-todo-o-ano` — **Há festas todo o ano.**  
+  _There are festivals all year._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_into
+
+- `gosto-de-musica` — **Gosto de música.**  
+  _I like music._  
+  → Said across a table, about ten seconds after what do you do.
+- `gosto-de` — **gosto de**  
+  _I like_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `musica` — **música**  
+  _music_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `gosto-muito-disto` — **Gosto muito disto.**  
+  _I like this a lot._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-gosto-de-cafe` — **Não gosto de café.**  
+  _I do not like coffee._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_email
+
+- `qual-e-o-teu-e-mail` — **Qual é o teu e-mail?**  
+  _What is your email?_  
+  → Asked at a counter, on a form, and by anybody who wants to send you something.
+- `qual-e` — **qual é**  
+  _what is_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `e-mail` — **e-mail**  
+  _email_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nao-tenho-e-mail-aqui` — **Não tenho e-mail aqui.**  
+  _I do not have email here._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `qual-e-a-tua-morada` — **Qual é a tua morada?**  
+  _What is your address?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### tb_why
+
+- `porque-porque-quero` — **Porquê? Porque quero.**  
+  _Why? Because I want to._  
+  → Asked, and answered flatly — the answer a parent gives, eventually.
+- `porque` — **porque**  
+  _because_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `ainda` — **ainda**  
+  _still / yet_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `quero` — **quero**  
+  _I want_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `porque-quero` — **Porque quero.**  
+  _Because I want to._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `ainda-estou-a-aprender` — **Ainda estou a aprender.**  
+  _I am still learning._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `porque-ainda-nao-percebi` — **Porque ainda não percebi.**  
+  _Because I still did not catch it._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+## Bob's Your Uncle!
+
+
+### bob_hold_your_horses
+
+- `calma` — **Calma.**  
+  _Hold your horses._  
+  → Four English words, one Portuguese one, and the Portuguese one is better.
+- `calma-nao-ha-pressa` — **Calma, não há pressa.**  
+  _Easy, there is no rush._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `tem-calma` — **Tem calma.**  
+  _Take it easy._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `esta-tudo-calmo` — **Está tudo calmo.**  
+  _Everything is quiet._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bob_better_late
+
+- `mais-vale-tarde-do-que-nunca` — **Mais vale tarde do que nunca.**  
+  _Better late than never._  
+  → The one on this shelf that comes apart into the most useful parts.
+- `mais-vale` — **mais vale**  
+  _better to_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `tarde` — **tarde**  
+  _late_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nunca` — **nunca**  
+  _never_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `mais-vale-agora` — **Mais vale agora.**  
+  _Better now._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `chego-tarde` — **Chego tarde.**  
+  _I am arriving late._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nunca-mais` — **Nunca mais.**  
+  _Never again._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bob_bobs_your_uncle
+
+- `e-pronto` **[MAN]** — **E pronto.**  
+  _And Bob's your uncle._  
+  → The name on the door, and the phrase that shuts it.
+- `pronto` **[MAN]** — **pronto**  
+  _ready_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `estou-pronto` **[MAN]** — **Estou pronto.**  
+  _I am ready._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `pronto-ja-esta` **[MAN]** — **Pronto, já está.**  
+  _Right, it is done._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `estas-pronto` **[MAN]** — **Estás pronto?**  
+  _Are you ready?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bob_so_far_so_good
+
+- `para-ja-tudo-bem` — **Para já, tudo bem.**  
+  _So far, so good._  
+  → The two phrases Portugal uses to avoid promising anything.
+- `para-ja` — **para já**  
+  _for now_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `tudo-bem` — **tudo bem**  
+  _all good_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `para-ja-nao` — **Para já, não.**  
+  _Not for now._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `esta-tudo-bem` — **Está tudo bem.**  
+  _Everything is fine._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bob_storm_teacup
+
+- `e-muito-barulho-para-nada` — **É muito barulho para nada.**  
+  _It is a storm in a teacup._  
+  → A lot of noise for nothing, which is also a fair description of the English.
+- `muito` — **muito**  
+  _a lot / very_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nada` — **nada**  
+  _nothing_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nao-e-nada` — **Não é nada.**  
+  _It is nothing._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `muito-bem` — **Muito bem.**  
+  _Very good._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bob_here_we_go
+
+- `la-vamos-nos` — **Lá vamos nós.**  
+  _Here we go again._  
+  → Pointing away from yourself is the whole joke.
+- `vamos` — **vamos**  
+  _we go / let us go_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `la` — **lá**  
+  _there_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `vamos-embora` — **Vamos embora.**  
+  _Let us go._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `esta-la` — **Está lá?**  
+  _Are you there?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `vamos-la` — **Vamos lá.**  
+  _Come on then._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bob_once_in_blue_moon
+
+- `de-vez-em-quando` — **De vez em quando.**  
+  _Once in a blue moon._  
+  → Less romantic, and you will say it every week.
+- `vez` — **vez**  
+  _occasion_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `quando` — **quando**  
+  _when_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `outra-vez-por-favor` — **Outra vez, por favor.**  
+  _Again, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `quando-chegas` — **Quando chegas?**  
+  _When do you arrive?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `as-vezes` — **Às vezes.**  
+  _Sometimes._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bob_youre_having_a_laugh
+
+- `estas-a-brincar` — **Estás a brincar.**  
+  _You are having a laugh._  
+  → The joke is a bonus. The construction is the lesson.
+- `estas-a` — **estás a**  
+  _you are_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `brincar` — **brincar**  
+  _to joke_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `estas-a-brincar-comigo` — **Estás a brincar comigo?**  
+  _Are you joking with me?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `estas-a-falar-comigo` — **Estás a falar comigo?**  
+  _Are you talking to me?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-estou-a-brincar` — **Não estou a brincar.**  
+  _I am not joking._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bob_it_is_what_it_is
+
+- `e-o-que-temos` — **É o que temos.**  
+  _It is what it is._  
+  → A shrug, with the whole country in it.
+- `temos` — **temos**  
+  _we have_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nao-temos-mais` — **Não temos mais.**  
+  _We have no more._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `temos-tempo` — **Temos tempo.**  
+  _We have time._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `temos-uma-mesa` — **Temos uma mesa.**  
+  _We have a table._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bob_god_knows
+
+- `sabe-se-la` — **Sabe-se lá.**  
+  _God knows._  
+  → The shrug that does not involve a deity.
+- `sabe` — **sabe**  
+  _knows / do you know_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `sabe-onde-e` — **Sabe onde é?**  
+  _Do you know where it is?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-sabe` — **Não sabe.**  
+  _He does not know._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `sabe-a-que-horas-abre` — **Sabe a que horas abre?**  
+  _Do you know what time it opens?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bob_last_straw
+
+- `foi-a-gota-de-agua` — **Foi a gota de água.**  
+  _That was the last straw._  
+  → The same moment, drawn better.
+- `gota` — **gota**  
+  _drop_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `agua` — **água**  
+  _water_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `uma-agua-por-favor` — **Uma água, por favor.**  
+  _A water, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `agua-sem-gas` — **Água sem gás.**  
+  _Still water._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nem-uma-gota` — **Nem uma gota.**  
+  _Not a drop._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bob_speak_of_the_devil
+
+- `falar-no-diabo-e-ele-aparece` — **Falar no diabo e ele aparece.**  
+  _Speak of the devil._  
+  → The exception that makes the rest of the shelf make sense.
+- `falar` — **falar**  
+  _to speak / to talk_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nao-falo-portugues` — **Não falo português.**  
+  _I do not speak Portuguese._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `pode-falar-devagar` — **Pode falar devagar?**  
+  _Can you speak slowly?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `quero-falar-contigo` — **Quero falar contigo.**  
+  _I want to talk to you._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+## Top Gun quotes
+
+
+### tg_school
+
+- `isto-e-uma-escola-estas-aqui-para-trabalhar` — **Isto é uma escola. Estás aqui para trabalhar.**  
+  _This is a school. You are here to work._  
+  → Said flatly, to people who thought they had arrived.
+- `a-escola` — **a escola**  
+  _school_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `trabalho-em-lisboa` — **Trabalho em Lisboa.**  
+  _I work in Lisbon._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `ando-numa-escola-de-portugues` — **Ando numa escola de português.**  
+  _I go to a Portuguese school._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `trabalho-com-coisas-criativas` — **Trabalho com coisas criativas.**  
+  _I work with creative things._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
 ### tg_goose
 
@@ -87,7 +696,7 @@ that a learner arrives in Lisbon and recognises what they hear.
 
 - `sinto-que-preciso` — **Sinto que preciso…**  
   _I need something, badly._  
-  → Neutral, everyday, endlessly useful. This is the product beating subtitle literalism.
+  → Neutral, everyday, endlessly useful.
 - `preciso-de` — **preciso de…**  
   _I need…_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
@@ -128,19 +737,58 @@ that a learner arrives in Lisbon and recognises what they hear.
   _I don’t think I’ll go._  
   → THE SOFT NO — Turning down an invitation without closing the door. Literally “I think I’m not going” — everyone hears it as no.
 
-## JAMES BOND FILM TITLES
+### tg_where
 
+- `onde-esta-o-meu-parceiro` — **Onde está o meu parceiro?**  
+  _Where is my wingman?_  
+  → The question you will ask on your first afternoon, and every afternoon after it.
+- `parceiro` — **parceiro**  
+  _partner_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `onde` — **onde**  
+  _where_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `esta` — **está**  
+  _is_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `onde-esta-a-casa-de-banho` — **Onde está a casa de banho?**  
+  _Where’s the toilet?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `onde-esta-o-meu-cafe` — **Onde está o meu café?**  
+  _Where’s my coffee?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `esta-aqui` — **Está aqui.**  
+  _It’s here._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `este-e-o-meu-parceiro` — **Este é o meu parceiro.**  
+  _This is my partner._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+## James Bond film titles
+
+
+### jb_english
+
+- `sou-ingles` **[MAN]** — **Sou inglês.**  
+  _I am English._  
+  → Stated, not explained.
+- `inglesa` **[WOMAN]** — **inglesa**  
+  _English_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `sou-inglesa-de-londres` **[WOMAN]** — **Sou inglesa, de Londres.**  
+  _I am English, from London._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-sou-portugues` — **Não sou português.**  
+  _I am not Portuguese._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
 ### jb_name
 
 - `chamo-me-james-bond` — **Chamo-me… James Bond.**  
   _The most famous introduction in film._  
   → A perfect freebie: culturally unmistakable and useful within an hour of landing.
-- `chamo-me` — **chamo-me…**  
-  _my name is…_  
-  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
-- `chamo-me-sam` — **Chamo-me Sam.**  
-  _My name is Sam._  
+- `chamo-me-ana` — **Chamo-me Ana.**  
+  _My name is Ana._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
 - `e-tu-como-te-chamas` — **E tu, como te chamas?**  
   _And you, what’s your name?_  
@@ -157,17 +805,11 @@ that a learner arrives in Lisbon and recognises what they hear.
 - `amanha` — **amanhã**  
   _tomorrow_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
-- `nunca` — **nunca**  
-  _never_  
-  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `ate-amanha` — **Até amanhã.**  
   _See you tomorrow._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
 - `amanha-nao-posso` — **Amanhã não posso.**  
   _I can’t tomorrow._  
-  → Ordinary conversational pace. This is the learner hearing what they are about to say.
-- `nunca-mais` — **Nunca mais.**  
-  _Never again._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
 ### jb_russia
@@ -175,9 +817,6 @@ that a learner arrives in Lisbon and recognises what they hear.
 - `da-russia-com-amor` — **Da Rússia com amor.**  
   _From Russia, with love._  
   → A compact root that quietly explains a piece you already have while handing you the general form.
-- `com` — **com**  
-  _with_  
-  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `amor` — **amor**  
   _love_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
@@ -233,8 +872,95 @@ that a learner arrives in Lisbon and recognises what they hear.
   _I don’t have time._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
-## BRIDGET JONES CRINGE MOMENTS
+### jb_007
 
+- `zero-zero-sete` — **Zero zero sete.**  
+  _Double-oh-seven._  
+  → The least glamorous line here, and the first one you will need at a till.
+- `zero` — **zero**  
+  _zero_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `sete` — **sete**  
+  _seven_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `sete-euros` — **Sete euros.**  
+  _Seven euros._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `mesa-sete` — **Mesa sete.**  
+  _Table seven._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `zero-problemas` — **Zero problemas.**  
+  _No problems at all._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### jb_quantum
+
+- `quanto-custa` — **Quanto custa?**  
+  _A quantum is an amount — a measure of how much._  
+  → Asked flatly, without apology. Nobody in Portugal thinks it is rude to ask a price.
+- `quanto` — **quanto**  
+  _how much_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `custa` — **custa**  
+  _it costs_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `quanto-custa-isto` — **Quanto custa isto?**  
+  _How much is this?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `quanto-e` — **Quanto é?**  
+  _How much is it?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `custa-sete-euros` — **Custa sete euros.**  
+  _It costs seven euros._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+## Bridget Jones cringe moments
+
+
+### bj_age
+
+- `tenho-trinta-e-dois-anos` — **Tenho trinta e dois anos.**  
+  _I am thirty-two years old._  
+  → Counted, and slightly regretted.
+- `ele-tem-trinta-e-cinco` — **Ele tem trinta e cinco.**  
+  _He is thirty-five._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bj_marrieds
+
+- `es-casada` — **És casada?**  
+  _Are you married?_  
+  → Asked lightly. Received otherwise.
+- `solteiro` — **solteiro**  
+  _single_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `divorciado` — **divorciado**  
+  _divorced_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `sou-solteira-e-estou-bem-assim` — **Sou solteira, e estou bem assim.**  
+  _I am single, and I am fine like that._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `sou-divorciado` — **Sou divorciado.**  
+  _I am divorced._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bj_sorry
+
+- `desculpe-desculpe-desculpe` — **Desculpe, desculpe — desculpe.**  
+  _Sorry, sorry — sorry._  
+  → Mortified, and moving.
+- `desculpe` — **desculpe**  
+  _sorry / excuse me_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `desculpe-com-licenca` — **Desculpe, com licença.**  
+  _Excuse me, may I get past._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `desculpe-o-atraso` — **Desculpe o atraso.**  
+  _Sorry I am late._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `desculpe-obrigada` **[WOMAN]** — **Desculpe, obrigada.**  
+  _Sorry — thank you._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
 ### bj_overshare
 
@@ -277,12 +1003,6 @@ that a learner arrives in Lisbon and recognises what they hear.
 - `desculpa-como-te-chamas` — **Desculpa… como te chamas?**  
   _Sorry… what’s your name?_  
   → Embarrassing but entirely recoverable. Everyone has done it.
-- `como-te-chamas` — **como te chamas?**  
-  _what’s your name?_  
-  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
-- `chamo-me-ana` — **Chamo-me Ana.**  
-  _My name is Ana._  
-  → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
 ### bj_wrong_thing
 
@@ -317,14 +1037,86 @@ that a learner arrives in Lisbon and recognises what they hear.
   _Is it a joke?_  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
-## PULP FICTION BANGER QUOTES
+### bj_wine
 
+- `um-copo-de-vinho-por-favor` — **Um copo de vinho, por favor.**  
+  _A glass of wine, please._  
+  → The most reliable sentence in the language. Learn the shape once and swap the last word forever.
+- `copo` — **copo**  
+  _glass_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `vinho` — **vinho**  
+  _wine_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `por-favor` — **por favor**  
+  _please_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `um-copo-de-agua-por-favor` — **Um copo de água, por favor.**  
+  _A glass of water, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `dois-copos-de-vinho` — **Dois copos de vinho.**  
+  _Two glasses of wine._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `vinho-tinto-por-favor` — **Vinho tinto, por favor.**  
+  _Red wine, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### bj_does_he
+
+- `ele-gosta-de-mim` — **Ele gosta de mim?**  
+  _Does he like me?_  
+  → Asked at one in the morning, of a friend who has heard it before.
+- `ele` — **ele**  
+  _he_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `gosta-de` — **gosta de**  
+  _likes_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `ela-gosta-de-ti` — **Ela gosta de ti.**  
+  _She likes you._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `ele-nao-gosta-de-vinho` — **Ele não gosta de vinho.**  
+  _He doesn’t like wine._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `eles-gostam-de-ti` — **Eles gostam de ti.**  
+  _They like you._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `ele-gosta-de-ti` — **Ele gosta de ti.**  
+  _He likes you._  
+  → Said cold, with no film behind it: your friend has been staring at the same person all evening.
+
+## Pulp Fiction banger quotes
+
+
+### pf_what
+
+- `nao-percebi-mais-devagar-por-favor` — **Não percebi. Mais devagar, por favor.**  
+  _I did not catch that. Slower, please._  
+  → Calm. Nobody is in trouble.
+- `nao-percebi` — **não percebi**  
+  _I did not catch that_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `devagar` — **devagar**  
+  _slowly_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `desculpe-nao-percebi` — **Desculpe, não percebi.**  
+  _Sorry, I did not catch that._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `pode-falar-mais-devagar` — **Pode falar mais devagar?**  
+  _Could you speak more slowly?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `mais-devagar-por-favor` — **Mais devagar, por favor.**  
+  _More slowly, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
 ### pf_royale
 
 - `royale-com-queijo` — **Royale com queijo.**  
   _A Royale with cheese._  
   → A fast wink, not a lesson. If you already have COM, this is a nod rather than a discovery.
+- `queijo` — **queijo**  
+  _cheese_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `com-gelo` — **Com gelo.**  
   _With ice._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
@@ -340,10 +1132,10 @@ that a learner arrives in Lisbon and recognises what they hear.
 - `diz` — **diz**  
   _say_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
-- `o-que` — **o quê?**  
+- `o-que-ask` — **o quê?**  
   _what?_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
-- `desculpa-o-que` — **Desculpa, o quê?**  
+- `desculpa-o-que-ask` — **Desculpa, o quê?**  
   _Sorry, what?_  
   → WITH ANYONE — One word in front and the same question turns polite. Reach for this one by default.
 
@@ -368,18 +1160,6 @@ that a learner arrives in Lisbon and recognises what they hear.
   _That one is good._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
-### pf_be_cool
-
-- `tem-calma` — **Tem calma.**  
-  _Calm down._  
-  → Register matters enormously. TEM CALMA can soothe or infuriate; CALMA alone is softer.
-- `calma` — **calma**  
-  _calm / easy_  
-  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
-- `esta-tudo-bem` — **Está tudo bem.**  
-  _It’s all right._  
-  → Ordinary conversational pace. This is the learner hearing what they are about to say.
-
 ### pf_what_do_they_call_it
 
 - `como-e-que-se-chama` — **Como é que se chama?**  
@@ -392,8 +1172,92 @@ that a learner arrives in Lisbon and recognises what they hear.
   _It’s called…_  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
-## AUDREY HEPBURN MUSINGS
+### pf_shake
 
+- `um-batido-de-cinco-euros` — **Um batido de cinco euros.**  
+  _A five-euro milkshake._  
+  → Ordinary, transactional language, hiding inside the most quoted diner scene ever filmed.
+- `euro` — **euro**  
+  _euro_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `cinco` — **cinco**  
+  _five_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `batido` — **batido**  
+  _milkshake_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `cinco-euros` — **Cinco euros.**  
+  _Five euros._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `um-batido-por-favor` — **Um batido, por favor.**  
+  _A milkshake, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `dois-batidos` — **Dois batidos.**  
+  _Two milkshakes._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### pf_they_call_it
+
+- `eles-chamam-lhe-royale-com-queijo` — **Eles chamam-lhe Royale com queijo.**  
+  _They call it a Royale with cheese._  
+  → Said as though it were fascinating, which is exactly how you will use it.
+- `eles` — **eles**  
+  _they_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `chamam` — **chamam**  
+  _they call_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `eles-chamam-me-ana` — **Eles chamam-me Ana.**  
+  _They call me Ana._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `eles-estao-aqui` — **Eles estão aqui.**  
+  _They’re here._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `como-e-que-eles-chamam-isto` — **Como é que eles chamam isto?**  
+  _What do they call this?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### pf_zed
+
+- `quem-e-o-zed` — **Quem é o Zed?**  
+  _Who is Zed?_  
+  → Asked flatly, of somebody who very much does not want to answer.
+- `quem` — **quem**  
+  _who_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `e` — **é**  
+  _is_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `quem-e-este` — **Quem é este?**  
+  _Who’s this?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `quem-e-ele` — **Quem é ele?**  
+  _Who is he?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `e-o-meu-parceiro` — **É o meu parceiro.**  
+  _He’s my wingman._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+## Audrey Hepburn musings
+
+
+### ah_adoro
+
+- `adoro-pessoas-que-me-fazem-rir` — **Adoro pessoas que me fazem rir.**  
+  _I love people who make me laugh._  
+  → Warm, and specific about it.
+- `adoro` — **adoro**  
+  _I love_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `adoro-lisboa` — **Adoro Lisboa.**  
+  _I love Lisbon._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `quero-fazer-as-coisas-que-adoro` — **Quero fazer as coisas que adoro.**  
+  _I want to do the things I love._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `quero-um-cafe-por-favor` — **Quero um café, por favor.**  
+  _I want a coffee, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
 ### ah_paris
 
@@ -439,6 +1303,9 @@ that a learner arrives in Lisbon and recognises what they hear.
 - `as-pessoas-importam-mais-do-que-as-coisas` — **As pessoas importam mais do que as coisas.**  
   _People matter more than things._  
   → Warm and emotionally useful, rather than phrasebook language.
+- `coisa` — **coisa**  
+  _thing_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `mais-do-que` — **mais do que**  
   _more than_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
@@ -453,6 +1320,9 @@ that a learner arrives in Lisbon and recognises what they hear.
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
 - `isto-importa` — **Isto importa.**  
   _This matters._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `as-coisas-mudam` — **As coisas mudam.**  
+  _Things change._  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
 ### ah_good_side
@@ -500,14 +1370,38 @@ that a learner arrives in Lisbon and recognises what they hear.
   _It matters to me._  
   → MAKING IT YOURS — “For me, it matters.” Same point, without telling anyone else what to think.
 
-## MARCUS AURELIUS WISDOM
+## Marcus Aurelius wisdom
 
+
+### ma_family
+
+- `os-meus-filhos-sao-o-que-tenho` — **Os meus filhos são o que tenho.**  
+  _My children are what I have._  
+  → Owed, and acknowledged.
+- `filhos` — **filhos**  
+  _children_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `o-meu` — **o meu**  
+  _my_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `tenho-tres-filhos` — **Tenho três filhos.**  
+  _I have three children._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `o-meu-filho-chama-se-oscar` — **O meu filho chama-se Oscar.**  
+  _My son is called Oscar._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `os-meus-filhos-estao-em-inglaterra` — **Os meus filhos estão em Inglaterra.**  
+  _My children are in England._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
 
 ### ma_control
 
 - `controla-o-que-podes-controlar` — **Controla o que podes controlar.**  
   _Control what you can control._  
   → Calm and practical. It sounds modern despite being nearly two thousand years old.
+- `o-que` — **o que**  
+  _what / that which_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `o-que-posso-fazer` — **O que posso fazer?**  
   _What can I do?_  
   → Ordinary conversational pace. This is the learner hearing what they are about to say.
@@ -605,7 +1499,70 @@ that a learner arrives in Lisbon and recognises what they hear.
   _I don’t think I can._  
   → LEAVING THE DOOR OPEN — Probably no, but you would rather not be blunt about it. Very common in Portugal.
 
-## HOW TO SWEAR IN PORTUGUESE
+### ma_ask_help
+
+- `nao-tenhas-vergonha-de-pedir-ajuda` — **Não tenhas vergonha de pedir ajuda.**  
+  _Don’t be ashamed to ask for help._  
+  → Practical rather than noble. He meant it as an instruction, not a comfort.
+- `ajuda` — **ajuda**  
+  _help_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `pedir` — **pedir**  
+  _to ask for_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `podes-ajudar-me` — **Podes ajudar-me?**  
+  _Can you help me?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `vou-pedir-ajuda` — **Vou pedir ajuda.**  
+  _I’m going to ask for help._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### ma_people
+
+- `as-pessoas-fazem-o-que-sabem` — **As pessoas fazem o que sabem.**  
+  _People do what they know how to do._  
+  → Not forgiveness exactly. More an instruction to stop expecting otherwise.
+- `as-pessoas` — **as pessoas**  
+  _people_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `fazem` — **fazem**  
+  _they do_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `as-pessoas-sao-assim` — **As pessoas são assim.**  
+  _People are like that._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `eles-fazem-o-mesmo` — **Eles fazem o mesmo.**  
+  _They do the same._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `as-pessoas-aqui-sao-boas` — **As pessoas aqui são boas.**  
+  _People here are good._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### ma_together
+
+- `nos-somos-feitos-uns-para-os-outros` — **Nós somos feitos uns para os outros.**  
+  _We are made for one another._  
+  → Less warm than it sounds. He is telling himself to get on with it.
+- `nos` — **nós**  
+  _we_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `somos` — **somos**  
+  _we are_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nos-somos-amigos` — **Nós somos amigos.**  
+  _We’re friends._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `somos-dois` — **Somos dois.**  
+  _There are two of us._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-somos-iguais` — **Não somos iguais.**  
+  _We’re not the same._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `somos-amigos` — **Somos amigos.**  
+  _We’re friends._  
+  → Said cold, with no film behind it: introducing the person standing next to you.
+
+## How to swear in Portuguese
 
 
 ### sw_vai_a_merda
@@ -614,7 +1571,7 @@ that a learner arrives in Lisbon and recognises what they hear.
   _Go away. I am fed up._  
   → Final, not playful. This ends a conversation rather than seasoning one.
 - `vai` — **Vai**  
-  _go (an order)_  
+  _go_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `estou-farto` **[MAN]** — **estou farto**  
   _I’m fed up_  
@@ -725,7 +1682,7 @@ that a learner arrives in Lisbon and recognises what they hear.
   _Said to a close friend, this is nearly affectionate. Said to anyone else, it is not._  
   → Register does all the work. Between friends it is warmth; anywhere else it is a genuine insult.
 - `grande` — **grande**  
-  _utter / total (in front of the word)_  
+  _utter / total_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `cabrao` **[MAN]** — **cabrão**  
   _bastard_  
@@ -746,7 +1703,7 @@ that a learner arrives in Lisbon and recognises what they hear.
   _You’re a total pain._  
   → EXASPERATED, NOT RUDE — Same structure, same affection, and you can say it to a colleague.
 
-## FLIRTING — HIM TO HER
+## Flirting — him to her
 
 
 ### fl_m_estas_gira
@@ -755,10 +1712,10 @@ that a learner arrives in Lisbon and recognises what they hear.
   _A remark about this evening, not a verdict on her existence._  
   → Light, unweighted, easy to say and easy to receive. Nothing rides on it.
 - `estas` — **Estás**  
-  _you are (right now)_  
+  _you are_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `gira` — **gira**  
-  _lovely — said about a woman_  
+  _lovely_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `estas-linda` — **Estás linda.**  
   _You look beautiful._  
@@ -822,7 +1779,7 @@ that a learner arrives in Lisbon and recognises what they hear.
   → SKIPPING THE SPEECH — It is going well, the taxi is outside, and there is no time for a sentence.
 - `gostava-de-um-cafe-por-favor` — **Gostava de um café, por favor.**  
   _I’d like a coffee, please._  
-  → Said cold, with no film behind it: you are at the counter, and the same tense turns out to work on coffee.
+  → Said cold, with no film behind it: gostava de is not about flirting — it is how you ask for anything. same two words, at a counter.
 
 ### fl_m_vim_aqui
 
@@ -854,7 +1811,7 @@ that a learner arrives in Lisbon and recognises what they hear.
   _Admitting it, which works considerably better than not admitting it._  
   → Disarming rather than weak. Said lightly it is the most effective line here.
 - `estou-nervoso` — **Estou nervoso**  
-  _I’m nervous — a man saying it_  
+  _I’m nervous_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `nao-sou-bom` — **não sou bom**  
   _I’m not good_  
@@ -890,7 +1847,7 @@ that a learner arrives in Lisbon and recognises what they hear.
   _Will you give me your email?_  
   → Said cold, with no film behind it: she would rather not hand over a phone number yet.
 
-## FLIRTING — HER TO HIM
+## Flirting — her to him
 
 
 ### fl_f_estas_giro
@@ -899,7 +1856,7 @@ that a learner arrives in Lisbon and recognises what they hear.
   _A remark about this evening, not a verdict on his existence._  
   → Light and unweighted. Delivered in passing it does far more than delivered solemnly.
 - `giro` — **giro**  
-  _good-looking — said about a man_  
+  _good-looking_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `estas-lindo` — **Estás lindo.**  
   _You look wonderful._  
@@ -956,10 +1913,10 @@ that a learner arrives in Lisbon and recognises what they hear.
 ### fl_f_engracado
 
 - `es-muito-engracado` — **És muito engraçado.**  
-  _The most effective sentence in this entire crate._  
+  _The most effective sentence in this entire vibe._  
   → Sincere, and worth spending. Said about a joke that was not funny it does the opposite.
 - `es` — **És**  
-  _you are (permanently)_  
+  _you are_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `engracado` — **engraçado**  
   _funny_  
@@ -983,7 +1940,7 @@ that a learner arrives in Lisbon and recognises what they hear.
   _And also, unremarkably, how the entire country says hello._  
   → Playful rather than forward. The diminutive is what takes the weight out of it.
 - `beijinho` — **beijinho**  
-  _a little kiss — and how Portugal says hello_  
+  _a little kiss_  
   → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
 - `da-me` — **Dá-me**  
   _give me_  
@@ -1022,26 +1979,311 @@ that a learner arrives in Lisbon and recognises what they hear.
   _I’ll call you tomorrow._  
   → Said cold, with no film behind it: you said you would be in touch, and you meant it.
 
+## The world of wizardry
+
+
+### wiz_nove
+
+- `nove-e-tres-quartos` — **Nove e três quartos.**  
+  _Nine and three-quarters._  
+  → Counting out loud, with something to count.
+- `nove` — **nove**  
+  _nine_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `um-dois-tres` — **Um, dois, três.**  
+  _One, two, three._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nove-euros` — **Nove euros.**  
+  _Nine euros._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `tres-cafes-por-favor` — **Três cafés, por favor.**  
+  _Three coffees, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### wiz_silencio
+
+- `silencio` — **Silêncio.**  
+  _Silence._  
+  → A ten-second wink. The shortest distance between something you know and something you can say.
+- `silencio-por-favor` — **Silêncio, por favor.**  
+  _Quiet, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `em-silencio` — **Em silêncio.**  
+  _In silence._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `faz-silencio` — **Faz silêncio.**  
+  _Be quiet._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### wiz_lumos_nox
+
+- `luz-noite` — **Luz. Noite.**  
+  _Light. Night._  
+  → Two words, opposite ends of a day, and you already knew both.
+- `luz` — **luz**  
+  _light_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `noite` — **noite**  
+  _night_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nao-ha-luz` — **Não há luz.**  
+  _There is no light._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `toda-a-noite` — **Toda a noite.**  
+  _All night._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### wiz_aguamenti
+
+- `preciso-de-agua` — **Preciso de água.**  
+  _I need water._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `mais-agua-por-favor` — **Mais água, por favor.**  
+  _More water, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### wiz_colloportus
+
+- `a-porta-esta-fechada` — **A porta está fechada.**  
+  _The door is locked._  
+  → Said at a shop at eight in the evening, with resignation.
+- `porta` — **porta**  
+  _door_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `fechada` — **fechada**  
+  _closed_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `onde-e-a-porta` — **Onde é a porta?**  
+  _Where is the door?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `fecha-a-porta-por-favor` — **Fecha a porta, por favor.**  
+  _Close the door, please._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `esta-fechado` — **Está fechado.**  
+  _It’s closed._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `a-loja-esta-fechada` — **A loja está fechada.**  
+  _The shop is closed._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `ja-fechou` — **Já fechou.**  
+  _It’s already shut._  
+  → THE MOMENT IT HAPPENED — You got here too late and somebody has just locked it — there is a hint of you missed it in this one.
+
+### wiz_plataforma
+
+- `onde-e-a-plataforma-do-comboio` — **Onde é a plataforma do comboio?**  
+  _Where is the platform?_  
+  → Asked in a station, slightly too late, with a bag in each hand.
+- `plataforma` — **plataforma**  
+  _platform_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `comboio` — **comboio**  
+  _train_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `o-comboio-para-lisboa` — **O comboio para Lisboa.**  
+  _The train to Lisbon._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `a-que-horas-e-o-comboio` — **A que horas é o comboio?**  
+  _What time is the train?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `que-plataforma` — **Que plataforma?**  
+  _Which platform?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### wiz_proibido
+
+- `e-proibido` — **É proibido.**  
+  _It is forbidden._  
+  → Flat and final. Portuguese signs do not soften this one.
+- `proibido` — **proibido**  
+  _forbidden_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `e-proibido-fumar` — **É proibido fumar.**  
+  _No smoking._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `entrada-proibida` — **Entrada proibida.**  
+  _No entry._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-e-proibido` — **Não é proibido.**  
+  _It’s not forbidden._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### wiz_ridiculus
+
+- `isto-e-ridiculo` — **Isto é ridículo.**  
+  _This is ridiculous._  
+  → Muttered, not shouted. Said to whoever is standing next to you.
+- `ridiculo` — **ridículo**  
+  _ridiculous_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `que-ridiculo` — **Que ridículo!**  
+  _How ridiculous!_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-sejas-ridiculo` — **Não sejas ridículo.**  
+  _Don’t be ridiculous._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `isto-e-mesmo-ridiculo` — **Isto é mesmo ridículo.**  
+  _This is really ridiculous._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+## Duran Duran song titles
+
+
+### dd_week
+
+- `terca-quarta-quinta-sexta` — **Terça, quarta, quinta, sexta.**  
+  _Tuesday, Wednesday, Thursday, Friday._  
+  → Rattled off, the way you would say the alphabet.
+- `terca` — **terça**  
+  _Tuesday_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `sexta` — **sexta**  
+  _Friday_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `ate-terca` — **Até terça.**  
+  _See you Tuesday._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `na-sexta-a-noite` — **Na sexta à noite.**  
+  _On Friday night._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `terca-ou-sexta` — **Terça ou sexta?**  
+  _Tuesday or Friday?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### dd_wolf
+
+- `tenho-uma-fome-de-lobo` — **Tenho uma fome de lobo.**  
+  _Hungry like the wolf._  
+  → Physical and unfussy. It is also the first thing you will say in a restaurant.
+- `fome` — **fome**  
+  _hunger_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `tenho-fome` — **Tenho fome.**  
+  _I’m hungry._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-tenho-fome` — **Não tenho fome.**  
+  _I’m not hungry._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `tenho-sede` — **Tenho sede.**  
+  _I’m thirsty._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `estou-cheio-de-fome` — **Estou cheio de fome.**  
+  _I’m starving._  
+  → AMONG FRIENDS — Louder, funnier, and used constantly between people who know each other well.
+
+### dd_monday
+
+- `lua-nova-na-segunda-feira` — **Lua nova na segunda-feira.**  
+  _New moon on Monday._  
+  → Flat, practical admin language — the stuff that decides whether you can make a plan.
+- `segunda-feira` — **segunda-feira**  
+  _Monday_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `nova` — **nova**  
+  _new_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `ate-segunda-feira` — **Até segunda-feira.**  
+  _See you Monday._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `na-segunda-feira-nao-posso` — **Na segunda-feira não posso.**  
+  _I can’t on Monday._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `uma-vida-nova` — **Uma vida nova.**  
+  _A new life._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### dd_know
+
+- `ha-alguma-coisa-que-eu-deva-saber` — **Há alguma coisa que eu deva saber?**  
+  _Is there something I should know?_  
+  → The question you ask when you can feel something is being left out.
+- `ha` — **há**  
+  _there is / there are_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `alguma-coisa` — **alguma coisa**  
+  _something_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `ha-um-problema` — **Há um problema.**  
+  _There’s a problem._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-ha-problema` — **Não há problema.**  
+  _No problem._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `ha-alguma-coisa-boa` — **Há alguma coisa boa?**  
+  _Is there anything good?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-faz-mal` — **Não faz mal.**  
+  _It doesn’t matter._  
+  → REASSURING SOMEONE — Softer, and aimed at the person rather than the problem — use it when they feel bad.
+
+### dd_prayer
+
+- `guarda-uma-oracao-para-a-manha-seguinte` — **Guarda uma oração para a manhã seguinte.**  
+  _Save a prayer for the morning after._  
+  → The one that quietly proves the whole compounding idea, using a word you already had.
+- `guarda` — **guarda**  
+  _keep / save_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `manha` — **manhã**  
+  _morning_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `guarda-isto` — **Guarda isto.**  
+  _Keep this._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `guarda-me-um-lugar` — **Guarda-me um lugar.**  
+  _Save me a seat._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `de-manha` — **De manhã.**  
+  _In the morning._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
+### dd_now
+
+- `tudo-o-que-precisas-e-agora` — **Tudo o que precisas é agora.**  
+  _All you need is now._  
+  → Reads like a slogan, works like a lever: it is the “you” form of a verb you already use.
+- `tudo` — **tudo**  
+  _everything / all_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `precisas` — **precisas**  
+  _you need_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `precisas-de-ajuda` — **Precisas de ajuda?**  
+  _Do you need help?_  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `e-tudo` — **É tudo.**  
+  _That’s everything._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `precisas-de-alguma-coisa` — **Precisas de alguma coisa?**  
+  _Do you need anything?_  
+  → Said cold, with no film behind it: your friend has gone quiet and you want to check without making a scene.
+
+### dd_ordinary
+
+- `um-mundo-normal` — **Um mundo normal.**  
+  _Ordinary world._  
+  → Plain, slightly melancholy, and structurally the most useful thing in the drop.
+- `mundo` — **mundo**  
+  _world_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `normal` — **normal**  
+  _normal / ordinary_  
+  → Isolated, unhurried. This is the piece being handed over — clear enough to copy.
+- `uma-vida-normal` — **Uma vida normal.**  
+  _A normal life._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `nao-e-normal` — **Não é normal.**  
+  _That’s not normal._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+- `o-mundo-e-assim` — **O mundo é assim.**  
+  _That’s the world for you._  
+  → Ordinary conversational pace. This is the learner hearing what they are about to say.
+
 ## Speaking as a man or a woman
 
-- `obrigado` **[MAN]** — **Obrigado.**  
-  _Thank you._  
-  → Said about yourself, unremarkably. The man’s form of the same sentence.
-- `sou-ingles` **[MAN]** — **Sou inglês.**  
-  _I’m English._  
-  → Said about yourself, unremarkably. The man’s form of the same sentence.
 - `estou-cansado` **[MAN]** — **Estou cansado.**  
   _I’m tired._  
   → Said about yourself, unremarkably. The man’s form of the same sentence.
-- `estou-pronto` **[MAN]** — **Estou pronto.**  
-  _I’m ready._  
-  → Said about yourself, unremarkably. The man’s form of the same sentence.
-- `obrigada` **[WOMAN]** — **Obrigada.**  
-  _Thank you._  
-  → Said about yourself, unremarkably. The woman’s form of the same sentence.
-- `sou-inglesa` **[WOMAN]** — **Sou inglesa.**  
-  _I’m English._  
-  → Said about yourself, unremarkably. The woman’s form of the same sentence.
 - `estou-cansada` **[WOMAN]** — **Estou cansada.**  
   _I’m tired._  
   → Said about yourself, unremarkably. The woman’s form of the same sentence.
@@ -1055,8 +2297,62 @@ that a learner arrives in Lisbon and recognises what they hear.
   _Can you repeat?_  
   → The formal form. One letter shorter, and a completely different level of respect.
 
+## The seven questions
+
+- `de-onde-es` — **De onde és?**  
+  _Where are you from?_  
+  → A stranger asking, friendly and unhurried — the question itself, not an exam. This is one of the seven on the Legend card.
+- `es-casado` — **És casado?**  
+  _Are you married?_  
+  → A stranger asking, friendly and unhurried — the question itself, not an exam. This is one of the seven on the Legend card.
+- `o-que-fazes` — **O que fazes?**  
+  _What do you do?_  
+  → A stranger asking, friendly and unhurried — the question itself, not an exam. This is one of the seven on the Legend card.
+- `que-idade-tens` — **Que idade tens?**  
+  _How old are you?_  
+  → A stranger asking, friendly and unhurried — the question itself, not an exam. This is one of the seven on the Legend card.
+- `porque-portugal` — **Porquê Portugal?**  
+  _Why Portugal?_  
+  → A stranger asking, friendly and unhurried — the question itself, not an exam. This is one of the seven on the Legend card.
+- `do-que-gostas` — **Do que gostas?**  
+  _What are you into?_  
+  → A stranger asking, friendly and unhurried — the question itself, not an exam. This is one of the seven on the Legend card.
+
 ## Collisions
 
+- `ola-um-copo-de-vinho-por-favor` — **Olá, um copo de vinho, por favor.**  
+  _Hello, a glass of wine, please._  
+  → Neutral. You have found a table outside and somebody comes over.
+- `ola-chamo-me-ana` — **Olá, chamo-me Ana.**  
+  _Hello, my name is Ana._  
+  → Neutral. Somebody has put out a hand and you have half a second.
+- `sim-uma-agua-por-favor` — **Sim, uma água, por favor.**  
+  _Yes, a water, please._  
+  → Neutral. They have asked whether you want anything with that.
+- `cinco-euros-obrigado` **[MAN]** — **Cinco euros. Obrigado.**  
+  _Five euros. Thank you._  
+  → Neutral. The change is in your hand and they are already looking past you.
+- `nao-percebi-tenha-paciencia` — **Não percebi. Tenha paciência.**  
+  _I did not catch that. Bear with me._  
+  → Neutral. They have said it twice and you still have not got it.
+- `ola-silencio-desculpe` — **Olá. Silêncio, desculpe.**  
+  _Hello. Quiet, sorry._  
+  → Neutral. You have walked into somewhere very quiet and everybody looked up.
+- `tenho-fome-adeus-na-mesma` — **Tenho fome. Adeus na mesma.**  
+  _I am hungry. Goodbye anyway._  
+  → Neutral. You are leaving and somebody asks whether you want to stay for food.
+- `sim-com-queijo` — **Sim, com queijo.**  
+  _Yes, with cheese._  
+  → Neutral. They are holding the lid open and waiting.
+- `sim-tres` — **Sim, três.**  
+  _Yes, three._  
+  → Neutral. They have asked how many and are already reaching for them.
+- `nao-nao-tenho-fome` — **Não, não tenho fome.**  
+  _No, I am not hungry._  
+  → Neutral. Somebody is trying to feed you and you have just eaten.
+- `talvez-tenho-fome` — **Talvez. Tenho fome.**  
+  _Maybe. I am hungry._  
+  → Neutral. Nobody has decided anything and it is getting late.
 - `gostava-de-te-ver-quando-quiseres` — **Gostava de te ver quando quiseres.**  
   _I’d like to see you whenever you want._  
   → Neutral. She has said yes but not said when.
@@ -1126,8 +2422,8 @@ that a learner arrives in Lisbon and recognises what they hear.
 - `calma-diz-outra-vez` — **Calma. Diz outra vez.**  
   _Easy. Say it again._  
   → Neutral. Someone is flustered and talking far too fast.
-- `chamo-me-sam-como-se-chama-isto` — **Chamo-me Sam. Como se chama isto?**  
-  _My name is Sam. What is this called?_  
+- `chamo-me-ana-como-se-chama-isto` — **Chamo-me Ana. Como se chama isto?**  
+  _My name is Ana. What is this called?_  
   → Neutral. You are introducing yourself and pointing at something at once.
 - `desculpa-preciso-de-ajuda` — **Desculpa, preciso de ajuda.**  
   _Sorry, I need help._  
@@ -1159,6 +2455,69 @@ that a learner arrives in Lisbon and recognises what they hear.
 - `aproveita-agora` — **Aproveita agora.**  
   _Make the most of now._  
   → Neutral. Something good is happening and it will not wait.
+- `precisas-de-vir-comigo` — **Precisas de vir comigo?**  
+  _Do you need to come with me?_  
+  → Neutral. He is standing outside the venue working up to going in alone.
+- `ate-amanha-de-manha` — **Até amanhã de manhã.**  
+  _See you tomorrow morning._  
+  → Neutral. You are saying goodnight and fixing the time in the same breath.
+- `desculpa-ha-um-problema` — **Desculpa, há um problema?**  
+  _Sorry — is there a problem?_  
+  → Neutral. You have arrived late again and something is clearly wrong.
+- `calma-esta-tudo-bem` — **Calma, está tudo bem.**  
+  _Calm down — everything’s fine._  
+  → Neutral. He is spiralling and none of it is actually that serious.
+- `nem-tudo-dura-sempre` — **Nem tudo dura sempre.**  
+  _Not everything lasts forever._  
+  → Neutral. The gig is over, and so is the drop it came in.
+- `tudo-muda` — **Tudo muda.**  
+  _Everything changes._  
+  → Neutral. He is annoyed that the drop has gone from his picker.
+- `foda-se-tenho-uma-fome-de-lobo` — **Foda-se, tenho uma fome de lobo.**  
+  _For fuck’s sake, I’m starving._  
+  → Neutral. Four hours in the queue and not one food stall has opened.
+- `posso-oferecer-te-alguma-coisa` — **Posso oferecer-te alguma coisa?**  
+  _Can I get you something?_  
+  → Neutral. The bar is three deep and you are going anyway.
+- `ligas-me-na-segunda-feira` — **Ligas-me na segunda-feira?**  
+  _Call me on Monday._  
+  → Neutral. The gig is on the Saturday. She is not leaving the rest of it to chance.
+- `traz-agua-contigo` — **Traz água contigo.**  
+  _Bring water back with you._  
+  → Neutral. He is going to the counter and you are not moving.
+- `o-comboio-amanha` — **O comboio amanhã.**  
+  _The train tomorrow._  
+  → Neutral. You are working out whether to go tonight or in the morning.
+- `desculpa-porta-errada` — **Desculpa, porta errada.**  
+  _Sorry — wrong door._  
+  → Neutral. You have walked into the wrong room and somebody is looking up.
+- `a-agua-e-boa` — **A água é boa.**  
+  _The water is good._  
+  → Neutral. Somebody asks whether the tap water is drinkable.
+- `a-luz-aqui-e-vida` — **A luz aqui é vida.**  
+  _The light here is life._  
+  → Neutral. Somebody is describing why they moved.
+- `e-noite-agora` — **É noite agora.**  
+  _It is night now._  
+  → Neutral. It is late and somebody is still deciding.
+- `isto-e-ridiculo-estou-farto` **[MAN]** — **Isto é ridículo. Estou farto.**  
+  _This is ridiculous. I have had enough._  
+  → Neutral. The queue has not moved and it is the second hour.
+- `posso-oferecer-te-uma-agua` — **Posso oferecer-te uma água?**  
+  _Can I get you a water?_  
+  → Neutral. It is thirty degrees and she has been standing in it.
+- `ligas-me-a-noite` — **Ligas-me à noite?**  
+  _Will you call me tonight?_  
+  → Neutral. The evening is ending and neither of you has said anything.
+- `nao-ha-luz-e-tenho-fome` — **Não há luz e tenho fome.**  
+  _There is no light and I am starving._  
+  → Neutral. The gig is over, the venue is emptying and nothing is open.
+
+## No cue
+
+- `com-queijo-por-favor` — **Com queijo, por favor.**  
+  _With cheese, please._  
+  → Neutral, real-world. No cultural colour at all.
 
 ---
 

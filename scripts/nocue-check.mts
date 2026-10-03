@@ -87,6 +87,57 @@ if (!SELF_SUFFICIENT.includes('the_basics' as CultureFamily)) {
   fail.push('the basics can no longer fill its own cold prompts — it is the forced doorway')
 }
 
+/*
+  AND NO PIECE MAY CARRY TWO PROMPTS, which is how one of them became a near-twin.
+
+  Sam: "I suddenly got vem comigo again and chamo-me sam multiple times." `chamo_me` was
+  the only piece in the list with two prompts, and they were nearly the same sentence —
+  "Olá, chamo-me Ana." against "Chamo-me Ana." One sentence per piece is not a hard
+  content rule, but two for one piece needs to be a decision rather than an accident, so
+  it is reported here.
+*/
+{
+  const byPiece = new Map<string, string[]>()
+  for (const p of NO_CUE_PROMPTS) {
+    const a = byPiece.get(p.requires) ?? []
+    a.push(p.answer)
+    byPiece.set(p.requires, a)
+  }
+  const twins = [...byPiece.entries()].filter(([, v]) => v.length > 1)
+  for (const [piece, answers] of twins) {
+    fail.push(piece + ' has ' + answers.length + ' cold prompts: ' + answers.join(' / '))
+  }
+}
+
+/*
+  HOW MUCH OF THE LIST IS A SECOND ASKING OF A RELEASE — reported, not failed.
+
+  Measured: 15 of the 20 prompts are word-for-word some root's release sentence. That is
+  deliberate and good content — the same sentence with a film behind it, then out in the
+  world, is the whole point of this beat. What it means is that the REPETITION SAM HIT was
+  never a content fault; the beat simply did not remember what had already been said, and
+  NoCueView now filters on `proof` as well as `nocue_done`.
+
+  Printed so the consequence stays visible: the more the list overlaps the releases, the
+  more often a vibe runs out of fresh prompts and lands on the out-in-the-world screen.
+*/
+{
+  const bare = (t: string) =>
+    t
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+  const releases = new Set(ROOTS.map((r) => bare(r.transfer_prompt.answer)))
+  const echoes = NO_CUE_PROMPTS.filter((p) => releases.has(bare(p.answer)))
+  console.log(
+    '\n  ' + echoes.length + ' of ' + NO_CUE_PROMPTS.length +
+      ' cold prompts are also a release — fine in itself, and the reason NoCueView filters on proof',
+  )
+}
+
 if (fail.length) {
   for (const f of fail) console.log('  FAIL  ' + f)
   console.log(`\n${fail.length} error(s)`)
