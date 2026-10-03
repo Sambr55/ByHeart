@@ -14,7 +14,7 @@
  * making here.
  */
 import { readFileSync } from 'node:fs'
-import { BREAKS, breakAfter } from '../content/breaks'
+import { BREAKS, breakAfter, DONE } from '../content/breaks'
 import { ROOTS, ROOTS_BY_FAMILY, type Root } from '../content/roots'
 import { ROAD, WARM_UP, roadFor, roadProgress } from '../content/road'
 import { beatsFor } from '../engine/journey'
@@ -206,9 +206,31 @@ console.log('\nevery sitting break teaches something, and something new\n')
 
     This walks the real order and requires four different screens.
   */
-  const met = [1, 2, 3, 4].map((n) => breakAfter(n).pt)
-  ok('four sittings meet four different breaks', new Set(met).size === 4, met.join(' / '))
-  ok('and the last one is the one that celebrates', met[3] === BREAKS[3].pt, met[3])
+  /*
+    AS MANY SITTINGS AS THERE ARE BREAKS, each one different.
+
+    This asserted four, and there are three now: Já está moved off the breaks and onto the
+    screen that opens the Legend — Sam, "Move Ja esta to the very last legend screen that
+    opens the legend" — because it is not about carrying on, which is what the other three
+    are for. Derived from BREAKS.length rather than counted, so moving one again does not
+    need this line edited.
+  */
+  const met = BREAKS.map((_, i) => breakAfter(i + 1).pt)
+  ok(
+    'each sitting meets a different break',
+    new Set(met).size === BREAKS.length,
+    met.join(' / '),
+  )
+  /*
+    AND THE ROAD'S END IS NOT ONE OF THEM. The celebration is DONE, on the Legend-opening
+    screen; a break saying "nearly there" to somebody who has arrived is the fault this
+    replaces.
+  */
+  ok(
+    'and none of them celebrates the end',
+    !BREAKS.some((b) => b.pt === DONE.pt),
+    BREAKS.map((b) => b.pt).join(' / '),
+  )
 
   /*
     AND THE SCREEN READS THE SITTING IT IS CLOSING, not the one before it.

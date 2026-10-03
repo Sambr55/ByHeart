@@ -131,23 +131,6 @@ export const BREAKS: SittingBreak[] = [
     choice: 'One sitting and your Legend is written. Carry on, or save your place.',
     cta: 'QUASE',
   },
-  {
-    after: 4,
-    /*
-      THE ONLY ONE THAT CELEBRATES, because it is the only one that should. Já está is
-      what a Portuguese person says the moment a thing is finished — handing back a card,
-      closing a bag, finishing a job — and it is the right sentence to hand somebody at
-      the end of their Legend.
-    */
-    pt: 'Já está.',
-    en: 'That’s it. / Done.',
-    gloss:
-      'Já is “already” and está is “it is”. Neither is worth much alone; together they are what somebody says the second a thing is finished — you will hear it from every waiter, every shopkeeper and every friend who has just fixed something.',
-    shelf: 'just_say',
-    where: 'THAT IS IT',
-    choice: 'Your Legend is written. Next you say it out loud — that is what opens the Club.',
-    cta: 'JÁ ESTÁ',
-  },
 ]
 
 /**
@@ -160,4 +143,26 @@ export const BREAKS: SittingBreak[] = [
 export function breakAfter(sittings: number): SittingBreak {
   const n = Math.max(1, sittings)
   return BREAKS.find((b) => b.after === n) ?? BREAKS[BREAKS.length - 1]
+}
+
+/**
+ * JÁ ESTÁ — the end of the road, not a break between sittings.
+ *
+ * Sam: "Move Ja esta to the very last legend screen that opens the legend."
+ *
+ * It was the fourth SittingBreak and that was the wrong shape for it. The other three are
+ * about carrying on — let's go, not far now, nearly there — and they interrupt a sitting to
+ * ask a question. "Já está" asks nothing. It is what a Portuguese person says the second a
+ * thing is finished, and the thing finished here is the Legend, so it belongs on the screen
+ * that opens it rather than on a gate before one more lesson.
+ *
+ * Still a phrase the product teaches, on the same terms as the three breaks: the words, what
+ * they do together, and nowhere else in DUB has a home for it.
+ */
+export const DONE = {
+  pt: 'Já está.',
+  en: 'That’s it. / Done.',
+  gloss:
+    'Já is “already” and está is “it is”. Neither is worth much alone; together they are what somebody says the second a thing is finished — you will hear it from every waiter, every shopkeeper and every friend who has just fixed something.',
+  shelf: 'just_say' as const,
 }

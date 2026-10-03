@@ -1818,11 +1818,34 @@ export function cardFor(purpose: Purpose | null): LegendFrame[] {
     for (const one of Array.isArray(a) ? a : [a]) asked.add(one)
   }
   /*
-    In LEGEND_FRAMES order rather than road order, so the deck reads the way it is
-    authored — the name first, then where you are from. The road decides membership; the
-    content file decides sequence.
+    IN ROAD ORDER, because that is the order they were built in.
+
+    Sam: "when the legend opens it should run through in exactly the same order as we build
+    it - name first etc."
+
+    This returned LEGEND_FRAMES order, which is the order the content file happens to
+    declare them in — and it diverged from the road at the third question: the card read
+    name, origin, AGE, married, INTO… while the learner had answered name, origin, married,
+    work, age… So the run-through asked for their Legend in an order they had never
+    assembled it in, which is the difference between reciting something you built and being
+    tested on a list.
+
+    `name` first because set-up asks it before the road starts; everything else follows the
+    step that asked for it. One sequence — the road — and the deck, the run-through and the
+    walk now all read it.
   */
-  return LEGEND_FRAMES.filter((f) => asked.has(f.id))
+  const order = new Map<string, number>([['name', -1]])
+  ROAD.forEach((step, i) => {
+    const root = ROOTS.find((r) => r.root_id === step.root)
+    const a = (root as { asks?: string | string[] } | undefined)?.asks
+    if (!a) return
+    for (const one of Array.isArray(a) ? a : [a]) {
+      if (!order.has(one)) order.set(one, i)
+    }
+  })
+  return LEGEND_FRAMES.filter((f) => asked.has(f.id)).sort(
+    (a, b) => (order.get(a.id) ?? 99) - (order.get(b.id) ?? 99),
+  )
 }
 
 /** The universal seven, for the places that ask before a purpose exists. */

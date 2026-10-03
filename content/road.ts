@@ -161,11 +161,12 @@ export const ROAD: RoadStep[] = [
     family: 'the_basics',
     because: 'Porque — why you are here at all.',
   },
-  {
-    root: 'tb_patience',
-    family: 'the_basics',
-    because: 'Bear with me, I am learning. The sentence that keeps a conversation alive.',
-  },
+  /*
+    tb_patience IS NOT HERE — see the note below the road.
+
+    Sam: "remove bear with me I am learning - and make a note to add it to the Repair Kit
+    which we are going to move into cheats/hacks later."
+  */
   {
     root: 'tb_into',
     family: 'the_basics',
@@ -174,6 +175,26 @@ export const ROAD: RoadStep[] = [
 ]
 
 /*
+  WHAT CAME OFF THE ROAD, AND WHERE IT WENT.
+
+  tb_patience taught "Estou a aprender. Tenha paciência." — bear with me, I am learning.
+  Sam: "remove bear with me I am learning - and make a note to add it to the Repair Kit
+  which we are going to move into cheats/hacks later."
+
+  IT IS ALREADY IN THE REPAIR KIT. REPAIR_KIT in content/legend.ts has carried the line
+  since it was written, alongside "Desculpe, pode falar mais devagar?", "Não percebi." and
+  "Como se diz…?" — so taking the root off the road loses the lesson and keeps the
+  sentence, which is the right way round for a phrase whose whole job is to be reached for
+  rather than recited.
+
+  TO DO, when the repair kit moves into cheats/hacks: it is four sentences that rescue a
+  conversation, which is exactly the shape of a BLUFF — see content/cheats.ts, where the
+  five bluffs already do this job. The kit should become bluffs rather than sitting in
+  content/legend.ts as a list nothing renders as cards.
+
+  `portuguese` was the card question tb_patience answered. It comes off the card with the
+  root, because the card is what the road answers — see cardFor.
+
   THE TWO STEPS THAT ARE NOT CARD QUESTIONS, and why each earns its place anyway.
 
   Neither tb_into nor tb_email is on the seven-card Legend: `into` is a depth 'deeper'

@@ -49,7 +49,7 @@ import { COLLISIONS } from '@/content/roots'
 import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
-import { BREAKS, breakAfter } from '@/content/breaks'
+import { BREAKS, DONE, breakAfter } from '@/content/breaks'
 import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, askFor, cardFor, frameApplies, knownValues, readableFrame, frameForPurpose, myAge, myName, personalise, framesJustOpened, legendStatus, metIn,
   provenanceOf, fillFrame, fillEnglish, type LegendFrame, worthSaving } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
@@ -2759,7 +2759,23 @@ function RootBeatView({
     match their own name: `origin` writes a nationality and a town, and `into` writes an
     array.
   */
-  const CARD_ASKS = ['married', 'work', 'why_here', 'staying_for', 'first_time', 'moved_when', 'portuguese']
+  /*
+    WHICH ASKS ARE CARD QUESTIONS — DERIVED, not listed.
+
+    Sam: "doing the Gosto question in the road doesnt unlock it in the legend."
+
+    It did not, and this literal is why. `into` was a deeper frame when the list was
+    written, so it fell through to the profile branch below — `Boolean(pr?.into?.length)` —
+    which reads the profile array the interest picker writes. That is true the moment
+    somebody taps a chip, so the beat settled, the lesson moved on, and nothing ever looked
+    at whether the LEGEND had been answered. The card stayed shut with the question behind
+    it answered.
+
+    `into` is on the card now because the road asks it, and `age` is too. A hand-written
+    list of card questions is the same second copy of the card that cardFor just stopped
+    being — so it reads cardFor, which reads the road.
+  */
+  const CARD_ASKS = cardFor(null).map((f) => f.id)
   const oneSettled = (which: string) => {
     if ((pr?.skipped ?? []).includes(which)) return true
     if (CARD_ASKS.includes(which)) {
@@ -2786,7 +2802,16 @@ function RootBeatView({
       return Boolean(a && Object.keys(a.values ?? {}).length > 0)
     }
     if (which === 'origin') return Boolean(pr?.nationality) && Boolean(pr?.from_place?.trim())
-    if (which === 'into') return Boolean(pr?.into?.length)
+    /*
+      `into` USED TO BE ANSWERED HERE and that was the bug. It read the profile array the
+      interest picker writes, which is true the instant somebody taps a chip — so the beat
+      settled before anything wrote the Legend, and the card stayed shut behind an answered
+      question. It is a card question now, so it is answered in the branch above with every
+      other one, and this line would shadow that if it stayed.
+
+      What remains is the genuine profile asks: gender and email, neither of which is a
+      thing you say about yourself on a card.
+    */
     return Boolean((pr as Record<string, unknown> | null | undefined)?.[which])
   }
   /* Settled means EVERY question this root asks, not the first of them. */
@@ -3656,7 +3681,8 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
     the question here and the question there cannot offer different answers — and the
     gendered ones agree with the speaker, which is what askFor and the `f` forms are for.
   */
-  const CARD_ASKS = ['married', 'work', 'why_here', 'staying_for', 'first_time', 'moved_when', 'portuguese']
+  /* The card's questions, derived — see the long note on the other CARD_ASKS above. */
+  const CARD_ASKS = cardFor(null).map((f) => f.id)
   if (CARD_ASKS.includes(which)) {
     const frame = LEGEND_FRAMES.find((f) => f.id === which)
     const slot = frame?.slots[0]
@@ -4912,7 +4938,25 @@ function LegendOpen() {
   return (
     <Shell stage="CHOICE" nav={false}>
       <div className="flex flex-1 flex-col justify-center gap-3">
-        <p className="eyebrow text-accent">YOUR LEGEND</p>
+        {/*
+          JÁ ESTÁ, HERE, ON THE SCREEN THAT OPENS THE LEGEND.
+
+          Sam: "Move Ja esta to the very last legend screen that opens the legend."
+
+          It was the fourth sitting break — a gate between two sittings of the basics, which
+          is where the other three belong because that is what they are about: let's go, not
+          far now, nearly there. "Já está" is not about the next sitting. It is what a
+          Portuguese person says the second a thing is finished, and the thing being
+          finished is the Legend. Said on a break it marked the end of some lessons; said
+          here it marks the end of the road.
+
+          The phrase and its gloss, above the offer rather than instead of it — the screen
+          still has a job and this is the moment it earns.
+        */}
+        <p className="eyebrow text-accent">JÁ ESTÁ</p>
+        <p className="pt display text-balance text-3xl text-accent">{DONE.pt}</p>
+        <p className="text-sm leading-relaxed text-fg/85">{DONE.gloss}</p>
+        <div className="mt-3 flex flex-col gap-3 border-t border-line pt-6">
         <h1 className="display text-balance text-3xl">{LEGEND_COPY.offer_head}</h1>
         <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.offer_body}</p>
         {/* The questions themselves, because they are the hook — not a count of them. */}
@@ -4924,6 +4968,7 @@ function LegendOpen() {
           ))}
         </ul>
         <p className="mt-3 text-xs leading-relaxed text-muted">{LEGEND_COPY.offer_repair}</p>
+        </div>
       </div>
       <div className="flex flex-col gap-3">
         <Link
@@ -5066,8 +5111,19 @@ function SittingBreakStep() {
     both answered "have they finished" when the question the screen asks is "which of the
     four is this". Counting is the honest answer to that and it cannot saturate.
   */
-  const pastTheEnd = sittingNow > BREAKS.length
-  const b = road.open ? BREAKS[BREAKS.length - 1] : breakAfter(sittingNow)
+  /*
+    AND THE ROAD BEING OPEN IS NOW ONE OF THE WAYS PAST THE END.
+
+    Já está was the fourth break and is now the Legend-opening screen — see DONE in
+    content/breaks.ts. So there are three breaks, and a learner whose road has just opened
+    is not owed a fourth one: the screen that celebrates is the next one they will see.
+
+    This read `road.open ? BREAKS[last] : …`, which with four breaks meant Já está and with
+    three would mean Quase — the "nearly there" screen shown to somebody who has arrived.
+    Standing aside is the honest answer to both.
+  */
+  const pastTheEnd = sittingNow > BREAKS.length || road.open
+  const b = breakAfter(sittingNow)
   useEffect(() => {
     if (pastTheEnd) next()
   }, [pastTheEnd, next])
