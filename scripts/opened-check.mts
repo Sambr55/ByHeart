@@ -20,7 +20,7 @@ import { framesJustOpened, legendStatus, cardFor, CARD_SIZE } from '../content/l
 import { ROOTS, CRATES, type CultureFamily, type Rung } from '../content/roots'
 import { sectionRoots } from '../engine/journey'
 import { FREE_ENTITLEMENTS } from '../lib/entitlements'
-import { WARM_UP, roadFor } from '../content/road'
+import { roadFor } from '../content/road'
 
 const fail: string[] = []
 const note = (s: string) => console.log('  ' + s)
@@ -166,15 +166,8 @@ for (const run of runs) {
         FIRES rather than what the door costs. Varying the second half here would make
         every assertion below depend on a condition this walk never simulates.
       */
-      /*
-        The warm-up granted, because roadProgress counts it from sectionsCompleted and this
-        walk does not simulate choosing one. Everything else the door needs is the road,
-        which this run actually plays.
-      */
-      const open = legendStatus({
-        rootsPlayed: played,
-        sectionsCompleted: [WARM_UP[0]],
-      }).open
+      /* The road is the roots this run plays; nothing has to be granted. */
+      const open = legendStatus({ rootsPlayed: played, sectionsCompleted: [] }).open
       /*
         NOTHING FIRES WHILE THE DOOR IS SHUT. Sam, on a phone at the end of his first vibe:
         "these unlockers shouldn't show while doing the first five vibes where we are

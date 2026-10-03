@@ -20,7 +20,6 @@
  * OPENS THE VIBE. Anything else is dimmed, and anything dimmed does something other than
  * open the vibe — or nothing at all.
  */
-import { WARM_UP } from '../content/road'
 import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { CRATES, ROOTS, ROOTS_BY_FAMILY } from '../content/roots'
@@ -456,13 +455,16 @@ console.log('\na vibe you cannot have yet still opens\n')
     no crate list at all. Measured both ways rather than assumed: brand new renders 0
     vibe tiles and 2 warm-up tiles, one warm-up done renders 13 and 0.
 
-    So the fixture takes the warm-up, which is the cheapest honest way onto the shelf. The
-    assertion is unchanged and is still the point of this block: the WHOLE shelf shows
-    from the first visit — locked crates included — because the picture is the argument
-    for them.
+    The fixture used to seed a finished warm-up, which was the cheapest honest way past the
+    gate standing in front of the shelf. There is no gate now — Sam: "that is now stale. It
+    needs to go completely" — so a genuinely new learner is seeded, which is both simpler
+    and a truer version of what this block is about.
+
+    The assertion is unchanged and is still the point: the WHOLE shelf shows from the first
+    visit — locked crates included — because the picture is the argument for them.
   */
   const p3 = await browser.newPage({ viewport: { width: 390, height: 900 } })
-  await seedInto(p3, seed([], [WARM_UP[0]]))
+  await seedInto(p3, seed([], []))
   await shelfReady(p3)
   const locked = await p3.$$eval('[data-testid^="vibe-"]', (els) =>
     els.map((el) => el.getAttribute('data-testid')).filter(Boolean),

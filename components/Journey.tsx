@@ -111,7 +111,7 @@ import { chapterById } from '@/content/chapters'
 import { TOO_YOUNG } from '@/content/consent'
 import { INTERESTS, genresFromInterests, interestById } from '@/content/interests'
 import { say, wordsIn } from '@/content/numbers'
-import { WARM_UP, roadProgress } from '@/content/road'
+import { roadProgress } from '@/content/road'
 import type { ProfileAsk } from '@/content/roots'
 import { buzz, nope } from '@/engine/tap'
 import { useLearner } from '@/engine/useLearner'
@@ -428,8 +428,6 @@ export function Journey() {
       return <SetUpStep />
     case 'theway':
       return <TheWay />
-    case 'warmup':
-      return <WarmUp />
     case 'picker':
       return <Picker />
     case 'root':
@@ -1079,134 +1077,6 @@ function DropRow({
 const BADGE =
   'rounded-full bg-black/55 px-2 py-1 text-[0.5rem] uppercase tracking-wider backdrop-blur-sm'
 
-/**
- * THE WARM-UP — one vibe, chosen from two, before the basics.
- *
- * Sam: "after intro I want to force a user to do either Top Gun or Bridget Jones — give
- * them the choice of the two before basics. We frame this as a warm up and a bit of fun to
- * get them going (and get the concept). We then push them through whatever the logic is
- * now to get to legend, but either Top Gun or Bridget will be banked."
- *
- * WHY TWO AND NOT THE SHELF. The shelf was the first thing after set-up: eleven tiles with
- * nine dimmed and captioned BASICS FIRST, so a person's opening act in DUB was reading a
- * list of what they could not have. And the basics — hello, thank you, yes, no — is the
- * right doorway and a poor opening line, because the argument DUB is making is that
- * Portuguese arrives out of something you already know, and nothing demonstrates that in
- * ninety seconds better than a Top Gun quote.
- *
- * WHY THESE TWO. Between them they cover the room: one is direct and kinetic, the other is
- * awkward and human, and a person knows immediately which one is theirs. That is the whole
- * job of the screen — not to teach a preference but to make somebody pick a thing they
- * like and watch Portuguese fall out of it.
- *
- * NOTHING IS SKIPPED BY DOING IT. Whichever they choose is banked like any other vibe, its
- * words count, and the basics follows exactly as before. The doorway logic is untouched:
- * this is a session in front of it, not a replacement for it.
- */
-function WarmUp() {
-  const { chooseFamily } = useJourney()
-  const [going, setGoing] = useState<CultureFamily | null>(null)
-
-  /*
-    READ FROM WARM_UP, which is the one place that decides this.
-
-    The ids were typed here — 'top_gun' || 'bridget_jones' — while content/road.ts also
-    declared WARM_UP, so one decision lived in two files. They drifted the moment the road
-    moved: both of those crates picked up a road step that asks a Legend question, WARM_UP
-    was changed to two crates that ask nothing, and this screen carried on offering the old
-    pair. A learner would have met the right constant in every check and the wrong one on
-    the actual screen.
-
-    Still read through CRATES so the tile says what the vibe says.
-  */
-  const offered = CRATES.filter((c) => (WARM_UP as string[]).includes(c.id))
-
-  return (
-    <Shell stage="CHOICE" eyebrow="WARM UP">
-      <div className="flex flex-col gap-3">
-        {/*
-          Sam: "changed the FUN BIT above Top Gun Bridget to Let's get you warmed up." It
-          also names what the screen IS, which THE FUN BIT only implied.
-        */}
-        <p className="eyebrow text-accent">WARMING UP</p>
-        <h1 className="display text-balance text-2xl">Let’s get you warmed up.</h1>
-        <p className="text-sm leading-relaxed text-muted">
-          Ninety seconds, out of something you have seen a hundred times. This is how DUB
-          works — the Portuguese comes out of what is already in your head, and you keep
-          every word of it.
-        </p>
-      </div>
-
-      <ul className="flex flex-col gap-3">
-        {offered.map((c) => {
-          const img = vibeImage(c.id)
-          return (
-          <li key={c.id}>
-            <button
-              type="button"
-              data-testid={'warmup-' + c.id}
-              disabled={going !== null}
-              onClick={() => {
-                /*
-                  Latched, because chooseFamily builds a whole session and the screen stays
-                  up while it does. Two taps would start two.
-                */
-                setGoing(c.id)
-                track('warmup_chosen', { crate: c.id })
-                chooseFamily(c.id)
-              }}
-              className={
-                'tap-target relative flex w-full flex-col gap-1 overflow-hidden rounded border border-line text-left transition hover:border-accent/50 ' +
-                (going === c.id ? 'border-accent' : '')
-              }
-            >
-              {/*
-                The vibe's own photograph, because a vibe is CHOSEN rather than read — the
-                argument content/vibe-images.ts already makes for the shelf.
-              */}
-              <span className="relative block aspect-[16/9] w-full overflow-hidden on-dark">
-                <Image
-                  src={img?.src ?? ''}
-                  alt={img?.alt ?? ''}
-                  fill
-                  sizes="(max-width: 448px) 100vw, 448px"
-                  className="object-cover"
-                />
-                <span
-                  aria-hidden
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      'linear-gradient(to bottom, rgb(0 0 0 / 0.15) 0%, rgb(0 0 0 / 0.72) 100%)',
-                  }}
-                />
-                <span
-                  className="display absolute inset-x-0 bottom-0 px-4 pb-3 text-xl text-white"
-                  style={{ textShadow: '0 1px 12px rgb(0 0 0 / 0.5)' }}
-                >
-                  {c.title}
-                </span>
-              </span>
-              <span className="px-4 py-3 text-sm leading-relaxed text-muted">{c.blurb}</span>
-            </button>
-          </li>
-          )
-        })}
-      </ul>
-
-      {/*
-        No way past, and it says so rather than hiding a skip.
-
-        The step is forced — Sam: "I want to force a user to do either" — and a screen that
-        offers no exit should admit it instead of leaving somebody hunting for one.
-      */}
-      <p className="mt-auto text-xs leading-relaxed text-muted">
-        Either one. The basics come straight after, and whichever you pick is yours to keep.
-      </p>
-    </Shell>
-  )
-}
-
 function Picker() {
   const router = useRouter()
   const { chooseFamily, state } = useJourney()
@@ -1598,26 +1468,20 @@ function Picker() {
   }
 
   /*
-    THE WARM-UP IS SHOWN HERE, because this is where a learner actually lands.
+    THE WARM-UP USED TO INTERCEPT HERE, and it is gone with the rest of it.
 
-    Sam: "Bridget and Top Gun are not being forced." They were not, and the reason is a
-    seam between two paths. The journey has a `warmup` step in its array — correct, and
-    unreachable: COME IN goes to /club, set-up happens inside that feed, and its button
-    links to /vibes. So a real learner never passes through the journey's step list at all
-    and arrived straight at the shelf.
+    Sam: "Of course you needed to move the warm up, that is now stale. It needs to go
+    completely."
 
-    Gating the SHELF is the fix rather than another step, because the shelf is the thing
-    being replaced: eleven tiles with nine dimmed is what somebody saw instead of the warm
-    up. Shown while nothing has been played, so it is genuinely first and genuinely once —
-    the moment a vibe is finished this is behind them for good.
+    A learner with nothing played was redirected to a forced choice of two vibes, because
+    the shelf they would otherwise meet was eleven tiles with nine dimmed and captioned
+    BASICS FIRST — a first act of reading a list of things you cannot have. That was the
+    whole argument for the interception and it has stopped being true: eight of fourteen
+    crates open at rung 1 now, and the road decides the order regardless of what the shelf
+    shows, so the first thing somebody taps leads to the same place either way.
 
-    The journey's step stays, and is still the right thing for anybody who does reach it.
+    So they land on the shelf, which is a shelf of things they can have.
   */
-  const nothingPlayed =
-    mounted &&
-    (learner.roots_played ?? []).length === 0 &&
-    (learner.sections_completed ?? []).length === 0
-  if (nothingPlayed) return <WarmUp />
 
   return (
     <Shell stage="CHOICE">
@@ -5657,21 +5521,15 @@ function SectionComplete() {
           THE WARM-UP SAYS WHAT IT WAS. Sam: "change top text to warm-up session done."
 
           A generic A SESSION DONE at the end of the first thing anybody plays tells them
-          nothing about where they are — the warm-up is a named step on the road, and
-          naming it is the difference between "a session" and "the one you were asked to
-          do first".
+          nothing about where they are.
 
-          Only while it IS the warm-up, which is the first road step and nothing else:
-          somebody who comes back to Top Gun later has finished an ordinary vibe and the
-          screen should say so. `road.done === 1` is that test — the warm-up is walked and
-          no basics step is, which is true exactly once.
+          THE WARM-UP BRANCH IS GONE WITH THE WARM-UP ITSELF. It read "WARM-UP SESSION
+          DONE" on the one sitting that was the warm-up, which no longer exists — Sam:
+          "that is now stale. It needs to go completely". The crate's own title is the
+          better line anyway, and it was already the branch underneath.
         */}
         <p className="eyebrow text-accent">
-          {road.warmedUp && road.done === 1 && state.family && WARM_UP.includes(state.family)
-            ? 'WARM-UP SESSION DONE'
-            : vibeFinished && family
-              ? family.title + ' — DONE'
-              : 'A SESSION DONE'}
+          {vibeFinished && family ? family.title + ' — DONE' : 'A SESSION DONE'}
         </p>
         {/*
           The capability sentence is not here any more.

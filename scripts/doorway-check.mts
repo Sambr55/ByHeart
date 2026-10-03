@@ -22,7 +22,7 @@
 import { doorwayRoots, legendUnlocked, LEGEND_CARD } from '../content/legend'
 import { ROOTS, type CultureFamily, type Rung } from '../content/roots'
 import { sectionRoots } from '../engine/journey'
-import { WARM_UP, roadFor } from '../content/road'
+import { roadFor } from '../content/road'
 
 const fail: string[] = []
 const note = (s: string) => console.log('  ' + s)
@@ -69,13 +69,11 @@ if (floor > 2) {
   the door is being held constant on purpose, not forgotten.
 */
 /*
-  THE WARM-UP, GRANTED, so this file keeps testing the one thing it tests.
-
-  roadProgress counts the warm-up as a step and reads it from sectionsCompleted, which this
-  walk does not simulate. Named rather than inlined so the next reader sees immediately
-  that it is held constant on purpose rather than forgotten.
+  NOTHING IS GRANTED ANY MORE. The warm-up was the one step roadProgress read from
+  sectionsCompleted rather than from roots played, so it had to be handed over here; it is
+  gone, and the road is now entirely the roots this walk actually plays.
 */
-const GRANTED = [WARM_UP[0]]
+const GRANTED: string[] = []
 
 /*
   WALKED ACROSS THE ROAD'S CRATES, not inside one.

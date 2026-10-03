@@ -2715,24 +2715,25 @@ export function legendStatus(opts: {
       screen among them. Sam saw the picker promising "three vibes of your own" and asked
       for it fixed.
 
-      The door is roadProgress and nothing else. The road counts ONE warm-up as one of its
-      steps — see WARM_UP in content/road.ts — so the honest pair is "have you warmed up"
-      expressed in the same shape the callers already read. `vibesNeeded` is 1 because one
-      is what is needed; it stays derived rather than typed, so the next time this rule
-      moves the number moves with it.
+      The door is roadProgress and nothing else.
 
-      VIBES_FOR_LEGEND is gone rather than set to 1. A constant whose own note explains
-      that it "has always been three" cannot be quietly redefined, and keeping it would
-      leave the next reader with two answers to one question.
+      AND THE VIBE TOLL IS NOW ZERO, which is the honest number. This reported "have you
+      warmed up" as one-of-one, because the warm-up was a step the road counted. The
+      warm-up is gone — Sam: "that is now stale. It needs to go completely" — and the road
+      it was bolted to is made of vibes anyway: seven of its ten steps are a film, a band
+      or a person, so asking for vibes ON TOP of it would be charging twice for the same
+      thing.
+
+      Both numbers stay in the shape rather than being deleted, because six call sites read
+      `vibesNeeded - vibesDone` to say how many are left. With both zero every one of them
+      says none, which is true, and none of them has to change. The pair goes when somebody
+      removes the last reader.
+
+      VIBES_FOR_LEGEND went earlier, rather than being set to 1. A constant whose own note
+      explains that it "has always been three" cannot be quietly redefined.
     */
-    vibesDone: roadProgress({
-      rootsPlayed: opts.rootsPlayed,
-      sectionsCompleted: sections,
-      purpose: opts.purpose ?? null,
-    }).warmedUp
-      ? 1
-      : 0,
-    vibesNeeded: 1,
+    vibesDone: 0,
+    vibesNeeded: 0,
     sessionsNeeded: doorwaySessions(doorwayRoots(opts.purpose).length),
     sessionsDone: doorwaySessions(doorwayRoots(opts.purpose).length) - doorwaySessions(toGo),
     openCards: open ? LEGEND_FRAMES.length : 0,

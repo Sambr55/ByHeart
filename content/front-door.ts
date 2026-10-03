@@ -336,15 +336,13 @@ export const PICKER = {
       ? 'One more basics session and your Legend opens.'
       : left + ' more basics sessions and your Legend opens.',
   /*
-    The end of the warm-up, which is not the end of a basics session.
+    `warmed_up` IS GONE WITH THE WARM-UP. It said "That's you warmed up. Now we'll get into
+    the basics, and after that, the vibes." — Sam's own words, written for the screen that
+    closed a forced warm-up session, and rendered by nothing since that screen was removed.
 
-    Sam wrote this one: "that's you warmed up. Now we'll get into the basics and after
-    that, the vibes." It replaces a count of basics sessions that was landing here at 0 of
-    4 — the first thing anybody finishes, answered with a tally of what they had not done.
-
-    It names what happens next in the order it happens, and counts nothing.
+    The order it described is also no longer the order: the road is vibes, so there is no
+    "after that, the vibes" to promise.
   */
-  warmed_up: "That's you warmed up. Now we'll get into the basics, and after that, the vibes.",
   /* Where that session put you, said at the end of one — the screen that used to say nothing. */
   /*
     IN STEPS, AND WITH NO TOLL AT THE END OF IT.
@@ -380,7 +378,19 @@ export const PICKER = {
     gone because the number cannot exceed one; a branch that cannot run is a promise this
     copy might start making again.
   */
-  legend_vibes: () => 'Take a warm-up vibe and your Legend opens.',
+  /*
+    IT NO LONGER PROMISES A WARM-UP, because there is no warm-up to take.
+
+    This read "Take a warm-up vibe and your Legend opens." — live on the shelf, under the
+    tiles, for any learner whose basics were done. Sam: "Of course you needed to move the
+    warm up, that is now stale. It needs to go completely."
+
+    It fires when `toGo` is zero and the door is still shut, which under the old road meant
+    exactly one thing was outstanding: the warm-up. Under this road it means the last road
+    step is a vibe step, so the sentence names what is actually left rather than a screen
+    that no longer exists.
+  */
+  legend_vibes: () => 'One more session and your Legend opens.',
   legend_open: 'Your Legend is open — build it and the Club is yours.',
   /*
     Why the rest of the shelf is dimmed on somebody's first visit.

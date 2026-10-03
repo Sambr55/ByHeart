@@ -23,7 +23,7 @@
 import { ROOTS_BY_FAMILY } from '../content/roots'
 import { DOORWAY, LEGEND_FRAMES, cardFor, doorwayToGo, frameApplies, frameForPurpose, legendStatus, legendUnlocked } from '../content/legend'
 import type { Purpose } from '../content/situations'
-import { WARM_UP, roadFor } from '../content/road'
+import { roadFor } from '../content/road'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -81,7 +81,7 @@ const STEPS = doorway.length
   The warm-up plus the crates the road now runs through, because roadProgress counts the
   warm-up from sectionsCompleted and legendStatus asks the same question.
 */
-const VIBES_DONE = [WARM_UP[0], 'james_bond', 'bridget_jones']
+const VIBES_DONE: string[] = []
 
 function legendOffers(played: string[], purpose: Purpose | null): number {
   if (!legendUnlocked(played, VIBES_DONE)) return 0
@@ -178,21 +178,31 @@ ok('one line short does not', !payoffSaysOpen(doorway.slice(0, STEPS - 1)))
   was asking for payment in a currency the card does not accept.
 
   What replaces them is the road's own promise: walking every step opens the Legend, and
-  skipping the warm-up does not. See content/road.ts.
+  nothing short of it does.
+
+  THE WARM-UP ASSERTIONS WENT THE SAME WAY, one commit later. Two of them held the road to
+  "its steps alone must not open it, because the warm-up is also required" — true while the
+  warm-up was a counted step and false the moment it was removed. Sam: "that is now stale.
+  It needs to go completely." What is left is the pair that still means something: an empty
+  record does not open the door, and the whole road does.
 */
 ok(
-  'the road without its warm-up does not open it',
-  !legendStatus({ rootsPlayed: doorway, sectionsCompleted: [], purpose: 'visiting' }).open,
+  'nothing played does not open it',
+  !legendStatus({ rootsPlayed: [], sectionsCompleted: [], purpose: 'visiting' }).open,
 )
 ok(
-  'the warm-up alone does not open it',
-  !legendStatus({ rootsPlayed: [], sectionsCompleted: [WARM_UP[0]], purpose: 'visiting' }).open,
+  'and one step short does not',
+  !legendStatus({
+    rootsPlayed: roadFor('visiting').slice(0, -1).map((st) => st.root),
+    sectionsCompleted: [],
+    purpose: 'visiting',
+  }).open,
 )
 ok(
   'the whole road does',
   legendStatus({
     rootsPlayed: roadFor('visiting').map((s) => s.root),
-    sectionsCompleted: [WARM_UP[0]],
+    sectionsCompleted: [],
     purpose: 'visiting',
   }).open,
 )

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { LEGEND_FRAMES, cardFor, clubOpen, doorwayRoots } from '@/content/legend'
-import { WARM_UP, roadProgress } from '@/content/road'
+import { roadProgress } from '@/content/road'
 import { PIECES } from '@/content/roots'
 import { Wordmark } from '@/components/Wordmark'
 import { learnerStorageKey, loadLearner, wipeLearner } from '@/engine/learner'
@@ -75,10 +75,9 @@ export function Reset() {
     needed: 0,
     other: 0,
   })
-  const [door, setDoor] = useState<{ open: boolean; missing: string[]; warmedUp: boolean; sections: string[] }>({
+  const [door, setDoor] = useState<{ open: boolean; missing: string[]; sections: string[] }>({
     open: false,
     missing: [],
-    warmedUp: false,
     sections: [],
   })
   /** null while unknown; a number once the server has answered for this device. */
@@ -193,7 +192,6 @@ export function Reset() {
       missing: doorwayRoots(s.purpose ?? null)
         .filter((r) => !played.includes(r.root_id))
         .map((r) => r.root_id),
-      warmedUp: WARM_UP.some((v) => sections.includes(v)),
       sections,
     })
     setState('ready')
@@ -376,7 +374,7 @@ export function Reset() {
               {door.missing.length
                 ? 'Roots not yet played: ' + door.missing.join(', ') + '.'
                 : 'Every doorway root played.'}{' '}
-              {door.warmedUp ? 'Warm-up done.' : 'NO WARM-UP VIBE FINISHED.'}
+              {/* The warm-up is gone — see the note on its removal in content/road.ts. */}
             </p>
             <p className="text-xs leading-relaxed text-muted">
               Sections finished: {door.sections.join(', ') || 'none'}

@@ -79,35 +79,36 @@ export interface RoadStep {
   not_for_the_card?: true
 }
 
-/**
- * THE WARM-UP, which is chosen rather than fixed.
- *
- * Two vibes, and the learner picks one. It is the only step on the road that is a choice,
- * and it is first for the reason Sam gave when he asked for it: somebody should find out
- * what DUB IS — that the Portuguese falls out of something already in their head — before
- * being asked for anything about themselves.
- *
- * It is a real vibe and counts as one: its words go into the inventory and into the Club's
- * reckoning like any other. What it is not is a toll.
- */
 /*
-  AND THE TWO ON OFFER CHANGED, because the road moved under them.
+  THE WARM-UP IS GONE, and the road is why.
 
-  It was Top Gun and Bridget Jones, chosen when they were ordinary vibes. Both now carry a
-  road step — tg_school asks `work`, bj_marrieds asks `married` — so warming up in either
-  one asked a Legend question on the first screen of the product, which is the opposite of
-  what the paragraph above promises. Worse, it asked before obrigado/obrigada has settled
-  gender, which is the fault Sam has reported twice.
+  Sam: "Of course you needed to move the warm up, that is now stale. It needs to go
+  completely."
 
-  Found by walking a lesson in a browser: the warm-up stalled on an ask-work chip screen,
-  three beats in, on a learner who had not yet been told what DUB was.
+  WHAT IT WAS FOR, AND WHY THAT IS SOLVED. It existed because the shelf was the first thing
+  after set-up — eleven tiles with nine of them dimmed and captioned BASICS FIRST, so a
+  person's first act in DUB was reading a list of things they could not have. The basics
+  were the only way in and they are a poor opening line: hello, thank you, yes and no is
+  the most useful content in the product and the least surprising. So a forced choice of
+  two vibes was put in front of them, to make the argument — Portuguese falls out of
+  something already in your head — before anything was asked.
 
-  Pulp Fiction and Bob's Your Uncle ask nothing at all — checked, not assumed — and both
-  are rung-1 rich, so a beginner meets a real vibe rather than a thin one. Neither is on
-  the road, which is now the rule: the warm-up is the one step that must not be a Legend
-  question, so it cannot be a crate the road is using.
+  The road makes that argument now, on step three, with Sean Connery. Seven of its ten
+  steps are a film, a band or a person, and the first vibe arrives before any Legend
+  question that needs a gendered form. A separate screen whose only job was to prove the
+  concept is a screen proving something the next screen also proves.
+
+  The shelf is not a wall any more either: eight of fourteen crates open at rung 1 against
+  two of eleven when the warm-up was written, and the road decides the order regardless of
+  what the shelf shows.
+
+  IT ALSO STOPPED BEING FREE. Both warm-up crates picked up a road step when the road
+  became vibes — tg_school asks `work`, bj_marrieds asks `married` — so warming up asked a
+  Legend question on the first screen of the product, before obrigado/obrigada had settled
+  gender. Moving it to two crates the road does not use fixed that and left a step whose
+  only remaining argument was "a choice is nice", which is not enough to spend somebody's
+  first minute on.
 */
-export const WARM_UP: CultureFamily[] = ['pulp_fiction', 'bobs_your_uncle']
 
 /**
  * THE BASICS, in the order they are met.
@@ -332,16 +333,18 @@ export function roadFor(purpose: Purpose | null): RoadStep[] {
  */
 export function roadProgress(opts: {
   rootsPlayed: string[]
-  sectionsCompleted: string[]
+  /** Kept in the signature: callers pass it, and nothing here reads it any more. */
+  sectionsCompleted?: string[]
   purpose: Purpose | null
-}): { done: number; total: number; open: boolean; next: RoadStep | null; warmedUp: boolean } {
+}): { done: number; total: number; open: boolean; next: RoadStep | null } {
   const played = new Set(opts.rootsPlayed)
   const steps = roadFor(opts.purpose)
-  const warmedUp = WARM_UP.some((v) => opts.sectionsCompleted.includes(v))
   const doneSteps = steps.filter((s) => played.has(s.root))
   const next = steps.find((s) => !played.has(s.root)) ?? null
-  /* The warm-up is one step, and it is the first. */
-  const done = (warmedUp ? 1 : 0) + doneSteps.length
-  const total = 1 + steps.length
-  return { done, total, open: done >= total, next, warmedUp }
+  /*
+    THE ROAD IS ITS OWN STEPS AND NOTHING ELSE now the warm-up is gone — see the note on
+    its removal. It used to add one for a finished warm-up crate, which is why `done` and
+    `total` both carried a +1 that corresponded to no entry in ROAD.
+  */
+  return { done: doneSteps.length, total: steps.length, open: doneSteps.length >= steps.length, next }
 }

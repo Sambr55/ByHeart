@@ -16,7 +16,7 @@
 import { readFileSync } from 'node:fs'
 import { BREAKS, breakAfter, DONE } from '../content/breaks'
 import { ROOTS, ROOTS_BY_FAMILY, type Root } from '../content/roots'
-import { ROAD, WARM_UP, roadFor, roadProgress } from '../content/road'
+import { ROAD, roadFor, roadProgress } from '../content/road'
 import { beatsFor } from '../engine/journey'
 import { cardFor, cardToGo, clubOpen, frameReady, legendStatus, DOORWAY, LEGEND_FRAMES } from '../content/legend'
 import type { Purpose } from '../content/situations'
@@ -135,43 +135,31 @@ for (const purpose of PURPOSES) {
 }
 
 /*
-  THE WARM-UP ASKS NOTHING, which is the one thing it is for.
+  THE ROAD OPENS ON A VIBE, which is what the warm-up used to be for.
 
-  "Somebody should find out what DUB IS — that the Portuguese falls out of something
-  already in their head — before being asked for anything about themselves." A warm-up
-  crate carrying a road step breaks that on the first screen of the product, and it broke
-  silently: Top Gun and Bridget Jones were the authored pair, both picked up a Legend
-  question when the road became vibes, and the warm-up started asking what you do for a
-  living three beats in. Found by walking a lesson in a browser, not by reading.
+  There was a forced warm-up before the basics, because the shelf was a wall and the basics
+  were a poor opening line. Sam: "that is now stale. It needs to go completely" — and it is
+  stale because the road makes its own argument: the first thing after the two settling
+  steps is a film, a band or a person.
 
-  Gender is the second half of it. obrigado/obrigada settles at road step two, so anything
-  asked before that is asked without knowing which ending is the learner's — the fault Sam
-  has reported twice.
-
-  AND THE SCREEN READS THE SAME CONSTANT. components/Journey.tsx typed the two ids itself
-  while this file declared them, so one decision lived in two places and drifted the moment
-  the road moved.
+  So the rule that survives is about the ROAD rather than about a separate screen: the
+  product must show somebody what DUB is before it finishes asking them about themselves.
+  Measured as "a vibe step comes before the last asking step", which is the honest shape of
+  that promise and cannot be satisfied by ten basics steps in a row.
 */
-for (const fam of WARM_UP) {
-  ok(
-    'the warm-up ' + fam + ' is not on the road',
-    !ROAD.some((step) => step.family === fam),
-    fam + ' carries a road step, so warming up there asks a Legend question',
-  )
-  const asking = (ROOTS_BY_FAMILY[fam] ?? []).filter((r) => r.asks)
-  ok(
-    'and asks nothing about the learner',
-    asking.length === 0,
-    asking.map((r) => r.root_id + ' asks ' + r.asks).join(', '),
-  )
-}
 {
-  const src = readFileSync('components/Journey.tsx', 'utf8')
+  const steps = roadFor(null)
+  const firstVibe = steps.findIndex((st) => st.family !== 'the_basics')
+  const lastAsk = steps.reduce((at, st, i) => {
+    const r = ROOTS.find((x) => x.root_id === st.root)
+    return (r as { asks?: unknown } | undefined)?.asks ? i : at
+  }, -1)
   ok(
-    'the warm-up screen reads WARM_UP rather than naming crates',
-    /CRATES\.filter\(\(c\) => \(WARM_UP as string\[\]\)\.includes\(c\.id\)\)/.test(src),
-    'the chooser types its own ids, so it can disagree with content/road.ts',
+    'the road reaches a vibe before it stops asking',
+    firstVibe >= 0 && firstVibe < lastAsk,
+    'first vibe at step ' + (firstVibe + 1) + ', last question at step ' + (lastAsk + 1),
   )
+  /* And nothing gendered is asked before gender settles — asserted in full further down. */
 }
 
 /*
@@ -197,19 +185,12 @@ for (const purpose of PURPOSES) {
 
   /* And the number the bar shows is the number the door reads. */
   const played = steps.map((s) => s.root)
-  const mid = roadProgress({ rootsPlayed: played.slice(0, 2), sectionsCompleted: [WARM_UP[0]], purpose })
-  const end = roadProgress({ rootsPlayed: played, sectionsCompleted: [WARM_UP[0]], purpose })
+  const mid = roadProgress({ rootsPlayed: played.slice(0, 2), sectionsCompleted: [], purpose })
+  const end = roadProgress({ rootsPlayed: played, sectionsCompleted: [], purpose })
   ok(purpose + ': the road is shut part-way', !mid.open, 'open at ' + mid.done + ' of ' + mid.total)
   ok(purpose + ': the road opens at the end', end.open, 'still ' + end.done + ' of ' + end.total)
   /* And not before the warm-up, whatever else has been played. */
-  const noWarm = roadProgress({ rootsPlayed: played, sectionsCompleted: [], purpose })
-  ok(purpose + ': the warm-up is required', !noWarm.open, 'open without it')
-  console.log('    ' + purpose.padEnd(9) + end.total + ' steps: warm-up + ' + steps.length)
-}
-
-/* 5. The warm-up offers something real. */
-for (const v of WARM_UP) {
-  ok('warm-up ' + v + ' has roots', (ROOTS_BY_FAMILY[v] ?? []).length > 0)
+  console.log('    ' + purpose.padEnd(9) + end.total + ' steps')
 }
 
 /*
@@ -444,7 +425,7 @@ console.log('\nthe door and the copy agree\n')
     /* Road walked AND warmed up — the door is open, so nothing may ask for more. */
     const done = legendStatus({
       rootsPlayed: all,
-      sectionsCompleted: [DOORWAY, WARM_UP[0]],
+      sectionsCompleted: [DOORWAY],
       sittings: 9,
       purpose,
     })
@@ -454,19 +435,16 @@ console.log('\nthe door and the copy agree\n')
       done.vibesNeeded - done.vibesDone <= 0,
       done.vibesDone + ' of ' + done.vibesNeeded,
     )
-    /* Road walked, no warm-up — one thing outstanding, and exactly one. */
-    const cold = legendStatus({
-      rootsPlayed: all,
-      sectionsCompleted: [DOORWAY],
-      sittings: 9,
-      purpose,
-    })
-    ok(purpose + ': without a warm-up it stays shut', !cold.open)
-    ok(
-      purpose + ': and asks for exactly one',
-      cold.vibesNeeded - cold.vibesDone === 1,
-      cold.vibesDone + ' of ' + cold.vibesNeeded,
-    )
+    /*
+      THE WARM-UP HALF IS GONE. There were two fixtures here — road walked WITH a finished
+      warm-up and road walked WITHOUT one — asserting open and shut respectively. With the
+      warm-up removed they became the same fixture, so one of them necessarily failed; the
+      honest reading is that the second question no longer exists.
+
+      What it was protecting is still protected by the assertion above it: a walked road
+      opens the door and nothing asks for more. See content/road.ts on why the warm-up
+      went.
+    */
   }
   /*
     AND NO SCREEN TYPES THE OLD NUMBER. The fault was a literal three in copy, so this

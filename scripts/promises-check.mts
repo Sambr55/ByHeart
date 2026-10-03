@@ -28,7 +28,7 @@ import { cardState, newLearner, playSitting, playVibe } from '../engine/sim'
 import { doorwayRoots, doorwayToGo, legendUnlocked } from '../content/legend'
 import { NO_CUE_PROMPTS } from '../content/front-door'
 import { CRATES, ROOTS_BY_FAMILY, type CultureFamily } from '../content/roots'
-import { ROAD, WARM_UP, roadFor } from '../content/road'
+import { ROAD, roadFor } from '../content/road'
 
 type Status = 'HOLDS' | 'BROKEN' | 'NOT YET ENFORCED'
 
@@ -87,14 +87,8 @@ promise(
       fixture follows the content rather than describing a sequence that has changed twice.
     */
     const l = newLearner()
-    /*
-      THE WARM-UP FIRST, because it is a step of the road that names no root.
-
-      roadProgress counts it from sectionsCompleted and the road's crate list does not
-      contain it — the warm-up is deliberately a crate the road does NOT use, so that the
-      first screen of the product asks nothing about the learner. See WARM_UP.
-    */
-    const crates: CultureFamily[] = [WARM_UP[0]]
+    /* Every crate the road passes through, in road order, which is what a learner does. */
+    const crates: CultureFamily[] = []
     for (const step of roadFor(null)) {
       if (!crates.includes(step.family)) crates.push(step.family)
     }

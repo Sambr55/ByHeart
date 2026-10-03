@@ -25,7 +25,6 @@
  * Where possible it now reads the product's own content files instead of restating them,
  * so a rewording moves the check with it rather than breaking it.
  */
-import { WARM_UP } from '../content/road'
 import { BRAND } from '../content/brand'
 import { chromium, type Locator, type Page } from 'playwright'
 import { CRATES, ROOTS, entryRung, isLive } from '../content/roots'
@@ -57,7 +56,23 @@ async function solveTiles(page: Page) {
   }
   const check = page.getByRole('button', { name: 'CHECK', exact: true })
   if (await check.isVisible().catch(() => false)) await press(check, 'CHECK')
-  return !(await page.getByTestId('tile-pool').isVisible().catch(() => false))
+  /*
+    SOLVED IS AN EMPTY POOL, NOT AN ABSENT ONE.
+
+    This returned `!tile-pool.isVisible()`, which was true while solving a build unmounted
+    it. On a SayItCard the picker STAYS — Sam: "but dont drop the word picker or copy /
+    listen" — so the pool is still on screen with nothing left in it, and this reported a
+    perfectly solved build as a failure. The walk then declared no way forward and sat on
+    the beat until it timed out.
+
+    Counting the tiles left is the question that was always being asked.
+  */
+  const left = await page
+    .getByTestId('tile-pool')
+    .getByRole('button')
+    .count()
+    .catch(() => 0)
+  return left === 0
 }
 
 async function main() {
@@ -180,23 +195,22 @@ async function main() {
     (await page.evaluate(() => document.querySelector('[data-stage]')?.getAttribute('data-stage'))) ?? '?'
 
   /*
-    THE WARM-UP STANDS WHERE THE PICKER USED TO, and this walk predates it.
+    AND THE PICKER IS WHERE A LEARNER LANDS AGAIN, because the warm-up is gone.
 
-    Set-up lands on a gate offering two warm-up vibes rather than on the crate list — see
-    WARM_UP in content/road.ts. So the picker's copy was read against the warm-up screen
-    and every assertion about it failed: a wrong headline, no group labels, and all
-    thirteen crates "missing". Sixteen problems, one cause, none of them a fault in the
-    product.
+    For a while set-up landed on a gate offering two warm-up vibes rather than on the crate
+    list, and this walk had to step through it. Sam: "Of course you needed to move the warm
+    up, that is now stale. It needs to go completely" — so the gate is removed and /vibes
+    is the first screen after set-up once more.
 
-    The picker is still real and still worth checking; it is simply not the screen
-    immediately after set-up any more. /vibes with the warm-up already behind them is
-    where a learner meets it, so that is where these assertions belong — and `warmed`
-    records whether the gate was there at all, because a check that silently skips its own
-    subject is the thing this whole exercise is about.
+    Asserted in the negative as well as the positive: a gate left behind by half a removal
+    would put a screen between somebody and the shelf that nothing else in the product
+    knows about, and the symptom would be exactly the sixteen bogus problems this note used
+    to describe. See the note on the warm-up's removal in content/road.ts.
   */
   const warmGate = page.locator('[data-testid^="warmup-"]').first()
-  const warmed = await warmGate.isVisible().catch(() => false)
-  if (!warmed) problems.push('the warm-up gate did not greet a new learner')
+  if (await warmGate.isVisible().catch(() => false)) {
+    problems.push('a warm-up gate still greets a new learner — it was removed')
+  }
 
   /*
     THE PICKER IS READ AFTER THE WARM-UP, which is where it now appears.
@@ -261,32 +275,30 @@ async function main() {
   /*
     THE DOORWAY, asserted on the screen a brand-new learner actually meets.
 
-    This said "a new learner can open exactly one crate: the basics", which was true and
-    stopped being so. The road puts a WARM-UP in front of the basics — Top Gun or Bridget
-    Jones, authored as WARM_UP in content/road.ts — so a first visit is a gate offering
-    those two, and this reported all three of them as faults: the basics "cannot be
-    opened", and each warm-up "is open to a brand-new learner".
+    This has been rewritten twice and the rule underneath has not moved: a beginner must
+    not be handed rung-2 content before they can say hello.
 
-    The underlying rule has not changed and is still worth holding: a beginner must not be
-    handed rung-2 content before they can say hello. What changed is which crates are the
-    honest first step, so that is what is asserted — the warm-up pair is offered, and
-    nothing outside it is.
+    First it said "a new learner can open exactly one crate: the basics". Then the road put
+    a forced warm-up in front, so it asserted that the warm-up pair was offered and nothing
+    else. The warm-up is now gone — Sam: "that is now stale. It needs to go completely" —
+    and the shelf is what a learner meets, so the assertion returns to the ladder itself.
+
+    Measured rather than listed: every crate shown as open must have a rung-1 root, and
+    nothing above rung 1 may be. That survives the next time the road moves, which neither
+    of the previous two versions did.
   */
   {
-    const warmUps = WARM_UP.map((id: string) => CRATES.find((c) => c.id === id)).filter((c) => Boolean(c))
     const openNow = b2.split('OPENS AS YOU GO')[0] ?? ''
-    for (const c of warmUps) {
-      if (c && !openNow.includes(c.title)) {
-        problems.push('a new learner is not offered the warm-up ' + c!.title)
+    for (const c of live.filter((x) => !x.drop)) {
+      const roots = ROOTS.filter((r) => r.culture_family === c.id)
+      if (!roots.length) continue
+      const entry = Math.min(...roots.map((r) => r.rung))
+      const shownOpen = openNow.includes(c.title)
+      if (shownOpen && entry > 1) {
+        problems.push(c.title + ' is open to a brand-new learner at rung ' + entry)
       }
-    }
-    /*
-      And nothing else. The basics included: they are the road's next step, not a learner's
-      first choice, and offering them beside the warm-up would be two doors at once.
-    */
-    for (const c of live.filter((c) => !c.drop && !(WARM_UP as string[]).includes(c.id))) {
-      if (openNow.includes(c.title)) {
-        problems.push(c.title + ' is open before the warm-up — the gate is not holding')
+      if (!shownOpen && entry === 1) {
+        problems.push(c.title + ' opens at rung 1 and is not offered to a new learner')
       }
     }
     /*
@@ -580,6 +592,20 @@ async function main() {
           problems.push('could not solve the build after the drain')
           break
         }
+      } else if (await page.getByTestId('say-next').isVisible().catch(() => false)) {
+        /*
+          THE RELEASE BEAT'S WAY ON IS AN ARROW, not a CONTINUE bar.
+
+          Sam: "removing continue CTA's." The release and the no-cue prompts are
+          SayItCards now — picker first, then the microphone, then a two-second wait or an
+          arrow for anybody quicker — so this walk stalled on a screen whose only forward
+          control it did not know about. It solved the tiles, the card revealed the
+          microphone, and then it waited twenty seconds for a button that no longer exists.
+
+          Pressed rather than waited out, because a walk that sits through every reading
+          pause is a walk nobody will run.
+        */
+        await press(page.getByTestId('say-next'), 'the way on after a release')
       } else {
         problems.push('no way forward at step ' + guard + ': ' + body.slice(0, 120).replace(/\n/g, ' | '))
         break
@@ -656,6 +682,27 @@ async function main() {
     seen. This runs at the end of a real section, which is the only place the state is
     real.
   */
+  /*
+    THE END OF A SECTION MAY NOW SIT BEHIND ANOTHER SAYITCARD.
+
+    The no-cue prompts are SayItCards too — picker first, microphone second, arrow for the
+    way on — so a walk that reached the last beat of a vibe could find itself on "1 OF 3"
+    with tiles and an arrow rather than a CONTINUE. Stepped through here for the same
+    reason the loop above does it: the walk's job is to be the ordinary path, and the
+    ordinary path now has an arrow on it.
+  */
+  for (let n = 0; n < 12; n++) {
+    if (await page.getByTestId('continue').isVisible().catch(() => false)) break
+    if (await page.getByTestId('tile-pool').isVisible().catch(() => false)) {
+      if (!(await solveTiles(page))) break
+      continue
+    }
+    if (await page.getByTestId('say-next').isVisible().catch(() => false)) {
+      await press(page.getByTestId('say-next'), 'the way on at the end of a vibe')
+      continue
+    }
+    await page.waitForTimeout(400)
+  }
   await press(page.getByTestId('continue'), 'into Dub Club')
   await page.waitForURL('**/club**', { timeout: 20000 }).catch(() => {})
   if (!/\/club/.test(page.url())) problems.push('the close did not land on the Club; url=' + page.url())
