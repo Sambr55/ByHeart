@@ -189,6 +189,20 @@ export function Legend() {
     and opens nothing, which is exactly the confusion the `extra` chip exists to end; a
     button that counted them would put it straight back.
   */
+  /*
+    HOW MANY OF THE SEVEN HAVE BEEN SAID COLD — the half of the door this page never read.
+
+    The card being written and the card being SAID are two different states, and until now
+    this screen only knew the first. So it announced the Club on a finished card while the
+    door was still waiting, and Sam tapped GO IN and was turned away.
+
+    Counted the same way clubOpen counts it — proof rows with source 'legend' and clean —
+    so the screen and the door cannot disagree about what is left.
+  */
+  const saidCold = (learner.proof ?? []).filter(
+    (p) => p.source === 'legend' && p.clean,
+  ).length
+
   const cardOpen = myCard.filter(
     (f) => !answers.some((a) => a.frame_id === f.id && Object.keys(a.values).length > 0),
   )
@@ -749,15 +763,33 @@ export function Legend() {
             the product had no last step.
           */
           <div className="flex flex-col gap-3 rounded border border-accent bg-accent/10 px-4 py-6">
+            {/*
+              WHAT IS ACTUALLY LEFT, which changes once the run has started.
+
+              Three states and the panel used to show one: card written, part-said, and
+              said. A learner four sentences in was told to run it through as though they
+              had not begun, and a learner who had finished was told the same thing while
+              the Club sat open behind them.
+            */}
             <p className="eyebrow text-accent">{LEGEND_COPY.card_done_eyebrow}</p>
             <p className="display text-balance text-xl">{LEGEND_COPY.card_done_head}</p>
-            <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.card_done_body}</p>
-            <Link
-              href="/club"
-              className="tap-target eyebrow mt-3 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-            >
-              {LEGEND_COPY.card_done_cta}
-            </Link>
+            <p className="text-sm leading-relaxed text-muted">
+              {saidCold >= myCard.length
+                ? LEGEND_COPY.card_said_body
+                : saidCold > 0
+                  ? LEGEND_COPY.card_part_said(myCard.length - saidCold)
+                  : LEGEND_COPY.card_done_body}
+            </p>
+            {/*
+              NO SECOND BUTTON. Sam: "the run it through and GO IN buttons are in effect
+              doing the same thing, so the second should be removed, then Club opens after
+              the legend run through."
+
+              GO IN went to /club, which turns a learner away until the card has been said —
+              so the screen offered two routes to the same place and one of them was a door
+              that was shut. RUN IT THROUGH, above, is the only next step, and the Club
+              opens on the far side of it.
+            */}
           </div>
         ) : null}
         {!mounted || !unlocked ? null : !reachable.length && !answered.length ? (

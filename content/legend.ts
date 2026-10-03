@@ -3217,10 +3217,35 @@ export const LEGEND_COPY = {
    * the Club sat behind a door those seven answers had just opened. The goal of the
    * product had no final move.
    */
+  /*
+    THE CARD IS WRITTEN. THE CLUB IS NOT OPEN YET, and this said it was.
+
+    Sam: "beneath it it says I can introduce yourself in Portuguese, but clicking it says
+    not yet this opens with your legend."
+
+    It did, because the panel fired on cardDone alone while the door asks for the card to
+    be SAID — his own instruction on 30 September: "this is about completing and rehearsing
+    the legend, which has now become a soft option, not a gate." So a learner with seven
+    answers was told the Club was open, tapped GO IN, and was turned away by the gate the
+    same screen had just told them they had passed.
+
+    It says what is actually left now. And the GO IN button is gone: Sam, "the run it
+    through and GO IN buttons are in effect doing the same thing, so the second should be
+    removed, then Club opens after the legend run through." Right — one screen, one next
+    step, and the Club announces itself when it is genuinely open.
+  */
   card_done_eyebrow: 'THAT IS YOUR CARD',
   card_done_head: 'You can introduce yourself in Portuguese.',
-  card_done_body: 'Which is the whole membership test, and the thing most people never get to. Dub Club — Lisbon is open.',
-  card_done_cta: 'GO IN',
+  card_done_body:
+    'Now say it with nothing on screen. All seven, out loud — that is the membership test, and it is the thing most people never get to. Run it through and the Club opens.',
+  /* Part-way through the run. Says what is left rather than starting the count again. */
+  card_part_said: (left: number) =>
+    left === 1
+      ? 'One more, said out loud with nothing on screen, and the Club opens.'
+      : left + ' more, said out loud with nothing on screen, and the Club opens.',
+  /* Said. The door is open and the screen should stop asking for anything. */
+  card_said_body:
+    'You have said all of it out loud, with nothing on screen. Dub Club — Lisbon is open.',
   offer_later: 'Not now',
   repair_head: 'The four that keep a conversation going',
   repair_body:
