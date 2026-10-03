@@ -202,7 +202,19 @@ export function Collection() {
  * the second because a shelf is never finished — so they report what they hold.
  */
 function count(deck: Deck): string {
-  if (deck.total !== undefined) return deck.cards.length + ' of ' + deck.total
+  if (deck.total !== undefined) {
+    /*
+      A DECK CAN HOLD MORE THAN ITS TOTAL, and the Legend is the one that does.
+
+      Its total is the card — seven — and the six extras are real cards a learner can add.
+      Sam added filhos and the board said "8 of 7", which is arithmetic nobody can read.
+      The card is still the measure, because that is what the door counts; anything past it
+      is a bonus and says so.
+    */
+    const over = deck.cards.length - deck.total
+    if (over > 0) return deck.total + ' of ' + deck.total + ' · +' + over
+    return deck.cards.length + ' of ' + deck.total
+  }
   return (
     deck.cards.length +
     (deck.id === 'drops' ? ' saved' : deck.id === 'asked' ? ' kept' : ' started')
@@ -313,26 +325,29 @@ function Board({ deck }: { deck: Deck }) {
             <PractiseCard />
           </li>
         ) : null}
-        {Array.from({
-          length: Math.max(
-            SLOTS - (deck.id === 'legend' ? 1 : 0) - (deck.id === 'legend' ? unopened.length : 0),
-            deck.cards.length,
-          ),
-        }).map((_, i) => {
-          const card = deck.cards[i]
-          return (
-            <li key={i}>
-              {card ? (
-                <Filled card={card} />
-              ) : (
-                <span
-                  aria-hidden
-                  className="block aspect-[3/4] rounded border border-dashed border-line/60 bg-surface/30"
-                />
-              )}
-            </li>
-          )
-        })}
+        {/*
+          EVERY CARD THIS DECK HOLDS, AND NOTHING ELSE.
+
+          Sam: "I added filhos and a child using the selector from the summary screen... but
+          now I am in yours with the tiles and the filhos card hasnt been added. Also how
+          long have you been here, are you with someone all have blanks and arent
+          actionable."
+
+          Both halves were this loop. It ran for `SLOTS - 1 - unopened.length` or the number
+          of cards, whichever is larger — arithmetic meant to reserve room for the Practise
+          card and the unopened ones. With eight collected and five unopened it produced
+          empty <li>s BETWEEN the real cards, so an answered `children` was drawn and then
+          followed by blanks that look exactly like the dashed slots below, and the whole
+          grid read as half-finished.
+
+          A deck draws what it holds. The padding that keeps a new board inviting is its own
+          loop below, after the unopened cards, where it cannot interleave with anything.
+        */}
+        {deck.cards.map((card) => (
+          <li key={card.kind + ':' + card.id}>
+            <Filled card={card} />
+          </li>
+        ))}
         {/*
           THE QUESTIONS THAT ARE NOT ON THE CARD, LAST, AS THINGS YOU CAN ADD.
 
@@ -357,6 +372,25 @@ function Board({ deck }: { deck: Deck }) {
               </li>
             ))
           : null}
+        {/*
+          AND THE EMPTY SLOTS LAST, so a new board still reads as something with room in it
+          rather than three lonely tiles. Never between the cards — see above.
+        */}
+        {Array.from({
+          length: Math.max(
+            0,
+            SLOTS -
+              deck.cards.length -
+              (deck.id === 'legend' ? 1 + unopened.length : 0),
+          ),
+        }).map((_, i) => (
+          <li key={'pad' + i}>
+            <span
+              aria-hidden
+              className="block aspect-[3/4] rounded border border-dashed border-line/60 bg-surface/30"
+            />
+          </li>
+        ))}
       </ul>
     </div>
   )
