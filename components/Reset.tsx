@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { LEGEND_FRAMES, cardFor } from '@/content/legend'
+import { LEGEND_FRAMES, cardFor, doorwayRoots } from '@/content/legend'
+import { WARM_UP, roadProgress } from '@/content/road'
 import { PIECES } from '@/content/roots'
 import { Wordmark } from '@/components/Wordmark'
 import { learnerStorageKey, loadLearner, wipeLearner } from '@/engine/learner'
@@ -45,6 +46,22 @@ export function Reset() {
   */
   const [rows, setRows] = useState<{ id: string; onCard: boolean; said: string }[]>([])
   const [outstanding, setOutstanding] = useState<string[]>([])
+  /*
+    AND WHAT THE DOOR IS WAITING ON, which is a different question from the card.
+
+    Sam's record showed all seven card questions answered and the Legend still shut. That
+    rules out the card and leaves the DOORWAY — roots played and a warm-up vibe finished —
+    which legendStatus reads and which nothing on any screen says out loud.
+
+    Listed for the same reason the cards are: I guessed at this twice from the outside and
+    was wrong both times.
+  */
+  const [door, setDoor] = useState<{ open: boolean; missing: string[]; warmedUp: boolean; sections: string[] }>({
+    open: false,
+    missing: [],
+    warmedUp: false,
+    sections: [],
+  })
   /** null while unknown; a number once the server has answered for this device. */
   const [onServer, setOnServer] = useState<number | null>(null)
 
@@ -135,6 +152,16 @@ export function Reset() {
     setOutstanding(
       card.filter((f) => !held.some((a) => a.frame_id === f.id)).map((f) => f.id),
     )
+    const played = s.roots_played ?? []
+    const sections = s.sections_completed ?? []
+    setDoor({
+      open: roadProgress({ rootsPlayed: played, sectionsCompleted: sections, purpose: s.purpose ?? null }).open,
+      missing: doorwayRoots(s.purpose ?? null)
+        .filter((r) => !played.includes(r.root_id))
+        .map((r) => r.root_id),
+      warmedUp: WARM_UP.some((v) => sections.includes(v)),
+      sections,
+    })
     setState('ready')
     fetch('/api/session?mine=1', { headers: { accept: 'application/json' } })
       .then((r) => r.json())
@@ -303,6 +330,24 @@ export function Reset() {
               Still to answer before the Legend opens: {outstanding.join(', ')}
             </p>
           ) : null}
+          {/*
+            AND THE DOOR, which is a different question from the card and the one that was
+            actually shut. The card can be finished while the Legend stays locked, because
+            the door counts ROOTS PLAYED and a warm-up vibe rather than answers.
+          */}
+          <div className="mt-3 flex flex-col gap-1 border-t border-line pt-3">
+            <p className="eyebrow text-muted">THE DOOR</p>
+            <p className="text-xs leading-relaxed">
+              {door.open ? 'Open.' : 'Shut.'}{' '}
+              {door.missing.length
+                ? 'Roots not yet played: ' + door.missing.join(', ') + '.'
+                : 'Every doorway root played.'}{' '}
+              {door.warmedUp ? 'Warm-up done.' : 'NO WARM-UP VIBE FINISHED.'}
+            </p>
+            <p className="text-xs leading-relaxed text-muted">
+              Sections finished: {door.sections.join(', ') || 'none'}
+            </p>
+          </div>
           {/*
             The other copy, named. This is the one that made a wipe look like it had
             failed: the device cookie is httpOnly so nothing in the browser can clear it,
