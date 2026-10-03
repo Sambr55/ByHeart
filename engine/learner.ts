@@ -125,6 +125,21 @@ export interface ProofLine {
 }
 
 /**
+ * One sentence that would not land, and when it was set down.
+ *
+ * `goes` is kept because it is the difference between "the room was loud once" and "this
+ * sentence has beaten me three separate times", which is exactly the judgement a later
+ * screen wants to make. It is never shown as a number — see the note on `rough`.
+ */
+export interface RoughLine {
+  pt: string
+  en: string
+  /** How many attempts across all sittings, not just the one that flagged it. */
+  goes: number
+  at: string
+}
+
+/**
  * One card of somebody's Legend, filled in.
  *
  * Kept as a list rather than a map so the order a learner built them in survives.
@@ -369,6 +384,26 @@ export interface LearnerState {
   inventory: Record<string, InventoryItem>
   /** Everything they have said cold. The number on the proof card. */
   proof: ProofLine[]
+  /**
+   * SENTENCES THE MICROPHONE AND THE LEARNER COULD NOT AGREE ON.
+   *
+   * Sam: "what happens if a user tries multiple times and keeps failing? after 5 goes they
+   * need to be given a we'll try again later message, but not block the legend opening. We
+   * need to flag to test again later."
+   *
+   * This is the flag. Written when the run-through gives up on a sentence after five
+   * attempts, cleared the moment the same sentence is said close enough — which is why it
+   * is keyed by the Portuguese rather than by the frame: the sentence is the thing being
+   * practised, and a learner who changes their job has a new sentence rather than an
+   * outstanding one.
+   *
+   * IT IS NOT THE OPPOSITE OF `proof` AND IT MUST NEVER BE COUNTED LIKE ONE. Proof is
+   * what somebody produced; this is a note about a room, a microphone and a browser's
+   * guess, with the learner as only one of the four parties. Nothing downstream gates on
+   * it, nothing totals it, and no screen shows it as a number — it exists so that "come
+   * back to it" has something to come back TO.
+   */
+  rough: RoughLine[]
   /**
    * Which roots and collisions have been through a session.
    *
@@ -683,6 +718,7 @@ export function emptyLearner(): LearnerState {
     learner_id: uid(),
     tester_label: '',
     voice_signals: [],
+    rough: [],
     osmosis_seen: [],
     user_id: null,
     profile: {
@@ -879,6 +915,7 @@ export function loadLearner(): LearnerState {
           tester_label: parsed.tester_label ?? base.tester_label,
           display_name: parsed.display_name ?? base.display_name,
           voice_signals: arr(parsed.voice_signals, []),
+          rough: arr(parsed.rough, []),
           osmosis_seen: arr(parsed.osmosis_seen, []),
           missions_completed: arr(parsed.missions_completed, []),
           proof: repairLegendEnglish(
@@ -1046,6 +1083,47 @@ export function recordProof(line: Omit<ProofLine, 'at'>) {
     if (line.clean && !s.proof[found].clean) {
       s.proof = s.proof.map((p, i) => (i === found ? { ...p, clean: true } : p))
     }
+  })
+}
+
+/**
+ * Set a sentence down for later, after five goes at it.
+ *
+ * ADDITIVE IN `goes`, so a sentence that defeats somebody on Tuesday and again on Friday
+ * carries eight rather than resetting to five. That is the only fact here worth keeping
+ * across sittings: one bad run is a room, a pattern is a sentence.
+ *
+ * Called only by the run-through, and never as part of a verdict — the panel that says
+ * "leave this one for now" is a thing the screen decides, and this is the note it leaves
+ * behind so the promise can be kept. Nothing reads it to block anything.
+ */
+export function markRough(line: { pt: string; en: string; goes: number }) {
+  update((s) => {
+    const rough = s.rough ?? []
+    const found = rough.findIndex((r) => r.pt === line.pt)
+    if (found < 0) {
+      s.rough = [...rough, { ...line, at: new Date().toISOString() }]
+      return
+    }
+    s.rough = rough.map((r, i) =>
+      i === found ? { ...r, goes: r.goes + line.goes, at: new Date().toISOString() } : r,
+    )
+  })
+}
+
+/**
+ * And off again, the moment it lands.
+ *
+ * Unconditional rather than checked: a sentence said close enough is no longer rough,
+ * whether it was flagged five minutes ago or last week, and a flag that outlived the
+ * problem would make the product wrong about the learner in the one direction that
+ * actually discourages somebody. Cheap enough to call on every success.
+ */
+export function clearRough(pt: string) {
+  update((s) => {
+    const rough = s.rough ?? []
+    if (!rough.some((r) => r.pt === pt)) return
+    s.rough = rough.filter((r) => r.pt !== pt)
   })
 }
 

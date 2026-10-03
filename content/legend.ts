@@ -3266,12 +3266,39 @@ export const LEGEND_COPY = {
   /** When the device cannot listen at all — see useCanListen. Never an apology. */
   run_no_mic: 'Say it out loud, then show yourself the answer.',
   /*
-    WHAT IT HEARD, in three words each. These sit above the words it caught, which are the
-    actual feedback — a verdict with the evidence under it rather than instead of it.
+    WHAT IT HEARD — and it used to be three verdicts for a scorer that returns a number.
+
+    Sam: "Is there any way we can get the feedback a bit more advanced on the audio? At the
+    moment it says just not quite."
+
+    It did, and "not quite" was covering everything from one wrong vowel to a completely
+    different sentence. `near` has returned a 0–1 score since it was written — the old
+    panel compared it to one threshold, printed one of three strings and threw the number
+    away. So somebody who said all but one word of a nine-word sentence got the same four
+    letters as somebody who said something unrelated, which tells them nothing about what
+    to change.
+
+    FOUR BANDS, AND EACH ONE IMPLIES A DIFFERENT NEXT MOVE: nearly there is "say it again,
+    you have it"; some of it is "you know the shape, check the words"; not this one is
+    "start from the answer". The band names never say WRONG and never say a number — see
+    the note at the top of engine/listen.ts on why a score shown to a learner would be
+    lying with a number. The browser's Portuguese recognition is a rough instrument and
+    these are deliberately warmer than its confidence deserves.
   */
   run_got_it: 'THAT IS IT',
-  run_not_quite: 'NOT QUITE',
+  run_nearly: 'NEARLY — SAY IT AGAIN',
+  run_some: 'SOME OF IT',
+  run_not_quite: 'NOT THIS ONE',
   run_missed: 'DID NOT CATCH IT',
+  /*
+    AND WHICH WORDS, which is the part a verdict cannot carry.
+
+    A band tells somebody how close they were; this tells them where. The missed words are
+    the ones in the answer that `near` could not find in what it heard — generally one or
+    two, which is why they are listed rather than counted. Framed as what to AIM at rather
+    than what was got wrong: "try" is a direction, "you missed" is a mark.
+  */
+  run_aim: (words: string[]) => 'Aim for ' + words.join(' · '),
   /** Forward. The last one says so, because a run that just stops is a run that broke. */
   run_next: 'NEXT',
   run_last: 'THAT IS THE LOT',
@@ -3281,6 +3308,37 @@ export const LEGEND_COPY = {
     difference between it and the microphone.
   */
   run_show: 'SHOW ME',
+  /*
+    FIVE GOES, AND THEN THE SCREEN STOPS ASKING.
+
+    Sam: "what happens if a user tries multiple times and keeps failing? after 5 goes they
+    need to be given a we'll try again later message, but not block the legend opening. We
+    need to flag to test again later."
+
+    Nothing happened. The microphone sat there accepting attempt eleven with the same three
+    words of feedback as attempt one, which is the shape of a product that has stopped
+    being on the learner's side — at some point the honest thing is to admit the exercise
+    is not working TODAY and move them on.
+
+    WHY IT IS NOT A FAILURE AND MUST NOT READ AS ONE. Five misses is at least as likely to
+    be a noisy room, a bad microphone, or the browser's recognition of an accent it has
+    never met as it is to be the learner. So the line blames nothing, says the sentence is
+    kept rather than lost, and the way forward is the ordinary NEXT the rest of the run
+    uses. No red, no retry counter on screen, nothing that totals up misses — the product
+    has no count that can go down and this is not where that starts.
+
+    AND IT DOES NOT HOLD THE DOOR. The Legend opens on the card being answered, not on
+    anybody's pronunciation; gating it on a browser speech scorer would make a rough
+    instrument into a lock. So this changes the screen and nothing else. What it DOES do is
+    write the sentence down as one to come back to — see `rough` in engine/learner.ts — so
+    "again later" is a promise the product keeps rather than a thing it says.
+  */
+  run_enough_head: 'Leave this one for now',
+  run_enough_body:
+    'Five goes is plenty. This is often the room or the microphone rather than you — it is saved, and it will come round again.',
+  /** On the card, afterwards, so the sentence is findable rather than just promised. */
+  run_again_later: 'COME BACK TO',
+  run_again_later_note: 'Sentences the microphone and you could not agree on. Nothing is blocked by them.',
   /*
     No number. It said "Ten questions" against a table of eleven, and it will be wrong
     again the moment a frame is added — which is the point of the parts. A count that has

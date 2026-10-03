@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 .screenshots/
 .env.local
+
+# Scratch probes written while debugging. Never part of the product.
+.tmp/

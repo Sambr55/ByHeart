@@ -32,7 +32,7 @@
  */
 import { readFileSync } from 'node:fs'
 import { chromium } from 'playwright'
-import { near, CLOSE_ENOUGH } from '../engine/listen'
+import { near, bandFor, missedWords, CLOSE_ENOUGH } from '../engine/listen'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_CARD } from '../content/legend'
 
@@ -144,6 +144,93 @@ console.log('\na result is not lost to the session closing\n')
   const src = readFileSync('engine/listen.ts', 'utf8')
   ok('onend does not discard a held result', /rec\.onend = \(\) => \{[\s\S]{0,200}if \(held\) return done\(held\)/.test(src))
   ok('and gives a late one a window', /window\.setTimeout\(\(\) => done\(held\), 250\)/.test(src))
+}
+
+/*
+  THE GRADED FEEDBACK, and the one way it could lie.
+
+  Sam: "Is there any way we can get the feedback a bit more advanced on the audio? At the
+  moment it says just not quite." So "not quite" became four bands and a list of the words
+  to aim at — and both are derived from the same score `near` already returned, which means
+  neither may contradict it.
+
+  THE RULE THAT MATTERS: a sentence that PASSES must never be told a word is missing. The
+  bands and the word list walk the target separately from `near`, so a drift between them
+  would have the product congratulating somebody and then pointing at a word in the same
+  panel. Asserted on the exact transcripts the matcher was built around.
+*/
+{
+  const band = (said: string, want: string) =>
+    bandFor({ said, close: near(said, want) >= CLOSE_ENOUGH, score: near(said, want) })
+
+  ok("a pass is 'got'", band('sou casado', 'Sou casado') === 'got')
+  ok('a badly spelled pass is still a pass', band('so cassado', 'Sou casado') === 'got')
+  ok('nothing heard is never graded', band('', 'Sou casado') === 'no')
+
+  /*
+    THE MIDDLE BANDS EXIST, which is the whole point of the change. A long sentence with
+    one word gone must not land in the same bucket as an unrelated sentence — if both come
+    back 'no' then nothing has been added and the copy is lying about being more advanced.
+  */
+  const long = 'Chamo-me Sam e sou de Inglaterra'
+  /*
+    BOTH MIDDLE BANDS, AT THE SCORES THEY ACTUALLY SIT AT. The first draft of this
+    assertion used a transcript missing two of seven words and expected a middle band —
+    it scores 0.71 and PASSES, because `near` divides by the expected words and is
+    generous on purpose. The test was wrong about the matcher rather than the other way
+    round, which is the useful kind of failure: these are measured, not guessed.
+  */
+  ok('most of a long sentence is nearly', band('chamo-me Sam e', long) === 'nearly', band('chamo-me Sam e', long))
+  ok('a fragment of one is some of it', band('chamo-me', long) === 'some', band('chamo-me', long))
+  ok('and something unrelated is neither', band('bom dia', long) === 'no')
+  /*
+    AND THE BANDS DO NOT OVERLAP THE PASS MARK. Nothing at or above CLOSE_ENOUGH may come
+    back as a miss — that would be the panel disagreeing with the proof row it just wrote.
+  */
+  ok(
+    'no band contradicts the pass mark',
+    ['chamo-me Sam e', 'chamo-me', 'bom dia', ''].every((t) =>
+      near(t, long) >= CLOSE_ENOUGH ? band(t, long) === 'got' : band(t, long) !== 'got',
+    ),
+  )
+
+  /* The words to aim at are the ones that went missing, and only those. */
+  ok(
+    'it names the missing word',
+    missedWords('sou de', 'Sou de Inglaterra').join(' ') === 'Inglaterra',
+    missedWords('sou de', 'Sou de Inglaterra').join(' '),
+  )
+  /*
+    AND IT FORGIVES WHAT `near` FORGIVES. "so cassado" is a pass, so there is nothing to
+    aim at — a word list here would contradict the verdict in the same panel.
+  */
+  ok('a forgiven transcript has nothing to aim at', missedWords('so cassado', 'Sou casado').length === 0)
+  /* Punctuation is not a word somebody can aim at. */
+  ok('no punctuation in the list', !/[,.?]/.test(missedWords('sou', 'Sou casado, sim').join('')))
+
+  /*
+    THE FIVE-GO RULE, asserted against the source because it is a product promise rather
+    than a function. Sam: "after 5 goes they need to be given a we'll try again later
+    message, but not block the legend opening."
+
+    The number and the NOT-BLOCKING are both checked: the flag writes to `rough`, and
+    nothing in the door's own reckoning may read it. That second half is the one that would
+    break silently — a later change that gated the Club on rough sentences would turn a
+    browser speech scorer into a lock.
+  */
+  const legend = readFileSync('components/Legend.tsx', 'utf8')
+  ok('five goes is the mark', /const ENOUGH_GOES = 5/.test(legend))
+  ok('and it sets the sentence down', /markRough\(\{/.test(legend))
+  ok('landing it clears the flag', /clearRough\(answer\)/.test(legend))
+  const learnerSrc = readFileSync('engine/learner.ts', 'utf8')
+  ok(
+    'nothing gates on a rough sentence',
+    !/\brough\b[^\n]*(toGo|clubOpen|legendOpen|canOpen)/.test(learnerSrc) &&
+      !/(toGo|clubOpen|legendOpen|canOpen)[^\n]*\brough\b/.test(learnerSrc),
+  )
+  /* And the success sound is the one in engine/tap, not a second voice on the button. */
+  const say = readFileSync('components/SayButton.tsx', 'utf8')
+  ok('the ping comes from engine/tap', /from '@\/engine\/tap'/.test(say) && /if \(h\.close\) ping\(\)/.test(say))
 }
 
 console.log('\nthe control is on the routes that ask for it\n')

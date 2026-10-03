@@ -1891,3 +1891,46 @@ summary:focus-visible,
 
   components/Translator.tsx now renders nothing when closed and waits for `dub:ask`.
 */
+
+/*
+  THE MICROPHONE, WHILE IT IS LISTENING.
+
+  Sam: "When the mic icon is in listening mode it needs to pulsate / radiate much more."
+
+  It was Tailwind's `animate-pulse`, which is an opacity fade from 1 to .5 — invisible on a
+  96px circle that is already tinted, and the reason the control gave no sign it was doing
+  anything. Half of "no indication it is listening" was this.
+
+  A ring that leaves the button rather than the button changing. Two of them, offset, so
+  the rhythm reads as continuous rather than as one thing blinking — and `box-shadow`
+  rather than a pseudo-element with a transform, because a shadow cannot be clipped by the
+  button's own overflow and costs no layout.
+
+  620ms is the longest step on the scale and the right one: a radar sweep, not a heartbeat.
+  The button itself holds still, which is the third law — the thing you are about to press
+  must not move under your thumb.
+*/
+@keyframes listening-ring {
+  from {
+    box-shadow:
+      0 0 0 0 color-mix(in oklab, var(--accent) 45%, transparent),
+      0 0 0 0 color-mix(in oklab, var(--accent) 30%, transparent);
+  }
+  to {
+    box-shadow:
+      0 0 0 18px color-mix(in oklab, var(--accent) 0%, transparent),
+      0 0 0 34px color-mix(in oklab, var(--accent) 0%, transparent);
+  }
+}
+
+.listening {
+  animation: listening-ring 620ms var(--ease-drain, ease-out) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .listening {
+    animation: none;
+    /* Still obviously live, without the sweep. */
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent) 30%, transparent);
+  }
+}

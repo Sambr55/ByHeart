@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { canListen, listenFor, type Heard } from '@/engine/listen'
+import { ping } from '@/engine/tap'
 
 /**
  * SAY IT — the third thing you can do with a Portuguese line.
@@ -109,6 +110,17 @@ export function SayButton({
             setState('blocked')
           } else {
             setState(h.close ? 'close' : 'missed')
+            /*
+              HEARD, AND HEARD. Sam: "when an audio is correct it needs to have a subtle
+              ping for success sound."
+
+              Here rather than in the run-through, because every one of these buttons is
+              marking the same act and a success that only sounds on one screen would be a
+              reward for being in the right place. It rides engine/tap's switch like the
+              press does — see the note on `ping` for why this sound exists at all when
+              the tick is right there on the button.
+            */
+            if (h.close) ping()
             onHeard?.(h)
           }
           /*
@@ -125,7 +137,7 @@ export function SayButton({
         'tap-target flex shrink-0 items-center justify-center rounded-full border transition ' +
         dim +
         (state === 'listening'
-          ? ' animate-pulse border-accent bg-accent/15 text-accent'
+          ? ' listening border-accent bg-accent/15 text-accent'
           : state === 'close'
             ? ' border-accent bg-accent text-accent-ink'
             : state === 'missed' || state === 'blocked'

@@ -353,3 +353,82 @@ export function listenFor(want: string, opts: { lang?: string } = {}): Promise<H
     }, 6000)
   })
 }
+
+/**
+ * WHICH WORDS DID NOT LAND.
+ *
+ * Sam: "Is there any way we can get the feedback a bit more advanced on the audio? At the
+ * moment it says just not quite."
+ *
+ * A band says how close; this says where. The run-through can now point at the one or two
+ * words that went missing rather than handing back a verdict on the whole sentence, which
+ * is the difference between feedback and a mark.
+ *
+ * THE SAME MATCHING AS `near`, DELIBERATELY DUPLICATED IN SHAPE AND NOT IN EFFECT. Both
+ * walk the expected words against a consumable pool, take an exact hit first and a
+ * per-word edit-distance miss second, with the same quarter-length allowance. If the two
+ * drifted apart the screen would highlight a word the scorer had already forgiven — the
+ * most confusing possible feedback, because it would be telling somebody to fix a word
+ * that was never counted against them. Any change to the loop in `near` belongs here too.
+ *
+ * It returns the words AS WRITTEN in the target, accents and all, rather than the bare
+ * forms it compares — somebody aiming at a word needs to see the word, not its skeleton.
+ */
+export function missedWords(saidRaw: string, wantRaw: string): string[] {
+  const said = bare(saidRaw).split(' ').filter(Boolean)
+  /*
+    Kept in step: the bare forms are what get compared, the originals are what get shown,
+    and they are zipped by index because `bare` only ever maps one word to one word.
+  */
+  const originals = wantRaw.split(/\s+/).filter(Boolean)
+  const want = originals.map((w) => bare(w))
+  const pool = [...said]
+  const missed: string[] = []
+
+  want.forEach((w, idx) => {
+    if (!w) return
+    const at = pool.indexOf(w)
+    if (at >= 0) {
+      pool.splice(at, 1)
+      return
+    }
+    const loose = pool.findIndex((pw) => {
+      const room = Math.max(1, Math.ceil(Math.max(w.length, pw.length) / 4))
+      return edits(w, pw) <= room
+    })
+    if (loose >= 0) {
+      pool.splice(loose, 1)
+      return
+    }
+    /* Punctuation off, because "casado," is not a word somebody can aim at. */
+    const shown = (originals[idx] ?? '').replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '')
+    if (shown) missed.push(shown)
+  })
+
+  return missed
+}
+
+/**
+ * How close, as a band rather than a number.
+ *
+ * FOUR, AND THE BOUNDARIES ARE WHERE THE ADVICE CHANGES rather than at round numbers.
+ * CLOSE_ENOUGH (0.6) is a pass and stays exactly where it was — this adds no strictness
+ * anywhere, it only subdivides what used to be one undifferentiated "not quite".
+ *
+ *   · 'got'    — at or above the pass mark. Counted, proof recorded, ping played.
+ *   · 'nearly' — 0.4 up to the pass. Most of the sentence arrived; saying it again is
+ *                genuinely likely to land it, so that is what the copy asks for.
+ *   · 'some'   — 0.15 up to 0.4. The shape is there and the words are not, which is a
+ *                different problem and wants the answer on screen.
+ *   · 'no'     — below 0.15, or nothing recognised at all. Not a telling-off: at this
+ *                level the most likely explanation is the microphone or the room.
+ */
+export type Band = 'got' | 'nearly' | 'some' | 'no'
+
+export function bandFor(h: Heard): Band {
+  if (h.close) return 'got'
+  if (!h.said) return 'no'
+  if (h.score >= 0.4) return 'nearly'
+  if (h.score >= 0.15) return 'some'
+  return 'no'
+}

@@ -141,3 +141,42 @@ export function buzz(ms = 8) {
     /* Some browsers throw rather than returning false. */
   }
 }
+
+/**
+ * A sentence that landed.
+ *
+ * THE THIRD SOUND, and the one that had the best reason to exist. Sam: "when an audio is
+ * correct it needs to have a subtle ping for success sound." The run-through is the only
+ * beat in DUB that marks somebody's work, and until now the marking was entirely visual —
+ * which is the wrong channel for it. A learner saying their Legend out loud is looking at
+ * the room, or at nothing, or has the phone at their chin. The one moment they are
+ * guaranteed NOT to be reading the screen is the moment they are speaking into it.
+ *
+ * WHY IT IS A RISE AND NOT A CHIME. Two notes a fifth apart, the second above the first,
+ * is the smallest gesture that reads as "yes" without reading as a reward — the arcade
+ * jingle is three or more and goes up at the end, which is the sound of points being
+ * scored. DUB has no points. This is somebody being told they said it, which is a smaller
+ * and truer thing, so it gets two notes and stops.
+ *
+ * E5 then B5, 55ms apart. Triangle rather than sine because a pure sine at 1kHz is a
+ * notification and everybody's phone has trained them to ignore it; a triangle has enough
+ * upper harmonic to sound struck. Both peaks are under `tap`'s thump on purpose: this
+ * plays after speech, and a success that is louder than the voice it is praising is a
+ * sound somebody turns off.
+ *
+ * It rides the same switch as everything else here. Somebody who has silenced the
+ * interface has silenced this too, and the visual mark is still there — see the heard
+ * panel in components/Legend.tsx, which never depended on sound and still does not.
+ */
+export function ping() {
+  if (!soundOn()) return
+  const c = audio()
+  if (!c) return
+  try {
+    const now = c.currentTime
+    tone(c, now, 659, 90, 0.035, 'triangle')
+    tone(c, now + 0.055, 988, 150, 0.03, 'triangle')
+  } catch {
+    /* Nothing to do about it, and nothing worth telling anybody. */
+  }
+}

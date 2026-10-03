@@ -244,6 +244,34 @@ for (const file of files) {
   if (!/export function setSound/.test(tapSrc) || !/soundOn\(\)/.test(tapSrc)) {
     fail('engine/tap.ts has no off switch — an interface sound is only allowed because it has one')
   }
+  /*
+    AND EVERY SOUND IN THERE CHECKS IT, not just the first one written.
+
+    The test above was satisfied by `soundOn()` appearing ANYWHERE in the file, which was
+    true the moment `tap` existed — so a sound added later could skip the guard entirely
+    and this check would still pass. It nearly mattered: `ping` is the third voice in that
+    file, added for the run-through, and the thing that makes an interface sound tolerable
+    is not that the file has a switch, it is that every noise obeys it.
+
+    Every exported function whose body reaches for `tone` or `audio()` must open with the
+    guard. Sabotage-tested by deleting the guard from `ping`, which fails this.
+  */
+  const bodies = strip(tapSrc).split(/\nexport function /).slice(1)
+  for (const body of bodies) {
+    const name = body.slice(0, body.indexOf('('))
+    /*
+      Comments stripped first: `setSound` has the word "audio" in its prose and matched a
+      bare /audio\(\)/ on the strength of a sentence rather than a call. Exactly the
+      self-matching fault that has shipped here before — the check has to read the code.
+    */
+    const makesNoise = /\btone\(c,|const c = audio\(\)/.test(body)
+    if (makesNoise && !/if \(!soundOn\(\)\) return/.test(body)) {
+      fail(
+        'engine/tap.ts ' + name + ' makes a sound without checking soundOn() — ' +
+          'the switch has to govern every voice in here, not just the first one',
+      )
+    }
+  }
 }
 
 /*

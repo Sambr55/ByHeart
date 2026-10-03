@@ -1,7 +1,7 @@
 'use client'
 
 import { SayButton, useCanListen } from '@/components/SayButton'
-import type { Heard } from '@/engine/listen'
+import { bandFor, missedWords, type Heard } from '@/engine/listen'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '@/content/roots'
@@ -18,7 +18,14 @@ import { MiniBuild } from '@/components/Journey'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
-import { acquirePiece, answerLegend, answerLegendFromLesson, recordProof } from '@/engine/learner'
+import {
+  acquirePiece,
+  answerLegend,
+  answerLegendFromLesson,
+  clearRough,
+  markRough,
+  recordProof,
+} from '@/engine/learner'
 import { wordsIn } from '@/content/numbers'
 import { useLearner } from '@/engine/useLearner'
 import { useRestore } from '@/engine/useRestore'
@@ -1579,6 +1586,19 @@ function ColdSay({
  * moment there is a score attached to being put on the spot, the feature becomes the
  * anxiety it exists to remove.
  */
+/**
+ * HOW MANY GOES BEFORE THE SCREEN STOPS ASKING.
+ *
+ * Sam: "after 5 goes they need to be given a we'll try again later message." Five, named
+ * once, because it is asserted in scripts and read in two places on the card.
+ *
+ * It is not a limit and nothing is withheld at it: SHOW ME, LISTEN, COPY and NEXT all
+ * still work, the Legend still opens, and the microphone is still there for anybody who
+ * wants a sixth. What changes is that the product stops pretending the next attempt is
+ * likely to be the one — see LEGEND_COPY.run_enough_head.
+ */
+const ENOUGH_GOES = 5
+
 function RunThrough({
   cards,
   gender,
@@ -1652,15 +1672,65 @@ function RunThrough({
     sentence they said, the sentence they meant, and a verdict in words.
   */
   const [heard, setHeard] = useState<Heard | null>(null)
+  /*
+    HOW MANY GOES AT THIS ONE, and what happens when it is plainly not working.
+
+    Sam: "what happens if a user tries multiple times and keeps failing? after 5 goes they
+    need to be given a we'll try again later message, but not block the legend opening. We
+    need to flag to test again later."
+
+    Nothing did. The microphone accepted attempt eleven with the same feedback as attempt
+    one, which is a screen that has stopped paying attention to the person using it. Five
+    is the point at which continuing to ask is no longer encouragement.
+
+    COUNTED PER SENTENCE, NOT PER RUN — reset in the NEXT handler below alongside `shown`
+    and `heard`, because a fresh question is a fresh five. A successful attempt resets it
+    too: somebody who misses four times, lands it, and then misses again is not one go
+    away from being told to give up.
+  */
+  const [goes, setGoes] = useState(0)
+  /* For the come-back-to list on the done screen. Subscribed, so clearRough is seen. */
+  const mine = useLearner()
   /* Hidden where the device cannot listen — see useCanListen. */
   const canSay = useCanListen()
   const frame = order[i]
 
   if (!frame) {
+    /*
+      WHAT THE RUN SET DOWN, named at the end of it.
+
+      Sam: "we need to flag to test again later." The flag is written by markRough, and
+      this is where the promise is visible — on the screen that exists precisely because
+      the run is over, rather than as a panel on Legend Practise. Sam stripped that screen
+      to the run and its text on purpose ("this entire screen is redundant other than the
+      practise run"), and a list of outstanding sentences is exactly the kind of thing that
+      regrew it last time.
+
+      It is never a failure tally. No count, no score, and the line under it says plainly
+      that nothing is blocked — because nothing is: the door reads the card, not the
+      microphone.
+    */
+    const rough = mine.rough ?? []
     return (
       <div className="flex flex-1 flex-col justify-center gap-3">
         <p className="eyebrow text-accent">DONE</p>
         <p className="display text-balance text-2xl">All the way through, out loud.</p>
+        {rough.length ? (
+          <div
+            data-testid="run-rough"
+            className="mt-3 flex flex-col gap-2 rounded-2xl border border-line bg-bg-elev px-4 py-4"
+          >
+            <p className="eyebrow text-muted">{LEGEND_COPY.run_again_later}</p>
+            {rough.map((r) => (
+              <p key={r.pt} className="pt text-base text-fg">
+                {r.pt}
+              </p>
+            ))}
+            <p className="text-sm leading-relaxed text-muted">
+              {LEGEND_COPY.run_again_later_note}
+            </p>
+          </div>
+        ) : null}
         <Dock>
           <button
             type="button"
@@ -1775,8 +1845,91 @@ function RunThrough({
     reveals without recording, which is the honest trade — the microphone marks your work,
     this just shows you the answer.
   */
+  /*
+    ONE HANDLER FOR BOTH MICROPHONES.
+
+    There are two SayButtons on this card — the big one before the answer is revealed and
+    the small one beside it afterwards — and they were carrying two copies of the same
+    four lines. The copies had already drifted once: only the first set `shown`. Attempt
+    counting, the rough flag and the proof row all have to behave identically whether
+    somebody spoke before looking or after, so they are written once here.
+  */
+  const took = (h: Heard, reveal: boolean) => {
+    setHeard(h)
+    if (reveal && h.said) setShown(true)
+    if (h.close) {
+      /* Landed, so it is no longer one to come back to, whenever it was flagged. */
+      setGoes(0)
+      clearRough(answer)
+      recordProof({
+        pt: answer,
+        en: fillEnglish(frame, valuesFor(frame.id) ?? {}),
+        source: 'legend',
+        clean: true,
+      })
+      return
+    }
+    /*
+      A REFUSED MICROPHONE IS NOT AN ATTEMPT, and SayButton does not call this for one —
+      see the `blocked` branch there. What reaches this line is a real go at saying it,
+      including a silent one, because silence on the fifth try is the same signal.
+    */
+    const next = goes + 1
+    setGoes(next)
+    if (next === ENOUGH_GOES) {
+      markRough({
+        pt: answer,
+        en: fillEnglish(frame, valuesFor(frame.id) ?? {}),
+        goes: next,
+      })
+    }
+  }
+
+  /*
+    WHAT THE PANEL SAYS, derived rather than branched at the point of use.
+
+    The old panel had the verdict inline as a nested ternary over `heard.close` and
+    `heard.said` — two conditions for what is really one four-way question, which is why
+    adding bands to it in place would have produced a ternary nobody could read.
+  */
+  const band = heard ? bandFor(heard) : null
+  const verdict =
+    band === 'got'
+      ? LEGEND_COPY.run_got_it
+      : band === 'nearly'
+        ? LEGEND_COPY.run_nearly
+        : band === 'some'
+          ? LEGEND_COPY.run_some
+          : band === 'no' && heard?.said
+            ? LEGEND_COPY.run_not_quite
+            : LEGEND_COPY.run_missed
+  /*
+    The words to aim at, shown only where they are useful. On a miss this bad the list
+    would be the whole sentence, which is not feedback — that case gets SHOW ME instead.
+  */
+  const aim =
+    heard && !heard.close && heard.said && (band === 'nearly' || band === 'some')
+      ? missedWords(heard.said, answer)
+      : []
+  /* Said five times with nothing landing. The screen stops asking — see ENOUGH_GOES. */
+  const enough = goes >= ENOUGH_GOES && !heard?.close
+
   return (
-    <div className="flex flex-1 flex-col gap-6">
+    /*
+      ONE WHITE CARD ON THE SAND. Sam: "I also want to see this whole page on a white card
+      with rounded corners on the sand background."
+
+      The run-through is the one screen in DUB where everything on it belongs to a single
+      question — the asking, the microphone, the marking and the answer — and it was laid
+      out as four things stacked on the page background, each with its own border. Lifting
+      the lot onto one surface says what the border could not: this is a card, there is one
+      of them, and it is replaced when you move on.
+
+      `bg-bg-elev` is the L*99 surface, which is the white in this palette; the shell
+      behind it is `bg-bg`, the sand. Both flip together in dark mode, so the card stays a
+      lift rather than becoming a bright hole — see the tokens in app/globals.css.
+    */
+    <div className="flex flex-1 flex-col rounded-2xl border border-line bg-bg-elev px-5 py-6 gap-6">
       <p className="eyebrow text-muted">
         {i + 1} OF {order.length}
       </p>
@@ -1818,20 +1971,7 @@ function RunThrough({
             <AudioButton slug={slugFor(answer)} text={answer} size="sm" />
             <CopyButton text={answer} size="sm" />
             {canSay ? (
-              <SayButton
-                want={answer}
-                onHeard={(h) => {
-                  setHeard(h)
-                  if (h.close) {
-                    recordProof({
-                      pt: answer,
-                      en: fillEnglish(frame, valuesFor(frame.id) ?? {}),
-                      source: 'legend',
-                      clean: true,
-                    })
-                  }
-                }}
-              />
+              <SayButton want={answer} onHeard={(h) => took(h, false)} />
             ) : null}
           </div>
         </div>
@@ -1839,22 +1979,7 @@ function RunThrough({
         <div className="flex flex-1 flex-col items-center justify-center gap-3">
           {canSay ? (
             <>
-              <SayButton
-                want={answer}
-                size="lg"
-                onHeard={(h) => {
-                  setHeard(h)
-                  if (h.said) setShown(true)
-                  if (h.close) {
-                    recordProof({
-                      pt: answer,
-                      en: fillEnglish(frame, valuesFor(frame.id) ?? {}),
-                      source: 'legend',
-                      clean: true,
-                    })
-                  }
-                }}
-              />
+              <SayButton want={answer} size="lg" onHeard={(h) => took(h, true)} />
               <p className="text-base text-muted">{LEGEND_COPY.run_say}</p>
             </>
           ) : (
@@ -1871,19 +1996,49 @@ function RunThrough({
       {heard ? (
         <div
           data-testid="run-heard"
+          /*
+            On `surface` rather than `bg-elev` now, because the card underneath IS bg-elev
+            — a panel the same colour as the thing it sits on is not a panel. `surface` is
+            the inset token, which is the right read: this is a well in the card holding
+            what came back.
+          */
           className={
-            'animate-bank rounded border px-4 py-3 ' +
-            (heard.close ? 'border-accent bg-accent/10' : 'border-line bg-bg-elev')
+            'animate-bank rounded-xl border px-4 py-3 ' +
+            (heard.close ? 'border-accent bg-accent/10' : 'border-line bg-surface')
           }
         >
-          <p className={'eyebrow ' + (heard.close ? 'text-accent' : 'text-muted')}>
-            {heard.close
-              ? LEGEND_COPY.run_got_it
-              : heard.said
-                ? LEGEND_COPY.run_not_quite
-                : LEGEND_COPY.run_missed}
-          </p>
+          <p className={'eyebrow ' + (heard.close ? 'text-accent' : 'text-muted')}>{verdict}</p>
           {heard.said ? <p className="pt mt-1 text-lg text-fg">“{heard.said}”</p> : null}
+          {/*
+            AND WHICH WORDS TO AIM AT — the part a verdict cannot carry. Sam: "is there any
+            way we can get the feedback a bit more advanced on the audio? at the moment it
+            says just not quite." Only on the two middle bands: see `aim` above for why a
+            bad miss gets SHOW ME instead of a list of the whole sentence.
+          */}
+          {aim.length ? (
+            <p data-testid="run-aim" className="mt-2 text-sm leading-relaxed text-muted">
+              {LEGEND_COPY.run_aim(aim)}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/*
+        FIVE GOES, AND THEN THE PRODUCT ADMITS IT. Sam: "after 5 goes they need to be given
+        a we'll try again later message, but not block the legend opening."
+
+        Nothing below this is disabled by it. The microphone stays, SHOW ME stays, NEXT
+        stays, and the Legend's door does not consult it — the sentence is written down
+        with markRough so it can come round again, and that is the whole mechanism. See
+        LEGEND_COPY.run_enough_head on why it blames the room before the learner.
+      */}
+      {enough ? (
+        <div
+          data-testid="run-enough"
+          className="animate-bank flex flex-col gap-1 rounded-xl border border-line bg-surface px-4 py-3"
+        >
+          <p className="eyebrow text-fg">{LEGEND_COPY.run_enough_head}</p>
+          <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.run_enough_body}</p>
         </div>
       ) : null}
 
@@ -1895,6 +2050,8 @@ function RunThrough({
             onClick={() => {
               setShown(false)
               setHeard(null)
+              /* A fresh question is a fresh five — see the note on `goes`. */
+              setGoes(0)
               setI(i + 1)
             }}
             className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"

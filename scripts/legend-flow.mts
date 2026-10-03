@@ -304,6 +304,48 @@ ok(
       /\d OF \d/.test(said),
       (said.match(/\d OF \d/) ?? ['nothing happened'])[0],
     )
+
+    /*
+      AND IT IS ONE WHITE CARD ON THE SAND. Sam: "I also want to see this whole page on a
+      white card with rounded corners on the sand background."
+
+      Measured rather than trusted, because this is the kind of claim a token change breaks
+      silently: the card and the page behind it must be DIFFERENT colours, and the card has
+      to be the lighter of the two. Asserting the class name would prove only that somebody
+      typed it — the question is whether the surface actually reads as lifted.
+    */
+    const look = (await page.evaluate(`(() => {
+      const num = [...document.querySelectorAll('p')].find((p) => /\\d OF \\d/.test(p.textContent || ''))
+      const card = num && num.parentElement
+      const shell = document.querySelector('[data-stage]')
+      if (!card || !shell) return null
+      const cs = getComputedStyle(card)
+      const lum = (c) => {
+        const [r, g, b] = (c.match(/\\d+/g) || []).slice(0, 3).map(Number)
+        const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4) }
+        return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+      }
+      return {
+        card: cs.backgroundColor,
+        page: getComputedStyle(shell).backgroundColor,
+        radius: parseFloat(cs.borderTopLeftRadius),
+        lifted: lum(cs.backgroundColor) > lum(getComputedStyle(shell).backgroundColor),
+      }
+    })()`)) as { card: string; page: string; radius: number; lifted: boolean } | null
+
+    /*
+      TRANSPARENT IS NOT A SURFACE. The first version of this test compared the two colours
+      and passed when the card had no background at all — rgba(0,0,0,0) is not equal to the
+      sand, so removing the card entirely satisfied it. Sabotage-tested by doing exactly
+      that, which is the only way this sort of hole shows up.
+    */
+    ok(
+      'the run sits on its own surface',
+      Boolean(look && look.card !== look.page && !/, 0\)$/.test(look.card)),
+      look?.card ?? 'not found',
+    )
+    ok('lighter than the sand behind it', Boolean(look?.lifted), look ? look.card + ' on ' + look.page : '')
+    ok('with rounded corners', Boolean(look && look.radius >= 12), String(look?.radius ?? 0) + 'px')
   }
 }
 
