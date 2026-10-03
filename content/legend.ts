@@ -452,66 +452,15 @@ export function personalise<T extends {
     answer is enough: from that moment the line is theirs and every swap should land on it.
   */
   /*
-    AND THE NATIONALITY IS THE ONE THAT DECIDES IT. AskOrigin only renders the town field
-    once a nationality exists, so a town with no nationality is unreachable — guarded
-    anyway, because that is a fact about one component and this is read by several.
+    AND THE NATIONALITY IS THE ONE THAT DECIDES IT.
+
+    `!said && !town` leaves one state — a town typed with no nationality — showing "Chamo-me
+    Golly. Sou inglês.", which is the original fault in miniature: the learner's name beside
+    a nationality nobody gave. AskOrigin only renders the town field once a nationality
+    exists, so that state is unreachable today; it is guarded anyway, because "unreachable"
+    is a fact about one component and this is read by several.
   */
-  const unanswered = asksOrigin && !said
-  /*
-    THE CHOICE, NOT A BORROWED FACT — and this is the third shape this line has taken.
-
-    I have been wrong about it twice in opposite directions. First "Chamo-me Sam. Sou
-    inglês." told Sam he was English before he had said. Then I held the whole specimen —
-    "Chamo-me Ana. Sou inglês." — which stops the claim and throws away the name he gave at
-    set-up: "Now youve regressed to first name Ana, not pulling through the entered name."
-
-    Both are the same mistake, which is treating one line as one decision. There are two
-    facts in it and they are in different states: the name is KNOWN and the nationality is
-    being ASKED FOR, on this very screen. So the name lands, and the nationality shows as
-    the choice on offer rather than as one option pretending to be the answer.
-
-    Sam chose this shape: "Sou inglês / escocês / irlandês?" The options come from the
-    origin frame's own slot, so this is the same list the question below it offers — the
-    specimen and the ask cannot drift, and a sixth nationality needs no change here.
-
-    It still teaches the shape, which the dash did not: `sou` is followed by a word of this
-    kind, and here are three of them.
-  */
-  const offered = (nat?.options ?? []).slice(0, 3)
-  const choiceLine = (t: string, pick: (o: { value: string; f?: string; en?: string }) => string) =>
-    offered.length >= 2 ? offered.map(pick).join(' / ') : null
-  /*
-    Applied last, so it only ever sees a specimen myOrigin did NOT replace — which is the
-    definition of unanswered, arrived at by the substitution rather than by a second
-    condition agreeing with it. Both languages, because a Portuguese choice under an
-    English statement would be two different sentences.
-  */
-  const offerChoice = (t: string) => {
-    if (!unanswered) return t
-    const pt = choiceLine(t, (o) => o.value)
-    const en = choiceLine(t, (o) => o.en ?? o.value)
-    /*
-      ONE PASS, OR THE REPLACEMENT EATS ITSELF.
-
-      Chained replaceAll doubled it: `inglesa` became "inglês / escocês / galês", and the
-      second call then found the `inglês` INSIDE that and expanded it again — "Sou inglês /
-      escocês / galês / escocês / galês." A single regex over both forms cannot match its
-      own output, because the output contains no bare specimen to match.
-    */
-    let out = t
-    if (pt) out = out.replace(/\bingl(ês|esa)\b/g, pt)
-    if (en) out = out.replace(/\bEnglish\b/g, en)
-    /*
-      AND THE TOWN, which is the same claim one branch further down: "Sou de Londres." says
-      where somebody is from before they have said. It has no option list to offer — a town
-      is free text — so it asks the question instead, which is what the screen is doing
-      anyway and is a sentence the learner will need to understand when it is put to them.
-    */
-    out = out
-      .replace(/\bSou de Londres\b\.?/g, 'De onde és?')
-      .replace(/\bI am from London\b\.?/g, 'Where are you from?')
-    return out
-  }
+  const holdSpecimen = asksOrigin && !said
   /*
     THE BLANK ITSELF, in both languages and for both the nationality and the town.
 
@@ -657,8 +606,13 @@ export function personalise<T extends {
       on the same line.
     */
     if (!swap)
-      return offerChoice(
-        myForm(myOrigin(myStatus(myAge(myName(t, me.display_name), me.profile?.age), status))),
+      return myForm(
+        myOrigin(
+          myStatus(
+            myAge(holdSpecimen ? t : myName(t, me.display_name), me.profile?.age),
+            status,
+          ),
+        ),
       )
     const swapped = t
       .replaceAll('de música', swap.after_de)
@@ -670,9 +624,12 @@ export function personalise<T extends {
       */
       .replaceAll('of music', 'of ' + swap.gloss)
       .replaceAll('music', swap.gloss)
-    return offerChoice(
-      myForm(
-        myOrigin(myStatus(myAge(myName(swapped, me.display_name), me.profile?.age), status)),
+    return myForm(
+      myOrigin(
+        myStatus(
+          myAge(holdSpecimen ? swapped : myName(swapped, me.display_name), me.profile?.age),
+          status,
+        ),
       ),
     )
   }
