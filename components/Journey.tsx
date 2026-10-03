@@ -3705,7 +3705,23 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
     falls through to the component written for it.
   */
   const frameHere = LEGEND_FRAMES.find((f) => f.id === which)
-  const hasChips = Boolean(frameHere?.slots[0]?.options)
+  /*
+    ONE SLOT, OR IT IS NOT A CHIP QUESTION.
+
+    Sam: "you've dropped the where are you from question and then assumed the user was from
+    London."
+
+    Exactly that. `origin` has TWO slots — a nationality and a town — and this branch draws
+    slots[0] and nothing else. It claimed the question because the frame has options on its
+    first slot, which left AskOrigin (two hundred lines below, and written for precisely
+    this frame) unreachable. The chips appeared, the town was never asked, and the specimen
+    Londres stood in the lesson as though it were the answer.
+
+    Same fault as the age freeze two commits ago and the same cause: this branch claiming
+    questions it cannot fully draw. `hasChips` stopped it taking the ones with no options;
+    this stops it taking the ones with more than one slot.
+  */
+  const hasChips = Boolean(frameHere?.slots[0]?.options) && frameHere?.slots.length === 1
   if (CARD_ASKS.includes(which) && hasChips) {
     const frame = frameHere
     const slot = frame?.slots[0]

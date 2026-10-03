@@ -269,6 +269,36 @@ console.log('\nno lesson asks a question its learner cannot see\n')
       /CARD_ASKS\.includes\(which\) && hasChips/.test(src),
       'age and into have their own components below it',
     )
+    /*
+      AND ONLY THE ONES IT CAN FULLY DRAW.
+
+      Sam: "you've dropped the where are you from question and then assumed the user was
+      from London." `origin` has two slots — a nationality and a town — and the chip branch
+      draws slots[0] and stops. It claimed the question because the first slot has options,
+      which left AskOrigin unreachable: the chips appeared, the town was never asked, and
+      the specimen Londres stood in the lesson as the answer.
+
+      Third time this branch has swallowed a question it cannot finish. The guard is now
+      both halves — has options AND has exactly one slot — so a frame that needs more than
+      a row of chips reaches the component written for it.
+    */
+    ok(
+      'and only the ones it can fully draw',
+      /frameHere\?\.slots\.length === 1/.test(src),
+      'origin has two slots and the branch draws one',
+    )
+    /*
+      Asserted against the content too, so authoring a second slot onto a chip frame cannot
+      quietly re-create it.
+    */
+    const multi = LEGEND_FRAMES.filter(
+      (f) => f.slots.length > 1 && f.slots[0]?.options,
+    ).map((f) => f.id)
+    ok(
+      'every multi-slot frame has a component of its own',
+      multi.every((id) => new RegExp('function Ask' + id[0].toUpperCase() + id.slice(1)).test(src)),
+      multi.join(', ') || 'none',
+    )
   }
 
   /*
