@@ -152,6 +152,9 @@ export type EventName =
   | 'legend_card_answered'
   | 'legend_card_skipped'
   | 'legend_rehearse'
+  /* The run finished, and whether it put somebody through the Club's front door. */
+  | 'legend_run_finished'
+  | 'legend_run_again'
   | 'legend_cold_open'
   | 'legend_unlocked'
   /*

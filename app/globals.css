@@ -52,6 +52,19 @@
   --telha: #a8492f;       /* warmth and urgency — numerals, counters, short headlines.
                              It clears AA, but it is not a body-text colour */
   --correct: #2c6b4a;
+  /*
+    WHAT GOES ON TOP OF THE GREEN, and it is not the same in both themes.
+
+    Sam: "make the success icon white tick on green." White on the light theme's #2c6b4a is
+    6.35:1 and fine — but dark mode's `--correct` is #74c79a, a pale mint chosen to be
+    legible as TEXT on a near-black ground, and white on that is 2.02:1. A tick hardcoded
+    white would have been close to invisible for every learner in dark mode, which is the
+    half of the audience that tests this at night.
+
+    So the ink is paired with the green rather than assumed: white where the green is deep,
+    the usual ink where it is pale (7.75:1). Both are asserted in contrast-check.
+  */
+  --correct-ink: #ffffff;
   --coach: #8a5a12;       /* wrong answers coach in amber, never red. Keep this rule */
   --chip: #e4d9c5;
   --grid: rgba(47, 110, 158, 0.05);
@@ -77,6 +90,8 @@
     --azulejo: #7fb3da;
     --telha: #e0876c;
     --correct: #74c79a;
+    /* Ink, not white — see the note in :root. White on this mint is 2.02:1. */
+    --correct-ink: #1a2430;
     --coach: #dda45e;
     --chip: #272d37;
     --grid: rgba(127, 179, 218, 0.06);
@@ -96,6 +111,7 @@
   --azulejo: #7fb3da;
   --telha: #e0876c;
   --correct: #74c79a;
+  --correct-ink: #1a2430;
   --coach: #dda45e;
   --chip: #272d37;
   --grid: rgba(127, 179, 218, 0.06);
@@ -138,6 +154,7 @@
   --color-telha: var(--telha);
   --color-line-strong: var(--line-strong);
   --color-correct: var(--correct);
+  --color-correct-ink: var(--correct-ink);
   --color-coach: var(--coach);
   --color-chip: var(--chip);
   --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
@@ -1477,10 +1494,19 @@ summary:focus-visible,
   text-wrap: balance;
 }
 
-/* The produced thing. Portuguese the learner made, and nothing else is ever this size. */
+/*
+  The produced thing. Portuguese the learner made, and nothing else is ever this size.
+
+  DOWN 15% FROM 3.5rem. Sam: "make the question and answer text 15% smaller
+  respectively." Both steps came up together when the run-through was rebuilt as one big
+  card, and on a 390px phone the longer Legend sentences — "Chamo-me Sam e sou de
+  Inglaterra" — were wrapping to three lines and pushing the controls under the fold. The
+  point of the big type was legibility at arm's length, and a sentence that needs
+  scrolling is not legible at any size.
+*/
 .t-said {
   font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-size: 3.5rem;
+  font-size: 2.975rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.02;
@@ -1488,10 +1514,10 @@ summary:focus-visible,
   text-wrap: balance;
 }
 
-/* The English ask, before it is demoted. */
+/* The English ask, before it is demoted. Down 15% from 2.5rem with `.t-said` above. */
 .t-ask {
   font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  font-size: 2.5rem;
+  font-size: 2.125rem;
   font-weight: 700;
   letter-spacing: -0.024em;
   line-height: 1.08;
@@ -1932,5 +1958,44 @@ summary:focus-visible,
     animation: none;
     /* Still obviously live, without the sweep. */
     box-shadow: 0 0 0 6px color-mix(in oklab, var(--accent) 30%, transparent);
+  }
+}
+
+/*
+  THE ARROW THAT SAYS "OR GO NOW".
+
+  Sam: "when an audio has successfully been ticked wait two seconds then automatically
+  swipe right to the next card… add an animated right arrow for someone to override the
+  auto swipe (if they are quicker)."
+
+  So there are two ways forward from a success and they must not compete. The wait is the
+  default and needs no control; this is the override, and it has to read as available
+  without becoming the loudest thing on a screen that has just said THAT IS IT.
+
+  A NUDGE, NOT A PULSE. It travels 4px right and comes back — the direction of the thing it
+  does, which is the only reason an arrow is animated at all. 620ms, which is the slowest
+  step on the scale and the one that reads as a beckon rather than a blink; anything faster
+  on a two-second window would be nine impatient twitches while somebody is still reading.
+
+  Translate only. The motion gate forbids a scaling entrance and it is right to: a growing
+  arrow is a notification, and this is a direction.
+*/
+@keyframes nudge-right {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.nudge-right {
+  animation: nudge-right 620ms var(--ease-drain, ease-out) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nudge-right {
+    animation: none;
   }
 }

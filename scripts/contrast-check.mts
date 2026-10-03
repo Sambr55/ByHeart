@@ -57,7 +57,7 @@ const DARK = palette(/:root\[data-theme='dark'\]\s*\{([\s\S]*?)\n\}/)
 
 /** Fail loudly rather than silently checking nothing if the stylesheet moves. */
 for (const [name, p] of [['light', LIGHT], ['dark', DARK]] as const) {
-  for (const token of ['bg', 'fg', 'muted', 'accent', 'telha', 'correct', 'coach', 'line-strong']) {
+  for (const token of ['bg', 'fg', 'muted', 'accent', 'telha', 'correct', 'correct-ink', 'coach', 'line-strong']) {
     if (!p[token]) {
       console.log('FAIL could not read --' + token + ' from globals.css (' + name + ')')
       process.exit(1)
@@ -136,6 +136,31 @@ for (const [name, hex] of Object.entries(HEADERS)) {
   const ok = r >= AA_TEXT
   if (!ok) failures++
   console.log('  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + name.padEnd(12) + hex + '  ' + r.toFixed(2) + ':1')
+}
+
+/*
+  THE SUCCESS TICK, ON ITS OWN GREEN.
+
+  Sam: "make the success icon white tick on green." The green is --correct, which already
+  had a row above as TEXT on the page ground — a different question from what reads on top
+  of it when it becomes a filled button.
+
+  Measured because the obvious answer is wrong in half the product: white on the light
+  theme's deep green is 6.35:1, and white on dark mode's pale mint is 2.02:1 — a tick
+  nobody could see at night. Hence --correct-ink, paired per theme, and asserted here so a
+  later palette change cannot quietly break the one mark the product makes.
+*/
+console.log('\nthe success tick, on its own green')
+for (const [name, green, ink] of [
+  ['light', LIGHT.correct, LIGHT['correct-ink']],
+  ['dark', DARK.correct, DARK['correct-ink']],
+] as [string, string, string][]) {
+  const r = ratio(ink, green)
+  const ok = r >= AA_TEXT
+  if (!ok) failures++
+  console.log(
+    '  ' + (ok ? 'ok  ' : 'FAIL') + ' ' + name.padEnd(12) + ink + ' on ' + green + '  ' + r.toFixed(2) + ':1',
+  )
 }
 
 /**

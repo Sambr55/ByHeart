@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { canListen, listenFor, type Heard } from '@/engine/listen'
-import { ping } from '@/engine/tap'
+import { missed as missedSound, ping } from '@/engine/tap'
 
 /**
  * SAY IT — the third thing you can do with a Portuguese line.
@@ -67,6 +67,21 @@ export function SayButton({
     paid for more than once.
   */
   useEffect(() => {
+    /*
+      SET LIVE AGAIN ON EVERY MOUNT, and the missing line was a real bug.
+
+      `alive.current` starts true, the cleanup sets it false, and nothing ever set it back —
+      so in Strict Mode, where React deliberately mounts, unmounts and remounts every
+      effect in development, the cleanup ran once and the button was dead for the rest of
+      the session. Every result came back from the recogniser and was dropped by the
+      `if (!alive.current) return` guard: no tick, no feedback panel, no proof row, and
+      (once it existed) no auto-advance.
+
+      Found by driving the run-through in a browser with a fake recogniser that always
+      agrees — the transcript arrived, the state never changed. It would have looked exactly
+      like the recogniser failing, which is the kind of bug that gets blamed on the device.
+    */
+    alive.current = true
     setAble(canListen())
     return () => {
       alive.current = false
@@ -121,6 +136,14 @@ export function SayButton({
               the tick is right there on the button.
             */
             if (h.close) ping()
+            /*
+              AND A MISS SAYS SO. Sam: "we also need a failed noise." Only where something
+              was actually heard and judged — silence already has the ear-with-a-line
+              through it, and a sound for "I heard nothing" would fire every time somebody
+              tapped the microphone by accident. See `missed` in engine/tap for why this is
+              not the rejection sound.
+            */
+            else if (h.said) missedSound()
             onHeard?.(h)
           }
           /*
@@ -139,7 +162,17 @@ export function SayButton({
         (state === 'listening'
           ? ' listening border-accent bg-accent/15 text-accent'
           : state === 'close'
-            ? ' border-accent bg-accent text-accent-ink'
+            /*
+              GREEN, NOT AZULEJO. Sam: "make the success icon white tick on green."
+
+              It was accent-on-accent-ink — the same blue as the Portuguese, the header and
+              every CTA in the product. So the one mark that means "you said it" looked
+              like every other filled button, and the tick was doing all the work. Green is
+              the only colour here that means a single thing, and `--correct` already
+              carried it. The ink is paired per theme: see the note on --correct-ink, white
+              on the light green and dark ink on the pale one.
+            */
+            ? ' border-correct bg-correct text-correct-ink'
             : state === 'missed' || state === 'blocked'
               ? ' border-line-strong text-muted'
               : ' border-line text-muted hover:border-accent/50')

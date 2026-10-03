@@ -180,3 +180,36 @@ export function ping() {
     /* Nothing to do about it, and nothing worth telling anybody. */
   }
 }
+
+/**
+ * A sentence that did not land.
+ *
+ * Sam: "we also need a failed noise." The ping tells somebody they said it without asking
+ * them to look up from the room they are speaking into; before this, the absence of a ping
+ * was the only audible signal — and silence is also what a broken microphone sounds like.
+ * So a miss gets a sound of its own, for the same reason the success did.
+ *
+ * WHY IT IS NOT `nope`, WHICH ALREADY EXISTS. That one refuses a PRESS — a tile landing in
+ * the wrong place — and it is pitched to feel like a door that does not open. A miss here
+ * is a different event: the learner did the thing asked of them and the browser could not
+ * make it out, which is nobody's fault and certainly not a refusal. Reusing the rejection
+ * sound would tell them they had done something wrong.
+ *
+ * SO IT FALLS, GENTLY, AND STOPS. Two notes a tone apart going down, slower and quieter
+ * than the ping, with no third note to make a phrase of it. The shape is "not that one"
+ * rather than "wrong" — and it is deliberately the quietest thing in this file, because a
+ * learner who keeps missing will hear it five times in a row and a sound that nags is a
+ * sound that makes somebody stop practising.
+ */
+export function missed() {
+  if (!soundOn()) return
+  const c = audio()
+  if (!c) return
+  try {
+    const now = c.currentTime
+    tone(c, now, 392, 110, 0.026, 'triangle')
+    tone(c, now + 0.075, 330, 170, 0.022, 'triangle')
+  } catch {
+    /* Nothing to do about it, and nothing worth telling anybody. */
+  }
+}

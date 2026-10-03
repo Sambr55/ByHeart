@@ -3299,9 +3299,16 @@ export const LEGEND_COPY = {
     than what was got wrong: "try" is a direction, "you missed" is a mark.
   */
   run_aim: (words: string[]) => 'Aim for ' + words.join(' · '),
-  /** Forward. The last one says so, because a run that just stops is a run that broke. */
-  run_next: 'NEXT',
-  run_last: 'THAT IS THE LOT',
+  /*
+    NEXT AND THAT IS THE LOT ARE GONE WITH THE BUTTON THEY LABELLED.
+
+    Sam: "remove the next CTA button thus opening up more real estate and removing
+    scrolling." The way forward is now the two-second wait, the arrow for anybody quicker,
+    and SHOW ME for anybody who did not speak — none of which wants a word on it. The
+    arrow's aria-label carries what the button used to say out loud, which is where that
+    sentence belonged all along: it is for somebody who cannot see the arrow, not for
+    somebody looking straight at it.
+  */
   /*
     THE WAY PAST WITHOUT SPEAKING. Sam: "bearing in mind a user may not want to say it loud
     but just see the correct response." It reveals and records nothing, which is the whole
@@ -3337,6 +3344,39 @@ export const LEGEND_COPY = {
   run_enough_body:
     'Five goes is plenty. This is often the room or the microphone rather than you — it is saved, and it will come round again.',
   /** On the card, afterwards, so the sentence is findable rather than just promised. */
+  /*
+    THE END OF THE RUN, WHICH WENT NOWHERE.
+
+    Sam: "I just successfully went through to the entire legend but it took me back to
+    another run through (which should be an option) but should have given me a success
+    message and the front door to the club."
+
+    It did exactly that: the run's `onDone` was `setMode('deck')` — the same call the STOP
+    HERE link makes — so finishing and giving up ended on the identical screen, with RUN IT
+    THROUGH offering the thing just completed. The one moment in DUB somebody has proved
+    the whole point of the product was handled as an exit.
+
+    AND THE DOOR WAS ALREADY OPEN. The run records a proof row per sentence with source
+    'legend', which is precisely what clubOpen counts — so a learner who finished was a
+    member and was told nothing. The GO IN button was taken off Legend Practise two commits
+    ago for the right reason (Sam: "the run it through and GO IN buttons are in effect doing
+    the same thing, so the second should be removed, then Club opens after the legend run
+    through") and this is the "after" that was never built.
+  */
+  run_done_eyebrow: 'YOU SAID IT',
+  run_done_head: 'Your whole Legend, out loud, with nothing on the screen.',
+  /** What it earns, stated once. The ceremony at /club?in=1 does the rest. */
+  run_done_club: 'That is the membership test. Dub Club is open.',
+  run_done_club_cta: 'GO IN',
+  /*
+    AND GOING ROUND AGAIN IS AN OPTION RATHER THAN THE DESTINATION — Sam's own
+    parenthesis, "(which should be an option)". Quiet, under the door, because somebody who
+    has just proved it does not need to be sent straight back to the start.
+  */
+  run_done_again: 'RUN IT AGAIN',
+  run_done_board: 'BACK TO YOUR LEGEND',
+  /** For anybody who finishes with the door still shut — see clubOpen on why it can be. */
+  run_done_more: 'Say the ones you left for later and the Club opens.',
   run_again_later: 'COME BACK TO',
   run_again_later_note: 'Sentences the microphone and you could not agree on. Nothing is blocked by them.',
   /*

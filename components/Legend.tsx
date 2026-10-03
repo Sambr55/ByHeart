@@ -5,7 +5,7 @@ import { bandFor, missedWords, type Heard } from '@/engine/listen'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '@/content/roots'
-import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, askFor, frameReady, nameFor, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, metIn,
+import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, askFor, frameReady, nameFor, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, metIn, clubOpen,
   provenanceOf, knownValues, readableFrame, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
 import { PICKER } from '@/content/front-door'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
@@ -1695,6 +1695,46 @@ function RunThrough({
   const canSay = useCanListen()
   const frame = order[i]
 
+  /*
+    TWO SECONDS AFTER A SUCCESS, IT MOVES ON BY ITSELF.
+
+    Sam: "when an audio has successfully been ticked wait two seconds then automatically
+    swipe right to the next card."
+
+    WHY TWO SECONDS AND NOT A MOTION STEP. Every other timing in this product comes off the
+    120/260/420/620 scale, and this one deliberately does not — those are durations of
+    MOVEMENT, and this is a reading pause. Two seconds is long enough to see the green
+    tick, read THAT IS IT and take in the sentence you produced; the longest thing on the
+    scale is 620ms, which would snatch the card away before the eye had finished with it.
+
+    GATED ON `close`, so it only ever follows a success. A miss leaves the card exactly
+    where it is — somebody who was not understood is the one person who should not be
+    hurried, and after five goes the screen says so in words instead.
+
+    ABOVE EVERY EARLY RETURN, which is not a style preference. This sat next to the Dock it
+    serves and crashed the run: React counts hooks per render, the done screen and the
+    unanswered-frame screen both return before that point, and reaching either one rendered
+    "fewer hooks than expected" — the whole card replaced by the error boundary at exactly
+    the moment somebody finished their Legend. Caught by walking the run to the end in a
+    browser; it is invisible from the source, since the effect reads correct where it was.
+
+    AND IT IS CANCELLED BY ANY MOVE, because the deps include `i`: tapping the arrow
+    changes `i`, the effect tears down, and the timer goes with it. Without that a quick
+    learner would be advanced twice — once by the tap and once by the timer still running —
+    which is the sort of bug that looks like a dropped card.
+  */
+  const closed = heard?.close ?? false
+  useEffect(() => {
+    if (!closed) return
+    const t = window.setTimeout(() => {
+      setShown(false)
+      setHeard(null)
+      setGoes(0)
+      setI((at) => at + 1)
+    }, 2000)
+    return () => window.clearTimeout(t)
+  }, [closed, i])
+
   if (!frame) {
     /*
       WHAT THE RUN SET DOWN, named at the end of it.
@@ -1711,14 +1751,36 @@ function RunThrough({
       microphone.
     */
     const rough = mine.rough ?? []
+    /*
+      IS THE DOOR OPEN NOW? Asked here with the same arguments the Club itself uses, because
+      a second way of deciding it is how the screen came to disagree with the door before —
+      see the note on LEGEND_COPY.run_done_club.
+
+      It can legitimately be false: somebody who left two sentences for later has not said
+      the whole card, so they get run_done_more rather than a button that turns them away.
+    */
+    const inNow = clubOpen({
+      answeredFrameIds: mine.legend.map((a) => a.frame_id),
+      purpose: mine.purpose ?? null,
+      answers: mine.legend.map((a) => ({ frame_id: a.frame_id, values: a.values })),
+      welcomedAt: mine.club_welcomed_at,
+      proof: mine.proof,
+    })
     return (
-      <div className="flex flex-1 flex-col justify-center gap-3">
-        <p className="eyebrow text-accent">DONE</p>
-        <p className="display text-balance text-2xl">All the way through, out loud.</p>
+      <div className="flex flex-1 flex-col justify-center gap-4">
+        <p className="eyebrow text-accent">{LEGEND_COPY.run_done_eyebrow}</p>
+        <p className="display text-balance text-2xl">{LEGEND_COPY.run_done_head}</p>
+        {inNow ? (
+          <p data-testid="run-done-club" className="text-base leading-relaxed text-fg">
+            {LEGEND_COPY.run_done_club}
+          </p>
+        ) : (
+          <p className="text-base leading-relaxed text-muted">{LEGEND_COPY.run_done_more}</p>
+        )}
         {rough.length ? (
           <div
             data-testid="run-rough"
-            className="mt-3 flex flex-col gap-2 rounded-2xl border border-line bg-bg-elev px-4 py-4"
+            className="flex flex-col gap-2 rounded-2xl border border-line bg-bg-elev px-4 py-4"
           >
             <p className="eyebrow text-muted">{LEGEND_COPY.run_again_later}</p>
             {rough.map((r) => (
@@ -1732,12 +1794,50 @@ function RunThrough({
           </div>
         ) : null}
         <Dock>
+          {/*
+            THE FRONT DOOR, which is what finishing earns. `?in=1` is what makes it the
+            ceremony rather than the feed — see components/Club.tsx, where the welcome is
+            gated on it.
+          */}
+          {inNow ? (
+            <Link
+              href="/club?in=1"
+              data-testid="run-done-in"
+              onClick={() => track('legend_run_finished', { into_club: true })}
+              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+            >
+              {LEGEND_COPY.run_done_club_cta}
+            </Link>
+          ) : null}
+          {/*
+            AND ROUND AGAIN AS AN OPTION, in Sam's own parenthesis — "(which should be an
+            option)". Below the door and outlined, because somebody who has just proved it
+            does not need to be sent back to the start as the primary act.
+          */}
           <button
             type="button"
-            onClick={onDone}
-            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+            data-testid="run-done-again"
+            onClick={() => {
+              track('legend_run_again', {})
+              setShown(false)
+              setHeard(null)
+              setGoes(0)
+              setI(0)
+            }}
+            className={
+              'tap-target eyebrow w-full rounded px-5 py-3 text-center ' +
+              (inNow ? 'border border-line text-fg' : 'bg-accent text-accent-ink')
+            }
           >
-            MY LEGEND
+            {LEGEND_COPY.run_done_again}
+          </button>
+          <button
+            type="button"
+            data-testid="run-done-board"
+            onClick={onDone}
+            className="tap-target text-center text-xs text-muted underline underline-offset-4"
+          >
+            {LEGEND_COPY.run_done_board}
           </button>
         </Dock>
       </div>
@@ -1914,6 +2014,25 @@ function RunThrough({
   /* Said five times with nothing landing. The screen stops asking — see ENOUGH_GOES. */
   const enough = goes >= ENOUGH_GOES && !heard?.close
 
+  /*
+    FORWARD AND BACK, in one place each.
+
+    The NEXT button is gone. Sam: "remove the next CTA button thus opening up more real
+    estate and removing scrolling." It was a full-width bar at the foot of a card that had
+    just grown a question at 2.125rem, an answer at 2.975rem, a feedback panel and
+    sometimes a five-goes notice — and it was the thing that pushed the lot into a scroll.
+    Its job is now done three ways: the two-second wait after a success, the arrow for
+    anybody quicker, and SHOW ME for anybody who did not speak.
+  */
+  const go = (to: number) => {
+    setShown(false)
+    setHeard(null)
+    /* A fresh question is a fresh five — see the note on `goes`. */
+    setGoes(0)
+    setI(to)
+  }
+
+
   return (
     /*
       ONE WHITE CARD ON THE SAND. Sam: "I also want to see this whole page on a white card
@@ -1930,7 +2049,7 @@ function RunThrough({
       lift rather than becoming a bright hole — see the tokens in app/globals.css.
     */
     <div className="flex flex-1 flex-col rounded-2xl border border-line bg-bg-elev px-5 py-6 gap-6">
-      <p className="eyebrow text-muted">
+      <p data-testid="run-step" className="eyebrow text-muted">
         {i + 1} OF {order.length}
       </p>
 
@@ -1954,7 +2073,9 @@ function RunThrough({
         /* The answer, in place, at the scale this product reserves for produced language. */
         <div className="animate-bank flex flex-col gap-3">
           <p className="eyebrow text-muted">YOURS</p>
-          <p className="pt t-said">{answer}</p>
+          <p data-testid="run-answer" className="pt t-said">
+            {answer}
+          </p>
           {/*
             LISTEN, COPY, SAY — all three, on the answer too.
 
@@ -2043,31 +2164,85 @@ function RunThrough({
       ) : null}
 
       <Dock>
-        {shown ? (
+        {/*
+          ONE ROW: back, the way on, forward. Sam asked for the back icon and the arrow and
+          for the NEXT bar to go — and three full-width buttons stacked is the scrolling he
+          wanted rid of. The icons take the edges and leave the middle to the only thing
+          here that needs words.
+        */}
+        <div className="flex items-center gap-3">
+          {/*
+            BACK. Sam: "and a back icon if the user wants to go back." Hidden on the first
+            card rather than disabled: a dead control is a worse answer than no control,
+            and the Dock's STOP HERE below is the way out of the run itself.
+          */}
+          {i > 0 ? (
+            <button
+              type="button"
+              data-testid="legend-back"
+              aria-label="Back to the question before"
+              onClick={() => go(i - 1)}
+              className="tap-target flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line text-muted"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                <path d="M15 5l-7 7 7 7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          ) : (
+            /* Holds the arrow at the right edge on card one, so it does not jump inwards. */
+            <span className="h-12 w-12 shrink-0" />
+          )}
+
+          {/*
+            SHOW ME, for anybody who does not want to speak. Sam: "a user may not want to
+            say it out loud but just see the correct response." It is the only worded
+            control left on the card, and once the answer is up there is nothing to show —
+            so the space goes back to the arrow.
+          */}
+          {shown ? (
+            <span className="flex-1" />
+          ) : (
+            <button
+              type="button"
+              data-testid="legend-show"
+              onClick={() => setShown(true)}
+              className="tap-target eyebrow flex-1 rounded border border-line-strong px-4 py-3 text-center"
+            >
+              {LEGEND_COPY.run_show}
+            </button>
+          )}
+
+          {/*
+            FORWARD, AND IT NUDGES WHEN THE CLOCK IS RUNNING.
+
+            Sam: "add an animated right arrow for someone to override the auto swipe (if
+            they are quicker)." The animation is exactly that signal — it moves only while
+            the two seconds are counting down, so it reads as "or now, if you like" rather
+            than as decoration. Filled green at that moment too, because it is continuing
+            a success; outlined the rest of the time, when it is just the way on.
+          */}
           <button
             type="button"
             data-testid="legend-next"
-            onClick={() => {
-              setShown(false)
-              setHeard(null)
-              /* A fresh question is a fresh five — see the note on `goes`. */
-              setGoes(0)
-              setI(i + 1)
-            }}
-            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+            aria-label={i + 1 < order.length ? 'Next question' : 'Finish the run'}
+            onClick={() => go(i + 1)}
+            className={
+              'tap-target flex h-12 w-12 shrink-0 items-center justify-center rounded-full border ' +
+              (closed ? 'border-correct bg-correct text-correct-ink' : 'border-line text-muted')
+            }
           >
-            {i + 1 < order.length ? LEGEND_COPY.run_next : LEGEND_COPY.run_last}
+            <svg
+              viewBox="0 0 24 24"
+              className={'h-5 w-5' + (closed ? ' nudge-right' : '')}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden
+            >
+              <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
-        ) : (
-          <button
-            type="button"
-            data-testid="legend-show"
-            onClick={() => setShown(true)}
-            className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center"
-          >
-            {LEGEND_COPY.run_show}
-          </button>
-        )}
+        </div>
         <button
           type="button"
           data-testid="legend-run-stop"

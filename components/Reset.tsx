@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { LEGEND_FRAMES, cardFor, doorwayRoots } from '@/content/legend'
+import { LEGEND_FRAMES, cardFor, clubOpen, doorwayRoots } from '@/content/legend'
 import { WARM_UP, roadProgress } from '@/content/road'
 import { PIECES } from '@/content/roots'
 import { Wordmark } from '@/components/Wordmark'
@@ -56,6 +56,25 @@ export function Reset() {
     Listed for the same reason the cards are: I guessed at this twice from the outside and
     was wrong both times.
   */
+  /*
+    AND THE CLUB'S DOOR, which is a THIRD question and the one that had no answer here.
+
+    Sam, having said all seven aloud: "I just successfully went through to the entire
+    legend but it took me back to another run through." The run had no finish screen, which
+    was the actual fault — but diagnosing it meant guessing at his proof rows, and I
+    guessed wrong out loud: I told him the run-through had probably not recorded them when
+    the only honest answer was that nothing on any screen said.
+
+    So it says. Said cold with source 'legend' is exactly what clubOpen counts, next to
+    what it needs, next to the rows themselves — the same shape as THE DOOR below, for the
+    same reason: a door nobody can see the state of is a door I end up speculating about.
+  */
+  const [club, setClub] = useState<{ open: boolean; said: number; needed: number; other: number }>({
+    open: false,
+    said: 0,
+    needed: 0,
+    other: 0,
+  })
   const [door, setDoor] = useState<{ open: boolean; missing: string[]; warmedUp: boolean; sections: string[] }>({
     open: false,
     missing: [],
@@ -152,6 +171,21 @@ export function Reset() {
     setOutstanding(
       card.filter((f) => !held.some((a) => a.frame_id === f.id)).map((f) => f.id),
     )
+    /* Counted the way clubOpen counts it, so this screen cannot disagree with the door. */
+    const proof = s.proof ?? []
+    const legendProof = proof.filter((pr) => pr.source === 'legend' && pr.clean)
+    setClub({
+      open: clubOpen({
+        answeredFrameIds: held.map((a) => a.frame_id),
+        purpose: s.purpose ?? null,
+        answers: held.map((a) => ({ frame_id: a.frame_id, values: a.values })),
+        welcomedAt: s.club_welcomed_at,
+        proof,
+      }),
+      said: legendProof.length,
+      needed: card.length,
+      other: proof.length - legendProof.length,
+    })
     const played = s.roots_played ?? []
     const sections = s.sections_completed ?? []
     setDoor({
@@ -347,6 +381,27 @@ export function Reset() {
             <p className="text-xs leading-relaxed text-muted">
               Sections finished: {door.sections.join(', ') || 'none'}
             </p>
+          </div>
+          {/*
+            THE CLUB'S DOOR. See the note on `club` above — it counts the one thing the
+            gate counts, so a finished run that does not open it can be read off the
+            screen instead of guessed at.
+          */}
+          <div className="mt-3 flex flex-col gap-1 border-t border-line pt-3">
+            <p className="eyebrow text-muted">THE CLUB</p>
+            <p data-testid="reset-club" className="text-xs leading-relaxed">
+              {club.open ? 'Open.' : 'Shut.'} Said cold from the run-through:{' '}
+              <span className="tabular-nums">{club.said}</span> of{' '}
+              <span className="tabular-nums">{club.needed}</span>.
+            </p>
+            {club.other ? (
+              <p className="text-xs leading-relaxed text-muted">
+                And{' '}
+                <span className="tabular-nums">{club.other}</span>{' '}
+                {club.other === 1 ? 'sentence' : 'sentences'} said cold in lessons, which
+                this door does not count — it asks for your own Legend.
+              </p>
+            ) : null}
           </div>
           {/*
             The other copy, named. This is the one that made a wipe look like it had

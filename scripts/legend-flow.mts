@@ -349,6 +349,189 @@ ok(
   }
 }
 
+/*
+  THE SUCCESS PATH, WITH A MICROPHONE THAT ALWAYS AGREES.
+
+  Sam: "when an audio has successfully been ticked wait two seconds then automatically
+  swipe right to the next card… add an animated right arrow for someone to override the
+  auto swipe (if they are quicker)."
+
+  None of that can be proved by reading the file — a timer that never fires, a stale
+  closure advancing past the wrong card, or two advances racing each other all look
+  correct in the source. So the browser gets a fake SpeechRecognition that hands back the
+  exact sentence the card is asking for, and the test watches what the screen then does.
+
+  THE FAKE IS THE REAL SHAPE, deliberately: it reports through `onresult` with a results
+  list and then `onend`, in that order, because that is the order the live API uses on
+  Chrome and the one engine/listen has a documented bug history with. A fake that resolved
+  some simpler way would pass while the product broke.
+*/
+{
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 } })
+  const page = await ctx.newPage()
+  /*
+    It needs to know the right answer, so it reads the card off the page at the moment it
+    is asked. Speaking the answer back is the point: this is testing the screen's
+    behaviour on a success, not the matcher — scripts/say-check.mts owns that.
+  */
+  await ctx.addInitScript(`
+    function FakeRec() {
+      this.lang = ''
+      this.continuous = false
+      this.interimResults = false
+      this.maxAlternatives = 1
+      this.onresult = null
+      this.onerror = null
+      this.onend = null
+    }
+    FakeRec.prototype.start = function () {
+      var self = this
+      var el = document.querySelector('[data-testid="run-answer"]')
+      var said = el ? el.textContent : ''
+      setTimeout(function () {
+        if (self.onresult) self.onresult({ results: { length: 1, 0: { length: 1, 0: { transcript: said } } } })
+        if (self.onend) self.onend()
+      }, 50)
+    }
+    FakeRec.prototype.stop = function () {}
+    window.SpeechRecognition = FakeRec
+    window.webkitSpeechRecognition = FakeRec
+  `)
+  await page.goto(BASE)
+  const full = {
+    ...seed,
+    club_welcomed_at: '2026-08-20T00:00:00.000Z',
+    legend: LEGEND_CARD.map((f) => ({
+      frame_id: f.id,
+      values: Object.fromEntries(f.slots.map((s2) => [s2.key, s2.kind === 'name' ? 'Sam' : 'x'])),
+      at: '2026-08-20T00:00:00.000Z',
+    })),
+  }
+  await page.evaluate(
+    ([k, blob]) => localStorage.setItem(k as string, JSON.stringify(blob)),
+    [KEY, full] as const,
+  )
+  await page.goto(BASE + '/legend')
+  await page.waitForTimeout(1200)
+  const start = await page.$('[data-testid="legend-rehearse"]')
+  if (start) {
+    await start.click()
+    await page.waitForTimeout(800)
+
+    const at = async () => ((await page.textContent('[data-testid="run-step"]')) ?? '').trim()
+    const first = await at()
+
+    /* THE NEXT BAR IS GONE. Sam: "remove the next CTA button." */
+    const wide = (await page.evaluate(
+      `(() => { const b = document.querySelector('[data-testid="legend-next"]'); return b ? b.getBoundingClientRect().width : 0 })()`,
+    )) as number
+    ok('the way on is an icon, not a bar', wide > 0 && wide < 80, Math.round(wide) + 'px')
+
+    /* And nothing scrolls, which is what removing it was for. */
+    const scrolls = (await page.evaluate(
+      `document.documentElement.scrollHeight > window.innerHeight + 4`,
+    )) as boolean
+    ok('the card fits without scrolling', !scrolls)
+
+    /* No back control on the first card — there is nothing behind it. */
+    ok('no back on the first card', !(await page.$('[data-testid="legend-back"]')))
+
+    /* Reveal, then say it — the answer has to be on screen for the fake to read it. */
+    await page.click('[data-testid="legend-show"]')
+    await page.waitForTimeout(400)
+    await page.click('[data-testid="say-it"]')
+    await page.waitForTimeout(700)
+
+    /* THE TICK IS WHITE ON GREEN. Sam's words, measured off the rendered button. */
+    const tick = (await page.evaluate(`(() => {
+      const b = document.querySelector('[data-testid="say-it"]')
+      if (!b) return null
+      const cs = getComputedStyle(b)
+      return { bg: cs.backgroundColor, ink: cs.color }
+    })()`)) as { bg: string; ink: string } | null
+    ok('the success mark is green', tick?.bg === 'rgb(44, 107, 74)', tick?.bg ?? 'no button')
+    ok('with white on it', tick?.ink === 'rgb(255, 255, 255)', tick?.ink ?? '')
+
+    /* The arrow nudges while the clock runs, which is the override signal. */
+    const nudging = (await page.evaluate(
+      `!!document.querySelector('[data-testid="legend-next"] .nudge-right')`,
+    )) as boolean
+    ok('the arrow invites an early move', nudging)
+
+    /* IT HAS NOT MOVED YET — a swipe that fires instantly is not a two-second wait. */
+    ok('it waits rather than snatching the card away', (await at()) === first, await at())
+
+    /* And two seconds later it has. */
+    await page.waitForTimeout(2300)
+    const second = await at()
+    ok('two seconds later it has moved on', second !== first, first + ' → ' + second)
+
+    /* Back goes back, now that there is somewhere to go. */
+    const back = await page.$('[data-testid="legend-back"]')
+    ok('and back appears once there is a card behind', Boolean(back))
+    if (back) {
+      await back.click()
+      await page.waitForTimeout(400)
+      ok('back returns to the card before', (await at()) === first, await at())
+    }
+
+    /*
+      AND THE END OF THE RUN IS THE FRONT DOOR.
+
+      Sam: "I just successfully went through to the entire legend but it took me back to
+      another run through (which should be an option) but should have given me a success
+      message and the front door to the club."
+
+      It did: `onDone` was setMode('deck'), so finishing and giving up landed on the same
+      screen. Walked the whole way here rather than asserted from the source, because the
+      fault was never in one line — it was that the finish had no screen of its own, and
+      only arriving at it proves there is one now.
+    */
+    /*
+      SAID, NOT SKIPPED, ON EVERY CARD. The door counts proof rows with source 'legend' —
+      one per sentence produced — so clicking the arrow through the run would reach the end
+      with one sentence said and the Club legitimately shut. Walking it properly is also
+      the only version of this test that proves the door opens at all.
+
+      The card is seven, plus slack; the loop stops on the done screen either way.
+    */
+    for (let n = 0; n < LEGEND_CARD.length + 3; n++) {
+      if (await page.$('[data-testid="run-done-again"]')) break
+      const show = await page.$('[data-testid="legend-show"]')
+      if (show) {
+        await show.click()
+        await page.waitForTimeout(260)
+      }
+      const mic = await page.$('[data-testid="say-it"]')
+      if (mic) {
+        await mic.click()
+        /* Long enough for the fake to answer and the two-second wait to carry the card. */
+        await page.waitForTimeout(2600)
+        continue
+      }
+      const arrow = await page.$('[data-testid="legend-next"]')
+      if (!arrow) break
+      await arrow.click()
+      await page.waitForTimeout(260)
+    }
+    const end = ((await page.textContent('body')) ?? '').replace(/\s+/g, ' ')
+    ok('finishing says you said it', /YOU SAID IT/.test(end))
+    ok('and does not just offer another run', Boolean(await page.$('[data-testid="run-done-again"]')))
+
+    /*
+      THE DOOR, and it has to be the ceremony rather than the feed — `?in=1` is what
+      components/Club.tsx gates the welcome on.
+    */
+    const into = await page.$('[data-testid="run-done-in"]')
+    ok('the Club is offered at the end', Boolean(into), /Dub Club is open/.test(end) ? 'said so' : 'no line')
+    if (into) {
+      const href = await into.getAttribute('href')
+      ok('and it is the front door, not the feed', href === '/club?in=1', String(href))
+    }
+  }
+  await ctx.close()
+}
+
 await browser.close()
 
 if (problems.length) {
