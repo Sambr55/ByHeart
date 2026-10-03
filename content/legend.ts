@@ -405,8 +405,24 @@ export function personalise<T extends {
     Legend pre-fill needed: the product may not show an answer it has not been told.
   */
   const asksOrigin = 'asks' in root && (root as { asks?: unknown }).asks === 'origin'
-  const unanswered = !said || !me.profile?.from_place?.trim()
-  const blankOrigin = asksOrigin && unanswered
+  /*
+    EACH HALF ON ITS OWN, which is the fix for a regression I introduced.
+
+    Sam: "The language selector has just blown up. I selected Scottish and it reverted to
+    English in the copy but didnt pull through, just gave me blanks."
+
+    This was `!said || !from_place` — blank the whole sentence unless BOTH are answered. The
+    origin question asks them one at a time, so the moment somebody picked `escocês` and had
+    not yet typed a town, the condition was still true and the line read "Sou —. Sou de —."
+    It blanked the answer they had just given, which is worse than the borrowed `inglês` it
+    replaced: that was wrong about them, this loses what they said.
+
+    A fact is shown when it is known and blank when it is not, independently. Nothing else
+    about the rule changes — an unanswered half still never borrows Ana's.
+  */
+  const town = me.profile?.from_place?.trim()
+  const blankNationality = asksOrigin && !said
+  const blankTown = asksOrigin && !town
   /*
     THE BLANK ITSELF, in both languages and for both the nationality and the town.
 
@@ -414,13 +430,26 @@ export function personalise<T extends {
     gap somebody is about to close. It matches root_display, which already writes the
     shape of this sentence as "My name is — and I am —".
   */
-  const blankFacts = (t: string) =>
-    t
-      .replaceAll('inglesa', '—')
-      .replaceAll('inglês', '—')
-      .replaceAll('English', '—')
-      .replaceAll('Londres', '—')
-      .replaceAll('London', '—')
+  /*
+    IT ONLY EVER SEES WHAT myOrigin LEFT BEHIND, and that is the point rather than a flaw.
+
+    blankFacts runs AFTER myOrigin in the chain, so by the time it looks at the line, an
+    answered nationality has already become escocês and there is no inglês left to blank.
+    What reaches it is exactly the specimen that was not replaced — which is the definition
+    of unanswered, arrived at by the substitution itself rather than by a second condition
+    agreeing with it.
+
+    The flags are still read, because a learner who answers and then CLEARS a value should
+    see the dash again rather than Ana's fact coming back.
+  */
+  const blankFacts = (t: string) => {
+    let out = t
+    if (blankNationality) {
+      out = out.replaceAll('inglesa', '—').replaceAll('inglês', '—').replaceAll('English', '—')
+    }
+    if (blankTown) out = out.replaceAll('Londres', '—').replaceAll('London', '—')
+    return out
+  }
   const myOrigin = (t: string) => {
     let out = t
     if (chosen && chosen.value !== 'inglês') {
@@ -547,13 +576,21 @@ export function personalise<T extends {
     */
     const status = statusOf(me)
     /*
-      THE NAME LANDS, THE UNASKED FACT DOES NOT — see blankOrigin. myName still runs, so
-      the learner reads their own name; the nationality and town become dashes rather than
-      Ana's, which is the line Sam objected to.
+      BLANKING IS A STEP, NOT A SHORT CIRCUIT — and that was the regression.
+
+      This returned early on blankOrigin, skipping myOrigin altogether. With the condition
+      requiring both halves, a learner who had chosen `escocês` and not yet typed a town got
+      the whole line blanked — including the nationality they had just picked, because
+      myOrigin never ran to put it in.
+
+      It runs in the chain now: myOrigin fills whatever IS answered, and blankFacts clears
+      whatever is not. Both can be true of one sentence, which is the state the origin
+      question spends most of its time in.
     */
-    if (blankOrigin) return blankFacts(myName(t, me.display_name))
     if (!swap)
-      return myForm(myOrigin(myStatus(myAge(myName(t, me.display_name), me.profile?.age), status)))
+      return blankFacts(
+        myForm(myOrigin(myStatus(myAge(myName(t, me.display_name), me.profile?.age), status))),
+      )
     const swapped = t
       .replaceAll('de música', swap.after_de)
       .replaceAll('música', swap.target)
@@ -564,7 +601,9 @@ export function personalise<T extends {
       */
       .replaceAll('of music', 'of ' + swap.gloss)
       .replaceAll('music', swap.gloss)
-    return myForm(myOrigin(myStatus(myAge(myName(swapped, me.display_name), me.profile?.age), status)))
+    return blankFacts(
+      myForm(myOrigin(myStatus(myAge(myName(swapped, me.display_name), me.profile?.age), status))),
+    )
   }
   return {
     ...root,

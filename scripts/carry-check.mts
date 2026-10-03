@@ -541,6 +541,53 @@ console.log('\nwhat the profile knows reaches the card\n')
   Asserted for every asking root, not just the one that broke, because the rule is
   general: a lesson may not show an answer it has not been told.
 */
+/*
+  AND AN ANSWER SHOWS THE MOMENT IT IS GIVEN.
+
+  Sam: "The language selector has just blown up. I selected Scottish and it reverted to
+  English in the copy but didnt pull through, just gave me blanks."
+
+  The blanking rule above — do not state a fact before it is answered — was written as one
+  condition over BOTH halves of the origin question: blank unless nationality AND town are
+  both known. The question asks them one at a time, so the whole middle of that flow had a
+  learner looking at "Sou —." having just chosen escocês.
+
+  Losing somebody's answer is worse than the borrowed inglês this replaced: that was wrong
+  about them, this throws away what they said. So the two halves are asserted separately,
+  which is the only shape that can hold both rules at once.
+*/
+console.log('\nand a half-answered origin keeps the half that was answered\n')
+{
+  const root = ROOTS.find((r) => r.root_id === 'tb_introduce')
+  if (root) {
+    const half = personalise(root, {
+      display_name: 'Sam',
+      profile: { nationality: 'escocês', from_place: null, gender: 'm', age: null, into: [] },
+      legend: [],
+    } as Parameters<typeof personalise>[1])
+    ok(
+      'a chosen nationality shows before the town is typed',
+      half.target.includes('escocês') && half.source.includes('Scottish'),
+      half.target,
+    )
+    ok(
+      'and the town it does not have yet stays blank',
+      !half.target.includes('Londres') && !half.source.includes('London'),
+      half.target,
+    )
+    const townOnly = personalise(root, {
+      display_name: 'Sam',
+      profile: { nationality: null, from_place: 'Glasgow', gender: 'm', age: null, into: [] },
+      legend: [],
+    } as Parameters<typeof personalise>[1])
+    ok(
+      'and the mirror: a town shows before the nationality is chosen',
+      (townOnly.branches ?? []).some((b) => b.target.includes('Glasgow')),
+      (townOnly.branches ?? []).map((b) => b.target).join(' / '),
+    )
+  }
+}
+
 console.log('\nand nothing is claimed before it is answered\n')
 {
   const blank = {
