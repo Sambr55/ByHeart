@@ -71,7 +71,12 @@ export function NotYet({
     The three things the Club actually holds, counted from the content it would serve.
 
     Read after mount like everything else that comes out of the learner record — the
-    chapter and the purpose decide the room count, and the server has neither.
+    chapter decides the room count, and the server does not have it.
+
+    PURPOSE NO LONGER CHANGES THIS NUMBER, and that is the point of the change behind it:
+    it ranks the rooms rather than removing them, so the promise on this screen is the
+    same 35 for everybody instead of 14 for a visitor and 23 for a mover. See purposeRank
+    in content/feed.ts.
   */
   const inside = useMemo(() => {
     const chapter = learner.chapter ?? undefined

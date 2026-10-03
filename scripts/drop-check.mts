@@ -14,7 +14,7 @@
  */
 import { DROPS } from '../content/drops'
 import { CRATES } from '../content/roots'
-import { dropDaysLeft, dropLive, dropsFor, feedFor, type FeedCard } from '../content/feed'
+import { dropDaysLeft, dropLive, dropsFor, feedFor, purposeRank, roomsFor, type FeedCard } from '../content/feed'
 import { DROP_TEMPLATES } from '../content/drop-templates'
 import { WANTED, bankImage } from '../content/images'
 import { generatedDrops, generationReport } from '../content/generated'
@@ -485,6 +485,70 @@ const reviewed = DROP_TEMPLATES.filter((t) => t.review === 'reviewed').length
 console.log('  ' + reviewed + ' of ' + DROP_TEMPLATES.length + ' templates read by a native speaker')
 if (reviewed < DROP_TEMPLATES.length) {
   console.log('  ⚠ nothing drafted from the rest should reach anybody until they have been')
+}
+
+/*
+  PURPOSE CURATES, IT DOES NOT SUBTRACT.
+
+  Sam: "purpose - it should curate rather than subtract."
+
+  It used to filter, and every honest answer shrank the Club — measured across the real
+  content: no answer 35 rooms, moving 23, staying 16, visiting 14, with visiting having
+  nothing at all at rung 4. The widest Club belonged to the person who claimed nothing,
+  which inverts what the question is for.
+
+  Worse than the counts: the feed weaves idioms every 7th card and cheats every 11th
+  against the ROOMS array, so a shorter room list is a shorter carrier. A visitor was
+  served 3 of 30 idioms where somebody who answered nothing got 6.
+
+  There was no test for any of this. feed-check runs on a learner with NO purpose, which
+  is the one case where the old filter was inert — so the starvation was invisible to the
+  gate for as long as it existed.
+*/
+console.log('\npurpose ranks the Club rather than shrinking it\n')
+{
+  const all = roomsFor('lisbon', null).length
+  for (const purpose of ['visiting', 'staying', 'moving'] as const) {
+    const rooms = roomsFor('lisbon', purpose)
+    ok(
+      purpose + ' sees the whole Club',
+      rooms.length === all,
+      rooms.length + ' of ' + all,
+    )
+    /*
+      AND ITS OWN ROOMS COME FIRST. Seeing everything is only half of curating — if the
+      order were unchanged, answering the question would buy nothing at all.
+    */
+    const first = rooms[0]
+    const firstIsMine =
+      first?.kind === 'situation' && purposeRank(first.situation, purpose) === 0
+    ok(purpose + ' opens on a room written for it', firstIsMine, first?.id ?? 'none')
+    /*
+      Every tagged room ahead of every untagged one, and those ahead of other purposes'.
+      Checked as a monotonic sequence rather than by counting, because that is the actual
+      claim: the bands never interleave.
+    */
+    const ranks = rooms.map((c) => (c.kind === 'situation' ? purposeRank(c.situation, purpose) : 1))
+    ok(
+      purpose + ' keeps the three bands in order',
+      ranks.every((r, i) => i === 0 || ranks[i - 1] <= r),
+      ranks.join('').slice(0, 40),
+    )
+  }
+  /*
+    AND NOBODY IS STARVED OF THE WEAVE. The carrier is the same length for everybody now,
+    so the idiom and cheat beats land the same number of cards whatever was answered.
+  */
+  const carrier = (p: 'visiting' | 'staying' | 'moving' | null) =>
+    roomsFor('lisbon', p).length + dropsFor('lisbon', new Date(), false).length
+  const base = carrier(null)
+  for (const purpose of ['visiting', 'staying', 'moving'] as const) {
+    ok(
+      purpose + ' gets the same weave carrier as an unanswered learner',
+      carrier(purpose) === base,
+      carrier(purpose) + ' against ' + base,
+    )
+  }
 }
 
 if (problems.length) {

@@ -484,10 +484,52 @@ export function dropDaysLeft(d: Drop, now: Date = new Date()): number {
  * are in the country. Tagging is for the ones where the answer genuinely differs, and an
  * unanswered purpose sees everything rather than nothing: a Club that empties itself
  * until a question is answered is a Club with a form in front of it.
+ *
+ * NO LONGER A FILTER ON THE CLUB — see purposeRank, which is what roomsFor uses now. This
+ * is kept because it is the honest answer to "is this one written for them", which the
+ * ranking is built out of and which other callers still ask.
  */
 export function forPurpose(s: Situation, purpose: Purpose | null): boolean {
   if (!s.purposes || !purpose) return true
   return s.purposes.includes(purpose)
+}
+
+/**
+ * HOW WELL A SITUATION FITS THIS LEARNER — 0 best, 2 worst.
+ *
+ * Sam: "purpose - it should curate rather than subtract."
+ *
+ * WHAT IT USED TO DO. roomsFor filtered on forPurpose, so the answer to "why are you
+ * here" removed rooms and never added any. Measured across the real content:
+ *
+ *   no answer / curious   35 rooms      ← the widest Club
+ *   moving                23
+ *   staying / work        16
+ *   visiting              14            ← and zero at rung 4
+ *
+ * So the widest Club belonged to the person who claimed nothing, every substantive answer
+ * strictly reduced the product, and a visitor who climbed the ladder found a ceiling that
+ * existed for nobody else. The file's own comment promised "every purpose has a Club of
+ * its own"; what each purpose actually had was a subset.
+ *
+ * It was worse than the room counts alone. The feed weaves idioms every 7th card and
+ * cheats every 11th against the ROOMS array, so a shorter room list is a shorter carrier:
+ * a visitor was served 3 of 30 idioms and 2 of 24 cheats, against 6 and 4 for somebody
+ * who answered nothing. Answering honestly cost half the Club's non-room content.
+ *
+ * WHAT IT DOES NOW. Purpose decides ORDER and never membership. Everybody sees all 35
+ * rooms; the ones written for you come first, the ones written for everybody follow, and
+ * the rest are behind them rather than absent. Nothing is taken away by answering a
+ * question, the rung-4 ceiling disappears because the rooms above it were always there,
+ * and the weave gets a 47-card carrier for every learner instead of 26.
+ *
+ * Three ranks rather than a score, because that is all the data supports: a situation is
+ * tagged for you, tagged for nobody in particular, or tagged for somebody else.
+ */
+export function purposeRank(s: Situation, purpose: Purpose | null): 0 | 1 | 2 {
+  if (!s.purposes?.length) return 1
+  if (!purpose) return 1
+  return s.purposes.includes(purpose) ? 0 : 2
 }
 
 export function roomsFor(
@@ -505,8 +547,19 @@ export function roomsFor(
   */
   purpose: Purpose | null = null,
 ): FeedCard[] {
-  return SITUATIONS.filter((s) => s.chapter === chapter && isCurrent(s) && forPurpose(s, purpose))
-    .sort((a, b) => a.rung - b.rung)
+  /*
+    RANKED, NOT FILTERED — see purposeRank for the measurement that changed this.
+
+    Purpose used to decide membership and the Club got smaller every time somebody
+    answered honestly. It decides order now: yours first, everybody's next, the rest
+    behind them. Rung still sorts within each band, so the ladder is unchanged inside the
+    part of the Club a learner is actually reading.
+  */
+  return SITUATIONS.filter((s) => s.chapter === chapter && isCurrent(s))
+    .sort(
+      (a, b) =>
+        purposeRank(a, purpose) - purposeRank(b, purpose) || a.rung - b.rung,
+    )
     .map((s): FeedCard => ({ kind: 'situation', id: s.id, situation: s }))
 }
 
