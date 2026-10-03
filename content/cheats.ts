@@ -327,6 +327,39 @@ export const CHEATS: Cheat[] = [
     ],
     note: 'The one to memorise word for word. Every conversation becomes a lesson.',
   },
+  {
+    /*
+      THE REPAIR KIT, WHICH WAS A LIST ON THE LEGEND PAGE AND NOTHING ELSE.
+
+      Sam: "move the repair kit into Hacks and remove everything on this screen other than
+      run it through and associated text."
+
+      REPAIR_KIT in content/legend.ts has carried four sentences since it was written and
+      the only place they rendered was a panel at the foot of the Legend page — a list, with
+      no card, no board, and nothing that could collect them. They are the most useful four
+      sentences in the product and they lived where nobody looks.
+
+      A HACK rather than a bluff, which is the other candidate. A bluff is what you say when
+      you have run out of Portuguese; these are what you say to keep the conversation GOING
+      — they ask the other person to do something, and each one buys more Portuguese rather
+      than covering for having none.
+
+      Three, not four: "Como se diz…?" is rescue_hack directly above, authored before this
+      and already doing the same job. Duplicating it would put the same sentence on two
+      cards, which is the thing this codebase keeps being bitten by.
+    */
+    id: 'repair_hack',
+    kind: 'hack',
+    shape: 'KEEP IT GOING',
+    does: 'Three sentences that rescue a conversation instead of ending it.',
+    needs: [],
+    says: [
+      { pt: 'Desculpe, pode falar mais devagar?', en: 'Sorry, could you speak more slowly?' },
+      { pt: 'Não percebi.', en: 'I did not catch that.' },
+      { pt: 'Estou a aprender. Tenha paciência.', en: 'I am learning. Bear with me.' },
+    ],
+    note: 'Saying you are learning invites somebody to switch to English. Asking them to slow down invites them not to.',
+  },
 
   /* ---------------------------------------------------------------- BLUFFS */
   /*
