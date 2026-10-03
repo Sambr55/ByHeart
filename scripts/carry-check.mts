@@ -247,9 +247,21 @@ console.log('  ' + touched.length + ' roots carry a specimen: ' + touched.map((r
 const NAME = 'Fred'
 for (const interest of INTERESTS) {
   for (const age of [17, 30, 56, 78]) {
+    /*
+      WITH AN ORIGIN, because this fixture is about the age and interest swaps and
+      tb_introduce holds its whole specimen until the origin is answered.
+
+      That hold is deliberate — see holdSpecimen in content/legend.ts. "Chamo-me Ana. Sou
+      inglês." is the sentence that lesson TEACHES, and putting the reader's own name in
+      the first half makes the second half a claim about them. So a fixture with no
+      nationality correctly gets Ana's name, and asserting "the name is the learner's"
+      against it was testing the wrong learner rather than finding a fault.
+
+      Answering it here keeps every other assertion in this loop pointed at what it is for.
+    */
     const me = {
       display_name: NAME,
-      profile: { age, into: [interest.id] },
+      profile: { age, into: [interest.id], nationality: 'escocês', from_place: 'Glasgow' },
     }
     for (const root of touched) {
       const p = personalise(root as never, me) as unknown as {
@@ -604,33 +616,43 @@ console.log('\nand nothing is claimed before it is answered\n')
       specimen's own values — inglês, English, Londres, London — because those are exactly
       what a learner would misread as their own.
     */
-    for (const claim of ['inglês', 'inglesa', 'Londres']) {
-      if (!r.target.includes(claim)) continue
-      ok(
-        r.root_id + ' does not state ' + claim + ' before it is answered',
-        !shown.target.includes(claim),
-        shown.target,
-      )
-    }
-    for (const claim of ['English', 'London']) {
-      if (!r.source.includes(claim)) continue
-      ok(
-        r.root_id + ' does not state ' + claim + ' before it is answered',
-        !shown.source.includes(claim),
-        shown.source,
-      )
-    }
-    /* And the branches, which are on the same screen and were read the same way. */
+    /*
+      THE RULE IS NOT "NEVER SAY INGLÊS" — it is never say it ABOUT THEM.
+
+      This asserted that the specimen's own words must not survive, and that was too
+      strong. "Chamo-me Ana. Sou inglês." is the sentence tb_introduce exists to teach; a
+      learner reading it is reading an example, and blanking it produced "Sou —.", which is
+      a shape with the word that explains it taken out. Sam, with the screenshot: "No its
+      not pulling through country."
+
+      What makes a specimen a claim is the NAME. Ana's sentence is plainly Ana's; put the
+      reader's own name in the first half and every word after it is about them. So the
+      assertion is that an unanswered root does not carry the learner's name — which holds
+      the original fault shut without emptying the lesson.
+    */
+    ok(
+      r.root_id + ' does not put the learner in an unanswered line',
+      !shown.target.includes('Sam') && !shown.source.includes('Sam'),
+      shown.target,
+    )
     for (const br of shown.branches) {
-      for (const claim of ['inglês', 'inglesa']) {
-        if (!r.branches.some((b) => b.target.includes(claim))) continue
-        ok(
-          r.root_id + ' branch does not state ' + claim + ' before it is answered',
-          !br.target.includes(claim),
-          br.target,
-        )
-      }
+      ok(
+        r.root_id + ' branch does not put the learner in an unanswered line',
+        !br.target.includes('Sam'),
+        br.target,
+      )
     }
+    /*
+      AND IT IS STILL A SENTENCE. The fix for the fault above was a dash — "Sou —." — which
+      is a shape with the word that explains it removed, on the one screen whose job is to
+      teach that shape. Sam read it off his phone. A specimen that has been emptied is not
+      a safer specimen, it is a worse lesson.
+    */
+    ok(
+      r.root_id + ' still teaches a whole sentence',
+      !shown.target.includes('—') && !shown.source.includes('—'),
+      shown.target,
+    )
   }
 }
 

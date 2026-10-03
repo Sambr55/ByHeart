@@ -421,8 +421,46 @@ export function personalise<T extends {
     about the rule changes — an unanswered half still never borrows Ana's.
   */
   const town = me.profile?.from_place?.trim()
-  const blankNationality = asksOrigin && !said
-  const blankTown = asksOrigin && !town
+  /*
+    NOTHING IS BLANKED ANY MORE, and the dash is gone.
+
+    Sam, with a screenshot of the lesson: "No its not pulling through country" — the line
+    read "Chamo-me Golly. Sou —." He had not answered yet, so this was the code doing
+    exactly what I built, which is the problem rather than the defence.
+
+    THE DASH WAS WRONG BECAUSE OF WHERE IT WAS. tb_introduce is the lesson that TEACHES
+    "Chamo-me Ana. Sou inglês." — the shape of an introduction, in both halves. A learner
+    reading "Sou —." is being shown a sentence with its verb complement removed, and there
+    is nothing to learn from it: the word that would show how `sou` works is the one that
+    was taken out. I replaced a specimen with a hole and called it honesty.
+
+    The original fault is still real — the lesson said "Chamo-me Sam. Sou inglês.", which
+    tells somebody they are English before they have said. But the wrong half was blanked.
+    The NAME is what turned a specimen into a claim: Ana's sentence is plainly Ana's, and
+    the moment it carries the reader's own name every word after it reads as being about
+    them. So the name no longer carries here, and the specimen stays whole — which is also
+    what root_display has always promised, "My name is — and I am —".
+
+    The moment they answer, every swap below applies and the whole line becomes theirs.
+  */
+  /*
+    HELD UNTIL THEY HAVE SAID ANYTHING AT ALL, not until they have said everything.
+
+    `!said || !town` left a middle state reading "Chamo-me Ana. Sou escocês." — Ana's name
+    beside the learner's own nationality, which is nobody's sentence. The question the hold
+    actually answers is "has this person started telling us who they are yet", and one
+    answer is enough: from that moment the line is theirs and every swap should land on it.
+  */
+  /*
+    AND THE NATIONALITY IS THE ONE THAT DECIDES IT.
+
+    `!said && !town` leaves one state — a town typed with no nationality — showing "Chamo-me
+    Golly. Sou inglês.", which is the original fault in miniature: the learner's name beside
+    a nationality nobody gave. AskOrigin only renders the town field once a nationality
+    exists, so that state is unreachable today; it is guarded anyway, because "unreachable"
+    is a fact about one component and this is read by several.
+  */
+  const holdSpecimen = asksOrigin && !said
   /*
     THE BLANK ITSELF, in both languages and for both the nationality and the town.
 
@@ -430,26 +468,7 @@ export function personalise<T extends {
     gap somebody is about to close. It matches root_display, which already writes the
     shape of this sentence as "My name is — and I am —".
   */
-  /*
-    IT ONLY EVER SEES WHAT myOrigin LEFT BEHIND, and that is the point rather than a flaw.
 
-    blankFacts runs AFTER myOrigin in the chain, so by the time it looks at the line, an
-    answered nationality has already become escocês and there is no inglês left to blank.
-    What reaches it is exactly the specimen that was not replaced — which is the definition
-    of unanswered, arrived at by the substitution itself rather than by a second condition
-    agreeing with it.
-
-    The flags are still read, because a learner who answers and then CLEARS a value should
-    see the dash again rather than Ana's fact coming back.
-  */
-  const blankFacts = (t: string) => {
-    let out = t
-    if (blankNationality) {
-      out = out.replaceAll('inglesa', '—').replaceAll('inglês', '—').replaceAll('English', '—')
-    }
-    if (blankTown) out = out.replaceAll('Londres', '—').replaceAll('London', '—')
-    return out
-  }
   const myOrigin = (t: string) => {
     let out = t
     if (chosen && chosen.value !== 'inglês') {
@@ -576,20 +595,24 @@ export function personalise<T extends {
     */
     const status = statusOf(me)
     /*
-      BLANKING IS A STEP, NOT A SHORT CIRCUIT — and that was the regression.
+      THE SPECIMEN STAYS WHOLE UNTIL IT IS ANSWERED — see holdSpecimen.
 
-      This returned early on blankOrigin, skipping myOrigin altogether. With the condition
-      requiring both halves, a learner who had chosen `escocês` and not yet typed a town got
-      the whole line blanked — including the nationality they had just picked, because
-      myOrigin never ran to put it in.
+      myName is the one swap that does NOT run on this root before the answer, and that is
+      the whole of the fix: "Chamo-me Ana. Sou inglês." is plainly Ana's sentence and
+      teaches the shape, while "Chamo-me Sam. Sou inglês." tells Sam he is English. The
+      name is what turns an example into a claim.
 
-      It runs in the chain now: myOrigin fills whatever IS answered, and blankFacts clears
-      whatever is not. Both can be true of one sentence, which is the state the origin
-      question spends most of its time in.
+      Everything else still runs, so a learner who HAS answered gets the full substitution
+      on the same line.
     */
     if (!swap)
-      return blankFacts(
-        myForm(myOrigin(myStatus(myAge(myName(t, me.display_name), me.profile?.age), status))),
+      return myForm(
+        myOrigin(
+          myStatus(
+            myAge(holdSpecimen ? t : myName(t, me.display_name), me.profile?.age),
+            status,
+          ),
+        ),
       )
     const swapped = t
       .replaceAll('de música', swap.after_de)
@@ -601,8 +624,13 @@ export function personalise<T extends {
       */
       .replaceAll('of music', 'of ' + swap.gloss)
       .replaceAll('music', swap.gloss)
-    return blankFacts(
-      myForm(myOrigin(myStatus(myAge(myName(swapped, me.display_name), me.profile?.age), status))),
+    return myForm(
+      myOrigin(
+        myStatus(
+          myAge(holdSpecimen ? swapped : myName(swapped, me.display_name), me.profile?.age),
+          status,
+        ),
+      ),
     )
   }
   return {
