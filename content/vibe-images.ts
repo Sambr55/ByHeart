@@ -63,8 +63,17 @@ export const VIBE_IMAGES: Record<CultureFamily, VibeImage> = {
     The counting songs, which left the basics and took the same street with them — a
     different frame of it, so the two tiles do not read as the same crate twice.
   */
+  /*
+    HYPHENS, NOT UNDERSCORES — the file on disk is the-basics.jpg and this said
+    the_basics.jpg, so the src pointed at nothing.
+
+    It never rendered, which is why it survived: counting_songs is a CultureFamily with
+    roots but no entry in CRATES, so nothing ever asked for its picture. Two faults
+    stacked — a typo hidden behind a missing crate — and adding the crate would have broken
+    the tile on the day somebody did it.
+  */
   counting_songs: {
-    src: '/vibes/the_basics.jpg',
+    src: '/vibes/the-basics.jpg',
     alt: 'A tiled Lisbon doorway, numbered',
     rights_status: 'generated',
   },

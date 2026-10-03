@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { DemoCard } from '@/components/DemoCard'
+import { SayButton } from '@/components/SayButton'
 import { Destination } from '@/components/Destination'
 import { AudioButton } from '@/components/AudioButton'
 import { Choose } from '@/components/Choose'
@@ -15,7 +16,7 @@ import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { INTRO_DEMO_AFTER, INTRO_SETUP_AFTER, type IntroCard } from '@/content/intro'
 import { COLLISIONS, CRATES, PIECES, ROOTS, displayForm, setPieces } from '@/content/roots'
-import { askFor, cardFor, fillFrame, STAGES } from '@/content/legend'
+import { askFor, cardFor, fillFrame, LEGEND_FRAMES, STAGES } from '@/content/legend'
 import { mintShowing } from '@/engine/showing'
 import {
   FEED_COPY,
@@ -3467,6 +3468,33 @@ function SayItBetter({ card }: { card: Extract<FeedCard, { kind: 'fluent' }> }) 
         <p className="eyebrow text-accent">{card.fluent.hinge.pt.toUpperCase().slice(0, 14)}</p>
         <p className="text-sm leading-relaxed">{card.fluent.hinge.note}</p>
       </div>
+
+      {/*
+        AND SOMEWHERE TO GO, which this card did not have.
+
+        An audit of the Club found two detail faces with no link, no button and no handler
+        on them at all — this one and the cheat sheet. The feed still advances, so nobody
+        was trapped, but a learner who opened a better way of saying their own sentence
+        could read it and do nothing with it.
+
+        Two things, in the order they are worth: say it, because that is what the card is
+        for and the microphone marks it the way it marks the Legend run; then the frame it
+        improves, because a better sentence about yourself belongs on the card about
+        yourself and this is the only screen that knows which frame it is.
+      */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-center gap-3">
+          <SayButton want={put(card.fluent.frame_pt)} />
+          <span className="text-sm text-muted">Say it out loud</span>
+        </div>
+        <Link
+          href={'/legend?build=' + encodeURIComponent(card.frame.id)}
+          data-testid="fluent-to-legend"
+          className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted transition hover:border-accent hover:text-accent"
+        >
+          PUT IT ON YOUR LEGEND
+        </Link>
+      </div>
     </div>
   )
 }
@@ -4713,6 +4741,30 @@ function Sheet({ card, onDone }: {
             className="tap-target eyebrow w-full rounded border border-accent px-5 py-3 text-center text-accent transition hover:bg-accent hover:text-accent-ink"
           >
             {justGot.length ? 'SAVED TO YOURS' : 'SEE THESE IN YOURS'}
+          </Link>
+        ) : null}
+        {/*
+          AND ONTO THE LEGEND, where the sheet IS a Legend question.
+
+          An audit asked whether everything that could become part of somebody's Legend
+          offers a route to it, and found exactly one affordance in the product — on the
+          legend cards themselves. The honest extension is small: of eleven sheets, one
+          shares an id with a frame. `into` is "What you are into" on both, and a learner
+          reading the list of things you can like is one tap from the question that asks
+          which of them is theirs.
+
+          Only where the ids genuinely match. The other ten sheets are numbers, weekdays
+          and the rooms of a house — real content, and not things you say about yourself,
+          so a button offering to put counting-to-ten on your Legend would be noise
+          pretending to be a feature.
+        */}
+        {LEGEND_FRAMES.some((f) => f.id === card.set.id) ? (
+          <Link
+            href={'/legend?build=' + encodeURIComponent(card.set.id)}
+            data-testid="sheet-to-legend"
+            className="tap-target eyebrow w-full rounded border border-accent px-5 py-3 text-center text-accent"
+          >
+            PUT IT ON YOUR LEGEND
           </Link>
         ) : null}
         <button

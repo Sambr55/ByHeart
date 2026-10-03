@@ -872,7 +872,21 @@ export function legendCards(
       id: 'legend_' + next.id,
       frame: next,
       toGo: outstanding.length,
-      image: {
+      /*
+        THE FRAME'S OWN PHOTOGRAPH, not one bakery queue for all thirteen.
+
+        This hardcoded /lisbon/bakery-queue.jpg for every frame, so a learner met the same
+        picture whether they were being asked their name, their work or how long they are
+        staying — while thirteen per-frame photographs sat in the bank and were already
+        being used on the Yours board. An audit found the two surfaces disagreeing about
+        the same content.
+
+        bankImage returns undefined for a frame with no slug, which falls to the sand
+        treatment the feed already gives an imageless card — so a newly authored frame
+        degrades rather than breaking, and the bakery queue is no longer standing in for
+        twelve pictures that exist.
+      */
+      image: bankImage('frame-' + next.id.replace(/_/g, '-')) ?? {
         src: '/lisbon/bakery-queue.jpg',
         alt: 'A short queue at a Lisbon bakery counter in the morning, two people mid-conversation.',
       },
@@ -1447,20 +1461,36 @@ export function cardFace(card: FeedCard): {
   }
   if (card.kind === 'cheat') {
     /*
-      THE SHAPE IS THE FACE, in the same way an idiom's literal is.
+      THE SHAPE IS THE FACE, ON A GROUND RATHER THAN ON NOTHING.
 
-      No image, and for the idiom card's reason: what is worth looking at here is the
-      pattern — NÃO + VERB — not a photograph of Lisbon behind it. The shape is short and
-      strange enough to carry a card on its own, which is the test that decided the idiom
-      cards too.
+      This returned no image at all, and the reason given was the idiom card's: the pattern
+      — NÃO + VERB — is worth looking at and a photograph of Lisbon behind it is not. That
+      argument stopped being true of idioms the day they were given clue photographs, and
+      it was never checked again here. An audit found these 24 to be the only content type
+      in the feed with no picture anywhere, which renders them on the sand ground — correct
+      as a fallback, wrong as the permanent state of a fifth of the Club.
 
-      The eyebrow says which of the three kinds it is, because a Cheat, a Hack and a Bluff
-      ask different things of the reader: one explains the machinery, one stretches what
-      you own, one buys you time in a conversation.
+      A TEXTURE, NOT A PHOTOGRAPH, because the argument above is still half right: a
+      mechanism is not a place, and a picture of a café would be decoration competing with
+      the shape. A ground gives the card weight on a feed of photographs without pretending
+      the shape happened somewhere.
+
+      ONE GROUND PER KIND, so the three read as three things before the eyebrow is read.
+      Azulejo for a cheat — the repeating pattern, which is what a shape is. The peeling
+      wall for a hack, where one layer shows through another, which is what converting a
+      word you already own looks like. Calçada for a bluff: the ground you stand on while
+      you work out what to say.
     */
     const kind =
       card.cheat.kind === 'cheat' ? 'CHEAT' : card.cheat.kind === 'hack' ? 'HACK' : 'BLUFF'
-    return { eyebrow: kind, title: card.cheat.shape, blurb: card.cheat.does }
+    const ground =
+      card.cheat.kind === 'cheat' ? 'azulejo' : card.cheat.kind === 'hack' ? 'wall' : 'calcada'
+    return {
+      eyebrow: kind,
+      title: card.cheat.shape,
+      blurb: card.cheat.does,
+      image: TEXTURE[ground],
+    }
   }
   return {
     eyebrow: 'WORTH HAVING',

@@ -29,6 +29,7 @@
  *      learner whose level disagrees with itself depending on which tab they are looking
  *      at.
  */
+import { cardFace } from '../content/feed'
 import { CHEATS, cheatUnlocked, cheatNeeds, type CheatKind } from '../content/cheats'
 import { LEGEND_FRAMES, frameForPurpose } from '../content/legend'
 import { ROOTS } from '../content/roots'
@@ -226,6 +227,33 @@ console.log('\nno lesson asks a question its learner cannot see\n')
 }
 
 console.log('')
+/*
+  EVERY MECHANISM HAS A GROUND IN THE FEED.
+
+  cardFace returned no image for all 24, which rendered them on the sand treatment — the
+  only content type in the Club with no picture anywhere. The reason given was the idiom
+  card's ("the shape is the face"), and it stopped being true of idioms the day they were
+  given clue photographs.
+
+  A texture rather than a photograph, because a mechanism is not a place: one ground per
+  kind, so the three read as three things before the eyebrow is read.
+*/
+console.log('\nevery mechanism has a ground\n')
+{
+  const grounds = new Set<string>()
+  for (const c of CHEATS) {
+    const face = cardFace({ kind: 'cheat', id: 'cheat_' + c.id, cheat: c } as never)
+    ok(c.id + ' has a ground', Boolean(face.image?.src), face.image?.src ?? 'none')
+    if (face.image?.src) grounds.add(c.kind + ':' + face.image.src)
+  }
+  /* Three kinds, three distinct grounds — not one texture used for all of them. */
+  ok(
+    'the three kinds are told apart by their ground',
+    new Set([...grounds].map((g) => g.split(':')[1])).size === 3,
+    [...grounds].join(' '),
+  )
+}
+
 if (problems.length) {
   console.log('✗ ' + problems.length + ' problem' + (problems.length === 1 ? '' : 's'))
   for (const p of problems) console.log('  - ' + p)

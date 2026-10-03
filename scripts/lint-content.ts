@@ -14,6 +14,8 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { BOB } from '../content/bob'
 import { IDIOMS } from '../content/idioms'
 import { idiomImage } from '../content/feed'
+import { IMAGE_BANK } from '../content/images'
+import { VIBE_IMAGES } from '../content/vibe-images'
 import { INTRO_CARDS } from '../content/intro'
 import { join } from 'node:path'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
@@ -2103,6 +2105,57 @@ console.log(
   const lib = readFileSync('components/Collection.tsx', 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/[^\n]*/g, '')
+  /*
+    EVERY VIBE STILL ON DISK.
+
+    counting_songs pointed at /vibes/the_basics.jpg while the file is the-basics.jpg, and
+    it never rendered because counting_songs is a CultureFamily with no entry in CRATES —
+    a typo hidden behind a missing crate, which would have broken the tile on the day
+    somebody added one. Checked against the filesystem rather than against CRATES, so the
+    unreachable entries are covered too.
+  */
+  for (const [family, img] of Object.entries(VIBE_IMAGES)) {
+    if (!existsSync(join('public', img.src))) {
+      fail('vibe image for ' + family + ' is not on disk: ' + img.src)
+    }
+  }
+
+  /*
+    AND THE LEGEND FRAMES DO NOT ALL SHARE ONE PHOTOGRAPH.
+
+    legendCards hardcoded /lisbon/bakery-queue.jpg for every frame, so a learner met the
+    same picture being asked their name, their work and how long they are staying — while
+    thirteen per-frame photographs sat in the bank and were already used on Yours. One
+    distinct image per frame is the claim; the fallback stays for a frame authored without
+    a slug.
+  */
+  {
+    const srcs = LEGEND_FRAMES.map(
+      (f) => IMAGE_BANK['frame-' + f.id.replace(/_/g, '-')]?.src,
+    ).filter(Boolean)
+    if (new Set(srcs).size < LEGEND_FRAMES.length) {
+      fail(
+        'legend frames share photographs: ' +
+          new Set(srcs).size +
+          ' distinct for ' +
+          LEGEND_FRAMES.length +
+          ' frames',
+      )
+    }
+    /*
+      AND THE FEED ASKS FOR THEM. The assertion above guards the BANK, which was never the
+      broken half — thirteen distinct photographs were sitting there being used on Yours
+      while the feed hardcoded one. Checked at the call site, because that is where the
+      fault was and where it would come back.
+    */
+    const feedSrc = readFileSync('content/feed.ts', 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/\/\/[^\n]*/g, '')
+    if (!/bankImage\('frame-' \+ next\.id/.test(feedSrc)) {
+      fail('the feed no longer asks for a per-frame photograph — see legendCards')
+    }
+  }
+
   /*
     The CALL, not the definition. A first version matched /idiomClue\(/ and passed happily
     with the call site deleted, because the helper's own `function idiomClue(` still
