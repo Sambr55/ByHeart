@@ -4633,7 +4633,17 @@ export const THE_BASICS: Root[] = [
         substitution happens where a learner is looking at it. See BranchRow: it swaps a
         known authored name for display_name and leaves every other line alone.
       */
-      { target: 'Chamo-me Ana.', en: 'My name is Ana.', demonstrates: ['chamo_me'] },
+      /*
+        NOT 'Chamo-me Ana.' AGAIN. Sam: "Look out for receptions of Chamos-me in this
+        flow, it's in there two or three times."
+
+        He is right and this was one: the root's own line is "Chamo-me Ana. Sou inglês."
+        and the first branch under it was the first half of that sentence with nothing
+        added. A branch exists to show the piece doing a job the headline did not — so it
+        asks the question back instead, which is the form a learner actually needs and the
+        exact sentence the Legend's name card asks them in.
+      */
+      { target: 'Como te chamas?', en: 'What are you called?', demonstrates: ['chamo_me'], address: 'tu', formal: 'Como se chama?' },
       { target: 'Sou inglesa.', en: 'I am English.', demonstrates: ['sou', 'ingles'] },
       { target: 'Sou de Londres.', en: 'I am from London.', demonstrates: ['sou'] },
     ],

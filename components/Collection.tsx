@@ -12,7 +12,7 @@ import {
   type Deck,
   type DeckId,
 } from '@/content/collection'
-import { progressFor, stageFor } from '@/content/legend'
+import { LEGEND_FRAMES, cardFor, progressFor, stageFor, type LegendFrame } from '@/content/legend'
 import Image from 'next/image'
 import { PIECES, type CultureFamily } from '@/content/roots'
 import { vibeImage } from '@/content/vibe-images'
@@ -290,6 +290,17 @@ function RailIcon({ id }: { id: DeckId }) {
  * full one is not forced to hide its overflow in a footnote.
  */
 function Board({ deck }: { deck: Deck }) {
+  /*
+    What the Legend holds that the card does not — see the note on the grid below. Empty
+    for every other board, which is why it is cheap to compute here.
+  */
+  const unopened = useMemo(() => {
+    if (deck.id !== 'legend') return []
+    const onCard = new Set(cardFor(null).map((f) => f.id))
+    const collected = new Set(deck.cards.map((c) => c.id))
+    return LEGEND_FRAMES.filter((f) => !onCard.has(f.id) && !collected.has(f.id))
+  }, [deck.id, deck.cards])
+
   return (
     <div data-testid={'board-' + deck.id} className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between gap-3">
@@ -303,7 +314,10 @@ function Board({ deck }: { deck: Deck }) {
           </li>
         ) : null}
         {Array.from({
-          length: Math.max(SLOTS - (deck.id === 'legend' ? 1 : 0), deck.cards.length),
+          length: Math.max(
+            SLOTS - (deck.id === 'legend' ? 1 : 0) - (deck.id === 'legend' ? unopened.length : 0),
+            deck.cards.length,
+          ),
         }).map((_, i) => {
           const card = deck.cards[i]
           return (
@@ -319,6 +333,30 @@ function Board({ deck }: { deck: Deck }) {
             </li>
           )
         })}
+        {/*
+          THE QUESTIONS THAT ARE NOT ON THE CARD, LAST, AS THINGS YOU CAN ADD.
+
+          Sam: "Any other unopened questions such as do you have children are unopened
+          cards in the legend board - but not blockers to a complete legend (part 1)... add
+          to your legend > filhos and others we will think of - as the last card."
+
+          The road answers eight questions and the Legend holds thirteen. The other five —
+          children, who with, how long you are staying, first time, how long you have been
+          here — used to be the difference between purposes, and taking them off the road
+          left them with nowhere to be. They are not gone and they are not waiting: they
+          are cards you can open, after the ones you have, which is the only honest place
+          for a question nothing is blocked on.
+
+          Visibly not an empty slot and visibly not a finished card. An empty slot is an
+          invitation to the deck; these are an invitation to one particular question.
+        */}
+        {deck.id === 'legend'
+          ? unopened.map((f) => (
+              <li key={f.id}>
+                <Unopened frame={f} />
+              </li>
+            ))
+          : null}
       </ul>
     </div>
   )
@@ -359,6 +397,33 @@ function PractiseCard() {
         <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
       </svg>
       <span className="text-xs leading-tight">Practise your Legend</span>
+    </Link>
+  )
+}
+
+/**
+ * A Legend question nobody has opened yet.
+ *
+ * Sam: "add to your legend > filhos and others we will think of - as the last card."
+ *
+ * NOT AN EMPTY SLOT AND NOT A FINISHED CARD. An empty slot says "there is room in this
+ * deck"; this says "here is a particular thing you could say about yourself". So it
+ * carries the question in English and goes straight to the screen that answers it —
+ * /legend?build=<id>, the same route the feed's legend card uses, so there is one way to
+ * answer a frame rather than two.
+ *
+ * Dashed like an empty slot and tinted like a card, which is what it is: a place with
+ * something named in it.
+ */
+function Unopened({ frame }: { frame: LegendFrame }) {
+  return (
+    <Link
+      href={'/legend?build=' + encodeURIComponent(frame.id)}
+      data-testid={'unopened-' + frame.id}
+      className="tap-target flex aspect-[3/4] flex-col justify-between rounded border border-dashed border-accent/50 bg-accent/5 p-3 text-accent transition hover:bg-accent/10"
+    >
+      <span aria-hidden className="text-lg leading-none">+</span>
+      <span className="text-xs leading-tight">{frame.ask_en}</span>
     </Link>
   )
 }
