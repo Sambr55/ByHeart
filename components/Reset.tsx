@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { LEGEND_FRAMES } from '@/content/legend'
+import { LEGEND_FRAMES, cardFor } from '@/content/legend'
 import { PIECES } from '@/content/roots'
 import { Wordmark } from '@/components/Wordmark'
 import { learnerStorageKey, loadLearner, wipeLearner } from '@/engine/learner'
@@ -31,6 +31,20 @@ export function Reset() {
     'reading',
   )
   const [what, setWhat] = useState({ pieces: 0, proof: 0, sections: 0, legend: 0, key: '' })
+  /*
+    WHICH CARDS, NOT JUST HOW MANY — because the count cannot answer the question that
+    actually comes up.
+
+    Sam: "did 7 of 7 but still two questions open so the legend didnt open." The reset
+    screen said 7 Legend cards and the Legend said two outstanding, and both were true:
+    the count here is every non-empty row, while the door counts the seven that are ON the
+    card. A learner can hold seven rows of which only five are card questions.
+
+    I spent an hour guessing which two from the outside, and asserted something wrong about
+    what he had answered. The screen that lists what is stored should list it.
+  */
+  const [rows, setRows] = useState<{ id: string; onCard: boolean; said: string }[]>([])
+  const [outstanding, setOutstanding] = useState<string[]>([])
   /** null while unknown; a number once the server has answered for this device. */
   const [onServer, setOnServer] = useState<number | null>(null)
 
@@ -108,6 +122,19 @@ export function Reset() {
       legend: (s.legend ?? []).filter((a) => Object.keys(a.values).length).length,
       key: learnerStorageKey(),
     })
+    /* The rows themselves, and which of the card's seven are still missing. */
+    const card = cardFor(s.purpose ?? null)
+    const held = (s.legend ?? []).filter((a) => Object.keys(a.values ?? {}).length)
+    setRows(
+      held.map((a) => ({
+        id: a.frame_id,
+        onCard: card.some((f) => f.id === a.frame_id),
+        said: Object.values(a.values).join(' · ').slice(0, 40),
+      })),
+    )
+    setOutstanding(
+      card.filter((f) => !held.some((a) => a.frame_id === f.id)).map((f) => f.id),
+    )
     setState('ready')
     fetch('/api/session?mine=1', { headers: { accept: 'application/json' } })
       .then((r) => r.json())
@@ -244,6 +271,38 @@ export function Reset() {
             <Row n={what.sections} one="section finished" many="sections finished" />
             <Row n={what.legend} one="Legend card" many="Legend cards" />
           </ul>
+          {/*
+            WHICH CARDS, AND WHICH OF THE SEVEN ARE STILL MISSING.
+
+            The counts above answer "how much is here"; this answers "why does the Legend
+            say it is not finished", which is the question that actually gets asked. A row
+            marked `extra` is a real answer to a question that is not one of the seven — it
+            counts in the number above and not towards the door, and that gap is exactly
+            what sent me guessing from the outside for an hour.
+          */}
+          {rows.length ? (
+            <div className="mt-3 flex flex-col gap-1 border-t border-line pt-3">
+              <p className="eyebrow text-muted">THE CARDS THEMSELVES</p>
+              <ul className="flex flex-col gap-1">
+                {rows.map((r) => (
+                  <li key={r.id} className="flex items-baseline justify-between gap-3 text-xs">
+                    <span className="min-w-0 flex-1 truncate">
+                      <span className="font-semibold">{r.id}</span>{' '}
+                      <span className="text-muted">{r.said}</span>
+                    </span>
+                    <span className={'shrink-0 ' + (r.onCard ? 'text-accent' : 'text-muted')}>
+                      {r.onCard ? 'card' : 'extra'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {outstanding.length ? (
+            <p className="mt-3 text-xs leading-relaxed text-accent">
+              Still to answer before the Legend opens: {outstanding.join(', ')}
+            </p>
+          ) : null}
           {/*
             The other copy, named. This is the one that made a wipe look like it had
             failed: the device cookie is httpOnly so nothing in the browser can clear it,
