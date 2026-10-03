@@ -4,9 +4,14 @@ import Link from 'next/link'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { useEffect, useState } from 'react'
-import { DROPS, type Drop } from '@/content/drops'
-import { dropDaysLeft, dropLive } from '@/content/feed'
-import { DROP_WINDOW_DAYS } from '@/content/roots'
+import { type Drop } from '@/content/drops'
+import { dropDaysLeft, dropLive, dropOpensOn, dropsFor, dropWhen } from '@/content/feed'
+import { nextRecurring, recurringDrops } from '@/content/recurring'
+import { generatedDrops } from '@/content/generated'
+import { DROPS } from '@/content/drops'
+import { useLearner } from '@/engine/useLearner'
+import { DEFAULT_CHAPTER } from '@/content/chapters'
+import type { Genre } from '@/content/calendar'
 import { Back } from '@/components/Back'
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
@@ -22,6 +27,7 @@ const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', '
  * the browser.
  */
 export function Drops() {
+  const learner = useLearner()
   const [now, setNow] = useState<Date | null>(null)
   useEffect(() => setNow(new Date()), [])
 
@@ -34,14 +40,33 @@ export function Drops() {
     get there, and how to ask somebody to come. The song titles stayed on the shelf, where
     they were always more use, because a band does not expire.
   */
-  const opensOn = (d: Drop) => {
-    if (d.from) return new Date(d.from + 'T00:00:00Z')
-    const o = new Date(d.on + 'T00:00:00Z')
-    o.setUTCDate(o.getUTCDate() - DROP_WINDOW_DAYS)
-    return o
-  }
-  const drops = DROPS
-  const live = drops.filter((d) => (now ? dropLive(d, now) : true))
+  /*
+    EVERY DROP THE PRODUCT HAS, NOT JUST THE HAND-WRITTEN ONE.
+
+    This read `DROPS` — the one authored drop — while the Club served twelve, because
+    content/feed.ts composes the authored ones with the generated and recurring ones and
+    this page never did. So the screen named Drops was the most impoverished view of drops
+    anywhere in the product: measured, one card against the Club's twelve.
+
+    Ordered by the same function the Club uses rather than by a local sort, so the two
+    cannot drift apart again — and that also brings the learner's own answers with it.
+  */
+  const chapter = learner.chapter ?? DEFAULT_CHAPTER
+  const live: Drop[] = now
+    ? dropsFor(
+        chapter,
+        now,
+        false,
+        (learner.profile?.genres ?? null) as Genre[] | null,
+        learner.purpose ?? null,
+      ).flatMap((c) => (c.kind === 'situation' && c.drop ? [c.drop] : []))
+    : []
+  /* The whole pool, for the COMING and GONE groups, which are about what is NOT open. */
+  const pool = now
+    ? [...DROPS, ...generatedDrops(chapter, now), ...recurringDrops(chapter, now)].filter(
+        (d) => d.chapter === chapter,
+      )
+    : []
   /*
     Three states, not two.
 
@@ -51,12 +76,51 @@ export function Drops() {
     this is the page where saying so is worth more than hiding it: somebody who came here
     to see what is happening in Portugal should be told what is happening in Portugal.
   */
+  /*
+    WHAT IS COMING, AND NOT THE WHOLE OF NEXT YEAR.
+
+    Recurring drops exist for this year AND next, so that the window can straddle New Year
+    — which meant this list rendered eighteen cards, including Santo António twice, two
+    Christmases and two Augusts. Seen in the browser at 390px it reads as a bug rather than
+    as a diary: the same event listed twice is the product looking like it has lost count.
+
+    So: the NEXT occurrence of each thing only, and a horizon of about four months. Beyond
+    that is not news — "the Christmas lights, in two hundred days" tells nobody anything
+    they wanted and buries the gig that is three weeks out.
+  */
+  const HORIZON_DAYS = 120
   const coming = now
-    ? drops.filter((d) => !dropLive(d, now) && now < new Date(d.on + 'T00:00:00Z'))
+    ? Object.values(
+        pool
+          .filter((d) => !dropLive(d, now) && now < new Date(d.on + 'T00:00:00Z'))
+          .filter(
+            (d) =>
+              new Date(d.on + 'T00:00:00Z').getTime() - now.getTime() <
+              HORIZON_DAYS * 86_400_000,
+          )
+          .sort((a, b) => a.on.localeCompare(b.on))
+          /* Keyed on the thing rather than the occurrence, so a recurring drop appears
+             once — as its soonest year — and a one-off appears as itself. */
+          .reduce<Record<string, Drop>>((acc, d) => {
+            const thing = d.id.replace(/_\d{4}$/, '')
+            if (!acc[thing]) acc[thing] = d
+            return acc
+          }, {}),
+      ).sort((a, b) => a.on.localeCompare(b.on))
     : []
+  /* Gone, and recently — a recurring thing that happened eleven months ago is not news
+     either, and listing last year's Santo António beside this year's is the same
+     double-vision problem as COMING. */
   const gone = now
-    ? drops.filter((d) => !dropLive(d, now) && now >= new Date(d.on + 'T00:00:00Z'))
+    ? pool
+        .filter((d) => !dropLive(d, now) && now >= new Date(d.on + 'T00:00:00Z'))
+        .filter(
+          (d) => now.getTime() - new Date(d.on + 'T00:00:00Z').getTime() < 60 * 86_400_000,
+        )
+        .sort((a, b) => b.on.localeCompare(a.on))
     : []
+  /* What the year does next, for the days when nothing is open. Never null. */
+  const next = now ? nextRecurring(chapter, now) : null
 
   return (
     <main
@@ -78,17 +142,6 @@ export function Drops() {
           </p>
         </div>
 
-        {now && !live.length ? (
-          <div className="rounded border border-line-strong bg-bg-elev px-4 py-3">
-            <p className="text-sm font-semibold">Nothing live right now.</p>
-            <p className="mt-1 text-xs leading-relaxed text-muted">
-              Drops only open a few weeks before the thing they are about, so that a
-              countdown means something when you see one. Your vibes are not going
-              anywhere in the meantime.
-            </p>
-          </div>
-        ) : null}
-
         {coming.length ? (
           <section className="flex flex-col gap-3">
             <div className="flex items-baseline gap-3">
@@ -103,7 +156,7 @@ export function Drops() {
                 </p>
                 <p className="mt-1 text-xs text-muted">
                   Opens{' '}
-                  {opensOn(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}, for{' '}
+                  {dropOpensOn(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}, for{' '}
                   {new Date(d.on + 'T00:00:00Z').toLocaleDateString('en-GB', {
                     day: 'numeric',
                     month: 'long',
@@ -113,7 +166,7 @@ export function Drops() {
                 {/* What is in it, before it opens. Somebody deciding whether to care is
                     owed the shape of the thing rather than a name and a date. */}
                 <p className="mt-3 text-xs leading-relaxed text-muted">
-                  {d.situations.map((x) => x.title).join(' · ')}
+                  {d.situations.map((x: Drop['situations'][number]) => x.title).join(' · ')}
                 </p>
               </div>
             ))}
@@ -147,7 +200,7 @@ export function Drops() {
                   titles any more, it is where it is, how to get in, how to get there, and
                   how to ask somebody to come with you. */}
               <ul className="mt-3 flex flex-col gap-1">
-                {d.situations.map((x) => (
+                {d.situations.map((x: Drop['situations'][number]) => (
                   <li key={x.id} className="text-xs leading-relaxed text-muted">
                     · {x.title}
                   </li>
@@ -180,12 +233,50 @@ export function Drops() {
           )
         })}
 
-        {!live.length && now ? (
-          <div className="rounded border border-line bg-bg-elev p-5">
-            <p className="text-sm leading-relaxed text-muted">
-              Nothing live right now. Drops arrive when something is actually on — a gig, a
-              festival, a match — and go when it does.
-            </p>
+        {/*
+          ONE EMPTY STATE, AND IT NAMES SOMETHING REAL.
+
+          There were two of these, both gated on `!live.length && now`, so a day with
+          nothing open rendered two different apologies stacked on top of each other above
+          a dead gig. That was the screen this page would have shown every day from the 4th
+          of November onwards.
+
+          And an apology was the wrong content anyway. The year always has a next thing in
+          it — Santo António, the 25th of April, the chestnut carts — so this says which
+          one and when, which is the same promise the rest of the product makes: tell them
+          what is true about the city. A countdown that has not started is still news.
+
+          ONLY WHEN COMING IS ALSO EMPTY. Seen in the browser, this sat directly under a
+          COMING list whose first card was the same event with its rooms named — so the
+          page said São Martinho twice, the second time with less detail. COMING is the
+          better answer wherever it has anything in it; this is the backstop beyond its
+          four-month horizon.
+        */}
+        {!live.length && !coming.length && now ? (
+          <div className="rounded border border-line-strong bg-bg-elev p-5">
+            {next ? (
+              <>
+                <span className="eyebrow text-accent">NEXT UP</span>
+                <p className="display mt-3 text-base">{next.event}</p>
+                <p className="mt-1 text-xs text-muted">
+                  {next.place.name} · {dropWhen(next)}
+                </p>
+                <p className="mt-3 text-xs leading-relaxed text-muted">
+                  It opens{' '}
+                  {dropOpensOn(next).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'long',
+                  })}
+                  , a few weeks before, so the countdown means something when you see it.
+                  Nothing you have already learned goes anywhere in the meantime.
+                </p>
+              </>
+            ) : (
+              <p className="text-sm leading-relaxed text-muted">
+                Nothing open right now. Drops arrive when something is actually on and go
+                when it does.
+              </p>
+            )}
           </div>
         ) : null}
 

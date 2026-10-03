@@ -373,6 +373,77 @@ export const WANTED: { slug: string; brief: string; used_by: string }[] = [
     bank is. Nobody's face is the subject and no answer is depicted — the pictures must
     work for a learner whose answer is the opposite of whatever is in frame.
   */
+  /*
+    THE NINE THE RECURRING DROPS ACTUALLY WANT, and the honest note about what they are
+    using instead.
+
+    content/recurring.ts authors eight drops for the things the Lisbon year does — Santo
+    António, the Christmas lights, the chestnut carts, the 25th of April. Each room points
+    at a picture from the existing bank chosen because its ALT TEXT is true of the picture
+    that exists, not because it is the right picture: a queue outside a lit doorway standing
+    in for a charcoal grill full of sardines is honest about what it shows and is not what
+    that room is about.
+
+    So these are the briefs. Until they are generated those rooms are visually generic
+    rather than wrong, which is the correct way round — a card with a slightly off
+    photograph reads as a card, while a card naming a slug the bank does not have renders
+    with no ground at all. Nothing here is referenced by a room yet, which is why
+    drop-check's "no pictures that already exist" assertion stays green.
+  */
+  {
+    slug: 'santo-antonio-grill',
+    brief:
+      'A pavement charcoal grill crowded with sardines, smoke rising thickly, paper plates of bread beside it, a crowd pressing in behind. Night, Alfama, strings of coloured bulbs overhead.',
+    used_by: 'recurring: Santo António — sardines, standing up',
+  },
+  {
+    slug: 'santo-antonio-street',
+    brief:
+      'A narrow Lisbon street at night strung with bunting and paper lanterns, packed with people between the houses, smoke drifting across the lights.',
+    used_by: 'recurring: Santo António — finding the party',
+  },
+  {
+    slug: 'natal-rua-augusta',
+    brief:
+      'A wide pedestrian street at night under arches of white Christmas lights, crowded with people walking towards a lit archway at the end.',
+    used_by: 'recurring: the Christmas lights — where the lights are',
+  },
+  {
+    slug: 'castanhas-cart',
+    brief:
+      'A street cart with a drum of roasting chestnuts, smoke rising, paper cones stacked on the edge, a man in an apron turning them. Winter, dusk, a city corner.',
+    used_by: 'recurring: São Martinho, and the Christmas lights',
+  },
+  {
+    slug: 'praia-carcavelos',
+    brief:
+      'A wide Atlantic beach busy with towels and umbrellas, a railway line and low cliffs behind it, bright hard summer light.',
+    used_by: 'recurring: the first hot Saturday — on the beach',
+  },
+  {
+    slug: 'metro-closed-gates',
+    brief:
+      'Closed metal gates across a metro entrance with a printed notice taped to the glass, several people standing reading it.',
+    used_by: 'recurring: when the metro is on strike — the gates are shut',
+  },
+  {
+    slug: 'bus-stop-crowd',
+    brief:
+      'A crowded Lisbon bus stop, people waiting along the kerb, a yellow bus arriving. Morning, overcast.',
+    used_by: 'recurring: when the metro is on strike — getting there anyway',
+  },
+  {
+    slug: 'avenida-cravos',
+    brief:
+      'A crowd filling a wide tree-lined avenue, red carnations held up above people\u2019s heads, banners further back. Bright spring afternoon.',
+    used_by: 'recurring: the 25th of April — the carnations',
+  },
+  {
+    slug: 'fechado-ferias',
+    brief:
+      'A handwritten sign taped inside a shop door behind a half-pulled metal shutter, a quiet empty street outside in strong August light.',
+    used_by: 'recurring: August — closed for the holidays',
+  },
 ]
 
 /** Every slug in the bank, for the gate that checks a template does not name a hole. */

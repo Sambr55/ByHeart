@@ -1,6 +1,6 @@
 import type { CalendarKind, Genre } from '@/content/calendar'
 import type { ChapterId } from '@/content/chapters'
-import type { Situation } from '@/content/situations'
+import type { Purpose, Situation } from '@/content/situations'
 
 /**
  * Drops — a real thing happening on a real date, and the language for going to it.
@@ -64,6 +64,23 @@ export interface Drop {
    * spent; but urgency spent TOO LATE is a sold-out show, which is the worse failure.
    */
   from?: string
+  /**
+   * Who this night is for. Absent means everybody.
+   *
+   * THE FIELD THE PRODUCT HAS BEEN GATHERING AND NEVER SPENDING. CalendarRow has carried a
+   * REQUIRED `purposes` since it was written — its own comment calls it "the heart of the
+   * whole idea: same calendar, three products" — the harvester is told it is the point of
+   * the exercise, the lint enforces it, and `candidateFor` never copied it onto the Drop.
+   * So a mover and somebody on a four-day holiday saw an identical list of drops, measured:
+   * twelve each, for all three purposes and for no answer at all.
+   *
+   * It RANKS and never filters. See dropPurposeRank in content/feed.ts — the same shape
+   * purposeRank uses for rooms, after the measurement that forced it: filtering gave a
+   * visitor fourteen rooms where somebody who answered nothing got thirty-five, so the
+   * product punished an honest answer. With a dozen drops to begin with, filtering would
+   * be worse. Nobody's Club gets smaller for having said why they are here.
+   */
+  purposes?: Purpose[]
   link?: { href: string; label: string }
   /** In teaching order, ending with the invitation. */
   situations: Situation[]
@@ -75,7 +92,16 @@ export interface Drop {
    * never sourced.
    */
   sources: DropSource[]
-  review_by: string
+  /**
+   * When somebody should look at this again, because a fact in it may have moved.
+   *
+   * OPTIONAL, AND THE ABSENCE IS ONLY HONEST FOR CONTENT THAT CANNOT GO STALE. Every drop
+   * pegged to a listing has one: a gig nobody has re-checked should hide itself rather than
+   * send somebody to a cancelled show, and silence beats a lie. A recurring drop — Santo
+   * António, the Christmas lights — has nothing to re-check, and a date on it would be a
+   * reminder to confirm that June still contains the twelfth. See content/recurring.ts.
+   */
+  review_by?: string
 }
 
 export const DROPS: Drop[] = [

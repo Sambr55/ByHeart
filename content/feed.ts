@@ -1,6 +1,7 @@
 import type { Genre } from '@/content/calendar'
 import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
 import { generatedDrops } from '@/content/generated'
+import { recurringDrops } from '@/content/recurring'
 import { DROP_LEAD_DAYS, SETS, setPieces, type WordSet } from '@/content/roots'
 import { SITUATIONS, isCurrent, situationById, type Purpose, type Situation } from '@/content/situations'
 import { DROPS, type Drop } from '@/content/drops'
@@ -303,17 +304,33 @@ export function feedFor(
   */
   // Drops first: they expire and nothing else on the screen does.
   return [
-    ...dropsFor(chapter, new Date(), preview, genres),
+    /* Purpose reaches the drops now as well as the rooms. It was in hand here all along
+       and dropped on the floor at this one call. */
+    ...dropsFor(chapter, new Date(), preview, genres, purpose),
     ...roomsFor(chapter, purpose),
   ]
 }
 
 /**
- * Live drops, soonest first.
+ * Live drops — what expires first, then what was written for this learner.
  *
- * They come before the standing rooms in the feed and the ranking is one of URGENCY rather
- * than quality: the pharmacy will still be there next month and the gig will not. Nothing
- * about engagement, nothing learned about the viewer — just what expires.
+ * They come before the standing rooms in the feed, and the ranking is still one of URGENCY
+ * rather than quality: the pharmacy will still be there next month and the gig will not.
+ * Nothing here is an engagement signal and nothing is learned by watching — the only two
+ * inputs are the clock and the two questions the learner was asked out loud.
+ *
+ * WHAT CHANGED, and the docstring is updated rather than left describing the old shape,
+ * because a stale comment is how the last reader of this file came to believe purpose
+ * already reached a drop:
+ *
+ *   · Anything inside a week of expiring is ordered by the clock alone. A night that goes
+ *     tomorrow outranks a preference, always.
+ *   · Beyond that week, the drops written for this purpose come first — see
+ *     dropPurposeRank.
+ *   · Genre leads but can no longer empty the list. Four of the seven genres used to
+ *     collapse the Club to a single card.
+ *   · And recurring drops are in the pool, so the list has a floor that does not depend on
+ *     anybody harvesting a month. See content/recurring.ts.
  */
 export function dropsFor(
   chapter: ChapterId = DEFAULT_CHAPTER,
@@ -329,6 +346,15 @@ export function dropsFor(
   */
   preview = false,
   genres: Genre[] | null = null,
+  /*
+    AND WHY THEY SAID THEY ARE HERE, which until now reached the rooms and never the drops.
+
+    `roomsFor` has taken a purpose since the blocks landed; this function did not even have
+    the parameter, so the answer to the product's most consequential question changed
+    thirty-five rooms and none of the twelve drops. Null still means everything — see
+    dropPurposeRank.
+  */
+  purpose: Purpose | null = null,
 ): FeedCard[] {
   /*
     Hand-written Drops and generated ones, in one list sorted by date.
@@ -364,11 +390,63 @@ export function dropsFor(
     learner.
   */
   const want = new Set(genres ?? [])
-  const all = [...DROPS, ...generatedDrops(chapter, now)]
-  return all
-    .filter((d) => d.chapter === chapter && (preview || dropLive(d, now)))
-    .filter((d) => !want.size || !d.genre || want.has(d.genre))
-    .sort((a, b) => a.on.localeCompare(b.on))
+  /*
+    AND THE THINGS THE YEAR DOES, which is what stops this list ever being empty.
+
+    Measured before they existed: twelve drops on 2026-10-03, eight on the 15th, four on the
+    23rd, one on the 29th, and from 2026-11-04 zero — for ever, because every drop came from
+    one harvested month and a row is gone the morning after it happens. The Club did not
+    break, which was the worst part: thirty-five standing rooms kept the feed at
+    forty-seven cards, so "what is on in your city" quietly stopped being about the city and
+    nothing said so.
+
+    Santo António, the Christmas lights and the first hot Saturday cannot expire, so the
+    floor under this list is now a property of the content rather than a promise somebody
+    has to keep every month. See content/recurring.ts.
+  */
+  const all = [...DROPS, ...generatedDrops(chapter, now), ...recurringDrops(chapter, now)]
+  const live = all.filter((d) => d.chapter === chapter && (preview || dropLive(d, now)))
+  /*
+    GENRE RANKS NOW, AND ONLY WHEN IT CAN AFFORD TO FILTER.
+
+    It filtered, and that was the same mistake purposeRank was rewritten to undo. Measured
+    on the real content: no filter twelve drops, rock_pop seven, and beach_surf, sport_local,
+    festival and annual ONE EACH — four of the seven genres collapsed the Club to a single
+    card, so somebody who said "I like the beach" got a thinner product than somebody who
+    said nothing. A preference given deliberately made the thing worse.
+
+    So the preference still leads — the whole point is that your sort of night is at the top
+    — but it cannot empty the list: below FLOOR matches the rest follow instead of being
+    dropped. Urgency still sorts inside each band, which is the ranking this function has
+    always promised.
+  */
+  const FLOOR = 3
+  const fits = (d: Drop) => !want.size || !d.genre || want.has(d.genre)
+  const mine = live.filter(fits)
+  /* The rest are kept rather than discarded, and only used if the preference alone would
+     leave the tab too thin to be worth opening. */
+  const pool = mine.length >= FLOOR ? mine : [...mine, ...live.filter((d) => !fits(d))]
+  /*
+    URGENCY STILL WINS WHERE URGENCY IS REAL, and purpose only breaks the tie.
+
+    This function's promise is a ranking "of URGENCY rather than quality: the pharmacy will
+    still be there next month and the gig will not", and that promise is worth keeping —
+    putting a preferred night three weeks out above one that expires tomorrow would be a
+    recommender wearing a countdown. So anything with THIS WEEK left on it is sorted by the
+    clock alone, and purpose decides the order of everything beyond that, where there is no
+    urgency to trade away.
+  */
+  const URGENT_DAYS = 7
+  const urgent = (d: Drop) => dropDaysLeft(d, now) <= URGENT_DAYS
+  return pool
+    .sort((a, b) => {
+      if (urgent(a) !== urgent(b)) return urgent(a) ? -1 : 1
+      if (urgent(a)) return a.on.localeCompare(b.on)
+      return (
+        dropPurposeRank(a, purpose) - dropPurposeRank(b, purpose) ||
+        a.on.localeCompare(b.on)
+      )
+    })
     .flatMap((d): FeedCard[] => {
       const [first, ...rest] = d.situations
       if (!first) return []
@@ -409,7 +487,9 @@ export function dropsInFortnight(
 ): Drop[] {
   const start = Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), from.getUTCDate())
   const end = start + 14 * 86_400_000
-  return [...DROPS, ...generatedDrops(chapter, now)]
+  /* The year's own dates are in the calendar as well as the feed, so the two never
+     disagree about what exists. A calendar shows what is ON, live or not. */
+  return [...DROPS, ...generatedDrops(chapter, now), ...recurringDrops(chapter, now)]
     .filter((d) => {
       if (d.chapter !== chapter) return false
       const on = new Date(d.on + 'T00:00:00Z').getTime()
@@ -424,7 +504,7 @@ export function dropsInMonth(
   month: number,
   now: Date = new Date(),
 ): Drop[] {
-  return [...DROPS, ...generatedDrops(chapter, now)]
+  return [...DROPS, ...generatedDrops(chapter, now), ...recurringDrops(chapter, now)]
     .filter((d) => {
       if (d.chapter !== chapter) return false
       const on = new Date(d.on + 'T00:00:00Z')
@@ -433,27 +513,33 @@ export function dropsInMonth(
     .sort((a, b) => a.on.localeCompare(b.on))
 }
 
+/**
+ * The day a drop stops being a date in the diary and starts being a drop.
+ *
+ * ONE FUNCTION, BECAUSE TWO OF THEM DISAGREED BY SIXTY-NINE DAYS. Drops.tsx computed this
+ * itself with the flat DROP_WINDOW_DAYS of twenty-one while dropLive used the per-kind
+ * DROP_LEAD_DAYS, so the COMING card on the Drops page could print an opening date more
+ * than two months after the drop had actually opened. Exported so nothing has a reason to
+ * work it out again.
+ *
+ * How far ahead this is depends on what the thing is. It was twenty-one days for
+ * everything, and that is wrong at both ends: by the time a three-week window opens on an
+ * arena show the good seats are gone, while a strike called two weeks out would have shown
+ * an empty countdown for the fortnight before anybody knew it was happening.
+ */
+export function dropOpensOn(d: Drop): Date {
+  if (d.from) return new Date(d.from + 'T00:00:00Z')
+  const o = new Date(d.on + 'T00:00:00Z')
+  o.setUTCDate(o.getUTCDate() - DROP_LEAD_DAYS[d.kind ?? 'event'])
+  return o
+}
+
 /** Open once its window has, gone the morning after the thing it is pegged to. */
 export function dropLive(d: Drop, now: Date = new Date()): boolean {
   const gone = new Date(d.on + 'T00:00:00Z')
   gone.setUTCDate(gone.getUTCDate() + 1)
   if (now >= gone) return false
-  /*
-    How far ahead this opens depends on what it is.
-
-    It was twenty-one days for everything, and that is wrong at both ends: by the time a
-    three-week window opens on an arena show the good seats are gone, while a strike called
-    two weeks out would have shown an empty countdown for the fortnight before anybody knew
-    it was happening.
-  */
-  const opens = d.from
-    ? new Date(d.from + 'T00:00:00Z')
-    : (() => {
-        const o = new Date(d.on + 'T00:00:00Z')
-        o.setUTCDate(o.getUTCDate() - DROP_LEAD_DAYS[d.kind ?? 'event'])
-        return o
-      })()
-  return now >= opens
+  return now >= dropOpensOn(d)
 }
 
 /** Whole days left, for the countdown. */
@@ -532,6 +618,26 @@ export function purposeRank(s: Situation, purpose: Purpose | null): 0 | 1 | 2 {
   return s.purposes.includes(purpose) ? 0 : 2
 }
 
+/**
+ * THE SAME THREE BANDS, FOR A NIGHT OUT — 0 written for you, 1 for everybody, 2 for
+ * somebody else.
+ *
+ * Deliberately a copy of purposeRank's shape rather than a cleverer score, because the data
+ * supports exactly three answers and because the argument above was settled once already
+ * and should not be re-litigated per content type.
+ *
+ * A DROP WITH NO PURPOSES IS BAND 1, NOT BAND 2. Untagged means unclassified, not
+ * unwanted: every harvested row in the product carries `['visiting','staying','moving']`,
+ * so treating an untagged drop as somebody else's would bury the entire live calendar
+ * behind three recurring ones. The same reasoning as the genre note in dropsFor — a gap in
+ * the data is not a choice by the learner.
+ */
+export function dropPurposeRank(d: Drop, purpose: Purpose | null): 0 | 1 | 2 {
+  if (!d.purposes?.length) return 1
+  if (!purpose) return 1
+  return d.purposes.includes(purpose) ? 0 : 2
+}
+
 export function roomsFor(
   chapter: ChapterId = DEFAULT_CHAPTER,
   /*
@@ -582,7 +688,9 @@ export function roomsFor(
 export function roomById(id: string, chapter: ChapterId = DEFAULT_CHAPTER, now = new Date()): Situation | undefined {
   const own = situationById(id)
   if (own) return own
-  for (const drop of [...DROPS, ...generatedDrops(chapter, now)]) {
+  /* Recurring drops included, or every SAY IT COLD button inside Santo António is a dead
+     link — the exact bug this function was written to fix for the first card in the Club. */
+  for (const drop of [...DROPS, ...generatedDrops(chapter, now), ...recurringDrops(chapter, now)]) {
     const found = drop.situations.find((s) => s.id === id)
     if (found) return found
   }
@@ -604,7 +712,7 @@ export function dropForRoom(
   chapter: ChapterId = DEFAULT_CHAPTER,
   now = new Date(),
 ): Drop | undefined {
-  for (const drop of [...DROPS, ...generatedDrops(chapter, now)]) {
+  for (const drop of [...DROPS, ...generatedDrops(chapter, now), ...recurringDrops(chapter, now)]) {
     if (drop.situations.some((s) => s.id === id)) return drop
   }
   return undefined

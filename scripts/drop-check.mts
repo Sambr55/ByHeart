@@ -14,7 +14,9 @@
  */
 import { DROPS } from '../content/drops'
 import { CRATES } from '../content/roots'
-import { dropDaysLeft, dropLive, dropsFor, feedFor, purposeRank, roomsFor, type FeedCard } from '../content/feed'
+import { dropDaysLeft, dropLive, dropPurposeRank, dropsFor, feedFor, purposeRank, roomsFor, type FeedCard } from '../content/feed'
+import { GENRES } from '../content/calendar'
+import { nextRecurring } from '../content/recurring'
 import { DROP_TEMPLATES } from '../content/drop-templates'
 import { WANTED, bankImage } from '../content/images'
 import { generatedDrops, generationReport } from '../content/generated'
@@ -548,6 +550,138 @@ console.log('\npurpose ranks the Club rather than shrinking it\n')
       carrier(purpose) === base,
       carrier(purpose) + ' against ' + base,
     )
+  }
+}
+
+/*
+  THE SHELF HAS A FLOOR, AND SOMETHING SAYS SO BEFORE A LEARNER FINDS OUT.
+
+  THE MEASUREMENT THAT PUT THIS HERE. Walking the real dropsFor forward from 2026-10-03:
+  twelve drops, eight on the 15th, four on the 23rd, one on the 29th, and ZERO from
+  2026-11-04 — not for a week but for ever, because every drop came from one harvested
+  month and a row is gone the morning after it happens. Nothing in the build noticed. The
+  only assertion that would have fired lives in scripts/calendar-check.mts, which is in
+  `gate:browser` rather than in `npm run check`, and it reads the authored DROPS alone so
+  it would not have fired until the very last one expired anyway.
+
+  So it is here, in the check that runs on every build, and it measures the WORST GENRE
+  rather than the total: four of the seven used to collapse the Club to a single card, so
+  an aggregate of three can pass while somebody who said they like the beach has nothing.
+
+  It fails rather than warns, because a warning in a passing build is the status quo that
+  produced this. Recurring content means it can be made green by authoring something true
+  rather than by harvesting a listing nobody has confirmed — see content/recurring.ts.
+*/
+console.log('\nthe shelf has a floor\n')
+{
+  /* The real clock. Every other block in this file pins a date so its assertions are
+     stable; this one is deliberately about TODAY, because the thing being checked is
+     whether the shelf is empty now. */
+  const now = new Date()
+  const FLOOR = 3
+  const horizon = (days: number) => new Date(now.getTime() + days * 86_400_000)
+  const worstAt = (when: Date) =>
+    Math.min(...GENRES.map((g) => dropsFor('lisbon', when, false, [g.id]).length))
+
+  /*
+    TWO HORIZONS, AND ONLY THE NEAR ONE FAILS — because a check must only fail for
+    something the person reading it can actually fix tonight.
+
+    TODAY AND A FORTNIGHT OUT ARE A HARD FLOOR. Recurring content can always make these
+    green, by authoring something that is true every year rather than by confirming a
+    listing nobody has checked. If these go red the tab is about to be empty and the fix is
+    in this repository.
+
+    BEYOND THAT IT WARNS. Three weeks out the shelf thins because real listings run out,
+    and the only honest fix is a harvest plus somebody reading each row — which cannot be
+    done by a build, at midnight, by a machine. A failure there would be a check Sam
+    deletes in a fortnight, and a deleted check is how this went unnoticed in the first
+    place.
+  */
+  for (const days of [0, 14]) {
+    const when = horizon(days)
+    const worst = worstAt(when)
+    ok(
+      days === 0 ? 'there are drops today, whatever you like' : 'and still some in a fortnight',
+      worst >= FLOOR,
+      dropsFor('lisbon', when).length + ' live, ' + worst + ' for the thinnest taste' +
+        (worst < FLOOR ? ' — author a recurring one in content/recurring.ts' : ''),
+    )
+  }
+  for (const days of [30, 60]) {
+    const when = horizon(days)
+    const worst = worstAt(when)
+    const total = dropsFor('lisbon', when).length
+    console.log(
+      '  ' + (worst >= FLOOR ? '✓' : '⚠') + ' in ' + days + ' days   ' + total + ' live, ' +
+        worst + ' for the thinnest taste' +
+        (worst >= FLOOR
+          ? ''
+          : ' — only the year itself is left out there. npm run calendar:harvest -- lisbon <month>'),
+    )
+  }
+  /*
+    AND IT CANNOT RUN OUT, which is the property the harvested calendar never had. A year
+    and a half out there is no listing in the product, so anything live on that date is
+    there because the year itself puts it there.
+  */
+  const far = horizon(550)
+  ok(
+    'the year itself still fills the tab long after every listing has expired',
+    dropsFor('lisbon', far).length > 0,
+    dropsFor('lisbon', far).length + ' live on ' + far.toISOString().slice(0, 10),
+  )
+  /*
+    AND AN EMPTY DAY STILL HAS SOMETHING TRUE TO SAY. The Drops page names the next real
+    thing instead of apologising twice, which only works if there is always a next one.
+  */
+  const quiet = new Date('2027-03-10T09:00:00Z')
+  const next = nextRecurring('lisbon', quiet)
+  ok(
+    'a quiet day can still name what is coming',
+    Boolean(next),
+    next ? next.event.slice(0, 48) + ' on ' + next.on : 'nothing to point at',
+  )
+}
+
+/*
+  PURPOSE REACHES A DROP NOW, AND RANKS RATHER THAN SHRINKS.
+
+  The same property purposeRank guarantees for rooms, which this file already asserts
+  below. It is asserted separately for drops because the two were wired independently and
+  only the rooms half was ever true: measured before this change, all three purposes and no
+  answer at all saw an identical twelve drops.
+*/
+console.log('\nand why they are here changes the order, never the size\n')
+{
+  const now = new Date()
+  const base = dropsFor('lisbon', now).length
+  for (const purpose of ['visiting', 'staying', 'moving'] as const) {
+    const mine = dropsFor('lisbon', now, false, null, purpose)
+    ok(
+      purpose + ' sees every drop',
+      mine.length === base,
+      mine.length + ' of ' + base,
+    )
+    /* Beyond the urgent week, the ones written for them come first. */
+    const ranks = mine
+      .flatMap((c) => (c.kind === 'situation' && c.drop ? [c.drop] : []))
+      .filter((d) => dropDaysLeft(d, now) > 7)
+      .map((d) => dropPurposeRank(d, purpose))
+    ok(
+      purpose + ' keeps the bands in order beyond the urgent week',
+      ranks.every((r, i) => i === 0 || ranks[i - 1] <= r),
+      ranks.join('') || 'nothing beyond the week',
+    )
+  }
+  /*
+    AND A NARROW TASTE CANNOT EMPTY IT. beach_surf returned exactly one drop before the
+    floor went in — a learner who answered honestly got a thinner Club than one who said
+    nothing, which is the failure purposeRank was rewritten to kill for rooms.
+  */
+  for (const g of GENRES) {
+    const n = dropsFor('lisbon', now, false, [g.id]).length
+    ok('liking ' + g.id + ' does not empty the Club', n >= 3, n + ' drops')
   }
 }
 
