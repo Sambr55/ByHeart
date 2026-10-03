@@ -14,6 +14,7 @@
 import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { LEGEND_CARD } from '../content/legend'
+import { INTRO_CARDS } from '../content/intro'
 import { PIECES, ROOTS } from '../content/roots'
 import { cardById, cardFace, setUpCard, cheatCards, explainerCards, fluentCards, idiomCards, legendCards, sheetCards, feedFor, vibeCards } from '../content/feed'
 
@@ -626,7 +627,25 @@ console.log('\na card with no photograph still has a ground\n')
     const card = setUpCard(false, false)
     return card ? cardFace(card).eyebrow : ''
   })()
-  const INTRO = ['HERE’S HOW IT WORKS', 'NOT THIS ONE', 'SIXTY SECONDS', 'THE WAY IN', setupEyebrow]
+  /*
+    THE SEQUENCE, FROM THE SEQUENCE — not retyped, because retyped is how this died.
+
+    What stood here was five strings: `['HERE’S HOW IT WORKS', 'NOT THIS ONE', 'SIXTY
+    SECONDS', 'THE WAY IN', setupEyebrow]`. Three of the five could never match anything.
+    SIXTY SECONDS and THE WAY IN name cards deleted releases ago, and the first entry
+    carried a CURLY apostrophe where content/intro.ts has a straight one — so the one card
+    whose eyebrow is the most distinctive string in the whole intro was being searched for
+    in a spelling the product does not use.
+
+    That left the check guarding two cards out of nine, silently, while reading as though
+    it guarded the lot. It is the exact failure the comment above it warns about for the
+    set-up card's eyebrow, applied to every other card on the list.
+
+    REMINDERS being removed from the deck is what surfaced it: a list that cannot go stale
+    is the only kind worth having here, because which cards are in the intro is precisely
+    the thing this file is asserting has not leaked.
+  */
+  const INTRO = [...INTRO_CARDS.map((c) => c.eyebrow), setupEyebrow]
   for (const route of ['/', '/club?in=1']) {
     await page.goto(BASE + route)
     await page.waitForTimeout(1800)

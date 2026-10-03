@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
-import { setAvatarFromFile } from '@/engine/avatar'
+import { AVATARS, setAvatarFromFile, setAvatarFromPick } from '@/engine/avatar'
 import { chapterById } from '@/content/chapters'
 import { IMAGE_BANK } from '@/content/images'
 import { roomsFor } from '@/content/feed'
@@ -460,7 +460,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
           <h2 className="display text-balance text-2xl">And what do they call you?</h2>
           <p className="text-sm leading-relaxed text-muted">
             The first thing you will say in Portuguese is your own name. This is the answer
-            to it. A photo if you want one.
+            to it. A photo or a picture if you want one.
           </p>
         </div>
       )}
@@ -607,9 +607,67 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                   el.scrollIntoView({ block: 'center', behavior: 'smooth' })
                 }, 260)
               }}
-              placeholder="Your name"
+              /*
+                THE PLACEHOLDER ASKS, rather than labelling the box.
+
+                Sam: "Your name" → "What shall we call you?". The old one named the field,
+                which a field that is plainly a name field under a heading that plainly
+                asks for a name did not need. What it cost was the tone: everything else on
+                this screen is somebody speaking to the person, and the one place they are
+                asked to answer was a form label.
+
+                It is also the more honest question of the two. What goes in here is what
+                DUB will call them for as long as they use it — not their legal name, not
+                the one on the card — and "what shall we call you" is the only phrasing
+                that says so.
+              */
+              placeholder="What shall we call you?"
               className="tap-target min-w-0 flex-1 rounded border border-line bg-bg-elev px-4 py-3 text-base text-fg placeholder:text-muted"
             />
+          </div>
+          {/*
+            OR PICK ONE, which is the half of this question that was never offered.
+
+            Sam, with an arrow at the photo circle: "Add Avatar selector option and provide
+            a selection to choose from."
+
+            The screen asked for a photograph and said it was optional, so the real choice
+            on offer was a picture of your own face or nothing — and a great many people
+            decline a camera on a product they met four minutes ago. The sentence
+            underneath already explains what the picture is for, "useful when you start
+            sharing with friends", and a blank circle is the one outcome that makes it
+            untrue.
+
+            Six marks rather than six people: see the note on AVATARS in engine/avatar.ts
+            for why none of them is a face.
+
+            UNDER THE FIELD, not beside it. The row above is one question — who are you —
+            and the picture is how it is answered, so a second control inside that row
+            would read as a second question. Here it reads as the alternative to the circle
+            immediately above it, which is what it is.
+          */}
+          <div className="flex flex-col gap-2">
+            <p className="eyebrow text-muted">OR PICK ONE</p>
+            <ul data-testid="setup-avatars" className="flex flex-wrap gap-3">
+              {AVATARS.map((a) => (
+                <li key={a.id}>
+                  <button
+                    type="button"
+                    data-testid={'avatar-' + a.id}
+                    aria-label={a.label}
+                    aria-pressed={photo === a.svg}
+                    onClick={() => setPhoto(setAvatarFromPick(a.id))}
+                    className={
+                      'tap-target h-12 w-12 overflow-hidden rounded-full border-2 transition ' +
+                      (photo === a.svg ? 'border-accent' : 'border-line')
+                    }
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={a.svg} alt="" className="h-full w-full object-cover" />
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
           {/*
             Why it is worth giving, next to the fact that it costs nothing.
@@ -619,8 +677,8 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             as the reason not to worry.
           */}
           <p className="text-xs leading-relaxed text-muted">
-            The photo is optional and stays on this phone. It will be useful when you start
-            sharing with friends.
+            The picture is optional and stays on this phone. It will be useful when you
+            start sharing with friends.
           </p>
         {/*
             WHAT THE BUTTON BELOW ACTUALLY AGREES TO, said before it is pressed.

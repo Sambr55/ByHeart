@@ -1221,18 +1221,20 @@ export const FEED_COPY = {
   */
   back: 'Back in the pile.',
   /*
-    Said the moment a card goes, with the way back attached.
+    A REJECT HAS NO SENTENCE, and the two that used to be here are gone.
 
-    The rail's rewind button describes itself as "a verb somebody needs exactly once,
-    immediately, in the second after a swipe they did not mean" — and then rendered
-    permanently, as a small icon among four others, from the first reject onwards. It was
-    right about when the verb is wanted and it never appeared at that moment.
+    `rejected: 'Sent to the back.'` and `rejected_cta: 'BRING IT BACK'` stood here on the
+    reasoning that a card leaving the screen is ambiguous and the undo should be offered
+    for as long as the thought lasts. Half of that is still true — the undo belongs at the
+    moment of the swipe, which is why the toast still fires on a reject — and half of it
+    was wrong. A card leaving the screen because a thumb pushed it leftwards is not
+    ambiguous to the thumb. Sam, with a red box round the pair of them: "Change to revert
+    icon, remove these old sent to the back and bring it back boxes."
 
-    So the moment gets its own line. It states what happened, because a card leaving the
-    screen is ambiguous, and it offers the undo for as long as the thought lasts.
+    So the reject toast is the arrow alone now, drawn in components/Feed.tsx. There is no
+    string for it on purpose, rather than an empty one: a copy key that renders nothing is
+    an invitation to put a sentence back.
   */
-  rejected: 'Sent to the back.',
-  rejected_cta: 'BRING IT BACK',
 } as const
 
 

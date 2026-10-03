@@ -622,7 +622,28 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
     const pushed = await held(-20, 0)
     ok('and will not budge the way it is not allowed', Boolean(pushed && pushed.x === 0), pushed ? pushed.x + 'px' : 'no card')
 
-    ok('the sequence opens on the open lesson', /HERE'S HOW IT WORKS/.test(await where()), await where())
+    /*
+      THE THREE EYEBROWS COME FROM THE CONTENT, not from here.
+
+      This and the two assertions below the swipes were `/HERE'S HOW IT WORKS/`,
+      `/NOT THIS ONE/` and `/VIBES/`, typed out — which is the one thing the rest of this
+      file is careful not to do, and for the reason this very walk documents at length
+      further up: the sequence has been reordered twice and the hardcoded version of these
+      assertions broke both times on correct work.
+
+      Worse than breaking, it can pass wrongly: `/VIBES/` matches the VIBES tab in the
+      bottom bar, so the third assertion would have gone on passing with the third card
+      replaced by anything at all.
+
+      Taken by position from INTRO_CARDS, which is what the assertion is actually about:
+      the first card, the one reached by swiping right off it, and the one after that.
+    */
+    const [open_card, away_card, third_card] = INTRO_CARDS
+    ok(
+      'the sequence opens on the open lesson',
+      (await where()).includes(open_card.eyebrow),
+      await where(),
+    )
     /*
       DOES THE CARD CHANGE MODE UNDER THE FINGER?
 
@@ -669,9 +690,17 @@ console.log('\nthe intro is a rail, and every gesture is made rather than read\n
       while it did only the first of those — the lock came off, the rail stayed put, and
       the gesture read as broken because nothing moved. That is what this assertion holds.
     */
-    ok('swipe right reaches the second slide', /NOT THIS ONE/.test(await where()), await where())
+    ok(
+      'swipe right reaches the second slide',
+      (await where()).includes(away_card.eyebrow),
+      await where(),
+    )
     await swipe(-120, 0)
-    ok('and swipe left moves on to the vibes claim', /VIBES/.test(await where()), await where())
+    ok(
+      'and swipe left moves on to the third card',
+      (await where()).includes(third_card.eyebrow),
+      await where(),
+    )
   }
 }
 

@@ -150,6 +150,24 @@ export interface IntroCard {
     */
     | { kind: 'stages' }
     | { kind: 'lines'; lines: { pt: string; en: string }[] }
+    /*
+      FIVE ACTS, NAMED AND NOT TRANSLATED — the only specimen on the rail with no
+      Portuguese in it at all.
+
+      `lines` is the obvious thing to reach for and it is wrong here twice over. Every row
+      it draws hangs a play button and a copy button off the left of it and sets the first
+      column in the Portuguese face, because every line it has ever carried was a sentence
+      somebody would say. Learn, Listen, Say, Share and Enjoy are none of those: they are
+      English names for the five things a member does, there is nothing to play and nothing
+      worth copying, and dressing them as the language being taught would be the clearest
+      possible lie on the card that explains what membership IS.
+
+      `stages` has the same shape and is already spoken for — it is the ladder, derived
+      from STAGES, and it carries a second column saying what each rung lets you do. These
+      have no second column on purpose. The claim is that there are five and they are
+      plain.
+    */
+    | { kind: 'steps'; steps: string[] }
     | { kind: 'exchange'; exchange: { asked: string; pt: string; en: string }[] }
     /*
       THE TWO WAYS INTO ASK, shown as the act rather than listed as features.
@@ -241,7 +259,20 @@ export const INTRO_CARDS: IntroCard[] = [
     image: 'intro_vibes_card',
     pillar: true,
     eyebrow: 'VIBES',
-    headline: 'Learn from what you have already seen a hundred times.',
+    /*
+      SAM'S OWN LINE, from the intro flow deck: "Build your LEGEND from what you have
+      seen a hundred times."
+
+      The headline it replaces — "Learn from what you have already seen a hundred times"
+      — said what the card SHOWS and stopped there. This one says what the showing is
+      FOR, and it names the Legend on the first pillar rather than waiting for the card
+      that introduces it, so the sequence has one destination stated four cards early
+      instead of a feature list that arrives at one.
+
+      The second half of the sentence is unchanged, because it is the claim: the hundred
+      times are already behind you.
+    */
+    headline: 'Build your legend from what you have seen a hundred times.',
     /*
       THE SONGS YOU KNOW IS NOT BOLD, and that is a deliberate piece of typography rather
       than an oversight.
@@ -296,8 +327,34 @@ export const INTRO_CARDS: IntroCard[] = [
     id: 'intro_cheats',
     image: 'intro_cheats_card',
     pillar: true,
-    eyebrow: 'CHEATS',
-    headline: 'The plain words, first — not in month three.',
+    /*
+      THREE WORDS, BECAUSE THE SHEETS ARE THREE THINGS.
+
+      Sam's own pillar: "CHEATS, HACKS & BLUFFS!". CHEATS alone named the file format —
+      a sheet you keep — and said nothing about why anybody would want one. The three
+      together are the three reasons: a cheat is the closed set handed over whole, a hack
+      is the shortcut past the unit you would otherwise earn, and a bluff is the word that
+      makes you sound like you have been here longer than you have.
+
+      LONGER THAN FOURTEEN CHARACTERS, deliberately, and the rule survives it. The
+      eyebrow-is-a-label rule exists because an eyebrow is a label — it is set at eleven
+      points above a headline and a sentence up there stops being readable as one. A
+      pillar is the opposite case: the eyebrow IS the headline, drawn at headline size
+      (see `pillar` in Feed.tsx), so it has a headline's room and a headline's wrap. The
+      length rule is checked against `className="eyebrow"` literals in JSX, which is
+      exactly the set it was written for and does not include this.
+    */
+    eyebrow: 'CHEATS, HACKS & BLUFFS!',
+    /*
+      WHAT IT BUYS, rather than what everybody else withholds.
+
+      "The plain words, first — not in month three" led with the complaint about other
+      apps, which the body already makes at length and better. Sam's line is the promise:
+      "Sound like a local with the words and phrases you actually need." A learner picking
+      between apps wants to know what they will be able to do, and sounding like somebody
+      who lives here is the whole of it.
+    */
+    headline: 'Sound like a local with the words and phrases you actually need.',
     body: 'Counting, the days, yes and no, the six things you say at a counter. Every other app buries them behind units you have to earn. Here they are a card you open, keep, and check whenever you need it.',
     shows: {
       kind: 'lines',
@@ -312,7 +369,21 @@ export const INTRO_CARDS: IntroCard[] = [
     id: 'intro_legend',
     image: 'intro_arrival',
     eyebrow: 'YOUR LEGEND',
-    headline: 'Build your legend out of what you have learned.',
+    /*
+      WHAT IT BUYS YOU, rather than what it is made of.
+
+      Sam's line: "Your LEGEND gets you a seat at any table." The headline it replaces —
+      "Build your legend out of what you have learned" — described the ASSEMBLY, which is
+      the one thing the body underneath already spells out at length. Worse, VIBES four
+      cards earlier now opens with "Build your legend from what you have seen a hundred
+      times", so the two pillars led with the same verb and the same object and read as
+      one claim made twice.
+
+      This one is the consequence: a seat at any table is what seven sentences said cold
+      actually gets somebody, and it is the only thing on this card that is not a
+      mechanic.
+    */
+    headline: 'Your legend gets you a seat at any table.',
     /*
       WHAT THE LEGEND IS FOR, said on the card that introduces it.
 
@@ -338,11 +409,65 @@ export const INTRO_CARDS: IntroCard[] = [
     shows: { kind: 'legend' },
   },
   {
+    /*
+      WHAT THE LEGEND IS A DOOR TO, on a card of its own.
+
+      New in the intro flow deck as screen 6, immediately behind the Legend: "Once your
+      LEGEND is complete*, you are in THE CLUB. *takes approx 10 minutes", and then five
+      words — Learn, Listen, Say, Share, Enjoy.
+
+      THE LEGEND CARD SAID THIS IN A SUBORDINATE CLAUSE and that is why this exists. Its
+      body ends "Once you have your Legend, you're in **DUB Club**" — the single most
+      important sentence in the sequence, arriving fourth in a paragraph about how many
+      questions there are. A consequence that big is not a clause.
+
+      TEN MINUTES IS THE WHOLE OF THE ASK, and nothing in the product had ever said how
+      long anything takes. Every other app in the category is vague about this on purpose,
+      because the honest answer is months. DUB's answer is ten minutes to the thing that
+      gets you in, and a number that specific is only worth printing if it is true: seven
+      Legend questions, answered out loud, is about that.
+
+      The asterisk is Sam's and it is kept as an asterisk rather than folded into the
+      sentence. A qualification inside the promise weakens it; a qualification under it
+      reads as the product showing its working.
+
+      NO PILLAR HERE, deliberately, though it is the biggest claim in the file. The five
+      pillars are the things DUB IS — VIBES, CHEATS, ASK, DROPS and the reward card — and
+      this is a threshold between two of them. Setting it at pillar size would make six
+      enormous eyebrows in a row and flatten the rhythm that makes any of them land.
+    */
+    id: 'intro_club',
+    image: 'intro_arrival',
+    eyebrow: 'THE CLUB',
+    headline: 'Once your legend is complete, you are in THE CLUB.',
+    /*
+      THE FIVE VERBS, said once in the body and drawn underneath.
+
+      They are not features and they are not a syllabus — they are what a member spends
+      an evening doing, in the order it happens: you learn a line, you hear it said, you
+      say it back, you send it to somebody, and then the night is better for it.
+    */
+    body: 'It takes about ten minutes. Seven sentences about yourself, said out loud, and the door is open.',
+    shows: {
+      kind: 'steps',
+      steps: ['Learn', 'Listen', 'Say', 'Share', 'Enjoy'],
+    },
+  },
+  {
     id: 'intro_ask',
     image: 'pharmacy',
     pillar: true,
     eyebrow: 'ASK',
-    headline: 'The sentence we have not taught you yet.',
+    /*
+      THE PERSON'S PROBLEM, not the product's gap.
+
+      Sam: "If you don't know the words you need, just ask!" The headline it replaces —
+      "The sentence we have not taught you yet" — was written from inside the syllabus:
+      it described ASK as the hole in the teaching, which is true and is nobody's reason
+      to tap it. The moment somebody actually uses ASK is the moment they are standing in
+      front of a thing they cannot say, and this is that moment in their words.
+    */
+    headline: "If you don't know the words you need, just ask.",
     body: 'Ask for it, anywhere, any time, and get it back in the words they actually speak here. It goes into your own library.',
     /*
       THE ACT, NOT A LIST OF QUESTIONS.
@@ -382,7 +507,17 @@ export const INTRO_CARDS: IntroCard[] = [
       the possessive is true before the choice and after it. Every other screen reads the
       chapter and names the place; this one runs before there is a chapter to read.
     */
-    headline: 'What is actually on in your city, and what to say when you get there.',
+    /*
+      AND WHAT YOU DO ABOUT IT, which the old line stopped short of.
+
+      Sam: "LEARN from what is actually on in your city, what to say when you get there,
+      invite someone and buy tickets!" The headline said what a drop KNOWS — what is on,
+      what to say — and left out the two things that make it a night rather than a
+      lesson: somebody comes with you, and you have tickets. Both are real: the invite is
+      the share sheet and the tickets are the drop's own link.
+    */
+    headline:
+      'Learn from what is actually on in your city, what to say when you get there, invite someone and buy tickets.',
     /*
       Sam's wording. The old line described the drop's LIFECYCLE — when it arrives and
       when it goes — which is a fact about the feed rather than a reason to want one.
@@ -430,59 +565,55 @@ export const INTRO_CARDS: IntroCard[] = [
       is what the eyebrow and the headline now say, and the number is left to the list
       underneath, which shows it rather than announcing it.
     */
-    eyebrow: 'WHAT YOU GET',
-    headline: 'And how you learn.',
-    body: 'Not days in a row, streaks and endless repetition. You learn as you live, relating to vibes, building your Legend, keeping cheat sheets and taking it on a real night out. The reward is getting there, not a load of emojis.',
+    /*
+      THE CLAIM, SAID AS A CLAIM.
+
+      Sam's three lines, and they invert what was here. WHAT YOU GET / "And how you learn"
+      was a label over a label: the eyebrow announced a list and the headline announced
+      the list's second half, so the loudest type on the card said nothing at all while
+      the actual argument — no streaks, no emojis — sat four lines down in the body where
+      nobody reads it.
+
+      "THE REWARD IS GETTING THERE, NOT EMOJIS" is the argument, so it goes in the pillar.
+      It is the one sentence in the sequence that says what DUB refuses to do, and every
+      other product in the category does the opposite loudly.
+
+      "KEEP BUSY LEARNIN'" rides as the headline under it, which is where the list that
+      follows gets its instruction — the stages underneath are the busy, and the apostrophe
+      is Sam's.
+    */
+    eyebrow: 'THE REWARD IS GETTING THERE, NOT EMOJIS.',
+    headline: 'Keep busy learnin’.',
+    /*
+      DROP IN WHENEVER — the permission, which the old body buried under its own refusals.
+
+      Sam: "Drop into your CLUB whenever you like - no streaks required. Learn as you
+      live, relate to Vibes, locals knowledge, tailored events and people like you."
+      The line it replaces opened on three things DUB does not do before it got to one it
+      does. The pillar now carries the refusal, so the body is free to be the offer.
+    */
+    body: 'Drop into **DUB Club** whenever you like — no streaks required. You learn as you live: vibes, local knowledge, events picked for you, and people like you.',
     shows: { kind: 'stages' },
   },
-  {
-    /*
-      REMINDERS — what keeps arriving after the first week.
-
-      Sam: "change it to Reminders in big letters and explain how Club members can access
-      a constant flow of tips, tricks and hacks to navigate their journey in their chosen
-      country and city."
-
-      LAST, AND DELIBERATELY. Every card before it is something the product does to teach
-      you; this is the one about what happens when you are no longer being taught — the
-      thing that arrives on a Tuesday because you live here now. Putting it earlier would
-      make it sound like a notification setting rather than the reason to stay.
-
-      TIPS ABOUT THE PLACE, NOT ABOUT THE APP. The distinction matters and the copy holds
-      it: nothing here reminds somebody to practise. A streak does that, and the whole
-      product is an argument against it. What arrives is the thing a person who lives in
-      Lisbon knows and a person who arrived in March does not — which counter to join,
-      what the sign on the door means, why the pharmacy is shut.
-
-      The specimen is three of them rather than a description of them, for the same reason
-      CHEATS shows a list: the claim is that they are small, concrete and immediately
-      usable, and three small concrete lines are what demonstrates that.
-    */
-    id: 'intro_reminders',
-    image: 'intro_revision_card',
-    pillar: true,
-    eyebrow: 'REMINDERS',
-    headline: 'The things people who live here just know.',
-    /*
-      THE CLUB IS NAMED IN FULL, and marked.
-
-      "Inside the Club" — which club? The card is the last thing somebody reads before
-      deciding whether to open an account, and the thing it is selling had been referred
-      to by a definite article. Sam: the body text should say "DUB Club", in bold white.
-      The ** is the emphasis the intro bodies already understand, lifted to full ink by
-      Emphasised so it reads at the strength of a name rather than of a stressed word.
-    */
-    body: 'Inside **DUB Club** they keep coming — what to say at which counter, when everything shuts, the habit that marks you out as a visitor. Small, useful, about your city rather than about the app.',
-    shows: {
-      kind: 'lines',
-      lines: [
-        { pt: 'Um café, por favor.', en: 'Not a coffee. A coffee is a different drink here.' },
-        { pt: 'Encerrado para férias', en: 'On a door in August. It means a fortnight, not today.' },
-        { pt: 'Está a atender?', en: 'The question that gets you served at a full counter.' },
-      ],
-    },
-  },
 ]
+/*
+  REMINDERS IS GONE, and it was the last card in the sequence.
+
+  Sam struck it through in the intro flow deck with one word beside it: Remove. The card
+  was good and the argument for it is still in the history — "the thing that arrives on a
+  Tuesday because you live here now", three small concrete lines rather than a description
+  of them — and it is the wrong thing for a stranger to be reading in the last minute
+  before the one decision.
+
+  Everything else in the sequence is something a person gets by joining. REMINDERS was
+  about what keeps arriving AFTER they have joined, which is a reason to stay rather than a
+  reason to start, and it sat between WHAT YOU GET — the summary of the offer — and the
+  card that asks for the answer. So the pitch landed, and then one more card happened.
+
+  The reminders themselves are not lost. They are what the Club's rooms are made of, and
+  the three specimen lines that stood here are the same kind of line every drop and
+  situation already carries.
+*/
 
 /**
  * Screen eight, woven into the sequence rather than declared in it.
@@ -529,12 +660,13 @@ export const INTRO_DEMO_AFTER: string | null = null
 /*
   AFTER THE LAST PITCH CARD, whichever that now is.
 
-  This named intro_drops because drops were last. REMINDERS is last now, and leaving the
-  anchor where it was would have put the language selector in the middle of the argument —
-  choose your language, then here is one more reason to stay.
+  This named intro_drops, then intro_reminders. REMINDERS has been removed from the deck,
+  so the card that closes the pitch is WHAT YOU GET — the one that says the reward is
+  getting there rather than emojis, and summarises how the learning works. That is the
+  right note to ask the question on: the offer has just been stated in full.
 
   Named rather than computed from the array's end on purpose: which card closes the pitch
   is an editorial decision, and a constant that quietly follows the last element would
   change meaning every time somebody appended one.
 */
-export const INTRO_SETUP_AFTER = 'intro_reminders'
+export const INTRO_SETUP_AFTER = 'intro_stages'

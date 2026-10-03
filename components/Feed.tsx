@@ -800,6 +800,31 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
   */
   const [freed, setFreed] = useState<string[]>([])
   const [atIndex, setAtIndex] = useState(0)
+  /*
+    IS THE CARD OPEN? — which the header needs and nothing was telling it.
+
+    See the note on `onPane` in onPaneScroll. A pane is sand whatever the face is made of,
+    so the wordmark cannot decide its colour from the card alone.
+
+    Reset whenever the rail moves to another card, because a pane left open on the card
+    behind is not this card's business and every card opens on its face.
+  */
+  const [paneOpen, setPaneOpen] = useState(false)
+  /*
+    WHICH GROUND THE FURNITURE IS SITTING ON — asked once, for the clock and the header.
+
+    A card face is sand when it has no photograph, and a pane is sand always: every one of
+    them is drawn on the product's own cream, because they are forms and arguments rather
+    than places. So the header is ink whenever the face has no picture OR the pane in front
+    of it is open.
+
+    This was `cards[atIndex] && !cardFace(cards[atIndex]).image`, written twice, and it
+    missed the second half entirely — which is how the wordmark and the one sentence saying
+    what DUB is came to be white-on-cream on the set-up pane, the single screen where
+    somebody is being asked to type their name. Sam, with an arrow at it: "Black text and
+    logo required."
+  */
+  const onSandNow = Boolean(cards[atIndex]) && (paneOpen || !cardFace(cards[atIndex]).image)
   const lockedNow = useMemo(() => {
     const card = cards[atIndex]
     if (!card) return null
@@ -922,7 +947,18 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     const el = rail.current
     if (!el || !el.clientHeight) return
     // Minus the leading clone, which is a copy of the last card rather than a card.
-    setAtIndex(Math.max(0, Math.round(el.scrollTop / el.clientHeight) - 1))
+    const next = Math.max(0, Math.round(el.scrollTop / el.clientHeight) - 1)
+    setAtIndex((was) => {
+      /*
+        Moving to another card closes the pane as far as the header is concerned.
+
+        Every card opens on its face, so a new card under the header is a face under the
+        header. Done here rather than in an effect on `atIndex` so the ink changes with
+        the scroll rather than a render after it.
+      */
+      if (was !== next) setPaneOpen(false)
+      return next
+    })
   }
 
   /*
@@ -1067,9 +1103,14 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         to match a ground that is not there. Same test as the header and the rail: is there
         an image.
       */}
-      <StatusBar
-        color={cards[atIndex] && !cardFace(cards[atIndex]).image ? '#efe7d9' : '#241f1a'}
-      />
+      {/*
+        AN OPEN PANE IS SAND, whatever the face in front of it was made of.
+
+        See `paneOpen`. Both this and the header below ask the same question in the same
+        words so the clock, the wordmark and the strapline cannot end up disagreeing about
+        which ground they are on.
+      */}
+      <StatusBar color={onSandNow ? '#efe7d9' : '#241f1a'} />
       <header
         className={
           'safe-top pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center gap-3 px-5 pt-6 ' +
@@ -1083,7 +1124,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
             three times one rule has been written as a list of members and gone stale the
             moment somebody added one.
           */
-          (cards[atIndex] && !cardFace(cards[atIndex]).image ? 'text-fg' : 'text-white')
+          (onSandNow ? 'text-fg' : 'text-white')
         }
       >
         {/*
@@ -1249,6 +1290,17 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
             */
             onRejected={() => setToast('rejected')}
             onDone={() => setToast('done')}
+            /*
+              Only the card being looked at may speak for the header.
+
+              Every card in the rail has its own pane scroller and every one of them fires
+              on its own scroll — including the ones being re-anchored off screen when the
+              rail moves. Without this guard a card three places down settling back onto
+              its face would tell the header the pane had closed.
+            */
+            onPane={(open) => {
+              if (i === atIndex + 1) setPaneOpen(open)
+            }}
           />
         ))}
       </div>
@@ -1302,32 +1354,75 @@ function Toast({
       style={{ bottom: 'calc(var(--bar-room) + var(--keyboard))' }}
       className="animate-bank absolute inset-x-0 z-50 flex items-center gap-3 bg-black/85 px-5 py-3 text-white"
     >
-      <p className="min-w-0 flex-1 text-sm">
-        {kind === 'saved'
-          ? FEED_COPY.saved
-          : kind === 'done'
-            ? FEED_COPY.done
-            : kind === 'back'
-              ? FEED_COPY.back
-              : kind === 'rejected'
-                ? FEED_COPY.rejected
+      {/*
+        NO SENTENCE ON A REJECT, which is the one kind that never needed one.
+
+        Sam, with a red box round the whole row: "Change to revert icon, remove these old
+        sent to the back and bring it back boxes."
+
+        He is right and the reason is in the two strings themselves. "Sent to the back."
+        is a caption on an event the person has this second caused with their own thumb —
+        they watched the card go — and "BRING IT BACK" is a four-word button for an act
+        that has exactly one meaning. Together they are a sentence and a paragraph of
+        furniture across the foot of the screen, over the card that just arrived, to say
+        something nobody was in any doubt about.
+
+        What survives is the undo, as the arrow. It is the same looping arrow drawn on the
+        tutorial slide that promised the card comes back, and the same one on the rail's
+        own rewind control — so the picture a person was shown on slide two is the picture
+        they are handed the first time they need it.
+
+        THE OTHER FOUR KINDS KEEP THEIR LINE. Saved, unsaved, done and back are all
+        reports about something that happened somewhere the person cannot see — a card
+        filed into Yours, a sitting finished, a card returned to the pile — and a
+        confirmation of an invisible act is the whole reason a toast exists.
+      */}
+      {kind === 'rejected' ? null : (
+        <p className="min-w-0 flex-1 text-sm">
+          {kind === 'saved'
+            ? FEED_COPY.saved
+            : kind === 'done'
+              ? FEED_COPY.done
+              : kind === 'back'
+                ? FEED_COPY.back
                 : FEED_COPY.unsaved}
-      </p>
+        </p>
+      )}
       {kind === 'rejected' ? (
         /*
-          The undo, where the thought is.
+          The undo, where the thought is, and now only the undo.
 
           Not a link to somewhere — the card is three seconds from being irretrievable in
           any way a person would notice, and asking them to go and find a control is the
           reason the rail's rewind was never the answer.
+
+          The label moves to aria-label rather than being dropped: an icon alone is a
+          picture to a sighted person and nothing at all to a screen reader, and the arrow
+          is the one control on this row. `ml-auto` because the sentence that used to push
+          it right is gone.
         */
         <button
           type="button"
           data-testid="toast-rewind"
+          aria-label="Bring back the last card"
           onClick={onRewind}
-          className="tap-target eyebrow shrink-0 rounded bg-white px-4 py-3 text-[#241f1a]"
+          className="tap-target ml-auto shrink-0 rounded-full bg-white p-3 text-[#241f1a]"
         >
-          {FEED_COPY.rejected_cta}
+          {/*
+            The same two paths as the tutorial's promise and the rail's control — see the
+            note on `rewind` in Gesture. One arrow means one thing in this product.
+          */}
+          <svg
+            viewBox="0 0 24 24"
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            aria-hidden
+          >
+            <path d="M9 14 4 9l5-5" />
+            <path d="M4 9h10a6 6 0 0 1 0 12h-3" />
+          </svg>
         </button>
       ) : kind === 'saved' || kind === 'done' ? (
         <Link
@@ -1357,6 +1452,7 @@ export function Card({
   freedHere,
   onPassed,
   onDone,
+  onPane,
   stage = 'member',
   hint = false,
   onScreen = false,
@@ -1365,6 +1461,13 @@ export function Card({
   saved: boolean
   liked: boolean
   onSaved?: (on: boolean) => void
+  /**
+   * The pane behind this card is open, or has closed again.
+   *
+   * The header reads it to pick its ink. A face can be a photograph while the pane behind
+   * it is sand, and the one control every screen carries has to be legible on both.
+   */
+  onPane?: (open: boolean) => void
   /** So the feed can say a card went away, and offer it back. */
   onRejected?: () => void
   /** A card came back, so the feed can say so. */
@@ -2100,6 +2203,24 @@ export function Card({
       el.scrollTo({ left: el.clientWidth * faceLane, behavior: 'auto' })
     }
     if (!away) wentAway.current = false
+    /*
+      AND THE HEADER IS TOLD WHICH GROUND IT IS SITTING ON.
+
+      Sam, with an arrow at the wordmark and the strapline on the set-up pane: "Black text
+      and logo required."
+
+      The header picks its ink from whether the card at this index has a photograph, which
+      is right for every face in the feed and blind to the one thing that can change under
+      it: opening a card. The pane is sand — ink on cream, the ground every form in the
+      product is drawn on — and the header above it stayed white, because the CARD still
+      has a doorway photograph on its face. So the mark and the one sentence saying what
+      DUB is went invisible at exactly the moment somebody is being asked for their name.
+
+      Reported from the position, not from the card kind. `faceLane - 0.5` is the same
+      threshold the reveal below uses, so the header turns at the point the pane is
+      committed to rather than at the first pixel of a swipe that may spring back.
+    */
+    onPane?.(el.scrollLeft < el.clientWidth * (faceLane - 0.5))
     /*
       Swiping right counts as entering, the same as the button does.
 
@@ -2893,23 +3014,32 @@ export function Card({
                 */
                 <div className="mb-3 mt-6">
                   {/*
-                    CHOOSING ADVANCES THE FACE AND NOTHING ELSE. The button is the exit.
+                    THE CITY IS THE LAST TAP. There is no button after it.
 
-                    This called onFreed as well, so the two taps that answered the question
-                    also unlocked the rail — and the Open card that appeared next could be
-                    scrolled straight past, the last card of the intro turning out not to
-                    be a card at all. Sam: "still scrollable — lock it, CTA the only way
-                    out."
+                    Sam, in the intro flow deck, striking out the OPEN variant of this card
+                    entirely: "When city is selected go straight to >", with an arrow drawn
+                    to the why screen, and under the struck card, "No swipe required."
 
-                    Which is the right shape for this one card. Everywhere else in the
-                    sequence a gesture frees what a gesture is holding, and the note this
-                    replaces was correct that an answer leaving the scroll locked would be
-                    a trap. It is not a trap here because the thing released IS on screen
-                    and is the only control on it — BUILD YOUR LEGEND, drawn the moment the
-                    question is answered, which is what setPairChosen does. The rail is
-                    freed when that button is pressed; see the handler on it below.
+                    What stood here was a third step that carried no question. The person
+                    answered the language, answered the city, and then met a card whose
+                    whole content was a word — OPEN — asking them to confirm the two taps
+                    they had just made. Nothing happened between the answer and the button
+                    that the button was deciding about, which is the definition of a step
+                    that is not one.
+
+                    So `onDone` is `reveal` now rather than `setPairChosen(true)`. The city
+                    tap scrolls the pane open onto the why step, and the rail is freed on
+                    the way past — `reveal` already does that for a set-up card, which is
+                    the line the OPEN button used to reach.
+
+                    THE CARD IS STILL NOT SKIPPABLE, which is what the note this replaces
+                    was protecting. Sam: "still scrollable — lock it, CTA the only way
+                    out." The lock is `onFreed`, and `onFreed` fires inside `reveal` — so
+                    the rail opens at exactly the moment the question is answered rather
+                    than one tap later. Before the city is picked there is still nothing to
+                    scroll past.
                   */}
-                  <Choose onSand={onSand} onDone={() => setPairChosen(true)} />
+                  <Choose onSand={onSand} onDone={reveal} />
                 </div>
               ) : card.kind === 'explainer' && card.explainer.id === 'how_the_calendar_works' ? (
                 /*
@@ -3988,6 +4118,50 @@ function Specimen({
     you and be handed European Portuguese back. Nothing else in the sequence demonstrates a
     thing the learner initiates.
   */
+  /*
+    FIVE THINGS A MEMBER DOES, drawn as five rings and five words.
+
+    The one specimen with no Portuguese in it, and therefore the one that must not borrow
+    the row the rest of them use. That row hangs a play button and a copy button off the
+    left of every line and sets the first column in the Portuguese face — correct for
+    every other kind, because every other kind is a sentence somebody would say. Learn,
+    Listen, Say, Share and Enjoy are English names for acts: there is nothing to play,
+    nothing worth copying, and dressing them as the language being taught would be a lie
+    on the card that explains what membership is.
+
+    AN OPEN RING RATHER THAN A TICK. Sam's mock draws five empty circles, and empty is the
+    whole of what they mean: these are not things this person has done, they are what the
+    Club is made of. A tick would claim progress on a card met before anybody has joined,
+    and a filled dot would read as a bullet, which is a list rather than a sequence.
+
+    The same cascade the other specimens use, and the same reason — the five arrive one
+    after another, so they read as five acts rather than as a block of five.
+  */
+  if (shows.kind === 'steps') {
+    return (
+      <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-3">
+        {shows.steps.map((s, i) => (
+          <li
+            key={s}
+            className={'flex items-center gap-4 ' + (onScreen ? 'animate-rise' : 'opacity-0')}
+            style={{ animationDelay: i * 190 + 'ms' }}
+          >
+            <span
+              aria-hidden
+              /*
+                Drawn with a border rather than as an SVG, because it is a ring and a ring
+                is a border. 36px so it sits at the height of the word beside it without
+                being the loudest thing in the row.
+              */
+              className="h-9 w-9 shrink-0 rounded-full border border-current opacity-60"
+            />
+            <span className="display min-w-0 text-xl">{s}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
   if (shows.kind === 'exchange') {
     return (
       <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-6">

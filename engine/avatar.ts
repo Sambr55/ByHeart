@@ -144,6 +144,88 @@ export function clearAvatar() {
 }
 
 /**
+ * THE ONES YOU CAN PICK INSTEAD OF TAKING A PHOTOGRAPH.
+ *
+ * Sam, beside the name field: "Add Avatar selector option and provide a selection to
+ * choose from."
+ *
+ * WHY THERE HAS TO BE A SECOND WAY IN. The photo is optional and the screen says so, which
+ * makes the real choice "a picture of my face, or nothing" — and a great many people
+ * decline a camera on a screen they met four minutes ago and then have no face at all. The
+ * copy beside the field already explains what the picture is FOR: "it will be useful when
+ * you start sharing with friends." A blank circle is the one outcome that makes that
+ * sentence false, and it is the outcome the layout was steering most people towards.
+ *
+ * DRAWN RATHER THAN DOWNLOADED. These are SVGs built here as data URIs, which means no
+ * image files to ship, no network request on the one screen somebody is deciding whether
+ * to continue, and nothing to go missing. They go through exactly the same storage path as
+ * a photograph — the same key, the same IndexedDB copy, the same never leaving the device
+ * — so everything downstream that reads an avatar reads one thing.
+ *
+ * NO FACES, AND THAT IS THE POINT. A set of cartoon people is a set of decisions about
+ * skin, hair, gender and age made by somebody who has never met this person, and six of
+ * them is six ways to be the wrong one. These are the azulejo palette the product is
+ * already built out of: a tile, a colour, a letter-free mark. Nobody has to find
+ * themselves in a drawing of somebody else.
+ */
+export const AVATARS: { id: string; label: string; svg: string }[] = (
+  [
+    ['tile', 'Blue tile', '#1f5d8c', '#e9e2d4'],
+    ['sand', 'Sand', '#c9a227', '#241f1a'],
+    ['tram', 'Tram yellow', '#e0b43b', '#241f1a'],
+    ['river', 'River', '#2f6f6b', '#e9e2d4'],
+    ['roof', 'Rooftop', '#b4573a', '#f2ece0'],
+    ['night', 'Night', '#241f1a', '#e9e2d4'],
+  ] as const
+).map(([id, label, bg, ink]) => ({
+  id,
+  label,
+  /*
+    One mark, four times, turned — the azulejo construction, which is why four quarter
+    arcs and nothing else. It reads as a tile at 64px and as a tile at 16px, which is the
+    whole requirement: this thing appears beside a name in a share sheet and inside a
+    circle on a card.
+
+    encodeURIComponent rather than base64 so the string stays readable in storage and in a
+    diff, and so a colour can be found by eye when one of these looks wrong.
+  */
+  svg:
+    'data:image/svg+xml;utf8,' +
+    encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+        '<rect width="64" height="64" fill="' + bg + '"/>' +
+        '<g fill="none" stroke="' + ink + '" stroke-width="3">' +
+        '<path d="M32 4a28 28 0 0 1 28 28"/>' +
+        '<path d="M60 32a28 28 0 0 1-28 28"/>' +
+        '<path d="M32 60A28 28 0 0 1 4 32"/>' +
+        '<path d="M4 32A28 28 0 0 1 32 4"/>' +
+        '<circle cx="32" cy="32" r="11"/>' +
+        '</g></svg>',
+    ),
+}))
+
+/**
+ * Keep a chosen avatar, by the same route a photograph takes.
+ *
+ * Not a separate key and not a separate field on the learner: everything that draws a
+ * face in this product reads `getAvatar()`, and a second source would mean every one of
+ * those places learning about two. What is stored is the picture itself, so nothing
+ * downstream needs to know whether somebody chose it or took it.
+ */
+export function setAvatarFromPick(id: string): string | null {
+  const picked = AVATARS.find((a) => a.id === id)
+  if (!picked) return null
+  void idbPut(picked.svg)
+  void askToKeep()
+  try {
+    localStorage.setItem(KEY, picked.svg)
+  } catch {
+    /* In IndexedDB either way — see the note in setAvatarFromFile. */
+  }
+  return picked.svg
+}
+
+/**
  * Read a file, square it off, shrink it, keep it.
  *
  * Centre-cropped rather than squashed: a face stretched into a square is worse than a
