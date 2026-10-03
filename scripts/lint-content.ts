@@ -13,6 +13,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { BOB } from '../content/bob'
 import { IDIOMS } from '../content/idioms'
+import { idiomImage } from '../content/feed'
 import { INTRO_CARDS } from '../content/intro'
 import { join } from 'node:path'
 import { MISSIONS, MISSION_ORDER } from '../content/missions'
@@ -2072,6 +2073,47 @@ console.log(
     slugs.size +
     ' audio assets',
 )
+/*
+  EVERY AUTHORED PICTURE IS ACTUALLY ASKED FOR.
+
+  Sam's audit found 29 of 30 idioms showing the same azulejo tile on Yours while their 30
+  clue photographs sat unused in public/idioms. The feed had always used them; the library
+  resolved an idiom through IMAGE_BANK['vibe-<id>'] and fell through to a texture, and the
+  comment above that line claimed it used the clue photo. A comment describing what the
+  code was supposed to do is how a fault like this survives.
+
+  The rule is not "every item has a picture" — a shared texture is a real design state and
+  several kinds use it on purpose. It is that a picture which EXISTS must be reachable:
+  authoring thirty photographs and rendering one is the failure worth catching.
+*/
+{
+  const unreached = IDIOMS.filter((i) => !idiomImage(i))
+  if (unreached.length) {
+    fail(
+      unreached.length +
+        ' idiom(s) have no clue photograph reachable: ' +
+        unreached.map((i) => i.id).join(', '),
+    )
+  }
+  /*
+    And the library asks for it. Source-level, because the alternative is rendering the
+    board in a browser to look at thirty tiles — and the fault was never in the resolver,
+    it was in one surface not calling it.
+  */
+  const lib = readFileSync('components/Collection.tsx', 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\/\/[^\n]*/g, '')
+  /*
+    The CALL, not the definition. A first version matched /idiomClue\(/ and passed happily
+    with the call site deleted, because the helper's own `function idiomClue(` still
+    matched — the same self-matching fault road-check and merge-test each hit once. So this
+    requires it inside the image expression, where removing it is the regression.
+  */
+  if (!/idiomClue\(card\.id\)/.test(lib)) {
+    fail('the library no longer asks for an idiom clue photograph — see idiomClue')
+  }
+}
+
 warnings.forEach((w) => console.log('  warn  ' + w))
 errors.forEach((e) => console.log('  FAIL  ' + e))
 console.log(errors.length ? '\n' + errors.length + ' error(s)' : '\nno errors')

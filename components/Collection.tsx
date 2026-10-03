@@ -16,8 +16,9 @@ import { progressFor, stageFor } from '@/content/legend'
 import Image from 'next/image'
 import { PIECES, type CultureFamily } from '@/content/roots'
 import { vibeImage } from '@/content/vibe-images'
-import { sheetImage } from '@/content/feed'
+import { idiomImage, sheetImage } from '@/content/feed'
 import { IMAGE_BANK } from '@/content/images'
+import { IDIOMS } from '@/content/idioms'
 
 /**
  * THE BOARDS — a rail of icons and one grid, the way a profile works.
@@ -363,6 +364,18 @@ function PractiseCard() {
 }
 
 /**
+ * The clue photograph for a collected idiom, if the id is one.
+ *
+ * Looked up rather than cast: a collected card carries an id and a kind, and the idiom it
+ * names may have been retired from the content since it was collected. Missing means the
+ * texture below, which is what every other kind already falls back to.
+ */
+function idiomClue(id: string): { src: string; alt: string } | undefined {
+  const idiom = IDIOMS.find((i) => i.id === id)
+  return idiom ? idiomImage(idiom) : undefined
+}
+
+/**
  * One collected card.
  *
  * It links to a REVISION of what it holds rather than to the lesson that taught it. Sam:
@@ -390,10 +403,23 @@ function Filled({ card }: { card: CollectedCard }) {
       : card.kind === 'idiom'
         ? /*
              An idiom has its own clue photograph, which is the whole card — the picture is
-             the hint you get before the punchline. Falls back to a texture, so a newly
-             authored idiom is never a blank rectangle.
+             the hint you get before the punchline.
+
+             AND IT NEVER ASKED FOR IT. This read IMAGE_BANK['vibe-<id>'] and fell through
+             to a texture, so 29 of 30 idioms showed the same azulejo tile while their 30
+             authored clue photographs sat unused in public/idioms. The one that worked —
+             bobs_your_uncle — worked by accident: it collides with a `vibe-` slug, so the
+             shelf was showing the VIBE still rather than the idiom's own clue.
+
+             The comment above it claimed the photograph was the whole card, which was true
+             of the feed and false here: idiomImage() has resolved all thirty since the
+             photographs were authored, and this is the one surface that never called it.
+             A comment describing what the code was supposed to do is how a fault like this
+             survives an audit.
            */
-          (IMAGE_BANK['vibe-' + card.id.replace(/_/g, '-')] ?? sheetImage(card.id))
+          (idiomClue(card.id) ??
+            IMAGE_BANK['vibe-' + card.id.replace(/_/g, '-')] ??
+            sheetImage(card.id))
         : card.kind === 'sheet' ||
             card.kind === 'drop' ||
             card.kind === 'words' ||
