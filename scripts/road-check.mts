@@ -427,5 +427,41 @@ console.log('\nthe door and the copy agree\n')
   ok('nor does the locked door', !/vibes of your own/i.test(notYet))
 }
 
+/*
+  A GENDERED QUESTION IS NEVER ASKED BEFORE GENDER IS KNOWN.
+
+  Sam: "it needs to feed the language selector so we get ingles/inglesa for the right
+  gender." The nationality chips are drawn with the learner's own ending — inglês or
+  inglesa — so the root that settles gender has to come first. It did not: thank_you was
+  third and tb_introduce, which draws the chips, was second.
+
+  Asserted as an ordering rule rather than as two fixed positions, so moving either one
+  again cannot quietly reopen it.
+*/
+console.log('\nnothing gendered is asked before gender is known\n')
+{
+  const order = ROAD.map((s) => s.root)
+  const genderAt = order.findIndex((id) => {
+    const r = ROOTS.find((x) => x.root_id === id)
+    const a = (r as { asks?: string | string[] } | undefined)?.asks
+    return (Array.isArray(a) ? a : a ? [a] : []).includes('gender')
+  })
+  /* Every frame with a gendered slot, and the step that asks it. */
+  for (const [i, step] of ROAD.entries()) {
+    const r = ROOTS.find((x) => x.root_id === step.root)
+    const a = (r as { asks?: string | string[] } | undefined)?.asks
+    for (const which of Array.isArray(a) ? a : a ? [a] : []) {
+      const frame = LEGEND_FRAMES.find((f) => f.id === which)
+      const gendered = frame?.slots.some((sl) => sl.gendered || sl.options?.some((o) => o.f))
+      if (!gendered) continue
+      ok(
+        step.root + ' is asked after gender is known',
+        genderAt >= 0 && genderAt < i,
+        'gender settles at step ' + (genderAt + 1) + ', this is step ' + (i + 1),
+      )
+    }
+  }
+}
+
 if (fail.length) { console.log('\n' + fail.length + ' error(s)'); process.exit(1) }
 console.log('\nevery step earns its place, and the road arrives')

@@ -126,32 +126,32 @@ export const ROAD: RoadStep[] = [
     because: 'The ten-second wink. Asks nothing, teaches two words everybody already half-knows.',
     not_for_the_card: true,
   },
-  {
-    root: 'tb_introduce',
-    family: 'the_basics',
-    because: 'Your name and where you are from — the answer every later line needs.',
-  },
   /*
-    OBRIGADO/OBRIGADA SECOND, BECAUSE EVERY GENDERED LINE AFTER IT IS A GUESS.
+    OBRIGADO/OBRIGADA FIRST OF THE ASKING ROOTS, because every gendered line after it is a
+    guess — and the very next one is gendered.
 
     Sam: "move the Obrigado/Obrigada section right up to the top after name - as the gender
-    needs to carry through - specifically to I am__ I am from__ - If I am male, I dont want
-    the feminine - Inglesa."
+    needs to carry through." Then, when it landed third: "if it did move it's in the wrong
+    place, as it needs to feed the language selector so we get ingles/inglesa for the right
+    gender."
 
-    He is right and the sequencing was the whole fault. tb_introduce teaches "Sou inglesa."
-    on a branch — the feminine, because the root has to show the pair somewhere — and
-    myForm bends it to the speaker only once gender is known. Gender was settled by
-    tb_thank_you, which came two steps LATER, so a man met the feminine on the one screen
-    that teaches him how to say where he is from.
+    Both are the same instruction and I only did half of it. I put thank_you third, behind
+    tb_introduce — which is the root that ASKS where you are from and draws the nationality
+    chips. So the chips were still being drawn before DUB knew which ending was the
+    learner's, which is the exact thing moving it was supposed to fix.
 
-    Nothing else wants to be this early: it asks a question with no Legend card behind it
-    and teaches two words. It is here purely so that everything downstream can agree with
-    the person reading it.
+    It has no Legend card behind it and teaches two words. It is this early for one reason:
+    so that everything downstream can agree with the person reading it.
   */
   {
     root: 'tb_thank_you',
     family: 'the_basics',
     because: 'Which of obrigado/obrigada is yours. Until this is answered every gendered line is a guess.',
+  },
+  {
+    root: 'tb_introduce',
+    family: 'the_basics',
+    because: 'Your name and where you are from — the answer every later line needs.',
   },
   {
     root: 'tb_email',

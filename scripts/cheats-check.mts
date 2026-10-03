@@ -271,6 +271,25 @@ console.log('\nno lesson asks a question its learner cannot see\n')
     )
   }
 
+  /*
+    AND A CHIP WRITES THE PROFILE, WHICH IS WHAT THE LESSONS READ.
+
+    Sam: "i selected wales as a Language and it progressed with English." The nationality
+    chip wrote the Legend and nothing else, while personalise — which builds every sentence
+    in every lesson — reads me.profile.nationality. So the answer was filed somewhere the
+    lessons never look and the next screen still said Sou inglês.
+
+    Sam on the direction: "logically speaking the profile comes before the legend and
+    populates it." Right, and the standing job is to make the Legend a view of the profile
+    rather than a second copy. Until that lands, this holds the one chip whose answer the
+    lessons actually read.
+  */
+  ok(
+    'the nationality chip writes the profile the lessons read',
+    /which === 'origin'\) setProfile\('nationality', word\)/.test(src),
+    'personalise reads me.profile.nationality',
+  )
+
   for (const [who, field] of [
     ['AskAge', 'age'],
     ['AskOrigin', 'origin'],
