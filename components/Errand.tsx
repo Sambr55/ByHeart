@@ -394,23 +394,41 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             {situation.image ? null : (
               <h1 className="display text-balance text-3xl">{situation.title}</h1>
             )}
-            <p className="text-sm leading-relaxed text-muted">{situation.why}</p>
+            {/* The reason to be in this room, under its title. Body size, as the
+                reference card sets the gloss under its own question. */}
+            <p className="text-base leading-relaxed text-muted">{situation.why}</p>
           </div>
 
           {/*
             Ordered by the encounter, not by difficulty. The sequence IS the teaching:
             somebody rehearsing this is walking through the door in their head.
           */}
+          {/*
+            A CARD PER LINE, RATHER THAN ONE CARD WITH ROWS IN IT.
+
+            These are separate sentences for separate moments in one encounter — not a
+            list of properties — so each keeps its own edge and the eye can take them one
+            at a time. What changes is the strength: `rounded px-4 py-3` is the shape of a
+            row in a table, and these are the content of the screen.
+
+            And the three lines in each were a ladder down into nothing: the Portuguese at
+            text-lg, the English at text-sm faded to 80%, and WHEN TO SAY IT — which is the
+            only part that teaches anything a dictionary would not — at text-xs muted.
+            The English comes up to body size in the ink, and the usage note follows it.
+          */}
           <ol className="flex flex-col gap-3">
             {situation.lines.map((l) => (
-              <li key={l.pt} className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+              <li
+                key={l.pt}
+                className="flex flex-col gap-1 rounded-2xl border border-line bg-bg-elev px-5 py-6"
+              >
                 <div className="flex items-center gap-3">
                   <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
                   <p className="pt min-w-0 flex-1 text-lg text-accent">{l.pt}</p>
                   <CopyButton text={l.pt} size="sm" />
                 </div>
-                <p className="text-sm text-fg/80">{l.en}</p>
-                <p className="text-xs leading-relaxed text-muted">{l.when}</p>
+                <p className="text-base text-fg">{l.en}</p>
+                <p className="text-sm leading-relaxed text-muted">{l.when}</p>
               </li>
             ))}
           </ol>
@@ -536,7 +554,14 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             it into the air has no idea whether they said it well, and this is the only
             moment in the flow where the comparison is free.
           */}
-          <div className="flex flex-col gap-3">
+          {/*
+            THE SENTENCE THEY PRODUCED, IN A CARD — the same shape SayItCard gives the
+            same moment. This is the payoff of the room: the Portuguese, the way to hear
+            it back, and the English it answers. It was floating on sand with the buttons
+            directly under it, so the thing achieved and the way out of the screen had
+            equal weight. The card separates them without a rule.
+          */}
+          <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
             <p className="eyebrow text-accent">YOU SAID</p>
             <div className="flex items-center gap-3">
               <AudioButton
@@ -546,7 +571,7 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
               <p className="pt text-balance text-2xl text-accent">{situation.release.answer}</p>
               <CopyButton text={situation.release.answer} />
             </div>
-            <p className="text-sm text-muted">{situation.release.ask}</p>
+            <p className="text-base leading-relaxed text-muted">{situation.release.ask}</p>
           </div>
           <div className="flex flex-col gap-3">
             {/*
@@ -596,9 +621,13 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
 
       {stage === 'done' ? (
         <div className="flex flex-1 flex-col justify-center gap-6">
-          <div className="flex flex-col gap-3">
+          {/* The same card as the `said` stage above, for the same block — the ask, the
+              sentence and the way to hear it. Symmetrical on purpose: arriving here with
+              the answer shown and arriving having said it are the same screen with a
+              different verb on the button. */}
+          <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
             <p className="eyebrow text-muted">SAY IT</p>
-            <p className="text-sm text-muted">{situation.release.ask}</p>
+            <p className="text-base leading-relaxed text-muted">{situation.release.ask}</p>
             <div className="flex items-center gap-3">
               <AudioButton slug={slugFor(situation.release.answer)} text={situation.release.answer} />
               <p className="pt text-balance text-2xl text-accent">{situation.release.answer}</p>

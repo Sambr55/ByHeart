@@ -347,8 +347,21 @@ export function Profile() {
           The line, and a way to start. Not a dead end: this is the one screen a person can
           reach with nothing on it, so it has to point somewhere.
         */
-        <div className="flex flex-col gap-6">
-          <p className="text-sm leading-relaxed text-muted" data-testid="yours-empty">
+        /*
+          THE EMPTY STATE IS A CARD, because on this screen it is standing in for all of
+          them.
+
+          Everything this page shows when it is full is a card: the Legend board, the
+          grid, the identity row above. When there is nothing, one sentence and a button
+          on bare sand is the one state of Yours that looks unfinished rather than empty —
+          and this is the first screen a new learner reaches with their own name on it.
+          A card says "this is where it goes" where a bare paragraph says "nothing here".
+
+          The sentence is the whole content of the screen at that moment, so it is read at
+          body size in the ink colour rather than as a muted caption.
+        */
+        <div className="flex flex-col gap-6 rounded-2xl border border-line bg-bg-elev px-5 py-6">
+          <p className="text-base leading-relaxed text-fg" data-testid="yours-empty">
             Nothing here yet. The vibes you go through, the Portuguese you keep and your
             Legend all collect on this screen.
           </p>
@@ -373,8 +386,16 @@ export function Profile() {
             record on the way already.
           */}
           {standaloneEmpty ? (
-            <div className="flex flex-col gap-3 rounded border border-line bg-bg-elev px-4 py-3">
-              <p className="text-sm leading-relaxed text-fg">
+            /*
+              An INSET panel now, because its parent became a card.
+
+              This was `bg-bg-elev` lifted off sand. Inside the card that is the parent's
+              own colour, so the panel vanished and left a stray hairline round a
+              paragraph. --surface is the inset token the reference card uses for exactly
+              this — a panel within a card — see SayItCard's verdict and notice blocks.
+            */
+            <div className="flex flex-col gap-3 rounded-xl border border-line bg-surface px-4 py-3">
+              <p className="text-base leading-relaxed text-fg">
                 Did you start in the browser? The app keeps its own copy, so anything you
                 did there is still there — sign in on both and they join up.
               </p>
@@ -868,13 +889,35 @@ function Identity() {
   }, [mounted, learner.display_name])
 
   return (
-    <section className="flex items-center gap-3">
+    /*
+      THE IDENTITY ROW, IN A CARD.
+
+      This is the top of Yours and it is the one block on the screen that is about the
+      person rather than about the Portuguese — a photograph, their name, whether any of
+      it is saved anywhere, and the way to the settings. It was `flex items-center gap-3`
+      on bare sand, which gave the avatar a border and the name an underline-less input
+      and nothing at all to say the four things belonged together. Measured before this
+      change: the only lifted element on /profile was the 64px avatar circle itself.
+
+      The card is what makes the row a header. Everything below it on this screen is a
+      grid of the learner's own cards, so the one thing above the boards wants an edge.
+    */
+    <section className="flex items-center gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
+      {/*
+        THE PHOTO WELL IS bg-surface, NOT bg-bg-elev, now that this row is a card.
+
+        The well was lifted when its ground was sand, so an empty circle read as an object
+        waiting for a picture. Inside the card that is the SAME colour as its parent, and
+        an empty avatar became an invisible hole with a hairline round it. --surface is the
+        inset token — L*87, below the ground on purpose — and is what the product uses for
+        a field everywhere else. See the note on the three grounds in globals.css.
+      */}
       <button
         type="button"
         data-testid="avatar"
         onClick={() => file.current?.click()}
         aria-label={photo ? 'Change your photo' : 'Add a photo'}
-        className="tap-target relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-line bg-bg-elev"
+        className="tap-target relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-line bg-surface"
       >
         {photo ? (
           /* Not next/image: this is a data URI from the person's own camera roll, and the
@@ -925,10 +968,17 @@ function Identity() {
           row is noise.
         */}
         {access.known ? (
+          /*
+            text-sm, not text-xs. The note above argues this state "was invisible to the
+            person it is about" — and then set it at the smallest size on the screen. Not
+            text-base: it is a fact ABOUT the name above it rather than content of its own,
+            and matching the name's own body size would make the row read as two equal
+            lines instead of a name with a note under it.
+          */
           <p
             data-testid="profile-account"
             className={
-              'mt-1 truncate text-xs ' + (access.signedIn ? 'text-muted' : 'text-accent')
+              'mt-1 truncate text-sm ' + (access.signedIn ? 'text-muted' : 'text-accent')
             }
           >
             {access.signedIn && access.email

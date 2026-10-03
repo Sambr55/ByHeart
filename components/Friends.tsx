@@ -142,61 +142,81 @@ export function Friends() {
   const waiting = mine.filter((m) => !m.returned)
 
   return (
-    <section className="flex flex-col gap-3">
-      <div className="flex flex-col gap-1">
-        <p className="eyebrow text-muted">SHOWN</p>
-        <p className="text-sm leading-relaxed text-muted">
-          {mine.length
-            ? 'Sentences you handed to somebody, and what came back.'
-            : 'Show somebody three things you can say. They can show you theirs.'}
-        </p>
+    /*
+      SHOWN AND BROUGHT IN, AS TWO CARDS RATHER THAN TWO HEADINGS.
+
+      These are the only parts of Yours that need another person, and they sat at the foot
+      of the screen as an eyebrow, a muted line and a button on bare sand — under a grid of
+      the learner's own cards, which all have edges. Framed, they read as the two things
+      you can do with what is above them.
+
+      The rule between them is replaced by the gap: two cards a `gap-6` apart say "related
+      but separate" more clearly than a hairline ever did, and the hairline was doing the
+      work of a border on a section that had no border.
+    */
+    <section className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
+        <div className="flex flex-col gap-1">
+          <p className="eyebrow text-muted">SHOWN</p>
+          {/* The invitation is the content of this card, so it is read at body size. */}
+          <p className="text-base leading-relaxed text-muted">
+            {mine.length
+              ? 'Sentences you handed to somebody, and what came back.'
+              : 'Show somebody three things you can say. They can show you theirs.'}
+          </p>
+        </div>
+
+        {mine.length ? (
+          <ul className="flex flex-col gap-1">
+            {[...paired, ...waiting].map((m) => (
+              <li key={m.id}>
+                {/*
+                  bg-surface, because this row now sits INSIDE a card. It was bg-bg-elev
+                  when its ground was sand; against its own parent that is the same colour
+                  and the row would lose its edge. Inset is what a row within a card is.
+                */}
+                <Link
+                  href={'/s/' + m.id}
+                  className="tap-target flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+                >
+                  <span className="text-base">
+                    {m.returned ? 'They showed you back' : m.sent ? 'Waiting on them' : 'Waiting on you'}
+                  </span>
+                  <span className="eyebrow shrink-0 text-muted">{m.returned ? 'BOTH' : 'ONE'}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        <button
+          type="button"
+          data-testid="friends-invite"
+          onClick={invite}
+          disabled={busy}
+          className="tap-target eyebrow rounded border border-line-strong px-5 py-3 text-center disabled:opacity-60"
+        >
+          {busy ? 'MAKING A LINK' : 'SHOW SOMEBODY'}
+        </button>
       </div>
-
-      {mine.length ? (
-        <ul className="flex flex-col gap-1">
-          {[...paired, ...waiting].map((m) => (
-            <li key={m.id}>
-              <Link
-                href={'/s/' + m.id}
-                className="tap-target flex items-center justify-between gap-3 rounded border border-line bg-bg-elev px-4 py-3"
-              >
-                <span className="text-sm">
-                  {m.returned ? 'They showed you back' : m.sent ? 'Waiting on them' : 'Waiting on you'}
-                </span>
-                <span className="eyebrow shrink-0 text-muted">{m.returned ? 'BOTH' : 'ONE'}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      <button
-        type="button"
-        data-testid="friends-invite"
-        onClick={invite}
-        disabled={busy}
-        className="tap-target eyebrow rounded border border-line-strong px-5 py-3 text-center disabled:opacity-60"
-      >
-        {busy ? 'MAKING A LINK' : 'SHOW SOMEBODY'}
-      </button>
 
       {/*
         AND THE PEOPLE YOU HAVE BROUGHT IN, which is the other half of community.
 
         Showing is one card handed to somebody who is already here. This is asking somebody
         who is not — and in an expat city those are different acts with different stakes.
-        Kept in the same section because they are both "the part of DUB that needs another
-        person", and separated by a rule because conflating them would make the invitation
-        read as a share.
+        Its own card rather than a ruled-off half of this one, because conflating them
+        would make the invitation read as a share — the separation the rule used to carry
+        is now the gap between two edges, which says it more plainly.
 
         A LIST AND NEVER A COUNT, the rule this component already holds: three states, none
         of them a position. "How many people have you recruited" is a leaderboard with extra
         steps and DUB exists because scores are the wrong fuel.
       */}
-      <div className="mt-3 flex flex-col gap-3 border-t border-line pt-6">
+      <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
         <div className="flex flex-col gap-1">
           <p className="eyebrow text-muted">{INVITE.eyebrow}</p>
-          <p className="text-sm leading-relaxed text-muted">
+          <p className="text-base leading-relaxed text-muted">
             {invites?.length ? INVITE.some : INVITE.empty}
           </p>
         </div>
@@ -208,11 +228,14 @@ export function Friends() {
                 key={i.code}
                 data-testid={'invite-' + i.code}
                 className={
-                  'flex items-center justify-between gap-3 rounded border px-4 py-3 ' +
-                  (i.landed_at ? 'border-accent bg-accent/10' : 'border-line bg-bg-elev')
+                  /* bg-surface for the same reason the SHOWN rows above take it: a row
+                     inside a card is an inset, not a second lift. The landed state keeps
+                     its accent tint, which reads against either ground. */
+                  'flex items-center justify-between gap-3 rounded-xl border px-4 py-3 ' +
+                  (i.landed_at ? 'border-accent bg-accent/10' : 'border-line bg-surface')
                 }
               >
-                <span className="text-sm">
+                <span className="text-base">
                   {i.landed_at
                     ? INVITE.state.landed
                     : i.accepted_at

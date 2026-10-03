@@ -378,7 +378,16 @@ function Library() {
       </header>
 
       <div className="flex flex-1 flex-col gap-6 px-5 pb-10 pt-6">
-        <div>
+        {/*
+          THE HEADLINE AND WHAT IT MEANS, IN A CARD.
+
+          This block answers "what am I looking at" — how many of these are yours, which
+          scope you are in, and the way to flip it — and it was a bare <div> with the
+          answer set at text-xs muted, directly under a blue bar. The shelves below it are
+          lists with hairline headers, so there was nothing on the page with an edge and
+          the orienting line was the smallest type on screen.
+        */}
+        <div className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
           <h1 className="display text-balance text-2xl" data-testid="vocab-headline">
             {q
               ? matching.length
@@ -388,7 +397,12 @@ function Library() {
                 ? 'Nothing yours yet.'
                 : capability}
           </h1>
-          <p className="mt-3 text-xs leading-relaxed text-muted" data-testid="vocab-subhead">
+          {/*
+            text-base, not text-xs. This is the sentence that tells somebody what the
+            screen is showing them — and it holds a BUTTON (the scope flip in Subhead), so
+            the smallest type on the page was also interactive.
+          */}
+          <p className="mt-3 text-base leading-relaxed text-muted" data-testid="vocab-subhead">
             <Subhead
               q={query.trim()}
               scope={scope}
@@ -430,8 +444,15 @@ function Library() {
                 <span className="eyebrow shrink-0 tabular-nums text-muted">{count}</span>
               </button>
 
+              {/*
+                THE CLOSED SHELF'S PREVIEW IS THE SHELF, as far as anybody scrolling is
+                concerned — the set names and the first three words are the only evidence
+                of what is behind the label. At text-xs it was a line of grey specks under
+                a blue heading; at text-sm the Portuguese in it is legible, which is the
+                entire reason the preview exists.
+              */}
               {!expanded ? (
-                <p className="-mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">
+                <p className="-mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted">
                   {sets.map((s) => (
                     <span key={s.id} className="text-muted">
                       {s.label.toLowerCase()}
@@ -567,14 +588,23 @@ function Subhead({
 /** The honest dead end, which is also the best content signal the product collects. */
 function DeadEnd({ term }: { term: string }) {
   return (
+    /*
+      THE DASH STAYS, and only the size and padding move.
+
+      A dashed edge is this file's mark for something provisional — an empty shelf, a word
+      that is nearly yours — and this is the most provisional thing in the product: a word
+      it does not teach YET. Making it a solid card would say the dead end is settled. The
+      frame gets the card's radius and gutter so it sits in the same system as its
+      neighbours; the border keeps saying what it said.
+    */
     <div
       data-testid="vocab-deadend"
-      className="rounded border border-dashed border-line-strong bg-bg-elev px-4 py-3"
+      className="rounded-2xl border border-dashed border-line-strong bg-bg-elev px-5 py-6"
     >
-      <p className="text-sm leading-relaxed">
+      <p className="text-base leading-relaxed">
         DUB does not teach <span className="pt text-accent">{term}</span> yet.
       </p>
-      <p className="mt-3 text-xs leading-relaxed text-muted">
+      <p className="mt-3 text-sm leading-relaxed text-muted">
         Noted, and that is not a polite noise — the words people look for and cannot find
         are what the next vibe gets written from.
       </p>
@@ -584,8 +614,8 @@ function DeadEnd({ term }: { term: string }) {
 
 function EmptyMine({ onScope }: { onScope: () => void }) {
   return (
-    <div className="rounded border border-line bg-bg-elev px-4 py-6">
-      <p className="text-sm leading-relaxed">
+    <div className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
+      <p className="text-base leading-relaxed">
         Nothing has landed here yet. A piece becomes yours the first time you use it
         with nothing on screen to copy from.
       </p>
@@ -871,12 +901,21 @@ function EntryRow({
       </button>
 
       {open ? (
-        <div className="mt-1 flex flex-col gap-3 rounded border border-line bg-bg-elev px-4 py-3">
+        /*
+          THE OPEN WORD, AT CARD STRENGTH.
+
+          This is the one place in the library where a word is explained rather than
+          listed — the gloss, the rung, why it did not come back cleanly, the grammar note
+          and the sentences it makes. It carried the row's own `rounded px-4 py-3`, which
+          is right for a row in a list and too tight for the pane that opens out of it.
+        */
+        <div className="mt-1 flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(head.target)} text={head.target} size="sm" />
             <span className="min-w-0">
               <span className="pt block text-lg text-accent">{displayForm(head)}</span>
-              <span className="block text-xs text-muted">
+              {/* The meaning of the word, under the word. It is why the pane was opened. */}
+              <span className="block text-sm text-muted">
                 {head.gloss}
                 {head.gender ? ' · ' + head.gender : ''}
                 {head.plural ? ' · pl. ' + head.plural : ''}
@@ -889,8 +928,17 @@ function EntryRow({
             {RUNGS[head.rung - 1].name}
           </p>
 
+          {/*
+            THE TWO NOTES ARE THE TEACHING, so they are read at body size in the ink.
+
+            One says why this word is worth another look and the other is the grammar —
+            the ser/estar kind of explanation that is the whole reason a library beats a
+            word list. Both were `text-xs text-fg/85`: the smallest type in the pane, and
+            faded, for the only prose in it that explains anything. The left rule and the
+            inset ground stay, because they are what makes a note a note.
+          */}
           {entry.needsLook ? (
-            <p className="rounded border-l-2 border-coach bg-surface px-3 py-3 text-xs leading-relaxed text-fg/85">
+            <p className="rounded border-l-2 border-coach bg-surface px-3 py-3 text-base leading-relaxed text-fg">
               This one did not come back cleanly last time. It is not a mark against you —
               it is the reason the library is worth reopening.
             </p>
@@ -899,7 +947,7 @@ function EntryRow({
           {notes.map((n) => (
             <p
               key={n}
-              className="rounded border-l-2 border-accent/50 bg-surface px-3 py-3 text-xs leading-relaxed text-fg/85"
+              className="rounded border-l-2 border-accent/50 bg-surface px-3 py-3 text-base leading-relaxed text-fg"
             >
               {n}
             </p>
@@ -935,9 +983,15 @@ function EntryRow({
                 {lines.map((l) => (
                   <li key={l.target} className="flex items-center gap-3">
                     <AudioButton slug={slugFor(l.target)} text={l.target} size="sm" />
+                    {/*
+                      The sentences this word makes — the payoff of opening the pane, and
+                      the only Portuguese in it a learner could say out loud. The
+                      Portuguese comes up to body size and its English follows one step
+                      behind, which is the hierarchy the rest of the product uses.
+                    */}
                     <span className="min-w-0 flex-1">
-                      <span className="pt block text-sm">{l.target}</span>
-                      <span className="block text-xs text-muted">{l.en}</span>
+                      <span className="pt block text-base">{l.target}</span>
+                      <span className="block text-sm text-muted">{l.en}</span>
                     </span>
                     <CopyButton text={l.target} size="sm" />
                   </li>

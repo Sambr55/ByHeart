@@ -175,13 +175,20 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
       ) : null}
 
       {/* ---------------------------------------------------------- the card */}
-      <section className="rounded border border-line bg-bg-elev p-6">
+      {/*
+        rounded-2xl, not rounded. This is the card the whole screen is named after — the
+        one built to be screenshotted — and it was carrying a 4px radius while the
+        reference card in the product carries 16. The radius is most of what makes a
+        rectangle read as a card rather than as a box, and this one is the card.
+      */}
+      <section className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
         <p className="eyebrow text-accent">WHAT I CAN SAY</p>
 
         {empty ? (
           <>
             <p className="display mt-3 text-balance text-3xl">Nothing yet.</p>
-            <p className="mt-3 text-sm text-muted">
+            {/* The explanation of what fills this card IS the card when it is empty. */}
+            <p className="mt-3 text-base leading-relaxed text-muted">
               This fills up when you say something with nothing on screen to copy from. Not when you
               finish a lesson — when you produce it cold.
             </p>
@@ -200,7 +207,10 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
               is a score, and a number that moves is a number asking to be watched.
             */}
             <p className="pt t-said mt-3">{recent[0].pt}</p>
-            <p className="mt-3 text-sm text-muted">{recent[0].en}</p>
+            {/* The gloss under the hero sentence, at the size the reference card gives its
+                own gloss — see SayItCard's askEn. Still muted: it is the translation, not
+                the thing produced. */}
+            <p className="mt-3 text-base leading-relaxed text-muted">{recent[0].en}</p>
 
             <p className="mt-6 border-t border-line pt-6 text-base text-fg/80">
               <span className="tabular-nums font-semibold">{proof.length}</span>{' '}
@@ -214,7 +224,10 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
                 {recent.slice(1).map((p) => (
                   <li key={p.pt}>
                     <p className="pt text-lg font-semibold text-accent">{p.pt}</p>
-                    <p className="mt-1 text-xs text-muted">{p.en}</p>
+                    {/* The gloss on the earlier lines. text-sm rather than text-xs: these
+                        are sentences this person can say, and the English under them was
+                        the smallest type on the card they are meant to show somebody. */}
+                    <p className="mt-1 text-sm text-muted">{p.en}</p>
                   </li>
                 ))}
               </ul>
@@ -233,17 +246,25 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
       </section>
 
       {/* --------------------------------------------------- how am I doing */}
+      {/*
+        THE TWO SECONDARY CARDS GET THE GROUND AS WELL AS THE BORDER.
+
+        Both were `rounded border border-line p-4` — an outline drawn on the sand with
+        nothing behind it, which is the one shape in this system that reads as neither
+        ground nor card. They say what the big card cannot: how it is going, and how far
+        there is to go. Same frame as their neighbour above, one step quieter in type.
+      */}
       {firstTry ? (
-        <section className="rounded border border-line p-4">
+        <section className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
           <p className="eyebrow text-muted">HOW IT GOES</p>
-          <p className="mt-3 text-sm">
+          <p className="mt-3 text-base leading-relaxed">
             You said{' '}
             <span className="font-semibold">
               {firstTry.hit} of your last {firstTry.of}
             </span>{' '}
             right first time, with nothing on screen.
           </p>
-          <p className="mt-3 text-xs leading-relaxed text-muted">
+          <p className="mt-3 text-sm leading-relaxed text-muted">
             Only the beats with nothing on screen to copy from are counted. It is the one
             number here that cannot be moved by opening the app.
           </p>
@@ -252,15 +273,15 @@ export function Proof({ standalone = false }: { standalone?: boolean }) {
 
       {/* ------------------------------------------------------- the distance */}
       {distance ? (
-        <section className="rounded border border-line p-4">
+        <section className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
           <p className="eyebrow text-muted">YOUR GOAL</p>
           {distance.done ? (
-            <p className="mt-3 text-sm">
+            <p className="mt-3 text-base leading-relaxed">
               You have everything the graph can give you for {GOAL_LABEL[distance.goal]}. Pick
               another crate and it starts compounding.
             </p>
           ) : (
-            <p className="mt-3 text-sm">
+            <p className="mt-3 text-base leading-relaxed">
               <span className="font-semibold">
                 {distance.count} {distance.count === 1 ? 'thing' : 'things'} to go
               </span>{' '}

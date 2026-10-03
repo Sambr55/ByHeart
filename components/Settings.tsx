@@ -86,23 +86,39 @@ export function Settings() {
             boundary. Somebody looking for their words should not have to open three rows
             to find out they are on the previous screen.
           */}
-          <p className="text-sm leading-relaxed text-muted">
+          <p className="text-base leading-relaxed text-muted">
             Your account and how the app behaves. The Portuguese you have earned is on
             Yours.
           </p>
         </div>
 
-        <section className="flex flex-col">
-          {ROWS.map((r) => (
+        {/*
+          THE ROWS, IN A CARD RATHER THAN RULED ACROSS THE PAGE.
+
+          Three destinations separated by hairlines on bare sand read as a list of
+          hairlines; the same three inside one lifted card read as a thing with three ways
+          into it. Measured: this page had NO element above the ground on it at all — the
+          only painted backgrounds were the two bars and the segmented controls — so every
+          group on it was a heading over a gap.
+
+          The last row loses its rule, because the card's own edge is the line under it and
+          two lines a pixel apart is a mistake somebody has to look at twice.
+        */}
+        <section className="flex flex-col rounded-2xl border border-line bg-bg-elev px-5 py-6">
+          {ROWS.map((r, i) => (
             <Link
               key={r.href}
               href={r.href}
               data-testid={'settings-' + r.label.toLowerCase()}
-              className="tap-target flex items-baseline justify-between gap-3 border-b border-line/60 py-3 transition hover:text-accent"
+              className={
+                'tap-target flex items-baseline justify-between gap-3 py-3 transition hover:text-accent ' +
+                (i === ROWS.length - 1 ? '' : 'border-b border-line/60')
+              }
             >
               <span className="min-w-0">
-                <span className="display block text-sm">{r.label}</span>
-                <span className="mt-1 block text-xs leading-relaxed text-muted">{r.hint}</span>
+                {/* The destination is the content of the row, so it is read at body size. */}
+                <span className="display block text-base">{r.label}</span>
+                <span className="mt-1 block text-sm leading-relaxed text-muted">{r.hint}</span>
               </span>
               <span aria-hidden className="shrink-0 text-muted">
                 →
@@ -128,15 +144,22 @@ export function Settings() {
           answer is in, rather than flashing it and taking it away.
         */}
         {access.known && access.signedIn ? (
-          <section className="flex flex-col gap-3 border-t border-line pt-6">
+          /*
+            A CARD RATHER THAN A RULE, for the same reason the rows above got one: this is
+            a control and a promise about what it does to somebody's work, and a promise
+            floating on the ground under a hairline is the shape of a footnote.
+          */
+          <section className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
             <a
               href="/api/auth/logout"
               data-testid="settings-signout"
-              className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted transition hover:border-accent hover:text-accent"
+              className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-center text-muted transition hover:border-accent hover:text-accent"
             >
               SIGN OUT
             </a>
-            <p className="text-xs leading-relaxed text-muted">
+            {/* The reassurance is the reason to read this at all, so it is read at body
+                size. It is still muted: it answers a worry rather than raising one. */}
+            <p className="text-base leading-relaxed text-muted">
               Your Portuguese stays on this phone and in your account. Signing back in puts
               the two together again.
             </p>
@@ -151,7 +174,18 @@ export function Settings() {
           competing with it. Same order they had at the foot of Yours, so anybody who knew
           where they were still does.
         */}
-        <section data-testid="settings-choices" className="flex flex-col border-t border-line pt-6">
+        {/*
+          AND THE THREE SWITCHES IN A CARD, with air between them.
+
+          This was `flex flex-col` with no gap under a hairline, so appearance, taps and
+          purpose ran into each other as one block of nine small controls — three separate
+          decisions reading as one setting with too many buttons. `gap-6` is the step for
+          one group to the next inside a section, which is exactly what these are.
+        */}
+        <section
+          data-testid="settings-choices"
+          className="flex flex-col gap-6 rounded-2xl border border-line bg-bg-elev px-5 py-6"
+        >
           <ThemeChoice />
           <SoundChoice />
           <PurposeChoice />
@@ -204,9 +238,18 @@ function Crashes() {
   if (!rows.length) return null
 
   return (
+    /*
+      Framed like its neighbours, but DELIBERATELY NOT PROMOTED in type.
+
+      Everything in here is a timestamp, a minified message and a stack — strings for
+      whoever is fixing it rather than prose for the person holding the phone. Reading a
+      stack trace at body size would make the loudest thing on the screen the one section
+      that is not about them. The card is for consistency; the small type is the content
+      being honest about what it is.
+    */
     <section
       data-testid="settings-crashes"
-      className="flex flex-col gap-3 border-t border-line pt-6"
+      className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6"
     >
       <div className="flex items-baseline gap-3">
         <h2 className="eyebrow min-w-0 flex-1 text-accent">WHAT BROKE</h2>
