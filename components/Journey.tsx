@@ -6277,6 +6277,32 @@ function SectionComplete() {
           outcome: the one way on is the one the road named.
         */}
       </Dock>
+      {/*
+        AND THE OFFER TO PUT IT ON THEIR PHONE, at the first moment it has been earned.
+
+        Sam, about to hand out a QR code: "lets fix the QR code config so the app lands on
+        people's phone desktop."
+
+        The manifest was never the problem — it is standalone, it has its icons, and the
+        install component handles both the Android prompt and the iOS Share-sheet
+        instructions. The problem is that nobody reached it. <Install /> rendered on the
+        picker, below `if (onRoad) return null`, so it appeared only once the ENTIRE road
+        was walked: ten roots, seven sittings. Measured on an iPhone user agent — brand new
+        learner, no prompt; mid-road, no prompt; road finished, prompt. Everybody handed a
+        QR code today would have missed it.
+
+        Here it is after the first sitting, which is the first honest moment: somebody has
+        finished a thing, has words they did not have, and a reason to want it back. The
+        argument on the picker — "a product that asks to be on your home screen before it
+        has shown you anything is asking for a commitment it has not earned" — is right and
+        is satisfied by the end of a sitting rather than by the end of the road.
+
+        It stays on the picker too. Install renders nothing once installed or waved away, so
+        a learner who takes it here never sees it again, and one who declines still has the
+        later chance. Two offers, each at a moment that makes sense, and no nagging because
+        the component's own state ends it.
+      */}
+      <Install />
     </Shell>
   )
 }
