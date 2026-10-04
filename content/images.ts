@@ -444,6 +444,267 @@ export const WANTED: { slug: string; brief: string; used_by: string }[] = [
       'A handwritten sign taped inside a shop door behind a half-pulled metal shutter, a quiet empty street outside in strong August light.',
     used_by: 'recurring: August — closed for the holidays',
   },
+  /*
+    THE THIRTY ROOMS THE CLUB ACTUALLY STANDS ON, and the count is the finding.
+
+    Audited by walking the member feed at 390x844 and asking cardFace for an image: 113
+    cards reachable, 30 of them with none — and all 30 are Situations, which is every room
+    in all three blocks. Five standing rooms in content/situations.ts have photographs
+    (the pharmacy, the Junta, the tram, the café counter, the bakery queue) and the thirty
+    that arrived with lisbon-moving-1, lisbon-staying-1 and lisbon-visiting-1 have none at
+    all: `image` is optional on a Situation, and none of the three blocks sets it.
+
+    WHAT THAT LOOKS LIKE, which is the reason this is a brief rather than a note. A room
+    with no image is not broken — cardFace returns undefined, the card takes the sand
+    ground and dark ink, and it reads perfectly well. It is also three-quarters empty: the
+    title and two lines sit at the bottom of a blank screen with nothing above them, while
+    every drop beside them in the same feed is a full-bleed photograph. So the best content
+    in the product is the part that looks least like it.
+
+    THE MOVING BLOCK ALREADY PROMISED THESE. Its own docstring says "Ten briefs are in
+    content/images.ts under WANTED, sharing one look so the block reads as a set" — and
+    they are not here. The briefs were written, the gate caught them sitting in both lists
+    at once, and the removal took the ten that had NOT been generated along with the ones
+    that had. The promise is kept here, for all thirty rather than ten.
+
+    ONE LOOK PER BLOCK, so a block reads as a set rather than as ten separate
+    commissions — which is the whole reason situations.ts says a block is ten at a time:
+    "ten is what one image session yields, which forces a block to be conceived as a set".
+
+      MOVING    interiors, waiting, counters. Nobody's face, and the counter seen from the
+                side a person stands on. These are rooms where you are the ninth person
+                that morning and the picture should feel like the wait rather than the
+                errand.
+      STAYING   the street you walk down anyway — small shops, a stair, a doorway. Closer
+                and warmer than the moving set, because the whole difference the staying
+                block teaches is that these are places you go back to.
+      VISITING  daylight and the city itself — a view, a table, a platform. The one block
+                that is allowed to be beautiful, because the rooms in it are the ones
+                somebody chose to be in.
+
+    EVERY ONE IS THE MOMENT BEFORE THE SENTENCE, never an illustration of the answer —
+    the rule the thirteen Legend frames are already built on. A picture of somebody being
+    handed a NIF is a picture of the errand finished; the queue and the numbered counter is
+    the thing the learner is standing in when they need the words. Nobody's face is the
+    subject anywhere, which is also what keeps these honest about being generated.
+
+    Nothing here is referenced by a room yet. drop-check accepts a room whose image is
+    either in the bank or wanted here, and asserts that no slug is in both — so these can
+    be generated and then moved across, which is the only order that keeps both lists
+    true.
+  */
+  /* ---------------------------------------------------- moving: the first two months */
+  {
+    slug: 'room-financas-counter',
+    brief:
+      'A numbered counter in a tax office seen from the public side: a low partition, a screen turned away, an empty chair pulled back, and the edge of a queue of moulded seats out of focus behind.',
+    used_by: 'lisbon_nif — Getting your NIF',
+  },
+  {
+    slug: 'room-bank-chairs',
+    brief:
+      'Two chairs facing a bank desk from the customer side, a closed folder squared on the desk between them, daylight from a glass frontage behind.',
+    used_by: 'lisbon_banco — Opening a bank account',
+  },
+  {
+    slug: 'room-phone-counter',
+    brief:
+      'A phone shop counter from the customer side, a lit wall of handsets behind it slightly out of focus, a card reader and a coil of cable on the glass.',
+    used_by: 'lisbon_telemovel — A phone number that is yours',
+  },
+  {
+    slug: 'room-viewing-empty',
+    brief:
+      'An empty Lisbon flat mid-viewing: bare boards, shutters half open, a tall window onto tiled roofs, and one folding chair left in the middle of the room.',
+    used_by: 'lisbon_visita — Seeing a flat',
+  },
+  {
+    slug: 'room-lease-table',
+    brief:
+      'A kitchen table with a stapled contract open at the last page, a pen laid across it, two cups pushed to the edge, late afternoon light across the paper.',
+    used_by: 'lisbon_contrato — Signing the lease',
+  },
+  {
+    slug: 'room-meter-cupboard',
+    brief:
+      'An opened meter cupboard on a tiled landing, the dial and the wiring in shadow, a phone held up to it in one hand to photograph the reading.',
+    used_by: 'lisbon_luz_agua — Getting the power on',
+  },
+  {
+    slug: 'room-health-centre-wait',
+    brief:
+      'A health centre waiting corridor: a run of empty chairs against a pale tiled wall, a closed door at the end, hard overhead light.',
+    used_by: 'lisbon_centro_saude — Registering at the health centre',
+  },
+  {
+    slug: 'room-ticket-screen',
+    brief:
+      'A municipal waiting hall from the back of the room: rows of occupied seats seen from behind, a paper ticket held in a hand in the foreground, a number display high on the far wall.',
+    used_by: 'lisbon_loja_cidadao — The Loja do Cidadão',
+  },
+  {
+    slug: 'room-used-car',
+    brief:
+      'A second-hand car parked at an angle on a quiet street, the driver window down, keys and folded paperwork on the passenger seat, flat overcast daylight.',
+    used_by: 'lisbon_carro — Buying a car',
+  },
+  {
+    slug: 'room-school-gate',
+    brief:
+      'A school gate from the pavement outside: green railings, a yard and low buildings beyond, a bag of small coats on a hook just inside. Early morning.',
+    used_by: 'lisbon_escola — Getting a place at school',
+  },
+  /* ------------------------------------------------ staying: the street you live on */
+  {
+    slug: 'room-stairwell',
+    brief:
+      'A Lisbon stairwell from a half-landing: a worn stone flight turning upward, a wooden handrail polished pale by hands, light from a window out of frame.',
+    used_by: 'lisbon_vizinho — The neighbour on the stairs',
+  },
+  {
+    slug: 'room-regular-cafe',
+    brief:
+      'The corner of a small neighbourhood café: a cup and saucer already waiting on the zinc, a folded newspaper, a stool with the seat worn through at one spot.',
+    used_by: 'lisbon_costume — Becoming a regular',
+  },
+  {
+    slug: 'room-navegante-desk',
+    brief:
+      'A small service window in a metro station seen from the queue: a glass hatch, a worn steel ledge, a card reader on the counter, tiled passage walls beyond.',
+    used_by: 'lisbon_navegante — The Navegante card',
+  },
+  {
+    slug: 'room-lavandaria',
+    brief:
+      'A row of front-loading machines in a small launderette, one drum turning, a plastic basket on the bench in front, strip light and a wet floor.',
+    used_by: 'lisbon_lavandaria — The launderette',
+  },
+  {
+    slug: 'room-barbers-chair',
+    brief:
+      'An empty barber chair facing a mirror in a small Lisbon shop, scissors and a comb laid on the ledge, the street visible in the reflection.',
+    used_by: 'lisbon_cabeleireiro — A haircut',
+  },
+  {
+    slug: 'room-gym-desk',
+    brief:
+      'The front desk of a small neighbourhood gym: a clipboard and a pen on the counter, a turnstile beyond it, equipment out of focus in the background.',
+    used_by: 'lisbon_ginasio — Joining a gym for three months',
+  },
+  {
+    slug: 'room-talho-counter',
+    brief:
+      'A butcher counter from the customer side: a chilled glass case, a set of scales with the dial facing out, a paper ticket in a hand at the edge of frame.',
+    used_by: 'lisbon_talho — The counter, by weight',
+  },
+  {
+    slug: 'room-pickup-point',
+    brief:
+      'A stack of parcels on a shelf behind a small shop counter, a newsagent’s racks beside them, a handwritten number on the top box turned away.',
+    used_by: 'lisbon_encomenda — The parcel you missed',
+  },
+  {
+    slug: 'room-repair-bench',
+    brief:
+      'A cobbler’s bench in a narrow shop: a shoe clamped mid-repair, tools laid in the order they are used, the door open onto the street behind.',
+    used_by: 'lisbon_arranjar — Getting something mended',
+  },
+  {
+    slug: 'room-classroom-evening',
+    brief:
+      'A small classroom at the end of the day: chairs pulled round a table, a blank whiteboard, a window onto a lit Lisbon street going dark.',
+    used_by: 'lisbon_aulas — Signing up for classes',
+  },
+  /* ------------------------------------------------- visiting: the city you chose */
+  {
+    slug: 'room-table-for-two',
+    brief:
+      'A small table laid for two outside a Lisbon restaurant, two glasses and a folded menu, the doorway and the dark interior behind. Early evening.',
+    used_by: 'lisbon_mesa — A table for two',
+  },
+  {
+    slug: 'room-the-bill',
+    brief:
+      'The end of a meal on a Lisbon table: a saucer with a folded paper bill under a coin, an untouched dish of olives and a bread basket pushed to one side.',
+    used_by: 'lisbon_conta — The bill, and the couvert',
+  },
+  {
+    slug: 'room-two-queues',
+    brief:
+      'Two queues of people seen from behind at a monument entrance, a rope divider between them and a stone archway ahead. Bright hard daylight.',
+    used_by: 'lisbon_bilhetes — Tickets, and which queue',
+  },
+  {
+    slug: 'room-miradouro',
+    brief:
+      'A Lisbon miradouro at golden hour: a tiled parapet in the foreground, the river and the roofs below, a few people at the rail seen from behind.',
+    used_by: 'lisbon_foto — Asking somebody to take the photo',
+  },
+  {
+    slug: 'room-taxi-rank',
+    brief:
+      'The back seat of a waiting taxi from the open kerbside door, the meter unlit on the dashboard, a Lisbon street beyond the windscreen at dusk.',
+    used_by: 'lisbon_taxi — Getting in a taxi',
+  },
+  {
+    slug: 'room-street-corner',
+    brief:
+      'A junction of three narrow Lisbon streets climbing away in different directions, calçada underfoot, no signage legible. Flat midday light.',
+    used_by: 'lisbon_perdido — Asking the way, and surviving the answer',
+  },
+  {
+    slug: 'room-market-scales',
+    brief:
+      'A market stall from the customer side: crates of fruit and greens banked up, a hanging set of scales with an empty pan, a paper bag open on the edge.',
+    used_by: 'lisbon_mercado — Buying by weight',
+  },
+  {
+    slug: 'room-fado-house',
+    brief:
+      'The inside of a small casa de fado before it starts: a stool and a Portuguese guitar leaning against a chair, a bare wall, one low lamp, empty tables.',
+    used_by: 'lisbon_fado — A fado house',
+  },
+  {
+    slug: 'room-rossio-platform',
+    brief:
+      'A train platform under an iron and glass roof, a validating machine on a post in the foreground, a waiting train further down. Morning light through the glass.',
+    used_by: 'lisbon_comboio — The train to Sintra',
+  },
+  {
+    slug: 'room-kitchen-pass',
+    brief:
+      'A restaurant kitchen pass seen from the dining side: a plate waiting under a heat lamp, a docket clipped above it turned away, steam and movement out of focus behind.',
+    used_by: 'lisbon_sem — What you cannot eat',
+  },
+  /*
+    THE TWO THE SHARING CARDS WANT, and what they are standing on meanwhile.
+
+    Both explainers in the Club that involve another person are using a photograph of
+    nobody, because the bank holds no picture with two people in it. That is not a crisis —
+    each is using an image whose alt text is TRUE of the image that exists, which is the
+    rule — but it is the gap worth naming rather than quietly living with.
+
+    bring_somebody described the picture it wished it had: its alt text claimed "two people
+    at a café counter, mid-conversation" over an empty counter with one cup. Corrected, and
+    recorded here instead, because a brief is where a wish for a photograph belongs.
+
+    NOBODY'S FACE IS THE SUBJECT, which is this bank's standing rule — see the note on the
+    Legend questions above. Two people from behind, or hands, or the space between them.
+    The pictures have to work for a learner whose friend looks nothing like whoever is in
+    frame.
+  */
+  {
+    slug: 'showing_pair',
+    brief:
+      'Two people at a Lisbon café counter from behind, one leaning in to say something to the other, both phones face-down on the zinc. Shot from the doorway, late morning light, neither face visible.',
+    used_by: 'explainer bring_somebody — Send somebody what you can say',
+  },
+  {
+    slug: 'bring_a_friend',
+    brief:
+      'Two people arriving somewhere together in Lisbon — walking up a calçada towards a lit doorway, seen from behind, one half a step ahead and turning back to the other. Early evening, the city doing something in the background. No faces.',
+    used_by: 'explainer bring_a_friend — Everybody you know here speaks English',
+  },
 ]
 
 /** Every slug in the bank, for the gate that checks a template does not name a hole. */

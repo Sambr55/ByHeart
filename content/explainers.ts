@@ -375,8 +375,77 @@ export const EXPLAINERS: Explainer[] = [
       body: 'In Yours you can make a showing: the lines you have produced from memory, as a card you can send to anybody. They see what you can say. If they are in here too, they show you theirs back and you both end up with the other. It is the one part of DUB that needs another person, and it is the part that makes a night out worth planning — you already know what they can order.',
     },
     image: {
+      /*
+        THE ALT TEXT SAID TWO PEOPLE AND THE PICTURE HAS NOBODY IN IT.
+
+        cafe-counter.jpg is "a zinc café counter with an empty espresso cup on a saucer and
+        a folded newspaper beside it" — the bank's own words for it. This card wanted two
+        people mid-conversation, so it simply described the picture it wished it had, which
+        is the one thing alt text may never do: a screen reader gets a fiction, and the
+        next person to look for that photograph goes looking for something that does not
+        exist.
+
+        Corrected to the bank's line. The right picture is wanted — see showing_pair in
+        content/images.ts.
+      */
       src: '/lisbon/cafe-counter.jpg',
-      alt: 'Two people at a café counter in Lisbon, mid-conversation.',
+      alt: 'A zinc café counter in Lisbon with an empty espresso cup on a saucer and a folded newspaper beside it.',
+    },
+    retires: 'acted-on-a-card',
+  },
+  /*
+    AND THE ONE THAT BRINGS SOMEBODY WHO IS NOT HERE YET.
+
+    Sam: "Add a recommend a friend card into the club flow - with image."
+
+    The card above it is about SHOWING — you and somebody who is already in DUB swapping
+    what you can each say. This is the other half and it was missing from the feed
+    entirely: asking somebody who is not here to come. The machinery has existed the whole
+    time — /api/invite mints a code, /come/[code] lands them, components/Friends.tsx lists
+    who has arrived — and the only thing pointing at it was a section inside Yours, which
+    is where you go to look at your own things rather than to think about somebody else's.
+
+    IT IS NOT A REFERRAL CARD, and the copy in content/invite.ts already settled why: "a
+    referral is a marketing act and this is asking somebody to learn a language with you."
+    So no code on the face, no discount, no count of who you have sent it to. What it
+    offers is the reason somebody would actually do it — everybody you know here speaks
+    English to each other, and one other person gives you both somewhere to put it.
+
+    The free month exists and is deliberately in the DETAIL rather than the blurb, which is
+    the rule content/invite.ts set for the same line in Yours: it is the second reason and
+    it must not become the first. A card that leads on free months is what gets somebody to
+    send twenty links to people who will never open one.
+
+    RETIRES ON `acted-on-a-card` rather than on having invited anybody. Inviting is not a
+    thing most people do once and finish with, and a card that only goes when you have used
+    it is a card that nags the people least likely to want it. It leaves with the rest of
+    the explainers once the learner has shown they know how the Club works.
+  */
+  {
+    id: 'bring_a_friend',
+    eyebrow: 'BRING ONE',
+    title: 'Everybody you know here speaks English to each other.',
+    blurb:
+      'Bring one of them and you will both have somewhere else to put it. One link, and they start where you started.',
+    detail: {
+      heading: 'What happens when they arrive',
+      body: 'You send a link from Yours. They land on the same first screen you did, with no account and nothing to pay, and they work out which film quotes they already half-know. When they get their Legend you will see it — and you will have somebody to use this on who is not a waiter being patient with you. If they stay, you both get a month of everything.',
+    },
+    image: {
+      /*
+        A QUEUE OF PEOPLE, which is the closest honest thing in the bank.
+
+        This card is about bringing somebody, and the right photograph has two people in it
+        — which the bank does not hold; see bring_a_friend in content/images.ts WANTED.
+        What it does hold is a morning queue at a pastelaria, which is at least other
+        people in Lisbon doing an ordinary thing, and the alt text is the bank's own and
+        true of the picture.
+
+        It became free this morning when CHEATS, HACKS & BLUFFS came off the intro sequence,
+        so nothing else is using it.
+      */
+      src: '/lisbon/bakery-queue.jpg',
+      alt: 'A queue at a pastelaria counter in the morning, seen from behind, trays of pastries under glass.',
     },
     retires: 'acted-on-a-card',
   },
