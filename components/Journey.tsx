@@ -6063,10 +6063,37 @@ function SectionComplete() {
             {LEGEND_COPY.banked_cta}
           </Link>
         ) : (
+          /*
+            THE WAY ON IS THE ROAD'S NEXT STEP, NOT ALWAYS THE BASICS.
+
+            Sam's diagnostic, which ended four days of this: roots played 6, road 2 of 10,
+            roots recorded tb_hello_goodbye, tb_thank_you, tb_introduce, tb_1234,
+            tb_yes_no, tb_patience — six roots, all of them basics, only two of them road
+            steps — above a row reading "Road next: jb_name, in crate james_bond".
+
+            This button is why. It is the primary control at the end of every sitting and
+            it hardcoded chooseFamily(DOORWAY), so whatever the road was asking for, the
+            big blue button sent him back into the basics. Press it, play three more
+            basics roots, finish, press it again. The road was never broken and the picker
+            was auto-entering Bond correctly — he simply never went through the picker,
+            because the end of a sitting is a dead end with one way out and that way out
+            pointed at the wrong crate.
+
+            It is the same mistake as the latched ref earlier today, one layer along: two
+            places deciding where somebody goes next, only one of them reading the road.
+            The road is the single answer to "what is next" — see content/road.ts — so the
+            button asks it rather than assuming.
+
+            The basics are still the answer whenever the road says so, which is the first
+            two steps and any later step that names them. What changes is that the road
+            gets to say.
+          */
           <button
             type="button"
             data-testid="more-basics"
-            onClick={() => chooseFamily(DOORWAY)}
+            onClick={() =>
+              road.next ? chooseFamily(road.next.family, road.next.root) : chooseFamily(DOORWAY)
+            }
             className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
           >
             {/*
@@ -6081,7 +6108,23 @@ function SectionComplete() {
               offered the basics for the first time has not met the phrase yet and gets
               the plain label.
             */}
-            {isDoorway ? breakAfter(learner.sittings ?? 0).cta : 'LET’S DO THE BASICS'}
+            {/*
+              AND THE LABEL NAMES WHERE IT IS ACTUALLY GOING.
+
+              "LET'S DO THE BASICS" on a button that opens James Bond is the product lying
+              about its own next screen, which is how this stayed invisible: the button did
+              what it said, and what it said was wrong.
+
+              VAMOS LÁ still wins where it applies — it is the phrase the break card taught
+              four lines above, used for the thing it is for, and it is true of any
+              destination. Outside that, the label is the crate the road is sending them
+              to, so somebody can see Bond coming before they press.
+            */}
+            {isDoorway
+              ? breakAfter(learner.sittings ?? 0).cta
+              : road.next && road.next.family !== DOORWAY
+                ? 'NEXT: ' + (CRATES.find((c) => c.id === road.next!.family)?.title ?? 'KEEP GOING').toUpperCase()
+                : 'LET’S DO THE BASICS'}
           </button>
         )}
         {/*
