@@ -42,6 +42,24 @@ async function rail(p: Page) {
   )) as string[]
 }
 
+/*
+  The rail by card id, which is the name that does not move.
+
+  `rail` reads the first line of each card's text — its eyebrow — and that was a unique
+  name for a card right up until it was not. Three cards now carry THE CLUB and three draw
+  a step number in place of a word, so every assertion keyed on eyebrows failed at once
+  while the sequence was exactly right.
+
+  A check that fails when correct copy changes is a check that gets loosened, and a loosened
+  check asserts nothing. So the position assertions ask for ids, which content/intro.ts
+  already keys on, and the copy assertions go on asking about copy.
+*/
+async function railIds(p: Page) {
+  return (await p.evaluate(
+    `Array.from(document.querySelectorAll('.snap-y > section')).map(s => s.getAttribute('data-card') || '')`,
+  )) as string[]
+}
+
 const browser = await chromium.launch()
 
 console.log('\nthe front door goes to the Club\n')
@@ -78,6 +96,7 @@ await page.goto(BASE + '/club?in=1')
 await page.waitForTimeout(2500)
 
 const cards = await rail(page)
+const ids = await railIds(page)
 ok('there is a feed', cards.length > 6, cards.length + ' cards')
 
 /*
@@ -112,8 +131,8 @@ const titles = (await page.evaluate(
   as somebody remembered to edit it in two places.
 */
 {
-  const real = cards.slice(1, -1)
-  const wanted = INTRO_CARDS.map((c) => c.eyebrow)
+  const real = ids.slice(1, -1)
+  const wanted = INTRO_CARDS.map((c) => c.id)
   const got = real.slice(0, 40)
   const at = wanted.map((e) => got.findIndex((g) => g === e))
   ok('every argument card is in the feed', at.every((i) => i >= 0), at.join(', '))
@@ -190,17 +209,13 @@ const titles = (await page.evaluate(
     cardFace is the one function that decides what this card says, so asking it is the only
     version of this that cannot drift.
   */
-  const setupFace = (() => {
-    const card = setUpCard(false, false)
-    return card ? cardFace(card).eyebrow : ''
-  })()
-  const setupAt = got.findIndex((g) => g === setupFace)
-  const afterEyebrow = INTRO_CARDS.find((c) => c.id === INTRO_SETUP_AFTER)?.eyebrow ?? ''
-  const anchorAt = got.indexOf(afterEyebrow)
+  const setupId = setUpCard(false, false)?.id ?? ''
+  const setupAt = got.findIndex((g) => g === setupId)
+  const anchorAt = got.indexOf(INTRO_SETUP_AFTER)
   ok(
     'and set-up follows the card the content anchors it to',
     setupAt === anchorAt + 1,
-    afterEyebrow + ' ' + anchorAt + ', set-up ' + setupAt,
+    INTRO_SETUP_AFTER + ' ' + anchorAt + ', set-up ' + setupAt,
   )
 }
 
@@ -222,7 +237,7 @@ const titles = (await page.evaluate(
       sequence grew by the collision card and the woven set-up.
     */
     `Array.from(document.querySelectorAll('.snap-y > section')).slice(1, -1).slice(0, 14).map(s => {
-       const t = (s.innerText || '').split(String.fromCharCode(10)).filter(Boolean)[0] || ''
+       const t = s.getAttribute('data-card') || ''
        const n = s.querySelectorAll('[data-testid="intro-shows"] li').length
          + s.querySelectorAll('[data-testid="intro-unpack"] li').length
          + s.querySelectorAll('[data-testid="intro-collision"] li').length
@@ -244,7 +259,7 @@ const titles = (await page.evaluate(
     a card with a `shows` adds it to this list automatically. The two tutorial slides
     declare nothing and are correctly not asked to show anything.
   */
-  const mustShow = INTRO_CARDS.filter((c) => c.shows).map((c) => c.eyebrow)
+  const mustShow = INTRO_CARDS.filter((c) => c.shows).map((c) => c.id)
   const bare = mustShow.filter((e) => !(seen.get(e) ?? 0))
   ok(
     'every card that claims something shows it',
@@ -809,11 +824,11 @@ console.log('\nthe demo plays where a stranger lands\n')
     content edit plus a test edit. Every claim below is unchanged — the line on the face,
     the word it gave you, the three sentences, the way on.
   */
-  const unpackEyebrow = INTRO_CARDS.find((c) => c.shows?.kind === 'unpack')?.eyebrow ?? ''
+  const unpackId = INTRO_CARDS.find((c) => c.shows?.kind === 'unpack')?.id ?? ''
   const demoAt = (await page.evaluate(
-    `Array.from(document.querySelectorAll('.snap-y > section')).findIndex(s => (s.innerText||'').startsWith(${JSON.stringify(unpackEyebrow)}))`,
+    `Array.from(document.querySelectorAll('.snap-y > section')).findIndex(s => s.getAttribute('data-card') === ${JSON.stringify(unpackId)})`,
   )) as number
-  ok('the demonstration is in the sequence', demoAt > 0, unpackEyebrow + ' at ' + demoAt)
+  ok('the demonstration is in the sequence', demoAt > 0, unpackId + ' at ' + demoAt)
   const face = async () =>
     ((await page.evaluate(
       `(() => {
@@ -980,15 +995,14 @@ console.log('\nthe set-up is a card, and it does not block\n')
     set-up sits is a decision that belongs in content/intro.ts, and a check naming a
     specific neighbour fails every time that decision is revisited.
   */
-  const anchor = INTRO_CARDS.find((c) => c.id === INTRO_SETUP_AFTER)?.eyebrow ?? ''
   const anchorIdx = (await page.evaluate(
     `Array.from(document.querySelectorAll('.snap-y > section')).slice(1, -1)
-      .findIndex(s => (s.innerText || '').startsWith(${JSON.stringify(anchor)}))`,
+      .findIndex(s => s.getAttribute('data-card') === ${JSON.stringify(INTRO_SETUP_AFTER)})`,
   )) as number
   ok(
     'and it comes straight after the card it is anchored to',
     set === anchorIdx + 1,
-    anchor + ' ' + anchorIdx + ', set-up ' + set,
+    INTRO_SETUP_AFTER + ' ' + anchorIdx + ', set-up ' + set,
   )
   /*
     MEASURED ON THE THUMB, not on a sentence about the thumb.

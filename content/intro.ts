@@ -64,6 +64,19 @@ export interface IntroCard {
   id: string
   /** Max 14 characters, like every eyebrow in the product. */
   eyebrow: string
+  /*
+    THE THREE THAT ARE A SEQUENCE, numbered.
+
+    Sam's deck puts a circled 1, 2 and 3 against VIBES, YOUR LEGEND and THE CLUB, and the
+    numbers are the argument: those three cards are one sentence said over three screens —
+    build your legend from vibes, your legend earns you the Club, drop into the Club
+    whenever you like. ASK, DROPS and the ladder are what the Club HOLDS, so they carry the
+    destination as an eyebrow rather than a position in a count.
+
+    Optional, because most cards are not a step. A card without one draws its eyebrow the
+    way it always did.
+  */
+  step?: 1 | 2 | 3
   headline: string
   body: string
   /**
@@ -331,8 +344,21 @@ export const INTRO_CARDS: IntroCard[] = [
   {
     id: 'intro_vibes',
     image: 'intro_vibes_card',
-    pillar: true,
-    eyebrow: 'VIBES',
+    /*
+      NO LONGER A PILLAR, and the word VIBES has gone with it.
+
+      Sam: "Remove the word Vibes and replace with — (1) Build your legend from VIBES you
+      have seen a hundred times."
+
+      The pillar shouted a category name at somebody who has not been told what the
+      category is. VIBES means something precise inside DUB and nothing at all on the
+      second screen a stranger sees, so the loudest type on the card was the one word they
+      could not read. Folding it into the sentence teaches it in passing — you learn what a
+      vibe is by being told what to do with one — and the number says this is the first of
+      three rather than one of six features.
+    */
+    step: 1,
+    eyebrow: '',
     /*
       SAM'S OWN LINE, from the intro flow deck: "Build your LEGEND from what you have
       seen a hundred times."
@@ -346,7 +372,7 @@ export const INTRO_CARDS: IntroCard[] = [
       The second half of the sentence is unchanged, because it is the claim: the hundred
       times are already behind you.
     */
-    headline: 'Build your legend from what you have seen a hundred times.',
+    headline: 'Build your legend from VIBES you have seen a hundred times.',
     /*
       THE SONGS YOU KNOW IS NOT BOLD, and that is a deliberate piece of typography rather
       than an oversight.
@@ -393,7 +419,16 @@ export const INTRO_CARDS: IntroCard[] = [
   {
     id: 'intro_legend',
     image: 'intro_arrival',
-    eyebrow: 'YOUR LEGEND',
+    /*
+      Sam: "In place of eyebrow — (2) Your LEGEND earns you access to the DUB CLUB."
+
+      YOUR LEGEND as a label said the card's subject twice, because the headline said it
+      too. What it never said is what a Legend BUYS, which is the only reason anybody would
+      spend ten minutes on one — so the step line carries the transaction and the headline
+      keeps the feeling.
+    */
+    step: 2,
+    eyebrow: '',
     /*
       WHAT IT BUYS YOU, rather than what it is made of.
 
@@ -408,7 +443,7 @@ export const INTRO_CARDS: IntroCard[] = [
       actually gets somebody, and it is the only thing on this card that is not a
       mechanic.
     */
-    headline: 'Your legend gets you a seat at any table.',
+    headline: 'Your LEGEND earns you access to the DUB CLUB.',
     /*
       WHAT THE LEGEND IS FOR, said on the card that introduces it.
 
@@ -420,7 +455,16 @@ export const INTRO_CARDS: IntroCard[] = [
       Kept as the last sentence rather than folded into the first: it is a consequence,
       and a consequence reads as one when it follows the thing it is a consequence of.
     */
-    body: "Seven things about yourself, said out loud with nothing on screen. It is what a stranger asks you, in the order they ask it. Once you have your Legend, you're in **DUB Club**.",
+    /*
+      Sam's line: "It takes about 10 minutes. Seven sentences about yourself, said out loud
+      and the door is open."
+
+      What it replaces spent three sentences on what the Legend IS and arrived at the Club
+      in a subordinate clause. This leads with the cost — ten minutes, which is the first
+      thing anybody being asked for effort wants to know — and ends on the door, which is
+      what the ten minutes buys.
+    */
+    body: 'It takes about 10 minutes. Seven sentences about yourself, said out loud and the door is open.',
     /*
       Derived from LEGEND_FRAMES rather than typed here.
 
@@ -463,8 +507,17 @@ export const INTRO_CARDS: IntroCard[] = [
     */
     id: 'intro_club',
     image: 'intro_arrival',
-    eyebrow: 'THE CLUB',
-    headline: 'Once your legend is complete, you are in THE CLUB.',
+    /*
+      Sam: "In place of eyebrow — (3) Drop into the DUB CLUB whenever you like."
+
+      THE CLUB over "Once your legend is complete, you are in THE CLUB" was the name said
+      twice with a condition between. The third step is not the condition — that was step
+      two — it is the standing invitation, which is the thing that makes a club a club
+      rather than a course you complete.
+    */
+    step: 3,
+    eyebrow: '',
+    headline: 'Drop into the DUB CLUB whenever you like.',
     /*
       THE FIVE VERBS, said once in the body and drawn underneath.
 
@@ -472,7 +525,7 @@ export const INTRO_CARDS: IntroCard[] = [
       an evening doing, in the order it happens: you learn a line, you hear it said, you
       say it back, you send it to somebody, and then the night is better for it.
     */
-    body: 'It takes about ten minutes. Seven sentences about yourself, said out loud, and the door is open.',
+    body: 'No streaks required. Learn as you live: vibes, local knowledge, events picked for you and people like you.',
     shows: {
       kind: 'steps',
       steps: [
@@ -514,8 +567,18 @@ export const INTRO_CARDS: IntroCard[] = [
   {
     id: 'intro_ask',
     image: 'pharmacy',
-    pillar: true,
-    eyebrow: 'ASK',
+    /*
+      THE PILLAR GOES AND THE DESTINATION TAKES ITS PLACE.
+
+      Sam: "Add eyebrow THE CLUB. (Remove big ASK) — If you don't know the words you need,
+      JUST ASK."
+
+      ASK, DROPS and the ladder are not steps on the way in — they are what the Club holds
+      once you are through the door, which is what the eyebrow now says on all three. The
+      word itself survives where it belongs: at the end of the sentence, in caps, as the
+      instruction rather than as a category heading nobody had been taught.
+    */
+    eyebrow: 'THE CLUB',
     /*
       THE PERSON'S PROBLEM, not the product's gap.
 
@@ -525,8 +588,8 @@ export const INTRO_CARDS: IntroCard[] = [
       to tap it. The moment somebody actually uses ASK is the moment they are standing in
       front of a thing they cannot say, and this is that moment in their words.
     */
-    headline: "If you don't know the words you need, just ask.",
-    body: 'Ask for it, anywhere, any time, and get it back in the words they actually speak here. It goes into your own library.',
+    headline: "If you don't know the words you need, JUST ASK.",
+    body: 'Anywhere, anytime, it gets straight back to you and saves the words in your library.',
     /*
       THE ACT, NOT A LIST OF QUESTIONS.
 
@@ -551,8 +614,16 @@ export const INTRO_CARDS: IntroCard[] = [
   {
     id: 'intro_drops',
     image: 'intro_drops_card',
-    pillar: true,
-    eyebrow: 'DROPS',
+    /*
+      Sam: "Add eyebrow THE CLUB. (Remove big DROPS) — LEARN from a gig, a match, a holiday
+      that shuts down the city - automatically dropped into your calendar. You can even buy
+      the tickets!"
+
+      Same move as ASK, and the same reason: DROPS is a word DUB uses, not one a stranger
+      arrives with. The verb LEARN opens the headline instead, because what this card is
+      actually offering is a reason the night is better rather than a feature with a name.
+    */
+    eyebrow: 'THE CLUB',
     /*
       NO CITY HERE, because none has been chosen yet.
 
@@ -575,14 +646,14 @@ export const INTRO_CARDS: IntroCard[] = [
       the share sheet and the tickets are the drop's own link.
     */
     headline:
-      'Learn from what is actually on in your city, what to say when you get there, invite someone and buy tickets.',
+      'LEARN from a gig, a match, a holiday that shuts down the city — automatically dropped into your calendar.',
     /*
       Sam's wording. The old line described the drop's LIFECYCLE — when it arrives and
       when it goes — which is a fact about the feed rather than a reason to want one.
       This says what it is for: the thing is on, you learn from it, and the night is
       better for it.
     */
-    body: "A gig, a match, a holiday that shuts down the city. We drop what's on in your calendar, you learn from it and enjoy it even more.",
+    body: 'You can even buy the tickets!',
     /*
       Whatever is genuinely on, with its real date.
 
@@ -613,7 +684,6 @@ export const INTRO_CARDS: IntroCard[] = [
     */
     id: 'intro_stages',
     image: 'intro_arrival',
-    pillar: true,
     /*
       Sam's own words, on all three lines.
 
@@ -640,7 +710,16 @@ export const INTRO_CARDS: IntroCard[] = [
       follows gets its instruction — the stages underneath are the busy, and the apostrophe
       is Sam's.
     */
-    eyebrow: 'THE REWARD IS GETTING THERE, NOT EMOJIS.',
+    /*
+      Sam: "Add eyebrow THE CLUB. Your REWARD is the fun of getting there, not Emojis!"
+
+      The pillar was the argument, said at four lines of headline type, and it was the right
+      argument on the wrong card — this is the sixth screen of six, where somebody is
+      deciding rather than being convinced. THE CLUB puts it with ASK and DROPS as a thing
+      the Club holds, and the claim moves into the headline where it is still the loudest
+      sentence without being the loudest object.
+    */
+    eyebrow: 'THE CLUB',
     /*
       THE HEADLINE IS NOW THE DESTINATION, because the instruction became the button.
 
@@ -653,7 +732,7 @@ export const INTRO_CARDS: IntroCard[] = [
       underneath cannot say about itself now the explanations are off it. The apostrophe in
       the button is Sam's.
     */
-    headline: 'As far as you want to take it.',
+    headline: 'Your REWARD is the fun of getting there, not Emojis!',
     /*
       DROP IN WHENEVER — the permission, which the old body buried under its own refusals.
 

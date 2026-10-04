@@ -2321,6 +2321,20 @@ export function Card({
       Clipped only while a card can travel, so a departing card cannot widen the rail.
     */
     <section
+      /*
+        THE CARD SAYS WHICH CARD IT IS.
+
+        firstrun-check identified cards by reading the first line of their text, which was
+        their eyebrow and was unique until it was not: three cards now share THE CLUB and
+        three draw a number instead of a word, and the check failed on all six at once
+        while every one of them was correct.
+
+        That is a check encoding today's copy rather than the thing it means to assert. The
+        id is the stable name — it is what content/intro.ts keys on and what every other
+        part of this file already passes around — so a check can ask "is this card present
+        and in this position" without caring what it currently says.
+      */
+      data-card={card.id}
       className={
         'relative h-full w-full snap-start snap-always' + (inHand ? ' overflow-hidden' : '')
       }
@@ -2620,11 +2634,34 @@ export function Card({
                     >
                       {face.eyebrow}
                     </p>
-                  ) : (
+                  ) : card.intro.step ? (
+                    /*
+                      A NUMBER IN A RING, where the first three cards are one sequence.
+
+                      Sam's deck circles 1, 2 and 3 against VIBES, YOUR LEGEND and THE CLUB
+                      and leaves the other three with a plain THE CLUB label. The number
+                      says these are ordered and finite — three screens, then you are in —
+                      which a category heading cannot say however loudly it is set.
+
+                      The same ring as every other roundel in this file, at the eyebrow's
+                      size rather than a headline's: it is a position, not a claim, and the
+                      sentence beside it is the thing to read.
+                    */
+                    <span
+                      data-testid="step"
+                      className={
+                        'eyebrow flex h-6 w-6 items-center justify-center rounded-full border border-current ' +
+                        (onSand ? 'text-accent' : 'text-white')
+                      }
+                      aria-label={'Step ' + card.intro.step + ' of 3'}
+                    >
+                      {card.intro.step}
+                    </span>
+                  ) : face.eyebrow ? (
                     <p className={'eyebrow ' + (onSand ? 'text-accent' : 'text-white/80')}>
                       {face.eyebrow}
                     </p>
-                  )}
+                  ) : null}
                   <div className={card.intro.pillar ? 'pillar-body' : undefined}>
                     <h2 className="display mt-3 text-balance text-3xl">{face.title}</h2>
                     <p
@@ -2678,7 +2715,11 @@ export function Card({
                         product uses. On sand it is left exactly as it was.
                       */
                       <div className={onSand ? undefined : 'shown-on-photo'}>
-                        <Specimen shows={card.intro.shows} onScreen={onScreen} />
+                        <Specimen
+                          shows={card.intro.shows}
+                          onScreen={onScreen}
+                          onDone={() => onPassed?.(card.id)}
+                        />
                       </div>
                     ) : null}
                     {/*
@@ -4292,9 +4333,11 @@ function StageGlyph({ icon }: { icon: StageIcon }) {
 function Stages({
   shows,
   onScreen,
+  onDone,
 }: {
   shows: Extract<NonNullable<IntroCard['shows']>, { kind: 'stages' }>
   onScreen: boolean
+  onDone?: () => void
 }) {
   /*
     The ten minutes first, then the ladder it opens onto.
@@ -4350,22 +4393,32 @@ function Stages({
         the bar is the shape of a form, and this is the one screen arguing that none of this
         is a form. It is the same control the jump-off screen already uses.
 
-        It carries no onClick. Every card in the sequence advances by swiping and this one
-        is no different; a button that moved the rail would be a second way forward competing
-        with the gesture the whole sequence is teaching. What it does is end the cascade
-        somewhere that looks like a door.
+        AND IT IS A BUTTON, which it was not. Sam, in red on his sheet: "MAKE SURE GET BUSY
+        LEARNIN' BUTTON IS ACTIVE."
+
+        It shipped as a <span> with a note arguing that a control here would compete with
+        the swipe the sequence teaches. That argument holds everywhere except the last card.
+        This is the sixth of six — what follows it is set-up, the one screen that is a form
+        rather than an argument — so somebody who has read the pitch and decided is being
+        shown a thing shaped exactly like a door and asked to keep swiping past it.
+
+        It calls the same `onPassed` a swipe does, so the button and the gesture cannot
+        disagree about where next is: it is a second way to do the one thing, not a second
+        destination.
       */}
       <div
         className={'flex justify-center ' + (onScreen ? 'animate-rise' : 'opacity-0')}
         style={{ animationDelay: ctaAt + 'ms' }}
       >
-        <span
+        <button
+          type="button"
           data-testid="stages-cta"
-          className="flex h-20 w-20 flex-col items-center justify-center rounded-full border border-line bg-black/55 text-center backdrop-blur-sm"
+          onClick={onDone}
+          className="tap-target flex h-20 w-20 flex-col items-center justify-center rounded-full border border-line bg-black/55 text-center backdrop-blur-sm transition active:scale-95"
         >
           <span className="eyebrow opacity-80">{shows.cta.over}</span>
           <span className="display mt-1 px-2 text-sm leading-tight">{shows.cta.label}</span>
-        </span>
+        </button>
       </div>
     </div>
   )
@@ -4519,8 +4572,18 @@ function Asking({
 function Specimen({
   shows,
   onScreen = false,
+  onDone,
 }: {
   shows: NonNullable<IntroCard['shows']>
+  /*
+    The way on, for the one specimen that draws a control.
+
+    Only the ladder card has something to press — see the note on its CTA — so this is
+    optional and every other kind ignores it. It is the same `onPassed` the rail gives a
+    card, which is the same thing a swipe does, so the button and the gesture cannot
+    disagree about where next is.
+  */
+  onDone?: () => void
   /*
     Whether the card carrying this specimen is the one being looked at.
 
@@ -4632,7 +4695,18 @@ function Specimen({
     const hinge = r.extracts[0]
     return (
       <div data-testid="intro-unpack" className="mt-6 flex flex-col gap-3">
-        <p className="text-xs text-muted">{r.root_display}</p>
+        {/*
+          THE LINE EVERYBODY KNOWS, said at the weight it deserves.
+
+          Sam: "Make Talk to me Goose bolder."
+
+          It was text-xs text-muted — the size this file uses for provenance, a credit under
+          a thing rather than the thing. But on this card the English line IS the hook: it
+          is what the stranger recognises, and the whole demonstration is that the
+          Portuguese underneath it comes apart into sentences they can use. Set as a credit,
+          the card opened on its own small print.
+        */}
+        <p className="text-sm font-semibold text-fg">{r.root_display}</p>
         <span className="flex items-center gap-3">
           <AudioButton slug={slugFor(r.target)} text={r.target} size="sm" />
           <span className="pt display min-w-0 flex-1 text-xl text-accent">{r.target}</span>
@@ -4751,7 +4825,7 @@ function Specimen({
 
   /* The ladder, and the way onto it — see Stages. */
   if (shows.kind === 'stages') {
-    return <Stages shows={shows} onScreen={onScreen} />
+    return <Stages shows={shows} onScreen={onScreen} onDone={onDone} />
   }
 
   if (shows.kind === 'exchange') {
