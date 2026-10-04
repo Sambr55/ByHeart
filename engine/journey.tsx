@@ -724,7 +724,22 @@ export function sectionRoots(
       ? [...wanted, ...rest].find((r) => r.root_id === wantRoot) ?? null
       : null
     if (errand) {
-      const others = [...wanted, ...rest].filter((r) => r.root_id !== errand.root_id)
+      /*
+        AND A ROAD STEP IS NOT AN ERRAND, even though it arrives the same way.
+
+        The picker auto-enters with `road.next.root`, which is the same argument the Legend
+        passes when somebody taps GO AND GET IT on a missing word — so a road step was
+        taking the errand path and being served with the whole crate behind it. That is
+        correct for an errand, which is a trip for one word out of a sitting that carries
+        on as normal, and wrong for a road step, which IS the sitting.
+
+        It is why cutting the remainder below changed nothing at first: every road sitting
+        was arriving here instead. The two cases are told apart by asking whether the thing
+        requested is a road step for this crate, which `wanted` already knows.
+      */
+      const onTheRoad = wanted.some((r) => r.root_id === errand.root_id)
+      const pool = onTheRoad ? wanted : [...wanted, ...rest]
+      const others = pool.filter((r) => r.root_id !== errand.root_id)
       return pack([errand, ...others], family)
     }
     /*
@@ -763,7 +778,52 @@ export function sectionRoots(
       the crate fills in as before — which is what somebody who comes back to the basics for
       the counting songs actually wants.
     */
-    if (wanted.length) return pack([...wanted, ...rest], family)
+    /*
+      THE ROAD SERVES THE LEGEND AND NOTHING ELSE, which is a narrowing Sam asked for by
+      name.
+
+      "Overall, it feels some of the questions are not required and don't feed the Legend.
+      What does Vem Comigo get us or the Audrey Hepburn musings. Audit this and make the
+      road only service the legend."
+
+      Audited, and the road itself came out clean: eight of its ten steps feed a card frame
+      directly, and the two that do not — olá/adeus and obrigado/obrigada — are the wink
+      that opens the product and the gender question every later sentence depends on.
+      Audrey earns her place twice over; ah_adoro gives porque and quero, which is the whole
+      of why_here.
+
+      `Vem comigo` is not a road step at all. It is tg_goose, filler, and that is what this
+      changes: every road sitting carried its step plus two more roots from the same crate,
+      so ten steps became twenty-seven roots and two thirds of the walk taught nothing on
+      the card. Sam was not wrong about what he was seeing — he was seeing the remainder.
+
+      WHAT THIS COSTS, MEASURED RATHER THAN HOPED. Cutting the remainder is a thing I tried
+      once before and reverted: collisions reachable from a learner's second section fell
+      from 14 pairings to 8, because a two-root sitting banks too few words to combine. That
+      number is real and it is a smaller promise than the one being kept here. The road to
+      the Legend is the product's spine, it is what somebody at a festival has ten minutes
+      for, and padding it to make a later feature richer is the wrong trade.
+
+      The remainder is not deleted, it is deferred. Once a crate's own road steps are walked
+      the sitting fills in exactly as before — so the crate is all still there for anybody
+      who comes back to it, and `vem comigo` is waiting in Top Gun rather than standing
+      between somebody and their Legend.
+    */
+    /*
+      AND ONLY WHERE THE ROAD SENT THEM, which is the distinction the first cut missed.
+
+      Serving the road step alone is right for somebody being carried along the road: that
+      is the ten minutes, and padding it is what Sam is objecting to. It is wrong for
+      somebody who opened Bridget Jones off the shelf because they like Bridget Jones. They
+      get a sitting of one root, and first-session measures exactly what that costs — no
+      capability line ("You can now ."), no answerable cold prompt, a single release, and no
+      collision reachable from their second section. Nine failures, all of them real.
+
+      `wantRoot` tells the two apart, because the picker passes the road's next root when it
+      auto-enters and the shelf passes nothing. So the road gets the road, the shelf gets the
+      crate, and neither is paying for the other.
+    */
+    if (wanted.length) return pack(wantRoot ? wanted : [...wanted, ...rest], family)
     return pack(rest, family)
   }
   const doorway = new Set(doorwayRoots(purpose).map((r) => r.root_id))
