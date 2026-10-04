@@ -508,6 +508,34 @@ export function Profile() {
           */}
           <Collection />
           {/*
+            AND THE ONE THING THAT COULD TAKE IT ALL AWAY, right under it.
+
+            Sam: "make the Sign in encouragement more forceful on the YOURS page."
+
+            WHAT WAS THERE. One grey caption under the name — "Not signed in — tap to keep
+            this off your phone" — at text-sm, on the row that also holds the inbox and the
+            cog. It is accurate and it is the smallest thing on the screen, which for the
+            only irreversible risk in the product is the wrong weight by a long way.
+
+            FORCEFUL MEANS CONCRETE, NOT LOUD. The caption's problem is not its volume, it
+            is that "keep this off your phone" is abstract: nothing on it says what would
+            be lost. So this counts the actual work — the sentences said cold, the vibes
+            gone through, the Legend answers — and names them, because a number somebody
+            recognises as theirs is the argument. Nothing here is invented and nothing is
+            exaggerated: it is read from the same record the boards above are drawn from.
+
+            UNDER THE COLLECTION, which is the whole point of the position. Somebody has
+            just scrolled their own library; this is the sentence that says the library
+            lives on one phone. Above it, before any of it is on screen, there is nothing
+            for the warning to be about.
+
+            IT IS NOT A WALL AND IT CANNOT BECOME ONE. No dismissal, nothing stored, no
+            counter — it is derived on every render and disappears the moment somebody
+            signs in, which is the same design as the inbox and /noticed. And it never
+            appears to somebody with nothing to lose: see `atStake`.
+          */}
+          <AtRisk />
+          {/*
             THE TEACHER, UNDER THE BOARDS WHERE THE PROGRESS IS.
 
             Sam: "we are the coolest and best teacher you ever had… build that into the
@@ -563,6 +591,133 @@ export function Profile() {
       */}
       {mounted && walk ? <Walkthrough onDone={() => setWalk(false)} /> : null}
     </main>
+  )
+}
+
+/**
+ * WHAT IS ON ONE PHONE AND NOWHERE ELSE.
+ *
+ * Sam: "make the Sign in encouragement more forceful on the YOURS page."
+ *
+ * THE ARGUMENT IS THE LEARNER'S OWN WORK, which is the only forceful thing available and
+ * is better than any adjective. "Sign in to save your progress" is what every app says and
+ * nobody reads; "eleven sentences you can say with the screen off, four vibes, nine
+ * answers — all of it on this phone only" is a fact about them, and it is alarming in
+ * precisely the way the situation deserves.
+ *
+ * SAID ONCE, WITH NUMBERS THAT ARE TRUE. Every count is read from the record the boards
+ * above are drawn from, so this cannot drift from them — the alternative is a second place
+ * computing what somebody has done, which is the fault this repo has unpicked repeatedly.
+ *
+ * AND NEVER TO SOMEBODY WITH NOTHING AT STAKE. A learner three taps into their first
+ * sitting does not need a warning about losing it, and showing one is how an app teaches
+ * people to ignore its warnings. The threshold is deliberately low but not zero: one real
+ * piece of work, of any kind.
+ */
+function AtRisk() {
+  const learner = useLearner()
+  const access = useEntitlements()
+
+  /*
+    What would be gone with the phone, in the units a person recognises.
+
+    The three the product itself puts first: sentences produced cold, which is the one
+    number DUB asks to be judged on; vibes gone through; and Legend answers, which are the
+    only content in here that is ABOUT them. Not a total — a total is a score, and this is
+    a list of things.
+  */
+  const atStake = useMemo(() => {
+    const cold = (learner.proof ?? []).filter((p) => p.clean).length
+    const vibes = new Set([
+      ...(learner.sections_completed ?? []),
+      ...ROOTS.filter((r) => (learner.roots_played ?? []).includes(r.root_id)).map(
+        (r) => r.culture_family,
+      ),
+    ]).size
+    const legend = (learner.legend ?? []).filter((a) => Object.keys(a.values ?? {}).length > 0)
+      .length
+    const words = Object.keys(learner.inventory ?? {}).filter((id) => PIECES[id]).length
+    return { cold, vibes, legend, words, any: cold + vibes + legend + words > 0 }
+  }, [learner.proof, learner.sections_completed, learner.roots_played, learner.legend, learner.inventory])
+
+  /*
+    `access.known` before anything is drawn, for the reason the account caption gives: a
+    panel saying the work is at risk, shown for a frame to somebody who is signed in, is a
+    lie the product tells itself every cold start.
+  */
+  if (!access.known || access.signedIn || !atStake.any) return null
+
+  /*
+    THE LIST, IN THE ORDER THE PRODUCT VALUES IT, and only the parts that exist. A learner
+    who has answered no Legend questions should not be told they are about to lose nought
+    of them — a zero in a warning reads as padding and makes the real numbers look like
+    padding too.
+  */
+  const parts = [
+    atStake.cold
+      ? atStake.cold + (atStake.cold === 1 ? ' sentence' : ' sentences') + ' you can say cold'
+      : null,
+    atStake.vibes ? atStake.vibes + (atStake.vibes === 1 ? ' vibe' : ' vibes') : null,
+    atStake.legend
+      ? atStake.legend + (atStake.legend === 1 ? ' answer' : ' answers') + ' about you'
+      : null,
+    atStake.words ? atStake.words + (atStake.words === 1 ? ' word' : ' words') : null,
+  ].filter(Boolean) as string[]
+
+  return (
+    <div
+      data-testid="yours-at-risk"
+      /*
+        COACH, NOT TELHA. The product's own rule is that nothing coaches in red — amber
+        carries attention without blame, and this is a warning about a situation rather
+        than about the person in it. The keyline carries it and the ground stays the card
+        every other block on this screen uses, which is the same decision /noticed made
+        for its stuck observations.
+      */
+      className="flex flex-col gap-3 rounded-2xl border border-coach/60 bg-bg-elev px-5 py-6"
+    >
+      <p className="eyebrow text-coach">ON THIS PHONE ONLY</p>
+      {/*
+        THE HEADLINE IS THE COUNT, at the size the product reserves for what it is about.
+        A heading that said "Save your progress" would be the generic line this card exists
+        to replace.
+      */}
+      {/*
+        ALL OF IT, NAMED, rather than three and "and more".
+
+        The first version capped the list at three and trailed off, which is the one move
+        this card cannot afford: "and more" is the vague gesture that the whole point here
+        is to replace, and it hides a real number behind a word. Four is the maximum there
+        can ever be — see `parts` — and four short clauses is a sentence, not a list.
+      */}
+      <h2 className="display text-balance text-2xl">
+        {parts.length > 1
+          ? parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1]
+          : parts[0]}
+        .
+      </h2>
+      <p className="text-sm leading-relaxed text-fg">
+        None of it has left this phone. Lose it, wipe it, or just clear Safari, and that is
+        the lot — there is no copy anywhere and nobody can get it back for you.
+      </p>
+      {/*
+        AND WHAT SIGNING IN ACTUALLY DOES, because a warning without a mechanism is a
+        scare. Two true things: the record goes to the server, and the browser copy and
+        the installed copy join up — which is the fault that sends people to this screen
+        in the first place.
+      */}
+      <p className="text-sm leading-relaxed text-muted">
+        One email address fixes it. No password — a link arrives, you tap it, and from then
+        on your Portuguese is on the server and follows you onto any phone you open it on.
+      </p>
+      <Link
+        href="/signin?next=%2Fprofile"
+        data-testid="yours-at-risk-go"
+        className="tap-target eyebrow mt-3 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+      >
+        KEEP IT SAFE
+      </Link>
+    </div>
   )
 }
 
