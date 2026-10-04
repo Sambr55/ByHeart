@@ -76,6 +76,31 @@ function isMember(s: LearnerState): boolean {
 export function HomeView() {
   const router = useRouter()
   const [leaving, setLeaving] = useState(false)
+  /*
+    AND NOTHING IS PAINTED UNTIL THE QUESTION HAS BEEN ASKED.
+
+    Sam: "the club always flashes on first card (so does first card on main home)."
+
+    `leaving` already blanks the screen for a returning learner, and the note on it is
+    right about why — "a returning member seeing the sales pitch flash past is worse than
+    seeing nothing at all". It is set INSIDE the effect, though, and an effect runs after
+    the first paint. So the pitch rendered, the effect decided, and the pitch was replaced:
+    exactly the flash it exists to prevent, one frame earlier than it was looking.
+
+    Measured by sampling the document every 50ms through a reload: "Find Yourself in
+    Language" → blank → "THE BASICS, IN SONGS YOU KNOW". The first of those three is the
+    frame this removes.
+
+    So the hold starts BEFORE the decision rather than after it, and lifts only for
+    somebody who is genuinely staying. The cost is one frame of dark for a first-time
+    visitor, which is the same frame they already spend waiting for the photograph behind
+    the hero.
+
+    `decided` rather than reusing `leaving`, because the two are different facts: one means
+    "we are going somewhere", the other means "we have looked". Collapsing them would leave
+    a first-timer held forever, since nobody ever sets leaving for them.
+  */
+  const [decided, setDecided] = useState(false)
 
   useEffect(() => {
     /*
@@ -90,12 +115,17 @@ export function HomeView() {
       Read from the URL rather than kept in state: it survives the reload, it is honest in
       a shared link, and it cannot get stuck on.
     */
-    if (new URLSearchParams(window.location.search).get('door') === '1') return
+    /*
+      Every way out of this effect says the looking is done — see `decided` above. A path
+      that returned without saying so would hold a first-time visitor on a dark screen
+      forever, which is a worse bug than the flash.
+    */
+    if (new URLSearchParams(window.location.search).get('door') === '1') return setDecided(true)
     // No pair chosen is a front-door problem, and the pair decides which learner record
     // even gets read — so it is checked first, exactly as the deal gate does it.
-    if (!chosenPair()) return
+    if (!chosenPair()) return setDecided(true)
     const learner = loadLearner()
-    if (!returning(learner)) return
+    if (!returning(learner)) return setDecided(true)
     setLeaving(true)
     /*
       Two homes, and which one you get says where you are in the game.
@@ -117,7 +147,7 @@ export function HomeView() {
     are sent, and it was sand between two dark screens. The redirect is fast and the flash
     was the only thing about it anybody could see.
   */
-  if (leaving) return <div className="min-h-svh on-dark" aria-hidden />
+  if (leaving || !decided) return <div className="min-h-svh on-dark" aria-hidden />
 
   return (
     <JourneyProvider>
