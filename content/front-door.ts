@@ -507,6 +507,29 @@ export const PICKER = {
     line that IS shown is built from FREE_CRATES in lib/entitlements.ts.
   */
   plan_cta: 'What DUB adds',
+  /*
+    THE JUMP-OFF, which is Sam's own words and his own structure.
+
+    "Need a new jump off screen that says Let's Build your legend. 10 questions and you'll
+    be seated at your table in the DUB CLUB."
+
+    It sits between set-up and the first question, and it is the only screen in the product
+    whose whole job is to say what the next ten minutes ARE. Before it, a learner had
+    answered three things about themselves and was then simply in a lesson, with a 2 of 10
+    bar as the only account of why.
+
+    The number is derived, never typed. ROAD.length is the ten, so a step added or removed
+    moves this line with it rather than leaving a promise the road no longer keeps.
+
+    "Seated at your table" is his phrase and it is the better one: the Club is a room with
+    people in it, and a seat is what the Legend buys. Not "unlock", not "access".
+  */
+  start_eyebrow: 'YOUR LEGEND',
+  start_head: 'Let’s build your Legend.',
+  start_body: (n: number) =>
+    n +
+    ' questions, and you will be seated at your table in the DUB Club. Each one is a line you will actually say — your name, where you are from, what you do.',
+  start_cta: 'START',
   cta: 'START HERE',
 } as const
 

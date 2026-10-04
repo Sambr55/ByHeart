@@ -725,7 +725,25 @@ export function sectionRoots(
       sitting that fills up stops at the road step; one with room carries on into the vibe
       it came from, which is what somebody who picked Bridget Jones actually wanted.
     */
-    return pack([...wanted, ...rest], family)
+    /*
+      THE ROAD STEPS ARE EXHAUSTED BEFORE THE CRATE FILLS IN BEHIND THEM.
+
+      Sam, stuck on tb_1234: "still cant get out of this screen." That root is a counting
+      song, not a road step, and it was reached because the remainder follows the road into
+      the same sitting — correct in a vibe, where the remainder is more of the same crate,
+      and wrong here while road steps are still unplayed.
+
+      I first cut the basics to road steps only, which fixed the symptom and cost something
+      real: collisions reachable from a learner's second section fell from 14 pairings to 8,
+      because a two-root sitting banks too few words to combine. Measured, not guessed.
+
+      So the rule is narrower and is the one that was always meant: the remainder waits
+      while the road still has somewhere to go IN THIS CRATE. Once its own steps are walked,
+      the crate fills in as before — which is what somebody who comes back to the basics for
+      the counting songs actually wants.
+    */
+    if (wanted.length) return pack([...wanted, ...rest], family)
+    return pack(rest, family)
   }
   const doorway = new Set(doorwayRoots(purpose).map((r) => r.root_id))
   const early = new Set(earlyRoots(purpose).map((r) => r.root_id))

@@ -111,7 +111,7 @@ import { chapterById } from '@/content/chapters'
 import { TOO_YOUNG } from '@/content/consent'
 import { INTERESTS, genresFromInterests, interestById } from '@/content/interests'
 import { say, wordsIn } from '@/content/numbers'
-import { roadProgress } from '@/content/road'
+import { roadFor, roadProgress } from '@/content/road'
 import type { ProfileAsk } from '@/content/roots'
 import { buzz, nope } from '@/engine/tap'
 import { useLearner } from '@/engine/useLearner'
@@ -1513,18 +1513,73 @@ function Picker() {
     rootsPlayed: learner.roots_played ?? [],
     purpose: learner.purpose ?? null,
   })
+  /*
+    AND BEFORE THE FIRST QUESTION, A SCREEN THAT SAYS WHAT THE NEXT TEN MINUTES ARE.
+
+    Sam: "Need a new jump off screen that says Let's Build your legend. 10 questions and
+    you'll be seated at your table in the DUB CLUB."
+
+    Auto-entering alone was better than a menu and still left a learner answering three
+    things about themselves and then simply BEING in a lesson, with a 2 of 10 bar as the
+    only account of why. This is the one screen whose whole job is the promise: what it is,
+    how long, and what it buys.
+
+    Once, at the start. Somebody returning mid-road is carried straight on — the promise has
+    been made and repeating it would be a toll on every session.
+  */
+  const started = (learner.roots_played ?? []).length > 0
+  const onRoad = mounted && !road.open && Boolean(road.next)
+
+  /*
+    THE HOOK SITS ABOVE THE RETURN, which is not a style preference — I made this exact
+    mistake on the run-through two days ago and made it again here. React counts hooks per
+    render, the jump-off returns before this point, and a useRef/useEffect below it renders
+    "fewer hooks than expected" and replaces the screen with the error boundary. Caught by
+    walking it: the jump-off came back as "This card broke."
+  */
   const autoEntered = useRef(false)
   useEffect(() => {
     if (autoEntered.current) return
-    if (!mounted || road.open || !road.next) return
+    if (!onRoad || !started || !road.next) return
     autoEntered.current = true
     setEntering(road.next.family)
     chooseFamily(road.next.family, road.next.root)
     /* eslint-disable-next-line react-hooks/exhaustive-deps -- fires once, on the road's next step */
-  }, [mounted, road.open, road.next?.root])
+  }, [onRoad, started, road.next?.root])
 
-  /* Nothing is drawn while the road is carrying them — see the note above. */
-  if (mounted && !road.open && road.next) return null
+  if (onRoad && !started) {
+    return (
+      <Shell stage="CHOICE">
+        <div className="flex flex-1 flex-col justify-center gap-4">
+          <p className="eyebrow text-accent">{PICKER.start_eyebrow}</p>
+          <h1 className="display text-balance text-3xl">{PICKER.start_head}</h1>
+          <p className="text-base leading-relaxed text-muted">
+            {PICKER.start_body(roadFor(learner.purpose ?? null).length)}
+          </p>
+        </div>
+        <Dock>
+          <button
+            type="button"
+            data-testid="road-start"
+            onClick={() => {
+              if (!road.next) return
+              setEntering(road.next.family)
+              chooseFamily(road.next.family, road.next.root)
+            }}
+            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            {PICKER.start_cta}
+          </button>
+        </Dock>
+      </Shell>
+    )
+  }
+
+  /*
+    PAST THE FIRST QUESTION the road carries them with no screen in between — see the note
+    above on why a menu is the wrong thing to show somebody with no choice to make.
+  */
+  if (onRoad) return null
 
   return (
     <Shell stage="CHOICE">
