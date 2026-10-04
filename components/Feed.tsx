@@ -2579,7 +2579,23 @@ export function Card({
               (onSand ? 'text-fg' : 'text-white')
             }
           >
-            <div className="min-w-0 flex-1">
+            {/*
+              `data-fits` marks a card that ENDS IN SOMETHING, so it must fit the screen.
+
+              Every other card in the sequence ends in prose, which is allowed to run under
+              the fold and be swiped away — somebody who stops reading has read enough. The
+              ladder ends in a control, and a control below the fold is not a control. So
+              this one attribute says "the bottom of me matters", and globals.css gives the
+              pillar back a few points on a short screen in exchange for showing it.
+
+              Keyed off the specimen's own kind rather than a hand-kept list of card ids,
+              so a second card that ends in something gets the behaviour by being that kind
+              of card rather than by somebody remembering to add it here.
+            */}
+            <div
+              className="min-w-0 flex-1"
+              data-fits={card.kind === 'intro' && card.intro.shows?.kind === 'stages' ? '' : undefined}
+            >
               {card.kind === 'intro' ? (
                 /*
                   Sand, dark ink, and the gesture drawn rather than described.
@@ -4306,7 +4322,7 @@ function Stages({
     asked to.
   */
   return (
-    <div data-testid="intro-shows" className="mt-6 flex flex-col gap-3">
+    <div data-testid="intro-shows" className="mt-3 flex flex-col gap-3">
       <ul className="flex flex-col gap-1">
         {rungs.map((r, i) => (
           <li

@@ -1818,6 +1818,47 @@ summary:focus-visible,
   animation: pillar-land 620ms var(--ease-drain, ease-out) both;
 }
 
+/*
+  AND IT GIVES WAY ON A SHORT SCREEN.
+
+  Sam, on the ladder card: "this screen needs to auto push down to reveal the cta."
+
+  The pillar is sized `clamp(2.5rem, 13vw, 4rem)` — off WIDTH alone — so on every phone
+  390px across it draws at 50.7px however tall the screen is. Four lines of that at
+  line-height 0.9 is most of the room the ladder card needs, and the card is the one
+  specimen in the sequence that cannot simply run on: it ends in a control, and a control
+  below the fold is not a control. Measured: the button cleared the nav by 13px at 844
+  tall, sat 31px under it at 800, and 91px under it at 740 — it fitted on exactly one
+  phone, which is the same as fitting on none.
+
+  So height joins the calculation, but only where the height is actually short. A screen
+  with the room keeps the pillar Sam designed; one without trades a few points of the
+  loudest type on the card for the thing the card is asking you to press. `vmin` rather
+  than `vh` so it answers to whichever dimension is the constraint, and the floor stays
+  2.5rem — below that it stops being a pillar.
+
+  Scoped to this card with `[data-fits]` rather than changed on `.pillar`, because every
+  other card in the sequence ends in prose that is allowed to run under the fold and swipe
+  away. This is the only one with something at the bottom that has to be seen.
+*/
+@media (max-height: 900px) {
+  [data-fits] .pillar {
+    font-size: clamp(2.25rem, 8vmin, 4rem);
+  }
+
+  /*
+    And the body gives way with it.
+
+    The pillar alone got 800-tall phones onto the screen and left 740 sixteen points short,
+    which is still a phone somebody owns. The blurb is four lines of 14px at
+    leading-relaxed; a point off the leading is invisible beside the headline above it and
+    is the rest of the gap.
+  */
+  [data-fits] .pillar-body p {
+    line-height: 1.5;
+  }
+}
+
 /* The card follows the word rather than arriving with it. */
 .pillar-body {
   animation: pillar-land 420ms var(--ease-drain, ease-out) 260ms both;
