@@ -68,6 +68,7 @@ function isMember(s: LearnerState): boolean {
     welcomedAt: s.club_welcomed_at,
     /* Said cold, which is what the door now asks for — see clubOpen. */
     proof: s.proof ?? [],
+    rough: s.rough ?? [],
     purpose: s.purpose ?? null,
   })
 }

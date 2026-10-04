@@ -133,6 +133,7 @@ export function Club() {
         purpose: state.purpose ?? null,
         /* The ceremony waits for the same thing the door does. */
         proof: state.proof ?? [],
+        rough: state.rough ?? [],
       })
     )
       return
@@ -187,6 +188,7 @@ export function Club() {
       purpose: learner.purpose ?? null,
       /* Said cold, which is what the door now asks for — see clubOpen. */
       proof: learner.proof ?? [],
+      rough: learner.rough ?? [],
     })
 
   /*

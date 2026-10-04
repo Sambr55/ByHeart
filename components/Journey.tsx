@@ -3254,6 +3254,25 @@ function RootBeatView({
     /* Same queue, same staleness, same answer — see the note on the 'piece' beat. */
     if (!e) return <Skip onMount={next} />
     const own = branchesFor(root, e.id)
+    /*
+      A SCREEN THAT WOULD SAY "0 THINGS YOU CAN SAY WITH IT" SHOWS NOTHING INSTEAD.
+
+      Sam, with a photograph of it: DIVORCIADO, "0 things you can say with it.", an empty
+      phone, and PUT THEM BACK TOGETHER at the bottom. He has now reported this four times
+      — see the three notes in content/legend.ts — and each previous fix filled the content
+      gap that caused that instance. This is the one that stops it being possible.
+
+      beatsFor already refuses to queue this beat when the piece has no branches, so in
+      principle it cannot be reached. In practice it was: the queue is built once when a
+      sitting starts and the root is looked up again on every render, and a deploy landing
+      mid-sitting separates them — the same staleness the `piece` beat above is already
+      guarded against, which is how we know it happens.
+
+      So the guard goes where the number is computed rather than only where the queue is
+      built. A beat with nothing to show moves on, exactly like a beat whose piece has gone.
+      It costs one screen nobody wanted and cannot produce a page whose headline is a zero.
+    */
+    if (!own.length) return <Skip onMount={next} />
     const more = pieceIndex < root.extracts.length - 1
     return (
       <Shell stage={stage} eyebrow={family.title} tone={family.tone}>

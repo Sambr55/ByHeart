@@ -1672,72 +1672,21 @@ export const JAMES_BOND: Root[] = [
 // ---------------------------------------------------------------------------
 
 export const BRIDGET_JONES: Root[] = [
-  q({
-    root_id: 'bj_age',
-    culture_family: 'bridget_jones',
-    rung: 2,
-    root_type: 'other',
-    source_label: 'The diary, which opens on the statistics',
-    source_status: 'paraphrased',
-    root_display: 'Thirty-two years old. Weight: unchanged.',
-    credit: 'Bridget, to her own diary, first page — the stats before the story',
-    source: 'I am thirty-two years old.',
-    target: 'Tenho trinta e dois anos.',
-    semantic_bridge:
-      'The one every English speaker gets wrong exactly once. Portuguese does not BE an age, it HAS one — tenho trinta e dois anos, "I have thirty-two years" — so the verb you already learned from a song about being hungry is the verb you need to say how old you are. Say sou trinta e dois and you have said "I am thirty-two", which means nothing at all.',
-    subtext: 'Counted, and slightly regretted.',
-    extracts: [
-      { id: 'anos', target: 'anos', gloss: 'years old', shelf: 'how_much', note: 'Always with tenho, never with sou. You have your age in Portuguese.' },
-      { id: 'trinta', target: 'trinta', gloss: 'thirty', shelf: 'how_much', set: 'numbers_to_100' },
-    ],
-    branches: [
-      { target: 'Tenho trinta anos.', en: 'I am thirty.', demonstrates: ['anos', 'trinta'] },
-      { target: 'Quantos anos tens?', en: 'How old are you?', demonstrates: ['anos'] , address: 'tu', formal: 'Quantos anos tem?' },
-      { target: 'Ele tem trinta e cinco.', en: 'He is thirty-five.', demonstrates: ['trinta'] },
-    ],
-    reinforces: ['tenho', 'cinco'],
-    helpers: { 'e': 'and', 'dois': 'two', 'Quantos': 'how many', 'tens': 'you have', 'Ele': 'he', 'tem': 'has' },
-    /*
-      THE RELEASE IS THE LEGEND ANSWER, in shape and in wording.
+  /*
+    BRIDGET'S AGE ROOT IS GONE, and Bowie has the word now.
 
-      Sam: "Then its the next question - which might be rooted in Bridget or Audrey."
-      Which only works if the sentence somebody produces at the release is the sentence
-      their Legend card then holds. Measured across the nine Legend-reaching roots: one
-      matched, six differed, and this one's release was a QUESTION — "Quantos anos tens?" —
-      on the beat that is supposed to hand over an answer about yourself.
+    Sam: "You can remove the age part from Bridget Jones as we deal with that with Bowie
+    later."
 
-      Converged on the frame's own output rather than the other way round, because the
-      frame is what the learner keeps. Where a frame's answer varies — a sector, a status,
-      a reason — the release matches the SHAPE and picks the commonest filling, since there
-      is no single sentence to converge on. See fillFrame in content/legend.ts.
+    `anos` used to live only here outside the basics, which is why bowie_golden_years was
+    built — see the note on that crate. Once it existed, Bridget was teaching a word the
+    road collects two steps later, and a learner who met both was handed "Tenho trinta e
+    dois anos" and then "Tenho trinta anos" as though they were different lessons.
 
-      The question does not disappear: it is still a branch above, which is where a form
-      somebody needs to RECOGNISE belongs. The release is for what they PRODUCE.
-
-      AND IT WAS A WORD-FOR-WORD DUPLICATE OF tb_age's. Same context, same ask, same
-      answer, in two different crates — so a learner who did the basics and then Bridget
-      said the identical sentence at the identical beat twice. Exactly the repetition Sam
-      reported, from a second cause: scripts/vibe-legend.mts now fails on any two roots
-      sharing a release.
-    */
-    /*
-      AND IT IS NOT THE AGE STEP ANY MORE, so it hands that sentence over.
-
-      bow_golden_years carries `age` on the road — written because `anos` had nowhere else
-      to live and Bridget was carrying two steps, which broke P4 for it. This root keeps
-      teaching anos and trinta, and releases the line only it offers: somebody ELSE's age,
-      which is the half of the pattern the card never needs and a conversation constantly
-      does.
-    */
-    transfer_prompt: {
-      context: 'Somebody is guessing how old a mutual friend is and getting it wrong.',
-      ask: 'He is thirty-five.',
-      answer: 'Ele tem trinta e cinco.',
-    },
-    rights_status: 'title-reference',
-    starter_tags: ['about-me', 'numbers'],
-    next_root_hooks: ['casado'],
-  }),
+    The road never named this root; it named bj_marrieds, which stays. What goes is a
+    duplicate sitting in the crate waiting to be served as filler behind the road step,
+    saying the same thing in a different number.
+  */
   q({
     root_id: 'bj_marrieds',
     culture_family: 'bridget_jones',

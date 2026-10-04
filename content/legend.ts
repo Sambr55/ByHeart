@@ -2076,6 +2076,13 @@ export function clubOpen(opts: {
     could not tell the difference — see the note below.
   */
   proof?: { pt: string; source: string; clean: boolean }[]
+  /*
+    THE ONES THEY TRIED AND COULD NOT LAND, which count — see below.
+
+    Optional like `proof`, and for the same reason: a caller that cannot supply it gets the
+    old answer rather than a door that slams on an omitted argument.
+  */
+  rough?: { pt: string }[]
 }): boolean {
   /*
     THE LEGEND HAS TO BE SAID, NOT JUST ANSWERED.
@@ -2101,11 +2108,41 @@ export function clubOpen(opts: {
     to hand, and a door that slams shut because an argument was omitted would be worse than
     the hole it replaces. The callers that decide entry pass it; see components/Club.tsx.
   */
+  /*
+    AND A SENTENCE GENUINELY ATTEMPTED COUNTS, OR THE DOOR CANNOT BE OPENED AT ALL.
+
+    Sam: "When the legend opens there is no way out. You can run it through but it loops
+    and never opens the club."
+
+    Exactly what it did. The only way to produce a proof row with source 'legend' is for
+    browser speech recognition to match the sentence — so on a device where the microphone
+    is refused, unavailable, or simply cannot make out one of seven sentences, `said` never
+    reaches `needed` and the Club is shut permanently. The run-through completes, says
+    "more to do", and offers another run-through. Forever.
+
+    That is also the exact instruction this contradicts. Sam, on the five-fail notice:
+    "after 5 goes they need to be given a we'll try again later message, but not block the
+    legend opening." The notice was built, it marks the line rough, and then the door went
+    on refusing anyway — the message said one thing and the gate did another.
+
+    So a line flagged rough after ENOUGH_GOES counts toward the door. It is not a free
+    pass: the learner attempted that sentence five times with nothing on screen, which is
+    more effort than the one that matched first go, and the line stays flagged for revision
+    so the product has not forgotten it. What it stops being is a wall built out of the
+    browser's speech recognition, which is approximate on a good phone and absent on some.
+
+    Said and attempted are counted together rather than separately, because the question
+    the door asks is "has every sentence on this card had its go" — and both answers are
+    yes.
+  */
   const needed = cardFor(opts.purpose ?? null).filter((f) =>
     frameApplies(f, opts.answers ?? []),
   ).length
   const said = (opts.proof ?? []).filter((p) => p.source === 'legend' && p.clean).length
-  if (opts.proof && said < needed) return false
+  const tried = (opts.rough ?? []).filter(
+    (r) => !(opts.proof ?? []).some((p) => p.source === 'legend' && p.clean && p.pt === r.pt),
+  ).length
+  if (opts.proof && said + tried < needed) return false
   if (opts.welcomedAt) return true
   return cardDone(opts.answeredFrameIds, opts.answers ?? [], opts.purpose ?? null)
 }

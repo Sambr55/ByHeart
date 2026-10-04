@@ -1783,6 +1783,8 @@ function RunThrough({
       answers: mine.legend.map((a) => ({ frame_id: a.frame_id, values: a.values })),
       welcomedAt: mine.club_welcomed_at,
       proof: mine.proof,
+      /* And the ones they tried five times — see clubOpen. */
+      rough: mine.rough ?? [],
     })
     return (
       <div className="flex flex-1 flex-col justify-center gap-4">
@@ -2042,7 +2044,41 @@ function RunThrough({
     Its job is now done three ways: the two-second wait after a success, the arrow for
     anybody quicker, and SHOW ME for anybody who did not speak.
   */
+  /*
+    MOVING ON WITHOUT SAYING IT IS ALLOWED, and it is recorded rather than refused.
+
+    Sam: "swiping right shouldn't block the legend if the user decides to not use audio,
+    the phrase should silently fall to one to practise out loud later. I know saying it WAS
+    the rule but we need people through to the legend. And anyway, they may be on the bus!"
+
+    The rule it replaces was a good one and was costing more than it bought. Saying the card
+    out loud is what the Legend is FOR, so the door asked for seven sentences produced with
+    nothing on screen — and that put browser speech recognition between a learner and the
+    Club. It is approximate on a good phone, absent on some, and useless on a bus, and the
+    failure mode was silent and permanent: run the card, match nothing, be told there is
+    more to do, run it again.
+
+    So the arrow flags instead of blocking. A sentence moved past unsaid goes onto the same
+    `rough` list the five-fail notice writes to, which the door now counts (see clubOpen)
+    and Revise already offers back. The learner is not told off and not stopped; the
+    product simply remembers which ones have not been said aloud yet.
+
+    SILENTLY, which is Sam's word and the right behaviour. Nothing appears, nothing is
+    announced — somebody who has decided not to speak has made a decision, and a notice
+    explaining it back to them is an argument with a person who is on a bus.
+
+    Only where it has not already landed. A sentence said correctly and then advanced past
+    is not rough; `goes` is 0 there, and clearRough has already run on the success.
+  */
   const go = (to: number) => {
+    if (frame && !heard?.close) {
+      markRough({
+        pt: answer,
+        en: fillEnglish(frame, valuesFor(frame.id) ?? {}),
+        /* What they actually spent on it, which may be nothing at all. */
+        goes,
+      })
+    }
     setShown(false)
     setHeard(null)
     /* A fresh question is a fresh five — see the note on `goes`. */

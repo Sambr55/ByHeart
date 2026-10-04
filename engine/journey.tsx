@@ -129,7 +129,28 @@ export function branchesFor(root: Root, extractId: string) {
   const extract = root.extracts.find((e) => e.id === extractId)
   if (!extract) return []
   const stem = extract.target.replace(/[…?]/g, '').trim().toLowerCase()
-  return root.branches.filter((b) => b.target.toLowerCase().includes(stem))
+  /*
+    THE FEMININE FORM IS THE SAME WORD, and a substring match did not think so.
+
+    `solteiro` matched nothing, because the branch that teaches it is "Sou solteira, e
+    estou bem assim" — Bridget's own line, and she is a woman. One letter, and the piece
+    appeared to have no uses at all: the beat was dropped from the queue, the learner was
+    walked past the one branch that existed, and the screen that did render said "0 things
+    you can say with it."
+
+    Portuguese marks gender on the final vowel of these adjectives, so matching the word
+    without it catches both — solteir(o|a), casad(o|a), divorciad(o|a), inglês/inglesa is
+    a different shape and is left alone. Only applied to a stem long enough for the trim to
+    be meaningful: cutting the last letter off a two-letter piece would match everything.
+
+    The trim is on the HAYSTACK side as well, so "solteiro" finds "solteira" and vice
+    versa, which is what makes it a gender fix rather than a prefix match in one direction.
+  */
+  const loose = stem.length >= 5 ? stem.slice(0, -1) : stem
+  return root.branches.filter((b) => {
+    const t = b.target.toLowerCase()
+    return t.includes(stem) || (loose !== stem && t.includes(loose))
+  })
 }
 
 /**

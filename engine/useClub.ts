@@ -49,6 +49,7 @@ export function useClub(): { open: boolean; mounted: boolean } {
         purpose: learner.purpose ?? null,
         /* Said cold, which is what the door now asks for — see clubOpen. */
         proof: learner.proof ?? [],
+        rough: learner.rough ?? [],
       }),
     [mounted, answeredIds, learner.legend, learner.club_welcomed_at, learner.purpose, learner.proof],
   )
