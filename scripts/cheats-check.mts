@@ -112,16 +112,35 @@ console.log('\nthe deck can be finished\n')
     boards.map((b) => b?.total ?? 0).join('+') + ' against ' + CHEATS.length,
   )
 
-  /* Using one puts exactly one card on the shelf. */
+  /*
+    EVERY SHAPE IS ON THE BOARD, AND USING ONE MARKS IT — which is the reverse of what this
+    asserted, and the reverse is the point.
+
+    It used to check that a used shape landed in the library and an unused one did not,
+    because `collected` returned only finished work and a board was a trophy cabinet. Sam:
+    "You shouldn't HAVE to scroll to find the content… everything visible and ungated." So
+    the board shows all twenty-five and the record says which are done.
+
+    The claim worth holding is unchanged in substance and inverted in shape: using a shape
+    must still be the thing that distinguishes it, and it must still distinguish exactly
+    one. A board that marked everything done, or nothing, would pass the old check's
+    successor if it only counted cards — so this counts DONE ones.
+  */
   const one = collected({
     cheats_used: [CHEATS[0].id],
     inventory: {},
     card_levels: {},
     stageNow: 'basics',
   })
-  ok('a used shape lands in the library', one.filter((c) => c.kind === 'cheat').length === 1)
+  const shapes = one.filter((c) => c.kind === 'cheat')
+  ok('every shape is on the board', shapes.length === CHEATS.length, shapes.length + ' of ' + CHEATS.length)
+  ok('a used shape is marked done', shapes.filter((c) => c.done).length === 1)
   const none = collected({ cheats_used: [], inventory: {}, card_levels: {}, stageNow: 'basics' })
-  ok('and an unused one does not', none.filter((c) => c.kind === 'cheat').length === 0)
+  ok(
+    'and an unused one is on the board but not done',
+    none.filter((c) => c.kind === 'cheat').length === CHEATS.length &&
+      none.filter((c) => c.kind === 'cheat' && c.done).length === 0,
+  )
 }
 
 console.log('\nand it moves the number, the same way everywhere\n')

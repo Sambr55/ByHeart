@@ -108,6 +108,23 @@ export interface CollectedCard {
    * because "36 words" is true and "36 of ?" is not.
    */
   holds?: number
+  /**
+   * WHETHER THIS LEARNER HAS DONE IT, which every board now shows either way.
+   *
+   * Sam: "You shouldn't HAVE to scroll to find the content. How about we take everything we
+   * have created so far as 'basic' and either flagged in their respective board as done /
+   * not done."
+   *
+   * The diagnosis underneath that is the useful part: a feed is for discovery and a library
+   * is for retrieval, and the Club was being asked to be both. Thirty idioms arriving one
+   * every seventh card is a feed; thirty idioms on a board with four ticked is a library,
+   * and only one of those answers "what have I got, and what is left".
+   *
+   * So `collected` returns the whole catalogue rather than the finished part of it, and
+   * this flag is the difference. Nothing is hidden and nothing is locked — see the note on
+   * the function.
+   */
+  done: boolean
   /** When it happened. Only drops have one, and it is why they are ordered by it. */
   on?: string
 }
@@ -196,6 +213,33 @@ export function wordsOnShelf(inventory: Record<string, unknown>): Record<Shelf, 
  * dropped: the records predate the grid, and a learner who kept nine sheets last week
  * should see nine sheets rather than an empty shelf and a bug report.
  */
+/*
+  THE WHOLE CATALOGUE, FLAGGED — not the finished part of it.
+
+  Sam: "You shouldn't HAVE to scroll to find the content… take everything we have created
+  so far as 'basic' and either flagged in their respective board as done / not done." And,
+  on what the boards should be: everything visible and ungated.
+
+  This used to return only what a learner had finished, so a board was a trophy cabinet: it
+  grew as you worked and said nothing about what was left. The product's own catalogue was
+  enumerated two hundred lines up in everyCard() and nothing rendered it — so the only way
+  to find out that DUB has thirty idioms was to meet them one at a time, one every seventh
+  card, in a feed.
+
+  The inversion is the whole change: walk the AUTHORED list and ask the record whether each
+  one is done, rather than walking the record and listing what it contains. Every board now
+  shows its full set with the finished ones marked, which is what makes it a menu — you can
+  see all thirty idioms, you know you have four, and you can go and get any of the other
+  twenty-six in whatever order you like.
+
+  NOTHING IS HIDDEN AND NOTHING IS LOCKED. A tier of "advanced" content behind a purchase is
+  a thing this structure makes easy to add later — it is one flag on a card, and the boards
+  already render the full set — but it is not here, because billing is not configured and a
+  lock with no key behind it reads as a fault rather than as an offer.
+
+  ASKED is the one deck unaffected: its cards are whatever somebody typed, so there is no
+  authored universe to compare against and every card in it is by definition done.
+*/
 export function collected(me: {
   sheet_got?: string[]
   sections_completed?: string[]
@@ -219,23 +263,54 @@ export function collected(me: {
   */
   const kept = new Set(me.sheet_got ?? [])
   for (const s of SETS) {
-    if (!s.members.some((m) => kept.has(m))) continue
-    out.push({ kind: 'sheet', id: s.id, label: s.label, level: levelOf('sheet:' + s.id) })
+    const did = s.members.some((m) => kept.has(m))
+    out.push({
+      kind: 'sheet',
+      id: s.id,
+      label: s.label,
+      done: did,
+      /* A level is a fact about finishing, so an unfinished card has none. */
+      ...(did ? { level: levelOf('sheet:' + s.id) } : {}),
+    })
   }
 
   /* A VIBE IS FINISHED — sections_completed, which is written at the end of a sitting. */
   const through = new Set(me.sections_completed ?? [])
   for (const c of CRATES) {
-    if (c.drop || !through.has(c.id as CultureFamily)) continue
-    out.push({ kind: 'vibe', id: c.id, label: c.title, level: levelOf('vibe:' + c.id) })
+    /* A drop's crate is shown inside the drop — see everyCard. */
+    if (c.drop) continue
+    const did = through.has(c.id as CultureFamily)
+    out.push({
+      kind: 'vibe',
+      id: c.id,
+      label: c.title,
+      done: did,
+      ...(did ? { level: levelOf('vibe:' + c.id) } : {}),
+    })
   }
 
-  /* A FRAME IS ANSWERED, which means it has values rather than merely existing. */
-  for (const a of me.legend ?? []) {
-    if (!Object.keys(a.values ?? {}).length) continue
-    const f = LEGEND_FRAMES.find((x) => x.id === a.frame_id)
-    if (!f) continue
-    out.push({ kind: 'frame', id: f.id, label: f.ask_en, level: levelOf('frame:' + f.id) })
+  /*
+    EVERY FRAME, FLAGGED BY WHETHER IT IS ANSWERED — which is values rather than merely
+    existing, the same test the door uses.
+
+    Walked from LEGEND_FRAMES rather than from the learner's answers, which is the inversion
+    this whole function just made: the catalogue is the authored thing and the record says
+    which of it is done.
+  */
+  const answered = new Map(
+    (me.legend ?? [])
+      .filter((a) => Object.keys(a.values ?? {}).length > 0)
+      .map((a) => [a.frame_id, a]),
+  )
+  for (const f of LEGEND_FRAMES) {
+    const did = answered.has(f.id)
+    out.push({
+      kind: 'frame',
+      id: f.id,
+      label: f.ask_en,
+      done: did,
+      ...(did ? { level: levelOf('frame:' + f.id) } : {}),
+    })
   }
 
   /*
@@ -253,10 +328,9 @@ export function collected(me: {
     No level. A drop's date is a fact about the gig, not about the learner, and stamping
     one here would put a card in a drawer for a reason that has nothing to do with them.
   */
-  const done = new Set(me.drops_done ?? [])
+  const went = new Set(me.drops_done ?? [])
   for (const d of DROPS) {
-    if (!done.has(d.id)) continue
-    out.push({ kind: 'drop', id: d.id, label: d.event, on: d.on })
+    out.push({ kind: 'drop', id: d.id, label: d.event, on: d.on, done: went.has(d.id) })
   }
 
   /*
@@ -272,8 +346,12 @@ export function collected(me: {
   */
   const counts = wordsOnShelf(me.inventory ?? {})
   for (const s of SHELVES) {
-    if (!counts[s.id]) continue
-    out.push({ kind: 'words', id: s.id, label: s.label, holds: counts[s.id] })
+    /*
+      A shelf is "done" the moment it holds a word, which is the same test as before — it
+      simply no longer decides whether the card exists. An empty shelf is a real thing to
+      show: it is a drawer with a name on it and nothing in it yet.
+    */
+    out.push({ kind: 'words', id: s.id, label: s.label, holds: counts[s.id] ?? 0, done: Boolean(counts[s.id]) })
   }
 
   /*
@@ -298,14 +376,26 @@ export function collected(me: {
   */
   const used = new Set(me.cheats_used ?? [])
   for (const c of CHEATS) {
-    if (!used.has(c.id)) continue
-    out.push({ kind: 'cheat', id: c.id, label: c.shape, level: levelOf('cheat:' + c.id) })
+    const did = used.has(c.id)
+    out.push({
+      kind: 'cheat',
+      id: c.id,
+      label: c.shape,
+      done: did,
+      ...(did ? { level: levelOf('cheat:' + c.id) } : {}),
+    })
   }
 
   const got = new Set(me.idioms_got ?? [])
   for (const i of IDIOMS) {
-    if (!got.has(i.id)) continue
-    out.push({ kind: 'idiom', id: i.id, label: i.english, level: levelOf('idiom:' + i.id) })
+    const did = got.has(i.id)
+    out.push({
+      kind: 'idiom',
+      id: i.id,
+      label: i.english,
+      done: did,
+      ...(did ? { level: levelOf('idiom:' + i.id) } : {}),
+    })
   }
 
   /*
@@ -325,6 +415,8 @@ export function collected(me: {
   for (const a of me.asked ?? []) {
     if (!a?.pt) continue
     out.push({
+      /* Always done: this deck has no authored universe — see everyCard. */
+      done: true,
       kind: 'asked',
       id: a.pt.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
       label: a.en || a.pt,

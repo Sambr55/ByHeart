@@ -573,20 +573,48 @@ function Filled({ card }: { card: CollectedCard }) {
         : card.kind === 'asked'
           ? /* The day you wanted it, which is the only fact this card has about itself. */
             (card.on ?? '').slice(0, 10)
-          : levelLabel(card.level)
+          : /*
+              AND A CARD NOT YET DONE SAYS SO, in place of the level it has not earned.
+
+              The boards show the whole catalogue now — see `collected` — so most tiles on a
+              fresh board are things somebody has not done. "NOT YET" rather than a blank
+              foot, because a blank reads as a card that failed to load; and rather than
+              anything sterner, because none of this is locked and nothing is being withheld.
+            */
+            (card.done ? levelLabel(card.level) : 'NOT YET')
 
   return (
     <Link
       href={href}
       data-testid={'collected-' + card.kind + '-' + card.id}
+      /*
+        DONE AND NOT DONE LOOK DIFFERENT, AND BOTH ARE A DOOR.
+
+        Sam: "everything visible and ungated." So the difference is weight rather than a
+        gate — an undone card is quieter, and tapping it goes exactly where a done one goes.
+        A lock icon or a disabled tile would make the board a shop window; this makes it a
+        menu, which is what "you shouldn't have to scroll to find the content" asks for.
+
+        The photograph carries it rather than an overlay: `opacity-60` on the image leaves
+        the type at full strength on its own scrim, so the card reads as unvisited rather
+        than as unreadable. Checked against the gate — the ink and its ground are untouched.
+      */
       className={
-        'tap-target relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded border border-line p-3 transition hover:border-accent/50 ' +
+        'tap-target relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded border p-3 transition ' +
+        (card.done ? 'border-line hover:border-accent/50 ' : 'border-line/60 hover:border-accent/50 ') +
         (image ? 'text-white' : 'bg-accent text-accent-ink')
       }
     >
       {image ? (
         <>
-          <Image src={image.src} alt="" fill sizes="33vw" className="object-cover" aria-hidden />
+          <Image
+            src={image.src}
+            alt=""
+            fill
+            sizes="33vw"
+            className={'object-cover ' + (card.done ? '' : 'opacity-60')}
+            aria-hidden
+          />
           {/*
             The scrim, so type never sits on the photograph itself — the same construction
             the door and the welcome use.
