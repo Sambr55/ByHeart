@@ -26,7 +26,27 @@ export const PROFILE_COPY = {
    * signed-out line says the consequence rather than the state, because "signed out" is
    * jargon for a fact that is really about losing things.
    */
-  account_out: 'Not signed in — this phone is the only copy',
+  /*
+    AND IT SAYS WHAT TO DO ABOUT IT, because the old line did not.
+
+    Sam, looking at it: "It says I am not logged in. How would I even have logged in?
+    Where/when should that happen?"
+
+    A fair question with no answer on the screen. The line reported a state, was set in
+    accent blue — which on every other surface in this product means tappable — and was a
+    paragraph. So it looked like the way in and was not one, on the one screen somebody
+    goes to when they want to know where they stand.
+
+    Signing in IS offered, in five places: the landing hero, the shelf, the sitting break,
+    the save step, and under the session summary. All five are moments in a flow, which is
+    deliberate — nobody should be stopped at a login wall to try a language app — and it
+    means somebody who declined them all, or never hit one, has nowhere to go looking.
+
+    So the line keeps the consequence and adds the verb. Short, because it is still a note
+    under a name rather than a call to action: this screen is not the place to start
+    arguing for an account, it is the place to stop pretending there is nothing to press.
+  */
+  account_out: 'Not signed in — tap to keep this off your phone',
   account_in: (email: string) => 'Signed in as ' + email,
   headline: 'Your Lisbon.',
   name_hint: 'Your name',

@@ -975,18 +975,47 @@ function Identity() {
             and matching the name's own body size would make the row read as two equal
             lines instead of a name with a note under it.
           */
-          <p
-            data-testid="profile-account"
-            className={
-              'mt-1 truncate text-sm ' + (access.signedIn ? 'text-muted' : 'text-accent')
-            }
-          >
-            {access.signedIn && access.email
-              ? PROFILE_COPY.account_in(access.email)
-              : access.signedIn
-                ? 'Signed in'
-                : PROFILE_COPY.account_out}
-          </p>
+          /*
+            SIGNED OUT, IT IS A LINK. SIGNED IN, IT IS A FACT.
+
+            Sam: "It says I am not logged in. How would I even have logged in? Where/when
+            should that happen?"
+
+            It was a <p> in accent blue — the colour every other surface here uses for
+            something you can press — reporting a state with no way to change it. So the
+            one screen a person opens to find out where they stand told them they were
+            signed out and offered nothing.
+
+            The five places that DO offer it are all moments inside a flow: the landing
+            hero, the shelf, the sitting break, the save step, the session summary. That is
+            the right design — nobody should meet a login wall to try a language app — and
+            it leaves anybody who declined them, or never hit one, with nowhere to look.
+            This is the place they look.
+
+            `?next=` returns them here rather than to the vibes, because somebody who
+            started from their own profile is not mid-sitting; sending them to a lesson
+            would be the product deciding what they came for.
+
+            Signed in it stays a <p>: the address is a fact about the account and there is
+            nothing to do with it here — Settings owns signing out, which is a decision
+            that deserves its own screen rather than a tap on a caption.
+          */
+          !access.signedIn ? (
+            <Link
+              href="/signin?next=%2Fprofile"
+              data-testid="profile-account"
+              className="mt-1 block truncate text-sm text-accent underline underline-offset-4"
+            >
+              {PROFILE_COPY.account_out}
+            </Link>
+          ) : (
+            <p
+              data-testid="profile-account"
+              className="mt-1 truncate text-sm text-muted"
+            >
+              {access.email ? PROFILE_COPY.account_in(access.email) : 'Signed in'}
+            </p>
+          )
         ) : null}
       </div>
 
