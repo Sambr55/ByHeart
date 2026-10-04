@@ -55,7 +55,7 @@ import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, askFor, cardFor, frameApplies, kno
   provenanceOf, fillFrame, fillEnglish, type LegendFrame, worthSaving } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
-import { Install } from '@/components/Install'
+import { Install, useInstallable } from '@/components/Install'
 import { NumberPicker } from '@/components/NumberPicker'
 import { ToLegend } from '@/components/ToLegend'
 import { Tick } from '@/components/Tick'
@@ -624,6 +624,8 @@ function TheWay() {
 function Landing() {
   const router = useRouter()
   const access = useEntitlements()
+  /* Which install this phone can do — see useInstallable in components/Install.tsx. */
+  const installable = useInstallable()
   return (
     /*
       The door is a place, not an argument.
@@ -785,6 +787,64 @@ function Landing() {
         >
           {LANDING.cta}
         </button>
+        {/*
+          PUT IT ON YOUR PHONE FIRST, which is the one instruction that has to come before
+          anything else.
+
+          Sam: "it needs to be the very first thing someone sees so they dont go down the
+          safari route." Right, and the failure is specific rather than general: somebody who
+          scans a QR code lands in a Safari tab, works through a sitting, and closes the tab.
+          Nothing is lost — the device cookie survives and restoreLearner refills — but they
+          have no icon, no notifications and no reason to come back, and at a festival that
+          is the whole difference between a download and a conversation.
+
+          ABOVE COME IN rather than beside it, and said as a line rather than a button. On
+          iOS there is nothing to press: Apple allows no programmatic install, so the only
+          honest control is the Share sheet, which is Safari's own furniture. A button that
+          cannot install would be a lie at the front door. Android gets the same line — the
+          real prompt is one screen later, where Install can hold the deferred event and
+          redeem it on a gesture.
+
+          It renders only where it can be acted on. useInstallable returns 'none' for an
+          already-installed app and for a desktop browser, which means an installed DUB opens
+          on a hero with nothing extra on it — the one case where this would be noise.
+
+          White on the photograph with the scrim behind it, like everything else here. The
+          share glyph is drawn rather than described, because "the Share button" means
+          nothing to somebody who has never looked for it.
+        */}
+        {installable !== 'none' ? (
+          <p
+            data-testid="landing-install"
+            className="flex items-center justify-center gap-3 text-sm text-white/90"
+          >
+            {installable === 'ios' ? (
+              <>
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-5 w-5 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d="M12 15V4" />
+                  <path d="m8 8 4-4 4 4" />
+                  <path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6" />
+                </svg>
+                <span>
+                  Tap <span className="font-semibold">Share</span>, then{' '}
+                  <span className="font-semibold">Add to Home Screen</span> — it works better
+                  as an app.
+                </span>
+              </>
+            ) : (
+              <span>Install it when your browser offers — it works better as an app.</span>
+            )}
+          </p>
+        ) : null}
         {access.signInReady ? (
           <Link href="/signin" className="text-xs text-white/80 underline underline-offset-4">
             Been here before?

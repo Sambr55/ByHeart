@@ -25,6 +25,42 @@ const DISMISSED = 'byheart.install.dismissed'
 
 type Prompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> }
 
+/**
+ * Which install this device can do, and whether it has already been done.
+ *
+ * Sam: "it needs to be the very first thing someone sees so they dont go down the safari
+ * route." He is right about the failure — somebody who starts in a Safari tab stays in a
+ * Safari tab, and everything they do that afternoon is in a window they will close.
+ *
+ * Exported so the landing hero can offer the install in its own voice without a second copy
+ * of this detection. The panel below and the line on the front door are two surfaces for one
+ * fact, and a device that is already installed must disappear from both — which is exactly
+ * the kind of agreement that breaks when two components each decide for themselves.
+ *
+ * 'none' means installed, dismissed, or a desktop browser with nothing to offer.
+ */
+export function useInstallable(): 'none' | 'ios' | 'android' {
+  const [how, setHow] = useState<'none' | 'ios' | 'android'>('none')
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const installed =
+      window.matchMedia?.('(display-mode: standalone)').matches ||
+      (navigator as { standalone?: boolean }).standalone === true
+    if (installed) return
+    const ua = navigator.userAgent
+    const isIOS =
+      /iPad|iPhone|iPod/.test(ua) || (ua.includes('Macintosh') && 'ontouchend' in document)
+    if (isIOS) {
+      setHow('ios')
+      return
+    }
+    const onPrompt = () => setHow('android')
+    window.addEventListener('beforeinstallprompt', onPrompt)
+    return () => window.removeEventListener('beforeinstallprompt', onPrompt)
+  }, [])
+  return how
+}
+
 export function Install() {
   const [how, setHow] = useState<'none' | 'ios' | 'android'>('none')
   const [deferred, setDeferred] = useState<Prompt | null>(null)
