@@ -5282,16 +5282,37 @@ function LegendOpened({
           until it can be acted on — so the only button that belongs here is the one that
           goes and answers it.
         */}
+        {/*
+          AT THE DOOR IT STARTS THE RUN; EVERYWHERE ELSE IT ANSWERS THE ONE QUESTION.
+
+          Sam: "Legend open now asks chamo-te and are you with someone before the run
+          through. It should go straight to run through after your legend is open screen."
+
+          Exactly what it did. `?build=` lands on one question as a FORM — type the answer,
+          save it — which is right for a card opening mid-journey: a question just became
+          answerable and the obvious next act is to answer it. At the door it is wrong
+          twice. The seven are already answered, because the road answers them as the
+          learner walks it, so the form re-asks something the product has stored; and the
+          thing the door is handing over is the rehearsal, not another question.
+
+          So the two firings diverge. `?run=1` is the run-through, which is the screen this
+          one has just spent its headline promising — seven sentences, out loud, nothing on
+          screen — and the first of them is the same frame shown above as the example.
+
+          The label follows, because ANSWER IT NOW over a run-through is a description of
+          the wrong screen.
+        */}
         <button
           type="button"
           data-testid="opened-answer"
           onClick={() => {
             track('legend_opened', { frame: first.id, opened: frames.length, took: true, door })
-            router.push(`/legend?build=${first.id}`)
+            router.push(door ? '/legend?run=1' : `/legend?build=${first.id}`)
           }}
           className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >
-          ANSWER IT NOW
+          {/* The deck's own words for this screen — see legend-rehearse in Legend.tsx. */}
+          {door ? 'RUN IT THROUGH' : 'ANSWER IT NOW'}
         </button>
         {/*
           Later is a real option and says so plainly. A screen you cannot decline has
