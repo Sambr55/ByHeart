@@ -2631,7 +2631,30 @@ export function Card({
               fill
               sizes="100vw"
               className="object-cover"
-              priority={near}
+              /*
+                EAGER, BUT NEVER `priority` — AND THAT DISTINCTION CRASHED SAFARI.
+
+                Sam: "Massive flash (still) and crash after swiping up on Club home page",
+                with a screenshot of Safari's "a problem repeatedly occurred" on /club?in=1.
+                That message is the tab being killed, and this line is what killed it.
+
+                `priority` does two things in Next/Image: it sets loading="eager", and it
+                injects a <link rel="preload"> into the document head. The second one is the
+                problem here. `near` changes on every scroll, so React was adding and
+                removing preload links continuously across a ninety-card rail — dozens of
+                head mutations a second, each one asking the browser to hold another
+                full-size image. iOS Safari runs out of memory and reloads the tab, and
+                because the condition recurs the moment the rail moves again, it reloads
+                repeatedly, which is the exact wording of that error.
+
+                `loading="eager"` on its own does the whole job this needed: it tells the
+                browser not to defer the fetch, which is what stops the next card arriving
+                before its photograph. It adds nothing to the head and nothing accumulates.
+
+                The lesson is narrower than "do not use priority": priority is for a hero
+                image that is on screen at first paint and never changes. A value that moves
+                with the scroll is not that.
+              */
               loading={near ? 'eager' : 'lazy'}
             />
           ) : (

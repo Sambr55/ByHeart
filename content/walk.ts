@@ -202,6 +202,27 @@ export const WALK: WalkStep[] = [
     because the fix has not landed, which is a visible disagreement rather than a silent
     one.
   */
+  /*
+    AND THE THING THAT IS WATCHING, which is the step that says there is somewhere to get to.
+
+    Sam: "build that into the walk-through so people get the idea there is progress to be
+    made." Every other step here names a place; this one names a relationship, and it is the
+    only step that answers "why would I keep doing this".
+
+    Said in the voice the whole feature is written in — Sam's brief for it was "the coolest
+    and best teacher you ever had, like being taught by your elder brother's best mate who is
+    really cool" — so it is flat and specific rather than encouraging. "I notice" rather than
+    "DUB tracks your progress", which is the same sentence wearing a lanyard.
+
+    Second to last, before the mark. The walk ends on the way back into the Club, and the
+    reason to go back is this.
+  */
+  {
+    id: 'noticed',
+    target: 'yours-noticed',
+    say: 'I notice what you can say and what keeps slipping. That is how this gets better.',
+    opens: ['What landed', 'What is close'],
+  },
   {
     id: 'logo',
     target: 'yours-wordmark',

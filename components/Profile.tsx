@@ -508,6 +508,30 @@ export function Profile() {
           */}
           <Collection />
           {/*
+            THE TEACHER, UNDER THE BOARDS WHERE THE PROGRESS IS.
+
+            Sam: "we are the coolest and best teacher you ever had… build that into the
+            walk-through so people get the idea there is progress to be made."
+
+            Under Collection rather than on the identity row, which already carries the inbox
+            and the cog: this is about the work, and the work is what it sits beneath. A
+            third control up top would make the row a toolbar.
+
+            One line and a door. The page behind it is where the observations are — see
+            components/Noticed.tsx — and putting any of them here would be the page twice,
+            with the half that fits competing against the half that does not.
+          */}
+          <Link
+            href="/noticed"
+            data-testid="yours-noticed"
+            className="tap-target flex flex-col gap-1 rounded-2xl border border-line bg-bg-elev px-5 py-6 transition hover:border-accent/50"
+          >
+            <span className="eyebrow text-accent">NOTICED</span>
+            <span className="text-base leading-relaxed text-fg">
+              I have been watching how you go. Here is what I have spotted.
+            </span>
+          </Link>
+          {/*
             Above More rather than below it, because a friend is a thing you have and More
             is the drawer for everything else.
           */}
