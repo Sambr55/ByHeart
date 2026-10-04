@@ -320,9 +320,41 @@ function Shell({
         */}
         <div
           ref={arriving}
-          className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-5 pb-6 pt-3"
+          className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pb-6 pt-3"
         >
-          {children}
+          {/*
+            EVERY LESSON BEAT IS A WHITE CARD, which is the change Sam has now asked for
+            three times.
+
+            "Why am I seeing no real Hinge updates to the legend build? I would have thought
+            screens such as these were perfect candidates."
+
+            He is right and I answered the wrong question twice. Both previous times I
+            checked components/Legend.tsx — the deck, the run-through, the build form — found
+            the treatment there and reported it live. The screens he was photographing are
+            not in that file at all: they are the lesson beats, drawn by this component, and
+            Journey.tsx carried exactly ONE instance of the card idiom across the whole of
+            it. Olá, adeus on bare sand; the piece payoff on bare sand; Vamos lá on bare
+            sand. Every one of them a headline, some body and a button lying on the ground.
+
+            Shell is where it belongs rather than on each beat, and that is the whole reason
+            this is one edit instead of forty: every screen in a sitting passes through here,
+            so a beat added next month is carded by existing. The alternative — the thirty-odd
+            `<Shell>` call sites each wrapping their own children — is thirty chances to
+            forget, which is how Journey.tsx came to have one.
+
+            `flex-1` on the card so a short beat still fills the screen and the dock stays at
+            the bottom, which is what the old wrapper did and what the beats are written
+            against. The gap moves inside with it.
+
+            NOT ON A PHOTOGRAPH. Nothing Shell draws sits on an image — the lesson screens
+            are sand with a coloured header — so the white-on-white trap that caught the Club
+            card this morning cannot apply here. Checked rather than assumed: `.shown-on-photo`
+            appears nowhere in this file.
+          */}
+          <div className="flex flex-1 flex-col gap-6 rounded-2xl border border-line bg-bg-elev px-5 py-6">
+            {children}
+          </div>
         </div>
       </Framed>
       {/*
