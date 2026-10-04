@@ -200,6 +200,31 @@ export const CHEATS: Cheat[] = [
       { pt: 'provavelmente', en: 'probably' },
       { pt: 'finalmente', en: 'finally' },
     ],
+    /*
+      THE MOVE ITSELF, WHICH THIS CARD WAS THE ONLY HACK NOT TO STATE.
+
+      Sam: "the 'add mente to English adjectives ending ly' explanation is on the front
+      card — needs to be in Board Hack click-throughs too."
+
+      `does` says what you GET — every adjective is nearly an adverb — and three worked
+      examples show it happening. Neither says what to DO, and the sibling above does:
+      cao_hack's note is the caveat that makes -ção usable. So somebody holding `provável`
+      and wanting "probably" had the pattern named in the header, the benefit named in the
+      headline, and nowhere the instruction.
+
+      The feminine is the part that bites and it is the reason this is a sentence rather
+      than three words. -mente attaches to the FEMININE form, so ridículo becomes
+      ridiculamente and not ridiculomente — which is the mistake somebody makes if they
+      generalise from the three examples above, all of which happen to end in -l or -e and
+      hide the rule.
+
+      BOTH EXAMPLES ARE WORDS THIS PRODUCT TEACHES, which is not decoration. ridículo and
+      normal are both on the describing shelf; the first draft of this note used claro and
+      provável, neither of which DUB has ever shown anybody — a rule demonstrated on
+      vocabulary the learner does not own is a rule they cannot check, and this repo has
+      unpicked the dead-word fault more than once already.
+    */
+    note: 'Make the adjective feminine first, then add -mente: ridículo → ridiculamente. Where there is no separate feminine, as in normal or provável, it goes straight on.',
   },
   {
     id: 'quero_hack',

@@ -169,7 +169,30 @@ export function revisionFor(
     */
     const cheat = CHEATS.find((c) => c.id === id)
     if (!cheat) return []
-    return cheat.says.map((l) => ({ ask: l.en, answer: l.pt }))
+    /*
+      AND THE RULE COMES WITH THEM, which is the whole point of a shape.
+
+      Sam: "the 'add mente to English adjectives ending ly' explanation is on the front
+      card — needs to be in Board Hack click-throughs too."
+
+      EXACTLY WHAT HE SAW. The feed's cheat card carries `does` — "Every adjective you own
+      is nearly an adverb too." — and CheatPane shows it under the shape with the note
+      below. The board click-through showed the header -LY → -MENTE and then asked for
+      "normally", with nothing anywhere saying what the rule IS. Three worked examples and
+      no rule is a vocabulary list wearing a pattern's name.
+
+      So `does` is the context on every line of it, and `note` joins it where there is one
+      — cao_hack's "not every one — reservation is reserva" is the caveat that stops the
+      hack being a lie, and it was being dropped on the one screen that asks somebody to
+      use it cold.
+
+      SAID ON EVERY LINE RATHER THAN ONCE AT THE TOP, because a shape is the thing those
+      three sentences have in common: a learner arriving at the third one still needs to
+      know what they are demonstrating. The same reasoning as asking for all three in the
+      first place.
+    */
+    const rule = cheat.note ? cheat.does + ' ' + cheat.note : cheat.does
+    return cheat.says.map((l) => ({ ask: l.en, answer: l.pt, context: rule }))
   }
 
   if (kind === 'idiom') {

@@ -42,6 +42,7 @@ import { everyCard, cardHref, type CardKind } from '../content/collection'
 import { revisionFor, revisionTitle } from '../content/revision'
 import { PIECES } from '../content/roots'
 import { LEGEND_FRAMES } from '../content/legend'
+import { CHEATS } from '../content/cheats'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -186,6 +187,37 @@ console.log('\nnothing is asked without its moment\n')
     'every vibe and drop line says what moment it is for',
     missing.length === 0,
     missing.slice(0, 4).join(' | ') || 'all situated',
+  )
+
+  /*
+    A SHAPE ALWAYS SAYS WHAT THE SHAPE IS.
+
+    Sam: "the 'add mente to English adjectives ending ly' explanation is on the front card
+    — needs to be in Board Hack click-throughs too."
+
+    The feed's cheat card and CheatPane both show `does`, and the board click-through showed
+    the header -LY → -MENTE then asked for "normally" with nothing stating the rule. Three
+    worked examples and no rule is a vocabulary list wearing a pattern's name.
+
+    AND A TRANSFORMATION HACK SAYS HOW. A shape with an arrow in it asks somebody to change
+    a word, which means there is a move to get wrong — -mente attaches to the feminine, so
+    ridiculomente is what you get by generalising from the examples. Both arrow shapes carry
+    a note now and they are the only two; QUERO + ANYTHING needs none, because its examples
+    ARE the rule.
+  */
+  const noRule = CHEATS.filter(
+    (c) => !revisionFor('cheat', c.id, rich).every((l) => l.context?.includes(c.does)),
+  )
+  ok(
+    'every shape says what the shape is',
+    noRule.length === 0,
+    noRule.slice(0, 3).map((c) => c.shape).join(', ') || String(CHEATS.length) + ' shapes',
+  )
+  const arrowsNoNote = CHEATS.filter((c) => c.shape.includes('→') && !c.note)
+  ok(
+    'and a transformation says how to make it',
+    arrowsNoNote.length === 0,
+    arrowsNoNote.map((c) => c.shape).join(', ') || 'both arrow shapes carry the move',
   )
 
   /* The one Sam named: Duran Duran handing over "See you Monday" with nothing round it. */
