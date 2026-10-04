@@ -818,7 +818,18 @@ function Landing() {
             data-testid="landing-install"
             className="flex items-center justify-center gap-3 text-sm text-white/90"
           >
-            {installable === 'ios' ? (
+            {installable === 'in-app' ? (
+              /*
+                The embedded view cannot install anything — see useInstallable. Telling
+                somebody to tap Share when there is no Share button is the version of this
+                Sam photographed, so here it names the control that IS on their screen.
+              */
+              <span>
+                Tap <span className="font-semibold">•••</span> bottom right, then{' '}
+                <span className="font-semibold">Open in Safari</span> to keep it on your
+                phone.
+              </span>
+            ) : installable === 'ios' ? (
               <>
                 <svg
                   viewBox="0 0 24 24"

@@ -90,7 +90,66 @@ export function Get() {
           Only once it is known which phone this is. Rendering the iOS instruction to an
           Android visitor would be worse than rendering nothing, and the gap is one frame.
         */}
-        {!ready ? null : how === 'ios' ? (
+        {!ready ? null : how === 'in-app' ? (
+          /*
+            THE EMBEDDED VIEW, WHERE THE INSTRUCTION IS DIFFERENT AND THE SCREEN IS NOT A
+            FAILURE.
+
+            Sam, with a photograph of the bar: "not seeing a share sheet." He could not have
+            been — the Camera app opens links in iOS's embedded web view, which carries back,
+            reload and a menu and has no Share icon at all. Add to Home Screen does not exist
+            there, so this is the one case where the two-tap instruction is instructions for
+            a button that is not on their screen.
+
+            And it is the DEFAULT for a QR code, which is why it gets its own branch rather
+            than a footnote: scanning a printed code lands here unless somebody deliberately
+            moves to Safari first.
+
+            So the instruction is the one that works — open it in Safari, where the Share
+            sheet exists — and it names the control by what it looks like, because "the menu"
+            is not a thing anybody has noticed. The way in is still directly below, because
+            somebody who would rather just look should not be made to move browsers first.
+          */
+          <div
+            data-testid="get-in-app"
+            className="flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-white/30 bg-black/55 px-5 py-6 backdrop-blur-sm"
+          >
+            <p className="eyebrow text-white/80">ONE STEP FIRST</p>
+            <p className="flex items-center justify-center gap-3 text-base leading-relaxed text-white">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-6 w-6 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <circle cx="5" cy="12" r="1.4" />
+                <circle cx="12" cy="12" r="1.4" />
+                <circle cx="19" cy="12" r="1.4" />
+              </svg>
+              {/*
+                BOTTOM RIGHT, because that is where it is and "at the bottom" is four
+                controls wide.
+
+                Sam: "update the text to reference the three dots bottom right where share
+                is." His screenshot of the embedded view shows back, the address, reload and
+                ••• — so naming the corner is the difference between finding it and reading
+                a sentence about it.
+              */}
+              <span>
+                Tap <span className="font-semibold">•••</span> bottom right, then{' '}
+                <span className="font-semibold">Open in Safari</span>.
+              </span>
+            </p>
+            <p className="text-sm leading-relaxed text-white/80">
+              This window cannot add apps to your phone. Safari can, and it takes two more
+              taps.
+            </p>
+          </div>
+        ) : how === 'ios' ? (
           <div
             data-testid="get-ios"
             className="flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-white/30 bg-black/55 px-5 py-6 backdrop-blur-sm"
@@ -111,9 +170,15 @@ export function Get() {
                 <path d="m8 8 4-4 4 4" />
                 <path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6" />
               </svg>
+              {/*
+                The share glyph is bottom CENTRE in Safari and the dots are bottom RIGHT in
+                the embedded view — two different buttons in two different corners, which is
+                exactly why the two branches say different things. Naming the place is what
+                makes either of them findable.
+              */}
               <span>
-                Tap <span className="font-semibold">Share</span> at the bottom, then{' '}
-                <span className="font-semibold">Add to Home Screen</span>.
+                Tap the <span className="font-semibold">share arrow</span> at the bottom,
+                then <span className="font-semibold">Add to Home Screen</span>.
               </span>
             </p>
             {/*
@@ -149,7 +214,7 @@ export function Get() {
           laptop, must be able to get in. Quiet rather than absent: the instruction above is
           the thing to do and this is the thing to do instead.
         */}
-        {ready && how === 'ios' ? (
+        {ready && (how === 'ios' || how === 'in-app') ? (
           <Link
             href="/"
             data-testid="get-skip"

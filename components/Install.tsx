@@ -39,8 +39,8 @@ type Prompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outco
  *
  * 'none' means installed, dismissed, or a desktop browser with nothing to offer.
  */
-export function useInstallable(): 'none' | 'ios' | 'android' {
-  const [how, setHow] = useState<'none' | 'ios' | 'android'>('none')
+export function useInstallable(): 'none' | 'ios' | 'android' | 'in-app' {
+  const [how, setHow] = useState<'none' | 'ios' | 'android' | 'in-app'>('none')
   useEffect(() => {
     if (typeof window === 'undefined') return
     const installed =
@@ -51,7 +51,28 @@ export function useInstallable(): 'none' | 'ios' | 'android' {
     const isIOS =
       /iPad|iPhone|iPod/.test(ua) || (ua.includes('Macintosh') && 'ontouchend' in document)
     if (isIOS) {
-      setHow('ios')
+      /*
+        AN IN-APP BROWSER CANNOT INSTALL ANYTHING, and telling somebody to tap Share there
+        is instructions for a button that is not on their screen.
+
+        Sam, photographing exactly this: "not seeing a share sheet." He was not, and he could
+        not have been — the bar in that screenshot says `◀ Camera` and carries back, reload
+        and a menu, with no Share icon at all. That is iOS's embedded web view, which is what
+        the Camera app, Instagram, WhatsApp and every other link-opening app uses. It has no
+        Add to Home Screen because it is not Safari, and no amount of better wording fixes a
+        control that does not exist.
+
+        It is the DEFAULT WAY A QR CODE OPENS, which is what makes this the whole problem
+        rather than an edge case: scanning a code at a festival lands in the embedded view
+        unless the person deliberately moves to Safari first.
+
+        DETECTED BY WHAT IS MISSING. There is no reliable flag for the embedded view, so this
+        asks the question that actually matters: standalone is undefined in it and a boolean
+        in real Safari. That is a documented difference rather than a user-agent guess, and a
+        user-agent guess is what every brittle version of this check has been built on.
+      */
+      const inApp = typeof (navigator as { standalone?: boolean }).standalone === 'undefined'
+      setHow(inApp ? 'in-app' : 'ios')
       return
     }
     const onPrompt = () => setHow('android')
