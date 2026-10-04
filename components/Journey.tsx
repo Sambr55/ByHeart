@@ -1485,20 +1485,46 @@ function Picker() {
   }
 
   /*
-    THE WARM-UP USED TO INTERCEPT HERE, and it is gone with the rest of it.
+    NOBODY ON THE ROAD IS SHOWN A MENU.
 
-    Sam: "Of course you needed to move the warm up, that is now stale. It needs to go
-    completely."
+    Sam: "my expectation here was setting up the legend didnt require picking from vibes,
+    but the user is fed the ten questions from the vibes… I wasnt expecting to see this
+    menu - just straight into the first of ten questions."
 
-    A learner with nothing played was redirected to a forced choice of two vibes, because
-    the shelf they would otherwise meet was eleven tiles with nine dimmed and captioned
-    BASICS FIRST — a first act of reading a list of things you cannot have. That was the
-    whole argument for the interception and it has stopped being true: eight of fourteen
-    crates open at rung 1 now, and the road decides the order regardless of what the shelf
-    shows, so the first thing somebody taps leads to the same place either way.
+    He is right and this was my mistake. The warm-up used to intercept here, so removing
+    it left the SHELF as the first screen after set-up — and I argued at the time that the
+    shelf was now harmless because "the road decides the order regardless of what the shelf
+    shows, so the first thing somebody taps leads to the same place either way". True about
+    the destination and wrong about the experience. A menu asks somebody to choose when
+    there is nothing to choose: the road has a next step, it is the same step whichever
+    tile they press, and presenting thirteen covers is asking a question whose answer the
+    product already knows.
 
-    So they land on the shelf, which is a shelf of things they can have.
+    So while the road is unwalked, this screen enters the next step instead of rendering.
+    The shelf comes back the moment the road is done, which is when picking a vibe becomes
+    a real choice with real consequences — and that is what the shelf is FOR.
+
+    NOT A REDIRECT AND NOT A NEW SCREEN. chooseFamily is the same call the tiles make, so
+    nothing downstream can tell the difference between this and a tap. The guard is `once`
+    rather than state, because chooseFamily sets the family and this component re-renders
+    before the journey switches away from the picker.
   */
+  const road = roadProgress({
+    rootsPlayed: learner.roots_played ?? [],
+    purpose: learner.purpose ?? null,
+  })
+  const autoEntered = useRef(false)
+  useEffect(() => {
+    if (autoEntered.current) return
+    if (!mounted || road.open || !road.next) return
+    autoEntered.current = true
+    setEntering(road.next.family)
+    chooseFamily(road.next.family, road.next.root)
+    /* eslint-disable-next-line react-hooks/exhaustive-deps -- fires once, on the road's next step */
+  }, [mounted, road.open, road.next?.root])
+
+  /* Nothing is drawn while the road is carrying them — see the note above. */
+  if (mounted && !road.open && road.next) return null
 
   return (
     <Shell stage="CHOICE">
@@ -2957,7 +2983,30 @@ function RootBeatView({
           So the button is removed where the question is live, and kept where it is
           settled, which is the only state it was ever needed in.
         */}
-        {root.asks && !askSettled ? null : <Cta label="TAKE THE USEFUL BIT" onClick={next} />}
+        {/*
+          AND A THIRD STATE NOBODY ANTICIPATED: THE QUESTION THAT CANNOT RENDER.
+
+          Sam, on his first run: "I got stuck on 1234 and couldnt move forward."
+
+          Reproduced and traced. tb_1234 declares `asks: 'moved_when'`, and moved_when is a
+          `purposes: ['moving']` frame — so for a visiting or staying learner frameForPurpose
+          rejects it, `asksHere` comes back EMPTY, and `askSettled` is false by its own
+          definition (`asksHere.length > 0 && ...`). The gate then read "this root asks
+          something and it is not settled", removed the button, and left a screen with no
+          question on it and no way off. A permanent dead end on the second beat of the
+          product.
+
+          The gate's own note above anticipated the settled case and not this one. The
+          honest test is whether a question is ACTUALLY ON SCREEN — `asksHere.length` — not
+          whether the root declares one in content that may not apply to this learner.
+
+          With that, all three states are right: a live question keeps its own confirm and
+          no CTA; a settled one shows AskSettled and the CTA; and one that does not apply
+          here is simply an ordinary beat with an ordinary button.
+        */}
+        {asksHere.length > 0 && !askSettled ? null : (
+          <Cta label="TAKE THE USEFUL BIT" onClick={next} />
+        )}
       </Shell>
     )
   }

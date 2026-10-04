@@ -18,7 +18,7 @@ import { BREAKS, breakAfter, DONE } from '../content/breaks'
 import { ROOTS, ROOTS_BY_FAMILY, type Root } from '../content/roots'
 import { ROAD, roadFor, roadProgress } from '../content/road'
 import { beatsFor } from '../engine/journey'
-import { cardFor, cardToGo, clubOpen, frameReady, legendStatus, DOORWAY, LEGEND_FRAMES } from '../content/legend'
+import { cardFor, cardToGo, clubOpen, frameForPurpose, frameReady, legendStatus, DOORWAY, LEGEND_FRAMES } from '../content/legend'
 import type { Purpose } from '../content/situations'
 
 const fail: string[] = []
@@ -160,6 +160,45 @@ for (const purpose of PURPOSES) {
     'first vibe at step ' + (firstVibe + 1) + ', last question at step ' + (lastAsk + 1),
   )
   /* And nothing gendered is asked before gender settles — asserted in full further down. */
+}
+
+/*
+  NO ROOT ASKS A QUESTION THIS LEARNER CANNOT BE ASKED.
+
+  Sam, on his first run: "I got stuck on 1234 and couldnt move forward."
+
+  tb_1234 declares `asks: 'moved_when'`, and moved_when is a purposes:['moving'] frame. For
+  a visiting or staying learner frameForPurpose rejects it, so the question rendered
+  nothing — and the beat's CTA was gated on "this root asks something and it is not
+  settled", which was true and unsatisfiable. A permanent dead end on the second beat of
+  the product, reachable by two purposes out of three.
+
+  The component fix is to test whether a question is ACTUALLY ON SCREEN rather than whether
+  the root declares one. This asserts the content side of the same fault: a root served to
+  somebody whose card has no home for its question is a root asking into the void, and
+  worth knowing about even now the screen no longer traps.
+
+  Reported rather than failed, because the content is not wrong — tb_1234 asking moved_when
+  is correct for a mover and this is about who else meets it.
+*/
+{
+  const ASKED = new Map()
+  for (const r of ROOTS) {
+    const a = (r as { asks?: string | string[] } | undefined)?.asks
+    if (!a) continue
+    for (const one of Array.isArray(a) ? a : [a]) {
+      const frame = LEGEND_FRAMES.find((f) => f.id === one)
+      if (!frame) continue
+      const only = PURPOSES.filter((p) => frameForPurpose(frame, p))
+      if (only.length < PURPOSES.length) ASKED.set(r.root_id, one + ' (only ' + only.join('/') + ')')
+    }
+  }
+  if (ASKED.size) {
+    console.log(
+      '\n  ' + ASKED.size + ' root(s) ask a question not every learner has a home for:\n    ' +
+        [...ASKED].map(([id, note]) => id + ' asks ' + note).join('\n    '),
+    )
+  }
 }
 
 /*
