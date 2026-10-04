@@ -60,6 +60,29 @@ export interface RevisionLine {
   ask: string
   /** What counts as having said it. */
   answer: string
+  /**
+   * The moment it is for — the one line that says WHY this sentence.
+   *
+   * Sam, from the board: "Board vibe cards show tasks with no reference to their source
+   * crate — Duran Duran gives you 'See you Monday'."
+   *
+   * HE IS DESCRIBING A LINE THAT ALREADY EXISTS AND WAS BEING THROWN AWAY. Every
+   * transfer_prompt is authored with a `context` — "You are leaving and you will next see
+   * them at the start of the week" — and the lesson shows it above the ask
+   * (components/Journey.tsx). This file mapped the ask and the answer and dropped it, so a
+   * revision was four bare English words with no situation and no visible connection to
+   * the card that was tapped.
+   *
+   * WHICH IS THE WHOLE COMPLAINT, and naming the crate would not have fixed it. "Duran
+   * Duran: See you Monday" still does not tell you when to say it; the crate is where the
+   * sentence came FROM and the context is what it is FOR. The header already carries the
+   * crate name. What was missing was the moment.
+   *
+   * Optional, because the kinds that have no situation genuinely have none: a word on a
+   * shelf is asked as a word, and inventing an occasion for `o talho` would be writing
+   * content in a lookup function.
+   */
+  context?: string
   /** Words the build offers that the sentence does not teach — see MiniBuild. */
   helpers?: Record<string, string>
 }
@@ -94,6 +117,8 @@ export function revisionFor(
       .map((r) => ({
         ask: r.transfer_prompt.ask,
         answer: r.transfer_prompt.answer,
+        /* The moment, which the lesson shows and this screen was dropping. See context. */
+        context: r.transfer_prompt.context,
         helpers: r.helpers,
       }))
   }
@@ -127,7 +152,13 @@ export function revisionFor(
     if (!drop) return []
     return drop.situations
       .filter((sit) => sit.release?.ask && sit.release?.answer)
-      .map((sit) => ({ ask: sit.release.ask, answer: sit.release.answer }))
+      /*
+        The room it happened in, as the context — a drop's release carries no `context` of
+        its own, and the situation title IS the moment: "A ticket, on the night", "Getting
+        to Oriente". Same fix as the vibe branch above and the same reason: four cold
+        sentences in a row with nothing between them read as a list rather than an evening.
+      */
+      .map((sit) => ({ ask: sit.release.ask, answer: sit.release.answer, context: sit.title }))
   }
 
   if (kind === 'cheat') {
@@ -143,14 +174,39 @@ export function revisionFor(
 
   if (kind === 'idiom') {
     /*
-      ASKED THE WAY THE CARD ASKS IT: the nonsense Portuguese is the prompt and the English
-      is the answer, because that is the direction the joke runs. Reversing it — English in,
-      Portuguese out — would be testing somebody's memory of a translation this product
-      openly calls wrong.
+      THE EQUIVALENT, WHICH IS THE ONLY PORTUGUESE ON THE CARD WORTH HAVING COLD.
+
+      Sam, from the board: "Lost in translations in the board are giving audio playback for
+      the English not the Portuguese."
+
+      WHAT IT WAS DOING, and why the old comment here was reasoning about the wrong screen.
+      This branch asked `literal` and answered `english`, on the argument that the riddle
+      runs that way — which is true of the CARD, where the nonsense Portuguese is the face
+      and recognising the English is the win. But `answer` is not a direction on this
+      screen. It is the field SayItCard renders in `pt` type, hands to slugFor for the
+      listen button, and gives the pt-PT recogniser as the thing to match. So the revision
+      printed English in Portuguese type, spoke English through the Portuguese voice, and
+      marked a learner against an English sentence with a Portuguese recogniser — which
+      cannot pass. Three faults from one field.
+
+      AND THE HEADER ALREADY GAVE IT AWAY. revisionTitle names an idiom by its english, so
+      the screen asking for "Bob's your uncle" was captioned BOB'S YOUR UNCLE.
+
+      WHAT REVISION IS FOR settles which way round it goes. Recognising the joke is a
+      first-meeting win and it is not repeatable — once you know the armchair is Bob, you
+      know it forever. What does not survive one meeting is `e pronto`: the real thing a
+      Portuguese person says, which is the whole reason the card is in a language product
+      rather than a book of jokes. So the revision asks for THAT, from its English gloss,
+      and the literal nonsense comes along as the reminder of which card this is.
+
+      `gloss` is the ask rather than `english` because the gloss is what the equivalent
+      actually means — "And there you go" for e pronto. Asking "Bob's your uncle" and
+      marking `e pronto` correct would be asking for a translation this product openly
+      calls wrong, which is the trap the old comment was right to name.
     */
     const idiom = IDIOMS.find((i) => i.id === id)
     if (!idiom) return []
-    return [{ ask: idiom.literal, answer: idiom.english }]
+    return [{ ask: idiom.gloss || idiom.english, answer: idiom.equivalent }]
   }
 
   if (kind === 'words') {
@@ -210,7 +266,15 @@ export function revisionTitle(kind: CardKind, id: string): string {
   /* A night is called what happened, and a shelf what it holds. */
   if (kind === 'drop') return DROPS.find((d) => d.id === id)?.event ?? id
   if (kind === 'words') return SHELVES.find((sh) => sh.id === id)?.label ?? id
-  /* An idiom is called by its answer; an asked sentence has no name but itself. */
+  /*
+    AN IDIOM IS CALLED BY THE JOKE, NOT BY THE ANSWER.
+
+    It used to be titled by its `english`, which was the answer the screen then asked for
+    — BOB'S YOUR UNCLE above a card asking for Bob's your uncle. Now the revision asks for
+    the equivalent, so the English is safe to show and is the better name: it is how
+    somebody thinks of the card ("the Bob one"), and `literal` in the header would be a
+    line of nonsense Portuguese with no context for it yet.
+  */
   if (kind === 'idiom') return IDIOMS.find((i) => i.id === id)?.english ?? id
   /* A shape is called by its shape — NÃO + VERB is the name and the lesson. */
   if (kind === 'cheat') return CHEATS.find((c) => c.id === id)?.shape ?? id

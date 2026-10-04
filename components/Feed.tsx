@@ -1129,7 +1129,25 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
       <main
         data-stage="REAL WORLD"
         data-testid="feed-waiting"
-        className="relative h-dvh w-full overflow-hidden bg-bg"
+        /*
+          ON-DARK, OR THE STRIP UNDER THE NAV FLASHES SAND.
+
+          Sam: "There are some states when returning to Club feed that reintroduces the gap
+          at the bottom beneath the nav."
+
+          This frame — the one that paints nothing until the store has answered — is one of
+          them. The canvas fix in globals.css is keyed on `html:has(.nav-bar)`, and this
+          renders BEFORE the nav exists, so for that frame the canvas is sand and the
+          home-indicator inset below the 100dvh frame shows it. On an installed PWA that is
+          the exact gap his screenshot catches, arriving and leaving too fast to look like
+          anything but a flicker.
+
+          `on-dark` is the class the photograph screens already use for this and the one the
+          canvas rule defers to, so the holding frame paints the same blue the bar does and
+          the strip is never sand. The ground stays `bg-bg` for the frame itself; this is
+          about what is UNDER it.
+        */
+        className="relative h-dvh w-full overflow-hidden bg-bg on-dark"
       />
     )
   }
@@ -1185,7 +1203,21 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
           can set it — nothing else in the product links here with it.
         */}
         <Link
-          href="/?door=1"
+          /*
+            THE MARK GOES TO YOURS, which is home now.
+
+            Sam: "Fix the Club main logo so it goes back to YOURS not the main home page."
+
+            It pointed at /?door=1 — the front door, with the marker that stops a returning
+            learner being redirected past it. That was right when the Club WAS the product's
+            home; it is not any more. Home is the screen with your name on it: the welcome
+            lands there, the boards are there, and a member tapping the mark is reaching for
+            their own things rather than for the sales pitch they saw once.
+
+            The front door is still reachable at /?door=1 for anybody who wants to look at
+            it, which is what that marker exists for.
+          */
+          href="/profile"
           aria-label={chapterName() + ' — back to the front door'}
           /*
             THE MARK IS CENTRED IN ITS OWN TAP TARGET, and that is the misalignment.

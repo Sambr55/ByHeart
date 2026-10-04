@@ -560,3 +560,48 @@ export function levelLabel(id: Stage['id'] | undefined): string | null {
   if (!id) return null
   return STAGES.find((s) => s.id === id)?.name ?? null
 }
+
+/**
+ * WHERE A BOARD CARD GOES WHEN YOU TAP IT.
+ *
+ * Sam: "Blank Legend cards (e.g. 'So you have children') link to the run-through but
+ * should link to the actual learning task."
+ *
+ * WHAT WAS HAPPENING, and it was one line in the board doing it. Every card linked at
+ * `/revise?kind=…&id=…` without asking whether there was anything to revise. For a
+ * finished card that is right and is the whole point of the library. For an UNANSWERED
+ * Legend frame there is nothing on the record to ask back, so revisionFor returns nothing
+ * and the screen fell through to its empty state — "it is a reference rather than a
+ * sentence" — which is false about a question you simply have not answered yet, and leaves
+ * the one useful action off the screen.
+ *
+ * THE BOARDS SHOW EVERYTHING NOW, WHICH IS WHY THIS APPEARED. Sam: "we should pre-populate
+ * the cheats, hacks etc with our content even when it hasn't been done… everything visible
+ * and ungated." Before that a board held finished cards only, and "tap it to revise it"
+ * needed no qualification. The moment an undone card is on the grid, a card has two
+ * possible destinations and something has to choose.
+ *
+ * ONLY WHERE A ROUTE EXISTS, which is the discipline here rather than a gap. A frame is
+ * answered at /legend?build=<id>, a crate and a drop are taught at /vibes?open=<id> — all
+ * live routes with callers already. A cheat, an idiom, a word shelf and a set have no
+ * per-card teaching screen, because those kinds TEACH inside the asking beat: the picker
+ * shows the sentence, the audio says it, and somebody meeting it for the first time on
+ * /revise is in the right place. So they keep the revise link whether or not they are
+ * done, and this function says so rather than inventing a route to send them to.
+ *
+ * A sheet whose members are all glossed is the one case that correctly has nowhere to go:
+ * it holds no sentence this product teaches, so it IS a reference, and /revise says
+ * exactly that.
+ */
+export function cardHref(card: Pick<CollectedCard, 'kind' | 'id' | 'done'>): string {
+  const revise = '/revise?kind=' + card.kind + '&id=' + encodeURIComponent(card.id)
+  if (card.done) return revise
+  /*
+    The same route the feed's legend card and the board's own Unopened tile use, so there
+    is one way to answer a frame rather than three.
+  */
+  if (card.kind === 'frame') return '/legend?build=' + encodeURIComponent(card.id)
+  /* A sitting, which is where a crate and a drop are both taught. */
+  if (card.kind === 'vibe' || card.kind === 'drop') return '/vibes?open=' + encodeURIComponent(card.id)
+  return revise
+}

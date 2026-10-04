@@ -11,6 +11,7 @@ import {
   type CollectedCard,
   type Deck,
   type DeckId,
+  cardHref,
 } from '@/content/collection'
 import { LEGEND_FRAMES, cardFor, progressFor, stageFor, type LegendFrame } from '@/content/legend'
 import Image from 'next/image'
@@ -514,7 +515,13 @@ function idiomClue(id: string): { src: string; alt: string } | undefined {
  * remind."
  */
 function Filled({ card }: { card: CollectedCard }) {
-  const href = '/revise?kind=' + card.kind + '&id=' + card.id
+  /*
+    REVISION IF IT IS DONE, THE LEARNING TASK IF IT IS NOT — see cardHref, which owns the
+    choice. This used to be a bare /revise link for every card, which sent an unanswered
+    Legend frame to a screen with nothing to ask it. Sam: "blank Legend cards link to the
+    run-through but should link to the actual learning task."
+  */
+  const href = cardHref(card)
 
   /*
     THE PICTURE THE CARD ALREADY HAS.
