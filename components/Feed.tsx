@@ -4370,6 +4370,104 @@ function Stages({
   )
 }
 
+/*
+  THE TWO WAYS INTO ASK, AND BOTH OF THEM HAPPENING.
+
+  ASK showed an exchange — two questions and their Portuguese — which is true and reads as
+  documentation: the more pairs it carried the more it looked like a FAQ somebody had
+  pasted onto a card. What the pillar actually offers is two doors, and one of them (the
+  camera) had never appeared anywhere in the sequence.
+
+  So the typed half is drawn as a field and the photographed half as a sign. What changed
+  here is that both now MOVE, because a card arguing "ask for anything, any time" was
+  making its case with two still objects.
+
+  THE QUESTION TYPES ITSELF. Sam: "Make the How do I ask to split the bill a typewriter
+  effect." It is the same Typed the Club card's meet-up uses, deliberately — a second way
+  of revealing text would be a second vocabulary for the same idea — and it is the right
+  one here for a better reason than reuse: the caret was already drawn beside it, so the
+  field was a moment frozen one keystroke early. Typing is that moment running.
+
+  THE SIGN IS PHOTOGRAPHED. A white flash over the panel, after it has arrived and been
+  read, which is the gesture everybody knows from the other side of a phone. See .shutter.
+
+  Its own component because it holds hooks and Specimen reaches it after several early
+  returns — the same reason Steps and Stages are components, and the same bug twice in one
+  week when it was not.
+*/
+function Asking({
+  shows,
+  onScreen,
+}: {
+  shows: Extract<NonNullable<IntroCard['shows']>, { kind: 'asking' }>
+  onScreen: boolean
+}) {
+  return (
+    /* A list, because it is two ways in rather than one thing with a caption. */
+    <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-6">
+      <li className="flex flex-col gap-3">
+        {/*
+          The field, as it looks while it is being typed into.
+
+          WHITE, BECAUSE THE FIELD IS ON THE PHOTOGRAPH. A first fix gave it a light ground
+          and dark ink — what a text field looks like everywhere — and that was an
+          overcorrection: `--bg` on a card over a photograph IS the dark ground, so it
+          produced dark ink on dark and read worse than the pale text it replaced. Sam:
+          "the text in the ask box needs to be white." The field is not a light chip and
+          should not pretend to be one. It is a translucent box on a dark street, so its
+          ink is the same white everything else on that ground uses.
+        */}
+        <div className="flex items-center gap-3 rounded-xl border border-white/30 bg-black/30 px-3 py-3 text-white">
+          {/* A speech mark, drawn the way every other icon in this file is drawn. */}
+          <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 opacity-60" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+            <path d="M20 15a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z" />
+          </svg>
+          <span className="min-w-0 flex-1 text-sm">
+            <Typed text={shows.typed.asked} start={onScreen} />
+          </span>
+          {/*
+            THE CARET BLINKS NOW, and the note that said it should not is why it does.
+
+            It read: "a caret that blinks would be motion for its own sake on a card nobody
+            is typing into." That was right about a static field and is wrong about this
+            one — the field IS being typed into, a character at a time, and a still caret
+            beside moving text is the one combination that looks broken.
+          */}
+          <span aria-hidden className="h-4 w-px shrink-0 animate-pulse bg-accent" />
+        </div>
+        <span className="flex items-center gap-3 pl-1">
+          <AudioButton slug={slugFor(shows.typed.pt)} text={shows.typed.pt} size="sm" />
+          <span className="pt display min-w-0 flex-1 text-lg text-accent">{shows.typed.pt}</span>
+          <CopyButton text={shows.typed.pt} size="sm" />
+        </span>
+      </li>
+
+      <li className="flex flex-col gap-3">
+        <span className="text-sm text-muted">{shows.shot.caption}</span>
+        {/*
+          The sign itself, and it is deliberately not styled like the app.
+
+          A photographed notice is somebody else's typography — painted, printed, stuck to
+          a door — so it gets a border and a centred line rather than the accent treatment
+          every other Portuguese string in the product wears. The difference is the point:
+          this is words DUB found, not words DUB taught.
+
+          `relative` and `overflow-hidden` so the shutter is clipped to the panel it is
+          photographing. A flash that spilled past the dashed border would be a flash over
+          the card rather than over the sign.
+        */}
+        <div className="relative flex flex-col items-center gap-1 overflow-hidden rounded-xl border border-dashed border-line px-3 py-6 text-center">
+          <span className="pt display text-lg text-fg">{shows.shot.pt}</span>
+          <span className="text-xs text-muted">{shows.shot.en}</span>
+          {onScreen ? (
+            <span aria-hidden className="shutter pointer-events-none absolute inset-0 bg-white" />
+          ) : null}
+        </div>
+      </li>
+    </ul>
+  )
+}
+
 /**
  * The real thing an argument card is arguing about.
  *
@@ -4637,84 +4735,9 @@ function Specimen({
     )
   }
 
-  /*
-    THE TWO WAYS IN, drawn as inputs rather than listed as answers.
-
-    ASK showed an exchange — two questions and their Portuguese — which is true and reads
-    as documentation: the more pairs it carried the more it looked like a FAQ somebody had
-    pasted onto a card. What the pillar actually offers is two doors, and one of them (the
-    camera) had never appeared anywhere in the sequence.
-
-    So the typed half is drawn as a field with a caret in it, the way it looks a moment
-    before somebody hits send, and the photographed half is drawn as a sign with its
-    translation under it. The English is kept ONLY on the photographed one, because there
-    the translation is the entire point — somebody at a locked door needs to know the shop
-    is shut, not how to pronounce it.
-
-    A caret that blinks would be motion for its own sake on a card nobody is typing into,
-    so it does not: it is a shape that says "a cursor lives here", which is all the
-    picture needs to do.
-  */
+  /* The two ways into ASK, drawn as acts — see Asking. Its own component for the hooks. */
   if (shows.kind === 'asking') {
-    return (
-      /* A list, because it is two ways in rather than one thing with a caption. */
-      <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-6">
-        <li className="flex flex-col gap-3">
-          {/*
-            The field, as it looks the moment before it is sent.
-
-            INK ON IT, NOT THE PAGE'S INK. Sam: "make How do I ask text black."
-
-            The card sits on a photograph, so .shown-on-photo remaps --fg to white for the
-            whole subtree — correct for the headline and the body over a dark street, and
-            wrong inside this one element, which is a pale chip standing in for a text
-            field. White on sand read as a placeholder nobody had typed yet.
-
-            WHITE, BECAUSE THE FIELD IS ON THE PHOTOGRAPH.
-
-            A first fix gave it a light ground and dark ink — what a text field looks like
-            everywhere — and that was an overcorrection: `--bg` on a card over a
-            photograph IS the dark ground, so it produced dark ink on dark and read worse
-            than the pale text it replaced. Sam: "the text in the ask box needs to be
-            white."
-
-            The field is not a light chip and should not pretend to be one. It is a
-            translucent box on a dark street, so its ink is the same white everything else
-            on that ground uses, at full strength rather than the 90% that made it look
-            like an unfilled placeholder.
-          */}
-          <div className="flex items-center gap-3 rounded-xl border border-white/30 bg-black/30 px-3 py-3 text-white">
-            {/* A speech mark, drawn the way every other icon in this file is drawn. */}
-            <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 opacity-60" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
-              <path d="M20 15a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2Z" />
-            </svg>
-            <span className="min-w-0 flex-1 text-sm">{shows.typed.asked}</span>
-            <span aria-hidden className="h-4 w-px shrink-0 bg-accent" />
-          </div>
-          <span className="flex items-center gap-3 pl-1">
-            <AudioButton slug={slugFor(shows.typed.pt)} text={shows.typed.pt} size="sm" />
-            <span className="pt display min-w-0 flex-1 text-lg text-accent">{shows.typed.pt}</span>
-            <CopyButton text={shows.typed.pt} size="sm" />
-          </span>
-        </li>
-
-        <li className="flex flex-col gap-3">
-          <span className="text-sm text-muted">{shows.shot.caption}</span>
-          {/*
-            The sign itself, and it is deliberately not styled like the app.
-
-            A photographed notice is somebody else's typography — painted, printed, stuck
-            to a door — so it gets a border and a centred line rather than the accent
-            treatment every other Portuguese string in the product wears. The difference
-            is the point: this is words DUB found, not words DUB taught.
-          */}
-          <div className="flex flex-col items-center gap-1 rounded-xl border border-dashed border-line px-3 py-6 text-center">
-            <span className="pt display text-lg text-fg">{shows.shot.pt}</span>
-            <span className="text-xs text-muted">{shows.shot.en}</span>
-          </div>
-        </li>
-      </ul>
-    )
+    return <Asking shows={shows} onScreen={onScreen} />
   }
 
   if (!lines.length) return null

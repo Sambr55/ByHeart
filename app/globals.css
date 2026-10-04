@@ -1859,6 +1859,53 @@ summary:focus-visible,
   }
 }
 
+/*
+  THE SHUTTER, over the thing that was photographed.
+
+  Sam, on the ASK card: "put a photograph / flash / click effect over photo panel."
+
+  The card makes two claims and shows one of them happening. The typed half has a field
+  with a caret in it, so it reads as a moment: somebody is about to send that. The
+  photographed half was a dashed box with a sign in it — true, and static, so the half of
+  ASK nobody had ever seen in the product looked like a quotation rather than an act.
+
+  A flash is the act. White, over the whole panel, from nothing to almost-opaque and back
+  — the frame a camera gives you when it fires, which is the one gesture everybody knows
+  from the other side of a phone.
+
+  FAST, BECAUSE A SHUTTER IS FAST. 120ms is --t-ack, the shortest step on the scale and the
+  one reserved for "a control confirming it heard you"; a flash is exactly that and nothing
+  longer would read as a flash. It fires once, on arrival, and never loops — a camera going
+  off repeatedly on a card somebody is reading is a strobe, not a demonstration.
+
+  The 620ms delay is the gap, not a sixth duration: the panel rises first and is briefly a
+  sign, and the shutter goes after it has been read. Taken together it is photograph THEN
+  flash, which is the order it happens in.
+
+  Reduced motion gets no flash at all. This one is decoration — the panel says what it says
+  without it — and a full-panel white pulse is the exact thing a person with that setting
+  turned the setting on for.
+*/
+@keyframes shutter {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.85;
+  }
+}
+
+.shutter {
+  animation: shutter var(--t-ack) var(--ease-out) 620ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shutter {
+    animation: none;
+  }
+}
+
 /* The card follows the word rather than arriving with it. */
 .pillar-body {
   animation: pillar-land 420ms var(--ease-drain, ease-out) 260ms both;
