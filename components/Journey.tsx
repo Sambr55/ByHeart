@@ -6208,25 +6208,21 @@ function SectionComplete() {
         renaming it would break the checks for a copy change.
       */}
         {/*
-          AND NOT BEFORE THERE IS ANYTHING TO SAY COLD.
+          SAY THREE COLD IS GONE. Sam: "remove the say three cold button."
 
-          Three prompts with nothing on screen is the right test for somebody who has been
-          through a few sittings and the wrong offer four words into a first one — which is
-          exactly where it was the only control on the screen. It is an outline button
-          beside the basics now, and on a first session it is not there at all: the way
-          forward is the doorway, and a cold test is what you do once you have something to
-          be cold about.
+          It offered a cold-recall test as a second way off the summary, beside the button
+          that carries on along the road. Two controls, and only one of them is the thing
+          the screen is for — the road is the spine, and a screen that ends a sitting should
+          point at the next one rather than offering a detour from it.
+
+          The cold prompts are not gone: they are three beats inside a sitting (see the
+          no-cue screens), which is where somebody meets them in the ordinary course of
+          things rather than by choosing to be tested. What has gone is the invitation to
+          leave the road in order to take one.
+
+          `finishSection('done')` has no other caller on this screen, which is the right
+          outcome: the one way on is the one the road named.
         */}
-        {(learner.sittings ?? 0) > 1 ? (
-          <button
-            type="button"
-            data-testid="im-done"
-            onClick={() => finishSection('done')}
-            className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-fg"
-          >
-            SAY THREE COLD
-          </button>
-        ) : null}
       </Dock>
     </Shell>
   )
@@ -6813,34 +6809,28 @@ function LegendPayoff({ justFinished }: { justFinished: CultureFamily | null }) 
         twice is nagging, and the state that records the answer is the same one the
         Legend offer uses.
       */}
-      {saveOffer ? (
-        <div className="mt-1 flex flex-col gap-3 border-t border-accent/30 pt-3">
-          <p className="text-sm font-semibold">{LEGEND_COPY.save_head}</p>
-          <p className="text-xs leading-relaxed text-muted">{LEGEND_COPY.save_body}</p>
-          <div className="flex flex-col gap-3">
-            {/* Mid-vibe, so back to the vibes — see the save step's note. */}
-            <Link
-              href="/signin?next=%2Fvibes"
-              data-testid="soft-save"
-              onClick={() => track('save_offered', { at: 'one_vibe_out', took: true })}
-              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-            >
-              {LEGEND_COPY.save_cta}
-            </Link>
-            <button
-              type="button"
-              data-testid="soft-save-skip"
-              onClick={() => {
-                setSaveDeclined()
-                track('save_offered', { at: 'one_vibe_out', took: false })
-              }}
-              className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted"
-            >
-              {LEGEND_COPY.save_skip}
-            </button>
-          </div>
-        </div>
-      ) : null}
+      {/*
+        THE SAVE OFFER IS GONE FROM HERE, because the road now asks for the email itself.
+
+        Sam: "remove these email boxes from the legend build (we ask them for email now
+        anyway in the road)."
+
+        This panel sat inside the LEGEND box on the summary — "Keep this, in case of a new
+        phone", EMAIL ME A LINK, NOT NOW — directly under the line saying how many steps
+        are left. So a screen whose job is to report progress and point at the next vibe
+        was also running a sign-up, and the two buttons that mattered least were the
+        loudest things on it.
+
+        tb_email asks for the address as a lesson, which is the better place by the rule
+        this product already follows: every question teaches Portuguese while it asks. A
+        second ask on a summary card is the same question with none of the teaching, and
+        somebody who gave it on the road was being asked again by a product that had just
+        stored their answer.
+
+        The offer is not gone from the product. The break screen still carries SAVE MY
+        PLACE for anybody who has not been asked, and /signin is a route. What has gone is
+        a form bolted onto a receipt.
+      */}
       {quiet ? null : (
       <div className="flex flex-wrap gap-3">
         <Link

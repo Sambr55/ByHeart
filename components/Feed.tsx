@@ -1613,7 +1613,31 @@ export function Card({
       merely past it. Everything beyond this point is the pane, and the pane's own CTA
       leaves the feed entirely.
     */
-    if (card.kind === 'setup') onFreed?.(card.id)
+    if (card.kind === 'setup') {
+      onFreed?.(card.id)
+      /*
+        AND THE NEXT QUESTION COMES TO THEM.
+
+        Sam: "selecting city auto-opens the WHY you are here card."
+
+        It was already on the same card — the Why buttons render under the choosers — and
+        it was below the fold, so picking Lisbon looked like nothing happened. Screenshotted
+        at 390x844: the city list fills the screen and WHAT BRINGS YOU TO LISBON is off the
+        bottom, which on the one card that may not be skipped reads as a dead end.
+
+        AND IT NEEDED NO SCROLLING, which is what measuring said after I had written some.
+
+        I added a scroll here on the assumption the Why was below the fold, and it broke
+        firstrun: the options ended up outside the clickable area, aimed at the top and then
+        aimed at the bottom, both times worse than nothing. Measured without it, the first
+        option sits at 382 against a nav floor of 777 — comfortably on screen, because
+        freeing the rail and claiming the pane has already brought the card up.
+
+        So what was actually wrong on Sam's phone was the swipe, which is fixed above. This
+        is left as a note rather than a change, because the next person to look at this
+        screen will have the same hunch I did.
+      */
+    }
     /*
       The unlock that used to be here could not be reached.
 
@@ -1668,7 +1692,45 @@ export function Card({
     feel like it is waiting rather than broken.
   */
   const gate = card.kind === 'intro' ? card.intro.exit : undefined
+  /*
+    THE SET-UP CARD IS LOCKED TOO, and this is the second place that had to be told.
+
+    Sam: "Make sure you cant swipe left/right on this card."
+
+    `lockedNow`, eight hundred lines up, already holds the rail on set-up — it was taught
+    to when he found he could swipe UP past the only question the product asks. This is the
+    other half of the same fact and was never updated: it reads `card.intro.exit`, which
+    exists only on intro cards, so on the set-up card `gate` is undefined, `locked` is
+    false, and the away lane renders. Swipe left and the one card that may not be skipped
+    goes to the back of the pile.
+
+    The same shape as the latched ref and the hardcoded end-of-sitting button earlier
+    today: two places computing one answer, and only one of them kept current. Named here
+    rather than derived from `lockedNow` because that one is about the card at `atIndex`
+    and this is about the card rendering itself, which are different questions with the
+    same answer for this card.
+  */
   const locked = Boolean(gate) && !freedHere
+  /*
+    THE SET-UP CARD MAY NOT BE SWIPED AWAY, but its pane must stay reachable.
+
+    Sam: "Make sure you cant swipe left/right on this card."
+
+    `lockedNow`, eight hundred lines up, already holds the rail on set-up — taught to when
+    he found he could swipe UP past the only question the product asks. This is the other
+    half of the same fact and was never updated: `gate` reads `card.intro.exit`, which
+    exists only on intro cards, so on set-up `locked` was false and the away lane rendered.
+    Swipe left and the one card that may not be skipped goes to the back of the pile.
+
+    Folding set-up into `locked` was the obvious fix and was wrong: both lanes share that
+    flag, and <SetUp /> — the Why question itself — renders inside the PANE lane. Locking
+    the card hid the question it exists to ask. firstrun caught it by trying to press an
+    option and finding it invisible, which is exactly the failure a learner would have hit.
+
+    So the two are separated. Nothing may carry this card away; everything may still open
+    it.
+  */
+  const noAway = locked || card.kind === 'setup'
 
   /*
     AND AGAIN WHEN THE LOCK LETS GO, which is the whole of a bug reported as
@@ -3360,7 +3422,7 @@ export function Card({
         */}
         <div
           aria-hidden
-          hidden={locked || !sides}
+          hidden={noAway || !sides}
           data-testid="card-away"
           className="order-3 flex h-full w-full shrink-0 snap-start flex-col items-start justify-end gap-1 bg-bg px-5 pb-10 text-fg"
         >

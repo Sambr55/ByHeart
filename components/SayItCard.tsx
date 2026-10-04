@@ -277,25 +277,45 @@ export function SayItCard({
         somebody is looking at, and the answer belongs in the same place.
       */}
       {/* What it heard: the verdict, the words it caught, and where to aim. */}
+      {/*
+        A MISS IS AMBER, BECAUSE SAND ON SAND IS NOT A MESSAGE.
+
+        Sam: "make the hint / progress messages on audio much clearer, they are easy to
+        miss on the sand background."
+
+        The success half was always loud — accent border, accent tint, accent eyebrow — and
+        the miss half was `border-line bg-surface` with a `text-muted` eyebrow, which is a
+        pale panel on a pale card with grey type on it. Photographed: DID NOT CATCH IT /
+        TRY AGAIN, barely separable from the card behind it. The panel that matters most is
+        the one somebody reads when they are stuck, and it was the quietest thing on screen.
+
+        --coach is the token for this and the rule that comes with it is already written:
+        "wrong answers coach in amber, never red." A miss is not a failure — the learner
+        said something and the browser could not make it out — so the colour has to carry
+        attention without carrying blame, which is the whole reason amber exists here.
+
+        The quoted words keep `text-fg`: that is what the learner actually said, and it is
+        evidence rather than commentary.
+      */}
       {heard ? (
         <div
           data-testid="say-heard"
           className={
             'animate-bank rounded-xl border px-4 py-3 ' +
-            (heard.close ? 'border-accent bg-accent/10' : 'border-line bg-surface')
+            (heard.close ? 'border-accent bg-accent/10' : 'border-coach/60 bg-coach/10')
           }
         >
-          <p className={'eyebrow ' + (heard.close ? 'text-accent' : 'text-muted')}>
+          <p className={'eyebrow ' + (heard.close ? 'text-accent' : 'text-coach')}>
             {blocked ? LEGEND_COPY.run_blocked : verdict}
           </p>
           {blocked ? (
-            <p className="mt-2 text-sm leading-relaxed text-muted">
+            <p className="mt-2 text-sm leading-relaxed text-coach">
               {LEGEND_COPY.run_blocked_body}
             </p>
           ) : null}
           {heard.said ? <p className="pt mt-1 text-lg text-fg">“{heard.said}”</p> : null}
           {aim.length ? (
-            <p data-testid="say-aim" className="mt-2 text-sm leading-relaxed text-muted">
+            <p data-testid="say-aim" className="mt-2 text-sm leading-relaxed text-coach">
               {LEGEND_COPY.run_aim(aim)}
             </p>
           ) : null}
@@ -306,7 +326,12 @@ export function SayItCard({
             — see run_try_again.
           */}
           {!heard.close && !enough ? (
-            <p data-testid="say-again" className="eyebrow mt-2 text-accent">
+            /*
+              TRY AGAIN is the instruction, so it is the strongest thing in the panel —
+              text-coach rather than text-accent, which was blue type inside an otherwise
+              sand box and read as a link to somewhere else rather than as the next move.
+            */
+            <p data-testid="say-again" className="eyebrow mt-2 font-semibold text-coach">
               {LEGEND_COPY.run_try_again}
             </p>
           ) : null}
@@ -321,10 +346,23 @@ export function SayItCard({
       {stubborn ? (
         <div
           data-testid="say-stubborn"
-          className="animate-bank flex flex-col gap-1 rounded-xl border border-line bg-surface px-4 py-3"
+          /*
+            STRONGER THAN SAND ON SAND, for the reason the verdict above it went amber.
+
+            `border-line bg-surface` on a bg-elev card is a pale panel on a pale card: the
+            encouragement that arrives on the third attempt was the faintest thing on a
+            screen somebody is already finding hard. --line-strong is the token for exactly
+            this — "where the border is the only thing saying control" — and the body text
+            comes up off muted so the sentence can be read without leaning in.
+
+            NOT AMBER, which the verdict is. This is not a correction: it says the
+            microphone is the difficult part, not the learner. Amber here would turn
+            encouragement into a second thing gone wrong.
+          */
+          className="animate-bank flex flex-col gap-1 rounded-xl border border-line-strong bg-surface px-4 py-3"
         >
           <p className="eyebrow text-fg">{LEGEND_COPY.run_third_head}</p>
-          <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.run_third_body}</p>
+          <p className="text-sm leading-relaxed text-fg/85">{LEGEND_COPY.run_third_body}</p>
         </div>
       ) : null}
 
@@ -335,10 +373,11 @@ export function SayItCard({
       {enough ? (
         <div
           data-testid="say-enough"
-          className="animate-bank flex flex-col gap-1 rounded-xl border border-line bg-surface px-4 py-3"
+          /* The five-goes notice, on the same terms as the third-go one above it. */
+          className="animate-bank flex flex-col gap-1 rounded-xl border border-line-strong bg-surface px-4 py-3"
         >
           <p className="eyebrow text-fg">{LEGEND_COPY.run_enough_head}</p>
-          <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.run_enough_body}</p>
+          <p className="text-sm leading-relaxed text-fg/85">{LEGEND_COPY.run_enough_body}</p>
         </div>
       ) : null}
 

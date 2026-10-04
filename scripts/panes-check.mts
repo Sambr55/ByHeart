@@ -86,14 +86,30 @@ const feed = readFileSync('components/Feed.tsx', 'utf8')
 if (!/const sides = card\.kind !== 'intro' \|\| introHasPane\(card\)/.test(feed)) {
   fail.push('Feed.tsx no longer decides its lanes with introHasPane — this check tests only itself')
 }
+/* And the away flag is still derived from the lock rather than written independently. */
+if (!/const noAway = locked \|\| card\.kind === 'setup'/.test(feed)) {
+  fail.push('the away lane no longer derives its guard from `locked`')
+}
 /*
   Both lanes, and faceLane, have to read it. faceLane especially: the face's index is
   1 + flow.length only while a lane sits to its LEFT, and computing that separately is the
   hard-coded lane arithmetic the component's own note warns about.
 */
+/*
+  THE TWO LANES NO LONGER READ THE SAME FLAG, and that is the point of the change.
+
+  Both were `locked || !sides`, which this asserted verbatim. The set-up card then needed
+  to refuse being swiped AWAY while still opening its PANE — the Why question renders
+  inside that pane, so one flag for both hid the question the card exists to ask.
+
+  So the away lane reads `noAway`, which is `locked` plus the set-up card. What this check
+  is for is unchanged: each lane must still be guarded by `sides`, so that deleting the
+  guard brings the lanes back silently. It now asks for that rather than for one exact
+  expression, and names the flag each lane is entitled to use.
+*/
 for (const [what, re] of [
   ['the language lane', /hidden=\{locked \|\| !sides\}[\s\S]{0,220}order-1/],
-  ['the away lane', /hidden=\{locked \|\| !sides\}[\s\S]{0,120}card-away/],
+  ['the away lane', /hidden=\{noAway \|\| !sides\}[\s\S]{0,120}card-away/],
   ['faceLane', /const faceLane = \(sides \? 1 : 0\) \+ flow\.length/],
 ] as const) {
   if (!re.test(feed)) fail.push(`${what} no longer follows the sides guard`)
