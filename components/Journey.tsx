@@ -856,6 +856,40 @@ function Landing() {
             )}
           </p>
         ) : null}
+        {/*
+          SEE IT FIRST, WITHOUT SIGNING UP FOR ANYTHING. Sam: "add a walkthrough button to
+          the main home page top priority."
+
+          WHY THE FRONT DOOR IS THE RIGHT PLACE FOR IT. The walk was built as the thing
+          that happens once, after the Club welcome, over the real controls on Yours — and
+          it is reachable at /walkthrough so Sam can show it at a festival. That covers
+          somebody already inside and somebody holding Sam's phone. It leaves out the
+          person this screen is for: a stranger deciding in about four seconds whether this
+          is worth a tap, who has no way to find out what DUB is without starting it.
+
+          IT IS SAFE FOR SOMEBODY WITH NO RECORD, which is the thing that had to be checked
+          rather than assumed. The walk keeps only the steps whose targets are on screen —
+          see components/Walkthrough.tsx — so a visitor with nothing gets the four tabs and
+          three more, seven steps, every one of them about a control that is genuinely
+          there. Measured on a fresh profile before this was added: "1 / 7", starting on
+          FIND. A tour that pointed at boards somebody has not filled would be the tour of
+          a screenshot, and it does not do that.
+
+          SECOND, NOT FIRST. COME IN is still the one thing to press — Sam's own read of
+          this screen is that the intro is the hook, and a visitor given two equal buttons
+          has been handed a decision instead of an invitation. So this is a quiet line
+          under it, in the row that already holds the way back for returning members.
+
+          BEFORE "Been here before?" because it is the more likely of the two: everybody
+          arriving here is new, and only some of them have an account.
+        */}
+        <Link
+          href="/walkthrough"
+          data-testid="landing-walk"
+          className="text-sm text-white/90 underline underline-offset-4"
+        >
+          Show me round first
+        </Link>
         {access.signInReady ? (
           <Link href="/signin" className="text-xs text-white/80 underline underline-offset-4">
             Been here before?
