@@ -901,6 +901,23 @@ export function vibeCards(playedRootIds: string[]): FeedCard[] {
   const played = new Set(playedRootIds)
   return CRATES.filter((c) => {
     if (c.drop || c.built === false) return false
+    /*
+      BOB HAS NO TILE, because his cards are already in the feed.
+
+      Sam, with a screenshot of it: "Remove this generic explainer completely."
+
+      Every other crate's tile is an invitation to a place the feed does not otherwise go —
+      tap Top Gun and you get a sitting you would not have seen. Bob's Your Uncle is the one
+      crate whose contents ARE feed cards: the idioms land one in seven on their own, each
+      with its own picture and its own joke. So the tile was an advert for the cards either
+      side of it, saying "English idioms, and what Portugal says instead" directly above an
+      English idiom and what Portugal says instead.
+
+      The crate itself is untouched. It is still on the shelf, still twelve roots deep, and
+      still reachable from /vibes — what goes is the card that described it to somebody who
+      was already reading it.
+    */
+    if (c.id === 'bobs_your_uncle') return false
     const roots = ROOTS_BY_FAMILY[c.id] ?? []
     return roots.length > 0 && !roots.some((r) => played.has(r.root_id))
   })
@@ -1479,7 +1496,17 @@ export function cardFace(card: FeedCard): {
       */
       eyebrow: card.idiom.blue ? 'NOT SAFE' : 'LOST IN TRANS.',
       title: card.idiom.literal,
-      blurb: 'What do we say?',
+      /*
+        THE GUESS IS THE GAME, so the card asks for one.
+
+        Sam: "Have a guess what you think this popular English saying is?!"
+
+        "What do we say?" was the question from DUB's side — it reads as the product about
+        to tell you something. The card is face-up Portuguese with the English hidden one
+        swipe away, which makes it a guess, and naming it as one is the difference between
+        a flashcard and a game somebody wants to play.
+      */
+      blurb: 'Have a guess what you think this popular English saying is?!',
       image: idiomImage(card.idiom),
     }
   }

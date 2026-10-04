@@ -56,7 +56,6 @@ import { acquirePiece, markIdiom, recordProof, rejectCard, rememberFinishedCard,
 import { useLearner } from '@/engine/useLearner'
 import { StatusBar } from '@/components/Native'
 import { SetUp } from '@/components/SetUp'
-import { EXPLAINER_CTA } from '@/content/explainers'
 import { cardDone } from '@/content/legend'
 import { loadLearner, markDropDone, setWhenHere, tasteRoom, useCheat } from '@/engine/learner'
 
@@ -3253,6 +3252,48 @@ export function Card({
                 <div className="mb-3 mt-6">
                   <WhenHere onSand={onSand} />
                 </div>
+              ) : card.kind === 'idiom' ? (
+                /*
+                  THE IDIOM CARD IS A GUESS, SO ITS WAY ON IS THE GESTURE THAT REVEALS.
+
+                  Sam: "Remove the Open CTA and blue box and add an obvious (larger than
+                  normal) bouncing swipe right."
+
+                  A blue OPEN button under "Have a guess what you think this is" answers the
+                  question for you. The whole card is a held breath — Portuguese face-up,
+                  the English one swipe away — and a button is the product offering to skip
+                  the only interesting second in it.
+
+                  LARGER AND MOVING, which is this file's existing .nudge-right at the size
+                  the intro cards use for the same job. The arrow IS the instruction: the
+                  deck has taught right-to-reveal on three intro cards already, and this is
+                  the card where somebody most wants to know they can.
+
+                  Tapping still works — the whole face is the reveal target, so nobody
+                  reaching for a button is stranded.
+                */
+                <p
+                  data-testid="card-swipe-hint"
+                  className={
+                    'mb-3 mt-6 flex items-center gap-3 text-base ' +
+                    (onSand ? 'text-muted' : 'text-white/80')
+                  }
+                >
+                  Swipe right to reveal
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="nudge-right h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <path d="M4 12h15" />
+                    <path d="m13 6 6 6-6 6" />
+                  </svg>
+                </p>
               ) : introExplainer ? (
                 /*
                   THE INTRO CARDS SAY THE GESTURE RATHER THAN OFFERING A BUTTON.
@@ -3578,12 +3619,42 @@ function Teased({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
         </p>
       </div>
 
-      <Link
-        href="/vibes"
-        className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+      {/*
+        THE WAY ON IS UP, not a blue bar pointing somewhere else.
+
+        Sam: "Remove any instances of the CTA button it's all about building your legend",
+        and on the pane itself: "Add swipe up for more up arrow."
+
+        It appeared on three panes — the teased room, the vibe taste, the explainer detail —
+        and in all three it was the same thing: a full-width accent button at the foot of a
+        pane somebody reached by swiping right, sending them to /vibes. So the reward for
+        opening a card was an advert for a different screen, and the gesture that actually
+        continues the feed went unnamed on the one surface where somebody has just arrived
+        and is looking for what to do.
+
+        The hint is the deck's own grammar, in the words the five intro cards already teach:
+        up is the next card. It costs no room, it does not compete with the content above
+        it, and it points where the person already is rather than away.
+      */}
+      <p
+        data-testid="pane-swipe-hint"
+        className="mt-10 flex items-center justify-center gap-3 text-sm text-muted"
       >
-        {EXPLAINER_CTA}
-      </Link>
+        Swipe up for more
+        <svg
+          viewBox="0 0 24 24"
+          className="nudge-up h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M12 20V5" />
+          <path d="m6 11 6-6 6 6" />
+        </svg>
+      </p>
     </div>
   )
 }
@@ -3931,7 +4002,25 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-accent">YOU KNOW THIS</p>
-        <p className="display text-balance text-2xl">{card.taste.en}</p>
+        {/*
+          AND IT DOES NOT QUITE TRANSLATE, which is more use than saying the line twice.
+
+          Sam, on the Bob pane: "Replace second hold your horses with — It doesn't quite
+          translate 😭! This is what they say here:"
+
+          The face carries the English idiom and this repeated it verbatim one swipe later,
+          under an eyebrow announcing that you know it. Two identical lines, the second one
+          introduced as a revelation.
+
+          What the swipe actually reveals is underneath — the Portuguese, which is NOT the
+          idiom translated but what Portugal says instead. "Hold your horses" becomes
+          "Calma", and the gap between those is the entire point of the deck. So the line
+          that was a repetition becomes the thing that frames it, and the emoji is Sam's:
+          this crate is the one place in DUB allowed to be funny about the language.
+        */}
+        <p className="display text-balance text-2xl">
+          It doesn’t quite translate 😭! This is what they say here:
+        </p>
         {/*
           Under the quote, as it is on the root card, so the two screens teach the same
           shape: the line, then where you would hear it, then the Portuguese.
@@ -3964,12 +4053,42 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
         <p className="mt-6 text-sm leading-relaxed text-fg/85">{card.taste.why}</p>
       </div>
 
-      <Link
-        href="/vibes"
-        className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+      {/*
+        THE WAY ON IS UP, not a blue bar pointing somewhere else.
+
+        Sam: "Remove any instances of the CTA button it's all about building your legend",
+        and on the pane itself: "Add swipe up for more up arrow."
+
+        It appeared on three panes — the teased room, the vibe taste, the explainer detail —
+        and in all three it was the same thing: a full-width accent button at the foot of a
+        pane somebody reached by swiping right, sending them to /vibes. So the reward for
+        opening a card was an advert for a different screen, and the gesture that actually
+        continues the feed went unnamed on the one surface where somebody has just arrived
+        and is looking for what to do.
+
+        The hint is the deck's own grammar, in the words the five intro cards already teach:
+        up is the next card. It costs no room, it does not compete with the content above
+        it, and it points where the person already is rather than away.
+      */}
+      <p
+        data-testid="pane-swipe-hint"
+        className="mt-10 flex items-center justify-center gap-3 text-sm text-muted"
       >
-        {EXPLAINER_CTA}
-      </Link>
+        Swipe up for more
+        <svg
+          viewBox="0 0 24 24"
+          className="nudge-up h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M12 20V5" />
+          <path d="m6 11 6-6 6 6" />
+        </svg>
+      </p>
     </div>
   )
 }
@@ -5377,12 +5496,42 @@ function Explains({ card }: { card: Extract<FeedCard, { kind: 'explainer' }> }) 
         Somebody sold by the Drop and somebody sold by the demo end up in the same place,
         which is what makes this a funnel rather than a menu.
       */}
-      <Link
-        href="/vibes"
-        className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+      {/*
+        THE WAY ON IS UP, not a blue bar pointing somewhere else.
+
+        Sam: "Remove any instances of the CTA button it's all about building your legend",
+        and on the pane itself: "Add swipe up for more up arrow."
+
+        It appeared on three panes — the teased room, the vibe taste, the explainer detail —
+        and in all three it was the same thing: a full-width accent button at the foot of a
+        pane somebody reached by swiping right, sending them to /vibes. So the reward for
+        opening a card was an advert for a different screen, and the gesture that actually
+        continues the feed went unnamed on the one surface where somebody has just arrived
+        and is looking for what to do.
+
+        The hint is the deck's own grammar, in the words the five intro cards already teach:
+        up is the next card. It costs no room, it does not compete with the content above
+        it, and it points where the person already is rather than away.
+      */}
+      <p
+        data-testid="pane-swipe-hint"
+        className="mt-10 flex items-center justify-center gap-3 text-sm text-muted"
       >
-        {EXPLAINER_CTA}
-      </Link>
+        Swipe up for more
+        <svg
+          viewBox="0 0 24 24"
+          className="nudge-up h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M12 20V5" />
+          <path d="m6 11 6-6 6 6" />
+        </svg>
+      </p>
     </div>
   )
 }
