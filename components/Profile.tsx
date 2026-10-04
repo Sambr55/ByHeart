@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { vibeImage } from '@/content/vibe-images'
 import Link from 'next/link'
+import { InboxDoor } from '@/components/InboxDoor'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '@/components/Feed'
 import { CrateIcon } from '@/components/CrateIcon'
@@ -1032,6 +1033,23 @@ function Identity() {
         sticky bar, and a bar added to carry one control would push the Legend down the
         page — which is the one thing the ordering note above this component refuses.
       */}
+      {/*
+        AND THE INBOX BESIDE IT, on the one other screen somebody opens to find their things.
+
+        Sam: "Add the same inbox to the top of the Yours page."
+
+        The same component the Club's header uses — see components/InboxDoor.tsx, which it
+        was extracted into for this. Copied, it would be two badges to keep in step about a
+        count, a colour and a size, which is the shape of every drift this codebase has had
+        to unpick; shared, a change to either surface lands on both.
+
+        LEFT OF THE COG, because the cog is the last thing in a row by convention on every
+        phone and the inbox is content rather than configuration. Both sit on the identity
+        row rather than in a bar of their own, for the reason the cog's note already gives:
+        this screen has no sticky bar, and adding one to carry two controls would push the
+        Legend down the page.
+      */}
+      <InboxDoor />
       <Link
         href="/settings"
         data-testid="yours-settings"

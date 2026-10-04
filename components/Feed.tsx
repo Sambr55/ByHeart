@@ -13,9 +13,9 @@ import { chosenPair } from '@/engine/pair'
 import { labelForLocale } from '@/content/pairs'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
-import { inboxFor, unreadCount } from '@/content/inbox'
 import { slugFor } from '@/content/audio-manifest'
 import { shutter } from '@/engine/tap'
+import { InboxDoor } from '@/components/InboxDoor'
 import {
   INTRO_DEMO_AFTER,
   INTRO_SETUP_AFTER,
@@ -49,7 +49,7 @@ import {
   vocabWord,
   type FeedCard,
 } from '@/content/feed'
-import { chapterById, DEFAULT_CHAPTER } from '@/content/chapters'
+import { chapterById } from '@/content/chapters'
 import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
 import { acquirePiece, markIdiom, recordProof, rejectCard, rememberFinishedCard, rememberSheetGot, rewindReject, toggleCard } from '@/engine/learner'
@@ -6239,102 +6239,3 @@ function Rail({
  * badge cannot claim a message the inbox would not show. It is one function and both
  * callers pass the learner's own chapter, genres and purpose.
  */
-function InboxDoor() {
-  const learner = useLearner()
-  /*
-    After mount, and null until then.
-
-    `inboxFor` reads the clock — a drop is live or it is not — so computing this during
-    render would have the server and the browser disagree about the number in the badge.
-    The icon is there either way; only the count waits.
-  */
-  const [count, setCount] = useState<number | null>(null)
-  useEffect(() => {
-    setCount(
-      unreadCount(
-        inboxFor(
-          learner.chapter ?? DEFAULT_CHAPTER,
-          new Date(),
-          (learner.profile?.genres ?? null) as Parameters<typeof inboxFor>[2],
-          learner.purpose ?? null,
-        ),
-        learner.inbox_opened_at ?? null,
-      ),
-    )
-  }, [learner.chapter, learner.profile?.genres, learner.purpose, learner.inbox_opened_at])
-
-  return (
-    <Link
-      href="/inbox"
-      data-testid="inbox-door"
-      data-count={count ?? undefined}
-      aria-label={
-        count ? count + ' new in your inbox' : 'Inbox — what has landed in your Club'
-      }
-      className="pointer-events-auto tap-target relative flex items-center"
-    >
-      {/*
-        An envelope, because that is what an inbox is and this is not the screen to be
-        clever on. currentColor so it inherits the header's own decision about sand or
-        photograph — see the note at the call site.
-      */}
-      {/*
-        FIFTEEN PERCENT LARGER, which is h-7 rather than h-6.
-
-        Sam: "make the envelope and indicator 15% larger." 24px to 28px is 16.7% and is the
-        nearest step Tailwind's scale offers; the alternative is an arbitrary value, and a
-        one-off size on the one piece of furniture in this header is how a scale starts
-        leaking. The viewBox is unchanged, so the drawing scales rather than the strokes
-        thickening.
-      */}
-      <svg
-        viewBox="0 0 24 24"
-        aria-hidden
-        className="h-7 w-7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M3 7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
-        <path d="m3 8 9 6 9-6" />
-      </svg>
-      {count ? (
-        <span
-          data-testid="inbox-count"
-          /*
-            RED, BECAUSE A COUNT OF UNREAD THINGS IS THE ONE THING IN DUB THAT SHOULD NAG.
-
-            Sam: "make the inbox message indicator red."
-
-            It was the accent, which is the product's blue on sand and WHITE over a
-            photograph — chosen so the badge would be legible on both grounds without a
-            second colour to keep in step. Reasonable, and it made the badge disappear into
-            the header on exactly the cards that carry a picture, which is most of them.
-
-            --telha is the token and its own note says what it is for: "warmth and urgency —
-            numerals, counters, short headlines. It clears AA, but it is not a body-text
-            colour." A count of things you have not read is a numeral and it is urgent, which
-            is the whole of that sentence. It is also the one colour in this palette that is
-            neither the ground nor the accent, so it reads as a badge on sand and on a
-            photograph alike without being told which it is on.
-
-            NOT THE COACH AMBER, which the palette reserves with a rule in its own comment:
-            "wrong answers coach in amber, never red." Unread mail is not a wrong answer.
-
-            White ink on it rather than --accent-ink, because that token means "text on the
-            accent" and this is no longer the accent. #a8492f takes white at 4.9:1.
-
-            FIFTEEN PERCENT LARGER with the envelope: h-3.5 and min-w-3.5 against h-3, and
-            the type goes up a notch with it so the numeral does not shrink inside a bigger
-            circle.
-          */
-          className="absolute -right-1 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-telha px-1 text-[0.5625rem] font-semibold leading-none text-white"
-        >
-          {count > 9 ? '9+' : count}
-        </span>
-      ) : null}
-    </Link>
-  )
-}
