@@ -28,6 +28,8 @@ import { useEntitlements } from '@/engine/useEntitlements'
 export function Diagnostic() {
   const access = useEntitlements()
   const [s, setS] = useState<LearnerState | null>(null)
+  const [copied, setCopied] = useState('')
+  const [showRaw, setShowRaw] = useState(false)
   useEffect(() => setS(loadLearner()), [])
   if (!s) return null
 
@@ -105,6 +107,42 @@ export function Diagnostic() {
           </div>
         ))}
       </dl>
+
+      {/*
+        THE WHOLE RECORD, IN ONE TAP, because four rounds of me seeding a test learner and
+        watching it work is four rounds of not looking at the device where it does not.
+
+        Sam: "No still stuck on 2 out of 10… check them and solve this once and for all."
+        Every reproduction I built walked the road correctly — 2 to 5, through Bond, ending
+        on A SESSION DONE — which means the fault is in a state I have not managed to guess,
+        and guessing again costs another round trip to a festival he is already at.
+
+        So the record comes to the diagnosis instead. It is the learner blob exactly as
+        stored, nothing summarised and nothing interpreted, because the summary is what has
+        been lying: every row above was derived by the same code that is producing the
+        wrong answer.
+      */}
+      <button
+        type="button"
+        data-testid="diag-copy"
+        onClick={() => {
+          const text = JSON.stringify(s, null, 2)
+          void navigator.clipboard?.writeText(text).then(
+            () => setCopied('copied — paste it into the chat'),
+            () => setCopied('could not copy; screenshot the block below'),
+          )
+          setShowRaw(true)
+        }}
+        className="tap-target eyebrow mt-3 rounded border border-accent px-4 py-3 text-accent"
+      >
+        COPY THE WHOLE RECORD
+      </button>
+      {copied ? <p className="text-xs text-muted">{copied}</p> : null}
+      {showRaw ? (
+        <pre className="max-h-64 overflow-auto rounded border border-line bg-surface p-3 text-[10px] leading-snug">
+          {JSON.stringify(s, null, 2)}
+        </pre>
+      ) : null}
 
       <p className="eyebrow mt-3 text-accent">EVERY VIBE</p>
       <ul className="flex flex-col">
