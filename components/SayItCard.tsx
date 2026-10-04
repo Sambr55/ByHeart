@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
-import { Dock } from '@/components/Dock'
 import { CopyButton } from '@/components/CopyButton'
 import { SayButton, useCanListen } from '@/components/SayButton'
 import { bandFor, missedWords, type Heard } from '@/engine/listen'
@@ -463,21 +462,32 @@ export function SayItCard({
           : children}
 
       {/*
-        THE DOCK, AND IT IS THE LEGEND RUN'S DOCK. Sam: "use what we built in legend as
-        your template… same two seconds swipe right after success or swipe right override
-        if they are quicker, removing continue CTA's."
+        THE CONTROLS LIVE IN THE CARD, which is what stops the screen scrolling.
 
-        ONE ROW: back at one edge, the way on at the other, and the only worded control in
-        the middle. Three stacked full-width buttons is the scrolling the Legend redesign
-        existed to remove, and a CONTINUE bar under a card that has just grown a question,
-        an answer, a verdict panel and sometimes two notices is what pushes it over.
+        Sam: "put the swipe right action button inside the card so it removes the scroll."
 
-        Drawn only where the beat hands over `onNext`. A beat that keeps its own CONTINUE
-        gets no dock from here, because two docks portal into one slot and the second wins.
+        They were in the Dock — fixed to the glass, with a measured spacer left behind in
+        the flow so nothing hides under it. That is the right shape for a screen whose
+        content runs long, and the wrong one here: the spacer plus the gap above it plus the
+        card came to more than the viewport, so a card that FITS was presented on a page that
+        scrolled, with the arrow stranded on the sand underneath it.
+
+        Inside, the row costs the card its own height and nothing else. The arrow is where
+        the thumb already is, the sand under the card goes back to being sand, and the beat
+        is one object again rather than a card and some controls that happen to be near it.
+
+        ONE ROW, unchanged: back at one edge, the way on at the other, and the only worded
+        control between them. Three stacked full-width buttons is the scrolling the Legend
+        redesign existed to remove.
+
+        Drawn only where the beat hands over `onNext` — a beat that keeps its own CONTINUE
+        still draws its own.
+
+        `mt-auto` holds it at the foot of the card however short the content above it is,
+        so the arrow does not travel up and down the screen between beats.
       */}
       {onNext ? (
-        <Dock>
-          <div className="flex items-center gap-3">
+          <div className="mt-auto flex items-center gap-3 pt-3">
             {onBack ? (
               <button
                 type="button"
@@ -539,7 +549,6 @@ export function SayItCard({
               </svg>
             </button>
           </div>
-        </Dock>
       ) : null}
     </div>
   )

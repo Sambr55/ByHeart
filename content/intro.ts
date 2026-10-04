@@ -41,6 +41,25 @@
 */
 export type StepIcon = 'learn' | 'listen' | 'say' | 'share' | 'enjoy'
 
+/*
+  AND ONE FOR EACH RUNG OF THE LADDER.
+
+  Sam: "Add an icon to each one and drop in one by one". Named here beside the step icons
+  and keyed to the STAGE IDS, so the picture a rung gets is decided by which rung it is
+  rather than by where it happens to sit in the list — a stage inserted or reordered keeps
+  its own icon, and a stage added without one is a type error rather than a blank ring.
+
+  `legend` is not a stage. It is the ten minutes before the ladder starts, so it carries an
+  id of its own here and is prepended by the renderer.
+*/
+export type StageIcon =
+  | 'legend'
+  | 'basics'
+  | 'around'
+  | 'understood'
+  | 'conversing'
+  | 'leading'
+
 export interface IntroCard {
   id: string
   /** Max 14 characters, like every eyebrow in the product. */
@@ -158,7 +177,27 @@ export interface IntroCard {
       and this is the card that tells somebody what the whole thing adds up to — a wrong
       rung is a promise about a product that does not exist. Same argument as `legend`.
     */
-    | { kind: 'stages' }
+    /*
+      THE LADDER, AS FIVE NAMES AND A WAY IN.
+
+      Sam, on this card: "Remove the sub text on each of these sections", "Add an icon to
+      each one", "Add Your Legend as the first, above Basics", and move the headline down
+      into "a round CTA at the end of the screen".
+
+      So what was a definition list — a rung and a sentence explaining it — becomes a list
+      of places, each with a picture, ending in the control that takes you to the first of
+      them. The explanations were good and they were also five paragraphs on the card whose
+      argument is that this is not homework; what somebody needs here is how far it goes
+      and a way to start, which is six words and a button.
+
+      The rungs still come from STAGES, derived rather than retyped, for the reason they
+      always did: this is the card that says what the product adds up to, and a rung renamed
+      in one place and not the other is a promise about a product that does not exist. YOUR
+      LEGEND is prepended here rather than added to STAGES because it is not a rung — it is
+      the ten minutes before the ladder starts, and putting it in STAGES would move every
+      threshold in the product.
+    */
+    | { kind: 'stages'; cta: { over: string; label: string } }
     | { kind: 'lines'; lines: { pt: string; en: string }[] }
     /*
       FIVE ACTS, NAMED AND NOT TRANSLATED — the only specimen on the rail with no
@@ -335,71 +374,22 @@ export const INTRO_CARDS: IntroCard[] = [
     */
     shows: { kind: 'unpack', root_id: 'tg_goose' },
   },
-  {
-    /*
-      CHEATS — the shortcut past the thing every other app makes you earn.
+  /*
+    CHEATS, HACKS & BLUFFS IS GONE, and it went the same way REMINDERS did.
 
-      Sam: "add a new intro card - Cheats (in big letters) explaining we will short cut
-      them to the foundational words and phrases other apps make impossible to get to /
-      find."
+    Sam: "Remove Cheats,Hacks and Bluffs from teh intro sequence."
 
-      This is the complaint everybody has about language apps and almost nobody says out
-      loud: the plainest words in the language — the numbers, the days, yes and no, the
-      six things you say at a counter — are behind twelve units of fruit vocabulary. They
-      are not hard. They are simply not offered, because offering them first would make
-      the ladder look short.
+    The argument it made is still true — the plainest words in the language are behind
+    twelve units of fruit vocabulary everywhere else, and here they are a card you open and
+    keep. What was wrong is where it made it. It sat second, between VIBES and the Legend,
+    which put a FEATURE in the middle of the one run of screens that has to be about the
+    person: you already know more than you think, here is what ten minutes buys you, here
+    is the Club. A cheat sheet is a thing DUB has; it is not a reason to start.
 
-      SECOND, AFTER VIBES, because the order is the argument. VIBES says you already know
-      more than you think; CHEATS says the rest of the basics is one tap away rather than
-      a month of taps. Together they are the whole of what makes the first week different
-      here, and putting either of them after the Legend would be leading with the
-      destination instead of the way in.
-
-      The specimen is a counting sheet rather than prose, because the claim is that these
-      are plain and listable and that is what a list demonstrates. Ten numbers on one card
-      is the argument made in its own form.
-    */
-    id: 'intro_cheats',
-    image: 'intro_cheats_card',
-    pillar: true,
-    /*
-      THREE WORDS, BECAUSE THE SHEETS ARE THREE THINGS.
-
-      Sam's own pillar: "CHEATS, HACKS & BLUFFS!". CHEATS alone named the file format —
-      a sheet you keep — and said nothing about why anybody would want one. The three
-      together are the three reasons: a cheat is the closed set handed over whole, a hack
-      is the shortcut past the unit you would otherwise earn, and a bluff is the word that
-      makes you sound like you have been here longer than you have.
-
-      LONGER THAN FOURTEEN CHARACTERS, deliberately, and the rule survives it. The
-      eyebrow-is-a-label rule exists because an eyebrow is a label — it is set at eleven
-      points above a headline and a sentence up there stops being readable as one. A
-      pillar is the opposite case: the eyebrow IS the headline, drawn at headline size
-      (see `pillar` in Feed.tsx), so it has a headline's room and a headline's wrap. The
-      length rule is checked against `className="eyebrow"` literals in JSX, which is
-      exactly the set it was written for and does not include this.
-    */
-    eyebrow: 'CHEATS, HACKS & BLUFFS!',
-    /*
-      WHAT IT BUYS, rather than what everybody else withholds.
-
-      "The plain words, first — not in month three" led with the complaint about other
-      apps, which the body already makes at length and better. Sam's line is the promise:
-      "Sound like a local with the words and phrases you actually need." A learner picking
-      between apps wants to know what they will be able to do, and sounding like somebody
-      who lives here is the whole of it.
-    */
-    headline: 'Sound like a local with the words and phrases you actually need.',
-    body: 'Counting, the days, yes and no, the six things you say at a counter. Every other app buries them behind units you have to earn. Here they are a card you open, keep, and check whenever you need it.',
-    shows: {
-      kind: 'lines',
-      lines: [
-        { pt: 'um, dois, três…', en: 'Counting to ten, on one card.' },
-        { pt: 'sim, não, talvez', en: 'Yes, no, maybe.' },
-        { pt: 'se faz favor', en: 'The one word that makes any of it polite.' },
-      ],
-    },
-  },
+    The sheets themselves are untouched. They are in the product, they are on YOURS, and
+    they are what a learner finds the first time they need the days of the week — which is
+    the moment the card was describing and a better place to meet it than screen two.
+  */
   {
     id: 'intro_legend',
     image: 'intro_arrival',
@@ -651,7 +641,19 @@ export const INTRO_CARDS: IntroCard[] = [
       is Sam's.
     */
     eyebrow: 'THE REWARD IS GETTING THERE, NOT EMOJIS.',
-    headline: 'Keep busy learnin’.',
+    /*
+      THE HEADLINE IS NOW THE DESTINATION, because the instruction became the button.
+
+      "Keep busy learnin'" sat here as a second, quieter claim, and Sam moved it: "Move
+      this to a round CTA at the end of the screen and change to Get Busy Learnin'." It
+      reads better as something you can act on than as a line you pass on the way down, and
+      the card now ends on a way in rather than on the last rung of a ladder.
+
+      What takes its place says where the ladder goes, which is the one thing the list
+      underneath cannot say about itself now the explanations are off it. The apostrophe in
+      the button is Sam's.
+    */
+    headline: 'As far as you want to take it.',
     /*
       DROP IN WHENEVER — the permission, which the old body buried under its own refusals.
 
@@ -661,7 +663,7 @@ export const INTRO_CARDS: IntroCard[] = [
       does. The pillar now carries the refusal, so the body is free to be the offer.
     */
     body: 'Drop into **DUB Club** whenever you like — no streaks required. You learn as you live: vibes, local knowledge, events picked for you, and people like you.',
-    shows: { kind: 'stages' },
+    shows: { kind: 'stages', cta: { over: 'GET', label: 'Busy Learnin’' } },
   },
 ]
 /*

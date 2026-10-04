@@ -9,6 +9,7 @@ import {
   type CultureFamily,
 } from '@/content/roots'
 import { doorwayToGo } from '@/content/legend'
+import { roadProgress } from '@/content/road'
 import { loadLearner, type LearnerState } from '@/engine/learner'
 import { useEntitlements } from '@/engine/useEntitlements'
 
@@ -46,6 +47,11 @@ export function Diagnostic() {
   const allowance = access.entitlements.crates
   const atLimit = access.known && claimed.size >= allowance
   const basicsStarted = done.includes('the_basics')
+  const road = roadProgress({
+    rootsPlayed: s.roots_played ?? [],
+    sectionsCompleted: done,
+    purpose: s.purpose ?? null,
+  })
 
   /** The picker's own reasoning, reproduced so the two cannot disagree silently. */
   const why = (id: CultureFamily) => {
@@ -67,6 +73,21 @@ export function Diagnostic() {
     ['Vibes finished', done.length ? done.join(', ') : 'none'],
     ['Vibes claimed', claimed.size + ' of ' + (allowance > 999 ? 'unlimited' : allowance)],
     ['Roots played', String((s.roots_played ?? []).length)],
+    /*
+      THE ROAD, SAID OUT LOUD, because reading it off a phone beat four rounds of guessing.
+
+      Sam, twice: "the road is just loping around 2 of 10". The first diagnosis — a latched
+      ref in the picker — was real and was not the whole of it, and every follow-up was me
+      reasoning about code instead of looking at his device. These four rows are what I kept
+      wanting to know: how far the road thinks he is, which step it is trying to serve, what
+      crate that step lives in, and the actual roots recorded — because `done` is derived
+      from that list and nothing else, so a step that never lands in it is a step that will
+      be served forever.
+    */
+    ['Road', road.done + ' of ' + road.total + (road.open ? ' · OPEN' : '')],
+    ['Road next', road.next ? road.next.root : '—'],
+    ['…in crate', road.next ? road.next.family : '—'],
+    ['Roots recorded', (s.roots_played ?? []).join(', ') || 'none'],
     ['Legend opens in', doorwayToGo(s.roots_played ?? []) + ' more basics lines'],
     ['Entitlements known', String(access.known)],
     ['Plan', access.entitlements.plan + (access.comped ? ' (comped)' : '')],

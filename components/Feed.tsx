@@ -18,6 +18,7 @@ import {
   INTRO_DEMO_AFTER,
   INTRO_SETUP_AFTER,
   type IntroCard,
+  type StageIcon,
   type StepIcon,
 } from '@/content/intro'
 import { COLLISIONS, CRATES, PIECES, ROOTS, displayForm, setPieces } from '@/content/roots'
@@ -4068,104 +4069,287 @@ function Steps({
   const meetAt = faceAt + Math.max(0, (shows.members?.length ?? 0) - 1) * FACE_STEP
 
   return (
-    <div data-testid="intro-shows" className="mt-6 flex flex-col gap-6">
+    <div data-testid="intro-shows" className="mt-6">
       <ul className="flex flex-col gap-3">
-        {shows.steps.map((s, i) => (
+        {shows.steps.map((s, i) => {
+          /*
+            THE FACES RIDE WITH SHARE, AND THE NIGHT RIDES WITH ENJOY.
+
+            Sam: "the user icons needs to be the right of share (smaller)… the meet up text
+            to the right of Enjoy (smaller)."
+
+            They were two blocks stacked under the column, which is how the card came to be
+            taller than the phone — the last line of the address sat behind the bottom nav
+            and the whole thing scrolled. Stacked, they also read as three separate
+            exhibits: five verbs, then some people, then an event, with nothing saying which
+            belonged to which.
+
+            Beside the word they illustrate, each one stops being a third exhibit and starts
+            being the evidence for its row. Share is who you share with. Enjoy is the night
+            you enjoy. The column carries its own argument across and the card fits.
+          */
+          const trailing =
+            s.icon === 'share' ? (
+              shows.members?.length ? (
+                <ul className="flex flex-wrap justify-end gap-1" aria-label="Members">
+                  {shows.members.map((m, k) => (
+                    <li
+                      key={m.src}
+                      className={onScreen ? 'animate-rise' : 'opacity-0'}
+                      style={{ animationDelay: faceAt + k * FACE_STEP + 'ms' }}
+                    >
+                      <Image
+                        src={m.src}
+                        alt={m.alt}
+                        width={28}
+                        height={28}
+                        className="h-7 w-7 rounded-full border border-line object-cover"
+                      />
+                    </li>
+                  ))}
+                </ul>
+              ) : null
+            ) : s.icon === 'enjoy' ? (
+              shows.meet ? (
+                /*
+                  GLASS, NOT A WHITE CARD, and that is the photo's doing rather than taste.
+
+                  The wrapper around every specimen on a photo is `.shown-on-photo`, which
+                  repoints --fg at white, so `bg-bg-elev` painted a near-white panel and
+                  then wrote white text on it — screenshotted and unreadable, which no
+                  amount of DOM assertion was going to catch. Black at 55% with a blur is
+                  the same move the toast uses: the street stays visible through it and the
+                  text keeps its contrast.
+                */
+                <div
+                  className={
+                    'rounded-xl border border-line bg-black/55 px-3 py-3 text-right backdrop-blur-sm ' +
+                    (onScreen ? 'animate-rise' : 'opacity-0')
+                  }
+                  style={{ animationDelay: meetAt + 'ms' }}
+                >
+                  <p className="display text-xs leading-snug">
+                    <Typed text={shows.meet.line} start={onScreen} delay={meetAt} />
+                  </p>
+                  <p className="mt-1 text-[11px] leading-snug text-muted">
+                    <Typed
+                      text={shows.meet.where}
+                      start={onScreen}
+                      delay={meetAt + shows.meet.line.length * 28}
+                    />
+                  </p>
+                  <p className="mt-1 text-[11px] leading-snug text-muted">
+                    <Typed
+                      text={shows.meet.when}
+                      start={onScreen}
+                      delay={meetAt + (shows.meet.line.length + shows.meet.where.length) * 28}
+                    />
+                  </p>
+                </div>
+              ) : null
+            ) : null
+
+          return (
+            <li
+              key={s.word}
+              className={'flex items-center gap-3 ' + (onScreen ? 'animate-rise' : 'opacity-0')}
+              style={{ animationDelay: i * STAGGER + 'ms' }}
+            >
+              <span
+                aria-hidden
+                /*
+                  Drawn with a border rather than as an SVG, because it is a ring and a ring
+                  is a border. 36px so it sits at the height of the word beside it without
+                  being the loudest thing in the row.
+                */
+                className={
+                  'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-current ' +
+                  (s.icon === 'say' && onScreen ? 'listening text-accent' : 'opacity-60')
+                }
+              >
+                <StepGlyph icon={s.icon} />
+              </span>
+              <span className="display shrink-0 text-xl">{s.word}</span>
+              {trailing ? <div className="min-w-0 flex-1">{trailing}</div> : null}
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
+
+/*
+  SIX PICTURES FOR THE LADDER, drawn the same way the five verbs are.
+
+  Same 24-unit box and same 1.7 stroke as StepGlyph, because they appear two cards apart in
+  one sequence and a second drawing hand would read as a second product. They are the PLACE
+  each rung gets you to rather than an abstraction of it: the Legend is a card with a person
+  on it, Basics is a first step, Getting around is a signpost, Being understood is one
+  speech bubble landing in another, Conversing is two of them, Leading is the one out front.
+*/
+function StageGlyph({ icon }: { icon: StageIcon }) {
+  const paths: Record<StageIcon, React.ReactNode> = {
+    legend: (
+      <>
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <circle cx="9" cy="11" r="2" />
+        <path d="M5.8 16.2a3.4 3.4 0 0 1 6.4 0" />
+        <path d="M14.5 10h4" />
+        <path d="M14.5 13.5h4" />
+      </>
+    ),
+    basics: (
+      <>
+        <path d="M4 20h4v-5H4Z" />
+        <path d="M10 20h4V9h-4Z" />
+        <path d="M16 20h4v-3h-4Z" />
+      </>
+    ),
+    around: (
+      <>
+        <path d="M12 3v18" />
+        <path d="M12 5h7l2 2.5L19 10h-7Z" />
+        <path d="M12 13H5l-2 2.5L5 18h7Z" />
+      </>
+    ),
+    understood: (
+      <>
+        <path d="M3 5h11v7H7l-4 3Z" />
+        <path d="M17 9h4v6l-3-2h-4" />
+      </>
+    ),
+    conversing: (
+      <>
+        <path d="M3 4h10v7H7l-4 3Z" />
+        <path d="M11 11h10v7h-6l-4 3v-3" />
+      </>
+    ),
+    leading: (
+      <>
+        <circle cx="8" cy="7" r="2.5" />
+        <path d="M3.5 19a4.5 4.5 0 0 1 9 0" />
+        <path d="M15 9.5 18 12l-3 2.5" />
+        <path d="M21 12h-6" />
+      </>
+    ),
+  }
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {paths[icon]}
+    </svg>
+  )
+}
+
+/*
+  HOW FAR IT GOES, AND A WAY TO START — the ladder as six places and a button.
+
+  This was a definition list: every rung with the sentence that explained it, derived from
+  STAGES. Sam took the sentences off ("Remove the sub text on each of these sections"), put
+  a picture on each rung, added YOUR LEGEND above Basics, and moved the headline down into a
+  round control at the end. What is left is the shape of the thing rather than a description
+  of it, which is the right register for the card whose whole argument is that this is not
+  homework.
+
+  THE RUNGS ARE STILL DERIVED. A rung renamed in STAGES and retyped here would be a promise
+  about a product that does not exist, and that rule does not relax because the explanations
+  came off. YOUR LEGEND is prepended rather than added to STAGES, because it is not a rung —
+  it is the ten minutes before the ladder starts, and putting it in STAGES would move every
+  threshold in the product.
+
+  THE CASCADE RUNS DOWN TO THE BUTTON, which is Sam's "drop in one by one and auto animate
+  down to the CTA". So the control is the last thing to arrive and the eye is already
+  travelling that way when it does. Its own component because it holds no hooks but sits
+  below four early returns in Specimen — the same reason Steps is one, and the cheaper
+  habit to keep than to re-derive each time.
+*/
+function Stages({
+  shows,
+  onScreen,
+}: {
+  shows: Extract<NonNullable<IntroCard['shows']>, { kind: 'stages' }>
+  onScreen: boolean
+}) {
+  /*
+    The ten minutes first, then the ladder it opens onto.
+
+    `as const` on the id so it types against StageIcon rather than widening to string — a
+    stage added to STAGES without a matching icon then fails here rather than rendering an
+    empty ring, which is the whole point of keying the pictures to the ids.
+  */
+  const rungs: { id: StageIcon; name: string }[] = [
+    { id: 'legend', name: 'Your Legend' },
+    ...STAGES.map((st) => ({ id: st.id as StageIcon, name: st.name })),
+  ]
+  const STAGGER = 190
+  const ctaAt = rungs.length * STAGGER
+
+  /*
+    SIX ROWS AND A BUTTON HAVE TO FIT, which the five-rung version never had to.
+
+    Measured at 390×844 with the pillar, the headline and the body above it: the list at the
+    Club card's sizes put the control 103px BELOW the bottom nav, so the one thing on this
+    card Sam asked to be at the end of the screen was the one thing not on the screen.
+
+    The rows carry it. A 28px ring with a 16px glyph and text-base is still comfortably over
+    the tap and contrast minimums — nothing here is pressed, so the ring is a picture rather
+    than a target — and six of them at this size leave the button room to land where it was
+    asked to.
+  */
+  return (
+    <div data-testid="intro-shows" className="mt-6 flex flex-col gap-3">
+      <ul className="flex flex-col gap-1">
+        {rungs.map((r, i) => (
           <li
-            key={s.word}
-            className={'flex items-center gap-4 ' + (onScreen ? 'animate-rise' : 'opacity-0')}
+            key={r.id}
+            className={'flex items-center gap-3 ' + (onScreen ? 'animate-rise' : 'opacity-0')}
             style={{ animationDelay: i * STAGGER + 'ms' }}
           >
             <span
               aria-hidden
-              /*
-                Drawn with a border rather than as an SVG, because it is a ring and a ring
-                is a border. 36px so it sits at the height of the word beside it without
-                being the loudest thing in the row.
-              */
-              className={
-                'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-current ' +
-                (s.icon === 'say' && onScreen ? 'listening text-accent' : 'opacity-60')
-              }
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-current opacity-60"
             >
-              <StepGlyph icon={s.icon} />
+              <StageGlyph icon={r.id} />
             </span>
-            <span className="display min-w-0 text-xl">{s.word}</span>
+            <span className="display min-w-0 text-base">{r.name}</span>
           </li>
         ))}
       </ul>
 
       {/*
-        SIX IN A ROW, and small enough that they stay in one.
+        THE WAY IN, ROUND, AT THE END.
 
-        At 56px they fitted five across 390px and dropped the sixth onto a row of its own,
-        which reads as one person left out rather than as a group. `grid-cols-3` fixed the
-        orphan and introduced a worse thing — three stretched cells with the faces drifting
-        apart, which is a layout rather than a group of people.
+        Sam drew it: a circle with GET small over "Busy Learnin'". Round rather than the
+        full-width bar the rest of the sequence uses, and that is deliberate on this card —
+        the bar is the shape of a form, and this is the one screen arguing that none of this
+        is a form. It is the same control the jump-off screen already uses.
 
-        48px is the size at which six sit together on the narrowest phone this ships on,
-        and together is the entire claim: this is a room, not a directory.
+        It carries no onClick. Every card in the sequence advances by swiping and this one
+        is no different; a button that moved the rail would be a second way forward competing
+        with the gesture the whole sequence is teaching. What it does is end the cascade
+        somewhere that looks like a door.
       */}
-      {shows.members?.length ? (
-        <ul className="flex flex-wrap gap-3" aria-label="Members">
-          {shows.members.map((m, i) => (
-            <li
-              key={m.src}
-              className={onScreen ? 'animate-rise' : 'opacity-0'}
-              style={{ animationDelay: faceAt + i * FACE_STEP + 'ms' }}
-            >
-              <Image
-                src={m.src}
-                alt={m.alt}
-                width={48}
-                height={48}
-                className="h-12 w-12 rounded-full border border-line object-cover"
-              />
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      {shows.meet ? (
-        /*
-          GLASS, NOT A WHITE CARD, and that is the photo's doing rather than a taste call.
-
-          The white-card treatment is right everywhere it sits on sand. This specimen does
-          not: the Club card carries a Lisbon street behind it, and the wrapper around every
-          specimen on a photo is `.shown-on-photo`, which repoints --fg at white. So
-          `bg-bg-elev` painted a near-white panel and then wrote white text on it —
-          screenshotted and unreadable, which no amount of DOM assertion was going to catch.
-
-          Black at 55% with a blur is the same move the toast above uses: the photo stays
-          visible through it, the white text keeps its contrast, and the panel still reads
-          as a thing laid on top rather than a hole cut in the picture.
-        */
-        <div
-          className={
-            'rounded-2xl border border-line bg-black/55 px-5 py-6 backdrop-blur-sm ' +
-            (onScreen ? 'animate-rise' : 'opacity-0')
-          }
-          style={{ animationDelay: meetAt + 'ms' }}
+      <div
+        className={'flex justify-center ' + (onScreen ? 'animate-rise' : 'opacity-0')}
+        style={{ animationDelay: ctaAt + 'ms' }}
+      >
+        <span
+          data-testid="stages-cta"
+          className="flex h-20 w-20 flex-col items-center justify-center rounded-full border border-line bg-black/55 text-center backdrop-blur-sm"
         >
-          <p className="display text-lg leading-snug">
-            <Typed text={shows.meet.line} start={onScreen} delay={meetAt} />
-          </p>
-          <p className="mt-1 text-sm text-muted">
-            <Typed
-              text={shows.meet.where}
-              start={onScreen}
-              delay={meetAt + shows.meet.line.length * 28}
-            />
-          </p>
-          <p className="mt-1 text-sm text-muted">
-            <Typed
-              text={shows.meet.when}
-              start={onScreen}
-              delay={meetAt + (shows.meet.line.length + shows.meet.where.length) * 28}
-            />
-          </p>
-        </div>
-      ) : null}
+          <span className="eyebrow opacity-80">{shows.cta.over}</span>
+          <span className="display mt-1 px-2 text-sm leading-tight">{shows.cta.label}</span>
+        </span>
+      </div>
     </div>
   )
 }
@@ -4234,20 +4418,12 @@ function Specimen({
       */
       return cardFor(null).map((f) => ({ pt: f.ask, en: f.ask_en }))
     }
-    if (shows.kind === 'stages') {
-      /*
-        The five rungs, from STAGES, with what each one lets you do.
-
-        Derived rather than written out for the same reason the Legend's questions are:
-        this is the card that says what the whole product adds up to, and a rung renamed in
-        one place and not the other is a promise about a product that does not exist.
-
-        `can` rather than the threshold. A number of points would turn the ladder into a
-        score, which is the thing this measure exists not to be — what changes as somebody
-        learns is what they can DO.
-      */
-      return STAGES.map((st) => ({ pt: st.name, en: st.can }))
-    }
+    /*
+      The ladder is drawn by Stages now, not listed here. It used to map into `lines` — a
+      rung and the sentence explaining it — and the explanations came off the card; see the
+      note on that component.
+    */
+    if (shows.kind === 'stages') return []
     /*
       Whatever is genuinely on, and nothing when nothing is.
 
@@ -4423,6 +4599,11 @@ function Specimen({
     return <Steps shows={shows} onScreen={onScreen} />
   }
 
+  /* The ladder, and the way onto it — see Stages. */
+  if (shows.kind === 'stages') {
+    return <Stages shows={shows} onScreen={onScreen} />
+  }
+
   if (shows.kind === 'exchange') {
     return (
       <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-6">
@@ -4521,8 +4702,13 @@ function Specimen({
   }
 
   if (!lines.length) return null
-  /* The stages are the one specimen whose left column is English. */
-  const portuguese = shows.kind !== 'stages'
+  /*
+    Everything that still reaches this renderer has Portuguese in its left column.
+
+    The stages were the one exception — English rung names against English explanations —
+    and they are drawn by Stages now, so the exception has nothing left to except.
+  */
+  const portuguese = true
 
   return (
     <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-3">
