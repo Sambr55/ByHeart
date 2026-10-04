@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { track } from '@/engine/analytics'
 import { useEntitlements } from '@/engine/useEntitlements'
@@ -74,9 +73,38 @@ export function Install() {
     Work on this device, and nowhere else yet. `signInReady` because where accounts are
     not configured there is no link to send, so the offer could not be honoured.
   */
+  /*
+    WHAT IS ACTUALLY AT RISK, which is less than this used to claim.
+
+    Sam: "fix the install-then-empty thing so I can tell people to install it."
+
+    The fear was right and the diagnosis was half wrong. An installed app does get its own
+    localStorage — that part is true of every phone. But the DEVICE COOKIE is shared between
+    Safari and the installed app on iOS, it is httpOnly and lasts two years, and the server
+    keeps a learner row keyed to it. restoreLearner() merges that row back down, and it fires
+    on `/` (start_url, via JourneyProvider) and on `/vibes`. So the installed app is not
+    empty: it is a cold cache that refills on first load.
+
+    Traced rather than assumed — engine/journey.tsx fires restoreLearner in the provider both
+    pages mount, and lib/auth.ts mints the cookie in /api/session.
+
+    WHAT WAS GENUINELY BROKEN was upstream of all of it: components/SetUp.tsx never called
+    syncSession, so somebody who finished set-up and installed immediately had nothing ON the
+    server to restore. Fixed separately; that is the commit that makes this safe to recommend.
+
+    SO THE WARNING NARROWS. It is no longer "it will open empty" — that is now false and
+    scares people off a thing they should do. It fires only where recovery genuinely cannot
+    happen: a browser blocking cookies, which is the one case the server cannot identify
+    somebody across.
+
+    `signInReady` is gone from the condition. It gated the warning on an email provider being
+    configured, which it is not in production — so the warning never rendered at all, and the
+    SAVE IT FIRST button it offered pointed at a sign-in that cannot send anything.
+  */
+  const noCookies = typeof navigator !== 'undefined' && navigator.cookieEnabled === false
   const atRisk =
     access.known &&
-    access.signInReady &&
+    noCookies &&
     !access.signedIn &&
     ((learner.roots_played ?? []).length > 0 ||
       (learner.legend ?? []).length > 0 ||
@@ -108,9 +136,17 @@ export function Install() {
           not now
         </button>
       </div>
-      <p className="text-sm leading-relaxed text-fg/85">
+      <p className="text-base leading-relaxed text-fg">
         It gets its own icon, loses the browser bar so nothing shifts under your thumb, and
         it is the only way to switch on the morning line.
+      </p>
+      {/*
+        AND IT SAYS THE WORK COMES WITH IT, because the first thing anybody fears about
+        installing a web app is losing what they have done — and until tonight they were
+        right to. See the note on `atRisk` above for why they no longer are.
+      */}
+      <p className="text-sm leading-relaxed text-muted">
+        Everything you have done comes with it.
       </p>
       {/*
         AND THE ONE THING THAT GOES WRONG IF THEY DO IT NOW.
@@ -135,17 +171,9 @@ export function Install() {
       {atRisk ? (
         <div className="flex flex-col gap-3 rounded border border-accent bg-accent/5 px-4 py-3">
           <p className="text-sm leading-relaxed text-fg">
-            The app gets its own storage, so it will open empty — everything you have done
-            so far stays in this browser.
+            This browser has cookies switched off, so the app would not recognise you and
+            would open empty. Turn them on for this site first, or keep using it here.
           </p>
-          <Link
-            href="/signin?next=%2Fvibes"
-            data-testid="install-save-first"
-            onClick={() => track('install_save_first', { how })}
-            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-          >
-            SAVE IT FIRST
-          </Link>
         </div>
       ) : null}
       {how === 'ios' ? (
