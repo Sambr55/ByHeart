@@ -3651,6 +3651,53 @@ export function Card({
  * says "we have it and you cannot have it", which is a shop with a guard on the door
  * rather than a window.
  */
+/**
+ * How you get to the next card, said on every pane that reveals something.
+ *
+ * Sam, after an audit of the whole feed: "Check the exit behaviour for all club card
+ * content, as in when a card has been swiped right and the content has been revealed. How
+ * do they move on? Most should have an up arrow."
+ *
+ * Measured before changing anything, which is the only reason this is the right fix: of
+ * eight card kinds reachable in a member's feed, two named a way on. The other six ended in
+ * controls that ACT on the card — I WENT, TEST ME, NOT FOR ME, PUT IT ON YOUR LEGEND — and
+ * said nothing about leaving it. Every one of those is a real verb and none of them is an
+ * exit, so a learner who had finished reading had three things to press and no way forward
+ * except a gesture nobody had mentioned.
+ *
+ * ONE COMPONENT RATHER THAN EIGHT COPIES. It was written inline three times when the blue
+ * CTA came off those panes, and three copies of a sentence is how a product ends up saying
+ * "Swipe up" on one card and "Keep swiping" on the next. The wording, the arrow and the
+ * spacing are decided here.
+ *
+ * `mt-10` is on the scale and is deliberately the largest gap the product has: this is not
+ * part of the content, it is the furniture after it, and a hint that crowds the last line
+ * reads as a fourth thing to do rather than as the way out.
+ */
+function WayOn() {
+  return (
+    <p
+      data-testid="pane-swipe-hint"
+      className="mt-10 flex items-center justify-center gap-3 text-sm text-muted"
+    >
+      Swipe up for more
+      <svg
+        viewBox="0 0 24 24"
+        className="nudge-up h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d="M12 20V5" />
+        <path d="m6 11 6-6 6 6" />
+      </svg>
+    </p>
+  )
+}
+
 function Teased({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
   const s = card.situation
   return (
@@ -3711,25 +3758,7 @@ function Teased({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
         up is the next card. It costs no room, it does not compete with the content above
         it, and it points where the person already is rather than away.
       */}
-      <p
-        data-testid="pane-swipe-hint"
-        className="mt-10 flex items-center justify-center gap-3 text-sm text-muted"
-      >
-        Swipe up for more
-        <svg
-          viewBox="0 0 24 24"
-          className="nudge-up h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <path d="M12 20V5" />
-          <path d="m6 11 6-6 6 6" />
-        </svg>
-      </p>
+      <WayOn />
     </div>
   )
 }
@@ -3804,6 +3833,7 @@ function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
       >
         {s.title.toUpperCase()}
       </Link>
+      <WayOn />
     </div>
   )
 }
@@ -3886,6 +3916,7 @@ function Derived({ card }: { card: Extract<FeedCard, { kind: 'derived' }> }) {
         <p className="mt-6 text-sm leading-relaxed text-fg/85">{d.note}</p>
       </div>
       <Done card={card} />
+      <WayOn />
     </div>
   )
 }
@@ -4013,6 +4044,7 @@ function SayItBetter({ card }: { card: Extract<FeedCard, { kind: 'fluent' }> }) 
           PUT IT ON YOUR LEGEND
         </Link>
       </div>
+      <WayOn />
     </div>
   )
 }
@@ -4136,25 +4168,7 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
         up is the next card. It costs no room, it does not compete with the content above
         it, and it points where the person already is rather than away.
       */}
-      <p
-        data-testid="pane-swipe-hint"
-        className="mt-10 flex items-center justify-center gap-3 text-sm text-muted"
-      >
-        Swipe up for more
-        <svg
-          viewBox="0 0 24 24"
-          className="nudge-up h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <path d="M12 20V5" />
-          <path d="m6 11 6-6 6 6" />
-        </svg>
-      </p>
+      <WayOn />
     </div>
   )
 }
@@ -5579,25 +5593,7 @@ function Explains({ card }: { card: Extract<FeedCard, { kind: 'explainer' }> }) 
         up is the next card. It costs no room, it does not compete with the content above
         it, and it points where the person already is rather than away.
       */}
-      <p
-        data-testid="pane-swipe-hint"
-        className="mt-10 flex items-center justify-center gap-3 text-sm text-muted"
-      >
-        Swipe up for more
-        <svg
-          viewBox="0 0 24 24"
-          className="nudge-up h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <path d="M12 20V5" />
-          <path d="m6 11 6-6 6 6" />
-        </svg>
-      </p>
+      <WayOn />
     </div>
   )
 }
@@ -5659,6 +5655,7 @@ function Asked({ card, onDone }: {
       >
         GOT IT
       </button>
+      <WayOn />
     </div>
   )
 }
@@ -5958,6 +5955,7 @@ function Sheet({ card, onDone }: {
           NOT FOR ME
         </button>
       </div>
+      <WayOn />
     </div>
   )
 }
@@ -6049,6 +6047,7 @@ function CheatPane({ card }: { card: Extract<FeedCard, { kind: 'cheat' }> }) {
           I SAID ONE
         </button>
       )}
+      <WayOn />
     </div>
   )
 }
@@ -6265,6 +6264,7 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
           ) : null}
         </div>
       ) : null}
+      <WayOn />
     </div>
   )
 }
@@ -6288,6 +6288,7 @@ function Word({ card }: { card: Extract<FeedCard, { kind: 'vocab' }> }) {
       >
         ALL YOUR WORDS
       </Link>
+      <WayOn />
     </div>
   )
 }
