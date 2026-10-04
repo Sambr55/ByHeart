@@ -19,6 +19,7 @@ import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/av
 import { Walkthrough } from '@/components/Walkthrough'
 import { loadLearner, setDisplayName } from '@/engine/learner'
 import { useEntitlements } from '@/engine/useEntitlements'
+import { Ticker } from '@/components/Ticker'
 import { useLearner } from '@/engine/useLearner'
 import { useRestore } from '@/engine/useRestore'
 
@@ -405,6 +406,24 @@ export function Profile() {
         </span>
       </header>
       <BottomNav />
+
+      {/*
+        WHO ELSE IS IN HERE, above the person this screen is about.
+
+        Sam: "a little ticker bar… very small and unclickable, at the top of the yours
+        section." Between the mark and Identity, which is the only place it can be and
+        still be the line ABOVE the learner's own work rather than another block in it.
+
+        It shows first names rather than faces, and the argument for that is in
+        components/Ticker.tsx — the short version is that this repo deliberately keeps a
+        learner's photograph off the server, so there is no pool of uploaded avatars to
+        draw from and showing stock portraits as members would be the one lie on the
+        screen that is entirely real work.
+
+        It renders null until there are at least two names, so a room with nobody in it is
+        silent rather than apologising.
+      */}
+      <Ticker />
 
       <Identity />
 
