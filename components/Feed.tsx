@@ -1339,6 +1339,28 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
               of the last card, so the real card n sits at i === n + 1.
             */
             onScreen={i === atIndex + 1}
+            /*
+              THE NEXT CARD'S PHOTOGRAPH IS ALREADY ON ITS WAY.
+
+              Sam, twice: "the club always flashes on first card", and after the first fix,
+              "Club is still doing a major flash on first swipe."
+
+              The first fix was real and was the wrong half: it stopped the rail rendering
+              empty before the store had answered. This is the other half, and it only shows
+              on a phone — every card's photograph was lazy, so the next one did not START
+              downloading until it scrolled into view. On this machine the cache is warm and
+              the swipe is clean; over a network the card arrives before its picture and
+              what you see is the ground.
+
+              Three cards are eager: the one being looked at and its neighbours either side.
+              Not the whole rail, which is ninety cards and would be a megabyte-scale
+              download on a festival connection for pictures nobody reaches — the point is
+              that the NEXT swipe is paid for before it happens, not that everything is.
+
+              Both neighbours rather than only the one ahead, because the rail goes both
+              ways and somebody who swipes back deserves the same.
+            */
+            near={Math.abs(i - (atIndex + 1)) <= 1}
             saved={mounted && (learner.saved ?? []).includes(card.id)}
             liked={mounted && (learner.liked ?? []).includes(card.id)}
             onSaved={(on) => setToast(on ? 'saved' : 'unsaved')}
@@ -1521,6 +1543,7 @@ export function Card({
   onPane,
   stage = 'member',
   hint = false,
+  near = false,
   onScreen = false,
 }: {
   card: FeedCard
@@ -1552,6 +1575,11 @@ export function Card({
   hint?: boolean
   /** The card the learner is actually looking at. Cascades wait for it. */
   onScreen?: boolean
+  /*
+    Whether this card is the one being looked at or sits beside it — see the note at the
+    call site. It decides whether the photograph downloads now or when it is reached.
+  */
+  near?: boolean
 }) {
   const pane = useRef<HTMLDivElement>(null)
 
@@ -2579,7 +2607,33 @@ export function Card({
               className={'absolute inset-0 ' + (card.kind === 'idiom' ? 'idiom-ground' : 'bg-bg')}
             />
           ) : image ? (
-            <Image src={image.src} alt={image.alt} fill sizes="100vw" className="object-cover" />
+            /*
+              EAGER FOR THE THREE CARDS IN REACH, lazy for the other eighty-seven.
+
+              Next/Image is lazy by default, so a card's photograph did not START
+              downloading until it scrolled into view — which means the card arrives before
+              its picture and what you see for a moment is the ground. Sam, twice: "the club
+              always flashes on first card", then "still doing a major flash on first swipe."
+
+              It does not show on this machine, where the cache is warm and the swipe is
+              clean when sampled every 40ms. It shows on a phone over a network, which is
+              where it matters and which is why the first fix — stopping the rail rendering
+              empty before the store answered — was real and was only half of it.
+
+              `near` is the current card and its two neighbours. Not the whole rail: ninety
+              photographs is a megabyte-scale download on a festival connection for pictures
+              nobody reaches. The claim is that the NEXT swipe is paid for before it
+              happens, in both directions.
+            */
+            <Image
+              src={image.src}
+              alt={image.alt}
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority={near}
+              loading={near ? 'eager' : 'lazy'}
+            />
           ) : (
             /*
               No photograph, so the pattern rather than a blank.
