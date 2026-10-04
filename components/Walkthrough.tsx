@@ -351,42 +351,32 @@ export function Walkthrough({ onDone }: { onDone: () => void }) {
         the hole. The whole argument for cutting a hole is that the thing under it is still
         the real thing.
       */}
-      <div
-        className={
-          'pointer-events-none absolute inset-0 flex flex-col ' +
-          /*
-            THE CAPTION GOES TO THE TOP WHEN THE HOLE IS AT THE BOTTOM, and nowhere else.
-
-            Sam's reference shots put the caption low, and that is right for most of the
-            walk: a caption at the top would sit over the top rail, which is two of the
-            nine things being pointed at. The four bottom-nav steps are the exception —
-            a panel of white type over the bar would cover the one control the step is
-            about.
-
-            560 is a measured threshold on this phone rather than a step flag: the bar sits
-            at y≈810 on a 844pt screen and the boards never get past the middle. Decided
-            from the hole, so a control that moves does not need this file edited.
-          */
-          (hole && hole.y > 560 ? 'justify-start' : 'justify-end')
-        }
-      >
+      <div className="pointer-events-none absolute inset-0 flex flex-col">
         {/*
           THE HEADER: where you are in the walk, and the way out.
 
           safe-top because this covers the whole screen including the notch, and it is the
-          one piece of furniture up there. Absolutely positioned so it stays pinned to the
-          top whichever end the caption has gone to — in the flow it was pushed down the
-          screen with it, and on the four bar steps the counter ended up mid-page.
-        */}
-        {/*
-          BOTH TO THE RIGHT, because the left is taken.
+          one piece of furniture up there.
 
-          The counter was on the left and landed on top of the DUB mark — which is a
-          control this walk POINTS AT on its last step, so the one piece of furniture the
-          overlay adds was obscuring the one it exists to describe. Visible in a screenshot
-          and nowhere else, which is the whole reason this is checked in a browser.
+          BOTH TO THE RIGHT, because the left is taken. The counter was on the left and
+          landed on top of the DUB mark — which is a control this walk POINTS AT on its last
+          step, so the one piece of furniture the overlay adds was obscuring the one it
+          exists to describe. Visible in a screenshot and nowhere else, which is the whole
+          reason this is checked in a browser.
+
+          IN THE FLOW, NOT PINNED, and a spacer decides where the caption goes.
+
+          It was `absolute top-0`, so on the four bottom-bar steps — where the caption moves
+          UP to leave the bar clear — the chips rendered straight through the counter. The
+          fix is not more padding on the caption: that wants a 20, and the spacing scale is
+          1/3/6/10 for reasons the gate enforces. These two are the overlay's only pieces of
+          furniture, so they go in one column with a growing spacer between them, and which
+          side of the caption that spacer falls on is the whole of the layout. They cannot
+          overlap by construction, at any caption length, on any screen height.
+
+          `shrink-0` so a long caption squeezes itself rather than this row.
         */}
-        <div className="safe-top absolute inset-x-0 top-0 flex items-center justify-end gap-3 px-5 pt-6">
+        <div className="safe-top flex shrink-0 items-center justify-end gap-3 px-5 pt-6">
           <p data-testid="walk-count" className="eyebrow tabular-nums text-white/75">
             {at + 1} / {steps.length}
           </p>
@@ -400,6 +390,21 @@ export function Walkthrough({ onDone }: { onDone: () => void }) {
           </button>
         </div>
 
+        {/*
+          THE SPACER, AND WHICH SIDE OF THE CAPTION IT FALLS ON IS THE LAYOUT.
+
+          Sam's reference shots put the caption low, and that is right for most of the walk:
+          a caption at the top would sit over the top rail, which is two of the nine things
+          being pointed at. The four bottom-nav steps are the exception — a panel of white
+          type over the bar would cover the one control the step is about.
+
+          560 is a measured threshold rather than a flag on the step: the bar sits at y≈810
+          on an 844pt screen and the boards never get past the middle. Read off the HOLE, so
+          a control that moves does not need this file edited — which is the same rule the
+          circle itself follows.
+        */}
+        {hole && hole.y > 560 ? null : <div className="flex-1" />}
+
         <div
           data-testid="walk-say"
           /*
@@ -412,13 +417,13 @@ export function Walkthrough({ onDone }: { onDone: () => void }) {
             step carries a short list of what is behind it, drawn as the product's own
             chips.
 
-            pt-20 on the top branch clears the counter row above it, which is absolute now
-            and no longer reserves its own height.
+            pt-6 and pb-10 on the scale, and no branch between them any more. An earlier
+            version carried a pt-20 on the top branch to clear a counter row that was
+            absolutely positioned above it — `npm run spacing` refused the 20, correctly,
+            and the right answer was not a smaller number but removing the overlap: the
+            counter is in the flow now with a spacer between, so there is nothing to clear.
           */
-          className={
-            'animate-bank flex flex-col gap-6 px-5 ' +
-            (hole && hole.y > 560 ? 'pb-6 pt-20' : 'pb-10 pt-6')
-          }
+          className="animate-bank flex flex-col gap-6 px-5 pb-10 pt-6"
         >
           {step.opens ? (
             <ul data-testid="walk-opens" className="flex flex-wrap gap-3">
@@ -460,6 +465,9 @@ export function Walkthrough({ onDone }: { onDone: () => void }) {
             {last ? (step.done ?? 'GOT IT') : 'NEXT'}
           </button>
         </div>
+
+        {/* The other half of the spacer above. One of the two is always present. */}
+        {hole && hole.y > 560 ? <div className="flex-1" /> : null}
       </div>
     </div>
   )

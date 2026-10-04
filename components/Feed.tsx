@@ -3499,7 +3499,28 @@ export function Card({
             pb-10 on the scroller rather than on the card: the bottom nav floats over this
             lane, and a card that ends under it reads as cut off.
           */}
-          <div className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
+          {/*
+            EXCEPT SET-UP, WHICH OWNS ITS OWN FULL-BLEED PHOTOGRAPH.
+
+            Sam: "put this screen on a full bleed image."
+
+            Every other pane is words on a card and the card is right for all of them. The
+            why step opens on a picture that runs edge to edge — SetUp does that with
+            `-mx-5 -mt-6`, cancelling the lane's own padding, and it worked until this card
+            was added around it: the negative margin then escaped the CARD and stopped at
+            the lane, so the photograph sat in a white frame with a visible gutter.
+
+            Two layers of padding cannot both be cancelled by one negative margin, so the
+            card simply does not apply here. The pane keeps its ground and its ink; what it
+            loses is the box, which is the one thing this screen cannot have.
+          */}
+          <div
+            className={
+              card.kind === 'setup'
+                ? undefined
+                : 'rounded-2xl border border-line bg-bg-elev px-5 py-6'
+            }
+          >
             {card.kind === 'situation' ? (
               /*
                 One room is given away, and the rest are teased until the Legend exists.

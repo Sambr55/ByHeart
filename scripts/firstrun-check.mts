@@ -24,7 +24,7 @@ import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { INTRO_CARDS, INTRO_SETUP_AFTER } from '../content/intro'
 import { ROOTS } from '../content/roots'
 import { cardFor } from '../content/legend'
-import { EXPLAINERS, EXPLAINER_CTA } from '../content/explainers'
+import { EXPLAINERS } from '../content/explainers'
 import { cardFace, explainerCards, setUpCard } from '../content/feed'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
@@ -924,11 +924,24 @@ console.log('\nevery explainer points the same way\n')
     a set that no longer describes the feed. Counting the string across the whole feed is
     both simpler and closer to the claim: one destination, several reasons.
   */
-  const detail = (await page.evaluate(
-    `Array.from(document.querySelectorAll('.snap-y > section')).map(s => s.innerText || '').join(' ~~ ')`,
-  )) as string
-  const links = (detail.match(new RegExp(EXPLAINER_CTA, 'g')) ?? []).length
-  ok('one destination, several reasons', links >= 3, links + ' cards carry it')
+  /*
+    THE DESTINATION IS THE NEXT CARD, which is the change this now asserts.
+
+    This counted EXPLAINER_CTA — "IT'S ALL ABOUT BUILDING YOUR LEGEND" — across the feed and
+    wanted it on at least three cards. Sam removed it from all three: "Remove any instances
+    of the CTA button it's all about building your legend." The reward for opening a card
+    was a full-width accent bar advertising /vibes, while the gesture that actually
+    continues the feed went unnamed on the surface where somebody had just arrived.
+
+    The claim underneath the old assertion is still worth holding, and it has not changed:
+    a card that ends in nothing wastes the moment it just earned. What changed is where it
+    points. So this counts the swipe hint the panes carry instead — same property, same
+    threshold, pointing at the deck's own grammar rather than at another screen.
+  */
+  const hints = (await page.evaluate(
+    `document.querySelectorAll('[data-testid="pane-swipe-hint"]').length`,
+  )) as number
+  ok('one destination, several reasons', hints >= 3, hints + ' panes say where next')
 }
 
 /*

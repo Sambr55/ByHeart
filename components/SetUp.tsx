@@ -440,9 +440,21 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
           >
             <p className="eyebrow text-white/80">{PAIR_STEP.eyebrow}</p>
             <h2 className="display text-balance text-2xl">{CLUB.welcome.ask_headline(city)}</h2>
-            <p className="text-sm italic leading-relaxed text-white/85">
-              {GOAL_QUESTION.askerLine}
-            </p>
+            {/*
+              THE REASSURANCE IS GONE. Sam: "Remove the second para (there is no wrong
+              answer)."
+
+              "There is no wrong answer, and the last one is a real one" was defending a
+              question nobody is anxious about. Five plain options about why somebody is
+              going to Lisbon do not read as a test, and telling a person not to worry is
+              the surest way to suggest there is something to worry about. The body below
+              says what the answer DOES, which is the useful thing and the only thing that
+              earns its place on the one screen the product may not skip.
+
+              GOAL_QUESTION.askerLine still serves the same question inside the Club's own
+              asker (components/Journey.tsx), where it arrives mid-flow with no body under
+              it — so the string stays and this one screen stops using it.
+            */}
             <p className="text-sm leading-relaxed text-white/85">{CLUB.welcome.ask_body}</p>
           </div>
         </div>

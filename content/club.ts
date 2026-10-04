@@ -114,7 +114,15 @@ export const CLUB = {
     */
     ask_headline: (city: string) => 'What brings you to ' + city + '?',
     ask_body:
-      'It decides what the Club offers you, and it decides some of what you are about to be asked. Buying a bus ticket and registering at the Junta are different products, and you should not have to scroll past one to find the other.',
+      /*
+        EXPERIENCES, NOT PRODUCTS. Sam: "change the word products to experiences."
+
+        "Different products" is the word somebody building the thing uses — it describes
+        two feature sets. A bus ticket and an afternoon at the Junta are two different
+        afternoons, which is what the learner is actually choosing between and the only
+        framing that makes the sentence about them rather than about DUB's roadmap.
+      */
+      'It decides what the Club offers you, and it decides some of what you are about to be asked. Buying a bus ticket and registering at the Junta are different experiences, and you should not have to scroll past one to find the other.',
     ask_footnote: 'Changeable any time, in Yours. Nothing you have done is affected.',
     /**
      * What the picture is, for anybody who cannot see it. The information, not the mood:
