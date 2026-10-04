@@ -5444,9 +5444,12 @@ function SittingBreakStep() {
     Two screens identical, and the one that celebrates finishing the Legend unreachable.
     Sam: "Vamos las appears twice identically."
 
-    Fixed at the read rather than by moving the screen, because the ORDER is deliberate —
-    the break is the decision and the summary is the receipt, and asking "carry on?" after
-    showing somebody the door is the wrong way round.
+    Fixed at the read rather than by moving the screen: the duplicate was a clamping bug
+    and the order was a separate question, which has since been answered the other way.
+    The summary now comes FIRST — see the step queue in engine/journey.tsx. Sam, having
+    used it: "the soft gates such as Quase need to come AFTER the summaries." A break that
+    asks "carry on?" before the product has said what was finished is a question about
+    nothing.
   */
   /*
     THE BREAK IS FOR THE ROAD, AND THE ROAD ENDS.

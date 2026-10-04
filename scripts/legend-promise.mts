@@ -21,7 +21,7 @@
  * not honour, and it must count the vibe being finished right now.
  */
 import { ROOTS_BY_FAMILY } from '../content/roots'
-import { DOORWAY, LEGEND_FRAMES, cardFor, doorwayToGo, frameApplies, frameForPurpose, legendStatus, legendUnlocked } from '../content/legend'
+import { DOORWAY, JOB_EN, LEGEND_FRAMES, cardFor, doorwayToGo, frameApplies, frameForPurpose, legendStatus, legendUnlocked } from '../content/legend'
 import type { Purpose } from '../content/situations'
 import { roadFor } from '../content/road'
 
@@ -332,6 +332,29 @@ console.log('\nthe card is the card, wherever it is counted\n')
       mine.length + ' counted against ' + card.length + ' answered',
     )
   }
+}
+
+/*
+  EVERY JOB THE PICKER OFFERS CAN BE SAID IN ENGLISH TOO.
+
+  personalise swaps the learner's chosen work into tg_school's release — "Trabalho com
+  computadores" instead of the authored "coisas criativas" — and swaps the English gloss
+  with it, because replacing one and not the other teaches a wrong translation. That was
+  the praia/música bug and it is the rule this protects.
+
+  The English lives in JOB_EN and the values live on the work frame's slot, which is two
+  lists that have to agree. A job added to the frame and not to the map is not a crash: it
+  is a sentence that quietly stops being personalised, which is exactly the kind of fault
+  that ships. So they are compared.
+*/
+{
+  console.log('\nthe work question can be said in both languages\n')
+  const work = LEGEND_FRAMES.find((f) => f.id === 'work')
+  const options = (work?.slots?.[0]?.options ?? []).map((o) => o.value)
+  const missing = options.filter((v) => !JOB_EN[v])
+  const orphan = Object.keys(JOB_EN).filter((k) => !options.includes(k))
+  ok('every job on the picker has an English gloss', missing.length === 0, missing.join(', '))
+  ok('and nothing in the map is unreachable', orphan.length === 0, orphan.join(', '))
 }
 
 if (problems.length) {

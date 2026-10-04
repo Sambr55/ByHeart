@@ -2634,35 +2634,45 @@ export function Card({
                     >
                       {face.eyebrow}
                     </p>
-                  ) : card.intro.step ? (
-                    /*
-                      A NUMBER IN A RING, where the first three cards are one sequence.
-
-                      Sam's deck circles 1, 2 and 3 against VIBES, YOUR LEGEND and THE CLUB
-                      and leaves the other three with a plain THE CLUB label. The number
-                      says these are ordered and finite — three screens, then you are in —
-                      which a category heading cannot say however loudly it is set.
-
-                      The same ring as every other roundel in this file, at the eyebrow's
-                      size rather than a headline's: it is a position, not a claim, and the
-                      sentence beside it is the thing to read.
-                    */
-                    <span
-                      data-testid="step"
-                      className={
-                        'eyebrow flex h-6 w-6 items-center justify-center rounded-full border border-current ' +
-                        (onSand ? 'text-accent' : 'text-white')
-                      }
-                      aria-label={'Step ' + card.intro.step + ' of 3'}
-                    >
-                      {card.intro.step}
-                    </span>
                   ) : face.eyebrow ? (
                     <p className={'eyebrow ' + (onSand ? 'text-accent' : 'text-white/80')}>
                       {face.eyebrow}
                     </p>
                   ) : null}
                   <div className={card.intro.pillar ? 'pillar-body' : undefined}>
+                    {/*
+                      THE NUMBER STARTS THE SENTENCE RATHER THAN STANDING OVER IT.
+
+                      Sam: "Place the numbers at the beginning of the sentence not above
+                      it." It was drawn where the eyebrow goes, which gave it a line of its
+                      own and a 12px gap — so it read as a label ABOUT the headline, like a
+                      chapter number, rather than as the first thing in the sentence.
+
+                      Inline it is what it was always meant to be: three screens, counted,
+                      with the count where your eye already is when it starts reading.
+
+                      `float-left` rather than a flex row, because the headline wraps to
+                      three lines and a flex row would indent all three to clear the ring —
+                      a hanging indent on a sentence that is not a list. Floated, only the
+                      first line moves over and the rest return to the margin, which is how
+                      a drop cap behaves and is the same shape.
+
+                      `mt-[0.3em]` nudges it onto the cap height of the line beside it:
+                      aligning a circle to a text baseline by its box leaves it sitting
+                      visibly high against display type this large.
+                    */}
+                    {card.intro.step ? (
+                      <span
+                        data-testid="step"
+                        className={
+                          'eyebrow float-left mr-3 mt-[0.3em] flex h-7 w-7 items-center justify-center rounded-full border border-current ' +
+                          (onSand ? 'text-accent' : 'text-white')
+                        }
+                        aria-label={'Step ' + card.intro.step + ' of 3'}
+                      >
+                        {card.intro.step}
+                      </span>
+                    ) : null}
                     <h2 className="display mt-3 text-balance text-3xl">{face.title}</h2>
                     <p
                       className={

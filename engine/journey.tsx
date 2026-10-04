@@ -1383,12 +1383,28 @@ export function JourneyProvider({
       const due = nextProfileQuestion()
       if (due) steps.push({ kind: 'profile', which: due })
       /*
-        The break comes BEFORE the summary, because it is the decision and the summary is
-        the receipt. Asking "carry on?" after showing somebody the door is the wrong way
-        round — see the SittingBreak screen.
+        THE SUMMARY FIRST, THEN THE GATE — which reverses what was here, on Sam's report.
+
+        "The soft gates such as Quase need to come AFTER the summaries — That is Top Gun
+        Quotes for today."
+
+        The argument for the old order was that the break is the decision and the summary is
+        the receipt, so asking "carry on?" after showing somebody the door is the wrong way
+        round. That is a good argument about a form and the wrong one about a sitting.
+
+        What the summary actually says is "That is Top Gun Quotes for today" — it NAMES what
+        was just finished. Arriving before it, the break asks somebody whether to continue
+        before telling them what they have done, so the question lands with nothing behind
+        it: carry on from what? The learner is being asked to decide about a thing the
+        product has not yet said it finished.
+
+        After it, the sequence reads the way the evening does: here is what you did, here is
+        where that leaves you, do you want more. The phrase the break teaches lands on the
+        same beat — Quase, nearly there — which is a sentence about progress and needs the
+        progress stated first to be about anything.
       */
-      steps.push({ kind: 'sitting-break' })
       steps.push({ kind: 'section-complete' })
+      steps.push({ kind: 'sitting-break' })
       dispatch({
         type: 'append',
         steps,

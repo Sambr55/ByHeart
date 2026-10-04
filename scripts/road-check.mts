@@ -390,13 +390,28 @@ console.log('\nevery sitting break teaches something, and something new\n')
     /kind: 'sitting-break'/.test(src),
     'engine/journey.tsx',
   )
-  /* Before the summary, because the break is the decision and the summary is the receipt. */
+  /*
+    AFTER the summary, which is the reverse of what this asserted.
+
+    The old order was argued from first principles — the break is the decision and the
+    summary is the receipt — and Sam reversed it having used the thing: "the soft gates
+    such as Quase need to come AFTER the summaries — That is Top Gun Quotes for today."
+
+    He is right, and the reason is in the sentence the summary says. It NAMES what was
+    finished; arriving before it, the break asks somebody whether to carry on from a thing
+    the product has not yet said it finished. Quase — nearly there — is a claim about
+    progress and needs the progress stated first to be about anything.
+
+    Still asserted on the step queue rather than the DOM, for the original reason: a break
+    that is not its own step cannot be its own screen, and reading the rendered page would
+    pass on a panel bolted back onto section-complete.
+  */
   const atBreak = src.indexOf("steps.push({ kind: 'sitting-break' })")
   const atSummary = src.indexOf("steps.push({ kind: 'section-complete' })")
   ok(
-    'and it comes before the summary',
-    atBreak > 0 && atSummary > atBreak,
-    atBreak + ' then ' + atSummary,
+    'and it comes after the summary',
+    atSummary > 0 && atBreak > atSummary,
+    atSummary + ' then ' + atBreak,
   )
 
   const ui = readFileSync('components/Journey.tsx', 'utf8')

@@ -219,6 +219,32 @@ export const AUTHORED_AGES = [32, 30]
   Read from content/interests.ts rather than retyped, so the chips a learner taps and the
   word the lesson teaches cannot name different things.
 */
+/*
+  THE TEN THINGS SOMEBODY CAN SAY THEY WORK WITH, in English.
+
+  Derived nowhere and written here, which is the one duplication in this file worth
+  arguing about: the values live on the `work` frame's slot options a thousand lines below
+  and this is the English for each. The alternative is reading that slot at module scope,
+  which would make the frame list a dependency of the personaliser and is a cycle waiting
+  to happen.
+
+  Held honest by scripts/legend-check, which asserts every option here has an entry and
+  vice versa — so a job added to the frame and not to this map is a failing check rather
+  than a silently unpersonalised sentence.
+*/
+export const JOB_EN: Record<string, string> = {
+  computadores: 'computers',
+  design: 'design',
+  'crianças': 'children',
+  pessoas: 'people',
+  'números': 'numbers',
+  'construção': 'building',
+  'restauração': 'restaurants',
+  'saúde': 'health',
+  'música': 'music',
+  vendas: 'sales',
+}
+
 const INTO_WORDS: Record<string, { id: string; target: string; gloss: string; after_de: string }> =
   Object.fromEntries(
     INTERESTS.map((i) => [i.id, { id: i.id, target: i.target, gloss: i.gloss, after_de: i.after_de }]),
@@ -259,6 +285,8 @@ export function personalise<T extends {
       from_place?: string | null
       /* Mirrored from the Legend by answerLegend — see PROFILE_OF in engine/learner.ts. */
       married?: string | null
+      /* The same mirror, and the same reason — see jobSwap below. */
+      work?: string | null
     } | null
     /**
      * The Legend answers.
@@ -287,6 +315,37 @@ export function personalise<T extends {
   */
   const first = me.profile?.into?.[0]
   const swap = first && first !== 'musica' ? INTO_WORDS[first] : null
+
+  /*
+    AND THE WORK THEY SAID THEY DO, on the same terms as the interest and the age.
+
+    Sam: "Make sure the job selected (i work in) carries through in the Top Gun question."
+
+    tg_school teaches `trabalho` and releases "Trabalho com coisas criativas" — creative
+    things, a placeholder standing in for whatever the learner actually does. So somebody
+    who had already tapped `computadores` on the work question was handed a sentence about
+    a job that is not theirs, on the beat that exists to hand over their card's answer.
+    The same fault the interest swap was built for: the product asks, and then drills
+    something else.
+
+    Taken from `profile.work`, which answerLegend mirrors from the Legend at the single
+    point it is written (see PROFILE_OF), so this reads the same answer the card holds and
+    the two cannot disagree.
+
+    BOTH LANGUAGES, OR NEITHER — the rule the praia/música bug wrote. The English gloss is
+    swapped in the same pass from JOB_EN, because replacing the Portuguese alone would
+    teach that "Trabalho com computadores" means "I work with creative things", and a wrong
+    translation is worse than no personalisation at all.
+
+    Nothing happens when they have not answered it. The authored specimen is a real lesson
+    and a learner who skipped the question keeps it.
+  */
+  const jobSwap = (() => {
+    const job = me.profile?.work
+    if (!job) return null
+    const en = JOB_EN[job]
+    return en ? { target: job, en } : null
+  })()
 
   /*
     AND THE NUMBER IN AN AGE, on exactly the same terms as the interest.
@@ -636,11 +695,26 @@ export function personalise<T extends {
       Everything else still runs, so a learner who HAS answered gets the full substitution
       on the same line.
     */
+    /*
+      THE PLACEHOLDER JOB, REPLACED BY THEIR OWN — see jobSwap.
+
+      Runs before the interest swap and independently of it: a learner can have answered
+      the work question and not the interest one, and `coisas criativas` is a placeholder
+      on tg_school whether or not they ever said what they are into.
+
+      Both halves together, longest first, for the reason the praia/música bug taught: the
+      English has to move with the Portuguese or the product teaches a wrong translation.
+    */
+    const withJob = jobSwap
+      ? t
+          .replaceAll('coisas criativas', jobSwap.target)
+          .replaceAll('creative things', jobSwap.en)
+      : t
     if (!swap)
       return myForm(
-        myOrigin(myStatus(myAge(myName(t, me.display_name), me.profile?.age), status)),
+        myOrigin(myStatus(myAge(myName(withJob, me.display_name), me.profile?.age), status)),
       )
-    const swapped = t
+    const swapped = withJob
       .replaceAll('de música', swap.after_de)
       .replaceAll('música', swap.target)
       /*
