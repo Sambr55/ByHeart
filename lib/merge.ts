@@ -197,6 +197,9 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     /* Answered once, on whichever device. It never un-answers. */
     set_up_at: earliest(l.set_up_at, r.set_up_at),
     club_welcomed_at: earliest(l.club_welcomed_at, r.club_welcomed_at),
+    /* Walked once, on whichever device. Being shown where things are does not un-happen,
+       and the earliest copy is the one that tells the truth about when it did. */
+    club_walked_at: earliest(l.club_walked_at, r.club_walked_at),
     /*
       The inbox mark goes the OTHER WAY from everything around it, and that is not an
       oversight.

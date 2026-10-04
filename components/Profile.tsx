@@ -16,7 +16,8 @@ import { PIECES, ROOTS, type CultureFamily } from '@/content/roots'
 import { LEGEND_FRAMES, askFor, cardFor, cardToGo, nextStage, stageFor, frameApplies, frameForPurpose, frameReady, legendStatus, progressFor, STAGES } from '@/content/legend'
 import { PROFILE_COPY } from '@/content/profile-copy'
 import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/avatar'
-import { setDisplayName } from '@/engine/learner'
+import { Walkthrough } from '@/components/Walkthrough'
+import { loadLearner, setDisplayName } from '@/engine/learner'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { useLearner } from '@/engine/useLearner'
 import { useRestore } from '@/engine/useRestore'
@@ -156,6 +157,50 @@ export function Profile() {
   */
   const [openSection, setOpenSection] = useState<string | null>(null)
   useEffect(() => setMounted(true), [])
+
+  /*
+    THE WALK, AFTER THE WELCOME AND ONCE EVER.
+
+    Sam: "This animation will run after the welcome screen in the Club." The ceremony is on
+    /club and the controls being described are on THIS screen, so the walk cannot be the
+    next card in the Club's own sequence — it has to be here, waiting, for the first time
+    this person arrives at Yours as a member.
+
+    GATED ON THE WELCOME HAVING FIRED, not on membership: `club_welcomed_at` is the stamp
+    written on the way out of the ceremony, so reading it is reading "the Club has let them
+    in and said so". A learner who has never been welcomed is mid-Legend and has nothing on
+    this screen for a walk to be about.
+
+    `loadLearner()` RATHER THAN THE SNAPSHOT, for exactly the reason the welcome gives in
+    components/Club.tsx: an unread store is indistinguishable from a learner who has never
+    been walked, and deciding from one would show the walk to somebody who has already seen
+    it on every cold start.
+
+    AND IT IS DECIDED ONCE, ON MOUNT. Keying this off the live snapshot would re-open the
+    walk the moment walkedTheClub() wrote the date — the record changes, the component
+    re-renders, the gate re-reads — which is the same remount fault the welcome had and had
+    to be moved out of an effect to fix.
+  */
+  const [walk, setWalk] = useState(false)
+  useEffect(() => {
+    const state = loadLearner()
+    /*
+      ?walk=1 IS THE DELIBERATE WAY IN, and it overrides the stamp rather than clearing it.
+
+      Sam needs to be able to show this at a festival without resetting a device — see
+      app/walkthrough/page.tsx, which is the route that adds it. Forcing rather than
+      wiping: the walk is a thing that happened to this learner once, and the date of it is
+      a fact whether or not it is being shown again.
+    */
+    const forced = new URLSearchParams(window.location.search).get('walk') === '1'
+    if (forced) {
+      setWalk(true)
+      return
+    }
+    if (!state.club_welcomed_at) return
+    if (state.club_walked_at) return
+    setWalk(true)
+  }, [])
 
   const saved = learner.saved ?? []
   const finished = learner.finished_cards ?? []
@@ -336,8 +381,28 @@ export function Profile() {
       pt-6 still holds on a phone with no inset.
     */
     <main className="safe-top mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg">
+      {/*
+        THE MARK IS NAMED, because the walk has to be able to point at it.
+
+        Sam asked for a walk-through that ends on "the Logo tap which will take you to the
+        Club home page" — see content/walk.ts — and every other control it circles already
+        had a testid for its own reasons. This one did not, because nothing had ever needed
+        to find it.
+
+        ON A SPAN AROUND THE MARK, not on the <header> and not inside <Wordmark>. The header
+        is a full-width row, and a round hole sized to a 350px row swallowed the identity
+        card under it and bleached the counter above it — a measured failure, visible only
+        in the screenshot. Inside the component it would be six placements answering to one
+        name, which is the drift that component exists to prevent. `w-fit` so the span is
+        the mark's own width and the circle lands on the mark.
+
+        WHERE IT POINTS IS NOT CHANGED HERE. The mark is not a link today; making it one,
+        to /club rather than /, is Sam's own separate fix. This only gives it a name.
+      */}
       <header className="flex items-center gap-3">
-        <Wordmark mark="club" className="h-6" title="DUB Club" />
+        <span data-testid="yours-wordmark" className="flex w-fit items-center">
+          <Wordmark mark="club" className="h-6" title="DUB Club" />
+        </span>
       </header>
       <BottomNav />
 
@@ -460,6 +525,19 @@ export function Profile() {
         </>
       )}
       <BottomNavSpace />
+      {/*
+        THE WALK, LAST IN THE DOM, which is how it covers the bar.
+
+        Both are z-50 — the layer scale has three values and a fourth invented to solve a
+        stacking problem is how three becomes seven, which Translator.tsx already argued at
+        length. Later in the DOM wins at the same layer, and this is the one thing in the
+        product that genuinely must cover the navigation: a walk-through of where the
+        buttons are, with a button over it, is a walk-through of the wrong screen.
+
+        AFTER `mounted` because every hole is a measurement of a real element, and there is
+        nothing to measure before the browser has painted the page it is describing.
+      */}
+      {mounted && walk ? <Walkthrough onDone={() => setWalk(false)} /> : null}
     </main>
   )
 }

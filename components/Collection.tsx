@@ -138,7 +138,16 @@ export function Collection() {
         THE RAIL. Four boards, a MORE toggle, and a rule under the selected one — which is
         the whole of how a profile says which grid you are looking at.
       */}
-      <div className="flex items-stretch border-b border-line">
+      {/*
+        THE RAIL IS NAMED, because the walk-through has to be able to point at the ROW.
+
+        Every button in it already answers to `rail-<id>` — see RailTab below — and the
+        card around the whole library answers to `collection`. Neither is the thing the
+        walk needs: one circle per board would be the same sentence five times with a
+        different noun, and a circle on `collection` lands in the middle of a 900px card,
+        which is a grid tile rather than a rail. See content/walk.ts.
+      */}
+      <div data-testid="rail" className="flex items-stretch border-b border-line">
         {rail.map((d) => (
           <RailTab
             key={d.id}

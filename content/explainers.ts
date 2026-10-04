@@ -385,11 +385,11 @@ export const EXPLAINERS: Explainer[] = [
         next person to look for that photograph goes looking for something that does not
         exist.
 
-        Corrected to the bank's line. The right picture is wanted — see showing_pair in
+        Corrected to the bank's line. The right picture is wanted — see showing-pair in
         content/images.ts.
       */
-      src: '/lisbon/cafe-counter.jpg',
-      alt: 'A zinc café counter in Lisbon with an empty espresso cup on a saucer and a folded newspaper beside it.',
+      src: '/bank/showing-pair.jpg',
+      alt: 'Two people side by side at a café counter seen from behind through a doorway, heads together over something between them, both phones face-down on the zinc.',
     },
     retires: 'acted-on-a-card',
   },
@@ -436,7 +436,7 @@ export const EXPLAINERS: Explainer[] = [
         A QUEUE OF PEOPLE, which is the closest honest thing in the bank.
 
         This card is about bringing somebody, and the right photograph has two people in it
-        — which the bank does not hold; see bring_a_friend in content/images.ts WANTED.
+        — which the bank does not hold; see bring-a-friend in content/images.ts WANTED.
         What it does hold is a morning queue at a pastelaria, which is at least other
         people in Lisbon doing an ordinary thing, and the alt text is the bank's own and
         true of the picture.
@@ -444,8 +444,8 @@ export const EXPLAINERS: Explainer[] = [
         It became free this morning when CHEATS, HACKS & BLUFFS came off the intro sequence,
         so nothing else is using it.
       */
-      src: '/lisbon/bakery-queue.jpg',
-      alt: 'A queue at a pastelaria counter in the morning, seen from behind, trays of pastries under glass.',
+      src: '/bank/bring-a-friend.jpg',
+      alt: 'Two people walking up a Lisbon calçada at dusk seen from behind, one turning to the other, a lit doorway beside them and the city dropping away below.',
     },
     retires: 'acted-on-a-card',
   },

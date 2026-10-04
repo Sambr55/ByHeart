@@ -578,6 +578,29 @@ export interface LearnerState {
   /** When the Club welcomed them. Fires once, ever. Earliest wins on a merge. */
   club_welcomed_at: string | null
   /**
+   * When they were walked through the controls. Fires once, ever, like the welcome above.
+   *
+   * Sam: "Build a Club intro animation that walks through each icon in the bottom, mid and
+   * top rails and the Logo tap." It runs immediately after the welcome ceremony, which is
+   * the one moment in DUB where somebody has just been let into a room and does not yet
+   * know where anything in it is.
+   *
+   * A TIMESTAMP RATHER THAN A FLAG, and for the same reason club_welcomed_at is one: a
+   * boolean records that something happened and loses when, and every date on this record
+   * is a fact about a moment. Earliest wins on a merge — being shown the controls is a
+   * thing that happened once, and the second device must not decide it has not yet.
+   *
+   * WRITTEN ON THE WAY OUT, not on the way in. The welcome learned this the hard way —
+   * stamping it when the screen is SCHEDULED rather than when it is SEEN means a remount
+   * (which React's strict mode does on every dev machine) spends the screen without
+   * showing it. See the note on finishWelcome in components/Club.tsx.
+   *
+   * Null means never walked, which is the honest reading for every record written before
+   * this existed: they have not seen it, and the deliberate route — /walkthrough — is how
+   * anybody sees it again without wiping a device.
+   */
+  club_walked_at: string | null
+  /**
    * When they last opened the inbox, which is the whole of what the inbox remembers.
    *
    * ONE DATE RATHER THAN A LIST OF MESSAGES SEEN, and it is the same shape as
@@ -788,6 +811,7 @@ export function emptyLearner(): LearnerState {
     sections_completed: [],
     sittings: 0,
     club_welcomed_at: null,
+    club_walked_at: null,
     inbox_opened_at: null,
     saved: [],
     liked: [],
@@ -1029,6 +1053,11 @@ export function loadLearner(): LearnerState {
               ? parsed.sittings
               : arr(parsed.sections_completed, []).length,
           club_welcomed_at: parsed.club_welcomed_at ?? null,
+          /* Absent on every record written before the walk-through existed, and absent is
+             the honest reading: they have not been shown the controls. A member already
+             past the welcome meets it on their next visit to Yours, which is the right
+             outcome — the walk is about where things are, and that does not expire. */
+          club_walked_at: parsed.club_walked_at ?? null,
           /* Absent on every record written before the inbox existed, and absent is the
              honest reading: they have never opened it, so everything live is new. */
           inbox_opened_at: parsed.inbox_opened_at ?? null,
@@ -1349,6 +1378,7 @@ export async function syncSession(reason: string): Promise<boolean> {
         sections_completed: s.sections_completed,
         sittings: s.sittings,
         club_welcomed_at: s.club_welcomed_at,
+        club_walked_at: s.club_walked_at,
         inbox_opened_at: s.inbox_opened_at,
         collisions_played: s.collisions_played,
         nocue_done: s.nocue_done,
@@ -2464,5 +2494,18 @@ export function rememberSection(family: string) {
 export function welcomeToClub() {
   update((s) => {
     s.club_welcomed_at ??= new Date().toISOString()
+  })
+}
+
+/**
+ * The walk-through fires once, ever, on the same terms as the welcome above.
+ *
+ * `??=` rather than a plain assignment, so running it again from /walkthrough — which is
+ * the point of that route — cannot restamp a date that is already a fact. The route shows
+ * the walk; this records the first time anybody was walked.
+ */
+export function walkedTheClub() {
+  update((s) => {
+    s.club_walked_at ??= new Date().toISOString()
   })
 }

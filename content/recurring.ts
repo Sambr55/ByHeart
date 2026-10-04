@@ -181,8 +181,8 @@ export const RECURRING: Recurring[] = [
         title: 'Sardines, standing up',
         why: 'There is a grill on the pavement, a queue that is not a queue, and no menu. This is the entire transaction.',
         image: {
-          src: '/bank/queue-outside.jpg',
-          alt: 'A short queue of people waiting on a pavement outside a small lit doorway in the evening.',
+          src: '/bank/santo-antonio-grill.jpg',
+          alt: 'A charcoal grill on a Lisbon street at night, packed with sardines and heavy with smoke, two paper plates of bread beside it and a crowd under strings of coloured lights behind.',
           rights_status: 'generated',
         },
         lines: [
@@ -212,8 +212,8 @@ export const RECURRING: Recurring[] = [
         title: 'Finding the party',
         why: 'You can hear four of them and see none. Everybody on the street knows which way to go and nobody has been asked.',
         image: {
-          src: '/bank/two-at-a-bar.jpg',
-          alt: 'Two people at a small outdoor table with glasses of white wine, turned towards each other, a Lisbon street behind them at dusk.',
+          src: '/bank/santo-antonio-street.jpg',
+          alt: 'A narrow Lisbon street at night strung with bunting and paper lanterns, filled shoulder to shoulder with people seen from behind, smoke hanging in the light.',
           rights_status: 'generated',
         },
         lines: [
@@ -322,8 +322,8 @@ export const RECURRING: Recurring[] = [
         title: 'Where the lights are',
         why: 'Everybody in Baixa is walking the same way and you cannot see why yet.',
         image: {
-          src: '/bank/arena-night.jpg',
-          alt: 'Gare do Oriente lit at night, its arched canopy above a plaza with people crossing towards the entrance.',
+          src: '/bank/natal-rua-augusta.jpg',
+          alt: 'A wide pedestrian street at night under arches of white Christmas lights, crowds walking away from the camera towards a lit archway at the end.',
           rights_status: 'generated',
         },
         lines: [
@@ -356,8 +356,8 @@ export const RECURRING: Recurring[] = [
         title: 'Chestnuts, from the cart',
         why: 'There is a drum of coals on the corner, a paper cone, and a man who has done this for thirty years and will not slow down for you.',
         image: {
-          src: '/bank/queue-outside.jpg',
-          alt: 'A short queue of people waiting on a pavement outside a small lit doorway in the evening.',
+          src: '/bank/castanhas-cart.jpg',
+          alt: 'A street vendor turning chestnuts on a drum roaster at dusk, paper cones stacked on the cart beside him, an empty Lisbon street behind.',
           rights_status: 'generated',
         },
         lines: [
@@ -498,8 +498,8 @@ export const RECURRING: Recurring[] = [
         title: 'On the beach, asking about the water',
         why: 'The Atlantic off Carcavelos in June is colder than it looks and everybody on the sand already knows how cold.',
         image: {
-          src: '/bank/metro-platform.jpg',
-          alt: 'A crowd walking away down a tiled metro passage towards the tunnel, all seen from behind.',
+          src: '/bank/praia-carcavelos.jpg',
+          alt: 'A wide Atlantic beach busy with towels and coloured umbrellas, a railway line running along low cliffs behind it, hard summer light.',
           rights_status: 'generated',
         },
         lines: [
@@ -607,8 +607,8 @@ export const RECURRING: Recurring[] = [
         title: 'The gates are shut',
         why: 'There is a printed sheet taped to the glass, a crowd reading it, and one member of staff. This is a rehearsal, not news — no strike is being claimed here.',
         image: {
-          src: '/bank/metro-platform.jpg',
-          alt: 'A crowd walking away down a tiled metro passage towards the tunnel, all seen from behind.',
+          src: '/bank/metro-closed-gates.jpg',
+          alt: 'Four people seen from behind reading a printed notice taped to the closed metal grille of a metro entrance.',
           rights_status: 'generated',
         },
         lines: [
@@ -638,8 +638,8 @@ export const RECURRING: Recurring[] = [
         title: 'Getting there anyway',
         why: 'The buses are running and nobody waiting at the stop knows which of them helps you.',
         image: {
-          src: '/bank/queue-outside.jpg',
-          alt: 'A short queue of people waiting on a pavement outside a small lit doorway in the evening.',
+          src: '/bank/bus-stop-crowd.jpg',
+          alt: 'A long queue waiting along the kerb at a Lisbon bus stop as a yellow bus pulls in, everybody seen from behind in flat morning light.',
           rights_status: 'generated',
         },
         lines: [
@@ -1145,8 +1145,8 @@ export const RECURRING: Recurring[] = [
         title: 'The carnations',
         why: 'Somebody will hand you one. It is a red carnation and it is the whole symbol of the day.',
         image: {
-          src: '/bank/two-at-a-bar.jpg',
-          alt: 'Two people at a small outdoor table with glasses of white wine, turned towards each other, a Lisbon street behind them at dusk.',
+          src: '/bank/avenida-cravos.jpg',
+          alt: 'A crowd filling a tree-lined avenue, red carnations held up on long stems above their heads, red banners further back in the haze.',
           rights_status: 'generated',
         },
         lines: [
@@ -1281,8 +1281,8 @@ export const RECURRING: Recurring[] = [
         title: 'Closed for the holidays',
         why: 'A sheet of paper taped inside the glass, handwritten, with a date on it. This is the month it is on every third door.',
         image: {
-          src: '/bank/moving-viewing.jpg',
-          alt: 'An empty room with shutters half closed and light coming through, nobody in it.',
+          src: '/bank/fechado-ferias.jpg',
+          alt: 'A blank handwritten sign taped inside a shop door behind a half-pulled metal shutter, an empty cobbled street in low August sun beyond it.',
           rights_status: 'generated',
         },
         lines: [

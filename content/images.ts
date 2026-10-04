@@ -330,6 +330,108 @@ export const IMAGE_BANK: Record<string, BankImage> = {
     alt: 'A chalk menu board outside a Lisbon tasca, half rubbed out, nobody reading it.',
     rights_status: 'generated',
   },
+  /*
+    THE ELEVEN GENERATED ON 2026-10-04, written from the pictures rather than the briefs.
+
+    Sam asked for the briefs to be run, and 41 came back. These are the eleven that are not
+    standing rooms: the nine the recurring drops have been standing on borrowed pictures
+    for, and the two the sharing cards wanted.
+
+    EVERY LINE BELOW DESCRIBES THE PICTURE THAT EXISTS. The generator deliberately emits
+    "…what is actually in it…" as the alt text and refuses to guess, and it is right to: a
+    brief is a wish and the image is what came back. I was reminded why this morning, finding
+    a card whose alt text claimed "two people at a café counter" over a photograph of an
+    empty counter — a screen reader got the fiction, and anybody searching for that
+    photograph went looking for something that did not exist. So each of these was opened
+    and looked at before its line was written.
+
+    TWO CARRY A FACE, against this bank's standing rule, and they are noted rather than
+    quietly kept. See castanhas_cart and showing_pair below.
+
+    Converted to JPEG at 1536px before landing: the generator writes PNG at around 2.7MB
+    each, which is 116MB for a set this size and the wrong thing to hand a phone on a
+    festival connection. The bank is JPEG everywhere else for the same reason; these are 0.4MB and
+    indistinguishable on a screen.
+  */
+  santo_antonio_grill: {
+    src: '/bank/santo-antonio-grill.jpg',
+    alt: 'A charcoal grill on a Lisbon street at night, packed with sardines and heavy with smoke, two paper plates of bread beside it and a crowd under strings of coloured lights behind.',
+    rights_status: 'generated',
+    taken_at: '2026-10-04',
+  },
+  santo_antonio_street: {
+    src: '/bank/santo-antonio-street.jpg',
+    alt: 'A narrow Lisbon street at night strung with bunting and paper lanterns, filled shoulder to shoulder with people seen from behind, smoke hanging in the light.',
+    rights_status: 'generated',
+    taken_at: '2026-10-04',
+  },
+  natal_rua_augusta: {
+    src: '/bank/natal-rua-augusta.jpg',
+    alt: 'A wide pedestrian street at night under arches of white Christmas lights, crowds walking away from the camera towards a lit archway at the end.',
+    rights_status: 'generated',
+    taken_at: '2026-10-04',
+  },
+  castanhas_cart: {
+    src: '/bank/castanhas-cart.jpg',
+    /*
+      A FACE, IN PROFILE, AND KEPT DELIBERATELY. The rule on this bank is that nobody's
+      face is the subject — see the note on the Legend questions — and here the subject is
+      plainly the chestnuts and the cart. He is a vendor at work, in profile, lit from the
+      drum rather than posed for anybody. Noted so the exception is a decision rather than
+      an oversight, and worth replacing if a version without him comes back.
+    */
+    alt: 'A street vendor turning chestnuts on a drum roaster at dusk, paper cones stacked on the cart beside him, an empty Lisbon street behind.',
+    rights_status: 'generated',
+    taken_at: '2026-10-04',
+  },
+  praia_carcavelos: {
+    src: '/bank/praia-carcavelos.jpg',
+    alt: 'A wide Atlantic beach busy with towels and coloured umbrellas, a railway line running along low cliffs behind it, hard summer light.',
+    rights_status: 'generated',
+    taken_at: '2026-10-04',
+  },
+  metro_closed_gates: {
+    src: '/bank/metro-closed-gates.jpg',
+    alt: 'Four people seen from behind reading a printed notice taped to the closed metal grille of a metro entrance.',
+    rights_status: 'generated',
+    taken_at: '2026-10-04',
+  },
+  bus_stop_crowd: {
+    src: '/bank/bus-stop-crowd.jpg',
+    alt: 'A long queue waiting along the kerb at a Lisbon bus stop as a yellow bus pulls in, everybody seen from behind in flat morning light.',
+    rights_status: 'generated',
+    taken_at: '2026-10-04',
+  },
+  avenida_cravos: {
+    src: '/bank/avenida-cravos.jpg',
+    alt: 'A crowd filling a tree-lined avenue, red carnations held up on long stems above their heads, red banners further back in the haze.',
+    rights_status: 'generated',
+    taken_at: '2026-10-04',
+  },
+  fechado_ferias: {
+    src: '/bank/fechado-ferias.jpg',
+    alt: 'A blank handwritten sign taped inside a shop door behind a half-pulled metal shutter, an empty cobbled street in low August sun beyond it.',
+    rights_status: 'generated',
+    taken_at: '2026-10-04',
+  },
+  showing_pair: {
+    src: '/bank/showing-pair.jpg',
+    /*
+      The second face exception, and the weaker of the two: the man behind the counter is
+      far back and out of focus, but he is facing the room. The pair this card is about are
+      from behind, which is what the brief asked for and what matters.
+    */
+    alt: 'Two people side by side at a café counter seen from behind through a doorway, heads together over something between them, both phones face-down on the zinc.',
+    rights_status: 'generated',
+    taken_at: '2026-10-04',
+  },
+  bring_a_friend: {
+    src: '/bank/bring-a-friend.jpg',
+    alt: 'Two people walking up a Lisbon calçada at dusk seen from behind, one turning to the other, a lit doorway beside them and the city dropping away below.',
+    rights_status: 'generated',
+    taken_at: '2026-10-04',
+  },
+
 }
 
 /**
@@ -390,60 +492,6 @@ export const WANTED: { slug: string; brief: string; used_by: string }[] = [
     with no ground at all. Nothing here is referenced by a room yet, which is why
     drop-check's "no pictures that already exist" assertion stays green.
   */
-  {
-    slug: 'santo-antonio-grill',
-    brief:
-      'A pavement charcoal grill crowded with sardines, smoke rising thickly, paper plates of bread beside it, a crowd pressing in behind. Night, Alfama, strings of coloured bulbs overhead.',
-    used_by: 'recurring: Santo António — sardines, standing up',
-  },
-  {
-    slug: 'santo-antonio-street',
-    brief:
-      'A narrow Lisbon street at night strung with bunting and paper lanterns, packed with people between the houses, smoke drifting across the lights.',
-    used_by: 'recurring: Santo António — finding the party',
-  },
-  {
-    slug: 'natal-rua-augusta',
-    brief:
-      'A wide pedestrian street at night under arches of white Christmas lights, crowded with people walking towards a lit archway at the end.',
-    used_by: 'recurring: the Christmas lights — where the lights are',
-  },
-  {
-    slug: 'castanhas-cart',
-    brief:
-      'A street cart with a drum of roasting chestnuts, smoke rising, paper cones stacked on the edge, a man in an apron turning them. Winter, dusk, a city corner.',
-    used_by: 'recurring: São Martinho, and the Christmas lights',
-  },
-  {
-    slug: 'praia-carcavelos',
-    brief:
-      'A wide Atlantic beach busy with towels and umbrellas, a railway line and low cliffs behind it, bright hard summer light.',
-    used_by: 'recurring: the first hot Saturday — on the beach',
-  },
-  {
-    slug: 'metro-closed-gates',
-    brief:
-      'Closed metal gates across a metro entrance with a printed notice taped to the glass, several people standing reading it.',
-    used_by: 'recurring: when the metro is on strike — the gates are shut',
-  },
-  {
-    slug: 'bus-stop-crowd',
-    brief:
-      'A crowded Lisbon bus stop, people waiting along the kerb, a yellow bus arriving. Morning, overcast.',
-    used_by: 'recurring: when the metro is on strike — getting there anyway',
-  },
-  {
-    slug: 'avenida-cravos',
-    brief:
-      'A crowd filling a wide tree-lined avenue, red carnations held up above people\u2019s heads, banners further back. Bright spring afternoon.',
-    used_by: 'recurring: the 25th of April — the carnations',
-  },
-  {
-    slug: 'fechado-ferias',
-    brief:
-      'A handwritten sign taped inside a shop door behind a half-pulled metal shutter, a quiet empty street outside in strong August light.',
-    used_by: 'recurring: August — closed for the holidays',
-  },
   /*
     THE THIRTY ROOMS THE CLUB ACTUALLY STANDS ON, and the count is the finding.
 
@@ -693,18 +741,6 @@ export const WANTED: { slug: string; brief: string; used_by: string }[] = [
     The pictures have to work for a learner whose friend looks nothing like whoever is in
     frame.
   */
-  {
-    slug: 'showing_pair',
-    brief:
-      'Two people at a Lisbon café counter from behind, one leaning in to say something to the other, both phones face-down on the zinc. Shot from the doorway, late morning light, neither face visible.',
-    used_by: 'explainer bring_somebody — Send somebody what you can say',
-  },
-  {
-    slug: 'bring_a_friend',
-    brief:
-      'Two people arriving somewhere together in Lisbon — walking up a calçada towards a lit doorway, seen from behind, one half a step ahead and turning back to the other. Early evening, the city doing something in the background. No faces.',
-    used_by: 'explainer bring_a_friend — Everybody you know here speaks English',
-  },
 ]
 
 /** Every slug in the bank, for the gate that checks a template does not name a hole. */

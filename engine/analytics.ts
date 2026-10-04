@@ -145,6 +145,15 @@ export type EventName =
   | 'vocab_search_miss'
   /* Dub Club — the home a returning learner actually lands on. */
   | 'club_welcome'
+  /*
+    The walk through the controls, which runs straight after the welcome above.
+
+    Two events rather than one, and the step is the useful one: a walk-through's only real
+    failure mode is people leaving part-way, and knowing WHICH step they left on is the
+    difference between "it is too long" and "step four says nothing".
+  */
+  | 'club_walk_step'
+  | 'club_walk_done'
   | 'club_move'
   /* Your Legend — the proposition, and the one goal that exists outside the app. */
   | 'legend_offered'
