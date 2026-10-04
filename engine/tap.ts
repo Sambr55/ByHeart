@@ -182,6 +182,84 @@ export function ping() {
 }
 
 /**
+ * A shutter, three times.
+ *
+ * Sam, on the ASK card: "Put a triple flash on the ASK page photograph panel and a
+ * photograph clicking sound."
+ *
+ * THE ONE SOUND IN THIS FILE THAT IS NOT INTERFACE FEEDBACK, and it is allowed because it
+ * is not pretending to be. Everything above answers something the learner did: a press, a
+ * refusal, a sentence that landed or did not. This answers nothing — it is part of a
+ * demonstration, the audio half of a picture being taken, on the one card that has to show
+ * what photographing a sign is like before anybody has done it.
+ *
+ * NOISE, NOT A NOTE. A camera click is a mechanism — a mirror and a blade, both broadband
+ * — so `tone` is the wrong instrument entirely: any oscillator at any frequency reads as a
+ * beep, and a beep is a notification. This is a burst of white noise through a high-pass,
+ * which is what a click actually is.
+ *
+ * TWO BURSTS PER FRAME, 38ms apart, because a shutter has two edges: the blade opening and
+ * the blade closing, and a single burst sounds like a switch rather than a camera. The
+ * second is quieter than the first for the same reason it is in life.
+ *
+ * QUIETER THAN EVERYTHING ELSE HERE. It fires without being asked for — nobody pressed
+ * anything — and an unrequested sound has to be further under the threshold than one that
+ * answers a finger. It is also three of them in a row, and three of anything at tap's
+ * volume is a nuisance.
+ *
+ * It rides the same switch as the rest of the file: silence the interface and this goes
+ * with it. The flash is still there, which is the half that carries the meaning.
+ */
+export function shutter(times = 3, gap = 0.42) {
+  if (!soundOn()) return
+  const c = audio()
+  if (!c) return
+  try {
+    const now = c.currentTime
+    for (let i = 0; i < times; i++) {
+      const at = now + i * gap
+      click(c, at, 0.02)
+      /* The blade closing: later, shorter, softer. */
+      click(c, at + 0.038, 0.012)
+    }
+  } catch {
+    /* Nothing to do about it, and nothing worth telling anybody. */
+  }
+}
+
+/**
+ * One edge of a shutter: a few milliseconds of filtered noise.
+ *
+ * Built as a buffer rather than an oscillator because the sound has no pitch — see the
+ * note on `shutter`. The high-pass takes out the rumble that makes unfiltered noise sound
+ * like wind rather than a mechanism, and the envelope is the same two-millisecond attack
+ * `tone` uses, for the same reason: a gain that steps produces a click of its own on top
+ * of the click being synthesised.
+ */
+function click(c: AudioContext, at: number, peak: number) {
+  const ms = 9
+  const frames = Math.max(1, Math.floor((c.sampleRate * ms) / 1000))
+  const buf = c.createBuffer(1, frames, c.sampleRate)
+  const data = buf.getChannelData(0)
+  for (let i = 0; i < frames; i++) {
+    /* Decaying noise: the energy is all at the start, which is what makes it a snap. */
+    data[i] = (Math.random() * 2 - 1) * (1 - i / frames)
+  }
+  const src = c.createBufferSource()
+  src.buffer = buf
+  const hp = c.createBiquadFilter()
+  hp.type = 'highpass'
+  hp.frequency.setValueAtTime(1800, at)
+  const gain = c.createGain()
+  gain.gain.setValueAtTime(0.0001, at)
+  gain.gain.exponentialRampToValueAtTime(peak, at + 0.002)
+  gain.gain.exponentialRampToValueAtTime(0.0001, at + ms / 1000)
+  src.connect(hp).connect(gain).connect(c.destination)
+  src.start(at)
+  src.stop(at + ms / 1000 + 0.02)
+}
+
+/**
  * A sentence that did not land.
  *
  * Sam: "we also need a failed noise." The ping tells somebody they said it without asking

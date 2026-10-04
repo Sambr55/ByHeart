@@ -14,6 +14,7 @@ import { labelForLocale } from '@/content/pairs'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
+import { shutter } from '@/engine/tap'
 import {
   INTRO_DEMO_AFTER,
   INTRO_SETUP_AFTER,
@@ -4402,6 +4403,30 @@ function Asking({
   shows: Extract<NonNullable<IntroCard['shows']>, { kind: 'asking' }>
   onScreen: boolean
 }) {
+  /*
+    THE CLICKS, WITH THE FLASHES.
+
+    Sam: "and a photograph clicking sound." Scheduled from here rather than left to the
+    CSS, because sound has no CSS — and fired once per arrival, on the same 620ms delay the
+    animation waits, so the first click lands on the first flash rather than near it. The
+    420ms gap is passed to both, so there is one number deciding the rhythm instead of two
+    that have to be kept in step.
+
+    THE CONTEXT MAY REFUSE, AND THAT IS FINE. Browsers only make an AudioContext on a user
+    gesture, and this card arrives on a swipe — which IS one, so in practice the context
+    exists by the time anybody reaches ASK. Where it does not, `shutter` returns silently:
+    the flashes still fire and the card still makes its point, because the picture is the
+    half that carries the meaning.
+
+    Cleared on the way out so a card swiped past mid-burst does not click at somebody who
+    is now two screens away.
+  */
+  useEffect(() => {
+    if (!onScreen) return
+    const t = window.setTimeout(() => shutter(3, 0.42), 620)
+    return () => window.clearTimeout(t)
+  }, [onScreen])
+
   return (
     /* A list, because it is two ways in rather than one thing with a caption. */
     <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-6">
@@ -4459,9 +4484,20 @@ function Asking({
         <div className="relative flex flex-col items-center gap-1 overflow-hidden rounded-xl border border-dashed border-line px-3 py-6 text-center">
           <span className="pt display text-lg text-fg">{shows.shot.pt}</span>
           <span className="text-xs text-muted">{shows.shot.en}</span>
-          {onScreen ? (
-            <span aria-hidden className="shutter pointer-events-none absolute inset-0 bg-white" />
-          ) : null}
+          {/*
+            One element per flash — see .shutter. Three overlaid panels, each firing on its
+            own delay, which is how the burst stays three runs of a 120ms animation rather
+            than one long one off the scale.
+          */}
+          {onScreen
+            ? ['', 'shutter-2', 'shutter-3'].map((extra, i) => (
+                <span
+                  key={i}
+                  aria-hidden
+                  className={'shutter pointer-events-none absolute inset-0 bg-white ' + extra}
+                />
+              ))
+            : null}
         </div>
       </li>
     </ul>

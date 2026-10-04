@@ -1873,10 +1873,15 @@ summary:focus-visible,
   — the frame a camera gives you when it fires, which is the one gesture everybody knows
   from the other side of a phone.
 
-  FAST, BECAUSE A SHUTTER IS FAST. 120ms is --t-ack, the shortest step on the scale and the
-  one reserved for "a control confirming it heard you"; a flash is exactly that and nothing
-  longer would read as a flash. It fires once, on arrival, and never loops — a camera going
-  off repeatedly on a card somebody is reading is a strobe, not a demonstration.
+  FAST, BECAUSE A SHUTTER IS FAST. Each flash is 120ms, which is --t-ack, the shortest step
+  on the scale and the one reserved for "a control confirming it heard you"; a flash is
+  exactly that and nothing longer would read as a flash.
+
+  THREE OF THEM, 420ms apart — Sam's "triple flash", and the gap is --t-land rather than a
+  number chosen to look right. Three is a burst: it reads as somebody taking the shot and
+  making sure of it, which is what a person does at a sign they cannot read. It still fires
+  once per arrival and never loops — a camera going off forever on a card somebody is
+  reading is a strobe, not a demonstration.
 
   The 620ms delay is the gap, not a sixth duration: the panel rises first and is briefly a
   sign, and the shutter goes after it has been read. Taken together it is photograph THEN
@@ -1896,8 +1901,36 @@ summary:focus-visible,
   }
 }
 
+/*
+  THREE SNAPS, EACH ONE ON THE SCALE.
+
+  Sam: "Put a triple flash on the ASK page photograph panel." A camera taking three shots
+  is a burst, and the obvious way to write it — one timeline with three peaks in it — needs
+  a duration long enough to hold all three, which was 1260ms and is not a step on the
+  scale. motion-check caught it, correctly: a fifth duration is a violation however it is
+  arrived at, and "it is three of an allowed one added together" is exactly the argument
+  that turns a scale into a suggestion.
+
+  So it stays one 120ms animation, run three times, each delayed by a step the scale
+  already has. --t-ack is the snap; the gaps are --t-land and twice --t-land, which is the
+  same arithmetic a stagger uses everywhere else in this file. The sound takes the same
+  420ms, so the three clicks and the three flashes are one event rather than two that
+  happen to coincide.
+
+  Three stacked elements rather than three iterations, because `iteration-count: 3` would
+  make it a loop with a gap baked into the keyframes — a longer duration again, wearing a
+  disguise.
+*/
 .shutter {
   animation: shutter var(--t-ack) var(--ease-out) 620ms both;
+}
+
+.shutter-2 {
+  animation-delay: calc(620ms + var(--t-land));
+}
+
+.shutter-3 {
+  animation-delay: calc(620ms + var(--t-land) * 2);
 }
 
 @media (prefers-reduced-motion: reduce) {
