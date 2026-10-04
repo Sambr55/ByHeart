@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { track } from '@/engine/analytics'
@@ -425,6 +427,44 @@ export function Walkthrough({ onDone }: { onDone: () => void }) {
           */
           className="animate-bank flex flex-col gap-6 px-5 pb-10 pt-6"
         >
+          {/*
+            THE PICTURE, WHERE THE SCREEN IS THE ARGUMENT — see `shot` in content/walk.ts.
+
+            Above the caption rather than below it, because the caption reads as the answer
+            to what you are looking at: picture, then the line that says what it means.
+
+            A fixed aspect box rather than a bare image, so the card does not reflow when
+            the file loads — the walk-through is a sequence of timed steps and a layout that
+            jumps between them is the one thing it cannot do. `border-white/30` is the same
+            keyline the chips below use, so the screenshot reads as part of the overlay
+            rather than as the product having escaped it.
+          */}
+          {/*
+            AND THE PICTURE SITS WITH THE CAPTION, never under the hole.
+
+            First build put it at the top of the caption block, which on the boards step is
+            directly beneath a circle 300px across — so the screenshot was half inside the
+            cut-out, showing through onto the real page behind it. Photographed, obvious;
+            invisible in the DOM, where both elements are exactly where they were asked to
+            be.
+
+            `self-end` keeps it on the side the counter is not, and the caption below is the
+            thing that explains it either way.
+          */}
+          {step.shot ? (
+            <div
+              data-testid="walk-shot"
+              className="relative aspect-[9/16] w-full max-w-[9rem] self-end overflow-hidden rounded-xl border border-white/30 shadow-lg"
+            >
+              <Image
+                src={step.shot.src}
+                alt={step.shot.alt}
+                fill
+                sizes="160px"
+                className="object-cover object-top"
+              />
+            </div>
+          ) : null}
           {step.opens ? (
             <ul data-testid="walk-opens" className="flex flex-wrap gap-3">
               {step.opens.map((what) => (
