@@ -1537,14 +1537,33 @@ function Picker() {
     "fewer hooks than expected" and replaces the screen with the error boundary. Caught by
     walking it: the jump-off came back as "This card broke."
   */
-  const autoEntered = useRef(false)
+  /*
+    ONCE PER STEP, NOT ONCE PER VISIT.
+
+    Sam: "the road is just loping around 2 of 10 from songs you know and not getting to any
+    of the vibe content."
+
+    Exactly what this did. The ref latched `true` on the first auto-enter and never cleared,
+    so the picker carried a learner into the basics and then — every time they finished a
+    root and came back — returned at the top of this effect and did nothing. The road's
+    first two steps are the basics; steps three to ten are Bond, Bridget, Top Gun, Duran
+    Duran, Bowie and Audrey. The learner was parked in the only crate the road had already
+    delivered, replaying it, while the bar sat at 2 of 10 telling the truth about a journey
+    that had stopped moving.
+
+    The ref was guarding against re-entering the SAME step — which is real: this effect also
+    runs when `entering` settles, and firing chooseFamily again mid-transition fights it. So
+    it remembers WHICH step it entered rather than merely THAT it entered one. A new step is
+    a new root, the ref no longer matches, and the learner is carried on.
+  */
+  const autoEntered = useRef<string | null>(null)
   useEffect(() => {
-    if (autoEntered.current) return
     if (!onRoad || !started || !road.next) return
-    autoEntered.current = true
+    if (autoEntered.current === road.next.root) return
+    autoEntered.current = road.next.root
     setEntering(road.next.family)
     chooseFamily(road.next.family, road.next.root)
-    /* eslint-disable-next-line react-hooks/exhaustive-deps -- fires once, on the road's next step */
+    /* eslint-disable-next-line react-hooks/exhaustive-deps -- fires once per road step */
   }, [onRoad, started, road.next?.root])
 
   if (onRoad && !started) {
@@ -3829,6 +3848,60 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
   }
 
   /*
+    AND THE WORD THE LIST DID NOT HAVE, COMING BACK FROM THE TRANSLATOR.
+
+    Sam: "reinstate the free text look up facility on this screen if one of our suggestions
+    doesnt fit."
+
+    It was never on THIS screen. The escape hatch — `slot.open`, "Not here? Ask for it" —
+    was built on the Legend's own card editor and the road holds a second copy of the chip
+    row, written for the lesson. Ten fields cannot hold everybody (reported the first time
+    as "it doesn't have advertising for instance so that is me stumped"), and the learner
+    now meets this row on the road long before they ever see the deck.
+
+    A plain text box would be the wrong answer here for the same reason it was there: the
+    frame is "Trabalho com {thing}" and typing into it asks the learner to do the
+    translating, which is what made this a pick list in the first place. So the way out is
+    the translator — the product's own answer to "what is the word for this" — which is
+    mounted at the root and opens OVER the lesson, so the half-answered question is still
+    here when the word arrives.
+
+    THE HOOK SITS ABOVE EVERY RETURN. This component returns early in six places below.
+    That mistake has cost two screens this week — "Rendered fewer hooks than expected",
+    then the error boundary — so it goes at the top with the others, and it is cheap when
+    the question on screen is not a chip question: the id says which frame asked, and one
+    that does not match simply ignores the word.
+
+    The cleaning is the same as the Legend's, deliberately. The frame supplies its own
+    punctuation and Portuguese likes an article in front of a bare noun, so a model
+    answering "a publicidade." would otherwise write "Trabalho com a publicidade..".
+  */
+  useEffect(() => {
+    const took = (e: Event) => {
+      const d = (e as CustomEvent<{ for: string; pt: string }>).detail
+      if (!d?.for || !d.pt) return
+      const [scope, frameId, slotKey] = d.for.split(':')
+      if (scope !== 'lesson' || frameId !== which) return
+      const word = d.pt
+        .trim()
+        .replace(/[.!?]+$/, '')
+        .replace(/^(?:o|a|os|as|um|uma)\s+/i, '')
+        .trim()
+      if (!word) return
+      /*
+        Deliberate, like a chip: the learner went and fetched this word on purpose, and it
+        must replace whatever the list had them settle for in the meantime.
+      */
+      answerLegendFromLesson(which, { [slotKey]: word }, { deliberate: true })
+      track('profile_answer', { question: which, answer: word, where: 'lesson:ask' })
+      settle()
+    }
+    window.addEventListener('dub:word', took)
+    return () => window.removeEventListener('dub:word', took)
+    /* eslint-disable-next-line react-hooks/exhaustive-deps -- settle is stable enough; the id is what matters */
+  }, [which])
+
+  /*
     A LEGEND QUESTION, ASKED BY THE LESSON THAT TEACHES ITS WORDS.
 
     Sam: "the legend build being a learning exercise which is populated with any
@@ -3945,7 +4018,7 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
                     somebody adds would have had to remember it. The mirror cannot be
                     forgotten, because every caller already goes through answerLegend.
                   */
-                  answerLegendFromLesson(which, { [slot.key]: word })
+                  answerLegendFromLesson(which, { [slot.key]: word }, { deliberate: true })
                   track('profile_answer', { question: which, answer: word, where: 'lesson' })
                   settle()
                 }}
@@ -3965,6 +4038,31 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
               </button>
             )
           })}
+          {/*
+            NOT ON THE LIST, ASK FOR IT — the same chip the Legend's editor offers, on the
+            screen where the question is actually first met.
+
+            Inside the row and shaped like a chip, because it is the same choice: one of
+            these ten, or the one you are about to go and fetch. A link underneath would
+            read as navigation, and this does not navigate — the translator opens over the
+            lesson and the answer comes back to the listener at the top of this component.
+          */}
+          {slot.open ? (
+            <button
+              type="button"
+              data-testid={'ask-' + which + '-open'}
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent('dub:ask-word', {
+                    detail: { for: 'lesson:' + which + ':' + slot.key, hint: slot.open },
+                  }),
+                )
+              }
+              className="tap-target rounded border border-dashed border-line px-3 py-3 text-left text-sm text-muted transition hover:border-accent/50"
+            >
+              Not here? Ask for it
+            </button>
+          ) : null}
         </div>
       </div>
     )
@@ -4168,10 +4266,13 @@ function AskAge({
               */
               setProfile('age_band', n >= 60 ? '60plus' : n >= 45 ? '45to59' : n >= 30 ? '30to44' : '16to29')
               /*
-                And the Legend card it answers, so the deck is not asking again — see
-                answerLegendFromLesson, which never overwrites a deliberate edit.
+                And the Legend card it answers, so the deck is not asking again.
+
+                `deliberate`, because this is the learner pressing a number they chose —
+                the same reason the chip row passes it. Without it the first age ever
+                stored would be permanent and re-picking would silently do nothing.
               */
-              answerLegendFromLesson('age', { n: String(n) })
+              answerLegendFromLesson('age', { n: String(n) }, { deliberate: true })
               /*
                 AND THE WORDS THEY JUST BUILT IT OUT OF.
 
@@ -4487,7 +4588,8 @@ function AskInto({
                 const g = genresFromInterests(chosen)
                 if (g.length) setGenres(g)
               }
-              answerLegendFromLesson('into', { into: chosen.join(',') })
+              /* Pressed, so it replaces — picking different interests must take. */
+              answerLegendFromLesson('into', { into: chosen.join(',') }, { deliberate: true })
               track('profile_answer', { question: 'into', answer: String(chosen.length), where: 'lesson' })
               setConfirmed(true)
               onDone()
@@ -4667,11 +4769,16 @@ function AskOrigin({
             data-testid="ask-origin-done"
             onClick={() => {
               setProfile('from_place', place.trim())
-              /* The Legend's origin card, answered by the lesson that asked it. */
-              answerLegendFromLesson('origin', {
-                nationality: said ?? '',
-                place: place.trim(),
-              })
+              /*
+                The Legend's origin card, answered by the lesson that asked it, and
+                `deliberate` because the learner has just typed a town and pressed a
+                button. The effect above seeds the same frame and correctly does not.
+              */
+              answerLegendFromLesson(
+                'origin',
+                { nationality: said ?? '', place: place.trim() },
+                { deliberate: true },
+              )
               onDone()
             }}
             className="tap-target eyebrow rounded bg-accent px-5 py-3 text-accent-ink"

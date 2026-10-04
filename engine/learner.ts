@@ -2056,13 +2056,37 @@ export function answerLegend(frameId: string, values: Record<string, string>) {
  * their own words, in a lesson built around the sentence. The only thing that changes is
  * that DUB stops asking twice.
  */
-export function answerLegendFromLesson(frameId: string, values: Record<string, string>) {
+export function answerLegendFromLesson(
+  frameId: string,
+  values: Record<string, string>,
+  /*
+    THE LEARNER PRESSED IT, so it is not a seed — it is an answer, and it replaces.
+
+    Sam: "whatever you select in what you do is selecting computadores."
+
+    Every chip in the lesson row called this, and the never-overwrite rule below ate the
+    second tap and every tap after it. The first value stored won permanently: tap design,
+    tap música, tap saúde, and the card still said computadores. Worse, the row calls
+    settle() regardless, so the lesson moved on looking as though the choice had taken, and
+    the chip highlight kept pointing at a word the learner had changed their mind about
+    nine taps ago.
+
+    The rule it ran into is a real one and stays: a card answered on the deck is a
+    deliberate edit and a lesson answered later must not quietly undo it. What was missing
+    is that a chip tap is ALSO deliberate. So the caller says which it is, and only the
+    incidental writes — the ones seeded from a profile answer the learner gave somewhere
+    else — defer to what is already there.
+  */
+  opts: { deliberate?: boolean } = {},
+) {
   const filled = Object.fromEntries(Object.entries(values).filter(([, v]) => String(v).trim()))
   if (!Object.keys(filled).length) return
-  const already = getLearner().legend.find(
-    (a) => a.frame_id === frameId && Object.keys(a.values ?? {}).length > 0,
-  )
-  if (already) return
+  if (!opts.deliberate) {
+    const already = getLearner().legend.find(
+      (a) => a.frame_id === frameId && Object.keys(a.values ?? {}).length > 0,
+    )
+    if (already) return
+  }
   answerLegend(frameId, filled)
 }
 
