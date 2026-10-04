@@ -528,8 +528,11 @@ export const PICKER = {
   start_head: 'Let’s build your Legend.',
   start_body: (n: number) =>
     n +
-    ' questions, and you will be seated at your table in the DUB Club. Each one is a line you will actually say — your name, where you are from, what you do.',
+    ' vibes you learn from, and you will be seated at your table in the DUB Club. Each one is a line you will actually say — your name, where you are from, what you do.',
+  /* On the control itself now, under the pulsing ring — see the jump-off in Journey.tsx. */
   start_cta: 'START',
+  /* What a screen reader hears on that control, since the word alone is not a sentence. */
+  start_aria: 'Start building your Legend',
   cta: 'START HERE',
 } as const
 

@@ -1548,30 +1548,77 @@ function Picker() {
   }, [onRoad, started, road.next?.root])
 
   if (onRoad && !started) {
+    /*
+      THE PROMISE, ON A PHOTOGRAPH, WITH THE CONTROL THE PRODUCT ALREADY USES.
+
+      Sam: "lets make this a bit more fun and enticing. We need a background image…
+      rather than the square CTA use the pulsating audio icon underneath the text and
+      change the Mic icon to START."
+
+      It was sand, a headline, a paragraph and a full-width blue bar — the shape of a form,
+      on the one screen whose job is to make somebody want the next ten minutes. The
+      landing hero is already built out of a full-bleed photograph, a bottom scrim and
+      white type, so this borrows that rather than inventing a third treatment: see the
+      LANDING screen above for the -bottom-[15vh] note on why the image hangs past the box.
+
+      THE PULSING RING IS NOT DECORATION. `.listening` is what the microphone wears while
+      it is actually listening — see app/globals.css — so it already means "this is live,
+      press it". Reusing it here puts the same signal on the one button that starts
+      everything, and it is the only animated thing on the screen.
+
+      The word sits INSIDE the circle rather than under it. START under a ring reads as a
+      caption for the ring; START in it is the control.
+    */
     return (
-      <Shell stage="CHOICE">
-        <div className="flex flex-1 flex-col justify-center gap-4">
-          <p className="eyebrow text-accent">{PICKER.start_eyebrow}</p>
+      <div
+        data-stage="CHOICE"
+        className="app-frame relative flex min-h-lvh w-full flex-col justify-end overflow-hidden on-dark text-white"
+      >
+        <div className="pointer-events-none absolute inset-x-0 top-0 -bottom-[15vh] overflow-hidden">
+          <Image
+            src="/lisbon/intro-vibes.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
+        {/* Legibility is measured against this, never against the photograph. */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black/92 via-black/70 to-transparent"
+        />
+        {/*
+          pb-16 rather than pb-10: the START control wears `.listening`, whose ring expands
+          34px past the button, and at pb-10 that ring crossed into the bottom nav.
+          Measured in a screenshot, not guessed — a pulse clipped by a navigation bar reads
+          as a rendering fault rather than as an invitation.
+        */}
+        <div className="relative mx-auto flex w-full max-w-md flex-col gap-4 px-5 pb-16">
+          <p className="eyebrow text-white/80">{PICKER.start_eyebrow}</p>
           <h1 className="display text-balance text-3xl">{PICKER.start_head}</h1>
-          <p className="text-base leading-relaxed text-muted">
+          <p className="text-base leading-relaxed text-white/85">
             {PICKER.start_body(roadFor(learner.purpose ?? null).length)}
           </p>
+          <div className="flex justify-center pt-4">
+            <button
+              type="button"
+              data-testid="road-start"
+              aria-label={PICKER.start_aria}
+              onClick={() => {
+                if (!road.next) return
+                setEntering(road.next.family)
+                chooseFamily(road.next.family, road.next.root)
+              }}
+              className="listening tap-target flex h-24 w-24 shrink-0 items-center justify-center rounded-full border border-accent bg-accent text-accent-ink"
+            >
+              <span className="eyebrow">{PICKER.start_cta}</span>
+            </button>
+          </div>
         </div>
-        <Dock>
-          <button
-            type="button"
-            data-testid="road-start"
-            onClick={() => {
-              if (!road.next) return
-              setEntering(road.next.family)
-              chooseFamily(road.next.family, road.next.root)
-            }}
-            className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-          >
-            {PICKER.start_cta}
-          </button>
-        </Dock>
-      </Shell>
+        <BottomNav />
+      </div>
     )
   }
 
