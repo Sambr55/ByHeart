@@ -90,7 +90,23 @@ console.log('\n1. every step names a control that exists in the source\n')
       /tab-/.test(step.target) ? /'tab-' \+ t\.label\.toLowerCase\(\)/.test(src)
       : /^rail-/.test(step.target) ? /'rail-' \+ deck\.id/.test(src)
       : false
-    ok('step ' + step.id + ' targets ' + step.target, literal || built, 'no such data-testid')
+    /*
+      THE DETAIL SAYS WHAT WAS FOUND, because `ok` prints it on a pass as well as a fail.
+
+      It read 'no such data-testid' unconditionally, so a passing assertion announced the
+      opposite of what it had just proved: "✓ step noticed targets yours-noticed   no such
+      data-testid". Harmless to the exit code and actively misleading to anybody reading
+      the output, which is the only reason the output exists.
+
+      Saying HOW it was found is also the more useful line of the two. A target satisfied by
+      the computed form is a target nobody can grep for, and knowing which of the two matched
+      is what you want when one of these eventually fails.
+    */
+    ok(
+      'step ' + step.id + ' targets ' + step.target,
+      literal || built,
+      literal ? 'written out' : built ? 'built from a loop' : 'no such data-testid',
+    )
   }
 
   /*
@@ -111,12 +127,14 @@ console.log('\n1. every step names a control that exists in the source\n')
     ok(
       'step ' + step.id + ' has its screenshot',
       existsSync(file),
-      file + ' — run npm run shots',
+      existsSync(file) ? file : file + ' is missing — run npm run shots',
     )
     ok(
       'and it describes what is in it',
       step.shot.alt.length > 30,
-      'alt text is the picture, not a label',
+      step.shot.alt.length > 30
+        ? step.shot.alt.length + ' chars'
+        : 'too short to be a description — alt text is the picture, not a label',
     )
   }
 
@@ -329,11 +347,23 @@ try {
       correctly nowhere near containing a 912px card.
     */
     const reach = (rr * 2) / Math.max(w, h)
+    /*
+      The detail reports the measurement and only DIAGNOSES on a failure — `ok` prints it
+      either way, so the old string told every passing step it was aimed at a wrapper.
+    */
     ok(
       'and the circle is the size of ' + step.target,
       reach >= 0.33,
-      'hole is ' + Math.round(reach * 100) + '% of the control — it is aimed at a wrapper, ' +
-        'not a control (r=' + Math.round(rr) + ' against ' + Math.round(w) + 'x' + Math.round(h) + ')',
+      'hole is ' +
+        Math.round(reach * 100) +
+        '% of the control (r=' +
+        Math.round(rr) +
+        ' against ' +
+        Math.round(w) +
+        'x' +
+        Math.round(h) +
+        ')' +
+        (reach >= 0.33 ? '' : ' — it is aimed at a wrapper, not a control'),
     )
     /*
       AND IT IS ROUND, which is the one piece of this Sam specified by itself: "The cut
