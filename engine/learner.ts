@@ -797,12 +797,56 @@ function emit() {
   listeners.forEach((l) => l())
 }
 
+/*
+  WHETHER THE LAST WRITE REACHED THE DISK.
+
+  Sam's exported record came back completely empty — no roots, no proof, no purpose, no
+  chapter — from a phone that was visibly mid-journey with a built Legend sentence on the
+  screen in front of him. Three rounds of reproduction walked the road correctly, on
+  localhost and against production, because the code is right: what was wrong is that none
+  of it was being KEPT.
+
+  This function swallowed every storage failure. The in-memory copy carries on, so the
+  product looks like it is working for as long as the page lives, and every reload starts
+  from nothing — which is exactly "stuck on 2 of 10, round and round": progress, reload,
+  reset, progress. Silent, and indistinguishable from the road being broken.
+
+  localStorage throws for real reasons on a real phone: private browsing, a full quota, and
+  iOS evicting storage under memory or Low Power Mode — Sam's screenshots are all at 10 to
+  20 percent battery. None of those are bugs here and all of them must be visible, because
+  a learner losing their Legend deserves to be told rather than to discover it.
+
+  So the outcome is recorded. Nothing retries and nothing throws — the session still runs
+  on the in-memory copy, which is the right behaviour — but the diagnostic can now say
+  whether this device is keeping anything at all, and the product can warn before somebody
+  spends ten minutes building a card that will not survive the walk home.
+*/
+let lastSave: { at: string; ok: boolean; why: string } | null = null
+
+/** Did the most recent write reach the disk, and if not, why not. */
+export function saveHealth(): { at: string; ok: boolean; why: string } | null {
+  return lastSave
+}
+
 function save() {
   if (typeof window === 'undefined' || !state) return
   try {
     window.localStorage.setItem(currentKey(), JSON.stringify(state))
-  } catch {
-    // Private mode or a full quota. The in-memory copy still drives the session.
+    /*
+      Written is not kept. A quota that is already full can accept the call and drop the
+      value, and an evicted store reads back as absent, so the only honest check is to ask
+      for it again.
+    */
+    const back = window.localStorage.getItem(currentKey())
+    lastSave = back
+      ? { at: new Date().toISOString(), ok: true, why: '' }
+      : { at: new Date().toISOString(), ok: false, why: 'written, but not there when read back' }
+  } catch (e) {
+    lastSave = {
+      at: new Date().toISOString(),
+      ok: false,
+      why: e instanceof Error ? e.name + ': ' + e.message.slice(0, 120) : 'storage refused the write',
+    }
   }
 }
 

@@ -10,7 +10,7 @@ import {
 } from '@/content/roots'
 import { doorwayToGo } from '@/content/legend'
 import { roadProgress } from '@/content/road'
-import { loadLearner, type LearnerState } from '@/engine/learner'
+import { learnerStorageKey, loadLearner, saveHealth, type LearnerState } from '@/engine/learner'
 import { useEntitlements } from '@/engine/useEntitlements'
 
 /**
@@ -30,9 +30,34 @@ export function Diagnostic() {
   const [s, setS] = useState<LearnerState | null>(null)
   const [copied, setCopied] = useState('')
   const [showRaw, setShowRaw] = useState(false)
+  const [raw, setRaw] = useState('')
   useEffect(() => setS(loadLearner()), [])
   if (!s) return null
 
+  /*
+    Asked rather than waited for.
+
+    saveHealth() only knows about writes this PAGE made, and /facilitator makes none — so a
+    healthy device reported "nothing written yet", which is true and useless. Writing the
+    record back to its own key proves the round trip on the spot, costs one set and one get,
+    and changes nothing: the value written is the value already there.
+  */
+  const health = (() => {
+    const live = saveHealth()
+    if (live) return live
+    if (typeof window === 'undefined') return null
+    try {
+      const k = learnerStorageKey()
+      const was = window.localStorage.getItem(k)
+      if (was == null) return { at: '', ok: false, why: 'no record on this device' }
+      window.localStorage.setItem(k, was)
+      return window.localStorage.getItem(k) === was
+        ? { at: '', ok: true, why: '' }
+        : { at: '', ok: false, why: 'written, but not there when read back' }
+    } catch (e) {
+      return { at: '', ok: false, why: e instanceof Error ? e.name : 'storage refused the write' }
+    }
+  })()
   const proof = s.proof ?? []
   const releases = proof.filter((p) => p.source === 'release')
   const rung = rungReached(proof)
@@ -90,6 +115,12 @@ export function Diagnostic() {
     ['Road next', road.next ? road.next.root : '—'],
     ['…in crate', road.next ? road.next.family : '—'],
     ['Roots recorded', (s.roots_played ?? []).join(', ') || 'none'],
+    /*
+      AND WHETHER THIS DEVICE IS KEEPING ANY OF IT, which is the row that would have ended
+      this three exports ago. An empty record on a phone mid-journey is not a road fault,
+      it is a storage fault, and the two look identical from every other row on this page.
+    */
+    ['Storage keeps writes', health ? (health.ok ? 'yes' : 'NO — ' + health.why) : 'nothing written yet'],
     ['Legend opens in', doorwayToGo(s.roots_played ?? []) + ' more basics lines'],
     ['Entitlements known', String(access.known)],
     ['Plan', access.entitlements.plan + (access.comped ? ' (comped)' : '')],
@@ -126,11 +157,44 @@ export function Diagnostic() {
         type="button"
         data-testid="diag-copy"
         onClick={() => {
-          const text = JSON.stringify(s, null, 2)
+          /*
+            EVERY RECORD ON THE DEVICE, not just the one this page resolved to.
+
+            The first export came back completely empty — no roots, no proof, no purpose,
+            no chapter, deal_accepted_at null — from a phone that was visibly mid-journey
+            with a built Legend sentence on screen. An empty record cannot be the record
+            being written to, so the page and the app were reading different keys.
+
+            They can be. The store is namespaced per pair — byheart.learner.v1:en-GB:pt-PT
+            — and `currentPair()` falls back to DEFAULT_PAIR when no pair is chosen yet. A
+            page that resolves before the pair does reads the default's record, which on a
+            device that chose a different pair is a pristine blank. Every derived row above
+            is then honest about a learner who does not exist.
+
+            So the export carries them all, keyed, plus the chosen pair. Whichever one holds
+            the roots is the one the app is using, and the gap between that and the one this
+            page read is the bug.
+          */
+          const all: Record<string, unknown> = {}
+          try {
+            for (let i = 0; i < localStorage.length; i++) {
+              const k = localStorage.key(i)
+              if (!k || !k.startsWith('byheart.')) continue
+              try {
+                all[k] = JSON.parse(localStorage.getItem(k) ?? 'null')
+              } catch {
+                all[k] = localStorage.getItem(k)
+              }
+            }
+          } catch {
+            // Private mode. The resolved record below is all there is.
+          }
+          const text = JSON.stringify({ resolved: s, everyKey: all }, null, 2)
           void navigator.clipboard?.writeText(text).then(
             () => setCopied('copied — paste it into the chat'),
             () => setCopied('could not copy; screenshot the block below'),
           )
+          setRaw(text)
           setShowRaw(true)
         }}
         className="tap-target eyebrow mt-3 rounded border border-accent px-4 py-3 text-accent"
@@ -140,7 +204,7 @@ export function Diagnostic() {
       {copied ? <p className="text-xs text-muted">{copied}</p> : null}
       {showRaw ? (
         <pre className="max-h-64 overflow-auto rounded border border-line bg-surface p-3 text-[10px] leading-snug">
-          {JSON.stringify(s, null, 2)}
+          {raw}
         </pre>
       ) : null}
 
