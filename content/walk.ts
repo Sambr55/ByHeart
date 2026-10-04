@@ -45,8 +45,36 @@
 export interface WalkStep {
   /** For analytics, and for the check to name a failing step. */
   id: string
-  /** The data-testid of the real control. Measured at runtime — never a coordinate. */
+  /**
+   * The data-testid of the real control. Measured at runtime — never a coordinate.
+   *
+   * Empty on a step that points at nothing — see `pick`. Every other step in this file
+   * names a control that is on the screen, and the walk filters out any whose control is
+   * absent, which is why this cannot simply be optional: a step with no target would be
+   * dropped by that filter on the way in.
+   */
   target: string
+  /**
+   * A STEP THAT ASKS SOMETHING INSTEAD OF POINTING AT SOMETHING.
+   *
+   * Sam: "add the pick your mentor concept to the walk through and have some fun with it."
+   *
+   * Every other step here is a caption over a hole: this is where FIND is, this is what
+   * the cog does. This one has no hole and no control, because the thing it is about does
+   * not exist on the screen yet — it is a choice, and making it is what brings it into
+   * existence.
+   *
+   * WHY IT GOES IN THE WALK AT ALL. A "tone of voice" dropdown in Settings is a
+   * preference, and nobody has ever changed one. Choosing the person who is going to talk
+   * to you is a character choice, it happens once, and the walk is the only place DUB
+   * introduces itself — so it is the one moment where asking is natural rather than
+   * administrative.
+   *
+   * It is also the only step somebody can get WRONG, which is why it cannot be a hole: a
+   * circle around part of the page while the caption asks a question would be two
+   * instructions at once.
+   */
+  pick?: 'mentor'
   /** The caption. Big, white, low on the screen. */
   say: string
   /** What is behind it, when saying so helps. Three or fewer: this is a label, not a menu. */
@@ -222,6 +250,27 @@ export const WALK: WalkStep[] = [
     target: 'yours-noticed',
     say: 'I notice what you can say and what keeps slipping. That is how this gets better.',
     opens: ['What landed', 'What is close'],
+  },
+  /*
+    AND THEN: WHO SAYS IT.
+
+    Straight after NOTICED, which is the step that introduces the watching — so the order
+    is "something is paying attention to you", then "pick who it sounds like". Reversed,
+    the question is about nobody.
+
+    The caption is a question rather than a statement, which is the only one in this file,
+    because this is the only step that wants an answer rather than a nod.
+  */
+  {
+    id: 'mentor',
+    /*
+      NOTHING TO POINT AT. The target is empty on purpose — the choice is not a control on
+      Yours, it is a thing being asked. The walk's own filter keeps a step whose target is
+      empty, precisely so this one survives on a screen where nothing else would.
+    */
+    target: '',
+    pick: 'mentor',
+    say: 'One last thing. Who do you want telling you how it is going?',
   },
   {
     id: 'logo',

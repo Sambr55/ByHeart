@@ -601,6 +601,24 @@ export interface LearnerState {
    */
   club_walked_at: string | null
   /**
+   * WHO IS TEACHING THEM, chosen in the walk.
+   *
+   * Sam: "Give /Noticed a configurable Mentor type… changing tone of voice and potentially
+   * number of notifications", and then "add the pick your mentor concept to the walk
+   * through and have some fun with it".
+   *
+   * Null means never chosen, which is every record written before this existed and every
+   * learner who skipped the walk — and it reads as the default rather than as a gap. See
+   * mentorFor in content/mentors.ts: it changes HOW an observation is said and never what
+   * is observed, so a null here is a voice, not a missing feature.
+   *
+   * Typed as a plain string rather than as MentorId, for the reason every other id on this
+   * record is: engine/learner.ts is the storage layer and importing a content union into
+   * it would make a record's SHAPE depend on what content exists this week. mentorFor
+   * narrows it, and falls back on an id it does not recognise.
+   */
+  mentor: string | null
+  /**
    * When they last opened the inbox, which is the whole of what the inbox remembers.
    *
    * ONE DATE RATHER THAN A LIST OF MESSAGES SEEN, and it is the same shape as
@@ -812,6 +830,7 @@ export function emptyLearner(): LearnerState {
     sittings: 0,
     club_welcomed_at: null,
     club_walked_at: null,
+    mentor: null,
     inbox_opened_at: null,
     saved: [],
     liked: [],
@@ -1058,6 +1077,9 @@ export function loadLearner(): LearnerState {
              past the welcome meets it on their next visit to Yours, which is the right
              outcome — the walk is about where things are, and that does not expire. */
           club_walked_at: parsed.club_walked_at ?? null,
+          /* Null on every record written before the picker existed, which reads as the
+             default voice rather than as a missing choice. See mentorFor. */
+          mentor: typeof parsed.mentor === 'string' ? parsed.mentor : null,
           /* Absent on every record written before the inbox existed, and absent is the
              honest reading: they have never opened it, so everything live is new. */
           inbox_opened_at: parsed.inbox_opened_at ?? null,
@@ -1379,6 +1401,8 @@ export async function syncSession(reason: string): Promise<boolean> {
         sittings: s.sittings,
         club_welcomed_at: s.club_welcomed_at,
         club_walked_at: s.club_walked_at,
+        /* Synced, because who is teaching you is not a fact about one handset. */
+        mentor: s.mentor,
         inbox_opened_at: s.inbox_opened_at,
         collisions_played: s.collisions_played,
         nocue_done: s.nocue_done,
@@ -2507,5 +2531,22 @@ export function welcomeToClub() {
 export function walkedTheClub() {
   update((s) => {
     s.club_walked_at ??= new Date().toISOString()
+  })
+}
+
+/**
+ * Who they picked to teach them.
+ *
+ * A PLAIN ASSIGNMENT, unlike the stamp above, and the difference matters: the walk-through
+ * date is a fact about something that happened once, and this is a preference somebody is
+ * allowed to change their mind about. Choosing again replaces it.
+ *
+ * Validated by the caller rather than here — see mentorFor, which falls back on an id it
+ * does not recognise. Storing an unknown string is harmless and losing somebody's choice
+ * because a content file was edited would not be.
+ */
+export function chooseMentor(id: string) {
+  update((s) => {
+    s.mentor = id
   })
 }

@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'
 import { track } from '@/engine/analytics'
 import { walkedTheClub } from '@/engine/learner'
 import { WALK } from '@/content/walk'
+import { MENTORS, type MentorId } from '@/content/mentors'
+import { chooseMentor } from '@/engine/learner'
 
 /**
  * THE WALK — every control in Yours, one at a time, with a hole cut over it.
@@ -82,7 +84,20 @@ export function Walkthrough({ onDone }: { onDone: () => void }) {
   */
   const [steps, setSteps] = useState<typeof WALK>(WALK)
   useEffect(() => {
-    setSteps(WALK.filter((s) => document.querySelector('[data-testid="' + s.target + '"]')))
+    /*
+      A STEP THAT POINTS AT NOTHING IS ALWAYS KEPT — see `pick` in content/walk.ts.
+
+      This filter exists to drop steps whose control is not on this screen, and it would
+      have dropped the mentor picker on the way in: it has no target, so the query finds
+      nothing, so it looked exactly like a board step on an empty library. The difference
+      is that an absent board is a reason not to talk about boards, and an absent control
+      here is the whole design — the question does not describe anything on the page.
+    */
+    setSteps(
+      WALK.filter(
+        (s) => !s.target || document.querySelector('[data-testid="' + s.target + '"]'),
+      ),
+    )
   }, [])
 
   const step = steps[at] ?? steps[0]
@@ -309,7 +324,30 @@ export function Walkthrough({ onDone }: { onDone: () => void }) {
           of whichever photograph happened to be under it, which is the white-on-white
           fault this codebase keeps having to undo.
         */}
-        <rect x="0" y="0" width="100%" height="100%" fill="rgba(0,0,0,0.8)" mask="url(#walk-hole)" />
+        {/*
+          AND A STEP THAT POINTS AT NOTHING GOES FULLY OPAQUE.
+
+          80% exists so the control in the hole stays visible THROUGH the scrim, which is
+          the whole mechanic — you can see the thing being described. A step with no hole
+          is describing nothing, so the 20% of page showing through is not information, it
+          is interference: photographed on the mentor step, the question "Who do you want
+          telling you how it is going?" sat directly over the empty-state paragraph behind
+          it, and the inbox badge showed through the first card as a stray dark block.
+          Both invisible in the DOM, both obvious in a picture.
+
+          Keyed off the HOLE rather than off the step id, so any future step that asks
+          something instead of pointing at it gets this for free and nothing here needs
+          editing. Black at 100% also moves the caption contrast from 15:1 to 21:1, which
+          is the one direction that rule is allowed to move.
+        */}
+        <rect
+          x="0"
+          y="0"
+          width="100%"
+          height="100%"
+          fill={hole ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,1)'}
+          mask="url(#walk-hole)"
+        />
         {/*
           THE RING, which is what makes the hole read as deliberate rather than as a gap.
 
@@ -488,6 +526,20 @@ export function Walkthrough({ onDone }: { onDone: () => void }) {
             Not invented here: the same type the Club's own cards use.
           */}
           <p className="t-line text-white">{step.say}</p>
+          {/*
+            THE CHOICE, WHERE A STEP ASKS ONE — see `pick` in content/walk.ts.
+
+            Four people, each saying THE SAME SENTENCE in their own voice, so the choice is
+            made on evidence rather than on a label. Somebody reading "A drill sergeant"
+            and "Your gentle dad" is choosing between two adjectives; somebody reading the
+            same observation four times over is choosing a person they want to hear from,
+            which is the actual decision.
+
+            The sample is deliberately the stuck line rather than the praise. Anyone sounds
+            fine congratulating you — what somebody actually wants to know is how this
+            thing is going to talk to them on a bad day.
+          */}
+          {step.pick === 'mentor' ? <MentorPick onPicked={next} /> : null}
           <button
             type="button"
             data-testid="walk-next"
@@ -502,7 +554,20 @@ export function Walkthrough({ onDone }: { onDone: () => void }) {
             */
             className="tap-target pointer-events-auto w-full rounded-full bg-white px-5 py-3 text-center text-sm font-semibold text-black transition hover:bg-white/90"
           >
-            {last ? (step.done ?? 'GOT IT') : 'NEXT'}
+            {/*
+              ON THE PICK STEP IT IS AN OPT-OUT, not a way on.
+
+              Every other step's button means "I have read this". Here there is a real
+              question above it, and a button saying NEXT under four choices reads as a
+              fifth choice — so it says what it does. Somebody who skips keeps the default
+              voice, which is the one the product was written in, so nothing is lost by
+              not deciding. See DEFAULT_MENTOR.
+            */}
+            {step.pick === 'mentor'
+              ? 'PICK FOR ME'
+              : last
+                ? (step.done ?? 'GOT IT')
+                : 'NEXT'}
           </button>
         </div>
 
@@ -510,6 +575,105 @@ export function Walkthrough({ onDone }: { onDone: () => void }) {
         {hole && hole.y > 560 ? <div className="flex-1" /> : null}
       </div>
     </div>
+  )
+}
+
+/**
+ * PICK WHO IS TEACHING YOU, in the middle of the walk.
+ *
+ * Sam: "add the pick your mentor concept to the walk through and have some fun with it."
+ *
+ * THE FUN IS IN THE EVIDENCE, not in the decoration. Four cards, four names, and the SAME
+ * observation written four ways — the stuck line, because anybody sounds pleasant
+ * congratulating you and what somebody wants to know is how this will talk to them when
+ * it is going badly. Reading "This sentence has beaten you how many times now?
+ * Unacceptable. Again." next to "That one is tricky, love. No rush on it." is the whole
+ * pitch, and it takes no explaining.
+ *
+ * ONE TAP AND IT MOVES ON. No confirm, no selected state waiting for a NEXT — the tap IS
+ * the answer, and a picker that makes somebody choose and then press something else has
+ * asked them twice. The brief chosen state exists only so the tap is acknowledged before
+ * the step changes.
+ *
+ * AND IT IS NOT A WALL. The button below says PICK FOR ME, which keeps the default voice —
+ * the one the product was already written in — so skipping costs nothing and nobody is
+ * held at a question on their first visit.
+ */
+function MentorPick({ onPicked }: { onPicked: () => void }) {
+  /*
+    The tap, held just long enough to be seen before the step moves. Not state the walk
+    reads — the record is written immediately — this is only so the card somebody pressed
+    is visibly the one that won.
+  */
+  const [chosen, setChosen] = useState<MentorId | null>(null)
+
+  function take(id: MentorId) {
+    if (chosen) return
+    setChosen(id)
+    chooseMentor(id)
+    track('mentor_chosen', { mentor: id })
+    /*
+      260ms, which is on the scale and is the acknowledgement rather than a pause for
+      effect. Long enough to see the card take, short enough that it does not feel like
+      the app is thinking about it.
+    */
+    window.setTimeout(onPicked, 260)
+  }
+
+  return (
+    <ul data-testid="walk-mentors" className="pointer-events-auto flex flex-col gap-3">
+      {MENTORS.map((m) => (
+        <li key={m.id}>
+          <button
+            type="button"
+            data-testid={'mentor-' + m.id}
+            onClick={() => take(m.id)}
+            /*
+              White on the scrim like the chips above, and the chosen one inverts rather
+              than growing a tick: at this size a tick is another small shape competing
+              with the glyph, and a card that goes solid white is unmistakable from across
+              a table — which is where this will be read, at a festival, on somebody
+              else's phone.
+            */
+            className={
+              'tap-target w-full rounded-xl border px-4 py-3 text-left transition ' +
+              (chosen === m.id
+                ? 'border-white bg-white text-black'
+                : 'border-white/30 bg-white/10 text-white hover:bg-white/20')
+            }
+          >
+            <span className="flex items-baseline gap-3">
+              <span className="text-sm font-semibold">{m.name}</span>
+              {/*
+                How often they would get in touch, said as a word rather than a number.
+                Sam asked for "potentially number of notifications" to be part of this, and
+                the honest version at this size is which of them would ever nudge you —
+                which is also the funniest thing on the dad card.
+              */}
+              <span
+                className={
+                  'eyebrow shrink-0 ' + (chosen === m.id ? 'text-black/55' : 'text-white/60')
+                }
+              >
+                {m.nudges === 'none' ? 'NEVER NAGS' : m.nudges === 'more' ? 'WILL CHASE' : 'NOW AND THEN'}
+              </span>
+            </span>
+            {/*
+              THEM, TALKING. The line that makes this a choice rather than a menu — see the
+              note on `sample` in content/mentors.ts.
+            */}
+            <span
+              className={
+                'mt-1 block text-sm leading-relaxed ' +
+                (chosen === m.id ? 'text-black/75' : 'text-white/80')
+              }
+            >
+              “{m.sample}”
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
   )
 }
 

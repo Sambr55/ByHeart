@@ -1,4 +1,5 @@
 import type { ProofLine, RoughLine } from '@/engine/learner'
+import { mentorFor, type MentorId } from '@/content/mentors'
 
 /**
  * What a teacher would have noticed, said in plain English.
@@ -53,6 +54,15 @@ export interface NoticedInput {
   idioms_got?: string[]
   drops_done?: string[]
   inventory?: Record<string, unknown>
+  /**
+   * WHO IS SAYING IT, which changes the words and nothing else.
+   *
+   * Sam: "Give /Noticed a configurable Mentor type… changing tone of voice." The
+   * observations below are unchanged by it — what is noticed is a fact about the record,
+   * and a product where the drill sergeant notices DIFFERENT things from the gentle dad
+   * would be four products. Only the sentence changes. See content/mentors.ts.
+   */
+  mentor?: string | null
 }
 
 /**
@@ -99,6 +109,15 @@ export function noticed(me: NoticedInput, now: Date = new Date()): Notice[] {
   const proof = me.proof ?? []
   const rough = me.rough ?? []
   const out: Notice[] = []
+  /*
+    THE VOICE, WHICH IS THE ONLY THING THE MENTOR CHANGES.
+
+    Every rule below is untouched by it: what counts as a win, what counts as stuck, the
+    one-nudge cap, the order. A learner who switches from the gentle dad to the drill
+    sergeant sees the same four observations in different words, which is the point — the
+    alternative is four products that disagree about what the learner has done.
+  */
+  const v = mentorFor(me.mentor as MentorId | null | undefined).voice
 
   /*
     WHAT THEY CAN SAY WITHOUT HELP, which is the thing nobody tells them.
@@ -118,7 +137,7 @@ export function noticed(me: NoticedInput, now: Date = new Date()): Notice[] {
     out.push({
       id: 'cold-count',
       tone: 'won',
-      say: clean.length + ' sentences, no screen, no help. This was the last one.',
+      say: v.cold(clean.length),
       about: last?.pt,
     })
   }
@@ -142,7 +161,7 @@ export function noticed(me: NoticedInput, now: Date = new Date()): Notice[] {
     out.push({
       id: 'rough-worst',
       tone: 'stuck',
-      say: 'This one keeps slipping. Not you — it is a mouthful. Have another listen.',
+      say: v.rough,
       about: worst.pt,
     })
   }
@@ -165,7 +184,7 @@ export function noticed(me: NoticedInput, now: Date = new Date()): Notice[] {
     out.push({
       id: 'nearly-yours',
       tone: 'nudge',
-      say: 'You have only said this one with the words up. Try it blind — you are closer than you think.',
+      say: v.nearly,
       about: one.pt,
     })
   }
@@ -186,7 +205,7 @@ export function noticed(me: NoticedInput, now: Date = new Date()): Notice[] {
     out.push({
       id: 'quiet-week',
       tone: 'nudge',
-      say: 'Not heard you in a week. This was the last thing you said.',
+      say: v.quiet,
       about: lastSpoken.pt,
     })
   }

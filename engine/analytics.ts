@@ -154,6 +154,13 @@ export type EventName =
   */
   | 'club_walk_step'
   | 'club_walk_done'
+  /*
+    WHO THEY PICKED, which is the first thing in the walk somebody can get wrong — and the
+    only step with a real decision in it. Worth knowing because the split IS the finding:
+    four mentors chosen evenly means the choice is working, and ninety per cent on one
+    means three of them are decoration.
+  */
+  | 'mentor_chosen'
   | 'club_move'
   /* Your Legend — the proposition, and the one goal that exists outside the app. */
   | 'legend_offered'

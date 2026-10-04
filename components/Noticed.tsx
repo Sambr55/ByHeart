@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { noticed, type Notice } from '@/content/noticed'
+import { mentorFor, type MentorId } from '@/content/mentors'
 import { AudioButton } from '@/components/AudioButton'
 import { slugFor } from '@/content/audio-manifest'
 import { loadLearner } from '@/engine/learner'
@@ -37,7 +38,17 @@ export function Noticed() {
     more than once.
   */
   const [notes, setNotes] = useState<Notice[] | null>(null)
-  useEffect(() => setNotes(noticed(loadLearner())), [])
+  /*
+    WHO IS SAYING IT. Held beside the notes rather than read again at render, so the
+    eyebrows and the observations cannot come from two different mentors on one screen —
+    which is exactly the two-places-computing-one-answer fault this repo keeps unpicking.
+  */
+  const [voice, setVoice] = useState(mentorFor(null).voice)
+  useEffect(() => {
+    const me = loadLearner()
+    setNotes(noticed(me))
+    setVoice(mentorFor(me.mentor as MentorId | null).voice)
+  }, [])
 
   return (
     <PageShell eyebrow="NOTICED" stage="REAL WORLD">
@@ -66,10 +77,7 @@ export function Noticed() {
             something instead, which is the useful thing and is also the nudge.
           */
           <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
-            <p className="text-sm leading-relaxed text-fg">
-              Nothing yet — you have not said anything out loud. Do one sentence with the
-              screen off and I will have something to tell you.
-            </p>
+            <p className="text-sm leading-relaxed text-fg">{voice.nothing}</p>
             <Link
               href="/legend?run=1"
               data-testid="noticed-go"
@@ -111,7 +119,7 @@ export function Noticed() {
                         : 'text-accent')
                   }
                 >
-                  {n.tone === 'won' ? 'NICE' : n.tone === 'stuck' ? 'THIS ONE' : 'GO ON'}
+                  {n.tone === 'won' ? voice.won : n.tone === 'stuck' ? voice.stuck : voice.nudge}
                 </p>
                 <p className="text-base leading-relaxed text-fg">{n.say}</p>
                 {/*
