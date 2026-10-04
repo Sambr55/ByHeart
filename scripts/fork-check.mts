@@ -105,9 +105,26 @@ const rolled = files.filter((f) => {
   return counts && routes
 })
 ok('nothing routes on a count of Legend answers', !rolled.length, rolled.join(' '))
+/*
+  THE FRONT DOOR'S LOGIC MOVED TO app/view.tsx, and this check found it missing the moment
+  it did — which is the check doing its job rather than a path to patch and forget.
+
+  app/page.tsx is a server component now, carrying `export const dynamic = 'force-dynamic'`
+  so Vercel's edge stops serving a stale copy of the install start_url. A client page
+  cannot export route config, so the component had to move. The decision it makes is
+  unchanged and is still the thing asserted here.
+
+  Both files are read, so this keeps holding wherever the logic sits.
+*/
 ok(
-  'and app/page.tsx asks clubOpen',
-  readFileSync('app/page.tsx', 'utf8').includes('clubOpen('),
+  'and the front door asks clubOpen',
+  ['app/page.tsx', 'app/view.tsx'].some((f) => {
+    try {
+      return readFileSync(f, 'utf8').includes('clubOpen(')
+    } catch {
+      return false
+    }
+  }),
 )
 
 if (problems.length) {

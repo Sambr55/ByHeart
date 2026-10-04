@@ -254,6 +254,79 @@ export function SayItCard({
         {askEn ? <p className="text-base leading-relaxed text-muted">{askEn}</p> : null}
       </div>
 
+      {/*
+        THE VERDICT SITS ABOVE THE MICROPHONE, NOT UNDER IT.
+
+        Sam: "i tried this audio about 10 times and it failed - my pronunciation isnt that
+        bad!" and "We have lost the feedback panel."
+
+        It was never lost. It rendered after the microphone and after the word picker, so
+        on a 390px screen it was two blocks below the fold — he pressed the button ten
+        times and every answer the product gave him was off screen. A verdict nobody sees
+        is the same as no verdict, and worse, because the product believes it has spoken.
+
+        Above, because the eye is already there: the control that was just pressed is what
+        somebody is looking at, and the answer belongs in the same place.
+      */}
+      {/* What it heard: the verdict, the words it caught, and where to aim. */}
+      {heard ? (
+        <div
+          data-testid="say-heard"
+          className={
+            'animate-bank rounded-xl border px-4 py-3 ' +
+            (heard.close ? 'border-accent bg-accent/10' : 'border-line bg-surface')
+          }
+        >
+          <p className={'eyebrow ' + (heard.close ? 'text-accent' : 'text-muted')}>{verdict}</p>
+          {heard.said ? <p className="pt mt-1 text-lg text-fg">“{heard.said}”</p> : null}
+          {aim.length ? (
+            <p data-testid="say-aim" className="mt-2 text-sm leading-relaxed text-muted">
+              {LEGEND_COPY.run_aim(aim)}
+            </p>
+          ) : null}
+          {/*
+            THE WAY BACK IN. Sam: "add a try again message to failed spoken audio." The
+            verdict diagnosed and stopped; this names the control to press. Hidden once
+            five goes have been reached, where the screen has deliberately stopped asking
+            — see run_try_again.
+          */}
+          {!heard.close && !enough ? (
+            <p data-testid="say-again" className="eyebrow mt-2 text-accent">
+              {LEGEND_COPY.run_try_again}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/*
+        THE THIRD GO. Sam: "as soon as they get to their third attempt they need some
+        encouraging text." It names the instrument rather than the learner — see
+        run_third_head — and gives way to the five-goes notice rather than stacking with it.
+      */}
+      {stubborn ? (
+        <div
+          data-testid="say-stubborn"
+          className="animate-bank flex flex-col gap-1 rounded-xl border border-line bg-surface px-4 py-3"
+        >
+          <p className="eyebrow text-fg">{LEGEND_COPY.run_third_head}</p>
+          <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.run_third_body}</p>
+        </div>
+      ) : null}
+
+      {/*
+        Five goes and the screen stops asking. Nothing is withheld by it — the microphone,
+        the reveal and whatever the caller puts below all still work. See run_enough_head.
+      */}
+      {enough ? (
+        <div
+          data-testid="say-enough"
+          className="animate-bank flex flex-col gap-1 rounded-xl border border-line bg-surface px-4 py-3"
+        >
+          <p className="eyebrow text-fg">{LEGEND_COPY.run_enough_head}</p>
+          <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.run_enough_body}</p>
+        </div>
+      ) : null}
+
       {shown || built ? (
         /*
           THE SENTENCE, AND EVERY ROUTE THROUGH IT — nothing replaced.
@@ -328,65 +401,6 @@ export function SayItCard({
         </div>
       )}
 
-      {/* What it heard: the verdict, the words it caught, and where to aim. */}
-      {heard ? (
-        <div
-          data-testid="say-heard"
-          className={
-            'animate-bank rounded-xl border px-4 py-3 ' +
-            (heard.close ? 'border-accent bg-accent/10' : 'border-line bg-surface')
-          }
-        >
-          <p className={'eyebrow ' + (heard.close ? 'text-accent' : 'text-muted')}>{verdict}</p>
-          {heard.said ? <p className="pt mt-1 text-lg text-fg">“{heard.said}”</p> : null}
-          {aim.length ? (
-            <p data-testid="say-aim" className="mt-2 text-sm leading-relaxed text-muted">
-              {LEGEND_COPY.run_aim(aim)}
-            </p>
-          ) : null}
-          {/*
-            THE WAY BACK IN. Sam: "add a try again message to failed spoken audio." The
-            verdict diagnosed and stopped; this names the control to press. Hidden once
-            five goes have been reached, where the screen has deliberately stopped asking
-            — see run_try_again.
-          */}
-          {!heard.close && !enough ? (
-            <p data-testid="say-again" className="eyebrow mt-2 text-accent">
-              {LEGEND_COPY.run_try_again}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {/*
-        THE THIRD GO. Sam: "as soon as they get to their third attempt they need some
-        encouraging text." It names the instrument rather than the learner — see
-        run_third_head — and gives way to the five-goes notice rather than stacking with it.
-      */}
-      {stubborn ? (
-        <div
-          data-testid="say-stubborn"
-          className="animate-bank flex flex-col gap-1 rounded-xl border border-line bg-surface px-4 py-3"
-        >
-          <p className="eyebrow text-fg">{LEGEND_COPY.run_third_head}</p>
-          <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.run_third_body}</p>
-        </div>
-      ) : null}
-
-      {/*
-        Five goes and the screen stops asking. Nothing is withheld by it — the microphone,
-        the reveal and whatever the caller puts below all still work. See run_enough_head.
-      */}
-      {enough ? (
-        <div
-          data-testid="say-enough"
-          className="animate-bank flex flex-col gap-1 rounded-xl border border-line bg-surface px-4 py-3"
-        >
-          <p className="eyebrow text-fg">{LEGEND_COPY.run_enough_head}</p>
-          <p className="text-sm leading-relaxed text-muted">{LEGEND_COPY.run_enough_body}</p>
-        </div>
-      ) : null}
-
       {/*
         SHOW ME, for anybody who does not want to speak — and only where this card has no
         dock. With a dock it moves into it, beside the arrow, exactly as the Legend run
@@ -406,7 +420,31 @@ export function SayItCard({
         </button>
       ) : null}
 
-      {typeof children === 'function' ? children({ solved: () => setBuilt(true), built }) : children}
+      {/*
+        THE PICKER LEAVES WHEN THE AUDIO TEST ARRIVES.
+
+        Sam: "The previous screen is the word picker of ola bom dia, we dont need to repeat
+        it in this screen. Sequence: Word picker, success message, two second auto swipe
+        with optional swipe button loads audio test only - remove word picker."
+
+        It used to stay. That came from his own earlier instruction — "but dont drop the
+        word picker or copy / listen" — which was right about the REVEAL and wrong once the
+        picker is solved: the tiles are then a finished puzzle sitting above a microphone,
+        and on a 390px screen they pushed the feedback panel below the fold. So he pressed
+        the microphone ten times and never saw what it heard. "We have lost the feedback
+        panel" is exactly that: not lost, just under the thing it was meant to replace.
+
+        Listen and copy do not go — they move up beside the answer, which is where he
+        wanted them and where they are now.
+
+        On a beat with no picker (the Legend run, a revision) nothing changes: `built` is
+        only ever set by a caller that has one.
+      */}
+      {buildFirst && built
+        ? null
+        : typeof children === 'function'
+          ? children({ solved: () => setBuilt(true), built })
+          : children}
 
       {/*
         THE DOCK, AND IT IS THE LEGEND RUN'S DOCK. Sam: "use what we built in legend as
