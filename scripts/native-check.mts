@@ -13,6 +13,24 @@ import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { CRATES, ROOTS } from '../content/roots'
 
+/*
+  THE WALK-THROUGH IS MODAL, so a check that presses anything on Yours has to get past it.
+
+  It opens on the first visit after the Club welcome and covers the screen at z-50 — which
+  is correct, it is a guided tour with SKIP as its way out — and it made both this check and
+  native-check time out waiting for controls underneath it. The product is behaving; the
+  checks were written before the walk existed.
+
+  Pressed rather than disabled, because dismissing it the way a learner does is also the
+  only version that proves SKIP works.
+*/
+async function pastTheWalk(p: Page) {
+  const skip = await p.$('[data-testid="walk-skip"]')
+  if (!skip) return
+  await skip.click().catch(() => {})
+  await p.waitForTimeout(500)
+}
+
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
 const problems: string[] = []
@@ -72,6 +90,7 @@ await seeded(page, '/club')
 const barOnClub = await page.getAttribute('meta[name="theme-color"]:not([media])', 'content')
 ok('a full-bleed card takes the dark', barOnClub === '#241f1a', String(barOnClub))
 await page.goto(BASE + '/profile')
+  await pastTheWalk(page)
 await page.waitForTimeout(1300)
 const barOnProfile = await page.getAttribute('meta[name="theme-color"]:not([media])', 'content')
 ok(
@@ -121,7 +140,7 @@ const marker = await page.$('[data-testid="nav-marker"]')
 ok('there is one marker', Boolean(marker))
 const onProfile = await page.evaluate(`document.querySelector('[data-testid="nav-marker"]').getBoundingClientRect().x`)
 /* Any other tab. The shelf left the bar; the marker's behaviour is what is measured. */
-await page.click('[data-testid="tab-club"]')
+await page.click('[data-testid="tab-find"]')
 await page.waitForTimeout(900)
 const onOther = await page.evaluate(`document.querySelector('[data-testid="nav-marker"]').getBoundingClientRect().x`)
 ok('and it moves between tabs', onProfile !== onOther, Math.round(onProfile as number) + ' → ' + Math.round(onOther as number))
@@ -136,7 +155,7 @@ console.log('\nnothing guesses at what the learner has done\n')
 
   This block used to inherit whatever page the one above it left behind, which happened to
   be /vibes only because the marker test clicked the VIBES tab. When that tab was removed
-  the click became tab-club, and the Club carries no `.needs-learner` — so the element
+  the click became tab-find, and the Club carries no `.needs-learner` — so the element
   query returned null and the assertion below failed on a product that was fine.
 
   The crate picker is where the class lives (Journey.tsx, "which of these are open is
@@ -177,7 +196,7 @@ await page.waitForTimeout(700)
 const went = (await page.evaluate('window.scrollY')) as number
 ok('there is a page long enough to scroll', went > 200, Math.round(went) + 'px')
 /* Any other tab. The shelf left the bar; the marker's behaviour is what is measured. */
-await page.click('[data-testid="tab-club"]')
+await page.click('[data-testid="tab-find"]')
 await page.waitForTimeout(1200)
 await page.goto(BASE + '/vocab')
 await hideDevChrome(page)

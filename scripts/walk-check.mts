@@ -152,7 +152,7 @@ console.log('\n1. every step names a control that exists in the source\n')
     still passes every assertion above while no longer doing what it was asked for.
   */
   const targets = new Set(WALK.map((s) => s.target))
-  ok('the bottom rail is walked', ['tab-club', 'tab-on', 'tab-ask', 'tab-yours'].every((t) => targets.has(t)))
+  ok('the bottom rail is walked', ['tab-find', 'tab-on', 'tab-ask', 'tab-yours'].every((t) => targets.has(t)))
   ok('the mid rail is walked', targets.has('rail'))
   ok('the top rail is walked', targets.has('inbox-door') && targets.has('yours-settings'))
   ok('and the mark', targets.has('yours-wordmark'))

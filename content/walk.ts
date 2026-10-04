@@ -77,9 +77,17 @@ export const WALK: WalkStep[] = [
     saving space" — so the walk makes the same claim out loud.
   */
   {
-    id: 'tab-club',
-    target: 'tab-club',
-    say: 'The Club is your city in Portuguese — what is on, and the words for being there.',
+    id: 'tab-find',
+    target: 'tab-find',
+    /*
+      FIND IS WHERE YOU BROWSE, which is the job the tab actually does now.
+
+      It said "The Club is your city in Portuguese", which described the whole product
+      while pointing at one scrolling feed — the confusion the rename exists to end. The
+      Club is everything after the Legend; this tab is the part of it you open with nothing
+      particular in mind.
+    */
+    say: 'FIND is for when you have no plan — rooms, nights out and the words for them.',
     opens: ['What is on', 'Rooms', 'Drops'],
   },
   {

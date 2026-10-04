@@ -68,7 +68,34 @@ import { useClub } from '@/engine/useClub'
   about the city, where it is already read from the chapter.
 */
 const TABS = [
-  { href: '/club', label: 'Club', d: 'M4 20V9l8-5 8 5v11M9 20v-6h6v6' },
+  /*
+    THE FEED IS DISCOVERY, SO IT IS CALLED THAT.
+
+    Sam: "the Home icon bottom left on the Club is not Club but a free scroll mechanic —
+    i.e. inspiration."
+
+    He is right and the old label was load-bearing in the wrong direction. The CLUB is
+    everything after the Legend — the boards, the inbox, what is on, your own card — and a
+    tab named CLUB pointing at one scrolling feed told a member that the feed WAS the club.
+    It is the part of it you browse when you have nothing particular in mind.
+
+    So the house becomes a compass and the word becomes FIND. A house means "home", and
+    home is now Yours — the screen with your name on it, which is where the welcome lands
+    (see components/Club.tsx) and where somebody goes to retrieve rather than to browse.
+
+    FIND rather than INSPIRATION, which is Sam's word for the mechanic and is three
+    syllables too long for a tab: the bar is four labels of one word each and the eyebrow
+    scale is unforgiving. FIND is what you do there.
+
+    The route is unchanged. /club is still the feed, still carries the welcome ceremony and
+    the showcase — this renames a door rather than moving one, which is why it is a two-line
+    change and not a restructure.
+  */
+  {
+    href: '/club',
+    label: 'Find',
+    d: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM14.8 9.2l-1.6 4.6-4.6 1.6 1.6-4.6z',
+  },
   /*
     What is on, and it belongs next to the city rather than out at the end.
 

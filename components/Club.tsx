@@ -1,6 +1,6 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -56,6 +56,7 @@ import { PURPOSES, type Purpose } from '@/content/situations'
  * first and the moves are ordered by what expires rather than by what is overdue.
  */
 export function Club() {
+  const router = useRouter()
   const params = useSearchParams()
   /* Set by the front door's COME IN, and by nothing else. */
   const fromDoor = params.get('in') === '1'
@@ -154,10 +155,48 @@ export function Club() {
 
     Written on the way out instead, where the fact being recorded is true.
   */
+  /*
+    AND THE CEREMONY ENDS ON YOURS, not on the feed.
+
+    Sam, rethinking what the Club is: "I have been focussing too much on the CLUB being a
+    TikTok style FYP page — whereas the CLUB is EVERYTHING post legend. So actually the
+    landing page after the walkthrough in the Club should be YOURS not the current scrolling
+    club content."
+
+    He is right, and the moment makes the case. Somebody has just finished their Legend and
+    been told they are in. What they want is their own card — the seven things they can now
+    say, on the boards that hold them — not an infinite scroll of other content. A feed says
+    "here is more"; a member who has just finished something wants "here is what you did".
+
+    The welcome itself is unchanged and still gated on ?in=1: the ceremony is the right
+    screen for that second. What changes is the room it opens onto.
+
+    replace() rather than push(), because the ceremony is spent — welcomeToClub has just
+    written the stamp that stops it ever showing again — and a back gesture should leave the
+    way it would from any other screen rather than returning to a screen that no longer
+    exists.
+  */
   const finishWelcome = useCallback(() => {
     welcomeToClub()
     setWelcome(false)
-  }, [])
+    /*
+      WITH ?walk=1, so the two ceremonies are one handover rather than two overlays.
+
+      The walk already fires on the first visit to Yours after the welcome — which, now
+      that the welcome LANDS on Yours, means immediately. Two full-screen overlays back to
+      back with nothing between them, and native-check found it by trying to press a nav
+      tab the walk was covering.
+
+      Passing the marker makes it deliberate: the ceremony says you are in, and hands
+      straight to the thing that shows you round. That is the sequence Sam described — "the
+      landing page after the walkthrough in the Club should be YOURS" — read in the order
+      he wrote it.
+
+      It is the same route /walkthrough uses, so there is one way to start the walk rather
+      than two, and the stamp still decides whether it ever fires on its own again.
+    */
+    router.replace('/profile?walk=1')
+  }, [router])
 
   const answeredIds = useMemo(
     () =>

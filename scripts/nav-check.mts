@@ -16,6 +16,24 @@ import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { ROOTS_BY_FAMILY } from '../content/roots'
 
+/*
+  THE WALK-THROUGH IS MODAL, so a check that presses anything on Yours has to get past it.
+
+  It opens on the first visit after the Club welcome and covers the screen at z-50 — which
+  is correct, it is a guided tour with SKIP as its way out — and it made both this check and
+  native-check time out waiting for controls underneath it. The product is behaving; the
+  checks were written before the walk existed.
+
+  Pressed rather than disabled, because dismissing it the way a learner does is also the
+  only version that proves SKIP works.
+*/
+async function pastTheWalk(p: Page) {
+  const skip = await p.$('[data-testid="walk-skip"]')
+  if (!skip) return
+  await skip.click().catch(() => {})
+  await p.waitForTimeout(500)
+}
+
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const KEY = 'byheart.learner.v1:' + pairId(DEFAULT_PAIR)
 const problems: string[] = []
@@ -152,9 +170,11 @@ console.log('\nthe tabs that are places\n')
   arrive at. The two that ARE places still have to know when they are the one you are on;
   ASK is checked below for the thing it does instead.
 */
-for (const [route, tab] of [['/club', 'club'], ['/profile', 'yours']] as const) {
+/* /club is the FIND tab now — the feed is discovery, see components/BottomNav.tsx. */
+for (const [route, tab] of [['/club', 'find'], ['/profile', 'yours']] as const) {
   await page.goto(BASE + route)
   await page.waitForTimeout(1200)
+  await pastTheWalk(page)
   const nav = await page.$('[data-testid="bottom-nav"]')
   ok(route + ' has the bar', Boolean(nav))
   const here = await page.$('[data-testid="tab-' + tab + '"][aria-current="page"]')
@@ -322,6 +342,7 @@ ok('and so is the header', beatCta.bar === AZULEJO, String(beatCta.bar))
 
 console.log('\neverything the burger held is still reachable\n')
 await page.goto(BASE + '/profile')
+  await pastTheWalk(page)
 await page.waitForTimeout(1200)
 const links = await page.$$eval('main a[href]', (els) => els.map((e) => e.getAttribute('href')))
 /*
