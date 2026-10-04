@@ -531,7 +531,23 @@ export function Legend() {
   */
   return (
     <Shell>
-      <div className="flex flex-col gap-3">
+      {/*
+        THE DECK'S OWN HEADER IS A CARD, like everything else that holds words.
+
+        Sam: "I am not seeing front end changes in the legend build." He was right and I
+        had not checked — the white-card pass reported Legend.tsx as "already done" because
+        the file contains two cards, and both were the run-through's, added weeks ago. The
+        deck itself — the screen you reach from YOURS, the one that says what a Legend IS
+        and offers RUN IT THROUGH — was bare type on sand. Photographed at 390x844: zero
+        rounded-2xl elements on the whole screen.
+
+        It is the same treatment the run-through card, Proof and SayItCard already wear, and
+        the argument for it is Sam's: black on white is easier to read, and a card tells you
+        where one thought ends. This screen carries a headline, a paragraph of spy framing,
+        a count and a status line — four different kinds of sentence with nothing separating
+        them but whitespace.
+      */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
         <p className="eyebrow text-accent">YOUR LEGEND</p>
         <h1 className="display text-balance text-2xl">{LEGEND_COPY.what}</h1>
         {/* One line of spy framing, then it gets out of the way. Dry, not jokey — the
@@ -1115,7 +1131,16 @@ function BuildCard({
 
       {beat === 'build' ? (
         <>
-          <div className="flex flex-col gap-3">
+          {/*
+            THE QUESTION AND ITS ANSWER SIT ON ONE CARD — see the deck header above.
+
+            This is the screen that asks a Legend question, and it was a label, a field and
+            a chip row loose on the sand, with the sentence preview in a bordered panel
+            underneath. The panel already reached for a ground to make the one line that
+            matters legible; everything above it was left lying on the floor, which is the
+            exact pattern the Club panes had before this morning.
+          */}
+          <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
             {shape.slots.map((slot) => (
               <div key={slot.key} className="flex flex-col gap-1">
                 <label htmlFor={slot.key} className="text-xs text-muted">
