@@ -431,7 +431,26 @@ export function Translator() {
         ) : null}
 
         {state === 'done' && result ? (
-          <div data-testid="translator-result" className="flex flex-col gap-3">
+          <div
+            data-testid="translator-result"
+            /*
+              THE WHITE CARD ON THE ANSWER, because the answer is the thing they came for.
+
+              Three parts — their English, the Portuguese, and the note about register —
+              and two of the three were loose grey text on sand with only the green chip
+              in the middle looking like anything. So the answer read as one coloured strip
+              with stray captions around it rather than as a reply.
+
+              The green chip stays exactly as it is. It is a tinted surface rather than a
+              card, and bg-correct/10 over bg-bg-elev is a cleaner tint than it was over
+              sand — the mint is mixed with near-white now instead of with a darker ochre.
+
+              The textarea above keeps bg-surface and stays outside this card: what you
+              typed is a hole you type into, what came back is a card. That is the whole
+              grammar of the panel in one screen.
+            */
+            className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6"
+          >
             {/* Their own words, quietly, above the answer — so what they asked for and
                 what they got can be read together. */}
             <p className="text-sm text-muted">“{result.en}”</p>

@@ -167,9 +167,9 @@ export async function upsertUser(email: string): Promise<DubUser | null> {
   return rows[0] ?? null
 }
 
-export async function startSession(userId: string): Promise<void> {
+export async function startSession(userId: string): Promise<SessionCookie | null> {
   const sql = db()
-  if (!sql) return
+  if (!sql) return null
   const token = secret()
   const ua = (await headers()).get('user-agent') ?? null
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 86_400_000)
@@ -178,14 +178,55 @@ export async function startSession(userId: string): Promise<void> {
     insert into sessions (id, user_id, expires_at, user_agent)
     values (${sha(token)}, ${userId}, ${expiresAt}, ${ua})
   `
-  const jar = await cookies()
-  jar.set(SESSION_COOKIE, token, {
+  const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    /*
+      LAX AND NOT NONE, deliberately.
+
+      The magic link arrives from a mail client, which makes the navigation to /verify
+      cross-site — and a Lax cookie IS sent and set on a cross-site top-level GET, which is
+      exactly the case Lax exists to allow. None would also work and would weaken every
+      other request for the sake of one, so it stays.
+    */
+    sameSite: 'lax' as const,
     path: '/',
     expires: expiresAt,
-  })
+  }
+  const jar = await cookies()
+  jar.set(SESSION_COOKIE, token, options)
+  /*
+    AND THE SAME COOKIE HANDED BACK, so a redirect can carry it itself.
+
+    Sam, after tapping the emailed link: "I'm still signed out." The row was written — the
+    token had been spent, which is why he landed on the site rather than on
+    /signin?expired=1 — so the session existed on the server and the browser never heard
+    about it.
+
+    This wrote to the `cookies()` jar and the verify route then returned
+    `NextResponse.redirect(...)`, which is a NEW response object. The jar's Set-Cookie
+    headers are attached to the response Next builds for the handler; a response the
+    handler constructs itself does not inherit them. So the 307 went out clean, Safari
+    followed it, and there was nothing to store.
+
+    The jar write stays, because it is correct for every caller that does not build its own
+    response. What is added is the cookie itself, returned, so a caller that DOES build one
+    can put it on. The verify route is the only such caller today.
+  */
+  return { name: SESSION_COOKIE, value: token, options }
+}
+
+/** A cookie a caller has to set itself, because it is building its own response. */
+export interface SessionCookie {
+  name: string
+  value: string
+  options: {
+    httpOnly: boolean
+    secure: boolean
+    sameSite: 'lax'
+    path: string
+    expires: Date
+  }
 }
 
 /**

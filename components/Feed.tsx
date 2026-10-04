@@ -13,6 +13,7 @@ import { chosenPair } from '@/engine/pair'
 import { labelForLocale } from '@/content/pairs'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
+import { inboxFor, unreadCount } from '@/content/inbox'
 import { slugFor } from '@/content/audio-manifest'
 import { shutter } from '@/engine/tap'
 import {
@@ -48,7 +49,7 @@ import {
   vocabWord,
   type FeedCard,
 } from '@/content/feed'
-import { chapterById } from '@/content/chapters'
+import { chapterById, DEFAULT_CHAPTER } from '@/content/chapters'
 import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
 import { acquirePiece, markIdiom, recordProof, rejectCard, rememberFinishedCard, rememberSheetGot, rewindReject, toggleCard } from '@/engine/learner'
@@ -1097,6 +1098,43 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
     reason (globals.css:667). The bar needs no change — it already carries the
     home-indicator inset as its own padding.
   */
+  /*
+    NOTHING AT ALL BEFORE THE STORE HAS ANSWERED, which is the other half of a fix that
+    only did one half.
+
+    Sam: "the club always flashes on first card (so does first card on main home)."
+
+    The memo above already returns an empty list until `mounted`, and the note on it is
+    right about why: it used to return the raw room list, so the first frame of a
+    stranger's visit was a Drop about a concert flashing past before the sequence replaced
+    it. An empty list fixed THAT and left this — because an empty list still renders the
+    rail, the header, the bar and the clone slots, and then twenty cards arrive into it a
+    frame later.
+
+    Measured rather than guessed: sampling the rail every 50ms through a reload gives
+    `0 children` → `20 children`, with the first card's text appearing in the same step.
+    That transition is the flash, on both /club and the home feed, which share this
+    component.
+
+    So the frame before the answer paints the ground and nothing else. `bg-bg` rather than
+    a spinner, because the store answers within a frame — a spinner that is never seen for
+    long enough to read is just a second flash — and the height is held so the bar does not
+    jump when the cards land.
+
+    It cannot hang: `mounted` is set by a mount effect with no conditions on it, so the only
+    way to stay here is for React not to have run effects at all, which is not a state the
+    page can reach.
+  */
+  if (!mounted) {
+    return (
+      <main
+        data-stage="REAL WORLD"
+        data-testid="feed-waiting"
+        className="relative h-dvh w-full overflow-hidden bg-bg"
+      />
+    )
+  }
+
   return (
     <main data-stage="REAL WORLD" className="relative h-dvh w-full overflow-hidden on-dark">
       {/* Over the feed, not in it. The chrome does not scroll away. */}
@@ -1217,6 +1255,28 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
           </p>
         ) : null}
         <span className="flex-1" />
+
+        {/*
+          THE INBOX, and it is the only thing in this header besides the mark.
+
+          Sam: "in your Club page there should be an inbox." The Club is a full-bleed feed
+          with no chrome by design, so there is exactly one place a door can go without
+          putting furniture over a photograph — the header that already carries the
+          wordmark, on the side it has been holding open with a flex spacer since it was
+          written.
+
+          NOT A TAB. The bar is four and the note in BottomNav.tsx is right about why a
+          fifth is wrong: a tab is for somewhere you go from anywhere, and an inbox is a
+          room inside the Club about the Club's own contents. It is reached from here and
+          goes back to here.
+
+          COLOUR BY currentColor, never by a token. The header flips between text-fg on
+          sand and text-white over a photograph — see onSandNow above — and anything in it
+          that names its own colour is the white-on-white bug waiting for the next
+          imageless card. The count badge takes the accent because the accent IS white on a
+          photograph (.shown-on-photo), so it stays visible on both grounds for free.
+        */}
+        {stage === 'member' ? <InboxDoor /> : null}
 
       </header>
 
@@ -3348,9 +3408,11 @@ export function Card({
             hidden={locked}
             data-testid={'card-flow-' + s.id}
             style={{ order: -i }}
-            className="card-pane nav-clear h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 text-fg"
+            className="card-pane nav-clear h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 pb-10 text-fg"
           >
-            <div>
+            {/* The same white card every other lane in the Club now gets — see the note
+                on the language lane below. A room in a flow is a room. */}
+            <div className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
               <Lines
                 card={{
                   kind: 'situation',
@@ -3364,11 +3426,39 @@ export function Card({
         ))}
         <div
           hidden={locked || !sides}
-          className="card-pane nav-clear order-1 h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 text-fg"
+          className="card-pane nav-clear order-1 h-full w-full shrink-0 snap-start overflow-y-auto bg-bg px-5 pb-10 text-fg"
         >
           {/* Clearance is card-pane in globals.css — the header's own measurement, notch
               included, so the two cannot drift apart. */}
-          <div>
+          {/*
+            A CARD, NOT A PAGE. Sam: "black text on white, it is so easy to read."
+
+            The thirteen pane renderers below all wrote themselves straight onto the sand:
+            a headline, a rule, some body, and somewhere in the middle one `bg-bg-elev`
+            panel carrying the one line that mattered. That inset is the tell — every one
+            of these screens had already reached for the white card to make its best bit
+            legible, and then left everything around it lying on the ground. So the Club's
+            most language-dense surface was the one place in the product that never got
+            the treatment Proof, SayItCard and the Legend run all share.
+
+            The same four classes those three use, applied once here rather than thirteen
+            times below, which is what keeps a pane added next month from being the
+            fourteenth screen that forgets. The renderers are untouched: an inset panel
+            inside this is `bg-surface` against `bg-bg-elev` — a hole in a card, which is
+            what the palette's own note says `--surface` is for — and reads as a step down
+            rather than as a second card, exactly as it does on SayItCard.
+
+            NOT ON THE FACE, and that is the whole safety argument. A face sits over a
+            photograph and carries `.shown-on-photo`, which repoints --fg to white; a
+            near-white card there would be white on white, which is the bug that shipped
+            this morning. This lane has no photograph behind it — it is `bg-bg` sand and
+            `text-fg` ink, declared on the line above — so the card is on its own ground
+            and the ink is the dark one.
+
+            pb-10 on the scroller rather than on the card: the bottom nav floats over this
+            lane, and a card that ends under it reads as cut off.
+          */}
+          <div className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
             {card.kind === 'situation' ? (
               /*
                 One room is given away, and the rest are teased until the Legend exists.
@@ -3466,7 +3556,21 @@ function Teased({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
         </ul>
       </div>
 
-      <div className="rounded border border-line-strong bg-bg-elev px-4 py-3">
+      {/*
+        A HOLE IN THE CARD, NOT A SECOND CARD — and this is why all six of these moved.
+
+        Every inset in this file was `bg-bg-elev`, which was exactly right while the pane
+        was sand: white panel, sand ground, the one line that matters lifted off it. The
+        pane is a white card now (see the language lane), so `bg-bg-elev` inside it paints
+        white on white and the panel collapses to a hairline outline with nothing behind
+        it. Photographed on the venue room: the border is there and the box is gone.
+
+        `--surface` is the token for precisely this and its own note says so — "inset,
+        L*87. Below the ground, so a field reads as a hole". A step DOWN from the card
+        reads as part of it; a step up reads as a card floating on a card. SayItCard's own
+        comment records this fault being found once already, in the same words.
+      */}
+      <div className="rounded border border-line-strong bg-surface px-4 py-3">
         <p className="text-sm font-semibold">What to say arrives with your Legend.</p>
         <p className="mt-1 text-xs leading-relaxed text-muted">
           Seven questions a stranger will ask you, answered in Portuguese out of language
@@ -3507,8 +3611,9 @@ function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
       <p className="eyebrow text-muted">WHAT TO SAY</p>
       <h2 className="display text-balance text-2xl">{s.title}</h2>
       <p className="text-sm leading-relaxed text-muted">{s.why}</p>
+      {/* bg-surface: an inset on a white card is a hole in it — see Teased above. */}
       {s.lines[0] ? (
-        <div className="mt-3 flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+        <div className="mt-3 flex flex-col gap-1 rounded border border-line bg-surface px-4 py-3">
           <div className="flex items-center gap-3">
             <AudioButton slug={slugFor(s.lines[0].pt)} text={s.lines[0].pt} size="sm" />
             <p className="pt min-w-0 flex-1 text-lg text-accent">{s.lines[0].pt}</p>
@@ -3730,7 +3835,8 @@ function SayItBetter({ card }: { card: Extract<FeedCard, { kind: 'fluent' }> }) 
         in these sentences is incidental — the join is not, and nothing else in the
         product ever points at one.
       */}
-      <div className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+      {/* bg-surface: an inset on a white card is a hole in it — see Teased above. */}
+      <div className="flex flex-col gap-1 rounded border border-line bg-surface px-4 py-3">
         <p className="eyebrow text-accent">{card.fluent.hinge.pt.toUpperCase().slice(0, 14)}</p>
         <p className="text-sm leading-relaxed">{card.fluent.hinge.note}</p>
       </div>
@@ -3830,8 +3936,22 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
           Under the quote, as it is on the root card, so the two screens teach the same
           shape: the line, then where you would hear it, then the Portuguese.
         */}
+        {/*
+          WHITE ON SAND IS NOTHING, and this one had been invisible the whole time.
+
+          `text-white/70` is the right colour on the FACE, where a vibe card is a
+          full-bleed photograph. This is the language lane, which has always been sand and
+          dark ink — so "The Beatles, 1967 — the one Paul wrote to prove a point about
+          opposites" rendered at about 1.3:1 against the ground. Photographed at 390px: the
+          line is there and cannot be read.
+
+          The credit is provenance rather than the thing being taught, so it takes --muted,
+          which is the token for exactly that and clears the gate on this ground. Same
+          class of fault the comment on the eyebrow above records, and the same fix: follow
+          the ground, never the memory of what the card looked like on the other side.
+        */}
         {card.taste.credit ? (
-          <p className="mt-1 text-sm text-white/70">{card.taste.credit}</p>
+          <p className="mt-1 text-sm text-muted">{card.taste.credit}</p>
         ) : null}
       </div>
 
@@ -5028,10 +5148,11 @@ function IntroPane({ card }: { card: Extract<FeedCard, { kind: 'intro' }> }) {
           <Emphasised text={c.body} />
         </p>
       </div>
+      {/* bg-surface: an inset on a white card is a hole in it — see Teased above. */}
       {c.examples ? (
         <ul data-testid="intro-examples" className="flex flex-col gap-1">
           {c.examples.map((line) => (
-            <li key={line} className="rounded border border-line bg-bg-elev px-4 py-3">
+            <li key={line} className="rounded border border-line bg-surface px-4 py-3">
               <span className="pt display block text-lg">{line}</span>
             </li>
           ))}
@@ -5683,7 +5804,8 @@ function CheatPane({ card }: { card: Extract<FeedCard, { kind: 'cheat' }> }) {
         {c.says.map((line) => (
           <li
             key={line.pt}
-            className="flex items-center gap-3 rounded border border-line bg-bg-elev px-4 py-3"
+            // bg-surface: an inset on a white card is a hole in it — see Teased above.
+            className="flex items-center gap-3 rounded border border-line bg-surface px-4 py-3"
           >
             <AudioButton slug={slugFor(line.pt)} text={line.pt} size="sm" />
             <CopyButton text={line.pt} size="sm" />
@@ -5775,7 +5897,8 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
         on the card that is real Portuguese somebody could use, and it should look like
         every other real line in the product rather than like part of the joke.
       */}
-      <div className="flex flex-col gap-1 rounded border border-line bg-bg-elev px-4 py-3">
+      {/* bg-surface: an inset on a white card is a hole in it — see Teased above. */}
+      <div className="flex flex-col gap-1 rounded border border-line bg-surface px-4 py-3">
         <p className="eyebrow text-accent">THEY SAY</p>
         <div className="mt-3 flex items-center gap-3">
           <AudioButton slug={slugFor(i.equivalent)} text={i.equivalent} />
@@ -6095,5 +6218,93 @@ function Rail({
         </svg>
       </button>
     </div>
+  )
+}
+
+/**
+ * The door to the inbox, in the Club's own header.
+ *
+ * An icon and, when there is something to say, a number. The number is the only count
+ * anywhere in Dub Club and it is worth being precise about why it is allowed: it counts
+ * CONTENT, not the learner. A streak counts what you did; this counts what the city did
+ * while you were away, and the product has nothing to gain from it being high — a quiet
+ * month shows nothing here and that is the honest reading of a quiet month.
+ *
+ * MEMBER ONLY. In the showcase the header already carries the strapline, the feed is an
+ * argument rather than a room, and there is no "your feed" yet for anything to have landed
+ * in. A badge over the intro would be a product with unread mail before it has said what
+ * it is.
+ *
+ * The count is derived on mount from the same `inboxFor` the screen itself calls, so the
+ * badge cannot claim a message the inbox would not show. It is one function and both
+ * callers pass the learner's own chapter, genres and purpose.
+ */
+function InboxDoor() {
+  const learner = useLearner()
+  /*
+    After mount, and null until then.
+
+    `inboxFor` reads the clock — a drop is live or it is not — so computing this during
+    render would have the server and the browser disagree about the number in the badge.
+    The icon is there either way; only the count waits.
+  */
+  const [count, setCount] = useState<number | null>(null)
+  useEffect(() => {
+    setCount(
+      unreadCount(
+        inboxFor(
+          learner.chapter ?? DEFAULT_CHAPTER,
+          new Date(),
+          (learner.profile?.genres ?? null) as Parameters<typeof inboxFor>[2],
+          learner.purpose ?? null,
+        ),
+        learner.inbox_opened_at ?? null,
+      ),
+    )
+  }, [learner.chapter, learner.profile?.genres, learner.purpose, learner.inbox_opened_at])
+
+  return (
+    <Link
+      href="/inbox"
+      data-testid="inbox-door"
+      data-count={count ?? undefined}
+      aria-label={
+        count ? count + ' new in your inbox' : 'Inbox — what has landed in your Club'
+      }
+      className="pointer-events-auto tap-target relative flex items-center"
+    >
+      {/*
+        An envelope, because that is what an inbox is and this is not the screen to be
+        clever on. currentColor so it inherits the header's own decision about sand or
+        photograph — see the note at the call site.
+      */}
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden
+        className="h-6 w-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M3 7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
+        <path d="m3 8 9 6 9-6" />
+      </svg>
+      {count ? (
+        <span
+          data-testid="inbox-count"
+          /*
+            The accent, which is white over a photograph and blue on sand, with the ground
+            taken from the ink rather than named — so the badge is legible on both and
+            there is no second colour to keep in step. --accent-ink is the token for
+            "text on the accent" and it is what every other accent-filled control uses.
+          */
+          className="absolute -right-1 -top-1 flex h-3 min-w-3 items-center justify-center rounded-full bg-accent px-1 text-[0.5rem] font-semibold leading-none text-accent-ink"
+        >
+          {count > 9 ? '9+' : count}
+        </span>
+      ) : null}
+    </Link>
   )
 }

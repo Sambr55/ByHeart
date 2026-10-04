@@ -111,7 +111,29 @@ export function Collection() {
   const showing = rows.find((d) => d.id === open) ?? rows[0]
 
   return (
-    <section data-testid="collection" className="flex flex-col gap-6">
+    /*
+      THE WHITE CARD AROUND THE WHOLE LIBRARY, because it was the hole in Yours.
+
+      Everything else on this screen is already a card — the identity row at the top, the
+      empty state, SHOWN and BROUGHT IN at the foot — and the boards, which are the
+      largest and most-used thing on the page, were the one block rendering straight onto
+      sand between them. A screen of cards with one uncontained section in the middle does
+      not read as "this bit is different"; it reads as a bit that has not been finished.
+
+      SAFE ON THE PHOTOGRAPHS, and this is the thing to be careful about. The tiles carry
+      images, but each one is clipped by its own `overflow-hidden rounded` and carries its
+      own scrim and white ink — the photographs are INSIDE the card rather than under it,
+      so nothing here is `.shown-on-photo` and nothing inherits white ink from a ground
+      this card paints over. The card is the frame; the pictures stay pictures.
+
+      The rail's own `border-b border-line` now insets to the card's padding, which is the
+      shape a tab rule wants anyway: it belongs to the board it is selecting, not to the
+      page.
+    */
+    <section
+      data-testid="collection"
+      className="flex flex-col gap-6 rounded-2xl border border-line bg-bg-elev px-5 py-6"
+    >
       {/*
         THE RAIL. Four boards, a MORE toggle, and a rule under the selected one — which is
         the whole of how a profile says which grid you are looking at.

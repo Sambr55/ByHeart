@@ -128,7 +128,23 @@ export function Diagnostic() {
   ]
 
   return (
-    <section className="flex flex-col gap-3">
+    /*
+      THE WHITE CARD, because this is a readout and a readout wants a sheet.
+
+      Two dense tables — eighteen device facts and every vibe with its verdict — drawn at
+      text-xs on hairlines, straight onto the sand. The rest of this page is already
+      sectioned (see `Section` in app/facilitator/page.tsx), so the diagnostic was the one
+      uncontained block on a page made of contained ones, and it is the block somebody is
+      actually here to read.
+
+      Sam: "I like the black text on white, it is so easy to read." A table of small
+      numbers is exactly where that is worth most — sand is seven points darker than the
+      card, and at 12px that difference is the whole of whether a row scans.
+
+      The raw-record `<pre>` below stays bg-surface. It is an inset well rather than a
+      card, and on bg-bg-elev it reads as one more clearly than it did on sand.
+    */
+    <section className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
       <p className="eyebrow text-accent">THIS DEVICE</p>
       <dl className="flex flex-col">
         {rows.map(([k, v]) => (

@@ -51,20 +51,34 @@ export function Come({ code }: { code: string }) {
     <main className="safe-top mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg">
       <Wordmark mark="club" className="h-6" title="DUB Club" />
 
-      <div className="flex flex-1 flex-col justify-center gap-3">
-        <p className="eyebrow text-accent">{COME.eyebrow}</p>
-        <h1 className="display text-balance text-3xl">{COME.headline}</h1>
-        <p className="text-sm leading-relaxed text-muted">{COME.body}</p>
-        {/*
-          What it is not, because an invitation from a friend in an expat group reads —
-          reasonably — as another social app, and the honest difference is worth a sentence.
-        */}
-        <p className="text-sm leading-relaxed text-muted">{COME.note}</p>
-        {spent ? (
-          <p data-testid="come-spent" className="text-sm leading-relaxed text-accent">
-            {COME.spent}
-          </p>
-        ) : null}
+      {/*
+        THE WHITE CARD ON THE INVITATION, which is the warmest arrival in the product and
+        was the plainest screen in it.
+
+        Somebody is here because a friend asked them to be. What they met was an eyebrow,
+        a headline and three grey paragraphs floating in the middle of a sand page — which
+        is the layout of a notice, not of something handed to you.
+
+        flex-1 justify-center stays on the OUTER div so the card still sits in the middle
+        of the screen; the card itself only holds the words. Putting flex-1 on the card
+        would stretch it to the full height and it would stop being a card.
+      */}
+      <div className="flex flex-1 flex-col justify-center">
+        <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
+          <p className="eyebrow text-accent">{COME.eyebrow}</p>
+          <h1 className="display text-balance text-3xl">{COME.headline}</h1>
+          <p className="text-sm leading-relaxed text-muted">{COME.body}</p>
+          {/*
+            What it is not, because an invitation from a friend in an expat group reads —
+            reasonably — as another social app, and the honest difference is worth a sentence.
+          */}
+          <p className="text-sm leading-relaxed text-muted">{COME.note}</p>
+          {spent ? (
+            <p data-testid="come-spent" className="text-sm leading-relaxed text-accent">
+              {COME.spent}
+            </p>
+          ) : null}
+        </div>
       </div>
 
       <button

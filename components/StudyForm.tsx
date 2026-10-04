@@ -6,11 +6,7 @@ import { BRAND } from '@/content/brand'
 import { QUESTIONS, type Question } from '@/content/feedback'
 import { PageShell } from '@/components/PageShell'
 import { track } from '@/engine/analytics'
-import {
-  buildSubmission,
-  downloadFeedback,
-  submitFeedback,
-} from '@/engine/feedback'
+import { buildSubmission, downloadFeedback, submitFeedback } from '@/engine/feedback'
 import { hydrateFromUrl, loadLearner } from '@/engine/learner'
 
 /**
@@ -40,9 +36,7 @@ export function StudyForm() {
 
   if (!ready) return <PageShell eyebrow={BRAND.name}>{null}</PageShell>
 
-  const missing = QUESTIONS.filter(
-    (q) => q.required && !String(answers[q.id] ?? '').trim(),
-  )
+  const missing = QUESTIONS.filter((q) => q.required && !String(answers[q.id] ?? '').trim())
 
   async function send() {
     setState('sending')
@@ -63,15 +57,26 @@ export function StudyForm() {
     return (
       <PageShell eyebrow={BRAND.name + ' · FEEDBACK'}>
         <div className="flex flex-1 flex-col justify-center">
-          <h1 className="display text-3xl">Thank you. Genuinely.</h1>
-          <p className="mt-3 text-sm text-muted">
-            {stored
-              ? 'Your answers are saved.'
-              : 'Your answers could not reach the server, so a copy has been downloaded to this phone. Hand it to the facilitator — nothing is lost.'}
-          </p>
-          {!stored && reason ? (
-            <p className="mt-3 font-mono text-[0.6rem] text-muted">{reason}</p>
-          ) : null}
+          {/*
+            The receipt gets the card, and the button stays outside it.
+
+            What this says — saved, or not saved and here is the copy on your phone — is
+            the one fact somebody came back for, and it was a headline and a grey line
+            floating in the middle of an empty sand page. A card makes it a thing that was
+            issued. The CTA below is a separate action rather than part of the receipt, so
+            it keeps its own ground.
+          */}
+          <div className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
+            <h1 className="display text-3xl">Thank you. Genuinely.</h1>
+            <p className="mt-3 text-sm text-muted">
+              {stored
+                ? 'Your answers are saved.'
+                : 'Your answers could not reach the server, so a copy has been downloaded to this phone. Hand it to the facilitator — nothing is lost.'}
+            </p>
+            {!stored && reason ? (
+              <p className="mt-3 font-mono text-[0.6rem] text-muted">{reason}</p>
+            ) : null}
+          </div>
           <Link
             href="/proof"
             className="tap-target eyebrow mt-6 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
@@ -85,11 +90,18 @@ export function StudyForm() {
 
   return (
     <PageShell eyebrow={BRAND.name + ' · FEEDBACK'}>
-      <h1 className="display text-balance text-3xl">Now take it apart.</h1>
-      <p className="mt-3 text-sm text-muted">
-        Be as critical as you can be. Praise is pleasant and useless; the sharpest
-        thing you say is the most valuable thing on this page.
-      </p>
+      {/*
+        The ask gets a card too, so the instruction is an object and not a caption. It is
+        the one thing on this page that is not a question, and six carded questions under
+        two loose paragraphs would read as the heading having been left behind.
+      */}
+      <div className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
+        <h1 className="display text-balance text-3xl">Now take it apart.</h1>
+        <p className="mt-3 text-sm text-muted">
+          Be as critical as you can be. Praise is pleasant and useless; the sharpest thing you say
+          is the most valuable thing on this page.
+        </p>
+      </div>
 
       <div className="mt-6 space-y-6">
         {QUESTIONS.map((q, i) => (
@@ -133,7 +145,20 @@ function Field({
   onChange: (v: string | number) => void
 }) {
   return (
-    <section>
+    /*
+      ONE WHITE CARD PER QUESTION, because six of them ran together on the sand.
+
+      This was a bare `<section>`: number, label, hint, then a field, repeated six times
+      with nothing between them but a gap. On a sand ground the only thing separating one
+      question from the next was whitespace, so the page read as a wall rather than as six
+      things to answer — and the answer fields are bg-surface, which is DARKER than sand,
+      so the holes were more visible than the questions they belonged to.
+
+      A card each inverts that: the question is the object, the field is the hole in it.
+      That is the relationship the inset token was chosen for, and it only works when
+      there is something lifted for it to be inset into.
+    */
+    <section className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
       <div className="flex gap-3">
         <span className="display shrink-0 text-sm text-accent">{index}</span>
         <div className="flex-1">
@@ -141,9 +166,7 @@ function Field({
             {question.prompt}
             {question.required ? <span className="text-accent"> *</span> : null}
           </label>
-          {question.hint ? (
-            <p className="mt-1 text-xs text-muted">{question.hint}</p>
-          ) : null}
+          {question.hint ? <p className="mt-1 text-xs text-muted">{question.hint}</p> : null}
 
           {question.kind === 'text' ? (
             <textarea
@@ -165,9 +188,7 @@ function Field({
                   onClick={() => onChange(p.value)}
                   className={
                     'tap-target flex w-full items-center gap-3 rounded border px-3 py-3 text-left text-sm transition ' +
-                    (value === p.value
-                      ? 'border-accent bg-accent/10'
-                      : 'border-line bg-surface')
+                    (value === p.value ? 'border-accent bg-accent/10' : 'border-line bg-surface')
                   }
                 >
                   <span className="display w-4 text-accent">{p.value}</span>

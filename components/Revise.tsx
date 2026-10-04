@@ -63,7 +63,21 @@ export function Revise() {
   if (!lines.length) {
     return (
       <Shell title={revisionTitle(kind, id)}>
-        <p className="text-sm leading-relaxed text-muted">
+        {/*
+          THE WHITE CARD ON THE EMPTY STATE TOO, which is the half of this screen that
+          never got it.
+
+          The asking beat is a SayItCard, which is `rounded-2xl border border-line
+          bg-bg-elev px-5 py-6` — so this screen showed a white card while it was working
+          and bare sand the moment it had nothing to ask. One muted sentence alone on a
+          sand page under a blue button does not read as "there is nothing here"; it
+          reads as a screen that failed to load.
+
+          Profile already settled this exact argument for Yours: "one sentence and a
+          button on bare sand is the one state that looks unfinished rather than empty".
+          Same fault, same fix.
+        */}
+        <p className="rounded-2xl border border-line bg-bg-elev px-5 py-6 text-sm leading-relaxed text-muted">
           Nothing to say back on this one yet — it is a reference rather than a sentence.
         </p>
         <Dock>
@@ -81,14 +95,25 @@ export function Revise() {
   if (done || !line) {
     return (
       <Shell title={revisionTitle(kind, id)}>
-        <p className="eyebrow text-accent">STILL YOURS</p>
-        <h1 className="display text-balance text-2xl">
-          {lines.length === 1 ? 'That is still there.' : 'All ' + lines.length + ' still there.'}
-        </h1>
-        <p className="text-sm leading-relaxed text-muted">
-          Nothing on this card can be lost by getting it wrong. It is here whenever you want it
-          again.
-        </p>
+        {/*
+          AND THE SAME CARD ON THE DONE BEAT, so the screen keeps its shape to the end.
+
+          This is the reward at the end of a revision — eyebrow, headline, and the one
+          sentence that says nothing here can be lost — and it was three loose siblings on
+          sand immediately after a run of white cards. The card going away at the moment
+          somebody finishes reads as the thing being taken back; keeping it means the
+          screen ends on the same object it worked on.
+        */}
+        <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
+          <p className="eyebrow text-accent">STILL YOURS</p>
+          <h1 className="display text-balance text-2xl">
+            {lines.length === 1 ? 'That is still there.' : 'All ' + lines.length + ' still there.'}
+          </h1>
+          <p className="text-sm leading-relaxed text-muted">
+            Nothing on this card can be lost by getting it wrong. It is here whenever you want it
+            again.
+          </p>
+        </div>
         <Dock>
           <Link
             href="/profile"

@@ -84,11 +84,24 @@ export function Subscribe({ city }: { city: string }) {
   }
 
   return (
-    <section data-testid="subscribe" className="flex flex-col gap-3">
-      <div className="flex items-baseline gap-3">
-        <h2 className="eyebrow min-w-0 text-accent">YOUR CALENDAR</h2>
-        <span className="h-px flex-1 bg-line" />
-      </div>
+    /*
+      THE WHITE CARD, because this is an ask and an ask should be an object.
+
+      Heading, a sentence, a row of genre chips, a per-week control and a button — five
+      different kinds of thing, all on the sand, directly under a month of events that are
+      themselves cards. Nothing said where the calendar stopped and the offer began except
+      a hairline, and a hairline between a list and a form is doing a border's job without
+      a border's edge.
+
+      THE RULE GOES WITH IT. `<span className="h-px flex-1 bg-line" />` existed to draw
+      that boundary; the card's own border draws it now, and keeping both would be the
+      same line twice.
+    */
+    <section
+      data-testid="subscribe"
+      className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6"
+    >
+      <h2 className="eyebrow text-accent">YOUR CALENDAR</h2>
       <p className="text-sm leading-relaxed text-muted">
         Put what is on in {city} into the calendar you already look at. Tap one and it opens
         the Portuguese for being there.

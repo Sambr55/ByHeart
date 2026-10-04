@@ -578,6 +578,30 @@ export interface LearnerState {
   /** When the Club welcomed them. Fires once, ever. Earliest wins on a merge. */
   club_welcomed_at: string | null
   /**
+   * When they last opened the inbox, which is the whole of what the inbox remembers.
+   *
+   * ONE DATE RATHER THAN A LIST OF MESSAGES SEEN, and it is the same shape as
+   * `lines_seen` is deliberately NOT. A daily line is content with an identity that has to
+   * be remembered for ever — the same sentence must never arrive twice, so the ids go in a
+   * set and stay there. An inbox message has no independent existence: it is derived from
+   * a drop that is live in the feed right now (see content/inbox.ts), and it stops existing
+   * the morning the drop does.
+   *
+   * So storing ids here would be storing the names of expired drops in a list that only
+   * grows, to answer a question — "is there anything new" — that a single timestamp answers
+   * exactly. It also means an expired drop needs no cleanup anywhere: it leaves the feed,
+   * the message leaves with it, and the count is right again on its own.
+   *
+   * Null means never opened, and then everything is new. That is what puts eleven messages
+   * in front of somebody on their first open without anything having been seeded.
+   *
+   * LATEST WINS ON A MERGE, unlike club_welcomed_at above. "I have seen the inbox" is a
+   * claim that gets truer with time, and the device that looked most recently is the one
+   * telling the truth — taking the earliest would re-announce, on the other phone, drops
+   * this learner has already read about.
+   */
+  inbox_opened_at: string | null
+  /**
    * Cards kept, and cards liked.
    *
    * Two different gestures and they are not the same thing. A save is FOR the learner —
@@ -764,6 +788,7 @@ export function emptyLearner(): LearnerState {
     sections_completed: [],
     sittings: 0,
     club_welcomed_at: null,
+    inbox_opened_at: null,
     saved: [],
     liked: [],
     finished_cards: [],
@@ -1004,6 +1029,9 @@ export function loadLearner(): LearnerState {
               ? parsed.sittings
               : arr(parsed.sections_completed, []).length,
           club_welcomed_at: parsed.club_welcomed_at ?? null,
+          /* Absent on every record written before the inbox existed, and absent is the
+             honest reading: they have never opened it, so everything live is new. */
+          inbox_opened_at: parsed.inbox_opened_at ?? null,
           saved: arr(parsed.saved, []),
           liked: arr(parsed.liked, []),
           finished_cards: arr(parsed.finished_cards, []),
@@ -1321,6 +1349,7 @@ export async function syncSession(reason: string): Promise<boolean> {
         sections_completed: s.sections_completed,
         sittings: s.sittings,
         club_welcomed_at: s.club_welcomed_at,
+        inbox_opened_at: s.inbox_opened_at,
         collisions_played: s.collisions_played,
         nocue_done: s.nocue_done,
         lines_seen: s.lines_seen,
@@ -2164,6 +2193,25 @@ export function setLegendPrompt(value: 'accepted' | 'declined') {
   })
 }
 
+
+/**
+ * The inbox was opened. Moves forward only.
+ *
+ * `Math.max` by string comparison on ISO dates, which is the whole of the merge rule
+ * expressed locally: a stale write — a tab that mounted an hour ago and only now flushes —
+ * must not pull the mark backwards and re-announce drops that have been read about.
+ *
+ * Written on OPEN rather than on scroll-to-bottom, deliberately. The count is a claim about
+ * whether anything has arrived since you last looked, not about whether you read every
+ * word, and a product that waits for proof of reading before clearing a badge is one that
+ * keeps a badge on to make you come back.
+ */
+export function markInboxOpened() {
+  update((s) => {
+    const now = new Date().toISOString()
+    if (!s.inbox_opened_at || now > s.inbox_opened_at) s.inbox_opened_at = now
+  })
+}
 
 /** A daily line shown. Recorded wherever it was shown — the page or a notification. */
 export function rememberLine(id: string) {

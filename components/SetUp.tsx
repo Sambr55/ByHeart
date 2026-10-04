@@ -504,11 +504,34 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                   */
                   window.setTimeout(() => setStep('who'), 260)
                 }}
+                /*
+                  THE UNCHOSEN ROW GETS A GROUND, which it never had.
+
+                  It was `border-line` and nothing else — an outline drawn on the sand
+                  with nothing behind it, which Proof's note already named as "the one
+                  shape in this system that reads as neither ground nor card". These five
+                  rows are the single most consequential tap in the product: the answer
+                  decides the Legend frames, the room ranking and the whole Club feed.
+                  They were the flattest thing on the screen, and they sit directly under
+                  a photograph, which made the contrast worse — a bright header above five
+                  hairlines on sand.
+
+                  bg-bg-elev, so each option is an object you are choosing between. The
+                  chosen one still goes solid accent, so the answer is still unmistakable;
+                  what changes is that the four you did not pick now look like cards you
+                  could have picked rather than like empty rules.
+
+                  NOT ON THE PHOTOGRAPH. These rows are below the header image, on the
+                  pane's own sand — the header is `-mx-5 -mt-6` and ends before this list
+                  starts, and nothing here is inside `.shown-on-photo`. Destination's rows
+                  take solid grounds for the opposite reason, over a picture; these take
+                  one because there is no picture to lift off.
+                */
                 className={
                   'tap-target flex w-full flex-col gap-1 rounded border px-4 py-3 text-left transition ' +
                   (chosenWhy === o.id
                     ? 'border-accent bg-accent text-accent-ink'
-                    : 'border-line hover:border-accent/50')
+                    : 'border-line bg-bg-elev hover:border-accent/50')
                 }
               >
                 <span className="display text-lg">{o.label}</span>

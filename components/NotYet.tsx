@@ -93,6 +93,23 @@ export function NotYet({
 
   return (
     <main data-stage="CHOICE" className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
+      {/*
+        THE WHITE CARD ON THE LOCKED HALF TOO, so the screen is two cards and not one.
+
+        INSIDE already had a card, and it is the SELL — the half that says what is behind
+        the door. The half that says what the door IS, which is the tab's name, the
+        headline and the two sentences explaining the distance, had nothing: eyebrow,
+        3xl headline and two grey paragraphs loose on the sand above a bordered box.
+
+        That ordering reads backwards. The thing the person tapped and the reason they
+        cannot have it is the answer to their question; the sell is the consolation. One
+        of the two being an object and the other being loose type made the consolation
+        look like the content.
+
+        Both carded, the screen is: here is what you asked for and why it is shut; here is
+        what is behind it. Two cards, in that order, which is the order it happens in.
+      */}
+      <div className="flex flex-col gap-6 rounded-2xl border border-line bg-bg-elev px-5 py-6">
       <p className="eyebrow text-accent">{what}</p>
       <h1 className="display text-balance text-3xl">Not yet — this opens with your Legend.</h1>
       <p className="text-sm leading-relaxed text-muted">{line}</p>
@@ -149,6 +166,7 @@ export function NotYet({
               (vibesLeft > 0 ? ', and a warm-up vibe.' : '.')
             : 'The basics are done. Take a warm-up vibe and it opens.'}
       </p>
+      </div>
 
       {/*
         WHAT IS BEHIND THE DOOR, named with real things rather than adjectives.
@@ -166,7 +184,16 @@ export function NotYet({
         things because there ARE fewer things. A number somebody can check is worth more
         than an adjective they cannot.
       */}
-      <div className="mt-3 flex flex-col gap-3 rounded border border-accent/40 bg-bg-elev px-4 py-6">
+      {/*
+        rounded-2xl and px-5, matching its new neighbour and every other card in DUB.
+
+        It was `rounded` — a 4px radius — with px-4, which is the shape Proof's note calls
+        out: the radius is most of what makes a rectangle read as a card rather than a box.
+        Beside a rounded-2xl card it read as a different kind of thing, and it is not.
+        The accent border stays: this one is the sell and is allowed to be the warmer of
+        the two.
+      */}
+      <div className="mt-3 flex flex-col gap-3 rounded-2xl border border-accent/40 bg-bg-elev px-5 py-6">
         <p className="eyebrow text-accent">INSIDE</p>
         <p className="text-sm leading-relaxed text-fg/85">{CLUB.door.inside}</p>
         <ul className="mt-1 flex flex-col gap-3">

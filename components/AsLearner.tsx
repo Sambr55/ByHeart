@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   answerLegend,
   markSetUpComplete,
+  recordProof,
   resetLearner,
   resetLearnerCache,
   setDisplayName,
@@ -12,7 +13,7 @@ import {
 } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
 import { DEFAULT_PAIR } from '@/content/pairs'
-import { cardFor } from '@/content/legend'
+import { cardFor, fillEnglish, fillFrame } from '@/content/legend'
 
 /**
  * Put the device into one known state and open the Club in it.
@@ -84,6 +85,27 @@ export function AsLearner({ mode }: { mode: 'new' | 'returning' | 'member' }) {
                 : (slot.options?.[0]?.value ?? 'x')
         }
         answerLegend(frame.id, values)
+        /*
+          AND SAID, not only answered, because the door asks for both now.
+
+          Sam: "What is the URL to jump the legend set-up so I can test the Club. I thought
+          it club-member?" It is, and it had stopped working — this route answered the seven
+          and wrote no proof, while clubOpen was changed this morning to ask for seven
+          sentences PRODUCED with nothing on screen. A card that is written but never said
+          is exactly the state that change exists to catch, so the shortcut was building a
+          learner the door was right to refuse.
+
+          Written through recordProof for the same reason the answers go through
+          answerLegend: it is what the run-through calls, so this cannot drift from what a
+          real member's record looks like. `clean: true` because a sentence said cold is
+          clean by definition — see the note in Legend.tsx.
+        */
+        recordProof({
+          pt: fillFrame(frame, values, null),
+          en: fillEnglish(frame, values),
+          source: 'legend',
+          clean: true,
+        })
       }
     }
     if (mode === 'returning') {

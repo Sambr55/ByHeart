@@ -197,6 +197,18 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     /* Answered once, on whichever device. It never un-answers. */
     set_up_at: earliest(l.set_up_at, r.set_up_at),
     club_welcomed_at: earliest(l.club_welcomed_at, r.club_welcomed_at),
+    /*
+      The inbox mark goes the OTHER WAY from everything around it, and that is not an
+      oversight.
+
+      Every date above is "when did this first happen", so the earliest copy is the true
+      one. This one is "how recently have you looked", which only ever gets truer — and
+      taking the earliest would hand the other phone a mark from before drops it has
+      already shown, re-announcing content this learner has read about. The failure mode of
+      being too recent is a badge that does not appear; the failure mode of being too old is
+      a product lying about what is new.
+    */
+    inbox_opened_at: latest(l.inbox_opened_at, r.inbox_opened_at),
     // Seen once is seen. A second phone must not decide it has not happened yet.
     switch_seen_at: earliest(l.switch_seen_at, r.switch_seen_at),
 
