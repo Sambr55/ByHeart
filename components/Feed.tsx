@@ -14,7 +14,12 @@ import { labelForLocale } from '@/content/pairs'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
-import { INTRO_DEMO_AFTER, INTRO_SETUP_AFTER, type IntroCard } from '@/content/intro'
+import {
+  INTRO_DEMO_AFTER,
+  INTRO_SETUP_AFTER,
+  type IntroCard,
+  type StepIcon,
+} from '@/content/intro'
 import { COLLISIONS, CRATES, PIECES, ROOTS, displayForm, setPieces } from '@/content/roots'
 import { askFor, cardFor, fillFrame, LEGEND_FRAMES, STAGES } from '@/content/legend'
 import { mintShowing } from '@/engine/showing'
@@ -3870,6 +3875,301 @@ function Gesture({
   )
 }
 
+/*
+  THE FIVE PICTURES.
+
+  Inline rather than an icon package: five shapes do not earn a dependency, and inline
+  SVG inherits `currentColor`, so each one is correct in both themes without a second
+  definition anywhere.
+
+  Each is drawn on the same 24-unit box at the same 1.7 stroke as the back arrow above,
+  so the set reads as one hand. They are the acts, not the nouns: Learn is an open book,
+  Listen is a sound leaving a speaker, Say is a microphone, Share is one point throwing to
+  two, Enjoy is a glass raised.
+*/
+function StepGlyph({ icon }: { icon: StepIcon }) {
+  const paths: Record<StepIcon, React.ReactNode> = {
+    learn: (
+      <>
+        <path d="M12 7v12" />
+        <path d="M12 7C10.5 5.6 8.6 5 6 5H4v12h2c2.6 0 4.5.6 6 2" />
+        <path d="M12 7c1.5-1.4 3.4-2 6-2h2v12h-2c-2.6 0-4.5.6-6 2" />
+      </>
+    ),
+    listen: (
+      <>
+        <path d="M4 10v4h3l4 3V7L7 10H4Z" />
+        <path d="M15 9.5a3.5 3.5 0 0 1 0 5" />
+        <path d="M17.5 7a7 7 0 0 1 0 10" />
+      </>
+    ),
+    say: (
+      <>
+        <rect x="9" y="3" width="6" height="11" rx="3" />
+        <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0" />
+        <path d="M12 18v3" />
+      </>
+    ),
+    share: (
+      <>
+        <circle cx="17.5" cy="5.5" r="2.5" />
+        <circle cx="17.5" cy="18.5" r="2.5" />
+        <circle cx="6" cy="12" r="2.5" />
+        <path d="M8.3 10.9 15.2 6.8" />
+        <path d="m8.3 13.1 6.9 4.1" />
+      </>
+    ),
+    enjoy: (
+      <>
+        <path d="M6.5 4h11l-1 6a4.5 4.5 0 0 1-9 0Z" />
+        <path d="M12 14.5V19" />
+        <path d="M8.5 19.5h7" />
+      </>
+    ),
+  }
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      {paths[icon]}
+    </svg>
+  )
+}
+
+/*
+  A LINE THAT ARRIVES A CHARACTER AT A TIME.
+
+  Sam: "use typewriter to bring in Meet up text". It is the one thing on this card that is
+  a real event with an address and a time, and typing it reads as news coming in rather
+  than as a caption that was always there.
+
+  NOT ON THE MOTION SCALE, and that is deliberate rather than an oversight: the scale sizes
+  transitions — how long a thing takes to become present — and this is a duration made of
+  one tick per character. The tick itself is 28ms, below --t-ack and therefore below
+  conscious notice, which is what a typewriter needs to be: you see the line filling, not
+  individual letters landing.
+
+  It holds the finished height from the first frame. A block that grows as it types shoves
+  everything under it down the screen, which on a phone means the card reflows while you
+  are reading it — so the full string sits in the layout invisibly and the typed copy is
+  painted over it.
+
+  Reduced motion gets the whole line immediately. Somebody who has asked the OS for no
+  animation is not asking to read more slowly.
+*/
+function Typed({ text, start, delay = 0 }: { text: string; start: boolean; delay?: number }) {
+  const [n, setN] = useState(0)
+
+  useEffect(() => {
+    if (!start) {
+      setN(0)
+      return
+    }
+    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+    if (still) {
+      setN(text.length)
+      return
+    }
+    let i = 0
+    let tick: ReturnType<typeof setInterval> | undefined
+    const open = setTimeout(() => {
+      tick = setInterval(() => {
+        i += 1
+        setN(i)
+        if (i >= text.length && tick) clearInterval(tick)
+      }, 28)
+    }, delay)
+    return () => {
+      clearTimeout(open)
+      if (tick) clearInterval(tick)
+    }
+  }, [text, start, delay])
+
+  /*
+    Said once, not twice.
+
+    The reserve and the typed copy both carry the string, so without this a screen reader
+    reads the line, then reads however much of it has arrived — the address twice, the
+    second time truncated. The reserve is the one that speaks (it is always complete); the
+    animation is hidden from the tree entirely, because a partial sentence is not
+    information.
+  */
+  return (
+    <span className="relative block">
+      {/* The finished line, holding its own height, and the copy that is read aloud. */}
+      <span className="invisible">{text}</span>
+      <span className="absolute inset-0" aria-hidden>
+        {text.slice(0, n)}
+      </span>
+    </span>
+  )
+}
+
+/*
+  FIVE THINGS A MEMBER DOES, WHO THEY DO THEM WITH, AND ONE NIGHT TO DO THEM ON.
+
+  The one specimen with no Portuguese in it, and therefore the one that must not borrow the
+  row the rest of them use. That row hangs a play button and a copy button off the left of
+  every line and sets the first column in the Portuguese face — correct for every other
+  kind, because every other kind is a sentence somebody would say. Learn, Listen, Say,
+  Share and Enjoy are English names for acts: there is nothing to play, nothing worth
+  copying, and dressing them as the language being taught would be a lie on the card that
+  explains what membership is.
+
+  A RING WITH SOMETHING IN IT. The ring was empty, and empty was honest while it stood
+  alone — these are not things this person has done, they are what the Club is made of, and
+  a tick would claim progress before anybody has joined. The icon keeps that: it names the
+  act without scoring it, and the ring stays open around it.
+
+  THE ONE THAT MOVES IS SAY, wearing `.listening` — the same ring the microphone throws
+  while it is genuinely hearing you. The card is not illustrating a feature, it is showing
+  the control the learner is about to meet, two screens early.
+
+  Its own component rather than a branch inside Specimen, because it holds hooks and
+  Specimen reaches it after four early returns. That has been the same bug twice in one
+  day: a hook below a return renders fine until the branch above it fires, and then the
+  card is gone.
+*/
+function Steps({
+  shows,
+  onScreen,
+}: {
+  shows: Extract<NonNullable<IntroCard['shows']>, { kind: 'steps' }>
+  onScreen: boolean
+}) {
+  /*
+    The cascade, in one sequence across both rows.
+
+    The five acts come first, then the faces, then the night — so the card assembles in the
+    order it argues: here is what you do, here is who is already doing it, here is where.
+    190ms apart is the gap the other specimens use.
+  */
+  const STAGGER = 190
+  const faceAt = shows.steps.length * STAGGER
+  /*
+    THE FACES OVERLAP EACH OTHER, AND THE NIGHT OVERLAPS THE FACES.
+
+    Six faces at a full 190ms each put the meet-up two seconds after the card arrives, and
+    then it types for three more. Measured in a browser: nothing moved in the bottom third
+    of the screen until t+2000ms, by which time somebody has decided the card is finished
+    and swiped. A cascade that outlasts the attention it was built to hold is just a delay.
+
+    So the faces come in at half the step — they are one group arriving, not six separate
+    claims — and the meet-up starts as the last of them lands rather than after it.
+  */
+  const FACE_STEP = STAGGER / 2
+  const meetAt = faceAt + Math.max(0, (shows.members?.length ?? 0) - 1) * FACE_STEP
+
+  return (
+    <div data-testid="intro-shows" className="mt-6 flex flex-col gap-6">
+      <ul className="flex flex-col gap-3">
+        {shows.steps.map((s, i) => (
+          <li
+            key={s.word}
+            className={'flex items-center gap-4 ' + (onScreen ? 'animate-rise' : 'opacity-0')}
+            style={{ animationDelay: i * STAGGER + 'ms' }}
+          >
+            <span
+              aria-hidden
+              /*
+                Drawn with a border rather than as an SVG, because it is a ring and a ring
+                is a border. 36px so it sits at the height of the word beside it without
+                being the loudest thing in the row.
+              */
+              className={
+                'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-current ' +
+                (s.icon === 'say' && onScreen ? 'listening text-accent' : 'opacity-60')
+              }
+            >
+              <StepGlyph icon={s.icon} />
+            </span>
+            <span className="display min-w-0 text-xl">{s.word}</span>
+          </li>
+        ))}
+      </ul>
+
+      {/*
+        SIX IN A ROW, and small enough that they stay in one.
+
+        At 56px they fitted five across 390px and dropped the sixth onto a row of its own,
+        which reads as one person left out rather than as a group. `grid-cols-3` fixed the
+        orphan and introduced a worse thing — three stretched cells with the faces drifting
+        apart, which is a layout rather than a group of people.
+
+        48px is the size at which six sit together on the narrowest phone this ships on,
+        and together is the entire claim: this is a room, not a directory.
+      */}
+      {shows.members?.length ? (
+        <ul className="flex flex-wrap gap-3" aria-label="Members">
+          {shows.members.map((m, i) => (
+            <li
+              key={m.src}
+              className={onScreen ? 'animate-rise' : 'opacity-0'}
+              style={{ animationDelay: faceAt + i * FACE_STEP + 'ms' }}
+            >
+              <Image
+                src={m.src}
+                alt={m.alt}
+                width={48}
+                height={48}
+                className="h-12 w-12 rounded-full border border-line object-cover"
+              />
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {shows.meet ? (
+        /*
+          GLASS, NOT A WHITE CARD, and that is the photo's doing rather than a taste call.
+
+          The white-card treatment is right everywhere it sits on sand. This specimen does
+          not: the Club card carries a Lisbon street behind it, and the wrapper around every
+          specimen on a photo is `.shown-on-photo`, which repoints --fg at white. So
+          `bg-bg-elev` painted a near-white panel and then wrote white text on it —
+          screenshotted and unreadable, which no amount of DOM assertion was going to catch.
+
+          Black at 55% with a blur is the same move the toast above uses: the photo stays
+          visible through it, the white text keeps its contrast, and the panel still reads
+          as a thing laid on top rather than a hole cut in the picture.
+        */
+        <div
+          className={
+            'rounded-2xl border border-line bg-black/55 px-5 py-6 backdrop-blur-sm ' +
+            (onScreen ? 'animate-rise' : 'opacity-0')
+          }
+          style={{ animationDelay: meetAt + 'ms' }}
+        >
+          <p className="display text-lg leading-snug">
+            <Typed text={shows.meet.line} start={onScreen} delay={meetAt} />
+          </p>
+          <p className="mt-1 text-sm text-muted">
+            <Typed
+              text={shows.meet.where}
+              start={onScreen}
+              delay={meetAt + shows.meet.line.length * 28}
+            />
+          </p>
+          <p className="mt-1 text-sm text-muted">
+            <Typed
+              text={shows.meet.when}
+              start={onScreen}
+              delay={meetAt + (shows.meet.line.length + shows.meet.where.length) * 28}
+            />
+          </p>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 /**
  * The real thing an argument card is arguing about.
  *
@@ -4118,48 +4418,9 @@ function Specimen({
     you and be handed European Portuguese back. Nothing else in the sequence demonstrates a
     thing the learner initiates.
   */
-  /*
-    FIVE THINGS A MEMBER DOES, drawn as five rings and five words.
-
-    The one specimen with no Portuguese in it, and therefore the one that must not borrow
-    the row the rest of them use. That row hangs a play button and a copy button off the
-    left of every line and sets the first column in the Portuguese face — correct for
-    every other kind, because every other kind is a sentence somebody would say. Learn,
-    Listen, Say, Share and Enjoy are English names for acts: there is nothing to play,
-    nothing worth copying, and dressing them as the language being taught would be a lie
-    on the card that explains what membership is.
-
-    AN OPEN RING RATHER THAN A TICK. Sam's mock draws five empty circles, and empty is the
-    whole of what they mean: these are not things this person has done, they are what the
-    Club is made of. A tick would claim progress on a card met before anybody has joined,
-    and a filled dot would read as a bullet, which is a list rather than a sequence.
-
-    The same cascade the other specimens use, and the same reason — the five arrive one
-    after another, so they read as five acts rather than as a block of five.
-  */
+  /* The Club card. Its own component because it holds hooks — see Steps. */
   if (shows.kind === 'steps') {
-    return (
-      <ul data-testid="intro-shows" className="mt-6 flex flex-col gap-3">
-        {shows.steps.map((s, i) => (
-          <li
-            key={s}
-            className={'flex items-center gap-4 ' + (onScreen ? 'animate-rise' : 'opacity-0')}
-            style={{ animationDelay: i * 190 + 'ms' }}
-          >
-            <span
-              aria-hidden
-              /*
-                Drawn with a border rather than as an SVG, because it is a ring and a ring
-                is a border. 36px so it sits at the height of the word beside it without
-                being the loudest thing in the row.
-              */
-              className="h-9 w-9 shrink-0 rounded-full border border-current opacity-60"
-            />
-            <span className="display min-w-0 text-xl">{s}</span>
-          </li>
-        ))}
-      </ul>
-    )
+    return <Steps shows={shows} onScreen={onScreen} />
   }
 
   if (shows.kind === 'exchange') {

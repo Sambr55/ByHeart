@@ -31,6 +31,16 @@
  * exactly where somebody would later be tempted to show a real one.
  */
 
+/*
+  THE FIVE PICTURES, named once.
+
+  Sam, on the Club card: "each roundel needs an icon". They are drawn in the renderer as
+  inline SVG inside the 36px ring the words already stood in — no icon font and no new
+  dependency for five shapes, and inline means they inherit `currentColor` and are right
+  in both themes without a second definition.
+*/
+export type StepIcon = 'learn' | 'listen' | 'say' | 'share' | 'enjoy'
+
 export interface IntroCard {
   id: string
   /** Max 14 characters, like every eyebrow in the product. */
@@ -167,7 +177,32 @@ export interface IntroCard {
       have no second column on purpose. The claim is that there are five and they are
       plain.
     */
-    | { kind: 'steps'; steps: string[] }
+    /*
+      The five are drawn with an icon each, and the icon is named here rather than
+      derived from the word in the renderer. A lookup keyed off a display string is a
+      silent break the day somebody rewords a step — this way each step carries its own
+      picture and the compiler says so.
+
+      `say` is the one that moves: it borrows `.listening`, the ring the microphone wears
+      while it is actually hearing you, so the card shows the mechanic rather than
+      describing it.
+    */
+    | {
+        kind: 'steps'
+        steps: { word: string; icon: StepIcon }[]
+        /*
+          SIX FACES, because the five verbs are what a member does and these are who they
+          do it with. They arrive one at a time — six landing together is a stock photo,
+          six landing in turn is a room filling up.
+        */
+        members?: { src: string; alt: string }[]
+        /*
+          The meet-up types itself out. It is the one piece of this card that is a real
+          thing on a real date, and a line that appears a character at a time reads as
+          news coming in rather than as a caption that was always there.
+        */
+        meet?: { line: string; where: string; when: string }
+      }
     | { kind: 'exchange'; exchange: { asked: string; pt: string; en: string }[] }
     /*
       THE TWO WAYS INTO ASK, shown as the act rather than listed as features.
@@ -450,7 +485,40 @@ export const INTRO_CARDS: IntroCard[] = [
     body: 'It takes about ten minutes. Seven sentences about yourself, said out loud, and the door is open.',
     shows: {
       kind: 'steps',
-      steps: ['Learn', 'Listen', 'Say', 'Share', 'Enjoy'],
+      steps: [
+        { word: 'Learn', icon: 'learn' },
+        { word: 'Listen', icon: 'listen' },
+        { word: 'Say', icon: 'say' },
+        { word: 'Share', icon: 'share' },
+        { word: 'Enjoy', icon: 'enjoy' },
+      ],
+      /*
+        WHO IS ALREADY IN, shown rather than counted.
+
+        Sam, on the member count: honest, and two is honest. A number is honest and cold;
+        six faces is what the room looks like when you walk in, and nothing here claims
+        how many there are. They are the example members shipped in /vibes/members.
+      */
+      members: [
+        { src: '/vibes/members/liv.png', alt: 'Liv, smiling, outdoors.' },
+        { src: '/vibes/members/rob.png', alt: 'Rob, outdoors.' },
+        { src: '/vibes/members/vinnie.png', alt: 'Vinnie.' },
+        { src: '/vibes/members/coffee-lover.png', alt: 'A member with a coffee.' },
+        { src: '/vibes/members/com-gelo.png', alt: 'A member with an iced drink.' },
+        { src: '/vibes/members/mountain-guy.png', alt: 'A member out on a hillside.' },
+      ],
+      /*
+        ONE REAL NIGHT, with an address and a time on it.
+
+        The rest of this card is what membership is in the abstract. This is the thing
+        that makes it a club rather than a course: somewhere to be, on a date, with the
+        people whose faces are directly above it.
+      */
+      meet: {
+        line: 'Lisbon Digital Nomads Xmas Meet-up!',
+        where: 'Honest Greens. R. Ivens 44, 1200-445 Lisboa',
+        when: '19 Dec. 1900hrs',
+      },
     },
   },
   {
