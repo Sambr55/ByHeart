@@ -5060,7 +5060,34 @@ function LegendOpened({
     can now say. The rest are on the deck when they get there, and the line below says how
     many are waiting — a fact, not a tally that grows.
   */
-  const first = frames[0]
+  /*
+    THE DOOR SHOWS THE CARD'S FIRST QUESTION, ANSWERED OR NOT.
+
+    Sam: "the legend opens with 'are you with somebody', then runs through the question. It
+    shouldn't do this. Should open with chamo-me as the example then the run through starts
+    with chamo-me."
+
+    `frames` is what just became readable AND is still unanswered, which is the right list
+    for an ordinary sitting — "you can say this now" is only news about something you have
+    not already said. It is the wrong list at the door, because the road answers all seven
+    card questions as the learner walks it, by design. So by the time the Legend opens the
+    seven are filtered out and whatever deeper frame happens to be readable is left holding
+    the screen: who_with, which became readable this morning when the Bridget fix banked
+    `solteiro`.
+
+    The screen under that headline says "here is the first thing you can say", and the
+    button under it starts a run-through that begins at card 1. So the example was
+    introducing a sentence the next screen would not ask for.
+
+    At the door, the hero is the card's own first question. That is what the Legend IS,
+    it is what the run begins with, and showing it already answered is not a problem —
+    this screen hands over a card, and a card somebody has filled in is the thing being
+    handed over.
+
+    Every other firing is unchanged: a part opening mid-journey still reports what actually
+    crossed the line, because there the news IS the delta.
+  */
+  const first = door ? (cardFor(learner.purpose ?? null)[0] ?? frames[0]) : frames[0]
   const more = frames.length - 1
   /* Where THIS learner met each word — see provenanceOf, which was naming the crate
      a word is authored in rather than the one they played. */

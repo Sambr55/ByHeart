@@ -2900,7 +2900,30 @@ export function framesJustOpened(opts: {
       frameApplies(f, opts.answers) &&
       frameReady(f, after) &&
       !frameReady(f, before),
-  ).sort((a, b) => a.card - b.card)
+    /*
+      THE CARD'S OWN QUESTIONS LEAD, and the deeper ones queue behind them.
+
+      Sam: "the legend opens with 'are you with somebody', then runs through the question.
+      It shouldn't do this. Should open with chamo-me as the example then the run through
+      starts with chamo-me."
+
+      Exactly what it did, and `card` order alone could not prevent it. The sort is correct
+      — name is card 1 and who_with is card 8 — but who_with is `depth: 'deeper'` and was
+      the only frame LEFT: the road answers all seven card questions as the learner walks
+      it, by design, so by the time the door opens every one of them is filtered out by
+      `!answered`. What remains is whatever deeper frame happens to have become readable,
+      and the screen that says "here is the first thing you can say" said it about a
+      question nobody had been promised.
+
+      The screen's job is to hand over the Legend, and the Legend IS the seven. So the
+      seven come first in their own order and the deeper ones follow — which also matches
+      the run-through that starts the moment somebody taps ANSWER IT NOW, so the example on
+      the door and the first question behind it are the same sentence.
+
+      Sorted rather than filtered, because a deeper frame crossing the line is still real
+      news for a learner whose card is finished; it simply is not the headline.
+    */
+  ).sort((a, b) => Number(a.depth === 'deeper') - Number(b.depth === 'deeper') || a.card - b.card)
 }
 
 /** Every card the learner's language reaches, answered or not. Drives the count. */
