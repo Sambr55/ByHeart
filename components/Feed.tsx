@@ -4078,24 +4078,15 @@ function Taste({ card }: { card: Extract<FeedCard, { kind: 'vibe' }> }) {
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-accent">YOU KNOW THIS</p>
         {/*
-          AND IT DOES NOT QUITE TRANSLATE, which is more use than saying the line twice.
+          PUT BACK, BECAUSE I CHANGED THE WRONG PANE.
 
-          Sam, on the Bob pane: "Replace second hold your horses with — It doesn't quite
-          translate 😭! This is what they say here:"
-
-          The face carries the English idiom and this repeated it verbatim one swipe later,
-          under an eyebrow announcing that you know it. Two identical lines, the second one
-          introduced as a revelation.
-
-          What the swipe actually reveals is underneath — the Portuguese, which is NOT the
-          idiom translated but what Portugal says instead. "Hold your horses" becomes
-          "Calma", and the gap between those is the entire point of the deck. So the line
-          that was a repetition becomes the thing that frames it, and the emoji is Sam's:
-          this crate is the one place in DUB allowed to be funny about the language.
+          Sam asked for "It doesn't quite translate 😭! This is what they say here:" and I
+          put it here — on Taste, the VIBE pane — reasoning from a screenshot rather than
+          checking which component drew it. This pane is a crate's taste of itself and its
+          line is the thing you know; the idiom cards are IdiomPane, two thousand lines
+          below, and that is where the sentence belongs and now is.
         */}
-        <p className="display text-balance text-2xl">
-          It doesn’t quite translate 😭! This is what they say here:
-        </p>
+        <p className="display text-balance text-2xl">{card.taste.en}</p>
         {/*
           Under the quote, as it is on the root card, so the two screens teach the same
           shape: the line, then where you would hear it, then the Portuguese.
@@ -6112,6 +6103,27 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-muted">WE SAY</p>
         <p className="display text-balance text-3xl">{i.english}</p>
+        {/*
+          AND THE LINE THAT FRAMES WHAT IS COMING, under the title.
+
+          Sam: "Add this text under the title — It doesn't quite translate 😭! This is what
+          they say here:"
+
+          Without it the pane reads as two facts stacked: here is the English, here is some
+          Portuguese. The whole deck is the GAP between them — "Bob's your uncle" is not
+          "E pronto" translated, it is what Portugal says in the same moment — and the panel
+          below is the answer to a question nobody had asked yet. This asks it.
+
+          Not the display size, deliberately. The English above is the thing the card is
+          about and this is the hinge into the next panel; at the same weight they compete,
+          and the Portuguese underneath is what should win the eye after it.
+
+          The emoji is Sam's. This crate is the one place in DUB allowed to be funny about
+          the language, which is the whole of why it exists.
+        */}
+        <p className="text-sm leading-relaxed text-muted">
+          It doesn’t quite translate 😭! This is what they say here:
+        </p>
       </div>
 
       {/*
@@ -6144,7 +6156,15 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
         a thing you cannot undo.
       */}
       <div className="flex flex-col gap-3">
-        <p className="eyebrow text-muted">{answered ? 'YOU SAID' : 'DID YOU GET IT'}</p>
+        {/*
+          GUESS, NOT GET, because guessing is what the card asked for.
+
+          Sam: "DID YOU GET IT change to DID YOU GUESS IT?" The face says "Have a guess what
+          you think this popular English saying is" — so "did you get it" changes the verb
+          between the question and the answer, which reads as a different, stricter question
+          about whether you were right.
+        */}
+        <p className="eyebrow text-muted">{answered ? 'YOU SAID' : 'DID YOU GUESS IT'}</p>
         <div className="flex gap-3">
           <button
             type="button"
@@ -6156,7 +6176,14 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
               (said === 'got' ? 'bg-correct text-accent-ink' : 'border border-line text-fg')
             }
           >
-            GOT IT
+            {/*
+              I GUESSED IT and NOPE!, which is Sam's wording and is better than the verbs it
+              replaces for the same reason the eyebrow changed: GOT IT / MISSED IT is the
+              language of a test being marked, and this is somebody saying how their own
+              guess went. The testids are unchanged — they are the identity of the control,
+              not its label, and renaming them would break the checks for a copy change.
+            */}
+            I GUESSED IT
           </button>
           <button
             type="button"
@@ -6168,7 +6195,7 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
               (said === 'missed' ? 'bg-accent text-accent-ink' : 'border border-line text-fg')
             }
           >
-            MISSED IT
+            NOPE!
           </button>
         </div>
         {/*
