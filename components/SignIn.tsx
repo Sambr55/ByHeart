@@ -55,7 +55,43 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
   */
   const [backTo, setBackTo] = useState<string | null>(null)
   useEffect(() => {
-    setBackTo(new URLSearchParams(window.location.search).get('next'))
+    const asked = new URLSearchParams(window.location.search).get('next')
+    if (asked) {
+      setBackTo(asked)
+      return
+    }
+    /*
+      AND WHERE THEY CAME FROM, WHEN NOTHING SAID.
+
+      Sam: "Clicking the emailed link when signing in takes me back to What brings you to
+      Lisbon. It needs to round trip to where you have come from."
+
+      The round trip works — returnTo honours ?next= and the allowlist has eight screens on
+      it. What was wrong is that nothing was capturing the origin: four of the six places
+      that offer sign-in hardcode `next=%2Fvibes`, and /vibes is where set-up asks "What
+      brings you to Lisbon". So a member signing in from their profile was handed the
+      shelf, and a learner mid-sitting was handed a question they had already answered.
+
+      `document.referrer` rather than threading a prop through six call sites, because the
+      browser already knows and the alternative is six places to keep right. Same-origin
+      only, and the path alone — returnTo filters it against the allowlist on the way out
+      and again on the way back, so this cannot widen what is reachable, only choose better
+      among what already is.
+
+      Falls through to null where there is no referrer, which is a direct visit or a
+      stripped one. That lands on /account?welcome=1, exactly as it did before, and that is
+      the right answer for somebody who arrived at the sign-in page from nowhere.
+    */
+    try {
+      const from = document.referrer
+      if (!from) return
+      const url = new URL(from)
+      if (url.origin !== window.location.origin) return
+      if (url.pathname === window.location.pathname) return
+      setBackTo(url.pathname)
+    } catch {
+      /* A referrer that will not parse is a referrer we do not have. */
+    }
   }, [])
 
   const submit = async (e: React.FormEvent) => {
@@ -124,17 +160,37 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
         </div>
       ) : null}
 
+      {/*
+        THE WHITE CARD, and on this screen it is a legibility fix rather than a style.
+
+        Sam: "I like the black text on white, it is so easy to read." On this page that is
+        not a preference — it is the bug. Every page carrying the bottom bar paints its
+        canvas azulejo so the strip under the bar is blue rather than sand (see
+        `html:has(.bar)` in globals.css), and this `<main>` is `justify-center` on a short
+        document: it never fills the viewport, so the blue canvas shows through behind the
+        words. The ink does not move with it — `--fg` is still the deep indigo meant for
+        sand — so the headline rendered dark-on-blue and the muted line rendered amber
+        on blue. Both are under 4.5:1 and the screenshot is unreadable.
+
+        A card fixes it at the root rather than by patching colours: the words get their
+        own near-white ground, so they are the black-on-white they were always designed
+        to be, and the blue stays where it was meant to be — behind the page, not behind
+        the type.
+
+        One card per state, because the three states are three different screens that
+        happen to share a route.
+      */}
       {state === 'undeliverable' ? (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
           <h1 className="display text-balance text-3xl">No email is going to arrive.</h1>
           <p className="text-sm leading-relaxed text-fg/85">
-            DUB has no mail sender configured yet, so it made you a sign-in link and had
-            nowhere to send it. That is a missing setting rather than a problem with your
-            address — nothing you do here will fix it.
+            DUB has no mail sender configured yet, so it made you a sign-in link and had nowhere to
+            send it. That is a missing setting rather than a problem with your address — nothing you
+            do here will fix it.
           </p>
           <p className="text-sm leading-relaxed text-muted">
-            Everything you have learned is safe on this device in the meantime. It stays
-            there, and it will still be there when accounts open.
+            Everything you have learned is safe on this device in the meantime. It stays there, and
+            it will still be there when accounts open.
           </p>
           <Link
             href="/club"
@@ -144,7 +200,7 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
           </Link>
         </div>
       ) : state === 'sent' ? (
-        <>
+        <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
           <h1 className="display text-balance text-3xl">Check your email.</h1>
           <p className="text-sm text-fg/80">
             One link, good for twenty minutes, and it only works once. Open it on the phone you
@@ -155,9 +211,9 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
               {debugUrl}
             </a>
           ) : null}
-        </>
+        </div>
       ) : (
-        <>
+        <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
           <h1 className="display text-balance text-3xl">
             {returning ? 'Welcome back.' : 'Keep what you have learned.'}
           </h1>
@@ -191,7 +247,10 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full rounded border border-line bg-bg-elev px-4 py-3 text-base outline-none focus:border-accent"
+                /* bg-surface, not bg-bg-elev: the field sits on the card now, and
+                   --surface is the inset token — "below the ground, so a field reads as
+                   a hole". bg-bg-elev here would be a borderless white box on white. */
+                className="w-full rounded border border-line bg-surface px-4 py-3 text-base outline-none focus:border-accent"
               />
               <button
                 type="submit"
@@ -203,12 +262,15 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
               {message ? <p className="text-xs text-accent">{message}</p> : null}
             </form>
           ) : (
-            <p className="rounded border border-line bg-bg-elev p-4 text-sm text-muted">
+            /* bg-surface: this note sits INSIDE the card now, and bg-bg-elev on
+               bg-bg-elev is the same colour with no edge. Inset is what a panel within a
+               card is — the move Friends.tsx makes for its rows. */
+            <p className="rounded border border-line bg-surface p-4 text-sm text-muted">
               Accounts are not switched on yet. Everything still works — what you have learned is
               saved on this device, and it will move across the moment you can sign in.
             </p>
           )}
-        </>
+        </div>
       )}
       <BottomNavSpace />
       <BottomNav />
