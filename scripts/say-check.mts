@@ -309,7 +309,23 @@ const browser = await chromium.launch()
   })()`)) as { mic: number; line: boolean; listen: boolean; copy: boolean; arrow: boolean; cta: boolean }
 
   ok('solving it reveals the microphone', after.mic >= 80, after.mic + 'px')
-  ok('and the picker is still there', after.line)
+  /*
+    AND THE PICKER LEAVES, which is the opposite of what this asserted yesterday.
+
+    It read `after.line` — the tiles still on screen after being solved — because Sam had
+    said "but dont drop the word picker or copy / listen". That was right about the REVEAL
+    and wrong once the picker is solved: he found the finished puzzle sitting above the
+    microphone, pushing the feedback panel below the fold on a 390px screen, and pressed
+    the button ten times without ever seeing what it heard.
+
+    "The previous screen is the word picker of ola bom dia, we dont need to repeat it in
+    this screen. Sequence: Word picker, success message, two second auto swipe with
+    optional swipe button loads audio test only - remove word picker."
+
+    Listen and copy did not go anywhere — they are asserted two lines down, which is the
+    half of his original instruction that still stands.
+  */
+  ok('and the picker has gone, leaving the audio test', !after.line)
   ok('and listen and copy came with it', after.listen && after.copy, after.listen + '/' + after.copy)
   ok('the way on is the arrow, not a CONTINUE bar', after.arrow && !after.cta, 'arrow ' + after.arrow + ', cta ' + after.cta)
   await ctx.close()

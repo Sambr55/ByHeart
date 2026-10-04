@@ -178,6 +178,8 @@ export function SayItCard({
   }, [closed, answer])
 
   const band = heard ? bandFor(heard) : null
+  /* A refused microphone is its own state — see run_blocked. */
+  const blocked = heard?.why === 'blocked'
   const verdict =
     band === 'got'
       ? LEGEND_COPY.run_got_it
@@ -227,10 +229,17 @@ export function SayItCard({
       return
     }
     /*
-      A refused microphone is not an attempt — SayButton does not call this for one. What
-      reaches here is a real go, including a silent one, because silence on the fifth try
-      is the same signal.
+      A REFUSED MICROPHONE IS NOT AN ATTEMPT, and it now reaches here so it can be SAID.
+
+      It used to be filtered out in SayButton, which left the one failure a learner can
+      actually fix — permission — explained only by a title attribute that no phone
+      renders. It arrives flagged instead: the panel reads it, nothing is counted against
+      the five, and nothing is written down as a sentence they could not say.
+
+      Everything else is a real go, including a silent one, because silence on the fifth
+      try is the same signal as a wrong word on the fifth try.
     */
+    if (h.why === 'blocked') return
     const next = goes + 1
     setGoes(next)
     if (next === ENOUGH_GOES) markRough({ pt: answer, en: answerEn ?? ask, goes: next })
@@ -277,7 +286,14 @@ export function SayItCard({
             (heard.close ? 'border-accent bg-accent/10' : 'border-line bg-surface')
           }
         >
-          <p className={'eyebrow ' + (heard.close ? 'text-accent' : 'text-muted')}>{verdict}</p>
+          <p className={'eyebrow ' + (heard.close ? 'text-accent' : 'text-muted')}>
+            {blocked ? LEGEND_COPY.run_blocked : verdict}
+          </p>
+          {blocked ? (
+            <p className="mt-2 text-sm leading-relaxed text-muted">
+              {LEGEND_COPY.run_blocked_body}
+            </p>
+          ) : null}
           {heard.said ? <p className="pt mt-1 text-lg text-fg">“{heard.said}”</p> : null}
           {aim.length ? (
             <p data-testid="say-aim" className="mt-2 text-sm leading-relaxed text-muted">

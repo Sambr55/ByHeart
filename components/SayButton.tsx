@@ -115,7 +115,26 @@ export function SayButton({
         void listenFor(want).then((h) => {
           if (!alive.current) return
           if (!h) {
+            /*
+              SILENCE IS AN ATTEMPT, AND THE CARD HAS TO HEAR ABOUT IT.
+
+              Sam: "im not getting any of the feedback or narrative and cant get any of my
+              attempts to pass."
+
+              This set the button's own state and returned, so `onHeard` never fired —
+              which meant the card around it learned NOTHING. No verdict panel, no attempt
+              counted, no third-go encouragement, no five-fail message. Every piece of
+              feedback this product has is driven by that callback, and the commonest
+              outcome on a phone in a quiet room skipped it entirely: the recogniser ends
+              having heard nothing and resolves null.
+
+              So a null becomes what it actually is — an attempt that produced no words —
+              and travels like any other. The card already renders exactly this: see
+              `run_missed`, "DID NOT CATCH IT", which until now could only appear when the
+              recogniser returned an empty string rather than nothing at all.
+            */
             setState('missed')
+            onHeard?.({ said: '', close: false, score: 0 })
           } else if (h.why === 'blocked') {
             /*
               The device refused the microphone, which is a different thing from not
@@ -123,6 +142,13 @@ export function SayButton({
               passed to onHeard: nothing was said, so nothing should be recorded.
             */
             setState('blocked')
+            /*
+              AND A REFUSED MICROPHONE REACHES THE CARD TOO, flagged so it is not counted
+              as a go. The button's own title attribute explains this and a phone never
+              shows a title — so the one failure the learner can actually DO something
+              about was the one the product said nothing about.
+            */
+            onHeard?.(h)
           } else {
             setState(h.close ? 'close' : 'missed')
             /*

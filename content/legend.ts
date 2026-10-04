@@ -3307,6 +3307,21 @@ export const LEGEND_COPY = {
   run_not_quite: 'NOT THIS ONE',
   run_missed: 'DID NOT CATCH IT',
   /*
+    AND THE ONE FAILURE A LEARNER CAN ACTUALLY FIX.
+
+    Sam: "im not getting any of the feedback or narrative and cant get any of my attempts
+    to pass." A refused microphone looks exactly like a miss from the outside — the button
+    greys, nothing happens — and the only explanation in the product was a `title`
+    attribute, which no phone renders. So somebody whose browser had never been granted
+    permission could press that button for ever and be told "did not catch it" by a
+    product that was not listening at all.
+
+    It names the cause and the fix, in that order, and never blames the learner.
+  */
+  run_blocked: 'DUB CANNOT HEAR',
+  run_blocked_body:
+    'Your browser has not given DUB the microphone. Allow it in the site settings, or build it below instead — nothing here needs the microphone to work.',
+  /*
     AND WHICH WORDS, which is the part a verdict cannot carry.
 
     A band tells somebody how close they were; this tells them where. The missed words are
