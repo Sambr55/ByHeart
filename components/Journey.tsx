@@ -2791,10 +2791,32 @@ function RootBeatView({
     list of card questions is the same second copy of the card that cardFor just stopped
     being — so it reads cardFor, which reads the road.
   */
-  const CARD_ASKS = cardFor(null).map((f) => f.id)
+  /*
+    EVERY FRAME, NOT ONLY THE SEVEN — and this was the freeze Sam kept hitting.
+
+    Sam, after two fixes that did not fix it: "STILL stuck on 1234, this cant be a deploy
+    issue as I have the new jump off screen." He was right, and the cache I blamed was
+    innocent.
+
+    This read `cardFor(null)`, which is the seven-card. tb_1234 asks `moved_when` — a real
+    Legend frame, answered on the Legend, but a DEEPER one and therefore not among the
+    seven. So the branch below never ran for it, the function fell all the way through to
+    `pr?.[which]`, and asked the PROFILE for a field called moved_when that does not and
+    will never exist. False for ever, CTA hidden for ever.
+
+    My previous fix tested `asksHere.length`, on the theory that the question was not
+    rendering at all. That is true for a visitor and false for Sam: he answered "for good",
+    moved_when IS his question, and `asksHere` is `['moved_when']` — length 1. The fix
+    could not have helped him, which is why it did not.
+
+    The honest test is "is this a Legend frame", because a frame is answered on the Legend
+    wherever it sits. LEGEND_FRAMES rather than cardFor, and the purpose check below still
+    settles the ones this learner is never asked.
+  */
+  const FRAME_ASKS = LEGEND_FRAMES.map((f) => f.id)
   const oneSettled = (which: string) => {
     if ((pr?.skipped ?? []).includes(which)) return true
-    if (CARD_ASKS.includes(which)) {
+    if (FRAME_ASKS.includes(which)) {
       /*
         A QUESTION THAT IS NOT ON YOUR CARD IS ALREADY SETTLED — and this is the freeze.
 
@@ -3693,29 +3715,56 @@ function Osmosis() {
 
       <div className="mt-6 space-y-3">
         {insights.map((i, n) => (
+          /*
+            THE SAME CARD AS THE SUMMARIES. Sam: "you did a nice design job last night with
+            what i referred to as the summary screens. Lets do the same with these absorbed
+            screens."
+
+            Three faults, and they are the ones the summaries had. The frame was a 4px
+            outline rather than the lifted white card. The EVIDENCE — the sentences the
+            learner actually produced, which is the entire proof of the claim above it —
+            was text-sm Portuguese over text-xs English, smaller than the explanation that
+            exists to point at it. And the proper name sat at 0.6rem in uppercase: a full
+            clause set smaller than anything else on the screen and in the hardest case to
+            read.
+
+            So: rounded-2xl bg-bg-elev like SayItCard, the evidence promoted into rows that
+            carry their own weight, and the proper name as an ordinary sentence. The body
+            goes text-sm to text-base, because an explanation nobody reads explains nothing.
+          */
           <section
             key={i.id}
             style={{ animationDelay: Math.min(n, 5) * 70 + 'ms' }}
-            className="animate-bank rounded border border-line bg-bg-elev p-4"
+            className="animate-bank rounded-2xl border border-line bg-bg-elev px-5 py-5"
           >
-            <p className="text-balance text-base font-semibold">{i.headline}</p>
-            <p className="mt-3 text-sm leading-relaxed text-muted">{i.body}</p>
-            <ul className="mt-3 space-y-1 border-t border-line/60 pt-3">
+            <p className="text-balance text-lg font-semibold">{i.headline}</p>
+            <p className="mt-3 text-base leading-relaxed text-fg/85">{i.body}</p>
+            {/*
+              THE EVIDENCE, IN ITS OWN WELL. `bg-surface` is the inset token, so this reads
+              as a thing held BY the card rather than a list appended to it — the same
+              relationship the feedback panel has inside SayItCard. It is also what somebody
+              looks at first, so it stops being the smallest type on the screen.
+            */}
+            <div className="mt-4 flex flex-col gap-3 rounded-xl bg-surface px-4 py-3">
               {i.evidence.map((e) => (
-                <li key={e.pt} className="flex flex-wrap items-baseline gap-x-3">
-                  <span className="pt text-sm text-accent">{e.pt}</span>
-                  <span className="text-xs text-muted">{e.en}</span>
-                </li>
+                <div key={e.pt} className="flex flex-col gap-0.5">
+                  <span className="pt text-base font-semibold text-accent">{e.pt}</span>
+                  <span className="text-sm leading-relaxed text-muted">{e.en}</span>
+                </div>
               ))}
-            </ul>
-            <p className="mt-3 text-[0.6rem] uppercase tracking-wider text-muted">
+            </div>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
               Linguists call this {i.proper_name}. You do not have to.
             </p>
           </section>
         ))}
       </div>
 
-      <p className="mb-3 mt-6 text-sm text-muted">
+      {/*
+        The one line on this screen that removes a fear, so it is not the smallest thing on
+        it. Somebody shown three grammar insights reasonably braces for a quiz.
+      */}
+      <p className="mb-3 mt-6 text-base leading-relaxed text-fg/85">
         None of this gets tested. It is already in there.
       </p>
 
@@ -3795,8 +3844,20 @@ function AskInLesson({ which, onAnswered }: { which: ProfileAsk; onAnswered: () 
     the question here and the question there cannot offer different answers — and the
     gendered ones agree with the speaker, which is what askFor and the `f` forms are for.
   */
-  /* The card's questions, derived — see the long note on the other CARD_ASKS above. */
-  const CARD_ASKS = cardFor(null).map((f) => f.id)
+  /*
+    EVERY FRAME, NOT ONLY THE SEVEN — the same correction as oneSettled above, and the
+    same bug in the second half of it.
+
+    This read cardFor(null), so a DEEPER frame like moved_when never reached the chip
+    branch below: the question that tb_1234 asks could not be drawn, whatever the settle
+    logic decided. Both halves had to move together — one deciding the question is
+    unanswered, the other refusing to render it, is precisely the pair that leaves a screen
+    with nothing on it.
+
+    The purpose test inside the branch is what still removes a question this learner is
+    never asked. That is the correct guard and it stays.
+  */
+  const CARD_ASKS = LEGEND_FRAMES.map((f) => f.id)
   /*
     THE CHIP BRANCH IS FOR CHIP QUESTIONS, and it was swallowing the ones that are not.
 
