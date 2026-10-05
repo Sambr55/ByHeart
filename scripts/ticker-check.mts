@@ -95,24 +95,53 @@ console.log('\nwhat the bar is\n')
   )
 
   /*
-    A count is the thing this must never grow — and finding the markup is the fiddly part.
+    A COUNT MUST NEVER BE DRAWN, which is not the same as never being compared.
 
-    First written as everything after the first `return (`, which is the CLEANUP FUNCTION
-    inside the effect, so the two-name guard below it tripped the rule it was meant to
-    pass. The markup is the block containing the testid, so that is what is read: from the
-    element that carries it to the end of the file.
+    The strip chooses between three sentences by how many names there are, so `.length`
+    legitimately appears in the markup — what must never happen is a number reaching the
+    page. So this looks for a length being RENDERED rather than merely read: inside
+    braces on its own, or concatenated into a string.
+
+    Finding the markup is the fiddly part. First written as everything after the first
+    `return (`, which is the CLEANUP FUNCTION inside the effect, so the guard below it
+    tripped the rule it was meant to pass. The markup is the block carrying the testid.
   */
   const rendered = body.slice(body.indexOf('data-testid'))
+  const drawsCount = /\{\s*names\.length\s*\}/.test(rendered) || /\+\s*names\.length/.test(rendered)
   ok(
     'it never says how many',
-    !/\.length/.test(rendered),
-    /\.length/.test(rendered) ? 'a count reaches the markup' : 'no number is drawn',
+    !drawsCount,
+    drawsCount ? 'a count reaches the markup' : 'length decides the sentence, never prints',
   )
 
+  /*
+    AND IT SAYS SOMETHING TRUE WHEN THE ROOM IS NEARLY EMPTY.
+
+    This asserted silence below two names, and the behaviour was wrong: DUB has two
+    signed-in learners, so the strip never once appeared on Sam's phone and he asked where
+    it had gone. A feature invisible until the product succeeds is absent rather than
+    cautious. Being early is the one thing a small room can offer, so it says so.
+  */
   ok(
-    'it is silent until there are at least two',
-    /names\.length\s*<\s*2/.test(comp),
-    'one name is a mirror, not a room',
+    'it has an honest line for an empty room',
+    /You are the first one in/.test(comp),
+    'first in, rather than nothing at all',
+  )
+  ok(
+    'and for a room of one',
+    /names\.length === 1/.test(comp) && /Early days/.test(comp),
+    'names the other person, not a number',
+  )
+
+  /*
+    THE CALLER IS NEVER IN THEIR OWN STRIP. With two members this rendered "You and
+    Sammy" to Sammy — a product telling somebody they have company and naming them.
+    Excluded in the query so a future caller cannot reintroduce it.
+  */
+  ok(
+    'the strip never contains the person reading it',
+    /currentUser\(\)/.test(route) && /id <> /.test(route),
+    'excluded in the query, not the component',
   )
 
   ok(

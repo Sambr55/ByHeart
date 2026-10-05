@@ -65,8 +65,25 @@ export function Ticker() {
     }
   }, [])
 
-  /* Fewer than two is not a room — see the note above. */
-  if (!names || names.length < 2) return null
+  /*
+    NOTHING UNTIL THE ANSWER IS KNOWN, and then something honest whatever it is.
+
+    This used to return null below two names, on the argument that showing somebody their
+    own name is a mirror rather than a room. The argument was right and the behaviour was
+    wrong: DUB has two signed-in learners, so the strip has never once appeared on Sam's
+    phone — he asked where it was, which is the only review that counts.
+
+    A feature that is invisible until the product succeeds is not cautious, it is absent.
+    And the honest version at this stage is better than silence, because being early is
+    the one thing a small room can offer that a large one cannot: "You and Sammy" says
+    there is somebody else here, and "You are the first one in" is true, flattering, and
+    an invitation rather than an apology.
+
+    Still nothing at all while `names` is null — that is "not asked yet", which is
+    different from "nobody here", and a strip that flickered a claim before the server
+    answered would be the one thing worse than being absent.
+  */
+  if (!names) return null
 
   return (
     <div
@@ -95,8 +112,24 @@ export function Ticker() {
         link: nothing here is a button, nothing has a href. A name in this bar is somebody
         being in the room, not a profile to go and look at.
       */}
+      {/*
+        THREE STATES, AND EACH ONE IS TRUE.
+
+        Nobody but you — the room is one, and the honest reading of that is that you got
+        here first. That is a better sentence than a count and it is the one Sam uses out
+        loud at a festival: "there are two of us, you'd be the third."
+
+        A handful — the names themselves, which is what this was always for.
+
+        The copy never says how many. A number is honest and cold, and at this size it is
+        also a roster; the Club intro card settled that and the rule holds here.
+      */}
       <p className="truncate text-sm leading-relaxed text-fg/75">
-        {names.join(' · ')}
+        {names.length === 0
+          ? 'You are the first one in.'
+          : names.length === 1
+            ? 'You and ' + names[0] + '. Early days.'
+            : names.join(' · ')}
       </p>
     </div>
   )

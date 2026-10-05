@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { currentUser } from '@/lib/auth'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -49,6 +50,17 @@ export async function GET() {
   */
   if (!sql) return NextResponse.json({ names: [] })
 
+  /*
+    EVERYBODY BUT THE PERSON READING IT.
+
+    The strip says who ELSE is in here, so the caller's own name has no business in it —
+    and at this size the fault is not cosmetic: with two members it rendered "You and
+    Sammy" to Sammy, which is a product telling somebody they have company and naming
+    them. Excluded in the query rather than filtered in the component, because a name
+    that never leaves the server cannot be shown by a future caller that forgets.
+  */
+  const me = await currentUser()
+
   try {
     const rows = await sql<{ display_name: string }[]>`
       select display_name
@@ -56,6 +68,7 @@ export async function GET() {
        where deleted_at is null
          and display_name is not null
          and display_name <> ''
+         and (${me?.id ?? null}::uuid is null or id <> ${me?.id ?? null}::uuid)
        order by last_seen_at desc nulls last
        limit 60
     `
