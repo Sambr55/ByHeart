@@ -237,6 +237,64 @@ console.log('\nonly Sam puts a table up\n')
   )
 }
 
+console.log('\ntelling everybody something\n')
+{
+  /*
+    Sam: "we also need a method of pushing these updates to people who have already
+    downloaded the app."
+
+    A BROADCAST IS THE ONE ACTION IN DUB THAT CANNOT BE TAKEN BACK. It is on a stranger's
+    lock screen a second after the tap, with no edit and no delete — so an endpoint that
+    could be found and called is the worst thing to leave open in the product.
+  */
+  const bc = readFileSync('app/api/push/broadcast/route.ts', 'utf8')
+  const screen = readFileSync('components/Broadcast.tsx', 'utf8')
+  const bcGet = bc.match(/export async function GET[\s\S]*?\n}/)?.[0] ?? ''
+  const bcPost = bc.match(/export async function POST[\s\S]*?\n}/)?.[0] ?? ''
+  ok(
+    'both broadcast verbs check the key',
+    /adminKeyValid/.test(bcGet) && /adminKeyValid/.test(bcPost),
+    'GET and POST',
+  )
+  ok(
+    'and a failed key gets a 404',
+    /status: 404/.test(bc) && !/status: 401/.test(bc),
+    'it does not confirm it exists',
+  )
+  /*
+    THE SAME ANNOUNCEMENT NEVER ARRIVES TWICE. A tag is recorded against every
+    subscription it reached, which is what makes pressing send again safe — and pressing
+    again is exactly what somebody does when the first attempt looks like it failed.
+  */
+  const push = readFileSync('lib/push.ts', 'utf8')
+  ok(
+    'a tag is required and recorded',
+    /a title, a body and a tag are required/.test(bc) && /array_append\(sent, \$\{opts\.tag\}\)/.test(push),
+    'a retry reaches nobody twice',
+  )
+  /*
+    AND THE EASY BUTTON IS THE HARMLESS ONE. The irreversible action must not be the one
+    somebody taps by habit, so the test sends to a single phone and the real send is an
+    outline that has to be chosen.
+  */
+  ok(
+    'the test sends to one phone and is the primary button',
+    /dryRun/.test(push) && /SEND IT TO ONE PHONE FIRST/.test(screen),
+    'the real send is the deliberate one',
+  )
+  ok(
+    'a dead subscription is marked rather than retried forever',
+    /expired_at = now\(\)/.test(push),
+    'the reachable count stays honest',
+  )
+  const bcCode = screen.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+  ok(
+    'the broadcast screen never stores the key',
+    !/localStorage|sessionStorage|document\.cookie/.test(bcCode),
+    'held in state for the visit only',
+  )
+}
+
 console.log('\nthe rule is the product\n')
 {
   ok('six seats', SEATS === 6, String(SEATS))
