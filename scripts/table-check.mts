@@ -26,7 +26,7 @@
  *      beside a name at a dinner table is a leaderboard.
  */
 import { readFileSync } from 'node:fs'
-import { SEATS, COLD_FLOOR, canSit, saidCold, TABLE, band } from '../content/table'
+import { SEATS, COLD_FLOOR, canSit, saidCold, TABLE, TABLE_PUSH, band } from '../content/table'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -234,6 +234,58 @@ console.log('\nonly Sam puts a table up\n')
     'a table cannot be put up in the past',
     /that is in the past/.test(make),
     'refused where the mistake is made',
+  )
+}
+
+console.log('\nasking to send anything at all\n')
+{
+  /*
+    Sam: "how do we get people to turn notifications on?"
+
+    THE BROWSER PROMPT IS ONE-SHOT AND PERMANENT. A person who taps "don't allow" while
+    unconvinced can never be asked again — not by this screen, not by any other — so where
+    and when DUB asks is the whole of whether anybody ever says yes.
+
+    The existing ask lives in the inbox and on The Line and offers a sentence every
+    morning: a daily habit, from a product whose entire position is that there are no
+    streaks and nothing to keep up. This asks for a CONSEQUENCE instead, at the one moment
+    the answer is obviously yes — somebody who has just taken a seat has committed to an
+    evening and the only thing left to want is to be told if it changes.
+  */
+  ok(
+    'the ask is for a consequence, not a daily habit',
+    /there is a table/i.test(TABLE_PUSH.cta) && !/every morning|daily/i.test(TABLE_PUSH.cta),
+    TABLE_PUSH.cta,
+  )
+  /*
+    AND THE PROMISE IS NARROW ENOUGH TO KEEP. "Nothing else" is the sentence that makes it
+    safe to say yes, and it is also a commitment the broadcast route has to honour.
+  */
+  ok(
+    'and it promises nothing else',
+    /nothing else/i.test(TABLE_PUSH.on),
+    TABLE_PUSH.on,
+  )
+  /*
+    ASKED ONLY OF SOMEBODY SITTING AT A TABLE. Offering it to a browser who has not taken
+    a seat spends the one prompt on somebody with no reason to say yes.
+  */
+  const tables = readFileSync('components/Tables.tsx', 'utf8')
+  const sitting = tables.slice(tables.indexOf('{t.sitting ?'))
+  ok(
+    'and only after a seat is taken',
+    /<PushToggle/.test(sitting) && tables.indexOf('<PushToggle') > tables.indexOf('{t.sitting ?'),
+    'inside the you-are-going branch',
+  )
+  /*
+    AN IPHONE CAN BE TOLD NOTHING UNTIL DUB IS ON THE HOME SCREEN, which is most of Sam's
+    festival signups. PushToggle already knows that; what matters here is that the copy it
+    shows them is about the table rather than about a sentence every morning.
+  */
+  ok(
+    'an uninstalled iPhone is told what installing gets them',
+    /home screen/i.test(TABLE_PUSH.install) && /table/i.test(TABLE_PUSH.install),
+    TABLE_PUSH.install,
   )
 }
 

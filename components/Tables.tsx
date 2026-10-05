@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { PageShell } from '@/components/PageShell'
-import { TABLE, band } from '@/content/table'
+import { TABLE, TABLE_PUSH, band } from '@/content/table'
+import { PushToggle } from '@/components/PushToggle'
 import { loadLearner } from '@/engine/learner'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { track } from '@/engine/analytics'
@@ -39,12 +40,13 @@ interface Seat {
  * as a band — see `band` in content/table.ts. A figure beside a name would make a dinner
  * table a leaderboard, which is the sorting-into-grades the matching rule refuses.
  */
-export function Tables() {
+export function Tables({ pushReady }: { pushReady: boolean }) {
   const access = useEntitlements()
   const [tables, setTables] = useState<Seat[] | null>(null)
   const [said, setSaid] = useState(0)
   const [busy, setBusy] = useState<string | null>(null)
   const [note, setNote] = useState<string | null>(null)
+
 
   /*
     After mount, like everything that reads the record: the server has no learner, and the
@@ -282,6 +284,28 @@ export function Tables() {
                   {t.sitting ? (
                     <div className="flex flex-col gap-3">
                       <p className="eyebrow text-correct">YOU ARE GOING</p>
+                      {/*
+                        THE ONLY PLACE DUB ASKS TO SEND YOU ANYTHING, and it is here
+                        because this is the one moment the answer is obviously yes.
+
+                        Sam: "how do we get people to turn notifications on?" The existing
+                        ask is in the inbox and on The Line, offering a sentence every
+                        morning — a daily habit, from a product whose whole position is
+                        that there are no streaks. This asks for a consequence instead:
+                        six seats go, and finding out on Thursday that Tuesday happened is
+                        losing something real.
+
+                        The same component as everywhere else, with different words. It
+                        already knows that an iPhone can be told nothing until DUB is on
+                        the home screen, and says so rather than failing quietly.
+                      */}
+                      <PushToggle
+                        ready={pushReady}
+                        from="table"
+                        cta={TABLE_PUSH.cta}
+                        on={TABLE_PUSH.on}
+                        install={TABLE_PUSH.install}
+                      />
                       <button
                         type="button"
                         disabled={busy === t.id}

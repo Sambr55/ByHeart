@@ -66,6 +66,37 @@ export const TABLE = {
 } as const
 
 /**
+ * ASKING FOR NOTIFICATIONS AT THE ONE MOMENT SOMEBODY WANTS THEM.
+ *
+ * Sam: "how do we get people to turn notifications on?"
+ *
+ * THE OLD ASK WAS IN THE WRONG PLACE AND FOR THE WRONG THING. It lives in the inbox and
+ * on The Line — rooms a new learner has no reason to open — and what it offers is "send me
+ * one every morning", which is a daily habit. This product's whole position is that there
+ * are no streaks and nothing to keep up, so the one thing it asks permission for is the
+ * one thing it promises not to do. Unsurprisingly almost nobody says yes.
+ *
+ * A TABLE IS A REASON. "We will tell you when there is a table" is a thing a person
+ * actually wants, because a table is six seats and they go; somebody who finds out on
+ * Thursday that Tuesday happened has lost something real. That is the difference between
+ * permission asked for a feature and permission asked for a consequence.
+ *
+ * AND IT IS ASKED ONCE, AFTER A SEAT. The browser prompt is one-shot and permanent — a
+ * person who taps "don't allow" while unconvinced can never be asked again by anybody —
+ * so the ask has to arrive when the answer is obviously yes. Taking a seat is that moment:
+ * they have committed to an evening and the only thing left to want is to be told if it
+ * changes.
+ */
+export const TABLE_PUSH = {
+  /** On the button. What it will do, not what it is. */
+  cta: 'TELL ME WHEN THERE IS A TABLE',
+  /** Once it is on. The promise, kept narrow so it is keepable. */
+  on: 'You will hear when a table goes up. Nothing else.',
+  /** Where DUB has to be before a phone can be told anything. See PushToggle. */
+  install: 'Put DUB on your home screen and we can tell you when a table goes up.',
+} as const
+
+/**
  * HOW MUCH SOMEBODY CAN SAY, AS A BAND RATHER THAN A FIGURE.
  *
  * The seat stores a count and this is the only thing allowed to render it. A number beside
