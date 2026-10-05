@@ -188,6 +188,55 @@ console.log('\nnobody is ranked\n')
   )
 }
 
+console.log('\nonly Sam puts a table up\n')
+{
+  const make = readFileSync('app/api/tables/make/route.ts', 'utf8')
+  const builder = readFileSync('components/TableBuilder.tsx', 'utf8')
+
+  /*
+    A MEMBER WHO COULD CREATE A TABLE would be arranging a meeting between strangers under
+    DUB's name, which is the moderation surface the schema was built to avoid. Both verbs
+    are gated, not just the one that writes.
+  */
+  const gets = make.match(/export async function GET[\s\S]*?\n}/)?.[0] ?? ''
+  const posts = make.match(/export async function POST[\s\S]*?\n}/)?.[0] ?? ''
+  ok(
+    'both admin verbs check the key',
+    /adminKeyValid/.test(gets) && /adminKeyValid/.test(posts),
+    'GET and POST',
+  )
+  ok(
+    'the key comes from a header, never a query string',
+    /headers\.get\('x-admin-key'\)/.test(make) && !/searchParams[\s\S]{0,40}key/.test(make),
+    'a key in a URL reaches logs and history',
+  )
+  ok(
+    'a failed key gets a 404, not a 401',
+    /status: 404/.test(make) && !/status: 401/.test(make),
+    'the route does not confirm it exists',
+  )
+  /*
+    AND THE ADMIN KEY IS NEVER PERSISTED. In state for the visit and gone when the tab
+    closes; localStorage would leave it on whatever device last opened this page.
+  */
+  /*
+    Comments stripped first: the note explaining why localStorage is NOT used mentions it
+    by name, and the first version of this assertion failed on its own reasoning.
+  */
+  const builderCode = builder.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+  ok(
+    'the builder never stores the key',
+    !/localStorage|sessionStorage|document\.cookie/.test(builderCode),
+    'held in state for the visit only',
+  )
+  /* A table in the past is a typo, and the board would silently never show it. */
+  ok(
+    'a table cannot be put up in the past',
+    /that is in the past/.test(make),
+    'refused where the mistake is made',
+  )
+}
+
 console.log('\nthe rule is the product\n')
 {
   ok('six seats', SEATS === 6, String(SEATS))

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { PageShell } from '@/components/PageShell'
 import { TABLE, band } from '@/content/table'
 import { loadLearner } from '@/engine/learner'
@@ -94,25 +95,94 @@ export function Tables() {
     <PageShell eyebrow="A TABLE" stage="REAL WORLD">
       <div className="flex flex-col gap-6">
         {/*
-          THE RULE, FIRST AND IN FULL. The whole decision somebody is making is about this
-          sentence, so it is not a footnote under a list of dates.
+          THE PHOTOGRAPH FIRST, BECAUSE THE DECISION IS EMOTIONAL BEFORE IT IS PRACTICAL.
+
+          Sam: "the /table page needs to be much more powerful and inviting with a strong
+          'together' image like the timeleft site."
+
+          Timeleft's whole visual argument is reassurance against nervousness — their own
+          copy is "don't be nervous, walk in knowing everyone chose to be there, too" —
+          and they make it with candid photographs of people who are already at the table
+          rather than with a description of one. A screen that opens with a rule reads as
+          a condition of entry; a screen that opens with a Lisbon evening reads as an
+          invitation, and the rule then explains it.
+
+          THIS PARTICULAR PICTURE, AND NOT THE PRETTIER ONE. bring-a-friend.jpg is two
+          people walking away up a hill and it is the better photograph — but they are
+          leaving, and they are plainly a pair. This one is an actual table with drinks on
+          it, both seen from behind, which is what makes it "you could be sitting there"
+          rather than "look at these two". The thing being sold is a seat.
+
+          THE SCRIM IS NOT OPTIONAL AND NOT .shown-on-photo. That class repoints --fg to
+          white, so anything with bg-bg-elev on it becomes white on white — a fault this
+          codebase has paid for more than once. A gradient from near-black at the foot,
+          measured against the brightest the image could be, and the type is white because
+          it is written white rather than because a cascade made it so.
+        */}
+        {/*
+          -mt-6 AND NOT -mt-3, which is the shell's own padding rather than a guess.
+          PageShell wraps its children in px-5 py-6, so a full-bleed image has to undo
+          exactly that — photographed at 390px with -mt-3 and there was a sand stripe
+          between the blue bar and the photograph, which reads as a rendering fault rather
+          than as a margin.
+        */}
+        <div className="relative isolate -mx-5 -mt-6 overflow-hidden sm:mx-0 sm:rounded-2xl">
+          <span className="relative block aspect-[4/5] w-full sm:aspect-[16/10]">
+            <Image
+              src="/bank/two-at-a-bar.jpg"
+              alt="Two people at a pavement table in Lisbon at dusk, drinks between them, the street falling away behind."
+              fill
+              priority
+              sizes="(min-width: 640px) 36rem, 100vw"
+              className="object-cover"
+            />
+            <span
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-t from-black/92 via-black/55 to-black/10"
+            />
+            <span className="absolute inset-x-0 bottom-0 flex flex-col gap-3 px-5 pb-6">
+              <span className="eyebrow text-white/80">A TABLE</span>
+              <span className="display text-balance text-3xl text-white">{TABLE.what}</span>
+            </span>
+          </span>
+        </div>
+
+        {/*
+          THE RULE, WHICH IS THE PRODUCT AND THE THING SOMEBODY IS DECIDING ABOUT.
+
+          Under the photograph rather than over it: the picture asks the question and this
+          answers it. In accent blue because in this product blue means "this is the
+          language", and the rule is entirely about which language is being spoken.
         */}
         <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
-          <h1 className="display text-balance text-2xl">{TABLE.what}</h1>
-          <p className="text-base leading-relaxed text-accent">{TABLE.rule}</p>
-          <p className="text-sm leading-relaxed text-muted">{TABLE.reassurance}</p>
-          <ul className="mt-3 flex flex-col gap-1 border-t border-line pt-3">
-            {TABLE.howItGoes.map((line) => (
-              <li key={line} className="text-sm leading-relaxed text-muted">
-                {line}
+          <p className="display text-balance text-xl text-accent">{TABLE.rule}</p>
+          <p className="text-base leading-relaxed text-fg">{TABLE.reassurance}</p>
+        </div>
+
+        {/*
+          HOW THE TEN MINUTES ACTUALLY GOES, numbered, because the fear is of the unknown
+          rather than of Portuguese. Somebody who can picture the evening can decide about
+          it; somebody who cannot will decline by default. Timeleft solves the same problem
+          with "choose, book, show up" and it is the most reassuring thing on their page.
+        */}
+        <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
+          <p className="eyebrow text-accent">HOW IT GOES</p>
+          <ol className="flex flex-col gap-3">
+            {TABLE.howItGoes.map((line, i) => (
+              <li key={line} className="flex gap-3 text-base leading-relaxed">
+                <span className="display shrink-0 text-telha" aria-hidden>
+                  {i + 1}
+                </span>
+                <span>{line}</span>
               </li>
             ))}
-          </ul>
+          </ol>
           {/*
-            WHAT DUB IS AND IS NOT DOING, said here rather than discovered on the night.
-            Sam: "match the people, not run the dinners."
+            WHAT DUB IS AND IS NOT DOING, in the quietest type on the card. Sam: "match
+            the people, not run the dinners." Said here rather than discovered on the
+            night, and small because it is a clarification rather than a warning.
           */}
-          <p className="mt-3 text-sm leading-relaxed text-muted">
+          <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-muted">
             {TABLE.weDo} {TABLE.weDont}
           </p>
         </div>

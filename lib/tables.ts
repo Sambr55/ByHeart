@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto'
 import { db } from '@/lib/db'
 import { SEATS, canSit, saidCold } from '@/content/table'
 
@@ -193,3 +194,92 @@ export async function whoElse(tableId: string, exceptUserId?: string | null) {
 
 /* Re-exported so a caller needs one import. The rules live in content/table.ts. */
 export { SEATS, COLD_FLOOR, canSit, saidCold } from '@/content/table'
+
+/**
+ * PUT A TABLE ON THE BOARD.
+ *
+ * Sam: "build the table builder." Six seats, a place somebody else already chose, and a
+ * time — which is the whole of what DUB decides about an evening. There is no venue
+ * record, no booking reference and no capacity beyond the seats, because the moment those
+ * exist this is a logistics product rather than a language one.
+ *
+ * ADMIN ONLY, AND DELIBERATELY NOT A MEMBER FEATURE. A member who could create tables
+ * would be creating a meeting between strangers using DUB's name, which is a moderation
+ * surface the schema was specifically built to avoid — see db/migrations/012_tables.sql.
+ * Sam puts the table up; members take seats.
+ *
+ * The id is minted here rather than supplied, so a caller cannot choose one that collides
+ * with or guesses at another.
+ */
+export async function makeTable(opts: {
+  place: string
+  area?: string | null
+  sitsAt: Date
+  chapter?: string
+  seats?: number
+}): Promise<{ id: string } | null> {
+  const sql = db()
+  if (!sql) return null
+  /*
+    Short, unguessable, and the same shape as a showing id — it travels in a URL and
+    there is nothing else to carry. Not sequential: a table id that counts up tells
+    anybody who sees one how many evenings DUB has ever arranged.
+  */
+  const id = 't_' + randomBytes(8).toString('base64url')
+  try {
+    await sql`
+      insert into tables (id, chapter, place, area, sits_at, seats, state)
+      values (
+        ${id},
+        ${opts.chapter ?? 'lisbon'},
+        ${opts.place.trim()},
+        ${opts.area?.trim() || null},
+        ${opts.sitsAt},
+        ${Math.max(2, Math.min(12, Math.floor(opts.seats ?? SEATS)))},
+        'open'
+      )
+    `
+    return { id }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Call a table off.
+ *
+ * Flipped rather than deleted, for the same reason a released seat is: somebody planned
+ * an evening around this and the fact that it was arranged is theirs. It also means the
+ * people who had seats can be told, where a deleted row could tell nobody anything.
+ */
+export async function callOffTable(id: string): Promise<boolean> {
+  const sql = db()
+  if (!sql) return false
+  try {
+    const rows = await sql<{ id: string }[]>`
+      update tables set state = 'called_off' where id = ${id} and state = 'open' returning id
+    `
+    return rows.length > 0
+  } catch {
+    return false
+  }
+}
+
+/** Every table, for the one screen that needs to see the ones that have passed. */
+export async function allTables(chapter = 'lisbon') {
+  const sql = db()
+  if (!sql) return []
+  try {
+    return await sql<(TableRow & { taken: number })[]>`
+      select t.id, t.chapter, t.place, t.area, t.sits_at, t.seats, t.state,
+             (select count(*)::int from seats s
+               where s.table_id = t.id and s.state = 'taken') as taken
+        from tables t
+       where t.chapter = ${chapter}
+       order by t.sits_at desc
+       limit 50
+    `
+  } catch {
+    return []
+  }
+}
