@@ -91,10 +91,91 @@ export interface WalkStep {
   shot?: { src: string; alt: string }
   /** The last step's button, when 'GOT IT' is not the right words. */
   done?: string
+  /**
+   * A SECOND LINE, UNDER THE CAPTION, on the steps that are making an argument.
+   *
+   * Sam: "it is too oblique at the moment and needs to lock into the proposition above
+   * the process."
+   *
+   * The furniture steps need one sentence each — a tab is a tab. The steps that say what
+   * DUB is FOR need two: the claim, and the thing that makes it true. Without this the
+   * opening step would have to be one long sentence, which at display size is a paragraph
+   * on a photograph.
+   */
+  more?: string
 }
 
 export const WALK: WalkStep[] = [
   /*
+    WHAT DUB IS, BEFORE WHERE ANYTHING IS.
+
+    Sam: "it is too oblique at the moment and needs to lock into the proposition above the
+    process."
+
+    He is right and the fault was structural rather than a wording problem. Every step
+    here named a control — FIND is for this, the cog is that, your boards are these —
+    which is a tour of the furniture. Somebody finished it knowing where the buttons were
+    and not what the product was FOR, and a walk-through that has to be followed by an
+    explanation has not worked.
+
+    So the first three steps make the argument and the rest show the rooms. They point at
+    nothing, like the mentor picker, because what they are about is not on the screen: it
+    is the reason the screen exists.
+
+    THE ORDER IS THE PITCH SAM GIVES OUT LOUD. The correction first — everybody teaches
+    you the wrong Portuguese — then what DUB does instead, then the thing that makes it
+    worth doing, which is other people. Process after that.
+  */
+  {
+    id: 'why',
+    target: '',
+    say: 'Every big app teaches you Brazilian Portuguese. You live in Lisbon.',
+    more: 'DUB teaches the one they actually speak here — estás, telemóvel, uma bica.',
+  },
+  {
+    id: 'legend',
+    target: '',
+    say: 'So it starts with you. Not a pencil, not a train timetable.',
+    more:
+      'Thirteen questions about who you are, said out loud. Ten minutes, and you can introduce yourself to anybody.',
+    shot: {
+      src: '/walk/legend.png',
+      alt: 'The first Legend question — Como te chamas? — with a microphone under it and Say it out loud.',
+    },
+  },
+  {
+    id: 'table',
+    target: '',
+    /*
+      THE THIRD CLAIM, AND THE ONE THAT NAMES THE ACTUAL PROBLEM.
+
+      Sam, twice and more bluntly the second time: "ex-pats hang out together and never
+      feel a pressing need to learn the new language", and then — "ex-pats are lazy, they
+      defer to speaking their native language with compatriots. This is about getting
+      people out of their comfort zone and actually trying to speak the language."
+
+      So this step does not say "then you use it on somebody", which was the first draft
+      and is a pleasantry. It says the thing is HARD, because the person watching already
+      knows it is and a product that pretends otherwise has lost them. "That is the hard
+      part" is the sentence somebody nods at.
+
+      AND THE RELIEF HAS TO ARRIVE IN THE SAME BREATH. Naming the discomfort without
+      resolving it is just a warning. "Everybody there is as uncomfortable as you" is the
+      whole mechanic — it is why a table works where a resolution to try harder does not,
+      and it is the one thing no other app can say, because no other app knows what
+      anybody at the table can actually do.
+    */
+    say: 'Then you have to actually use it. That is the hard part.',
+    more:
+      'A table is six people who can already say the same things, and the first ten minutes are in Portuguese. Everybody there is as uncomfortable as you, which is what makes it possible.',
+    shot: {
+      src: '/walk/table.png',
+      alt: 'The table screen — two people at a pavement table in Lisbon at dusk, with the rule under it.',
+    },
+  },
+  /*
+    AND NOW THE ROOMS.
+
     THE BOTTOM RAIL, four tabs, and each one gets its own step rather than one step for
     the bar.
 
@@ -117,22 +198,6 @@ export const WALK: WalkStep[] = [
     */
     say: 'FIND is for when you have no plan — rooms, nights out and the words for them.',
     opens: ['What is on', 'Rooms', 'Drops'],
-  },
-  {
-    id: 'tab-on',
-    target: 'tab-on',
-    say: 'ON is the calendar. Real nights out, with the Portuguese you will need at them.',
-    opens: ['This week', 'Gigs', 'Save to your phone'],
-  },
-  {
-    /*
-      ASK is the one tab that is not a place — BottomNav says so in its own comment — and
-      the caption has to say that, because a person who taps it expecting a screen and
-      gets a panel over the one they were on has learnt that the bar is unreliable.
-    */
-    id: 'tab-ask',
-    target: 'tab-ask',
-    say: 'ASK opens on top of whatever you are doing. Say it in English, get it in Portuguese.',
   },
   {
     id: 'tab-yours',
@@ -214,11 +279,6 @@ export const WALK: WalkStep[] = [
     say: 'The inbox. The red number is what has landed since you last looked.',
     opens: ['Drops near you', 'What is new'],
   },
-  {
-    id: 'yours-settings',
-    target: 'yours-settings',
-    say: 'The cog is settings — your account, your language, and what the app may send you.',
-  },
 
   /*
     THE LOGO, LAST, AND THE CAPTION PROMISES THE CLUB.
@@ -245,6 +305,19 @@ export const WALK: WalkStep[] = [
     Second to last, before the mark. The walk ends on the way back into the Club, and the
     reason to go back is this.
   */
+  /*
+    AND THE TABLE ITSELF, pointed at on the screen rather than only claimed at the start.
+
+    The third step makes the argument; this one shows where it lives. Before NOTICED,
+    because a reason to speak to a person beats a report on how your speaking is going —
+    which is the same order the Yours screen itself uses.
+  */
+  {
+    id: 'table-door',
+    target: 'yours-table',
+    say: 'And this is where you find one. Six seats, a real bar, a real night.',
+    opens: ['Who is coming', 'What they can say'],
+  },
   {
     id: 'noticed',
     target: 'yours-noticed',

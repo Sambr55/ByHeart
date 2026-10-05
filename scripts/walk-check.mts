@@ -574,6 +574,46 @@ try {
   await browser.close()
 }
 
+console.log('\nthe proposition comes before the process\n')
+{
+  /*
+    Sam: "it is too oblique at the moment and needs to lock into the proposition above the
+    process."
+
+    The fault was structural rather than a wording problem. Every step named a control —
+    FIND is for this, the cog is that — so somebody finished the walk knowing where the
+    buttons were and not what the product was FOR, and a walk-through that needs an
+    explanation afterwards has not worked.
+
+    So this asserts the ORDER rather than the words: the first steps must point at
+    nothing, because a tour that opens on furniture is the thing this replaced.
+  */
+  const first = WALK.slice(0, 3)
+  ok(
+    'the walk opens on what DUB is, not on a button',
+    first.every((s) => s.target === ''),
+    first.map((s) => s.id).join(', '),
+  )
+  ok('and the first thing said is the wedge', /Brazilian Portuguese/.test(WALK[0].say), WALK[0].say)
+  /*
+    THE ARGUMENT STEPS CARRY EVIDENCE. A sentence about the Legend is a claim; a picture of
+    the microphone under "Como te chamas?" is proof, and the walk is the only place a
+    stranger meets either.
+  */
+  const withShots = WALK.filter((s) => s.shot).length
+  ok('the argument is shown rather than described', withShots >= 4, withShots + ' screenshots')
+  /*
+    AND THE TABLE IS IN IT. Sam's own diagnosis — "ex-pats are lazy, they defer to speaking
+    their native language with compatriots" — is what the table answers, and a walk that
+    never mentions other people leaves the product looking like homework.
+  */
+  ok(
+    'the table is both claimed and shown',
+    WALK.some((s) => s.id === 'table') && WALK.some((s) => s.target === 'yours-table'),
+    'the argument, then the door',
+  )
+}
+
 console.log('\nscreenshots in ' + SHOTS)
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s):')

@@ -527,6 +527,20 @@ export function Walkthrough({ onDone }: { onDone: () => void }) {
           */}
           <p className="t-line text-white">{step.say}</p>
           {/*
+            THE SECOND LINE, on the steps that are making an argument rather than naming a
+            control. See `more` in content/walk.ts: the furniture needs one sentence and
+            the proposition needs two, and forcing the claim into a single display-sized
+            line would make it a paragraph on a photograph.
+
+            Smaller and at 85% white, so it reads as the thing under the headline rather
+            than as a second headline competing with it.
+          */}
+          {step.more ? (
+            <p data-testid="walk-more" className="-mt-3 text-base leading-relaxed text-white/85">
+              {step.more}
+            </p>
+          ) : null}
+          {/*
             THE CHOICE, WHERE A STEP ASKS ONE — see `pick` in content/walk.ts.
 
             Four people, each saying THE SAME SENTENCE in their own voice, so the choice is

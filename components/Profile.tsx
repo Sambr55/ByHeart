@@ -19,6 +19,7 @@ import { askToKeep, getAvatar, loadAvatar, setAvatarFromFile } from '@/engine/av
 import { Walkthrough } from '@/components/Walkthrough'
 import { loadLearner, setDisplayName } from '@/engine/learner'
 import { useEntitlements } from '@/engine/useEntitlements'
+import { TABLE } from '@/content/table'
 import { Ticker } from '@/components/Ticker'
 import { useLearner } from '@/engine/useLearner'
 import { useRestore } from '@/engine/useRestore'
@@ -568,6 +569,32 @@ export function Profile() {
             components/Noticed.tsx — and putting any of them here would be the page twice,
             with the half that fits competing against the half that does not.
           */}
+          {/*
+            THE TABLE, ABOVE NOTICED, BECAUSE IT IS THE ONLY THING ON THIS SCREEN WITH
+            OTHER PEOPLE IN IT.
+
+            Sam: "we need to add a Table link in Yours."
+
+            Everything else on Yours is the learner alone — their boards, their Legend,
+            what DUB noticed about them. This is the one door out to anybody else, and it
+            is the answer to the problem Sam named: "ex-pats hang out together and never
+            feel a pressing need to learn the new language." So it sits above the teacher
+            rather than below it, because a reason to speak Portuguese to a person beats
+            a report on how your Portuguese is going.
+
+            IT SAYS THE RULE RATHER THAN THE FEATURE. "A table" means nothing; the first
+            ten minutes being in Portuguese is the whole proposition and it fits on a
+            card. See content/table.ts.
+          */}
+          <Link
+            href="/table"
+            data-testid="yours-table"
+            className="tap-target flex flex-col gap-1 rounded-2xl border border-line bg-bg-elev px-5 py-6 transition hover:border-accent/50"
+          >
+            <span className="eyebrow text-telha">A TABLE</span>
+            <span className="text-base leading-relaxed text-fg">{TABLE.rule}</span>
+            <span className="mt-1 text-sm leading-relaxed text-muted">{TABLE.what}</span>
+          </Link>
           <Link
             href="/noticed"
             data-testid="yours-noticed"

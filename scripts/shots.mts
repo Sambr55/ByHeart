@@ -1,5 +1,5 @@
 /**
- * The two screenshots the walk-through shows, taken from the live product.
+ * The screenshots the walk-through shows, taken from the live product.
  *
  *   npm run shots        (with the dev server running)
  *
@@ -17,6 +17,16 @@
  * jump-off screen, which is what the first run of this captured and is the reason the seed
  * below exists. The Goose card is the intro sequence's, so it is taken from a second,
  * untouched page: a member has already been through the showcase.
+ *
+ * FIVE NOW RATHER THAN TWO. Sam: "it needs to be seriously updated with screenshots. It
+ * is too oblique at the moment and needs to lock into the proposition above the process."
+ *
+ * The walk used to name controls — FIND is for this, the cog is that — and a tour of the
+ * furniture needs no pictures, because the control is on the screen behind the overlay.
+ * The steps that make an ARGUMENT are the ones that need them: a stranger has not seen
+ * the Legend being said, has never met a table, and has no idea the product has a voice
+ * to choose. Those three are the proposition, and a sentence about each is a claim where
+ * a picture of each is evidence.
  *
  * At deviceScaleFactor 2 and 390x844, which is the phone this product is designed on.
  */
@@ -74,4 +84,53 @@ console.log('goose shows:', await fresh.evaluate(`(() => {
   return s ? (s.innerText||'').replace(/\\s+/g,' ').trim().slice(0,66) : 'NOT FOUND'
 })()`))
 await fresh.screenshot({ path: 'public/walk/goose.png' })
+
+/*
+  3 — THE LEGEND BEING SAID, which is the product's whole first claim and the one thing a
+  stranger has never seen. /legend?run=1 is the run-through: the sentence, the microphone,
+  and the tiles under it.
+*/
+const legend = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })
+legend.setDefaultTimeout(25000)
+await legend.goto(BASE + '/club-member', { waitUntil: 'domcontentloaded' })
+await legend.waitForTimeout(5000)
+await legend.goto(BASE + '/legend?run=1', { waitUntil: 'domcontentloaded' })
+await legend.waitForTimeout(3200)
+/* The run-through draws its own card rather than a SayItCard, so read the page. */
+console.log('legend shows:', await legend.evaluate(`(() => {
+  const m = document.querySelector('main') || document.body
+  return ((m.textContent)||'').replace(/\\s+/g,' ').trim().slice(0,52)
+})()`))
+await legend.screenshot({ path: 'public/walk/legend.png' })
+
+/*
+  4 — A TABLE. The screen a stranger has no reason to imagine exists, and the one that
+  answers "ex-pats are lazy, they defer to speaking their native language". The page opens
+  on the photograph and the rule, which is exactly what the step is claiming.
+*/
+await legend.goto(BASE + '/table', { waitUntil: 'domcontentloaded' })
+await legend.waitForTimeout(2800)
+console.log('table shows:', await legend.evaluate(`(() => {
+  const m = document.querySelector('main') || document.body
+  return ((m.textContent)||'').replace(/\\s+/g,' ').trim().slice(0,60)
+})()`))
+await legend.screenshot({ path: 'public/walk/table.png' })
+
+/*
+  5 — THE MENTOR PICKER, taken from the walk itself. It is the only step with a real
+  decision in it and the funniest thing in the product; a line about "you choose who it
+  sounds like" is a claim, and four voices saying the same sentence is the joke landing.
+*/
+await legend.goto(BASE + '/profile?walk=1', { waitUntil: 'domcontentloaded' })
+await legend.waitForTimeout(3000)
+for (let i = 0; i < 14; i++) {
+  const there = await legend.evaluate(`Boolean(document.querySelector('[data-testid="walk-mentors"]'))`)
+  if (there) break
+  await legend.click('[data-testid="walk-next"]').catch(() => {})
+  await legend.waitForTimeout(420)
+}
+await legend.waitForTimeout(900)
+console.log('mentors shows:', await legend.evaluate(`String(document.querySelectorAll('[data-testid^="mentor-"]').length) + ' mentors'`))
+await legend.screenshot({ path: 'public/walk/mentors.png' })
+
 await browser.close()
