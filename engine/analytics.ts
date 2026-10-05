@@ -161,6 +161,13 @@ export type EventName =
     means three of them are decoration.
   */
   | 'mentor_chosen'
+  /*
+    A SEAT TAKEN OR GIVEN BACK, which is the one number that says whether the table is a
+    product or an idea. `state` carries what actually happened — taken, full, gone — so a
+    table that fills in minutes and a table nobody sits at look different in the data
+    rather than both looking like silence.
+  */
+  | 'table_seat'
   | 'club_move'
   /* Your Legend — the proposition, and the one goal that exists outside the app. */
   | 'legend_offered'
