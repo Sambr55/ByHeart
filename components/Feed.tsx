@@ -1,6 +1,6 @@
 'use client'
 
-import { isFreeRoom } from '@/lib/entitlements'
+import { FREE_ROOMS, isFreeRoom } from '@/lib/entitlements'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -3799,11 +3799,17 @@ function Teased({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
         reads as part of it; a step up reads as a card floating on a card. SayItCard's own
         comment records this fault being found once already, in the same words.
       */}
+      {/*
+        WHAT IS WITHHELD, AND WHY — the paywall's own sentence. It said "What to say arrives
+        with your Legend", which was the old rule (free until the Legend). The rule is the
+        starter set now — see FREE_ROOMS in lib/entitlements — so this names it: five rooms
+        free once you are set up, the rest of the city with Pro.
+      */}
       <div className="rounded border border-line-strong bg-surface px-4 py-3">
-        <p className="text-sm font-semibold">What to say arrives with your Legend.</p>
+        <p className="text-sm font-semibold">What to say here comes with DUB Pro.</p>
         <p className="mt-1 text-xs leading-relaxed text-muted">
-          Seven questions a stranger will ask you, answered in Portuguese out of language
-          you own. That is the whole of the way in.
+          {FREE_ROOMS.length} first-day rooms are free from the moment you are set up. This
+          one is part of the rest of the city.
         </p>
       </div>
 

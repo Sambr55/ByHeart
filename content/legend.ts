@@ -3545,6 +3545,20 @@ export const LEGEND_COPY = {
     again the moment a frame is added — which is the point of the parts. A count that has
     to be maintained by hand is a count that will lie.
   */
+  /*
+    THE ROAD, OFFERED ON THE SHELF. It took the shelf over — a full-screen jump-off, then
+    each step entered automatically — while it was the way into the Club. It is optional
+    now (the Club opens on set-up), so it is a card among the vibes, and the promise it
+    makes is the Legend's own: introducing yourself, not a seat it no longer buys.
+  */
+  road_offer_eyebrow: 'OPTIONAL',
+  road_offer_head: 'Build your Legend.',
+  road_offer_body: (n: number, started: boolean) =>
+    (started ? 'Carry on where you left off. ' : '') +
+    n +
+    ' short vibes, each one a line about you — your name, where you are from, what you do — until you can introduce yourself in Portuguese without a script. Take it whenever you like; nothing else waits for it.',
+  road_offer_cta: 'START MY LEGEND',
+  road_offer_resume: 'CARRY ON',
   locked_head: 'The questions a stranger will ask you.',
   locked_body:
     'They are not a form — each one is a short lesson built round your own answer, and you keep what it teaches. The vibes are where you get the language to build them.',

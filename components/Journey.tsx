@@ -51,7 +51,7 @@ import { slugFor } from '@/content/audio-manifest'
 import { Proof } from '@/components/Proof'
 import { Shelves } from '@/components/Shelves'
 import { BREAKS, DONE, breakAfter } from '@/content/breaks'
-import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, askFor, cardFor, frameApplies, knownValues, readableFrame, frameForPurpose, myAge, myName, personalise, framesJustOpened, legendStatus, metIn,
+import { DOORWAY, LEGEND_COPY, LEGEND_FRAMES, clubOpenFor, askFor, cardFor, frameApplies, knownValues, readableFrame, frameForPurpose, myAge, myName, personalise, framesJustOpened, legendStatus, metIn,
   provenanceOf, fillFrame, fillEnglish, type LegendFrame, worthSaving } from '@/content/legend'
 import { CrateIcon } from '@/components/CrateIcon'
 import { Dock, Framed } from '@/components/Dock'
@@ -1622,167 +1622,64 @@ function Picker() {
   }
 
   /*
-    NOBODY ON THE ROAD IS SHOWN A MENU.
+    WHERE THE ROAD IS, for the offer below.
 
-    Sam: "my expectation here was setting up the legend didnt require picking from vibes,
-    but the user is fed the ten questions from the vibes… I wasnt expecting to see this
-    menu - just straight into the first of ten questions."
-
-    He is right and this was my mistake. The warm-up used to intercept here, so removing
-    it left the SHELF as the first screen after set-up — and I argued at the time that the
-    shelf was now harmless because "the road decides the order regardless of what the shelf
-    shows, so the first thing somebody taps leads to the same place either way". True about
-    the destination and wrong about the experience. A menu asks somebody to choose when
-    there is nothing to choose: the road has a next step, it is the same step whichever
-    tile they press, and presenting thirteen covers is asking a question whose answer the
-    product already knows.
-
-    So while the road is unwalked, this screen enters the next step instead of rendering.
-    The shelf comes back the moment the road is done, which is when picking a vibe becomes
-    a real choice with real consequences — and that is what the shelf is FOR.
-
-    NOT A REDIRECT AND NOT A NEW SCREEN. chooseFamily is the same call the tiles make, so
-    nothing downstream can tell the difference between this and a tap. The guard is `once`
-    rather than state, because chooseFamily sets the family and this component re-renders
-    before the journey switches away from the picker.
+    This screen used to enter the next road step instead of rendering — "nobody on the road
+    is shown a menu" — and before the first step it showed a full-screen jump-off promising
+    a seat at the Club. Both were right while the road was the only way in. It is not any
+    more; see the note on `roadOffer`.
   */
   const road = roadProgress({
     rootsPlayed: learner.roots_played ?? [],
     purpose: learner.purpose ?? null,
   })
-  /*
-    AND BEFORE THE FIRST QUESTION, A SCREEN THAT SAYS WHAT THE NEXT TEN MINUTES ARE.
-
-    Sam: "Need a new jump off screen that says Let's Build your legend. 10 questions and
-    you'll be seated at your table in the DUB CLUB."
-
-    Auto-entering alone was better than a menu and still left a learner answering three
-    things about themselves and then simply BEING in a lesson, with a 2 of 10 bar as the
-    only account of why. This is the one screen whose whole job is the promise: what it is,
-    how long, and what it buys.
-
-    Once, at the start. Somebody returning mid-road is carried straight on — the promise has
-    been made and repeating it would be a toll on every session.
-  */
+  /* Whether any of it has been walked, so the offer can say START or CARRY ON. */
   const started = (learner.roots_played ?? []).length > 0
   const onRoad = mounted && !road.open && Boolean(road.next)
 
   /*
-    THE HOOK SITS ABOVE THE RETURN, which is not a style preference — I made this exact
-    mistake on the run-through two days ago and made it again here. React counts hooks per
-    render, the jump-off returns before this point, and a useRef/useEffect below it renders
-    "fewer hooks than expected" and replaces the screen with the error boundary. Caught by
-    walking it: the jump-off came back as "This card broke."
+    AND THE ROAD IS NOW OFFERED, NOT TAKEN.
+
+    Sam, pivoting DUB to the city: the Legend "must stop being the gateway to the Club", and
+    new users land in the Club after set-up rather than on the road. What was here — a
+    jump-off photograph before the first step, and an auto-entry that carried somebody from
+    step to step with no shelf between — was right for a road that was the only way in, and is a takeover of the shelf for a road that is
+    now one option among the vibes. So the shelf renders normally, always, and the road is
+    an offer card at the top of it (see `roadOffer` below): BUILD YOUR LEGEND, which steps
+    into the next road step with the same chooseFamily call a tile makes.
+
+    No auto-entry at all, even mid-road. The "loping around 2 of 10" fault the old ref
+    guarded against (it latched on one step and never moved on) cannot happen without it, and somebody who has walked three steps and
+    comes back to the shelf may want a vibe of their own — the card offers the fourth step
+    rather than deciding for them.
   */
-  /*
-    ONCE PER STEP, NOT ONCE PER VISIT.
-
-    Sam: "the road is just loping around 2 of 10 from songs you know and not getting to any
-    of the vibe content."
-
-    Exactly what this did. The ref latched `true` on the first auto-enter and never cleared,
-    so the picker carried a learner into the basics and then — every time they finished a
-    root and came back — returned at the top of this effect and did nothing. The road's
-    first two steps are the basics; steps three to ten are Bond, Bridget, Top Gun, Duran
-    Duran, Bowie and Audrey. The learner was parked in the only crate the road had already
-    delivered, replaying it, while the bar sat at 2 of 10 telling the truth about a journey
-    that had stopped moving.
-
-    The ref was guarding against re-entering the SAME step — which is real: this effect also
-    runs when `entering` settles, and firing chooseFamily again mid-transition fights it. So
-    it remembers WHICH step it entered rather than merely THAT it entered one. A new step is
-    a new root, the ref no longer matches, and the learner is carried on.
-  */
-  const autoEntered = useRef<string | null>(null)
-  useEffect(() => {
-    if (!onRoad || !started || !road.next) return
-    if (autoEntered.current === road.next.root) return
-    autoEntered.current = road.next.root
-    setEntering(road.next.family)
-    chooseFamily(road.next.family, road.next.root)
-    /* eslint-disable-next-line react-hooks/exhaustive-deps -- fires once per road step */
-  }, [onRoad, started, road.next?.root])
-
-  if (onRoad && !started) {
-    /*
-      THE PROMISE, ON A PHOTOGRAPH, WITH THE CONTROL THE PRODUCT ALREADY USES.
-
-      Sam: "lets make this a bit more fun and enticing. We need a background image…
-      rather than the square CTA use the pulsating audio icon underneath the text and
-      change the Mic icon to START."
-
-      It was sand, a headline, a paragraph and a full-width blue bar — the shape of a form,
-      on the one screen whose job is to make somebody want the next ten minutes. The
-      landing hero is already built out of a full-bleed photograph, a bottom scrim and
-      white type, so this borrows that rather than inventing a third treatment: see the
-      LANDING screen above for the -bottom-[15vh] note on why the image hangs past the box.
-
-      THE PULSING RING IS NOT DECORATION. `.listening` is what the microphone wears while
-      it is actually listening — see app/globals.css — so it already means "this is live,
-      press it". Reusing it here puts the same signal on the one button that starts
-      everything, and it is the only animated thing on the screen.
-
-      The word sits INSIDE the circle rather than under it. START under a ring reads as a
-      caption for the ring; START in it is the control.
-    */
-    return (
-      <div
-        data-stage="CHOICE"
-        className="app-frame relative flex min-h-lvh w-full flex-col justify-end overflow-hidden on-dark text-white"
+  const roadOffer =
+    onRoad && road.next ? (
+      <section
+        data-testid="road-offer"
+        className="flex flex-col gap-3 rounded-2xl border border-accent/40 bg-bg-elev px-5 py-6"
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 -bottom-[15vh] overflow-hidden">
-          <Image
-            src="/lisbon/intro-vibes.jpg"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-        </div>
-        {/* Legibility is measured against this, never against the photograph. */}
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-black/92 via-black/70 to-transparent"
-        />
-        {/*
-          pb-16 rather than pb-10: the START control wears `.listening`, whose ring expands
-          34px past the button, and at pb-10 that ring crossed into the bottom nav.
-          Measured in a screenshot, not guessed — a pulse clipped by a navigation bar reads
-          as a rendering fault rather than as an invitation.
-        */}
-        <div className="relative mx-auto flex w-full max-w-md flex-col gap-4 px-5 pb-16">
-          <p className="eyebrow text-white/80">{PICKER.start_eyebrow}</p>
-          <h1 className="display text-balance text-3xl">{PICKER.start_head}</h1>
-          <p className="text-base leading-relaxed text-white/85">
-            {PICKER.start_body(roadFor(learner.purpose ?? null).length)}
-          </p>
-          <div className="flex justify-center pt-4">
-            <button
-              type="button"
-              data-testid="road-start"
-              aria-label={PICKER.start_aria}
-              onClick={() => {
-                if (!road.next) return
-                setEntering(road.next.family)
-                chooseFamily(road.next.family, road.next.root)
-              }}
-              className="listening tap-target flex h-24 w-24 shrink-0 items-center justify-center rounded-full border border-accent bg-accent text-accent-ink"
-            >
-              <span className="eyebrow">{PICKER.start_cta}</span>
-            </button>
-          </div>
-        </div>
-        <BottomNav />
-      </div>
-    )
-  }
-
-  /*
-    PAST THE FIRST QUESTION the road carries them with no screen in between — see the note
-    above on why a menu is the wrong thing to show somebody with no choice to make.
-  */
-  if (onRoad) return null
+        <p className="eyebrow text-accent">{LEGEND_COPY.road_offer_eyebrow}</p>
+        <h2 className="display text-balance text-2xl">{LEGEND_COPY.road_offer_head}</h2>
+        <p className="text-sm leading-relaxed text-muted">
+          {LEGEND_COPY.road_offer_body(roadFor(learner.purpose ?? null).length, started)}
+        </p>
+        <button
+          type="button"
+          data-testid="road-start"
+          aria-label={PICKER.start_aria}
+          onClick={() => {
+            if (!road.next) return
+            track('legend_road_started', { step: road.next.root, resumed: started })
+            setEntering(road.next.family)
+            chooseFamily(road.next.family, road.next.root)
+          }}
+          className="tap-target eyebrow mt-3 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+        >
+          {started ? LEGEND_COPY.road_offer_resume : LEGEND_COPY.road_offer_cta}
+        </button>
+      </section>
+    ) : null
 
   return (
     <Shell stage="CHOICE">
@@ -1831,7 +1728,12 @@ function Picker() {
         three screens cannot drift apart. That drift is the exact failure this promise
         exists to catch.
       */}
-      {mounted && !shelfLegend.open ? (
+      {/*
+        NOT FOR A MEMBER, whose Legend is already open: being in the Club unlocks building
+        it (see `unlocked` in components/Legend.tsx), so "N more sessions and your Legend
+        opens" would be counting down to something they have.
+      */}
+      {mounted && !shelfLegend.open && !clubOpenFor(learner) ? (
         <p data-testid="shelf-legend" className="-mt-3 text-sm text-muted">
           {shelfLegend.toGo > 0
             ? PICKER.legend_basics(
@@ -1841,6 +1743,7 @@ function Picker() {
               )}
         </p>
       ) : null}
+      {roadOffer}
       {/*
         AND THE SAVE OFFER, HERE TOO, because one screen was not enough.
 

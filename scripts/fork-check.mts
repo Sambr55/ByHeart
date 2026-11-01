@@ -10,11 +10,13 @@
  * to hit it was somebody halfway through building their Legend, which is exactly who the
  * fork exists for.
  *
+ * The door has since moved to set-up (see clubOpen); the property is unchanged — one
+ * answer, asked in one place.
+ *
  * This is the check that keeps one answer. Everything here is logic, so it needs no
  * browser — the routing decision is a function of saved state and nothing else.
  */
-import { LEGEND_CARD, clubOpen } from '../content/legend'
-import { ROOTS } from '../content/roots'
+import { LEGEND_CARD, clubOpen, clubOpenFor } from '../content/legend'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -22,55 +24,32 @@ const ok = (label: string, cond: boolean, detail = '') => {
   if (!cond) problems.push(label + (detail ? ' — ' + detail : ''))
 }
 
+/*
+  THE DOOR IS SET-UP NOW, not the card — see clubOpen. So the fork's question is the same
+  one in the same place, and what it is asked about is the record's two door fields. The
+  Legend answers are carried in each fixture to prove they no longer decide anything.
+*/
 type Answer = { frame_id: string; values: Record<string, string> }
 const answersFor = (n: number): Answer[] =>
   LEGEND_CARD.slice(0, n).map((f) => ({ frame_id: f.id, values: { x: 'y' } }))
 
-/** The rung-2 proof the door also requires — said cold, twice. */
-const rung2 = ROOTS.filter((r) => r.rung === 1)
-  .slice(0, 2)
-  .map((r) => ({ pt: r.transfer_prompt.answer, en: r.transfer_prompt.ask, source: 'release' as const, clean: true, at: '1' }))
-
-/** The same decision app/page.tsx makes, kept in step by this file existing. */
-function member(answers: Answer[], proof: typeof rung2): boolean {
-  return clubOpen({
-    answeredFrameIds: answers.map((a) => a.frame_id),
-    answers,
-    welcomedAt: null,
-  })
+/** The same decision app/view.tsx makes, kept in step by this file existing. */
+function member(s: { legend: Answer[]; set_up_at?: string | null; club_welcomed_at?: string | null }): boolean {
+  return clubOpenFor(s)
 }
 
 console.log('\nthe fork\n')
-ok('a brand new device is not a member', !member([], []))
-ok('nor is somebody who has only played', !member([], rung2))
-
-/*
-  The exact case that used to break. Five answers was enough for the front door and not
-  enough for the room, so this person bounced off a door they had been sent to.
-*/
-for (const n of [1, 3, 5, 6]) {
+ok('a brand new device is not a member', !member({ legend: [] }))
+for (const n of [1, 5, LEGEND_CARD.length]) {
   ok(
-    n + ' of ' + LEGEND_CARD.length + ' answered is not yet a member',
-    !member(answersFor(n), rung2),
-    n === 5 ? 'the one that used to be sent to a locked room' : '',
+    n + ' of ' + LEGEND_CARD.length + ' answered and no set-up is not a member',
+    !member({ legend: answersFor(n) }),
+    'the card does not open the door',
   )
 }
-
-ok('the whole card is a member', member(answersFor(LEGEND_CARD.length), rung2))
-/*
-  THE CARD IS THE DOOR, and the assertion that used to sit here was the ladder's last
-  claim on it: "the card alone is not — it has to have been said", justified by "the
-  ladder is what proves you can say it".
-
-  Neither half survived inspection. rungReached dropped its `clean` test long ago, so the
-  rung stopped proving anything about cold speech; and the state being asserted could not
-  occur, because finishing a card takes five completed vibes and those produce releases.
-  The clause it guarded was inert, so it went, and this went with it.
-
-  What is asserted instead is the thing that is actually load-bearing: the card decides,
-  and playing without answering does not.
-*/
-ok('the whole card with no releases at all is still a member', member(answersFor(LEGEND_CARD.length), []))
+ok('set-up with nothing answered is a member', member({ legend: [], set_up_at: '2026-11-01' }))
+ok('welcomed with nothing else is a member', member({ legend: [], club_welcomed_at: '2026-08-01' }))
+ok('and clubOpen agrees', clubOpen({ setUpAt: '2026-11-01' }) && !clubOpen({}))
 
 console.log('\nand it is asked in one place\n')
 /*
@@ -120,7 +99,7 @@ ok(
   'and the front door asks clubOpen',
   ['app/page.tsx', 'app/view.tsx'].some((f) => {
     try {
-      return readFileSync(f, 'utf8').includes('clubOpen(')
+      return /clubOpen(For)?\(/.test(readFileSync(f, 'utf8'))
     } catch {
       return false
     }

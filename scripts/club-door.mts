@@ -12,6 +12,11 @@
  * Now membership is something you can be outside of, so it is something that can be
  * wrongly granted or wrongly refused. Both are checked here, against the predicate the
  * app itself uses rather than a copy of its logic.
+ *
+ * The door moved from the Legend to set-up (Sam, pivoting DUB to the city), so this now
+ * asserts set-up opens it, the card has no say, welcomed members are never put out, and
+ * the free starter set is what the paywall reads. The card checks below stay: the Legend
+ * is optional, not gone.
  */
 import {
   LEGEND_CARD,
@@ -20,6 +25,7 @@ import {
   cardDone,
   cardToGo,
   clubOpen,
+  clubOpenFor,
   fillFrame,
   frameApplies,
   isAnswered,
@@ -27,6 +33,10 @@ import {
 import { ROAD } from '../content/road'
 import { ROOTS } from '../content/roots'
 import { say } from '../content/numbers'
+import { SITUATIONS } from '../content/situations'
+import { LISBON_VISITING_1 } from '../content/blocks/lisbon-visiting-1'
+import { FREE_ROOMS, PLANS, canOpenRoom, hasFullAccess, isFreeRoom } from '../lib/entitlements'
+import { readFileSync } from 'node:fs'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -108,34 +118,117 @@ ok(
   held.join(', ') || 'nothing held back',
 )
 
-console.log('\nthe door\n')
-ok('a brand new learner is outside', !clubOpen({ answeredFrameIds: [] }))
-ok('most of a card is still outside', !clubOpen({ answeredFrameIds: all.slice(0, 6) }))
 /*
-  THE RUNG IS NO LONGER ASKED, and the assertion it used to carry was the clearest sign
-  the clause had to go.
+  THE DOOR IS SET-UP, NOT THE LEGEND.
 
-  This said "a finished card with no cold speech is still outside", on the grounds that
-  "the ladder is what measures speaking". Two things had quietly stopped being true:
-  rungReached dropped its `clean` test long ago, so the rung had not measured cold speech
-  for some time; and the state being asserted was unreachable anyway — stage 1 means zero
-  releases ever, while finishing a card takes five completed vibes, which produce them.
-
-  So the door is the card, plus the grandfather clause below.
+  Sam moved it when DUB became about the city: the Legend "must stop being the gateway to
+  the Club". clubOpen takes the two facts the door reads — set_up_at and club_welcomed_at
+  — and nothing about the card, so the assertions below are about those two facts and
+  about the card having NO say.
 */
-ok('a finished card is in', clubOpen({ answeredFrameIds: all }))
+console.log('\nthe door\n')
+const SET_UP = '2026-11-01T00:00:00.000Z'
+ok('a brand new learner is outside', !clubOpen({}))
+ok('nulls are outside too', !clubOpen({ setUpAt: null, welcomedAt: null }))
+ok('set-up opens it', clubOpen({ setUpAt: SET_UP }), 'no Legend, no road')
 ok(
-  'answering the HARD three does not sneak you in',
-  !clubOpen({ answeredFrameIds: harder }),
-  'those are what you build inside',
+  'and the record form asks the same question',
+  clubOpenFor({ set_up_at: SET_UP }) && !clubOpenFor({}) && !clubOpenFor({ set_up_at: null }),
 )
 
 console.log('\nnobody already inside is put back out\n')
+/*
+  WELCOMED IS ALWAYS IN, and it is the bug this replaces: the old clubOpen counted Legend
+  proof BEFORE reading welcomedAt, so a member welcomed under one rule was shut out again
+  when the rule moved — and /skip, which writes the stamp, said "The door is open" over a
+  door that was shut.
+*/
 ok(
-  'an existing member with nothing on their card stays in',
-  clubOpen({ answeredFrameIds: [], welcomedAt: '2026-08-01T00:00:00.000Z' }),
+  'a welcomed member with no set-up stays in',
+  clubOpen({ welcomedAt: '2026-08-01T00:00:00.000Z' }),
   'grandfathered',
 )
+ok(
+  'and so does one whose record is otherwise empty',
+  clubOpenFor({ club_welcomed_at: '2026-01-01', set_up_at: null }),
+)
+
+console.log('\nthe card has no say in it\n')
+{
+  /*
+    Source-level: the signature no longer takes a card, so a caller cannot pass one by
+    mistake — and the function body must not read proof, answers or the card.
+  */
+  const legendSrc = readFileSync('content/legend.ts', 'utf8')
+  const body = legendSrc.slice(
+    legendSrc.indexOf('export function clubOpen('),
+    legendSrc.indexOf('export function clubOpenFor('),
+  )
+  const code = body.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+  ok('clubOpen reads no proof, answers or card', !/proof|answer|cardDone|cardFor|rough/.test(code))
+  ok(
+    'and it reads the welcome before set-up',
+    code.indexOf('welcomedAt') > -1 && code.indexOf('welcomedAt') < code.indexOf('setUpAt)'),
+  )
+  /* Every gate asks the one function, not a copy of it. */
+  for (const file of [
+    'engine/useClub.ts',
+    'app/view.tsx',
+    'components/Club.tsx',
+    'components/Legend.tsx',
+    'components/Skip.tsx',
+  ]) {
+    const src = readFileSync(file, 'utf8')
+    ok(file + ' asks clubOpenFor', /clubOpenFor\(/.test(src))
+  }
+  const club = readFileSync('components/Club.tsx', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+  ok(
+    'the welcome fires on the door, not on the Legend',
+    /if \(!clubOpenFor\(state\)\) return\s*\n\s*setWelcome\(true\)/.test(club),
+    'first entry after set-up',
+  )
+  const view = readFileSync('app/view.tsx', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
+  ok(
+    'the front door sends a set-up learner to the Club',
+    /isMember\(learner\) \? '\/club'/.test(view) && /!isMember\(learner\) && !returning\(learner\)/.test(view),
+    'even before they have played anything',
+  )
+}
+
+/*
+  THE STARTER SET, which replaced "free until the Legend".
+
+  Five Lisbon rooms that exist, are standing rooms in the visitor's city, and are named
+  in one place — the new home screen imports them, so a typo here would be a room that
+  is free in the copy and paid in the product.
+*/
+console.log('\nthe starter set\n')
+{
+  const ids = new Set([...SITUATIONS, ...LISBON_VISITING_1].map((x) => x.id))
+  ok('five rooms are free', FREE_ROOMS.length === 5, FREE_ROOMS.join(', '))
+  const missing = FREE_ROOMS.filter((id) => !ids.has(id))
+  ok('every free room exists', missing.length === 0, missing.join(', ') || 'all found')
+  ok('isFreeRoom agrees with the list', FREE_ROOMS.every(isFreeRoom) && !isFreeRoom('lisbon_fado'))
+  /*
+    "When billing is not configured, everybody is in", and nothing locks before the server
+    has answered — the two rules the Club wrote inline, now one function.
+  */
+  const free = { plan: 'free' as const }
+  const pro = { plan: 'pro' as const }
+  ok('no billing, everybody is in', hasFullAccess({ known: true, billingReady: false, entitlements: free }))
+  ok('unknown is in, so nobody is locked out for a second', hasFullAccess({ known: false, billingReady: true, entitlements: free }))
+  ok('billing live, free is not', !hasFullAccess({ known: true, billingReady: true, entitlements: free }))
+  ok('billing live, pro is', hasFullAccess({ known: true, billingReady: true, entitlements: pro }))
+  const live = { known: true, billingReady: true, entitlements: free }
+  ok('a free room opens for free', canOpenRoom(FREE_ROOMS[0], live))
+  ok('a paid room does not', !canOpenRoom('lisbon_fado', live))
+  /* And the feed — the one place rooms are withheld today — reads the same list. */
+  const feed = readFileSync('components/Feed.tsx', 'utf8')
+  ok('the feed frees the starter set', /isFreeRoom\(card\.id\)/.test(feed))
+  /* The pricing no longer promises a door that is gone. */
+  const plans = JSON.stringify(PLANS)
+  ok('no plan sells the path to the Legend', !/path to the Legend|Your Legend all the way/i.test(plans), PLANS.free.line)
+}
 
 console.log('\ncounting down\n')
 /* The whole card, whatever size the road makes it — see the derivation note above. */
@@ -248,74 +341,6 @@ ok(
   cardToGo(cardIds, answeredCard.map((a, i) => (i === 0 ? ans(a.frame_id, {}) : a))) === 1,
 )
 
-/*
-  THE LEGEND IS A GATE, NOT A SOFT OPTION.
-
-  Sam: "this is about completing and rehearsing the legend, which has now become a soft
-  option, not a gate."
-
-  The road answers all seven card questions as a learner walks it — by design — so
-  cardDone was true the moment the basics finished, and the door opened on a card that had
-  been written and never spoken. Measured at the time: eleven sentences said cold on the
-  way in, not one of them their own Legend.
-
-  So the door now reads `proof`: seven Legend sentences, clean, said with nothing on
-  screen. Answering builds the card; saying it opens the Club.
-*/
-console.log('\nthe Legend has to be said, not just answered\n')
-{
-  const seven = LEGEND_CARD.map((f) => f.id)
-  const answers = seven.map((id) => ans(id, { x: 'y' }))
-  const said = (n: number) =>
-    Array.from({ length: n }, (_, i) => ({ pt: 'legend' + i, source: 'legend', clean: true }))
-
-  ok(
-    'a written card alone does not open it',
-    !clubOpen({ answeredFrameIds: seven, answers, proof: [] }),
-    'seven answered, none said',
-  )
-  ok(
-    'nor does most of it',
-    !clubOpen({ answeredFrameIds: seven, answers, proof: said(seven.length - 1) }),
-    seven.length - 1 + ' of ' + seven.length,
-  )
-  ok(
-    'saying all seven does',
-    clubOpen({ answeredFrameIds: seven, answers, proof: said(seven.length) }),
-    seven.length + ' of ' + seven.length,
-  )
-  /*
-    AND A PREVIOUS WELCOME DOES NOT EXCUSE IT. welcomedAt latches the door open, which is
-    right for somebody who earned it and wrong as a way past the new rule — Sam chose to
-    re-gate everybody, so a learner welcomed under the old one rehearses like anybody else.
-  */
-  ok(
-    'and a previous welcome does not excuse it',
-    !clubOpen({ answeredFrameIds: seven, answers, proof: [], welcomedAt: '2026-01-01' }),
-    'welcomed, none said',
-  )
-  /*
-    A caller with no proof to hand keeps the old answer. Not every one has the record, and
-    a door that slams shut because an argument was omitted is worse than the hole it
-    replaces — so the omission is deliberate and asserted rather than left to chance.
-  */
-  ok(
-    'a caller that supplies no proof is unchanged',
-    clubOpen({ answeredFrameIds: seven, answers }),
-    'no proof argument',
-  )
-  /* Sentences said cold that are NOT the Legend do not count toward it. */
-  ok(
-    'other cold sentences do not count',
-    !clubOpen({
-      answeredFrameIds: seven,
-      answers,
-      proof: Array.from({ length: 11 }, (_, i) => ({ pt: 'r' + i, source: 'release', clean: true })),
-    }),
-    'eleven releases, no Legend',
-  )
-}
-
 console.log('\nnumbers are words\n')
 ok('an age reads as Portuguese, not digits', fillFrame(F('age'), { n: '56' }, 'm').includes('cinquenta e seis'),
   fillFrame(F('age'), { n: '56' }, 'm'))
@@ -352,4 +377,4 @@ if (problems.length) {
   for (const p of problems) console.log('  ✗ ' + p)
   process.exit(1)
 }
-console.log('\nthe way in is the card, and the ladder is what proves you can say it')
+console.log('\nthe way in is set-up, the welcome is never taken back, and five rooms are free')

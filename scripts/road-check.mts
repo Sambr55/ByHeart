@@ -18,7 +18,7 @@ import { BREAKS, breakAfter, DONE } from '../content/breaks'
 import { ROOTS, ROOTS_BY_FAMILY, type Root } from '../content/roots'
 import { ROAD, roadFor, roadProgress } from '../content/road'
 import { beatsFor } from '../engine/journey'
-import { cardFor, cardToGo, clubOpen, frameForPurpose, frameReady, legendStatus, DOORWAY, LEGEND_FRAMES } from '../content/legend'
+import { cardDone, cardFor, cardToGo, clubOpen, frameForPurpose, frameReady, legendStatus, DOORWAY, LEGEND_FRAMES } from '../content/legend'
 import type { Purpose } from '../content/situations'
 
 const fail: string[] = []
@@ -435,33 +435,28 @@ console.log('\nevery sitting break teaches something, and something new\n')
   finish anything, and one it calls unfinished must never be told they are done.
 */
 /*
-  AN EMPTY CARD DOES NOT OPEN THE CLUB.
+  AN EMPTY CARD IS NOT A FINISHED ONE — and the road no longer opens the Club.
 
   Sam: "I completed the basics but it allowed me into the club without completing the
-  legend." Walking the basics DOES answer all seven — that is the design, and his own
-  words are quoted at the top of content/road.ts: "you are literally building the legend
-  as you learn." So the Club opening on a finished road is correct.
+  legend." That was the old door: the Club opened on the card. It opens on set-up now (see
+  clubOpen) and the road is an optional "Build your Legend" path, so what this section
+  guards is the CARD: clearing or skipping a card writes `values: {}`, and cardToGo used to
+  take the caller's word for which ids were answered — so an empty card counted as done.
 
-  What was not correct is what happens to a SKIPPED one. Clearing or skipping a card
-  writes `values: {}`, and cardToGo took the caller's word for which ids were answered —
-  so an empty card counted as done, and four outstanding became three. All four callers
-  filter the empties first, in four separate places; the fifth to forget would have opened
-  the Club to somebody who had answered nothing.
-
-  Asserted on cardToGo rather than on the callers, because that is where it is now decided
-  and a new caller inherits it for free.
+  Asserted on cardDone/cardToGo, where it is decided, and then the new rule beside it: a
+  finished road with no set-up is still outside, and set-up with no road is inside.
 */
 console.log('\nan empty card is not an answered one\n')
 {
   for (const purpose of ['visiting', 'staying', 'moving'] as const) {
     const all = cardFor(purpose).map((f) => f.id)
     const real = all.map((id) => ({ frame_id: id, values: { x: 'y' } }))
-    ok(purpose + ': seven real answers open it', clubOpen({ answeredFrameIds: all, answers: real, purpose }))
+    ok(purpose + ': seven real answers finish the card', cardDone(all, real, purpose))
     /* One of them cleared — the id is still listed, the values are gone. */
     const skipped = real.map((a, i) => (i === 0 ? { ...a, values: {} } : a))
     ok(
-      purpose + ': one skipped keeps it shut',
-      !clubOpen({ answeredFrameIds: all, answers: skipped, purpose }),
+      purpose + ': one skipped leaves it unfinished',
+      !cardDone(all, skipped, purpose),
       'cleared ' + all[0],
     )
     ok(
@@ -470,6 +465,30 @@ console.log('\nan empty card is not an answered one\n')
       String(cardToGo(all, skipped, purpose)),
     )
   }
+  ok('a walked road alone does not open the Club', !clubOpen({}), 'the door is set-up')
+  ok('set-up alone does', clubOpen({ setUpAt: '2026-11-01T00:00:00.000Z' }), 'no road needed')
+}
+
+/*
+  THE ROAD IS OFFERED, NOT TAKEN.
+
+  The shelf used to enter the next road step instead of rendering, and showed a full-screen
+  jump-off before the first. The road is optional now, so the shelf must render and the
+  road must be an offer on it. Source-level, like the break-screen check below: the
+  alternative is a browser, and the thing being guarded is one effect coming back.
+*/
+console.log('\nthe road is an offer on the shelf\n')
+{
+  const src = readFileSync('components/Journey.tsx', 'utf8')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+  ok('nothing auto-enters a road step', !/autoEntered/.test(src), 'no takeover effect')
+  ok('the shelf does not hide itself for the road', !/if \(onRoad\) return null/.test(src))
+  ok(
+    'and the road is offered on it',
+    /data-testid="road-offer"/.test(src) && /\{roadOffer\}/.test(src),
+    'BUILD YOUR LEGEND',
+  )
 }
 
 console.log('\nthe door and the copy agree\n')

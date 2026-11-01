@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { cardFor } from '@/content/legend'
+import { cardFor, clubOpenFor } from '@/content/legend'
 import { ROOTS_BY_FAMILY } from '@/content/roots'
 import { Dock, Framed } from '@/components/Dock'
 import { Wordmark } from '@/components/Wordmark'
@@ -15,10 +15,13 @@ import { fastForward, loadLearner, provideSeedContent } from '@/engine/learner'
  *
  * Sam: "I need a way of testing club without having to reset and redo the legend."
  *
- * The Club opens on one field — club_welcomed_at, the first line of clubOpen — and
- * everything between a fresh device and that field is six basics sittings, three vibes and
- * seven Legend answers. That is the product working as designed and it is twenty minutes
- * every time somebody wants to look at a feed card.
+ * The Club opens on set-up now, or on having been welcomed — see clubOpen — so this is
+ * less of a shortcut than it was: set-up is a minute. It is still the quickest way to a
+ * Club with a Legend, a proof line and a played basics in it, which is what a tester
+ * usually wants to look at. It used to be broken in a way worth naming: it wrote
+ * club_welcomed_at and said "The door is open", while the door counted Legend proof
+ * BEFORE reading the welcome and shut it anyway. The welcome is read first now and this
+ * writes set_up_at too, so the banner is true.
  *
  * THE SIBLING OF /reset, and deliberately shaped like it. A URL you have to know, not in
  * any menu, saying what it is about to do before it does it. The two are a pair: this one
@@ -49,7 +52,8 @@ export function Skip() {
     )
     const me = loadLearner()
     if (me.display_name) setName(me.display_name)
-    setState(me.club_welcomed_at ? 'already' : 'ready')
+    /* Already in by the door's own rule, not by one of its fields. */
+    setState(clubOpenFor(me) ? 'already' : 'ready')
   }, [])
 
   if (state === 'reading') return <Frame>{null}</Frame>
@@ -65,7 +69,7 @@ export function Skip() {
           <p className="text-sm leading-relaxed text-muted">
             {state === 'done'
               ? 'The Club, the calendar and Yours all work. Your stage still says BASICS, because nothing here pretends you have learned words you have not — that number only moves in a lesson.'
-              : 'This device already has club_welcomed_at set, so the Club is open and there is nothing for this page to do. /reset puts you back to a blank device if you want the whole run again.'}
+              : 'This device is already set up, so the Club is open and there is nothing for this page to do. /reset puts you back to a blank device if you want the whole run again.'}
           </p>
         </div>
         <Dock>
@@ -104,11 +108,12 @@ export function Skip() {
           tool you cannot trust the next time a screen looks wrong.
         */}
         <ul className="flex flex-col gap-1 rounded border border-line bg-bg-elev p-4 text-sm leading-relaxed">
-          <li>The deal accepted, and Lisbon as your chapter.</li>
+          <li>Set-up finished: the deal accepted, and Lisbon as your chapter.</li>
           <li>Moving, as why you are here.</li>
           <li>The basics played and marked done.</li>
           <li>Your seven Legend answers, filled in.</li>
           <li>One line of proof, so the proof card is not empty.</li>
+          <li>Welcomed, so you skip the ceremony and land on the feed.</li>
           <li className="mt-3 text-muted">
             Not your inventory. The stage on Yours counts words you actually banked, and
             this will not lie to it.
