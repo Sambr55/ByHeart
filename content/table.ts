@@ -60,9 +60,16 @@ export const TABLE = {
   weDont: 'We do not book it, pay for it, or come with you.',
   /** The bar for a seat, in the learner's own terms. See COLD_FLOOR in lib/tables.ts. */
   bar: 'You need to be able to say three things about yourself out loud, cold.',
-  /** When somebody has not earned a seat yet. Never "you are not good enough". */
+  /*
+    When somebody has not earned a seat yet. Never "you are not good enough".
+
+    It said "three of your Legend", and the count never asked for the Legend: saidCold
+    takes any clean proof row. Now that the Legend is optional, naming it sent people to the
+    one optional thing as if it were the requirement. A room is the quickest real way to
+    three sentences said cold, so that is what it names.
+  */
   notYet:
-    'Not yet — say three of your Legend out loud with the screen off and the next table is yours.',
+    'Not yet — say three things out loud with nothing on screen and the next table is yours. A room in the Club is the quickest way there.',
 } as const
 
 /**
@@ -125,8 +132,9 @@ export const SEATS = 6
 /**
  * The floor: a learner who can introduce themselves out loud.
  *
- * Counted from proof lines marked `clean` — said with nothing on screen — against the
- * Legend sources, which is the same evidence clubOpen uses to open the Club. Three is the
+ * Counted from proof lines marked `clean` — said with nothing on screen — from any source:
+ * a room, a vibe or the optional Legend. (This used to claim it was the evidence clubOpen
+ * used; the Club opens on set-up now and asks for no proof at all.) Three is the
  * floor rather than all seven, because the first ten minutes is name, where you are from
  * and why you came; demanding the full card would seat nobody and demanding one would
  * seat somebody who can say their name and then stop.

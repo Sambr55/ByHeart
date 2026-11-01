@@ -170,8 +170,10 @@ export function Profile() {
 
     GATED ON THE WELCOME HAVING FIRED, not on membership: `club_welcomed_at` is the stamp
     written on the way out of the ceremony, so reading it is reading "the Club has let them
-    in and said so". A learner who has never been welcomed is mid-Legend and has nothing on
-    this screen for a walk to be about.
+    in and said so". The ceremony fires on the first entry to the Club after set-up now
+    (it used to wait for the Legend, said cold), so this follows it there with no change of
+    its own: welcome, then walk. A learner who has never been welcomed has not entered the
+    Club yet and has nothing on this screen for a walk to be about.
 
     `loadLearner()` RATHER THAN THE SNAPSHOT, for exactly the reason the welcome gives in
     components/Club.tsx: an unread store is indistinguishable from a learner who has never

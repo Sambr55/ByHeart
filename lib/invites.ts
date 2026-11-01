@@ -1,4 +1,5 @@
 import { db } from '@/lib/db'
+import { inviteEarned } from '@/content/invite'
 
 /**
  * Bringing somebody in, and what it earns.
@@ -31,7 +32,7 @@ const OPEN_FOR_DAYS = 30
  * Both, equally, because the thing being paid for is a person learning to speak — and the
  * learner did that, while the person who brought them made it happen. Paying only the
  * recommender would make this an affiliate scheme; paying only the newcomer would make it
- * a coupon. It is neither: it is two people in a city, one of whom now has a Legend.
+ * a coupon. It is neither: it is two people in a city, one of whom can now say something in it.
  */
 export const GRANT_DAYS = 30
 
@@ -138,8 +139,11 @@ export async function acceptInvite(opts: {
   return { ok: true }
 }
 
+/* The trigger itself is pure and lives in content/invite.ts — see inviteEarned there. */
+export { inviteEarned }
+
 /**
- * The person brought in has said their Legend cold. Pay both sides.
+ * The person brought in has said their first room cold. Pay both sides.
  *
  * IDEMPOTENT, and that is the whole of its correctness: the event that triggers this is a
  * client reporting progress, so it will arrive more than once. `paid_from_at` and

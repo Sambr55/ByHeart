@@ -1,5 +1,6 @@
 'use client'
 
+import { isFreeRoom } from '@/lib/entitlements'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -2465,8 +2466,18 @@ export function Card({
   */
   const learner = useLearner()
   const [claimed, setClaimed] = useState(false)
+  /*
+    AND THE STARTER SET IS FREE TO EVERYBODY IN THE CLUB — isFreeRoom, from the one list
+    in lib/entitlements. The paywall was "free until the Legend"; it is five first-day
+    Lisbon rooms now, so a set-up visitor who has not paid opens those in full and sees the
+    rest teased. `tasted` stays: the one extra room given on the spot is still theirs.
+  */
   const free =
-    stage === 'member' || card.kind !== 'situation' || claimed || learner.tasted === card.id
+    stage === 'member' ||
+    card.kind !== 'situation' ||
+    isFreeRoom(card.id) ||
+    claimed ||
+    learner.tasted === card.id
   const [isSaved, setSaved] = useState(saved)
   const [isLiked, setLiked] = useState(liked)
   useEffect(() => setSaved(saved), [saved])

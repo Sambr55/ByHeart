@@ -195,17 +195,20 @@ export function Tables({ pushReady }: { pushReady: boolean }) {
           "Not yet" names the one thing that fixes it and links at the screen that does —
           which is the same shape every gate in this product uses, because a door that says
           no without saying how is a wall.
+
+          It linked the Legend run-through. The seat counts any sentence said cold, and the
+          Legend is optional now, so the way on is a room: /club, where they are.
         */}
         {!canSit ? (
           <div className="flex flex-col gap-3 rounded-2xl border border-coach/60 bg-bg-elev px-5 py-6">
             <p className="eyebrow text-coach">NOT YET</p>
             <p className="text-base leading-relaxed text-fg">{TABLE.notYet}</p>
             <Link
-              href="/legend?run=1"
+              href="/club"
               data-testid="table-earn"
               className="tap-target eyebrow mt-3 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
             >
-              RUN YOUR LEGEND
+              TRY A ROOM
             </Link>
           </div>
         ) : null}
@@ -226,8 +229,8 @@ export function Tables({ pushReady }: { pushReady: boolean }) {
           <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
             <p className="text-base leading-relaxed text-fg">
               No table yet. They happen when six people in {''}
-              <span className="whitespace-nowrap">the same city</span> can all say their
-              Legend — so the fastest way to get one is to bring somebody in.
+              <span className="whitespace-nowrap">the same city</span> can each say a few
+              things cold — so the fastest way to get one is to bring somebody in.
             </p>
             <Link
               href="/profile"

@@ -40,15 +40,35 @@ console.log('\nan invitation pays for learning, not for signing up\n')
 /*
   THE ONE THAT MATTERS. Paying on acceptance would reward an expat for adding another
   English speaker to their phone — the behaviour the product exists to counteract — and
-  would be farmable with a browser and ten minutes. Paying on a said Legend is
+  would be farmable with a browser and ten minutes. Paying on a room said cold is
   unspammable without a single fraud check, because a fake account cannot speak
   Portuguese.
+
+  The trigger was the Legend, said cold. The Legend is optional now — the Club opens on
+  set-up — so it is the first ROOM said cold: a proof row with source 'room' and clean,
+  which is what Errand banks. Asserted on the function as well as on the wiring, so the
+  rule cannot drift to "any proof" (a vibe line said on the warm-up) or to "any room
+  attempt" (a row with clean: false) without this going red.
 */
 ok(
-  'the reward is paid on a said Legend, not on acceptance',
-  /clubOpen\(/.test(session) && /landInvite\(/.test(session),
+  'the reward is paid on a room said cold, not on acceptance',
+  /inviteEarned\(/.test(session) && /landInvite\(/.test(session),
   'the session route is where the proof rows arrive',
 )
+{
+  const { inviteEarned } = await import('../content/invite')
+  ok('nothing said earns nothing', !inviteEarned([]) && !inviteEarned(undefined))
+  ok(
+    'a room attempted but not clean earns nothing',
+    !inviteEarned([{ source: 'room', clean: false }]),
+  )
+  ok(
+    'a vibe line said cold is not a room',
+    !inviteEarned([{ source: 'release', clean: true }, { source: 'legend', clean: true }]),
+    'the Legend no longer pays either',
+  )
+  ok('the first room said cold pays', inviteEarned([{ source: 'room', clean: true }]))
+}
 ok(
   'and nothing in the invite route itself can pay',
   !/grant\(|landInvite\(/.test(route),

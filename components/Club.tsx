@@ -20,7 +20,8 @@ import {
 } from '@/content/roots'
 import { CLUB, MOVES } from '@/content/club'
 import { Feed, type ClubStage } from '@/components/Feed'
-import { cardDone, cardToGo, clubOpen, legendStatus } from '@/content/legend'
+import { cardDone, cardToGo, clubOpenFor, legendStatus } from '@/content/legend'
+import { hasFullAccess } from '@/lib/entitlements'
 import { DEFAULT_CHAPTER } from '@/content/chapters'
 import { isCurrent, situationsFor } from '@/content/situations'
 import { CrateIcon } from '@/components/CrateIcon'
@@ -112,34 +113,29 @@ export function Club() {
     [...claimed].filter((id) => !finished.has(id)).length >= access.entitlements.crates
 
   /**
-   * The welcome, once.
+   * The welcome, once — on the first arrival in the Club after set-up.
    *
-   * Gated on rung 2 as specified: somebody who has finished a section but cannot yet ask
-   * for anything has not really been through DUB, and a ceremony at that moment would be
-   * congratulating them for turning up — which is the one thing this product refuses to
-   * do. `loadLearner()` is called explicitly rather than read off the snapshot, because
-   * an unread store is indistinguishable from a learner who has never been welcomed.
+   * It waited for the Legend, said cold, because the Legend was the door. The door is
+   * set-up now (see clubOpen), so the ceremony waits for the same thing the door does and
+   * fires the first time somebody who has finished set-up walks in: that is the moment
+   * they become a member, and the only one there is. `loadLearner()` is called explicitly
+   * rather than read off the snapshot, because an unread store is indistinguishable from a
+   * learner who has never been welcomed.
+   *
+   * The `legend` field on the event says whether the card was said before they arrived,
+   * which it now usually will not be — kept so the old cohort and the new one can be told
+   * apart rather than so anybody is congratulated for it.
    */
   const [welcome, setWelcome] = useState(false)
   useEffect(() => {
     const state = loadLearner()
     if (state.club_welcomed_at) return
-    const answered = (state.legend ?? [])
-      .filter((a) => Object.keys(a.values).length > 0)
-      .map((a) => a.frame_id)
-    if (
-      !clubOpen({
-        answeredFrameIds: answered,
-        answers: state.legend ?? [],
-        purpose: state.purpose ?? null,
-        /* The ceremony waits for the same thing the door does. */
-        proof: state.proof ?? [],
-        rough: state.rough ?? [],
-      })
-    )
-      return
+    if (!clubOpenFor(state)) return
     setWelcome(true)
-    track('club_welcome', { sections: state.sections_completed.length })
+    track('club_welcome', {
+      sections: state.sections_completed.length,
+      legend: (state.proof ?? []).some((p) => p.source === 'legend' && p.clean),
+    })
   }, [])
 
   /*
@@ -157,6 +153,10 @@ export function Club() {
   */
   /*
     AND THE CEREMONY ENDS ON YOURS, not on the feed.
+
+    (Still true after the door moved to set-up: the walk that follows is what shows a new
+    member round the controls, and it lives on Yours. What the welcome now celebrates is
+    arriving in Lisbon, not a finished Legend — see CLUB.welcome.)
 
     Sam, rethinking what the Club is: "I have been focussing too much on the CLUB being a
     TikTok style FYP page — whereas the CLUB is EVERYTHING post legend. So actually the
@@ -216,19 +216,11 @@ export function Club() {
     `mounted` matters: the answer is unknowable before the browser has read localStorage,
     and flashing the door at a member is worse than a moment of nothing.
   */
-  const inside =
-    !mounted ||
-    clubOpen({
-      answeredFrameIds: answeredIds,
-      answers: learner.legend ?? [],
-      welcomedAt: learner.club_welcomed_at,
-      // Measured against THIS learner's seven — see cardFor. Somebody being checked against
-      // another purpose's card would find the door opening early or never.
-      purpose: learner.purpose ?? null,
-      /* Said cold, which is what the door now asks for — see clubOpen. */
-      proof: learner.proof ?? [],
-      rough: learner.rough ?? [],
-    })
+  /*
+    SET-UP OPENS IT, not the Legend — see clubOpen. Welcomed members are in whatever else
+    the record says, which the old version got backwards.
+  */
+  const inside = !mounted || clubOpenFor(learner)
 
   /*
     Three Clubs, one screen. See docs/spec-club-first-run.md §03.
@@ -283,26 +275,27 @@ export function Club() {
   */
   const started = Boolean(learner.set_up_at)
   /*
-    THE WALL IS THE LEGEND, and the teased state is what sits behind it.
+    THE WALL IS A STARTER SET, NOT THE LEGEND.
 
-    "Free until the Legend, then pay" needed no new screen: the three Club states already
-    describe it exactly. Showcase is the sequence — the argument, the demo, the Legend
-    explained. Working is content with the Portuguese withheld: you can read what the
-    moment IS and not what to say, which is precisely a decent lookaround. Member is the
-    whole thing.
+    It was "free until the Legend, then pay". Sam moved the door to set-up and the price
+    with it: a free starter set — five Lisbon rooms a visitor needs on day one, plus the
+    survival kit — and then pay for the rest. FREE_ROOMS in lib/entitlements is that set,
+    in one place, and the feed reads it per card (see Feed's `free`).
 
-    So graduating opens the door and paying walks through it. Somebody who has built their
-    Legend and not subscribed keeps everything they earned and sees the Club teased, which
-    is a far better argument for paying than a locked screen — they are looking at the
-    thing rather than at a price.
+    The three Club states still describe it. Showcase is the sequence — the argument, the
+    demo, set-up. Working is the Club with the rooms outside the starter set teased: you
+    can read what the moment IS and not what to say. Member is the whole thing. So set-up
+    opens the door and paying walks through all of it; somebody who has not subscribed
+    keeps the five rooms in full and sees the rest, which is a far better argument for
+    paying than a locked screen.
 
     WHEN BILLING IS NOT CONFIGURED, EVERYBODY IS IN. Gating on a subscription in an
     environment that cannot sell one would lock every person out of the Club permanently,
     including whoever is testing it — and the product already follows this rule everywhere
     else: nothing is purchasable until it is, and until then nothing is withheld either.
+    hasFullAccess is that rule, written once.
   */
-  const entitled =
-    !access.known || !access.billingReady || access.entitlements.plan === 'pro'
+  const entitled = hasFullAccess(access)
   /*
     THE FRONT DOOR ALWAYS SHOWS THE FRONT DOOR, whatever the record says.
 
@@ -319,8 +312,8 @@ export function Club() {
     COME IN is asking for exactly that, however much of a record survived their reset.
 
     So the door wins over `started`, and only over `started`. Somebody who is genuinely
-    `inside` still gets the Club: they have a Legend, and showing a graduate the tutorial
-    would be worse than the bug being fixed.
+    `inside` still gets the Club: they are set up, and showing a member the tutorial would
+    be worse than the bug being fixed.
   */
   const stage: ClubStage =
     !mounted || (inside && entitled)
@@ -396,11 +389,18 @@ export function Club() {
     sequence. A first-timer sees the intro; a returning learner without a Legend sees the
     explainer, exactly as before.
   */
+  /*
+    NOW THAT SET-UP IS THE DOOR, THIS IS A BACKSTOP. `started` and `inside` both read
+    set_up_at, so somebody who has been through the sequence is inside by definition and a
+    stranger is shown the sequence — which ends at set-up, the thing that lets them in.
+    Kept rather than deleted so that if the door ever asks for more than set-up again, the
+    room still refuses rather than quietly serving the venue.
+  */
   if (!inside && !fromDoor && started) {
     return (
       <NotYet
         what="THE CLUB"
-        line="Your city, in its own language — what is on this week, the rooms you will actually stand in, and the words for being there. It opens when your Legend does."
+        line="Your city, in its own language — what is on this week, the rooms you will actually stand in, and the words for being there. It opens as soon as you have told us where you are going."
       />
     )
   }

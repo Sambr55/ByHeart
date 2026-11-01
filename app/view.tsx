@@ -6,7 +6,7 @@ import { Journey } from '@/components/Journey'
 import { JourneyProvider } from '@/engine/journey'
 import { chosenPair } from '@/engine/pair'
 import { loadLearner, type LearnerState } from '@/engine/learner'
-import { clubOpen } from '@/content/legend'
+import { clubOpenFor } from '@/content/legend'
 
 /**
  * The front door — or the Club, for somebody who has already been through it.
@@ -51,26 +51,15 @@ function returning(s: LearnerState): boolean {
 /**
  * Is this person a member? The SAME question the Club's own door asks.
  *
- * There used to be two answers here and they disagreed. This file said five or more Legend
- * answers; `clubOpen()` — which the Club itself uses — says every applicable card on the
- * card, plus rung 2. So somebody with five or six was sent to the Club by the front door
- * and shown the closed door by the Club, one tap later. The most likely person to hit that
- * was somebody in the middle of building their Legend, which is exactly who this fork is
- * for.
+ * There used to be two answers here and they disagreed — this file counted Legend answers
+ * while the Club asked something stricter — so somebody was sent to the Club by the front
+ * door and shown the closed door by the Club, one tap later. One function now, and it is
+ * the room's, because the room is the thing being opened.
  *
- * One function now, and it is the room's, because the room is the thing being opened.
+ * The room's question is now set-up, not the Legend: see clubOpen in content/legend.ts.
  */
 function isMember(s: LearnerState): boolean {
-  const answers = s.legend ?? []
-  return clubOpen({
-    answeredFrameIds: answers.filter((a) => Object.keys(a.values).length > 0).map((a) => a.frame_id),
-    answers,
-    welcomedAt: s.club_welcomed_at,
-    /* Said cold, which is what the door now asks for — see clubOpen. */
-    proof: s.proof ?? [],
-    rough: s.rough ?? [],
-    purpose: s.purpose ?? null,
-  })
+  return clubOpenFor(s)
 }
 
 export function HomeView() {
@@ -125,15 +114,23 @@ export function HomeView() {
     // even gets read — so it is checked first, exactly as the deal gate does it.
     if (!chosenPair()) return setDecided(true)
     const learner = loadLearner()
-    if (!returning(learner)) return setDecided(true)
+    /*
+      SET-UP IS ENOUGH TO GO STRAIGHT IN. A member is sent on whether or not they have
+      played anything yet — `returning` asks for evidence of a lesson, and the Club is now
+      where the first lesson is found, so asking for one first would hold a newly set-up
+      visitor on the pitch they have just answered.
+    */
+    if (!isMember(learner) && !returning(learner)) return setDecided(true)
     setLeaving(true)
     /*
-      Two homes, and which one you get says where you are in the game.
+      Two homes, and which one you get says where you are.
 
-      Dub Club is the graduation — it opens on the Legend being finished AND said, which is
-      what clubOpen asks. Before that the shelf is home, because the shelf is where the work
-      is: vibes are how you earn the Legend. Sending a mid-game learner to a Club they have
-      not reached would be the same mistake as sending them to the front door.
+      Dub Club — Lisbon is home for anybody who has finished set-up, which is what clubOpen
+      asks now. Sam moved the door off the Legend when DUB became about the city: a visitor
+      lands among the rooms they will actually stand in, and the Legend is an optional card
+      inside. Only somebody with a history and no set-up (a record from before set_up_at
+      existed, or a set-up abandoned half-way) goes to the shelf, which is where their work
+      already is.
     */
     router.replace(isMember(learner) ? '/club' : '/vibes')
   }, [router])

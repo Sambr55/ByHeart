@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { clubOpen } from '@/content/legend'
+import { clubOpenFor } from '@/content/legend'
 import { useLearner } from '@/engine/useLearner'
 import { useNowAfterMount } from '@/engine/useNow'
 
@@ -14,10 +14,10 @@ import { useNowAfterMount } from '@/engine/useNow'
  * device that had been reset four seconds earlier, and the translator opened on any
  * screen, so the bottom bar offered four doors into a building somebody had not entered.
  *
- * The rule is not new and is not invented here: `clubOpen` already is the door, and its
- * terms are the Legend — your seven answered, at rung 2 — or having been welcomed once.
- * Entry to the Club was always predicated on completing your Legend; what was missing was
- * anything outside Club.tsx asking.
+ * The rule is not invented here: `clubOpen` is the door, and its terms are now SET-UP —
+ * `set_up_at` written — or having been welcomed once. It used to be the Legend, said cold;
+ * Sam moved the door when DUB became about the city rather than about introducing
+ * yourself, and the Legend is an optional card inside. See clubOpen in content/legend.ts.
  *
  * `mounted` resolves to OUTSIDE rather than inside, and that is the opposite of the
  * choice Club.tsx makes for itself. Club.tsx is right for Club.tsx: it renders the room
@@ -30,28 +30,11 @@ export function useClub(): { open: boolean; mounted: boolean } {
   const learner = useLearner()
   const mounted = useNowAfterMount() !== null
 
-  const answeredIds = useMemo(
-    () =>
-      (learner.legend ?? [])
-        .filter((a) => Object.keys(a.values).length > 0)
-        .map((a) => a.frame_id),
-    [learner.legend],
-  )
-
+  const setUpAt = learner.set_up_at
+  const welcomedAt = learner.club_welcomed_at
   const open = useMemo(
-    () =>
-      mounted &&
-      clubOpen({
-        answeredFrameIds: answeredIds,
-        answers: learner.legend ?? [],
-        welcomedAt: learner.club_welcomed_at,
-        /* Measured against THIS learner's seven — see cardFor. */
-        purpose: learner.purpose ?? null,
-        /* Said cold, which is what the door now asks for — see clubOpen. */
-        proof: learner.proof ?? [],
-        rough: learner.rough ?? [],
-      }),
-    [mounted, answeredIds, learner.legend, learner.club_welcomed_at, learner.purpose, learner.proof],
+    () => mounted && clubOpenFor({ set_up_at: setUpAt, club_welcomed_at: welcomedAt }),
+    [mounted, setUpAt, welcomedAt],
   )
 
   return { open, mounted }
