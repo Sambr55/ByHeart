@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { LEGEND_FRAMES, cardFor, clubOpen, doorwayRoots } from '@/content/legend'
+import { LEGEND_FRAMES, cardFor, clubOpenFor, doorwayRoots } from '@/content/legend'
 import { roadProgress } from '@/content/road'
 import { PIECES } from '@/content/roots'
 import { Wordmark } from '@/components/Wordmark'
@@ -170,17 +170,15 @@ export function Reset() {
     setOutstanding(
       card.filter((f) => !held.some((a) => a.frame_id === f.id)).map((f) => f.id),
     )
-    /* Counted the way clubOpen counts it, so this screen cannot disagree with the door. */
+    /*
+      The door asked exactly as the Club asks it — set-up, or welcomed — so this screen
+      cannot disagree with it. The Legend counts beside it are now just that: how much of the
+      optional card has been said, not what stands between anybody and the Club.
+    */
     const proof = s.proof ?? []
     const legendProof = proof.filter((pr) => pr.source === 'legend' && pr.clean)
     setClub({
-      open: clubOpen({
-        answeredFrameIds: held.map((a) => a.frame_id),
-        purpose: s.purpose ?? null,
-        answers: held.map((a) => ({ frame_id: a.frame_id, values: a.values })),
-        welcomedAt: s.club_welcomed_at,
-        proof,
-      }),
+      open: clubOpenFor(s),
       said: legendProof.length,
       needed: card.length,
       other: proof.length - legendProof.length,

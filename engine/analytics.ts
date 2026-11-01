@@ -177,6 +177,8 @@ export type EventName =
   | 'legend_rehearse'
   /* The run finished, and whether it put somebody through the Club's front door. */
   | 'legend_run_finished'
+  /* The optional road, taken from the offer on the shelf — it is no longer entered for you. */
+  | 'legend_road_started'
   | 'legend_run_again'
   | 'legend_cold_open'
   | 'legend_unlocked'

@@ -5,7 +5,7 @@ import { bandFor, missedWords, type Heard } from '@/engine/listen'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '@/content/roots'
-import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, askFor, frameReady, nameFor, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, metIn, clubOpen,
+import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, askFor, frameReady, nameFor, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, metIn, clubOpenFor,
   provenanceOf, knownValues, readableFrame, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
 import { PICKER } from '@/content/front-door'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
@@ -162,14 +162,28 @@ export function Legend() {
     finished, one said "your Legend is open, fill them in" and this one, a tap later,
     showed ten dashed cards. Both correct, different questions.
   */
+  /*
+    AND A MEMBER OF THE CLUB MAY BUILD IT WITHOUT WALKING THE ROAD.
+
+    The Legend is an optional "introduce yourself" card offered inside the Club now, and the
+    road is an optional path rather than the way in. Requiring the whole road before a single
+    card could be built would make the offer inside the Club a locked door of its own — so
+    being in the Club (set-up done, see clubOpen) unlocks building too. legendStatus still
+    unlocks it for anybody who walked the road before set-up, which is the old route in.
+
+    Safe to open early: each card is a short lesson built round the learner's own answer and
+    teaches the words it needs — the note above says so — so nothing about building depends
+    on having walked the road first.
+  */
   const unlocked =
     mounted &&
-    legendStatus({
-      rootsPlayed: played,
-      sectionsCompleted: sections,
-      sittings: learner.sittings ?? 0,
-      purpose: learner.purpose ?? null,
-    }).open
+    (clubOpenFor(learner) ||
+      legendStatus({
+        rootsPlayed: played,
+        sectionsCompleted: sections,
+        sittings: learner.sittings ?? 0,
+        purpose: learner.purpose ?? null,
+      }).open)
   const toGo = doorwayToGo(played, learner.purpose ?? null)
   /*
     THE DOORWAY'S OWN LENGTH, not the whole vibe's.
@@ -203,8 +217,8 @@ export function Legend() {
     this screen only knew the first. So it announced the Club on a finished card while the
     door was still waiting, and Sam tapped GO IN and was turned away.
 
-    Counted the same way clubOpen counts it — proof rows with source 'legend' and clean —
-    so the screen and the door cannot disagree about what is left.
+    Proof rows with source 'legend' and clean. (This used to be the count the door read; the
+    Club opens on set-up now, so it is only how much of the optional card has been said.)
   */
   const saidCold = (learner.proof ?? []).filter(
     (p) => p.source === 'legend' && p.clean,
@@ -1795,22 +1809,14 @@ function RunThrough({
     */
     const rough = mine.rough ?? []
     /*
-      IS THE DOOR OPEN NOW? Asked here with the same arguments the Club itself uses, because
-      a second way of deciding it is how the screen came to disagree with the door before —
-      see the note on LEGEND_COPY.run_done_club.
+      IS THE DOOR OPEN NOW? Asked exactly as the Club itself asks it, because a second way
+      of deciding it is how the screen came to disagree with the door before.
 
-      It can legitimately be false: somebody who left two sentences for later has not said
-      the whole card, so they get run_done_more rather than a button that turns them away.
+      The run no longer opens anything — the door is set-up, and the Legend is an optional
+      card inside — so this only chooses between "back into the Club" for a member and
+      "finish setting up" for the rare person who reached the Legend before set-up.
     */
-    const inNow = clubOpen({
-      answeredFrameIds: mine.legend.map((a) => a.frame_id),
-      purpose: mine.purpose ?? null,
-      answers: mine.legend.map((a) => ({ frame_id: a.frame_id, values: a.values })),
-      welcomedAt: mine.club_welcomed_at,
-      proof: mine.proof,
-      /* And the ones they tried five times — see clubOpen. */
-      rough: mine.rough ?? [],
-    })
+    const inNow = clubOpenFor(mine)
     return (
       <div className="flex flex-1 flex-col justify-center gap-4">
         <p className="eyebrow text-accent">{LEGEND_COPY.run_done_eyebrow}</p>
@@ -1840,15 +1846,16 @@ function RunThrough({
         ) : null}
         <Dock>
           {/*
-            THE FRONT DOOR, which is what finishing earns. `?in=1` is what makes it the
-            ceremony rather than the feed — see components/Club.tsx, where the welcome is
-            gated on it.
+            BACK INTO THE CLUB, which is where the Legend is offered from now. It was the
+            front door (`?in=1`) because finishing the run was what opened the Club; it is
+            set-up that opens it now, so this is simply the way back. The event no longer
+            says `into_club`, which would claim the run had let them in.
           */}
           {inNow ? (
             <Link
-              href="/club?in=1"
+              href="/club"
               data-testid="run-done-in"
-              onClick={() => track('legend_run_finished', { into_club: true })}
+              onClick={() => track('legend_run_finished', { back_to_club: true })}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
             >
               {LEGEND_COPY.run_done_club_cta}
@@ -2084,8 +2091,8 @@ function RunThrough({
     more to do, run it again.
 
     So the arrow flags instead of blocking. A sentence moved past unsaid goes onto the same
-    `rough` list the five-fail notice writes to, which the door now counts (see clubOpen)
-    and Revise already offers back. The learner is not told off and not stopped; the
+    `rough` list the five-fail notice writes to, which Revise already offers back. (The
+    door used to count it; the door is set-up now and reads neither — see clubOpen.) The learner is not told off and not stopped; the
     product simply remembers which ones have not been said aloud yet.
 
     SILENTLY, which is Sam's word and the right behaviour. Nothing appears, nothing is

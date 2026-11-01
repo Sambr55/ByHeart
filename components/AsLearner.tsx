@@ -27,14 +27,12 @@ import { cardFor, fillEnglish, fillFrame } from '@/content/legend'
  *
  *   new        nothing has happened. The nine intro cards, which is what a first-timer
  *              meets on the CLUB tab.
- *   returning  set-up finished, no Legend. The explainer, because the door is shut and
- *              the argument has already been made. This is where most learners spend
- *              most of their time.
- *   member     the seven answered and never welcomed, which is the ONE state that shows
- *              the Club's own welcome — the ceremony, YOU ARE IN. Sam: "club-new took me
- *              to the main intro not the CLUB intro." It is gated on clubOpen and on
- *              club_welcomed_at being unset, so reaching it by hand means building an
- *              entire Legend first and then never opening the Club again.
+ *   returning  set-up finished, no Legend. Since the door moved to set-up (see clubOpen)
+ *              this is a member too: the first visit shows the welcome, and after that
+ *              the Club. The Legend is optional and this proves it.
+ *   member     set-up AND the seven answered and said, never welcomed — the old member,
+ *              kept so a full Legend can still be looked at inside the Club. Shows the
+ *              welcome, YOU ARE IN, on the first visit.
  *
  * It RESETS rather than patching, so what renders is the real thing rather than a record
  * that happens to look like one. That also makes /club-new destructive by design, which

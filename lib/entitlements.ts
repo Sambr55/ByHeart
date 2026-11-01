@@ -87,16 +87,93 @@ export const FREE_ENTITLEMENTS: Entitlements = {
     door, and the two constants are deliberately separate now rather than one wearing two
     names.
 
-    What the free tier IS, said out loud: the whole path to the Legend, plus four more
-    vibes chosen for the pleasure of them. You build the one thing DUB is actually for
-    before being asked for anything; what money buys is the Club afterwards. Full value
-    exchange, and the value is delivered before the ask rather than promised.
+    What the free tier IS, said out loud: the Club itself, the starter set of five Lisbon
+    rooms and the survival kit (FREE_ROOMS, below), and this many vibes chosen for the
+    pleasure of them. The Legend is free too and optional — it is no longer the door, so it
+    is no longer the thing the free tier is measured against. What money buys is the rest
+    of the city's rooms. The value is delivered before the ask rather than promised.
   */
   crates: FREE_CRATES,
   drops: UNLIMITED,
   booth: false,
   share: true,
   morningLine: true,
+}
+
+/**
+ * THE FREE STARTER SET — the one place it is written down.
+ *
+ * Sam, moving the door off the Legend: a free starter set, then pay for the rest. It was
+ * "free until the Legend, then pay", which asked a visitor to introduce themselves before
+ * they had been shown a single thing they would actually say in Lisbon.
+ *
+ * FIVE ROOMS, chosen for a first-day visitor rather than for breadth — the order is the
+ * order the day happens in:
+ *
+ *   lisbon_taxi       Getting in a taxi. The airport is the first conversation most
+ *                     visitors have, and it is the one where a wrong address costs money.
+ *   lisbon_cafe       A coffee, standing up. The counter is where you will speak most
+ *                     often, and um café is the single most-used sentence in the city.
+ *   lisbon_perdido    Asking the way, and surviving the answer. Lisbon is hills and dead
+ *                     ends, and the answer comes back fast — the room teaches the reply.
+ *   lisbon_electrico  Getting on the 28. Every visitor rides it, usually on day one, and
+ *                     buying on board is where the queue behind you is listening.
+ *   lisbon_conta      The bill, and the couvert. Every meal ends here, and the couvert is
+ *                     the one surprise on a Portuguese bill a visitor actually asks about.
+ *
+ * Tickets (lisbon_bilhetes) was the close sixth: monuments sell online in English, and the
+ * taxi is a conversation you cannot avoid. Everything else is behind the paywall, and is
+ * shown teased rather than hidden — see the Club's `working` stage.
+ *
+ * AND THE SURVIVAL KIT, which is free and needs no list here because nothing gates it:
+ * REPAIR_KIT (content/legend.ts), numbers, greetings and the cheat sheets are all feed
+ * cards of kinds other than 'situation', and the feed only ever withholds situations. If
+ * that ever changes, FREE_KIT below is the list of what must stay free.
+ *
+ * Ids, not titles, so a rename never quietly moves a room across the line. Asserted to
+ * exist by scripts/club-door.mts.
+ */
+export const FREE_ROOMS: readonly string[] = [
+  'lisbon_taxi',
+  'lisbon_cafe',
+  'lisbon_perdido',
+  'lisbon_electrico',
+  'lisbon_conta',
+] as const
+
+/** Whether a room (a Situation id) is in the free starter set. */
+export function isFreeRoom(id: string): boolean {
+  return FREE_ROOMS.includes(id)
+}
+
+/** The survival kit, named so the promise is written down — see the note on FREE_ROOMS. */
+export const FREE_KIT = ['repair', 'numbers', 'greetings', 'cheat-sheets'] as const
+
+/**
+ * Whether this learner has everything — the paid side of the starter-set line.
+ *
+ * TRUE WHEN BILLING IS NOT CONFIGURED, because nothing is withheld until something is
+ * purchasable, and TRUE BEFORE THE SERVER HAS ANSWERED, because a gate that fires early
+ * locks a paying subscriber out of their own rooms for the first second of every load.
+ * Both rules were already the Club's (it wrote this expression inline); they are here so
+ * the new home screen and the feed ask one function instead of copying three clauses.
+ *
+ * Takes the shape useEntitlements returns, so a client caller passes `access` straight in.
+ */
+export function hasFullAccess(access: {
+  known: boolean
+  billingReady: boolean
+  entitlements: { plan: Plan }
+}): boolean {
+  return !access.known || !access.billingReady || access.entitlements.plan === 'pro'
+}
+
+/** May this learner open this room? Free rooms always; the rest with full access. */
+export function canOpenRoom(
+  id: string,
+  access: Parameters<typeof hasFullAccess>[0],
+): boolean {
+  return isFreeRoom(id) || hasFullAccess(access)
 }
 
 export const PRO_ENTITLEMENTS: Entitlements = {
@@ -170,10 +247,18 @@ export const PLANS = {
       constant outlived it by weeks, and the door now asks for one warm-up. Five is still
       five here, and it is the only three-or-five left in the product.
     */
+    /*
+      AND THE STARTER SET LEADS, because it is what the free tier is now. "Your Legend"
+      led this line while the Legend was the door; it is an optional card now, and the
+      thing a visitor gets for nothing is five rooms of the city they are standing in.
+    */
     line:
-      'Your Legend, ' + (WORDS[FREE_CRATES] ?? String(FREE_CRATES)) +
-      ' vibes, a line every morning, and everything you make is yours to share.',
+      'Five Lisbon rooms for your first day, the survival kit, ' +
+      (WORDS[FREE_CRATES] ?? String(FREE_CRATES)) +
+      ' vibes, and a line every morning.',
     includes: [
+      'Five Lisbon rooms for day one — a taxi, the café counter, asking the way, the 28, the bill',
+      'The survival kit: the lines that rescue a conversation, numbers, greetings and the cheat sheets',
       (WORDS[FREE_CRATES] ?? String(FREE_CRATES)).replace(/^./, (c) => c.toUpperCase()) +
         ' vibes, chosen by you and yours for good',
       'The morning line, every day',
@@ -185,10 +270,10 @@ export const PLANS = {
     id: 'pro' as const,
     name: 'DUB Pro',
     price: null, // filled from Stripe at render time
-    line: 'Every vibe, your whole Legend, and the voices to go with them.',
+    line: 'Every room in the city, every vibe, and the voices to go with them.',
     includes: [
+      'Every room in Lisbon — the market, the fado house, the train to Sintra and the rest',
       'Every vibe, no limit — and every vibe DUB writes from now on',
-      'Your Legend all the way to ten, and the Club where it keeps growing',
       'Real Lisbon voices, recorded properly — including your own Legend, read back',
       'The morning line and every live drop, same as free',
       'Share anything you can say',

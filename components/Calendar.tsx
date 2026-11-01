@@ -111,8 +111,8 @@ export function Calendar() {
 
     It rendered in full to a device that had been reset four seconds earlier: a month of
     events in a chapter nobody had chosen, under a header naming a city nobody had named.
-    The door is the Legend, asked through useClub so this screen and the Club cannot
-    disagree about who is inside.
+    The door is set-up (it was the Legend — see clubOpen), asked through useClub so this
+    screen and the Club cannot disagree about who is inside.
   */
   if (!club.open) {
     return (

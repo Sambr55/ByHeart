@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useMemo } from 'react'
 import { CLUB } from '@/content/club'
 import { dropsFor, roomsFor } from '@/content/feed'
-import { cardFor, frameApplies, legendStatus } from '@/content/legend'
+import { FREE_ROOMS } from '@/lib/entitlements'
 import { useLearner } from '@/engine/useLearner'
 
 /**
@@ -17,14 +17,17 @@ import { useLearner } from '@/engine/useLearner'
  * bar offered four doors into a building the person had not entered, and three of them
  * gave away the thing the door is for.
  *
- * The door is the Legend, which it always was: `clubOpen` in content/legend.ts, asked
- * through useClub so all four tabs ask it once and in one place.
+ * The door is SET-UP — `clubOpen` in content/legend.ts, asked through useClub so all four
+ * tabs ask it once and in one place. It was the Legend, said cold, and this screen spent
+ * most of its length counting sittings of the basics and sentences left to say. Sam moved
+ * the door when DUB became about the city: the Club opens the moment somebody has said
+ * where they are going, and the Legend is an optional card inside. So the only thing this
+ * screen now has to say is "you have not set up yet", and the way on is set-up.
  *
- * TWO WAYS OUT, AND THEY GO TO THE SAME PLACE. Back, for somebody who tapped by mistake
- * and wants the screen they were on; and the way on, for somebody who has just been told
- * what this is and wants to start. Both land on the vibes, because the vibes are the only
- * thing to do before the Legend exists — a screen that explains a locked door and then
- * offers nothing is the dead end `forward-check` exists to catch.
+ * TWO WAYS OUT. Back, for somebody who tapped by mistake and wants the screen they were
+ * on; and the way on, which is the front door's sequence (`/club?in=1`) — it ends at the
+ * set-up card, which is the thing that opens this. A screen that explains a locked door
+ * and then offers nothing is the dead end `forward-check` exists to catch.
  */
 export function NotYet({
   what,
@@ -37,35 +40,6 @@ export function NotYet({
 }) {
   const router = useRouter()
   const learner = useLearner()
-  const played = learner.roots_played ?? []
-  const sections = learner.sections_completed ?? []
-  const status = legendStatus({
-    rootsPlayed: played,
-    sectionsCompleted: sections,
-    sittings: learner.sittings ?? 0,
-    purpose: learner.purpose ?? null,
-  })
-  const open = status.open
-  const left = Math.max(0, status.sessionsNeeded - status.sessionsDone)
-  const vibesLeft = Math.max(0, status.vibesNeeded - status.vibesDone)
-
-  /*
-    AND HOW MUCH OF THE LEGEND HAS ACTUALLY BEEN SAID.
-
-    Sam: "this is about completing and rehearsing the legend, which has now become a soft
-    option, not a gate." The road answers all seven as a learner walks it, so the card is
-    written before they get here — and this screen said "It is open now, build it" to
-    somebody whose card was already built and never spoken.
-
-    What is outstanding is the rehearsal, so that is what the screen names. Counted from
-    the same proof record the door reads, so the sentence here and the lock cannot
-    disagree about what is left.
-  */
-  const saidCold = (learner.proof ?? []).filter((p) => p.source === 'legend' && p.clean).length
-  const cardSize = cardFor(learner.purpose ?? null).filter((f) =>
-    frameApplies(f, learner.legend ?? []),
-  ).length
-  const toSay = Math.max(0, cardSize - saidCold)
 
   /*
     The three things the Club actually holds, counted from the content it would serve.
@@ -85,7 +59,8 @@ export function NotYet({
     const out = [
       rooms + ' rooms of your city — the errands, the counters, the awkward ones',
       'What is on this week, and the words for being there',
-      'Your Legend, said cold, to people doing the same thing',
+      /* The starter set, counted from the one list rather than typed. */
+      FREE_ROOMS.length + ' of them free from the first day, with the survival kit',
     ]
     if (drops > 0) out[1] = drops + ' things on in Lisbon right now, and what to say there'
     return out
@@ -111,60 +86,18 @@ export function NotYet({
       */}
       <div className="flex flex-col gap-6 rounded-2xl border border-line bg-bg-elev px-5 py-6">
       <p className="eyebrow text-accent">{what}</p>
-      <h1 className="display text-balance text-3xl">Not yet — this opens with your Legend.</h1>
+      <h1 className="display text-balance text-3xl">Not yet — this opens once you are set up.</h1>
       <p className="text-sm leading-relaxed text-muted">{line}</p>
       <p className="text-sm leading-relaxed text-muted">
         {/*
-          BOTH HALVES OF THE DOOR, named, in the order they are met.
-
-          The door is the basics plus three vibes you chose, and this said only the first
-          half — so somebody who had finished the basics was told "it opens now" by
-          arithmetic that no longer decided anything, and somebody three vibes deep was
-          told to play more of a vibe they had finished. Sam, having done exactly
-          that: "I have just done multiple vibes but the legend isn't opening."
-
-          One sentence per half, and only the half they are actually on: naming the vibes
-          while the basics are unfinished is a second instruction nobody can act on yet.
-
-          Counted in SITTINGS, which is the thing a learner chooses to start. This screen
-          was the last one still counting roots, which is why it could say "5 more lines
-          of the basics" to somebody who had just finished everything they were shown.
+          ONE STEP, NAMED. This was two paragraphs of arithmetic — sittings of the basics, a
+          warm-up vibe, Legend sentences left to say — because the door was the Legend and
+          the Legend was a long way off. The door is set-up now: where you are going and why,
+          which takes a minute. So that is all this says, and the Legend is not mentioned,
+          because it no longer stands between anybody and anything.
         */}
-        Your Legend is seven things about yourself, said with nothing on screen.{' '}
-        {open
-          ? toSay === 0
-            ? 'It is open now — the Club is yours.'
-            : /*
-                THE CARD IS WRITTEN; SAYING IT IS THE DOOR.
-
-                "Build it" was right when the deck was where the Legend got filled in. The
-                lessons fill it now, so by the time somebody reads this the card is
-                complete and untouched — and the thing between them and the Club is having
-                said it out loud with nothing on screen.
-              */
-              toSay === 1
-              ? 'Your Legend is written. Say the last one out loud and the Club is yours.'
-              : 'Your Legend is written. Say all ' +
-                toSay +
-                ' out loud, with nothing on screen, and the Club is yours.'
-          : left > 0
-            ? /*
-                THE BASICS, AND THE WARM-UP ONLY IF IT IS STILL OWED.
-
-                This said "then N vibes of your own" against a toll of three that had
-                already been removed, so the locked door asked for two things the product
-                was not going to check. And a learner who had warmed up was still told to
-                do it: the clause was unconditional.
-
-                Named rather than counted, for the reason legend_vibes is: the warm-up is
-                Top Gun or Bridget Jones, not any vibe off the shelf, and "one vibe of
-                your own" sends somebody to pick the wrong thing.
-              */
-              (left === 1
-                ? 'One more sitting of the basics'
-                : left + ' more sittings of the basics') +
-              (vibesLeft > 0 ? ', and a warm-up vibe.' : '.')
-            : 'The basics are done. Take a warm-up vibe and it opens.'}
+        Tell us where you are going and why — it takes a minute — and the Club opens on the
+        rooms you will need first.
       </p>
       </div>
 
@@ -210,20 +143,18 @@ export function NotYet({
 
       <div className="mt-3 flex flex-col gap-3">
         {/*
-          THE BUTTON GOES WHERE THE WORK IS.
+          THE BUTTON GOES TO SET-UP, which is what opens the door.
 
-          It always sent people to the shelf, which is right while there are still basics
-          to play and wrong the moment the card is written and unspoken: the shelf has no
-          Legend on it. ?run=1 is the run-through the deck's own button starts — see
-          components/Legend.tsx — so the one thing standing between them and the Club is
-          one tap away rather than somewhere they have to go and find.
+          It went to the shelf, or to the Legend run-through (`/legend?run=1`) once the card
+          was written — both were the work the old door asked for. `/club?in=1` is the front
+          door's sequence and it ends at the set-up card, so one tap here is the whole way in.
         */}
         <Link
-          href={open && toSay > 0 ? '/legend?run=1' : '/vibes'}
+          href="/club?in=1"
           data-testid="notyet-go"
           className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >
-          {open && toSay > 0 ? 'SAY IT OUT LOUD' : 'GET GOING'}
+          SET ME UP
         </Link>
         {/*
           Back, and it is a real back — router.back() returns the screen they came from

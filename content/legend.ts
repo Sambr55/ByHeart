@@ -2122,103 +2122,50 @@ export function cardToGo(
 }
 
 /**
- * The door.
+ * The door. SET-UP, NOT THE LEGEND.
  *
- * `welcomedAt` grandfathers anybody already inside. The rule was attendance before this
- * and some people are in on it; taking membership back off an early member costs more
- * than it can ever earn, and it is the same rule the entitlements take — never remove
- * access somebody already has.
+ * Sam, pivoting DUB to the city: the Legend "must stop being the gateway to the Club". It
+ * was seven questions about yourself, said cold, asked of somebody who had come for
+ * Lisbon — and the road in front of it was ten steps long. A visitor with four days does
+ * not want to introduce themselves first; they want the café counter and the 28.
+ *
+ * So the Club opens when set-up is finished: `set_up_at`, which markSetUpComplete and
+ * SetUp's own finish() write and nothing else does (see engine/learner.ts on why it has a
+ * field of its own). That is the moment somebody has told us who they are and where they
+ * are going, which is everything the Club needs to be about them. The Legend is now an
+ * optional "introduce yourself" card offered INSIDE the Club, and nothing anywhere
+ * requires it to be built or said.
+ *
+ * WELCOMED MEMBERS ARE ALWAYS IN, AND THAT IS CHECKED FIRST. The old version counted
+ * Legend proof before reading `welcomedAt`, so a member welcomed under one rule was shut
+ * out again when the rule moved — exactly what "never remove access somebody already
+ * has" forbids, and the same rule the entitlements take.
+ *
+ * THE ARGUMENTS ARE THE TWO FACTS AND NOTHING ELSE, deliberately. The old signature took
+ * the card, the answers, the proof and the rough lines; leaving them accepted-and-ignored
+ * would let a caller believe it was still asking about the Legend. Removing them made the
+ * compiler name every caller, and each now passes the record's own two fields.
+ *
+ * What this does NOT decide is what a member may open for free. That is lib/entitlements
+ * — FREE_ROOMS and hasFullAccess — because being in the Club and having paid for all of
+ * it are different questions, and the old door conflated them ("free until the Legend").
  */
 export function clubOpen(opts: {
-  answeredFrameIds: string[]
-  /**
-   * Which seven this learner's card is.
-   *
-   * Absent means the universal set, which is right for every caller that asks the question
-   * before a purpose exists — and wrong to leave absent in the Club and the Legend, where
-   * the learner has one and being measured against somebody else's card would either open
-   * the door early or refuse to open it at all.
-   */
-  purpose?: Purpose | null
-  /** The answers themselves, because a card can be conditional on another card's. */
-  answers?: { frame_id: string; values: Record<string, string> }[]
+  /** `set_up_at` — set-up finished. */
+  setUpAt?: string | null
+  /** `club_welcomed_at` — welcomed once, under any rule, ever. */
   welcomedAt?: string | null
-  /*
-    WHAT THEY HAVE SAID WITH NOTHING ON SCREEN.
-
-    The card being written is not the same as being able to say it, and until now the door
-    could not tell the difference — see the note below.
-  */
-  proof?: { pt: string; source: string; clean: boolean }[]
-  /*
-    THE ONES THEY TRIED AND COULD NOT LAND, which count — see below.
-
-    Optional like `proof`, and for the same reason: a caller that cannot supply it gets the
-    old answer rather than a door that slams on an omitted argument.
-  */
-  rough?: { pt: string }[]
 }): boolean {
-  /*
-    THE LEGEND HAS TO BE SAID, NOT JUST ANSWERED.
-
-    Sam: "this is about completing and rehearsing the legend, which has now become a soft
-    option, not a gate."
-
-    He is right, and the measurement is stark. The road answers all seven card questions
-    as a learner walks it — by design, and his own instruction — so `cardDone` was true the
-    moment the basics finished. A learner arrived at the Club having said ELEVEN sentences
-    cold and not one of them their own Legend: they had a written card they had never used.
-
-    The rehearsal existed the whole time and nothing required it. So the door now asks for
-    the thing the Legend is FOR: seven sentences about yourself, produced with nothing on
-    screen to copy from. Answering in a lesson builds the card; saying it is what opens the
-    Club.
-
-    Counted from `proof` with source 'legend' and clean, which is the same record the proof
-    card and SAID COLD already read — one number, three screens, no second definition of
-    what counts.
-
-    A LEARNER WITH NO PROOF SUPPLIED KEEPS THE OLD ANSWER. Not every caller has the record
-    to hand, and a door that slams shut because an argument was omitted would be worse than
-    the hole it replaces. The callers that decide entry pass it; see components/Club.tsx.
-  */
-  /*
-    AND A SENTENCE GENUINELY ATTEMPTED COUNTS, OR THE DOOR CANNOT BE OPENED AT ALL.
-
-    Sam: "When the legend opens there is no way out. You can run it through but it loops
-    and never opens the club."
-
-    Exactly what it did. The only way to produce a proof row with source 'legend' is for
-    browser speech recognition to match the sentence — so on a device where the microphone
-    is refused, unavailable, or simply cannot make out one of seven sentences, `said` never
-    reaches `needed` and the Club is shut permanently. The run-through completes, says
-    "more to do", and offers another run-through. Forever.
-
-    That is also the exact instruction this contradicts. Sam, on the five-fail notice:
-    "after 5 goes they need to be given a we'll try again later message, but not block the
-    legend opening." The notice was built, it marks the line rough, and then the door went
-    on refusing anyway — the message said one thing and the gate did another.
-
-    So a line flagged rough after ENOUGH_GOES counts toward the door. It is not a free
-    pass: the learner attempted that sentence five times with nothing on screen, which is
-    more effort than the one that matched first go, and the line stays flagged for revision
-    so the product has not forgotten it. What it stops being is a wall built out of the
-    browser's speech recognition, which is approximate on a good phone and absent on some.
-
-    Said and attempted are counted together rather than separately, because the question
-    the door asks is "has every sentence on this card had its go" — and both answers are
-    yes.
-  */
-  const needed = cardFor(opts.purpose ?? null).filter((f) =>
-    frameApplies(f, opts.answers ?? []),
-  ).length
-  const said = (opts.proof ?? []).filter((p) => p.source === 'legend' && p.clean).length
-  const tried = (opts.rough ?? []).filter(
-    (r) => !(opts.proof ?? []).some((p) => p.source === 'legend' && p.clean && p.pt === r.pt),
-  ).length
-  if (opts.proof && said + tried < needed) return false
   if (opts.welcomedAt) return true
-  return cardDone(opts.answeredFrameIds, opts.answers ?? [], opts.purpose ?? null)
+  return Boolean(opts.setUpAt)
+}
+
+/** The same question asked of a learner record, so callers cannot mis-map the fields. */
+export function clubOpenFor(s: {
+  set_up_at?: string | null
+  club_welcomed_at?: string | null
+}): boolean {
+  return clubOpen({ setUpAt: s.set_up_at ?? null, welcomedAt: s.club_welcomed_at ?? null })
 }
 
 /**
@@ -3371,16 +3318,21 @@ export const LEGEND_COPY = {
   */
   card_done_eyebrow: 'THAT IS YOUR CARD',
   card_done_head: 'You can introduce yourself in Portuguese.',
+  /*
+    AND IT IS NO LONGER THE MEMBERSHIP TEST. The Club opens on set-up (see clubOpen), so
+    these three stopped promising the Club for saying the card — that promise would now be
+    a lie in the other direction, offering something the learner already has.
+  */
   card_done_body:
-    'Now say it with nothing on screen. All seven, out loud — that is the membership test, and it is the thing most people never get to. Run it through and the Club opens.',
+    'Now say it with nothing on screen. All seven, out loud — the thing most people never get to. Run it through when you are ready.',
   /* Part-way through the run. Says what is left rather than starting the count again. */
   card_part_said: (left: number) =>
     left === 1
-      ? 'One more, said out loud with nothing on screen, and the Club opens.'
-      : left + ' more, said out loud with nothing on screen, and the Club opens.',
-  /* Said. The door is open and the screen should stop asking for anything. */
+      ? 'One more, said out loud with nothing on screen, and the whole card is yours.'
+      : left + ' more, said out loud with nothing on screen, and the whole card is yours.',
+  /* Said. The screen should stop asking for anything. */
   card_said_body:
-    'You have said all of it out loud, with nothing on screen. Dub Club — Lisbon is open.',
+    'You have said all of it out loud, with nothing on screen. You can introduce yourself in Lisbon.',
   offer_later: 'Not now',
   repair_head: 'The four that keep a conversation going',
   repair_body:
@@ -3570,9 +3522,13 @@ export const LEGEND_COPY = {
   */
   run_done_eyebrow: 'YOU SAID IT',
   run_done_head: 'Your whole Legend, out loud, with nothing on the screen.',
-  /** What it earns, stated once. The ceremony at /club?in=1 does the rest. */
-  run_done_club: 'That is the membership test. Dub Club is open.',
-  run_done_club_cta: 'GO IN',
+  /*
+    What it earns, stated once. It said "That is the membership test. Dub Club is open."
+    The Club opens on set-up now and the Legend is optional, so the run earns the thing it
+    always actually earned: introducing yourself without a script. The button goes back in.
+  */
+  run_done_club: 'You can introduce yourself without a script. Take it into the city.',
+  run_done_club_cta: 'BACK TO THE CLUB',
   /*
     AND GOING ROUND AGAIN IS AN OPTION RATHER THAN THE DESTINATION — Sam's own
     parenthesis, "(which should be an option)". Quiet, under the door, because somebody who
@@ -3580,8 +3536,8 @@ export const LEGEND_COPY = {
   */
   run_done_again: 'RUN IT AGAIN',
   run_done_board: 'BACK TO YOUR LEGEND',
-  /** For anybody who finishes with the door still shut — see clubOpen on why it can be. */
-  run_done_more: 'Say the ones you left for later and the Club opens.',
+  /** For the rare person who reaches the Legend before set-up — the door is set-up now. */
+  run_done_more: 'Tell us where you are going and the Club opens — your Legend comes with you.',
   run_again_later: 'COME BACK TO',
   run_again_later_note: 'Sentences the microphone and you could not agree on. Nothing is blocked by them.',
   /*
@@ -3589,6 +3545,20 @@ export const LEGEND_COPY = {
     again the moment a frame is added — which is the point of the parts. A count that has
     to be maintained by hand is a count that will lie.
   */
+  /*
+    THE ROAD, OFFERED ON THE SHELF. It took the shelf over — a full-screen jump-off, then
+    each step entered automatically — while it was the way into the Club. It is optional
+    now (the Club opens on set-up), so it is a card among the vibes, and the promise it
+    makes is the Legend's own: introducing yourself, not a seat it no longer buys.
+  */
+  road_offer_eyebrow: 'OPTIONAL',
+  road_offer_head: 'Build your Legend.',
+  road_offer_body: (n: number, started: boolean) =>
+    (started ? 'Carry on where you left off. ' : '') +
+    n +
+    ' short vibes, each one a line about you — your name, where you are from, what you do — until you can introduce yourself in Portuguese without a script. Take it whenever you like; nothing else waits for it.',
+  road_offer_cta: 'START MY LEGEND',
+  road_offer_resume: 'CARRY ON',
   locked_head: 'The questions a stranger will ask you.',
   locked_body:
     'They are not a form — each one is a short lesson built round your own answer, and you keep what it teaches. The vibes are where you get the language to build them.',

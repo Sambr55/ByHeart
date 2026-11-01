@@ -1805,11 +1805,16 @@ export function hydrateFromUrl(): boolean {
  *
  * Sam: "I need a way of testing club without having to reset and redo the legend."
  *
- * The Club opens on `club_welcomed_at` alone — see clubOpen, where it is the first line
- * and returns true unconditionally. Everything else this writes is there so the Club is
- * worth LOOKING at once it opens: a feed with no inventory, no proof and no answered
- * Legend renders every card in its empty state, which tests almost nothing and reads as
- * broken rather than as new.
+ * The Club opens on set-up, or on `club_welcomed_at` — see clubOpen, where the welcome is
+ * now genuinely the first line. It was not, for a while: the Legend proof check ran before
+ * it, so this tool wrote the stamp, said "The door is open", and the door read one proof
+ * row, wanted seven Legend ones, and stayed shut. Both are written here now, so the
+ * banner is true whichever of them the door is asked about, and the Club's set-up card
+ * does not come back asking for a language on a device that claims to be through it.
+ *
+ * Everything else this writes is there so the Club is worth LOOKING at once it opens: a
+ * feed with no inventory, no proof and no answered Legend renders every card in its empty
+ * state, which tests almost nothing and reads as broken rather than as new.
  *
  * WHAT IT FAKES AND WHAT IT DOES NOT. It writes the shape of somebody who has been
  * through the doorway: the pair, the deal, a purpose, a chapter, the basics played and
@@ -1832,6 +1837,8 @@ export function fastForward(opts: { name?: string; purpose?: PropertyId | string
   const now = new Date().toISOString()
   update((s) => {
     s.deal_accepted_at = s.deal_accepted_at ?? now
+    /* Set-up, which is the door now — the same field markSetUpComplete writes. */
+    s.set_up_at = s.set_up_at ?? now
     s.display_name = s.display_name ?? name
     s.chapter = s.chapter ?? 'lisbon'
     s.purpose = (s.purpose ?? opts.purpose ?? 'moving') as LearnerState['purpose']
@@ -1862,7 +1869,11 @@ export function fastForward(opts: { name?: string; purpose?: PropertyId | string
       s.proof.push({ pt: 'Chamo-me ' + name + '.', en: 'My name is ' + name + '.', source: 'release', clean: true, at: now })
     }
     s.legend_prompt = s.legend_prompt === 'unseen' ? 'accepted' : s.legend_prompt
-    /* The line that actually opens the door. Everything above is so it is worth opening. */
+    /*
+      And welcomed, so the ceremony and the walk do not stand between a tester and the
+      feed. Set-up above already opens the door; this is the stamp that says they have been
+      shown in. /walkthrough replays the walk if that is what is being tested.
+    */
     s.club_welcomed_at = s.club_welcomed_at ?? now
   })
 }

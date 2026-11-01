@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { clubOpen } from '@/content/legend'
+import { inviteEarned } from '@/content/invite'
 import { landInvite } from '@/lib/invites'
 import { adminKeyValid, currentUser, ensureDevice } from '@/lib/auth'
 import {
@@ -56,35 +56,24 @@ export async function POST(request: Request) {
     /*
       AND THE INVITATION THAT BROUGHT THEM HERE, IF IT HAS LANDED.
 
-      Sam asked for a financial advantage to the recommender, and chose the trigger: the
-      person brought in says their Legend cold. That is the one event in DUB meaning
-      somebody has LEARNED something rather than installed something, and it is what makes
-      this unspammable without a single fraud check — a fake account earns nothing, because
-      a fake account cannot speak Portuguese.
+      Sam asked for a financial advantage to the recommender, and the trigger was the person
+      brought in saying their Legend cold. The Legend is optional now — it stopped being the
+      door when DUB became about the city — so paying on it would pay on something most
+      people never do. The trigger is the first ROOM said cold instead: still an event that
+      means somebody has LEARNED something rather than installed something, and still
+      unspammable without a single fraud check — a fake account earns nothing, because a
+      fake account cannot say a Lisbon room out loud.
 
       Measured here rather than on the client because the client is the party with the
-      incentive to lie. The proof rows are already on the merged state, and `clubOpen` is
-      the same function the Club door reads — so the thing being paid for is exactly the
-      thing the product already calls finished, rather than a second definition that could
-      drift from it.
+      incentive to lie. The proof rows are already on the merged state; the rule is
+      inviteEarned in lib/invites, beside the payment it triggers.
 
       Idempotent all the way down: landInvite claims the payment inside the statement that
       makes it, so this firing on every sync costs one indexed read and pays once.
     */
     try {
-      const legend = (merged.legend ?? []) as { frame_id: string; values: Record<string, string> }[]
       const proof = (merged.proof ?? []) as { pt: string; source: string; clean: boolean }[]
-      const answered = legend
-        .filter((a) => Object.keys(a.values ?? {}).length > 0)
-        .map((a) => a.frame_id)
-      if (
-        clubOpen({
-          answeredFrameIds: answered,
-          answers: legend,
-          purpose: (merged.purpose ?? null) as never,
-          proof,
-        })
-      ) {
+      if (inviteEarned(proof)) {
         await landInvite({ userId: user?.id ?? null, device })
       }
     } catch {

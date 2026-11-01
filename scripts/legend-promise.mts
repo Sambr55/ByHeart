@@ -357,6 +357,35 @@ console.log('\nthe card is the card, wherever it is counted\n')
   ok('and nothing in the map is unreachable', orphan.length === 0, orphan.join(', '))
 }
 
+/*
+  THE LEGEND NO LONGER PROMISES THE CLUB, and a member can build it.
+
+  The Club opens on set-up now (see clubOpen) and the Legend is an optional card inside it.
+  So two promises the Legend used to make are now false in the other direction: "run it
+  through and the Club opens" offers something the learner already has, and a build deck
+  locked until the whole road is walked is a closed door inside the room they were let into.
+*/
+{
+  console.log('\nthe Legend is optional, and says so\n')
+  const { LEGEND_COPY } = await import('../content/legend')
+  /* A function's source carries its string literals, which is what is being read. */
+  const said = Object.entries(LEGEND_COPY).map(([k, v]) => [k, String(v)])
+  const promising = said.filter(([, v]) =>
+    /(membership test|seated at your table|Club is open|(run it through|say|said)[^.]*Club opens)/i.test(v),
+  )
+  ok(
+    'no Legend line promises the Club for saying it',
+    promising.length === 0,
+    promising.map(([k]) => k).join(', '),
+  )
+  const legendSrc = readFileSync('components/Legend.tsx', 'utf8')
+  ok(
+    'a member may build without walking the road',
+    /const unlocked =\s*mounted &&\s*\(clubOpenFor\(learner\) \|\|/.test(legendSrc),
+    'unlocked reads the door as well as legendStatus',
+  )
+}
+
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)\n')
   for (const p of problems) console.log('  ✗ ' + p)

@@ -43,13 +43,17 @@ export const INVITE = {
     first. A screen that leads on free months is a referral scheme, and a referral scheme
     is what gets somebody to send twenty links to people who will never open them.
   */
+  /*
+    The trigger moved from the Legend to the first room, said cold — see inviteEarned in
+    lib/invites.ts — so the sentence that promises it moved with it.
+  */
   reward:
-    'When somebody you brought can say their Legend out loud, you both get a month of DUB free. It pays when they can speak, not when they sign up.',
+    'When somebody you brought says their first Lisbon room out loud, with nothing on screen, you both get a month of DUB free. It pays when they can speak, not when they sign up.',
   /** The three states an invitation can be in. */
   state: {
     waiting: 'Not opened yet',
-    accepted: 'Started — not said their Legend yet',
-    landed: 'Said their Legend. You both got a month.',
+    accepted: 'Started — not said a room out loud yet',
+    landed: 'Said their first room. You both got a month.',
   },
 } as const
 
@@ -75,3 +79,18 @@ export const COME = {
   /** When the code is spent, expired or theirs. The tone is never an accusation. */
   spent: 'That invitation has already been taken up. You can still start here.',
 } as const
+
+/**
+ * HAS THE PERSON BROUGHT IN EARNED THE REWARD? Their first room, said cold.
+ *
+ * A proof row with source 'room' — which is what Errand banks when a Situation is said
+ * with nothing on screen — and `clean`. It was the whole Legend said cold; the Legend is
+ * optional now (the Club opens on set-up), so the reward moved to the first thing every
+ * new member actually does. Pure, and here rather than in lib/invites.ts (which imports the database and is
+ * server-only) so app/api/session, lib/invites and the check script ask one function.
+ */
+export function inviteEarned(
+  proof: { source: string; clean: boolean }[] | null | undefined,
+): boolean {
+  return (proof ?? []).some((p) => p.source === 'room' && p.clean)
+}
