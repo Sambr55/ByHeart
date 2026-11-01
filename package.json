@@ -102,7 +102,8 @@
     "say": "tsx scripts/say-check.mts",
     "inbox": "tsx scripts/inbox-check.mts",
     "signin": "tsx scripts/signin-check.mts",
-    "walk": "tsx scripts/walk-check.mts"
+    "walk": "tsx scripts/walk-check.mts",
+    "path": "tsx scripts/path-check.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",
