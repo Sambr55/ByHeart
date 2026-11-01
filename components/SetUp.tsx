@@ -8,12 +8,10 @@ import { AVATARS, setAvatarFromFile, setAvatarFromPick } from '@/engine/avatar'
 import { chapterById } from '@/content/chapters'
 import { IMAGE_BANK } from '@/content/images'
 import { roomsFor } from '@/content/feed'
-import { CLUB } from '@/content/club'
 import { CONSENT } from '@/content/consent'
 import { DOOR_CTA, EXPLAINER_CTA } from '@/content/explainers'
-import { PAIR_STEP } from '@/content/front-door'
-import { GOAL_QUESTION } from '@/content/profile'
-import { track } from '@/engine/analytics'
+import { PAIR_STEP, VISITING } from '@/content/front-door'
+import { Visiting } from '@/components/Destination'
 import {
   acceptDeal,
   answerLegendFromLesson,
@@ -21,12 +19,11 @@ import {
   resetLearnerCache,
   setChapter,
   setDisplayName,
-  setProfile,
-  setPurpose,
   rememberSetUp,
   syncSession,
 } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
+import { useLearner } from '@/engine/useLearner'
 import { DEFAULT_PAIR } from '@/content/pairs'
 
 /**
@@ -81,6 +78,16 @@ import { DEFAULT_PAIR } from '@/content/pairs'
   So it is a STEP rather than a screen: choose, then why, then who, inside one card. Sam:
   "move language selector to its logical slot so its dependants follow."
 */
+/*
+  AND NOW IT IS ONE QUESTION, "Visiting Lisbon?", with yes as the lead.
+
+  The owner's call: DUB is for people visiting Lisbon, so visiting is the default and
+  set-up should be short. The language and the city were confirmations of the only open
+  answer, and the five reasons buried the common one. components/Destination.tsx `Visiting`
+  writes all of it in one tap — pair, chapter, purpose, goal — and the same component sits
+  on the set-up card's face in the feed, so the why step here is only met by somebody who
+  reached set-up another way (the journey at /vibes).
+*/
 type Step = 'why' | 'who'
 
 export function SetUp({ onDone }: { onDone?: () => void } = {}) {
@@ -106,23 +113,6 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   const [agreed, setAgreed] = useState(false)
   /* Shown only after somebody presses commit with something missing — never pre-emptively. */
   const [nudge, setNudge] = useState(false)
-  /*
-    WHICH REASON WAS TAPPED, held for as long as it takes to see it.
-
-    The five reasons were a list of outlined rows that advanced the moment one was pressed,
-    so the answer was never shown to the person who gave it — the screen simply changed.
-    Sam, on the screenshot: the selected button should turn blue and the card should then
-    fire to the next screen on its own.
-
-    Both, in that order, which is the only order in which the first one means anything. The
-    row goes blue, and 260ms later — the product's own settle duration, not a number picked
-    here — the step advances. Long enough to register as acknowledgement, short enough that
-    nobody waits for it.
-
-    Null while nothing is chosen, and it stays set through the transition rather than being
-    cleared, so the row does not flicker back to its outline on the way out.
-  */
-  const [chosenWhy, setChosenWhy] = useState<string | null>(null)
   const [name, setName] = useState('')
   /*
     THE TWO THINGS THIS SCREEN ACTUALLY NEEDS, named once so the button, the dimming and
@@ -147,6 +137,17 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   useEffect(() => {
     setMounted(true)
   }, [])
+  /*
+    ANSWERED ON THE FACE, so the pane opens on the name.
+
+    The feed's set-up card asks "Visiting Lisbon?" on its face and opens this pane once it
+    is answered — and the pane is mounted with the card, long before the tap. So this reads
+    the live record rather than a snapshot taken at mount: the moment the goal is written,
+    the why step is behind us. Asking it again here would be the very repeat the face
+    exists to remove.
+  */
+  const learner = useLearner()
+  const shown: Step = step === 'why' && mounted && learner.profile?.goal ? 'who' : step
 
   /*
     ALREADY MEANS ASKED, not merely agreed.
@@ -322,7 +323,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
           <p className="text-sm leading-relaxed text-muted">
             {topics.length
               ? 'Rooms you will get because of what you just said.'
-              : 'Three vibes are waiting. Nothing else to decide.'}
+              : 'The Club is waiting. Nothing else to decide.'}
           </p>
         </div>
 
@@ -369,11 +370,17 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
           </button>
         ) : (
         <Link
-          href="/vibes"
+          href="/club"
           data-testid="setup-go"
           className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >
           {/*
+            INTO THE CLUB, because that is where a new member lands now.
+
+            It said BUILD YOUR LEGEND and pointed at /vibes, back when the Legend was the
+            price of the Club. The Legend is an optional card inside the Club now, and the
+            Club opens on the visitor path — so the button goes there and says so.
+
             IT NAMES WHAT HAPPENS NEXT, rather than naming the door.
 
             This said OPEN, on the argument that the eighth screen of eight has finished
@@ -414,7 +421,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         WHY only. The who step is a name field and a photo picker, and a header image over
         a form is a header image in the way of a form.
       */}
-      {step === 'why' ? (
+      {shown === 'why' ? (
         <div className="relative -mx-5 -mt-6 overflow-hidden on-dark">
           <Image
             src={IMAGE_BANK.intro_arrival.src}
@@ -438,8 +445,8 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             className="relative flex flex-col gap-3 px-5 py-6 text-white"
             style={{ textShadow: '0 1px 12px rgb(0 0 0 / 0.5)' }}
           >
-            <p className="eyebrow text-white/80">{PAIR_STEP.eyebrow}</p>
-            <h2 className="display text-balance text-2xl">{CLUB.welcome.ask_headline(city)}</h2>
+            <p className="eyebrow text-white/80">{VISITING.eyebrow}</p>
+            <h2 className="display text-balance text-2xl">{VISITING.headline(city)}</h2>
             {/*
               THE REASSURANCE IS GONE. Sam: "Remove the second para (there is no wrong
               answer)."
@@ -455,7 +462,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
               asker (components/Journey.tsx), where it arrives mid-flow with no body under
               it — so the string stays and this one screen stops using it.
             */}
-            <p className="text-sm leading-relaxed text-white/85">{CLUB.welcome.ask_body}</p>
+            <p className="text-sm leading-relaxed text-white/85">{VISITING.body}</p>
           </div>
         </div>
       ) : null}
@@ -467,7 +474,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         last one is a real one" — has moved onto the photograph with the rest of the why
         step, where the question it belongs to is.
       */}
-      {step === 'why' ? null : (
+      {shown === 'why' ? null : (
         <div className="flex flex-col gap-3">
           <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
           <h2 className="display text-balance text-2xl">And what do they call you?</h2>
@@ -483,85 +490,11 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         staying — "a season" means nothing until you know it means the café that starts
         recognising you.
       */}
-      {step === 'why' ? (
-        <ul className="flex flex-col gap-3">
-          {GOAL_QUESTION.options.map((o) => (
-            <li key={o.id}>
-              <button
-                type="button"
-                data-testid={'setup-why-' + o.id}
-                onClick={() => {
-                  /*
-                    The answer is shown before it is acted on — see chosenWhy above.
-                  */
-                  setChosenWhy(o.id)
-                  /*
-                    ONE ANSWER, TWO RECORDS, and that is the whole merge.
-
-                    `purpose` is what the product runs on — feedFor builds the Club from it,
-                    cardFor picks the seven Legend frames from it. `goal` is what the proof
-                    card reads. They were collected by two different questions on two
-                    different screens, both of them asking why you are here.
-
-                    Writing both here means nothing downstream changes and nothing gets
-                    asked twice: nextProfileQuestion sees goal answered and never orphans
-                    this question at the end of a vibe again.
-                  */
-                  if (o.purpose) setPurpose(o.purpose)
-                  setProfile('goal', o.id)
-                  track('purpose_chosen', { purpose: o.purpose ?? 'none', goal: o.id })
-                  /*
-                    260ms is the settle on the product's motion scale, so the acknowledgement
-                    lasts exactly as long as every other thing that settles here.
-                  */
-                  window.setTimeout(() => setStep('who'), 260)
-                }}
-                /*
-                  THE UNCHOSEN ROW GETS A GROUND, which it never had.
-
-                  It was `border-line` and nothing else — an outline drawn on the sand
-                  with nothing behind it, which Proof's note already named as "the one
-                  shape in this system that reads as neither ground nor card". These five
-                  rows are the single most consequential tap in the product: the answer
-                  decides the Legend frames, the room ranking and the whole Club feed.
-                  They were the flattest thing on the screen, and they sit directly under
-                  a photograph, which made the contrast worse — a bright header above five
-                  hairlines on sand.
-
-                  bg-bg-elev, so each option is an object you are choosing between. The
-                  chosen one still goes solid accent, so the answer is still unmistakable;
-                  what changes is that the four you did not pick now look like cards you
-                  could have picked rather than like empty rules.
-
-                  NOT ON THE PHOTOGRAPH. These rows are below the header image, on the
-                  pane's own sand — the header is `-mx-5 -mt-6` and ends before this list
-                  starts, and nothing here is inside `.shown-on-photo`. Destination's rows
-                  take solid grounds for the opposite reason, over a picture; these take
-                  one because there is no picture to lift off.
-                */
-                className={
-                  'tap-target flex w-full flex-col gap-1 rounded border px-4 py-3 text-left transition ' +
-                  (chosenWhy === o.id
-                    ? 'border-accent bg-accent text-accent-ink'
-                    : 'border-line bg-bg-elev hover:border-accent/50')
-                }
-              >
-                <span className="display text-lg">{o.label}</span>
-                {o.sub ? (
-                  <span
-                    className={
-                      'text-sm leading-relaxed ' +
-                      (chosenWhy === o.id ? 'opacity-80' : 'text-muted')
-                    }
-                  >
-                    {o.sub}
-                  </span>
-                ) : null}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      {/*
+        WHY, as one question with yes as the lead — see `Visiting` in Destination.tsx, which
+        also sits on the set-up card's face. The 260ms settle and the testids moved with it.
+      */}
+      {shown === 'why' ? <Visiting onDone={() => setStep('who')} /> : null}
 
       {/*
         WHO. A name, and the only one of the three that is optional.
@@ -571,7 +504,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         to type before they have seen a single vibe is the kind of friction the whole
         restructure exists to remove.
       */}
-      {step === 'who' ? (
+      {shown === 'who' ? (
         <>
           <div className="flex items-center gap-3">
             {/*
@@ -682,7 +615,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             would read as a second question. Here it reads as the alternative to the circle
             immediately above it, which is what it is.
           */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-3">
             <p className="eyebrow text-muted">OR PICK ONE</p>
             <ul data-testid="setup-avatars" className="flex flex-wrap gap-3">
               {AVATARS.map((a) => (
@@ -812,7 +745,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                   /* Only clears the complaint if it was the LAST thing outstanding. */
                   if (e.target.checked && named) setNudge(false)
                 }}
-                className="mt-0.5 h-5 w-5 shrink-0 accent-accent"
+                className="mt-1 h-5 w-5 shrink-0 accent-accent"
               />
               <span className="text-xs leading-relaxed">{CONSENT.tick}</span>
             </label>
@@ -904,8 +837,13 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                 is correct — the blob syncs again on the next beat that calls this.
               */
               void syncSession('set_up')
+              /*
+                INTO THE CLUB, not the shelf. A new member lands on the visitor path —
+                arrive, coffee and food, get about, see the city, when it goes wrong — and
+                the vibes are a side door from there rather than the first thing they meet.
+              */
               if (onDone) onDone()
-              else router.push('/vibes')
+              else router.push('/club')
             }}
             className={
               'tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink transition-opacity ' +
@@ -918,25 +856,6 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         </>
       ) : null}
 
-      {/*
-        THE INVITATION TO SKIP IS GONE, and a reminder to answer stands where it was.
-
-        "Keep swiping if you would rather look around first" sat under both questions, and
-        it was the last thing on the screen — so the final word on the one card that shapes
-        every other card was permission to ignore it. Purpose is what filters the Club and
-        the name is what the Legend is built out of; a screen that shrugs at its own
-        question gets shrugged at back.
-
-        Nothing about the gate has changed. The card can still be swiped past, every call to
-        action that needs an answer still routes back here, and this is still not a wall.
-        What changed is that the product now says which answer it is waiting for instead of
-        offering to do without it.
-      */}
-      {step === 'why' ? (
-        <p className="text-xs leading-relaxed text-muted">
-          Pick one to start. It is what decides which rooms the Club puts in front of you.
-        </p>
-      ) : null}
     </div>
   )
 }

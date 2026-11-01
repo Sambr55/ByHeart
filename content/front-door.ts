@@ -44,6 +44,13 @@ export const LANDING = {
   strapline: BRAND.strapline,
   /** A door, and the Club is on the other side of it. */
   cta: 'COME IN',
+  /*
+    WHERE, SAID ON THE DOOR. The strapline is the promise and stays the only one; this is
+    the one line of fact under it, and it is the owner's pivot in eight words: DUB is the
+    Portuguese a visitor needs to get about Lisbon. No product words — the lint on this
+    object holds it to the same rule as the strapline.
+  */
+  support: 'The Portuguese you need to get about Lisbon.',
   /**
    * What the picture is, for anybody who cannot see it.
    *
@@ -208,18 +215,53 @@ export const PAIR_STEP = {
  * this is route and evidence; this one is allowed to describe the room, because somebody
  * who does not want to go there should find that out on screen one rather than five.
  */
+/*
+  THE ONE QUESTION SET-UP OPENS ON: "Visiting Lisbon?"
+
+  It replaces two screens and a list. The set-up card used to ask for a language (one is
+  built), then a city (one is open), then "What brings you to Lisbon?" over five equal rows
+  — three taps to reach the answer most people arriving at DUB actually have. The owner's
+  call is that DUB is for people visiting Lisbon, so visiting is the default: yes is one
+  big tap, and staying, moving and the rest sit one row underneath for whoever they are.
+
+  A FUNCTION OF THE CITY rather than "Lisbon" typed here, for the reason THE_WAY.cta gives:
+  the day Porto opens this should not need finding.
+
+  Nothing is pre-selected. Leading is not choosing for somebody; the yes is the largest
+  thing on the card, and it still has to be pressed.
+*/
+export const VISITING = {
+  eyebrow: 'ONE DECISION',
+  headline: (city: string) => 'Visiting ' + city + '?',
+  body: 'Say yes and the Club opens on the rooms a visitor stands in: arriving, coffee and food, getting about. Staying longer, or moving here? That’s just below.',
+  yes: 'YES, I’M VISITING',
+  yes_sub: 'days or weeks, not years',
+  or: 'NOT VISITING?',
+} as const
+
 export const WELCOME = {
   headline: 'Welcome to the Dub Club.',
-  body: 'The place where you learn to fluently navigate situations and local events with language, while continuously broadening your knowledge, sharing with people doing the same as you, and remaining inspired as you become a native speaker.',
+  /*
+    LISBON, A ROOM AT A TIME. The line it replaces promised fluency and ended "as you
+    become a native speaker" — the exact claim the brand spec lists under Avoid, and a
+    promise nobody can keep. What a visitor gets is concrete: the rooms they will stand in,
+    what is on, and the few lines each needs.
+  */
+  body: 'Lisbon, a room at a time: arriving, coffee and food, getting about, seeing the city, and what is on this week. The few lines each one needs, said the way Lisbon says them.',
   cta: 'SHOW ME HOW IT WORKS',
 } as const
 
 export const HOW_IN = {
-  eyebrow: 'HOW YOU GET IN',
-  headline: 'Here’s how you get through the door of the Dub Club.',
+  /*
+    THERE IS NO DOOR TO GET THROUGH. A new member lands in the Club, on the visitor path, so
+    this says how it works rather than how to earn your way in — the rooms first, and the
+    vibes as the fun side door that the example below demonstrates.
+  */
+  eyebrow: 'HOW IT WORKS',
+  headline: 'Here’s how the Dub Club works.',
   steps: [
-    'Start with the basics — built out of song titles you already know, so there is nothing to memorise.',
-    'Then pick a vibe you actually connect with. Top Gun, say. We pull the phrases out of it that are useful the day you land.',
+    'Start in the rooms a visitor stands in — arriving, coffee and food, getting about, seeing the city, and when it goes wrong.',
+    'Then, for fun, a vibe you already know by heart. Top Gun, say. The phrases in it work at the café counter too.',
   ],
   /** The demo is the third step, and it is a demonstration rather than a claim. */
   example: 'Here is one of them.',
@@ -258,11 +300,15 @@ export const THE_WAY = {
       unlock the questions. The exact count is said where somebody can act on it, from
       legendStatus, on the shelf and the door.
     */
-    body: 'Your Legend is the first minute of conversation you have every time you meet somebody new. As you build up your confidence through the vibes you pick, you are also unlocking your Legend questions.',
+    /*
+      OPTIONAL, AND SAID SO. The Legend stopped being the way into the Club; it is the
+      "introduce yourself" card inside it.
+    */
+    body: 'Your Legend is the first minute of conversation you have every time you meet somebody new — your name, where you are from, what you do. It is optional, and it is in the Club whenever you want it.',
   },
   club: {
     label: 'DUB CLUB',
-    body: 'We build it together — and it is your ticket into the Dub Club.',
+    body: 'The rooms, what is on, and your Legend all live there. Drop in whenever you like.',
   },
   /*
     THE CALL TO ACTION IS THE NEXT SCREEN'S QUESTION, and it names the learner's own city.
@@ -391,7 +437,8 @@ export const PICKER = {
     that no longer exists.
   */
   legend_vibes: () => 'One more session and your Legend opens.',
-  legend_open: 'Your Legend is open — build it and the Club is yours.',
+  /* The Club is not behind it any more, so the line stops promising that it is. */
+  legend_open: 'Your Legend is open — introduce yourself whenever you like.',
   /*
     Why the rest of the shelf is dimmed on somebody's first visit.
 
@@ -528,7 +575,7 @@ export const PICKER = {
   start_head: 'Let’s build your Legend.',
   start_body: (n: number) =>
     n +
-    ' vibes you learn from, and you will be seated at your table in the DUB Club. Each one is a line you will actually say — your name, where you are from, what you do.',
+    ' vibes you learn from, and you will have a minute about yourself ready for whoever you meet. Each one is a line you will actually say — your name, where you are from, what you do.',
   /* On the control itself now, under the pulsing ring — see the jump-off in Journey.tsx. */
   start_cta: 'START',
   /* What a screen reader hears on that control, since the word alone is not a sentence. */

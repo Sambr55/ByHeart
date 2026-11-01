@@ -24,11 +24,9 @@
  * are told to swipe is the card that responds, and the swipe left on the first is what
  * lands you on the second.
  *
- * THE FIVE LEGEND EXAMPLES ARE SPECIMENS, NOT ANYBODY'S. Worth saying out loud in the file
- * that holds them, because the rule that a Legend contains somebody's children by name,
- * their age and their marital status, and must never leave the device, is enforced in one
- * place (engine/showable.ts) with a check behind it. A screen full of "example Legends" is
- * exactly where somebody would later be tempted to show a real one.
+ * NO CARD HERE SELLS THE LEGEND. It used to be the price of the Club and three cards said
+ * so. It is an optional "introduce yourself" card inside the Club now, and the sequence
+ * says nothing about it rather than promising a door that is not there.
  */
 
 /*
@@ -75,6 +73,10 @@ export interface IntroCard {
 
     Optional, because most cards are not a step. A card without one draws its eyebrow the
     way it always did.
+
+    NO CARD CARRIES ONE SINCE THE LISBON PASS: the three-step Legend sentence went with the
+    cards that said it. The field stays because the renderer still draws it, and the next
+    counted run of screens should not have to rebuild it.
   */
   step?: 1 | 2 | 3
   headline: string
@@ -277,18 +279,21 @@ export interface IntroCard {
 }
 
 /*
-  NO CARD HERE NAMES A LANGUAGE, and that is a rule rather than a style choice.
+  THE SEQUENCE LEADS WITH LISBON NOW, and that reverses a rule this file used to state.
 
-  Every screen in this list is met BEFORE the language is chosen — the selector is on the
-  set-up card, which is the last of them. So "Inside is the Portuguese", "said in
-  Portuguese" and "the Portuguese they actually speak here" were all asserting an answer
-  to a question nobody had been asked. Reported directly: "you are assuming Portuguese
-  ... before the language has been selected."
+  It said no card may name a language or a city, because every card was met before set-up
+  asked for either. That rule belonged to a product whose pitch was "learn through the films
+  and songs you already know", where the city was a detail to be settled later. The pitch
+  is the city now: somebody visiting Lisbon gets the European Portuguese they need to get
+  about. Lisbon is the only open chapter, set-up opens on "Visiting Lisbon?", and a front
+  door that will not say where it is, is hiding the one thing a visitor came in for.
 
-  The specimens are a different matter and stay as they are. A card SHOWING "Fala comigo,
-  Goose" is showing what the product does with a real line, and the demonstration has to
-  be in some language to be a demonstration at all. What changes is the copy that
-  describes the product, which should read as true whichever language gets picked.
+  What still holds is the narrower half: no card names a city that is not open. See
+  scripts/intro-check.mts, which reads the open chapters rather than a list.
+
+  THE SPECIMENS ARE REAL LINES, every one with its English underneath. The Lisbon card's
+  three are taken verbatim from the rooms they come from (content/situations.ts and the
+  visitor blocks), so the intro cannot teach a sentence the product does not.
 */
 export const INTRO_CARDS: IntroCard[] = [
   {
@@ -298,17 +303,9 @@ export const INTRO_CARDS: IntroCard[] = [
       It opens the sequence: COME IN, and the very next thing is how a card is opened.
 
       OPENING BEFORE REJECTING, which is the order Sam asked for and is the better lesson
-      anyway. The two gestures are not equals. Tapping a card is what somebody does with
-      the thing in front of them — it is the verb the whole product is made of, and it is
-      the one a stranger will try first whether or not they were told to. Swiping a card
-      away is what you do with a card you have decided about, and deciding requires having
-      looked. Teaching reject first asked people to dismiss something before they had any
-      idea what opening one would have given them.
-
-      What used to be here was SIXTY SECONDS: the Goose unpack, arguing that you already
-      understand more than you can say. That argument has not been lost, it moved to slide
-      4, VIBES, which carries the Goose line itself. Two cards making the same
-      demonstration under two eyebrows was the actual fault.
+      anyway. Tapping a card is what somebody does with the thing in front of them — it is
+      the verb the whole product is made of. Swiping one away is what you do with a card you
+      have decided about, and deciding requires having looked.
     */
     id: 'intro_in',
     image: 'intro_in_card',
@@ -319,20 +316,14 @@ export const INTRO_CARDS: IntroCard[] = [
   },
   {
     /*
-      AND THE SECOND SLIDE, which is the other half of the same lesson.
+      AND THE SECOND SLIDE, the other half of the same lesson.
 
-      Reached BY the tap or the right swipe, which is what makes the pair work: the
-      instruction on the card before it has to be performed to get here, so the tutorial is
-      never read without being done. Then this one asks for the opposite movement.
+      Reached BY the tap or the right swipe, so the instruction on the card before has to be
+      performed to get here. A promise about loss only means something to somebody who now
+      knows what a card contains; having just opened one, they do.
 
-      It follows opening for a reason beyond order. "Swipe left and it goes to the back of
-      the pile" is a promise about loss, and a promise about loss only means something to
-      somebody who now knows what a card contains. Having just opened one, they do.
-
-      THE REWIND RIDES HERE NOW. It answers the gesture that has just been asked for rather
-      than one made two cards ago — the person has been told a card can be sent away, and
-      the looping arrow beside the instruction says it comes back. See the `rewind` prop in
-      components/Feed.tsx, which keys on this card's id.
+      THE REWIND RIDES HERE. See the `rewind` prop in components/Feed.tsx, which keys on
+      this card's id.
     */
     id: 'intro_away',
     image: 'intro_away_card',
@@ -342,268 +333,78 @@ export const INTRO_CARDS: IntroCard[] = [
     body: 'Not gone — behind the rest, for later. Change your mind and the rewind arrow brings it straight back.',
   },
   {
-    id: 'intro_vibes',
-    image: 'intro_vibes_card',
     /*
-      NO LONGER A PILLAR, and the word VIBES has gone with it.
+      LISBON, FIRST — the card the whole sequence now exists to make.
 
-      Sam: "Remove the word Vibes and replace with — (1) Build your legend from VIBES you
-      have seen a hundred times."
+      It used to be VIBES here: Top Gun, Bridget Jones and Bond as the pitch, and the city
+      somewhere behind them. The owner's call is the reverse. Somebody visiting Lisbon needs
+      to get about — arrive, order, find the metro, see the place, cope when it goes wrong —
+      and those five are the rooms of the visitor path in the Club, named here in the order
+      the path walks them.
 
-      The pillar shouted a category name at somebody who has not been told what the
-      category is. VIBES means something precise inside DUB and nothing at all on the
-      second screen a stranger sees, so the loudest type on the card was the one word they
-      could not read. Folding it into the sentence teaches it in passing — you learn what a
-      vibe is by being told what to do with one — and the number says this is the first of
-      three rather than one of six features.
+      THE PLACES, NOT A FEATURE LIST. "The rooms you will actually stand in" is the claim,
+      and it is concrete enough to check: every one is a room a new member lands in straight
+      after set-up.
+
+      THREE REAL LINES, verbatim from the rooms that teach them, each with its English: the
+      café counter (content/situations.ts lisbon_cafe), asking the way and the bill (the
+      visitor blocks). Um café is the first thing most visitors say, so it goes first.
     */
-    step: 1,
-    eyebrow: '',
-    /*
-      SAM'S OWN LINE, from the intro flow deck: "Build your LEGEND from what you have
-      seen a hundred times."
-
-      The headline it replaces — "Learn from what you have already seen a hundred times"
-      — said what the card SHOWS and stopped there. This one says what the showing is
-      FOR, and it names the Legend on the first pillar rather than waiting for the card
-      that introduces it, so the sequence has one destination stated four cards early
-      instead of a feature list that arrives at one.
-
-      The second half of the sentence is unchanged, because it is the claim: the hundred
-      times are already behind you.
-    */
-    headline: 'Build your legend from VIBES you have seen a hundred times.',
-    /*
-      THE SONGS YOU KNOW IS NOT BOLD, and that is a deliberate piece of typography rather
-      than an oversight.
-
-      The three before it are titles — Top Gun, Bridget Jones, Bond — and they are set in
-      the emphasis this card uses for a named thing. "the songs you know" is not a title.
-      Bolding it would make the list read as four franchises, one of which nobody can
-      place; leaving it plain is what makes the sentence land as "and everything else you
-      already carry around".
-    */
-    body: '**Top Gun**, **Bridget Jones**, **Bond**, the songs you know. You don’t learn the line — you recognise it, and keep a word or two that works everywhere.',
-    /*
-      GOOSE, NOT ROYALE, and the reason is that there is only one unpack in the sequence
-      now.
-
-      This card showed pf_royale on the reasoning that card one was already the Goose
-      unpack, so a second line from a second film proved the trick was a system rather
-      than a one-off. Card one is gone — the SIXTY SECONDS screen went with it — and with
-      it the thing royale was contrasting against. What is left is a single specimen, and
-      the single specimen should be the strongest one: "Talk to me, Goose" is the line
-      Sam names first, it is the one everybody can hear in their head, and `comigo` comes
-      out of it into three sentences somebody would actually use.
-
-      The Royale com queijo card went entirely in the same pass — see the removals.
-    */
-    shows: { kind: 'unpack', root_id: 'tg_goose' },
-  },
-  /*
-    CHEATS, HACKS & BLUFFS IS GONE, and it went the same way REMINDERS did.
-
-    Sam: "Remove Cheats,Hacks and Bluffs from teh intro sequence."
-
-    The argument it made is still true — the plainest words in the language are behind
-    twelve units of fruit vocabulary everywhere else, and here they are a card you open and
-    keep. What was wrong is where it made it. It sat second, between VIBES and the Legend,
-    which put a FEATURE in the middle of the one run of screens that has to be about the
-    person: you already know more than you think, here is what ten minutes buys you, here
-    is the Club. A cheat sheet is a thing DUB has; it is not a reason to start.
-
-    The sheets themselves are untouched. They are in the product, they are on YOURS, and
-    they are what a learner finds the first time they need the days of the week — which is
-    the moment the card was describing and a better place to meet it than screen two.
-  */
-  {
-    id: 'intro_legend',
-    image: 'intro_arrival',
-    /*
-      Sam: "In place of eyebrow — (2) Your LEGEND earns you access to the DUB CLUB."
-
-      YOUR LEGEND as a label said the card's subject twice, because the headline said it
-      too. What it never said is what a Legend BUYS, which is the only reason anybody would
-      spend ten minutes on one — so the step line carries the transaction and the headline
-      keeps the feeling.
-    */
-    step: 2,
-    eyebrow: '',
-    /*
-      WHAT IT BUYS YOU, rather than what it is made of.
-
-      Sam's line: "Your LEGEND gets you a seat at any table." The headline it replaces —
-      "Build your legend out of what you have learned" — described the ASSEMBLY, which is
-      the one thing the body underneath already spells out at length. Worse, VIBES four
-      cards earlier now opens with "Build your legend from what you have seen a hundred
-      times", so the two pillars led with the same verb and the same object and read as
-      one claim made twice.
-
-      This one is the consequence: a seat at any table is what seven sentences said cold
-      actually gets somebody, and it is the only thing on this card that is not a
-      mechanic.
-    */
-    headline: 'Your LEGEND earns you access to the DUB CLUB.',
-    /*
-      WHAT THE LEGEND IS FOR, said on the card that introduces it.
-
-      The card explained the mechanic — seven things, said cold — and stopped there, so
-      the Legend read as an exercise rather than as the threshold it is. Every other card
-      in the intro sells the Club; this one built the thing that gets you in and never
-      mentioned it. Sam: add "Once you have your Legend, you're in The DUB Club."
-
-      Kept as the last sentence rather than folded into the first: it is a consequence,
-      and a consequence reads as one when it follows the thing it is a consequence of.
-    */
-    /*
-      Sam's line: "It takes about 10 minutes. Seven sentences about yourself, said out loud
-      and the door is open."
-
-      What it replaces spent three sentences on what the Legend IS and arrived at the Club
-      in a subordinate clause. This leads with the cost — ten minutes, which is the first
-      thing anybody being asked for effort wants to know — and ends on the door, which is
-      what the ten minutes buys.
-    */
-    body: 'It takes about 10 minutes. Seven sentences about yourself, said out loud and the door is open.',
-    /*
-      Derived from LEGEND_FRAMES rather than typed here.
-
-      Five hand-written specimens drift the moment a frame changes, and this is the card
-      that tells somebody what the Legend IS — a wrong example here is a promise about the
-      wrong product. Deriving them means they cannot go stale without the questions going
-      stale too.
-
-      They are still specimens. Nobody's real Legend leaves the device.
-    */
-    shows: { kind: 'legend' },
-  },
-  {
-    /*
-      WHAT THE LEGEND IS A DOOR TO, on a card of its own.
-
-      New in the intro flow deck as screen 6, immediately behind the Legend: "Once your
-      LEGEND is complete*, you are in THE CLUB. *takes approx 10 minutes", and then five
-      words — Learn, Listen, Say, Share, Enjoy.
-
-      THE LEGEND CARD SAID THIS IN A SUBORDINATE CLAUSE and that is why this exists. Its
-      body ends "Once you have your Legend, you're in **DUB Club**" — the single most
-      important sentence in the sequence, arriving fourth in a paragraph about how many
-      questions there are. A consequence that big is not a clause.
-
-      TEN MINUTES IS THE WHOLE OF THE ASK, and nothing in the product had ever said how
-      long anything takes. Every other app in the category is vague about this on purpose,
-      because the honest answer is months. DUB's answer is ten minutes to the thing that
-      gets you in, and a number that specific is only worth printing if it is true: seven
-      Legend questions, answered out loud, is about that.
-
-      The asterisk is Sam's and it is kept as an asterisk rather than folded into the
-      sentence. A qualification inside the promise weakens it; a qualification under it
-      reads as the product showing its working.
-
-      NO PILLAR HERE, deliberately, though it is the biggest claim in the file. The five
-      pillars are the things DUB IS — VIBES, CHEATS, ASK, DROPS and the reward card — and
-      this is a threshold between two of them. Setting it at pillar size would make six
-      enormous eyebrows in a row and flatten the rhythm that makes any of them land.
-    */
-    id: 'intro_club',
-    image: 'intro_arrival',
-    /*
-      Sam: "In place of eyebrow — (3) Drop into the DUB CLUB whenever you like."
-
-      THE CLUB over "Once your legend is complete, you are in THE CLUB" was the name said
-      twice with a condition between. The third step is not the condition — that was step
-      two — it is the standing invitation, which is the thing that makes a club a club
-      rather than a course you complete.
-    */
-    step: 3,
-    eyebrow: '',
-    headline: 'Drop into the DUB CLUB whenever you like.',
-    /*
-      THE FIVE VERBS, said once in the body and drawn underneath.
-
-      They are not features and they are not a syllabus — they are what a member spends
-      an evening doing, in the order it happens: you learn a line, you hear it said, you
-      say it back, you send it to somebody, and then the night is better for it.
-    */
-    body: 'No streaks required. Learn as you live: vibes, local knowledge, events picked for you and people like you.',
+    id: 'intro_lisbon',
+    image: 'cafe_counter',
+    eyebrow: 'IN LISBON',
+    headline: 'The rooms you’ll actually stand in.',
+    body: 'Arriving, coffee and food, getting about, seeing the city, and when it goes wrong. Each one gives you the few lines it needs, said the way Lisbon says them.',
     shows: {
-      kind: 'steps',
-      steps: [
-        { word: 'Learn', icon: 'learn' },
-        { word: 'Listen', icon: 'listen' },
-        { word: 'Say', icon: 'say' },
-        { word: 'Share', icon: 'share' },
-        { word: 'Enjoy', icon: 'enjoy' },
+      kind: 'lines',
+      lines: [
+        { pt: 'Um café, por favor.', en: 'An espresso, please.' },
+        { pt: 'Desculpe, onde fica o Chiado?', en: 'Excuse me, where is the Chiado?' },
+        { pt: 'A conta, por favor.', en: 'The bill, please.' },
       ],
-      /*
-        WHO IS ALREADY IN, shown rather than counted.
-
-        Sam, on the member count: honest, and two is honest. A number is honest and cold;
-        six faces is what the room looks like when you walk in, and nothing here claims
-        how many there are. They are the example members shipped in /vibes/members.
-      */
-      members: [
-        { src: '/vibes/members/liv.png', alt: 'Liv, smiling, outdoors.' },
-        { src: '/vibes/members/rob.png', alt: 'Rob, outdoors.' },
-        { src: '/vibes/members/vinnie.png', alt: 'Vinnie.' },
-        { src: '/vibes/members/coffee-lover.png', alt: 'A member with a coffee.' },
-        { src: '/vibes/members/com-gelo.png', alt: 'A member with an iced drink.' },
-        { src: '/vibes/members/mountain-guy.png', alt: 'A member out on a hillside.' },
-      ],
-      /*
-        ONE REAL NIGHT, with an address and a time on it.
-
-        The rest of this card is what membership is in the abstract. This is the thing
-        that makes it a club rather than a course: somewhere to be, on a date, with the
-        people whose faces are directly above it.
-      */
-      meet: {
-        line: 'Lisbon Digital Nomads Xmas Meet-up!',
-        where: 'Honest Greens. R. Ivens 44, 1200-445 Lisboa',
-        when: '19 Dec. 1900hrs',
-      },
     },
+  },
+  {
+    id: 'intro_drops',
+    image: 'intro_drops_card',
+    /*
+      WHAT IS ON, straight after where you will be — because a visitor's week is both.
+
+      Sam's wording is kept where it still holds: LEARN opens the headline, the calendar and
+      the tickets stay. What changed is that the city is named. It came out once because the
+      card ran before a city had been chosen; the sequence is about Lisbon now, so "the city"
+      stops being coy about which one.
+    */
+    eyebrow: 'WHAT’S ON',
+    headline:
+      'LEARN from what’s actually on in Lisbon — a gig, a match, a holiday that shuts the city.',
+    body: 'Dropped into your calendar, with the words for when you get there. You can even buy the tickets!',
+    /*
+      Whatever is genuinely on, with its real date and its English under the Portuguese.
+      Empty when nothing is live, which is the honest outcome.
+    */
+    shows: { kind: 'drop' },
   },
   {
     id: 'intro_ask',
     image: 'pharmacy',
     /*
-      THE PILLAR GOES AND THE DESTINATION TAKES ITS PLACE.
-
-      Sam: "Add eyebrow THE CLUB. (Remove big ASK) — If you don't know the words you need,
-      JUST ASK."
-
-      ASK, DROPS and the ladder are not steps on the way in — they are what the Club holds
-      once you are through the door, which is what the eyebrow now says on all three. The
-      word itself survives where it belongs: at the end of the sentence, in caps, as the
-      instruction rather than as a category heading nobody had been taught.
-    */
-    eyebrow: 'THE CLUB',
-    /*
       THE PERSON'S PROBLEM, not the product's gap.
 
-      Sam: "If you don't know the words you need, just ask!" The headline it replaces —
-      "The sentence we have not taught you yet" — was written from inside the syllabus:
-      it described ASK as the hole in the teaching, which is true and is nobody's reason
-      to tap it. The moment somebody actually uses ASK is the moment they are standing in
-      front of a thing they cannot say, and this is that moment in their words.
+      Sam: "If you don't know the words you need, just ask!" The moment somebody uses ASK is
+      the moment they are standing in front of a thing they cannot say — which, for a
+      visitor, is a pharmacy counter or a sign on a locked door.
+
+      The eyebrow said THE CLUB, grouping ASK with DROPS and the ladder as what the Club
+      holds once you are through the door. There is no door to be through now — a new
+      member lands in the Club — so the eyebrow says when rather than where.
     */
+    eyebrow: 'ANY TIME',
     headline: "If you don't know the words you need, JUST ASK.",
     body: 'Anywhere, anytime, it gets straight back to you and saves the words in your library.',
     /*
-      THE ACT, NOT A LIST OF QUESTIONS.
-
-      This showed an exchange: two questions somebody typed and the European Portuguese
-      that came back. As copy it was true and as a card it was a FAQ — a stack of
-      sentences, read left to right, describing a feature.
-
-      What the card has to show is the two ways in, because they are the whole of what
-      ASK is: type a phrase, or point the camera at something written in a language you
-      cannot read. A person looking at a menu they cannot order from is the entire use
-      case, and no list of example questions puts them in that moment.
-
-      So the specimen is the input rather than the output — a phrase being typed, and a
-      sign being photographed — and the answer comes underneath one of them.
+      THE ACT, NOT A LIST OF QUESTIONS: a phrase being typed, and a sign being photographed.
+      Same specimen as the ask_anything explainer, so the two cannot drift.
     */
     shows: {
       kind: 'asking',
@@ -612,210 +413,67 @@ export const INTRO_CARDS: IntroCard[] = [
     },
   },
   {
-    id: 'intro_drops',
-    image: 'intro_drops_card',
+    id: 'intro_vibes',
+    image: 'intro_vibes_card',
     /*
-      Sam: "Add eyebrow THE CLUB. (Remove big DROPS) — LEARN from a gig, a match, a holiday
-      that shuts down the city - automatically dropped into your calendar. You can even buy
-      the tickets!"
+      THE SIDE DOOR, and it is last of the four on purpose.
 
-      Same move as ASK, and the same reason: DROPS is a word DUB uses, not one a stranger
-      arrives with. The verb LEARN opens the headline instead, because what this card is
-      actually offering is a reason the night is better rather than a feature with a name.
+      This was the pitch — step one of three, "Build your legend from VIBES you have seen a
+      hundred times" — and the Legend it promised was the price of the Club. Neither is true
+      now: the Club is where a new member lands, and the Legend is an optional card inside
+      it. So VIBES stops arguing for the product and becomes the fun way in: the lines you
+      already carry around, and the word or two in each that works at a café counter too.
+
+      THE SONGS YOU KNOW IS STILL NOT BOLD: the three before it are titles, and it is not.
+      The list keeps the shape scripts/vocabulary-check.mts exempts — a list of what a vibe
+      can BE, not DUB calling itself a product about songs.
+
+      GOOSE STAYS, because it is the strongest single specimen: "Talk to me, Goose" is the
+      line everybody can hear in their head, and comigo comes out of it into three
+      sentences somebody would actually use.
     */
-    eyebrow: 'THE CLUB',
-    /*
-      NO CITY HERE, because none has been chosen yet.
-
-      Sam: "We need to remove 'in Lisbon' as we haven't selected it yet." This card is
-      screen six of the intro and the selector is on screen seven, so a stranger was being
-      told what is on in a city they had not picked — the same fault as "Inside is the
-      Portuguese", caught and fixed across the other cards in this file and missed here.
-
-      "Your city" rather than a blank: the card still has to say what a drop is ABOUT, and
-      the possessive is true before the choice and after it. Every other screen reads the
-      chapter and names the place; this one runs before there is a chapter to read.
-    */
-    /*
-      AND WHAT YOU DO ABOUT IT, which the old line stopped short of.
-
-      Sam: "LEARN from what is actually on in your city, what to say when you get there,
-      invite someone and buy tickets!" The headline said what a drop KNOWS — what is on,
-      what to say — and left out the two things that make it a night rather than a
-      lesson: somebody comes with you, and you have tickets. Both are real: the invite is
-      the share sheet and the tickets are the drop's own link.
-    */
-    headline:
-      'LEARN from a gig, a match, a holiday that shuts down the city — automatically dropped into your calendar.',
-    /*
-      Sam's wording. The old line described the drop's LIFECYCLE — when it arrives and
-      when it goes — which is a fact about the feed rather than a reason to want one.
-      This says what it is for: the thing is on, you learn from it, and the night is
-      better for it.
-    */
-    body: 'You can even buy the tickets!',
-    /*
-      Whatever is genuinely on, with its real date.
-
-      Empty when nothing is live, which is the honest outcome and the one worth having: a
-      card promising live events while showing none is the exact failure this whole sequence
-      is meant to avoid.
-    */
-    shows: { kind: 'drop' },
-  },
-  {
-    /*
-      WHERE ALL OF IT GOES, which nothing said anywhere.
-
-      The stages — Basics, Getting around, Being understood, Conversing, Leading — existed
-      in exactly one place: the function that computes them. They were never named to a
-      learner, never explained, and the bar on Yours sat under one of them with no
-      indication it was a rung on anything. Sam, looking straight at it: "I had no idea the
-      being understood was a progress bar to another level."
-
-      So this card is the ladder, before anybody starts climbing it. It goes last in the
-      sequence, after the cards that show what there IS to do, because it is the answer to
-      the question those raise: what does any of this add up to?
-
-      THE POINT IS THAT THE FUN IS THE MECHANISM, not a sweetener on top of one. A film
-      quote, a night out, a cheat sheet you keep — every one of them moves the same number,
-      and the number is what you can do rather than how often you turned up. That is the
-      claim this product makes and it has never been made out loud.
-    */
-    id: 'intro_stages',
-    image: 'intro_arrival',
-    /*
-      Sam's own words, on all three lines.
-
-      "WHERE IT GOES" and "everything you do here moves one number" described the
-      MECHANISM — the stage count — and led with the thing the screen is least interested
-      in. What somebody wants at this point is what they get and how they learn, so that
-      is what the eyebrow and the headline now say, and the number is left to the list
-      underneath, which shows it rather than announcing it.
-    */
-    /*
-      THE CLAIM, SAID AS A CLAIM.
-
-      Sam's three lines, and they invert what was here. WHAT YOU GET / "And how you learn"
-      was a label over a label: the eyebrow announced a list and the headline announced
-      the list's second half, so the loudest type on the card said nothing at all while
-      the actual argument — no streaks, no emojis — sat four lines down in the body where
-      nobody reads it.
-
-      "THE REWARD IS GETTING THERE, NOT EMOJIS" is the argument, so it goes in the pillar.
-      It is the one sentence in the sequence that says what DUB refuses to do, and every
-      other product in the category does the opposite loudly.
-
-      "KEEP BUSY LEARNIN'" rides as the headline under it, which is where the list that
-      follows gets its instruction — the stages underneath are the busy, and the apostrophe
-      is Sam's.
-    */
-    /*
-      Sam: "Add eyebrow THE CLUB. Your REWARD is the fun of getting there, not Emojis!"
-
-      The pillar was the argument, said at four lines of headline type, and it was the right
-      argument on the wrong card — this is the sixth screen of six, where somebody is
-      deciding rather than being convinced. THE CLUB puts it with ASK and DROPS as a thing
-      the Club holds, and the claim moves into the headline where it is still the loudest
-      sentence without being the loudest object.
-    */
-    eyebrow: 'THE CLUB',
-    /*
-      THE HEADLINE IS NOW THE DESTINATION, because the instruction became the button.
-
-      "Keep busy learnin'" sat here as a second, quieter claim, and Sam moved it: "Move
-      this to a round CTA at the end of the screen and change to Get Busy Learnin'." It
-      reads better as something you can act on than as a line you pass on the way down, and
-      the card now ends on a way in rather than on the last rung of a ladder.
-
-      What takes its place says where the ladder goes, which is the one thing the list
-      underneath cannot say about itself now the explanations are off it. The apostrophe in
-      the button is Sam's.
-    */
-    headline: 'Your REWARD is the fun of getting there, not Emojis!',
-    /*
-      DROP IN WHENEVER — the permission, which the old body buried under its own refusals.
-
-      Sam: "Drop into your CLUB whenever you like - no streaks required. Learn as you
-      live, relate to Vibes, locals knowledge, tailored events and people like you."
-      The line it replaces opened on three things DUB does not do before it got to one it
-      does. The pillar now carries the refusal, so the body is free to be the offer.
-    */
-    body: 'Drop into **DUB Club** whenever you like — no streaks required. You learn as you live: vibes, local knowledge, events picked for you, and people like you.',
-    shows: { kind: 'stages', cta: { over: 'GET', label: 'Busy Learnin’' } },
+    eyebrow: 'FOR FUN',
+    headline: 'And a side door: lines you’ve heard a hundred times.',
+    body: '**Top Gun**, **Bridget Jones**, **Bond**, the songs you know. You recognise the line, and keep a word or two that works at the café counter too.',
+    shows: { kind: 'unpack', root_id: 'tg_goose' },
   },
 ]
 /*
-  REMINDERS IS GONE, and it was the last card in the sequence.
+  GONE IN THE LISBON PASS: YOUR LEGEND, THE CLUB, AND THE LADDER.
 
-  Sam struck it through in the intro flow deck with one word beside it: Remove. The card
-  was good and the argument for it is still in the history — "the thing that arrives on a
-  Tuesday because you live here now", three small concrete lines rather than a description
-  of them — and it is the wrong thing for a stranger to be reading in the last minute
-  before the one decision.
+  The three said one sentence across three screens — build your Legend from vibes, your
+  Legend earns you the Club, drop into the Club whenever you like — and the ladder card
+  after them put YOUR LEGEND on its first rung. That sentence is no longer true. A new
+  member lands in the Club after set-up, on the visitor path, and the Legend is an optional
+  "introduce yourself" card inside it. Keeping the cards and softening a word would have
+  left the sequence promising a toll the product does not charge.
 
-  Everything else in the sequence is something a person gets by joining. REMINDERS was
-  about what keeps arriving AFTER they have joined, which is a reason to stay rather than a
-  reason to start, and it sat between WHAT YOU GET — the summary of the offer — and the
-  card that asks for the answer. So the pitch landed, and then one more card happened.
+  What they said that still holds moved: "no streaks" and "drop in whenever" are what the
+  Club itself says once you are in it; the meet-up and the faces are Club content.
 
-  The reminders themselves are not lost. They are what the Club's rooms are made of, and
-  the three specimen lines that stood here are the same kind of line every drop and
-  situation already carries.
+  REMINDERS, CHEATS and SIXTY SECONDS went in earlier passes; their notes are in history.
 */
 
 /**
- * Screen eight, woven into the sequence rather than declared in it.
+ * The last screen, woven into the sequence rather than declared in it.
  *
- * ONE DECISION is the set-up card — a form that answers back rather than an argument —
- * which is why it is spliced in here instead of sitting in the list above with the six
- * that are copy. It is last because last is what it means: by the time somebody reaches
- * it they have made both gestures, seen what a vibe is, what a Legend is, what ASK does
- * and what is on in Lisbon. Then one decision, and tapping OPEN ends the intro.
- *
- * It follows DROPS because DROPS is the final card now. It used to follow `intro_share`,
- * the WITH MATES card, which no longer exists — that card, THE FOUR RS and the collision
- * went in the same pass that took the sequence to eight screens.
+ * ONE DECISION is the set-up card — a form that answers back rather than an argument. It
+ * opens on "Visiting Lisbon?" with yes as the one-tap answer, and staying or moving one
+ * row underneath. Then a name, and the learner is in the Club.
  */
 /**
  * THE DEMO IS NOT WOVEN IN.
  *
- * `how_it_works` — the playable three-beat DemoCard — used to be spliced in after the
- * VIBES card, back when the sequence opened on "DUB — your travel companion" and nothing
- * demonstrated anything for six cards. It was the only thing showing Portuguese being
- * built, and it was seventh.
- *
- * VIBES carries the Goose unpack itself now, so weaving the explainer in would replay the
- * same demonstration on the very next card — which is the duplication this rework exists
- * to remove.
- *
- * DemoCard itself stays: it is the /vibes experience and its beat structure works there.
- * What stops is the splice into the showcase feed.
+ * VIBES carries the Goose unpack itself, so splicing the three-beat DemoCard in after it
+ * would replay the same demonstration on the very next card. DemoCard stays: it is the
+ * /vibes experience.
  */
 export const INTRO_DEMO_AFTER: string | null = null
 /*
-  ONE DECISION follows DROPS, and it now carries the language question itself.
-
-  The selector was a card of its own here for one release — `intro_choose`, ninth, right
-  after OPEN. That put it in the right place in the sequence and the wrong place in the
-  logic: the set-up card's own form asks why and who, and BOTH name the answer the
-  selector had not yet been given. "What brings you to Lisbon?" interpolates the city;
-  "the first thing you will say in Portuguese is your own name" names the language.
-
-  So it moved INSIDE the card as its first step — choose, then why, then who — and the
-  separate card went. Sam: "move language selector to its logical slot so its dependants
-  follow."
-*/
-/*
-  AFTER THE LAST PITCH CARD, whichever that now is.
-
-  This named intro_drops, then intro_reminders. REMINDERS has been removed from the deck,
-  so the card that closes the pitch is WHAT YOU GET — the one that says the reward is
-  getting there rather than emojis, and summarises how the learning works. That is the
-  right note to ask the question on: the offer has just been stated in full.
+  AFTER THE LAST PITCH CARD, which is the side door now.
 
   Named rather than computed from the array's end on purpose: which card closes the pitch
   is an editorial decision, and a constant that quietly follows the last element would
   change meaning every time somebody appended one.
 */
-export const INTRO_SETUP_AFTER = 'intro_stages'
+export const INTRO_SETUP_AFTER = 'intro_vibes'

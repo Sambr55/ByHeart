@@ -738,6 +738,14 @@ function Landing() {
           {LANDING.strapline}
         </p>
         {/*
+          AND WHERE, under the promise: the door leads with Lisbon now. Smaller than the
+          strapline and white at 85% on the scrim, which is the ink every other line on a
+          photograph in this product uses.
+        */}
+        <p data-testid="landing-support" className="text-balance text-base text-white/85">
+          {LANDING.support}
+        </p>
+        {/*
           Not the shared Cta: that is built for a sand ground and an accent fill, and on a
           photograph the thing that reads is white on nothing. The iOS unlock still rides
           on it — the first tap of a session is where the browser decides whether this

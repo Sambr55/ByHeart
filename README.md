@@ -1,11 +1,26 @@
-# DUB — European Portuguese through culture you already know
+# DUB — the European Portuguese you need to get about Lisbon
 
-Every big language app teaches Brazilian Portuguese. DUB teaches the European one, and it
-teaches it through things a person already carries around: a Bond title, a Bridget Jones
-disaster, a Duran Duran gig, a Beatles single. The cultural hook is scaffolding, and the
-whole method is built around taking it away again.
+*Find Yourself in Language.*
 
-**81 roots · 12 crates · 149 pieces · 65 collisions.**
+Somebody visiting Lisbon needs a small amount of Portuguese, badly, in specific places: the
+café counter, the metro gate, the pharmacy, the table where the bill never comes. DUB is
+built around those rooms. After a one-question set-up — *Visiting Lisbon?* — a new member
+lands in the Club, on a visitor path: **arrive · coffee & food · get about · see the city ·
+when it goes wrong**, plus whatever is actually on in Lisbon that week.
+
+    Um café, por favor.            An espresso, please.
+    Desculpe, onde fica o Chiado?  Excuse me, where is the Chiado?
+
+Every big language app teaches Brazilian Portuguese. DUB teaches the European one, in the
+register Lisbon actually uses.
+
+The fun side door is the culture people already carry around — a Bond title, a Bridget
+Jones disaster, a Duran Duran gig, "Talk to me, Goose." Those are the **vibes**: the
+cultural hook is scaffolding, and the method is built around taking it away again. The
+**Legend** — seven lines about yourself, said cold — is an optional "introduce yourself"
+card inside the Club, not a toll on the way in.
+
+**120 roots · 14 vibes · 226 pieces · 68 collisions**, as of 2026-11-01 (`content/roots.ts`).
 
 ## The idea, in four beats
 
@@ -45,8 +60,8 @@ writing a loss, and `scripts/merge-test.mts` runs the real shapes through it.
 | Route | What |
 | --- | --- |
 | `/` | The front door — or Dub Club, for anybody who has been here before |
-| `/club` | Dub Club: what you can say, and three to five moves worth making |
-| `/crates` | The picker, grouped by what you can actually open |
+| `/club` | Dub Club: where a new member lands — the Lisbon visitor path, what is on, and the optional Legend |
+| `/crates` | The vibes picker, grouped by what you can actually open |
 | `/vocab` | The library: every word DUB teaches, and which are yours |
 | `/line` | One sentence a morning, chosen from what you own |
 | `/drops` | Live, expiring, never gated |

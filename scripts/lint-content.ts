@@ -1072,6 +1072,7 @@ for (const e of EXAMPLES) {
     const doorText: [string, string][] = [
       ['strapline', LANDING.strapline],
       ['cta', LANDING.cta],
+      ['support', LANDING.support],
       ['hero_alt', LANDING.hero_alt],
     ]
     for (const [where, line] of doorText) {

@@ -113,7 +113,8 @@ async function main() {
   await page.waitForTimeout(700)
   const gated = await page.evaluate(() => document.body.innerText)
   if (/Pick a vibe/.test(gated)) problems.push('/vibes bypassed set-up with cleared storage')
-  if (!/What brings you to/i.test(gated)) {
+  /* Set-up opens on "Visiting Lisbon?" since the Lisbon pass; the old question is kept as an alternative. */
+  if (!/Visiting \w[\w ]*\?|What brings you to/i.test(gated)) {
     problems.push('/vibes with cleared storage did not land on set-up; got: ' + gated.slice(0, 80))
   }
 

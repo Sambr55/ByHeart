@@ -20,6 +20,7 @@
 import { chromium, type Page } from 'playwright'
 import { readFileSync } from 'node:fs'
 import { INTRO_CARDS } from '../content/intro'
+import { CHAPTERS } from '../content/chapters'
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3111'
 const problems: string[] = []
@@ -123,8 +124,16 @@ const CLAIMS: { name: string; says: RegExp }[] = [
     way of wording it. Checked against the rendered feed before the pattern was changed,
     which is the rule at the top of this block.
   */
-  { name: 'you understand more than you can say', says: /(understand more than you can say|you recognise it)/i },
-  { name: 'the Legend is the way in', says: /(Seven questions a stranger will ask you|Build your legend)/i },
+  /* "You recognise the line" since the Lisbon pass, where VIBES became the side door. */
+  { name: 'you understand more than you can say', says: /(understand more than you can say|you recognise (it|the line))/i },
+  /*
+    THE WAY IN IS LISBON NOW, not the Legend.
+
+    This was "the Legend is the way in", matched on "Build your legend" — the sentence the
+    owner retired when the Legend became an optional card inside the Club. The claim that
+    replaced it is the visitor path: the rooms somebody visiting Lisbon will stand in.
+  */
+  { name: 'the rooms a visitor stands in', says: /rooms you(’|'| wi)ll actually stand in/i },
   /*
     THE CLAIM IS THAT IT IS REAL, not that it is Lisbon.
 
@@ -200,39 +209,43 @@ for (let i = 0; i < 4; i++) {
 }
 
 /*
-  NO INTRO CARD NAMES A LANGUAGE OR A CITY, which content/intro.ts states as a rule and
-  had never been enforced.
+  THE INTRO LEADS WITH LISBON, AND NAMES NO CITY THAT IS NOT OPEN.
 
-  Every card in that file is met before the set-up card, which is where the language and
-  the city are chosen. So copy naming either is asserting an answer to a question nobody
-  has been asked — reported twice, once for the language ("you are assuming Portuguese
-  before the language has been selected") and once for the city ("We need to remove 'in
-  Lisbon' as we haven't selected it yet"). The second was still live in a headline and
-  pinned there by this file's own pattern.
+  This used to assert the opposite — that no card names a language or a city — because
+  every card was met before set-up chose either, and the pitch was the films and songs you
+  already know. The owner reversed the pitch: DUB is the European Portuguese a visitor needs
+  to get about Lisbon, and set-up opens on "Visiting Lisbon?". So the city is the claim now,
+  and a sequence that will not say it is hiding the one thing a visitor came in for.
 
-  COPY ONLY, never specimens. A card SHOWING "Onde é o concerto?" is demonstrating what the
-  product does with a real line, and a demonstration has to be in some language to be one
-  at all. That distinction is the rule in intro.ts and it is the rule here.
+  What is still worth holding is the half that was always the real fault: a card promising
+  a place DUB has not built. The open cities come from CHAPTERS, so the day Porto opens
+  this lets it be named without anybody editing a pattern.
+
+  COPY ONLY, never specimens — a card SHOWING "Um café, por favor." is demonstrating what
+  the product does with a real line.
 */
-console.log('\nthe corridor assumes nothing it has not asked\n')
+console.log('\nthe corridor leads with the city, and only an open one\n')
 {
-  const ASSUMES = /\b(Lisbon|Portugal|Portuguese|Porto|Algarve|French|Spanish|Italian)\b/
-  const named: string[] = []
+  const open = CHAPTERS.filter((c) => c.open).map((c) => c.city)
+  const closed = CHAPTERS.filter((c) => !c.open).map((c) => c.city)
+  const copy = (card: (typeof INTRO_CARDS)[number]) =>
+    [card.eyebrow, card.headline, card.body].join(' ')
+  const leads = INTRO_CARDS.find((c) => open.some((city) => copy(c).includes(city)))
+  ok(
+    'a card names the open city',
+    Boolean(leads),
+    leads ? leads.id + ': ' + leads.headline : 'none of ' + INTRO_CARDS.length + ' cards says where',
+  )
+  const strays: string[] = []
   for (const card of INTRO_CARDS) {
-    for (const [field, value] of [
-      ['eyebrow', card.eyebrow],
-      ['headline', card.headline],
-      ['body', card.body],
-    ] as const) {
-      if (typeof value === 'string' && ASSUMES.test(value)) {
-        named.push(card.id + '.' + field + ': ' + value)
-      }
+    for (const city of closed) {
+      if (new RegExp('\\b' + city + '\\b').test(copy(card))) strays.push(card.id + ': ' + city)
     }
   }
   ok(
-    'no card names a language or a city',
-    named.length === 0,
-    named.length ? named.join(' / ') : INTRO_CARDS.length + ' cards, none assuming an answer',
+    'and none names a city that is not open',
+    strays.length === 0,
+    strays.length ? strays.join(' / ') : 'closed: ' + closed.join(', '),
   )
 }
 

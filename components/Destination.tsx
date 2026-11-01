@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { CHAPTERS } from '@/content/chapters'
+import { CHAPTERS, DEFAULT_CHAPTER } from '@/content/chapters'
+import { VISITING } from '@/content/front-door'
 import { DEFAULT_PAIR } from '@/content/pairs'
+import { GOAL_QUESTION } from '@/content/profile'
 import { track } from '@/engine/analytics'
-import { setChapter } from '@/engine/learner'
+import { resetLearnerCache, setChapter, setProfile, setPurpose } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
 
 /**
@@ -100,3 +102,104 @@ export function Destination({ onDone }: { onDone?: () => void } = {}) {
     </div>
   )
 }
+
+/**
+ * "Visiting Lisbon?" — where and why in one answer, with yes as the lead.
+ *
+ * WHY IT IS ONE QUESTION NOW. Set-up asked a language (one is built), a city (one is open)
+ * and then why, over five equal rows. Two of those were confirmations wearing the clothes
+ * of a question, and the third buried the answer most people have under four that few do.
+ * DUB is for people visiting Lisbon, so the question names the city and the yes is the
+ * largest thing on the card; the other reasons are still here, one row underneath, because
+ * somebody staying or moving needs a different Club and should not have to argue for it.
+ *
+ * ONE TAP WRITES EVERYTHING THE THREE USED TO. The pair and the chapter first, because the
+ * pair decides which learner record is read — and the cached record is dropped between
+ * them, which is the fault components/Choose.tsx records finding the hard way. Then the
+ * purpose the Club filters on and the goal that says the question was answered, exactly as
+ * SetUp's why step wrote them, so nothing downstream can tell the difference.
+ *
+ * THE TESTIDS FOLLOW THE REASON (`setup-why-trip`, `setup-why-moving`), as they always
+ * did, so the checks that answer set-up keep answering it.
+ *
+ * NOTHING IS PRE-SELECTED. Leading is not choosing for somebody.
+ */
+export function Visiting({
+  onDone,
+  onSand = true,
+}: {
+  onDone?: () => void
+  /* Whether this sits on the pane's sand or on the card face's photograph. */
+  onSand?: boolean
+} = {}) {
+  const [chosen, setChosen] = useState<string | null>(null)
+  const lead = GOAL_QUESTION.options.find((o) => o.purpose === 'visiting')
+  const rest = GOAL_QUESTION.options.filter((o) => o !== lead)
+
+  const pick = (o: (typeof GOAL_QUESTION.options)[number]) => {
+    if (chosen) return
+    setChosen(o.id)
+    setPair(DEFAULT_PAIR)
+    resetLearnerCache()
+    setChapter(DEFAULT_CHAPTER)
+    if (o.purpose) setPurpose(o.purpose)
+    setProfile('goal', o.id)
+    track('chapter_chosen', { chapter: DEFAULT_CHAPTER, locale: DEFAULT_PAIR.target_locale })
+    track('purpose_chosen', { purpose: o.purpose ?? 'none', goal: o.id })
+    /* Seen before it is acted on: the row goes blue, then the card moves on. 260ms is the settle. */
+    window.setTimeout(() => onDone?.(), 260)
+  }
+
+  const row = (picked: boolean) =>
+    'tap-target flex w-full flex-col gap-1 rounded border px-4 py-3 text-left transition ' +
+    (picked
+      ? 'border-accent bg-accent text-accent-ink'
+      : 'border-line ' +
+        (onSand ? 'bg-bg-elev text-fg hover:border-accent/50' : 'bg-[rgba(12,14,18,0.88)] text-white'))
+
+  return (
+    <div data-testid="visiting" className="flex flex-col gap-6">
+      {lead ? (
+        <button
+          type="button"
+          data-testid={'setup-why-' + lead.id}
+          aria-pressed={chosen === lead.id}
+          onClick={() => pick(lead)}
+          /*
+            THE YES IS SOLID BEFORE IT IS PRESSED, which is what leading means.
+
+            Every other row is a choice drawn as an object; this one is drawn as the answer
+            most people will give. Pressed, it gains the ring rather than changing colour,
+            so the acknowledgement still reads.
+          */
+          className={
+            'tap-target flex w-full flex-col gap-1 rounded border border-accent bg-accent px-4 py-6 text-left text-accent-ink transition ' +
+            (chosen === lead.id ? 'ring-2 ring-white' : '')
+          }
+        >
+          <span className="display text-2xl">{VISITING.yes}</span>
+          <span className="text-sm opacity-80">{VISITING.yes_sub}</span>
+        </button>
+      ) : null}
+      <div className="flex flex-col gap-3">
+        <p className={'eyebrow ' + (onSand ? 'text-muted' : 'text-white/80')}>{VISITING.or}</p>
+        <ul className="flex flex-col gap-1">
+          {rest.map((o) => (
+            <li key={o.id}>
+              <button
+                type="button"
+                data-testid={'setup-why-' + o.id}
+                aria-pressed={chosen === o.id}
+                onClick={() => pick(o)}
+                className={row(chosen === o.id)}
+              >
+                <span className="display text-base">{o.label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
