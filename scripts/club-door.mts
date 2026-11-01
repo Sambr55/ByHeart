@@ -205,7 +205,9 @@ console.log('\nthe card has no say in it\n')
 console.log('\nthe starter set\n')
 {
   const ids = new Set([...SITUATIONS, ...LISBON_VISITING_1].map((x) => x.id))
-  ok('five rooms are free', FREE_ROOMS.length === 5, FREE_ROOMS.join(', '))
+  /* Five first-day rooms plus the emergency room, which belongs to the survival kit. */
+  ok('five first-day rooms and the emergency room are free', FREE_ROOMS.length === 6 && FREE_ROOMS.includes('lisbon_emergencia'), FREE_ROOMS.join(', '))
+  ok('the first unit of the path can be started free', FREE_ROOMS.includes('lisbon_aeroporto'))
   const missing = FREE_ROOMS.filter((id) => !ids.has(id))
   ok('every free room exists', missing.length === 0, missing.join(', ') || 'all found')
   ok('isFreeRoom agrees with the list', FREE_ROOMS.every(isFreeRoom) && !isFreeRoom('lisbon_fado'))
@@ -377,4 +379,4 @@ if (problems.length) {
   for (const p of problems) console.log('  ✗ ' + p)
   process.exit(1)
 }
-console.log('\nthe way in is set-up, the welcome is never taken back, and five rooms are free')
+console.log('\nthe way in is set-up, the welcome is never taken back, and the first day is free')
