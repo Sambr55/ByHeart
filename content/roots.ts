@@ -7152,10 +7152,11 @@ export function linesFor(pieceId: string, limit = 6, ownCrates: CultureFamily[] 
   /*
     And the room's own lines, for a word a room handed over.
 
-    No root shows "casa de banho", so this list was empty for every room word and its pane
-    had nothing to say with it — the one place in the library that is meant to be the
-    payoff. The room's lines are exactly that, and they are the sentences the learner was
-    taught it in. Mine by definition when owned: it is only owned because they did the room.
+    Most room words appear in no root branch at all — "roubaram-me", "o talão", "meia
+    dose" — so this list was empty and the pane had nothing to say with them, in the one
+    place in the library that is meant to be the payoff. The room's lines are exactly that,
+    and they are the sentences the learner was taught it in. Mine by definition when owned:
+    it is only owned because they did the room.
   */
   const room = PIECES[pieceId].room
   const sit = room ? SITUATIONS.find((s) => s.id === room) : undefined
