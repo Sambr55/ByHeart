@@ -233,10 +233,10 @@ export const PAIR_STEP = {
 export const VISITING = {
   eyebrow: 'ONE DECISION',
   headline: (city: string) => 'Visiting ' + city + '?',
-  body: 'Say yes and the Club opens on the rooms a visitor stands in: arriving, coffee and food, getting about. Here for longer? That’s just below.',
+  body: 'Say yes and the Club opens on the rooms a visitor stands in: arriving, coffee and food, getting about. Staying longer, or moving here? That’s just below.',
   yes: 'YES, I’M VISITING',
   yes_sub: 'days or weeks, not years',
-  or: 'HERE FOR LONGER?',
+  or: 'NOT VISITING?',
 } as const
 
 export const WELCOME = {
