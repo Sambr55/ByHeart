@@ -100,7 +100,7 @@ function Node({ n }: { n: PathView['units'][number]['nodes'][number] }) {
         aria-hidden
         className={
           'eyebrow rounded-full px-3 py-1 ' +
-          (state === 'next' ? 'nudge-up bg-telha text-white' : 'invisible')
+          (state === 'next' ? 'nudge-up bg-telha text-accent-ink' : 'invisible')
         }
       >
         Start
@@ -117,21 +117,21 @@ function Node({ n }: { n: PathView['units'][number]['nodes'][number] }) {
           <KindIcon kind={room.kind} />
         )}
         {cold ? (
-          <span className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-bg-elev bg-telha text-white">
+          <span className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-bg-elev bg-telha text-accent-ink">
             <StarIcon filled className="h-4 w-4" />
           </span>
         ) : null}
       </span>
       <span
         className={
-          'mt-1 text-balance text-center text-xs font-semibold leading-tight ' +
+          'mt-1 text-balance rounded-md bg-bg px-1 text-center text-xs font-semibold leading-tight ' +
           (state === 'next' ? 'text-fg' : paid ? 'text-muted' : 'text-fg')
         }
       >
         {room.title}
       </span>
       {paid ? (
-        <span aria-hidden className="eyebrow flex items-center gap-1 rounded-full border-2 border-line-strong px-3 py-1 text-fg">
+        <span aria-hidden className="eyebrow flex items-center gap-1 rounded-full border-2 border-line-strong bg-bg px-3 py-1 text-fg">
           <LockIcon className="h-3 w-3" />
           Unlock
         </span>
