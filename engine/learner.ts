@@ -1640,6 +1640,30 @@ export function acquirePiece(id: PieceId, family: string) {
 }
 
 /**
+ * Bank the words a room declares, once each.
+ *
+ * The room-shaped twin of `acquirePiece`, and the half `transferPieces` below promised:
+ * "rooms will hand over new vocabulary when they say which words they teach". They say so
+ * now (Situation.pieces), so this is the one place that takes them.
+ *
+ * SKIPS WHAT IS ALREADY OWNED, which acquirePiece does not need to and this does. A room
+ * can be done twice, and a second `acquire` after a clean transfer would add a perfect
+ * first-try event on top of a word that is already YOURS — harmless to deriveState today,
+ * but it is noise in the evidence and a word met once should read as met once. A piece a
+ * root already gave them keeps the root as its source for the same reason.
+ *
+ * `room` is recorded as the culture context: where the word came from, which for these
+ * is a counter in Lisbon rather than a film.
+ */
+export function acquireRoomPieces(ids: PieceId[], room: string) {
+  const owned = getLearner().inventory
+  for (const id of ids) {
+    if (owned[id]) continue
+    acquirePiece(id, room)
+  }
+}
+
+/**
  * A word used away from where it was learned, which is what makes it yours.
  *
  * THE LIBRARY WAS A LIST OF WORDS PERMANENTLY MARKED NEW. `acquirePiece` hardcodes a
@@ -1657,8 +1681,8 @@ export function acquirePiece(id: PieceId, family: string) {
  * it from the sentence would bank `bom`, `um` and `com` off any errand that happens to
  * contain them — inventing an acquisition out of a word-match, which is the class of bug
  * that put the Club off the ladder in the first place. So this reinforces what is already
- * owned and claims nothing new. Rooms will hand over new vocabulary when they say which
- * words they teach, and not before.
+ * owned and claims nothing new. Rooms hand over new vocabulary by saying which words they
+ * teach — see `acquireRoomPieces` above, which Errand calls first.
  */
 export function transferPieces(ids: PieceId[]) {
   const owned = getLearner().inventory

@@ -1,5 +1,6 @@
 import { BOB } from '@/content/bob'
 import { NUMBER_WORDS } from '@/content/numbers'
+import { SITUATIONS, type Situation } from '@/content/situations'
 
 /**
  * The cultural root — the unit the whole product is built from (spec Appendix A).
@@ -6261,10 +6262,29 @@ export function rootById(id: string): Root | undefined {
   return ROOTS.find((r) => r.root_id === id)
 }
 
+/**
+ * Where a piece first comes from: a vibe, or the Club.
+ *
+ * 'club' is not a CultureFamily and deliberately not added to that union. A culture family
+ * is a crate — it has a title, an image, a road position, a list of roots — and every
+ * Record<CultureFamily, …> in the product would have had to invent an empty entry for a
+ * thing that is not one. A room is a different kind of source, so it gets its own value
+ * and `room` says which room.
+ */
+export type PieceFamily = CultureFamily | 'club'
+
 /** Every distinct piece the graph can teach, and where it first comes from. */
 export interface Piece extends Omit<Extract, 'id'> {
-  family: CultureFamily
+  family: PieceFamily
   rung: Rung
+  /**
+   * The Situation that hands this piece over, when it was a room rather than a root.
+   *
+   * Only set on pieces a room DECLARES as its own (see Situation.pieces). A root piece a
+   * room merely reuses keeps the root as its source — the library says where you could
+   * first have met it, and that is still the film.
+   */
+  room?: string
 }
 
 export const PIECES: Record<string, Piece> = (() => {
@@ -6326,8 +6346,51 @@ export const PIECES: Record<string, Piece> = (() => {
       rung: 1,
     }
   }
+  /*
+    AND THE ROOMS, which used to hand over nothing.
+
+    A room's lines were recorded as proof and never became library pieces unless a film
+    root happened to teach the same word: piecesIn can only match what is already here.
+    So somebody could stand at a pharmacy counter, say "Não me sinto bem" cold, and find
+    nothing in the library afterwards — the Club taught them a sentence and the product
+    forgot the words in it.
+
+    A room now declares the two or three words worth keeping (Situation.pieces), and the
+    ones it AUTHORS are filed here like any other piece. Added after the roots and the
+    numbers and never over them: a root that teaches the same id keeps it, and the lint
+    fails the collision so it is fixed at the source rather than silently shadowed. A room
+    that wants a word a root already teaches names the id instead of re-authoring it.
+
+    Their rung defaults to the room's, which is the same rule a root's extracts follow.
+  */
+  for (const sit of SITUATIONS) {
+    for (const p of sit.pieces ?? []) {
+      if (typeof p === 'string') continue
+      if (out[p.id]) continue
+      const { id, ...rest } = p
+      out[id] = { ...rest, family: 'club', rung: p.rung ?? sit.rung, room: sit.id }
+    }
+  }
   return out
 })()
+
+/**
+ * The piece ids a room hands over when it is done — its own and the ones it reuses.
+ *
+ * Filtered to ids that exist, so a typo in a block costs that one word rather than banking
+ * an inventory key the library cannot render. The lint reports the typo.
+ */
+export function roomPieceIds(sit: Pick<Situation, 'pieces'>): string[] {
+  return [...new Set((sit.pieces ?? []).map((p) => (typeof p === 'string' ? p : p.id)))].filter(
+    (id) => PIECES[id],
+  )
+}
+
+/** The room that authored a piece, when a room did. */
+export function roomOf(pieceId: string): Situation | undefined {
+  const room = PIECES[pieceId]?.room
+  return room ? SITUATIONS.find((s) => s.id === room) : undefined
+}
 
 /**
  * §11 — collisions. Each one must use pieces the learner has actually met, from at
@@ -7004,16 +7067,25 @@ export function rungReached(
  * sentence still counts.
  */
 export function piecesIn(sentence: string): string[] {
-  const words = new Set(
-    fold(sentence)
-      .replace(/[.,!?;:()"'¿¡]/g, ' ')
-      .split(/\s+/)
-      .filter(Boolean),
-  )
+  const flat = fold(sentence)
+    .replace(/[.,!?;:()"'¿¡—–]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+  const words = new Set(flat)
+  /*
+    PHRASES TOO, now that rooms bring them.
+
+    A whole-word set can never contain "casa de banho" or "por favor", so every multi-word
+    piece was invisible here — harmless while only roots fed this, and a hole once a room's
+    best piece is usually a phrase. Matched against the joined words, padded, so it is still
+    whole-word: "de banho" cannot match inside "debanho".
+  */
+  const joined = ' ' + flat.join(' ') + ' '
   const out: string[] = []
   for (const [id, piece] of Object.entries(PIECES)) {
-    const form = fold(String(piece.target).replace(/…/g, '').trim())
-    if (form && words.has(form)) out.push(id)
+    const form = fold(String(piece.target).replace(/[…?]/g, '').trim())
+    if (!form) continue
+    if (form.includes(' ') ? joined.includes(' ' + form + ' ') : words.has(form)) out.push(id)
   }
   return out
 }
@@ -7076,6 +7148,22 @@ export function linesFor(pieceId: string, limit = 6, ownCrates: CultureFamily[] 
       if (hits.some((h) => h.branch.target === b.target)) continue
       hits.push({ branch: b, mine: own.has(r.culture_family) })
     }
+  }
+  /*
+    And the room's own lines, for a word a room handed over.
+
+    No root shows "casa de banho", so this list was empty for every room word and its pane
+    had nothing to say with it — the one place in the library that is meant to be the
+    payoff. The room's lines are exactly that, and they are the sentences the learner was
+    taught it in. Mine by definition when owned: it is only owned because they did the room.
+  */
+  const room = PIECES[pieceId].room
+  const sit = room ? SITUATIONS.find((s) => s.id === room) : undefined
+  for (const l of sit?.lines ?? []) {
+    const b: Branch = { target: l.pt, en: l.en }
+    if (!branchShows(b, pieceId)) continue
+    if (hits.some((h) => h.branch.target === b.target)) continue
+    hits.push({ branch: b, mine: true })
   }
   return hits
     .sort((a, b) => Number(b.mine) - Number(a.mine))
