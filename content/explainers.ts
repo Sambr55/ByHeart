@@ -83,7 +83,15 @@ export interface Explainer {
  * The apostrophe is the typographic one (U+2019), like every other apostrophe in the copy;
  * scripts/copy-check.mts holds that line.
  */
-export const EXPLAINER_CTA = 'IT’S ALL ABOUT BUILDING YOUR LEGEND'
+/*
+  ON TO THE VIBES, since the Legend stopped being the point.
+
+  It read IT'S ALL ABOUT BUILDING YOUR LEGEND, from when the Legend was the price of the
+  Club. It is an optional card inside the Club now, and the two places this button still
+  stands — the Goose demo and set-up inside /vibes — both lead to the vibes, which are the
+  fun side door. So it says that.
+*/
+export const EXPLAINER_CTA = 'ON TO THE VIBES'
 
 /*
   The last button of the intro, which is an instruction rather than a label.
@@ -97,7 +105,10 @@ export const EXPLAINER_CTA = 'IT’S ALL ABOUT BUILDING YOUR LEGEND'
   eyebrow is a label. This is a call to action that happens to share the type scale, which
   is precisely the distinction EXPLAINER_CTA above already relies on.
 */
-export const DOOR_CTA = 'BUILD YOUR LEGEND'
+/*
+  INTO THE CLUB, where a new member lands now — the visitor path, not the Legend.
+*/
+export const DOOR_CTA = 'INTO THE CLUB'
 
 export const EXPLAINERS: Explainer[] = [
   {
@@ -131,13 +142,17 @@ export const EXPLAINERS: Explainer[] = [
   },
   {
     id: 'the_legend',
-    eyebrow: 'THE WAY IN',
+    /*
+      INTRODUCE YOURSELF, not THE WAY IN. The Legend is no longer the door to anything; it
+      is the optional card where you say who you are.
+    */
+    eyebrow: 'WHO YOU ARE',
     title: 'Seven questions a stranger will ask you.',
     blurb:
       'Your name, where you live, what you do, why you are here. Answered in Portuguese, out of language you own, with nothing on screen.',
     detail: {
       heading: 'Why it is the test',
-      body: 'Anybody can read a phrasebook out loud. The Legend is the minute about yourself you can say without assembling it first — which is the difference between having Portuguese and having a phone with Portuguese on it. It is also the only thing DUB has ever counted.',
+      body: 'Anybody can read a phrasebook out loud. The Legend is the minute about yourself you can say without assembling it first — which is the difference between having Portuguese and having a phone with Portuguese on it. It is optional, and it is yours whenever you want it.',
     },
     image: {
       src: '/lisbon/azulejo.jpg',
@@ -337,7 +352,7 @@ export const EXPLAINERS: Explainer[] = [
     eyebrow: 'SEE WHATS ON THE',
     title: 'CARDS',
     blurb:
-      'Everything you have learned so far is safely stored in your first card deck. Just tap on YOURS in the bottom menu and remind yourself of your Legend.',
+      'Everything you have learned so far is safely stored in your first card deck. Just tap on YOURS in the bottom menu and remind yourself of what you can say.',
     detail: {
       heading: 'What each deck is worth',
       body: 'Each Card you complete in the Club will be stored here. Each deck you complete will open up greater learning opportunities and more fun.',
@@ -429,7 +444,7 @@ export const EXPLAINERS: Explainer[] = [
       'Bring one of them and you will both have somewhere else to put it. One link, and they start where you started.',
     detail: {
       heading: 'What happens when they arrive',
-      body: 'You send a link from Yours. They land on the same first screen you did, with no account and nothing to pay, and they work out which film quotes they already half-know. When they get their Legend you will see it — and you will have somebody to use this on who is not a waiter being patient with you. If they stay, you both get a month of everything.',
+      body: 'You send a link from Yours. They land on the same first screen you did, with no account and nothing to pay, and they land in the same Lisbon rooms you did — and you will have somebody to use this on who is not a waiter being patient with you. If they stay, you both get a month of everything.',
     },
     image: {
       /*

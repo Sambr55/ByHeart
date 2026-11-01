@@ -5,9 +5,8 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { DemoCard } from '@/components/DemoCard'
 import { SayButton } from '@/components/SayButton'
-import { Destination } from '@/components/Destination'
+import { Destination, Visiting } from '@/components/Destination'
 import { AudioButton } from '@/components/AudioButton'
-import { Choose } from '@/components/Choose'
 import { CopyButton } from '@/components/CopyButton'
 import { chosenPair } from '@/engine/pair'
 import { labelForLocale } from '@/content/pairs'
@@ -3343,7 +3342,14 @@ export function Card({
                     than one tap later. Before the city is picked there is still nothing to
                     scroll past.
                   */}
-                  <Choose onSand={onSand} onDone={reveal} />
+                  {/*
+                    VISITING LISBON? in place of the language and city lists.
+
+                    One tap writes the pair, the chapter and the reason — see `Visiting` in
+                    components/Destination.tsx — so the pane opens straight on the name.
+                    Choose stays in the codebase for the day a second language opens.
+                  */}
+                  <Visiting onSand={onSand} onDone={reveal} />
                 </div>
               ) : card.kind === 'explainer' && card.explainer.id === 'how_the_calendar_works' ? (
                 /*

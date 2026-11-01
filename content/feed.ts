@@ -1,5 +1,6 @@
 import type { Genre } from '@/content/calendar'
-import { CHAPTERS, DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
+import { CHAPTERS, DEFAULT_CHAPTER, chapterById, type ChapterId } from '@/content/chapters'
+import { VISITING } from '@/content/front-door'
 import { generatedDrops } from '@/content/generated'
 import { recurringDrops } from '@/content/recurring'
 import { DROP_LEAD_DAYS, SETS, setPieces, type WordSet } from '@/content/roots'
@@ -1455,10 +1456,17 @@ export function cardFace(card: FeedCard): {
       more steps after this one, and a card that undercounts them is a card that makes the
       next screen feel like a delay.
     */
+    /*
+      VISITING LISBON? — the face asks the one question set-up opens on now.
+
+      The language and the city were confirmations of the only open answer, so the face
+      leads with the answer most people have and the Visiting component draws it. Copy from
+      VISITING in content/front-door.ts, so the face and SetUp's own why step cannot drift.
+    */
     return {
-      eyebrow: 'YOUR LANGUAGE',
-      title: 'What are we learning, and where?',
-      blurb: 'Pick the pair and the city. Everything DUB shows you comes from these two.',
+      eyebrow: VISITING.eyebrow,
+      title: VISITING.headline(chapterById(DEFAULT_CHAPTER).city),
+      blurb: VISITING.body,
       image: card.image,
     }
   }

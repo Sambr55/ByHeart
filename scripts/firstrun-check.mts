@@ -23,7 +23,6 @@ import { chromium, type Page } from 'playwright'
 import { DEFAULT_PAIR, pairId } from '../content/pairs'
 import { INTRO_CARDS, INTRO_SETUP_AFTER } from '../content/intro'
 import { ROOTS } from '../content/roots'
-import { cardFor } from '../content/legend'
 import { EXPLAINERS } from '../content/explainers'
 import { cardFace, explainerCards, setUpCard } from '../content/feed'
 
@@ -294,12 +293,21 @@ const titles = (await page.evaluate(
     Boolean(root && feedText.includes(root.target)),
     root ? named + ': ' + root.target : 'no such root: ' + named,
   )
-  const asks = cardFor(null).slice(0, 5).map((f) => f.ask)
-  const missing = asks.filter((a) => !feedText.includes(a))
+  /*
+    THE LISBON LINES, where the Legend's questions used to be.
+
+    The Legend card left the sequence when the Legend became an optional card inside the
+    Club, so its seven questions are no longer a specimen a stranger meets. What replaced it
+    is the city card, and the same property is asserted of it: whatever lines it declares
+    reach the screen, Portuguese and English both.
+  */
+  const lisbon = INTRO_CARDS.find((c) => c.shows?.kind === 'lines')
+  const lines = lisbon?.shows?.kind === 'lines' ? lisbon.shows.lines : []
+  const missing = lines.filter((l) => !feedText.includes(l.pt) || !feedText.includes(l.en))
   ok(
-    'and the Legend specimens are the questions it actually asks',
-    missing.length === 0,
-    missing.length ? 'not shown: ' + missing.join(', ') : asks.length + ' real questions',
+    'and the city specimens are real lines with their English',
+    lines.length > 0 && missing.length === 0,
+    missing.length ? 'not shown: ' + missing.map((l) => l.pt).join(', ') : lines.length + ' lines',
   )
 }
 

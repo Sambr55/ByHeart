@@ -35,7 +35,10 @@ export const BRAND = {
   description:
     // The sanctioned list, verbatim: naming ONE medium narrows the product to it, which
     // is what the lint is for. Naming the range is the opposite and is already allowed.
-    'Learn European Portuguese through films, music, books, TV, sport and culture you already know.',
+    //
+    // LISBON FIRST, since the pivot: the nouns a visitor searches for lead, and the
+    // cultural range is the fun way in rather than the pitch.
+    'The European Portuguese you need to get about Lisbon — the café, the metro, what is on this week — with films, music, books, TV, sport and culture you already know as the fun way in.',
   /** Named objects inside the product. */
   deckName: 'DUB DECK',
   inventoryName: 'Your Portuguese',
