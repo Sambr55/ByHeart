@@ -406,6 +406,25 @@ export const PARADIGMS: Paradigm[] = [
       imperative: 'percebe',
       imperative_negative: 'não percebas',
     }),
+  /* The two verbs the Club rooms brought in. `leva` is what a dish CONTAINS ("isto leva
+     peixe?") and `roubaram-me` is how a theft is reported — so neither arrived from a film,
+     and both were lemmas with no table under them until the rooms started banking words. */
+  v('levar', 'to take, to carry — and what a dish has in it',
+    { base: 'take', third: 'takes' },
+    { eu: 'levo', tu: 'levas', ele: 'leva', nos: 'levamos', eles: 'levam' },
+    {
+      past: { eu: 'levei', tu: 'levaste', ele: 'levou', nos: 'levámos', eles: 'levaram' },
+      imperfect: { eu: 'levava', tu: 'levavas', ele: 'levava', nos: 'levávamos', eles: 'levavam' },
+      imperative: 'leva',
+      imperative_negative: 'não leves',
+    }),
+  v('roubar', 'to steal, to rob',
+    { base: 'steal', third: 'steals' },
+    { eu: 'roubo', tu: 'roubas', ele: 'rouba', nos: 'roubamos', eles: 'roubam' },
+    {
+      past: { eu: 'roubei', tu: 'roubaste', ele: 'roubou', nos: 'roubámos', eles: 'roubaram' },
+      imperfect: { eu: 'roubava', tu: 'roubavas', ele: 'roubava', nos: 'roubávamos', eles: 'roubavam' },
+    }),
 
   // ------------------------------------------------------------------------- agreement
   /*

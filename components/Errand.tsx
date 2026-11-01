@@ -8,10 +8,17 @@ import { MiniBuild } from '@/components/Journey'
 import { CopyButton } from '@/components/CopyButton'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
-import { piecesIn } from '@/content/roots'
+import { piecesIn, roomPieceIds } from '@/content/roots'
 import { chapterById } from '@/content/chapters'
 import type { Situation } from '@/content/situations'
-import { loadLearner, recordProof, rememberFinishedCard, revealPieces, transferPieces } from '@/engine/learner'
+import {
+  acquireRoomPieces,
+  loadLearner,
+  recordProof,
+  rememberFinishedCard,
+  revealPieces,
+  transferPieces,
+} from '@/engine/learner'
 import { authoredLine } from '@/engine/showable'
 import type { Drop } from '@/content/drops'
 import { track } from '@/engine/analytics'
@@ -252,12 +259,23 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
       rung: situation.rung,
     })
     /*
+      FIRST, THE ROOM'S OWN WORDS, cold or not.
+
+      A room now says which two or three words it teaches (Situation.pieces), and they go
+      into the library here, before the reinforcement below — so a word that is new AND in
+      the release is owned by the time transferPieces looks, and comes out YOURS on a cold
+      claim rather than being skipped as not-yet-owned. Banked on the reveal as well:
+      being shown a word in a room is meeting it, and the reveal then marks it as needing
+      another look, which is the honest pair of facts.
+    */
+    acquireRoomPieces(roomPieceIds(situation), situation.id)
+    /*
       And the words in it, when it was said cold.
 
       Only on the cold claim: a sentence read off the screen demonstrates nothing about the
       words in it. `transferPieces` reinforces what the learner already owns and adds
-      nothing new — a room does not declare what it teaches, and guessing from the sentence
-      would bank every `bom` and `um` it happens to contain.
+      nothing new — guessing new words from the sentence would bank every `bom` and `um`
+      it happens to contain, which is why the room declares them above instead.
     */
     if (clean) transferPieces(piecesIn(situation.release.answer))
     /*

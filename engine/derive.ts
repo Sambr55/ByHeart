@@ -1,4 +1,4 @@
-import { COLLISIONS, CRATES, PIECES, type CultureFamily, type Piece } from '@/content/roots'
+import { COLLISIONS, CRATES, PIECES, roomOf, type PieceFamily, type Piece } from '@/content/roots'
 import {
   PARADIGM,
   PERSON_ORDER,
@@ -36,7 +36,7 @@ export interface DerivedCard {
   id: string
   kind: DerivedKind
   /** The piece they already have. */
-  from: { id: string; target: string; gloss: string; family: CultureFamily }
+  from: { id: string; target: string; gloss: string; family: PieceFamily }
   /**
    * Provenance, as a fragment that sits UNDER the eyebrow rather than repeating it.
    *
@@ -63,8 +63,17 @@ export interface DerivedCard {
   sources?: { target: string; vibe: string }[]
 }
 
-/** Which vibe it came from, said the way a person would say it. */
-function vibeName(family: CultureFamily): string {
+/**
+ * Which vibe it came from, said the way a person would say it.
+ *
+ * Or which room: a word banked at the pharmacy counter is provenance too, and "a vibe"
+ * would be telling somebody they learned it somewhere they never went.
+ */
+function vibeName(family: PieceFamily, pieceId?: string): string {
+  if (family === 'club') {
+    const room = pieceId ? roomOf(pieceId) : undefined
+    return room ? room.title : 'the Club'
+  }
   return CRATES.find((c) => c.id === family)?.title ?? 'a vibe'
 }
 
@@ -176,7 +185,7 @@ function nextPerson(
     id: 'derived_next_' + lemma + '_' + next,
     kind: 'next_person',
     from: { id: piece.id, target: piece.target, gloss: piece.gloss, family: piece.family },
-    because: piece.target.trim() + ' — ' + vibeName(piece.family),
+    because: piece.target.trim() + ' — ' + vibeName(piece.family, piece.id),
     target,
     en: englishFor(p, next),
     note: NOTE[next] ?? 'Same verb, a different person.',
@@ -251,7 +260,7 @@ function nearMiss(piece: Piece & { id: string }, ownedForms: Set<string>): Deriv
     id: 'derived_near_' + lemma,
     kind: 'near_miss',
     from: { id: piece.id, target: piece.target, gloss: piece.gloss, family: piece.family },
-    because: piece.target.trim() + ' — ' + vibeName(piece.family),
+    because: piece.target.trim() + ' — ' + vibeName(piece.family, piece.id),
     target: other,
     en: p.gloss,
     note,
@@ -301,7 +310,7 @@ function collisions(owned: Set<string>, done: Set<string>): DerivedCard[] {
         because: pieces.map((x) => x.piece.target.trim()).join(' + '),
         sources: pieces.map((x) => ({
           target: x.piece.target.trim(),
-          vibe: vibeName(x.piece.family),
+          vibe: vibeName(x.piece.family, x.id),
         })),
         target: c.answer,
         en: c.ask,

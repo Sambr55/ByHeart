@@ -38,7 +38,14 @@
  * which is the thing DUB exists to prevent.
  *
  * NOT REVIEWED. Written by me; the register and the fixed phrases want a pt-PT reader
- * before anybody says them to a stranger.
+ * before anybody says them to a stranger. Every room says so in `qa_status`, which is the
+ * list a reviewer is handed.
+ *
+ * WORDS. Each room hands two or three pieces to the library (Situation.pieces), backfilled
+ * after the block shipped: before that a room's words were only ever reinforced if a film
+ * had taught them first, so "a conta" and "à esquerda" were said cold and kept nowhere.
+ * Where a root or another room already owns the word — `comboio`, `sem`, `reserva` — the id
+ * is named rather than the word authored twice.
  */
 import type { Situation } from '@/content/situations'
 
@@ -82,8 +89,20 @@ export const LISBON_VISITING_1: Situation[] = [
       ask: 'Good evening. A table for two, please.',
       answer: 'Boa noite. Uma mesa para dois, por favor.',
     },
+    pieces: [
+      { id: 'mesa', target: 'a mesa', gloss: 'table', shelf: 'things', gender: 'f', set: 'around_the_house' },
+      {
+        id: 'la_fora',
+        target: 'lá fora',
+        gloss: 'outside',
+        shelf: 'people',
+        note: 'Ficar lá fora, to sit outside. Lá dentro is inside.',
+      },
+      'reserva',
+    ],
     rung: 2,
     review_by: '2027-09-01',
+    qa_status: 'pending-native-review',
   },
   {
     /*
@@ -127,7 +146,27 @@ export const LISBON_VISITING_1: Situation[] = [
       },
     ],
     release: { ask: 'The bill, please.', answer: 'A conta, por favor.' },
+    pieces: [
+      {
+        id: 'conta',
+        target: 'a conta',
+        gloss: 'bill',
+        shelf: 'things',
+        gender: 'f',
+        note: 'A conta, por favor. The same word is an account at a bank.',
+      },
+      {
+        id: 'couvert',
+        target: 'o couvert',
+        gloss: 'table starters',
+        shelf: 'things',
+        gender: 'm',
+        note: 'The bread, olives and cheese that arrive unasked. Charged if eaten, and fine to send back.',
+      },
+      'cartao',
+    ],
     rung: 2,
+    qa_status: 'pending-native-review',
   },
   {
     id: 'lisbon_bilhetes',
@@ -165,8 +204,21 @@ export const LISBON_VISITING_1: Situation[] = [
       },
     ],
     release: { ask: 'Is the queue here?', answer: 'A fila é aqui?' },
+    pieces: [
+      { id: 'bilhete', target: 'bilhete', gloss: 'ticket', shelf: 'things', gender: 'm' },
+      {
+        id: 'fila',
+        target: 'fila',
+        gloss: 'queue',
+        shelf: 'things',
+        gender: 'f',
+        note: 'Estar na fila, to be in the queue.',
+      },
+      { id: 'desconto', target: 'desconto', gloss: 'discount', shelf: 'things', gender: 'm' },
+    ],
     rung: 2,
     review_by: '2027-09-01',
+    qa_status: 'pending-native-review',
   },
   {
     /*
@@ -214,7 +266,32 @@ export const LISBON_VISITING_1: Situation[] = [
       ask: 'Excuse me, could you take a photo of us?',
       answer: 'Desculpe, pode tirar-nos uma foto?',
     },
+    pieces: [
+      {
+        id: 'foto',
+        target: 'foto',
+        gloss: 'photo',
+        shelf: 'things',
+        gender: 'f',
+        note: 'Short for fotografia, and feminine like it: uma foto.',
+      },
+      {
+        id: 'tirar',
+        target: 'tirar',
+        gloss: 'to take',
+        shelf: 'doing',
+        note: 'Tirar uma foto, to take a photo. Also to take out, or take off.',
+      },
+      {
+        id: 'mais_uma',
+        target: 'mais uma',
+        gloss: 'one more',
+        shelf: 'how_much',
+        note: 'Mais um with a masculine noun: mais um café.',
+      },
+    ],
     rung: 2,
+    qa_status: 'pending-native-review',
   },
   {
     id: 'lisbon_taxi',
@@ -251,7 +328,19 @@ export const LISBON_VISITING_1: Situation[] = [
       },
     ],
     release: { ask: 'You can stop here, please.', answer: 'Pode parar aqui, por favor.' },
+    pieces: [
+      {
+        id: 'parar',
+        target: 'parar',
+        gloss: 'to stop',
+        shelf: 'doing',
+        note: 'Pode parar aqui? is the polite way to ask. Para, it stops, has lost its accent and looks like for.',
+      },
+      { id: 'aqui', target: 'aqui', gloss: 'here', shelf: 'people' },
+      'sabe',
+    ],
     rung: 2,
+    qa_status: 'pending-native-review',
   },
   {
     /*
@@ -294,7 +383,19 @@ export const LISBON_VISITING_1: Situation[] = [
       },
     ],
     release: { ask: 'Is it far from here?', answer: 'É longe daqui?' },
+    pieces: [
+      { id: 'a_esquerda', target: 'à esquerda', gloss: 'on the left', shelf: 'small_words', set: 'directions' },
+      { id: 'a_direita', target: 'à direita', gloss: 'on the right', shelf: 'small_words', set: 'directions' },
+      {
+        id: 'longe',
+        target: 'longe',
+        gloss: 'far',
+        shelf: 'small_words',
+        note: 'É longe? Is it far? Perto is near.',
+      },
+    ],
     rung: 3,
+    qa_status: 'pending-native-review',
   },
   {
     id: 'lisbon_mercado',
@@ -332,8 +433,26 @@ export const LISBON_VISITING_1: Situation[] = [
       },
     ],
     release: { ask: 'Half a kilo, please.', answer: 'Meio quilo, por favor.' },
+    pieces: [
+      { id: 'quilo', target: 'quilo', gloss: 'kilo', shelf: 'things', gender: 'm' },
+      {
+        id: 'meio',
+        target: 'meio',
+        gloss: 'half',
+        shelf: 'how_much',
+        note: 'Meia with a feminine noun: meia dúzia, meia hora.',
+      },
+      {
+        id: 'bocadinho',
+        target: 'um bocadinho',
+        gloss: 'a little bit',
+        shelf: 'how_much',
+        note: 'The diminutive of bocado, and what people actually say.',
+      },
+    ],
     rung: 2,
     review_by: '2027-09-01',
+    qa_status: 'pending-native-review',
   },
   {
     id: 'lisbon_fado',
@@ -371,8 +490,26 @@ export const LISBON_VISITING_1: Situation[] = [
       },
     ],
     release: { ask: 'Is there a minimum spend?', answer: 'Há consumo mínimo?' },
+    pieces: [
+      {
+        id: 'consumo_minimo',
+        target: 'o consumo mínimo',
+        gloss: 'minimum spend',
+        shelf: 'things',
+        gender: 'm',
+      },
+      {
+        id: 'lindo',
+        target: 'lindo',
+        gloss: 'beautiful',
+        shelf: 'describing',
+        note: 'Linda with a feminine noun. Foi lindo: that was beautiful.',
+      },
+      'silencio',
+    ],
     rung: 3,
     review_by: '2027-09-01',
+    qa_status: 'pending-native-review',
   },
   {
     id: 'lisbon_comboio',
@@ -410,8 +547,26 @@ export const LISBON_VISITING_1: Situation[] = [
       },
     ],
     release: { ask: 'A ticket to Sintra, return.', answer: 'Um bilhete para Sintra, ida e volta.' },
+    pieces: [
+      {
+        id: 'ida_e_volta',
+        target: 'ida e volta',
+        gloss: 'return',
+        shelf: 'just_say',
+        note: 'A return ticket. Só ida is one way.',
+      },
+      {
+        id: 'validar',
+        target: 'validar',
+        gloss: 'to validate',
+        shelf: 'doing',
+        note: 'Touching the card on the reader before you board. An unvalidated ticket is a fine.',
+      },
+      'comboio',
+    ],
     rung: 3,
     review_by: '2027-09-01',
+    qa_status: 'pending-native-review',
   },
   {
     /*
@@ -455,6 +610,27 @@ export const LISBON_VISITING_1: Situation[] = [
       },
     ],
     release: { ask: 'It is an allergy, not a preference.', answer: 'É alergia, não é preferência.' },
+    pieces: [
+      {
+        id: 'alergia',
+        target: 'alergia',
+        gloss: 'allergy',
+        shelf: 'things',
+        gender: 'f',
+        note: 'Tenho alergia a marisco: I am allergic to shellfish.',
+      },
+      {
+        id: 'leva',
+        target: 'leva',
+        gloss: 'it contains',
+        shelf: 'doing',
+        lemma: 'levar',
+        form: 'he/she',
+        note: 'What a dish has in it: isto leva peixe? Elsewhere levar is to take or to carry.',
+      },
+      'sem',
+    ],
     rung: 3,
+    qa_status: 'pending-native-review',
   },
 ]

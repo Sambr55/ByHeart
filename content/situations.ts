@@ -16,10 +16,11 @@
  * somebody informed but unable to say anything has failed, however useful it reads.
  */
 import type { ChapterId } from '@/content/chapters'
-import type { Rung } from '@/content/roots'
+import type { Extract, QaStatus, Rung } from '@/content/roots'
 import { LISBON_MOVING_1 } from '@/content/blocks/lisbon-moving-1'
 import { LISBON_STAYING_1 } from '@/content/blocks/lisbon-staying-1'
 import { LISBON_VISITING_1 } from '@/content/blocks/lisbon-visiting-1'
+import { LISBON_VISITING_2 } from '@/content/blocks/lisbon-visiting-2'
 
 export type SituationKind = 'place' | 'person' | 'moment' | 'errand'
 
@@ -116,6 +117,34 @@ export interface Situation {
   purposes?: Purpose[]
   /** Past this date it is hidden rather than wrong. Silence beats a lie. */
   review_by?: string
+  /**
+   * Whether a pt-PT native has read it. The roots' own field, for the same reason.
+   *
+   * Optional because the standing rooms predate it and saying 'reviewed' of them would be a
+   * claim nobody has made. New rooms carry 'pending-native-review' until somebody has read
+   * every line aloud — it is the list a reviewer is handed, not a gate on serving.
+   */
+  qa_status?: QaStatus
+  /**
+   * The words this room hands over to the library when it is done.
+   *
+   * WHY A ROOM NOW SAYS WHAT IT TEACHES. A room's release was recorded as proof and its
+   * words were only ever REINFORCED — the ones a film had already taught. Everything else
+   * evaporated: the Club taught "casa de banho" and the library had never heard of it.
+   * Inferring the words from the sentence would bank every `um` and `com` it contains, so
+   * the room declares them instead, two or three per room, the ones worth keeping.
+   *
+   * Two shapes, and the difference matters:
+   *   - an Extract is a word this room AUTHORS — filed into PIECES with `family: 'club'`
+   *     and `room` pointing back here (see content/roots.ts);
+   *   - a string is the id of a piece a root already teaches. Same word, same entry: a
+   *     room never re-authors a word the library already holds, because two rows for one
+   *     word is the duplicate the lint fails.
+   *
+   * Banked on completion, cold or revealed, by components/Errand.tsx. Being shown a word
+   * in a room is meeting it; saying it cold is what then makes it YOURS.
+   */
+  pieces?: (Extract | string)[]
 }
 
 /**
@@ -130,6 +159,7 @@ export const SITUATIONS: Situation[] = [
   ...LISBON_MOVING_1,
   ...LISBON_STAYING_1,
   ...LISBON_VISITING_1,
+  ...LISBON_VISITING_2,
   {
     id: 'lisbon_farmacia',
     chapter: 'lisbon',

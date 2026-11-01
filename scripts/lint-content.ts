@@ -1751,6 +1751,35 @@ for (const e of EXAMPLES) {
     if (sit.review_by && new Date(sit.review_by) < now) {
       warn(S + 'is past its review date and is being hidden — check it or retire it')
     }
+
+    /*
+      The words a room hands to the library.
+
+      Two ways for this to go quietly wrong, and both render as nothing: a reused id with a
+      typo in it (roomPieceIds drops it, so the word is simply never banked), and an
+      authored id a root already owns (PIECES keeps the root's, so the room's gloss and
+      note are silently thrown away). Either is a decision somebody thought they made and
+      did not, so both fail here rather than in the library.
+    */
+    const authored = new Set<string>()
+    for (const p of sit.pieces ?? []) {
+      if (typeof p === 'string') {
+        if (!PIECES[p]) fail(S + 'reuses the piece "' + p + '", which does not exist')
+        continue
+      }
+      if (authored.has(p.id)) fail(S + 'authors the piece "' + p.id + '" twice')
+      authored.add(p.id)
+      if (PIECES[p.id]?.room !== sit.id) {
+        fail(
+          S + 'authors the piece "' + p.id + '", which ' +
+            (PIECES[p.id]?.room ? 'room ' + PIECES[p.id].room : 'a root') +
+            ' already owns — name the id instead of authoring it again',
+        )
+      }
+    }
+    if (sit.pieces && sit.pieces.length > 4) {
+      warn(S + 'hands over ' + sit.pieces.length + ' pieces — two or three, the ones worth keeping')
+    }
   }
   /*
     A drop is a claim about the world with an expiry on it.

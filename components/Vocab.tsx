@@ -16,6 +16,7 @@ import {
   fold,
   formsOf,
   linesFor,
+  roomOf,
   rungReached,
   setPieces,
   sourceOf,
@@ -137,7 +138,11 @@ function Library() {
     [learner.inventory],
   )
   const ownCrates = useMemo<CultureFamily[]>(
-    () => [...new Set([...owned].map((id) => PIECES[id].family))],
+    // Crates only: a room is not a crate, so a word banked in the Club opens no vibe.
+    () =>
+      [...new Set([...owned].map((id) => PIECES[id].family))].filter(
+        (f): f is CultureFamily => f !== 'club',
+      ),
     [owned],
   )
   // Before mount, assume the top: nothing may render as locked until the browser has
@@ -157,7 +162,12 @@ function Library() {
     const build = (key: string, head: Piece, headId: string, forms: Entry['forms']): Entry => {
       const isOwned = forms.some((f) => owned.has(f.id))
       const crate = CRATES.find((c) => c.id === head.family)
-      const locked = crate ? entryRung(crate) : 1
+      /*
+        A room's word opens with the room, not with a crate. The Club serves a room from its
+        own rung, so that is when its words become reachable — not rung 1, which is what a
+        missing crate fell back to.
+      */
+      const locked = crate ? entryRung(crate) : head.family === 'club' ? head.rung : 1
       return {
         key,
         head,
@@ -167,7 +177,7 @@ function Library() {
         owned: isOwned,
         ownedForms: forms.filter((f) => owned.has(f.id)).length,
         needsLook: forms.some((f) => shaky(f.id)),
-        nearly: !isOwned && started.has(head.family),
+        nearly: !isOwned && head.family !== 'club' && started.has(head.family),
         opensAt: !isOwned && locked > rung ? locked : null,
       }
     }
@@ -658,6 +668,19 @@ function lower(titles: string[]): string[] {
   return titles.map((t) => (t.startsWith('The ') ? 'the ' + t.slice(4) : t))
 }
 
+/**
+ * Where a word lives: its crate, or the Club room that handed it over.
+ *
+ * Every label below fell back to "a vibe" when no crate matched, which for a word banked at
+ * a pharmacy counter is telling somebody they learned it somewhere they never went. A room
+ * names itself — "from The pharmacy" — because that is the answer to "where did I get
+ * this?", which is the question the label exists for.
+ */
+function sourceTitle(piece: Piece, id: string): string {
+  if (piece.family === 'club') return roomOf(id)?.title ?? 'the Club'
+  return CRATES.find((c) => c.id === piece.family)?.title ?? 'a vibe'
+}
+
 function SetRow({
   set,
   owned,
@@ -805,6 +828,7 @@ function EntryRow({
   const { head, headId, forms } = entry
   const isLemma = forms.length > 1
   const root = sourceOf(headId)
+  const room = root ? undefined : roomOf(headId)
   const crate = CRATES.find((c) => c.id === head.family)
   const lines = open ? linesFor(headId, 6, ownCrates) : []
   // Every note the forms carry, not just the first: a lemma card is where ser and estar
@@ -882,7 +906,7 @@ function EntryRow({
             </span>
           ) : entry.owned ? (
             <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
-              from {crate?.title ?? 'a vibe'}
+              from {sourceTitle(head, headId)}
             </span>
           ) : entry.opensAt ? (
             <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
@@ -894,7 +918,7 @@ function EntryRow({
             </span>
           ) : (
             <span className="mt-1 block text-[0.55rem] uppercase tracking-wider text-muted">
-              in {crate?.title ?? 'a vibe'}
+              in {sourceTitle(head, headId)}
             </span>
           )}
         </span>
@@ -965,7 +989,7 @@ function EntryRow({
                     <span className="text-xs text-muted">{f.piece.form ?? f.piece.gloss}</span>
                     {!owned.has(f.id) ? (
                       <span className="text-[0.55rem] uppercase tracking-wider text-muted">
-                        in {CRATES.find((c) => c.id === f.piece.family)?.title}
+                        in {sourceTitle(f.piece, f.id)}
                       </span>
                     ) : null}
                   </li>
@@ -1000,6 +1024,18 @@ function EntryRow({
             </div>
           ) : null}
 
+          {room && !root ? (
+            /*
+              A room's word says which room, and the sentence it was taught for — the same
+              block a film word gets, with the release standing in for the root's line.
+            */
+            <div>
+              <p className="eyebrow text-muted">{entry.owned ? 'Where you met it' : 'Where it is taught'}</p>
+              <p className="mt-1 text-xs text-muted">The Club · {room.title}</p>
+              <p className="pt mt-1 text-sm">{room.release.answer}</p>
+            </div>
+          ) : null}
+
           {root ? (
             <div>
               <p className="eyebrow text-muted">{entry.owned ? 'Where you met it' : 'Where it is taught'}</p>
@@ -1021,6 +1057,15 @@ function EntryRow({
               className="tap-target eyebrow rounded bg-accent px-4 py-3 text-center text-accent-ink"
             >
               {entry.nearly ? 'BACK INTO ' + crate.title.toUpperCase() : 'OPEN ' + crate.title.toUpperCase()}
+            </Link>
+          ) : null}
+          {/* And a room's word goes to the room, which is the only place it is taught. */}
+          {!entry.owned && !crate && room ? (
+            <Link
+              href={'/errand/' + room.id}
+              className="tap-target eyebrow rounded bg-accent px-4 py-3 text-center text-accent-ink"
+            >
+              {'OPEN ' + room.title.toUpperCase()}
             </Link>
           ) : null}
         </div>
