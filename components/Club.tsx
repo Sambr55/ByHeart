@@ -126,8 +126,18 @@ export function Club() {
    * which it now usually will not be — kept so the old cohort and the new one can be told
    * apart rather than so anybody is congratulated for it.
    */
+  /*
+    RE-ASKED WHEN SET-UP LANDS, not only on mount. Set-up is the last card of the Club's
+    own showcase, so the door usually opens while this component is already mounted — and
+    a mount-only effect would leave the ceremony for some later visit. Not while `?in=1` is
+    still on the URL, though: that is the sequence itself, and the set-up card owns the
+    moment it finishes. When it moves on to /club the marker goes, this runs, and the
+    welcome is the first thing they see inside.
+  */
+  const setUpAt = learner.set_up_at
   const [welcome, setWelcome] = useState(false)
   useEffect(() => {
+    if (fromDoor) return
     const state = loadLearner()
     if (state.club_welcomed_at) return
     if (!clubOpenFor(state)) return
@@ -136,7 +146,7 @@ export function Club() {
       sections: state.sections_completed.length,
       legend: (state.proof ?? []).some((p) => p.source === 'legend' && p.clean),
     })
-  }, [])
+  }, [fromDoor, setUpAt])
 
   /*
     Marked welcomed when it has been SEEN, not when it has been decided.

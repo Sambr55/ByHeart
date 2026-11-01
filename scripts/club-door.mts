@@ -184,7 +184,7 @@ console.log('\nthe card has no say in it\n')
   const club = readFileSync('components/Club.tsx', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
   ok(
     'the welcome fires on the door, not on the Legend',
-    /if \(!clubOpenFor\(state\)\) return\s*\n\s*setWelcome\(true\)/.test(club),
+    /if \(!clubOpenFor\(state\)\) return\s*\n\s*setWelcome\(true\)/.test(club) && /\[fromDoor, setUpAt\]/.test(club),
     'first entry after set-up',
   )
   const view = readFileSync('app/view.tsx', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')
