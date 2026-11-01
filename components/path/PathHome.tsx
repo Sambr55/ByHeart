@@ -57,8 +57,8 @@ export function PathHome() {
           <p className="eyebrow rounded-full bg-[rgba(255,255,255,0.14)] px-3 py-1" aria-label={view.done + ' of ' + view.total + ' rooms done'}>
             <span className="needs-learner">{view.done}</span> / {view.total}
           </p>
-          <Link href="/club/feed" className="eyebrow tap-target hidden rounded-full border border-[rgba(255,255,255,0.4)] px-3 py-1 sm:inline-flex">
-            What&apos;s on
+          <Link href="/club/feed" className="eyebrow tap-target inline-flex shrink-0 items-center rounded-full border border-[rgba(255,255,255,0.4)] px-3 py-1">
+            On now
           </Link>
           <Streak days={streak.days} today={streak.today} />
         </div>
