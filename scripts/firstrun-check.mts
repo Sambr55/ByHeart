@@ -1236,7 +1236,8 @@ console.log('\nset-up asks who, where and why — and the feed changes because o
     await sp.waitForTimeout(1800)
     ok(
       'a stored pair does not skip the question',
-      Boolean(await sp.$('[data-testid="choose"]')),
+      /* The question is "Visiting Lisbon?" now — one tap for pair, city and reason. */
+      Boolean(await sp.$('[data-testid="visiting"]')),
       'the pair is written by three things and only one of them is somebody choosing',
     )
     /*

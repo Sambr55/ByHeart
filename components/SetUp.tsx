@@ -23,6 +23,7 @@ import {
   syncSession,
 } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
+import { useLearner } from '@/engine/useLearner'
 import { DEFAULT_PAIR } from '@/content/pairs'
 
 /**
@@ -135,14 +136,18 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     setMounted(true)
-    /*
-      ANSWERED ON THE FACE, so the pane opens on the name.
-
-      The feed's set-up card asks "Visiting Lisbon?" on its face and opens this pane once it
-      is answered. Asking it again here would be the very repeat the face exists to remove.
-    */
-    if (loadLearner().profile?.goal) setStep('who')
   }, [])
+  /*
+    ANSWERED ON THE FACE, so the pane opens on the name.
+
+    The feed's set-up card asks "Visiting Lisbon?" on its face and opens this pane once it
+    is answered — and the pane is mounted with the card, long before the tap. So this reads
+    the live record rather than a snapshot taken at mount: the moment the goal is written,
+    the why step is behind us. Asking it again here would be the very repeat the face
+    exists to remove.
+  */
+  const learner = useLearner()
+  const shown: Step = step === 'why' && mounted && learner.profile?.goal ? 'who' : step
 
   /*
     ALREADY MEANS ASKED, not merely agreed.
@@ -416,7 +421,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         WHY only. The who step is a name field and a photo picker, and a header image over
         a form is a header image in the way of a form.
       */}
-      {step === 'why' ? (
+      {shown === 'why' ? (
         <div className="relative -mx-5 -mt-6 overflow-hidden on-dark">
           <Image
             src={IMAGE_BANK.intro_arrival.src}
@@ -469,7 +474,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         last one is a real one" — has moved onto the photograph with the rest of the why
         step, where the question it belongs to is.
       */}
-      {step === 'why' ? null : (
+      {shown === 'why' ? null : (
         <div className="flex flex-col gap-3">
           <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
           <h2 className="display text-balance text-2xl">And what do they call you?</h2>
@@ -489,7 +494,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         WHY, as one question with yes as the lead — see `Visiting` in Destination.tsx, which
         also sits on the set-up card's face. The 260ms settle and the testids moved with it.
       */}
-      {step === 'why' ? <Visiting onDone={() => setStep('who')} /> : null}
+      {shown === 'why' ? <Visiting onDone={() => setStep('who')} /> : null}
 
       {/*
         WHO. A name, and the only one of the three that is optional.
@@ -499,7 +504,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         to type before they have seen a single vibe is the kind of friction the whole
         restructure exists to remove.
       */}
-      {step === 'who' ? (
+      {shown === 'who' ? (
         <>
           <div className="flex items-center gap-3">
             {/*

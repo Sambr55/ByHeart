@@ -124,7 +124,8 @@ const CLAIMS: { name: string; says: RegExp }[] = [
     way of wording it. Checked against the rendered feed before the pattern was changed,
     which is the rule at the top of this block.
   */
-  { name: 'you understand more than you can say', says: /(understand more than you can say|you recognise it)/i },
+  /* "You recognise the line" since the Lisbon pass, where VIBES became the side door. */
+  { name: 'you understand more than you can say', says: /(understand more than you can say|you recognise (it|the line))/i },
   /*
     THE WAY IN IS LISBON NOW, not the Legend.
 
