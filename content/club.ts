@@ -43,7 +43,8 @@ export const CLUB = {
   door: {
     eyebrow: 'NOT YET',
     headline: 'Dub Club — Lisbon.',
-    body: 'The way in is your Legend Card: seven questions a stranger will ask you, answered in Portuguese, out of language you own. It is the one thing you genuinely need on your first day there.',
+    /* Since 2026-11-01 the way in is set-up, not the Legend — see clubOpen in content/legend.ts. */
+    body: 'The way in is one question: are you visiting Lisbon? Say where you are going and the Club opens on the rooms you will actually stand in.',
     /** Said plainly, because a door you cannot see the far side of is just a wall. */
     inside: 'Inside is the part that is about Lisbon rather than about Portuguese — the people, the places, and what to say when a conversation goes wrong.',
     cta: 'BUILD MY CARD',
@@ -65,7 +66,12 @@ export const CLUB = {
       Legend you can introduce yourself in Portuguese without reading it off a screen. Now
       we are going to help you grow your Legend."
     */
-    body: 'You can now introduce yourself in Portuguese with your Legend without reading it off a screen.',
+    /*
+      REWRITTEN 2026-11-01, when the Legend stopped being the door. The welcome used to
+      congratulate a proof (the card said cold) that nobody now has to give before arriving,
+      so it says what is in front of them instead. Sam's "front door to Lisboa" survives below.
+    */
+    body: 'Your trip is laid out in order: arriving, coffee and food, getting about, seeing the city, and what to say when it goes wrong.',
     /*
       "Front door to Lisboa", which is a bigger claim than "your way in".
 
@@ -73,7 +79,7 @@ export const CLUB = {
       one screen where somebody has just proved they can introduce themselves in
       Portuguese, so the city gets its own name back.
     */
-    body_two: 'Being in the Dub Club will help you grow your Legend. This is the front door to Lisboa from now on — there is a lot to do and discover.',
+    body_two: 'Want to introduce yourself too? Your Legend is waiting whenever you are. This is the front door to Lisboa from now on — there is a lot to do and discover.',
     /*
       NOT A BUTTON. Sam: "remove CTA, add: Swipe ↑ to continue."
 
