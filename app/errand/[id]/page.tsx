@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { Errand } from '@/components/Errand'
+import { RoomGate } from '@/components/path/RoomGate'
 import { dropForRoom, roomById } from '@/content/feed'
 import { DROP_SITUATIONS } from '@/content/drops'
 import { SITUATIONS, isCurrent } from '@/content/situations'
@@ -30,5 +31,9 @@ export default async function ErrandPage({ params }: { params: Promise<{ id: str
     rather than about an evening, and only a room pegged to a date has an invitation worth
     sending.
   */
-  return <Errand situation={situation} drop={dropForRoom(id)} />
+  return (
+    <RoomGate id={situation.id} title={situation.title}>
+      <Errand situation={situation} drop={dropForRoom(id)} />
+    </RoomGate>
+  )
 }

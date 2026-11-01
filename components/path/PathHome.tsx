@@ -3,17 +3,17 @@
 import Link from 'next/link'
 import { useMemo } from 'react'
 import { Wordmark } from '@/components/Wordmark'
-import { BottomNavSpace } from '@/components/BottomNav'
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { useLearner } from '@/engine/useLearner'
 import { useNowAfterMount } from '@/engine/useNow'
 import { useEntitlements } from '@/engine/useEntitlements'
+import { hasFullAccess } from '@/lib/entitlements'
 import { pathUnits } from '@/content/path'
 import { activityTimes, dayStreak, milestoneHref, pathView } from './progress'
 import { roomLock } from './locks'
 import { RoomCard } from './RoomCard'
 import { WindingPath } from './WindingPath'
 import { CardRail } from './CardRail'
-import { TabBar, pathTabs } from './TabBar'
 import { FlameIcon } from './icons'
 
 /**
@@ -30,7 +30,8 @@ export function PathHome() {
   const learner = useLearner()
   const now = useNowAfterMount()
   const access = useEntitlements()
-  const member = access.entitlements.plan === 'pro' || access.comped
+  /* The same rule the feed asks: billing not configured, not yet answered, or paid. */
+  const member = hasFullAccess(access) || access.comped
 
   const units = useMemo(() => pathUnits(), [])
   const view = useMemo(
@@ -48,7 +49,7 @@ export function PathHome() {
   const practiceHref = practiceUnit ? milestoneHref(practiceUnit.milestone.cheat) : '/revise'
 
   return (
-    <div data-stage="LISBON" className="min-h-svh bg-bg text-fg md:pl-24">
+    <div data-stage="LISBON" className="min-h-svh bg-bg text-fg">
       <header className="bar safe-top sticky top-0 z-30 px-5 py-3">
         <div className="mx-auto flex w-full max-w-md items-center gap-3 md:max-w-6xl">
           <Wordmark mark="club" className="h-7 text-white" />
@@ -56,6 +57,9 @@ export function PathHome() {
           <p className="eyebrow rounded-full bg-[rgba(255,255,255,0.14)] px-3 py-1" aria-label={view.done + ' of ' + view.total + ' rooms done'}>
             <span className="needs-learner">{view.done}</span> / {view.total}
           </p>
+          <Link href="/club/feed" className="eyebrow tap-target hidden rounded-full border border-[rgba(255,255,255,0.4)] px-3 py-1 sm:inline-flex">
+            What&apos;s on
+          </Link>
           <Streak days={streak.days} today={streak.today} />
         </div>
       </header>
@@ -99,7 +103,12 @@ export function PathHome() {
         <BottomNavSpace />
       </main>
 
-      <TabBar tabs={pathTabs(practiceHref)} />
+      {/*
+        THE APP'S OWN BAR, not the path's prototype TabBar (components/path/TabBar.tsx, kept
+        for the left-rail idea). One bar everywhere: a home with different tabs from every
+        other screen would be two apps.
+      */}
+      <BottomNav />
     </div>
   )
 }

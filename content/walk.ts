@@ -186,8 +186,8 @@ export const WALK: WalkStep[] = [
     saving space" — so the walk makes the same claim out loud.
   */
   {
-    id: 'tab-find',
-    target: 'tab-find',
+    id: 'tab-trip',
+    target: 'tab-trip',
     /*
       FIND IS WHERE YOU BROWSE, which is the job the tab actually does now.
 
@@ -196,8 +196,9 @@ export const WALK: WalkStep[] = [
       Club is everything after the Legend; this tab is the part of it you open with nothing
       particular in mind.
     */
-    say: 'FIND is for when you have no plan — rooms, nights out and the words for them.',
-    opens: ['What is on', 'Rooms', 'Drops'],
+    /* TRIP since 2026-11-01: the tab opens the Lisbon path home, not the feed. */
+    say: 'TRIP is your Lisbon, in order — arrive, eat, get about, see it, and what to say when it goes wrong.',
+    opens: ['Up next', 'Rooms', 'Practice'],
   },
   {
     id: 'tab-yours',

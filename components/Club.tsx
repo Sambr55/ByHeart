@@ -26,6 +26,7 @@ import { DEFAULT_CHAPTER } from '@/content/chapters'
 import { isCurrent, situationsFor } from '@/content/situations'
 import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { PathHome } from '@/components/path/PathHome'
 import { NotYet } from '@/components/NotYet'
 import { Wordmark } from '@/components/Wordmark'
 import { LEGEND_FRAMES, frameApplies, frameForPurpose } from '@/content/legend'
@@ -56,7 +57,7 @@ import { PURPOSES, type Purpose } from '@/content/situations'
  * home screen is exactly where a product betrays that promise, so it is written here
  * first and the moves are ordered by what expires rather than by what is overdue.
  */
-export function Club() {
+export function Club({ view = 'path' }: { view?: 'path' | 'feed' } = {}) {
   const router = useRouter()
   const params = useSearchParams()
   /* Set by the front door's COME IN, and by nothing else. */
@@ -431,6 +432,15 @@ export function Club() {
     moves it offered are all reachable from the feed's own cards; what changes is that
     the room comes first and the menu does not come at all.
   */
+  /*
+    THE PATH IS HOME; the feed is one tap away at /club/feed.
+
+    Sam (2026-11-01): "make it more app like, like Duolingo or Simply Guitar." A swipe
+    feed is a place to browse; an app home is one obvious next thing and the whole trip
+    laid out under it. The showcase stage still gets the feed — it is the sequence that
+    ends at set-up — and the welcome ceremony above runs whichever view is showing.
+  */
+  if (view === 'path' && stage !== 'showcase') return <PathHome />
   return <Feed stage={stage} />
 
   return (

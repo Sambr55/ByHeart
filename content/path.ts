@@ -72,7 +72,7 @@ export const PATH_UNITS: PathUnit[] = [
       'Get a table, and get the bill',
       'Shop for the picnic',
     ],
-    rooms: ['lisbon_cafe', 'lisbon_padaria', 'lisbon_mesa', 'lisbon_conta', 'lisbon_supermercado'],
+    rooms: ['lisbon_cafe', 'lisbon_padaria', 'lisbon_mesa', 'lisbon_tasca', 'lisbon_conta', 'lisbon_multibanco', 'lisbon_supermercado'],
     milestone: {
       cheat: 'quero_hack',
       title: 'Quero …',

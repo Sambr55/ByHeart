@@ -134,11 +134,23 @@ export const FREE_ENTITLEMENTS: Entitlements = {
  * exist by scripts/club-door.mts.
  */
 export const FREE_ROOMS: readonly string[] = [
-  'lisbon_taxi',
+  /*
+    THE FIRST DAY, IN THE ORDER IT HAPPENS — revised at merge (2026-11-01) once the second
+    visitor block existed. The first cut (taxi, café, asking the way, the 28, the bill) was
+    chosen before there was an airport or a check-in room, and it left the whole of Unit 1
+    on the new path home — Arrive — behind a padlock: the first thing a new member saw was
+    UNLOCK. A starter set that cannot start the trip is not one.
+  */
+  'lisbon_aeroporto',
+  'lisbon_checkin',
   'lisbon_cafe',
-  'lisbon_perdido',
-  'lisbon_electrico',
   'lisbon_conta',
+  'lisbon_perdido',
+  /*
+    AND THE EMERGENCY ROOM, as part of the survival kit rather than the five. "Help, call
+    an ambulance" is not a feature to sell; it sits with the repair lines, which are free.
+  */
+  'lisbon_emergencia',
 ] as const
 
 /** Whether a room (a Situation id) is in the free starter set. */

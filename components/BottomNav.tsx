@@ -93,7 +93,8 @@ const TABS = [
   */
   {
     href: '/club',
-    label: 'Find',
+    /* Trip, not Find: /club is the Lisbon path home now (2026-11-01). */
+    label: 'Trip',
     d: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM14.8 9.2l-1.6 4.6-4.6 1.6 1.6-4.6z',
   },
   /*
