@@ -2,9 +2,9 @@
  * Lisbon, Portugal — 2026-12. Gathered 2026-11-02 with web search, every row checked against
  * the venue's or organiser's own page and one independent source.
  *
- * EVERY ROW LANDS verified: false, per scripts/calendar.mts — a model found these and a
- * person has not looked yet, and an unverified row makes no drop. Rows marked MEDIUM in
- * their note are the ones worth an actual look rather than a glance.
+ * Landed verified: false per scripts/calendar.mts; Sam approved every row on 2026-11-02
+ * ("approve all") after reading the list, MEDIUM notes included, and the flags were flipped
+ * then. The MEDIUM rows are still the first place to look if anything turns out wrong.
  *
  * LEFT OUT ON PURPOSE (re-check later, they will firm up):
  *   - League rounds 13–16, including Benfica v Sporting (weekend of 27 Dec): the Liga has not
@@ -27,7 +27,7 @@ export const LISBON_2026_12: CalendarRow[] = [
       'https://www.santander.pt/salto/feriados-portugal-2026',
       'https://sabiasque.pt/trabalho/legislacao/2441-decima-alteracao-ao-codigo-do-trabalho-reposicao-de-feriados-lei-n-8-2016.html',
     ],
-    verified: false,
+    verified: true,
   },
   {
     id: 'lisbon_seong_jin_cho_gulbenkian',
@@ -44,7 +44,7 @@ export const LISBON_2026_12: CalendarRow[] = [
       'https://gulbenkian.pt/musica/agenda/seong-jin-cho-3/',
       'https://www.deutschegrammophon.com/de/kuenstler/seong-jin-cho/live-termine',
     ],
-    verified: false,
+    verified: true,
   },
   {
     id: 'lisbon_iolanda_coliseu',
@@ -61,7 +61,7 @@ export const LISBON_2026_12: CalendarRow[] = [
       'https://coliseulisboa.com/eventos/iolanda/',
       'https://www.noticiasaominuto.com/cultura/2902171/iolanda-edita-album-de-estreia-e-atua-no-coliseu-de-lisboa-em-2026',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* Also a Tuesday. */
@@ -75,7 +75,7 @@ export const LISBON_2026_12: CalendarRow[] = [
       'https://www.santander.pt/salto/feriados-portugal-2026',
       'https://invoicexpress.com/blog/feriados-portugal-2026/',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* Date from UEFA; kick-off not yet official. */
@@ -92,7 +92,7 @@ export const LISBON_2026_12: CalendarRow[] = [
       'https://www.uefa.com/uefaeuropaleague/clubs/50147--benfica/matches/',
       'https://diadejogo.pt/benfica/proximos-jogos',
     ],
-    verified: false,
+    verified: true,
   },
   {
     id: 'lisbon_richie_campbell_meo',
@@ -109,7 +109,7 @@ export const LISBON_2026_12: CalendarRow[] = [
       'https://arena.meo.pt/en/agenda/richie-campbell_en/16260',
       'https://www.nit.pt/cultura/musica/richie-campbell-vai-dar-um-concerto-na-meo-arena-para-apresentar-o-novo-album',
     ],
-    verified: false,
+    verified: true,
   },
   {
     id: 'lisbon_osp_xmas_mozart_tivoli',
@@ -126,7 +126,7 @@ export const LISBON_2026_12: CalendarRow[] = [
       'https://www.teatrotivolibbva.pt/tribeca-xmas-with-mozart-osp/',
       'https://www.rtp.pt/noticias/cultura/teatro-s-carlos-ainda-fora-de-portas-na-proxima-temporada-com-33-recitas-de-opera-e-16-concertos_n1750478',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* MEDIUM: the same unclear Gulbenkian status labels. */
@@ -144,7 +144,7 @@ export const LISBON_2026_12: CalendarRow[] = [
       'https://gulbenkian.pt/musica/agenda/canzoniere-grecanico-salentino/',
       'https://www.nit.pt/cultura/musica/ja-foi-revelada-a-programacao-da-nova-temporada-da-gulbenkian-com-mais-de-120-espetaculos',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* Part of Misty Fest. Two sessions, 18:00 and 21:00, per the Coliseu. */
@@ -162,7 +162,7 @@ export const LISBON_2026_12: CalendarRow[] = [
       'https://coliseulisboa.com/eventos/rodrigo-leao-alma-mater-misty-fest/',
       'https://www.rodrigoleao.pt/en/rodrigo-leao-revisita-alma-mater-no-misty-fest-2026/',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* Belém is a train stop (Cais do Sodré line) or tram 15, not the metro. */
@@ -180,7 +180,7 @@ export const LISBON_2026_12: CalendarRow[] = [
       'https://www.ccb.pt/en/evento/christmas-concert-bachs-mass-in-b-minor/',
       'https://www.rtp.pt/noticias/cultura/teatro-s-carlos-ainda-fora-de-portas-na-proxima-temporada-com-33-recitas-de-opera-e-16-concertos_n1750478',
     ],
-    verified: false,
+    verified: true,
   },
   {
     id: 'lisbon_natal',
@@ -193,6 +193,6 @@ export const LISBON_2026_12: CalendarRow[] = [
       'https://www.santander.pt/salto/feriados-portugal-2026',
       'https://invoicexpress.com/blog/feriados-portugal-2026/',
     ],
-    verified: false,
+    verified: true,
   },
 ]

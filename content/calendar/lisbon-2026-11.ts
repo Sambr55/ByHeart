@@ -2,9 +2,9 @@
  * Lisbon, Portugal — 2026-11. Gathered 2026-11-02 with web search, every row checked against
  * the venue's or organiser's own page and one independent source.
  *
- * EVERY ROW LANDS verified: false, per scripts/calendar.mts — a model found these and a
- * person has not looked yet, and an unverified row makes no drop. Rows marked MEDIUM in
- * their note are the ones worth an actual look rather than a glance.
+ * Landed verified: false per scripts/calendar.mts; Sam approved every row on 2026-11-02
+ * ("approve all") after reading the list, MEDIUM notes included, and the flags were flipped
+ * then. The MEDIUM rows are still the first place to look if anything turns out wrong.
  *
  * LEFT OUT ON PURPOSE (re-check later, they will firm up):
  *   - Christmas markets (Wonderland Lisboa, Rossio): no official 2026 dates yet.
@@ -31,7 +31,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://www.slbenfica.pt/pt-pt/bilhetes',
       'https://www.uefa.com/uefaeuropaleague/clubs/50147--benfica/matches/',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* No station: LAV is in Marvila (its own coordinates), not Alcântara as the October file says, and the nearest metro (Chelas?) is unchecked. No station means no drop rather than a wrong route. */
@@ -48,7 +48,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://www.lisboaaovivo.com/',
       'https://feverup.com/m/648920/en',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* Main venue only; screenings spread across several cinemas. */
@@ -67,7 +67,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://www.leffest.com/',
       'https://www.timeout.pt/lisboa/pt/filmes/leffest',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* Many venues, so no `where` and no shape: on the calendar, never a drop. Dates from Visit Lisboa only; the festival site confirms the 2026 edition without dates — MEDIUM confidence. */
@@ -84,7 +84,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://www.visitlisboa.com/en/events/misty-fest-2?date=2026-11-01',
       'https://www.misty-fest.com/',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* Liga round 11, 20:30. */
@@ -101,7 +101,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://www.abola.pt/noticias/ja-ha-data-para-o-fc-porto-benfica-os-horarios-ate-a-12a-jornada-da-liga-2026090319073200619',
       'https://www.record.pt/futebol/futebol-nacional/liga-betclic/detalhe/ja-e-conhecida-a-data-e-hora-do-fc-porto-benfica',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* Opening night at the arena, conference at FIL. The venue is from third-party listings; websummit.com confirms the dates. */
@@ -121,7 +121,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://hadea.ec.europa.eu/events/web-summit-2026-2026-11-09_en',
       'https://english.rvo.nl/events/web-summit-2026-lisbon',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* MEDIUM: neither page prints the year. No station, as for Max Cooper. */
@@ -138,7 +138,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://www.lisboaaovivo.com/',
       'https://www.visitlisboa.com/en/events/the-last-internationale',
     ],
-    verified: false,
+    verified: true,
   },
   {
     id: 'lisbon_luisa_sobral_tivoli',
@@ -155,7 +155,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://www.teatrotivolibbva.pt/luisa-sobral-cartas-de-desamor/',
       'https://observador.pt/2026/06/05/luisa-sobral-edita-novo-album-em-outubro-que-apresenta-em-novembro-em-lisboa-e-porto/',
     ],
-    verified: false,
+    verified: true,
   },
   {
     id: 'lisbon_rubel_coliseu',
@@ -172,7 +172,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://coliseulisboa.com/eventos/rubel-beleza-rubel-violao/',
       'https://dnbrasil.dn.pt/entretenimento-dn-brasil/rubel-volta-a-portugal-aps-shows-esgotados-em-2025',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* The smaller hall inside the arena; same entrance and station. */
@@ -190,7 +190,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://arena.meo.pt/en/agenda/amon-amarth_en/15718',
       'https://www.metalblade.com/us/news/amon-amarth-announce-uk-eu-2026-tour-dates-tease-new-album/',
     ],
-    verified: false,
+    verified: true,
   },
   {
     id: 'lisbon_bryan_adams_meo',
@@ -208,7 +208,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://arena.meo.pt/en/agenda/bryan-adams-roll-with-the-punches_en/15883',
       'https://www.forbespt.com/?p=181954',
     ],
-    verified: false,
+    verified: true,
   },
   {
     id: 'lisbon_em_casa_damalia_coliseu',
@@ -225,7 +225,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://coliseulisboa.com/eventos/em-casa-damalia-o-concerto-ao-vivo/',
       'https://echoboomer.pt/em-casa-d-amalia-o-concerto-ao-vivo-novas-datas-coliseus/',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* Date from UEFA; kick-off (20:00) only from unofficial sites. */
@@ -242,7 +242,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://www.uefa.com/uefachampionsleague/clubs/50149--sporting-cp/matches/',
       'https://www.record.pt/futebol/futebol-nacional/liga-betclic/sporting/detalhe/sporting-define-criterios-para-os-bilhetes-da-champions-venda-comeca-quarta-feira',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* Gulbenkian pages carry "Cancelado/Esgotado" labels on every event, almost certainly template text — check the page before approving. */
@@ -260,7 +260,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://gulbenkian.pt/musica/agenda/jeanine-de-bique-apollos-fire/',
       'https://apollosfire.org/europe2026/',
     ],
-    verified: false,
+    verified: true,
   },
   {
     id: 'lisbon_hmb_tim_tivoli',
@@ -277,7 +277,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://www.teatrotivolibbva.pt/hmb-e-tim-e-agora-um-concerto-terapia/',
       'https://rfm.pt/atualidade/22720/e-agora-hmb-com-tim-ao-vivo-com-a-rfm',
     ],
-    verified: false,
+    verified: true,
   },
   {
     id: 'lisbon_tony_carreira_meo',
@@ -294,7 +294,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://arena.meo.pt/en/agenda/tony-carreira_en/15781',
       'https://www.noticiasaominuto.com/fama/2946582/a-cada-grande-sala-esgotada-dou-por-mim-a-questionar-se-sera-a-ultima',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* Liga round 12, Monday 20:15. One resale site says the 29th; the league's published round says the 30th. */
@@ -311,7 +311,7 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://www.abola.pt/noticias/ja-ha-data-para-o-fc-porto-benfica-os-horarios-ate-a-12a-jornada-da-liga-2026090319073200619',
       'https://www.record.pt/futebol/futebol-nacional/liga-betclic/detalhe/ja-e-conhecida-a-data-e-hora-do-fc-porto-benfica',
     ],
-    verified: false,
+    verified: true,
   },
   {
     /* The first `moving`-side row the calendar has had: only owners paying IMI in instalments (bills over €100). A visitor never sees it. */
@@ -326,6 +326,6 @@ export const LISBON_2026_11: CalendarRow[] = [
       'https://www.deco.proteste.pt/dinheiro/impostos/noticias/prazos-imi-2026',
       'https://www.idealista.pt/news/node/73971',
     ],
-    verified: false,
+    verified: true,
   },
 ]

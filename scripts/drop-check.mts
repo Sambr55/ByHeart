@@ -350,13 +350,15 @@ console.log('\nthe calendar becoming drops\n')
   const football = rep.filter((r) => /benfica|sporting/.test(r.id))
   ok(
     'the football drafts, and drafts as football',
-    football.length === 2 && football.every((r) => r.status !== 'blocked'),
+    /* Every fixture in the calendar, not "both": October had two, November and December
+       added five more (2026-11-02). The guard is that none is blocked, whatever the count. */
+    football.length >= 2 && football.every((r) => r.status !== 'blocked'),
     football.map((r) => r.id + ': ' + r.status).join(', '),
   )
   const matchDrops = generatedDrops('lisbon', now).filter((d) => /benfica|sporting/.test(d.id))
   ok(
     'and nobody is sent to a match asking about a concert',
-    matchDrops.length === 2 &&
+    matchDrops.length === football.length &&
       matchDrops.every((d) =>
         d.situations.some((s2) => s2.lines.some((l) => l.pt === 'Onde é o jogo?')),
       ) &&
