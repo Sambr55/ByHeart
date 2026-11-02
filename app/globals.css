@@ -2122,82 +2122,135 @@ summary:focus-visible,
 }
 
 /*
-  THE WALL — the home screen's progress, as a building (Sam approved, 2026-11-02).
+  THE PANEL — the home screen's progress, as one azulejo painting (Sam approved, 2026-11-02).
 
-  The design review found the old path "too Duolingo": a winding line of round nodes, a
-  bouncing START, stars, and chunky hard shadows under everything. The Wall says the same
-  facts as material instead — a room you did is a tile LAID, a room you said cold is a tile
-  GLAZED, and the unit's practice session is the KEYSTONE that caps the course. Nothing
-  bounces, nothing has a hard bottom shadow, and nothing on it is a score.
+  It replaced the Wall the same day. Sam: "At the moment it looks like a badly laid out
+  PowerPoint … something much more elegant and aspirational with some level of movement."
+  Ported from the website's prototype (dub-site-v2/app/globals.css, .panel-*), which he
+  called "you surpassed yourself there". components/path/Panel.tsx says what each state is.
 
-  THE SKIN IS A TOKEN KEYED BY CHAPTER (components/path/Wall.tsx, WALL_CITY). Lisbon's is
-  azulejo, and every rule below reads --wall-* variables, so brick for one city or stone
-  for another is a new [data-skin] block and not a new component. Pure CSS, no images —
-  the same choice the azulejo field made, for the same reasons: no asset, no request, no
-  rights question.
+  THE PANEL IS ALWAYS BLUE ON WHITE, in dark mode too: it is a painting in a frame, and a
+  painting does not change colour when the lights go down. So its colours are its own and
+  not the theme's roles — only the breathing outline and the keystone glaze use --azulejo.
 */
-[data-skin] {
-  /* Plaster: what a laid tile is before it is glazed. The lifted card colour, warmed. */
-  --wall-plaster: var(--bg-elev);
-  --wall-mortar: var(--line);
-  /* The glaze — the colour a tile takes when the room was said cold. */
-  --wall-glaze: var(--accent);
-  --wall-glaze-ink: var(--accent-ink);
-  /* The motif painted on the glaze, at low strength so a title stays readable over it. */
-  --wall-motif: color-mix(in srgb, var(--accent-ink) 22%, transparent);
-  /* The keystone's finishing rim, three of three said cold. Gilt, not a star. */
-  --wall-gilt: #b8902f;
+.panel-frame {
+  background: #f6f3ec;
+  box-shadow: 0 30px 60px -36px rgba(26, 36, 48, 0.7);
+  outline: 1px solid rgba(0, 0, 0, 0.05);
 }
-
-[data-skin='azulejo'] {
-  --wall-glaze: var(--azulejo);
+.panel-cell { background: #fbfaf6; box-shadow: inset 0 0 0 0.5px rgba(31, 93, 140, 0.18) }
+.panel-ghost { opacity: 0.16; filter: saturate(0.6) }
+.panel-tile {
+  opacity: 0;
+  transform: rotateY(90deg) scale(0.92);
+  /*
+    The site flips in over 650ms with a little overshoot; here it is the app's own scale —
+    --t-land, once per screen, which is what a tile laid is — and no overshoot, because
+    scripts/motion-check.mts is right that a bounce is the signature of a toy.
+  */
+  transition: transform var(--t-land) var(--ease-out), opacity var(--t-arrive) ease;
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.35), inset 0 -6px 10px -8px rgba(0, 0, 0, 0.25);
 }
-
-/* The motif: a corner quatrefoil and a fine diagonal, the azulejo-block drawing at strength. */
-.wall-glazed {
-  background-color: var(--wall-glaze);
-  color: var(--wall-glaze-ink);
-  background-image:
-    radial-gradient(circle at 0 0, var(--wall-motif) 0 6px, transparent 6.5px),
-    radial-gradient(circle at 100% 0, var(--wall-motif) 0 6px, transparent 6.5px),
-    radial-gradient(circle at 0 100%, var(--wall-motif) 0 6px, transparent 6.5px),
-    radial-gradient(circle at 100% 100%, var(--wall-motif) 0 6px, transparent 6.5px),
-    radial-gradient(circle at 50% 50%, transparent 0 9px, var(--wall-motif) 9px 10px, transparent 10.5px),
-    repeating-linear-gradient(45deg, var(--wall-motif) 0 1px, transparent 1px 10px);
+.panel-tile.is-laid { opacity: 1; transform: none }
+/* Said cold: a thin gold glaze at the edge. Gilt, not a star, and only just there. */
+.panel-tile.is-laid.is-cold {
+  box-shadow: inset 0 0 0 1.5px rgba(201, 151, 59, 0.85), inset 0 0 6px 0 rgba(201, 151, 59, 0.35),
+    inset 0 -6px 10px -8px rgba(0, 0, 0, 0.25);
 }
-
-/* Laid, not yet glazed: plaster with a soft inset edge — set into the wall, not floating on it. */
-.wall-laid {
-  background-color: var(--wall-plaster);
-  box-shadow: inset 0 0 0 1px var(--wall-mortar), inset 0 -3px 0 color-mix(in srgb, var(--wall-mortar) 70%, transparent);
-}
-
-/* The next tile: an outline and a soft glow. No bounce, no hard shadow, no START. */
-.wall-next {
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent),
-    0 0 18px 2px color-mix(in srgb, var(--accent) 18%, transparent);
-}
-
 /*
-  THE KEYSTONE'S GLAZE, 0–3 (progress.ts, keystoneGlaze). Outline → part-glazed → glazed →
-  gold-rimmed. Part-glazed is the lower third, the way glaze is dipped from the bottom.
+  DRIFTED (Panel.tsx, DRIFT): a laid tile come loose — turned 8–13°, lifted, a deep
+  shadow and a white edge — with bare mortar in the bed it came out of. The site's
+  `.is-loose`, after Sam said the first, gentler tilts "aren't crooked enough to see".
+  Never red, never cracked, never removed.
 */
-.keystone-part {
-  background-image: linear-gradient(to top, var(--wall-glaze) 0 34%, transparent 34%);
+.panel-tile.is-laid.is-drifted {
+  transform: rotate(var(--rot, 10deg)) translate(var(--dx, 3px), var(--dy, -4px)) scale(0.86);
+  box-shadow: 0 14px 22px -6px rgba(20, 36, 58, 0.7), 0 0 0 2px #fff;
 }
-.keystone-gold {
-  box-shadow: 0 0 0 3px var(--wall-gilt), inset 0 0 0 2px var(--wall-gilt);
+.panel-gap { background: #d9d2c3 }
+.panel-next { animation: panel-breathe 2.4s ease-in-out infinite; box-shadow: inset 0 0 0 2px var(--azulejo) }
+@keyframes panel-breathe { 0%, 100% { background: rgba(31, 93, 140, 0.06) } 50% { background: rgba(31, 93, 140, 0.22) } }
+/* Leftover squares in the top course: the frieze, so the panel is never ragged. */
+.panel-frieze {
+  background-color: #fbfaf6;
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(31, 93, 140, 0.55) 0 10%, transparent 11%),
+    radial-gradient(circle at 0 0, rgba(31, 93, 140, 0.35) 0 22%, transparent 23%),
+    radial-gradient(circle at 100% 0, rgba(31, 93, 140, 0.35) 0 22%, transparent 23%),
+    radial-gradient(circle at 0 100%, rgba(31, 93, 140, 0.35) 0 22%, transparent 23%),
+    radial-gradient(circle at 100% 100%, rgba(31, 93, 140, 0.35) 0 22%, transparent 23%);
+  box-shadow: inset 0 0 0 0.5px rgba(31, 93, 140, 0.2);
+}
+.panel-sheen::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.32) 50%, transparent 60%);
+  transform: translateX(-100%);
+  animation: panel-sheen 7s ease-in-out infinite;
+}
+@keyframes panel-sheen { 0%, 55% { transform: translateX(-100%) } 85%, 100% { transform: translateX(100%) } }
+
+/* The one word on a tile: hidden until the pointer, focus, or a finger is on it. */
+.panel-word { opacity: 0; transform: translateY(3px); transition: opacity var(--t-ack) ease, transform var(--t-ack) ease }
+.panel-cell:hover .panel-word,
+.panel-cell:focus-visible .panel-word,
+.panel-cell:active .panel-word { opacity: 1; transform: none }
+.panel-cell:focus-visible { outline: 2px solid #c9973b; outline-offset: -2px; z-index: 2 }
+
+/* While a tile's sheet is open, that tile alone is outlined and named (Panel.tsx, openId). */
+.panel-open .panel-cell:not(.is-open) .panel-word { opacity: 0 !important }
+.panel-cell.is-open .panel-word { opacity: 1; transform: none }
+.panel-cell.is-open { outline: 2px solid #c9973b; outline-offset: -2px }
+
+/* A drifted tile's own little square, in the "Put these back" strip. */
+.panel-chip {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(20, 36, 58, 0.35);
 }
 
-/* The crack: a hairline, never red. Muted on plaster, the glaze's own ink on a glazed tile. */
-.wall-crack {
-  color: var(--line-strong);
+/* The keystone: a slim labelled strip, glazed 0–3 (progress.ts, keystoneGlaze). */
+.panel-keystone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* One width for all, so the units' bars line up down the legend. */
+  width: 8.25rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  text-align: center;
 }
-.wall-glazed .wall-crack {
-  color: color-mix(in srgb, var(--wall-glaze-ink) 70%, transparent);
+.panel-keystone.is-outline { border: 1.5px dashed var(--line-strong); color: var(--fg) }
+.panel-keystone.is-part {
+  border: 1.5px solid var(--azulejo);
+  color: var(--fg);
+  background-image: linear-gradient(to right, color-mix(in srgb, var(--azulejo) 28%, transparent) 0 34%, transparent 34%);
+}
+.panel-keystone.is-glazed,
+.panel-keystone.is-gold {
+  border: 1.5px solid var(--azulejo);
+  background: var(--azulejo);
+  color: #fbfaf6;
+}
+.panel-keystone.is-gold { box-shadow: 0 0 0 2px #c9973b }
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-tile { transition: opacity var(--t-arrive) ease; transform: none }
+  .panel-tile.is-laid.is-drifted { transform: rotate(var(--rot, 10deg)) translate(var(--dx, 3px), var(--dy, -4px)) scale(0.86) }
+  .panel-next { animation: none; background: rgba(31, 93, 140, 0.14) }
+  .panel-sheen::after { animation: none; display: none }
 }
 
-/* The ground under the wall: the foundation strip, mortar-coloured, edge to edge. */
+/* The ground under the panel: the foundation strip, mortar-coloured, edge to edge. */
 .wall-foundation {
   background-color: var(--surface);
   background-image: repeating-linear-gradient(

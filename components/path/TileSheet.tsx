@@ -8,7 +8,7 @@ import { CRATES, PIECES, roomPieceIds, sourceOf } from '@/content/roots'
 import type { PathNode } from './progress'
 
 /**
- * A LAID TILE, OPENED (the Wall, Sam approved 2026-11-02).
+ * A LAID TILE, OPENED (the Wall, Sam approved 2026-11-02; kept for the Panel the same day).
  *
  * Tapping a tile you have not laid opens the room, as the path always did. Tapping one you
  * HAVE laid used to do the same — replay the whole room — which is the fault Sam named on
@@ -20,7 +20,7 @@ import type { PathNode } from './progress'
  *                (the release), and the save — the rescue card's own layout pieces
  *                (SpokenLine, components/Opener.tsx), with the same listen button.
  *   SAY IT COLD  /revise?kind=room — the release and the room's words, asked back. Saying
- *                them is what glazes the tile and mends a crack.
+ *                them is what glazes the tile and puts a drifted one back.
  *   WHERE IT CAME FROM
  *                for each word the room handed over that a film or a song taught first,
  *                the crate it came from — "comigo — from Top Gun". The point of DUB is that
@@ -35,6 +35,13 @@ import type { PathNode } from './progress'
  * “Sorry. Sorry. Sorry.”" — which is the hook itself.
  *
  * And "Open the room again", for somebody who does want the whole thing.
+ *
+ * A DRIFTED TILE'S SHEET LEADS WITH "PUT IT BACK" (the Panel, 2026-11-02). When the tile has
+ * slid out of its place (`slipping`, components/path/Panel.tsx DRIFT), the first thing on
+ * the sheet is the one thing that fixes it — the same /revise?kind=room as "Say it cold",
+ * named for what it does to the panel. Sam's sliding puzzle: "only one square was empty and
+ * you had to move all the others around" — here it is one tile, and one tap moves it home.
+ * The remind lines are still under it, for a look before you try.
  */
 export function TileSheet({
   node,
@@ -49,6 +56,7 @@ export function TileSheet({
   const first = room.lines[0] ?? null
   const save = saveSentence(gender)
   const close = useRef<HTMLButtonElement>(null)
+  const coldHref = '/revise?kind=room&id=' + encodeURIComponent(room.id)
 
   /* Escape closes; focus starts on the close button so a keyboard user is inside the sheet. */
   useEffect(() => {
@@ -90,7 +98,7 @@ export function TileSheet({
           <div className="flex min-w-0 flex-1 flex-col gap-1">
             <p className="eyebrow text-muted">
               {cold ? 'Laid and glazed' : 'Laid'}
-              {slipping ? ' · worth another look' : ''}
+              {slipping ? ' · slid out of place' : ''}
             </p>
             <h2 id="tile-sheet-title" className="display text-balance text-2xl">
               {room.title}
@@ -105,6 +113,18 @@ export function TileSheet({
             Close
           </button>
         </div>
+
+        {slipping ? (
+          <div className="flex flex-col gap-3" data-testid="sheet-put-back">
+            <Link
+              href={coldHref}
+              className="tap-target eyebrow block w-full rounded-full bg-accent px-6 py-3 text-center text-accent-ink"
+            >
+              Put it back
+            </Link>
+            <p className="text-center text-sm text-muted">Say the room cold once and the tile goes back in its place.</p>
+          </div>
+        ) : null}
 
         <section aria-labelledby="sheet-remind" className="flex flex-col gap-4">
           <p id="sheet-remind" className="eyebrow text-accent">
@@ -130,13 +150,16 @@ export function TileSheet({
           ) : null}
         </section>
 
-        <Link
-          href={'/revise?kind=room&id=' + encodeURIComponent(room.id)}
-          data-testid="sheet-cold"
-          className="tap-target eyebrow block w-full rounded-full bg-accent px-6 py-3 text-center text-accent-ink"
-        >
-          Say it cold
-        </Link>
+        {/* Drifted: "Put it back" above already is this, so it is not asked twice. */}
+        {slipping ? null : (
+          <Link
+            href={coldHref}
+            data-testid="sheet-cold"
+            className="tap-target eyebrow block w-full rounded-full bg-accent px-6 py-3 text-center text-accent-ink"
+          >
+            Say it cold
+          </Link>
+        )}
 
         {sources.length ? (
           <section aria-labelledby="sheet-source" className="flex flex-col gap-2" data-testid="sheet-source">

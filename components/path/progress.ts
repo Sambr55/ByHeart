@@ -59,9 +59,10 @@ export interface PathNode {
   state: NodeState
   cold: boolean
   /**
-   * WORTH ANOTHER LOOK — a laid tile with a hairline crack (the Wall, Sam, 2026-11-02).
+   * DRIFTED — a laid tile knocked a little out of its place on the Panel (2026-11-02; on
+   * the Wall it replaced that same day, it was a hairline crack).
    *
-   * Only ever true of a DONE room: a crack is something that happens to a tile already
+   * Only ever true of a DONE room: drifting is something that happens to a tile already
    * laid, and an unlaid one has nothing to slip. See roomSlipping for what counts. It is
    * never shown in red and it never takes the tile away — a room you did is a room you
    * did, and a wall that lost bricks for not visiting would be a streak by another name.
@@ -117,10 +118,10 @@ export function pathView(
 }
 
 /**
- * How long a room's words can go untouched before the tile shows a hairline crack.
+ * How long a room's words can go untouched before its tile drifts out of place.
  *
  * Fourteen days, from the Wall's design (2026-11-02): long enough that one quiet week does
- * not crack anything, short enough that a crack still means the words have gone quiet.
+ * not move anything, short enough that a drifted tile still means the words have gone quiet.
  */
 export const SLIP_DAYS = 14
 
@@ -138,10 +139,10 @@ export const SLIP_DAYS = 14
  * "Last recalled" is latest_recall_at first. It is null for most words — it is only set by
  * a cold, delayed or checkpoint recall — so it falls back to the newest evidence for the
  * word, and then to the newest clean proof of the room's own release line. Saying the room
- * cold again is the thing that should clear the crack, and this is what makes it.
+ * cold again is the thing that should put the tile back, and this is what makes it.
  *
  * A word with no timestamp anywhere is NOT slipping: we do not know when it was met, and a
- * crack is a claim. Better to under-say than to crack a tile laid this morning.
+ * drift is a claim. Better to under-say than to knock a tile laid this morning.
  */
 export function roomSlipping(r: PathRecord, room: Situation, now: Date = new Date()): boolean {
   const inventory = r.inventory ?? {}

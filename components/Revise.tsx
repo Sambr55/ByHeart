@@ -38,11 +38,13 @@ export function Revise() {
     WHERE "BACK" GOES DEPENDS ON WHERE YOU CAME FROM (the Wall, 2026-11-02).
 
     Every other kind is a card on the board in Yours, so back is /profile. A room is a tile
-    on the Wall — "Say it cold" on a laid tile, or a tile in the "Worth another look" strip
-    — and sending somebody from the home screen to Yours would be a door into a different
-    room than the one they left by. So a room goes back to the Club, where the Wall is.
+    on the home screen's panel — "Say it cold" on a laid tile, "Put it back" on a drifted
+    one, or a tile in the "Put these back" strip — and sending somebody from the home screen
+    to Yours would be a door into a different room than the one they left by. So a room goes
+    back to the Club, where the panel is. (It said BACK TO THE WALL until the Panel replaced
+    the Wall, 2026-11-02.)
   */
-  const back = kind === 'room' ? { href: '/club', label: 'BACK TO THE WALL', aria: 'Back to the Wall' } : { href: '/profile', label: 'BACK TO YOURS', aria: 'Back to Yours' }
+  const back = kind === 'room' ? { href: '/club', label: 'BACK TO THE PANEL', aria: 'Back to the panel' } : { href: '/profile', label: 'BACK TO YOURS', aria: 'Back to Yours' }
   const [at, setAt] = useState(0)
   const [done, setDone] = useState(false)
   /*
@@ -212,6 +214,12 @@ export function Revise() {
           {line.context}
         </p>
       ) : null}
+      {/* "How do you say:" — the context sets the scene, this asks the question. RevisionLine.lead. */}
+      {line.lead ? (
+        <p data-testid="revise-lead" className="text-sm font-semibold text-fg">
+          {line.lead}
+        </p>
+      ) : null}
       <SayItCard
         key={line.answer}
         ask={line.ask}
@@ -248,7 +256,7 @@ export function Revise() {
             produced with nothing on screen, and a revision said cold is one of those.
           */
           recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
-          /* A room's words, recalled — what mends a crack on the Wall. See RevisionLine.pieces. */
+          /* A room's words, recalled — what puts a drifted tile back on the panel. See RevisionLine.pieces. */
           if (line.pieces?.length) recallPieces(line.pieces)
           /*
             AND IT DOES NOT ADVANCE HERE, WHICH IS WHY THE TICK WAS NEVER SEEN.

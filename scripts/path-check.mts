@@ -22,7 +22,8 @@ import { readFileSync, existsSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { CHEATS } from '../content/cheats'
-import { Wall, keystoneLabel, BUILDING } from '../components/path/Wall'
+import { Panel, keystoneLabel, driftOf } from '../components/path/Panel'
+import { PANEL_ART, TILE_WORDS, panelArt, tileWord } from '../content/panel'
 import { roomSlipping, keystoneGlaze, SLIP_DAYS } from '../components/path/progress'
 import { revisionFor, revisionTitle } from '../content/revision'
 import { roomPieceIds } from '../content/roots'
@@ -138,53 +139,70 @@ console.log('\nthe understood tally — little wins, never pressure\n')
   ok('and the manifest has it as a shortcut', /shortcuts:[\s\S]*url: '\/opener'/.test(manifest))
 }
 
-console.log('\nthe Wall — a course per unit, built from the bottom (2026-11-02)\n')
+console.log('\nthe Panel — one painting per path, one tile per room (2026-11-02)\n')
 {
   /*
-    Sam approved the Wall on 2026-11-02 after the review found the path "too Duolingo". It
-    is rendered here for real — renderToStaticMarkup on plain records — so these are claims
-    about the markup a phone receives, not about the source text.
+    Sam replaced the Wall with the Panel on 2026-11-02: the Wall "looks like a badly laid
+    out PowerPoint"; the Panel he was shown on the website — "you surpassed yourself there".
+    It is rendered here for real — renderToStaticMarkup on plain records — so these are
+    claims about the markup a phone receives, not about the source text.
   */
   const empty: PathRecord = { finished_cards: [], proof: [], evidence: [], mission_completed_at: {} }
   for (const purpose of ['visiting', 'staying', 'moving'] as const) {
     const us = pathUnits(undefined, undefined, purpose)
+    const rooms = us.flatMap((u) => u.rooms)
     const v = pathView(empty, us, () => 'open', now)
     const html = renderToStaticMarkup(
-      createElement(Wall, { view: v, purpose, chapter: 'lisbon', inventory: {}, onLaid: () => {} }),
+      createElement(Panel, { view: v, purpose, chapter: 'lisbon', inventory: {}, onLaid: () => {} }),
     )
-    const courses = html.match(/data-course="[^"]+"/g) ?? []
-    ok(purpose + ': the Wall renders a course per unit', courses.length === us.length, courses.length + ' of ' + us.length)
-    ok(purpose + ': in path order in the DOM (drawn bottom-up by flex-col-reverse)', courses.map((c) => c.slice(13, -1)).join() === us.map((u) => u.id).join() && /flex-col-reverse/.test(html))
-    ok(purpose + ': a tile per room', (html.match(/data-testid="tile"/g) ?? []).length === us.flatMap((u) => u.rooms).length)
-    ok(purpose + ': a keystone per course', (html.match(/data-testid="keystone"/g) ?? []).length === us.length)
-    ok(purpose + ': and it opens on the course you are on', /data-course="[^"]+" data-current="true"/.test(html) && html.indexOf('data-current="true"') === html.indexOf('data-course="' + us[0].id + '"') + ('data-course="' + us[0].id + '"').length + 1)
-    ok(purpose + ': the building is named for why you are here', html.includes(BUILDING[purpose]('Lisboa')))
-    ok(purpose + ': no stars, no START', !/>Start<|\bstars?\b|nudge-up/i.test(html))
-    /* Every unit with a milestone has a keystone label — the pattern, by name. */
+    const tiles = (html.match(/data-testid="tile"/g) ?? []).length
+    const frieze = (html.match(/data-testid="frieze"/g) ?? []).length
+    ok(purpose + ': a tile per room', tiles === rooms.length, tiles + ' of ' + rooms.length)
+    ok(purpose + ': frieze fills the top course to a full 6-wide grid', (tiles + frieze) % 6 === 0 && frieze < 6, tiles + ' tiles + ' + frieze + ' frieze')
+    /* Laid from the bottom-left: the first room is the first cell of the LAST row in the DOM. */
+    const order = [...html.matchAll(/data-testid="(tile|frieze)"(?:[^>]*?data-room="([^"]+)")?/g)].map((m) => m[2] ?? '·')
+    const lastRow = order.slice(-6)
+    ok(purpose + ': laid from the bottom-left, in path order', lastRow[0] === rooms[0].id && lastRow.slice(1).join() === rooms.slice(1, 6).map((r) => r.id).join(), lastRow.join())
+    const art = PANEL_ART.lisbon![purpose]
+    ok(purpose + ': its painting exists in public/', existsSync('public' + art.src), art.src)
+    ok(purpose + ': the caption names the painting and counts tiles', html.includes('Your panel: ' + art.title) && html.includes('0 of ' + rooms.length + ' tiles laid'))
+    ok(purpose + ': every room has its own tile word', rooms.every((r) => Boolean(TILE_WORDS[r.id])), rooms.filter((r) => !TILE_WORDS[r.id]).map((r) => r.id).join(', '))
+    ok(purpose + ': and the words are on the tiles', rooms.every((r) => html.includes('>' + tileWord(r).replace(/&/g, '&amp;') + '<')))
+    ok(purpose + ': one tile breathes', (html.match(/panel-next/g) ?? []).length === 1)
+    ok(purpose + ': a keystone per unit', (html.match(/data-testid="keystone"/g) ?? []).length === us.length)
     ok(purpose + ': every keystone is labelled with its pattern', us.every((u) => keystoneLabel(u).length > 0 && html.includes(keystoneLabel(u).replace(/&/g, '&amp;'))), us.map(keystoneLabel).join(' · '))
+    ok(purpose + ': no stars, no START, no Wall', !/>Start<|\bstars?\b|nudge-up|data-testid="wall"|data-course=/i.test(html))
   }
+  ok('another city borrows Lisbon’s painting until it has its own', panelArt('porto', 'moving').src === PANEL_ART.lisbon!.moving.src)
+  ok('a room with no listed word falls back to its title', tileWord({ id: 'x', title: 'Asking the way.' }) === 'way')
   ok('keystone glaze is 0–3 as material, not stars', [0, 1, 2, 3].map(keystoneGlaze).join() === 'outline,part,glazed,gold')
+  {
+    const us = pathUnits(undefined, undefined, 'moving')
+    const rec: PathRecord = { finished_cards: [us[0].rooms[0].id], proof: [], evidence: [], mission_completed_at: {} }
+    const html = renderToStaticMarkup(createElement(Panel, { view: pathView(rec, us, () => 'open', now), purpose: 'moving', chapter: 'lisbon', inventory: {}, onLaid: () => {} }))
+    ok('a done room is laid; the rest are ghosts', (html.match(/panel-tile[^"]*is-laid/g) ?? []).length === 1 && (html.match(/panel-ghost/g) ?? []).length === us.flatMap((u) => u.rooms).length)
+    const paid = renderToStaticMarkup(createElement(Panel, { view: pathView(rec, us, (id) => (id === us[0].rooms[2].id ? 'paid' : 'open'), now), purpose: 'moving', chapter: 'lisbon', inventory: {}, onLaid: () => {} }))
+    ok('a paid tile goes to /pro, with a lock', /data-state="paid"[^>]*>|href="\/pro"[^>]*data-state="paid"/.test(paid) && paid.includes('locked, unlock with membership'))
+  }
   const home = readFileSync('components/path/PathHome.tsx', 'utf8')
-  ok('PathHome draws the Wall, not the winding path', /<Wall\b/.test(home) && !/WindingPath/.test(home) && !existsSync('components/path/WindingPath.tsx'))
+  ok('PathHome draws the Panel, and the Wall is gone', /<Panel\b/.test(home) && !/<Wall\b|from '.\/Wall'/.test(home) && !existsSync('components/path/Wall.tsx') && !/WindingPath/.test(home) && !existsSync('components/path/WindingPath.tsx'))
   ok('no flame on the home screen', !/FlameIcon/.test(home))
   ok('the tally is honest about the microphone', /Said out loud, and heard/.test(home) && !/'Understood ' \+/.test(home))
   ok('no cheer claims "understood"', UNDERSTOOD_MILESTONES.every((m) => !/understood/i.test(understoodCheer(m))))
-  /*
-    AT EVERY WIDTH (Sam, 2026-11-02: "Yes, replace the old card rail with the Wall on
-    desktop."). The Wall must not be hidden above md, and the rail must be gone with its
-    stars and its hard-shadowed practice circle.
-  */
-  const wallMount = home.slice(home.lastIndexOf('<div', home.indexOf('<Wall')), home.indexOf('<Wall'))
-  ok('the Wall renders at desktop widths too', !/md:hidden|hidden md:/.test(wallMount), wallMount.trim())
+  /* AT EVERY WIDTH (Sam, 2026-11-02, of the Wall: "Yes, replace the old card rail … on desktop."). */
+  const mount = home.slice(home.lastIndexOf('<div', home.indexOf('<Panel')), home.indexOf('<Panel'))
+  ok('the Panel renders at desktop widths too', !/md:hidden|hidden md:/.test(mount), mount.trim())
   ok('no CardRail anywhere', !/<CardRail|from '.\/CardRail'/.test(home) && !existsSync('components/path/CardRail.tsx') && !existsSync('components/path/Unit.tsx'))
   ok('no stars on the home screen', !/StarIcon|stars=\{/.test(home))
   ok('no hard bottom shadows on the home screen', !/shadow-\[0_\d+px_0_0/.test(home))
   ok('a laid tile opens the sheet', /<TileSheet\b/.test(home) && existsSync('components/path/TileSheet.tsx'))
-  const wall = readFileSync('components/path/Wall.tsx', 'utf8')
-  ok('no chunky hard bottom shadows on the Wall', !/shadow-\[0_\d+px_0_0/.test(wall))
+  const panel = readFileSync('components/path/Panel.tsx', 'utf8')
+  ok('no chunky hard bottom shadows on the Panel', !/shadow-\[0_\d+px_0_0/.test(panel))
+  const css = readFileSync('app/globals.css', 'utf8')
+  ok('the panel stands still under reduced motion', /prefers-reduced-motion[^{]*\{[^}]*\.panel-tile \{[^}]*transform: none/.test(css) && /\.panel-next \{ animation: none/.test(css) && /\.panel-sheen::after \{ animation: none/.test(css))
 }
 
-console.log('\nworth another look — a crack, never a removal\n')
+console.log('\nput it back — a drift, never a removal\n')
 {
   const us = pathUnits(undefined, undefined, 'moving')
   const room = us[0].rooms.find((r) => roomPieceIds(r).length > 0)!
@@ -199,25 +217,39 @@ console.log('\nworth another look — a crack, never a removal\n')
   ok('flagged NEEDS ANOTHER LOOK is slipping', roomSlipping({ ...base, inventory: item('NEEDS ANOTHER LOOK', fresh) as never }, room, now))
   ok('recalled more than ' + SLIP_DAYS + ' days ago is slipping', roomSlipping({ ...base, inventory: item('YOURS', old) as never }, room, now))
   ok('recalled recently is not', !roomSlipping({ ...base, inventory: item('YOURS', fresh) as never }, room, now))
-  ok('no timestamp anywhere is not — a crack is a claim', !roomSlipping({ ...base, inventory: item('NEW', null) as never }, room, now))
+  ok('no timestamp anywhere is not — a drift is a claim', !roomSlipping({ ...base, inventory: item('NEW', null) as never }, room, now))
   ok('fresh evidence counts when latest_recall_at is null', !roomSlipping({ ...base, inventory: item('NEW', null) as never, evidence: [{ target_id: pid, timestamp: fresh } as never] }, room, now))
   ok('old evidence alone is slipping', roomSlipping({ ...base, inventory: item('NEW', null) as never, evidence: [{ target_id: pid, timestamp: old } as never] }, room, now))
   const v = pathView({ ...base, inventory: item('NEEDS ANOTHER LOOK', fresh) as never }, us, () => 'open', now)
   const node = v.units[0].nodes.find((n) => n.room.id === room.id)!
   ok('pathView marks it, and it stays laid', node.slipping && node.state === 'done')
   ok('an unlaid room never slips', v.units.flatMap((u) => u.nodes).filter((n) => n.state !== 'done').every((n) => !n.slipping))
-  const html = renderToStaticMarkup(createElement(Wall, { view: v, purpose: 'moving', chapter: 'lisbon', inventory: item('NEEDS ANOTHER LOOK', fresh), onLaid: () => {} }))
-  ok('the strip lists it, and the crack is drawn', /data-testid="worth-another-look"/.test(html) && /data-slipping="true"/.test(html) && html.includes('/revise?kind=room&amp;id=' + room.id))
-  const none = renderToStaticMarkup(createElement(Wall, { view: pathView(base, us, () => 'open', now), purpose: 'moving', chapter: 'lisbon', inventory: {}, onLaid: () => {} }))
-  ok('and with nothing slipping there is no strip', !/worth-another-look/.test(none))
+  const html = renderToStaticMarkup(createElement(Panel, { view: v, purpose: 'moving', chapter: 'lisbon', inventory: item('NEEDS ANOTHER LOOK', fresh), onLaid: () => {} }))
+  const d = driftOf(room.id)
+  const rooms0 = us.flatMap((u) => u.rooms)
+  /* Sam, of the website's first tilts: "aren't crooked enough to see". 8–13°, like the site. */
+  ok('the drift is 8–13° — crooked enough to see — and the same every time', Math.abs(d.rot) >= 8 && Math.abs(d.rot) <= 13 && JSON.stringify(driftOf(room.id)) === JSON.stringify(d))
+  ok('and leans both ways across rooms', new Set(rooms0.map((r) => Math.sign(driftOf(r.id).rot))).size === 2)
+  ok('the drifted tile is drawn rotated, still laid', /data-slipping="true"/.test(html) && new RegExp('is-laid is-drifted" style="[^"]*--rot:' + d.rot + 'deg').test(html))
+  ok('never red, never cracked', !/crack|text-wrong|bg-wrong|#c0392b|red/i.test(html))
+  ok('the strip says "Put these back" and links the revision', /data-testid="put-back"/.test(html) && html.includes('Put these back') && html.includes('/revise?kind=room&amp;id=' + room.id) && !/Worth another look/.test(html))
+  const opened = renderToStaticMarkup(createElement(Panel, { view: v, purpose: 'moving', chapter: 'lisbon', inventory: {}, onLaid: () => {}, openId: room.id }))
+  ok('with its sheet open, that tile alone is marked and named', /panel-open/.test(opened) && (opened.match(/is-open/g) ?? []).length === 1 && new RegExp('is-open"[^>]*data-room="' + room.id + '"|data-room="' + room.id + '"[^>]*is-open').test(opened))
+  const none = renderToStaticMarkup(createElement(Panel, { view: pathView(base, us, () => 'open', now), purpose: 'moving', chapter: 'lisbon', inventory: {}, onLaid: () => {} }))
+  ok('and with nothing drifted there is no strip, and nothing rotated', !/put-back/.test(none) && !/is-drifted/.test(none))
   ok('the foundation counts words by shelf', /data-testid="foundation"/.test(html) && /1 word · 1 shelf/.test(html))
+  const sheet = readFileSync('components/path/TileSheet.tsx', 'utf8')
+  ok('a drifted tile’s sheet leads with "Put it back"', /slipping \? \(\s*<div[^>]*data-testid="sheet-put-back"/.test(sheet) && sheet.indexOf('Put it back') < sheet.indexOf('sheet-remind'))
 }
 
 console.log('\nrevision knows a room\n')
 {
   const room = situationById('lisbon_save')!
   const lines = revisionFor('room', 'lisbon_save', {})
-  ok('kind=room asks the release first', lines[0]?.answer === room.release.answer && lines[0]?.context === room.title)
+  ok('kind=room asks the release first', lines[0]?.answer === room.release.answer)
+  /* Sam, 2026-11-02, on a bare recall: "there is no context whatsoever… what is the right answer?" */
+  ok('with the situation as context and "How do you say:" as the question', lines[0]?.context === room.why && lines[0]?.lead === 'How do you say:' && !/first line/i.test(JSON.stringify(lines)))
+  ok('/revise shows the lead between the context and the card', /data-testid="revise-lead"/.test(readFileSync('components/Revise.tsx', 'utf8')))
   ok('then the room’s words', lines.length === 1 + roomPieceIds(room).length, lines.map((l) => l.answer).join(' | '))
   ok('and every line knows which words it recalls', lines.every((l) => (l.pieces ?? []).length > 0))
   ok('a room is titled by its title', revisionTitle('room', 'lisbon_save') === room.title)

@@ -20,7 +20,7 @@ import {
 } from './progress'
 import { roomLock } from './locks'
 import { RoomCard } from './RoomCard'
-import { Wall } from './Wall'
+import { Panel } from './Panel'
 import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
 
@@ -28,8 +28,16 @@ import { DoorIcon, SpeechIcon } from './icons'
  * The Lisbon path, as a home screen.
  *
  * One obvious next action — the up-next card with one big PLAY — then the whole trip
- * below it: THE WALL (components/path/Wall.tsx), at every width. Nothing is locked by
+ * below it: THE PANEL (components/path/Panel.tsx), at every width. Nothing is locked by
  * order; only paid rooms are, and they say UNLOCK.
+ *
+ * THE PANEL REPLACED THE WALL ON 2026-11-02, the same day the Wall arrived. Sam, on the
+ * Wall: "it looks like a badly laid out PowerPoint" — he asked for "something much more
+ * elegant and aspirational with some level of movement", was shown the Panel on the
+ * website ("you surpassed yourself there") and chose it. Each path is one azulejo painting
+ * and each room one square of it; the Wall's courses, cracks and plaster are gone, its
+ * keystones, sheet and foundation kept. Everything below about the Wall's arrival still
+ * stands for the Panel: it is the same slot, at the same widths.
  *
  * THE WALL REPLACED THE WINDING PATH ON 2026-11-02. Sam approved it after a design review
  * found the path "too Duolingo" — the code's own comments called it "Duolingo's winding
@@ -57,14 +65,15 @@ export function PathHome() {
 
   /*
     THE PATH FOLLOWS THE REASON GIVEN AT SET-UP — a trip, a season, or moving here — see
-    content/path.ts. Settings can change it, and the path changes with it.
+    content/path.ts. Settings can change it, and the path changes with it — and so does
+    the painting on the panel (content/panel.ts).
   */
   const purpose = learner.purpose ?? null
   const name = PATH_NAMES[pathPurpose(purpose)]
   const units = useMemo(() => pathUnits(undefined, undefined, purpose), [purpose])
   /*
     `now` from useNowAfterMount, because slipping reads the clock and the server has none
-    worth trusting — before mount nothing is cracked, which is the kinder first frame.
+    worth trusting — before mount nothing has drifted, which is the kinder first frame.
   */
   const view = useMemo(
     () => pathView(learner, units, (id) => roomLock(id, member, purpose), now ?? new Date(0)),
@@ -118,7 +127,7 @@ export function PathHome() {
       </header>
 
       <main className="mx-auto w-full max-w-md px-5 py-6 md:max-w-6xl md:px-6">
-        {/* One column on a phone; on anything wide, now on the left and the Wall on the right. */}
+        {/* One column on a phone; on anything wide, now on the left and the Panel on the right. */}
         <div className="flex flex-col gap-10 md:grid md:grid-cols-[minmax(0,24rem)_minmax(0,38rem)] md:items-start md:justify-center md:gap-12">
           <div className="flex flex-col gap-10 md:sticky md:top-24">
             <Understood
@@ -158,12 +167,13 @@ export function PathHome() {
           </div>
 
           <div className="needs-learner">
-            <Wall
+            <Panel
               view={view}
               purpose={pathPurpose(purpose)}
               chapter={learner.chapter ?? 'lisbon'}
               inventory={learner.inventory ?? {}}
               onLaid={setSheet}
+              openId={sheet?.room.id ?? null}
             />
           </div>
         </div>

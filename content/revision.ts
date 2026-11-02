@@ -97,13 +97,18 @@ export interface RevisionLine {
    * content in a lookup function.
    */
   context?: string
+  /**
+   * The words that turn the English into a question — "How do you say:" — shown between
+   * the context and the card. Only the room kind sets it today: see the room branch.
+   */
+  lead?: string
   /** Words the build offers that the sentence does not teach — see MiniBuild. */
   helpers?: Record<string, string>
   /**
    * The library words a clean answer counts as recalled — the `room` kind only.
    *
-   * The Wall cracks a tile when its words go quiet, so saying them again on /revise has to
-   * mend it: Revise records a cold recall for these (recallPieces in engine/learner.ts).
+   * The Panel knocks a tile out of place when its words go quiet (the Wall, before it, drew
+   * a crack), so saying them again on /revise has to put it back: Revise records a cold recall for these (recallPieces in engine/learner.ts).
    * The release carries every word the room handed over; a word line carries itself.
    */
   pieces?: string[]
@@ -162,16 +167,26 @@ export function revisionFor(
     const room = situationById(id)
     if (!room) return []
     const ids = roomPieceIds(room)
+    /*
+      CONTEXT, OR IT IS A QUIZ WITH NO QUESTION (Sam, 2026-11-02). Testing "put it back" on
+      the website's panel, he was asked a bare line and said: "there is no context
+      whatsoever… what is the right answer?" The header already names the room (its
+      title), so the context here is the room's `why` — the situation, in a sentence —
+      and the lead turns the English into the question it is: How do you say: "…".
+      This is the first thing "Put it back" on a drifted tile shows, so it must be about
+      that tile, and say so.
+    */
     const release: RevisionLine = {
       ask: room.release.ask,
       answer: room.release.answer,
-      context: room.title,
+      context: room.why || room.title,
+      lead: 'How do you say:',
       pieces: ids,
     }
     const words = ids
       .map((pid) => ({ pid, p: PIECES[pid] }))
       .filter(({ p }) => p && p.target && p.gloss && p.target !== room.release.answer)
-      .map(({ pid, p }) => ({ ask: p.gloss, answer: p.target, pieces: [pid] }))
+      .map(({ pid, p }) => ({ ask: p.gloss, answer: p.target, lead: 'And the word for:', pieces: [pid] }))
     return [release, ...words]
   }
 
