@@ -7,6 +7,7 @@ import { BRAND } from '@/content/brand'
 import { LANDING } from '@/content/front-door'
 import { Wordmark } from '@/components/Wordmark'
 import { useInstallable } from '@/components/Install'
+import { applyBookingFromUrl } from '@/engine/booking'
 
 /**
  * The page a QR code points at, whose only job is to get DUB onto a home screen.
@@ -38,7 +39,15 @@ export function Get() {
     codebase has paid for more than once.
   */
   const [ready, setReady] = useState(false)
-  useEffect(() => setReady(true), [])
+  useEffect(() => {
+    /*
+      THE MARKETING SITE'S SEARCH LANDS HERE (2026-11-02): /get?purpose=…&depart=…&ret=….
+      Written to the learner now, after mount, so set-up never asks the question the
+      search already answered. Validated and never over an answer — see engine/booking.ts.
+    */
+    applyBookingFromUrl()
+    setReady(true)
+  }, [])
 
   return (
     <main

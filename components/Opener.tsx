@@ -24,7 +24,7 @@ import { roomLock } from '@/components/path/locks'
  *   the opening line of the next room on your path — its FIRST line, because the lines
  *   are ordered by the encounter and the first one is the one you walk in with; and
  *
- *   the save, underneath — "Desculpe, não percebo. Sou inglês." — for when the reply
+ *   the save, underneath — "Desculpe, não percebi. Sou inglês." (Sam chose percebi, 2026-11-02) — for when the reply
  *   comes back faster than you expected. See content/blocks/lisbon-save.ts.
  *
  * BIG TYPE, NO CHROME. No bottom bar, no header, no tally: those are for sitting down.
@@ -87,16 +87,11 @@ export function Opener() {
               <p id="opener-room" className="eyebrow text-muted">
                 Walking into · {room.title}
               </p>
-              <p className="pt text-balance text-[2.6rem] font-semibold leading-[1.1] text-accent" lang="pt-PT">
-                {opening.pt}
-              </p>
-              <p className="text-xl leading-snug text-fg">{opening.en}</p>
-              <div className="flex items-center gap-4">
-                <AudioButton slug={slugFor(opening.pt)} text={opening.pt} />
+              <SpokenLine pt={opening.pt} en={opening.en} size="xl">
                 <Link href={'/errand/' + room.id} className="eyebrow text-accent underline-offset-4 hover:underline">
                   The whole room
                 </Link>
-              </div>
+              </SpokenLine>
             </>
           ) : (
             <p id="opener-room" className="display text-2xl">
@@ -115,16 +110,49 @@ export function Opener() {
           <p id="opener-save" className="eyebrow text-muted">
             If it goes past you
           </p>
-          <p className="pt text-balance text-[2rem] font-semibold leading-[1.15] text-accent" lang="pt-PT">
-            {save.pt}
-          </p>
-          <p className="text-lg leading-snug text-fg">{save.en}</p>
-          <div className="flex items-center gap-4">
-            <AudioButton slug={slugFor(save.pt)} text={save.pt} />
+          <SpokenLine pt={save.pt} en={save.en} size="lg">
             <p className="text-sm leading-snug text-muted">Then: Pode falar mais devagar?</p>
-          </div>
+          </SpokenLine>
         </section>
       </div>
     </div>
+  )
+}
+
+/**
+ * ONE LINE TO SAY: the Portuguese, the English under it, and the listen button.
+ *
+ * Lifted out of the rescue card on 2026-11-02 so the Wall's tile sheet
+ * (components/path/TileSheet.tsx) can "Remind" you of a room in exactly the same shape —
+ * the line you walk in with, the release, the save — rather than growing a second way of
+ * drawing a sentence. `size` is the only difference: the rescue card is read at arm's
+ * length on a pavement (xl, lg); the sheet is read sitting down, three lines deep (md).
+ * `children` sit beside the listen button: "The whole room", "Then: Pode falar …".
+ */
+export function SpokenLine({
+  pt,
+  en,
+  size = 'lg',
+  children,
+}: {
+  pt: string
+  en: string
+  size?: 'xl' | 'lg' | 'md'
+  children?: React.ReactNode
+}) {
+  const ptSize =
+    size === 'xl' ? 'text-[2.6rem] leading-[1.1]' : size === 'lg' ? 'text-[2rem] leading-[1.15]' : 'text-2xl leading-tight'
+  const enSize = size === 'xl' ? 'text-xl' : size === 'lg' ? 'text-lg' : 'text-base'
+  return (
+    <>
+      <p className={'pt text-balance font-semibold text-accent ' + ptSize} lang="pt-PT">
+        {pt}
+      </p>
+      <p className={enSize + ' leading-snug text-fg'}>{en}</p>
+      <div className="flex items-center gap-4">
+        <AudioButton slug={slugFor(pt)} text={pt} size={size === 'md' ? 'sm' : 'md'} />
+        {children}
+      </div>
+    </>
   )
 }

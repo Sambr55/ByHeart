@@ -23,6 +23,7 @@ import {
   syncSession,
 } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
+import { applyBookingFromUrl } from '@/engine/booking'
 import { useLearner } from '@/engine/useLearner'
 import { DEFAULT_PAIR } from '@/content/pairs'
 
@@ -135,6 +136,13 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   */
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
+    /*
+      AND THE BOOKING PASS-THROUGH (2026-11-02), for a link that lands on set-up directly:
+      ?purpose=visiting|staying|moving&depart=…&ret=… is written to the record here, before
+      the first real render, so `shown` below reads the goal and opens on the name. /get
+      does the same. Validated, and never over an answer — see engine/booking.ts.
+    */
+    applyBookingFromUrl()
     setMounted(true)
   }, [])
   /*

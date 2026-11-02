@@ -1961,7 +1961,19 @@ export function Card({
     const deal = Boolean(me.deal_accepted_at)
     const goal = Boolean(me.profile?.goal)
     const answered = pair && deal && goal
-    setPairChosen(answered)
+    /*
+      THE FACE ASKS WHY, SO THE FACE IS QUIET ONCE WHY IS ON THE RECORD (2026-11-02).
+
+      The booking pass-through (lib/booking.ts) writes the pair, the chapter, the purpose
+      and the goal from the marketing site's search — exactly what a "Visiting Lisbon?" tap
+      writes — but not the deal, which only the pane's consent tick can give. Gating the
+      face on the deal too put "Visiting Lisbon?" back in front of somebody who had just
+      answered it on the site, which is the asking-twice this whole card was rebuilt to
+      stop. So the face reads pair and goal — the two things its own question writes — and
+      the deal stays the pane's business: SetUp opens on the name and the tick, and
+      `answered` above still decides what is worth reporting below.
+    */
+    setPairChosen(pair && goal)
     /*
       AND WHY, WHEN THE ANSWER IS NO — because this has now been reported twice and I have
       twice failed to reproduce it.
@@ -2502,10 +2514,27 @@ export function Card({
     was added; the other two are noted on .on-dark in globals.css.
   */
   const onSand = !image
-  const title = face.title
+  /*
+    THE SET-UP FACE, WHEN WHY IS ALREADY ANSWERED (2026-11-02).
+
+    The booking pass-through (lib/booking.ts) arrives with the reason already given on the
+    marketing site — "moving", say — and the face still read "Visiting Lisbon?" over OPEN.
+    The question was no longer being asked (no options are drawn once the goal is on the
+    record), but its headline was, and a person who just searched for moving was asked if
+    they were visiting. So the face says the answer back instead, and OPEN goes to the name.
+  */
+  const said = card.kind === 'setup' && learner.profile?.goal ? learner.purpose ?? null : null
+  const SAID: Record<'visiting' | 'staying' | 'moving', string> = {
+    visiting: 'Visiting Lisbon.',
+    staying: 'A season in Lisbon.',
+    moving: 'Moving to Lisbon.',
+  }
+  const title = said ? SAID[said] : face.title
   /* A drop carries its date; a standing room has none. */
   const when = face.when
-  const blurb = face.blurb
+  const blurb = said
+    ? 'Noted — the Club opens on the rooms for that. Open it and tell us your name. Settings can change the reason any time.'
+    : face.blurb
 
   return (
     /*

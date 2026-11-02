@@ -153,7 +153,7 @@ export const FREE_ROOMS: readonly string[] = [
   'lisbon_emergencia',
   /*
     AND THE SAVE (2026-11-02), for the same reason as the emergency room: it is survival,
-    not a product. "Desculpe, não percebo. Sou inglês." is the first room on every path —
+    not a product. "Desculpe, não percebi. Sou inglês." is the first room on every path —
     see content/blocks/lisbon-save.ts — and a padlock on the sentence for when it goes
     wrong would be a padlock on the floor of the building. Sam: "at the very least you can
     say 'I am sorry I don't understand, I am English' in Portuguese." At the very least

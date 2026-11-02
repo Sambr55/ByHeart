@@ -19,11 +19,18 @@ import type { LearnerState } from '@/engine/learner'
 import type { ResolvedUnit } from '@/content/path'
 import type { Situation } from '@/content/situations'
 import { CHEATS } from '@/content/cheats'
+import { roomPieceIds } from '@/content/roots'
 
+/*
+  `inventory` is optional so every record written before the Wall — and every plain object
+  in scripts/path-check.mts — still reads as a path. Without it nothing can be slipping,
+  which is the right answer for a record that holds no words.
+*/
 export type PathRecord = Pick<
   LearnerState,
   'finished_cards' | 'proof' | 'evidence' | 'mission_completed_at'
->
+> &
+  Partial<Pick<LearnerState, 'inventory'>>
 
 export function roomDone(r: PathRecord, id: string): boolean {
   return (r.finished_cards ?? []).includes(id)
@@ -51,6 +58,15 @@ export interface PathNode {
   room: Situation
   state: NodeState
   cold: boolean
+  /**
+   * WORTH ANOTHER LOOK — a laid tile with a hairline crack (the Wall, Sam, 2026-11-02).
+   *
+   * Only ever true of a DONE room: a crack is something that happens to a tile already
+   * laid, and an unlaid one has nothing to slip. See roomSlipping for what counts. It is
+   * never shown in red and it never takes the tile away — a room you did is a room you
+   * did, and a wall that lost bricks for not visiting would be a streak by another name.
+   */
+  slipping: boolean
 }
 
 export interface PathView {
@@ -71,6 +87,8 @@ export function pathView(
   r: PathRecord,
   units: ResolvedUnit[],
   lock: (id: string) => 'open' | 'paid',
+  /* Injectable for the check script; slipping is the only thing that reads the clock. */
+  now: Date = new Date(),
 ): PathView {
   let next: PathView['next'] = null
   let done = 0
@@ -84,18 +102,103 @@ export function pathView(
       if (isDone) {
         done++
         unitDone++
-        return { room, state: 'done', cold }
+        return { room, state: 'done', cold, slipping: roomSlipping(r, room, now) }
       }
-      if (lock(room.id) === 'paid') return { room, state: 'paid', cold: false }
+      if (lock(room.id) === 'paid') return { room, state: 'paid', cold: false, slipping: false }
       if (!next) {
         next = { room, unit }
-        return { room, state: 'next', cold: false }
+        return { room, state: 'next', cold: false, slipping: false }
       }
-      return { room, state: 'open', cold: false }
+      return { room, state: 'open', cold: false, slipping: false }
     })
     return { unit, nodes, done: unitDone, stars: milestoneStars(r, unit.milestone.cheat) }
   })
   return { units: out, next, done, total }
+}
+
+/**
+ * How long a room's words can go untouched before the tile shows a hairline crack.
+ *
+ * Fourteen days, from the Wall's design (2026-11-02): long enough that one quiet week does
+ * not crack anything, short enough that a crack still means the words have gone quiet.
+ */
+export const SLIP_DAYS = 14
+
+/**
+ * IS THIS LAID ROOM WORTH ANOTHER LOOK? (the Wall, Sam, 2026-11-02)
+ *
+ * Read from the words the room handed over (its `pieces`, via roomPieceIds) — never stored,
+ * like everything else in this file. A room is slipping when ANY of its words is:
+ *
+ *   flagged     latest_state is NEEDS ANOTHER LOOK — the one honest signal, written by
+ *               revealPieces when a sentence had to be shown (engine/learner.ts). It is
+ *               rarely written, which is why there is a second rule;
+ *   untouched   the last time the word was recalled is more than SLIP_DAYS ago.
+ *
+ * "Last recalled" is latest_recall_at first. It is null for most words — it is only set by
+ * a cold, delayed or checkpoint recall — so it falls back to the newest evidence for the
+ * word, and then to the newest clean proof of the room's own release line. Saying the room
+ * cold again is the thing that should clear the crack, and this is what makes it.
+ *
+ * A word with no timestamp anywhere is NOT slipping: we do not know when it was met, and a
+ * crack is a claim. Better to under-say than to crack a tile laid this morning.
+ */
+export function roomSlipping(r: PathRecord, room: Situation, now: Date = new Date()): boolean {
+  const inventory = r.inventory ?? {}
+  const ids = roomPieceIds(room).filter((id) => inventory[id])
+  if (ids.length === 0) return false
+  const cutoff = now.getTime() - SLIP_DAYS * 24 * 60 * 60 * 1000
+  const releaseSaid = newest(
+    (r.proof ?? []).filter((p) => p.clean && p.pt === room.release.answer).map((p) => p.at),
+  )
+  return ids.some((id) => {
+    const item = inventory[id]
+    if (item.latest_state === 'NEEDS ANOTHER LOOK') return true
+    const last = newest([
+      item.latest_recall_at,
+      newest((r.evidence ?? []).filter((e) => e.target_id === id).map((e) => e.timestamp)),
+      releaseSaid,
+    ])
+    return last !== null && new Date(last).getTime() < cutoff
+  })
+}
+
+/** The latest of some ISO strings, ignoring junk; null when there are none. */
+function newest(times: (string | null | undefined)[]): string | null {
+  let best: string | null = null
+  let bestT = -Infinity
+  for (const t of times) {
+    if (!t) continue
+    const n = new Date(t).getTime()
+    if (Number.isNaN(n)) continue
+    if (n > bestT) {
+      bestT = n
+      best = t
+    }
+  }
+  return best
+}
+
+/**
+ * THE KEYSTONE'S GLAZE — the milestone's 0–3, without a single star (2026-11-02).
+ *
+ * The design review called stars the most Duolingo thing on the path, and they are: a row
+ * of three gold shapes is a score, and a score is something you can be short of. The
+ * keystone that caps each course says the same 0–3 as a material instead — the way a real
+ * tile goes from bisque to glazed — so it reads as something being made, not marked:
+ *
+ *   0  outline       nothing said cold yet; the shape is drawn, waiting
+ *   1  part-glazed   one of the three sentences said cold
+ *   2  glazed        two of them
+ *   3  gold-rimmed   all three — finished, and it looks it
+ */
+export type Glaze = 'outline' | 'part' | 'glazed' | 'gold'
+
+export function keystoneGlaze(stars: number): Glaze {
+  if (stars >= 3) return 'gold'
+  if (stars === 2) return 'glazed'
+  if (stars === 1) return 'part'
+  return 'outline'
 }
 
 /** A local calendar day, YYYY-MM-DD. */
@@ -166,12 +269,20 @@ export function understoodMilestone(count: number, marked: number): number | nul
   return reached.length ? reached[reached.length - 1] : null
 }
 
-/** What the moment says. Warm, short, and never about what is left to do. */
+/**
+ * What the moment says. Warm, short, and never about what is left to do.
+ *
+ * HONEST ABOUT WHAT WAS MEASURED (the Wall, 2026-11-02). These said "understood", and the
+ * thing counting them cannot know that: engine/listen.ts returns `close`, never `correct`,
+ * and says so — a recogniser hearing something near enough is not a Lisboeta nodding. So the
+ * tally says what actually happened: you said it out loud, and it was heard. That is still
+ * the whole thing, and it is a claim the code can stand behind.
+ */
 export function understoodCheer(milestone: number): string {
-  if (milestone === 1) return 'Your first time understood. Out loud, in Portuguese — that is the whole thing.'
-  if (milestone === 5) return 'Five times understood. It is starting to sound like you.'
-  if (milestone === 10) return 'Ten times understood. Saying it out loud is a habit now.'
-  if (milestone === 25) return 'Twenty-five times understood. Out loud, every one.'
-  if (milestone === 50) return 'Fifty times understood. You are ready for the counter.'
-  return 'A hundred times understood. Lisbon is going to like you.'
+  if (milestone === 1) return 'Your first one: said out loud, in Portuguese, and heard. That is the whole thing.'
+  if (milestone === 5) return 'Five times said out loud and heard. It is starting to sound like you.'
+  if (milestone === 10) return 'Ten times said out loud and heard. Saying it out loud is a habit now.'
+  if (milestone === 25) return 'Twenty-five times said out loud, and heard every one.'
+  if (milestone === 50) return 'Fifty times said out loud and heard. You are ready for the counter.'
+  return 'A hundred times said out loud and heard. Lisbon is going to like you.'
 }

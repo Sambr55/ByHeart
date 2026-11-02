@@ -1730,6 +1730,34 @@ export function transferPieces(ids: PieceId[]) {
 }
 
 /**
+ * A word said cold again, on purpose — "Say it cold" on a laid tile of the Wall (2026-11-02).
+ *
+ * The Wall cracks a tile when the room's words have gone quiet for a fortnight (see
+ * roomSlipping in components/path/progress.ts), so saying them again has to be the thing
+ * that mends it. That is a COLD RECALL by the plainest reading — asked from the English,
+ * nothing on screen — and it is the one event that sets `latest_recall_at`, which is
+ * exactly what the crack reads first.
+ *
+ * Same restraint as transferPieces: only words already owned. A revision does not teach.
+ */
+export function recallPieces(ids: PieceId[]) {
+  const owned = getLearner().inventory
+  for (const id of ids) {
+    if (!owned[id]) continue
+    recordEvidence({
+      target_id: id,
+      event_type: 'cold_recall',
+      correct_first_try: true,
+      hint_count: 0,
+      revealed: false,
+      latency_ms: 0,
+      culture_context: null,
+      mission_id: null,
+    })
+  }
+}
+
+/**
  * The other half of `transferPieces`: a word the learner had to be shown.
  *
  * NEEDS ANOTHER LOOK WAS A STATE NOTHING COULD REACH. Every recordEvidence call in the

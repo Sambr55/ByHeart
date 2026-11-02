@@ -2120,3 +2120,109 @@ summary:focus-visible,
     animation: none;
   }
 }
+
+/*
+  THE WALL — the home screen's progress, as a building (Sam approved, 2026-11-02).
+
+  The design review found the old path "too Duolingo": a winding line of round nodes, a
+  bouncing START, stars, and chunky hard shadows under everything. The Wall says the same
+  facts as material instead — a room you did is a tile LAID, a room you said cold is a tile
+  GLAZED, and the unit's practice session is the KEYSTONE that caps the course. Nothing
+  bounces, nothing has a hard bottom shadow, and nothing on it is a score.
+
+  THE SKIN IS A TOKEN KEYED BY CHAPTER (components/path/Wall.tsx, WALL_CITY). Lisbon's is
+  azulejo, and every rule below reads --wall-* variables, so brick for one city or stone
+  for another is a new [data-skin] block and not a new component. Pure CSS, no images —
+  the same choice the azulejo field made, for the same reasons: no asset, no request, no
+  rights question.
+*/
+[data-skin] {
+  /* Plaster: what a laid tile is before it is glazed. The lifted card colour, warmed. */
+  --wall-plaster: var(--bg-elev);
+  --wall-mortar: var(--line);
+  /* The glaze — the colour a tile takes when the room was said cold. */
+  --wall-glaze: var(--accent);
+  --wall-glaze-ink: var(--accent-ink);
+  /* The motif painted on the glaze, at low strength so a title stays readable over it. */
+  --wall-motif: color-mix(in srgb, var(--accent-ink) 22%, transparent);
+  /* The keystone's finishing rim, three of three said cold. Gilt, not a star. */
+  --wall-gilt: #b8902f;
+}
+
+[data-skin='azulejo'] {
+  --wall-glaze: var(--azulejo);
+}
+
+/* The motif: a corner quatrefoil and a fine diagonal, the azulejo-block drawing at strength. */
+.wall-glazed {
+  background-color: var(--wall-glaze);
+  color: var(--wall-glaze-ink);
+  background-image:
+    radial-gradient(circle at 0 0, var(--wall-motif) 0 6px, transparent 6.5px),
+    radial-gradient(circle at 100% 0, var(--wall-motif) 0 6px, transparent 6.5px),
+    radial-gradient(circle at 0 100%, var(--wall-motif) 0 6px, transparent 6.5px),
+    radial-gradient(circle at 100% 100%, var(--wall-motif) 0 6px, transparent 6.5px),
+    radial-gradient(circle at 50% 50%, transparent 0 9px, var(--wall-motif) 9px 10px, transparent 10.5px),
+    repeating-linear-gradient(45deg, var(--wall-motif) 0 1px, transparent 1px 10px);
+}
+
+/* Laid, not yet glazed: plaster with a soft inset edge — set into the wall, not floating on it. */
+.wall-laid {
+  background-color: var(--wall-plaster);
+  box-shadow: inset 0 0 0 1px var(--wall-mortar), inset 0 -3px 0 color-mix(in srgb, var(--wall-mortar) 70%, transparent);
+}
+
+/* The next tile: an outline and a soft glow. No bounce, no hard shadow, no START. */
+.wall-next {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 0 18px 2px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/*
+  THE KEYSTONE'S GLAZE, 0–3 (progress.ts, keystoneGlaze). Outline → part-glazed → glazed →
+  gold-rimmed. Part-glazed is the lower third, the way glaze is dipped from the bottom.
+*/
+.keystone-part {
+  background-image: linear-gradient(to top, var(--wall-glaze) 0 34%, transparent 34%);
+}
+.keystone-gold {
+  box-shadow: 0 0 0 3px var(--wall-gilt), inset 0 0 0 2px var(--wall-gilt);
+}
+
+/* The crack: a hairline, never red. Muted on plaster, the glaze's own ink on a glazed tile. */
+.wall-crack {
+  color: var(--line-strong);
+}
+.wall-glazed .wall-crack {
+  color: color-mix(in srgb, var(--wall-glaze-ink) 70%, transparent);
+}
+
+/* The ground under the wall: the foundation strip, mortar-coloured, edge to edge. */
+.wall-foundation {
+  background-color: var(--surface);
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 46px,
+    color-mix(in srgb, var(--line-strong) 25%, transparent) 46px 47px
+  );
+}
+
+/* The sheet rises, and under reduced motion it simply appears. */
+@keyframes sheet-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.sheet-up {
+  animation: sheet-up 260ms var(--ease-drain, ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-up {
+    animation: none;
+  }
+}

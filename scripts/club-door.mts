@@ -207,7 +207,7 @@ console.log('\nthe starter set\n')
   const ids = new Set([...SITUATIONS, ...LISBON_VISITING_1].map((x) => x.id))
   /*
     Five first-day rooms plus the survival kit's two: the emergency room, and — since
-    2026-11-02 — the save, "Desculpe, não percebo. Sou inglês.", which is the first room on
+    2026-11-02 — the save, "Desculpe, não percebi. Sou inglês.", which is the first room on
     every path. See content/blocks/lisbon-save.ts.
   */
   ok(

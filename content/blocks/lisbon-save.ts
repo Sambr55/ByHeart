@@ -30,13 +30,20 @@
  * place the learner's own gender is read: see `saveSentence` below, which is what /opener
  * shows.
  *
- * NOT REVIEWED, and one decision is explicitly the reviewer's. "Desculpe, não percebo"
- * (I don't understand — present: a state) and "Desculpe, não percebi" (I didn't catch that
- * — past: one sentence went past you) are both real pt-PT. Sam's brief said "I don't
- * understand", so this says percebo. But the rest of DUB teaches percebi — the nao_percebi
- * piece in content/roots.ts and the repair lines in every moving room — on the argument
- * that it is friendlier and truer. A native reviewer must choose one, and if it is percebi,
- * change the line, the release, and SAVE_SENTENCE together.
+ * NOT YET REVIEWED, BUT CHOSEN — "NÃO PERCEBI", SAM'S CHOICE (2026-11-02).
+ *
+ * "Desculpe, não percebo" (I don't understand — present: a state) and "Desculpe, não
+ * percebi" (I didn't catch that — past: one sentence went past you) are both real pt-PT.
+ * The first draft said percebo, from the brief's "I don't understand", and left the choice
+ * to a reviewer. Sam chose percebi, everywhere: it is what the rest of DUB already teaches
+ * — the nao_percebi piece in content/roots.ts, and the repair lines in every moving room —
+ * and it is the friendlier and truer thing to say. "I don't understand" sounds like a
+ * verdict on the whole language; "I didn't catch that" asks for one sentence again, which
+ * is all you actually want. So the line, the release, SAVE_SENTENCE and the rescue card
+ * (/opener) all say percebi, and the room now names nao_percebi among its pieces.
+ *
+ * STILL PENDING NATIVE REVIEW. Sam has chosen the verb; a native has not yet read the four
+ * lines aloud, so qa_status stays where it was.
  */
 import type { Situation } from '@/content/situations'
 
@@ -47,9 +54,9 @@ import type { Situation } from '@/content/situations'
  * itself carries the masculine (see GENDER above); `saveSentence` picks.
  */
 export const SAVE_SENTENCE = {
-  m: 'Desculpe, não percebo. Sou inglês.',
-  f: 'Desculpe, não percebo. Sou inglesa.',
-  en: 'Sorry, I don’t understand. I’m English.',
+  m: 'Desculpe, não percebi. Sou inglês.',
+  f: 'Desculpe, não percebi. Sou inglesa.',
+  en: 'Sorry, I didn’t catch that. I’m English.',
 } as const
 
 /** The save in the learner's own ending. No gender known reads as the room does. */
@@ -72,9 +79,9 @@ export const LISBON_SAVE: Situation[] = [
     why: 'Somebody answers fast, or does not speak English, and you are about to fall back on English or on saying it louder. Four lines that keep you in the conversation instead.',
     lines: [
       {
-        pt: 'Desculpe, não percebo.',
-        en: 'Sorry, I don’t understand.',
-        when: 'The first thing to say when it goes past you. Not an apology for being foreign — a request for another go.',
+        pt: 'Desculpe, não percebi.',
+        en: 'Sorry, I didn’t catch that.',
+        when: 'The first thing to say when it goes past you. Past tense on purpose: not "I don’t understand" (the whole language), just "that one went past me" — a request for another go, not an apology for being foreign.',
       },
       {
         pt: 'Sou inglês.',
@@ -93,7 +100,7 @@ export const LISBON_SAVE: Situation[] = [
       },
     ],
     release: {
-      ask: 'Sorry, I don’t understand. I’m English.',
+      ask: 'Sorry, I didn’t catch that. I’m English.',
       answer: SAVE_SENTENCE.m,
     },
     /*
@@ -112,7 +119,11 @@ export const LISBON_SAVE: Situation[] = [
     */
     rung: 1,
     qa_status: 'pending-native-review',
-    /* Named, not authored — the library already owns all three. */
-    pieces: ['desculpe', 'devagar', 'ingles'],
+    /*
+      Named, not authored — the library already owns all four. nao_percebi joined on
+      2026-11-02, when the save moved from percebo to percebi: the room now teaches the very
+      piece the library already had, instead of a near-twin of it.
+    */
+    pieces: ['desculpe', 'nao_percebi', 'devagar', 'ingles'],
   },
 ]

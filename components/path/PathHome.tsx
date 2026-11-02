@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Wordmark } from '@/components/Wordmark'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { useLearner } from '@/engine/useLearner'
@@ -16,19 +16,28 @@ import {
   pathView,
   understoodCheer,
   understoodMilestone,
+  type PathNode,
 } from './progress'
 import { roomLock } from './locks'
 import { RoomCard } from './RoomCard'
-import { WindingPath } from './WindingPath'
+import { Wall } from './Wall'
+import { TileSheet } from './TileSheet'
 import { CardRail } from './CardRail'
-import { DoorIcon, FlameIcon, SpeechIcon } from './icons'
+import { DoorIcon, SpeechIcon } from './icons'
 
 /**
  * The Lisbon path, as a home screen.
  *
  * One obvious next action — the up-next card with one big PLAY — then the whole trip
- * below it: a winding path on a phone, a rail of big cards on anything wide. Nothing is
- * locked by order; only paid rooms are, and they say UNLOCK.
+ * below it: THE WALL on a phone (components/path/Wall.tsx), a rail of big cards on
+ * anything wide. Nothing is locked by order; only paid rooms are, and they say UNLOCK.
+ *
+ * THE WALL REPLACED THE WINDING PATH ON 2026-11-02. Sam approved it after a design review
+ * found the path "too Duolingo" — the code's own comments called it "Duolingo's winding
+ * line" and the bubble over the next node "Duolingo's START". With it went the rest of
+ * the tells on this screen: the flame beside the streak, the bouncing START, the stars and
+ * the chunky hard bottom shadows. The desktop rail (CardRail) is a separate drawing and is
+ * left as it was for now.
  *
  * Built to be dropped into the Club home at merge: it takes no props and reads only the
  * learner, the clock and the entitlements.
@@ -47,10 +56,17 @@ export function PathHome() {
   const purpose = learner.purpose ?? null
   const name = PATH_NAMES[pathPurpose(purpose)]
   const units = useMemo(() => pathUnits(undefined, undefined, purpose), [purpose])
+  /*
+    `now` from useNowAfterMount, because slipping reads the clock and the server has none
+    worth trusting — before mount nothing is cracked, which is the kinder first frame.
+  */
   const view = useMemo(
-    () => pathView(learner, units, (id) => roomLock(id, member, purpose)),
-    [learner, units, member, purpose],
+    () => pathView(learner, units, (id) => roomLock(id, member, purpose), now ?? new Date(0)),
+    [learner, units, member, purpose, now],
   )
+  /* The laid tile whose sheet is open, if any. Unlaid tiles open the room, as ever. */
+  const [sheet, setSheet] = useState<PathNode | null>(null)
+  const closeSheet = useCallback(() => setSheet(null), [])
   const streak = useMemo(
     () => (now ? dayStreak(activityTimes(learner), now) : { days: 0, today: false }),
     [learner, now],
@@ -132,7 +148,13 @@ export function PathHome() {
         </section>
 
         <div className="needs-learner md:hidden">
-          <WindingPath view={view} />
+          <Wall
+            view={view}
+            purpose={pathPurpose(purpose)}
+            chapter={learner.chapter ?? 'lisbon'}
+            inventory={learner.inventory ?? {}}
+            onLaid={setSheet}
+          />
         </div>
         <div className="needs-learner hidden md:block">
           <CardRail view={view} />
@@ -146,13 +168,20 @@ export function PathHome() {
         other screen would be two apps.
       */}
       <BottomNav />
+      {sheet ? <TileSheet node={sheet} gender={learner.profile?.gender ?? null} onClose={closeSheet} /> : null}
     </div>
   )
 }
 
-/** In the header, where the flame used to be: the tally, as a glyph and a number. */
+/**
+ * In the header, where the flame used to be: the tally, as a glyph and a number.
+ *
+ * THE WORDS ARE HONEST ABOUT THE MICROPHONE (2026-11-02). engine/listen.ts says a result
+ * is "close", never "correct" — a recogniser is not a person nodding — so the tally says
+ * what it can know: said out loud, and heard. The chip stays a number with a speech icon.
+ */
 function UnderstoodChip({ count }: { count: number }) {
-  const label = count === 0 ? 'Not understood out loud yet' : 'Understood ' + timesOf(count)
+  const label = count === 0 ? 'Nothing said out loud yet' : 'Said out loud, and heard ' + timesOf(count)
   return (
     <p className="needs-learner flex items-center gap-1 font-bold" aria-label={label} title={label} data-testid="understood-chip">
       <SpeechIcon filled={count > 0} className="h-6 w-6" />
@@ -234,14 +263,21 @@ function Understood({
     <section aria-labelledby="understood" className="needs-learner flex flex-col gap-4 md:max-w-xl">
       <div className="flex min-w-0 flex-col gap-1">
         <h2 id="understood" className="display text-2xl" data-testid="understood-tally">
-          {count === 0 ? 'Say it out loud' : 'Understood ' + timesOf(count)}
+          {count === 0 ? 'Say it out loud' : 'Said out loud, and heard ' + timesOf(count)}
         </h2>
         <p className="text-sm leading-relaxed text-muted">
-          {count === 0 ? 'Every time you say a line and it lands, it counts here.' : 'Out loud, in Portuguese.'}
+          {count === 0 ? 'Every time you say a line out loud and it is heard, it counts here.' : 'In Portuguese.'}
+          {/*
+            THE STREAK, AS WORDS ONLY (the Wall, 2026-11-02). The flame was the last
+            Duolingo tell on the home screen; the line stays for the people who like it.
+          */}
           {streakLabel ? (
-            <span className="ml-2 inline-flex items-center gap-1 whitespace-nowrap align-middle text-xs" data-testid="streak">
-              <FlameIcon filled={today} className="h-3.5 w-3.5" />
-              {streakLabel}
+            <span
+              className="ml-2 inline-flex items-center gap-1 whitespace-nowrap align-middle text-xs"
+              data-testid="streak"
+              data-today={today ? 'true' : undefined}
+            >
+              · {streakLabel}
             </span>
           ) : null}
         </p>

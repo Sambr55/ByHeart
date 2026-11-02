@@ -8,9 +8,8 @@ import { MiniBuild } from '@/components/Journey'
 import { BottomNav } from '@/components/BottomNav'
 import { Dock, Framed } from '@/components/Dock'
 import { useLearner } from '@/engine/useLearner'
-import { recordProof } from '@/engine/learner'
-import { revisionFor, revisionTitle } from '@/content/revision'
-import type { CardKind } from '@/content/collection'
+import { recallPieces, recordProof } from '@/engine/learner'
+import { revisionFor, revisionTitle, type RevisionKind } from '@/content/revision'
 
 /**
  * REVISION — a finished card, asked back.
@@ -33,8 +32,17 @@ import type { CardKind } from '@/content/collection'
 export function Revise() {
   const params = useSearchParams()
   const learner = useLearner()
-  const kind = (params.get('kind') ?? 'vibe') as CardKind
+  const kind = (params.get('kind') ?? 'vibe') as RevisionKind
   const id = params.get('id') ?? ''
+  /*
+    WHERE "BACK" GOES DEPENDS ON WHERE YOU CAME FROM (the Wall, 2026-11-02).
+
+    Every other kind is a card on the board in Yours, so back is /profile. A room is a tile
+    on the Wall — "Say it cold" on a laid tile, or a tile in the "Worth another look" strip
+    — and sending somebody from the home screen to Yours would be a door into a different
+    room than the one they left by. So a room goes back to the Club, where the Wall is.
+  */
+  const back = kind === 'room' ? { href: '/club', label: 'BACK TO THE WALL', aria: 'Back to the Wall' } : { href: '/profile', label: 'BACK TO YOURS', aria: 'Back to Yours' }
   const [at, setAt] = useState(0)
   const [done, setDone] = useState(false)
   /*
@@ -62,7 +70,7 @@ export function Revise() {
   */
   if (!lines.length) {
     return (
-      <Shell title={revisionTitle(kind, id)}>
+      <Shell title={revisionTitle(kind, id)} back={back}>
         {/*
           THE WHITE CARD ON THE EMPTY STATE TOO, which is the half of this screen that
           never got it.
@@ -107,10 +115,10 @@ export function Revise() {
             button says what it can do instead.
           */}
           <Link
-            href={kind === 'words' ? '/vibes' : '/profile'}
+            href={kind === 'words' ? '/vibes' : back.href}
             className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
-            {kind === 'words' ? 'GO AND EARN SOME' : 'BACK TO YOURS'}
+            {kind === 'words' ? 'GO AND EARN SOME' : back.label}
           </Link>
         </Dock>
       </Shell>
@@ -119,7 +127,7 @@ export function Revise() {
 
   if (done || !line) {
     return (
-      <Shell title={revisionTitle(kind, id)}>
+      <Shell title={revisionTitle(kind, id)} back={back}>
         {/*
           AND THE SAME CARD ON THE DONE BEAT, so the screen keeps its shape to the end.
 
@@ -141,10 +149,10 @@ export function Revise() {
         </div>
         <Dock>
           <Link
-            href="/profile"
+            href={back.href}
             className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
-            BACK TO YOURS
+            {back.label}
           </Link>
         </Dock>
       </Shell>
@@ -152,7 +160,7 @@ export function Revise() {
   }
 
   return (
-    <Shell title={revisionTitle(kind, id)}>
+    <Shell title={revisionTitle(kind, id)} back={back}>
       <div className="flex items-baseline gap-3">
         <p className="eyebrow min-w-0 text-accent">SAY IT BACK</p>
         <span className="h-px flex-1 bg-line" />
@@ -240,6 +248,8 @@ export function Revise() {
             produced with nothing on screen, and a revision said cold is one of those.
           */
           recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
+          /* A room's words, recalled — what mends a crack on the Wall. See RevisionLine.pieces. */
+          if (line.pieces?.length) recallPieces(line.pieces)
           /*
             AND IT DOES NOT ADVANCE HERE, WHICH IS WHY THE TICK WAS NEVER SEEN.
 
@@ -283,6 +293,7 @@ export function Revise() {
               */
               if (clean) {
                 recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
+                if (line.pieces?.length) recallPieces(line.pieces)
               }
               /*
                 AND IT NO LONGER JUMPS. Solving the picker used to advance the card
@@ -299,12 +310,20 @@ export function Revise() {
   )
 }
 
-function Shell({ title, children }: { title: string; children: React.ReactNode }) {
+function Shell({
+  title,
+  back,
+  children,
+}: {
+  title: string
+  back: { href: string; aria: string }
+  children: React.ReactNode
+}) {
   return (
     <div className="app-frame bg-bg text-fg">
       <header className="bar sticky top-0 z-30 px-5 py-3">
         <div className="mx-auto flex w-full max-w-md items-center gap-3">
-          <Link href="/profile" className="tap-target shrink-0" aria-label="Back to Yours">
+          <Link href={back.href} className="tap-target shrink-0" aria-label={back.aria}>
             ‹
           </Link>
           <p className="eyebrow min-w-0 flex-1 truncate">{title.toUpperCase()}</p>
