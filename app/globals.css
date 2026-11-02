@@ -2317,6 +2317,52 @@ summary:focus-visible,
   .road-disc { transition: none }
 }
 
+/*
+  EVERY PUT-BACK IS A WIN (components/path/homecoming.ts; Sam, 2026-11-02). The website's
+  gold flash, chip burst and finale sweep, on the app's own scale: the tile slides home from
+  its loose pose over --t-drain with a gold glow that fades, ten chips fly out, and the last
+  one home sweeps gold across the panel. No overshoot (motion-check), and under reduced
+  motion none of it moves — the tile is simply back.
+*/
+.panel-tile.is-laid.is-home { animation: panel-home var(--t-drain) var(--ease-out) both; z-index: 1 }
+@keyframes panel-home {
+  0% { transform: rotate(10deg) translate(3px, -4px); box-shadow: inset 0 0 0 3px #e2b450, 0 0 22px 4px rgba(226, 180, 80, 0.75) }
+  70% { transform: none; box-shadow: inset 0 0 0 3px #e2b450, 0 0 22px 4px rgba(226, 180, 80, 0.75) }
+  100% { transform: none; box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.35) }
+}
+.road-stop.is-home .road-disc { animation: road-home var(--t-drain) var(--ease-out) both }
+@keyframes road-home {
+  0% { transform: translate(16px, -12px) rotate(10deg); box-shadow: 0 0 0 3px #fff, 0 0 0 6px #e2b450, 0 0 26px 6px rgba(226, 180, 80, 0.75) }
+  100% { transform: none }
+}
+.home-burst { pointer-events: none; z-index: 2 }
+.home-burst i {
+  position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px; border-radius: 2px;
+  background: #1f5d8c; box-shadow: inset 0 0 0 2px #fff; transform: rotate(var(--a)) translateY(0); opacity: 1;
+  animation: home-chip var(--t-drain) var(--ease-out) both;
+}
+.home-burst i:nth-child(odd) { background: #e2b450 }
+@keyframes home-chip { to { transform: rotate(var(--a)) translateY(-58px) rotate(180deg); opacity: 0 } }
+.panel-finale { box-shadow: 0 0 0 3px rgba(226, 180, 80, 0.7), 0 0 40px 6px rgba(226, 180, 80, 0.35) }
+.panel-finale::after {
+  background: linear-gradient(115deg, transparent 35%, rgba(226, 180, 80, 0.55) 50%, transparent 65%);
+  animation: panel-gold calc(var(--t-drain) * 2) var(--ease-out) 1 both;
+}
+@keyframes panel-gold { from { transform: translateX(-100%) } to { transform: translateX(100%) } }
+/* The cheer on /revise when a room comes back clean. */
+.win-card { position: relative; overflow: hidden; animation: win-in var(--t-land) var(--ease-out) both }
+@keyframes win-in { from { transform: translateY(6px); opacity: 0 } to { transform: none; opacity: 1 } }
+.win-card::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle at 50% 30%, rgba(226, 180, 80, 0.45), transparent 60%);
+  animation: win-flash var(--t-drain) var(--ease-out) both;
+}
+@keyframes win-flash { from { opacity: 1 } to { opacity: 0 } }
+@media (prefers-reduced-motion: reduce) {
+  .panel-tile.is-laid.is-home, .road-stop.is-home .road-disc, .win-card, .win-card::before { animation: none }
+  .home-burst, .panel-finale::after { display: none }
+}
+
 /* The Panel | Road toggle: two segments, one pressed. */
 .view-toggle { display: inline-flex; border-radius: 9999px; border: 1px solid var(--line-strong); padding: 2px }
 .view-toggle button { border-radius: 9999px; padding: 0.25rem 0.85rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted) }

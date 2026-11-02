@@ -22,6 +22,7 @@ import { roomLock } from './locks'
 import { RoomCard } from './RoomCard'
 import { Panel } from './Panel'
 import { Road } from './Road'
+import { useHomecoming } from './homecoming'
 import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
 
@@ -92,6 +93,8 @@ export function PathHome() {
     toggle"). The Panel by default; the choice is remembered on this device, read after
     mount so the server and the first frame agree.
   */
+  /* Rooms just put back on /revise: they come home with a flourish, once. homecoming.ts. */
+  const homing = useHomecoming()
   const [mode, setMode] = useState<PathMode>('panel')
   useEffect(() => setMode(readPathMode()), [])
   const chooseMode = useCallback((m: PathMode) => {
@@ -195,6 +198,7 @@ export function PathHome() {
                 inventory={learner.inventory ?? {}}
                 onLaid={setSheet}
                 openId={sheet?.room.id ?? null}
+                homing={homing}
               />
             ) : (
               <Panel
@@ -204,6 +208,7 @@ export function PathHome() {
                 inventory={learner.inventory ?? {}}
                 onLaid={setSheet}
                 openId={sheet?.room.id ?? null}
+                homing={homing}
               />
             )}
           </div>

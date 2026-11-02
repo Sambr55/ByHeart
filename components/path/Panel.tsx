@@ -111,6 +111,7 @@ export function Panel({
   inventory,
   onLaid,
   openId = null,
+  homing,
 }: {
   view: PathView
   purpose: Purpose
@@ -124,6 +125,8 @@ export function Panel({
     the wrong tile is worse than none.
   */
   openId?: string | null
+  /* Rooms just put back on /revise, which come home with a flourish, once (homecoming.ts). */
+  homing?: Set<string>
 }) {
   const art = panelArt(chapter, purpose)
   const nodes = useMemo(() => view.units.flatMap((u) => u.nodes), [view])
@@ -182,6 +185,12 @@ export function Panel({
   }, [doneKey])
 
   const drifted = useMemo(() => nodes.filter((x) => x.slipping).slice(0, 3), [nodes])
+  /*
+    THE LAST ONE HOME SWEEPS GOLD ACROSS THE PANEL — the website's finale (Sam, 2026-11-02:
+    every put-back is a win, and the last is the biggest). Only when something just came
+    home and nothing is left loose.
+  */
+  const finale = Boolean(homing?.size) && drifted.length === 0
 
   return (
     <section aria-labelledby="panel-caption" data-testid="panel" className={'flex flex-col gap-6' + (openId ? ' panel-open' : '')}>
@@ -200,7 +209,7 @@ export function Panel({
 
       <div className="panel-frame rounded-[1.25rem] p-3">
         <ol
-          className="panel-sheen relative grid overflow-hidden rounded-md"
+          className={'panel-sheen relative grid overflow-hidden rounded-md' + (finale ? ' panel-finale' : '')}
           style={{ gridTemplateColumns: `repeat(${COLS}, minmax(0, 1fr))`, aspectRatio: `${COLS} / ${rows}` }}
           aria-label={`Your panel, laid from the bottom: ${view.done} of ${view.total} tiles laid. ${art.alt}.`}
         >
@@ -209,7 +218,14 @@ export function Panel({
             if (i === undefined) return <li key={c} className="panel-frieze" aria-hidden="true" data-testid="frieze" />
             return (
               <li key={c} className="contents">
-                <Tile node={nodes[i]} slice={sliceOf(c)} face={face.has(nodes[i].room.id)} open={nodes[i].room.id === openId} onLaid={onLaid} />
+                <Tile
+                  node={nodes[i]}
+                  slice={sliceOf(c)}
+                  face={face.has(nodes[i].room.id)}
+                  open={nodes[i].room.id === openId}
+                  home={homing?.has(nodes[i].room.id) ?? false}
+                  onLaid={onLaid}
+                />
               </li>
             )
           })}
@@ -219,6 +235,20 @@ export function Panel({
       <Legend view={view} />
       <Foundation inventory={inventory} />
     </section>
+  )
+}
+
+/**
+ * The burst of tile-chips when a tile comes home — the website's, in the app's motion scale.
+ * Ten chips at 36° apart, blue and gold alternating. Decorative, and gone under reduced motion.
+ */
+export function Burst() {
+  return (
+    <span aria-hidden className="home-burst absolute inset-0" data-testid="home-burst">
+      {Array.from({ length: 10 }, (_, k) => (
+        <i key={k} style={{ ['--a' as string]: k * 36 + 'deg' } as CSSProperties} />
+      ))}
+    </span>
   )
 }
 
@@ -265,12 +295,14 @@ function Tile({
   slice,
   face,
   open,
+  home,
   onLaid,
 }: {
   node: PathNode
   slice: CSSProperties
   face: boolean
   open: boolean
+  home: boolean
   onLaid: (n: PathNode) => void
 }) {
   const { room, state, cold, slipping } = node
@@ -296,10 +328,12 @@ function Tile({
           'panel-tile absolute inset-0' +
           (laid && !face ? ' is-laid' : '') +
           (cold ? ' is-cold' : '') +
-          (d ? ' is-drifted' : '')
+          (d ? ' is-drifted' : '') +
+          (home && laid && !d ? ' is-home' : '')
         }
         style={tileStyle}
       />
+      {home && laid && !d ? <Burst /> : null}
       {state === 'next' ? <span aria-hidden className="panel-next absolute inset-0" /> : null}
       {state === 'paid' ? (
         <span aria-hidden className="absolute right-0.5 top-0.5 rounded-full bg-[#fbfaf6]/90 p-0.5 text-[#14243a]">

@@ -272,6 +272,25 @@ console.log('\nthe Road — the winding path, back as a second view (2026-11-02)
   ok('PathHome toggles Panel | Road, remembered per device, Panel by default', /<Road\b/.test(home) && /<Panel\b/.test(home) && /PATH_MODE_KEY = 'dub.path.view'/.test(home) && /useState<PathMode>\('panel'\)/.test(home) && /localStorage\.setItem\(PATH_MODE_KEY/.test(home))
 }
 
+console.log('\nevery put-back is a win (2026-11-02)\n')
+{
+  const us = pathUnits(undefined, undefined, 'moving')
+  const room = us[0].rooms[0]
+  const v = pathView({ finished_cards: [room.id], proof: [], evidence: [], mission_completed_at: {} }, us, () => 'open', now)
+  const homing = new Set([room.id])
+  const panel = renderToStaticMarkup(createElement(Panel, { view: v, purpose: 'moving', chapter: 'lisbon', inventory: {}, onLaid: () => {}, homing }))
+  const road = renderToStaticMarkup(createElement(Road, { view: v, inventory: {}, onLaid: () => {}, homing }))
+  ok('a tile just put back comes home on the Panel, with its burst', /is-home/.test(panel) && /data-testid="home-burst"/.test(panel))
+  ok('and nothing left loose sweeps the finale', /panel-finale/.test(panel))
+  ok('and on the Road', /is-home/.test(road) && /data-testid="home-burst"/.test(road))
+  const quiet = renderToStaticMarkup(createElement(Panel, { view: v, purpose: 'moving', chapter: 'lisbon', inventory: {}, onLaid: () => {} }))
+  ok('without one, nothing flies', !/home-burst|panel-finale|is-home/.test(quiet))
+  const revise = readFileSync('components/Revise.tsx', 'utf8')
+  ok('/revise cheers a clean room release and hands the tile home', /data-testid="put-back-win"/.test(revise) && /if \(wasLoose\) markHomecoming\(room\.id\)/.test(revise) && /put back/.test(revise))
+  const css = readFileSync('app/globals.css', 'utf8')
+  ok('and it all stands still under reduced motion', /prefers-reduced-motion[^{]*\{[^}]*\.panel-tile\.is-laid\.is-home[^}]*animation: none/.test(css) && /\.home-burst, \.panel-finale::after \{ display: none/.test(css))
+}
+
 console.log('\nrevision knows a room\n')
 {
   const room = situationById('lisbon_save')!

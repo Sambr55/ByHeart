@@ -7,7 +7,7 @@ import type { PathNode, PathView } from './progress'
 import { keystoneGlaze, milestoneHref } from './progress'
 import { UNLOCK_HREF } from './locks'
 import { KindIcon, LockIcon } from './icons'
-import { Foundation, PutBack, driftOf, keystoneLabel } from './Panel'
+import { Burst, Foundation, PutBack, driftOf, keystoneLabel } from './Panel'
 
 /**
  * THE ROAD — the winding path, back as the second view beside the Panel (Sam, 2026-11-02).
@@ -177,7 +177,7 @@ function Stop({ n, open, home, onLaid }: { n: PathNode; open: boolean; home: boo
   const d = slipping ? driftOf(room.id) : null
   const style = d ? ({ '--rot': d.rot + 'deg' } as CSSProperties) : undefined
   const cls =
-    'road-stop is-' + state + (cold ? ' is-cold' : '') + (d ? ' is-drifted' : '') + (open ? ' is-sheet' : '') + (home ? ' is-home' : '')
+    'road-stop is-' + state + (cold ? ' is-cold' : '') + (d ? ' is-drifted' : '') + (open ? ' is-sheet' : '') + (home && laid && !d ? ' is-home' : '')
   const face = (
     <>
       {d ? <span aria-hidden data-testid="road-gap" className="road-gap" /> : null}
@@ -189,6 +189,7 @@ function Stop({ n, open, home, onLaid }: { n: PathNode; open: boolean; home: boo
           </span>
         ) : null}
       </span>
+      {home && laid && !d ? <Burst /> : null}
       <span className="road-name">{room.title}</span>
     </>
   )
