@@ -24,6 +24,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { CHEATS } from '../content/cheats'
 import { Panel, keystoneLabel, driftOf } from '../components/path/Panel'
 import { Road } from '../components/path/Road'
+import { RoomSteps } from '../components/RoomSteps'
 import { PANEL_ART, TILE_WORDS, panelArt, tileWord } from '../content/panel'
 import { roomSlipping, keystoneGlaze, SLIP_DAYS } from '../components/path/progress'
 import { revisionFor, revisionTitle } from '../content/revision'
@@ -289,6 +290,25 @@ console.log('\nevery put-back is a win (2026-11-02)\n')
   ok('/revise cheers a clean room release and hands the tile home', /data-testid="put-back-win"/.test(revise) && /if \(wasLoose\) markHomecoming\(room\.id\)/.test(revise) && /put back/.test(revise))
   const css = readFileSync('app/globals.css', 'utf8')
   ok('and it all stands still under reduced motion', /prefers-reduced-motion[^{]*\{[^}]*\.panel-tile\.is-laid\.is-home[^}]*animation: none/.test(css) && /\.home-burst, \.panel-finale::after \{ display: none/.test(css))
+}
+
+console.log('\na room, app-style (2026-11-02)\n')
+{
+  /*
+    Sam: "click through to the content and it's still pretty 'posh HTML'." The room's read
+    stage is one sentence a card now, rendered here for real.
+  */
+  const room = situationById('lisbon_cafe')!
+  const html = renderToStaticMarkup(createElement(RoomSteps, { situation: room, gender: null, top: null, onGo: () => {} }))
+  ok('one card on screen, not a list of every line', (html.match(/data-testid="room-card"/g) ?? []).length === 1 && html.includes(room.lines[0].pt) && !html.includes(room.lines[1].pt))
+  ok('a dot per line, and one for your turn', (html.match(/class="room-dot/g) ?? []).length === room.lines.length + 1)
+  ok('the English waits for a tap', /room-en text-lg[^"]*"[^>]*aria-hidden="true"/.test(html) && html.includes('Tap for the English'))
+  ok('the why is a line under the title on the photo', html.includes(room.why) && /room-why line-clamp-2/.test(html))
+  ok('the save is one tap away', /data-testid="room-save"/.test(html))
+  ok('hear and on are in the thumb dock', /room-dock sticky bottom-0/.test(html) && /data-testid="room-next"/.test(html))
+  const errand = readFileSync('components/Errand.tsx', 'utf8')
+  ok('Errand reads through RoomSteps and still banks the same way', /<RoomSteps\b/.test(errand) && /const bank = \(clean: boolean\)/.test(errand) && /acquireRoomPieces\(/.test(errand) && /rememberFinishedCard\(situation\.id\)/.test(errand) && /<SayButton want=\{situation\.release\.answer\}/.test(errand))
+  ok('and its end state lays the tile it earned', /data-testid="room-laid"/.test(errand) && /panelSliceFor\(/.test(errand))
 }
 
 console.log('\nrevision knows a room\n')

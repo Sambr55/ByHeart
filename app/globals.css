@@ -2363,6 +2363,34 @@ summary:focus-visible,
   .home-burst, .panel-finale::after { display: none }
 }
 
+/*
+  A ROOM, APP-STYLE (components/RoomSteps.tsx; Sam, 2026-11-02: "click through to the
+  content and it's still pretty 'posh HTML'"). The place full-bleed and collapsing, one
+  sentence a card, the English held back until asked for, and the controls in the thumb
+  zone. Every move is a height or a fade on the app's scale; nothing grows.
+*/
+.room-hero { height: 44svh; min-height: 15rem; transition: height var(--t-land) var(--ease-out), min-height var(--t-land) var(--ease-out) }
+.room-hero.is-compact { height: 8.5rem; min-height: 8.5rem }
+.room-hero-scrim { background: linear-gradient(to bottom, rgb(0 0 0 / 0.05) 20%, rgb(0 0 0 / 0.72) 100%) }
+.room-why { transition: opacity var(--t-arrive) ease }
+.room-hero.is-compact .room-why { opacity: 0; height: 0 }
+.room-dot { width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--line); transition: width var(--t-arrive) var(--ease-out), background-color var(--t-arrive) ease }
+.room-dot.is-past { background: color-mix(in srgb, var(--azulejo) 55%, transparent) }
+.room-dot.is-at { width: 1.5rem; background: var(--azulejo) }
+.room-dot.is-turn { border: 1.5px dashed var(--line-strong); background: transparent }
+.room-card { animation: room-card-in var(--t-arrive) var(--ease-out) both; box-shadow: 0 18px 36px -24px rgba(20, 36, 58, 0.45) }
+@keyframes room-card-in { from { transform: translateX(14px); opacity: 0 } to { transform: none; opacity: 1 } }
+.room-en { opacity: 0; filter: blur(6px); transition: opacity var(--t-arrive) ease, filter var(--t-arrive) ease }
+.room-en.is-shown { opacity: 1; filter: none }
+.room-dock { padding-bottom: calc(1.5rem + var(--safe-bottom, 0px)) }
+.room-laid-flip { animation: room-laid var(--t-drain) var(--ease-out) both }
+@keyframes room-laid { from { transform: rotateY(90deg); opacity: 0 } to { transform: none; opacity: 1 } }
+@media (prefers-reduced-motion: reduce) {
+  .room-hero, .room-dot, .room-why { transition: none }
+  .room-card, .room-laid-flip { animation: none }
+  .room-en { transition: none }
+}
+
 /* The Panel | Road toggle: two segments, one pressed. */
 .view-toggle { display: inline-flex; border-radius: 9999px; border: 1px solid var(--line-strong); padding: 2px }
 .view-toggle button { border-radius: 9999px; padding: 0.25rem 0.85rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted) }

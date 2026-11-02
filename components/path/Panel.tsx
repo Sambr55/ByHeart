@@ -7,6 +7,7 @@ import type { Purpose } from '@/content/situations'
 import { SHELVES } from '@/content/roots'
 import { wordsOnShelf } from '@/content/collection'
 import { panelArt, tileWord } from '@/content/panel'
+import { pathUnits } from '@/content/path'
 import type { PathNode, PathView } from './progress'
 import { keystoneGlaze, milestoneHref, type Glaze } from './progress'
 import { UNLOCK_HREF } from './locks'
@@ -96,6 +97,29 @@ export function driftOf(id: string): { rot: number; dx: number; dy: number } {
   const rot = sign * (8 + ((h >>> 1) % 51) / 10) // 8.0°–13.0°
   /* The site's offset: a little right and lifted, as if it had come away from the wall. */
   return { rot, dx: 3, dy: -4 }
+}
+
+/**
+ * ONE ROOM'S SQUARE OF THE PAINTING, outside the Panel — for the room page's end state,
+ * which lays the tile you just earned (Sam, 2026-11-02: content pages "more app style").
+ * The same geometry as the Panel's own cells, so the square on the room page is exactly the
+ * square that appears on the home screen. Null when the room is not on this path.
+ */
+export function panelSliceFor(roomId: string, purpose: Purpose | null, chapter: ChapterId | null | undefined): CSSProperties | null {
+  const p: Purpose = purpose ?? 'visiting'
+  const ids = pathUnits(undefined, undefined, p).flatMap((u) => u.rooms.map((r) => r.id))
+  const i = ids.indexOf(roomId)
+  if (i < 0) return null
+  const rows = Math.max(1, Math.ceil(ids.length / COLS))
+  const c = (rows - 1 - Math.floor(i / COLS)) * COLS + (i % COLS)
+  const S = Math.max(COLS, rows)
+  const x = (S - COLS) / 2 + (c % COLS)
+  const y = (S - rows) / 2 + Math.floor(c / COLS)
+  return {
+    backgroundImage: `url(${panelArt(chapter, p).src})`,
+    backgroundSize: `${S * 100}% ${S * 100}%`,
+    backgroundPosition: `${(x / (S - 1)) * 100}% ${(y / (S - 1)) * 100}%`,
+  }
 }
 
 /* Before paint in the browser (so a fresh tile never shows laid, then face-down); a plain effect on the server. */
