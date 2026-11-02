@@ -1,3 +1,4 @@
+import { ROOM_IMAGES } from '@/content/room-images'
 /**
  * Situations — what a City Club is made of.
  *
@@ -156,7 +157,7 @@ export interface Situation {
  * — because ten is what one image session yields, which forces a block to be conceived as
  * a set with a shared look rather than ten cards commissioned separately.
  */
-export const SITUATIONS: Situation[] = [
+export const SITUATIONS: Situation[] = withRoomImages([
   /* The save first — it is the first room on every path. See content/blocks/lisbon-save.ts. */
   ...LISBON_SAVE,
   ...LISBON_MOVING_1,
@@ -407,7 +408,12 @@ export const SITUATIONS: Situation[] = [
     rung: 3,
     review_by: '2027-08-01',
   },
-]
+])
+
+/** Fill rooms with no photograph from the generated set (content/room-images.ts). */
+function withRoomImages(list: Situation[]): Situation[] {
+  return list.map((s) => (s.image || !ROOM_IMAGES[s.id] ? s : { ...s, image: ROOM_IMAGES[s.id] }))
+}
 
 export function situationsFor(chapter: ChapterId): Situation[] {
   return SITUATIONS.filter((s) => s.chapter === chapter)
