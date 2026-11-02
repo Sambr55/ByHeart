@@ -37,6 +37,36 @@ import type { PieceId } from '@/engine/learner'
  * what it counts, and the argument for why a tally is allowed on this card when it is
  * refused on a Legend one.
  */
+/**
+ * WHO SAYS WHICH LINE — the three labels on an idiom card, from one place (Sam, 2026-11-02).
+ *
+ * Sam: "make it clear on the idioms cards in web and app so they say 'They say' versus
+ * 'You say'." The card had WE SAY over the English and THEY SAY over the Portuguese, and
+ * "we" is ambiguous on a screen that is DUB talking: we, the app? we, the Portuguese? So
+ * the labels are from the learner's side of the table, and they are not ours to blur:
+ *
+ *   you      the English idiom — what YOU, the English speaker, would say
+ *   they     the Portuguese equivalent — what THEY, in Portugal, say instead
+ *   literal  the English pushed word for word into Portuguese — the wreckage on the face
+ *
+ * Keyed by language pair so another pair swaps its own (an English speaker in Madrid is
+ * still "you" and "they"; a Spanish speaker learning English would not be). Every
+ * component that labels an idiom reads these rather than spelling them.
+ */
+export interface IdiomLabels {
+  you: string
+  they: string
+  literal: string
+}
+
+export const IDIOM_LABELS: Record<string, IdiomLabels> = {
+  'en>pt-PT': { you: 'YOU SAY', they: 'THEY SAY', literal: 'WORD FOR WORD' },
+}
+
+export function idiomLabels(pair = 'en>pt-PT'): IdiomLabels {
+  return IDIOM_LABELS[pair] ?? IDIOM_LABELS['en>pt-PT']
+}
+
 export interface Idiom {
   id: string
   /**

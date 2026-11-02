@@ -52,6 +52,7 @@ import {
 import { chapterById } from '@/content/chapters'
 import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
+import { idiomLabels } from '@/content/idioms'
 import { acquirePiece, markIdiom, recordProof, rejectCard, rememberFinishedCard, rememberSheetGot, rewindReject, toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { StatusBar } from '@/components/Native'
@@ -6159,6 +6160,8 @@ function CheatPane({ card }: { card: Extract<FeedCard, { kind: 'cheat' }> }) {
   )
 }
 
+const IDIOM_LABEL = idiomLabels()
+
 function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
   const learner = useLearner()
   const i = card.idiom
@@ -6207,7 +6210,8 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
         opens on its own small print.
       */}
       <div className="flex flex-col gap-3">
-        <p className="eyebrow text-muted">WE SAY</p>
+        {/* YOU SAY, not WE SAY — Sam, 2026-11-02. From content/idioms.ts idiomLabels. */}
+        <p className="eyebrow text-muted" data-testid="idiom-you">{IDIOM_LABEL.you}</p>
         <p className="display text-balance text-3xl">{i.english}</p>
         {/*
           AND THE LINE THAT FRAMES WHAT IS COMING, under the title.
@@ -6241,7 +6245,7 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
       */}
       {/* bg-surface: an inset on a white card is a hole in it — see Teased above. */}
       <div className="flex flex-col gap-1 rounded border border-line bg-surface px-4 py-3">
-        <p className="eyebrow text-accent">THEY SAY</p>
+        <p className="eyebrow text-accent" data-testid="idiom-they">{IDIOM_LABEL.they}</p>
         <div className="mt-3 flex items-center gap-3">
           <AudioButton slug={slugFor(i.equivalent)} text={i.equivalent} />
           <p className="pt min-w-0 flex-1 text-xl text-accent">{i.equivalent}</p>
