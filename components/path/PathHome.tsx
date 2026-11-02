@@ -22,22 +22,28 @@ import { roomLock } from './locks'
 import { RoomCard } from './RoomCard'
 import { Wall } from './Wall'
 import { TileSheet } from './TileSheet'
-import { CardRail } from './CardRail'
 import { DoorIcon, SpeechIcon } from './icons'
 
 /**
  * The Lisbon path, as a home screen.
  *
  * One obvious next action — the up-next card with one big PLAY — then the whole trip
- * below it: THE WALL on a phone (components/path/Wall.tsx), a rail of big cards on
- * anything wide. Nothing is locked by order; only paid rooms are, and they say UNLOCK.
+ * below it: THE WALL (components/path/Wall.tsx), at every width. Nothing is locked by
+ * order; only paid rooms are, and they say UNLOCK.
  *
  * THE WALL REPLACED THE WINDING PATH ON 2026-11-02. Sam approved it after a design review
  * found the path "too Duolingo" — the code's own comments called it "Duolingo's winding
  * line" and the bubble over the next node "Duolingo's START". With it went the rest of
  * the tells on this screen: the flame beside the streak, the bouncing START, the stars and
- * the chunky hard bottom shadows. The desktop rail (CardRail) is a separate drawing and is
- * left as it was for now.
+ * the chunky hard bottom shadows.
+ *
+ * AND ON DESKTOP TOO (Sam, 2026-11-02: "Yes, replace the old card rail with the Wall on
+ * desktop."). The rail of big cards — CardRail, with its unit banners, its star rows and
+ * the hard-shadowed practice circle — was the wide-screen copy of the same Duolingo
+ * shape, so it is gone, and the one drawing serves every width. Wide screens get two calm
+ * columns rather than a stretched phone: on the left what to do now (the tally, My
+ * opening line, Up next), held in place while you scroll; on the right the Wall, at the
+ * width a wall of tiles reads best, with its strip above and its foundation under it.
  *
  * Built to be dropped into the Club home at merge: it takes no props and reads only the
  * learner, the clock and the entitlements.
@@ -111,53 +117,55 @@ export function PathHome() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-md flex-col gap-10 px-5 py-6 md:max-w-6xl md:px-6">
-        <Understood
-          count={understood}
-          days={streak.days}
-          today={streak.today}
-        />
+      <main className="mx-auto w-full max-w-md px-5 py-6 md:max-w-6xl md:px-6">
+        {/* One column on a phone; on anything wide, now on the left and the Wall on the right. */}
+        <div className="flex flex-col gap-10 md:grid md:grid-cols-[minmax(0,24rem)_minmax(0,38rem)] md:items-start md:justify-center md:gap-12">
+          <div className="flex flex-col gap-10 md:sticky md:top-24">
+            <Understood
+              count={understood}
+              days={streak.days}
+              today={streak.today}
+            />
 
-        <section aria-labelledby="up-next" className="needs-learner flex flex-col gap-3">
-          <h1 id="up-next" className="eyebrow text-muted">
-            {view.next ? 'Up next' : name.done}
-          </h1>
-          {view.next ? (
-            <div className="md:max-w-xl">
-              <RoomCard
-                room={view.next.room}
-                tag={'Unit ' + view.next.unit.n + ' · ' + view.next.unit.title}
-                state="next"
-                big
-              />
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3 rounded-3xl border border-line bg-bg-elev p-5 md:max-w-xl">
-              <p className="display text-2xl">Every open room, played.</p>
-              <p className="text-sm leading-relaxed text-muted">
-                Keep them warm: the practice sessions ask for them back cold.
-              </p>
-              <Link
-                href={practiceHref}
-                className="tap-target eyebrow inline-flex justify-center rounded-full bg-accent px-6 py-3 text-accent-ink"
-              >
-                Practise
-              </Link>
-            </div>
-          )}
-        </section>
+            <section aria-labelledby="up-next" className="needs-learner flex flex-col gap-3">
+              <h1 id="up-next" className="eyebrow text-muted">
+                {view.next ? 'Up next' : name.done}
+              </h1>
+              {view.next ? (
+                <div className="md:max-w-xl">
+                  <RoomCard
+                    room={view.next.room}
+                    tag={'Unit ' + view.next.unit.n + ' · ' + view.next.unit.title}
+                    state="next"
+                    big
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3 rounded-3xl border border-line bg-bg-elev p-5 md:max-w-xl">
+                  <p className="display text-2xl">Every open room, played.</p>
+                  <p className="text-sm leading-relaxed text-muted">
+                    Keep them warm: the practice sessions ask for them back cold.
+                  </p>
+                  <Link
+                    href={practiceHref}
+                    className="tap-target eyebrow inline-flex justify-center rounded-full bg-accent px-6 py-3 text-accent-ink"
+                  >
+                    Practise
+                  </Link>
+                </div>
+              )}
+            </section>
+          </div>
 
-        <div className="needs-learner md:hidden">
-          <Wall
-            view={view}
-            purpose={pathPurpose(purpose)}
-            chapter={learner.chapter ?? 'lisbon'}
-            inventory={learner.inventory ?? {}}
-            onLaid={setSheet}
-          />
-        </div>
-        <div className="needs-learner hidden md:block">
-          <CardRail view={view} />
+          <div className="needs-learner">
+            <Wall
+              view={view}
+              purpose={pathPurpose(purpose)}
+              chapter={learner.chapter ?? 'lisbon'}
+              inventory={learner.inventory ?? {}}
+              onLaid={setSheet}
+            />
+          </div>
         </div>
         <BottomNavSpace />
       </main>

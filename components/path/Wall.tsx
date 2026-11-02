@@ -12,7 +12,12 @@ import { UNLOCK_HREF } from './locks'
 import { LockIcon } from './icons'
 
 /**
- * THE WALL — the phone's progress, as a building going up (Sam approved, 2026-11-02).
+ * THE WALL — progress, as a building going up (Sam approved, 2026-11-02).
+ *
+ * At every width since the same day — Sam: "Yes, replace the old card rail with the Wall
+ * on desktop." On a wide screen PathHome gives it a column of its own (about 38rem): the
+ * tiles grow a little and the scroll box takes the height of the window, and nothing else
+ * changes, because a wall does not need a second drawing to be wide.
  *
  * Replaces WindingPath, which its own comment called "Duolingo's winding line of round
  * nodes" with "Duolingo's START" bouncing over the next one. The design review's verdict
@@ -145,7 +150,7 @@ export function Wall({
       <div
         ref={scroller}
         data-testid="wall-scroll"
-        className="relative max-h-[34rem] overflow-y-auto rounded-t-2xl px-1 pt-3 [scrollbar-width:thin]"
+        className="relative max-h-[34rem] overflow-y-auto md:max-h-[max(20rem,calc(100svh-26rem))] rounded-t-2xl px-1 pt-3 [scrollbar-width:thin]"
       >
         {/* flex-col-reverse: unit 1 is the bottom course. The DOM keeps path order for readers. */}
         <ol className="flex flex-col-reverse gap-5" aria-label="The wall, one course per unit, built from the bottom">
@@ -166,7 +171,7 @@ export function Wall({
                     'Keystone, practice session: ' + unit.milestone.title + ' — ' + GLAZE_WORDS[glaze] + ', ' + stars + ' of 3 said cold. ' + unit.milestone.blurb
                   }
                   className={
-                    'tap-target relative mx-auto flex h-14 w-48 items-center justify-center rounded-b-md rounded-t-[1.75rem] ' +
+                    'tap-target relative mx-auto flex h-14 w-48 md:w-60 items-center justify-center rounded-b-md rounded-t-[1.75rem] ' +
                     (glaze === 'outline'
                       ? 'border-2 border-dashed border-line-strong'
                       : glaze === 'part'
@@ -219,7 +224,7 @@ function Tile({ n, onLaid }: { n: PathNode; onLaid: (n: PathNode) => void }) {
     (state === 'next' ? ' — up next' : '') +
     (state === 'paid' ? ' — locked, unlock with membership' : '')
   const base =
-    'tap-target relative flex h-[4.75rem] w-full flex-col justify-end overflow-hidden rounded-md px-1.5 pb-1.5 pt-3 text-left text-[0.68rem] font-semibold leading-tight'
+    'tap-target relative flex h-[4.75rem] w-full md:h-24 md:text-xs flex-col justify-end overflow-hidden rounded-md px-1.5 pb-1.5 pt-3 text-left text-[0.68rem] font-semibold leading-tight'
   const look =
     state === 'done'
       ? cold

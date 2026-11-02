@@ -169,6 +169,16 @@ console.log('\nthe Wall — a course per unit, built from the bottom (2026-11-02
   ok('no flame on the home screen', !/FlameIcon/.test(home))
   ok('the tally is honest about the microphone', /Said out loud, and heard/.test(home) && !/'Understood ' \+/.test(home))
   ok('no cheer claims "understood"', UNDERSTOOD_MILESTONES.every((m) => !/understood/i.test(understoodCheer(m))))
+  /*
+    AT EVERY WIDTH (Sam, 2026-11-02: "Yes, replace the old card rail with the Wall on
+    desktop."). The Wall must not be hidden above md, and the rail must be gone with its
+    stars and its hard-shadowed practice circle.
+  */
+  const wallMount = home.slice(home.lastIndexOf('<div', home.indexOf('<Wall')), home.indexOf('<Wall'))
+  ok('the Wall renders at desktop widths too', !/md:hidden|hidden md:/.test(wallMount), wallMount.trim())
+  ok('no CardRail anywhere', !/<CardRail|from '.\/CardRail'/.test(home) && !existsSync('components/path/CardRail.tsx') && !existsSync('components/path/Unit.tsx'))
+  ok('no stars on the home screen', !/StarIcon|stars=\{/.test(home))
+  ok('no hard bottom shadows on the home screen', !/shadow-\[0_\d+px_0_0/.test(home))
   ok('a laid tile opens the sheet', /<TileSheet\b/.test(home) && existsSync('components/path/TileSheet.tsx'))
   const wall = readFileSync('components/path/Wall.tsx', 'utf8')
   ok('no chunky hard bottom shadows on the Wall', !/shadow-\[0_\d+px_0_0/.test(wall))
