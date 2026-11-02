@@ -21,6 +21,7 @@ import {
 import { roomLock } from './locks'
 import { RoomCard } from './RoomCard'
 import { Panel } from './Panel'
+import { Road } from './Road'
 import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
 
@@ -38,6 +39,11 @@ import { DoorIcon, SpeechIcon } from './icons'
  * and each room one square of it; the Wall's courses, cracks and plaster are gone, its
  * keystones, sheet and foundation kept. Everything below about the Wall's arrival still
  * stands for the Panel: it is the same slot, at the same widths.
+ *
+ * AND THE ROAD BESIDE IT (Sam, 2026-11-02): "I'm still seeing the Duo Lingo roadmap view in
+ * the app and it is kinda cool … could we have a 'winding road' map view and a tile view and
+ * a toggle." A small Panel | Road switch above the picture, remembered per device. Both are
+ * drawn from the one pathView, so drifting, the sheet and "Put these back" are one game.
  *
  * THE WALL REPLACED THE WINDING PATH ON 2026-11-02. Sam approved it after a design review
  * found the path "too Duolingo" — the code's own comments called it "Duolingo's winding
@@ -81,6 +87,21 @@ export function PathHome() {
   )
   /* The laid tile whose sheet is open, if any. Unlaid tiles open the room, as ever. */
   const [sheet, setSheet] = useState<PathNode | null>(null)
+  /*
+    PANEL OR ROAD (Sam, 2026-11-02: "a 'winding road' map view and a tile view and a
+    toggle"). The Panel by default; the choice is remembered on this device, read after
+    mount so the server and the first frame agree.
+  */
+  const [mode, setMode] = useState<PathMode>('panel')
+  useEffect(() => setMode(readPathMode()), [])
+  const chooseMode = useCallback((m: PathMode) => {
+    setMode(m)
+    try {
+      window.localStorage.setItem(PATH_MODE_KEY, m)
+    } catch {
+      /* No storage: the choice lasts as long as the screen does. */
+    }
+  }, [])
   const closeSheet = useCallback(() => setSheet(null), [])
   const streak = useMemo(
     () => (now ? dayStreak(activityTimes(learner), now) : { days: 0, today: false }),
@@ -166,15 +187,25 @@ export function PathHome() {
             </section>
           </div>
 
-          <div className="needs-learner">
-            <Panel
-              view={view}
-              purpose={pathPurpose(purpose)}
-              chapter={learner.chapter ?? 'lisbon'}
-              inventory={learner.inventory ?? {}}
-              onLaid={setSheet}
-              openId={sheet?.room.id ?? null}
-            />
+          <div className="needs-learner flex flex-col gap-3">
+            <ViewToggle mode={mode} onChange={chooseMode} />
+            {mode === 'road' ? (
+              <Road
+                view={view}
+                inventory={learner.inventory ?? {}}
+                onLaid={setSheet}
+                openId={sheet?.room.id ?? null}
+              />
+            ) : (
+              <Panel
+                view={view}
+                purpose={pathPurpose(purpose)}
+                chapter={learner.chapter ?? 'lisbon'}
+                inventory={learner.inventory ?? {}}
+                onLaid={setSheet}
+                openId={sheet?.room.id ?? null}
+              />
+            )}
           </div>
         </div>
         <BottomNavSpace />
@@ -205,6 +236,35 @@ function UnderstoodChip({ count }: { count: number }) {
       <SpeechIcon filled={count > 0} className="h-6 w-6" />
       <span className="display text-lg tabular-nums">{count}</span>
     </p>
+  )
+}
+
+/*
+  THE VIEW, PER DEVICE. A preference about a screen, not a fact about the learner — the same
+  reasoning as MARKED_KEY below — so it lives in localStorage and never syncs.
+*/
+export type PathMode = 'panel' | 'road'
+export const PATH_MODE_KEY = 'dub.path.view'
+
+function readPathMode(): PathMode {
+  try {
+    return window.localStorage.getItem(PATH_MODE_KEY) === 'road' ? 'road' : 'panel'
+  } catch {
+    return 'panel'
+  }
+}
+
+/** Panel | Road — two segments, small, above the picture. */
+function ViewToggle({ mode, onChange }: { mode: PathMode; onChange: (m: PathMode) => void }) {
+  return (
+    <div role="group" aria-label="How to show your path" className="view-toggle self-start" data-testid="view-toggle">
+      <button type="button" aria-pressed={mode === 'panel'} onClick={() => onChange('panel')} data-mode="panel">
+        Panel
+      </button>
+      <button type="button" aria-pressed={mode === 'road'} onClick={() => onChange('road')} data-mode="road">
+        Road
+      </button>
+    </div>
   )
 }
 

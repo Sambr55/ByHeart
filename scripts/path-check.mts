@@ -23,6 +23,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { CHEATS } from '../content/cheats'
 import { Panel, keystoneLabel, driftOf } from '../components/path/Panel'
+import { Road } from '../components/path/Road'
 import { PANEL_ART, TILE_WORDS, panelArt, tileWord } from '../content/panel'
 import { roomSlipping, keystoneGlaze, SLIP_DAYS } from '../components/path/progress'
 import { revisionFor, revisionTitle } from '../content/revision'
@@ -240,6 +241,35 @@ console.log('\nput it back — a drift, never a removal\n')
   ok('the foundation counts words by shelf', /data-testid="foundation"/.test(html) && /1 word · 1 shelf/.test(html))
   const sheet = readFileSync('components/path/TileSheet.tsx', 'utf8')
   ok('a drifted tile’s sheet leads with "Put it back"', /slipping \? \(\s*<div[^>]*data-testid="sheet-put-back"/.test(sheet) && sheet.indexOf('Put it back') < sheet.indexOf('sheet-remind'))
+}
+
+console.log('\nthe Road — the winding path, back as a second view (2026-11-02)\n')
+{
+  /*
+    Sam: "could we have a 'winding road' map view and a tile view and a toggle. And we
+    gamify the winding road view the same — when something drifts etc?" Same pathView,
+    same states, none of the Duolingo tells.
+  */
+  for (const purpose of ['visiting', 'staying', 'moving'] as const) {
+    const us = pathUnits(undefined, undefined, purpose)
+    const html = renderToStaticMarkup(createElement(Road, { view: pathView(empty, us, () => 'open', now), inventory: {}, onLaid: () => {} }))
+    ok(purpose + ': the Road renders a stop per room', (html.match(/data-testid="stop"/g) ?? []).length === us.flatMap((u) => u.rooms).length)
+    ok(purpose + ': and a keystone per unit', (html.match(/data-testid="keystone"/g) ?? []).length === us.length)
+    ok(purpose + ': no stars, no START, no bounce', !/>Start<|\bstars?\b|nudge-up|StarIcon/i.test(html))
+  }
+  const us = pathUnits(undefined, undefined, 'moving')
+  const room = us[0].rooms.find((r) => roomPieceIds(r).length > 0)!
+  const pid = roomPieceIds(room)[0]
+  const inv = { [pid]: { target_id: pid, acquired_source: null, reinforced_sources: [], latest_state: 'NEEDS ANOTHER LOOK', latest_recall_at: now.toISOString() } }
+  const v = pathView({ finished_cards: [room.id], proof: [], evidence: [], mission_completed_at: {}, inventory: inv as never }, us, () => 'open', now)
+  const road = renderToStaticMarkup(createElement(Road, { view: v, inventory: inv, onLaid: () => {} }))
+  ok('a drifted stop is knocked off the road, with its gap on the line', /data-slipping="true"/.test(road) && /road-gap/.test(road) && new RegExp('--rot:' + driftOf(room.id).rot + 'deg').test(road))
+  ok('and the same "Put these back" strip as the Panel', /data-testid="put-back"/.test(road) && road.includes('/revise?kind=room&amp;id=' + room.id))
+  const roadSrc = readFileSync('components/path/Road.tsx', 'utf8')
+  ok('the Road forks no logic: it reads pathView nodes and the Panel’s drift', !/roomSlipping|roomDone|finished_cards/.test(roadSrc) && /driftOf/.test(roadSrc))
+  ok('no hard bottom shadows on the Road', !/shadow-\[0_\d+px_0_0/.test(roadSrc))
+  const home = readFileSync('components/path/PathHome.tsx', 'utf8')
+  ok('PathHome toggles Panel | Road, remembered per device, Panel by default', /<Road\b/.test(home) && /<Panel\b/.test(home) && /PATH_MODE_KEY = 'dub.path.view'/.test(home) && /useState<PathMode>\('panel'\)/.test(home) && /localStorage\.setItem\(PATH_MODE_KEY/.test(home))
 }
 
 console.log('\nrevision knows a room\n')

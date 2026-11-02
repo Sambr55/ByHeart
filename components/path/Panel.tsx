@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useLayoutEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import type { ChapterId } from '@/content/chapters'
 import type { Purpose } from '@/content/situations'
 import { SHELVES } from '@/content/roots'
@@ -191,29 +191,12 @@ export function Panel({
         {view.done} of {view.total} tiles laid
       </p>
 
-      {/*
-        PUT THESE BACK, up to three, and only when there are any. Above the panel because it
-        is the one thing on it that asks you for something — and it asks gently: the tiles
-        are still laid, they have only slid. (It was "Worth another look" on the Wall.)
-      */}
-      {drifted.length ? (
-        <div data-testid="put-back" className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-6 py-3">
-          <p className="eyebrow text-muted">Put these back</p>
-          <ul className="flex flex-wrap gap-3">
-            {drifted.map((x) => (
-              <li key={x.room.id}>
-                <Link
-                  href={'/revise?kind=room&id=' + encodeURIComponent(x.room.id)}
-                  className="tap-target inline-flex items-center gap-3 rounded-full border border-line-strong px-3 py-1 text-sm"
-                >
-                  <span aria-hidden className="panel-chip" style={{ ...sliceOf(cellOf(nodes.indexOf(x))), transform: `rotate(${driftOf(x.room.id).rot}deg)` }} />
-                  {x.room.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+      <PutBack
+        drifted={drifted}
+        chip={(x) => (
+          <span aria-hidden className="panel-chip" style={{ ...sliceOf(cellOf(nodes.indexOf(x))), transform: `rotate(${driftOf(x.room.id).rot}deg)` }} />
+        )}
+      />
 
       <div className="panel-frame rounded-[1.25rem] p-3">
         <ol
@@ -237,6 +220,44 @@ export function Panel({
       <Foundation inventory={inventory} />
     </section>
   )
+}
+
+/**
+ * PUT THESE BACK, up to three, and only when there are any — shared by the Panel and the
+ * Road, so the one thing on the home screen that asks you for something asks it the same
+ * way in both views. Above the picture because it is that one thing, and it asks gently:
+ * the tiles are still laid, they have only come loose. (It was "Worth another look" on the
+ * Wall.)
+ *
+ * Each link carries `round` — the ids in the strip — so /revise can say "2 of 3 put back"
+ * when one comes home. It is counted there from the record (roomSlipping), not stored.
+ */
+export function PutBack({ drifted, chip }: { drifted: PathNode[]; chip: (n: PathNode) => ReactNode }) {
+  if (!drifted.length) return null
+  const round = drifted.map((x) => x.room.id).join(',')
+  return (
+    <div data-testid="put-back" className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-6 py-3">
+      <p className="eyebrow text-muted">Put these back</p>
+      <ul className="flex flex-wrap gap-3">
+        {drifted.map((x) => (
+          <li key={x.room.id}>
+            <Link
+              href={putBackHref(x.room.id, round)}
+              className="tap-target inline-flex items-center gap-3 rounded-full border border-line-strong px-3 py-1 text-sm"
+            >
+              {chip(x)}
+              {x.room.title}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/** Where "Put it back" goes: the room's own revision, with the strip's round if there is one. */
+export function putBackHref(id: string, round?: string): string {
+  return '/revise?kind=room&id=' + encodeURIComponent(id) + (round ? '&round=' + encodeURIComponent(round) : '')
 }
 
 function Tile({
@@ -373,7 +394,7 @@ function Legend({ view }: { view: PathView }) {
  * counted by wordsOnShelf in content/collection.ts — the same count the library shows).
  * Kept from the Wall: every room you lay puts words in the ground it stands on. → /vocab.
  */
-function Foundation({ inventory }: { inventory: Record<string, unknown> }) {
+export function Foundation({ inventory }: { inventory: Record<string, unknown> }) {
   const counts = useMemo(() => wordsOnShelf(inventory), [inventory])
   const shelves = SHELVES.filter((s) => counts[s.id] > 0)
   const words = shelves.reduce((k, s) => k + counts[s.id], 0)
