@@ -14,6 +14,8 @@
  */
 import type { ChapterId } from '@/content/chapters'
 import { LISBON_2026_10 } from '@/content/calendar/lisbon-2026-10'
+import { LISBON_2026_11 } from '@/content/calendar/lisbon-2026-11'
+import { LISBON_2026_12 } from '@/content/calendar/lisbon-2026-12'
 import type { Purpose } from '@/content/situations'
 
 /**
@@ -191,7 +193,7 @@ export interface CalendarRow {
  * without anybody deciding it should, which is exactly the property this content must not
  * have.
  */
-export const CALENDAR: CalendarRow[] = [...LISBON_2026_10]
+export const CALENDAR: CalendarRow[] = [...LISBON_2026_10, ...LISBON_2026_11, ...LISBON_2026_12]
 
 /** Rows that are live for a date: verified, in window, and not past their review date. */
 export function rowsFor(chapter: ChapterId, now: Date = new Date()): CalendarRow[] {
