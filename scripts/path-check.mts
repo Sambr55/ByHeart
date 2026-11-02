@@ -6,7 +6,8 @@
  * The streak is a pure function of timestamps and the path is a pure function of which
  * rooms exist, so both can be proved here without a browser.
  */
-import { PATH_UNITS, pathUnits } from '../content/path'
+import { PATH_UNITS, PATHS, pathUnits } from '../content/path'
+import { FREE_BY_PURPOSE } from '../lib/entitlements'
 import { situationById } from '../content/situations'
 import { dayStreak, pathView, milestoneStars, type PathRecord } from '../components/path/progress'
 import { CHEATS } from '../content/cheats'
@@ -42,6 +43,30 @@ ok('every milestone is a real cheat', PATH_UNITS.every((u) => CHEATS.some((c) =>
 const none = pathUnits(() => undefined)
 ok('a path with no rooms has no units', none.length === 0)
 console.log('  ' + units.length + ' units, ' + ids.length + ' rooms playable now')
+
+console.log('\nthe path follows the reason given at set-up\n')
+{
+  /*
+    Sam, 2026-11-02: moving here and a trip are different paths. Each one must resolve in
+    full, open with a free room, and be different from the others where it matters.
+  */
+  for (const [purpose, list] of Object.entries(PATHS) as [keyof typeof PATHS, typeof PATH_UNITS][]) {
+    const resolved = pathUnits(undefined, undefined, purpose)
+    const rids = resolved.flatMap((u) => u.rooms.map((r) => r.id))
+    const listed = list.flatMap((u) => u.rooms)
+    ok(purpose + ': every listed room exists', listed.every((id) => Boolean(situationById(id))), listed.filter((id) => !situationById(id)).join(', '))
+    ok(purpose + ': no room twice', new Set(rids).size === rids.length)
+    ok(purpose + ': every milestone is a real cheat', list.every((u) => CHEATS.some((c) => c.id === u.milestone.cheat)))
+    const free = FREE_BY_PURPOSE[purpose]
+    ok(purpose + ': the very first room is free', free.includes(rids[0]), rids[0])
+    ok(purpose + ': every free room is on this path', free.every((id) => rids.includes(id)), free.filter((id) => !rids.includes(id)).join(', '))
+    ok(purpose + ': the emergency room is free', free.includes('lisbon_emergencia'))
+    console.log('    ' + resolved.length + ' units, ' + rids.length + ' rooms')
+  }
+  ok('no purpose gets the trip', pathUnits(undefined, undefined, null)[0].id === PATHS.visiting[0].id)
+  ok('moving starts with the paperwork', PATHS.moving[0].rooms[0] === 'lisbon_nif')
+  ok('the trip starts at the airport', PATHS.visiting[0].rooms[0] === 'lisbon_aeroporto')
+}
 
 console.log('\nprogress is read from the record, and order never locks\n')
 const empty: PathRecord = { finished_cards: [], proof: [], evidence: [], mission_completed_at: {} }

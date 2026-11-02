@@ -575,6 +575,8 @@ function throughLine(n: number): string {
  * by being about what they did rather than about how often they showed up.
  */
 function Welcome({ onDone }: { onDone: () => void }) {
+  /* The path follows why you are here, so the welcome that describes it does too. */
+  const welcomePurpose = useLearner().purpose ?? null
   /*
     THE SWIPE THE SCREEN ASKS FOR, which it did not accept.
 
@@ -665,7 +667,9 @@ function Welcome({ onDone }: { onDone: () => void }) {
         <Wordmark mark="club" className="h-8 text-white" />
         <p className="eyebrow mt-3 text-white/75">{CLUB.welcome.eyebrow}</p>
         <h1 className="display text-balance text-3xl">{CLUB.welcome.headline}</h1>
-        <p className="text-sm leading-relaxed text-white/80">{CLUB.welcome.body}</p>
+        <p className="text-sm leading-relaxed text-white/80">
+          {CLUB.welcome.body_by_purpose[welcomePurpose ?? 'visiting'] ?? CLUB.welcome.body}
+        </p>
         <p className="text-sm leading-relaxed text-white/80">{CLUB.welcome.body_two}</p>
         {/*
           THE GESTURE, NOT A BUTTON. Sam: "remove CTA, add: Swipe ↑ to continue."

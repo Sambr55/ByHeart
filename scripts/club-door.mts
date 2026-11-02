@@ -210,7 +210,7 @@ console.log('\nthe starter set\n')
   ok('the first unit of the path can be started free', FREE_ROOMS.includes('lisbon_aeroporto'))
   const missing = FREE_ROOMS.filter((id) => !ids.has(id))
   ok('every free room exists', missing.length === 0, missing.join(', ') || 'all found')
-  ok('isFreeRoom agrees with the list', FREE_ROOMS.every(isFreeRoom) && !isFreeRoom('lisbon_fado'))
+  ok('isFreeRoom agrees with the list', FREE_ROOMS.every((id) => isFreeRoom(id)) && !isFreeRoom('lisbon_fado'))
   /*
     "When billing is not configured, everybody is in", and nothing locks before the server
     has answered — the two rules the Club wrote inline, now one function.
@@ -226,7 +226,7 @@ console.log('\nthe starter set\n')
   ok('a paid room does not', !canOpenRoom('lisbon_fado', live))
   /* And the feed — the one place rooms are withheld today — reads the same list. */
   const feed = readFileSync('components/Feed.tsx', 'utf8')
-  ok('the feed frees the starter set', /isFreeRoom\(card\.id\)/.test(feed))
+  ok('the feed frees the starter set', /isFreeRoom\(card\.id, learner\.purpose \?\? null\)/.test(feed))
   /* The pricing no longer promises a door that is gone. */
   const plans = JSON.stringify(PLANS)
   ok('no plan sells the path to the Legend', !/path to the Legend|Your Legend all the way/i.test(plans), PLANS.free.line)

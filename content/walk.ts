@@ -197,7 +197,8 @@ export const WALK: WalkStep[] = [
       particular in mind.
     */
     /* TRIP since 2026-11-01: the tab opens the Lisbon path home, not the feed. */
-    say: 'TRIP is your Lisbon, in order — arrive, eat, get about, see it, and what to say when it goes wrong.',
+    /* PATH since 2026-11-02, and it follows why you are here. */
+    say: 'PATH is your Lisbon, in order — built for why you are here: a trip, a season, or moving for good.',
     opens: ['Up next', 'Rooms', 'Practice'],
   },
   {

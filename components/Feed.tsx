@@ -2474,7 +2474,7 @@ export function Card({
   const free =
     stage === 'member' ||
     card.kind !== 'situation' ||
-    isFreeRoom(card.id) ||
+    isFreeRoom(card.id, learner.purpose ?? null) ||
     claimed ||
     learner.tasted === card.id
   const [isSaved, setSaved] = useState(saved)

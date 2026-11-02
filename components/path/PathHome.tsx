@@ -8,7 +8,7 @@ import { useLearner } from '@/engine/useLearner'
 import { useNowAfterMount } from '@/engine/useNow'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { hasFullAccess } from '@/lib/entitlements'
-import { pathUnits } from '@/content/path'
+import { PATH_NAMES, pathPurpose, pathUnits } from '@/content/path'
 import { activityTimes, dayStreak, milestoneHref, pathView } from './progress'
 import { roomLock } from './locks'
 import { RoomCard } from './RoomCard'
@@ -33,10 +33,16 @@ export function PathHome() {
   /* The same rule the feed asks: billing not configured, not yet answered, or paid. */
   const member = hasFullAccess(access) || access.comped
 
-  const units = useMemo(() => pathUnits(), [])
+  /*
+    THE PATH FOLLOWS THE REASON GIVEN AT SET-UP — a trip, a season, or moving here — see
+    content/path.ts. Settings can change it, and the path changes with it.
+  */
+  const purpose = learner.purpose ?? null
+  const name = PATH_NAMES[pathPurpose(purpose)]
+  const units = useMemo(() => pathUnits(undefined, undefined, purpose), [purpose])
   const view = useMemo(
-    () => pathView(learner, units, (id) => roomLock(id, member)),
-    [learner, units, member],
+    () => pathView(learner, units, (id) => roomLock(id, member, purpose)),
+    [learner, units, member, purpose],
   )
   const streak = useMemo(
     () => (now ? dayStreak(activityTimes(learner), now) : { days: 0, today: false }),
@@ -53,7 +59,14 @@ export function PathHome() {
       <header className="bar safe-top sticky top-0 z-30 px-5 py-3">
         <div className="mx-auto flex w-full max-w-md items-center gap-3 md:max-w-6xl">
           <Wordmark mark="club" className="h-7 text-white" />
-          <p className="eyebrow flex-1 truncate opacity-90">Lisboa</p>
+          <Link
+            href="/settings#purpose"
+            className="flex min-w-0 flex-1 flex-col leading-tight"
+            aria-label={'Lisboa · ' + name.title + ' — change in settings'}
+          >
+            <span className="eyebrow truncate opacity-90">Lisboa</span>
+            <span className="needs-learner truncate text-[0.7rem] font-semibold opacity-75">{name.short}</span>
+          </Link>
           <p className="eyebrow rounded-full bg-[rgba(255,255,255,0.14)] px-3 py-1" aria-label={view.done + ' of ' + view.total + ' rooms done'}>
             <span className="needs-learner">{view.done}</span> / {view.total}
           </p>
@@ -67,7 +80,7 @@ export function PathHome() {
       <main className="mx-auto flex w-full max-w-md flex-col gap-10 px-5 py-6 md:max-w-6xl md:px-6">
         <section aria-labelledby="up-next" className="needs-learner flex flex-col gap-3">
           <h1 id="up-next" className="eyebrow text-muted">
-            {view.next ? 'Up next' : 'The whole trip, done'}
+            {view.next ? 'Up next' : name.done}
           </h1>
           {view.next ? (
             <div className="md:max-w-xl">

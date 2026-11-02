@@ -93,8 +93,12 @@ const TABS = [
   */
   {
     href: '/club',
-    /* Trip, not Find: /club is the Lisbon path home now (2026-11-01). */
-    label: 'Trip',
+    /*
+      Path, not Trip (2026-11-02): the path now follows why you are here — a trip, a season
+      or moving — so "Trip" was wrong for two of the three. The testid stays tab-trip so
+      the walkthrough and the checks that point at it do not move.
+    */
+    label: 'Path',
     d: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM14.8 9.2l-1.6 4.6-4.6 1.6 1.6-4.6z',
   },
   /*

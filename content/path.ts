@@ -1,5 +1,27 @@
 /**
- * THE LISBON PATH — a visitor's trip, in the order it happens.
+ * THE LISBON PATHS — one for each reason somebody gives at set-up, in the order it happens.
+ *
+ * Sam, 2026-11-02: "check the 'why' someone is moving here function. It seems it may have
+ * got lost … paths would be very different in Moving here versus a trip." It had been lost:
+ * the city-first rewrite gave everybody the visitor's five units, so a person who answered
+ * "I'm moving there" was walked from the airport to the beach train while the NIF, the bank,
+ * the lease and the health centre sat unreached in the feed. Set-up still asked why and
+ * still stored it (learner.purpose); nothing on the path read it.
+ *
+ * So there are three paths, chosen by `purpose`, which set-up writes from the reason and
+ * Settings lets you change:
+ *
+ *   visiting — "I've got a trip coming" (and "no reason, I just like it", which has no
+ *              purpose and gets the trip: the most general and the cheapest to finish)
+ *   staying  — "a season", "someone in my life speaks it", "it's for work": the same faces
+ *              twice, where small talk starts doing real work
+ *   moving   — "I'm moving there": the paperwork first, because nothing else works until
+ *              you have a NIF, then a home, then a life
+ *
+ * They share rooms freely — a coffee is a coffee — but the ORDER is the argument, and the
+ * order is different for each.
+ *
+ * (The visitor's path, below, was the first and is described as it was written.)
  *
  * Owner: "make it more app like, like Duolingo or Simply Guitar." What those two have that
  * the Club feed does not is a SHAPE: one line through everything, with the next thing on
@@ -21,7 +43,7 @@
  * NOT A GATE. Order is a suggestion: the next room glows, but any open room can be played
  * at any time. The only lock on the path is the paid one — see components/path/locks.ts.
  */
-import { isCurrent, situationById, type Situation } from '@/content/situations'
+import { isCurrent, situationById, type Purpose, type Situation } from '@/content/situations'
 
 export interface PathMilestone {
   /** A cheat id from content/cheats.ts, played through /revise?kind=cheat. */
@@ -44,7 +66,7 @@ export interface PathUnit {
   milestone: PathMilestone
 }
 
-export const PATH_UNITS: PathUnit[] = [
+const VISITING_UNITS: PathUnit[] = [
   {
     id: 'arrive',
     n: 1,
@@ -138,6 +160,147 @@ export const PATH_UNITS: PathUnit[] = [
   },
 ]
 
+/**
+ * A SEASON — and work, and the partner's family. Here long enough to see the same faces
+ * twice, not long enough (or not yet) for the paperwork. Settle in, find your rounds, then
+ * the small talk that turns a shop into "the usual", then going out, and the bad day.
+ */
+const STAYING_UNITS: PathUnit[] = [
+  {
+    id: 'settle',
+    n: 1,
+    title: 'Settling in',
+    pt: 'Instalar-me',
+    learn: ['Check in and get a local number', 'Get a travel pass for the weeks ahead', 'Order the coffee you will order every day'],
+    rooms: ['lisbon_checkin', 'lisbon_telemovel', 'lisbon_navegante', 'lisbon_cafe', 'lisbon_costume'],
+    milestone: { cheat: 'posso_hack', title: 'Posso …?', blurb: 'Can I …? — the sentence that opens most of a new week.' },
+  },
+  {
+    id: 'rounds',
+    n: 2,
+    title: 'The daily round',
+    pt: 'A rotina',
+    learn: ['Bread, market and the butcher’s counter', 'The supermarket till and the cash machine', 'The launderette and the parcel you missed'],
+    rooms: ['lisbon_padaria', 'lisbon_mercado', 'lisbon_talho', 'lisbon_supermercado', 'lisbon_multibanco', 'lisbon_lavandaria', 'lisbon_encomenda'],
+    milestone: { cheat: 'quero_hack', title: 'Quero …', blurb: 'I want … — and how to make it polite at a counter.' },
+  },
+  {
+    id: 'faces',
+    n: 3,
+    title: 'The same faces',
+    pt: 'As mesmas caras',
+    learn: ['Say more than boa tarde to the neighbour', 'Book a haircut, join a gym, sign up for classes', 'Get something mended'],
+    rooms: ['lisbon_vizinho', 'lisbon_cabeleireiro', 'lisbon_ginasio', 'lisbon_aulas', 'lisbon_arranjar'],
+    milestone: { cheat: 'estar_a', title: 'Estou a …', blurb: 'What you are doing right now — which is most of small talk.' },
+  },
+  {
+    id: 'out',
+    n: 4,
+    title: 'Out and about',
+    pt: 'Sair',
+    learn: ['A table, a tasca, and the bill', 'Trams and trains, out to the beach', 'A night of fado'],
+    rooms: ['lisbon_mesa', 'lisbon_tasca', 'lisbon_conta', 'lisbon_electrico', 'lisbon_comboio', 'lisbon_praia', 'lisbon_fado'],
+    milestone: { cheat: 'pode_hack', title: 'Pode …?', blurb: 'Could you …? — asking a stranger for anything.' },
+  },
+  {
+    id: 'wrong',
+    n: 5,
+    title: 'When it goes wrong',
+    pt: 'Quando corre mal',
+    learn: ['The pharmacy and the health centre', 'Say what you cannot eat', 'Call for help, report a theft'],
+    rooms: ['lisbon_farmacia', 'lisbon_centro_saude', 'lisbon_sem', 'lisbon_emergencia', 'lisbon_roubo'],
+    milestone: { cheat: 'rescue_hack', title: 'Como se diz …?', blurb: 'The sentence that turns any gap into a lesson — said cold.' },
+  },
+]
+
+/**
+ * MOVING HERE. The paperwork first, because it is the order the country makes you do it
+ * in: without a NIF there is no bank account, without both there is no lease, and the
+ * Loja do Cidadão is where a morning goes. Then a home, then the everyday, then getting
+ * about, then the health centre and the school, then the part where you become a regular.
+ */
+const MOVING_UNITS: PathUnit[] = [
+  {
+    id: 'papers',
+    n: 1,
+    title: 'The paperwork',
+    pt: 'Os papéis',
+    learn: ['Get your NIF, the number everything needs', 'Open a bank account and get a Portuguese number', 'Survive the Loja do Cidadão and the Junta'],
+    rooms: ['lisbon_nif', 'lisbon_telemovel', 'lisbon_banco', 'lisbon_loja_cidadao', 'lisbon_junta'],
+    milestone: { cheat: 'tenho_de', title: 'Tenho de …', blurb: 'I have to … — the shape every counter conversation runs on.' },
+  },
+  {
+    id: 'home',
+    n: 2,
+    title: 'A place to live',
+    pt: 'Uma casa',
+    learn: ['View a flat and ask the right questions', 'Read the lease before you sign it', 'Get the power on and meet the neighbour'],
+    rooms: ['lisbon_visita', 'lisbon_contrato', 'lisbon_luz_agua', 'lisbon_vizinho', 'lisbon_encomenda'],
+    milestone: { cheat: 'question_hack', title: 'The six questions', blurb: 'Who, what, where, when, how much, how — enough for any viewing.' },
+  },
+  {
+    id: 'daily',
+    n: 3,
+    title: 'Everyday life',
+    pt: 'O dia a dia',
+    learn: ['The café, the bakery and becoming a regular', 'The butcher, the supermarket, the cash machine', 'The launderette'],
+    rooms: ['lisbon_cafe', 'lisbon_padaria', 'lisbon_costume', 'lisbon_talho', 'lisbon_supermercado', 'lisbon_multibanco', 'lisbon_lavandaria'],
+    milestone: { cheat: 'quero_hack', title: 'Quero …', blurb: 'I want … — and how to make it polite at a counter.' },
+  },
+  {
+    id: 'about',
+    n: 4,
+    title: 'Getting about',
+    pt: 'Andar por aí',
+    learn: ['Get a Navegante pass', 'Trams, trains and taxis', 'Buy a car without being had'],
+    rooms: ['lisbon_navegante', 'lisbon_electrico', 'lisbon_perdido', 'lisbon_comboio', 'lisbon_taxi', 'lisbon_carro'],
+    milestone: { cheat: 'pode_hack', title: 'Pode …?', blurb: 'Could you …? — asking a stranger for anything.' },
+  },
+  {
+    id: 'care',
+    n: 5,
+    title: 'Health & family',
+    pt: 'Saúde e família',
+    learn: ['Register at the health centre', 'Get a place at school', 'The pharmacy, allergies, and an emergency'],
+    rooms: ['lisbon_centro_saude', 'lisbon_farmacia', 'lisbon_escola', 'lisbon_sem', 'lisbon_emergencia'],
+    milestone: { cheat: 'rescue_hack', title: 'Como se diz …?', blurb: 'The sentence that turns any gap into a lesson — said cold.' },
+  },
+  {
+    id: 'local',
+    n: 6,
+    title: 'Becoming local',
+    pt: 'Ser daqui',
+    learn: ['Portuguese classes, a gym, a haircut', 'Get something mended', 'A table, a tasca, a night of fado'],
+    rooms: ['lisbon_aulas', 'lisbon_ginasio', 'lisbon_cabeleireiro', 'lisbon_arranjar', 'lisbon_mesa', 'lisbon_tasca', 'lisbon_fado'],
+    milestone: { cheat: 'repair_hack', title: 'Keep it going', blurb: 'The lines that keep a conversation in Portuguese when it wobbles.' },
+  },
+]
+
+/** Every path, by the purpose that chooses it. */
+export const PATHS: Record<Purpose, PathUnit[]> = {
+  visiting: VISITING_UNITS,
+  staying: STAYING_UNITS,
+  moving: MOVING_UNITS,
+}
+
+/** What each path is called where the learner can see it. */
+export const PATH_NAMES: Record<Purpose, { title: string; short: string; pt: string; done: string }> = {
+  visiting: { title: 'Your trip', short: 'Trip', pt: 'A viagem', done: 'The whole trip, done' },
+  staying: { title: 'Your season', short: 'Season', pt: 'A temporada', done: 'The whole season, done' },
+  moving: { title: 'Moving here', short: 'Moving', pt: 'Mudar-me', done: 'The whole move, done' },
+}
+
+/**
+ * No purpose — "no reason, I just like it", or somebody who skipped set-up — gets the
+ * trip: the most general path and the quickest to feel finished.
+ */
+export function pathPurpose(purpose: Purpose | null | undefined): Purpose {
+  return purpose ?? 'visiting'
+}
+
+/** The visitor's path, kept under its old name for the scripts that predate the others. */
+export const PATH_UNITS: PathUnit[] = VISITING_UNITS
+
 export interface ResolvedUnit extends Omit<PathUnit, 'rooms'> {
   rooms: Situation[]
 }
@@ -151,8 +314,9 @@ export interface ResolvedUnit extends Omit<PathUnit, 'rooms'> {
 export function pathUnits(
   find: (id: string) => Situation | undefined = situationById,
   now = new Date(),
+  purpose: Purpose | null = null,
 ): ResolvedUnit[] {
-  return PATH_UNITS.map((u) => ({
+  return PATHS[pathPurpose(purpose)].map((u) => ({
     ...u,
     rooms: u.rooms
       .map((id) => find(id))

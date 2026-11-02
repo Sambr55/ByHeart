@@ -131,7 +131,7 @@ export function PurposeChoice() {
   if (purpose === 'unknown') return null
 
   return (
-    <div className="flex flex-col gap-1">
+    <div id="purpose" className="flex scroll-mt-24 flex-col gap-1">
       <p className="eyebrow text-muted">IN LISBON</p>
       <div role="group" aria-label="Why you are here" className="flex gap-1">
         {PURPOSES.map((p) => (
@@ -156,7 +156,8 @@ export function PurposeChoice() {
         ))}
       </div>
       <p className="mt-1 text-xs leading-relaxed text-muted">
-        Changes what Lisbon offers you. Nothing you have already done goes anywhere.
+        Changes your path — a trip, a season, or moving here — and what Lisbon offers you.
+        Nothing you have already done goes anywhere.
       </p>
     </div>
   )

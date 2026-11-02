@@ -153,9 +153,30 @@ export const FREE_ROOMS: readonly string[] = [
   'lisbon_emergencia',
 ] as const
 
-/** Whether a room (a Situation id) is in the free starter set. */
-export function isFreeRoom(id: string): boolean {
-  return FREE_ROOMS.includes(id)
+/**
+ * THE FIRST DAY IS DIFFERENT FOR EACH PATH (2026-11-02), because the paths are.
+ *
+ * Sam asked for the "why" to change the path again — a trip, a season, moving here — and a
+ * free set chosen for a visitor would put a padlock on a mover's very first room (the NIF)
+ * for the same reason the first cut padlocked the airport. So each path gets its own
+ * first day, picked the same way: the rooms you meet first, spread so every early unit can
+ * be started, and the emergency room always.
+ *
+ * FREE_ROOMS above stays the visitor's set — it is also what somebody with no purpose
+ * gets, and what the older checks and copy count.
+ */
+export const FREE_BY_PURPOSE: Record<'visiting' | 'staying' | 'moving', readonly string[]> = {
+  visiting: FREE_ROOMS,
+  staying: ['lisbon_checkin', 'lisbon_telemovel', 'lisbon_cafe', 'lisbon_padaria', 'lisbon_vizinho', 'lisbon_emergencia'],
+  moving: ['lisbon_nif', 'lisbon_telemovel', 'lisbon_visita', 'lisbon_cafe', 'lisbon_navegante', 'lisbon_emergencia'],
+}
+
+/**
+ * Whether a room (a Situation id) is in the free starter set for this learner's path.
+ * No purpose means the visitor's set, the same default the path itself uses.
+ */
+export function isFreeRoom(id: string, purpose: 'visiting' | 'staying' | 'moving' | null = null): boolean {
+  return FREE_BY_PURPOSE[purpose ?? 'visiting'].includes(id)
 }
 
 /** The survival kit, named so the promise is written down — see the note on FREE_ROOMS. */
@@ -184,8 +205,9 @@ export function hasFullAccess(access: {
 export function canOpenRoom(
   id: string,
   access: Parameters<typeof hasFullAccess>[0],
+  purpose: 'visiting' | 'staying' | 'moving' | null = null,
 ): boolean {
-  return isFreeRoom(id) || hasFullAccess(access)
+  return isFreeRoom(id, purpose) || hasFullAccess(access)
 }
 
 export const PRO_ENTITLEMENTS: Entitlements = {

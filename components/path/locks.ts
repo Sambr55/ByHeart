@@ -13,6 +13,10 @@ import { isFreeRoom } from '@/lib/entitlements'
 /** Where an UNLOCK goes. /pro is the existing "what the money is for" screen. */
 export const UNLOCK_HREF = '/pro'
 
-export function roomLock(id: string, member: boolean): 'open' | 'paid' {
-  return member || isFreeRoom(id) ? 'open' : 'paid'
+export function roomLock(
+  id: string,
+  member: boolean,
+  purpose: 'visiting' | 'staying' | 'moving' | null = null,
+): 'open' | 'paid' {
+  return member || isFreeRoom(id, purpose) ? 'open' : 'paid'
 }

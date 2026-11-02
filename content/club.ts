@@ -73,6 +73,16 @@ export const CLUB = {
     */
     body: 'Your trip is laid out in order: arriving, coffee and food, getting about, seeing the city, and what to say when it goes wrong.',
     /*
+      ONE PER PATH (2026-11-02), because the path now follows why you are here and a mover
+      told "your trip is laid out" has been told we were not listening. `body` above is the
+      trip's, and what somebody with no purpose sees.
+    */
+    body_by_purpose: {
+      visiting: 'Your trip is laid out in order: arriving, coffee and food, getting about, seeing the city, and what to say when it goes wrong.',
+      staying: 'Your season is laid out in order: settling in, the daily round, the same faces, going out, and what to say when it goes wrong.',
+      moving: 'Your move is laid out in order: the paperwork first, then a place to live, everyday life, getting about, health and family, and becoming local.',
+    },
+    /*
       "Front door to Lisboa", which is a bigger claim than "your way in".
 
       Sam's wording, and the Portuguese spelling of the city is deliberate: this is the

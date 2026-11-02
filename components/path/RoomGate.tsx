@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { useEntitlements } from '@/engine/useEntitlements'
+import { useLearner } from '@/engine/useLearner'
 import { canOpenRoom } from '@/lib/entitlements'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 
@@ -21,21 +22,22 @@ import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
  */
 export function RoomGate({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   const access = useEntitlements()
-  if (canOpenRoom(id, access) || access.comped) return <>{children}</>
+  const learner = useLearner()
+  if (canOpenRoom(id, access, learner.purpose ?? null) || access.comped) return <>{children}</>
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-5 bg-bg px-6 text-fg">
       <p className="eyebrow text-muted">Dub Club · Lisboa</p>
       <h1 className="display text-3xl">{title}</h1>
       <p className="leading-relaxed text-muted">
-        This room comes with DUB Pro. The first-day rooms — the airport, checking in, a coffee,
-        the bill, asking the way — and the survival kit are free.
+        This room comes with DUB Pro. The first day of your path, and the survival kit, are
+        free.
       </p>
       <div className="flex flex-wrap gap-3">
         <Link href="/pro" className="tap-target eyebrow inline-flex rounded-full bg-accent px-6 py-3 text-accent-ink">
           Unlock
         </Link>
         <Link href="/club" className="tap-target eyebrow inline-flex rounded-full border border-line px-6 py-3">
-          Back to the trip
+          Back to the path
         </Link>
       </div>
       <BottomNavSpace />
