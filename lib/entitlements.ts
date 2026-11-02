@@ -151,6 +151,15 @@ export const FREE_ROOMS: readonly string[] = [
     an ambulance" is not a feature to sell; it sits with the repair lines, which are free.
   */
   'lisbon_emergencia',
+  /*
+    AND THE SAVE (2026-11-02), for the same reason as the emergency room: it is survival,
+    not a product. "Desculpe, não percebo. Sou inglês." is the first room on every path —
+    see content/blocks/lisbon-save.ts — and a padlock on the sentence for when it goes
+    wrong would be a padlock on the floor of the building. Sam: "at the very least you can
+    say 'I am sorry I don't understand, I am English' in Portuguese." At the very least
+    means free.
+  */
+  'lisbon_save',
 ] as const
 
 /**
@@ -160,15 +169,16 @@ export const FREE_ROOMS: readonly string[] = [
  * free set chosen for a visitor would put a padlock on a mover's very first room (the NIF)
  * for the same reason the first cut padlocked the airport. So each path gets its own
  * first day, picked the same way: the rooms you meet first, spread so every early unit can
- * be started, and the emergency room always.
+ * be started, and the emergency room always — and, since 2026-11-02, the save always: it
+ * is the first room on all three paths.
  *
  * FREE_ROOMS above stays the visitor's set — it is also what somebody with no purpose
  * gets, and what the older checks and copy count.
  */
 export const FREE_BY_PURPOSE: Record<'visiting' | 'staying' | 'moving', readonly string[]> = {
   visiting: FREE_ROOMS,
-  staying: ['lisbon_checkin', 'lisbon_telemovel', 'lisbon_cafe', 'lisbon_padaria', 'lisbon_vizinho', 'lisbon_emergencia'],
-  moving: ['lisbon_nif', 'lisbon_telemovel', 'lisbon_visita', 'lisbon_cafe', 'lisbon_navegante', 'lisbon_emergencia'],
+  staying: ['lisbon_save', 'lisbon_checkin', 'lisbon_telemovel', 'lisbon_cafe', 'lisbon_padaria', 'lisbon_vizinho', 'lisbon_emergencia'],
+  moving: ['lisbon_save', 'lisbon_nif', 'lisbon_telemovel', 'lisbon_visita', 'lisbon_cafe', 'lisbon_navegante', 'lisbon_emergencia'],
 }
 
 /**

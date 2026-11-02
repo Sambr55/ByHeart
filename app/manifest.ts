@@ -55,5 +55,24 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: '/icon/mask', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
       { src: '/apple-icon', sizes: '180x180', type: 'image/png' },
     ],
+    /*
+      MY OPENING LINE, ONE LONG-PRESS FROM THE HOME SCREEN (Sam, 2026-11-02).
+
+      "I love the idea of an app rescue/reminder button. Perhaps so you can remind yourself
+      of your planned opening sentence as you walk into a situation, on your home screen."
+      The button is on the path home; this is the same card without opening the app first —
+      long-press the icon, tap the shortcut, and the next room's first line and the save are
+      on screen. Android and desktop Chrome honour shortcuts; iOS ignores the field, and
+      there the button on the home screen is the way in. See components/Opener.tsx.
+    */
+    shortcuts: [
+      {
+        name: 'My opening line',
+        short_name: 'Opening line',
+        description: 'The first line for the next place you walk into, and the save if it goes wrong.',
+        url: '/opener',
+        icons: [{ src: '/icon/tile', sizes: '512x512', type: 'image/png' }],
+      },
+    ],
   }
 }

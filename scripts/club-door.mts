@@ -205,8 +205,16 @@ console.log('\nthe card has no say in it\n')
 console.log('\nthe starter set\n')
 {
   const ids = new Set([...SITUATIONS, ...LISBON_VISITING_1].map((x) => x.id))
-  /* Five first-day rooms plus the emergency room, which belongs to the survival kit. */
-  ok('five first-day rooms and the emergency room are free', FREE_ROOMS.length === 6 && FREE_ROOMS.includes('lisbon_emergencia'), FREE_ROOMS.join(', '))
+  /*
+    Five first-day rooms plus the survival kit's two: the emergency room, and — since
+    2026-11-02 — the save, "Desculpe, não percebo. Sou inglês.", which is the first room on
+    every path. See content/blocks/lisbon-save.ts.
+  */
+  ok(
+    'five first-day rooms, the emergency room and the save are free',
+    FREE_ROOMS.length === 7 && FREE_ROOMS.includes('lisbon_emergencia') && FREE_ROOMS.includes('lisbon_save'),
+    FREE_ROOMS.join(', '),
+  )
   ok('the first unit of the path can be started free', FREE_ROOMS.includes('lisbon_aeroporto'))
   const missing = FREE_ROOMS.filter((id) => !ids.has(id))
   ok('every free room exists', missing.length === 0, missing.join(', ') || 'all found')

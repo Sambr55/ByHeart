@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
 import { MiniBuild } from '@/components/Journey'
 import { CopyButton } from '@/components/CopyButton'
+import { SayButton, useCanListen } from '@/components/SayButton'
 import { Wordmark } from '@/components/Wordmark'
 import { slugFor } from '@/content/audio-manifest'
 import { piecesIn, roomPieceIds } from '@/content/roots'
@@ -232,6 +233,7 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
     banking already happened on the tap that got here.
   */
   const [stage, setStage] = useState<'read' | 'cold' | 'said' | 'done'>('read')
+  const canListen = useCanListen()
 
   /*
     ONE PLACE THAT BANKS A ROOM, and it is what puts the Club on the ladder.
@@ -590,6 +592,23 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
               <CopyButton text={situation.release.answer} />
             </div>
             <p className="text-base leading-relaxed text-muted">{situation.release.ask}</p>
+            {/*
+              AND NOW OUT LOUD — the third of "listen, copy or say" (2026-11-02).
+
+              A room ended in tiles, so the one place a learner rehearses the sentence they
+              will actually walk in with was the one place the microphone never appeared,
+              and the understood tally on the home screen (Sam: "Count the times you were
+              understood, not your streak") could never be fed by a room. The button banks
+              nothing — the proof was recorded on the tap that got here — it only listens,
+              pings, and counts. Not drawn where the browser cannot listen, and neither is
+              the caption, for the reason SayButton gives.
+            */}
+            {canListen ? (
+              <div className="flex items-center gap-3 border-t border-line pt-4" data-testid="errand-say">
+                <SayButton want={situation.release.answer} />
+                <p className="text-sm leading-snug text-muted">Now say it out loud. If it lands, it counts.</p>
+              </div>
+            ) : null}
           </div>
           <div className="flex flex-col gap-3">
             {/*

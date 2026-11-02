@@ -141,3 +141,37 @@ export function dayStreak(
   }
   return { days: n, today }
 }
+
+/**
+ * THE UNDERSTOOD TALLY'S LITTLE MOMENTS (Sam, 2026-11-02).
+ *
+ * "Count the times you were understood, not your streak … the little wins of being
+ * understood are phenomenal and confidence boosting." The count itself is
+ * `understood` on the learner (engine/learner.ts); these are the totals worth a small
+ * celebration on the home screen. The first one most of all — it is the moment somebody
+ * finds out they can be understood at all.
+ *
+ * Deliberately sparse and deliberately not a ladder to the next one: nothing on screen
+ * says how far away 25 is. A target is pressure, and this is a tally of wins.
+ */
+export const UNDERSTOOD_MILESTONES = [1, 5, 10, 25, 50, 100] as const
+
+/**
+ * The milestone to celebrate, if any: the highest one reached that has not been marked.
+ * `marked` is the highest already celebrated on this device (0 for none). Null when there
+ * is nothing new — which is almost always, because these are rare on purpose.
+ */
+export function understoodMilestone(count: number, marked: number): number | null {
+  const reached = UNDERSTOOD_MILESTONES.filter((m) => count >= m && m > marked)
+  return reached.length ? reached[reached.length - 1] : null
+}
+
+/** What the moment says. Warm, short, and never about what is left to do. */
+export function understoodCheer(milestone: number): string {
+  if (milestone === 1) return 'Your first time understood. Out loud, in Portuguese — that is the whole thing.'
+  if (milestone === 5) return 'Five times understood. It is starting to sound like you.'
+  if (milestone === 10) return 'Ten times understood. Saying it out loud is a habit now.'
+  if (milestone === 25) return 'Twenty-five times understood. Out loud, every one.'
+  if (milestone === 50) return 'Fifty times understood. You are ready for the counter.'
+  return 'A hundred times understood. Lisbon is going to like you.'
+}

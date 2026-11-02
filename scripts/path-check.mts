@@ -9,7 +9,16 @@
 import { PATH_UNITS, PATHS, pathUnits } from '../content/path'
 import { FREE_BY_PURPOSE } from '../lib/entitlements'
 import { situationById } from '../content/situations'
-import { dayStreak, pathView, milestoneStars, type PathRecord } from '../components/path/progress'
+import {
+  dayStreak,
+  pathView,
+  milestoneStars,
+  understoodMilestone,
+  understoodCheer,
+  UNDERSTOOD_MILESTONES,
+  type PathRecord,
+} from '../components/path/progress'
+import { readFileSync } from 'node:fs'
 import { CHEATS } from '../content/cheats'
 
 const problems: string[] = []
@@ -64,8 +73,17 @@ console.log('\nthe path follows the reason given at set-up\n')
     console.log('    ' + resolved.length + ' units, ' + rids.length + ' rooms')
   }
   ok('no purpose gets the trip', pathUnits(undefined, undefined, null)[0].id === PATHS.visiting[0].id)
-  ok('moving starts with the paperwork', PATHS.moving[0].rooms[0] === 'lisbon_nif')
-  ok('the trip starts at the airport', PATHS.visiting[0].rooms[0] === 'lisbon_aeroporto')
+  /*
+    THE SAVE COMES FIRST, ON EVERY PATH (Sam, 2026-11-02): "at the very least you can say
+    'I am sorry I don't understand, I am English' in Portuguese." The argument each path
+    makes still starts straight after it — the NIF, the airport — so both are asserted.
+  */
+  for (const purpose of ['visiting', 'staying', 'moving'] as const) {
+    ok(purpose + ': the save is the first room of the first unit', PATHS[purpose][0].rooms[0] === 'lisbon_save', PATHS[purpose][0].rooms[0])
+    ok(purpose + ': and it is free', FREE_BY_PURPOSE[purpose].includes('lisbon_save'))
+  }
+  ok('moving starts with the paperwork, straight after the save', PATHS.moving[0].rooms[1] === 'lisbon_nif')
+  ok('the trip starts at the airport, straight after the save', PATHS.visiting[0].rooms[1] === 'lisbon_aeroporto')
 }
 
 console.log('\nprogress is read from the record, and order never locks\n')
@@ -87,6 +105,30 @@ const paid = pathView(empty, units, (id) => (id === ids[0] ? 'paid' : 'open'))
 ok('a paid room is skipped by next, not blocking it', paid.units[0].nodes[0].state === 'paid' && paid.next?.room.id === ids[1])
 const cheat = CHEATS.find((c) => c.id === 'quero_hack')!
 ok('stars count clean cheat lines', milestoneStars({ ...empty, proof: cheat.says.slice(0, 2).map((l) => ({ pt: l.pt, en: l.en, source: 'release' as const, clean: true, at: '' })) }, 'quero_hack') === 2)
+
+console.log('\nthe understood tally — little wins, never pressure\n')
+{
+  /*
+    Sam, 2026-11-02: "Count the times you were understood, not your streak … the little
+    wins of being understood are phenomenal and confidence boosting." The count lives on the
+    learner and only SayButton raises it; the moments are pure and checked here.
+  */
+  ok('nothing said, nothing to celebrate', understoodMilestone(0, 0) === null)
+  ok('the first one is celebrated', understoodMilestone(1, 0) === 1)
+  ok('and only once', understoodMilestone(1, 1) === null && understoodMilestone(3, 1) === null)
+  ok('five, ten, twenty-five, fifty, a hundred', [5, 10, 25, 50, 100].every((m) => understoodMilestone(m, m === 5 ? 1 : m === 10 ? 5 : m === 25 ? 10 : m === 50 ? 25 : 50) === m))
+  ok('jumping past two celebrates the higher one, once', understoodMilestone(12, 1) === 10)
+  ok('every milestone has its own words', new Set(UNDERSTOOD_MILESTONES.map(understoodCheer)).size === UNDERSTOOD_MILESTONES.length)
+  ok('no cheer counts down to the next one', UNDERSTOOD_MILESTONES.every((m) => !/\b(next|left|to go|until|more)\b/i.test(understoodCheer(m))))
+  const say = readFileSync('components/SayButton.tsx', 'utf8')
+  ok('SayButton counts a close result, once', (say.match(/recordUnderstood\(\)/g) ?? []).length === 1 && /if \(h\.close\) recordUnderstood\(\)/.test(say))
+  const home = readFileSync('components/path/PathHome.tsx', 'utf8')
+  ok('the tally has the header spot', /<UnderstoodChip count=\{understood\} \/>/.test(home))
+  ok('the streak is demoted, not deleted', /data-testid="streak"/.test(home) && !/<Streak /.test(home))
+  ok('the home screen opens the rescue card', /href="\/opener"/.test(home))
+  const manifest = readFileSync('app/manifest.ts', 'utf8')
+  ok('and the manifest has it as a shortcut', /shortcuts:[\s\S]*url: '\/opener'/.test(manifest))
+}
 
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)')

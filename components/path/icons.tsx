@@ -78,3 +78,26 @@ export function KindIcon({ kind, className = 'h-7 w-7' }: P & { kind: string }) 
     </svg>
   )
 }
+
+/**
+ * A speech bubble — the understood tally. Said out loud, and heard. Filled once there is
+ * at least one, the way the flame fills on a day that counts.
+ */
+export function SpeechIcon({ className = 'h-5 w-5', filled = false }: P & { filled?: boolean }) {
+  return (
+    <svg {...base} className={className} fill={filled ? 'currentColor' : 'none'} strokeWidth={1.8}>
+      <path d="M4 12.5C4 8.4 7.6 5 12 5s8 3.4 8 7.5S16.4 20 12 20c-1.2 0-2.4-.2-3.4-.7L4.5 20.5l1.2-3.4C4.6 15.8 4 14.2 4 12.5z" />
+    </svg>
+  )
+}
+
+/** A door ajar — "My opening line", the line for walking in. */
+export function DoorIcon({ className = 'h-5 w-5' }: P) {
+  return (
+    <svg {...base} className={className} strokeWidth={1.8}>
+      <path d="M4 21h16M6 21V4h9v17" />
+      <path d="M15 4l4 2v15" />
+      <path d="M12 12.5v.5" />
+    </svg>
+  )
+}

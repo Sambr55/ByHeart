@@ -18,6 +18,7 @@
 import type { ChapterId } from '@/content/chapters'
 import type { Extract, QaStatus, Rung } from '@/content/roots'
 import { LISBON_MOVING_1 } from '@/content/blocks/lisbon-moving-1'
+import { LISBON_SAVE } from '@/content/blocks/lisbon-save'
 import { LISBON_STAYING_1 } from '@/content/blocks/lisbon-staying-1'
 import { LISBON_VISITING_1 } from '@/content/blocks/lisbon-visiting-1'
 import { LISBON_VISITING_2 } from '@/content/blocks/lisbon-visiting-2'
@@ -156,6 +157,8 @@ export interface Situation {
  * a set with a shared look rather than ten cards commissioned separately.
  */
 export const SITUATIONS: Situation[] = [
+  /* The save first — it is the first room on every path. See content/blocks/lisbon-save.ts. */
+  ...LISBON_SAVE,
   ...LISBON_MOVING_1,
   ...LISBON_STAYING_1,
   ...LISBON_VISITING_1,

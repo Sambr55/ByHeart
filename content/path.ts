@@ -21,6 +21,15 @@
  * They share rooms freely — a coffee is a coffee — but the ORDER is the argument, and the
  * order is different for each.
  *
+ * EXCEPT THE FIRST ROOM, which is the same on all three (2026-11-02): lisbon_save, "When
+ * you don't understand". Sam: "at the very least you can say 'I am sorry I don't
+ * understand, I am English' in Portuguese." A trip, a season and a move all start with the
+ * same risk — the reply comes back and you reach for English, or for saying it louder — so
+ * every path opens with the four lines that keep you in the conversation. It sits inside
+ * unit 1 rather than as a unit of its own: one room is not a unit, and the airport, the
+ * check-in and the NIF are still where each path's argument begins. See
+ * content/blocks/lisbon-save.ts.
+ *
  * (The visitor's path, below, was the first and is described as it was written.)
  *
  * Owner: "make it more app like, like Duolingo or Simply Guitar." What those two have that
@@ -77,7 +86,7 @@ const VISITING_UNITS: PathUnit[] = [
       'Check in without switching to English',
       'Get a SIM and a signal',
     ],
-    rooms: ['lisbon_aeroporto', 'lisbon_checkin', 'lisbon_cartao_sim'],
+    rooms: ['lisbon_save', 'lisbon_aeroporto', 'lisbon_checkin', 'lisbon_cartao_sim'],
     milestone: {
       cheat: 'posso_hack',
       title: 'Posso …?',
@@ -172,7 +181,7 @@ const STAYING_UNITS: PathUnit[] = [
     title: 'Settling in',
     pt: 'Instalar-me',
     learn: ['Check in and get a local number', 'Get a travel pass for the weeks ahead', 'Order the coffee you will order every day'],
-    rooms: ['lisbon_checkin', 'lisbon_telemovel', 'lisbon_navegante', 'lisbon_cafe', 'lisbon_costume'],
+    rooms: ['lisbon_save', 'lisbon_checkin', 'lisbon_telemovel', 'lisbon_navegante', 'lisbon_cafe', 'lisbon_costume'],
     milestone: { cheat: 'posso_hack', title: 'Posso …?', blurb: 'Can I …? — the sentence that opens most of a new week.' },
   },
   {
@@ -226,7 +235,7 @@ const MOVING_UNITS: PathUnit[] = [
     title: 'The paperwork',
     pt: 'Os papéis',
     learn: ['Get your NIF, the number everything needs', 'Open a bank account and get a Portuguese number', 'Survive the Loja do Cidadão and the Junta'],
-    rooms: ['lisbon_nif', 'lisbon_telemovel', 'lisbon_banco', 'lisbon_loja_cidadao', 'lisbon_junta'],
+    rooms: ['lisbon_save', 'lisbon_nif', 'lisbon_telemovel', 'lisbon_banco', 'lisbon_loja_cidadao', 'lisbon_junta'],
     milestone: { cheat: 'tenho_de', title: 'Tenho de …', blurb: 'I have to … — the shape every counter conversation runs on.' },
   },
   {

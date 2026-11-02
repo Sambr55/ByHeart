@@ -575,6 +575,26 @@ export interface LearnerState {
    * SESSION DONE badge marks, and now what the Legend counts.
    */
   sittings: number
+  /**
+   * HOW MANY TIMES THEY WERE UNDERSTOOD — said a line out loud and the listener caught it.
+   *
+   * Sam, 2026-11-02: "Count the times you were understood, not your streak. A gentle tally
+   * of 'times you said it out loud' — the little wins of being understood are phenomenal
+   * and confidence boosting."
+   *
+   * Incremented in exactly one place, components/SayButton.tsx, on a result the listener
+   * marked close (engine/listen.ts) — which is every say-it control in the product: rooms,
+   * revision, the Legend, the feed. One press, one verdict, at most one count. Silence, a
+   * miss and a blocked microphone count nothing; nothing is ever taken away.
+   *
+   * A COUNT, NOT A LIST, because it is a tally and not a record. The sentences themselves
+   * are in `proof` already; this is the number on the home screen, and it only rises.
+   * Merged as the higher of the two copies, the rule `sittings` follows — see lib/merge.ts.
+   *
+   * Zero on every record written before this existed, which is the honest reading: nothing
+   * was counting, so nothing is claimed.
+   */
+  understood: number
   /** When the Club welcomed them. Fires once, ever. Earliest wins on a merge. */
   club_welcomed_at: string | null
   /**
@@ -828,6 +848,7 @@ export function emptyLearner(): LearnerState {
     cheats_used: [],
     sections_completed: [],
     sittings: 0,
+    understood: 0,
     club_welcomed_at: null,
     club_walked_at: null,
     mentor: null,
@@ -1071,6 +1092,11 @@ export function loadLearner(): LearnerState {
             typeof parsed.sittings === 'number'
               ? parsed.sittings
               : arr(parsed.sections_completed, []).length,
+          /* Zero, not guessed, on a record from before the tally — see `understood`. */
+          understood:
+            typeof parsed.understood === 'number' && parsed.understood > 0
+              ? Math.floor(parsed.understood)
+              : 0,
           club_welcomed_at: parsed.club_welcomed_at ?? null,
           /* Absent on every record written before the walk-through existed, and absent is
              the honest reading: they have not been shown the controls. A member already
@@ -1399,6 +1425,8 @@ export async function syncSession(reason: string): Promise<boolean> {
         roots_played: s.roots_played,
         sections_completed: s.sections_completed,
         sittings: s.sittings,
+        /* The tally travels like the sittings: a count of work done, merged as the max. */
+        understood: s.understood,
         club_welcomed_at: s.club_welcomed_at,
         club_walked_at: s.club_walked_at,
         /* Synced, because who is teaching you is not a fact about one handset. */
@@ -2547,6 +2575,20 @@ export function rememberSection(family: string) {
     */
     s.sittings = (s.sittings ?? 0) + 1
   })
+}
+
+/**
+ * One more time understood. Called by components/SayButton.tsx when the listener accepts
+ * a line as close — see the note on `understood` above. Returns the new total, so the
+ * caller could mark a milestone if it ever wants to; today the home screen does that.
+ */
+export function recordUnderstood(): number {
+  let n = 0
+  update((s) => {
+    s.understood = (s.understood ?? 0) + 1
+    n = s.understood
+  })
+  return n
 }
 
 /** The welcome fires once, ever, and the first time is the true time. */

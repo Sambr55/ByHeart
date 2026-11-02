@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { canListen, listenFor, type Heard } from '@/engine/listen'
 import { missed as missedSound, ping } from '@/engine/tap'
+import { recordUnderstood } from '@/engine/learner'
 
 /**
  * SAY IT — the third thing you can do with a Portuguese line.
@@ -170,6 +171,14 @@ export function SayButton({
               not the rejection sound.
             */
             else if (h.said) missedSound()
+            /*
+              AND IT COUNTS. Sam, 2026-11-02: "Count the times you were understood, not
+              your streak." Here, for the reason the ping is here: every say-it control
+              in the product is this button, so one place counts them all, once per
+              verdict, and no screen can forget to. The home screen shows the total —
+              see `understood` in engine/learner.ts and components/path/PathHome.tsx.
+            */
+            if (h.close) recordUnderstood()
             onHeard?.(h)
           }
           /*

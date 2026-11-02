@@ -334,6 +334,15 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
       way setUnion is it applied to a list.
     */
     sittings: Math.max(Number(l.sittings ?? 0), Number(r.sittings ?? 0)),
+    /*
+      THE UNDERSTOOD TALLY, by the same rule and for the same reason (2026-11-02).
+
+      A count of times somebody said a line out loud and was understood — see `understood`
+      in engine/learner.ts. It only rises, so the higher copy is the truer one. Not the SUM:
+      both copies count from the same history once they have synced, and adding them would
+      double every win the first time a second device signed in.
+    */
+    understood: Math.max(Number(l.understood ?? 0), Number(r.understood ?? 0)),
     osmosis_seen: setUnion(l.osmosis_seen, r.osmosis_seen),
     // A save is for the learner and has to survive a sync like anything else they made.
     saved: setUnion(l.saved, r.saved),
