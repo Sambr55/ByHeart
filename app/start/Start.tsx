@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { SetUp } from '@/components/SetUp'
 import { Wordmark } from '@/components/Wordmark'
+import { PathReveal } from '@/components/path/PathReveal'
 import { clubOpenFor } from '@/content/legend'
 import { loadLearner, welcomeToClub } from '@/engine/learner'
 
@@ -18,11 +19,14 @@ import { loadLearner, welcomeToClub } from '@/engine/learner'
  * The welcome is stamped here so the old ceremony (Club.tsx) never hijacks the way home:
  * the first room IS the welcome. The explainers' content belongs on the website.
  */
-export const FIRST_ROOM = 'lisbon_save'
+/* The first tile of Basics — hello, goodbye, thank you (2026-11-03). */
+export const FIRST_ROOM = 'lisbon_ola'
 
 export function Start() {
   const router = useRouter()
   const [ready, setReady] = useState(false)
+  /* After set-up and before the first room: the path, said back and shown (PathReveal). */
+  const [reveal, setReveal] = useState(false)
   useEffect(() => {
     /* Somebody already set up has nothing to answer: home. */
     if (clubOpenFor(loadLearner())) router.replace('/club')
@@ -30,12 +34,14 @@ export function Start() {
   }, [router])
 
   if (!ready) return <div className="min-h-svh bg-bg" aria-hidden />
+  if (reveal) return <PathReveal first={FIRST_ROOM} />
   return (
     <main data-testid="start" className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg px-5 pb-10 pt-6 text-fg">
       <SetUp
         onDone={() => {
           welcomeToClub()
-          router.replace('/errand/' + FIRST_ROOM + '?first=1')
+          setReveal(true)
+          window.scrollTo(0, 0)
         }}
       />
       <div className="mt-auto flex justify-center pt-8 opacity-60">

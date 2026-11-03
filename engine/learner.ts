@@ -572,12 +572,6 @@ export interface LearnerState {
    * shape with different verbs, which no string match could tell you.
    */
   cheats_used: string[]
-  /**
-   * START HERE, met (2026-11-03): the ids of the Start-here tiles somebody has opened and
-   * heard — content/start-here.ts. The level before Level 1 is done when they all are.
-   * Optional, so every record written before it reads as nothing met yet.
-   */
-  start_done?: string[]
   sections_completed: string[]
   /**
    * How many sittings this learner has done, in total, across every vibe.
@@ -859,7 +853,6 @@ export function emptyLearner(): LearnerState {
     card_levels: {},
     drops_done: [],
     cheats_used: [],
-    start_done: [],
     sections_completed: [],
     sittings: 0,
     understood: 0,
@@ -1094,7 +1087,6 @@ export function loadLearner(): LearnerState {
           card_levels: (parsed.card_levels as Record<string, string>) ?? {},
           drops_done: arr(parsed.drops_done, []),
           cheats_used: arr(parsed.cheats_used, []),
-          start_done: arr(parsed.start_done, []),
           sections_completed: arr(parsed.sections_completed, []),
           /*
             Back-filled from sections_completed for anybody who has one and no count.
@@ -2453,15 +2445,6 @@ export function markDropDone(id: string) {
  * way to un-use one: a thing you have done stays done, which is the same rule the rest of
  * the library follows.
  */
-/** A Start-here tile, met. Append-only, like everything else somebody has done. */
-export function markStartDone(id: string) {
-  update((s) => {
-    const done = s.start_done ?? []
-    if (done.includes(id)) return
-    s.start_done = [...done, id]
-  })
-}
-
 export function useCheat(id: string) {
   update((s) => {
     if (s.cheats_used.includes(id)) return

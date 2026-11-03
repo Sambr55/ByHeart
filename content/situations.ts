@@ -20,6 +20,8 @@ import type { ChapterId } from '@/content/chapters'
 import type { Extract, QaStatus, Rung } from '@/content/roots'
 import { LISBON_MOVING_1 } from '@/content/blocks/lisbon-moving-1'
 import { LISBON_SAVE } from '@/content/blocks/lisbon-save'
+import { LISBON_BASICS } from '@/content/blocks/lisbon-basics'
+import { LISBON_FUN } from '@/content/blocks/lisbon-fun'
 import { LISBON_STAYING_1 } from '@/content/blocks/lisbon-staying-1'
 import { LISBON_VISITING_1 } from '@/content/blocks/lisbon-visiting-1'
 import { LISBON_VISITING_2 } from '@/content/blocks/lisbon-visiting-2'
@@ -160,6 +162,9 @@ export interface Situation {
 export const SITUATIONS: Situation[] = withRoomImages([
   /* The save first — it is the first room on every path. See content/blocks/lisbon-save.ts. */
   ...LISBON_SAVE,
+  /* Basics and one fun tile per level (2026-11-03) — content/blocks/lisbon-basics.ts, lisbon-fun.ts. */
+  ...LISBON_BASICS,
+  ...LISBON_FUN,
   ...LISBON_MOVING_1,
   ...LISBON_STAYING_1,
   ...LISBON_VISITING_1,

@@ -1,18 +1,15 @@
 'use client'
 
-import { TripStep } from '@/components/TripStep'
-import Image from 'next/image'
+import { Booker } from '@/components/Booker'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { AVATARS, setAvatarFromFile, setAvatarFromPick } from '@/engine/avatar'
 import { chapterById } from '@/content/chapters'
-import { IMAGE_BANK } from '@/content/images'
 import { roomsFor } from '@/content/feed'
 import { CONSENT } from '@/content/consent'
 import { DOOR_CTA, EXPLAINER_CTA } from '@/content/explainers'
-import { PAIR_STEP, VISITING } from '@/content/front-door'
-import { Visiting } from '@/components/Destination'
+import { PAIR_STEP } from '@/content/front-door'
 import {
   acceptDeal,
   answerLegendFromLesson,
@@ -22,6 +19,7 @@ import {
   setDisplayName,
   rememberSetUp,
   syncSession,
+  getLearner,
 } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
 import { applyBookingFromUrl } from '@/engine/booking'
@@ -90,7 +88,7 @@ import { DEFAULT_PAIR } from '@/content/pairs'
   on the set-up card's face in the feed, so the why step here is only met by somebody who
   reached set-up another way (the journey at /vibes).
 */
-type Step = 'why' | 'trip' | 'who'
+type Step = 'why' | 'who'
 
 export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   const router = useRouter()
@@ -136,6 +134,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     this card should answer it the same way rather than invent a second habit.
   */
   const [mounted, setMounted] = useState(false)
+  const [skipWhy, setSkipWhy] = useState(false)
   useEffect(() => {
     /*
       AND THE BOOKING PASS-THROUGH (2026-11-02), for a link that lands on set-up directly:
@@ -144,6 +143,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
       does the same. Validated, and never over an answer — see engine/booking.ts.
     */
     applyBookingFromUrl()
+    setSkipWhy(Boolean(getLearner().profile?.goal))
     setMounted(true)
   }, [])
   /*
@@ -161,9 +161,13 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     the same order. Answered on the website (dates or who with arrived on the link), it is
     behind us too.
   */
-  const tripDone = Boolean(learner.profile?.here_said || learner.profile?.company)
-  const shown: Step =
-    step === 'why' && mounted && learner.profile?.goal ? (tripDone ? 'who' : 'trip') : step
+  /*
+    ANSWERED BEFORE THIS SCREEN OPENED — on the website, or on an earlier visit — skips the
+    booker. Read once at mount, not live: the booker writes the goal the moment "Find my
+    route" is pressed, and a live read swapped it for the name step before the plane had
+    left the ground (2026-11-03).
+  */
+  const shown: Step = step === 'why' && skipWhy ? 'who' : step
 
   /*
     ALREADY MEANS ASKED, not merely agreed.
@@ -437,59 +441,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         WHY only. The who step is a name field and a photo picker, and a header image over
         a form is a header image in the way of a form.
       */}
-      {shown === 'why' ? (
-        <div className="relative -mx-5 -mt-6 overflow-hidden on-dark">
-          <Image
-            src={IMAGE_BANK.intro_arrival.src}
-            alt={IMAGE_BANK.intro_arrival.alt}
-            width={896}
-            height={504}
-            sizes="(max-width: 448px) 100vw, 448px"
-            className="h-full w-full object-cover"
-            style={{ position: 'absolute', inset: 0 }}
-            priority
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0"
-            style={{
-              background:
-                'linear-gradient(to bottom, rgb(0 0 0 / 0.30) 0%, rgb(0 0 0 / 0.68) 100%)',
-            }}
-          />
-          <div
-            className="relative flex flex-col gap-3 px-5 py-6 text-white"
-            style={{ textShadow: '0 1px 12px rgb(0 0 0 / 0.5)' }}
-          >
-            <p className="eyebrow text-white/80">{VISITING.eyebrow}</p>
-            <h2 className="display text-balance text-2xl">{VISITING.headline(city)}</h2>
-            {/*
-              THE REASSURANCE IS GONE. Sam: "Remove the second para (there is no wrong
-              answer)."
-
-              "There is no wrong answer, and the last one is a real one" was defending a
-              question nobody is anxious about. Five plain options about why somebody is
-              going to Lisbon do not read as a test, and telling a person not to worry is
-              the surest way to suggest there is something to worry about. The body below
-              says what the answer DOES, which is the useful thing and the only thing that
-              earns its place on the one screen the product may not skip.
-
-              GOAL_QUESTION.askerLine still serves the same question inside the Club's own
-              asker (components/Journey.tsx), where it arrives mid-flow with no body under
-              it — so the string stays and this one screen stops using it.
-            */}
-            <p className="text-sm leading-relaxed text-white/85">{VISITING.body}</p>
-          </div>
-        </div>
-      ) : null}
-      {/*
-        The who step keeps the plain heading. Its header is a form, and the photograph
-        above belongs to the question that earns one — see the note on it.
-
-        The orphan's framing that used to sit here — "there is no wrong answer, and the
-        last one is a real one" — has moved onto the photograph with the rest of the why
-        step, where the question it belongs to is.
-      */}
+      {/* The photograph header that asked "Visiting Lisbon?" went with the card it headed (2026-11-03). */}
       {shown !== 'who' ? null : (
         <div className="flex flex-col gap-3">
           <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
@@ -510,8 +462,11 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         WHY, as one question with yes as the lead — see `Visiting` in Destination.tsx, which
         also sits on the set-up card's face. The 260ms settle and the testids moved with it.
       */}
-      {shown === 'why' ? <Visiting onDone={() => setStep('trip')} /> : null}
-      {shown === 'trip' ? <TripStep onDone={() => setStep('who')} /> : null}
+      {/*
+        THE BOOKER, not the "Visiting Lisbon?" card (Sam, 2026-11-03): why, when and who with
+        on one boarding pass — components/Booker.tsx. Answered on the website, it is skipped.
+      */}
+      {shown === 'why' ? <Booker onDone={() => setStep('who')} /> : null}
 
       {/*
         WHO. A name, and the only one of the three that is optional.
