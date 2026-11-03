@@ -7,7 +7,7 @@
  * rooms exist, so both can be proved here without a browser.
  */
 import { PATH_UNITS, PATHS, pathUnits } from '../content/path'
-import { FREE_BY_PURPOSE } from '../lib/entitlements'
+import { FREE_BY_PURPOSE, isFreeRoom } from '../lib/entitlements'
 import { situationById } from '../content/situations'
 import {
   dayStreak,
@@ -79,7 +79,7 @@ console.log('\nthe path follows the reason given at set-up\n')
     ok(purpose + ': no room twice', new Set(rids).size === rids.length)
     ok(purpose + ': every milestone is a real cheat', list.every((u) => CHEATS.some((c) => c.id === u.milestone.cheat)))
     const free = FREE_BY_PURPOSE[purpose]
-    ok(purpose + ': the very first room is free', free.includes(rids[0]), rids[0])
+    ok(purpose + ': the very first room is free', isFreeRoom(rids[0], purpose), rids[0])
     ok(purpose + ': every free room is on this path', free.every((id) => rids.includes(id)), free.filter((id) => !rids.includes(id)).join(', '))
     ok(purpose + ': the emergency room is free', free.includes('lisbon_emergencia'))
     console.log('    ' + resolved.length + ' units, ' + rids.length + ' rooms')
@@ -91,11 +91,16 @@ console.log('\nthe path follows the reason given at set-up\n')
     makes still starts straight after it — the NIF, the airport — so both are asserted.
   */
   for (const purpose of ['visiting', 'staying', 'moving'] as const) {
-    ok(purpose + ': the save is the first room of the first unit', PATHS[purpose][0].rooms[0] === 'lisbon_save', PATHS[purpose][0].rooms[0])
-    ok(purpose + ': and it is free', FREE_BY_PURPOSE[purpose].includes('lisbon_save'))
+    /* 2026-11-03: Basics first — hello, counting, the save, who you are, a hack — on every path. */
+    const b = PATHS[purpose][0]
+    ok(purpose + ': Basics is the first level, and hello is its first room', b.id === 'basics' && b.rooms[0] === 'lisbon_ola', b.rooms[0])
+    ok(purpose + ': the save is in Basics, and Who you are with it', b.rooms.includes('lisbon_save') && b.rooms.includes('lisbon_legend'))
+    ok(purpose + ': every room in Basics is free', b.rooms.every((id) => isFreeRoom(id, purpose)), b.rooms.filter((id) => !isFreeRoom(id, purpose)).join(', '))
+    ok(purpose + ': every later level ends on a free fun tile', PATHS[purpose].slice(1).every((u) => u.rooms[u.rooms.length - 1].startsWith('fun_') && isFreeRoom(u.rooms[u.rooms.length - 1], purpose)))
+    ok(purpose + ': the save appears once', PATHS[purpose].flatMap((u) => u.rooms).filter((id) => id === 'lisbon_save').length === 1)
   }
-  ok('moving starts with the paperwork, straight after the save', PATHS.moving[0].rooms[1] === 'lisbon_nif')
-  ok('the trip starts at the airport, straight after the save', PATHS.visiting[0].rooms[1] === 'lisbon_aeroporto')
+  ok('moving starts with the paperwork, straight after Basics', PATHS.moving[1].rooms[0] === 'lisbon_nif')
+  ok('the trip starts at the airport, straight after Basics', PATHS.visiting[1].rooms[0] === 'lisbon_aeroporto')
 }
 
 console.log('\nprogress is read from the record, and order never locks\n')

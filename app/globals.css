@@ -2425,3 +2425,70 @@ summary:focus-visible,
     animation: none;
   }
 }
+
+/*
+  THE BOOKER (components/Booker.tsx, 2026-11-03) — set-up as an airline search. A night-sky
+  ground, a boarding pass, a plane that idles at the start of its arc and flies it when the
+  route is booked, the trail drawing in behind it.
+*/
+.booker {
+  background:
+    radial-gradient(120% 60% at 80% 0%, rgba(31, 92, 143, 0.55), transparent 60%),
+    radial-gradient(90% 50% at 0% 100%, rgba(229, 176, 74, 0.12), transparent 60%),
+    #0f1f33;
+}
+.booker-plane {
+  offset-rotate: auto;
+  offset-distance: 0%;
+  animation: booker-idle 2.4s ease-in-out infinite;
+}
+.booker-plane.is-flying {
+  animation: booker-fly 1.8s cubic-bezier(0.55, 0.05, 0.3, 1) 0.4s forwards;
+}
+@keyframes booker-idle {
+  0%, 100% { offset-distance: 0%; translate: 0 0; }
+  50% { offset-distance: 2.5%; translate: 0 -1px; }
+}
+@keyframes booker-fly {
+  from { offset-distance: 0%; }
+  to { offset-distance: 100%; }
+}
+.booker-trail {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.booker-trail.is-flying {
+  animation: booker-trail 1.8s cubic-bezier(0.55, 0.05, 0.3, 1) 0.4s forwards;
+}
+@keyframes booker-trail {
+  to { stroke-dashoffset: 0; }
+}
+.booker-barcode {
+  background: repeating-linear-gradient(90deg, #fff 0 2px, transparent 2px 4px, #fff 4px 5px, transparent 5px 8px, #fff 8px 11px, transparent 11px 12px);
+  opacity: 0.8;
+}
+.booker-stamp {
+  animation: booker-stamp 0.35s cubic-bezier(0.2, 1.6, 0.4, 1) 1.9s both;
+  rotate: -8deg;
+}
+@keyframes booker-stamp {
+  from { opacity: 0; scale: 2.2; }
+  to { opacity: 1; scale: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .booker-plane, .booker-plane.is-flying { animation: none; offset-distance: 100%; }
+  .booker-trail.is-flying { animation: none; stroke-dashoffset: 0; }
+  .booker-stamp { animation-delay: 0s; animation-duration: 0.01s; }
+}
+
+/* The Your-path reveal (components/path/PathReveal.tsx): tiles drop into place, one after another. */
+.reveal-tile {
+  animation: reveal-tile 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+@keyframes reveal-tile {
+  from { opacity: 0; transform: translateY(-14px) rotate(-12deg) scale(0.8); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-tile { animation: none; }
+}

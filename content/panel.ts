@@ -80,6 +80,19 @@ export function panelArt(chapter: ChapterId | null | undefined, purpose: Purpose
  * not a style.
  */
 export const TILE_WORDS: Record<string, string> = {
+  /* Basics and the fun tiles (2026-11-03). */
+  lisbon_ola: 'Hello',
+  lisbon_numeros: '1–20',
+  lisbon_legend: 'You',
+  fun_cao_hack: '-ção',
+  fun_bluff_time: 'Buy time',
+  fun_bluff_react: 'React',
+  fun_piece_of_cake: 'Cake',
+  fun_hold_your_horses: 'Horses',
+  fun_bobs_your_uncle: 'Bob',
+  fun_the_penny_dropped: 'Penny',
+  fun_fl_m_posso_oferecer: 'A drink?',
+  fun_dd_wolf: 'Wolf',
   lisbon_aeroporto: 'Airport',
   lisbon_checkin: 'Check-in',
   lisbon_cartao_sim: 'SIM',

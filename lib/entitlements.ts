@@ -175,6 +175,19 @@ export const FREE_ROOMS: readonly string[] = [
  * FREE_ROOMS above stays the visitor's set — it is also what somebody with no purpose
  * gets, and what the older checks and copy count.
  */
+/**
+ * BASICS AND THE FUN TILES ARE FREE ON EVERY PATH (2026-11-03). Basics is the first level
+ * now, and a first level behind a padlock is the mistake FREE_ROOMS' own note describes; a
+ * fun tile is one per level and is the reason to keep going, so locking it would lock the
+ * fun. Listed by id rather than imported, so billing never reaches into the content tree.
+ */
+export const FREE_ALWAYS: readonly string[] = [
+  'lisbon_ola', 'lisbon_numeros', 'lisbon_legend',
+  'fun_cao_hack', 'fun_bluff_time', 'fun_bluff_react',
+  'fun_piece_of_cake', 'fun_hold_your_horses', 'fun_bobs_your_uncle', 'fun_the_penny_dropped',
+  'fun_fl_m_posso_oferecer', 'fun_dd_wolf',
+]
+
 export const FREE_BY_PURPOSE: Record<'visiting' | 'staying' | 'moving', readonly string[]> = {
   visiting: FREE_ROOMS,
   staying: ['lisbon_save', 'lisbon_checkin', 'lisbon_telemovel', 'lisbon_cafe', 'lisbon_padaria', 'lisbon_vizinho', 'lisbon_emergencia'],
@@ -186,7 +199,7 @@ export const FREE_BY_PURPOSE: Record<'visiting' | 'staying' | 'moving', readonly
  * No purpose means the visitor's set, the same default the path itself uses.
  */
 export function isFreeRoom(id: string, purpose: 'visiting' | 'staying' | 'moving' | null = null): boolean {
-  return FREE_BY_PURPOSE[purpose ?? 'visiting'].includes(id)
+  return FREE_ALWAYS.includes(id) || FREE_BY_PURPOSE[purpose ?? 'visiting'].includes(id)
 }
 
 /** The survival kit, named so the promise is written down — see the note on FREE_ROOMS. */

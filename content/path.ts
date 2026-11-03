@@ -285,12 +285,49 @@ const MOVING_UNITS: PathUnit[] = [
   },
 ]
 
+/**
+ * BASICS FIRST, AND ONE FUN TILE IN EVERY LEVEL (Sam, 2026-11-03: "basics first, 1–20,
+ * Hello, Goodbye and thank you, then arrive etc. … build your legend near the top … it
+ * should all be one flow … every section should have a fun section thrown in").
+ *
+ * Basics is the same first level on all three paths: hello and thank you, counting, the
+ * save (moved here from each path's first unit, so it is still on every path and still
+ * near the very start) and "Who you are", the door to the Legend — then a hack that hands
+ * over hundreds of words for free. Every later level gains one fun tile at its end:
+ * content/blocks/lisbon-fun.ts. Unit numbers move up by one, so Arrive is Level 2.
+ */
+export const BASICS_UNIT: PathUnit = {
+  id: 'basics',
+  n: 1,
+  title: 'Basics',
+  pt: 'O básico',
+  learn: ['Say hello, thank you and goodbye', 'Count to twenty', 'Say who you are'],
+  rooms: ['lisbon_ola', 'lisbon_numeros', 'lisbon_save', 'lisbon_legend', 'fun_cao_hack'],
+  milestone: {
+    cheat: 'nao_verb',
+    title: 'Não + verb',
+    blurb: 'Any sentence you can say, you can now un-say — said cold.',
+  },
+}
+
+function withBasics(units: PathUnit[], fun: string[]): PathUnit[] {
+  return [
+    BASICS_UNIT,
+    ...units.map((u, i) => ({
+      ...u,
+      n: u.n + 1,
+      rooms: [...u.rooms.filter((r) => r !== 'lisbon_save'), ...(fun[i] ? [fun[i]] : [])],
+    })),
+  ]
+}
+
 /** Every path, by the purpose that chooses it. */
 export const PATHS: Record<Purpose, PathUnit[]> = {
-  visiting: VISITING_UNITS,
-  staying: STAYING_UNITS,
-  moving: MOVING_UNITS,
+  visiting: withBasics(VISITING_UNITS, ['fun_bluff_time', 'fun_fl_m_posso_oferecer', 'fun_hold_your_horses', 'fun_dd_wolf', 'fun_bluff_react']),
+  staying: withBasics(STAYING_UNITS, ['fun_bluff_time', 'fun_piece_of_cake', 'fun_fl_m_posso_oferecer', 'fun_the_penny_dropped', 'fun_bluff_react']),
+  moving: withBasics(MOVING_UNITS, ['fun_bluff_time', 'fun_bobs_your_uncle', 'fun_dd_wolf', 'fun_hold_your_horses', 'fun_bluff_react', 'fun_fl_m_posso_oferecer']),
 }
+
 
 /** What each path is called where the learner can see it. */
 export const PATH_NAMES: Record<Purpose, { title: string; short: string; pt: string; done: string }> = {

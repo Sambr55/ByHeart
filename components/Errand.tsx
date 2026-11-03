@@ -219,7 +219,13 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
   useEffect(() => {
     const from = new URLSearchParams(window.location.search).get('from')
     if (from === 'yours') setBack('/profile')
-  }, [])
+    /*
+      WHO YOU ARE OPENS ONTO YOUR LEGEND (Sam, 2026-11-03: "put build your legend near the
+      top of the flow"). The room teaches the shape with somebody else's name; the Legend is
+      where it becomes yours, so that is where finishing it goes.
+    */
+    else if (situation.id === 'lisbon_legend') setBack('/legend')
+  }, [situation.id])
   /*
     A FOURTH STAGE, because I SAID IT walked straight out of the door.
 
@@ -582,7 +588,7 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
               }}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
             >
-              {nextRoom ? 'GOT IT — ' + nextRoom.title.toUpperCase() : 'GOT IT'}
+              {nextRoom ? 'GOT IT — ' + nextRoom.title.toUpperCase() : back === '/legend' ? 'GOT IT — NOW MAKE IT YOURS' : 'GOT IT'}
             </button>
             <button
               type="button"

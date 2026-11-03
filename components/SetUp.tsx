@@ -1,18 +1,15 @@
 'use client'
 
-import { TripStep } from '@/components/TripStep'
-import Image from 'next/image'
+import { Booker } from '@/components/Booker'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { AVATARS, setAvatarFromFile, setAvatarFromPick } from '@/engine/avatar'
 import { chapterById } from '@/content/chapters'
-import { IMAGE_BANK } from '@/content/images'
 import { roomsFor } from '@/content/feed'
 import { CONSENT } from '@/content/consent'
 import { DOOR_CTA, EXPLAINER_CTA } from '@/content/explainers'
-import { PAIR_STEP, VISITING } from '@/content/front-door'
-import { Visiting } from '@/components/Destination'
+import { PAIR_STEP } from '@/content/front-door'
 import {
   acceptDeal,
   answerLegendFromLesson,
@@ -22,6 +19,7 @@ import {
   setDisplayName,
   rememberSetUp,
   syncSession,
+  getLearner,
 } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
 import { applyBookingFromUrl } from '@/engine/booking'
@@ -90,7 +88,7 @@ import { DEFAULT_PAIR } from '@/content/pairs'
   on the set-up card's face in the feed, so the why step here is only met by somebody who
   reached set-up another way (the journey at /vibes).
 */
-type Step = 'why' | 'trip' | 'who'
+type Step = 'why' | 'who'
 
 export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   const router = useRouter()
@@ -136,6 +134,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     this card should answer it the same way rather than invent a second habit.
   */
   const [mounted, setMounted] = useState(false)
+  const [skipWhy, setSkipWhy] = useState(false)
   useEffect(() => {
     /*
       AND THE BOOKING PASS-THROUGH (2026-11-02), for a link that lands on set-up directly:
@@ -144,6 +143,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
       does the same. Validated, and never over an answer — see engine/booking.ts.
     */
     applyBookingFromUrl()
+    setSkipWhy(Boolean(getLearner().profile?.goal))
     setMounted(true)
   }, [])
   /*
@@ -161,9 +161,13 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     the same order. Answered on the website (dates or who with arrived on the link), it is
     behind us too.
   */
-  const tripDone = Boolean(learner.profile?.here_said || learner.profile?.company)
-  const shown: Step =
-    step === 'why' && mounted && learner.profile?.goal ? (tripDone ? 'who' : 'trip') : step
+  /*
+    ANSWERED BEFORE THIS SCREEN OPENED — on the website, or on an earlier visit — skips the
+    booker. Read once at mount, not live: the booker writes the goal the moment "Find my
+    route" is pressed, and a live read swapped it for the name step before the plane had
+    left the ground (2026-11-03).
+  */
+  const shown: Step = step === 'why' && skipWhy ? 'who' : step
 
   /*
     ALREADY MEANS ASKED, not merely agreed.
@@ -437,69 +441,8 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         WHY only. The who step is a name field and a photo picker, and a header image over
         a form is a header image in the way of a form.
       */}
-      {shown === 'why' ? (
-        <div className="relative -mx-5 -mt-6 overflow-hidden on-dark">
-          <Image
-            src={IMAGE_BANK.intro_arrival.src}
-            alt={IMAGE_BANK.intro_arrival.alt}
-            width={896}
-            height={504}
-            sizes="(max-width: 448px) 100vw, 448px"
-            className="h-full w-full object-cover"
-            style={{ position: 'absolute', inset: 0 }}
-            priority
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0"
-            style={{
-              background:
-                'linear-gradient(to bottom, rgb(0 0 0 / 0.30) 0%, rgb(0 0 0 / 0.68) 100%)',
-            }}
-          />
-          <div
-            className="relative flex flex-col gap-3 px-5 py-6 text-white"
-            style={{ textShadow: '0 1px 12px rgb(0 0 0 / 0.5)' }}
-          >
-            <p className="eyebrow text-white/80">{VISITING.eyebrow}</p>
-            <h2 className="display text-balance text-2xl">{VISITING.headline(city)}</h2>
-            {/*
-              THE REASSURANCE IS GONE. Sam: "Remove the second para (there is no wrong
-              answer)."
-
-              "There is no wrong answer, and the last one is a real one" was defending a
-              question nobody is anxious about. Five plain options about why somebody is
-              going to Lisbon do not read as a test, and telling a person not to worry is
-              the surest way to suggest there is something to worry about. The body below
-              says what the answer DOES, which is the useful thing and the only thing that
-              earns its place on the one screen the product may not skip.
-
-              GOAL_QUESTION.askerLine still serves the same question inside the Club's own
-              asker (components/Journey.tsx), where it arrives mid-flow with no body under
-              it — so the string stays and this one screen stops using it.
-            */}
-            <p className="text-sm leading-relaxed text-white/85">{VISITING.body}</p>
-          </div>
-        </div>
-      ) : null}
-      {/*
-        The who step keeps the plain heading. Its header is a form, and the photograph
-        above belongs to the question that earns one — see the note on it.
-
-        The orphan's framing that used to sit here — "there is no wrong answer, and the
-        last one is a real one" — has moved onto the photograph with the rest of the why
-        step, where the question it belongs to is.
-      */}
-      {shown !== 'who' ? null : (
-        <div className="flex flex-col gap-3">
-          <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
-          <h2 className="display text-balance text-2xl">And what do they call you?</h2>
-          <p className="text-sm leading-relaxed text-muted">
-            The first thing you will say in Portuguese is your own name. This is the answer
-            to it. A photo or a picture if you want one.
-          </p>
-        </div>
-      )}
+      {/* The photograph header that asked "Visiting Lisbon?" went with the card it headed (2026-11-03). */}
+      {/* The who step's header now lives on its own check-in card below (2026-11-03). */}
 
       {/*
         WHY. The three, described by what they contain rather than by how long somebody is
@@ -510,8 +453,11 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         WHY, as one question with yes as the lead — see `Visiting` in Destination.tsx, which
         also sits on the set-up card's face. The 260ms settle and the testids moved with it.
       */}
-      {shown === 'why' ? <Visiting onDone={() => setStep('trip')} /> : null}
-      {shown === 'trip' ? <TripStep onDone={() => setStep('who')} /> : null}
+      {/*
+        THE BOOKER, not the "Visiting Lisbon?" card (Sam, 2026-11-03): why, when and who with
+        on one boarding pass — components/Booker.tsx. Answered on the website, it is skipped.
+      */}
+      {shown === 'why' ? <Booker onDone={() => setStep('who')} /> : null}
 
       {/*
         WHO. A name, and the only one of the three that is optional.
@@ -522,8 +468,24 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         restructure exists to remove.
       */}
       {shown === 'who' ? (
-        <>
-          <div className="flex items-center gap-3">
+        /*
+          CHECK-IN, AFTER THE BOOKER (Sam, 2026-11-03: "this screen looks really old hat now,
+          let's elevate its design so it follows on naturally from the booking screen"). The
+          same night ground and the same pass: the route they just booked rides along at the
+          top, the name is the passenger name, the picture is the passport photo, and the
+          consent is the last thing on the card before boarding. Consent is unchanged in
+          substance — an unticked box only the learner's tap can tick — just set in the pass.
+        */
+        <div data-testid="checkin" className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 pt-8 text-white">
+          <p className="eyebrow text-white/60">DUB · Check-in</p>
+          <h1 className="display mt-2 text-3xl leading-tight">Passenger details</h1>
+          <p className="mt-2 text-sm text-white/70">
+            The first thing you will say in Portuguese is your own name. Tell us what to call you.
+          </p>
+          <div className="mt-6 overflow-hidden rounded-3xl bg-[#fbf8f2] text-[#14243a] shadow-[0_30px_60px_-30px_rgba(0,0,0,0.8)]">
+            <RouteStrip />
+            <div className="flex flex-col gap-5 px-5 pb-6 pt-5">
+          <div className="flex items-end gap-4">
             {/*
               The photograph, and it never leaves this phone.
 
@@ -537,14 +499,15 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
               phone. That is the honest trade for not holding somebody's face.
             */}
             <label
-              className="tap-target relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-line bg-bg-elev"
+              className="tap-target relative h-24 w-20 shrink-0 overflow-hidden rounded-xl border-2 border-dashed border-[#14243a]/25 bg-white"
               aria-label="Add a photo"
             >
               {photo ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={photo} alt="" className="h-full w-full object-cover" />
               ) : (
-                <span className="flex h-full w-full items-center justify-center text-xs text-muted">
+                <span className="eyebrow flex h-full w-full flex-col items-center justify-center gap-1 text-center text-[0.6rem] text-[#14243a]/50">
+                  <span aria-hidden className="text-lg leading-none">+</span>
                   PHOTO
                 </span>
               )}
@@ -607,8 +570,9 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                 the one on the card — and "what shall we call you" is the only phrasing
                 that says so.
               */
-              placeholder="What shall we call you?"
-              className="tap-target min-w-0 flex-1 rounded border border-line bg-bg-elev px-4 py-3 text-base text-fg placeholder:text-muted"
+              placeholder="Your first name"
+              aria-label="Passenger name — what shall we call you?"
+              className="tap-target display min-w-0 flex-1 border-0 border-b-2 border-[#14243a]/20 bg-transparent px-0 pb-2 pt-6 text-2xl text-[#14243a] placeholder:text-[#14243a]/30 focus:border-[#1f5c8f] focus:outline-none"
             />
           </div>
           {/*
@@ -633,8 +597,8 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             immediately above it, which is what it is.
           */}
           <div className="flex flex-col gap-3">
-            <p className="eyebrow text-muted">OR PICK ONE</p>
-            <ul data-testid="setup-avatars" className="flex flex-wrap gap-3">
+            <p className="eyebrow text-[0.6rem] text-[#14243a]/50">No photo? Pick a mark</p>
+            <ul data-testid="setup-avatars" className="flex flex-wrap gap-2">
               {AVATARS.map((a) => (
                 <li key={a.id}>
                   <button
@@ -644,8 +608,8 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                     aria-pressed={photo === a.svg}
                     onClick={() => setPhoto(setAvatarFromPick(a.id))}
                     className={
-                      'tap-target h-12 w-12 overflow-hidden rounded-full border-2 transition ' +
-                      (photo === a.svg ? 'border-accent' : 'border-line')
+                      'tap-target h-11 w-11 overflow-hidden rounded-full border-2 transition ' +
+                      (photo === a.svg ? 'border-[#1f5c8f] ring-2 ring-[#1f5c8f]/30' : 'border-transparent')
                     }
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -662,7 +626,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             honest answer to it is to skip. A reason to say yes belongs in the same breath
             as the reason not to worry.
           */}
-          <p className="text-xs leading-relaxed text-muted">
+          <p className="text-xs leading-relaxed text-[#14243a]/55">
             The picture is optional and stays on this phone. It will be useful when you
             start sharing with friends.
           </p>
@@ -682,8 +646,14 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             the profile and the Legend on delete rather than orphaning them, and
             app/api/account/export already returns the lot. See content/consent.ts.
           */}
-          <div className="flex flex-col gap-3 rounded border border-line bg-bg-elev p-4">
-            <p className="eyebrow text-accent">{CONSENT.eyebrow}</p>
+          </div>
+          <div className="relative flex items-center" aria-hidden="true">
+            <span className="absolute -left-3 h-6 w-6 rounded-full bg-[#0f1f33]" />
+            <span className="mx-4 h-px flex-1 border-t-2 border-dashed border-[#14243a]/15" />
+            <span className="absolute -right-3 h-6 w-6 rounded-full bg-[#0f1f33]" />
+          </div>
+          <div className="flex flex-col gap-3 px-5 pb-6 pt-4">
+            <p className="eyebrow text-[0.6rem] text-[#14243a]/50">{CONSENT.eyebrow}</p>
             <p className="text-sm font-semibold">{CONSENT.headline}</p>
             {/*
               THE FIRST SENTENCE, AND THE REST BEHIND THE TAP.
@@ -762,21 +732,22 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                   /* Only clears the complaint if it was the LAST thing outstanding. */
                   if (e.target.checked && named) setNudge(false)
                 }}
-                className="mt-1 h-5 w-5 shrink-0 accent-accent"
+                className="mt-0.5 h-5 w-5 shrink-0 accent-[#1f5c8f]"
               />
-              <span className="text-xs leading-relaxed">{CONSENT.tick}</span>
+              <span className="text-sm font-semibold leading-snug">{CONSENT.tick}</span>
             </label>
           </div>
           {/*
             SAID ONLY AFTER A REFUSED PRESS. A message that appears before anybody has done
             anything wrong is an error message about nothing.
           */}
+          </div>
           {nudge && !ready ? (
             <p
               id="consent-wait"
               data-testid="consent-nudge"
               role="status"
-              className="animate-bank text-xs text-accent"
+              className="animate-bank mt-4 text-center text-sm text-[#e5b04a]"
             >
               {/* Which one is missing, rather than a single message for two faults. */}
               {!named && !agreed
@@ -863,16 +834,53 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
               else router.push('/club')
             }}
             className={
-              'tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink transition-opacity ' +
+              'tap-target eyebrow mt-6 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#e5b04a] px-5 py-4 text-base text-[#14243a] shadow-[0_6px_0_0_rgba(0,0,0,0.35)] transition active:translate-y-[4px] active:shadow-none ' +
               /* Dimmed, not disabled: it still takes the press and says what is missing. */
               (ready ? '' : 'opacity-50')
             }
           >
-            THAT IS ME
+            Board · that is me
           </button>
-        </>
+        </div>
       ) : null}
 
+    </div>
+  )
+}
+
+/**
+ * The route just booked, riding along at the top of the check-in card, so the second
+ * screen reads as the same journey as the first: EN ✈ LIS, and what the booker heard.
+ */
+const REASON_SHORT: Record<string, string> = {
+  trip: 'A trip',
+  someone: 'Someone I love',
+  moving: 'Moving there',
+  work: 'Work',
+  curious: 'Just because',
+}
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+function RouteStrip() {
+  const learner = useLearner()
+  const p = learner.profile
+  const d = (iso: string) => {
+    const x = new Date(iso + 'T12:00:00Z')
+    return x.getUTCDate() + ' ' + MONTHS_SHORT[x.getUTCMonth()]
+  }
+  const bits = [
+    p?.goal ? REASON_SHORT[p.goal] : null,
+    p?.here_from ? d(p.here_from) + (p.here_to ? ' – ' + d(p.here_to) : '') : null,
+  ].filter(Boolean)
+  return (
+    <div data-testid="checkin-route" className="flex items-center justify-between gap-3 bg-[#14243a] px-5 py-3 text-white">
+      <span className="flex items-center gap-2">
+        <span className="display text-xl leading-none">EN</span>
+        <svg viewBox="-16 -11 31 22" className="h-4 w-6 text-[#e5b04a]" aria-hidden="true">
+          <path d="M14 0 Q13 -1.6 10 -1.6 L2 -1.6 L-5 -10 L-8.5 -10 L-3 -1.6 L-10 -1.6 L-13 -5.5 L-15.5 -5.5 L-14 -1 L-14 1 L-15.5 5.5 L-13 5.5 L-10 1.6 L-3 1.6 L-8.5 10 L-5 10 L2 1.6 L10 1.6 Q13 1.6 14 0 Z" fill="currentColor" />
+        </svg>
+        <span className="display text-xl leading-none text-[#9cc6ea]">LIS</span>
+      </span>
+      <span className="truncate text-right text-xs text-white/70">{bits.join(' · ') || 'Lisboa'}</span>
     </div>
   )
 }
