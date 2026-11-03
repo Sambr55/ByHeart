@@ -3,7 +3,7 @@
 import { SayButton, useCanListen } from '@/components/SayButton'
 import { bandFor, missedWords, type Heard } from '@/engine/listen'
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CRATES, PIECES, ROOTS, ROOTS_BY_FAMILY } from '@/content/roots'
 import { DOORWAY, LEGEND_CARD, LEGEND_COPY, LEGEND_FRAMES, LEGEND_PARTS, askFor, frameReady, nameFor, cardDone, cardFor, doorwayRoots, doorwayToGo, fillEnglish, fillFrame, frameApplies, frameForPurpose, frameFor, isAnswered, legendStatus, parseChildren, metIn, clubOpenFor,
   provenanceOf, knownValues, readableFrame, type Child, type LegendFrame, type LegendSlot } from '@/content/legend'
@@ -25,6 +25,7 @@ import {
   clearRough,
   markRough,
   recordProof,
+  rememberFinishedCard,
 } from '@/engine/learner'
 import { wordsIn } from '@/content/numbers'
 import { useLearner } from '@/engine/useLearner'
@@ -50,6 +51,8 @@ export function Legend() {
   /* Signed in on another surface? Pull it back. See useRestore. */
   useRestore()
   const [mode, setMode] = useState<Mode>('deck')
+  /* ?next=1 — the path's Who you are tile — asks for the first unanswered question once the record is read. */
+  const wantNext = useRef(false)
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     setMounted(true)
@@ -72,6 +75,7 @@ export function Legend() {
     */
     const build = q.get('build')
     if (build && LEGEND_FRAMES.some((f) => f.id === build)) setMode({ build })
+    if (q.get('next') === '1') wantNext.current = true
   }, [])
 
   const owned = useMemo(
@@ -230,6 +234,25 @@ export function Legend() {
   const onCard = answers.filter(
     (a) => Object.keys(a.values).length > 0 && myCard.some((f) => f.id === a.frame_id),
   )
+  /*
+    ?next=1 opens the first question still unanswered; with nothing left it stays on this
+    page, which says the card is written.
+  */
+  useEffect(() => {
+    if (!mounted || !wantNext.current) return
+    wantNext.current = false
+    if (cardOpen.length) setMode({ build: cardOpen[0].id })
+  }, [mounted, cardOpen])
+  /*
+    WHO YOU ARE IS LAID when the two questions it stands for — your name, where you are
+    from — are on the card (2026-11-03). Idempotent; it never comes back off.
+  */
+  const whoDone = ['name', 'origin'].every((id) =>
+    answers.some((a) => a.frame_id === id && Object.keys(a.values).length > 0),
+  )
+  useEffect(() => {
+    if (mounted && whoDone) rememberFinishedCard('lisbon_legend')
+  }, [mounted, whoDone])
   /*
     THIS LEARNER'S FRAMES, NOT EVERY FRAME THERE IS.
 
@@ -598,7 +621,7 @@ export function Legend() {
           sentence that reconciles them, so the one remaining sitting reads as the last
           step of something rather than as a door that moved.
         */}
-        {mounted && !cardOpen.length && !doorStatus.open ? (
+        {mounted && !cardOpen.length && !doorStatus.open && !clubOpenFor(learner) ? (
           <p data-testid="card-full-road-left" className="text-xs leading-relaxed text-accent">
             Your card is written. {doorStatus.toGo === 1 ? 'One more basics step' : doorStatus.toGo + ' more basics steps'}{' '}
             and the words behind it are yours too — then your Legend opens.
@@ -639,20 +662,18 @@ export function Legend() {
         <button
           type="button"
           data-testid="legend-find-missing"
-          onClick={() => {
-            const el = document.querySelector('[data-testid="legend-card-' + cardOpen[0].id + '"]')
-            if (!el) return
-            /* The same courtesy the city selector takes — see components/Choose.tsx. */
-            const still =
-              typeof window !== 'undefined' &&
-              window.matchMedia('(prefers-reduced-motion: reduce)').matches
-            el.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'center' })
-          }}
+          /*
+            OPENS THE QUESTION rather than scrolling to it (2026-11-03). The list it scrolled
+            to left this page on 2026-10-03 ("Legend Practise is the run and nothing else")
+            and the button kept looking for it — Sam: "the button doesn't click anywhere".
+          */
+          onClick={() => setMode({ build: cardOpen[0].id })}
           className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
         >
-          {cardOpen.length === 1
-            ? 'FIND YOUR MISSING QUESTION'
-            : 'FIND YOUR ' + cardOpen.length + ' MISSING QUESTIONS'}
+          {'Next: ' + cardOpen[0].ask_en}
+          <span className="mt-1 block text-[0.65rem] opacity-75">
+            {cardOpen.length === 1 ? 'The last question on your card' : cardOpen.length + ' questions left on your card'}
+          </span>
         </button>
       ) : null}
 
