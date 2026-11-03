@@ -442,16 +442,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         a form is a header image in the way of a form.
       */}
       {/* The photograph header that asked "Visiting Lisbon?" went with the card it headed (2026-11-03). */}
-      {shown !== 'who' ? null : (
-        <div className="flex flex-col gap-3">
-          <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
-          <h2 className="display text-balance text-2xl">And what do they call you?</h2>
-          <p className="text-sm leading-relaxed text-muted">
-            The first thing you will say in Portuguese is your own name. This is the answer
-            to it. A photo or a picture if you want one.
-          </p>
-        </div>
-      )}
+      {/* The who step's header now lives on its own check-in card below (2026-11-03). */}
 
       {/*
         WHY. The three, described by what they contain rather than by how long somebody is
@@ -477,8 +468,24 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         restructure exists to remove.
       */}
       {shown === 'who' ? (
-        <>
-          <div className="flex items-center gap-3">
+        /*
+          CHECK-IN, AFTER THE BOOKER (Sam, 2026-11-03: "this screen looks really old hat now,
+          let's elevate its design so it follows on naturally from the booking screen"). The
+          same night ground and the same pass: the route they just booked rides along at the
+          top, the name is the passenger name, the picture is the passport photo, and the
+          consent is the last thing on the card before boarding. Consent is unchanged in
+          substance — an unticked box only the learner's tap can tick — just set in the pass.
+        */
+        <div data-testid="checkin" className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 pt-8 text-white">
+          <p className="eyebrow text-white/60">DUB · Check-in</p>
+          <h1 className="display mt-2 text-3xl leading-tight">Passenger details</h1>
+          <p className="mt-2 text-sm text-white/70">
+            The first thing you will say in Portuguese is your own name. Tell us what to call you.
+          </p>
+          <div className="mt-6 overflow-hidden rounded-3xl bg-[#fbf8f2] text-[#14243a] shadow-[0_30px_60px_-30px_rgba(0,0,0,0.8)]">
+            <RouteStrip />
+            <div className="flex flex-col gap-5 px-5 pb-6 pt-5">
+          <div className="flex items-end gap-4">
             {/*
               The photograph, and it never leaves this phone.
 
@@ -492,14 +499,15 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
               phone. That is the honest trade for not holding somebody's face.
             */}
             <label
-              className="tap-target relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-line bg-bg-elev"
+              className="tap-target relative h-24 w-20 shrink-0 overflow-hidden rounded-xl border-2 border-dashed border-[#14243a]/25 bg-white"
               aria-label="Add a photo"
             >
               {photo ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={photo} alt="" className="h-full w-full object-cover" />
               ) : (
-                <span className="flex h-full w-full items-center justify-center text-xs text-muted">
+                <span className="eyebrow flex h-full w-full flex-col items-center justify-center gap-1 text-center text-[0.6rem] text-[#14243a]/50">
+                  <span aria-hidden className="text-lg leading-none">+</span>
                   PHOTO
                 </span>
               )}
@@ -562,8 +570,9 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                 the one on the card — and "what shall we call you" is the only phrasing
                 that says so.
               */
-              placeholder="What shall we call you?"
-              className="tap-target min-w-0 flex-1 rounded border border-line bg-bg-elev px-4 py-3 text-base text-fg placeholder:text-muted"
+              placeholder="Your first name"
+              aria-label="Passenger name — what shall we call you?"
+              className="tap-target display min-w-0 flex-1 border-0 border-b-2 border-[#14243a]/20 bg-transparent px-0 pb-2 pt-6 text-2xl text-[#14243a] placeholder:text-[#14243a]/30 focus:border-[#1f5c8f] focus:outline-none"
             />
           </div>
           {/*
@@ -588,8 +597,8 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             immediately above it, which is what it is.
           */}
           <div className="flex flex-col gap-3">
-            <p className="eyebrow text-muted">OR PICK ONE</p>
-            <ul data-testid="setup-avatars" className="flex flex-wrap gap-3">
+            <p className="eyebrow text-[0.6rem] text-[#14243a]/50">No photo? Pick a mark</p>
+            <ul data-testid="setup-avatars" className="flex flex-wrap gap-2">
               {AVATARS.map((a) => (
                 <li key={a.id}>
                   <button
@@ -599,8 +608,8 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                     aria-pressed={photo === a.svg}
                     onClick={() => setPhoto(setAvatarFromPick(a.id))}
                     className={
-                      'tap-target h-12 w-12 overflow-hidden rounded-full border-2 transition ' +
-                      (photo === a.svg ? 'border-accent' : 'border-line')
+                      'tap-target h-11 w-11 overflow-hidden rounded-full border-2 transition ' +
+                      (photo === a.svg ? 'border-[#1f5c8f] ring-2 ring-[#1f5c8f]/30' : 'border-transparent')
                     }
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -617,7 +626,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             honest answer to it is to skip. A reason to say yes belongs in the same breath
             as the reason not to worry.
           */}
-          <p className="text-xs leading-relaxed text-muted">
+          <p className="text-xs leading-relaxed text-[#14243a]/55">
             The picture is optional and stays on this phone. It will be useful when you
             start sharing with friends.
           </p>
@@ -637,8 +646,14 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
             the profile and the Legend on delete rather than orphaning them, and
             app/api/account/export already returns the lot. See content/consent.ts.
           */}
-          <div className="flex flex-col gap-3 rounded border border-line bg-bg-elev p-4">
-            <p className="eyebrow text-accent">{CONSENT.eyebrow}</p>
+          </div>
+          <div className="relative flex items-center" aria-hidden="true">
+            <span className="absolute -left-3 h-6 w-6 rounded-full bg-[#0f1f33]" />
+            <span className="mx-4 h-px flex-1 border-t-2 border-dashed border-[#14243a]/15" />
+            <span className="absolute -right-3 h-6 w-6 rounded-full bg-[#0f1f33]" />
+          </div>
+          <div className="flex flex-col gap-3 px-5 pb-6 pt-4">
+            <p className="eyebrow text-[0.6rem] text-[#14243a]/50">{CONSENT.eyebrow}</p>
             <p className="text-sm font-semibold">{CONSENT.headline}</p>
             {/*
               THE FIRST SENTENCE, AND THE REST BEHIND THE TAP.
@@ -717,21 +732,22 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                   /* Only clears the complaint if it was the LAST thing outstanding. */
                   if (e.target.checked && named) setNudge(false)
                 }}
-                className="mt-1 h-5 w-5 shrink-0 accent-accent"
+                className="mt-0.5 h-5 w-5 shrink-0 accent-[#1f5c8f]"
               />
-              <span className="text-xs leading-relaxed">{CONSENT.tick}</span>
+              <span className="text-sm font-semibold leading-snug">{CONSENT.tick}</span>
             </label>
           </div>
           {/*
             SAID ONLY AFTER A REFUSED PRESS. A message that appears before anybody has done
             anything wrong is an error message about nothing.
           */}
+          </div>
           {nudge && !ready ? (
             <p
               id="consent-wait"
               data-testid="consent-nudge"
               role="status"
-              className="animate-bank text-xs text-accent"
+              className="animate-bank mt-4 text-center text-sm text-[#e5b04a]"
             >
               {/* Which one is missing, rather than a single message for two faults. */}
               {!named && !agreed
@@ -818,16 +834,53 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
               else router.push('/club')
             }}
             className={
-              'tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink transition-opacity ' +
+              'tap-target eyebrow mt-6 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#e5b04a] px-5 py-4 text-base text-[#14243a] shadow-[0_6px_0_0_rgba(0,0,0,0.35)] transition active:translate-y-[4px] active:shadow-none ' +
               /* Dimmed, not disabled: it still takes the press and says what is missing. */
               (ready ? '' : 'opacity-50')
             }
           >
-            THAT IS ME
+            Board · that is me
           </button>
-        </>
+        </div>
       ) : null}
 
+    </div>
+  )
+}
+
+/**
+ * The route just booked, riding along at the top of the check-in card, so the second
+ * screen reads as the same journey as the first: EN ✈ LIS, and what the booker heard.
+ */
+const REASON_SHORT: Record<string, string> = {
+  trip: 'A trip',
+  someone: 'Someone I love',
+  moving: 'Moving there',
+  work: 'Work',
+  curious: 'Just because',
+}
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+function RouteStrip() {
+  const learner = useLearner()
+  const p = learner.profile
+  const d = (iso: string) => {
+    const x = new Date(iso + 'T12:00:00Z')
+    return x.getUTCDate() + ' ' + MONTHS_SHORT[x.getUTCMonth()]
+  }
+  const bits = [
+    p?.goal ? REASON_SHORT[p.goal] : null,
+    p?.here_from ? d(p.here_from) + (p.here_to ? ' – ' + d(p.here_to) : '') : null,
+  ].filter(Boolean)
+  return (
+    <div data-testid="checkin-route" className="flex items-center justify-between gap-3 bg-[#14243a] px-5 py-3 text-white">
+      <span className="flex items-center gap-2">
+        <span className="display text-xl leading-none">EN</span>
+        <svg viewBox="-16 -11 31 22" className="h-4 w-6 text-[#e5b04a]" aria-hidden="true">
+          <path d="M14 0 Q13 -1.6 10 -1.6 L2 -1.6 L-5 -10 L-8.5 -10 L-3 -1.6 L-10 -1.6 L-13 -5.5 L-15.5 -5.5 L-14 -1 L-14 1 L-15.5 5.5 L-13 5.5 L-10 1.6 L-3 1.6 L-8.5 10 L-5 10 L2 1.6 L10 1.6 Q13 1.6 14 0 Z" fill="currentColor" />
+        </svg>
+        <span className="display text-xl leading-none text-[#9cc6ea]">LIS</span>
+      </span>
+      <span className="truncate text-right text-xs text-white/70">{bits.join(' · ') || 'Lisboa'}</span>
     </div>
   )
 }

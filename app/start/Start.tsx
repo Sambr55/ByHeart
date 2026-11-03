@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { SetUp } from '@/components/SetUp'
-import { Wordmark } from '@/components/Wordmark'
 import { PathReveal } from '@/components/path/PathReveal'
 import { clubOpenFor } from '@/content/legend'
 import { loadLearner, welcomeToClub } from '@/engine/learner'
@@ -36,7 +35,7 @@ export function Start() {
   if (!ready) return <div className="min-h-svh bg-bg" aria-hidden />
   if (reveal) return <PathReveal first={FIRST_ROOM} />
   return (
-    <main data-testid="start" className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg px-5 pb-10 pt-6 text-fg">
+    <main data-testid="start" className="booker mx-auto flex min-h-svh w-full max-w-md flex-col px-5 pt-6 text-fg">
       <SetUp
         onDone={() => {
           welcomeToClub()
@@ -44,9 +43,6 @@ export function Start() {
           window.scrollTo(0, 0)
         }}
       />
-      <div className="mt-auto flex justify-center pt-8 opacity-60">
-        <Wordmark className="h-5" />
-      </div>
     </main>
   )
 }
