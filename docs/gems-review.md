@@ -1,6 +1,6 @@
 # Gems to vet — Lisbon, like a local
 
-Drafted from research on 2026-11-03. **Nothing here is live** until it is checked: production shows only gems with `verified: true` in `content/gems.ts`; preview builds show the drafts (gold pins, a DRAFT note on each card).
+Drafted from research on 2026-11-03; 26 accepted the same day, 4 held back. **Only verified gems are live** until it is checked: production shows only gems with `verified: true` in `content/gems.ts`; preview builds show the drafts (gold pins, a DRAFT note on each card).
 
 For each one: is it still open, is it a place locals actually go, is the line natural European Portuguese, and is the tip right? Then set `verified: true` — or tell Claude which to change or drop.
 
@@ -18,7 +18,7 @@ Up the hill from Alfama: viewpoints locals actually use, and the 28 rattling pas
 - **Room:** `lisbon_tasca`
 - **Unconfirmed:** Hours from Time Out; no 2025–26 confirmation.
 - **Sources:** https://www.timeout.pt/lisboa/pt/restaurantes/piteu-da-graca · https://culinarybackstreets.com/?p=18721
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### A Tasca do Jaime — venue
 
@@ -30,7 +30,7 @@ Up the hill from Alfama: viewpoints locals actually use, and the 28 rattling pas
 - **Room:** `lisbon_fado`
 - **Unconfirmed:** Fado schedule differs between sources; no listing dated 2025–26.
 - **Sources:** https://www.timeout.pt/lisboa/pt/restaurantes/tasca-do-jaime · https://lifecooler.com/artigo/atividades/tasca-do-jaime/411829 · https://devourtours.com/blog/free-fado-lisbon/
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Damas — bar
 
@@ -42,7 +42,7 @@ Up the hill from Alfama: viewpoints locals actually use, and the 28 rattling pas
 - **Room:** `lisbon_bilhetes`
 - **Unconfirmed:** Current hours and prices not confirmed.
 - **Sources:** https://www.timeout.pt/lisboa/pt/noite/damas · https://www.viralagenda.com/pt/p/DAMASLISBOA
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Micro Padaria — bakery
 
@@ -54,7 +54,7 @@ Up the hill from Alfama: viewpoints locals actually use, and the 28 rattling pas
 - **Room:** `lisbon_padaria`
 - **Unconfirmed:** Coordinates are the street segment; no 2025–26 review or confirmed hours; on the Graça/Arroios edge.
 - **Sources:** https://www.timeout.pt/lisboa/pt/noticias/micro-padaria-pao-de-fermentacao-lenta-na-graca-em-meia-duzia-de-metros-quadrados-020318 · https://www.timeout.com/lisbon/restaurants/micro-padaria
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Jardim da Cerca da Graça — miradouro
 
@@ -66,7 +66,7 @@ Up the hill from Alfama: viewpoints locals actually use, and the 28 rattling pas
 - **Room:** `lisbon_foto`
 - **Unconfirmed:** Kiosk operator and hours for 2025–26 not confirmed; coordinates are the garden.
 - **Sources:** https://www.timeout.pt/lisboa/pt/atraccoes/jardim-da-cerca-da-graca-1 · https://www.timeout.pt/lisboa/pt/restaurantes/quiosque-popular
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ## Mouraria & Intendente
 
@@ -82,7 +82,7 @@ Where fado was born and half the world now cooks; the most mixed square mile in 
 - **Room:** `lisbon_mesa`
 - **Unconfirmed:** Hours and card payment conflict between sources.
 - **Sources:** https://www.timeout.pt/lisboa/pt/restaurantes/ze-dos-cornos · https://www.2foodtrippers.com/ze-dos-cornos-lisbon/
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Cantinho do Aziz — tasca
 
@@ -94,7 +94,7 @@ Where fado was born and half the world now cooks; the most mixed square mile in 
 - **Room:** `lisbon_tasca`
 - **Unconfirmed:** Hours conflict, including Sunday.
 - **Sources:** https://www.timeout.pt/lisboa/pt/restaurantes/cantinho-do-aziz · https://www.timeout.com/lisbon/restaurants/cantinho-do-aziz
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### A Vida Portuguesa (Intendente) — shop
 
@@ -106,7 +106,7 @@ Where fado was born and half the world now cooks; the most mixed square mile in 
 - **Room:** `lisbon_conta`
 - **Unconfirmed:** A small chain, though this is its flagship.
 - **Sources:** https://www.avidaportuguesa.com/en/stores/intendente · https://www.timeout.pt/lisboa/pt/compras/a-vida-portuguesa
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Associação Renovar a Mouraria — workshop
 
@@ -118,7 +118,7 @@ Where fado was born and half the world now cooks; the most mixed square mile in 
 - **Room:** `lisbon_aulas`
 - **Unconfirmed:** Door number 8 or 10; timetable and whether visitors can join not confirmed.
 - **Sources:** https://spottedbylocals.com/lisbon/renovar-a-mouraria · https://www.rtp.pt/noticias/pais/associacao-renovar-a-mouraria-aponta-pouca-oferta-de-aulas-de-portugues-para-imigrantes_a1659587
-- [ ] verified
+- [ ] verified — held back: Door number 8 or 10; timetable and whether visitors can join not confirmed.
 
 ### Maria da Mouraria — venue
 
@@ -130,7 +130,7 @@ Where fado was born and half the world now cooks; the most mixed square mile in 
 - **Room:** `lisbon_fado`
 - **Unconfirmed:** Current hours and prices not confirmed.
 - **Sources:** https://www.timeout.com/lisbon/restaurants/maria-da-mouraria · https://theportugalnews.com/news/2022-10-20/the-mystery-of-maria-severa/71332
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ## Alfama
 
@@ -146,7 +146,7 @@ Away from the castle queue: stairways, washing lines, and neighbours who talk ac
 - **Room:** `lisbon_fado`
 - **Unconfirmed:** Schedule and minimum spend from undated guides; no 2025–26 confirmation.
 - **Sources:** https://theeuropeanbarguide.com/tag/wine/ · https://cdn.fodors.com/world/europe/portugal/lisbon/neighborhoods/alfama/things-to-do/nightlife
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Pateo 13 — tasca
 
@@ -158,7 +158,7 @@ Away from the castle queue: stairways, washing lines, and neighbours who talk ac
 - **Room:** `lisbon_mesa`
 - **Unconfirmed:** Hours conflict; may be seasonal or quieter in winter.
 - **Sources:** https://www.timeout.pt/lisboa/pt/restaurantes/pateo-13 · https://lisboasecreta.co/en/grilled-sardines-in-lisbon-en/
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Miradouro de Santo Estêvão — miradouro
 
@@ -170,7 +170,7 @@ Away from the castle queue: stairways, washing lines, and neighbours who talk ac
 - **Room:** `lisbon_perdido`
 - **Unconfirmed:** nothing flagged
 - **Sources:** https://getlisbon.com/discovering/discreet-viewpoints-lisbon/ · https://www.portugalvisitor.com/lisbon-churches/igreja-de-santo-estevao
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Grupo Sportivo Adicense — other
 
@@ -182,7 +182,7 @@ Away from the castle queue: stairways, washing lines, and neighbours who talk ac
 - **Room:** `lisbon_ola`
 - **Unconfirmed:** Coordinates approximate (not in OSM); current fado schedule not confirmed.
 - **Sources:** https://www.viralagenda.com/pt/p/202933367172182 · https://www.timeout.pt/lisboa/pt/coisas-para-fazer/arraial-do-adicense
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Fábrica do Pastel de Feijão — bakery
 
@@ -194,7 +194,7 @@ Away from the castle queue: stairways, washing lines, and neighbours who talk ac
 - **Room:** `lisbon_padaria`
 - **Unconfirmed:** Newest source on the shop itself is 2019; not confirmed open in 2025–26.
 - **Sources:** https://www.timeout.pt/lisboa/pt/blog/aqui-o-feijao-e-rei-060917 · https://saltofportugal.com/2025/08/25/the-bean-pastries-of-torres-vedras/
-- [ ] verified
+- [ ] verified — held back: Newest source on the shop itself is 2019; not confirmed open in 2025–26.
 
 ## Campo de Ourique
 
@@ -210,7 +210,7 @@ A village inside the city: a market hall, the last stop of the 28, and nobody in
 - **Room:** `lisbon_mercado`
 - **Unconfirmed:** Fresh-stall hours vary by source (about Mon–Sat 7:00–14:00); food-court hours run late.
 - **Sources:** https://www.openstreetmap.org/search?query=Mercado%20de%20Campo%20de%20Ourique · https://observador.pt/especiais/gastronomicos-e-culturais-serao-assim-os-mercados-futuro/ · https://doeatbetterexperience.com/blog/mercado-de-campo-de-ourique/
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Pastelaria Aloma — bakery
 
@@ -222,7 +222,7 @@ A village inside the city: a market hall, the last stop of the 28, and nobody in
 - **Room:** `lisbon_padaria`
 - **Unconfirmed:** Opening hours vary by source; number of contest wins varies.
 - **Sources:** https://www.timeout.pt/lisboa/pt/restaurantes/pastelaria-aloma · https://www.spottedbylocals.com/lisbon/pastelaria-aloma · https://lojascomhistoria.pt/shops/pastelaria-aloma
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Imperial de Campo de Ourique — tasca
 
@@ -234,7 +234,7 @@ A village inside the city: a market hall, the last stop of the 28, and nobody in
 - **Room:** `lisbon_tasca`
 - **Unconfirmed:** No 2025–26 confirmation it is still open; newest review found is 2021. Host's name (Sr. João) not confirmed recently.
 - **Sources:** https://www.timeout.pt/lisboa/pt/restaurantes/imperial-de-campo-de-ourique · https://observador.pt/2021/07/28/uma-oportunidade-ou-traz-pouco-a-nivel-pratico-o-que-dizem-os-quatro-restaurantes-que-sao-novas-lojas-com-historia/ · https://www.openstreetmap.org/search?query=Imperial%20de%20Campo%20de%20Ourique
-- [ ] verified
+- [ ] verified — held back: No 2025–26 confirmation it is still open; newest review found is 2021. Host's name (Sr. João) not confirmed recently.
 
 ### Garrafeira Campo de Ourique — shop
 
@@ -246,7 +246,7 @@ A village inside the city: a market hall, the last stop of the 28, and nobody in
 - **Room:** `lisbon_supermercado`
 - **Unconfirmed:** No dated 2025–26 review; hours vary by source.
 - **Sources:** https://www.timeout.pt/lisboa/pt/compras/garrafeira-de-campo-de-ourique · https://lifecooler.com/artigo/comer/garrafeira-campo-de-ourique/408334 · https://www.openstreetmap.org/search?query=Garrafeira%20Campo%20de%20Ourique
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Casa Fernando Pessoa — other
 
@@ -258,7 +258,7 @@ A village inside the city: a market hall, the last stop of the 28, and nobody in
 - **Room:** `lisbon_bilhetes`
 - **Unconfirmed:** Library closed for works 1 Jul 2025 – 2 Jan 2026; reopening not confirmed.
 - **Sources:** https://www.timeout.pt/lisboa/pt/atraccoes/casa-fernando-pessoa · https://www.casafernandopessoa.pt/en/cfp/news-publications/noticias/library-casa-fernando-pessoa-temporary-closure
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ## Arroios & Anjos
 
@@ -274,7 +274,7 @@ The neighbourhood with the most nationalities in Portugal, and the cafés to mat
 - **Room:** `lisbon_talho`
 - **Unconfirmed:** Hours not confirmed; current stall list not seen.
 - **Sources:** https://www.timeout.pt/lisboa/pt/noticias/com-pequenos-grandes-criadores-e-produtores-faz-se-o-mercado-da-primavera-em-arroios-031426 · https://www.trienaldelisboa.com/ohl/en/espaco/mercado-de-arroios/
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Adega do Domingos — tasca
 
@@ -286,7 +286,7 @@ The neighbourhood with the most nationalities in Portugal, and the cafés to mat
 - **Room:** `lisbon_mesa`
 - **Unconfirmed:** Street number and hours from OSM only.
 - **Sources:** https://www.nit.pt/comida/restaurantes/a-tasca-de-arroios-com-francesinhas-e-doses-para-farta-brutos · https://www.openstreetmap.org/search?query=Adega%20do%20Domingos%20Lisboa
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Salão Pais — other
 
@@ -298,7 +298,7 @@ The neighbourhood with the most nationalities in Portugal, and the cafés to mat
 - **Room:** `lisbon_cabeleireiro`
 - **Unconfirmed:** Prices unknown; Saturday hours look like a listing typo.
 - **Sources:** https://www.timeout.pt/lisboa/pt/saude-e-beleza/salao-pais · https://www.timeout.pt/lisboa/pt/coisas-para-fazer/do-pilates-a-ceramica-as-melhores-coisas-para-fazer-no-anjos
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Tijolo — workshop
 
@@ -310,7 +310,7 @@ The neighbourhood with the most nationalities in Portugal, and the cafés to mat
 - **Room:** `lisbon_aulas`
 - **Unconfirmed:** Coordinates are the street segment, not the exact door; class prices unknown.
 - **Sources:** https://www.timeout.pt/lisboa/pt/coisas-para-fazer/tijolo · https://www.timeout.pt/lisboa/pt/coisas-para-fazer/do-pilates-a-ceramica-as-melhores-coisas-para-fazer-no-anjos
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Casa Independente — venue
 
@@ -322,7 +322,7 @@ The neighbourhood with the most nationalities in Portugal, and the cafés to mat
 - **Room:** `lisbon_ola`
 - **Unconfirmed:** Closes for good at the end of December 2026 (Time Out, RTP) — drop it then. No fully dated 2025–26 confirmation; back garden not confirmed in sources; hours/entry may be out of date.
 - **Sources:** https://ma.to/venue/casa_independente · https://inyourpocket.com/casa-independente_164575v · https://www.timeout.pt/lisboa/pt/musica/os-melhores-sitios-para-ouvir-musica-em-lisboa
-- [ ] verified
+- [ ] verified — held back: Closes for good at the end of December 2026 (Time Out, RTP) — drop it then. No fully dated 2025–26 confirmation; back garden not confirmed in sources; hours/entry may be out of date.
 
 ## Marvila & Beato
 
@@ -338,7 +338,7 @@ Old warehouses by the river turned breweries, galleries and studios — Lisbon�
 - **Room:** `lisbon_conta`
 - **Unconfirmed:** Monday opening conflicts between sources.
 - **Sources:** https://doiscorvos.pt/-/visit/taproom-marvila · https://www.timeout.pt/lisboa/pt/noticias/dois-corvos-celebra-dez-anos-com-festa-em-marvila-091025 · https://mesprestiges.com/en/lisboa/places/dois-corvos-marvila
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Fábrica Braço de Prata — venue
 
@@ -350,7 +350,7 @@ Old warehouses by the river turned breweries, galleries and studios — Lisbon�
 - **Room:** `lisbon_bilhetes`
 - **Unconfirmed:** Regular opening days not confirmed; bookshop rooms not confirmed in 2025 sources.
 - **Sources:** https://www.timeout.pt/lisboa/pt/noticias/fabrica-do-braco-de-prata-celebra-18-anos-com-noite-de-musica-e-resistencia-061325 · https://dnbrasil.dn.pt/feira-brasileira-da-fabrica-braco-de-prata-tera-edicao-especial-nordeste/ · https://ma.to/event/africa-day-sound-system-24-may-2026
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Galeria Underdogs — other
 
@@ -362,7 +362,7 @@ Old warehouses by the river turned breweries, galleries and studios — Lisbon�
 - **Room:** `lisbon_foto`
 - **Unconfirmed:** Current exhibition not confirmed.
 - **Sources:** https://mesprestiges.com/en/lisboa/places/underdogs-gallery · https://www.timeout.pt/lisboa/pt/noticias/de-galeria-a-estudio-underdogs-recebe-cinco-artistas-em-residencias-abertas-ao-publico-041526
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Biblioteca de Marvila — other
 
@@ -374,7 +374,7 @@ Old warehouses by the river turned breweries, galleries and studios — Lisbon�
 - **Room:** `lisbon_perdido`
 - **Unconfirmed:** Hours conflict between sources (changed Sept 2025); no street number.
 - **Sources:** https://blx.cm-lisboa.pt/wp-content/uploads/2025/11/Aniversario_9ANOS_BM_programa_digital_27nov2025.pdf · https://www.timeout.pt/lisboa/pt/atraccoes/biblioteca-de-marvila
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)
 
 ### Varanda do Vale Formoso — tasca
 
@@ -386,4 +386,4 @@ Old warehouses by the river turned breweries, galleries and studios — Lisbon�
 - **Room:** `lisbon_tasca`
 - **Unconfirmed:** No dated 2025–26 review; snail season from general knowledge.
 - **Sources:** https://www.timeout.pt/lisboa/pt/restaurantes/varanda-do-vale-formoso · https://www.tasteoflisboa.com/blog/marvila-travel-guide-for-food-and-art-lovers/
-- [ ] verified
+- [x] verified (accepted by Sam, 2026-11-03)

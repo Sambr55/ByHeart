@@ -572,6 +572,12 @@ export interface LearnerState {
    * shape with different verbs, which no string match could tell you.
    */
   cheats_used: string[]
+  /**
+   * LANGUAGE WALKS, stop by stop (2026-11-03): "<walk id>:<stop index>" for every stop
+   * whose line the learner said there, in the street. Optional — older records read as
+   * no walks walked. content/walks.ts.
+   */
+  walk_stops?: string[]
   sections_completed: string[]
   /**
    * How many sittings this learner has done, in total, across every vibe.
@@ -853,6 +859,7 @@ export function emptyLearner(): LearnerState {
     card_levels: {},
     drops_done: [],
     cheats_used: [],
+    walk_stops: [],
     sections_completed: [],
     sittings: 0,
     understood: 0,
@@ -1087,6 +1094,7 @@ export function loadLearner(): LearnerState {
           card_levels: (parsed.card_levels as Record<string, string>) ?? {},
           drops_done: arr(parsed.drops_done, []),
           cheats_used: arr(parsed.cheats_used, []),
+          walk_stops: arr(parsed.walk_stops, []),
           sections_completed: arr(parsed.sections_completed, []),
           /*
             Back-filled from sections_completed for anybody who has one and no count.
@@ -2445,6 +2453,15 @@ export function markDropDone(id: string) {
  * way to un-use one: a thing you have done stays done, which is the same rule the rest of
  * the library follows.
  */
+/** A walk's stop, said in the street. Append-only. */
+export function markWalkStop(key: string) {
+  update((s) => {
+    const done = s.walk_stops ?? []
+    if (done.includes(key)) return
+    s.walk_stops = [...done, key]
+  })
+}
+
 export function useCheat(id: string) {
   update((s) => {
     if (s.cheats_used.includes(id)) return

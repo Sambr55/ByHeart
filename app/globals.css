@@ -2510,3 +2510,12 @@ summary:focus-visible,
   display: block; width: 18px; height: 18px; border-radius: 50%;
   background: #2f7ae5; border: 3px solid #fff; box-shadow: 0 0 0 6px rgba(47,122,229,0.25);
 }
+
+/* Walk pins (components/city/WalkMap.tsx). */
+.walk-pin {
+  display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;
+  border-radius: 50%; background: #fff; color: #1f5c8f; border: 3px solid #1f5c8f;
+  font: 700 13px/1 var(--font-sans, system-ui); box-shadow: 0 6px 12px -6px rgba(0,0,0,0.6);
+}
+.walk-pin.is-on { background: #1f5c8f; color: #fff; font-size: 16px; }
+.walk-pin.is-said { background: #c9973b; border-color: #c9973b; color: #1a2430; }

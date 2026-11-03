@@ -7,6 +7,7 @@
  */
 import { BAIRROS, GEMS, distanceM, gemsNear, visibleGems } from '../content/gems'
 import { situationById } from '../content/situations'
+import { WALKS, walkView, walkProgress } from '../content/walks'
 
 const problems: string[] = []
 const ok = (name: string, pass: boolean, detail = '') => {
@@ -34,6 +35,20 @@ ok('off production, drafts are visible for review', draftsShown)
 if (GEMS.length) {
   const g = GEMS[0]
   ok('a gem is near itself', gemsNear([g.lat, g.lng], 1, 50, GEMS)[0]?.id === g.id)
+}
+
+console.log('\nlanguage walks\n')
+ok('walk ids are unique', new Set(WALKS.map((w) => w.id)).size === WALKS.length)
+for (const w of WALKS) {
+  ok(w.id + ': every stop names a gem that exists', w.stops.every((s) => GEMS.some((g) => g.id === s.gem)), w.stops.filter((s) => !GEMS.some((g) => g.id === s.gem)).map((s) => s.gem).join(', '))
+  ok(w.id + ': every stop is in the walk’s own bairro', w.stops.every((s) => GEMS.find((g) => g.id === s.gem)?.bairro === w.bairro))
+  ok(w.id + ': no stop twice', new Set(w.stops.map((s) => s.gem)).size === w.stops.length)
+  const v = walkView(w, GEMS.filter((g) => g.verified))
+  ok(w.id + ': walkable on verified gems alone (3+ stops)', Boolean(v), String(v?.stops.length ?? 0))
+  if (v) {
+    ok(w.id + ': under 4 km stop to stop', v.metres < 4000, Math.round(v.metres) + ' m')
+    ok(w.id + ': progress counts said stops', walkProgress(v, [v.stops[0].key]).done === 1 && !walkProgress(v, []).complete)
+  }
 }
 
 if (problems.length) {
