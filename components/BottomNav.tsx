@@ -173,7 +173,12 @@ export function BottomNav() {
     gone the marker simply leaves on a route that is not one of the four, which is what it
     already does on a lesson or a Legend card — see the note above.
   */
-  const hereIndex = TABS.findIndex((t) => path === t.href)
+  /*
+    EVERY SCREEN BELONGS TO A TAB (2026-11-03). Exact matches only left the bar blank on a
+    room, a practice, the Legend or the library — and a bar with nothing lit is a map with
+    no "you are here", which is most of what "I get lost in my own app" meant.
+  */
+  const hereIndex = tabFor(path ?? '')
 
   return (
     <nav
@@ -298,4 +303,14 @@ export function BottomNav() {
  */
 export function BottomNavSpace() {
   return <div aria-hidden className="nav-clear shrink-0" />
+}
+
+/** Which of the four tabs a route lives under: Path 0, On 1, Ask 2, Yours 3; -1 for none. */
+export function tabFor(path: string): number {
+  const under = (...roots: string[]) => roots.some((r) => path === r || path.startsWith(r + '/'))
+  if (under('/club/feed', '/calendar', '/drops')) return 1
+  if (under('/club', '/path', '/errand', '/revise', '/opener')) return 0
+  if (under('/ask')) return 2
+  if (under('/profile', '/legend', '/vocab', '/proof', '/settings', '/account', '/inbox', '/noticed', '/table', '/line', '/pro')) return 3
+  return -1
 }

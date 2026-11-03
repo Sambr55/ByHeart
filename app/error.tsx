@@ -124,7 +124,7 @@ export default function Error({
           TRY AGAIN
         </button>
         <Link
-          href="/vibes"
+          href="/club"
           data-testid="error-out"
           className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted"
         >

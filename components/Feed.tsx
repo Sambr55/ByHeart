@@ -1066,7 +1066,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         </div>
         <div className="flex flex-col gap-3">
           <Link
-            href="/vibes"
+            href="/club"
             className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
             {FEED_COPY.empty_cta}

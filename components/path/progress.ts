@@ -125,6 +125,9 @@ export function pathView(
  */
 export const SLIP_DAYS = 14
 
+/** How long a freshly flagged word waits before it drifts its tile. */
+const GRACE_MS = 24 * 60 * 60 * 1000
+
 /**
  * IS THIS LAID ROOM WORTH ANOTHER LOOK? (the Wall, Sam, 2026-11-02)
  *
@@ -154,12 +157,20 @@ export function roomSlipping(r: PathRecord, room: Situation, now: Date = new Dat
   )
   return ids.some((id) => {
     const item = inventory[id]
-    if (item.latest_state === 'NEEDS ANOTHER LOOK') return true
     const last = newest([
       item.latest_recall_at,
       newest((r.evidence ?? []).filter((e) => e.target_id === id).map((e) => e.timestamp)),
       releaseSaid,
     ])
+    /*
+      A DAY'S GRACE ON THE FLAG (2026-11-03). Revealing a line in a room flags its words
+      NEEDS ANOTHER LOOK at once, so the very first room of the first run came home already
+      knocked out of place, under "Put these back" — a correction at the moment of the first
+      win. A flag now drifts the tile only once the words have sat a day.
+    */
+    if (item.latest_state === 'NEEDS ANOTHER LOOK') {
+      return last === null || new Date(last).getTime() < now.getTime() - GRACE_MS
+    }
     return last !== null && new Date(last).getTime() < cutoff
   })
 }
@@ -286,4 +297,43 @@ export function understoodCheer(milestone: number): string {
   if (milestone === 25) return 'Twenty-five times said out loud, and heard every one.'
   if (milestone === 50) return 'Fifty times said out loud and heard. You are ready for the counter.'
   return 'A hundred times said out loud and heard. Lisbon is going to like you.'
+}
+
+/**
+ * THE ONE LADDER (Sam, 2026-11-03: "I have no idea how to walk through it, level up,
+ * anything"). Twelve counters had grown up side by side and none of them said "level", so
+ * the header now says one thing: which level you are on, which district it is, and how
+ * many rooms stand between you and the next.
+ *
+ *   a room       lays a tile
+ *   a district   (a unit of the path) is a level; finishing its open rooms climbs one
+ *   gold         is still "said cold" — it shows on the tile, it does not change the level
+ *
+ * Paid rooms do not hold a free learner back: a unit counts as finished when every room
+ * this learner can open is done. Derived from pathView, so it needs no storage of its own.
+ */
+export interface PathLevel {
+  /** 1-based: the level you are on now. */
+  level: number
+  /** The unit that level is, or null when the whole path is done. */
+  unit: ResolvedUnit | null
+  /** Rooms still to lay in that unit before the next level. */
+  toNext: number
+  /** Rooms laid in that unit, and how many it has that you can open. */
+  laid: number
+  open: number
+  /** Every unit finished. */
+  complete: boolean
+}
+
+export function pathLevel(view: PathView): PathLevel {
+  /* A unit of nothing but paid rooms is stepped over rather than standing in the way. */
+  const finished = (u: PathView['units'][number]) => u.nodes.every((n) => n.state === 'done' || n.state === 'paid')
+  const at = view.units.findIndex((u) => !finished(u))
+  if (at === -1) {
+    return { level: view.units.length + 1, unit: null, toNext: 0, laid: 0, open: 0, complete: true }
+  }
+  const u = view.units[at]
+  const open = u.nodes.filter((n) => n.state !== 'paid').length
+  return { level: at + 1, unit: u.unit, toNext: open - u.done, laid: u.done, open, complete: false }
 }

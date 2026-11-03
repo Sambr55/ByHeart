@@ -48,7 +48,7 @@ export function Revise() {
     the Wall, 2026-11-02, and BACK TO THE PANEL until the Road came back beside it the same
     day — the home screen can be either now, so it names neither.)
   */
-  const back = kind === 'room' ? { href: '/club', label: 'BACK TO YOUR PATH', aria: 'Back to your path' } : { href: '/profile', label: 'BACK TO YOURS', aria: 'Back to Yours' }
+  const back = kind === 'room' || kind === 'cheat' ? { href: '/club', label: 'BACK TO YOUR PATH', aria: 'Back to your path' } : { href: '/profile', label: 'BACK TO YOURS', aria: 'Back to Yours' }
   const backTo = back
   const [at, setAt] = useState(0)
   const [done, setDone] = useState(false)
@@ -151,7 +151,7 @@ export function Revise() {
             button says what it can do instead.
           */}
           <Link
-            href={kind === 'words' ? '/vibes' : back.href}
+            href={kind === 'words' ? '/club' : back.href}
             className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
             {kind === 'words' ? 'GO AND EARN SOME' : back.label}

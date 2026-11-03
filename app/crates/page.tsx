@@ -9,5 +9,5 @@ import { redirect } from 'next/navigation'
  * about a word — and a 404 is a much worse thing to hand a tester than an old noun.
  */
 export default function CratesRedirect() {
-  redirect('/vibes')
+  redirect('/club')
 }

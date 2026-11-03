@@ -10,10 +10,10 @@ import { useEntitlements } from '@/engine/useEntitlements'
 import { hasFullAccess } from '@/lib/entitlements'
 import { PATH_NAMES, pathPurpose, pathUnits } from '@/content/path'
 import {
-  activityTimes,
-  dayStreak,
   milestoneHref,
+  pathLevel,
   pathView,
+  type PathLevel,
   understoodCheer,
   understoodMilestone,
   type PathNode,
@@ -25,6 +25,7 @@ import { Road } from './Road'
 import { useHomecoming } from './homecoming'
 import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
+import { Foundations } from './Foundations'
 
 /**
  * The Lisbon path, as a home screen.
@@ -106,10 +107,8 @@ export function PathHome() {
     }
   }, [])
   const closeSheet = useCallback(() => setSheet(null), [])
-  const streak = useMemo(
-    () => (now ? dayStreak(activityTimes(learner), now) : { days: 0, today: false }),
-    [learner, now],
-  )
+  /* THE ONE LADDER (2026-11-03) — see pathLevel. */
+  const level = useMemo(() => pathLevel(view), [view])
 
   const understood = learner.understood ?? 0
 
@@ -131,12 +130,14 @@ export function PathHome() {
             <span className="eyebrow truncate opacity-90">Lisboa</span>
             <span className="needs-learner truncate text-[0.7rem] font-semibold opacity-75">{name.short}</span>
           </Link>
-          <p className="eyebrow rounded-full bg-[rgba(255,255,255,0.14)] px-3 py-1" aria-label={view.done + ' of ' + view.total + ' rooms done'}>
-            <span className="needs-learner">{view.done}</span> / {view.total}
+          {/*
+            ONE NUMBER IN THE HEADER, AND IT IS THE LEVEL (2026-11-03). The rooms-done
+            fraction and the "On now" button went: the fraction is the level bar below, and
+            what is on is the On tab — two doors to one room was half the maze.
+          */}
+          <p className="eyebrow needs-learner rounded-full bg-[rgba(255,255,255,0.14)] px-3 py-1" data-testid="level-chip">
+            Level {level.level}
           </p>
-          <Link href="/club/feed" className="eyebrow tap-target inline-flex shrink-0 items-center rounded-full border border-[rgba(255,255,255,0.4)] px-3 py-1">
-            On now
-          </Link>
           {/*
             THE PROMINENT SPOT IS THE UNDERSTOOD TALLY NOW, NOT THE STREAK (2026-11-02).
 
@@ -154,11 +155,8 @@ export function PathHome() {
         {/* One column on a phone; on anything wide, now on the left and the Panel on the right. */}
         <div className="flex flex-col gap-10 md:grid md:grid-cols-[minmax(0,24rem)_minmax(0,38rem)] md:items-start md:justify-center md:gap-12">
           <div className="flex flex-col gap-10 md:sticky md:top-24">
-            <Understood
-              count={understood}
-              days={streak.days}
-              today={streak.today}
-            />
+            <LevelBar level={level} />
+
 
             <section aria-labelledby="up-next" className="needs-learner flex flex-col gap-3">
               <h1 id="up-next" className="eyebrow text-muted">
@@ -168,7 +166,7 @@ export function PathHome() {
                 <div className="md:max-w-xl">
                   <RoomCard
                     room={view.next.room}
-                    tag={'Unit ' + view.next.unit.n + ' · ' + view.next.unit.title}
+                    tag={'Level ' + level.level + ' · ' + view.next.unit.title}
                     state="next"
                     big
                   />
@@ -188,6 +186,8 @@ export function PathHome() {
                 </div>
               )}
             </section>
+
+            <Understood count={understood} />
           </div>
 
           <div className="needs-learner flex flex-col gap-3">
@@ -211,13 +211,16 @@ export function PathHome() {
                 homing={homing}
               />
             )}
+            <div className="mt-8">
+              <Foundations inventory={learner.inventory ?? {}} used={learner.cheats_used ?? []} />
+            </div>
           </div>
         </div>
         <BottomNavSpace />
       </main>
 
       {/*
-        THE APP'S OWN BAR, not the path's prototype TabBar (components/path/TabBar.tsx, kept
+        THE APP'S OWN BAR (the prototype TabBar was deleted 2026-11-03; it was
         for the left-rail idea). One bar everywhere: a home with different tabs from every
         other screen would be two apps.
       */}
@@ -315,15 +318,7 @@ function readMarked(): number {
  * situation, on your home screen." It opens /opener — the next room's first line, and the
  * save under it, in type you can read at arm's length.
  */
-function Understood({
-  count,
-  days,
-  today,
-}: {
-  count: number
-  days: number
-  today: boolean
-}) {
+function Understood({ count }: { count: number }) {
   /* Read after mount: the server has no localStorage, and a cheer must not flash on load. */
   const [marked, setMarked] = useState<number | null>(null)
   useEffect(() => setMarked(readMarked()), [])
@@ -339,30 +334,15 @@ function Understood({
     setMarked(cheer)
   }
 
-  const streakLabel =
-    days === 0 ? null : days + (days === 1 ? ' day' : ' days') + ' in a row'
 
   return (
     <section aria-labelledby="understood" className="needs-learner flex flex-col gap-4 md:max-w-xl">
       <div className="flex min-w-0 flex-col gap-1">
-        <h2 id="understood" className="display text-2xl" data-testid="understood-tally">
+        <h2 id="understood" className="display text-xl" data-testid="understood-tally">
           {count === 0 ? 'Say it out loud' : 'Said out loud, and heard ' + timesOf(count)}
         </h2>
         <p className="text-sm leading-relaxed text-muted">
           {count === 0 ? 'Every time you say a line out loud and it is heard, it counts here.' : 'In Portuguese.'}
-          {/*
-            THE STREAK, AS WORDS ONLY (the Wall, 2026-11-02). The flame was the last
-            Duolingo tell on the home screen; the line stays for the people who like it.
-          */}
-          {streakLabel ? (
-            <span
-              className="ml-2 inline-flex items-center gap-1 whitespace-nowrap align-middle text-xs"
-              data-testid="streak"
-              data-today={today ? 'true' : undefined}
-            >
-              · {streakLabel}
-            </span>
-          ) : null}
         </p>
       </div>
 
@@ -391,6 +371,48 @@ function Understood({
           <span className="text-sm text-muted">For walking in — and the save, if it goes wrong.</span>
         </span>
       </Link>
+    </section>
+  )
+}
+
+/**
+ * WHERE YOU ARE, IN ONE LINE (Sam, 2026-11-03: "no idea how to … level up").
+ *
+ * The level, the district it is, and a bar of that district's rooms — so the next thing
+ * to do and why it matters sit together. When every open room is laid it says so, and
+ * points at the Foundations and the practice instead of a number that cannot move.
+ */
+function LevelBar({ level }: { level: PathLevel }) {
+  if (level.complete || !level.unit) {
+    return (
+      <section aria-label="Your level" className="needs-learner flex flex-col gap-1" data-testid="level">
+        <p className="eyebrow text-telha">Level {level.level}</p>
+        <p className="display text-3xl leading-tight">Every open room, laid.</p>
+        <p className="text-sm text-muted">Keep the tiles in place, and fill the Foundations below.</p>
+      </section>
+    )
+  }
+  const pct = level.open ? Math.round((level.laid / level.open) * 100) : 0
+  return (
+    <section aria-label="Your level" className="needs-learner flex flex-col gap-2" data-testid="level">
+      <p className="eyebrow text-telha">Level {level.level}</p>
+      <p className="display text-3xl leading-tight">{level.unit.title}</p>
+      <div
+        className="h-2.5 w-full overflow-hidden rounded-full bg-surface"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={level.open}
+        aria-valuenow={level.laid}
+        aria-label={level.laid + ' of ' + level.open + ' rooms laid'}
+      >
+        <div className="h-full rounded-full bg-accent transition-[width] duration-700" style={{ width: pct + '%' }} />
+      </div>
+      <p className="text-sm text-muted" data-testid="level-next">
+        {level.laid} of {level.open} rooms laid ·{' '}
+        <span className="font-semibold text-fg">
+          {level.toNext === 1 ? '1 room' : level.toNext + ' rooms'} to Level {level.level + 1}
+        </span>
+      </p>
     </section>
   )
 }

@@ -81,7 +81,7 @@ function OpenFeedback() {
           <p className="text-sm leading-relaxed text-muted">{FEEDBACK_COPY.sent_body}</p>
         </div>
         <Link
-          href="/vibes"
+          href="/club"
           /* mt-10, not mt-auto. See Journey's Cta. */
           className="tap-target eyebrow mt-10 block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >

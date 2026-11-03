@@ -206,7 +206,11 @@ export function Club({ view = 'path' }: { view?: 'path' | 'feed' } = {}) {
       It is the same route /walkthrough uses, so there is one way to start the walk rather
       than two, and the stamp still decides whether it ever fires on its own again.
     */
-    router.replace('/profile?walk=1')
+    /*
+      HOME, NOT YOURS (2026-11-03). Landing on Yours with a walkthrough on top was the second
+      detour of the old first run; one home now, and the ceremony simply closes onto it.
+    */
+    void router
   }, [router])
 
   const answeredIds = useMemo(
@@ -440,114 +444,20 @@ export function Club({ view = 'path' }: { view?: 'path' | 'feed' } = {}) {
     laid out under it. The showcase stage still gets the feed — it is the sequence that
     ends at set-up — and the welcome ceremony above runs whichever view is showing.
   */
-  if (view === 'path' && stage !== 'showcase') return <PathHome />
+  /*
+    ONE HOME (2026-11-03). Inside: the path, always. Not inside: set-up and the first room
+    (/start), never the nineteen-card showcase — see app/start/Start.tsx. The feed view is
+    what's-on at /club/feed and is unchanged.
+  */
+  if (view === 'path') return inside ? <PathHome /> : <GoTo href="/start" />
   return <Feed stage={stage} />
+}
 
-  return (
-    <main
-      data-stage="REAL WORLD"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
-    >
-      <div className="flex items-center gap-3">
-        <Wordmark mark="club" className="h-8" />
-      </div>
-      <BottomNav />
-
-      {/*
-        The masthead says what they can do, never how often they have done it. The
-        fallback is a real sentence rather than an empty state, because a learner who
-        has finished a section always has something.
-      */}
-      <div className="flex flex-col gap-3">
-        <h1 className="display text-balance text-3xl">
-          {acts.length
-            ? 'You can ' + acts.slice(0, 3).join(', ') + (acts.length > 3 ? ' — and more.' : '.')
-            : CLUB.greeting}
-        </h1>
-        <p className="text-sm text-muted">
-          {/*
-            WHAT YOU HAVE, not which stage you are on. This read "Talk about other
-            people, stage 5 of 6." — the ladder, on the most prominent line of the screen
-            a returning learner lands on, with no onboarding anywhere for what a stage is.
-            The Legend is the spine now, so this says what has been built, in the same
-            terms Yours uses. The nbsp holds the line's height before mount.
-          */}
-          {mounted ? legendLine(answeredIds.length) : ' '}
-          {done.size ? ' ' + throughLine(done.size) : ''}
-        </p>
-      </div>
-
-      <Moves
-        learner={{
-          played,
-          done,
-          rung,
-          owned: owned.length,
-          ownedPieces: owned,
-          /*
-            THE NUMERATOR FILTERED THE SAME WAY AS THE DENOMINATOR, which it was not.
-
-            legendTotal below applies frameForPurpose and frameApplies — see its note —
-            and this counted every answer on file. Purpose is changeable from Yours, so a
-            learner who answered as a visitor and later switched to moving kept answers
-            for questions no longer on their card: the numerator counted frames the
-            denominator had dropped, which reads as "9 of 8" and makes `left` negative,
-            silently removing the move that offers the next question.
-
-            Same two predicates, in the same order, so the two can only ever agree.
-          */
-          legendAnswered: (learner.legend ?? [])
-            .filter((a) => Object.keys(a.values).length > 0)
-            .filter((a) => {
-              const f = LEGEND_FRAMES.find((x) => x.id === a.frame_id)
-              return (
-                !!f &&
-                frameForPurpose(f, learner.purpose ?? null) &&
-                frameApplies(f, learner.legend ?? [])
-              )
-            })
-            .map((a) => a.frame_id),
-          /*
-            THE LEARNER'S OWN DENOMINATOR, computed here because this is where the purpose
-            is known. The move used LEGEND_FRAMES.length — eleven — against a deck that
-            opens eight for anybody who answered set-up, so `left` never reached zero and a
-            learner who had answered everything the product allows saw a permanent
-            "8 of 11" with three questions they could not action. A progress line with an
-            unreachable denominator is the opposite of a sense of building.
-          */
-          legendTotal: LEGEND_FRAMES.filter(
-            (f) =>
-              frameForPurpose(f, learner.purpose ?? null) &&
-              frameApplies(f, learner.legend ?? []),
-          ).length,
-          purpose: learner.purpose ?? null,
-          legendPrompt: learner.legend_prompt ?? 'unseen',
-          legendUnlocked: legendStatus({
-            rootsPlayed: learner.roots_played ?? [],
-            sectionsCompleted: learner.sections_completed ?? [],
-    sittings: learner.sittings ?? 0,
-            purpose: learner.purpose ?? null,
-          }).open,
-          capped,
-          claimed,
-        }}
-        now={now}
-        mounted={mounted}
-      />
-
-      {/*
-        The city half of the Club, and the half that is not about Portuguese.
-
-        Pull, not push: nobody is sent this. It is here for the person who has a thing to
-        do tomorrow and would rather not do the whole exchange in English — which is the
-        only reason a tool like this gets opened at all.
-      */}
-      <Situations />
-
-      <p className="mt-auto text-center text-xs text-muted">{CLUB.footer}</p>
-      <BottomNavSpace />
-    </main>
-  )
+/** A client-side replace, holding a dark frame while it happens. */
+function GoTo({ href }: { href: string }) {
+  const router = useRouter()
+  useEffect(() => router.replace(href), [router, href])
+  return <div className="min-h-svh on-dark" aria-hidden />
 }
 
 /** Crates finished, said as a fact about them rather than as a score. */

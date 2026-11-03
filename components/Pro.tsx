@@ -80,7 +80,7 @@ export function Pro() {
                 : 'Every vibe, every drop, and whatever comes next.'}
             </p>
             <Link
-              href="/vibes"
+              href="/club"
               className="eyebrow mt-6 inline-block text-accent underline underline-offset-4"
             >
               YOUR VIBES

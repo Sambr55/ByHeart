@@ -132,7 +132,8 @@ export function HomeView() {
       existed, or a set-up abandoned half-way) goes to the shelf, which is where their work
       already is.
     */
-    router.replace(isMember(learner) ? '/club' : '/vibes')
+    /* One home (2026-11-03): the Vibes shelf is retired, so a half-set-up record finishes set-up. */
+    router.replace(isMember(learner) ? '/club' : '/start')
   }, [router])
 
   // Deliberately blank for the one frame between deciding and arriving. A returning

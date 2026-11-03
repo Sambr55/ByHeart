@@ -147,7 +147,7 @@ export function DemoCard({ onBeat }: { onBeat?: (beat: number) => void } = {}) {
             place, which is what makes this a funnel rather than a menu.
           */}
           <Link
-            href="/vibes"
+            href="/club"
             data-testid="demo-go"
             className="tap-target eyebrow mt-3 block w-full rounded bg-[#1f5d8c] px-5 py-3 text-center text-white"
           >

@@ -11,6 +11,7 @@ import { FREE_BY_PURPOSE } from '../lib/entitlements'
 import { situationById } from '../content/situations'
 import {
   dayStreak,
+  pathLevel,
   pathView,
   milestoneStars,
   understoodMilestone,
@@ -135,7 +136,8 @@ console.log('\nthe understood tally — little wins, never pressure\n')
   ok('SayButton counts a close result, once', (say.match(/recordUnderstood\(\)/g) ?? []).length === 1 && /if \(h\.close\) recordUnderstood\(\)/.test(say))
   const home = readFileSync('components/path/PathHome.tsx', 'utf8')
   ok('the tally has the header spot', /<UnderstoodChip count=\{understood\} \/>/.test(home))
-  ok('the streak is demoted, not deleted', /data-testid="streak"/.test(home) && !/<Streak /.test(home))
+  /* 2026-11-03, one ladder: the streak left the home screen; the level took the header. */
+  ok('the streak is off the home screen, the level is on it', !/data-testid="streak"/.test(home) && /data-testid="level-chip"/.test(home) && /<LevelBar /.test(home))
   ok('the home screen opens the rescue card', /href="\/opener"/.test(home))
   const manifest = readFileSync('app/manifest.ts', 'utf8')
   ok('and the manifest has it as a shortcut', /shortcuts:[\s\S]*url: '\/opener'/.test(manifest))
@@ -217,6 +219,8 @@ console.log('\nput it back — a drift, never a removal\n')
   const old = new Date(now.getTime() - (SLIP_DAYS + 1) * day).toISOString()
   const fresh = new Date(now.getTime() - 2 * day).toISOString()
   ok('flagged NEEDS ANOTHER LOOK is slipping', roomSlipping({ ...base, inventory: item('NEEDS ANOTHER LOOK', fresh) as never }, room, now))
+  /* 2026-11-03: the first room of the first run came home already drifted. A day's grace. */
+  ok('but a word flagged within the day does not drift its tile yet', !roomSlipping({ ...base, inventory: item('NEEDS ANOTHER LOOK', now.toISOString()) as never }, room, now))
   ok('recalled more than ' + SLIP_DAYS + ' days ago is slipping', roomSlipping({ ...base, inventory: item('YOURS', old) as never }, room, now))
   ok('recalled recently is not', !roomSlipping({ ...base, inventory: item('YOURS', fresh) as never }, room, now))
   ok('no timestamp anywhere is not — a drift is a claim', !roomSlipping({ ...base, inventory: item('NEW', null) as never }, room, now))
@@ -261,7 +265,7 @@ console.log('\nthe Road — the winding path, back as a second view (2026-11-02)
   const us = pathUnits(undefined, undefined, 'moving')
   const room = us[0].rooms.find((r) => roomPieceIds(r).length > 0)!
   const pid = roomPieceIds(room)[0]
-  const inv = { [pid]: { target_id: pid, acquired_source: null, reinforced_sources: [], latest_state: 'NEEDS ANOTHER LOOK', latest_recall_at: now.toISOString() } }
+  const inv = { [pid]: { target_id: pid, acquired_source: null, reinforced_sources: [], latest_state: 'NEEDS ANOTHER LOOK', latest_recall_at: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString() } }
   const v = pathView({ finished_cards: [room.id], proof: [], evidence: [], mission_completed_at: {}, inventory: inv as never }, us, () => 'open', now)
   const road = renderToStaticMarkup(createElement(Road, { view: v, inventory: inv, onLaid: () => {} }))
   ok('a drifted stop is knocked off the road, with its gap on the line', /data-slipping="true"/.test(road) && /road-gap/.test(road) && new RegExp('--rot:' + driftOf(room.id).rot + 'deg').test(road))
@@ -353,6 +357,22 @@ console.log('\nthe booking pass-through — /get?purpose=…&depart=…&ret=…\
   ok('/get and set-up both apply it after mount', /applyBookingFromUrl\(\)/.test(get) && /applyBookingFromUrl\(\)/.test(setup))
   const booking = readFileSync('engine/booking.ts', 'utf8')
   ok('and never over an answer', /!me\.profile\?\.goal/.test(booking) && /!getLearner\(\)\.profile\?\.here_said/.test(booking))
+}
+
+console.log('\none ladder — the level (2026-11-03)\n')
+{
+  /* Sam: "I have no idea how to walk through it, level up, anything." */
+  const us = pathUnits(undefined, undefined, 'visiting')
+  const none = { finished_cards: [], proof: [], evidence: [], mission_completed_at: {} }
+  const l0 = pathLevel(pathView(none, us, () => 'open', now))
+  ok('a new learner is on Level 1, the first unit', l0.level === 1 && l0.unit?.id === us[0].id && l0.laid === 0 && l0.toNext === us[0].rooms.length)
+  const first = us[0].rooms.map((r) => r.id)
+  const l1 = pathLevel(pathView({ ...none, finished_cards: first }, us, () => 'open', now))
+  ok('laying every room of a unit climbs one level', l1.level === 2 && l1.unit?.id === us[1].id)
+  const paidAll = pathLevel(pathView(none, us, (id) => (first.includes(id) ? 'paid' : 'open'), now))
+  ok('a unit of nothing but paid rooms is stepped over, not a wall', paidAll.level === 2)
+  const all = pathLevel(pathView({ ...none, finished_cards: us.flatMap((u) => u.rooms.map((r) => r.id)) }, us, () => 'open', now))
+  ok('every room laid is complete', all.complete && all.toNext === 0)
 }
 
 if (problems.length) {

@@ -270,8 +270,8 @@ console.log('\nno dead tiles\n')
   )
   ok(
     'and it offers the sitting that would fill it',
-    /kind === 'words' \? '\/vibes'/.test(revise),
-    'GO AND EARN SOME → /vibes',
+    /kind === 'words' \? '\/club'/.test(revise),
+    'GO AND EARN SOME → /club (the path; Vibes retired 2026-11-03)',
   )
 }
 
