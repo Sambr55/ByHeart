@@ -6,6 +6,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { BAIRROS, KIND_LABEL, distanceM, visibleGems, type BairroId } from '@/content/gems'
 import { GemCard } from './GemCard'
+import { visibleWalks, walkProgress } from '@/content/walks'
+import { useLearner } from '@/engine/useLearner'
 import { useWhereAmI } from './useWhereAmI'
 
 /* Leaflet reads `window` at import, so the map only ever renders in the browser. */
@@ -28,6 +30,8 @@ export function City() {
   const [bairro, setBairro] = useState<BairroId | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
   const where = useWhereAmI()
+  const learner = useLearner()
+  const walks = useMemo(() => visibleWalks(gems), [gems])
   /* ?gem=<id> — from Near you on home — opens straight onto that gem. */
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get('gem')
@@ -107,6 +111,42 @@ export function City() {
                     {b ? b.feel : 'Not the sights — the places people who live here go, who you will meet there, and the line for walking in.'}
                   </p>
                 </div>
+                {/*
+                  LANGUAGE WALKS (2026-11-03) — a bairro, a few hours, one line at every
+                  stop. All of them on the whole-city view; the neighbourhood's own when one
+                  is picked. content/walks.ts.
+                */}
+                {(bairro ? walks.filter((w) => w.walk.bairro === bairro) : walks).length ? (
+                  <div className="flex flex-col gap-2" data-testid="city-walks">
+                    <p className="eyebrow text-muted">Language walks</p>
+                    <div className={bairro ? 'flex flex-col gap-2' : 'no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5 pb-1'}>
+                      {(bairro ? walks.filter((w) => w.walk.bairro === bairro) : walks).map((v) => {
+                        const pr = walkProgress(v, learner.walk_stops ?? [])
+                        return (
+                          <Link
+                            key={v.walk.id}
+                            href={'/walk/' + v.walk.id}
+                            data-testid="walk-card"
+                            className={
+                              'tap-target flex shrink-0 flex-col gap-1 rounded-2xl border-2 px-4 py-3 transition ' +
+                              (bairro ? '' : 'w-64 ') +
+                              (pr.complete ? 'border-[#c9973b] bg-[#c9973b]/10' : 'border-accent/30 bg-bg-elev hover:border-accent')
+                            }
+                          >
+                            <span className="eyebrow text-[0.6rem] text-telha">
+                              {BAIRROS.find((x) => x.id === v.walk.bairro)?.name} · {v.stops.length} stops · ~{v.minutes} min
+                            </span>
+                            <span className="display text-lg leading-tight">{v.walk.title}</span>
+                            <span className="text-xs text-muted">
+                              {pr.complete ? 'Walked ✓' : pr.done ? pr.done + ' of ' + pr.total + ' lines said' : v.walk.when}
+                            </span>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ) : null}
+
                 {shown.length === 0 ? (
                   <p className="rounded-2xl border border-dashed border-line px-4 py-6 text-sm text-muted" data-testid="city-empty">
                     The gems are being checked by somebody who lives here. They will appear on this map as each one is confirmed.

@@ -314,7 +314,7 @@ export function BottomNavSpace() {
 /** Which of the four tabs a route lives under: Path 0, On 1, Ask 2, Yours 3; -1 for none. */
 export function tabFor(path: string): number {
   const under = (...roots: string[]) => roots.some((r) => path === r || path.startsWith(r + '/'))
-  if (under('/city', '/club/feed', '/calendar', '/drops')) return 1
+  if (under('/city', '/walk', '/club/feed', '/calendar', '/drops')) return 1
   if (under('/club', '/path', '/errand', '/revise', '/opener')) return 0
   if (under('/ask')) return 2
   if (under('/profile', '/legend', '/vocab', '/proof', '/settings', '/account', '/inbox', '/noticed', '/table', '/line', '/pro')) return 3
