@@ -8,6 +8,7 @@ import { LANDING } from '@/content/front-door'
 import { Wordmark } from '@/components/Wordmark'
 import { useInstallable } from '@/components/Install'
 import { applyBookingFromUrl } from '@/engine/booking'
+import { useEntitlements } from '@/engine/useEntitlements'
 
 /**
  * The page a QR code points at, whose only job is to get DUB onto a home screen.
@@ -33,6 +34,7 @@ import { applyBookingFromUrl } from '@/engine/booking'
  */
 export function Get() {
   const how = useInstallable()
+  const access = useEntitlements()
   /*
     Decided after mount, like every platform read in this product: the server has no user
     agent worth trusting and branching on one during render is the hydration mismatch this
@@ -231,6 +233,16 @@ export function Get() {
             className="text-sm text-white/80 underline underline-offset-4"
           >
             Or carry on in the browser
+          </Link>
+        ) : null}
+        {/*
+          THE WAY BACK IN, as on the front door (components/Journey.tsx). The site's START FREE
+          lands here, so somebody returning on a new phone needs it here too — Sam: "I land on
+          it after Start Free but it's missing the been here before" (2026-11-03).
+        */}
+        {access.signInReady ? (
+          <Link href="/signin" data-testid="get-signin" className="text-xs text-white/80 underline underline-offset-4">
+            Been here before? Sign in
           </Link>
         ) : null}
       </div>
