@@ -1434,7 +1434,7 @@ export const LEGEND_FRAMES: LegendFrame[] = [
       on the card and in the sentence they built, and the inventory does not pretend they
       banked it. See the note in AskInto, which stopped calling acquirePiece on them.
     */
-    helpers: { futebol: 'football', praia: 'the beach' },
+    // No helpers line: the chips carry every gloss now (2026-11-03).
     teaches:
       'GOSTO DE, always with the de. Portuguese does not like a thing, it takes pleasure FROM it — so there is a de between the liking and the thing, every time, and it contracts with the article: de música, mas da praia.',
   },
