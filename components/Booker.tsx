@@ -44,6 +44,29 @@ const iso = (d: Date) => d.toISOString().slice(0, 10)
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
+/*
+  THE ROUTES (Sam, 2026-11-03: "It now seems to be hard coded EN > LIS"). The same languages
+  and cities the website's booker offers (dub-site content/routes.ts, markets.ts): English to
+  Lisbon is open; every other pair says when, and takes an email for the day it opens —
+  the app's own /api/waitlist, noted with the route, as the website does.
+*/
+const FROM = [
+  { code: 'EN', name: 'English', native: 'English', open: true },
+  { code: 'PT', name: 'Portuguese', native: 'Português', open: false },
+  { code: 'ES', name: 'Spanish', native: 'Español', open: false },
+  { code: 'DE', name: 'German', native: 'Deutsch', open: false },
+  { code: 'FR', name: 'French', native: 'Français', open: false },
+] as const
+const TO = [
+  { code: 'LIS', id: 'lisbon', city: 'Lisboa', lang: 'Português', speaks: 'PT', open: true },
+  { code: 'MAD', id: 'madrid', city: 'Madrid', lang: 'Español', speaks: 'ES', open: false },
+  { code: 'BER', id: 'berlin', city: 'Berlin', lang: 'Deutsch', speaks: 'DE', open: false },
+  { code: 'PAR', id: 'paris', city: 'Paris', lang: 'Français', speaks: 'FR', open: false },
+  { code: 'LON', id: 'london', city: 'London', lang: 'English', speaks: 'EN', open: false },
+] as const
+type FromCode = (typeof FROM)[number]['code']
+type ToCode = (typeof TO)[number]['code']
+
 /* The arc the plane flies, in the 320×90 box of the route strip. */
 const ARC = 'M 34 70 Q 160 -18 286 70'
 
@@ -54,6 +77,13 @@ export function Booker({ onDone }: { onDone: () => void }) {
   const [to, setTo] = useState(learner.profile?.here_to ?? '')
   const [company, pick] = useState<Company | null>((learner.profile?.company as Company | undefined) ?? null)
   const [flying, setFlying] = useState(false)
+  const [fromLang, setFromLang] = useState<FromCode>('EN')
+  const [dest, setDest] = useState<ToCode>('LIS')
+  const [picking, setPicking] = useState<'from' | 'to' | null>(null)
+  const origin = FROM.find((f) => f.code === fromLang)!
+  const place = TO.find((t) => t.code === dest)!
+  /* Open only where both ends are: English speakers, to Lisbon — today. */
+  const routeOpen = origin.open && place.open
   const route = useRef<HTMLDivElement>(null)
   const [still, setStill] = useState(false)
   useEffect(() => setStill(window.matchMedia('(prefers-reduced-motion: reduce)').matches), [])
@@ -98,17 +128,17 @@ export function Booker({ onDone }: { onDone: () => void }) {
       {/* THE BOARDING PASS */}
       <div ref={route} className="booker-pass mt-6 scroll-mt-4 overflow-hidden rounded-3xl bg-[#fbf8f2] text-[#14243a] shadow-[0_30px_60px_-30px_rgba(0,0,0,0.8)]">
         <div className="relative px-5 pb-3 pt-5">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="eyebrow text-[0.6rem] text-[#14243a]/50">From</p>
-              <p className="display text-4xl leading-none tracking-tight">EN</p>
-              <p className="text-xs text-[#14243a]/60">English</p>
-            </div>
-            <div className="text-right">
-              <p className="eyebrow text-[0.6rem] text-[#14243a]/50">To</p>
-              <p className="display text-4xl leading-none tracking-tight text-[#1f5c8f]">LIS</p>
-              <p className="text-xs text-[#14243a]/60">Lisboa · Português</p>
-            </div>
+          <div className="relative z-10 flex items-start justify-between">
+            <button type="button" data-testid="booker-pick-from" onClick={() => setPicking('from')} disabled={flying} className="tap-target -m-2 rounded-2xl p-2 text-left transition hover:bg-[#14243a]/5" aria-label={'From ' + origin.name + ' — change'}>
+              <span className="eyebrow block text-[0.6rem] text-[#14243a]/50">From ▾</span>
+              <span className="display block text-4xl leading-none tracking-tight">{origin.code}</span>
+              <span className="block text-xs text-[#14243a]/60">{origin.native}</span>
+            </button>
+            <button type="button" data-testid="booker-pick-to" onClick={() => setPicking('to')} disabled={flying} className="tap-target -m-2 rounded-2xl p-2 text-right transition hover:bg-[#14243a]/5" aria-label={'To ' + place.city + ' — change'}>
+              <span className="eyebrow block text-[0.6rem] text-[#14243a]/50">To ▾</span>
+              <span className="display block text-4xl leading-none tracking-tight text-[#1f5c8f]">{place.code}</span>
+              <span className="block text-xs text-[#14243a]/60">{place.city} · {place.lang}</span>
+            </button>
           </div>
           {/* The route, and the plane on it. */}
           <svg viewBox="0 0 320 90" className="pointer-events-none -mt-6 h-20 w-full" aria-hidden="true">
@@ -129,7 +159,8 @@ export function Booker({ onDone }: { onDone: () => void }) {
           <span className="absolute -right-3 h-6 w-6 rounded-full bg-[#0f1f33]" />
         </div>
 
-        <div className="flex flex-col gap-5 px-5 pb-6 pt-4">
+        {routeOpen ? null : <Soon origin={origin.name} city={place.city} lang={place.lang} route={origin.code + '>' + place.id} />}
+        <div className={'flex flex-col gap-5 px-5 pb-6 pt-4 ' + (routeOpen ? '' : 'hidden')}>
           <fieldset>
             <legend className="eyebrow mb-2 text-[0.6rem] text-[#14243a]/50">Reason for travel</legend>
             <div className="grid grid-cols-3 gap-2">
@@ -197,6 +228,22 @@ export function Booker({ onDone }: { onDone: () => void }) {
         </div>
       </div>
 
+      {picking ? (
+        <RoutePicker
+          which={picking}
+          from={fromLang}
+          to={dest}
+          onPick={(code) => {
+            if (picking === 'from') setFromLang(code as FromCode)
+            else setDest(code as ToCode)
+            setPicking(null)
+          }}
+          onClose={() => setPicking(null)}
+        />
+      ) : null}
+
+      {routeOpen ? (
+      <>
       <button
         type="button"
         data-testid="booker-go"
@@ -210,14 +257,183 @@ export function Booker({ onDone }: { onDone: () => void }) {
         </svg>
       </button>
       <p className="mt-3 text-center text-xs text-white/50">Dates and company are optional. Change any of it later in settings.</p>
+      </>
+      ) : (
+        <button
+          type="button"
+          onClick={() => {
+            setFromLang('EN')
+            setDest('LIS')
+          }}
+          className="mt-6 w-full text-center text-sm text-white/70 underline underline-offset-4"
+        >
+          Or start with English → Lisboa, open now
+        </button>
+      )}
+    </div>
+  )
+}
+
+/** The departures board: choose where you are from, or where you are going. */
+function RoutePicker({
+  which,
+  from,
+  to,
+  onPick,
+  onClose,
+}: {
+  which: 'from' | 'to'
+  from: FromCode
+  to: ToCode
+  onPick: (code: string) => void
+  onClose: () => void
+}) {
+  useEffect(() => {
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', esc)
+    return () => window.removeEventListener('keydown', esc)
+  }, [onClose])
+  const rows =
+    which === 'from'
+      ? FROM.map((f) => ({ code: f.code, title: f.native, sub: f.name === f.native ? '' : f.name, open: f.open, same: false }))
+      : TO.map((t) => ({ code: t.code, title: t.city, sub: t.lang, open: t.open, same: t.speaks === from }))
+  const current = which === 'from' ? from : to
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 sm:items-center" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={which === 'from' ? 'You speak' : 'Where to'}
+        data-testid="booker-picker"
+        onClick={(e) => e.stopPropagation()}
+        className="animate-rise w-full max-w-md rounded-t-3xl bg-[#0f1f33] p-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)] text-white sm:rounded-3xl"
+      >
+        <div className="flex items-center justify-between">
+          <p className="eyebrow text-white/60">{which === 'from' ? 'Departures · you speak' : 'Arrivals · where to'}</p>
+          <button type="button" onClick={onClose} aria-label="Close" className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10">
+            ✕
+          </button>
+        </div>
+        <ul className="mt-3 divide-y divide-white/10 overflow-hidden rounded-2xl bg-white/5">
+          {rows.map((r) => (
+            <li key={r.code}>
+              <button
+                type="button"
+                disabled={r.same}
+                data-testid={'booker-option-' + r.code}
+                onClick={() => onPick(r.code)}
+                className={'tap-target flex w-full items-center gap-4 px-4 py-3 text-left transition hover:bg-white/5 disabled:opacity-35 ' + (current === r.code ? 'bg-white/10' : '')}
+              >
+                <span className="display w-14 text-2xl leading-none tracking-tight text-[#9cc6ea]">{r.code}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-semibold">{r.title}</span>
+                  {r.sub ? <span className="block text-xs text-white/60">{r.sub}</span> : null}
+                </span>
+                <span
+                  className={
+                    'eyebrow shrink-0 rounded px-2 py-1 text-[0.6rem] ' +
+                    (r.same ? 'text-white/50' : r.open ? 'bg-[#2c6b4a] text-white' : 'bg-[#e5b04a]/15 text-[#e5b04a]')
+                  }
+                >
+                  {r.same ? 'Your language' : r.open ? 'Boarding' : 'Coming soon'}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * A ROUTE THAT IS NOT OPEN YET, said like a departures board says it, with the one useful
+ * thing to do: leave an email for the day it opens. Posted to the app's /api/waitlist with
+ * the route in the note, the same shape the website sends.
+ */
+function Soon({ origin, city, lang, route }: { origin: string; city: string; lang: string; route: string }) {
+  const [email, setEmail] = useState('')
+  const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
+  useEffect(() => setState('idle'), [route])
+  const send = async () => {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return setState('error')
+    setState('sending')
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), note: 'route:' + route + '; via:app-booker' }),
+      })
+      setState(res.ok ? 'done' : 'error')
+      track('waitlist_joined', { route, via: 'booker' })
+    } catch {
+      setState('error')
+    }
+  }
+  return (
+    <div data-testid="booker-soon" className="flex flex-col gap-3 px-5 pb-6 pt-4">
+      <p className="eyebrow self-start rounded bg-[#e5b04a]/20 px-2 py-1 text-[0.6rem] text-[#9a6b12]">Coming soon</p>
+      <p className="display text-2xl leading-tight">
+        {city} {origin === 'English' ? '' : 'for ' + origin + ' speakers '}is not boarding yet.
+      </p>
+      <p className="text-sm text-[#14243a]/65">
+        We are building {lang} the way we built Portuguese for Lisbon. Leave your email and we will tell you the day it opens — nothing else.
+      </p>
+      {state === 'done' ? (
+        <p className="rounded-2xl bg-[#2c6b4a]/10 px-4 py-3 text-sm font-semibold text-[#2c6b4a]">You are on the list for {city}.</p>
+      ) : (
+        <div className="flex gap-2">
+          <input
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            aria-label="Your email"
+            className="tap-target min-w-0 flex-1 rounded-2xl border border-[#14243a]/15 bg-white px-4 py-3 text-base text-[#14243a] focus:border-[#1f5c8f] focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={send}
+            disabled={state === 'sending'}
+            className="tap-target eyebrow shrink-0 rounded-2xl bg-[#14243a] px-4 text-xs text-white"
+          >
+            {state === 'sending' ? '…' : 'Tell me'}
+          </button>
+        </div>
+      )}
+      {state === 'error' ? <p className="text-xs text-[#b5523a]">That email did not go through. Check it and try again.</p> : null}
     </div>
   )
 }
 
 function DateField({ label, value, min, onChange, testid }: { label: string; value: string; min: string; onChange: (v: string) => void; testid: string }) {
   const d = value ? new Date(value + 'T12:00:00Z') : null
+  const input = useRef<HTMLInputElement>(null)
+  /*
+    THE WHOLE BOX OPENS THE PICKER (Sam, 2026-11-03: "the depart and return dates aren't
+    clickable"). An invisible date input laid over the face is ignored by iPhone Safari and
+    by desktop Chrome away from its little calendar icon, so a tap on the box asks for the
+    picker outright — showPicker() — and focuses the input where that is not available.
+  */
+  const open = () => {
+    const el = input.current
+    if (!el) return
+    try {
+      if (typeof el.showPicker === 'function') el.showPicker()
+      else el.focus()
+    } catch {
+      el.focus()
+    }
+  }
   return (
-    <label className="relative flex flex-col rounded-2xl border border-[#14243a]/15 bg-white px-3 py-2.5">
+    <div
+      role="button"
+      tabIndex={-1}
+      onClick={open}
+      className="tap-target relative flex cursor-pointer flex-col rounded-2xl border border-[#14243a]/15 bg-white px-3 py-2.5 transition hover:border-[#1f5c8f]/50"
+    >
       <span className="eyebrow text-[0.6rem] text-[#14243a]/50">{label}</span>
       {d ? (
         <span className="flex items-baseline gap-1.5">
@@ -226,18 +442,19 @@ function DateField({ label, value, min, onChange, testid }: { label: string; val
           <span className="text-xs text-[#14243a]/50">{WEEKDAYS[d.getUTCDay()]}</span>
         </span>
       ) : (
-        <span className="text-sm font-semibold text-[#14243a]/40">Add date</span>
+        <span className="text-sm font-semibold text-[#1f5c8f]">Add date</span>
       )}
-      {/* The real input sits over the face, invisible, so the phone's own date picker opens. */}
+      {/* The real input: over the box, invisible, 16px so iOS does not zoom, and reachable by keyboard. */}
       <input
+        ref={input}
         type="date"
         data-testid={testid}
         aria-label={label}
         min={min}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        className="absolute inset-0 h-full w-full cursor-pointer appearance-none text-base opacity-0"
       />
-    </label>
+    </div>
   )
 }

@@ -233,6 +233,8 @@ export type EventName =
   | 'purpose_chosen'
   /** Set-up's when / who-with step (2026-11-03): dates given?, company. */
   | 'trip_set'
+  /** An email left for a route that is not open yet, from the booker (2026-11-03). */
+  | 'waitlist_joined'
   /** Which of the two warm-up vibes somebody picked before the basics. */
   | 'warmup_chosen'
   | 'demo_played'
