@@ -457,15 +457,15 @@ export function Profile() {
         */
         <div className="flex flex-col gap-6 rounded-2xl border border-line bg-bg-elev px-5 py-6">
           <p className="text-base leading-relaxed text-fg" data-testid="yours-empty">
-            Nothing here yet. Every room you lay hands you lines to keep, and they
-            collect here — with your Legend, ready to show somebody.
+            Nothing here yet. Every level of your path hands you lines to keep. They
+            collect here, with your Legend, the places you said them and your tables.
           </p>
           <Link
             href="/club"
             data-testid="yours-start"
             className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
-            YOUR FIRST ROOM
+            START LEVEL 1
           </Link>
           {/*
             AND THE WAY BACK, for the one person this screen is a disaster for.
@@ -1291,7 +1291,7 @@ function Identity() {
             <Link
               href="/signin?next=%2Fprofile"
               data-testid="profile-account"
-              className="mt-1 block truncate text-sm text-accent underline underline-offset-4"
+              className="mt-1 block text-sm leading-snug text-accent underline underline-offset-4"
             >
               {PROFILE_COPY.account_out}
             </Link>

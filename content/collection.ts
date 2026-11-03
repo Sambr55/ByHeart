@@ -469,7 +469,7 @@ function deckOf(card: { kind: CardKind; id: string }): DeckId {
  */
 const DECKS: { id: DeckId; label: string; holds: string; rail?: boolean }[] = [
   { id: 'legend', label: 'YOUR LEGEND', holds: 'The things you can say about yourself.', rail: true },
-  { id: 'vibes', label: 'VIBES', holds: 'Sittings you have been through, basics included.', rail: true },
+  { id: 'vibes', label: 'VIBES', holds: 'Songs, films, flirting and swearing you have played, basics included.', rail: true },
   /*
     THE THREE MECHANISMS, THREE BOARDS. See the note on DeckId: I merged them and Sam
     separated them again, and the data had carried the distinction all along.

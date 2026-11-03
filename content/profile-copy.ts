@@ -46,7 +46,7 @@ export const PROFILE_COPY = {
     under a name rather than a call to action: this screen is not the place to start
     arguing for an account, it is the place to stop pretending there is nothing to press.
   */
-  account_out: 'Not signed in — tap to keep this off your phone',
+  account_out: 'Not signed in. Tap to keep it safe',
   account_in: (email: string) => 'Signed in as ' + email,
   headline: 'Your Lisbon.',
   name_hint: 'Your name',

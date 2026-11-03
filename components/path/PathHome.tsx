@@ -26,6 +26,7 @@ import { useHomecoming } from './homecoming'
 import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
 import { Foundations } from './Foundations'
+import { FunShelf } from './FunShelf'
 import { NearYou } from '@/components/city/NearYou'
 
 
@@ -217,6 +218,9 @@ export function PathHome() {
             )}
             <div className="mt-8">
               <Foundations inventory={learner.inventory ?? {}} used={learner.cheats_used ?? []} />
+            </div>
+            <div className="mt-6">
+              <FunShelf proof={learner.proof ?? []} units={units} />
             </div>
 
           </div>
