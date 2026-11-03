@@ -26,6 +26,7 @@ import { useHomecoming } from './homecoming'
 import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
 import { Foundations } from './Foundations'
+import { NearYou } from '@/components/city/NearYou'
 
 
 /**
@@ -186,6 +187,9 @@ export function PathHome() {
                 </div>
               )}
             </section>
+
+            {/* Local knowledge, from where they are standing (2026-11-03) — components/city/NearYou.tsx. */}
+            <NearYou />
 
             <Understood count={understood} />
           </div>

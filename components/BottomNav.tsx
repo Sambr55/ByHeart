@@ -108,9 +108,15 @@ const TABS = [
     calendar is the city with a date on it, so it sits where the city is.
   */
   {
-    href: '/calendar',
-    label: 'On',
-    d: 'M4 7a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8 4v4M16 4v4',
+    /*
+      CITY, NOT ON (2026-11-03). The tab is Lisbon like a local now — the map of gems, with
+      what's on one tap away at its top — so it is named for the place, and the pin replaces
+      the calendar. The test id stays tab-on, as tab-trip did when Trip became Path.
+    */
+    href: '/city',
+    label: 'City',
+    testid: 'tab-on',
+    d: 'M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
   },
   {
     href: null,
@@ -233,7 +239,7 @@ export function BottomNav() {
         */
         const shared = {
           'aria-current': here ? ('page' as const) : undefined,
-          'data-testid': 'tab-' + t.label.toLowerCase(),
+          'data-testid': ('testid' in t && t.testid) || 'tab-' + t.label.toLowerCase(),
           /*
             White on blue, and the current tab is the WHITEST thing on it.
 
@@ -308,7 +314,7 @@ export function BottomNavSpace() {
 /** Which of the four tabs a route lives under: Path 0, On 1, Ask 2, Yours 3; -1 for none. */
 export function tabFor(path: string): number {
   const under = (...roots: string[]) => roots.some((r) => path === r || path.startsWith(r + '/'))
-  if (under('/club/feed', '/calendar', '/drops')) return 1
+  if (under('/city', '/club/feed', '/calendar', '/drops')) return 1
   if (under('/club', '/path', '/errand', '/revise', '/opener')) return 0
   if (under('/ask')) return 2
   if (under('/profile', '/legend', '/vocab', '/proof', '/settings', '/account', '/inbox', '/noticed', '/table', '/line', '/pro')) return 3
