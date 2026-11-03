@@ -166,7 +166,7 @@ export function NotYet({
           data-testid="notyet-back"
           onClick={() => {
             if (window.history.length > 1) router.back()
-            else router.push('/vibes')
+            else router.push('/club')
           }}
           className="tap-target eyebrow w-full rounded border border-line px-5 py-3 text-center text-muted"
         >

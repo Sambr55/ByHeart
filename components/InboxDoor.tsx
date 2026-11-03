@@ -44,10 +44,15 @@ export function InboxDoor() {
           (learner.profile?.genres ?? null) as Parameters<typeof inboxFor>[2],
           learner.purpose ?? null,
         ),
-        learner.inbox_opened_at ?? null,
+        /*
+          NEVER OPENED COUNTS FROM SET-UP, NOT FROM THE DAWN OF TIME (2026-11-03). A brand-new
+          learner met a red "9+" for messages dated weeks before they arrived — noise at the
+          exact moment the app should be quiet. The messages are still all there inside.
+        */
+        learner.inbox_opened_at ?? learner.set_up_at ?? new Date().toISOString(),
       ),
     )
-  }, [learner.chapter, learner.profile?.genres, learner.purpose, learner.inbox_opened_at])
+  }, [learner.chapter, learner.profile?.genres, learner.purpose, learner.inbox_opened_at, learner.set_up_at])
 
   return (
     <Link

@@ -61,7 +61,7 @@ export function RedeemCode() {
         // The picker and the Club both read entitlements once, on mount, so a redeemed
         // code changes nothing on screen until something reloads. Somebody redeeming a
         // club code is going to the Club.
-        setTimeout(() => window.location.assign(body.club ? '/club' : '/vibes'), 1400)
+        setTimeout(() => window.location.assign(body.club ? '/club' : '/club'), 1400)
       }
     } catch {
       setState({ ok: false, message: 'That did not work.' })

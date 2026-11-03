@@ -7,7 +7,7 @@ import { DROP_LEAD_DAYS, SETS, setPieces, type WordSet } from '@/content/roots'
 import { SITUATIONS, isCurrent, situationById, type Purpose, type Situation } from '@/content/situations'
 import { DROPS, type Drop } from '@/content/drops'
 import { explainersFor, type Explainer } from '@/content/explainers'
-import { IDIOMS, type Idiom } from '@/content/idioms'
+import { IDIOMS, idiomLabels, type Idiom } from '@/content/idioms'
 import { CHEATS, cheatUnlocked, type Cheat } from '@/content/cheats'
 import { INTRO_CARDS, type IntroCard } from '@/content/intro'
 import { LEGEND_FRAMES, cardFor, frameApplies, frameForPurpose, type LegendFrame } from '@/content/legend'
@@ -1502,7 +1502,13 @@ export function cardFace(card: FeedCard): {
         characters, so the card keeps a short form of the same idea rather than the old
         WHAT WE SAY — which now names nothing, the strip it belonged to having gone.
       */
-      eyebrow: card.idiom.blue ? 'NOT SAFE' : 'LOST IN TRANS.',
+      /*
+        WORD FOR WORD, on the face, since 2026-11-02 — the deck's name said what the deck
+        was; this says what the big words ARE, which is the thing a first-time reader needs
+        (Sam: "make it clear … 'They say' versus 'You say'"; the literal is neither). The
+        blue ones keep NOT SAFE: that warning outranks the label.
+      */
+      eyebrow: card.idiom.blue ? 'NOT SAFE' : idiomLabels().literal,
       title: card.idiom.literal,
       /*
         THE GUESS IS THE GAME, so the card asks for one.

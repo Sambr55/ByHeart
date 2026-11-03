@@ -216,7 +216,7 @@ export function Collection() {
         link would have re-made a dead end that took a report to find.
       */}
       <Link
-        href="/vibes"
+        href="/club"
         data-testid="collection-more"
         className="tap-target eyebrow inline-flex items-center text-accent underline underline-offset-4"
       >

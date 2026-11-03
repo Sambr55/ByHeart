@@ -98,7 +98,7 @@ export function Showing({ id, state }: { id: string; state: 'open' | 'paired' })
       <section className="flex flex-col gap-3">
         <p className="text-sm leading-relaxed text-muted">{SHOWING_COPY.nothing_yet}</p>
         <Link
-          href="/vibes"
+          href="/club"
           className="tap-target eyebrow rounded bg-accent px-5 py-3 text-center text-accent-ink"
         >
           {SHOWING_COPY.nothing_cta}

@@ -307,6 +307,12 @@ export interface LearnerState {
      */
     here_said: boolean
     /**
+     * WHO THEY ARE GOING WITH — the website's booking header asks it, and set-up asks it
+     * the same way since 2026-11-03 ("airline-style set-up"). Optional, so every record
+     * written before it reads as unanswered.
+     */
+    company?: 'solo' | 'partner' | 'family' | 'friends' | 'work' | null
+    /**
      * WHICH KINDS OF NIGHT OUT THEY CARE ABOUT, which the calendar asked and threw away.
      *
      * Sam: "I also want to look at how the information we are gathering INCLUDING the
@@ -566,6 +572,12 @@ export interface LearnerState {
    * shape with different verbs, which no string match could tell you.
    */
   cheats_used: string[]
+  /**
+   * START HERE, met (2026-11-03): the ids of the Start-here tiles somebody has opened and
+   * heard — content/start-here.ts. The level before Level 1 is done when they all are.
+   * Optional, so every record written before it reads as nothing met yet.
+   */
+  start_done?: string[]
   sections_completed: string[]
   /**
    * How many sittings this learner has done, in total, across every vibe.
@@ -575,6 +587,26 @@ export interface LearnerState {
    * SESSION DONE badge marks, and now what the Legend counts.
    */
   sittings: number
+  /**
+   * HOW MANY TIMES THEY WERE UNDERSTOOD — said a line out loud and the listener caught it.
+   *
+   * Sam, 2026-11-02: "Count the times you were understood, not your streak. A gentle tally
+   * of 'times you said it out loud' — the little wins of being understood are phenomenal
+   * and confidence boosting."
+   *
+   * Incremented in exactly one place, components/SayButton.tsx, on a result the listener
+   * marked close (engine/listen.ts) — which is every say-it control in the product: rooms,
+   * revision, the Legend, the feed. One press, one verdict, at most one count. Silence, a
+   * miss and a blocked microphone count nothing; nothing is ever taken away.
+   *
+   * A COUNT, NOT A LIST, because it is a tally and not a record. The sentences themselves
+   * are in `proof` already; this is the number on the home screen, and it only rises.
+   * Merged as the higher of the two copies, the rule `sittings` follows — see lib/merge.ts.
+   *
+   * Zero on every record written before this existed, which is the honest reading: nothing
+   * was counting, so nothing is claimed.
+   */
+  understood: number
   /** When the Club welcomed them. Fires once, ever. Earliest wins on a merge. */
   club_welcomed_at: string | null
   /**
@@ -797,6 +829,7 @@ export function emptyLearner(): LearnerState {
       here_to: null,
       here_for_good: false,
       here_said: false,
+      company: null,
       email: null,
       genres: [],
       into: [],
@@ -826,8 +859,10 @@ export function emptyLearner(): LearnerState {
     card_levels: {},
     drops_done: [],
     cheats_used: [],
+    start_done: [],
     sections_completed: [],
     sittings: 0,
+    understood: 0,
     club_welcomed_at: null,
     club_walked_at: null,
     mentor: null,
@@ -1059,6 +1094,7 @@ export function loadLearner(): LearnerState {
           card_levels: (parsed.card_levels as Record<string, string>) ?? {},
           drops_done: arr(parsed.drops_done, []),
           cheats_used: arr(parsed.cheats_used, []),
+          start_done: arr(parsed.start_done, []),
           sections_completed: arr(parsed.sections_completed, []),
           /*
             Back-filled from sections_completed for anybody who has one and no count.
@@ -1071,6 +1107,11 @@ export function loadLearner(): LearnerState {
             typeof parsed.sittings === 'number'
               ? parsed.sittings
               : arr(parsed.sections_completed, []).length,
+          /* Zero, not guessed, on a record from before the tally — see `understood`. */
+          understood:
+            typeof parsed.understood === 'number' && parsed.understood > 0
+              ? Math.floor(parsed.understood)
+              : 0,
           club_welcomed_at: parsed.club_welcomed_at ?? null,
           /* Absent on every record written before the walk-through existed, and absent is
              the honest reading: they have not been shown the controls. A member already
@@ -1303,6 +1344,13 @@ export function setProfile(
  * note on here_from. Passing null for both clears it back to unsaid, which is what the
  * `change` link on a settled answer needs.
  */
+/** Who they are going with; null clears it. See profile.company. */
+export function setCompany(company: NonNullable<LearnerState['profile']['company']> | null) {
+  update((s) => {
+    s.profile = { ...s.profile, company }
+  })
+}
+
 export function setWhenHere(opts: {
   from?: string | null
   to?: string | null
@@ -1399,6 +1447,8 @@ export async function syncSession(reason: string): Promise<boolean> {
         roots_played: s.roots_played,
         sections_completed: s.sections_completed,
         sittings: s.sittings,
+        /* The tally travels like the sittings: a count of work done, merged as the max. */
+        understood: s.understood,
         club_welcomed_at: s.club_welcomed_at,
         club_walked_at: s.club_walked_at,
         /* Synced, because who is teaching you is not a fact about one handset. */
@@ -1691,6 +1741,34 @@ export function transferPieces(ids: PieceId[]) {
     recordEvidence({
       target_id: id,
       event_type: 'transfer',
+      correct_first_try: true,
+      hint_count: 0,
+      revealed: false,
+      latency_ms: 0,
+      culture_context: null,
+      mission_id: null,
+    })
+  }
+}
+
+/**
+ * A word said cold again, on purpose — "Say it cold" on a laid tile of the Wall (2026-11-02).
+ *
+ * The Panel knocks a tile out of place when the room's words have gone quiet for a
+ * fortnight (see roomSlipping in components/path/progress.ts; on the Wall it was a crack),
+ * so saying them again has to be the thing that puts it back. That is a COLD RECALL by the plainest reading — asked from the English,
+ * nothing on screen — and it is the one event that sets `latest_recall_at`, which is
+ * exactly what the drift reads first.
+ *
+ * Same restraint as transferPieces: only words already owned. A revision does not teach.
+ */
+export function recallPieces(ids: PieceId[]) {
+  const owned = getLearner().inventory
+  for (const id of ids) {
+    if (!owned[id]) continue
+    recordEvidence({
+      target_id: id,
+      event_type: 'cold_recall',
       correct_first_try: true,
       hint_count: 0,
       revealed: false,
@@ -2375,6 +2453,15 @@ export function markDropDone(id: string) {
  * way to un-use one: a thing you have done stays done, which is the same rule the rest of
  * the library follows.
  */
+/** A Start-here tile, met. Append-only, like everything else somebody has done. */
+export function markStartDone(id: string) {
+  update((s) => {
+    const done = s.start_done ?? []
+    if (done.includes(id)) return
+    s.start_done = [...done, id]
+  })
+}
+
 export function useCheat(id: string) {
   update((s) => {
     if (s.cheats_used.includes(id)) return
@@ -2547,6 +2634,20 @@ export function rememberSection(family: string) {
     */
     s.sittings = (s.sittings ?? 0) + 1
   })
+}
+
+/**
+ * One more time understood. Called by components/SayButton.tsx when the listener accepts
+ * a line as close — see the note on `understood` above. Returns the new total, so the
+ * caller could mark a milestone if it ever wants to; today the home screen does that.
+ */
+export function recordUnderstood(): number {
+  let n = 0
+  update((s) => {
+    s.understood = (s.understood ?? 0) + 1
+    n = s.understood
+  })
+  return n
 }
 
 /** The welcome fires once, ever, and the first time is the true time. */

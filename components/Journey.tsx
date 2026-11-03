@@ -779,7 +779,8 @@ function Landing() {
               is built for. The URL carries it for the same reasons ?door=1 does: it
               survives a reload, it is honest in a shared link, and it cannot get stuck on.
             */
-            router.push('/club?in=1')
+            /* Straight to set-up and the first room (2026-11-03) — see app/start/Start.tsx. */
+            router.push('/start')
           }}
           /*
             Azulejo blue, pinned rather than tokenised.

@@ -7,6 +7,7 @@ import { BRAND } from '@/content/brand'
 import { LANDING } from '@/content/front-door'
 import { Wordmark } from '@/components/Wordmark'
 import { useInstallable } from '@/components/Install'
+import { applyBookingFromUrl } from '@/engine/booking'
 
 /**
  * The page a QR code points at, whose only job is to get DUB onto a home screen.
@@ -38,7 +39,16 @@ export function Get() {
     codebase has paid for more than once.
   */
   const [ready, setReady] = useState(false)
-  useEffect(() => setReady(true), [])
+  useEffect(() => {
+    /*
+      THE MARKETING SITE'S SEARCH LANDS HERE (2026-11-02): /get?purpose=…&depart=…&ret=….
+      Written to the learner now, after mount, so set-up never asks the question the
+      search already answered. Validated and never over an answer — see engine/booking.ts.
+    */
+    applyBookingFromUrl()
+    /* Onward to /start, not the front door: the trip is answered, so the only thing left is the name (2026-11-03). */
+    setReady(true)
+  }, [])
 
   return (
     <main
@@ -199,7 +209,7 @@ export function Get() {
             both, this page has no job, so it does not pretend to have one.
           */
           <Link
-            href="/"
+            href="/start"
             data-testid="get-in"
             className="tap-target eyebrow w-full max-w-sm rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
@@ -216,7 +226,7 @@ export function Get() {
         */}
         {ready && (how === 'ios' || how === 'in-app') ? (
           <Link
-            href="/"
+            href="/start"
             data-testid="get-skip"
             className="text-sm text-white/80 underline underline-offset-4"
           >

@@ -15,7 +15,14 @@ import type { Purpose } from '@/content/situations'
 
 export type LanguageGender = 'm' | 'f'
 export type AgeBand = 'under25' | '25to39' | '40to59' | '60plus'
-export type Goal = 'trip' | 'someone' | 'moving' | 'work' | 'curious'
+/*
+  `season` is not one of the five answers on screen. It is written only by the booking
+  pass-through (lib/booking.ts, 2026-11-02): the marketing site's search asks visiting,
+  staying or moving, and "staying" is a season — not "someone in my life speaks it" and not
+  "it's for work", the two on-screen answers that also mean staying. Writing either of
+  those would put a claim in the record that the learner never made.
+*/
+export type Goal = 'trip' | 'someone' | 'moving' | 'work' | 'curious' | 'season'
 
 /*
   THE ONE WHY, and there were two.
@@ -271,6 +278,15 @@ export const GOAL_NEEDS: Record<Goal, { label: string; pieces: string[] }[]> = {
     { label: 'check you understood', pieces: ['e_verdade'] },
   ],
   curious: [],
+  /* A season: the counter and the same faces twice. Only pieces the graph teaches. */
+  season: [
+    { label: 'asking for something at a counter', pieces: ['preciso_de'] },
+    { label: 'ordering it the way you actually want it', pieces: ['com', 'sem'] },
+    { label: 'when you did not catch what they said', pieces: ['outra_vez'] },
+    { label: 'agreeing a time with somebody', pieces: ['amanha'] },
+    { label: 'introduce yourself', pieces: ['chamo_me'] },
+    { label: 'the moment after you get it wrong', pieces: ['desculpa'] },
+  ],
 }
 
 export const GOAL_LABEL: Record<Goal, string> = {
@@ -279,4 +295,5 @@ export const GOAL_LABEL: Record<Goal, string> = {
   moving: 'living there',
   work: 'work',
   curious: 'no particular destination',
+  season: 'the season',
 }

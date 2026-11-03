@@ -378,6 +378,20 @@ function ev(
   )
 }
 
+/* -------------------------------------------------------------- the understood tally */
+/*
+  Sam, 2026-11-02: "Count the times you were understood, not your streak." A counter that
+  only rises, merged like `sittings`: the higher copy, never the sum, and never lost to a
+  record that predates it.
+*/
+console.log('\nthe understood tally')
+{
+  check('the higher copy wins', mergeLearner({ understood: 7 }, { understood: 3 }).understood === 7)
+  check('either way round', mergeLearner({ understood: 3 }, { understood: 7 }).understood === 7)
+  check('a record from before the tally does not reset it', mergeLearner({ understood: 4 }, {}).understood === 4)
+  check('two synced copies are not added together', mergeLearner({ understood: 5 }, { understood: 5 }).understood === 5)
+}
+
 /* ------------------------------------------------------------------ whose copy is it */
 /*
   The one field in the record that can say no.

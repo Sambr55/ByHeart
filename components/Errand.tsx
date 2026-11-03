@@ -1,12 +1,15 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
 import { MiniBuild } from '@/components/Journey'
 import { CopyButton } from '@/components/CopyButton'
+import { SayButton, useCanListen } from '@/components/SayButton'
 import { Wordmark } from '@/components/Wordmark'
+import { RoomSteps } from '@/components/RoomSteps'
+import { Burst, panelSliceFor } from '@/components/path/Panel'
+import { useLearner } from '@/engine/useLearner'
 import { slugFor } from '@/content/audio-manifest'
 import { piecesIn, roomPieceIds } from '@/content/roots'
 import { chapterById } from '@/content/chapters'
@@ -232,6 +235,13 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
     banking already happened on the tap that got here.
   */
   const [stage, setStage] = useState<'read' | 'cold' | 'said' | 'done'>('read')
+  const canListen = useCanListen()
+  const learner = useLearner()
+  /* This room's square of the painting, for the end state. Null off the learner's path. */
+  const slice = useMemo(
+    () => panelSliceFor(situation.id, learner.purpose ?? null, learner.chapter ?? 'lisbon'),
+    [situation.id, learner.purpose, learner.chapter],
+  )
 
   /*
     ONE PLACE THAT BANKS A ROOM, and it is what puts the Club on the ladder.
@@ -319,196 +329,55 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
       </header>
 
       {stage === 'read' ? (
-        <>
-          {/*
-            The room, before the language for it.
-
-            This is the evidence register rather than the front door's: an ordinary
-            pharmacy on an ordinary afternoon, not a sunset. It is doing a different job
-            too — the door makes you want to go, and this makes the place recognisable
-            before you are standing in it, which is most of what being nervous is about.
-
-            16:9 and short on purpose. It sets the scene and then gets out of the way,
-            because the lines underneath are what somebody actually came for.
-          */}
-          {situation.image ? (
-            /*
-              THE TITLE LIVES ON THE PHOTOGRAPH, in the room as well as on the card.
-
-              The image was a bare 16:9 strip and the title sat in ink underneath it, so a
-              room opened with a picture of a place and then, separately, told you where you
-              were. Sam, on the screenshot: "Add big title letters" — the same splash the
-              drop card in the Club already wears, which is what makes the two read as one
-              object seen twice rather than two designs.
-
-              The scrim is a gradient from nothing at the top to near-black at the bottom,
-              which is what lets white letters sit on a photograph whose brightness nobody
-              authored. `drop-shadow` underneath it for the same reason at the pixel level.
-
-              The heading is HERE now rather than below, so the block underneath keeps the
-              dots and the blurb and loses its h1 — see the next comment. One title per
-              room, which was the whole complaint.
-            */
-            <div className="relative -mx-5 aspect-[16/9] overflow-hidden on-dark">
-              <Image
-                src={situation.image.src}
-                alt={situation.image.alt}
-                fill
-                sizes="(max-width: 448px) 100vw, 448px"
-                className="object-cover"
-              />
-              <div
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                  background:
-                    'linear-gradient(to bottom, rgb(0 0 0 / 0) 30%, rgb(0 0 0 / 0.62) 100%)',
-                }}
-              />
-              <h1
-                className="display absolute inset-x-0 bottom-0 text-balance px-5 pb-3 text-3xl text-white"
-                style={{ textShadow: '0 1px 12px rgb(0 0 0 / 0.55)' }}
-              >
-                {situation.title}
-              </h1>
-            </div>
-          ) : null}
-
-          <div className="flex flex-col gap-3">
-            {/*
-              WHERE THIS ROOM IS IN THE NIGHT, said in one line instead of a menu.
-
-              The list that used to sit under TAKE IT AWAY made the other rooms reachable
-              and made the screen read as two competing offers — "take this away" above
-              "or go somewhere else". Sam: "The The Rest of teh Night and Take it away are
-              jarring."
-
-              The sequence is the flow now, so this only has to say where you are in it.
-              Four dots and the event's name: enough to know there is more and that this is
-              part of something, and not enough to be a decision.
-            */}
-            {drop && rooms.length > 1 ? (
+        /*
+          THE ROOM, APP-STYLE (Sam, 2026-11-02: "click through to the content and it's still
+          pretty 'posh HTML'"). The read stage is RoomSteps now — the place full-bleed, one
+          sentence a card, the controls under the thumb. Everything it used to say is still
+          said: the night's progress or the city over the title, the why, every line with
+          its moment, its English and its audio, and the button into YOUR TURN carrying the
+          job's own words. See components/RoomSteps.tsx for why each part moved.
+        */
+        <RoomSteps
+          situation={situation}
+          gender={learner.profile?.gender ?? null}
+          top={
+            drop && rooms.length > 1 ? (
+              /* Where this room is in the night: four dots and the event, not a menu. */
               <div className="flex items-center gap-3" data-testid="night-progress">
                 <span className="flex shrink-0 items-center gap-1" aria-hidden>
                   {rooms.map((s2, i) => (
-                    <span
-                      key={s2.id}
-                      className={
-                        'block h-1 w-4 rounded-full ' + (i <= at ? 'bg-accent' : 'bg-line')
-                      }
-                    />
+                    <span key={s2.id} className={'block h-1 w-4 rounded-full ' + (i <= at ? 'bg-white' : 'bg-white/35')} />
                   ))}
                 </span>
-                <span className="eyebrow min-w-0 truncate text-muted">{drop.event}</span>
+                <span className="eyebrow min-w-0 truncate">{drop.event}</span>
               </div>
             ) : (
-              <p className="eyebrow text-muted">{chapter.city.toUpperCase()}</p>
-            )}
-            {/*
-              Only when the photograph is not already carrying it. A room with an image
-              says its name once, in white, over the picture; a room without one still
-              needs a heading, and this is it.
-            */}
-            {situation.image ? null : (
-              <h1 className="display text-balance text-3xl">{situation.title}</h1>
-            )}
-            {/* The reason to be in this room, under its title. Body size, as the
-                reference card sets the gloss under its own question. */}
-            <p className="text-base leading-relaxed text-muted">{situation.why}</p>
-          </div>
-
-          {/*
-            Ordered by the encounter, not by difficulty. The sequence IS the teaching:
-            somebody rehearsing this is walking through the door in their head.
-          */}
-          {/*
-            A CARD PER LINE, RATHER THAN ONE CARD WITH ROWS IN IT.
-
-            These are separate sentences for separate moments in one encounter — not a
-            list of properties — so each keeps its own edge and the eye can take them one
-            at a time. What changes is the strength: `rounded px-4 py-3` is the shape of a
-            row in a table, and these are the content of the screen.
-
-            And the three lines in each were a ladder down into nothing: the Portuguese at
-            text-lg, the English at text-sm faded to 80%, and WHEN TO SAY IT — which is the
-            only part that teaches anything a dictionary would not — at text-xs muted.
-            The English comes up to body size in the ink, and the usage note follows it.
-          */}
-          <ol className="flex flex-col gap-3">
-            {situation.lines.map((l) => (
-              <li
-                key={l.pt}
-                className="flex flex-col gap-1 rounded-2xl border border-line bg-bg-elev px-5 py-6"
+              <p className="eyebrow">{chapter.city.toUpperCase()}</p>
+            )
+          }
+          onGo={() => {
+            setStage('cold')
+            track('errand_cold', { id: situation.id })
+          }}
+          extra={
+            /*
+              A WAY TO ACTUALLY BUY ONE, on the room that is about buying one (Sam: "where
+              tickets are available to buy online add a link"). Under the last line, outlined,
+              because it leaves DUB and nothing that leaves should outrank what does not.
+            */
+            drop?.link && /ticket/.test(situation.id) ? (
+              <a
+                href={drop.link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="drop-tickets"
+                className="tap-target eyebrow mt-3 block w-full rounded border border-accent px-5 py-3 text-center text-accent transition hover:bg-accent hover:text-accent-ink"
               >
-                <div className="flex items-center gap-3">
-                  <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
-                  <p className="pt min-w-0 flex-1 text-lg text-accent">{l.pt}</p>
-                  <CopyButton text={l.pt} size="sm" />
-                </div>
-                <p className="text-base text-fg">{l.en}</p>
-                <p className="text-sm leading-relaxed text-muted">{l.when}</p>
-              </li>
-            ))}
-          </ol>
-
-          <button
-            type="button"
-            onClick={() => {
-              setStage('cold')
-              track('errand_cold', { id: situation.id })
-            }}
-            /* mt-10, not mt-auto. See Journey's Cta. */
-            className="tap-target eyebrow mt-10 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
-          >
-            {/*
-              THE CTA NAMES WHAT IT OPENS, rather than describing the mechanic.
-
-              Sam: "The CTAs in venbues are supposed to feed teh next section, not repeat
-              take it away." Every room's button said TAKE IT AWAY, so four screens in a
-              row carried the same label and none of them said where it went — which reads
-              as a loop rather than a sequence, and was the same fault as four lanes all
-              labelled THE ROOM.
-
-              TAKE IT AWAY described what happens to the lines (they go off the screen) and
-              that is the mechanic, not the destination. The destination is the sentence
-              this room is for, so the button says it — the PDF's own note on screen 3:
-              "Change CTA to Finding the entrance".
-
-              From release.ask, which is already the one-line statement of the job and is
-              what the next screen shows at the top. The two cannot drift because they are
-              the same string.
-            */}
-            {situation.release.ask.replace(/\.$/, '').toUpperCase()}
-          </button>
-
-          {/*
-            AND A WAY TO ACTUALLY BUY ONE, on the room that is about buying one.
-
-            Sam: "where tickets are available to buy online add a link." Drop has carried a
-            `link` since the hand-authored one and nothing ever rendered it, so the room
-            that teaches "Ainda há bilhetes?" could not sell you a ticket.
-
-            On the ticket room only. A box office link under "Getting to Oriente" is a
-            button looking for a home, and on the invitation it would compete with the one
-            thing that screen is for.
-
-            Under TAKE IT AWAY rather than above it: the language is what somebody came
-            for, and this is the errand the language is about. Outlined, for the same
-            reason — it leaves DUB, and nothing that leaves should outrank what does not.
-          */}
-          {drop?.link && /ticket/.test(situation.id) ? (
-            <a
-              href={drop.link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="drop-tickets"
-              className="tap-target eyebrow mt-3 block w-full rounded border border-accent px-5 py-3 text-center text-accent transition hover:bg-accent hover:text-accent-ink"
-            >
-              {drop.link.label} ↗
-            </a>
-          ) : null}
-
-        </>
+                {drop.link.label} ↗
+              </a>
+            ) : null
+          }
+        />
       ) : null}
 
       {stage === 'cold' ? (
@@ -579,6 +448,24 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
             directly under it, so the thing achieved and the way out of the screen had
             equal weight. The card separates them without a rule.
           */}
+          {/*
+            THE TILE, LAID — the end of a room ties to the home screen (Sam, 2026-11-02). The
+            square of the Panel's painting this room earns flips into place here, the same
+            square that will be waiting on the panel. Banking happened on the tap that got
+            here (bank, above); this only shows it.
+          */}
+          {slice ? (
+            <div className="flex items-center gap-3" data-testid="room-laid">
+              <span className="room-laid-tile relative block h-20 w-20 shrink-0 overflow-hidden rounded-md [perspective:700px]">
+                <span className="panel-tile is-laid room-laid-flip absolute inset-0" style={slice} />
+                <Burst />
+              </span>
+              <span className="flex flex-col gap-1">
+                <span className="eyebrow text-accent">A tile laid</span>
+                <span className="text-sm leading-snug text-muted">It is on your panel now. Tap it there for the line, any time.</span>
+              </span>
+            </div>
+          ) : null}
           <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
             <p className="eyebrow text-accent">YOU SAID</p>
             <div className="flex items-center gap-3">
@@ -590,6 +477,23 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
               <CopyButton text={situation.release.answer} />
             </div>
             <p className="text-base leading-relaxed text-muted">{situation.release.ask}</p>
+            {/*
+              AND NOW OUT LOUD — the third of "listen, copy or say" (2026-11-02).
+
+              A room ended in tiles, so the one place a learner rehearses the sentence they
+              will actually walk in with was the one place the microphone never appeared,
+              and the understood tally on the home screen (Sam: "Count the times you were
+              understood, not your streak") could never be fed by a room. The button banks
+              nothing — the proof was recorded on the tap that got here — it only listens,
+              pings, and counts. Not drawn where the browser cannot listen, and neither is
+              the caption, for the reason SayButton gives.
+            */}
+            {canListen ? (
+              <div className="flex items-center gap-3 border-t border-line pt-4" data-testid="errand-say">
+                <SayButton want={situation.release.answer} />
+                <p className="text-sm leading-snug text-muted">Now say it out loud. If it lands, it counts.</p>
+              </div>
+            ) : null}
           </div>
           <div className="flex flex-col gap-3">
             {/*

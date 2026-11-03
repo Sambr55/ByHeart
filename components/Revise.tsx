@@ -1,16 +1,18 @@
 'use client'
 
 import { SayItCard } from '@/components/SayItCard'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { MiniBuild } from '@/components/Journey'
 import { BottomNav } from '@/components/BottomNav'
 import { Dock, Framed } from '@/components/Dock'
 import { useLearner } from '@/engine/useLearner'
-import { recordProof } from '@/engine/learner'
-import { revisionFor, revisionTitle } from '@/content/revision'
-import type { CardKind } from '@/content/collection'
+import { recallPieces, recordProof } from '@/engine/learner'
+import { revisionFor, revisionTitle, type RevisionKind } from '@/content/revision'
+import { situationById } from '@/content/situations'
+import { roomSlipping } from '@/components/path/progress'
+import { markHomecoming } from '@/components/path/homecoming'
 
 /**
  * REVISION — a finished card, asked back.
@@ -33,10 +35,52 @@ import type { CardKind } from '@/content/collection'
 export function Revise() {
   const params = useSearchParams()
   const learner = useLearner()
-  const kind = (params.get('kind') ?? 'vibe') as CardKind
+  const kind = (params.get('kind') ?? 'vibe') as RevisionKind
   const id = params.get('id') ?? ''
+  /*
+    WHERE "BACK" GOES DEPENDS ON WHERE YOU CAME FROM (the Wall, 2026-11-02).
+
+    Every other kind is a card on the board in Yours, so back is /profile. A room is a tile
+    on the home screen's panel — "Say it cold" on a laid tile, "Put it back" on a drifted
+    one, or a tile in the "Put these back" strip — and sending somebody from the home screen
+    to Yours would be a door into a different room than the one they left by. So a room goes
+    back to the Club, where the panel is. (It said BACK TO THE WALL until the Panel replaced
+    the Wall, 2026-11-02, and BACK TO THE PANEL until the Road came back beside it the same
+    day — the home screen can be either now, so it names neither.)
+  */
+  const back = kind === 'room' || kind === 'cheat' ? { href: '/club', label: 'BACK TO YOUR PATH', aria: 'Back to your path' } : { href: '/profile', label: 'BACK TO YOURS', aria: 'Back to Yours' }
+  const backTo = back
   const [at, setAt] = useState(0)
   const [done, setDone] = useState(false)
+
+  /*
+    EVERY PUT-BACK IS A WIN (Sam, 2026-11-02 — the website's restore demo, brought here).
+
+    A room's revision is how a drifted tile is put back, so when its release comes back
+    clean this screen ends on a celebration rather than on STILL YOURS: back in place, the
+    line itself, and — when you came from the "Put these back" strip — how many of that
+    round are home. And it tells the home screen (markHomecoming) so the tile animates home
+    the next time the Panel or the Road is drawn.
+
+    `wasLoose` is whether the tile had come loose when this screen opened. Taken once, from
+    the first render whose record actually holds the room — the hydration render has an
+    empty record, and an empty record would say "not loose" about every room.
+  */
+  const room = kind === 'room' ? situationById(id) : undefined
+  const [wasLoose, setWasLoose] = useState<boolean | null>(null)
+  useEffect(() => {
+    if (!room || wasLoose !== null) return
+    if (!(learner.finished_cards ?? []).includes(room.id)) return
+    setWasLoose(roomSlipping(learner, room, new Date()))
+  }, [learner, room, wasLoose])
+  const [won, setWon] = useState(false)
+  const winOn = (answer: string) => {
+    if (!room || answer !== room.release.answer) return
+    setWon(true)
+    if (wasLoose) markHomecoming(room.id)
+  }
+  /* The round from the strip: the ids that were loose, counted home from the record. */
+  const round = (params.get('round') ?? '').split(',').filter(Boolean)
   /*
     Whether the device can listen is SayItCard's business now, not this screen's — it
     draws the microphone or the line that replaces it. See components/SayItCard.tsx.
@@ -62,7 +106,7 @@ export function Revise() {
   */
   if (!lines.length) {
     return (
-      <Shell title={revisionTitle(kind, id)}>
+      <Shell title={revisionTitle(kind, id)} back={back}>
         {/*
           THE WHITE CARD ON THE EMPTY STATE TOO, which is the half of this screen that
           never got it.
@@ -107,10 +151,46 @@ export function Revise() {
             button says what it can do instead.
           */}
           <Link
-            href={kind === 'words' ? '/vibes' : '/profile'}
+            href={kind === 'words' ? '/club' : back.href}
             className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
-            {kind === 'words' ? 'GO AND EARN SOME' : 'BACK TO YOURS'}
+            {kind === 'words' ? 'GO AND EARN SOME' : back.label}
+          </Link>
+        </Dock>
+      </Shell>
+    )
+  }
+
+  if ((done || !line) && won && room) {
+    const back = (round.length ? round : [room.id]).map((rid) => situationById(rid)).filter((r): r is NonNullable<typeof r> => Boolean(r))
+    const home = back.filter((r) => (learner.finished_cards ?? []).includes(r.id) && !roomSlipping(learner, r, new Date())).length
+    return (
+      <Shell title={revisionTitle(kind, id)} back={backTo}>
+        <div className="win-card flex flex-col gap-3 rounded-2xl border-2 border-[#e2b450] bg-bg-elev px-5 py-6" data-testid="put-back-win" role="status">
+          <p className="eyebrow text-accent">{wasLoose ? '✓ Back in place' : '✓ Said cold'}</p>
+          <h1 className="display text-balance text-2xl">{room.title}</h1>
+          <p lang="pt-PT" className="pt display text-balance text-3xl text-accent">
+            {room.release.answer}
+          </p>
+          <p className="text-sm leading-relaxed text-muted">{room.release.ask}</p>
+          {round.length > 1 ? (
+            <p className="flex items-center gap-1 text-xs text-muted" data-testid="put-back-count">
+              {back.map((r, k) => (
+                <span
+                  key={r.id}
+                  aria-hidden
+                  className={'inline-block h-3.5 w-3.5 rounded-[3px] ' + (k < home ? 'bg-[color:var(--azulejo)]' : 'border border-dashed border-line-strong')}
+                />
+              ))}
+              <span className="ml-1">
+                {home} of {back.length} put back
+              </span>
+            </p>
+          ) : null}
+        </div>
+        <Dock>
+          <Link href={backTo.href} className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink">
+            {wasLoose ? 'SEE IT BACK IN PLACE' : backTo.label}
           </Link>
         </Dock>
       </Shell>
@@ -119,7 +199,7 @@ export function Revise() {
 
   if (done || !line) {
     return (
-      <Shell title={revisionTitle(kind, id)}>
+      <Shell title={revisionTitle(kind, id)} back={back}>
         {/*
           AND THE SAME CARD ON THE DONE BEAT, so the screen keeps its shape to the end.
 
@@ -141,10 +221,10 @@ export function Revise() {
         </div>
         <Dock>
           <Link
-            href="/profile"
+            href={back.href}
             className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
-            BACK TO YOURS
+            {back.label}
           </Link>
         </Dock>
       </Shell>
@@ -152,7 +232,7 @@ export function Revise() {
   }
 
   return (
-    <Shell title={revisionTitle(kind, id)}>
+    <Shell title={revisionTitle(kind, id)} back={back}>
       <div className="flex items-baseline gap-3">
         <p className="eyebrow min-w-0 text-accent">SAY IT BACK</p>
         <span className="h-px flex-1 bg-line" />
@@ -204,6 +284,12 @@ export function Revise() {
           {line.context}
         </p>
       ) : null}
+      {/* "How do you say:" — the context sets the scene, this asks the question. RevisionLine.lead. */}
+      {line.lead ? (
+        <p data-testid="revise-lead" className="text-sm font-semibold text-fg">
+          {line.lead}
+        </p>
+      ) : null}
       <SayItCard
         key={line.answer}
         ask={line.ask}
@@ -240,6 +326,9 @@ export function Revise() {
             produced with nothing on screen, and a revision said cold is one of those.
           */
           recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
+          /* A room's words, recalled — what puts a drifted tile back on the panel. See RevisionLine.pieces. */
+          if (line.pieces?.length) recallPieces(line.pieces)
+          winOn(line.answer)
           /*
             AND IT DOES NOT ADVANCE HERE, WHICH IS WHY THE TICK WAS NEVER SEEN.
 
@@ -283,6 +372,8 @@ export function Revise() {
               */
               if (clean) {
                 recordProof({ pt: line.answer, en: line.ask, source: 'release', clean: true })
+                if (line.pieces?.length) recallPieces(line.pieces)
+                winOn(line.answer)
               }
               /*
                 AND IT NO LONGER JUMPS. Solving the picker used to advance the card
@@ -299,12 +390,20 @@ export function Revise() {
   )
 }
 
-function Shell({ title, children }: { title: string; children: React.ReactNode }) {
+function Shell({
+  title,
+  back,
+  children,
+}: {
+  title: string
+  back: { href: string; aria: string }
+  children: React.ReactNode
+}) {
   return (
     <div className="app-frame bg-bg text-fg">
       <header className="bar sticky top-0 z-30 px-5 py-3">
         <div className="mx-auto flex w-full max-w-md items-center gap-3">
-          <Link href="/profile" className="tap-target shrink-0" aria-label="Back to Yours">
+          <Link href={back.href} className="tap-target shrink-0" aria-label={back.aria}>
             ‹
           </Link>
           <p className="eyebrow min-w-0 flex-1 truncate">{title.toUpperCase()}</p>

@@ -46,6 +46,7 @@ import {
   SETS,
   SHELVES,
   PIECES,
+  roomPieceIds,
   type CultureFamily,
   type Shelf,
 } from '@/content/roots'
@@ -54,6 +55,19 @@ import { DROPS } from '@/content/drops'
 import { IDIOMS } from '@/content/idioms'
 import { CHEATS } from '@/content/cheats'
 import type { CardKind } from '@/content/collection'
+import { situationById } from '@/content/situations'
+
+/**
+ * EVERY KIND /revise CAN ASK, which is one more than the board holds.
+ *
+ * `room` arrived with the Wall (2026-11-02): a laid tile on the home screen offers "Say it
+ * cold", and that is a revision of a ROOM — a Situation — which is not a card on the
+ * collection grid. It is a separate union on purpose, so collection.ts's CardKind, its
+ * decks and its boards (DECK_OF_KIND, everyCard, cardHref) are not forced to grow a branch
+ * for something they never show. Anything that only knows cards keeps taking CardKind;
+ * only this file and components/Revise.tsx take the wider one.
+ */
+export type RevisionKind = CardKind | 'room'
 
 export interface RevisionLine {
   /** What they are asked for, in English. */
@@ -83,8 +97,21 @@ export interface RevisionLine {
    * content in a lookup function.
    */
   context?: string
+  /**
+   * The words that turn the English into a question — "How do you say:" — shown between
+   * the context and the card. Only the room kind sets it today: see the room branch.
+   */
+  lead?: string
   /** Words the build offers that the sentence does not teach — see MiniBuild. */
   helpers?: Record<string, string>
+  /**
+   * The library words a clean answer counts as recalled — the `room` kind only.
+   *
+   * The Panel knocks a tile out of place when its words go quiet (the Wall, before it, drew
+   * a crack), so saying them again on /revise has to put it back: Revise records a cold recall for these (recallPieces in engine/learner.ts).
+   * The release carries every word the room handed over; a word line carries itself.
+   */
+  pieces?: string[]
 }
 
 /**
@@ -95,7 +122,7 @@ export interface RevisionLine {
  * somebody on language this product has never shown them.
  */
 export function revisionFor(
-  kind: CardKind,
+  kind: RevisionKind,
   id: string,
   me: {
     legend?: { frame_id: string; values: Record<string, string> }[]
@@ -121,6 +148,46 @@ export function revisionFor(
         context: r.transfer_prompt.context,
         helpers: r.helpers,
       }))
+  }
+
+  if (kind === 'room') {
+    /*
+      A ROOM IS REVISED BY ITS RELEASE, AND THEN ITS WORDS (the Wall, 2026-11-02).
+
+      The release first, because it is the one sentence the room said you must be able to
+      say cold — the same line the proof card counts, and the one that turns a laid tile
+      into a glazed one (roomSaidCold in components/path/progress.ts). The room's title is
+      its context, for the reason the drop branch gives: the title IS the moment.
+
+      Then the words it handed over (its `pieces`, via roomPieceIds), asked as words like a
+      shelf asks them — these are what make a tile "worth another look" when they go quiet,
+      so they are what saying it cold should touch again. A word that is the release itself
+      is not asked twice.
+    */
+    const room = situationById(id)
+    if (!room) return []
+    const ids = roomPieceIds(room)
+    /*
+      CONTEXT, OR IT IS A QUIZ WITH NO QUESTION (Sam, 2026-11-02). Testing "put it back" on
+      the website's panel, he was asked a bare line and said: "there is no context
+      whatsoever… what is the right answer?" The header already names the room (its
+      title), so the context here is the room's `why` — the situation, in a sentence —
+      and the lead turns the English into the question it is: How do you say: "…".
+      This is the first thing "Put it back" on a drifted tile shows, so it must be about
+      that tile, and say so.
+    */
+    const release: RevisionLine = {
+      ask: room.release.ask,
+      answer: room.release.answer,
+      context: room.why || room.title,
+      lead: 'How do you say:',
+      pieces: ids,
+    }
+    const words = ids
+      .map((pid) => ({ pid, p: PIECES[pid] }))
+      .filter(({ p }) => p && p.target && p.gloss && p.target !== room.release.answer)
+      .map(({ pid, p }) => ({ ask: p.gloss, answer: p.target, lead: 'And the word for:', pieces: [pid] }))
+    return [release, ...words]
   }
 
   if (kind === 'sheet') {
@@ -282,7 +349,9 @@ export function revisionFor(
 }
 
 /** What the screen is called, which is the card's own name. */
-export function revisionTitle(kind: CardKind, id: string): string {
+export function revisionTitle(kind: RevisionKind, id: string): string {
+  /* A room is called what it is called on the Wall. */
+  if (kind === 'room') return situationById(id)?.title ?? id
   /* A vibe is a crate and a sheet is a set. Looking a vibe up in SETS never matches. */
   if (kind === 'vibe') return CRATES.find((c) => c.id === id)?.title ?? id
   if (kind === 'sheet') return SETS.find((s) => s.id === id)?.label ?? id

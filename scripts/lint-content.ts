@@ -12,7 +12,7 @@
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { BOB } from '../content/bob'
-import { IDIOMS } from '../content/idioms'
+import { IDIOMS, idiomLabels } from '../content/idioms'
 import { idiomImage } from '../content/feed'
 import { IMAGE_BANK } from '../content/images'
 import { VIBE_IMAGES } from '../content/vibe-images'
@@ -1554,6 +1554,17 @@ for (const e of EXAMPLES) {
     if (!r.wreckage.why.trim()) {
       fail('Bob root ' + r.root_id + ' crosses a line out without saying why')
     }
+  }
+  /*
+    YOU SAY / THEY SAY / WORD FOR WORD (Sam, 2026-11-02: "make it clear on the idioms cards
+    … 'They say' versus 'You say'"). One source, and the card reads it rather than spelling
+    it — so a stray WE SAY in the feed fails here.
+  */
+  {
+    const l = idiomLabels()
+    if (l.you !== 'YOU SAY' || l.they !== 'THEY SAY' || l.literal !== 'WORD FOR WORD') fail('idiom labels are not YOU SAY / THEY SAY / WORD FOR WORD: ' + JSON.stringify(l))
+    const feedSrc = readFileSync('components/Feed.tsx', 'utf8')
+    if (/>\s*WE SAY\s*</.test(feedSrc) || !/\{IDIOM_LABEL\.you\}/.test(feedSrc) || !/\{IDIOM_LABEL\.they\}/.test(feedSrc)) fail('components/Feed.tsx labels idioms itself rather than from idiomLabels()')
   }
   const byEnglish = new Map(IDIOMS.map((i) => [i.english.toLowerCase(), i]))
   let paired = 0

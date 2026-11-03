@@ -2120,3 +2120,308 @@ summary:focus-visible,
     animation: none;
   }
 }
+
+/*
+  THE PANEL — the home screen's progress, as one azulejo painting (Sam approved, 2026-11-02).
+
+  It replaced the Wall the same day. Sam: "At the moment it looks like a badly laid out
+  PowerPoint … something much more elegant and aspirational with some level of movement."
+  Ported from the website's prototype (dub-site-v2/app/globals.css, .panel-*), which he
+  called "you surpassed yourself there". components/path/Panel.tsx says what each state is.
+
+  THE PANEL IS ALWAYS BLUE ON WHITE, in dark mode too: it is a painting in a frame, and a
+  painting does not change colour when the lights go down. So its colours are its own and
+  not the theme's roles — only the breathing outline and the keystone glaze use --azulejo.
+*/
+.panel-frame {
+  background: #f6f3ec;
+  box-shadow: 0 30px 60px -36px rgba(26, 36, 48, 0.7);
+  outline: 1px solid rgba(0, 0, 0, 0.05);
+}
+.panel-cell { background: #fbfaf6; box-shadow: inset 0 0 0 0.5px rgba(31, 93, 140, 0.18) }
+.panel-ghost { opacity: 0.16; filter: saturate(0.6) }
+.panel-tile {
+  opacity: 0;
+  transform: rotateY(90deg) scale(0.92);
+  /*
+    The site flips in over 650ms with a little overshoot; here it is the app's own scale —
+    --t-land, once per screen, which is what a tile laid is — and no overshoot, because
+    scripts/motion-check.mts is right that a bounce is the signature of a toy.
+  */
+  transition: transform var(--t-land) var(--ease-out), opacity var(--t-arrive) ease;
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.35), inset 0 -6px 10px -8px rgba(0, 0, 0, 0.25);
+}
+.panel-tile.is-laid { opacity: 1; transform: none }
+/* Said cold: a thin gold glaze at the edge. Gilt, not a star, and only just there. */
+.panel-tile.is-laid.is-cold {
+  box-shadow: inset 0 0 0 1.5px rgba(201, 151, 59, 0.85), inset 0 0 6px 0 rgba(201, 151, 59, 0.35),
+    inset 0 -6px 10px -8px rgba(0, 0, 0, 0.25);
+}
+/*
+  DRIFTED (Panel.tsx, DRIFT): a laid tile come loose — turned 8–13°, lifted, a deep
+  shadow and a white edge — with bare mortar in the bed it came out of. The site's
+  `.is-loose`, after Sam said the first, gentler tilts "aren't crooked enough to see".
+  Never red, never cracked, never removed.
+*/
+.panel-tile.is-laid.is-drifted {
+  transform: rotate(var(--rot, 10deg)) translate(var(--dx, 3px), var(--dy, -4px)) scale(0.86);
+  box-shadow: 0 14px 22px -6px rgba(20, 36, 58, 0.7), 0 0 0 2px #fff;
+}
+.panel-gap { background: #d9d2c3 }
+.panel-next { animation: panel-breathe 2.4s ease-in-out infinite; box-shadow: inset 0 0 0 2px var(--azulejo) }
+@keyframes panel-breathe { 0%, 100% { background: rgba(31, 93, 140, 0.06) } 50% { background: rgba(31, 93, 140, 0.22) } }
+/* Leftover squares in the top course: the frieze, so the panel is never ragged. */
+.panel-frieze {
+  background-color: #fbfaf6;
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(31, 93, 140, 0.55) 0 10%, transparent 11%),
+    radial-gradient(circle at 0 0, rgba(31, 93, 140, 0.35) 0 22%, transparent 23%),
+    radial-gradient(circle at 100% 0, rgba(31, 93, 140, 0.35) 0 22%, transparent 23%),
+    radial-gradient(circle at 0 100%, rgba(31, 93, 140, 0.35) 0 22%, transparent 23%),
+    radial-gradient(circle at 100% 100%, rgba(31, 93, 140, 0.35) 0 22%, transparent 23%);
+  box-shadow: inset 0 0 0 0.5px rgba(31, 93, 140, 0.2);
+}
+.panel-sheen::after {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.32) 50%, transparent 60%);
+  transform: translateX(-100%);
+  animation: panel-sheen 7s ease-in-out infinite;
+}
+@keyframes panel-sheen { 0%, 55% { transform: translateX(-100%) } 85%, 100% { transform: translateX(100%) } }
+
+/* The one word on a tile: hidden until the pointer, focus, or a finger is on it. */
+.panel-word { opacity: 0; transform: translateY(3px); transition: opacity var(--t-ack) ease, transform var(--t-ack) ease }
+.panel-cell:hover .panel-word,
+.panel-cell:focus-visible .panel-word,
+.panel-cell:active .panel-word { opacity: 1; transform: none }
+.panel-cell:focus-visible { outline: 2px solid #c9973b; outline-offset: -2px; z-index: 2 }
+
+/* While a tile's sheet is open, that tile alone is outlined and named (Panel.tsx, openId). */
+.panel-open .panel-cell:not(.is-open) .panel-word { opacity: 0 !important }
+.panel-cell.is-open .panel-word { opacity: 1; transform: none }
+.panel-cell.is-open { outline: 2px solid #c9973b; outline-offset: -2px }
+
+/* A drifted tile's own little square, in the "Put these back" strip. */
+.panel-chip {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(20, 36, 58, 0.35);
+}
+
+/* The keystone: a slim labelled strip, glazed 0–3 (progress.ts, keystoneGlaze). */
+.panel-keystone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* One width for all, so the units' bars line up down the legend. */
+  width: 8.25rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  text-align: center;
+}
+.panel-keystone.is-outline { border: 1.5px dashed var(--line-strong); color: var(--fg) }
+.panel-keystone.is-part {
+  border: 1.5px solid var(--azulejo);
+  color: var(--fg);
+  background-image: linear-gradient(to right, color-mix(in srgb, var(--azulejo) 28%, transparent) 0 34%, transparent 34%);
+}
+.panel-keystone.is-glazed,
+.panel-keystone.is-gold {
+  border: 1.5px solid var(--azulejo);
+  background: var(--azulejo);
+  color: #fbfaf6;
+}
+.panel-keystone.is-gold { box-shadow: 0 0 0 2px #c9973b }
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-tile { transition: opacity var(--t-arrive) ease; transform: none }
+  .panel-tile.is-laid.is-drifted { transform: rotate(var(--rot, 10deg)) translate(var(--dx, 3px), var(--dy, -4px)) scale(0.86) }
+  .panel-next { animation: none; background: rgba(31, 93, 140, 0.14) }
+  .panel-sheen::after { animation: none; display: none }
+}
+
+/*
+  THE ROAD (components/path/Road.tsx) — the winding path as the Panel's second view (Sam,
+  2026-11-02: "a 'winding road' map view and a tile view and a toggle"). The same states as
+  the Panel, said in round stops: faded photo → ringed in azulejo → ringed in gold, and a
+  stop that has come loose sits knocked off the line. No bounce, no stars, no hard shadows.
+*/
+.road-stop { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.25rem }
+.road-disc {
+  position: relative;
+  display: block;
+  border-radius: 9999px;
+  /* Opaque, so the road runs under a stop and not through it. */
+  background: var(--bg-elev);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--line);
+  transition: transform var(--t-land) var(--ease-out), box-shadow var(--t-arrive) ease;
+}
+.road-stop.is-open .road-disc img,
+.road-stop.is-next .road-disc img,
+.road-stop.is-paid .road-disc img { filter: saturate(0.25); opacity: 0.55 }
+.road-stop.is-open .road-disc .azulejo-block,
+.road-stop.is-paid .road-disc .azulejo-block { opacity: 0.55 }
+.road-stop.is-done .road-disc { box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px var(--azulejo) }
+.road-stop.is-done.is-cold .road-disc { box-shadow: 0 0 0 3px var(--bg), 0 0 0 6px #c9973b }
+.road-stop.is-next .road-disc { animation: road-breathe 2.4s ease-in-out infinite }
+@keyframes road-breathe {
+  0%, 100% { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--azulejo) }
+  50% { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--azulejo), 0 0 0 11px color-mix(in srgb, var(--azulejo) 22%, transparent) }
+}
+/* Knocked off the road: tilted, lifted aside, a deep shadow — never red, never removed. */
+.road-stop.is-drifted .road-disc {
+  transform: translate(16px, -12px) rotate(var(--rot, 10deg)) scale(0.92);
+  box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--azulejo), 0 14px 22px -6px rgba(20, 36, 58, 0.7);
+  z-index: 1;
+}
+.road-stop.is-drifted.is-cold .road-disc { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #c9973b, 0 14px 22px -6px rgba(20, 36, 58, 0.7) }
+/* Where it belongs: a faint dashed ring on the line. */
+.road-gap {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 68px;
+  height: 68px;
+  margin-left: -34px;
+  border-radius: 9999px;
+  border: 2px dashed color-mix(in srgb, var(--azulejo) 45%, transparent);
+  background: color-mix(in srgb, var(--bg) 80%, #d9d2c3);
+}
+.road-stop.is-sheet .road-disc,
+.road-stop:focus-visible .road-disc { outline: 2px solid #c9973b; outline-offset: 5px }
+.road-name {
+  max-width: 8rem;
+  border-radius: 0.375rem;
+  background: var(--bg);
+  padding: 0 0.25rem;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--fg);
+  text-wrap: balance;
+}
+.road-chip { display: inline-block; line-height: 0; border-radius: 9999px; box-shadow: 0 1px 3px rgba(20, 36, 58, 0.35) }
+@media (prefers-reduced-motion: reduce) {
+  .road-stop.is-next .road-disc { animation: none; box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--azulejo) }
+  .road-disc { transition: none }
+}
+
+/*
+  EVERY PUT-BACK IS A WIN (components/path/homecoming.ts; Sam, 2026-11-02). The website's
+  gold flash, chip burst and finale sweep, on the app's own scale: the tile slides home from
+  its loose pose over --t-drain with a gold glow that fades, ten chips fly out, and the last
+  one home sweeps gold across the panel. No overshoot (motion-check), and under reduced
+  motion none of it moves — the tile is simply back.
+*/
+.panel-tile.is-laid.is-home { animation: panel-home var(--t-drain) var(--ease-out) both; z-index: 1 }
+@keyframes panel-home {
+  0% { transform: rotate(10deg) translate(3px, -4px); box-shadow: inset 0 0 0 3px #e2b450, 0 0 22px 4px rgba(226, 180, 80, 0.75) }
+  70% { transform: none; box-shadow: inset 0 0 0 3px #e2b450, 0 0 22px 4px rgba(226, 180, 80, 0.75) }
+  100% { transform: none; box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.35) }
+}
+.road-stop.is-home .road-disc { animation: road-home var(--t-drain) var(--ease-out) both }
+@keyframes road-home {
+  0% { transform: translate(16px, -12px) rotate(10deg); box-shadow: 0 0 0 3px #fff, 0 0 0 6px #e2b450, 0 0 26px 6px rgba(226, 180, 80, 0.75) }
+  100% { transform: none }
+}
+.home-burst { pointer-events: none; z-index: 2 }
+.home-burst i {
+  position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px; border-radius: 2px;
+  background: #1f5d8c; box-shadow: inset 0 0 0 2px #fff; transform: rotate(var(--a)) translateY(0); opacity: 1;
+  animation: home-chip var(--t-drain) var(--ease-out) both;
+}
+.home-burst i:nth-child(odd) { background: #e2b450 }
+@keyframes home-chip { to { transform: rotate(var(--a)) translateY(-58px) rotate(180deg); opacity: 0 } }
+.panel-finale { box-shadow: 0 0 0 3px rgba(226, 180, 80, 0.7), 0 0 40px 6px rgba(226, 180, 80, 0.35) }
+.panel-finale::after {
+  background: linear-gradient(115deg, transparent 35%, rgba(226, 180, 80, 0.55) 50%, transparent 65%);
+  animation: panel-gold calc(var(--t-drain) * 2) var(--ease-out) 1 both;
+}
+@keyframes panel-gold { from { transform: translateX(-100%) } to { transform: translateX(100%) } }
+/* The cheer on /revise when a room comes back clean. */
+.win-card { position: relative; overflow: hidden; animation: win-in var(--t-land) var(--ease-out) both }
+@keyframes win-in { from { transform: translateY(6px); opacity: 0 } to { transform: none; opacity: 1 } }
+.win-card::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(circle at 50% 30%, rgba(226, 180, 80, 0.45), transparent 60%);
+  animation: win-flash var(--t-drain) var(--ease-out) both;
+}
+@keyframes win-flash { from { opacity: 1 } to { opacity: 0 } }
+@media (prefers-reduced-motion: reduce) {
+  .panel-tile.is-laid.is-home, .road-stop.is-home .road-disc, .win-card, .win-card::before { animation: none }
+  .home-burst, .panel-finale::after { display: none }
+}
+
+/*
+  A ROOM, APP-STYLE (components/RoomSteps.tsx; Sam, 2026-11-02: "click through to the
+  content and it's still pretty 'posh HTML'"). The place full-bleed and collapsing, one
+  sentence a card, the English held back until asked for, and the controls in the thumb
+  zone. Every move is a height or a fade on the app's scale; nothing grows.
+*/
+.room-hero { height: 44svh; min-height: 15rem; transition: height var(--t-land) var(--ease-out), min-height var(--t-land) var(--ease-out) }
+.room-hero.is-compact { height: 8.5rem; min-height: 8.5rem }
+.room-hero-scrim { background: linear-gradient(to bottom, rgb(0 0 0 / 0.05) 20%, rgb(0 0 0 / 0.72) 100%) }
+.room-why { transition: opacity var(--t-arrive) ease }
+.room-hero.is-compact .room-why { opacity: 0; height: 0 }
+.room-dot { width: 0.5rem; height: 0.5rem; border-radius: 9999px; background: var(--line); transition: width var(--t-arrive) var(--ease-out), background-color var(--t-arrive) ease }
+.room-dot.is-past { background: color-mix(in srgb, var(--azulejo) 55%, transparent) }
+.room-dot.is-at { width: 1.5rem; background: var(--azulejo) }
+.room-dot.is-turn { border: 1.5px dashed var(--line-strong); background: transparent }
+.room-card { animation: room-card-in var(--t-arrive) var(--ease-out) both; box-shadow: 0 18px 36px -24px rgba(20, 36, 58, 0.45) }
+@keyframes room-card-in { from { transform: translateX(14px); opacity: 0 } to { transform: none; opacity: 1 } }
+.room-en { opacity: 0; filter: blur(6px); transition: opacity var(--t-arrive) ease, filter var(--t-arrive) ease }
+.room-en.is-shown { opacity: 1; filter: none }
+.room-dock { padding-bottom: calc(1.5rem + var(--safe-bottom, 0px)) }
+.room-laid-flip { animation: room-laid var(--t-drain) var(--ease-out) both }
+@keyframes room-laid { from { transform: rotateY(90deg); opacity: 0 } to { transform: none; opacity: 1 } }
+@media (prefers-reduced-motion: reduce) {
+  .room-hero, .room-dot, .room-why { transition: none }
+  .room-card, .room-laid-flip { animation: none }
+  .room-en { transition: none }
+}
+
+/* The Panel | Road toggle: two segments, one pressed. */
+.view-toggle { display: inline-flex; border-radius: 9999px; border: 1px solid var(--line-strong); padding: 2px }
+.view-toggle button { border-radius: 9999px; padding: 0.25rem 0.85rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted) }
+.view-toggle button[aria-pressed='true'] { background: var(--azulejo); color: #fbfaf6 }
+
+/* The ground under the panel: the foundation strip, mortar-coloured, edge to edge. */
+.wall-foundation {
+  background-color: var(--surface);
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0 46px,
+    color-mix(in srgb, var(--line-strong) 25%, transparent) 46px 47px
+  );
+}
+
+/* The sheet rises, and under reduced motion it simply appears. */
+@keyframes sheet-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+.sheet-up {
+  animation: sheet-up 260ms var(--ease-drain, ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-up {
+    animation: none;
+  }
+}

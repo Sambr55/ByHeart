@@ -201,9 +201,13 @@ export function Profile() {
       setWalk(true)
       return
     }
-    if (!state.club_welcomed_at) return
-    if (state.club_walked_at) return
-    setWalk(true)
+    /*
+      ONLY WHEN ASKED (2026-11-03). It also fired by itself on the first visit to Yours,
+      which made it the third detour of the old first run: somebody who had just laid their
+      first tile tapped Yours and met an eleven-step tour over it. "Show me round first" on
+      the front door still opens it. `state` is kept for the forced path's sake.
+    */
+    void state
   }, [])
 
   const saved = learner.saved ?? []
@@ -450,15 +454,15 @@ export function Profile() {
         */
         <div className="flex flex-col gap-6 rounded-2xl border border-line bg-bg-elev px-5 py-6">
           <p className="text-base leading-relaxed text-fg" data-testid="yours-empty">
-            Nothing here yet. The vibes you go through, the Portuguese you keep and your
-            Legend all collect on this screen.
+            Nothing here yet. Every room you lay hands you lines to keep, and they
+            collect here — with your Legend, ready to show somebody.
           </p>
           <Link
-            href="/vibes"
+            href="/club"
             data-testid="yours-start"
             className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
-            START HERE
+            YOUR FIRST ROOM
           </Link>
           {/*
             AND THE WAY BACK, for the one person this screen is a disaster for.

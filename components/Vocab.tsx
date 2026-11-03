@@ -631,7 +631,7 @@ function EmptyMine({ onScope }: { onScope: () => void }) {
       </p>
       <div className="mt-3 flex flex-wrap gap-3">
         <Link
-          href="/vibes"
+          href="/club"
           className="tap-target eyebrow rounded bg-accent px-4 py-3 text-accent-ink"
         >
           OPEN A VIBE

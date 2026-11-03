@@ -52,6 +52,7 @@ import {
 import { chapterById } from '@/content/chapters'
 import { derivedFor } from '@/engine/derive'
 import { track } from '@/engine/analytics'
+import { idiomLabels } from '@/content/idioms'
 import { acquirePiece, markIdiom, recordProof, rejectCard, rememberFinishedCard, rememberSheetGot, rewindReject, toggleCard } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { StatusBar } from '@/components/Native'
@@ -1065,7 +1066,7 @@ export function Feed({ stage = 'member' }: { stage?: ClubStage }) {
         </div>
         <div className="flex flex-col gap-3">
           <Link
-            href="/vibes"
+            href="/club"
             className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
             {FEED_COPY.empty_cta}
@@ -1961,7 +1962,19 @@ export function Card({
     const deal = Boolean(me.deal_accepted_at)
     const goal = Boolean(me.profile?.goal)
     const answered = pair && deal && goal
-    setPairChosen(answered)
+    /*
+      THE FACE ASKS WHY, SO THE FACE IS QUIET ONCE WHY IS ON THE RECORD (2026-11-02).
+
+      The booking pass-through (lib/booking.ts) writes the pair, the chapter, the purpose
+      and the goal from the marketing site's search — exactly what a "Visiting Lisbon?" tap
+      writes — but not the deal, which only the pane's consent tick can give. Gating the
+      face on the deal too put "Visiting Lisbon?" back in front of somebody who had just
+      answered it on the site, which is the asking-twice this whole card was rebuilt to
+      stop. So the face reads pair and goal — the two things its own question writes — and
+      the deal stays the pane's business: SetUp opens on the name and the tick, and
+      `answered` above still decides what is worth reporting below.
+    */
+    setPairChosen(pair && goal)
     /*
       AND WHY, WHEN THE ANSWER IS NO — because this has now been reported twice and I have
       twice failed to reproduce it.
@@ -2502,10 +2515,27 @@ export function Card({
     was added; the other two are noted on .on-dark in globals.css.
   */
   const onSand = !image
-  const title = face.title
+  /*
+    THE SET-UP FACE, WHEN WHY IS ALREADY ANSWERED (2026-11-02).
+
+    The booking pass-through (lib/booking.ts) arrives with the reason already given on the
+    marketing site — "moving", say — and the face still read "Visiting Lisbon?" over OPEN.
+    The question was no longer being asked (no options are drawn once the goal is on the
+    record), but its headline was, and a person who just searched for moving was asked if
+    they were visiting. So the face says the answer back instead, and OPEN goes to the name.
+  */
+  const said = card.kind === 'setup' && learner.profile?.goal ? learner.purpose ?? null : null
+  const SAID: Record<'visiting' | 'staying' | 'moving', string> = {
+    visiting: 'Visiting Lisbon.',
+    staying: 'A season in Lisbon.',
+    moving: 'Moving to Lisbon.',
+  }
+  const title = said ? SAID[said] : face.title
   /* A drop carries its date; a standing room has none. */
   const when = face.when
-  const blurb = face.blurb
+  const blurb = said
+    ? 'Noted — the Club opens on the rooms for that. Open it and tell us your name. Settings can change the reason any time.'
+    : face.blurb
 
   return (
     /*
@@ -6130,6 +6160,8 @@ function CheatPane({ card }: { card: Extract<FeedCard, { kind: 'cheat' }> }) {
   )
 }
 
+const IDIOM_LABEL = idiomLabels()
+
 function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
   const learner = useLearner()
   const i = card.idiom
@@ -6178,7 +6210,8 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
         opens on its own small print.
       */}
       <div className="flex flex-col gap-3">
-        <p className="eyebrow text-muted">WE SAY</p>
+        {/* YOU SAY, not WE SAY — Sam, 2026-11-02. From content/idioms.ts idiomLabels. */}
+        <p className="eyebrow text-muted" data-testid="idiom-you">{IDIOM_LABEL.you}</p>
         <p className="display text-balance text-3xl">{i.english}</p>
         {/*
           AND THE LINE THAT FRAMES WHAT IS COMING, under the title.
@@ -6212,7 +6245,7 @@ function IdiomPane({ card }: { card: Extract<FeedCard, { kind: 'idiom' }> }) {
       */}
       {/* bg-surface: an inset on a white card is a hole in it — see Teased above. */}
       <div className="flex flex-col gap-1 rounded border border-line bg-surface px-4 py-3">
-        <p className="eyebrow text-accent">THEY SAY</p>
+        <p className="eyebrow text-accent" data-testid="idiom-they">{IDIOM_LABEL.they}</p>
         <div className="mt-3 flex items-center gap-3">
           <AudioButton slug={slugFor(i.equivalent)} text={i.equivalent} />
           <p className="pt min-w-0 flex-1 text-xl text-accent">{i.equivalent}</p>
