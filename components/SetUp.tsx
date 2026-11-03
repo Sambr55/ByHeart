@@ -1,5 +1,6 @@
 'use client'
 
+import { TripStep } from '@/components/TripStep'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -89,7 +90,7 @@ import { DEFAULT_PAIR } from '@/content/pairs'
   on the set-up card's face in the feed, so the why step here is only met by somebody who
   reached set-up another way (the journey at /vibes).
 */
-type Step = 'why' | 'who'
+type Step = 'why' | 'trip' | 'who'
 
 export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   const router = useRouter()
@@ -155,7 +156,14 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     exists to remove.
   */
   const learner = useLearner()
-  const shown: Step = step === 'why' && mounted && learner.profile?.goal ? 'who' : step
+  /*
+    AND THE TRIP (2026-11-03): why · when & who with · name, the website's booking header in
+    the same order. Answered on the website (dates or who with arrived on the link), it is
+    behind us too.
+  */
+  const tripDone = Boolean(learner.profile?.here_said || learner.profile?.company)
+  const shown: Step =
+    step === 'why' && mounted && learner.profile?.goal ? (tripDone ? 'who' : 'trip') : step
 
   /*
     ALREADY MEANS ASKED, not merely agreed.
@@ -482,7 +490,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         last one is a real one" — has moved onto the photograph with the rest of the why
         step, where the question it belongs to is.
       */}
-      {shown === 'why' ? null : (
+      {shown !== 'who' ? null : (
         <div className="flex flex-col gap-3">
           <p className="eyebrow text-accent">{PAIR_STEP.eyebrow}</p>
           <h2 className="display text-balance text-2xl">And what do they call you?</h2>
@@ -502,7 +510,8 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         WHY, as one question with yes as the lead — see `Visiting` in Destination.tsx, which
         also sits on the set-up card's face. The 260ms settle and the testids moved with it.
       */}
-      {shown === 'why' ? <Visiting onDone={() => setStep('who')} /> : null}
+      {shown === 'why' ? <Visiting onDone={() => setStep('trip')} /> : null}
+      {shown === 'trip' ? <TripStep onDone={() => setStep('who')} /> : null}
 
       {/*
         WHO. A name, and the only one of the three that is optional.

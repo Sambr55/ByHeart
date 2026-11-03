@@ -32,7 +32,12 @@ export interface Booking {
   goal: Goal | null
   from: string | null
   to: string | null
+  /** Who with — the website's booking header, passed as ?with=. */
+  company: Company | null
 }
+
+export type Company = 'solo' | 'partner' | 'family' | 'friends' | 'work'
+const COMPANIES: readonly Company[] = ['solo', 'partner', 'family', 'friends', 'work']
 
 const GOAL_OF: Record<BookingPurpose, Goal> = {
   visiting: 'trip',
@@ -63,7 +68,9 @@ export function parseBooking(
   let to = from ? validDay(params.get('ret'), now) : null
   /* ISO days compare as strings. A return before the departure is a typo; keep the start. */
   if (from && to && to < from) to = null
-  return { purpose, goal: purpose ? GOAL_OF[purpose] : null, from, to }
+  const w = params.get('with')
+  const company = COMPANIES.includes(w as Company) ? (w as Company) : null
+  return { purpose, goal: purpose ? GOAL_OF[purpose] : null, from, to, company }
 }
 
 /** Whether a URL carried anything worth writing. */

@@ -10,6 +10,7 @@ import {
   setChapter,
   setProfile,
   setPurpose,
+  setCompany,
   setWhenHere,
 } from '@/engine/learner'
 import { setPair } from '@/engine/pair'
@@ -48,6 +49,10 @@ export function applyBookingFromUrl(search: string = window.location.search): bo
   }
   if (b.from && !getLearner().profile?.here_said) {
     setWhenHere({ from: b.from, to: b.to })
+    wrote = true
+  }
+  if (b.company && !getLearner().profile?.company) {
+    setCompany(b.company)
     wrote = true
   }
   return wrote

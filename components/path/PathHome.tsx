@@ -26,6 +26,8 @@ import { useHomecoming } from './homecoming'
 import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
 import { Foundations } from './Foundations'
+import { StartHere, StartNext, StartSheet } from './StartHere'
+import { START_HERE, startProgress, startTileDone, type StartTile } from '@/content/start-here'
 
 /**
  * The Lisbon path, as a home screen.
@@ -109,6 +111,15 @@ export function PathHome() {
   const closeSheet = useCallback(() => setSheet(null), [])
   /* THE ONE LADDER (2026-11-03) — see pathLevel. */
   const level = useMemo(() => pathLevel(view), [view])
+  /*
+    START HERE IS THE LEVEL BEFORE LEVEL 1 (2026-11-03) — the website's step one: the save,
+    counting to twenty, three shortcuts and three fun lines. Until it is met it is what the
+    header names and what Up next offers; then the rooms of your purpose take over.
+  */
+  const start = useMemo(() => startProgress(learner), [learner])
+  const startNext = useMemo(() => START_HERE.find((t) => !startTileDone(t, learner)) ?? null, [learner])
+  const [startOpen, setStartOpen] = useState<StartTile | null>(null)
+  const closeStart = useCallback(() => setStartOpen(null), [])
 
   const understood = learner.understood ?? 0
 
@@ -136,7 +147,7 @@ export function PathHome() {
             what is on is the On tab — two doors to one room was half the maze.
           */}
           <p className="eyebrow needs-learner rounded-full bg-[rgba(255,255,255,0.14)] px-3 py-1" data-testid="level-chip">
-            Level {level.level}
+            {start.complete ? 'Level ' + level.level : 'Start here'}
           </p>
           {/*
             THE PROMINENT SPOT IS THE UNDERSTOOD TALLY NOW, NOT THE STREAK (2026-11-02).
@@ -155,14 +166,17 @@ export function PathHome() {
         {/* One column on a phone; on anything wide, now on the left and the Panel on the right. */}
         <div className="flex flex-col gap-10 md:grid md:grid-cols-[minmax(0,24rem)_minmax(0,38rem)] md:items-start md:justify-center md:gap-12">
           <div className="flex flex-col gap-10 md:sticky md:top-24">
-            <LevelBar level={level} />
-
+            {start.complete ? <LevelBar level={level} /> : <StartBar done={start.done} total={start.total} />}
 
             <section aria-labelledby="up-next" className="needs-learner flex flex-col gap-3">
               <h1 id="up-next" className="eyebrow text-muted">
-                {view.next ? 'Up next' : name.done}
+                {!start.complete || view.next ? 'Up next' : name.done}
               </h1>
-              {view.next ? (
+              {!start.complete && startNext ? (
+                <div className="md:max-w-xl">
+                  <StartNext t={startNext} onOpen={setStartOpen} />
+                </div>
+              ) : view.next ? (
                 <div className="md:max-w-xl">
                   <RoomCard
                     room={view.next.room}
@@ -186,6 +200,8 @@ export function PathHome() {
                 </div>
               )}
             </section>
+
+            {start.complete ? null : <StartHere record={learner} onOpen={setStartOpen} />}
 
             <Understood count={understood} />
           </div>
@@ -214,6 +230,11 @@ export function PathHome() {
             <div className="mt-8">
               <Foundations inventory={learner.inventory ?? {}} used={learner.cheats_used ?? []} />
             </div>
+            {start.complete ? (
+              <div className="mt-8">
+                <StartHere record={learner} onOpen={setStartOpen} compact />
+              </div>
+            ) : null}
           </div>
         </div>
         <BottomNavSpace />
@@ -226,6 +247,7 @@ export function PathHome() {
       */}
       <BottomNav />
       {sheet ? <TileSheet node={sheet} gender={learner.profile?.gender ?? null} onClose={closeSheet} /> : null}
+      {startOpen ? <StartSheet t={startOpen} lang="pt-PT" onClose={closeStart} /> : null}
     </div>
   )
 }
@@ -412,6 +434,31 @@ function LevelBar({ level }: { level: PathLevel }) {
         <span className="font-semibold text-fg">
           {level.toNext === 1 ? '1 room' : level.toNext + ' rooms'} to Level {level.level + 1}
         </span>
+      </p>
+    </section>
+  )
+}
+
+/** The ladder before Level 1: Start here, met tile by tile. */
+function StartBar({ done, total }: { done: number; total: number }) {
+  const left = total - done
+  return (
+    <section aria-label="Your level" className="needs-learner flex flex-col gap-2" data-testid="level">
+      <p className="eyebrow text-telha">Start here</p>
+      <p className="display text-3xl leading-tight">Saves, basics and fun lines</p>
+      <div
+        className="h-2.5 w-full overflow-hidden rounded-full bg-surface"
+        role="progressbar"
+        aria-valuemin={0}
+        aria-valuemax={total}
+        aria-valuenow={done}
+        aria-label={done + ' of ' + total + ' met'}
+      >
+        <div className="h-full rounded-full bg-accent transition-[width] duration-700" style={{ width: Math.round((done / total) * 100) + '%' }} />
+      </div>
+      <p className="text-sm text-muted" data-testid="level-next">
+        {done} of {total} met ·{' '}
+        <span className="font-semibold text-fg">{left === 1 ? '1 more' : left + ' more'} to Level 1</span>
       </p>
     </section>
   )

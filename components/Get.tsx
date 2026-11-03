@@ -46,6 +46,7 @@ export function Get() {
       search already answered. Validated and never over an answer — see engine/booking.ts.
     */
     applyBookingFromUrl()
+    /* Onward to /start, not the front door: the trip is answered, so the only thing left is the name (2026-11-03). */
     setReady(true)
   }, [])
 
@@ -208,7 +209,7 @@ export function Get() {
             both, this page has no job, so it does not pretend to have one.
           */
           <Link
-            href="/"
+            href="/start"
             data-testid="get-in"
             className="tap-target eyebrow w-full max-w-sm rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
@@ -225,7 +226,7 @@ export function Get() {
         */}
         {ready && (how === 'ios' || how === 'in-app') ? (
           <Link
-            href="/"
+            href="/start"
             data-testid="get-skip"
             className="text-sm text-white/80 underline underline-offset-4"
           >

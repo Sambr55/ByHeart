@@ -49,9 +49,32 @@ export function Calendar() {
   */
   const [now, setNow] = useState<Date | null>(null)
   const [chapter, setChapter] = useState(chapterById(null))
+  /* The trip, from set-up or the website's booking header (2026-11-03). */
+  const [trip, setTrip] = useState<{ from: string; to: string | null } | null>(null)
   useEffect(() => {
-    setNow(new Date())
-    setChapter(chapterById(loadLearner().chapter))
+    const t = new Date()
+    setNow(t)
+    const me = loadLearner()
+    setChapter(chapterById(me.chapter))
+    const from = me.profile?.here_from ?? null
+    if (from) {
+      setTrip({ from, to: me.profile?.here_to ?? null })
+      /*
+        OPEN ON THE TRIP, not on this week (2026-11-03). Somebody going in March was shown
+        November. The fortnight holding their arrival is where the calendar starts; the
+        arrows still go anywhere.
+      */
+      const day = 86_400_000
+      const monday = (d: number) => d - ((new Date(d).getUTCDay() + 6) % 7) * day
+      const today = Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate())
+      const arrive = Date.parse(from + 'T00:00:00Z')
+      if (arrive > today) {
+        /* Whole weeks to the arrival's Monday: fortnights, plus a week's shift when it lands in the second half, so the trip starts the view. */
+        const weeks = Math.round((monday(arrive) - monday(today)) / (7 * day))
+        setOffset(Math.floor(weeks / 2))
+        setShift(weeks % 2)
+      }
+    }
   }, [])
 
   /*
@@ -71,13 +94,15 @@ export function Calendar() {
     next" stops being a thing anybody can point at.
   */
   const [offset, setOffset] = useState(0)
+  /* 0 or 1: a week's nudge so a trip's first week leads its fortnight. */
+  const [shift, setShift] = useState(0)
 
   const anchor = (() => {
     if (!now) return null
     const midnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
     /* getUTCDay is Sunday-first; the grid is Monday-first. */
     const back = (new Date(midnight).getUTCDay() + 6) % 7
-    return new Date(midnight - back * 86_400_000 + offset * 14 * 86_400_000)
+    return new Date(midnight - back * 86_400_000 + (offset * 14 + shift * 7) * 86_400_000)
   })()
 
   const drops = anchor ? dropsInFortnight(chapter.id, anchor, now ?? undefined) : []
@@ -152,6 +177,13 @@ export function Calendar() {
         </div>
 
         <section className="flex flex-col gap-3">
+          {trip ? (
+            <p data-testid="cal-trip" className="rounded-2xl bg-accent/10 px-4 py-3 text-sm text-fg">
+              <span className="eyebrow mr-2 text-accent">Your trip</span>
+              {fmt(trip.from)}
+              {trip.to && trip.to !== trip.from ? ' – ' + fmt(trip.to) : ''} · highlighted below
+            </p>
+          ) : null}
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -197,6 +229,7 @@ export function Calendar() {
               const iso = d.toISOString().slice(0, 10)
               const on = byDay.get(iso) ?? []
               const isToday = todayIso === iso
+              const inTrip = Boolean(trip && iso >= trip.from && iso <= (trip.to ?? trip.from))
               const day = d.getUTCDate()
               /*
                 A day with something on is a LINK; a day without is not a control at all.
@@ -211,7 +244,8 @@ export function Calendar() {
                     key={iso}
                     className={
                       'flex min-h-[3.5rem] flex-col items-center justify-start rounded py-1 text-sm tabular-nums ' +
-                      (isToday ? 'border border-line-strong text-fg' : 'text-muted')
+                      (isToday ? 'border border-line-strong text-fg' : 'text-muted') +
+                      (inTrip ? ' bg-accent/10 font-semibold text-fg' : '')
                     }
                   >
                     {day}
@@ -222,7 +256,7 @@ export function Calendar() {
               return (
                 <Link
                   key={iso}
-                  href={'/club?drop=' + on[0].id}
+                  href={'/club/feed?drop=' + on[0].id}
                   data-testid={'cal-day-' + day}
                   aria-label={on.map((x) => x.event).join(', ') + ' on the ' + day + 'th'}
                   /*
@@ -236,7 +270,8 @@ export function Calendar() {
                   */
                   className={
                     'flex min-h-[3.5rem] flex-col items-center gap-1 overflow-hidden rounded px-1 py-1 text-white ' +
-                    (isToday ? 'ring-1 ring-fg' : '')
+                    (isToday ? 'ring-1 ring-fg' : '') +
+                    (inTrip ? ' outline outline-2 outline-offset-1 outline-accent' : '')
                   }
                   style={{ backgroundColor: g?.colour ?? 'var(--accent)' }}
                 >
@@ -354,4 +389,10 @@ export function Calendar() {
       <BottomNav />
     </main>
   )
+}
+
+/** "12 Dec" from an ISO day, in UTC like the grid. */
+function fmt(iso: string): string {
+  const d = new Date(iso + 'T00:00:00Z')
+  return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()].slice(0, 3)
 }

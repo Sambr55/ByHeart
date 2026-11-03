@@ -231,6 +231,10 @@ export type EventName =
     purposes, and the split between them is the answer to "which block of ten do we write".
   */
   | 'purpose_chosen'
+  /** Set-up's when / who-with step (2026-11-03): dates given?, company. */
+  | 'trip_set'
+  /** A Start-here tile met (2026-11-03). */
+  | 'start_done'
   /** Which of the two warm-up vibes somebody picked before the basics. */
   | 'warmup_chosen'
   | 'demo_played'
