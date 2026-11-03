@@ -28,6 +28,7 @@ import {
   rememberFinishedCard,
 } from '@/engine/learner'
 import { wordsIn } from '@/content/numbers'
+import { INTERESTS } from '@/content/interests'
 import { useLearner } from '@/engine/useLearner'
 import { useRestore } from '@/engine/useRestore'
 
@@ -1197,6 +1198,18 @@ function BuildCard({
                     max={100}
                     onChange={(n) => setDraft((d) => ({ ...d, [slot.key]: n }))}
                   />
+                ) : slot.kind === 'into' ? (
+                  /*
+                    WHAT YOU ARE INTO, AS CHIPS (Sam, 2026-11-03: "it used to make
+                    suggestions"). The eight-and-more interests were picked in the gosto de
+                    lesson, which went with Vibes; on its own the deck fell through to a bare
+                    text box whose words could not reach the sentence. Pick as many as are
+                    true — stored as the comma-joined ids intoSentence composes from.
+                  */
+                  <IntoChips
+                    value={draft[slot.key] ?? ''}
+                    onChange={(next) => setDraft((d) => ({ ...d, [slot.key]: next }))}
+                  />
                 ) : slot.kind === 'pick' ? (
                   <div className="flex flex-wrap items-start gap-1">
                     {/*
@@ -2359,6 +2372,34 @@ function RunThrough({
           Stop here — back to your Legend
         </button>
       </Dock>
+    </div>
+  )
+}
+
+/** The interests as chips, many at once — see content/interests.ts. */
+function IntoChips({ value, onChange }: { value: string; onChange: (next: string) => void }) {
+  const chosen = value.split(',').filter(Boolean)
+  return (
+    <div className="flex flex-wrap items-start gap-1.5" data-testid="legend-into">
+      {INTERESTS.map((i) => {
+        const on = chosen.includes(i.id)
+        return (
+          <button
+            key={i.id}
+            type="button"
+            aria-pressed={on}
+            data-testid={'legend-into-' + i.id}
+            onClick={() => onChange((on ? chosen.filter((x) => x !== i.id) : [...chosen, i.id]).join(','))}
+            className={
+              'tap-target flex flex-col items-start gap-0.5 rounded border px-3 py-1.5 text-left text-sm transition ' +
+              (on ? 'border-accent bg-accent/10 text-accent' : 'border-line text-muted')
+            }
+          >
+            <span className="pt">{i.target}</span>
+            <span className="text-xs text-muted">{i.gloss}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }

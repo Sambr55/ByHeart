@@ -65,6 +65,14 @@ export const INTERESTS: Interest[] = [
   { id: 'filmes', target: 'filmes', gloss: 'films', after_de: 'de filmes' },
   { id: 'livros', target: 'livros', gloss: 'books', after_de: 'de livros' },
   { id: 'cozinhar', target: 'cozinhar', gloss: 'cooking', after_de: 'de cozinhar' },
+  /*
+    And four more, for the Legend's own chips (2026-11-03: Sam typed "walking" and nothing
+    came of it). No genre, for the same reason as the three above.
+  */
+  { id: 'caminhar', target: 'caminhar', gloss: 'walking', after_de: 'de caminhar' },
+  { id: 'viajar', target: 'viajar', gloss: 'travelling', after_de: 'de viajar' },
+  { id: 'arte', target: 'arte', gloss: 'art', after_de: 'de arte' },
+  { id: 'dancar', target: 'dançar', gloss: 'dancing', after_de: 'de dançar' },
 ]
 
 /** One interest by id, for a card or a check. */
