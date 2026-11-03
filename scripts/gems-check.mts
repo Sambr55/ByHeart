@@ -8,6 +8,9 @@
 import { BAIRROS, GEMS, distanceM, gemsNear, visibleGems } from '../content/gems'
 import { situationById } from '../content/situations'
 import { WALKS, walkView, walkProgress } from '../content/walks'
+import { KNOWHOW, knowHowNow } from '../content/knowhow'
+import { gemOfTheWeek, gemRotation } from '../content/gems'
+import { inboxFor } from '../content/inbox'
 
 const problems: string[] = []
 const ok = (name: string, pass: boolean, detail = '') => {
@@ -50,6 +53,22 @@ for (const w of WALKS) {
     ok(w.id + ': progress counts said stops', walkProgress(v, [v.stops[0].key]).done === 1 && !walkProgress(v, []).complete)
   }
 }
+
+console.log('\nlocal know-how and the gem of the week\n')
+ok('know-how ids are unique', new Set(KNOWHOW.map((k) => k.id)).size === KNOWHOW.length)
+for (const k of KNOWHOW) {
+  ok(k.id + ': has a line, both languages', Boolean(k.line.pt.trim() && k.line.en.trim()))
+  ok(k.id + ': its room exists', !k.room || Boolean(situationById(k.room)), k.room ?? '')
+  ok(k.id + ': months are real months', !k.months || k.months.every((m) => m >= 1 && m <= 12))
+}
+ok('seasonal cards come and go: chestnuts in November, not in June', knowHowNow(new Date(2026, 10, 15)).some((k) => k.id === 'castanhas') && !knowHowNow(new Date(2026, 5, 15)).some((k) => k.id === 'castanhas'))
+const verified = GEMS.filter((g) => g.verified)
+const rot = gemRotation(verified)
+ok('the rotation holds every verified gem once', rot.length === verified.length && new Set(rot.map((g) => g.id)).size === rot.length)
+ok('two weeks running are never the same bairro', rot.every((g, i) => i === 0 || g.bairro !== rot[i - 1].bairro || new Set(rot.map((x) => x.bairro)).size === 1))
+const mon = new Date(2026, 10, 2), sun = new Date(2026, 10, 8), next = new Date(2026, 10, 9)
+ok('the same gem all week, a new one on Monday', gemOfTheWeek(mon, verified)?.id === gemOfTheWeek(sun, verified)?.id && gemOfTheWeek(next, verified)?.id !== gemOfTheWeek(mon, verified)?.id)
+ok('the inbox leads with the gem of the week', inboxFor('lisbon', mon)[0]?.kind === 'gem')
 
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)')

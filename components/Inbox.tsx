@@ -241,7 +241,7 @@ export function Inbox({ pushReady }: { pushReady: boolean }) {
                     feed rather than the day anybody wrote a message about it.
                   */}
                   <span className="eyebrow min-w-0 text-accent">
-                    {isNew(m) ? 'OPENED' : 'IN YOUR FEED'}
+                    {m.kind === 'gem' ? 'GEM OF THE WEEK' : isNew(m) ? 'OPENED' : 'IN YOUR FEED'}
                   </span>
                   <span className="shrink-0 text-[0.6rem] uppercase tracking-wider text-muted">
                     {m.left <= 0 ? 'last day' : m.left === 1 ? '1 day left' : m.left + ' days left'}
@@ -261,10 +261,10 @@ export function Inbox({ pushReady }: { pushReady: boolean }) {
                 */}
                 <p className="mt-3 text-xs leading-relaxed text-muted">{m.rooms.join(' · ')}</p>
                 <Link
-                  href="/club"
+                  href={m.href ?? '/club'}
                   className="tap-target eyebrow mt-6 inline-flex text-accent underline underline-offset-4"
                 >
-                  Open it
+                  {m.kind === 'gem' ? 'See it on the map' : 'Open it'}
                 </Link>
               </article>
             ))}
