@@ -150,3 +150,34 @@ export function gemsNear(at: [number, number], n = 2, radius = 1500, all: Gem[] 
 export function walkMinutes(m: number): number {
   return Math.max(1, Math.round(m / 70))
 }
+
+/**
+ * GEM OF THE WEEK (2026-11-03) — what keeps the City tab new without anybody writing a
+ * thing every Monday. The verified gems are dealt round the bairros (one from each in turn,
+ * so two weeks running are never the same neighbourhood) and the week number picks one.
+ * Weeks start on Monday; the same gem all week on every phone.
+ */
+export function weekNumber(now: Date = new Date()): number {
+  const monday = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
+  monday.setUTCDate(monday.getUTCDate() - ((monday.getUTCDay() + 6) % 7))
+  return Math.floor(monday.getTime() / (7 * 24 * 60 * 60 * 1000))
+}
+
+export function gemRotation(all: Gem[] = visibleGems()): Gem[] {
+  const by = BAIRROS.map((b) => all.filter((g) => g.bairro === b.id).sort((a, c) => a.id.localeCompare(c.id)))
+  const out: Gem[] = []
+  for (let i = 0; by.some((list) => list[i]); i++) for (const list of by) if (list[i]) out.push(list[i])
+  return out
+}
+
+export function gemOfTheWeek(now: Date = new Date(), all: Gem[] = visibleGems()): Gem | null {
+  const r = gemRotation(all)
+  return r.length ? r[weekNumber(now) % r.length] : null
+}
+
+/** The Monday this week's gem began, as YYYY-MM-DD — the inbox dates it from there. */
+export function weekStart(now: Date = new Date()): string {
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7))
+  return d.toISOString().slice(0, 10)
+}

@@ -6,6 +6,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { BAIRROS, KIND_LABEL, distanceM, visibleGems, type BairroId } from '@/content/gems'
 import { GemCard } from './GemCard'
+import { KnowHowCard } from './KnowHowCard'
+import { knowHowNow } from '@/content/knowhow'
+import { gemOfTheWeek } from '@/content/gems'
 import { visibleWalks, walkProgress } from '@/content/walks'
 import { useLearner } from '@/engine/useLearner'
 import { useWhereAmI } from './useWhereAmI'
@@ -32,6 +35,11 @@ export function City() {
   const where = useWhereAmI()
   const learner = useLearner()
   const walks = useMemo(() => visibleWalks(gems), [gems])
+  /* Read after mount: the week and the season are the phone's, not the server's. */
+  const [now, setNow] = useState<Date | null>(null)
+  useEffect(() => setNow(new Date()), [])
+  const weekly = useMemo(() => (now ? gemOfTheWeek(now, gems) : null), [now, gems])
+  const knowhow = useMemo(() => (now ? knowHowNow(now) : []), [now])
   /* ?gem=<id> — from Near you on home — opens straight onto that gem. */
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get('gem')
@@ -112,6 +120,26 @@ export function City() {
                   </p>
                 </div>
                 {/*
+                  GEM OF THE WEEK (2026-11-03) — a different bairro every Monday, so the tab
+                  has something new to say every time it is opened in a new week.
+                */}
+                {!bairro && weekly ? (
+                  <button
+                    type="button"
+                    data-testid="gem-of-week"
+                    onClick={() => {
+                      setBairro(weekly.bairro)
+                      setSelected(weekly.id)
+                    }}
+                    className="tap-target flex flex-col gap-1 rounded-2xl border-2 border-telha/40 bg-telha/5 px-4 py-3 text-left"
+                  >
+                    <span className="eyebrow text-[0.6rem] text-telha">Gem of the week · {BAIRROS.find((x) => x.id === weekly.bairro)?.name}</span>
+                    <span className="display text-lg leading-tight">{weekly.name}</span>
+                    <span className="lang text-sm text-accent" lang="pt-PT">“{weekly.line.pt}”</span>
+                  </button>
+                ) : null}
+
+                {/*
                   LANGUAGE WALKS (2026-11-03) — a bairro, a few hours, one line at every
                   stop. All of them on the whole-city view; the neighbourhood's own when one
                   is picked. content/walks.ts.
@@ -176,6 +204,19 @@ export function City() {
                     ))}
                   </ul>
                 )}
+
+                {/*
+                  LOCAL KNOW-HOW (2026-11-03) — the things nobody tells you, each with its line.
+                  What is in season leads. content/knowhow.ts.
+                */}
+                {knowhow.length ? (
+                  <div className="mt-2 flex flex-col gap-2" data-testid="city-knowhow">
+                    <p className="eyebrow text-muted">Local know-how</p>
+                    {knowhow.map((k) => (
+                      <KnowHowCard key={k.id} k={k} />
+                    ))}
+                  </div>
+                ) : null}
               </>
             )}
           </section>

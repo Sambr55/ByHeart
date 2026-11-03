@@ -1,3 +1,4 @@
+import { bairroById, gemOfTheWeek, weekStart } from '@/content/gems'
 import type { Genre } from '@/content/calendar'
 import { DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
 import type { Drop } from '@/content/drops'
@@ -75,6 +76,9 @@ export interface InboxMessage {
   rooms: string[]
   /** Sort of night, where the drop has one. The calendar colours by it. */
   genre?: Genre
+  /** Not a drop: this week's gem (2026-11-03). Opens on the City map rather than the Club. */
+  kind?: 'gem'
+  href?: string
 }
 
 /**
@@ -100,7 +104,27 @@ export function inboxFor(
   const drops: Drop[] = dropsFor(chapter, now, false, genres, purpose).flatMap((c) =>
     c.kind === 'situation' && c.drop ? [c.drop] : [],
   )
-  return drops
+  /*
+    THIS WEEK'S GEM (2026-11-03), first in the list from its Monday: one local place and the
+    line for it, so the inbox has something new every week even when nothing is on.
+  */
+  const gem = gemOfTheWeek(now)
+  const gemMessage: InboxMessage[] = gem
+    ? [
+        {
+          id: 'gem-' + weekStart(now),
+          at: weekStart(now),
+          headline: gem.name,
+          where: gem.address + ' · ' + bairroById(gem.bairro).name,
+          when: 'this week',
+          left: 6 - ((now.getDay() + 6) % 7),
+          rooms: ['“' + gem.line.pt + '” — ' + gem.line.en],
+          kind: 'gem',
+          href: '/city?gem=' + gem.id,
+        },
+      ]
+    : []
+  return [...gemMessage, ...drops
     .map((d): InboxMessage => ({
       id: d.id,
       at: dropOpensOn(d).toISOString().slice(0, 10),
@@ -126,7 +150,7 @@ export function inboxFor(
       morning, the one happening sooner goes above, because that is the one with something
       at stake.
     */
-    .sort((a, b) => b.at.localeCompare(a.at) || a.left - b.left)
+    .sort((a, b) => b.at.localeCompare(a.at) || a.left - b.left)]
 }
 
 /**
