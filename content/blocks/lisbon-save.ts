@@ -85,6 +85,7 @@ export const LISBON_SAVE: Situation[] = [
       },
       {
         pt: 'Sou inglês.',
+        f: 'Sou inglesa.',
         en: 'I’m English.',
         when: 'A woman says Sou inglesa — nationalities take an ending like every other description. Said straight after the first line, it explains everything without a speech.',
       },
@@ -102,6 +103,7 @@ export const LISBON_SAVE: Situation[] = [
     release: {
       ask: 'Sorry, I didn’t catch that. I’m English.',
       answer: SAVE_SENTENCE.m,
+      answer_f: SAVE_SENTENCE.f,
     },
     /*
       From the bank rather than commissioned: the "Portuguese" frame's picture — a chalk

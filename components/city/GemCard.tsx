@@ -7,6 +7,8 @@ import { KIND_LABEL, bairroById, walkMinutes, type Gem } from '@/content/gems'
 import { situationById } from '@/content/situations'
 import { knowHowForRoom } from '@/content/knowhow'
 import { KnowHowCard } from './KnowHowCard'
+import { said } from '@/content/speaker'
+import { useLearner } from '@/engine/useLearner'
 
 /**
  * ONE GEM, OPENED. The shape is the rule (content/gems.ts): what happens here, who you will
@@ -15,6 +17,8 @@ import { KnowHowCard } from './KnowHowCard'
  */
 export function GemCard({ gem, metres, onClose }: { gem: Gem; metres?: number; onClose?: () => void }) {
   const room = situationById(gem.room)
+  /* The walking-in line in this learner's own ending (content/speaker.ts). */
+  const line = said(gem.line, useLearner().profile?.gender ?? null)
   const bairro = bairroById(gem.bairro)
   /* The piece of know-how this kind of place brings to mind — the couvert at a tasca, the counter at a café. */
   const tip = knowHowForRoom(gem.room)
@@ -46,13 +50,13 @@ export function GemCard({ gem, metres, onClose }: { gem: Gem; metres?: number; o
       <p className="text-base leading-relaxed">{gem.why}</p>
 
       <div className="flex items-center gap-3 rounded-2xl bg-accent/10 px-4 py-3">
-        <AudioButton slug={slugFor(gem.line.pt)} text={gem.line.pt} size="sm" />
+        <AudioButton slug={slugFor(line.pt)} text={line.pt} size="sm" />
         <div className="min-w-0">
           <p className="eyebrow text-[0.6rem] text-accent">Say this when you walk in</p>
           <p className="lang text-lg leading-snug text-accent" lang="pt-PT">
-            {gem.line.pt}
+            {line.pt}
           </p>
-          <p className="text-sm text-muted">{gem.line.en}</p>
+          <p className="text-sm text-muted">{line.en}</p>
         </div>
       </div>
 

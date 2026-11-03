@@ -20,6 +20,8 @@ import type { ResolvedUnit } from '@/content/path'
 import type { Situation } from '@/content/situations'
 import { CHEATS } from '@/content/cheats'
 import { roomPieceIds } from '@/content/roots'
+/* Either ending counts: obrigado or obrigada is the room said (content/speaker.ts). */
+import { isRelease } from '@/content/speaker'
 
 /*
   `inventory` is optional so every record written before the Wall — and every plain object
@@ -37,7 +39,7 @@ export function roomDone(r: PathRecord, id: string): boolean {
 }
 
 export function roomSaidCold(r: PathRecord, room: Situation): boolean {
-  return (r.proof ?? []).some((p) => p.pt === room.release.answer && p.clean)
+  return (r.proof ?? []).some((p) => p.clean && isRelease(p.pt, room))
 }
 
 /** 0–3: the cheat's sentences said clean. */
@@ -153,7 +155,7 @@ export function roomSlipping(r: PathRecord, room: Situation, now: Date = new Dat
   if (ids.length === 0) return false
   const cutoff = now.getTime() - SLIP_DAYS * 24 * 60 * 60 * 1000
   const releaseSaid = newest(
-    (r.proof ?? []).filter((p) => p.clean && p.pt === room.release.answer).map((p) => p.at),
+    (r.proof ?? []).filter((p) => p.clean && isRelease(p.pt, room)).map((p) => p.at),
   )
   return ids.some((id) => {
     const item = inventory[id]

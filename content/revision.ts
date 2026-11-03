@@ -56,6 +56,7 @@ import { IDIOMS } from '@/content/idioms'
 import { CHEATS } from '@/content/cheats'
 import type { CardKind } from '@/content/collection'
 import { situationById } from '@/content/situations'
+import { voiced } from '@/content/speaker'
 
 /**
  * EVERY KIND /revise CAN ASK, which is one more than the board holds.
@@ -164,7 +165,8 @@ export function revisionFor(
       so they are what saying it cold should touch again. A word that is the release itself
       is not asked twice.
     */
-    const room = situationById(id)
+    /* Asked in this learner's own endings: obrigada from a woman (content/speaker.ts). */
+    const room = voiced(situationById(id), me.gender ?? null)
     if (!room) return []
     const ids = roomPieceIds(room)
     /*

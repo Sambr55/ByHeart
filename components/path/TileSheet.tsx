@@ -6,6 +6,7 @@ import { SpokenLine } from '@/components/Opener'
 import { saveSentence } from '@/content/blocks/lisbon-save'
 import { CRATES, PIECES, roomPieceIds, sourceOf } from '@/content/roots'
 import type { PathNode } from './progress'
+import { voiced } from '@/content/speaker'
 
 /**
  * A LAID TILE, OPENED (the Wall, Sam approved 2026-11-02; kept for the Panel the same day).
@@ -52,7 +53,9 @@ export function TileSheet({
   gender: 'm' | 'f' | null
   onClose: () => void
 }) {
-  const { room, cold, slipping } = node
+  const { cold, slipping } = node
+  /* The tile's lines in this learner's own endings — obrigada for a woman (content/speaker.ts). */
+  const room = voiced(node.room, gender)
   const first = room.lines[0] ?? null
   const save = saveSentence(gender)
   const close = useRef<HTMLButtonElement>(null)

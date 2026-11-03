@@ -1342,6 +1342,22 @@ export function setProfile(
 }
 
 /**
+ * WHICH ENDING THIS LEARNER SAYS — obrigado, obrigada, or both shown (2026-11-03).
+ *
+ * setProfile cannot do the third: a null there records a skip but leaves an earlier answer
+ * standing, so somebody who chose "as a woman" and then "show me both" would go on being
+ * taught obrigada. This sets both halves together. See content/speaker.ts.
+ */
+export function setSpeaker(g: 'm' | 'f' | 'both') {
+  setProfile('gender', g === 'both' ? null : g)
+  if (g === 'both') {
+    update((s) => {
+      if (s.profile) s.profile.gender = null
+    })
+  }
+}
+
+/**
  * Which kinds of night out this learner wants to hear about.
  *
  * Replaces rather than unions, because this is a preference and not a record: unticking

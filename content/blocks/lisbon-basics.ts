@@ -32,10 +32,10 @@ export const LISBON_BASICS: Situation[] = [
       { pt: 'Olá.', en: 'Hello.', when: 'To anybody, any time. Friendly, never rude.' },
       { pt: 'Bom dia.', en: 'Good morning.', when: 'Until lunch — and said walking in, before you ask for anything.' },
       { pt: 'Boa tarde.', en: 'Good afternoon.', when: 'From lunch until it gets dark. After that, boa noite.' },
-      { pt: 'Obrigado.', en: 'Thank you.', when: 'A woman says obrigada: it agrees with the person saying it, not the one being thanked.' },
+      { pt: 'Obrigado.', f: 'Obrigada.', en: 'Thank you.', when: 'A woman says obrigada: it agrees with the person saying it, not the one being thanked.' },
       { pt: 'Até logo.', en: 'See you later.', when: 'Leaving a shop or a café. Adeus is for a real goodbye.' },
     ],
-    release: { ask: 'Good afternoon — and, on the way out, thank you.', answer: 'Boa tarde. Obrigado.' },
+    release: { ask: 'Good afternoon — and, on the way out, thank you.', answer: 'Boa tarde. Obrigado.', answer_f: 'Boa tarde. Obrigada.' },
     image: {
       src: '/rooms/lisbon_ola.jpg',
       alt: 'Somebody walking into a small café between blue-and-white tiled walls, the owner raising a hand from behind the counter.',

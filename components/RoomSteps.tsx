@@ -8,6 +8,7 @@ import { SayButton, useCanListen } from '@/components/SayButton'
 import { KindIcon } from '@/components/path/icons'
 import { slugFor } from '@/content/audio-manifest'
 import { saveSentence } from '@/content/blocks/lisbon-save'
+import { SpeakerAsk } from '@/components/SpeakerAsk'
 import type { Situation } from '@/content/situations'
 
 /**
@@ -160,6 +161,8 @@ export function RoomSteps({
           </span>
           {shown ? null : <span className="text-sm text-muted">Tap for the English</span>}
         </button>
+        {/* Obrigado or obrigada: asked here, the first time a line will not let you say it until it knows. */}
+        <SpeakerAsk line={line} gender={gender} />
 
         <div className="mt-3 flex items-center gap-3">
           <button

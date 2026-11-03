@@ -88,6 +88,12 @@ export interface SituationImage {
 
 export interface SituationLine {
   pt: string
+  /**
+   * The line as a woman says it, when it changes with the speaker — obrigada, Sou inglesa,
+   * a nova vizinha. Absent when it does not. See content/speaker.ts; never read `pt`
+   * directly to show a learner their line, go through `voiced` / `said`.
+   */
+  f?: string
   en: string
   /** The moment in the encounter this line is for. Ordering is the teaching. */
   when: string
@@ -106,7 +112,7 @@ export interface Situation {
   where?: { name: string; area: string }
   lines: SituationLine[]
   /** What they must be able to say cold at the end. Never optional. */
-  release: { ask: string; answer: string }
+  release: { ask: string; answer: string; /** The answer as a woman says it. See content/speaker.ts. */ answer_f?: string }
   image?: SituationImage
   rung: Rung
   /**
@@ -300,6 +306,7 @@ export const SITUATIONS: Situation[] = withRoomImages([
       },
       {
         pt: 'Obrigado. Bom dia.',
+        f: 'Obrigada. Bom dia.',
         en: 'Thank you. Good day.',
         when: 'You say bom dia on the way out as well as on the way in.',
       },
@@ -397,6 +404,7 @@ export const SITUATIONS: Situation[] = withRoomImages([
       },
       {
         pt: 'Obrigado, boa tarde.',
+        f: 'Obrigada, boa tarde.',
         en: 'Thank you, good afternoon.',
         when: 'To the driver on the way off. People do.',
       },

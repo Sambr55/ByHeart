@@ -32,6 +32,7 @@ import { CopyButton } from '@/components/CopyButton'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
 import { useLearner } from '@/engine/useLearner'
+import { voiced } from '@/content/speaker'
 
 /**
  * The vocab library.
@@ -829,6 +830,7 @@ function EntryRow({
   const isLemma = forms.length > 1
   const root = sourceOf(headId)
   const room = root ? undefined : roomOf(headId)
+  const gender = useLearner().profile?.gender ?? null
   const crate = CRATES.find((c) => c.id === head.family)
   const lines = open ? linesFor(headId, 6, ownCrates) : []
   // Every note the forms carry, not just the first: a lemma card is where ser and estar
@@ -1032,7 +1034,7 @@ function EntryRow({
             <div>
               <p className="eyebrow text-muted">{entry.owned ? 'Where you met it' : 'Where it is taught'}</p>
               <p className="mt-1 text-xs text-muted">The Club · {room.title}</p>
-              <p className="pt mt-1 text-sm">{room.release.answer}</p>
+              <p className="pt mt-1 text-sm">{voiced(room, gender).release.answer}</p>
             </div>
           ) : null}
 

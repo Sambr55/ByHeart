@@ -49,7 +49,25 @@ export function translatorConfigured(): boolean {
  * input will invent one on "obrigado", and a confident invention in a learning product is
  * worse than a silence.
  */
-function systemPrompt(register: Register): string {
+/**
+ * WHO IS SPEAKING (2026-11-03). Portuguese agrees words about the speaker with the speaker:
+ * "I'm tired" is cansado from a man and cansada from a woman, "thank you" is obrigado or
+ * obrigada. The rooms teach the learner's own ending (content/speaker.ts); a translator
+ * that handed a woman cansado would contradict them. Unknown is not masculine: the
+ * masculine goes in pt and the feminine is named in the note, so nobody is taught the
+ * wrong one by default.
+ */
+export type SpeakerGender = 'm' | 'f' | null
+
+function speakerLine(g: SpeakerGender): string {
+  if (g === 'f')
+    return 'The learner is a woman. Words that agree with the speaker take the feminine: obrigada, cansada, inglesa, sozinha, a nova vizinha.'
+  if (g === 'm')
+    return 'The learner is a man. Words that agree with the speaker take the masculine: obrigado, cansado, inglês, sozinho.'
+  return 'The learner has not said whether they speak as a man or a woman. If the Portuguese changes with the speaker (obrigado/obrigada, cansado/cansada), give the masculine in pt and put the feminine in the note, e.g. "A woman says cansada."'
+}
+
+function systemPrompt(register: Register, speaker: SpeakerGender = null): string {
   return [
     'You translate between English and European Portuguese for a learner in Lisbon.',
     '',
@@ -61,6 +79,8 @@ function systemPrompt(register: Register): string {
     register === 'formal'
       ? 'Address the listener as você or by the third person. This learner is being taught the formal register.'
       : 'Address the listener as tu. This learner is being taught the tu register. Use você only if the situation plainly demands it, and say so in the note.',
+    '',
+    speakerLine(speaker),
     '',
     'Answer with JSON only, no prose around it, in this exact shape:',
     '{"pt": "...", "en": "...", "note": "...", "direction": "en-pt" | "pt-en"}',
@@ -272,6 +292,7 @@ export async function readImage(opts: {
 export async function translate(opts: {
   text: string
   register: Register
+  speaker?: SpeakerGender
   signal?: AbortSignal
 }): Promise<Translation> {
   const key = process.env.ANTHROPIC_API_KEY
@@ -303,7 +324,7 @@ export async function translate(opts: {
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 400,
-      system: systemPrompt(opts.register),
+      system: systemPrompt(opts.register, opts.speaker ?? null),
       /*
         The learner's text is a user message and nothing else — never spliced into the
         system prompt. A free-form box is exactly where somebody types "ignore your

@@ -11,6 +11,7 @@ import { useEntitlements } from '@/engine/useEntitlements'
 import { hasFullAccess } from '@/lib/entitlements'
 import { pathView } from '@/components/path/progress'
 import { roomLock } from '@/components/path/locks'
+import { said } from '@/content/speaker'
 
 /**
  * MY OPENING LINE — the rescue card (Sam, 2026-11-02).
@@ -58,7 +59,8 @@ export function Opener() {
     )
   }, [learner, units, member, purpose])
 
-  const opening = room?.lines[0] ?? null
+  /* In this learner's own ending — Obrigada, Sou inglesa (content/speaker.ts). */
+  const opening = room?.lines[0] ? said(room.lines[0], learner.profile?.gender ?? null) : null
   const save = saveSentence(learner.profile?.gender ?? null)
   const name = PATH_NAMES[pathPurpose(purpose)]
 

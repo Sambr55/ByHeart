@@ -17,7 +17,8 @@ export interface KnowHow {
   title: string
   /** The knowledge, in two or three sentences. */
   body: string
-  line: { pt: string; en: string }
+  /** `f`: as a woman says it, when it changes with the speaker (content/speaker.ts). */
+  line: { pt: string; f?: string; en: string }
   room?: string
   /** 1–12. Absent: all year. */
   months?: number[]
@@ -38,7 +39,7 @@ export const KNOWHOW: KnowHow[] = [
     topic: 'eating',
     title: 'The bread you did not order',
     body: 'Bread, butter, olives or cheese arrive at the table before you ask. They are the couvert, and if you eat them they are on the bill. Saying no is normal and nobody minds.',
-    line: { pt: 'Não, obrigado. Pode levar o couvert.', en: 'No thanks — you can take the couvert away.' },
+    line: { pt: 'Não, obrigado. Pode levar o couvert.', f: 'Não, obrigada. Pode levar o couvert.', en: 'No thanks — you can take the couvert away.' },
     room: 'lisbon_conta',
   },
   {
@@ -110,7 +111,7 @@ export const KNOWHOW: KnowHow[] = [
     topic: 'manners',
     title: 'Say bom dia when you walk in',
     body: 'Walking into a small shop or café and going straight to what you want reads as brusque. A bom dia (or boa tarde after lunch) on the way in, and obrigado on the way out, changes how the whole exchange goes.',
-    line: { pt: 'Bom dia! Obrigado, até logo.', en: 'Good morning! Thank you, see you later.' },
+    line: { pt: 'Bom dia! Obrigado, até logo.', f: 'Bom dia! Obrigada, até logo.', en: 'Good morning! Thank you, see you later.' },
     room: 'lisbon_ola',
   },
   {
