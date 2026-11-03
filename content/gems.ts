@@ -123,6 +123,11 @@ export function visibleGems(all: Gem[] = GEMS): Gem[] {
   return production ? all.filter((g) => g.verified) : all
 }
 
+/** One gem, by id — any gem, verified or not; callers decide what to show. */
+export function gemById(id: string): Gem | undefined {
+  return GEMS.find((g) => g.id === id)
+}
+
 export function bairroById(id: BairroId): Bairro {
   return BAIRROS.find((b) => b.id === id)!
 }

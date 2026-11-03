@@ -578,6 +578,13 @@ export interface LearnerState {
    * no walks walked. content/walks.ts.
    */
   walk_stops?: string[]
+  /**
+   * TABLES (2026-11-03): codes of the tables this learner sat at, and the lines they said
+   * there — marked by them at the end of the evening. Optional, like walk_stops.
+   * content/table.ts.
+   */
+  tables_sat?: string[]
+  table_lines?: string[]
   sections_completed: string[]
   /**
    * How many sittings this learner has done, in total, across every vibe.
@@ -860,6 +867,8 @@ export function emptyLearner(): LearnerState {
     drops_done: [],
     cheats_used: [],
     walk_stops: [],
+    tables_sat: [],
+    table_lines: [],
     sections_completed: [],
     sittings: 0,
     understood: 0,
@@ -1095,6 +1104,8 @@ export function loadLearner(): LearnerState {
           drops_done: arr(parsed.drops_done, []),
           cheats_used: arr(parsed.cheats_used, []),
           walk_stops: arr(parsed.walk_stops, []),
+          tables_sat: arr(parsed.tables_sat, []),
+          table_lines: arr(parsed.table_lines, []),
           sections_completed: arr(parsed.sections_completed, []),
           /*
             Back-filled from sections_completed for anybody who has one and no count.
@@ -2459,6 +2470,17 @@ export function markWalkStop(key: string) {
     const done = s.walk_stops ?? []
     if (done.includes(key)) return
     s.walk_stops = [...done, key]
+  })
+}
+
+/** A table sat at, and the lines this learner says they said there. */
+export function markTableSat(code: string, lines: string[] = []) {
+  update((s) => {
+    const sat = s.tables_sat ?? []
+    if (!sat.includes(code)) s.tables_sat = [...sat, code]
+    const had = s.table_lines ?? []
+    const add = lines.filter((l) => !had.includes(l))
+    if (add.length) s.table_lines = [...had, ...add]
   })
 }
 
