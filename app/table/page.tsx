@@ -6,9 +6,10 @@ export const metadata = {
 }
 
 /*
-  YOUR TABLE (2026-11-03): host-led, friends only — content/table-night.ts. This page used
-  to offer seats at tables DUB matched strangers onto (components/Tables.tsx, lib/tables.ts);
-  that flow is no longer linked from anywhere a learner goes.
+  YOUR TABLE (2026-11-03): host-led, friends only — content/table-night.ts. The earlier
+  stranger-matching table (seats earned by proof, tables made by an admin) was removed on
+  2026-11-03; its database tables (`tables`, `seats`, migration 012) are left in place,
+  unused, rather than dropped.
 */
 export default function TablePage() {
   return <YourTables />
