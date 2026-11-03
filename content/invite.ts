@@ -25,7 +25,7 @@ export const INVITE_TEXT =
 
 export const INVITE = {
   /** On the Yours section that lists them. */
-  eyebrow: 'BROUGHT IN',
+  eyebrow: 'BRING A FRIEND IN',
   /*
     THE ASK, said as the thing it actually is. Not "refer a friend" — a referral is a
     marketing act and this is asking somebody to learn a language with you.
@@ -33,7 +33,7 @@ export const INVITE = {
   cta: 'BRING SOMEBODY',
   /** When there is nobody yet. */
   empty:
-    'Everybody you know here speaks English to each other. Bring one of them and you will both have somewhere else to put it.',
+    'Everybody you know here speaks English to each other. Bring one of them in, and you have somebody to speak Portuguese with, and somebody for your table.',
   /** When there are some. */
   some: 'The people you have asked, and how far they have got.',
   /*

@@ -154,15 +154,16 @@ export function Friends() {
       but separate" more clearly than a hairline ever did, and the hairline was doing the
       work of a border on a section that had no border.
     */
-    <section className="flex flex-col gap-6">
+    <section className="flex flex-col gap-3" data-testid="yours-people">
+      <h2 className="eyebrow text-telha">Your people</h2>
       <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
         <div className="flex flex-col gap-1">
-          <p className="eyebrow text-muted">SHOWN</p>
+          <p className="eyebrow text-muted">SHOW A FRIEND</p>
           {/* The invitation is the content of this card, so it is read at body size. */}
           <p className="text-base leading-relaxed text-muted">
             {mine.length
               ? 'Sentences you handed to somebody, and what came back.'
-              : 'Show somebody three things you can say. They can show you theirs.'}
+              : 'Send a friend three things you can say, and they send theirs back. A good warm-up before a table.'}
           </p>
         </div>
 

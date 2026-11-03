@@ -1,15 +1,18 @@
 import { redirect } from 'next/navigation'
+import { VibesView } from './view'
+
+export const dynamic = 'force-dynamic'
 
 /**
- * VIBES IS RETIRED AS A SEPARATE LOOP (Sam, 2026-11-03).
+ * VIBES: ONE SITTING, NOT A SECOND LOOP (Sam, 2026-11-03).
  *
- * It was a second app beside the path — its own picker, sections, sittings and Legend
- * hand-off — and two loops was half of "I get lost in my own app in seconds". Its lasting
- * part, the shapes (NÃO + VERB, -ÇÃO, POSSO …?, the bluffs), is now the Foundations row on
- * the Path (components/path/Foundations.tsx). Old links, push notifications and installed
- * shortcuts that still say /vibes land home. The journey code (VibesView, components/
- * Journey.tsx) stays in the tree, because the front door still renders through it.
+ * The shelf as a place of its own is retired — two loops was half of "I get lost in my own
+ * app in seconds". But the vibes themselves came back, as the Just for fun row on the Path
+ * (components/path/FunShelf.tsx), and each of those opens here with ?open=<vibe>. Without
+ * one, /vibes still lands home, so old links and shortcuts go somewhere sensible.
  */
-export default function VibesPage() {
-  redirect('/club')
+export default async function VibesPage({ searchParams }: { searchParams: Promise<{ open?: string }> }) {
+  const { open } = await searchParams
+  if (!open) redirect('/club#fun')
+  return <VibesView />
 }

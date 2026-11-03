@@ -172,10 +172,10 @@ export function Inbox({ pushReady }: { pushReady: boolean }) {
                     (fresh === 1 ? ' drop has' : ' drops have') +
                     ' opened in ' +
                     city +
-                    ' since you last looked. Each one is already in your feed.'
+                    ' since you last looked.'
                   : 'Everything open in ' +
                     city +
-                    ' is below, newest first. Each one is already in your feed.'}
+                    ' is below, newest first.'}
           </p>
         </div>
 

@@ -215,12 +215,13 @@ export function Collection() {
         vibes via any nav to continue." The shelf is deliberately not a tab, so losing this
         link would have re-made a dead end that took a report to find.
       */}
+      {/* To the Just for fun row on the Path (components/path/FunShelf.tsx), where the vibes live now. */}
       <Link
-        href="/club"
+        href="/club#fun"
         data-testid="collection-more"
         className="tap-target eyebrow inline-flex items-center text-accent underline underline-offset-4"
       >
-        PICK ANOTHER
+        MORE VIBES
       </Link>
     </section>
   )
