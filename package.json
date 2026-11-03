@@ -8,7 +8,7 @@
     "start": "next start",
     "lint:content": "tsx scripts/lint-content.ts",
     "audio:generate": "tsx scripts/generate-audio.ts",
-    "check": "npm run lint:content && npm run carry && npm run cheats && npm run road && npm run line:test && npm run merge:test && npm run invite && npm run first && npm run club && npm run opener && npm run drops && npm run fork && npm run legend && npm run ladder && npm run parts && npm run promises && npm run allowance && npm run doorway && npm run signature && npm run opened && npm run nocue && npm run vibes:legend && npm run shelf:group && npm run quiet && npm run panes && npm run viewport && npm run paradigms && npm run derive && npm run showing && npm run board && npm run ticker && npm run mentor && npm run table && next build",
+    "check": "npm run lint:content && npm run carry && npm run cheats && npm run road && npm run line:test && npm run merge:test && npm run invite && npm run first && npm run club && npm run opener && npm run drops && npm run fork && npm run legend && npm run ladder && npm run parts && npm run promises && npm run allowance && npm run doorway && npm run signature && npm run opened && npm run nocue && npm run vibes:legend && npm run shelf:group && npm run quiet && npm run panes && npm run viewport && npm run paradigms && npm run derive && npm run showing && npm run board && npm run ticker && npm run mentor && npm run table && next build && npm run gems",
     "walkthrough": "tsx scripts/walkthrough.ts",
     "shots": "tsx scripts/shots.mts",
     "journey": "tsx scripts/journey-smoke.ts",
@@ -103,11 +103,13 @@
     "inbox": "tsx scripts/inbox-check.mts",
     "signin": "tsx scripts/signin-check.mts",
     "walk": "tsx scripts/walk-check.mts",
-    "path": "tsx scripts/path-check.mts"
+    "path": "tsx scripts/path-check.mts",
+    "gems": "tsx scripts/gems-check.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.123.0",
     "@vercel/blob": "^2.8.0",
+    "leaflet": "^1.9.4",
     "next": "16.3.2",
     "postgres": "^3.4.9",
     "react": "19.2.8",
@@ -118,6 +120,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/leaflet": "^1.9.22",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
