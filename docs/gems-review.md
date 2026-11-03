@@ -387,3 +387,9 @@ Old warehouses by the river turned breweries, galleries and studios — Lisbon�
 - **Unconfirmed:** No dated 2025–26 review; snail season from general knowledge.
 - **Sources:** https://www.timeout.pt/lisboa/pt/restaurantes/varanda-do-vale-formoso · https://www.tasteoflisboa.com/blog/marvila-travel-guide-for-food-and-art-lovers/
 - [x] verified (accepted by Sam, 2026-11-03)
+
+## Your table — lines for a native read (2026-11-03)
+
+All in `content/table-night.ts`: the five rounds' lines, the lifelines, the 24 question cards
+(two marked `stretch` use the imperfect for the conditional — "Comprava…", "Vivia em…") and
+`arriveLine`. Friends, so `tu` throughout. Check register and anything that sounds Brazilian.

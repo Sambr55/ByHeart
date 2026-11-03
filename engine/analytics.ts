@@ -235,6 +235,11 @@ export type EventName =
   | 'trip_set'
   /** A language walk's stop, said in the street (2026-11-03). */
   | 'walk_stop_said'
+  | 'table_hosted'
+  | 'table_invite_shared'
+  | 'table_joined'
+  | 'table_round'
+  | 'table_lines_saved'
   /** An email left for a route that is not open yet, from the booker (2026-11-03). */
   | 'waitlist_joined'
   /** Which of the two warm-up vibes somebody picked before the basics. */
