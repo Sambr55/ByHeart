@@ -2908,6 +2908,13 @@ export function provenanceOf(
   for (const id of frame.built_from) {
     const piece = PIECES[id]
     if (!piece) continue
+    /*
+      WITH A LEARNER, ONLY WHAT THEY MET (2026-11-03). The fallback to the authored family
+      still told a learner who never opened a vibe that sou "came out of" a James Bond
+      lesson — and with Vibes retired from the path that is now every new learner. When the
+      caller passes this learner's record, a word with no meeting in it is left out.
+    */
+    if (met && !met[id]) continue
     const family = met?.[id] ?? piece.family
     if (out.some((o) => o.family === family)) continue
     out.push({ piece: piece.target, family })
