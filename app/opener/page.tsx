@@ -1,6 +1,11 @@
 import { Opener } from '@/components/Opener'
 
-export const metadata = { title: 'My opening line — DUB' }
+export const metadata = {
+  title: 'My opening line — DUB',
+  /* Its own manifest and home-screen name, so an iPhone can give it an icon of its own. */
+  manifest: '/opener/manifest.webmanifest',
+  appleWebApp: { capable: true, title: 'My line', statusBarStyle: 'black-translucent' as const },
+}
 
 /**
  * /opener — "My opening line", the rescue card (Sam, 2026-11-02).
