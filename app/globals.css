@@ -2546,3 +2546,41 @@ summary:focus-visible,
 details > summary.list-none::-webkit-details-marker {
   display: none;
 }
+
+/*
+  THE OPENER SCREENSAVER (2026-11-04) — components/Opener.tsx.
+  A slow azulejo glow drifting behind the line, each line arriving out of a soft blur, and
+  story bars filling at the top. All still under reduced motion.
+*/
+.saver-glow {
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(40% 35% at 30% 30%, rgb(31 93 140 / 0.55), transparent 70%),
+    radial-gradient(35% 30% at 75% 70%, rgb(127 179 218 / 0.28), transparent 70%);
+  filter: blur(20px);
+}
+.saver-glow.is-moving {
+  animation: saver-drift 24s ease-in-out infinite alternate;
+}
+@keyframes saver-drift {
+  from { transform: translate3d(-6%, -4%, 0) rotate(0deg) }
+  to { transform: translate3d(6%, 5%, 0) rotate(8deg) }
+}
+.saver-in {
+  animation: saver-in 700ms var(--ease-out) both;
+}
+@keyframes saver-in {
+  from { opacity: 0; filter: blur(8px); transform: translateY(8px) }
+  to { opacity: 1; filter: none; transform: none }
+}
+.saver-fill {
+  width: 0;
+  animation-name: saver-fill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+@keyframes saver-fill { to { width: 100% } }
+@media (prefers-reduced-motion: reduce) {
+  .saver-glow.is-moving, .saver-in { animation: none }
+}
