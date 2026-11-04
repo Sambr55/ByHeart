@@ -241,6 +241,7 @@ export type EventName =
   | 'table_round'
   | 'table_lines_saved'
   | 'table_finished'
+  | 'vocab_search_ask'
   /** An email left for a route that is not open yet, from the booker (2026-11-03). */
   | 'waitlist_joined'
   /** Which of the two warm-up vibes somebody picked before the basics. */
