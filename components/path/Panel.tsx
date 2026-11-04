@@ -260,8 +260,24 @@ export function Panel({
       {/* What to do next, straight under the picture it builds (2026-11-04). */}
       {children}
 
-      <Legend view={view} />
-      <Foundation inventory={inventory} />
+      {/*
+        ROLLED UP (2026-11-04). Sam: "roll up the progress and shortcuts so they start
+        closed". The picture is the progress; the per-level list and the Foundation are a tap
+        away for anybody who wants the numbers.
+      */}
+      <details className="rollup group rounded-2xl border border-line bg-bg-elev" data-testid="progress-rollup">
+        <summary className="tap-target flex cursor-pointer list-none items-center gap-3 px-4 py-3">
+          <span className="eyebrow flex-1 text-fg">Your progress</span>
+          <span className="text-sm tabular-nums text-muted">
+            {view.done} of {view.total} rooms
+          </span>
+          <span aria-hidden className="text-muted transition-transform group-open:rotate-180">⌄</span>
+        </summary>
+        <div className="flex flex-col gap-6 px-4 pb-4 pt-2">
+          <Legend view={view} />
+          <Foundation inventory={inventory} />
+        </div>
+      </details>
     </section>
   )
 }

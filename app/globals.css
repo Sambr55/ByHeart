@@ -2541,3 +2541,8 @@ summary:focus-visible,
 }
 .walk-pin.is-on { background: #1f5c8f; color: #fff; font-size: 16px; }
 .walk-pin.is-said { background: #c9973b; border-color: #c9973b; color: #1a2430; }
+
+/* Rolled-up sections draw their own chevron; Safari's disclosure triangle would be a second. */
+details > summary.list-none::-webkit-details-marker {
+  display: none;
+}
