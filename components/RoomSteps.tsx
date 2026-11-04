@@ -69,8 +69,20 @@ export function RoomSteps({
   const line = lines[at]
   const last = at === lines.length - 1
 
+  /*
+    ONCE SHRUNK, THE PHOTO STAYS SHRUNK (2026-11-04). Sam: "when you try and scroll up to
+    see the rest of the card everything expands and then flops back to start position."
+
+    This was `scrolled = scrollY > 24` both ways. Shrinking the photo takes ~280px off the
+    page, which on a short room drags the scroll back under 24, which grows the photo, which
+    makes the page scrollable again — a loop the eye sees as a bounce. A layout that changes
+    the scroll it is driven by has to latch: past 24 it shrinks and stays shrunk for this
+    room, and the page simply scrolls.
+  */
   useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 24)
+    const on = () => {
+      if (window.scrollY > 24) setScrolled(true)
+    }
     on()
     window.addEventListener('scroll', on, { passive: true })
     return () => window.removeEventListener('scroll', on)
@@ -195,7 +207,12 @@ export function RoomSteps({
         THE THUMB ZONE: hear, say, on. Pinned, so the next move is always under the thumb
         and never at the bottom of a page somebody has to scroll to find.
       */}
-      <div className="room-dock sticky bottom-[calc(var(--bar-room)+var(--keyboard))] -mx-5 mt-6 flex items-center gap-3 border-t border-line bg-bg px-5 pb-6 pt-3">
+      {/*
+        SLIM (2026-11-04, Sam: "The panel above the bottom nav is too tall"). It sits on the
+        bottom bar, which already clears the home indicator, so it carries no safe-area
+        padding of its own — it had both, and the gap under the buttons was the second one.
+      */}
+      <div className="room-dock sticky bottom-[calc(var(--bar-room)+var(--keyboard))] -mx-5 mt-4 flex items-center gap-3 border-t border-line bg-bg px-5 py-2.5">
         <AudioButton slug={slugFor(line.pt)} text={line.pt} />
         {canListen ? <SayButton key={line.pt} want={line.pt} /> : null}
         {last ? null : <span className="flex-1" />}
