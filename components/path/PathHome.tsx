@@ -343,6 +343,22 @@ function Understood({ count }: { count: number }) {
   return (
     /* The tally itself is the header chip; here only its milestone cheer, when one is due. */
     <div className="flex flex-col gap-3">
+      {/*
+        ONE LINE, NOT A CARD (2026-11-04). Sam asked why the opening-line card sat on the
+        Path on every visit; it is needed on a pavement, not every time the Path opens. So
+        it is a line under Play — and still the home-screen shortcut (app/manifest.ts).
+        Always there: with every room done, it still has the save on it.
+      */}
+      <Link
+        href="/opener"
+        data-testid="opener-button"
+        className="tap-target -mt-1 flex items-center gap-2 self-start py-1 text-sm text-muted"
+      >
+        <DoorIcon className="h-4 w-4 shrink-0 text-accent" />
+        <span>
+          Walking in now? <span className="font-semibold text-accent">My opening line →</span>
+        </span>
+      </Link>
 
       {cheer !== null ? (
         <button
@@ -357,18 +373,6 @@ function Understood({ count }: { count: number }) {
         </button>
       ) : null}
 
-      {/* Always there: with every room done, the card still has the save on it. */}
-      <Link
-        href="/opener"
-        data-testid="opener-button"
-        className="tap-target flex items-center gap-3 rounded-2xl border border-line bg-bg-elev px-4 py-3"
-      >
-        <DoorIcon className="h-6 w-6 shrink-0 text-accent" />
-        <span className="flex min-w-0 flex-1 flex-col leading-tight">
-          <span className="eyebrow text-accent">My opening line</span>
-          <span className="text-sm text-muted">For walking in — and the save, if it goes wrong.</span>
-        </span>
-      </Link>
     </div>
   )
 }
