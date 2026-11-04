@@ -133,33 +133,21 @@ export const FREE_ENTITLEMENTS: Entitlements = {
  * Ids, not titles, so a rename never quietly moves a room across the line. Asserted to
  * exist by scripts/club-door.mts.
  */
+/*
+  THE FIRST TWO LEVELS, WHOLE (2026-11-04). Sam agreed: the paywall falls after Level 2
+  rather than room by room from Level 2 on — a habit is built before anybody is asked to
+  pay, and no free room ever sits beside a padlock in the levels you can play. Each path's
+  Basics and its second level, by id (billing never imports the content tree), plus the
+  emergency room wherever it falls. scripts/path-check.mts fails if these stop matching
+  the first two levels of content/path.ts. The fun tile that closes every later level
+  stays free (FREE_ALWAYS below).
+*/
+const BASICS = ['lisbon_ola', 'lisbon_numeros', 'lisbon_save', 'lisbon_legend']
+
 export const FREE_ROOMS: readonly string[] = [
-  /*
-    THE FIRST DAY, IN THE ORDER IT HAPPENS — revised at merge (2026-11-01) once the second
-    visitor block existed. The first cut (taxi, café, asking the way, the 28, the bill) was
-    chosen before there was an airport or a check-in room, and it left the whole of Unit 1
-    on the new path home — Arrive — behind a padlock: the first thing a new member saw was
-    UNLOCK. A starter set that cannot start the trip is not one.
-  */
-  'lisbon_aeroporto',
-  'lisbon_checkin',
-  'lisbon_cafe',
-  'lisbon_conta',
-  'lisbon_perdido',
-  /*
-    AND THE EMERGENCY ROOM, as part of the survival kit rather than the five. "Help, call
-    an ambulance" is not a feature to sell; it sits with the repair lines, which are free.
-  */
+  ...BASICS,
+  'lisbon_aeroporto', 'lisbon_checkin', 'lisbon_cartao_sim',
   'lisbon_emergencia',
-  /*
-    AND THE SAVE (2026-11-02), for the same reason as the emergency room: it is survival,
-    not a product. "Desculpe, não percebi. Sou inglês." is the first room on every path —
-    see content/blocks/lisbon-save.ts — and a padlock on the sentence for when it goes
-    wrong would be a padlock on the floor of the building. Sam: "at the very least you can
-    say 'I am sorry I don't understand, I am English' in Portuguese." At the very least
-    means free.
-  */
-  'lisbon_save',
 ] as const
 
 /**
@@ -190,8 +178,8 @@ export const FREE_ALWAYS: readonly string[] = [
 
 export const FREE_BY_PURPOSE: Record<'visiting' | 'staying' | 'moving', readonly string[]> = {
   visiting: FREE_ROOMS,
-  staying: ['lisbon_save', 'lisbon_checkin', 'lisbon_telemovel', 'lisbon_cafe', 'lisbon_padaria', 'lisbon_vizinho', 'lisbon_emergencia'],
-  moving: ['lisbon_save', 'lisbon_nif', 'lisbon_telemovel', 'lisbon_visita', 'lisbon_cafe', 'lisbon_navegante', 'lisbon_emergencia'],
+  staying: [...BASICS, 'lisbon_checkin', 'lisbon_telemovel', 'lisbon_navegante', 'lisbon_cafe', 'lisbon_costume', 'lisbon_emergencia'],
+  moving: [...BASICS, 'lisbon_nif', 'lisbon_telemovel', 'lisbon_banco', 'lisbon_loja_cidadao', 'lisbon_junta', 'lisbon_emergencia'],
 }
 
 /**
@@ -310,11 +298,11 @@ export const PLANS = {
       thing a visitor gets for nothing is five rooms of the city they are standing in.
     */
     line:
-      'Five Lisbon rooms for your first day, the survival kit, ' +
+      'The first two levels of your path, the survival kit, ' +
       (WORDS[FREE_CRATES] ?? String(FREE_CRATES)) +
       ' vibes, and a line every morning.',
     includes: [
-      'Five Lisbon rooms for day one — a taxi, the café counter, asking the way, the 28, the bill',
+      'The first two levels of your path, whole — Basics, then arriving, settling in or the paperwork',
       'The survival kit: the lines that rescue a conversation, numbers, greetings and the cheat sheets',
       (WORDS[FREE_CRATES] ?? String(FREE_CRATES)).replace(/^./, (c) => c.toUpperCase()) +
         ' vibes, chosen by you and yours for good',

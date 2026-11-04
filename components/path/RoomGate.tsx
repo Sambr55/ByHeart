@@ -29,8 +29,8 @@ export function RoomGate({ id, title, children }: { id: string; title: string; c
       <p className="eyebrow text-muted">Dub Club · Lisboa</p>
       <h1 className="display text-3xl">{title}</h1>
       <p className="leading-relaxed text-muted">
-        This room comes with DUB Pro. The first day of your path, and the survival kit, are
-        free.
+        This room comes with DUB Pro. The first two levels of your path, and the survival kit,
+        are free.
       </p>
       <div className="flex flex-wrap gap-3">
         <Link href="/pro" className="tap-target eyebrow inline-flex rounded-full bg-accent px-6 py-3 text-accent-ink">

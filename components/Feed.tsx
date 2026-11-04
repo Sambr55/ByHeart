@@ -1,6 +1,6 @@
 'use client'
 
-import { FREE_ROOMS, isFreeRoom } from '@/lib/entitlements'
+import { isFreeRoom } from '@/lib/entitlements'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -3845,7 +3845,7 @@ function Teased({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
       <div className="rounded border border-line-strong bg-surface px-4 py-3">
         <p className="text-sm font-semibold">What to say here comes with DUB Pro.</p>
         <p className="mt-1 text-xs leading-relaxed text-muted">
-          {FREE_ROOMS.length} first-day rooms are free from the moment you are set up. This
+          The first two levels of your path are free from the moment you are set up. This
           one is part of the rest of the city.
         </p>
       </div>

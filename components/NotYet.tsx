@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useMemo } from 'react'
 import { CLUB } from '@/content/club'
 import { dropsFor, roomsFor } from '@/content/feed'
-import { FREE_ROOMS } from '@/lib/entitlements'
 import { useLearner } from '@/engine/useLearner'
 
 /**
@@ -60,7 +59,7 @@ export function NotYet({
       rooms + ' rooms of your city — the errands, the counters, the awkward ones',
       'What is on this week, and the words for being there',
       /* The starter set, counted from the one list rather than typed. */
-      FREE_ROOMS.length + ' of them free from the first day, with the survival kit',
+      'The first two levels free, with the survival kit',
     ]
     if (drops > 0) out[1] = drops + ' things on in Lisbon right now, and what to say there'
     return out
