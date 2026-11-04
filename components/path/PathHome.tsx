@@ -361,15 +361,28 @@ function Understood({ count }: { count: number }) {
       </Link>
 
       {cheer !== null ? (
+        /*
+          BOA! IS THE HEADLINE (2026-11-04). Sam: "Boa gets lost". It sat as a grey eyebrow
+          squeezed beside three lines of text. Now it leads, big and green, with the
+          message under it and a close mark where people look for one.
+        */
         <button
           type="button"
           onClick={dismiss}
           data-testid="understood-cheer"
-          className="animate-rise flex items-start gap-3 rounded-2xl border border-correct bg-correct/10 px-4 py-3 text-left"
+          aria-label={'Boa! ' + understoodCheer(cheer) + ' Tap to close.'}
+          className="animate-rise relative flex flex-col gap-1 rounded-2xl border border-correct bg-correct/10 px-5 py-4 text-left"
         >
-          <SpeechIcon filled className="mt-0.5 h-5 w-5 shrink-0 text-correct" />
-          <span className="min-w-0 flex-1 text-base leading-snug">{understoodCheer(cheer)}</span>
-          <span className="eyebrow shrink-0 self-center text-muted">Boa!</span>
+          <span className="flex items-center gap-2 pr-8 text-correct">
+            <SpeechIcon filled className="h-6 w-6 shrink-0" />
+            <span className="display text-2xl leading-none" lang="pt-PT">
+              Boa!
+            </span>
+          </span>
+          <span className="text-base leading-snug">{understoodCheer(cheer)}</span>
+          <span aria-hidden className="absolute right-4 top-3 text-xl leading-none text-muted">
+            ×
+          </span>
         </button>
       ) : null}
 
