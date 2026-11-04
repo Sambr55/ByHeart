@@ -20,8 +20,9 @@ self.addEventListener('push', (event) => {
       body: data.body || '',
       icon: '/icon',
       badge: '/icon',
-      tag: 'dub-line',
-      // Replace yesterday's rather than stacking a column of unread guilt.
+      // Replace yesterday's of the same kind rather than stacking a column of unread guilt;
+      // a table reminder has its own tag so it never knocks the morning line off.
+      tag: data.tag || 'dub-line',
       renotify: true,
       data: { url: data.url || '/line' },
     }),
@@ -33,8 +34,17 @@ self.addEventListener('notificationclick', (event) => {
   const url = (event.notification.data && event.notification.data.url) || '/line'
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
-      for (const client of list) {
-        if (client.url.includes(url) && 'focus' in client) return client.focus()
+      /*
+        An app already open is brought forward and taken to the room, rather than a second
+        window being opened beside it. navigate() only works on a window this worker
+        controls, so anything else falls back to opening one.
+      */
+      const open = list.find((c) => 'focus' in c)
+      if (open) {
+        return open
+          .focus()
+          .then((c) => (c && 'navigate' in c ? c.navigate(url) : self.clients.openWindow(url)))
+          .catch(() => self.clients.openWindow(url))
       }
       return self.clients.openWindow(url)
     }),

@@ -1,4 +1,6 @@
 import 'server-only'
+import { notifyDevices } from '@/lib/push'
+import { tableJoined } from '@/lib/push-plan'
 import { randomBytes } from 'node:crypto'
 import { db } from '@/lib/db'
 import { CODE_ALPHABET, MAX_GUESTS, ROUNDS, type HouseRule } from '@/content/table-night'
@@ -122,9 +124,23 @@ export async function join(code: string, device: string, name: string): Promise<
        where exists (select 1 from hosted_tables where code = ${code} and state = 'on')
          and (select count(*) from hosted_guests where code = ${code}) < ${MAX_GUESTS}
       on conflict (code, device) do update set name = excluded.name
-      returning code
+      returning code, (xmax = 0) as inserted
     `
-    if (rows.length) return 'in'
+    if (rows.length) {
+      /*
+        THE HOST HEARS WHO IS COMING (2026-11-04), once per new guest — a rename is not
+        news. Only when table pushes are switched on, and never allowed to fail the join.
+      */
+      if (rows[0].inserted && process.env.PUSH_TABLES === 'on') {
+        const [t] = await sql`select host_device, place, sits_at from hosted_tables where code = ${code}`
+        if (t && t.host_device !== device) {
+          await notifyDevices([t.host_device], 'table', (tz) =>
+            tableJoined({ code, guest: n, place: t.place, sits_at: new Date(t.sits_at).toISOString() }, tz),
+          ).catch(() => 0)
+        }
+      }
+      return 'in'
+    }
     const [t] = await sql`select state from hosted_tables where code = ${code}`
     return !t || t.state !== 'on' ? 'gone' : 'full'
   }
