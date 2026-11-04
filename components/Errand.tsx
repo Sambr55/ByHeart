@@ -1,5 +1,6 @@
 'use client'
 
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
@@ -306,6 +307,7 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
   }
 
   return (
+    <>
     <main
       data-stage="REAL WORLD"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
@@ -605,6 +607,10 @@ export function Errand({ situation, drop }: { situation: Situation; drop?: Drop 
           </div>
         </div>
       ) : null}
+      <BottomNavSpace />
     </main>
+    {/* Every screen carries the bar (2026-11-04, Sam: "The bottom nav doesnt appear on a lot of screens"). */}
+    <BottomNav />
+    </>
   )
 }

@@ -192,7 +192,7 @@ export function RoomSteps({
         THE THUMB ZONE: hear, say, on. Pinned, so the next move is always under the thumb
         and never at the bottom of a page somebody has to scroll to find.
       */}
-      <div className="room-dock sticky bottom-0 -mx-5 mt-6 flex items-center gap-3 border-t border-line bg-bg px-5 pb-6 pt-3">
+      <div className="room-dock sticky bottom-[calc(var(--bar-room)+var(--keyboard))] -mx-5 mt-6 flex items-center gap-3 border-t border-line bg-bg px-5 pb-6 pt-3">
         <AudioButton slug={slugFor(line.pt)} text={line.pt} />
         {canListen ? <SayButton key={line.pt} want={line.pt} /> : null}
         {last ? null : <span className="flex-1" />}

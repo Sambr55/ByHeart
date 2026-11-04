@@ -315,7 +315,13 @@ body {
   background-color: var(--ground-dark);
 }
 
-html:has(.on-dark) {
+/*
+  A DARK HERO IS NOT A DARK GROUND (2026-11-04). The room's photograph header carries
+  .on-dark, so every lesson room turned the whole canvas brown — and in the installed app,
+  where the page stops short of the glass, that brown showed as a dark band at the foot of
+  a sand screen. Only a screen whose ground is dark to its edge should darken the canvas.
+*/
+html:has(.on-dark:not(.room-hero)) {
   background: var(--ground-dark);
 }
 
@@ -352,7 +358,7 @@ html:has(.nav-bar) {
   different colour. `.on-dark` is more specific than the bar and says so here rather than
   relying on source order.
 */
-html:has(.on-dark):has(.nav-bar) {
+html:has(.on-dark:not(.room-hero)):has(.nav-bar) {
   background: var(--ground-dark);
 }
 
@@ -1043,6 +1049,11 @@ html {
   every other button in DUB sat at 72.
 */
 body:has(.dock) .nav-clear {
+  padding-bottom: 0;
+}
+
+/* The same for a lesson room's own sticky row (RoomSteps), which holds itself above the bar. */
+main:has(.room-dock) > .nav-clear {
   padding-bottom: 0;
 }
 
