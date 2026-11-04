@@ -2,7 +2,7 @@
 
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { KIND_LABEL, bairroById, visibleGems } from '@/content/gems'
 import { HOUSE_RULES, TABLE_KINDS, inviteText, type HouseRule } from '@/content/table-night'
 import { setDisplayName } from '@/engine/learner'
@@ -31,6 +31,11 @@ export function HostTable() {
   const learner = useLearner()
   const places = useMemo(() => visibleGems().filter((g) => (TABLE_KINDS as readonly string[]).includes(g.kind)), [])
   const [gemId, setGemId] = useState<string | null>(null)
+  /* Arriving from a venue card's "host a table here" (2026-11-04): that place, chosen. */
+  useEffect(() => {
+    const want = new URLSearchParams(window.location.search).get('gem')
+    if (want && places.some((g) => g.id === want)) setGemId(want)
+  }, [places])
   const [other, setOther] = useState('')
   const [elsewhere, setElsewhere] = useState(false)
   const start = useMemo(() => defaultWhen(), [])

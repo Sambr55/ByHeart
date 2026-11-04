@@ -28,6 +28,7 @@ import { DoorIcon, SpeechIcon } from './icons'
 import { Foundations } from './Foundations'
 import { FunShelf } from './FunShelf'
 import { PushAsk } from '@/components/PushChoices'
+import { track } from '@/engine/analytics'
 
 
 /**
@@ -139,6 +140,21 @@ export function PathHome() {
       <Understood count={understood} />
       {/* The morning line, offered where the path is — until this phone has it (Sam, 2026-11-04: "make this more prominent"). */}
       <PushAsk room="path" />
+      {/*
+        A TABLE, ONCE THERE IS ENOUGH TO SAY AT ONE (2026-11-04). The "Host one" card left
+        Yours, where it showed to everybody from the first minute; it lives here from level 3
+        — two levels of lines is an evening's worth — until they have sat at one.
+      */}
+      {(level.level >= 3 || level.complete) && !(learner.tables_sat ?? []).length ? (
+        <Link
+          href="/table/new"
+          data-testid="path-table-nudge"
+          onClick={() => track('path_table_nudge')}
+          className="tap-target -mt-1 self-start py-1 text-sm text-muted"
+        >
+          Two levels in. <span className="font-semibold text-accent">Host a table with friends →</span>
+        </Link>
+      ) : null}
     </section>
   )
 
@@ -387,6 +403,20 @@ function Understood({ count }: { count: number }) {
             ×
           </span>
         </button>
+      ) : null}
+      {/*
+        BRING A FRIEND, at the moment it lands (2026-11-04, the review of Yours): you have
+        just been understood by a real person, and the next thing worth having is somebody
+        to speak it with. Goes to Your people on Yours, which keeps the full invitation.
+      */}
+      {cheer !== null ? (
+        <Link
+          href="/profile#people"
+          data-testid="cheer-bring-friend"
+          className="tap-target -mt-1 self-start py-1 text-sm text-muted"
+        >
+          Got someone to practise with? <span className="font-semibold text-accent">Bring a friend in →</span>
+        </Link>
       ) : null}
 
     </div>

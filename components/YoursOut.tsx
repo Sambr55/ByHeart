@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { visibleWalks, walkProgress } from '@/content/walks'
+import { gemById } from '@/content/gems'
+import { placeKeysToGems } from '@/content/yours'
 import { houseRule } from '@/content/table-night'
 import { useLearner } from '@/engine/useLearner'
 import { shortWhen } from './table/bits'
@@ -43,14 +45,29 @@ export function YoursOut() {
   const places = useMemo(() => {
     const out: { name: string; walk: string }[] = []
     for (const w of visibleWalks()) for (const s of w.stops) if (said.includes(s.key) && !out.some((o) => o.name === s.g.name)) out.push({ name: s.g.name, walk: w.walk.id })
+    /* And places marked straight from a venue card ("Said it here", 2026-11-04). */
+    for (const id of placeKeysToGems(said)) {
+      const g = gemById(id)
+      if (g && !out.some((o) => o.name === g.name)) out.push({ name: g.name, walk: '' })
+    }
     return out
   }, [said])
   const walksDone = useMemo(() => visibleWalks().filter((w) => walkProgress(w, said).complete).length, [said])
   const sat = learner.tables_sat?.length ?? 0
   const tableLines = learner.table_lines?.length ?? 0
 
+  /*
+    ONLY WITH SOMETHING IN IT (2026-11-04, the review of Yours). Both cards used to show to
+    everybody — "Host one", "Nowhere yet" — above the learner's own work. The invitations now
+    live where they make sense: "Host a table here" and "Said it here" on every venue card in
+    City, and a table nudge on the Path after level 2. See HOMES in content/yours.ts.
+  */
+  const hasPlaces = places.length > 0 || sat > 0
+  if (!next && !hasPlaces) return null
+
   return (
     <section className="flex flex-col gap-3" data-testid="yours-out">
+      <p className="eyebrow text-accent">Your Lisbon</p>
       {next ? (
         <Link
           href={'/t/' + next.code}
@@ -64,51 +81,31 @@ export function YoursOut() {
             <span className="eyebrow text-[0.65rem] text-[#e5b04a]">Your lines →</span>
           </span>
         </Link>
-      ) : (
-        <Link
-          href="/table"
-          data-testid="yours-table"
-          className="booker tap-target flex flex-col gap-2 rounded-2xl px-5 py-5 text-[#f4ead6]"
-        >
-          <span className="eyebrow text-[#e5b04a]">Your table</span>
-          <span className="display text-2xl leading-tight">Gather your friends. Speak Portuguese. Have fun doing it.</span>
-          <span className="flex items-center justify-between gap-3">
-            <span className="text-sm text-white/75">A real place, your own people, five rounds on everyone’s phone.</span>
-            <span className="eyebrow shrink-0 text-[0.65rem] text-[#e5b04a]">Host one →</span>
-          </span>
-        </Link>
-      )}
+      ) : null}
 
-      <Link
-        href="/city"
-        data-testid="yours-places"
-        className="tap-target flex flex-col gap-2 rounded-2xl border border-line bg-bg-elev px-5 py-5"
-      >
-        <span className="eyebrow text-telha">Where you’ve said it</span>
-        {places.length || sat ? (
-          <>
-            <span className="grid grid-cols-3 gap-2 text-center">
-              <Stat n={places.length} label={places.length === 1 ? 'place' : 'places'} />
-              <Stat n={walksDone} label={walksDone === 1 ? 'walk' : 'walks'} />
-              <Stat n={sat} label={sat === 1 ? 'table' : 'tables'} />
-            </span>
-            {places.length ? (
-              <span className="text-sm text-muted">
-                {places
-                  .slice(-4)
-                  .map((p) => p.name)
-                  .join(' · ')}
-              </span>
-            ) : null}
-            {tableLines ? <span className="text-sm text-muted">{tableLines} lines said out loud at a table.</span> : null}
-          </>
-        ) : (
-          <span className="text-base leading-relaxed">
-            Nowhere yet. Every line you say to a real person — on a walk, at a gem, at your table — gets its place here.{' '}
-            <span className="text-accent">Find a walk →</span>
+      {hasPlaces ? (
+        <Link
+          href="/city"
+          data-testid="yours-places"
+          className="tap-target flex flex-col gap-2 rounded-2xl border border-line bg-bg-elev px-5 py-5"
+        >
+          <span className="eyebrow text-telha">Where you’ve said it</span>
+          <span className="grid grid-cols-3 gap-2 text-center">
+            <Stat n={places.length} label={places.length === 1 ? 'place' : 'places'} />
+            <Stat n={walksDone} label={walksDone === 1 ? 'walk' : 'walks'} />
+            <Stat n={sat} label={sat === 1 ? 'table' : 'tables'} />
           </span>
-        )}
-      </Link>
+          {places.length ? (
+            <span className="text-sm text-muted">
+              {places
+                .slice(-4)
+                .map((p) => p.name)
+                .join(' · ')}
+            </span>
+          ) : null}
+          {tableLines ? <span className="text-sm text-muted">{tableLines} lines said out loud at a table.</span> : null}
+        </Link>
+      ) : null}
     </section>
   )
 }
