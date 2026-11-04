@@ -83,7 +83,14 @@ export function Ticker() {
     different from "nobody here", and a strip that flickered a claim before the server
     answered would be the one thing worse than being absent.
   */
-  if (!names) return null
+  /*
+    AND NOTHING WHILE IT IS ONLY YOU (2026-11-04). "You are the first one in" sat at the
+    top of Yours above the learner's own name, a line about an empty room in the place the
+    screen should start on them. The review of Yours took it out: the strip comes back the
+    moment anybody else is in (the caller is never in `names`), and says who is here
+    rather than who is not.
+  */
+  if (!names || names.length === 0) return null
 
   return (
     <div
@@ -125,9 +132,7 @@ export function Ticker() {
         also a roster; the Club intro card settled that and the rule holds here.
       */}
       <p className="truncate text-sm leading-relaxed text-fg/75">
-        {names.length === 0
-          ? 'You are the first one in.'
-          : names.length === 1
+        {names.length === 1
             ? 'You and ' + names[0] + '. Early days.'
             : names.join(' · ')}
       </p>

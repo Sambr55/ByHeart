@@ -122,10 +122,15 @@ console.log('\nwhat the bar is\n')
     it had gone. A feature invisible until the product succeeds is absent rather than
     cautious. Being early is the one thing a small room can offer, so it says so.
   */
+  /*
+    REVERSED AGAIN, on the review of Yours (2026-11-04): an empty room is silent. "You are
+    the first one in" was the first line on the learner's own screen and it was about
+    nobody. The strip appears as soon as one other person is in.
+  */
   ok(
-    'it has an honest line for an empty room',
-    /You are the first one in/.test(comp),
-    'first in, rather than nothing at all',
+    'an empty room says nothing',
+    /names\.length === 0\) return null/.test(comp) && !/'You are the first one in\.'/.test(comp),
+    'silent until somebody else is here',
   )
   ok(
     'and for a room of one',
