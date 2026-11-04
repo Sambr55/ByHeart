@@ -49,7 +49,8 @@ export interface Gem {
   /** What makes it a gem and what actually happens there. */
   why: string
   /** The one sentence for walking in. European Portuguese. */
-  line: { pt: string; en: string }
+  /** `f`: as a woman says it, when it changes with the speaker (content/speaker.ts). */
+  line: { pt: string; f?: string; en: string }
   /** Who you will actually talk to. */
   meet: string
   tip: string

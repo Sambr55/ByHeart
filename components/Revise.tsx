@@ -13,6 +13,7 @@ import { revisionFor, revisionTitle, type RevisionKind } from '@/content/revisio
 import { situationById } from '@/content/situations'
 import { roomSlipping } from '@/components/path/progress'
 import { markHomecoming } from '@/components/path/homecoming'
+import { voiced } from '@/content/speaker'
 
 /**
  * REVISION — a finished card, asked back.
@@ -66,7 +67,8 @@ export function Revise() {
     the first render whose record actually holds the room — the hydration render has an
     empty record, and an empty record would say "not loose" about every room.
   */
-  const room = kind === 'room' ? situationById(id) : undefined
+  /* The room in this learner's own endings, so SAY IT COLD asks for obrigada from a woman (content/speaker.ts). */
+  const room = voiced(kind === 'room' ? situationById(id) : undefined, learner.profile?.gender ?? null)
   const [wasLoose, setWasLoose] = useState<boolean | null>(null)
   useEffect(() => {
     if (!room || wasLoose !== null) return

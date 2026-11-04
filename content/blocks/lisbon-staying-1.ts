@@ -62,6 +62,7 @@ export const LISBON_STAYING_1: Situation[] = [
       },
       {
         pt: 'Bom dia, sou o novo vizinho do terceiro.',
+        f: 'Bom dia, sou a nova vizinha do terceiro.',
         en: 'Good morning, I am the new neighbour from the third floor.',
         when: 'Once, early. Vizinha if you are a woman. It buys you a year of goodwill.',
       },
@@ -81,7 +82,7 @@ export const LISBON_STAYING_1: Situation[] = [
         when: 'The offer that makes you a neighbour rather than a tenant.',
       },
     ],
-    release: { ask: 'I am the new neighbour from the third floor.', answer: 'Sou o novo vizinho do terceiro.' },
+    release: { ask: 'I am the new neighbour from the third floor.', answer: 'Sou o novo vizinho do terceiro.', answer_f: 'Sou a nova vizinha do terceiro.' },
     rung: 2,
   },
   {
@@ -234,6 +235,7 @@ export const LISBON_STAYING_1: Situation[] = [
       },
       {
         pt: 'Assim está bom, obrigado.',
+        f: 'Assim está bom, obrigada.',
         en: 'That is good like that, thank you.',
         when: 'The stop signal. Say it while there is still hair.',
       },
@@ -325,6 +327,7 @@ export const LISBON_STAYING_1: Situation[] = [
       },
       {
         pt: 'Mais nada, obrigado.',
+        f: 'Mais nada, obrigada.',
         en: 'Nothing else, thank you.',
         when: 'Ends it. Without it they will keep offering, politely, for a while.',
       },

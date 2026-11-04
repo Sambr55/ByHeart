@@ -13,6 +13,7 @@ import { situationById } from '@/content/situations'
 import { markWalkStop } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
 import { track } from '@/engine/analytics'
+import { said as inEnding } from '@/content/speaker'
 
 const WalkMap = dynamic(() => import('./WalkMap').then((m) => m.WalkMap), {
   ssr: false,
@@ -105,7 +106,7 @@ export function WalkScreen({ id }: { id: string }) {
               <ul className="flex flex-col gap-1">
                 {view.stops.map((s) => (
                   <li key={s.key} className="lang text-accent" lang="pt-PT">
-                    {s.g.line.pt}
+                    {inEnding(s.g.line, learner.profile?.gender ?? null).pt}
                   </li>
                 ))}
               </ul>
@@ -143,18 +144,18 @@ export function WalkScreen({ id }: { id: string }) {
                       </header>
                       <p className="text-base leading-relaxed">{s.do}</p>
                       <div className="flex items-center gap-3 rounded-2xl bg-accent/10 px-4 py-3">
-                        <AudioButton slug={slugFor(s.g.line.pt)} text={s.g.line.pt} size="sm" />
+                        <AudioButton slug={slugFor(inEnding(s.g.line, learner.profile?.gender ?? null).pt)} text={inEnding(s.g.line, learner.profile?.gender ?? null).pt} size="sm" />
                         <div className="min-w-0">
                           <p className="eyebrow text-[0.6rem] text-accent">Your line here</p>
                           <p className="lang text-lg leading-snug text-accent" lang="pt-PT">
-                            {s.g.line.pt}
+                            {inEnding(s.g.line, learner.profile?.gender ?? null).pt}
                           </p>
                           <p className="text-sm text-muted">{s.g.line.en}</p>
                         </div>
                       </div>
                       <div className="flex flex-col items-center gap-1">
                         <p className="eyebrow text-[0.6rem] text-muted">Try it first</p>
-                        <SayButton want={s.g.line.pt} />
+                        <SayButton want={inEnding(s.g.line, learner.profile?.gender ?? null).pt} />
                       </div>
                       <p className="text-sm text-muted">
                         <span className="font-semibold text-fg">You’ll meet:</span> {s.g.meet}
@@ -206,7 +207,7 @@ export function WalkScreen({ id }: { id: string }) {
                       <span className="min-w-0 flex-1">
                         <span className="block font-semibold leading-tight">{s.g.name}</span>
                         <span className="lang block truncate text-sm text-accent" lang="pt-PT">
-                          {s.g.line.pt}
+                          {inEnding(s.g.line, learner.profile?.gender ?? null).pt}
                         </span>
                       </span>
                     </button>

@@ -258,6 +258,7 @@ export const LISBON_VISITING_1: Situation[] = [
       },
       {
         pt: 'Muito obrigado, ficou ótima.',
+        f: 'Muito obrigada, ficou ótima.',
         en: 'Thank you very much, it came out great.',
         when: 'Obrigada if you are a woman. The photograph does not have to be great.',
       },
@@ -378,6 +379,7 @@ export const LISBON_VISITING_1: Situation[] = [
       },
       {
         pt: 'Muito obrigado, foi simpático.',
+        f: 'Muito obrigada, foi simpático.',
         en: 'Thank you very much, that was kind.',
         when: 'Simpático is the word for it, and it is worth more here than obrigado alone.',
       },
@@ -423,6 +425,7 @@ export const LISBON_VISITING_1: Situation[] = [
       },
       {
         pt: 'Assim chega, obrigado.',
+        f: 'Assim chega, obrigada.',
         en: 'That is enough, thank you.',
         when: 'The stop signal, before it becomes a kilo.',
       },
@@ -485,6 +488,7 @@ export const LISBON_VISITING_1: Situation[] = [
       },
       {
         pt: 'Foi lindo. Obrigado.',
+        f: 'Foi lindo. Obrigada.',
         en: 'That was beautiful. Thank you.',
         when: 'Afterwards, to whoever sang. Lindo is the right word and nothing bigger is needed.',
       },

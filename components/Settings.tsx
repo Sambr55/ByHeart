@@ -6,6 +6,7 @@ import { Back } from '@/components/Back'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { PurposeChoice, SoundChoice, ThemeChoice } from '@/components/Theme'
 import { useEntitlements } from '@/engine/useEntitlements'
+import { EndingChoice } from '@/components/SpeakerAsk'
 
 /**
  * Everything that is not the language.
@@ -189,6 +190,7 @@ export function Settings() {
           <ThemeChoice />
           <SoundChoice />
           <PurposeChoice />
+          <EndingChoice />
         </section>
 
         <Crashes />

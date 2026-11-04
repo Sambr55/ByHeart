@@ -201,6 +201,8 @@ export function Translator() {
           // hands back você to somebody being taught tu contradicts the screen they were
           // on ninety seconds ago.
           register: registerFor(loadLearner().profile?.age_band),
+          // And the ending they say: "I'm tired" is cansada from a woman (lib/translate.ts).
+          speaker: loadLearner().profile?.gender ?? null,
         }),
       })
       const data = (await res.json()) as Result & { error?: string; why?: string }

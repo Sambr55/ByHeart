@@ -543,6 +543,7 @@ export const LISBON_VISITING_2: Situation[] = [
     lines: [
       {
         pt: 'Não, obrigado, não preciso de saco.',
+        f: 'Não, obrigada, não preciso de saco.',
         en: 'No thanks, I do not need a bag.',
         when: 'They will ask "Quer saco?". Bags are paid for, so it is a real question. Obrigada if you are a woman.',
       },
@@ -558,6 +559,7 @@ export const LISBON_VISITING_2: Situation[] = [
       },
       {
         pt: 'Contribuinte? — Não, obrigado.',
+        f: 'Contribuinte? — Não, obrigada.',
         en: 'Tax number? — No, thank you.',
         when: 'They are asking for a NIF to put on the receipt. A visitor does not have one, and não is the whole answer.',
       },
@@ -575,6 +577,7 @@ export const LISBON_VISITING_2: Situation[] = [
     release: {
       ask: 'No thanks, I do not need a bag.',
       answer: 'Não, obrigado, não preciso de saco.',
+      answer_f: 'Não, obrigada, não preciso de saco.',
     },
     pieces: [
       {
@@ -722,6 +725,7 @@ export const LISBON_VISITING_2: Situation[] = [
       },
       {
         pt: 'Estava tudo ótimo, obrigado.',
+        f: 'Estava tudo ótimo, obrigada.',
         en: 'It was all great, thank you.',
         when: 'On the way out, to whoever cooked if you can see them.',
       },

@@ -56,6 +56,7 @@ export const LISBON_MOVING_1: Situation[] = [
       },
       {
         pt: 'Sou estrangeiro e vivo cá agora.',
+        f: 'Sou estrangeira e vivo cá agora.',
         en: 'I am a foreigner and I live here now.',
         when: 'Answers the next question before it is asked, and it is the reason you are entitled to one.',
       },

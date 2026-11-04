@@ -25,6 +25,7 @@ import {
 import { authoredLine } from '@/engine/showable'
 import type { Drop } from '@/content/drops'
 import { track } from '@/engine/analytics'
+import { voiced } from '@/content/speaker'
 
 /**
  * Turn the ask into something you can actually send.
@@ -166,7 +167,14 @@ function SendInvite({ situation, drop }: { situation: Situation; drop: Drop }) {
  * away and say it cold. Nothing here counts, and nothing congratulates — the only thing
  * it does is make being bad at this cost less.
  */
-export function Errand({ situation, drop }: { situation: Situation; drop?: Drop }) {
+export function Errand({ situation: room, drop }: { situation: Situation; drop?: Drop }) {
+  /*
+    THE ROOM IN THIS LEARNER'S OWN ENDINGS (2026-11-03): obrigada, Sou inglesa, a nova
+    vizinha for a woman. Everything below — the lines, YOUR TURN, the proof banked, the
+    words handed to the library — reads this, so nothing in the room says it the house's way
+    when it should say it hers. See content/speaker.ts.
+  */
+  const situation = voiced(room, useLearner().profile?.gender ?? null)
   const chapter = chapterById(situation.chapter)
   /*
     The room that asks somebody out, which is the only one worth minting from.

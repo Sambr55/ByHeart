@@ -59,6 +59,7 @@ import { StatusBar } from '@/components/Native'
 import { SetUp } from '@/components/SetUp'
 import { cardDone } from '@/content/legend'
 import { loadLearner, markDropDone, setWhenHere, tasteRoom, useCheat } from '@/engine/learner'
+import { voiced } from '@/content/speaker'
 
 /**
  * The Club as a feed.
@@ -3873,7 +3874,8 @@ function Teased({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
 
 /** The learning, one swipe right. */
 function Lines({ card }: { card: Extract<FeedCard, { kind: 'situation' }> }) {
-  const s = card.situation
+  /* In this learner's own endings — obrigada for a woman (content/speaker.ts). */
+  const s = voiced(card.situation, useLearner().profile?.gender ?? null)
   return (
     <div className="flex flex-col gap-3">
       {/*

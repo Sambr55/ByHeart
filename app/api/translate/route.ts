@@ -105,7 +105,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'off', why: 'The translator is not switched on.' }, { status: 503 })
   }
 
-  let body: { text?: unknown; register?: unknown; keep?: unknown; image?: unknown }
+  let body: { text?: unknown; register?: unknown; speaker?: unknown; keep?: unknown; image?: unknown }
   try {
     body = (await request.json()) as typeof body
   } catch {
@@ -213,6 +213,8 @@ export async function POST(request: Request) {
   }
 
   const register = body.register === 'formal' ? 'formal' : 'tu'
+  /* Which ending the learner says — obrigada or obrigado. Anything else is unknown. See lib/translate.ts. */
+  const speaker = body.speaker === 'f' || body.speaker === 'm' ? body.speaker : null
 
   try {
     /*
@@ -274,7 +276,7 @@ export async function POST(request: Request) {
       })
     }
 
-    const result = await translate({ text, register, signal: controller.signal }).finally(() =>
+    const result = await translate({ text, register, speaker, signal: controller.signal }).finally(() =>
       clearTimeout(bail),
     )
 

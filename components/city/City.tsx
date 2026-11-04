@@ -12,6 +12,7 @@ import { gemOfTheWeek } from '@/content/gems'
 import { visibleWalks, walkProgress } from '@/content/walks'
 import { useLearner } from '@/engine/useLearner'
 import { useWhereAmI } from './useWhereAmI'
+import { said } from '@/content/speaker'
 
 /* Leaflet reads `window` at import, so the map only ever renders in the browser. */
 const CityMap = dynamic(() => import('./CityMap').then((m) => m.CityMap), {
@@ -34,6 +35,7 @@ export function City() {
   const [selected, setSelected] = useState<string | null>(null)
   const where = useWhereAmI()
   const learner = useLearner()
+  const gender = learner.profile?.gender ?? null
   const walks = useMemo(() => visibleWalks(gems), [gems])
   /* Read after mount: the week and the season are the phone's, not the server's. */
   const [now, setNow] = useState<Date | null>(null)
@@ -135,7 +137,7 @@ export function City() {
                   >
                     <span className="eyebrow text-[0.6rem] text-telha">Gem of the week · {BAIRROS.find((x) => x.id === weekly.bairro)?.name}</span>
                     <span className="display text-lg leading-tight">{weekly.name}</span>
-                    <span className="lang text-sm text-accent" lang="pt-PT">“{weekly.line.pt}”</span>
+                    <span className="lang text-sm text-accent" lang="pt-PT">“{said(weekly.line, gender).pt}”</span>
                   </button>
                 ) : null}
 
@@ -196,7 +198,7 @@ export function City() {
                               {g.verified ? '' : ' · draft'}
                             </span>
                             <span className="display block text-lg leading-tight">{g.name}</span>
-                            <span className="lang mt-1 block text-sm text-accent" lang="pt-PT">“{g.line.pt}”</span>
+                            <span className="lang mt-1 block text-sm text-accent" lang="pt-PT">“{said(g.line, gender).pt}”</span>
                           </span>
                           <span aria-hidden className="mt-2 text-muted">›</span>
                         </button>
