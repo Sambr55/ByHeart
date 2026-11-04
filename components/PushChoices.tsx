@@ -178,8 +178,8 @@ export function PushChoices() {
 
 /**
  * THE ASK, at the moment it is most likely to be wanted: you have just said a room out
- * loud, and the next one is waiting. Once dismissed it waits a fortnight, and after three
- * dismissals it stops asking — Settings still has the switch.
+ * loud, and the next one is waiting — and on the path home. Once dismissed it waits three
+ * days, and after four dismissals it stops asking — Settings still has the switch.
  *
  * Hidden where it cannot work (no push on the server, or permission already refused) and
  * where it is already on. On an iPhone in a browser tab PushToggle explains the Home Screen
@@ -211,7 +211,7 @@ export function PushAsk({ room }: { room: string }) {
   useEffect(() => {
     if (!READY) return
     const rec = askRecord()
-    if (rec.n >= 3 || Date.now() - rec.at < 14 * 86_400_000) return
+    if (rec.n >= 4 || Date.now() - rec.at < 3 * 86_400_000) return
     const reveal = () => {
       setShow(true)
       track('push_ask_shown', { room })
@@ -231,17 +231,20 @@ export function PushAsk({ room }: { room: string }) {
   if (!show) return null
 
   return (
-    <div data-testid="push-ask" className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-5">
+    <div data-testid="push-ask" className="flex flex-col gap-3 rounded-2xl border border-accent/40 bg-accent/5 px-5 py-5">
+      <p className="eyebrow text-accent">Your next line, on your lock screen</p>
       <p className="text-sm leading-relaxed">
-        Want the next one on your lock screen? One line at 8 in the morning, from the room you are on.
+        A phrase sticks when you meet it again before you need it. One line at 8 each morning, from the room
+        you’re on. Tap it and you’re in.
       </p>
       <PushToggle
         ready={READY}
-        from="room"
+        from={room === 'path' ? 'path' : 'room'}
+        buttonClass="tap-target eyebrow w-full rounded-full bg-accent px-5 py-3 text-center text-accent-ink"
         on="Done. Your next line comes at 8. How often is up to you, in Settings."
         onChange={(yes) => {
           if (!yes) return
-          writeAsk({ n: 3, at: Date.now() })
+          writeAsk({ n: 4, at: Date.now() })
           setDone(true)
         }}
       />
@@ -260,6 +263,109 @@ export function PushAsk({ room }: { room: string }) {
           Not now
         </button>
       )}
+    </div>
+  )
+}
+
+/**
+ * Can this phone be offered the morning line at all? Push on the server, and either a
+ * browser that can ask, or an iPhone in a Safari tab, which can be told how.
+ */
+export function canOfferPush(): boolean {
+  if (!READY || typeof window === 'undefined') return false
+  if ('Notification' in window) return Notification.permission !== 'denied'
+  const ua = navigator.userAgent
+  return /iPad|iPhone|iPod/.test(ua) || (ua.includes('Macintosh') && 'ontouchend' in document)
+}
+
+/**
+ * THE LAST STEP OF SET-UP (Sam, 2026-11-04): "We need to make this more prominent, it's
+ * buried … it's important. Should be part of set-up and be shown as a valuable part of
+ * learning."
+ *
+ * So it is on the boarding pass, after the name and before the city: the next line from
+ * the path the booker just drew, on a drawing of a lock screen, and the reason it is worth
+ * saying yes to — meeting a line again before you need it is how it sticks. One big yes,
+ * and a quiet way past it. Settings keeps the switch for later.
+ */
+export function MorningLineStep({
+  line,
+  onDone,
+}: {
+  line: { title: string; body: string } | null
+  onDone: () => void
+}) {
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    track('push_ask_shown', { room: 'setup' })
+  }, [])
+  const shown = line ?? { title: 'Bom dia. Um café, por favor.', body: 'Good morning. A coffee, please.' }
+  return (
+    <div data-testid="setup-line" className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 pt-8 text-white">
+      <p className="eyebrow text-white/60">DUB · Before you board</p>
+      <h1 className="display mt-2 text-3xl leading-tight">Your line, every morning</h1>
+      <p className="mt-3 text-sm leading-relaxed text-white/75">
+        A phrase sticks when you meet it again before you need it. So at 8 each morning DUB puts the next line from
+        your path on your lock screen. Read it on the way out, and it’s yours by the time you get there.
+      </p>
+
+      {/* The lock screen, drawn: the time, and the real line this learner would get tomorrow. */}
+      <div
+        aria-hidden
+        className="mx-auto mt-7 w-full max-w-[19rem] rounded-[2.2rem] border border-white/15 bg-gradient-to-b from-[#1f5d8c] to-[#0f1f33] px-4 pb-8 pt-6 shadow-[0_30px_60px_-30px_rgba(0,0,0,0.8)]"
+      >
+        <p className="text-center text-xs text-white/70">Tomorrow</p>
+        <p className="text-center text-5xl font-semibold tracking-tight">8:00</p>
+        <div className="mt-6 rounded-2xl bg-white/90 px-3 py-3 text-[#14243a] shadow-lg">
+          <div className="flex items-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#1f5d8c] text-[0.5rem] font-bold text-white">
+              DUB
+            </span>
+            <span className="eyebrow text-[0.55rem] text-[#14243a]/60">DUB · now</span>
+          </div>
+          <p className="pt mt-2 text-[0.95rem] font-semibold leading-snug" lang="pt-PT" data-testid="setup-line-pt">
+            {shown.title}
+          </p>
+          <p className="mt-0.5 text-xs leading-snug text-[#14243a]/70">{shown.body}</p>
+        </div>
+      </div>
+
+      <ul className="mx-auto mt-6 flex max-w-[19rem] flex-col gap-2 text-sm text-white/80">
+        <li>· One line, from the room you’re on. Tap it and you’re in that room.</li>
+        <li>· Never the same line twice. No streaks, no nagging.</li>
+        <li>· Every day, three a week, or off. Change it any time in Settings.</li>
+      </ul>
+
+      <div className="mt-8 flex flex-col gap-3">
+        <PushToggle
+          ready={READY}
+          from="setup"
+          cta="YES, SEND MY LINE AT 8AM"
+          on="Done. Your first line comes tomorrow at 8."
+          install="Your line on your lock screen, every morning."
+          onChange={setOn}
+          buttonClass="tap-target eyebrow flex w-full items-center justify-center rounded-2xl bg-[#e5b04a] px-5 py-4 text-base text-[#14243a] shadow-[0_6px_0_0_rgba(0,0,0,0.35)] transition active:translate-y-[4px] active:shadow-none"
+          onClass="text-center text-sm font-semibold text-[#e5b04a]"
+        />
+        <button
+          type="button"
+          data-testid="setup-line-next"
+          onClick={() => {
+            if (!on) {
+              track('push_ask_dismissed', { room: 'setup' })
+              writeAsk({ n: askRecord().n + 1, at: Date.now() })
+            }
+            onDone()
+          }}
+          className={
+            on
+              ? 'tap-target eyebrow flex w-full items-center justify-center rounded-2xl bg-[#e5b04a] px-5 py-4 text-base text-[#14243a] shadow-[0_6px_0_0_rgba(0,0,0,0.35)]'
+              : 'tap-target eyebrow py-2 text-center text-xs text-white/60'
+          }
+        >
+          {on ? 'Board' : 'Not now, take me in'}
+        </button>
+      </div>
     </div>
   )
 }
