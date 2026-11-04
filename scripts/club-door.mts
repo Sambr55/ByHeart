@@ -210,12 +210,13 @@ console.log('\nthe starter set\n')
     2026-11-02 — the save, "Desculpe, não percebi. Sou inglês.", which is the first room on
     every path. See content/blocks/lisbon-save.ts.
   */
+  /* 2026-11-04: the first two levels, whole, plus the emergency room. */
   ok(
-    'five first-day rooms, the emergency room and the save are free',
-    FREE_ROOMS.length === 7 && FREE_ROOMS.includes('lisbon_emergencia') && FREE_ROOMS.includes('lisbon_save'),
+    'the first two levels, the emergency room and the save are free',
+    FREE_ROOMS.includes('lisbon_emergencia') && FREE_ROOMS.includes('lisbon_save') && FREE_ROOMS.includes('lisbon_ola'),
     FREE_ROOMS.join(', '),
   )
-  ok('the first unit of the path can be started free', FREE_ROOMS.includes('lisbon_aeroporto'))
+  ok('the second level can be started free', FREE_ROOMS.includes('lisbon_aeroporto'))
   const missing = FREE_ROOMS.filter((id) => !ids.has(id))
   ok('every free room exists', missing.length === 0, missing.join(', ') || 'all found')
   ok('isFreeRoom agrees with the list', FREE_ROOMS.every((id) => isFreeRoom(id)) && !isFreeRoom('lisbon_fado'))

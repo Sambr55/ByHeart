@@ -82,6 +82,11 @@ console.log('\nthe path follows the reason given at set-up\n')
     ok(purpose + ': the very first room is free', isFreeRoom(rids[0], purpose), rids[0])
     ok(purpose + ': every free room is on this path', free.every((id) => rids.includes(id)), free.filter((id) => !rids.includes(id)).join(', '))
     ok(purpose + ': the emergency room is free', free.includes('lisbon_emergencia'))
+    /* 2026-11-04: the paywall falls after Level 2 — both levels whole, nothing past them but fun tiles and the emergency room. */
+    const firstTwo = list.slice(0, 2).flatMap((u) => u.rooms)
+    ok(purpose + ': Levels 1 and 2 are free, whole', firstTwo.every((id) => isFreeRoom(id, purpose)), firstTwo.filter((id) => !isFreeRoom(id, purpose)).join(', '))
+    const later = list.slice(2).flatMap((u) => u.rooms).filter((id) => isFreeRoom(id, purpose) && !id.startsWith('fun_') && id !== 'lisbon_emergencia')
+    ok(purpose + ': nothing after Level 2 is free but fun tiles and the emergency room', later.length === 0, later.join(', '))
     console.log('    ' + resolved.length + ' units, ' + rids.length + ' rooms')
   }
   ok('no purpose gets the trip', pathUnits(undefined, undefined, null)[0].id === PATHS.visiting[0].id)
