@@ -347,9 +347,16 @@ export function Translator() {
       {lens ? <Lens onClose={() => setLens(false)} /> : null}
 
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 overflow-y-auto px-5 pb-6 pt-2">
-        <h1 className="display text-3xl leading-tight">{want ? 'Find the word' : 'What do you need to say?'}</h1>
+        <h1 className="translator-title display shrink-0 text-3xl leading-tight">{want ? 'Find the word' : 'What do you need to say?'}</h1>
 
-        <div className="overflow-hidden rounded-3xl bg-[#fbf8f2] text-[#14243a] shadow-[0_30px_60px_-30px_rgba(0,0,0,0.8)]">
+        {/*
+          shrink-0 ON EVERYTHING IN THIS COLUMN (2026-11-04). The column is a flex scroller, and
+          flex children shrink by default: when the keyboard opened and the panel got shorter,
+          the pass — overflow-hidden — was squeezed to nothing, so tapping the box made the
+          whole ticket vanish under the finger. Sam: "When you click in to translate from it
+          immediately closes." Now they keep their height and the column scrolls.
+        */}
+        <div className="shrink-0 overflow-hidden rounded-3xl bg-[#fbf8f2] text-[#14243a] shadow-[0_30px_60px_-30px_rgba(0,0,0,0.8)]">
           {/* The route: EN ✈ PT, the same strip the check-in carries. */}
           <div className="flex items-center justify-between gap-3 bg-[#14243a] px-5 py-3 text-white">
             <span className="flex items-center gap-2">
@@ -457,7 +464,7 @@ export function Translator() {
             track('lens_opened', {})
             setLens(true)
           }}
-          className="tap-target flex w-full items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-white/90 transition hover:bg-white/10"
+          className="tap-target flex w-full shrink-0 items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-white/90 transition hover:bg-white/10"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-[#e5b04a]" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
             {CAMERA}
@@ -470,7 +477,7 @@ export function Translator() {
           one tap to put them on the ticket. An empty box is the hardest thing to start.
         */}
         {empty && !want ? (
-          <div className="flex flex-col gap-2" data-testid="translator-tries">
+          <div className="flex shrink-0 flex-col gap-2" data-testid="translator-tries">
             <p className="eyebrow text-[0.6rem] text-white/45">Or try</p>
             <div className="flex flex-wrap gap-2">
               {TRIES.map((t) => (
@@ -490,7 +497,7 @@ export function Translator() {
           </div>
         ) : null}
 
-        <div className="mt-auto flex flex-col gap-3 pt-2">
+        <div className="mt-auto flex shrink-0 flex-col gap-3 pt-2">
           {state === 'done' && result?.pt ? (
             <>
               {/*
