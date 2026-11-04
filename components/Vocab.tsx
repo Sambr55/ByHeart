@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CRATES,
@@ -31,6 +31,7 @@ import { AudioButton } from '@/components/AudioButton'
 import { CopyButton } from '@/components/CopyButton'
 import { slugFor } from '@/content/audio-manifest'
 import { track } from '@/engine/analytics'
+import { useClub } from '@/engine/useClub'
 import { useLearner } from '@/engine/useLearner'
 import { voiced } from '@/content/speaker'
 
@@ -598,6 +599,8 @@ function Subhead({
 
 /** The honest dead end, which is also the best content signal the product collects. */
 function DeadEnd({ term }: { term: string }) {
+  const club = useClub()
+  const router = useRouter()
   return (
     /*
       THE DASH STAYS, and only the size and padding move.
@@ -619,6 +622,24 @@ function DeadEnd({ term }: { term: string }) {
         Noted, and that is not a polite noise — the words people look for and cannot find
         are what the next vibe gets written from.
       </p>
+      {/*
+        AND IT IS NOT A DEAD END ANY MORE (2026-11-04, Sam: "look ups (e.g. jobs)"). The
+        translator answers what the library cannot, in your register, and KEEP puts it in
+        Yours. Not a member: the same explainer the bar's ASK opens.
+      */}
+      <button
+        type="button"
+        data-testid="vocab-ask"
+        onClick={() => {
+          track('vocab_search_ask', { query: term })
+          /* The same door as the bar's ASK: the panel for members, the explainer otherwise. */
+          if (club.open) window.dispatchEvent(new CustomEvent('dub:ask', { detail: { text: term } }))
+          else router.push('/ask')
+        }}
+        className="tap-target eyebrow mt-4 rounded-full bg-accent px-5 py-3 text-accent-ink"
+      >
+        Ask DUB: “{term}”
+      </button>
     </div>
   )
 }

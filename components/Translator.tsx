@@ -120,8 +120,16 @@ export function Translator() {
     passing it through every card in the feed to reach a button that already exists.
   */
   useEffect(() => {
-    const ask = () => {
+    /* `detail.text`, when given, arrives typed in — the Vocab dead end sends its search. */
+    const ask = (e: Event) => {
+      const seed = (e as CustomEvent<{ text?: string } | undefined>).detail?.text
       setWant(null)
+      if (seed) {
+        setResult(null)
+        setKept(false)
+        setState('idle')
+        setText(seed)
+      }
       setOpen(true)
     }
     /*
