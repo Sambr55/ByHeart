@@ -12,6 +12,7 @@ export type EventName =
   | 'session_start'
   /* Notifications (2026-11-04): opened from the lock screen, the ask after a room, and the settings. */
   | 'push_opened'
+  | 'gem_directions'
   | 'push_ask_shown'
   | 'push_ask_dismissed'
   | 'push_prefs'

@@ -8,13 +8,14 @@ import { GemPicture, PhotoCredit, useGemPhoto } from '@/components/city/GemPhoto
 import { situationById } from '@/content/situations'
 import { knowHowForRoom } from '@/content/knowhow'
 import { KnowHowCard } from './KnowHowCard'
+import { GemDirections } from './GemDirections'
 import { said } from '@/content/speaker'
 import { useLearner } from '@/engine/useLearner'
 
 /**
  * ONE GEM, OPENED. The shape is the rule (content/gems.ts): what happens here, who you will
  * talk to, the line for walking in — with a voice — a local tip, and the room on the path
- * that trains you for it. Directions hand off to the phone's own maps.
+ * that trains you for it. Directions open a walking map in the card (GemDirections).
  */
 export function GemCard({ gem, metres, onClose }: { gem: Gem; metres?: number; onClose?: () => void }) {
   const room = situationById(gem.room)
@@ -90,14 +91,7 @@ export function GemCard({ gem, metres, onClose }: { gem: Gem; metres?: number; o
             Practise first: {room.title}
           </Link>
         ) : null}
-        <a
-          href={'https://www.google.com/maps/dir/?api=1&destination=' + gem.lat + ',' + gem.lng}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="tap-target eyebrow flex-1 rounded-2xl border border-line px-4 py-3 text-center text-fg"
-        >
-          Directions
-        </a>
+        <GemDirections gem={gem} />
       </div>
     </article>
   )
