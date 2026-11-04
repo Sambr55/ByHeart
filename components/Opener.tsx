@@ -1,5 +1,6 @@
 'use client'
 
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import Link from 'next/link'
 import { useMemo } from 'react'
 import { AudioButton } from '@/components/AudioButton'
@@ -65,6 +66,7 @@ export function Opener() {
   const name = PATH_NAMES[pathPurpose(purpose)]
 
   return (
+    <>
     <div data-stage="LISBON" className="safe-top flex min-h-svh flex-col bg-bg text-fg">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 pb-10 pt-4">
         <div className="flex items-center justify-between">
@@ -117,7 +119,10 @@ export function Opener() {
           </SpokenLine>
         </section>
       </div>
+      <BottomNavSpace />
     </div>
+    <BottomNav />
+    </>
   )
 }
 

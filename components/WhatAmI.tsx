@@ -1,5 +1,6 @@
 'use client'
 
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Back } from '@/components/Back'
@@ -163,6 +164,7 @@ export function WhatAmI({ sha, built }: { sha: string; built: string }) {
   }, [sha, built, access.known, access.signedIn, access.signInReady])
 
   return (
+    <>
     <main className="safe-top mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 py-10 text-fg">
       <header className="flex items-center gap-3">
         <Back />
@@ -196,6 +198,9 @@ export function WhatAmI({ sha, built }: { sha: string; built: string }) {
       >
         START AGAIN
       </Link>
+      <BottomNavSpace />
     </main>
+    <BottomNav />
+    </>
   )
 }

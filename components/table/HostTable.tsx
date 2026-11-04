@@ -1,5 +1,6 @@
 'use client'
 
+import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { KIND_LABEL, bairroById, visibleGems } from '@/content/gems'
@@ -77,6 +78,7 @@ export function HostTable() {
     const url = (typeof window === 'undefined' ? '' : window.location.origin) + '/t/' + made.code
     const text = inviteText({ host: host.trim(), place: made.place, when: whenText(made.when), rule, url })
     return (
+      <>
       <div data-stage="TABLE" className="booker min-h-svh px-5 py-8 text-[#f4ead6]">
         <main className="mx-auto flex max-w-md flex-col gap-5" data-testid="table-made">
           <p className="eyebrow text-[#e5b04a]">Table laid</p>
@@ -118,11 +120,15 @@ export function HostTable() {
             Only people with this link can join. Each of them gets the lines for the night on their own phone, with a voice, before they arrive.
           </p>
         </main>
+        <BottomNavSpace />
       </div>
+      <BottomNav />
+      </>
     )
   }
 
   return (
+    <>
     <div data-stage="TABLE" className="min-h-svh bg-bg text-fg">
       <header className="booker safe-top px-5 pb-6 pt-6 text-[#f4ead6]">
         <div className="mx-auto flex max-w-md flex-col gap-3">
@@ -257,6 +263,9 @@ export function HostTable() {
           {busy ? 'Laying the table…' : ready ? 'Lay the table' : 'Pick a place, a time and your name'}
         </button>
       </main>
+      <BottomNavSpace />
     </div>
+    <BottomNav />
+    </>
   )
 }
