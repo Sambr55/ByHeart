@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useLearner } from '@/engine/useLearner'
+import { LIBRARY_ORDER } from '@/content/yours'
 import {
   SLOTS,
   collected,
@@ -102,14 +103,28 @@ export function Collection() {
     ],
   )
 
-  const rows = useMemo(() => decks(all), [all])
-  const rail = rows.filter((d) => d.rail)
-  const more = rows.filter((d) => !d.rail)
+  /*
+    ONLY WHAT HOLDS SOMETHING, YOUR OWN FIRST (2026-11-04, the review of Yours). The library
+    drew every deck, empty or not — a Legend of thirteen NOT YETs led the screen for
+    somebody whose Legend is optional. Now a shelf appears once it has a done card in it,
+    in LIBRARY_ORDER, and the first four are the rail. Nothing is lost: every kind's way in
+    is named in content/yours.ts (HOMES) and checked by scripts/yours-check.mts.
+  */
+  const rows = useMemo(
+    () =>
+      decks(all)
+        .filter((d) => d.cards.some((c) => c.done))
+        .sort((a, b) => LIBRARY_ORDER.indexOf(a.id) - LIBRARY_ORDER.indexOf(b.id)),
+    [all],
+  )
+  const rail = rows.slice(0, 4)
+  const more = rows.slice(4)
 
   /* The Legend, always — see the note above. */
-  const [open, setOpen] = useState<DeckId>('legend')
+  const [open, setOpen] = useState<DeckId | null>(null)
   const [drawer, setDrawer] = useState(false)
   const showing = rows.find((d) => d.id === open) ?? rows[0]
+  if (!rows.length) return null
 
   return (
     /*
@@ -148,6 +163,7 @@ export function Collection() {
         different noun, and a circle on `collection` lands in the middle of a 900px card,
         which is a grid tile rather than a rail. See content/walk.ts.
       */}
+      <p className="eyebrow text-accent">Your library</p>
       <div data-testid="rail" className="flex items-stretch border-b border-line">
         {rail.map((d) => (
           <RailTab
@@ -160,7 +176,7 @@ export function Collection() {
             }}
           />
         ))}
-        <button
+        {more.length ? <button
           type="button"
           data-testid="rail-more"
           aria-expanded={drawer}
@@ -174,7 +190,7 @@ export function Collection() {
             {drawer ? '\u25b4' : '\u25be'}
           </span>
           <span className="eyebrow text-[0.5rem]">MORE</span>
-        </button>
+        </button> : null}
       </div>
 
       {/*
@@ -216,13 +232,16 @@ export function Collection() {
         link would have re-made a dead end that took a report to find.
       */}
       {/* To the Just for fun row on the Path (components/path/FunShelf.tsx), where the vibes live now. */}
-      <Link
-        href="/club#fun"
-        data-testid="collection-more"
-        className="tap-target eyebrow inline-flex items-center text-accent underline underline-offset-4"
-      >
-        MORE VIBES
-      </Link>
+      {/* Only under the Vibes shelf, where it means something (2026-11-04). */}
+      {showing.id === 'vibes' ? (
+        <Link
+          href="/club#fun"
+          data-testid="collection-more"
+          className="tap-target eyebrow inline-flex items-center text-accent underline underline-offset-4"
+        >
+          MORE VIBES
+        </Link>
+      ) : null}
     </section>
   )
 }
@@ -416,12 +435,14 @@ function Board({ deck }: { deck: Deck }) {
           rather than three lonely tiles. Never between the cards — see above.
         */}
         {Array.from({
-          length: Math.max(
-            0,
-            SLOTS -
-              deck.cards.length -
-              (deck.id === 'legend' ? 1 + unopened.length : 0),
-          ),
+          /*
+            TO THE END OF THE ROW, NOT TO NINE (2026-11-04). One kept sentence padded to nine
+            slots read as an empty board; three to a row, the padding only squares it off.
+          */
+          length: (() => {
+            const n = deck.cards.length + (deck.id === 'legend' ? 1 + unopened.length : 0)
+            return n >= SLOTS ? 0 : (3 - (n % 3)) % 3
+          })(),
         }).map((_, i) => (
           <li key={'pad' + i}>
             <span

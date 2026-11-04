@@ -9,6 +9,7 @@ import { situationById } from '@/content/situations'
 import { knowHowForRoom } from '@/content/knowhow'
 import { KnowHowCard } from './KnowHowCard'
 import { GemDirections } from './GemDirections'
+import { GemHere } from './GemHere'
 import { said } from '@/content/speaker'
 import { useLearner } from '@/engine/useLearner'
 
@@ -93,6 +94,13 @@ export function GemCard({ gem, metres, onClose }: { gem: Gem; metres?: number; o
         ) : null}
         <GemDirections gem={gem} />
       </div>
+      {/*
+        THE TWO INVITATIONS THAT USED TO SIT EMPTY ON YOURS (2026-11-04). Yours showed
+        "Host one" and "Nowhere yet" to everybody; they belong here, at the place itself.
+        Said it here marks the gem the same way a walk stop is marked (walk_stops,
+        `gem:<id>`), and it then shows on Yours under Your Lisbon.
+      */}
+      <GemHere gem={gem} />
     </article>
   )
 }

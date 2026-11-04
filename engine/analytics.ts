@@ -13,6 +13,8 @@ export type EventName =
   /* Notifications (2026-11-04): opened from the lock screen, the ask after a room, and the settings. */
   | 'push_opened'
   | 'gem_directions'
+  | 'gem_said_here'
+  | 'path_table_nudge'
   | 'push_ask_shown'
   | 'push_ask_dismissed'
   | 'push_prefs'

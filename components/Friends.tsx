@@ -154,7 +154,7 @@ export function Friends() {
       but separate" more clearly than a hairline ever did, and the hairline was doing the
       work of a border on a section that had no border.
     */
-    <section className="flex flex-col gap-3" data-testid="yours-people">
+    <section id="people" className="scroll-mt-6 flex flex-col gap-3" data-testid="yours-people">
       <h2 className="eyebrow text-telha">Your people</h2>
       <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
         <div className="flex flex-col gap-1">

@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '@/components/Feed'
 import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { CanSay } from '@/components/yours/CanSay'
 import { Collection } from '@/components/Collection'
 import { Friends } from '@/components/Friends'
 import { Wordmark } from '@/components/Wordmark'
@@ -434,6 +435,14 @@ export function Profile() {
 
       <Identity />
 
+      {/*
+        THE ORDER OF YOURS (2026-11-04, the review): you; what is on this phone only, right
+        under the name it belongs to; WHAT YOU CAN SAY; your Lisbon; the library; then the
+        teacher and your people. Every part draws itself only when it has something in it —
+        the invitations live where they make sense instead (content/yours.ts, HOMES).
+      */}
+      {mounted ? <AtRisk /> : null}
+      {mounted ? <CanSay /> : null}
       {/* Your Lisbon: your table, and where you have said it — components/YoursOut.tsx. */}
       {mounted ? <YoursOut /> : null}
 
@@ -457,8 +466,8 @@ export function Profile() {
         */
         <div className="flex flex-col gap-6 rounded-2xl border border-line bg-bg-elev px-5 py-6">
           <p className="text-base leading-relaxed text-fg" data-testid="yours-empty">
-            Nothing here yet. Every level of your path hands you lines to keep. They
-            collect here, with your Legend, the places you said them and your tables.
+            Nothing here yet. Every room you finish on your path adds its lines here, ready to
+            hear again. The places you say them and your tables join them as they happen.
           </p>
           <Link
             href="/club"
@@ -563,7 +572,6 @@ export function Profile() {
             signs in, which is the same design as the inbox and /noticed. And it never
             appears to somebody with nothing to lose: see `atStake`.
           */}
-          <AtRisk />
           {/*
             THE TEACHER, UNDER THE BOARDS WHERE THE PROGRESS IS.
 
@@ -703,46 +711,27 @@ function AtRisk() {
         every other block on this screen uses, which is the same decision /noticed made
         for its stuck observations.
       */
-      className="flex flex-col gap-3 rounded-2xl border border-coach/60 bg-bg-elev px-5 py-6"
+      /*
+        COMPACT, NOW THAT IT SITS UNDER THE NAME (2026-11-04, the review of Yours). It moved
+        from the foot of the library to straight under the "Not signed in" it explains, so it
+        is a strip, not a page: what is at stake, why, and the one button. Same facts.
+      */
+      className="flex flex-col gap-2 rounded-2xl border border-coach/60 bg-bg-elev px-5 py-4"
     >
-      <p className="eyebrow text-coach">ON THIS PHONE ONLY</p>
-      {/*
-        THE HEADLINE IS THE COUNT, at the size the product reserves for what it is about.
-        A heading that said "Save your progress" would be the generic line this card exists
-        to replace.
-      */}
-      {/*
-        ALL OF IT, NAMED, rather than three and "and more".
-
-        The first version capped the list at three and trailed off, which is the one move
-        this card cannot afford: "and more" is the vague gesture that the whole point here
-        is to replace, and it hides a real number behind a word. Four is the maximum there
-        can ever be — see `parts` — and four short clauses is a sentence, not a list.
-      */}
-      <h2 className="display text-balance text-2xl">
+      <p className="eyebrow text-[0.6rem] text-coach">ON THIS PHONE ONLY</p>
+      <p className="text-base font-semibold leading-snug">
         {parts.length > 1
           ? parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1]
           : parts[0]}
-        .
-      </h2>
-      <p className="text-sm leading-relaxed text-fg">
-        None of it has left this phone. Lose it, wipe it, or just clear Safari, and that is
-        the lot — there is no copy anywhere and nobody can get it back for you.
+        , and no copy anywhere else.
       </p>
-      {/*
-        AND WHAT SIGNING IN ACTUALLY DOES, because a warning without a mechanism is a
-        scare. Two true things: the record goes to the server, and the browser copy and
-        the installed copy join up — which is the fault that sends people to this screen
-        in the first place.
-      */}
       <p className="text-sm leading-relaxed text-muted">
-        One email address fixes it. No password — a link arrives, you tap it, and from then
-        on your Portuguese is on the server and follows you onto any phone you open it on.
+        Clear Safari or lose the phone and it is gone. One email keeps it, no password.
       </p>
       <Link
         href="/signin?next=%2Fprofile"
         data-testid="yours-at-risk-go"
-        className="tap-target eyebrow mt-3 w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+        className="tap-target eyebrow mt-1 w-full rounded bg-accent px-5 py-2.5 text-center text-accent-ink"
       >
         KEEP IT SAFE
       </Link>
