@@ -2584,3 +2584,15 @@ details > summary.list-none::-webkit-details-marker {
 @media (prefers-reduced-motion: reduce) {
   .saver-glow.is-moving, .saver-in { animation: none }
 }
+
+/* The translator's plane, nudging along while the answer is on its way (components/Translator.tsx). */
+.translator-flying {
+  animation: translator-fly 0.9s ease-in-out infinite alternate;
+}
+@keyframes translator-fly {
+  from { transform: translateX(-3px) }
+  to { transform: translateX(3px) }
+}
+@media (prefers-reduced-motion: reduce) {
+  .translator-flying { animation: none }
+}

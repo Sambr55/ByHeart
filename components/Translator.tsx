@@ -11,6 +11,10 @@ import { registerFor } from '@/content/roots'
 import { track } from '@/engine/analytics'
 import { keepAsk, loadLearner } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
+import { StatusBar } from '@/components/Native'
+
+/* Things people need to say, for an empty pass. */
+const TRIES = ['Can I have the bill, please?', 'Do you have a table for two?', 'Where is the nearest pharmacy?']
 
 /**
  * "How do I say…", from anywhere, once you are in the Club.
@@ -265,76 +269,57 @@ export function Translator() {
   */
   if (!open) return null
 
+  const PLANE =
+    'M14 0 Q13 -1.6 10 -1.6 L2 -1.6 L-5 -10 L-8.5 -10 L-3 -1.6 L-10 -1.6 L-13 -5.5 L-15.5 -5.5 L-14 -1 L-14 1 L-15.5 5.5 L-13 5.5 L-10 1.6 L-3 1.6 L-8.5 10 L-5 10 L2 1.6 L10 1.6 Q13 1.6 14 0 Z'
+  const CAMERA = (
+    <>
+      <path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <circle cx="12" cy="12.5" r="3.5" />
+    </>
+  )
+  /* The gold button from the booker and the boarding pass, so the three read as one journey. */
+  const GOLD =
+    'tap-target eyebrow flex w-full items-center justify-center gap-3 rounded-2xl bg-[#e5b04a] px-5 py-4 text-base text-[#14243a] shadow-[0_6px_0_0_rgba(0,0,0,0.35)] transition active:translate-y-[4px] active:shadow-none disabled:opacity-40 disabled:shadow-none'
+  const QUIET =
+    'tap-target eyebrow w-full rounded-2xl border border-white/25 px-5 py-3 text-center text-white/80 disabled:opacity-60'
+  const empty = state === 'idle' && !text.trim() && !result
+
   return (
     /*
-      IT STOPS ABOVE THE BAR, and it is not modal any more.
+      THE BOARDING PASS (Sam, 2026-11-04): "This screen needs to be much sexier, designed with
+      the same vibe as the airline screens. It's another crucial function."
 
-      inset-0 and z-50 put it over the navigation, so the only way to go anywhere was to
-      close it first — which is a strange demand from a panel you open mid-sentence in a
-      shop. The bar is the one thing that should never be covered: it is how you leave.
+      So it is one: the night ground of the booker, and a pass you write on. The top half is
+      what you want to say (FROM · English), the perforation, and the bottom half is where
+      the Portuguese lands (TO · Português) — the answer is the thing they came for, so it
+      gets the pass's biggest type. The gold button is the booker's.
 
-      aria-modal went with the geometry. It said "nothing behind this is reachable", which
-      was true and is not any more, and a screen reader told the truth about the old layout
-      and would have lied about this one.
-
-      Height comes from --bar-room and --keyboard, the same two values .app-frame uses, so
-      the bar's furniture is described in one place rather than measured again here.
-
-      z-50, the same layer as the bar, and not a new one between them. The first attempt
-      used z-40 to sit under it — which the layer lint refused, correctly: three layers is a
-      decision this product made, and a fourth invented to solve a stacking problem is how
-      three becomes seven. Nothing needs to sit between them, because they no longer
-      overlap at all.
+      THE GEOMETRY IS UNCHANGED, and it was hard won: the box stops above the bar so the bar
+      stays tappable (it is how you leave), a fill covers the keyboard's strip so nothing
+      shows through, z-50 is the bar's own layer, not a new one. Height comes from
+      --bar-room and --keyboard, the values .app-frame uses. Not modal, so no aria-modal.
     */
     <div
       data-testid="translator"
       role="dialog"
       aria-label="How do I say"
-      /*
-        TWO THINGS AT ONCE, AND THE FIRST ATTEMPT TRADED ONE FOR THE OTHER.
-
-        Nothing may show through beneath the panel, and the bar must stay tappable — it is
-        how you leave. This was bounded to `bottom: bar-room + keyboard`, which kept the bar
-        clear and, the moment a keyboard opened, lifted the panel's own floor with it: the
-        screen underneath showed through the gap. Reported as "the residue of the previous
-        calendar screen", and it is why tapping out was temperamental — the thing being
-        tapped was a live calendar below the panel rather than the panel.
-
-        Making the panel full height fixed the hole and broke the bar, which the gate caught
-        immediately. So the two jobs are split rather than traded: the panel's BOX stops
-        above the bar exactly as it did, and a fill sits behind it covering the keyboard's
-        strip, so there is nothing to see through and nothing over the bar.
-      */
-      className="fixed inset-x-0 top-0 z-50 flex flex-col bg-bg text-fg"
+      className="booker fixed inset-x-0 top-0 z-50 flex flex-col text-white"
       style={{ bottom: 'calc(var(--bar-room) + var(--keyboard))' }}
     >
-      {/*
-        THE GROUND UNDER THE KEYBOARD'S STRIP.
-
-        The panel stops above the bar so the bar stays reachable, which leaves the band a
-        keyboard occupies uncovered — and on the way in and out of that keyboard, the screen
-        beneath was visible in it. This is a plain fill, pinned behind everything, ending
-        where the bar begins: it cannot take a tap and it cannot cover the bar, it simply
-        means there is never a window onto the last screen.
-      */}
+      <StatusBar color="#0f1f33" />
+      {/* The ground under the keyboard's strip: never a window onto the last screen. */}
       <span
         aria-hidden
         data-testid="translator-floor"
-        className="pointer-events-none fixed inset-x-0 z-[1] bg-bg"
+        className="pointer-events-none fixed inset-x-0 z-[1] bg-[#0f1f33]"
         style={{ top: 'auto', bottom: 'var(--bar-room)', height: 'var(--keyboard)' }}
       />
 
-      <header className="bar flex items-center justify-between gap-3 px-5 py-3">
-        <p className="eyebrow">HOW DO I SAY</p>
+      <header className="safe-top flex items-center justify-between gap-3 px-5 pb-1 pt-3">
+        <p className="eyebrow text-white/60">DUB · How do I say</p>
         <span className="flex-1" />
-        {/*
-          The camera lives with the translator because it IS the translator.
-
-          A menu is the same question as the text box — what does this say, and how would I
-          say it — asked by pointing instead of typing. Giving it a tab of its own would put
-          two doors on one room, and it is metered out of the same daily allowance, so it
-          belongs where a learner can see what it costs them.
-        */}
+        {/* The camera lives with the translator because it IS the translator — the same
+            question asked by pointing, metered from the same allowance. */}
         <button
           type="button"
           aria-label="Read something with the camera"
@@ -343,25 +328,17 @@ export function Translator() {
             track('lens_opened', {})
             setLens(true)
           }}
-          className="tap-target eyebrow px-2 opacity-80"
+          className="tap-target px-2 text-white/80"
         >
-          <svg
-            viewBox="0 0 24 24"
-            className="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            aria-hidden
-          >
-            <path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <circle cx="12" cy="12.5" r="3.5" />
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+            {CAMERA}
           </svg>
         </button>
         <button
           type="button"
           data-testid="translator-close"
           onClick={() => setOpen(false)}
-          className="tap-target eyebrow px-2 opacity-80"
+          className="tap-target eyebrow px-2 text-white/80"
         >
           CLOSE
         </button>
@@ -369,137 +346,157 @@ export function Translator() {
 
       {lens ? <Lens onClose={() => setLens(false)} /> : null}
 
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-y-auto px-5 py-6">
-        <div className="flex flex-col gap-3">
-          <label htmlFor="ask" className="text-sm text-muted">
-            In English, or in Portuguese if you want it checked.
-          </label>
-          <textarea
-            id="ask"
-            ref={box}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => {
-              // Enter sends. A translator is one line, and a newline in it means nothing.
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault()
-                void ask()
-              }
-            }}
-            rows={3}
-            maxLength={300}
-            data-testid="translator-input"
-            /* What the caller asked for, when one did. A placeholder is the shortest
-               possible way to say what this box wants, and "I'd like to pay by card" is
-               the wrong prompt when the answer has to be one noun. */
-            placeholder={want ? want.hint : "I'd like to pay by card"}
-            className="w-full rounded border border-line bg-surface px-4 py-3 text-base text-fg outline-none focus:border-accent"
-          />
-          {/*
-            THE CAMERA, SAID IN WORDS, UNDER THE THING IT IS AN ALTERNATIVE TO.
+      <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 overflow-y-auto px-5 pb-6 pt-2">
+        <h1 className="display text-3xl leading-tight">{want ? 'Find the word' : 'What do you need to say?'}</h1>
 
-            It was an icon in the panel's header and nothing else — reported as needing to
-            be "more visible/obvious", which is fair: a glyph beside CLOSE reads as chrome
-            for the panel rather than as a second way of asking the question the panel is
-            for. Somebody who has not been told it exists will not find it there.
+        <div className="overflow-hidden rounded-3xl bg-[#fbf8f2] text-[#14243a] shadow-[0_30px_60px_-30px_rgba(0,0,0,0.8)]">
+          {/* The route: EN ✈ PT, the same strip the check-in carries. */}
+          <div className="flex items-center justify-between gap-3 bg-[#14243a] px-5 py-3 text-white">
+            <span className="flex items-center gap-2">
+              <span className="display text-xl leading-none">EN</span>
+              <svg
+                viewBox="-16 -11 31 22"
+                className={'h-4 w-6 text-[#e5b04a] ' + (state === 'asking' ? 'translator-flying' : '')}
+                aria-hidden="true"
+              >
+                <path d={PLANE} fill="currentColor" />
+              </svg>
+              <span className="display text-xl leading-none text-[#9cc6ea]">PT</span>
+            </span>
+            <span className="text-right text-xs text-white/70">Português de Portugal</span>
+          </div>
 
-            Here it sits directly beneath the text box, phrased as the alternative it
-            actually is: type the thing, or point at it. The header icon stays for anybody
-            who has learned it — two doors into one room is fine when the room is the point;
-            what was wrong was having only the hidden one.
-          */}
-          <button
-            type="button"
-            data-testid="translator-lens-wide"
-            onClick={() => {
-              track('lens_opened', {})
-              setLens(true)
-            }}
-            className="tap-target flex w-full items-center justify-center gap-3 rounded border border-line bg-surface px-4 py-3 text-sm text-fg transition hover:border-accent/60"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              className="h-5 w-5 shrink-0 text-accent"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              aria-hidden
-            >
-              <path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <circle cx="12" cy="12.5" r="3.5" />
-            </svg>
-            Or point the camera at it
-          </button>
+          {/* FROM: what they want to say. Typed into the pass, not into a form field. */}
+          <div className="flex flex-col gap-1 px-5 pb-4 pt-4">
+            <label htmlFor="ask" className="eyebrow text-[0.6rem] text-[#14243a]/50">
+              From · English, or Portuguese to check
+            </label>
+            <textarea
+              id="ask"
+              ref={box}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => {
+                // Enter sends. A translator is one line, and a newline in it means nothing.
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  void ask()
+                }
+              }}
+              rows={2}
+              maxLength={300}
+              data-testid="translator-input"
+              /* What the caller asked for, when one did: "I'd like to pay by card" is the
+                 wrong prompt when the answer has to be one noun. */
+              placeholder={want ? want.hint : "I'd like to pay by card"}
+              className="display w-full resize-none border-0 border-b-2 border-[#14243a]/15 bg-transparent px-0 pb-2 pt-1 text-2xl leading-snug text-[#14243a] outline-none placeholder:text-[#14243a]/30 focus:border-[#1f5c8f]"
+            />
+          </div>
+
+          {/* The perforation, notched like the check-in pass. */}
+          <div className="relative flex items-center" aria-hidden="true">
+            <span className="absolute -left-3 h-6 w-6 rounded-full bg-[#0f1f33]" />
+            <span className="mx-4 h-px flex-1 border-t-2 border-dashed border-[#14243a]/15" />
+            <span className="absolute -right-3 h-6 w-6 rounded-full bg-[#0f1f33]" />
+          </div>
+
+          {/* TO: where the Portuguese lands. */}
+          <div className="flex min-h-[8.5rem] flex-col gap-2 px-5 pb-5 pt-4" aria-live="polite">
+            <p className="eyebrow text-[0.6rem] text-[#14243a]/50">To · Português</p>
+
+            {state === 'asking' ? (
+              <p className="display text-2xl text-[#14243a]/35" data-testid="translator-asking">
+                Translating…
+              </p>
+            ) : state === 'failed' ? (
+              <p data-testid="translator-why" className="text-sm text-[#a5432a]">
+                {why}
+              </p>
+            ) : state === 'done' && result ? (
+              <div data-testid="translator-result" className="animate-bank flex flex-col gap-3">
+                {result.pt ? (
+                  <>
+                    <p className="pt display text-balance text-[1.9rem] font-semibold leading-tight text-[#1f5c8f]" lang="pt-PT">
+                      {result.pt}
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <AudioButton slug={slugFor(result.pt)} text={result.pt} size="sm" />
+                      {/* The commonest thing to do with a looked-up sentence is send it. */}
+                      <CopyButton text={result.pt} size="sm" />
+                      <span className="flex-1" />
+                      <Tick className="text-correct" />
+                    </div>
+                    {result.note ? (
+                      <p className="border-t border-[#14243a]/10 pt-3 text-sm leading-relaxed text-[#14243a]/65">
+                        {result.note}
+                      </p>
+                    ) : null}
+                  </>
+                ) : (
+                  /* The model refuses by returning no Portuguese and a reason, shown as written. */
+                  <p className="text-sm text-[#a5432a]">{result.note || 'Nothing to translate there.'}</p>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-end justify-between gap-4">
+                <p className="display text-2xl text-[#14243a]/25">Your Portuguese lands here</p>
+                <span aria-hidden className="booker-barcode h-10 w-16 shrink-0 rounded-sm opacity-30 invert" />
+              </div>
+            )}
+          </div>
         </div>
 
-        {state === 'asking' ? <p className="text-sm text-muted">Asking…</p> : null}
+        {/*
+          THE CAMERA, SAID IN WORDS, under the thing it is the alternative to: type it, or
+          point at it. The header icon stays for anybody who has learned it.
+        */}
+        <button
+          type="button"
+          data-testid="translator-lens-wide"
+          onClick={() => {
+            track('lens_opened', {})
+            setLens(true)
+          }}
+          className="tap-target flex w-full items-center justify-center gap-3 rounded-2xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-white/90 transition hover:bg-white/10"
+        >
+          <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-[#e5b04a]" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+            {CAMERA}
+          </svg>
+          Or point the camera at a menu or a sign
+        </button>
 
-        {state === 'failed' ? (
-          <p data-testid="translator-why" className="text-sm text-coach">
-            {why}
-          </p>
-        ) : null}
-
-        {state === 'done' && result ? (
-          <div
-            data-testid="translator-result"
-            /*
-              THE WHITE CARD ON THE ANSWER, because the answer is the thing they came for.
-
-              Three parts — their English, the Portuguese, and the note about register —
-              and two of the three were loose grey text on sand with only the green chip
-              in the middle looking like anything. So the answer read as one coloured strip
-              with stray captions around it rather than as a reply.
-
-              The green chip stays exactly as it is. It is a tinted surface rather than a
-              card, and bg-correct/10 over bg-bg-elev is a cleaner tint than it was over
-              sand — the mint is mixed with near-white now instead of with a darker ochre.
-
-              The textarea above keeps bg-surface and stays outside this card: what you
-              typed is a hole you type into, what came back is a card. That is the whole
-              grammar of the panel in one screen.
-            */
-            className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6"
-          >
-            {/* Their own words, quietly, above the answer — so what they asked for and
-                what they got can be read together. */}
-            <p className="text-sm text-muted">“{result.en}”</p>
-            {result.pt ? (
-              <>
-                <div className="animate-bank flex items-center gap-3 rounded border border-correct/40 bg-correct/10 px-4 py-3">
-                  <AudioButton slug={slugFor(result.pt)} text={result.pt} size="sm" />
-                  <span className="pt min-w-0 flex-1 text-lg">{result.pt}</span>
-                  {/* The commonest thing to do with a looked-up sentence is send it. */}
-                  <CopyButton text={result.pt} size="sm" />
-                  <Tick className="text-correct" />
-                </div>
-                {result.note ? (
-                  <p className="text-sm leading-relaxed text-muted">{result.note}</p>
-                ) : null}
-              </>
-            ) : (
-              /* The model was asked to refuse by returning no Portuguese and a reason.
-                 Shown as written rather than dressed up as an error. */
-              <p className="text-sm text-coach">{result.note || 'Nothing to translate there.'}</p>
-            )}
+        {/*
+          SOMETHING TO TRY, on an empty pass: three things people actually need to say,
+          one tap to put them on the ticket. An empty box is the hardest thing to start.
+        */}
+        {empty && !want ? (
+          <div className="flex flex-col gap-2" data-testid="translator-tries">
+            <p className="eyebrow text-[0.6rem] text-white/45">Or try</p>
+            <div className="flex flex-wrap gap-2">
+              {TRIES.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => {
+                    setText(t)
+                    box.current?.focus()
+                  }}
+                  className="tap-target rounded-full border border-white/20 px-3 py-1.5 text-xs text-white/80 transition hover:bg-white/10"
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
           </div>
         ) : null}
 
-        <div className="mt-auto flex flex-col gap-3">
+        <div className="mt-auto flex flex-col gap-3 pt-2">
           {state === 'done' && result?.pt ? (
             <>
               {/*
-                THE ANSWER GOES BACK TO WHOEVER ASKED, when somebody asked.
-
-                First, and in the accent, because for a caller this IS the action — KEEP
-                puts a sentence in a list they will read later, and this puts a word in the
-                box they are filling now.
-
-                The Portuguese only. The caller wanted one noun for "Trabalho com {thing}",
-                and a model asked for a word usually answers with one — but not always, so
-                the word is trimmed of a trailing stop and of the article Portuguese likes
-                to put in front of a bare noun. "a publicidade" and "publicidade." both
-                become "publicidade", which is what the frame needs.
+                THE ANSWER GOES BACK TO WHOEVER ASKED, when somebody asked — first, in gold,
+                because for a caller this IS the action. Sent as the model gave it; the
+                caller trims the article and the stop, since it knows its own frame.
               */}
               {want ? (
                 <button
@@ -508,12 +505,6 @@ export function Translator() {
                   onClick={() => {
                     const word = (result?.pt ?? '').trim()
                     if (!word) return
-                    /*
-                      Sent as the model gave it. The caller trims the article and the full
-                      stop, because the caller is the one that knows what shape its own
-                      frame needs — and doing it in both places would be two rules to keep
-                      in step over one word.
-                    */
                     window.dispatchEvent(
                       new CustomEvent('dub:word', { detail: { for: want.for, pt: word, en: result?.en ?? '' } }),
                     )
@@ -521,7 +512,7 @@ export function Translator() {
                     setOpen(false)
                     setWant(null)
                   }}
-                  className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink"
+                  className={GOLD}
                 >
                   USE THIS WORD
                 </button>
@@ -531,21 +522,11 @@ export function Translator() {
                 data-testid="translator-keep"
                 onClick={keep}
                 disabled={kept}
-                className={
-                  'tap-target eyebrow w-full rounded px-5 py-3 disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted ' +
-                  (want
-                    ? 'border border-line-strong text-muted'
-                    : 'bg-accent text-accent-ink')
-                }
+                className={want ? QUIET : GOLD}
               >
                 {kept ? 'KEPT' : 'KEEP THIS'}
               </button>
-              <button
-                type="button"
-                data-testid="translator-again"
-                onClick={again}
-                className="tap-target eyebrow w-full rounded border border-line-strong px-5 py-3 text-muted"
-              >
+              <button type="button" data-testid="translator-again" onClick={again} className={QUIET}>
                 ASK ANOTHER
               </button>
             </>
@@ -555,13 +536,16 @@ export function Translator() {
               data-testid="translator-ask"
               onClick={ask}
               disabled={!text.trim() || state === 'asking'}
-              className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-accent-ink disabled:border disabled:border-line-strong disabled:bg-transparent disabled:text-muted"
+              className={GOLD}
             >
-              {state === 'asking' ? 'ASKING' : want ? 'FIND THE WORD' : 'SAY IT IN PORTUGUESE'}
+              {state === 'asking' ? 'TRANSLATING' : want ? 'FIND THE WORD' : 'SAY IT IN PORTUGUESE'}
+              <svg viewBox="-16 -11 31 22" className="h-5 w-7" aria-hidden="true">
+                <path d={PLANE} fill="currentColor" />
+              </svg>
             </button>
           )}
           {kept ? (
-            <p className="text-xs leading-relaxed text-muted">
+            <p className="text-center text-xs leading-relaxed text-white/60">
               Kept. It is with your sentences, and it will come back around.
             </p>
           ) : null}
