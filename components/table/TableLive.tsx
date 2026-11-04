@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { SayButton } from '@/components/SayButton'
 import { AudioButton } from '@/components/AudioButton'
@@ -35,6 +36,8 @@ export function TableLive({ code }: { code: string }) {
   const [ticked, setTicked] = useState<string[]>([])
   const [saved, setSaved] = useState(false)
   const pending = useRef<number | null>(null)
+  const scroller = useRef<HTMLDivElement | null>(null)
+  const router = useRouter()
 
   const load = useCallback(
     () =>
@@ -58,7 +61,7 @@ export function TableLive({ code }: { code: string }) {
   const round = t && t !== 'missing' ? t.round : 0
   const r = round > 0 ? ROUNDS[round - 1] : null
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    scroller.current?.scrollTo({ top: 0, behavior: 'smooth' })
   }, [round])
 
   const intro = useMemo(() => myIntroLines(learner), [learner])
@@ -80,11 +83,15 @@ export function TableLive({ code }: { code: string }) {
     setT({ ...t, round: to })
     track('table_round', { round: to })
     try {
-      await fetch('/api/hosted/' + code, {
+      const res = await fetch('/api/hosted/' + code, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ action: 'round', round: to }),
       })
+      /* A refused move must not leave every later poll ignored while waiting for it. */
+      if (!res.ok) pending.current = null
+    } catch {
+      pending.current = null
     } finally {
       setMoving(false)
       load()
@@ -108,10 +115,28 @@ export function TableLive({ code }: { code: string }) {
   const me = learner.display_name?.trim()
   const lines: Line[] = r ? (r.id === 'intro' && intro.length ? intro : r.id === 'arrive' ? [arriveLine(t.host, t.sitsAt), ...r.lines] : r.lines) : []
   const tryLine = lines.find((l) => !l.pt.includes('…'))
+  const last = round >= ROUNDS.length
+
+  /* The night ends somewhere: what you ticked goes into Yours, and so do you. */
+  function finish() {
+    if (!saved) {
+      markTableSat(code, ticked)
+      track('table_lines_saved', { n: ticked.length })
+      setSaved(true)
+    }
+    track('table_finished', { hosting: !!(t && t !== 'missing' && t.hosting) })
+    router.push('/profile')
+  }
 
   return (
-    <div data-stage="TABLE-LIVE" className="booker min-h-svh text-[#f4ead6]">
-      <header className="safe-top sticky top-0 z-30 border-b border-white/10 bg-[#0f1f33]/90 px-5 py-3 backdrop-blur">
+    /*
+      ONE FRAME, ONE SCROLLER, CONTROLS UNDER IT (2026-11-04). The host bar was
+      position: fixed over a window-scrolled page, and on an installed iPhone it came
+      loose — Sam found it floating mid-screen with taps that no longer landed on it. In
+      the flow beneath the scroller it has nowhere to float to (see components/Dock.tsx).
+    */
+    <div data-stage="TABLE-LIVE" className="booker flex h-dvh flex-col text-[#f4ead6]">
+      <header className="safe-top z-30 shrink-0 border-b border-white/10 bg-[#0f1f33]/90 px-5 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-md items-center gap-3">
           <Link href={'/t/' + code} className="eyebrow text-white/70" aria-label="Back to the invite">
             ←
@@ -135,7 +160,8 @@ export function TableLive({ code }: { code: string }) {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-md flex-col gap-5 px-5 py-6 pb-40">
+      <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <main className="mx-auto flex w-full max-w-md flex-col gap-5 px-5 py-6 pb-10">
         {!r ? (
           <section className="flex flex-col gap-4" data-testid="live-lobby">
             <p className="eyebrow text-[#e5b04a]">Who’s here</p>
@@ -279,9 +305,10 @@ export function TableLive({ code }: { code: string }) {
           </button>
         </details>
       </main>
+      </div>
 
       {t.hosting ? (
-        <nav className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#0f1f33]/95 px-5 py-3 backdrop-blur" data-testid="live-host">
+        <nav className="shrink-0 border-t border-white/10 bg-[#0f1f33] px-5 pt-3 pb-[calc(0.75rem+var(--safe-bottom))]" data-testid="live-host">
           <div className="mx-auto flex max-w-md items-center gap-2">
             <button
               type="button"
@@ -293,18 +320,30 @@ export function TableLive({ code }: { code: string }) {
             </button>
             <button
               type="button"
-              disabled={moving || round >= ROUNDS.length}
-              onClick={() => move(round + 1)}
+              disabled={moving}
+              onClick={() => (last ? finish() : move(round + 1))}
               data-testid="live-next"
               className="tap-target eyebrow flex-1 rounded-2xl bg-[#e5b04a] px-4 py-3 text-[#0f1f33] disabled:opacity-40"
             >
-              {round === 0 ? 'Start the first round' : round >= ROUNDS.length ? 'Last round' : 'Next: ' + ROUNDS[round].en}
+              {round === 0 ? 'Start the first round' : last ? (saved ? 'Finish the night' : 'Save and finish') : 'Next: ' + ROUNDS[round].en}
             </button>
           </div>
           <p className="mx-auto mt-1 max-w-md text-center text-[0.65rem] text-white/50">You’re the host — every phone at the table follows you.</p>
         </nav>
       ) : (
-        <p className="safe-bottom fixed inset-x-0 bottom-0 bg-[#0f1f33]/90 py-2 text-center text-xs text-white/60">{t.people[0]} moves the table on — your screen follows.</p>
+        <div className="shrink-0 border-t border-white/10 bg-[#0f1f33] px-5 pt-2 pb-[calc(0.5rem+var(--safe-bottom))]">
+          {last ? (
+            <button
+              type="button"
+              onClick={finish}
+              data-testid="live-finish"
+              className="tap-target eyebrow mx-auto mb-1 block w-full max-w-md rounded-2xl bg-[#e5b04a] px-4 py-3 text-[#0f1f33]"
+            >
+              {saved ? 'Finish the night' : 'Save and finish'}
+            </button>
+          ) : null}
+          <p className="text-center text-xs text-white/60">{t.people[0]} moves the table on — your screen follows.</p>
+        </div>
       )}
     </div>
   )
