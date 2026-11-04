@@ -40,15 +40,19 @@ export function Foundations({
   const waiting = tiles.length - shown.length
 
   return (
-    <section aria-labelledby="shortcuts" className="flex flex-col gap-3" data-testid="foundations">
-      <div className="flex flex-col gap-1">
-        <h2 id="shortcuts" className="eyebrow text-muted">
+    /* Rolled up until asked for (2026-11-04) — see the same note on the panel's progress. */
+    <details className="group rounded-2xl border border-line bg-bg-elev" data-testid="foundations">
+      <summary className="tap-target flex cursor-pointer list-none items-center gap-3 px-4 py-3">
+        <span id="shortcuts" className="eyebrow flex-1 text-fg">
           Shortcuts
-        </h2>
+        </span>
+        <span className="text-sm tabular-nums text-muted">{shown.length} open</span>
+        <span aria-hidden className="text-muted transition-transform group-open:rotate-180">⌄</span>
+      </summary>
+      <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
         <p className="text-sm text-muted">
           Shapes that turn a few words into hundreds of sentences. Use one cold and it turns gold.
         </p>
-      </div>
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {shown.map(({ c, done }) => (
           <li key={c.id}>
@@ -72,6 +76,7 @@ export function Foundations({
           {waiting} more open as your rooms give you their words.
         </p>
       ) : null}
-    </section>
+      </div>
+    </details>
   )
 }

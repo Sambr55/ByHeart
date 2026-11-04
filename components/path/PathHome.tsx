@@ -213,7 +213,7 @@ export function PathHome() {
             </Panel>
           )}
 
-          <div className="mt-4">
+          <div className="-mt-3">
             <Foundations inventory={learner.inventory ?? {}} used={learner.cheats_used ?? []} />
           </div>
           <div className="mt-2">
