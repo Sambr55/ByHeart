@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import type { ReactNode } from 'react'
 import { useMemo, type CSSProperties } from 'react'
 import type { PathNode, PathView } from './progress'
 import { keystoneGlaze, milestoneHref } from './progress'
@@ -52,6 +53,7 @@ export function Road({
   onLaid,
   openId = null,
   homing,
+  children,
 }: {
   view: PathView
   inventory: Record<string, unknown>
@@ -59,16 +61,17 @@ export function Road({
   openId?: string | null
   /* Rooms just put back, which come home with a flourish once (see Panel). */
   homing?: Set<string>
+  /* Up next, laid on the road where you are: after the unit that holds the next stop. */
+  children?: ReactNode
 }) {
   const drifted = useMemo(() => view.units.flatMap((u) => u.nodes).filter((n) => n.slipping).slice(0, 3), [view])
   /* The swing runs on across units, so the road is one road and not five. */
   let k = 0
+  const here = view.next?.unit.id ?? null
   return (
     <section aria-labelledby="road-caption" data-testid="road" className="flex flex-col gap-6">
       <p id="road-caption" className="text-sm leading-snug text-muted" data-testid="road-caption">
         <span className="font-semibold text-fg">Your road through Lisboa</span>
-        <br />
-        {view.done} of {view.total} stops reached
       </p>
 
       <PutBack
@@ -138,10 +141,12 @@ export function Road({
                   {keystoneLabel(unit)}
                 </span>
               </Link>
+              {unit.id === here ? <div className="mt-3">{children}</div> : null}
             </li>
           )
         })}
       </ol>
+      {here ? null : children}
 
       <Foundation inventory={inventory} />
     </section>
