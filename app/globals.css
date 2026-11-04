@@ -839,6 +839,7 @@ html {
   gate can put a 47px notch on a headless browser and measure what lands underneath it.
 */
 :root {
+  --vv-drift: 0px;
   /*
     The ground a full-bleed photograph sits on, taken from the images themselves. A token
     rather than a hex in six components, so the canvas behind the page can match it — see
@@ -931,6 +932,16 @@ html {
 
 .nav-bar {
   transition: transform 260ms var(--ease-drain, ease-out);
+}
+
+/*
+  Back onto the glass when iOS leaves the visible area below the layout viewport after a
+  keyboard closes (see the stuck-viewport note in components/Native.tsx). `translate`
+  rather than `transform`, so it composes with the keyboard's slide-away above.
+*/
+.nav-bar,
+.dock-slot {
+  translate: 0 var(--vv-drift, 0px);
 }
 
 /*

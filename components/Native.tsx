@@ -87,7 +87,40 @@ function useKeyboard() {
       if (keyboard) root.setAttribute('data-keyboard', 'on')
       else root.removeAttribute('data-keyboard')
     }
+    /*
+      THE STUCK VIEWPORT (2026-11-04). Sam, twice in a morning, with screenshots: the bottom
+      bar floating 60% of the way down the screen, the header gone off the top — "this is
+      happening in many places". The bar's bottom edge sat a keyboard's height above the
+      glass. After the keyboard closes, iOS can leave the visible area offset from the layout
+      viewport that position: fixed is measured against, so everything fixed to the bottom is
+      drawn where the keyboard's top used to be until something makes it relayout.
+
+      Two answers. Measure the drift — how far below the layout viewport's foot the visible
+      area really ends — and let the fixed furniture (the bar, the dock) translate down by it,
+      so it sits on the glass whatever the browser believes. And when a field loses focus,
+      nudge the scroll once the keyboard has gone, which is what makes iOS let go of the
+      offset. Only a positive drift counts, and never while zoomed: pinch-zoom moves the
+      visual viewport on purpose.
+    */
+    const drift = () => {
+      const d = vv.offsetTop + vv.height - window.innerHeight
+      const zoomed = Math.abs(vv.scale - 1) > 0.01
+      root.style.setProperty('--vv-drift', (d > 1 && !zoomed && !root.hasAttribute('data-keyboard') ? Math.round(d) : 0) + 'px')
+    }
+    let nudge = 0
+    const onBlur = () => {
+      window.clearTimeout(nudge)
+      nudge = window.setTimeout(() => {
+        if (document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return
+        if (vv.offsetTop + vv.height - window.innerHeight > 1) {
+          window.scrollBy(0, 1)
+          window.scrollBy(0, -1)
+        }
+        drift()
+      }, 350)
+    }
     const measure = () => {
+      drift()
       const eaten = Math.max(0, window.innerHeight - vv.height - vv.offsetTop)
       /*
         A floor of 120px before this counts as a keyboard.
@@ -100,6 +133,7 @@ function useKeyboard() {
       window.clearTimeout(settle)
       if (!keyboard) {
         commit(0)
+        drift()
         return
       }
       settle = window.setTimeout(() => commit(keyboard), 120)
@@ -108,8 +142,14 @@ function useKeyboard() {
     measure()
     vv.addEventListener('resize', measure)
     vv.addEventListener('scroll', measure)
+    window.addEventListener('scroll', drift, { passive: true })
+    document.addEventListener('focusout', onBlur)
     return () => {
       window.clearTimeout(settle)
+      window.clearTimeout(nudge)
+      window.removeEventListener('scroll', drift)
+      document.removeEventListener('focusout', onBlur)
+      root.style.removeProperty('--vv-drift')
       vv.removeEventListener('resize', measure)
       vv.removeEventListener('scroll', measure)
       document.documentElement.removeAttribute('data-keyboard')
