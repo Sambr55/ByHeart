@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Wordmark } from '@/components/Wordmark'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { useLearner } from '@/engine/useLearner'
@@ -27,7 +27,6 @@ import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
 import { Foundations } from './Foundations'
 import { FunShelf } from './FunShelf'
-import { NearYou } from '@/components/city/NearYou'
 
 
 /**
@@ -120,6 +119,26 @@ export function PathHome() {
     view.units.find((u) => u.unit.id === view.next?.unit.id)?.unit ?? view.units[0]?.unit
   const practiceHref = practiceUnit ? milestoneHref(practiceUnit.milestone.cheat) : '/revise'
 
+  const task = (
+    <section aria-labelledby="up-next" className="flex flex-col gap-3" data-testid="up-next">
+      <h2 id="up-next" className="eyebrow text-muted">
+        {view.next ? 'Up next' : name.done}
+      </h2>
+      {view.next ? (
+        <RoomCard room={view.next.room} tag={view.next.unit.title} state="next" big />
+      ) : (
+        <div className="flex flex-col gap-3 rounded-3xl border border-line bg-bg-elev p-5">
+          <p className="display text-2xl">Every open room, played.</p>
+          <p className="text-sm leading-relaxed text-muted">Keep them warm: the practice sessions ask for them back cold.</p>
+          <Link href={practiceHref} className="tap-target eyebrow inline-flex justify-center rounded-full bg-accent px-6 py-3 text-accent-ink">
+            Practise
+          </Link>
+        </div>
+      )}
+      <Understood count={understood} />
+    </section>
+  )
+
   return (
     <div data-stage="LISBON" className="min-h-svh bg-bg text-fg">
       <header className="bar safe-top sticky top-0 z-30 px-5 py-3">
@@ -154,75 +173,51 @@ export function PathHome() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-md px-5 py-6 md:max-w-6xl md:px-6">
-        {/* One column on a phone; on anything wide, now on the left and the Panel on the right. */}
-        <div className="flex flex-col gap-10 md:grid md:grid-cols-[minmax(0,24rem)_minmax(0,38rem)] md:items-start md:justify-center md:gap-12">
-          <div className="flex flex-col gap-10 md:sticky md:top-24">
-            <LevelBar level={level} />
+      {/*
+        ONE COLUMN, IN THE ORDER YOU USE IT (2026-11-04). Sam: "I'm finding the path screens
+        very busy and a bit confusing … is it all necessary? … the path/road toggle should
+        always be at the top, then the tiles, then the task."
 
-            <section aria-labelledby="up-next" className="needs-learner flex flex-col gap-3">
-              <h1 id="up-next" className="eyebrow text-muted">
-                {view.next ? 'Up next' : name.done}
-              </h1>
-              {view.next ? (
-                <div className="md:max-w-xl">
-                  <RoomCard
-                    room={view.next.room}
-                    tag={'Level ' + level.level + ' · ' + view.next.unit.title}
-                    state="next"
-                    big
-                  />
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3 rounded-3xl border border-line bg-bg-elev p-5 md:max-w-xl">
-                  <p className="display text-2xl">Every open room, played.</p>
-                  <p className="text-sm leading-relaxed text-muted">
-                    Keep them warm: the practice sessions ask for them back cold.
-                  </p>
-                  <Link
-                    href={practiceHref}
-                    className="tap-target eyebrow inline-flex justify-center rounded-full bg-accent px-6 py-3 text-accent-ink"
-                  >
-                    Practise
-                  </Link>
-                </div>
-              )}
-            </section>
+        So: where you are (level, and the Panel/Road toggle beside it), the picture you are
+        building, and what to do next straight under it. Gone from here: "Lisbon, like a
+        local" (the City tab already has Show what's near me), and the said-out-loud section,
+        whose number is already the header chip — its milestone cheer and the opening-line
+        card now sit under the task. The level appeared three times; the Up next tag no
+        longer repeats it.
+      */}
+      <main className="mx-auto w-full max-w-md px-5 py-6 md:max-w-xl">
+        <div className="needs-learner flex flex-col gap-6">
+          <LevelBar level={level} toggle={<ViewToggle mode={mode} onChange={chooseMode} />} />
 
-            {/* Local knowledge, from where they are standing (2026-11-03) — components/city/NearYou.tsx. */}
-            <NearYou />
+          {mode === 'road' ? (
+            <Road
+              view={view}
+              inventory={learner.inventory ?? {}}
+              onLaid={setSheet}
+              openId={sheet?.room.id ?? null}
+              homing={homing}
+            >
+              {task}
+            </Road>
+          ) : (
+            <Panel
+              view={view}
+              purpose={pathPurpose(purpose)}
+              chapter={learner.chapter ?? 'lisbon'}
+              inventory={learner.inventory ?? {}}
+              onLaid={setSheet}
+              openId={sheet?.room.id ?? null}
+              homing={homing}
+            >
+              {task}
+            </Panel>
+          )}
 
-            <Understood count={understood} />
+          <div className="mt-4">
+            <Foundations inventory={learner.inventory ?? {}} used={learner.cheats_used ?? []} />
           </div>
-
-          <div className="needs-learner flex flex-col gap-3">
-            <ViewToggle mode={mode} onChange={chooseMode} />
-            {mode === 'road' ? (
-              <Road
-                view={view}
-                inventory={learner.inventory ?? {}}
-                onLaid={setSheet}
-                openId={sheet?.room.id ?? null}
-                homing={homing}
-              />
-            ) : (
-              <Panel
-                view={view}
-                purpose={pathPurpose(purpose)}
-                chapter={learner.chapter ?? 'lisbon'}
-                inventory={learner.inventory ?? {}}
-                onLaid={setSheet}
-                openId={sheet?.room.id ?? null}
-                homing={homing}
-              />
-            )}
-            <div className="mt-8">
-              <Foundations inventory={learner.inventory ?? {}} used={learner.cheats_used ?? []} />
-            </div>
-            <div className="mt-6">
-              <FunShelf proof={learner.proof ?? []} units={units} />
-            </div>
-
+          <div className="mt-2">
+            <FunShelf proof={learner.proof ?? []} units={units} />
           </div>
         </div>
         <BottomNavSpace />
@@ -275,7 +270,7 @@ function readPathMode(): PathMode {
 /** Panel | Road — two segments, small, above the picture. */
 function ViewToggle({ mode, onChange }: { mode: PathMode; onChange: (m: PathMode) => void }) {
   return (
-    <div role="group" aria-label="How to show your path" className="view-toggle self-start" data-testid="view-toggle">
+    <div role="group" aria-label="How to show your path" className="view-toggle shrink-0" data-testid="view-toggle">
       <button type="button" aria-pressed={mode === 'panel'} onClick={() => onChange('panel')} data-mode="panel">
         Panel
       </button>
@@ -346,15 +341,8 @@ function Understood({ count }: { count: number }) {
 
 
   return (
-    <section aria-labelledby="understood" className="needs-learner flex flex-col gap-4 md:max-w-xl">
-      <div className="flex min-w-0 flex-col gap-1">
-        <h2 id="understood" className="display text-xl" data-testid="understood-tally">
-          {count === 0 ? 'Say it out loud' : 'Said out loud, and heard ' + timesOf(count)}
-        </h2>
-        <p className="text-sm leading-relaxed text-muted">
-          {count === 0 ? 'Every time you say a line out loud and it is heard, it counts here.' : 'In Portuguese.'}
-        </p>
-      </div>
+    /* The tally itself is the header chip; here only its milestone cheer, when one is due. */
+    <div className="flex flex-col gap-3">
 
       {cheer !== null ? (
         <button
@@ -381,7 +369,7 @@ function Understood({ count }: { count: number }) {
           <span className="text-sm text-muted">For walking in — and the save, if it goes wrong.</span>
         </span>
       </Link>
-    </section>
+    </div>
   )
 }
 
@@ -392,12 +380,14 @@ function Understood({ count }: { count: number }) {
  * to do and why it matters sit together. When every open room is laid it says so, and
  * points at the Foundations and the practice instead of a number that cannot move.
  */
-function LevelBar({ level }: { level: PathLevel }) {
+function LevelBar({ level, toggle }: { level: PathLevel; toggle: ReactNode }) {
   if (level.complete || !level.unit) {
     return (
       <section aria-label="Your level" className="needs-learner flex flex-col gap-1" data-testid="level">
-        <p className="eyebrow text-telha">Level {level.level}</p>
-        <p className="display text-3xl leading-tight">Every open room, laid.</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="display text-2xl leading-tight">Every open room, laid.</p>
+          {toggle}
+        </div>
         <p className="text-sm text-muted">Keep the tiles in place, and fill the Foundations below.</p>
       </section>
     )
@@ -405,8 +395,13 @@ function LevelBar({ level }: { level: PathLevel }) {
   const pct = level.open ? Math.round((level.laid / level.open) * 100) : 0
   return (
     <section aria-label="Your level" className="needs-learner flex flex-col gap-2" data-testid="level">
-      <p className="eyebrow text-telha">Level {level.level}</p>
-      <p className="display text-3xl leading-tight">{level.unit.title}</p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="display min-w-0 text-2xl leading-tight">
+          <span className="eyebrow block text-telha">Level {level.level}</span>
+          {level.unit.title}
+        </p>
+        {toggle}
+      </div>
       <div
         className="h-2.5 w-full overflow-hidden rounded-full bg-surface"
         role="progressbar"

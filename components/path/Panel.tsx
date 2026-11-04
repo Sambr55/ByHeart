@@ -136,6 +136,7 @@ export function Panel({
   onLaid,
   openId = null,
   homing,
+  children,
 }: {
   view: PathView
   purpose: Purpose
@@ -151,6 +152,8 @@ export function Panel({
   openId?: string | null
   /* Rooms just put back on /revise, which come home with a flourish, once (homecoming.ts). */
   homing?: Set<string>
+  /* Up next, laid between the picture and the list of levels. */
+  children?: ReactNode
 }) {
   const art = panelArt(chapter, purpose)
   const nodes = useMemo(() => view.units.flatMap((u) => u.nodes), [view])
@@ -220,8 +223,6 @@ export function Panel({
     <section aria-labelledby="panel-caption" data-testid="panel" className={'flex flex-col gap-6' + (openId ? ' panel-open' : '')}>
       <p id="panel-caption" className="text-sm leading-snug text-muted" data-testid="panel-caption">
         <span className="font-semibold text-fg">Your panel: {art.title}</span>
-        <br />
-        {view.done} of {view.total} tiles laid
       </p>
 
       <PutBack
@@ -255,6 +256,9 @@ export function Panel({
           })}
         </ol>
       </div>
+
+      {/* What to do next, straight under the picture it builds (2026-11-04). */}
+      {children}
 
       <Legend view={view} />
       <Foundation inventory={inventory} />
