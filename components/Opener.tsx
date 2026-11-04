@@ -1,6 +1,6 @@
 'use client'
 
-import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { StatusBar } from '@/components/Native'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -97,17 +97,26 @@ export function Opener() {
 
   const [at, setAt] = useState(0)
   const [playing, setPlaying] = useState(true)
+  const [still, setStill] = useState(false)
   const n = slides.length
-  const slide = slides[at % Math.max(1, n)]
+  const i = n ? at % n : 0
+  const slide = slides[i]
   const go = useCallback((d: number) => setAt((x) => (x + d + n) % n), [n])
 
-  /* Turning on its own, slowly enough to say the line twice; a hand on it stops it. */
   useEffect(() => {
-    if (!playing || n < 2) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const t = window.setInterval(() => setAt((x) => (x + 1) % n), ROTATE_MS)
-    return () => window.clearInterval(t)
-  }, [playing, n])
+    setStill(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  }, [])
+
+  /*
+    Turning on its own, slowly enough to say the line twice. A timeout per slide rather than
+    an interval, so a tap forward starts the next line's clock from zero instead of cutting
+    it short — the progress bar at the top is drawn from the same number.
+  */
+  useEffect(() => {
+    if (!playing || still || n < 2) return
+    const t = window.setTimeout(() => setAt((x) => (x + 1) % n), ROTATE_MS)
+    return () => window.clearTimeout(t)
+  }, [playing, still, n, at])
 
   /*
     THE SCREEN STAYS ON while this is open — it is read at arm's length, and a phone that
@@ -115,9 +124,8 @@ export function Opener() {
     to. The Wake Lock API, where the browser has it (iOS 16.4+); re-asked when the page
     comes back, because the lock is dropped whenever it is hidden.
   */
-  const [awake, setAwake] = useState(false)
   useEffect(() => {
-    type Lock = { release: () => Promise<void>; addEventListener: (t: 'release', f: () => void) => void }
+    type Lock = { release: () => Promise<void> }
     const wl = (navigator as unknown as { wakeLock?: { request: (t: 'screen') => Promise<Lock> } }).wakeLock
     if (!wl) return
     let lock: Lock | null = null
@@ -125,10 +133,8 @@ export function Opener() {
       if (document.visibilityState !== 'visible') return
       try {
         lock = await wl.request('screen')
-        setAwake(true)
-        lock.addEventListener('release', () => setAwake(false))
       } catch {
-        setAwake(false)
+        /* Low battery mode, or a browser that says no. The card still works. */
       }
     }
     void ask()
@@ -139,8 +145,8 @@ export function Opener() {
     }
   }, [])
 
-  /* Swipe, as well as the arrows. */
-  const touch = useRef<number | null>(null)
+  /* Swipe, as well as the taps. */
+  const touch = useRef<{ x: number; y: number } | null>(null)
 
   const ask = () => {
     track('opener_ask')
@@ -148,82 +154,113 @@ export function Opener() {
     else router.push('/ask')
   }
 
+  /*
+    THE SCREENSAVER (Sam, 2026-11-04): "I am talking your screensaver — there you see the
+    language you need and the translator button."
+
+    So the whole glass is the card. Dark to every edge, no bottom bar, no header: one line
+    in Portuguese at display size, fading into the next, the English under it, and the
+    translator at the foot for the sentence that isn't here. Story-style bars across the
+    top say how many lines there are and how long until the next one.
+
+    Tap the right of the screen for the next line, the left for the one before; tap the
+    middle to hold it still. Swipe works too. Nothing on it needs reading twice.
+  */
   return (
-    <>
-    <div data-stage="LISBON" className="safe-top flex min-h-svh flex-col bg-bg text-fg">
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 pb-8 pt-4">
-        <div className="flex items-center justify-between">
+    <div
+      data-stage="LISBON"
+      data-testid="opener-saver"
+      className="on-dark saver safe-top relative flex h-dvh flex-col overflow-hidden text-white"
+    >
+      <StatusBar color="#241f1a" />
+      <div aria-hidden className={'saver-glow' + (still ? '' : ' is-moving')} />
+
+      <div className="relative z-10 mx-auto flex w-full max-w-md flex-1 flex-col px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-3">
+        {/* The bars: one per line, the current one filling. */}
+        <div className="flex gap-1" aria-hidden data-testid="opener-bars">
+          {slides.map((_, k) => (
+            <span key={k} className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/20">
+              {k < i ? <span className="block h-full w-full bg-white/90" /> : null}
+              {k === i ? (
+                <span
+                  key={at}
+                  className="saver-fill block h-full bg-white/90"
+                  style={{
+                    animationDuration: ROTATE_MS + 'ms',
+                    animationPlayState: playing && !still ? 'running' : 'paused',
+                    width: still ? '100%' : undefined,
+                  }}
+                />
+              ) : null}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-3 flex items-center justify-between">
+          <p className="eyebrow text-white/60">My opening line</p>
           <Link
             href="/club"
             data-testid="back"
-            className="tap-target eyebrow -ml-1 flex shrink-0 items-center gap-1 px-1 text-accent"
+            aria-label={'Close, back to ' + PATH_NAMES[pathPurpose(purpose)].short}
+            className="tap-target -mr-2 flex h-11 w-11 items-center justify-center text-2xl leading-none text-white/80"
           >
-            <span aria-hidden>←</span>
-            {PATH_NAMES[pathPurpose(purpose)].short.toUpperCase()}
+            ×
           </Link>
-          <p className="eyebrow text-muted">My opening line</p>
         </div>
 
         {/*
-          The card. `needs-learner` because it is read from the device: the server has no
+          The line. `needs-learner` because it is read from the device: the server has no
           path, and a wrong room flashing in for a frame is worse than a blank one.
         */}
         <section
           aria-roledescription="carousel"
           aria-label="Lines to say"
-          className="needs-learner flex flex-1 flex-col justify-center gap-5"
+          className="needs-learner relative flex flex-1 flex-col justify-center"
           data-testid="opener-line"
           onTouchStart={(e) => {
-            touch.current = e.touches[0]?.clientX ?? null
+            const t = e.touches[0]
+            touch.current = t ? { x: t.clientX, y: t.clientY } : null
           }}
           onTouchEnd={(e) => {
-            const x0 = touch.current
-            const x1 = e.changedTouches[0]?.clientX
+            const a = touch.current
+            const b = e.changedTouches[0]
             touch.current = null
-            if (x0 == null || x1 == null || Math.abs(x1 - x0) < 40) return
-            setPlaying(false)
-            go(x1 < x0 ? 1 : -1)
+            if (!a || !b) return
+            const dx = b.clientX - a.x
+            if (Math.abs(dx) >= 40 && Math.abs(dx) > Math.abs(b.clientY - a.y)) {
+              e.preventDefault()
+              go(dx < 0 ? 1 : -1)
+            }
+          }}
+          onClick={(e) => {
+            if ((e.target as HTMLElement).closest('a,button')) return
+            const r = e.currentTarget.getBoundingClientRect()
+            const x = (e.clientX - r.left) / r.width
+            if (x < 0.3) go(-1)
+            else if (x > 0.7) go(1)
+            else setPlaying((p) => !p)
           }}
         >
           {slide ? (
-            <div key={at} className="animate-rise flex flex-col gap-4" aria-live={playing ? 'off' : 'polite'} data-testid="opener-slide">
-              <p className="eyebrow text-muted">{slide.label}</p>
-              <SpokenLine pt={slide.pt} en={slide.en} size="xl">
+            <div key={at} className="saver-in flex flex-col gap-5" aria-live={playing ? 'off' : 'polite'} data-testid="opener-slide">
+              <p className="eyebrow text-white/55">{slide.label}</p>
+              <p className="pt text-balance text-[clamp(2.4rem,11vw,3.6rem)] font-semibold leading-[1.05]" lang="pt-PT">
+                {slide.pt}
+              </p>
+              <p className="text-xl leading-snug text-white/70">{slide.en}</p>
+              <div className="saver-audio flex items-center gap-5">
+                <AudioButton slug={slugFor(slide.pt)} text={slide.pt} size="md" />
                 {slide.room ? (
-                  <Link href={'/errand/' + slide.room} className="eyebrow text-accent underline-offset-4 hover:underline">
+                  <Link href={'/errand/' + slide.room} className="eyebrow text-white/60 underline-offset-4 hover:underline">
                     The whole room
                   </Link>
                 ) : null}
-              </SpokenLine>
+              </div>
             </div>
           ) : null}
 
-          {n > 1 ? (
-            <div className="mt-4 flex items-center gap-3">
-              <button type="button" aria-label="Previous line" onClick={() => { setPlaying(false); go(-1) }} className="tap-target h-11 w-11 rounded-full border border-line text-lg">
-                ←
-              </button>
-              <div className="flex flex-1 justify-center gap-1.5" aria-hidden>
-                {slides.map((_, i) => (
-                  <span key={i} className={'h-1.5 rounded-full transition-all ' + (i === at % n ? 'w-6 bg-accent' : 'w-1.5 bg-line-strong')} />
-                ))}
-              </div>
-              <button
-                type="button"
-                data-testid="opener-play"
-                aria-label={playing ? 'Pause' : 'Play'}
-                onClick={() => setPlaying((p) => !p)}
-                className="tap-target eyebrow h-11 rounded-full border border-line px-4 text-[0.65rem]"
-              >
-                {playing ? 'Pause' : 'Play'}
-              </button>
-              <button type="button" aria-label="Next line" onClick={() => { setPlaying(false); go(1) }} className="tap-target h-11 w-11 rounded-full border border-line text-lg">
-                →
-              </button>
-            </div>
-          ) : null}
-          <p className="text-xs text-muted" data-testid="opener-awake">
-            {awake ? 'The screen stays on while this is open.' : 'Swipe for the next line.'}
+          <p className="eyebrow mt-10 text-center text-[0.6rem] text-white/40" data-testid="opener-play" aria-live="polite">
+            {still ? 'Swipe for the next line' : playing ? 'Tap the middle to hold this line' : 'Held · tap the middle to carry on'}
           </p>
         </section>
 
@@ -232,18 +269,15 @@ export function Opener() {
           type="button"
           data-testid="opener-ask"
           onClick={ask}
-          className="tap-target flex items-center justify-center gap-3 rounded-2xl bg-accent px-5 py-4 text-accent-ink"
+          className="tap-target flex w-full items-center justify-center gap-3 rounded-2xl bg-white px-5 py-4 text-[#241f1a] shadow-lg"
         >
           <span aria-hidden className="text-xl leading-none">?</span>
-          <span className="eyebrow">Something else? Ask DUB</span>
+          <span className="eyebrow">Need another line? Ask DUB</span>
         </button>
 
         <HomeScreenHint />
       </div>
-      <BottomNavSpace />
     </div>
-    <BottomNav />
-    </>
   )
 }
 
@@ -265,12 +299,12 @@ function HomeScreenHint() {
   }, [])
   if (!show) return null
   return (
-    <details className="rounded-2xl border border-line bg-bg-elev px-4 py-3 text-sm" data-testid="opener-homescreen">
-      <summary className="eyebrow cursor-pointer text-muted">Put this on your home screen</summary>
-      <ol className="mt-2 list-decimal space-y-1 pl-5 text-muted">
+    <details className="mt-3 text-center text-sm" data-testid="opener-homescreen">
+      <summary className="eyebrow cursor-pointer list-none text-[0.6rem] text-white/45">Keep this on your home screen</summary>
+      <ol className="mt-2 list-decimal space-y-1 pl-5 text-left text-white/70">
         <li>In Safari, on this page, tap Share.</li>
         <li>Choose Add to Home Screen, then Add.</li>
-        <li>A “My line” icon opens straight onto this card.</li>
+        <li>A “My line” icon opens straight onto this screen.</li>
       </ol>
     </details>
   )
