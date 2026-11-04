@@ -2,6 +2,8 @@
 
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import { GemPicture, PhotoCredit, useGemPhoto } from '@/components/city/GemPhoto'
+import type { Gem } from '@/content/gems'
 import { useEffect, useMemo, useState } from 'react'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { BAIRROS, KIND_LABEL, distanceM, visibleGems, type BairroId } from '@/content/gems'
@@ -191,15 +193,15 @@ export function City() {
                           data-testid="gem-row"
                           className="tap-target flex w-full items-start gap-3 rounded-2xl border border-line bg-bg-elev px-4 py-3 text-left transition hover:border-accent/50"
                         >
-                          <span className="min-w-0 flex-1">
-                            <span className="eyebrow block text-[0.6rem] text-telha">
-                              {KIND_LABEL[g.kind]}
-                              {where.at ? ' · ' + Math.round(distanceM(where.at, [g.lat, g.lng]) / 70) + ' min' : ''}
-                              {g.verified ? '' : ' · draft'}
-                            </span>
-                            <span className="display block text-lg leading-tight">{g.name}</span>
-                            <span className="lang mt-1 block text-sm text-accent" lang="pt-PT">“{said(g.line, gender).pt}”</span>
-                          </span>
+                          <GemRowBody
+                            gem={g}
+                            eyebrow={
+                              KIND_LABEL[g.kind] +
+                              (where.at ? ' · ' + Math.round(distanceM(where.at, [g.lat, g.lng]) / 70) + ' min' : '') +
+                              (g.verified ? '' : ' · draft')
+                            }
+                            line={said(g.line, gender).pt}
+                          />
                           <span aria-hidden className="mt-2 text-muted">›</span>
                         </button>
                       </li>
@@ -243,5 +245,24 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
     >
       {children}
     </button>
+  )
+}
+
+/**
+ * One venue in the list: its picture on the left (2026-11-04, Sam: "are we able to pull
+ * through a small picture of the venues?"), then the kind, the name and the line.
+ */
+function GemRowBody({ gem, eyebrow, line }: { gem: Gem; eyebrow: string; line: string }) {
+  const { ref, photo } = useGemPhoto(gem.id)
+  return (
+    <span ref={ref} className="flex min-w-0 flex-1 items-start gap-3">
+      <GemPicture kind={gem.kind} photo={photo} className="mt-0.5 h-16 w-16 rounded-xl" />
+      <span className="min-w-0 flex-1">
+        <span className="eyebrow block text-[0.6rem] text-telha">{eyebrow}</span>
+        <span className="display block text-lg leading-tight">{gem.name}</span>
+        <span className="lang mt-1 block text-sm text-accent" lang="pt-PT">“{line}”</span>
+        <PhotoCredit photo={photo} link={false} className="mt-1" />
+      </span>
+    </span>
   )
 }
