@@ -99,20 +99,27 @@ function useKeyboard() {
       area really ends — and let the fixed furniture (the bar, the dock) translate down by it,
       so it sits on the glass whatever the browser believes. And when a field loses focus,
       nudge the scroll once the keyboard has gone, which is what makes iOS let go of the
-      offset. Only a positive drift counts, and never while zoomed: pinch-zoom moves the
+      offset. Never while zoomed: pinch-zoom moves the
       visual viewport on purpose.
     */
     const drift = () => {
       const d = vv.offsetTop + vv.height - window.innerHeight
       const zoomed = Math.abs(vv.scale - 1) > 0.01
-      root.style.setProperty('--vv-drift', (d > 1 && !zoomed && !root.hasAttribute('data-keyboard') ? Math.round(d) : 0) + 'px')
+      /*
+        Upward too, but only in the installed app. In Safari a shorter visual viewport is the
+        URL bar, which is real; standalone has no browser chrome, so any gap is the bug —
+        Sam's next screenshot had the bar pushed off the bottom of the glass entirely.
+      */
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true
+      const ok = !zoomed && !root.hasAttribute('data-keyboard') && (d > 1 || (standalone && d < -1))
+      root.style.setProperty('--vv-drift', (ok ? Math.round(d) : 0) + 'px')
     }
     let nudge = 0
     const onBlur = () => {
       window.clearTimeout(nudge)
       nudge = window.setTimeout(() => {
         if (document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return
-        if (vv.offsetTop + vv.height - window.innerHeight > 1) {
+        if (Math.abs(vv.offsetTop + vv.height - window.innerHeight) > 1) {
           window.scrollBy(0, 1)
           window.scrollBy(0, -1)
         }
