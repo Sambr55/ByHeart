@@ -2596,3 +2596,8 @@ details > summary.list-none::-webkit-details-marker {
 @media (prefers-reduced-motion: reduce) {
   .translator-flying { animation: none }
 }
+
+/* While the keyboard is up, the translator's headline steps aside so the pass and the button fit above it. */
+[data-keyboard='on'] .translator-title {
+  display: none;
+}

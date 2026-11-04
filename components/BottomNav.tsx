@@ -119,8 +119,10 @@ const TABS = [
     d: 'M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
   },
   {
+    /* TRANSLATE, NOT ASK (Sam, 2026-11-04) — named for what it does. The test id stays tab-ask. */
     href: null,
-    label: 'Ask',
+    label: 'Translate',
+    testid: 'tab-ask',
     d: 'M9.1 9a3 3 0 1 1 4 2.8c-.8.3-1.1 1-1.1 1.7v.5M12 17.5h.01',
   },
   { href: '/profile', label: 'Yours', d: 'M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0' },
