@@ -24,6 +24,8 @@ import {
 import { setPair } from '@/engine/pair'
 import { applyBookingFromUrl } from '@/engine/booking'
 import { useLearner } from '@/engine/useLearner'
+import { MorningLineStep, canOfferPush } from '@/components/PushChoices'
+import { pathLine } from '@/lib/push-plan'
 import { DEFAULT_PAIR } from '@/content/pairs'
 
 /**
@@ -88,7 +90,7 @@ import { DEFAULT_PAIR } from '@/content/pairs'
   on the set-up card's face in the feed, so the why step here is only met by somebody who
   reached set-up another way (the journey at /vibes).
 */
-type Step = 'why' | 'who'
+type Step = 'why' | 'who' | 'line'
 
 export function SetUp({ onDone }: { onDone?: () => void } = {}) {
   const router = useRouter()
@@ -271,6 +273,17 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
     /* And that this form has been answered, which is what ends the showcase. */
     rememberSetUp()
     setDone(true)
+  }
+
+  /*
+    INTO THE PRODUCT: the record written, the server told, and through the door. Shared by
+    the boarding button and, when it is offered, the morning-line step after it.
+  */
+  const board = () => {
+    finish()
+    void syncSession('set_up')
+    if (onDone) onDone()
+    else router.push('/club')
   }
 
   /*
@@ -788,6 +801,15 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
                 setNudge(true)
                 return
               }
+              /*
+                THE MORNING LINE FIRST, where this phone can have it (Sam, 2026-11-04): one
+                more screen on the pass, then board. See MorningLineStep.
+              */
+              if (canOfferPush()) {
+                setStep('line')
+                window.scrollTo(0, 0)
+                return
+              }
               finish()
               /*
                 STRAIGHT INTO THE PRODUCT, with no confirmation screen in between.
@@ -844,6 +866,7 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
         </div>
       ) : null}
 
+      {shown === 'line' ? <MorningLineStep line={pathLine(learner, [], true)} onDone={board} /> : null}
     </div>
   )
 }

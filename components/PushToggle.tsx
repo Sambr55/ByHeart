@@ -55,6 +55,10 @@ export function PushToggle({
   from = 'line',
   /** Told when the phone is subscribed, so a caller can show the choices that go with it. */
   onChange,
+  /** The button's look, where a caller needs it to be the main action rather than a quiet one. */
+  buttonClass = 'tap-target w-full rounded-full border border-line px-5 py-3 text-xs tracking-widest text-muted',
+  /** The look of the "it is on" line, for callers on a dark ground. */
+  onClass = 'text-center text-xs text-muted',
 }: {
   ready: boolean
   cta?: string
@@ -62,6 +66,8 @@ export function PushToggle({
   install?: string
   from?: string
   onChange?: (on: boolean) => void
+  buttonClass?: string
+  onClass?: string
 }) {
   const [state, setState] = useState<'unknown' | 'off' | 'on' | 'denied' | 'busy' | 'install'>(
     'unknown',
@@ -166,7 +172,7 @@ export function PushToggle({
   if (!ready || state === 'denied' || state === 'unknown') return null
 
   if (state === 'on') {
-    return <p className="text-center text-xs text-muted">{on}</p>
+    return <p className={onClass} data-testid="push-on">{on}</p>
   }
 
   return (
@@ -175,7 +181,7 @@ export function PushToggle({
       data-testid="push-toggle"
       onClick={enable}
       disabled={state === 'busy'}
-      className="tap-target w-full rounded-full border border-line px-5 py-3 text-xs tracking-widest text-muted"
+      className={buttonClass}
     >
       {state === 'busy' ? 'ONE MOMENT…' : cta}
     </button>

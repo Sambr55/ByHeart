@@ -27,6 +27,7 @@ import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
 import { Foundations } from './Foundations'
 import { FunShelf } from './FunShelf'
+import { PushAsk } from '@/components/PushChoices'
 
 
 /**
@@ -136,6 +137,8 @@ export function PathHome() {
         </div>
       )}
       <Understood count={understood} />
+      {/* The morning line, offered where the path is — until this phone has it (Sam, 2026-11-04: "make this more prominent"). */}
+      <PushAsk room="path" />
     </section>
   )
 
