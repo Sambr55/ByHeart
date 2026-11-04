@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { track } from '@/engine/analytics'
 import type { Gem } from '@/content/gems'
 
@@ -22,6 +22,11 @@ const EMBED_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_KEY
 export function GemDirections({ gem }: { gem: Gem }) {
   const [src, setSrc] = useState<string | null>(null)
   const [finding, setFinding] = useState(false)
+  const mapRef = useRef<HTMLDivElement>(null)
+  /* Brought into view when it opens: at this height it would otherwise start below the fold. */
+  useEffect(() => {
+    if (src) mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [src])
   const where = encodeURIComponent(gem.name + ', ' + gem.address + ', Lisboa')
   const outside = 'https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=' + gem.lat + ',' + gem.lng
 
@@ -73,14 +78,15 @@ export function GemDirections({ gem }: { gem: Gem }) {
         {finding ? 'Finding you…' : src ? 'Hide the map' : 'Directions'}
       </button>
       {src ? (
-        <div className="animate-bank flex flex-col gap-2" data-testid="gem-map">
+        /* Most of the screen, so the walk reads at a glance (Sam: "make the map real estate taller"). */
+        <div ref={mapRef} className="animate-bank flex flex-col gap-2" data-testid="gem-map">
           <iframe
             title={'Walking to ' + gem.name}
             src={src}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen
-            className="aspect-[4/3] w-full rounded-2xl border border-line"
+            className="h-[62svh] min-h-[22rem] w-full rounded-2xl border border-line"
           />
           <a
             href={outside}
