@@ -196,16 +196,14 @@ export function Inbox({ pushReady }: { pushReady: boolean }) {
           <div className="rounded-2xl border border-line bg-bg-elev px-5 py-6">
             <span className="eyebrow text-accent">ON YOUR PHONE</span>
             <p className="mt-3 text-sm leading-relaxed">
-              These are here whether or not you turn anything on. If you would rather hear
-              about a drop when it opens, DUB can tell you — the same switch as the morning
-              line, because a phone only has the one.
+              These are here whether or not you turn anything on. If you would rather
+              something came to you, DUB can put your next line on your lock screen each
+              morning. How often, and what else, is yours to choose in Settings.
             </p>
             <div className="mt-6">
               <PushToggle
                 ready={pushReady}
-                cta="TELL ME WHEN ONE OPENS"
-                on="A line every morning, and a word when a drop opens. Nothing else."
-                install="A word when a drop opens, on your lock screen."
+                cta="SEND ME MY NEXT LINE AT 8AM"
                 from="inbox"
               />
             </div>

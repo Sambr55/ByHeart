@@ -133,3 +133,37 @@ export async function reachable(): Promise<number> {
     return 0
   }
 }
+
+/**
+ * Something for particular phones — a table's host, its guests — rather than everybody.
+ *
+ * Only to subscriptions that have this topic on (push_subscriptions.topics), and never
+ * the same push id twice to one phone. `build` gets the subscriber's time zone, so a
+ * time in the message reads as theirs.
+ */
+export async function notifyDevices(
+  devices: string[],
+  topic: 'week' | 'table',
+  build: (tz: string) => { id: string; title: string; body: string; url: string; tag: string },
+): Promise<number> {
+  const sql = db()
+  if (!sql || !pushConfigured() || !devices.length) return 0
+  const rows = await sql<{ endpoint: string; p256dh: string; auth: string; time_zone: string; sent: string[] }[]>`
+    select endpoint, p256dh, auth, time_zone, sent
+      from push_subscriptions
+     where expired_at is null and device_id = any(${devices}) and ${topic} = any(topics)
+  `
+  let n = 0
+  for (const row of rows) {
+    const push = build(row.time_zone)
+    if (row.sent?.includes(push.id)) continue
+    const result = await sendPush(row, { title: push.title, body: push.body, url: push.url, tag: push.tag })
+    if (result === 'sent') {
+      n++
+      await sql`update push_subscriptions set sent = array_append(sent, ${push.id}) where endpoint = ${row.endpoint}`.catch(() => {})
+    } else if (result === 'expired') {
+      await sql`update push_subscriptions set expired_at = now() where endpoint = ${row.endpoint}`.catch(() => {})
+    }
+  }
+  return n
+}

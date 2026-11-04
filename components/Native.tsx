@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
+import { track } from '@/engine/analytics'
 
 /**
  * The handful of things a browser does not do for you and an app is expected to.
@@ -19,6 +20,7 @@ export function Native() {
   useReady()
   useScrollMemory()
   useStatusBarDefault()
+  usePushOpened()
   return null
 }
 
@@ -163,6 +165,24 @@ function useKeyboard() {
       document.documentElement.style.removeProperty('--keyboard')
     }
   }, [])
+}
+
+/**
+ * Arrived from a notification.
+ *
+ * Every push URL carries ?n=<kind> (lib/push-plan.ts). Counted once, then taken off the
+ * address, so a reload or a shared link does not count it again.
+ */
+function usePushOpened() {
+  const path = usePathname()
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    const kind = url.searchParams.get('n')
+    if (!kind) return
+    track('push_opened', { kind, path })
+    url.searchParams.delete('n')
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
+  }, [path])
 }
 
 /**

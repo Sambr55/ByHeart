@@ -43,22 +43,25 @@ export function PushToggle({
     screen it came from. A caller that wants different copy passes it; a caller that
     forgets gets the morning line's promise, which is the one the product has made longest.
   */
-  cta = 'SEND ME ONE EVERY MORNING',
-  on = 'One line every morning. Nothing else, ever.',
+  cta = 'SEND ME MY NEXT LINE AT 8AM',
+  on = 'Your next line at 8 every morning. How often is up to you, in Settings.',
   /*
     The iOS Home Screen explanation, which is about the PLATFORM rather than about the
     feature — so it has a default that is true wherever it is shown, and the headline is
     the only part a caller needs to replace.
   */
-  install = 'One line every morning, on your lock screen.',
+  install = 'Your next line on your lock screen, every morning.',
   /** For the analytics event, so the two opt-ins can be told apart. */
   from = 'line',
+  /** Told when the phone is subscribed, so a caller can show the choices that go with it. */
+  onChange,
 }: {
   ready: boolean
   cta?: string
   on?: string
   install?: string
   from?: string
+  onChange?: (on: boolean) => void
 }) {
   const [state, setState] = useState<'unknown' | 'off' | 'on' | 'denied' | 'busy' | 'install'>(
     'unknown',
@@ -93,10 +96,22 @@ export function PushToggle({
       return
     }
     if (Notification.permission === 'denied') return setState('denied')
-    navigator.serviceWorker?.ready
-      .then((reg) => reg.pushManager.getSubscription())
-      .then((sub) => setState(sub ? 'on' : 'off'))
+    /*
+      getRegistration, not `ready` (2026-11-04). The worker is only registered by enable()
+      below, so on a phone that has never switched this on `ready` never resolves — the
+      state sat at 'unknown' and the button was never drawn. The opt-in was invisible to
+      exactly the people it was for.
+    */
+    if (!navigator.serviceWorker) return setState('denied')
+    navigator.serviceWorker
+      .getRegistration()
+      .then((reg) => reg?.pushManager.getSubscription() ?? null)
+      .then((sub) => {
+        setState(sub ? 'on' : 'off')
+        onChange?.(Boolean(sub))
+      })
       .catch(() => setState('off'))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready])
 
   const enable = async () => {
@@ -123,6 +138,7 @@ export function PushToggle({
         }),
       })
       setState(res.ok ? 'on' : 'off')
+      onChange?.(res.ok)
       /* Same event name as before, with where it was tapped — so the existing series is
          unbroken and the inbox's share of it is still answerable. */
       if (res.ok) track('line_subscribed', { from })

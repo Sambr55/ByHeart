@@ -1,6 +1,7 @@
 'use client'
 
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { PushAsk } from '@/components/PushChoices'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
@@ -540,6 +541,9 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
               the LAST room, so nothing follows it but this.
             */}
             {isInvite && drop ? <SendInvite situation={situation} drop={drop} /> : null}
+            {/* Just said it out loud, with the next room waiting: the moment to offer the
+                next line on the lock screen (components/PushChoices.tsx). */}
+            {nextRoom ? <PushAsk room={situation.id} /> : null}
             <button
               type="button"
               data-testid="errand-done"
