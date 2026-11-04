@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { AudioButton } from '@/components/AudioButton'
 import { slugFor } from '@/content/audio-manifest'
 import { KIND_LABEL, bairroById, walkMinutes, type Gem } from '@/content/gems'
+import { GemPicture, PhotoCredit, useGemPhoto } from '@/components/city/GemPhoto'
 import { situationById } from '@/content/situations'
 import { knowHowForRoom } from '@/content/knowhow'
 import { KnowHowCard } from './KnowHowCard'
@@ -22,8 +23,18 @@ export function GemCard({ gem, metres, onClose }: { gem: Gem; metres?: number; o
   const bairro = bairroById(gem.bairro)
   /* The piece of know-how this kind of place brings to mind — the couvert at a tasca, the counter at a café. */
   const tip = knowHowForRoom(gem.room)
+  const pic = useGemPhoto(gem.id, 800)
   return (
-    <article data-testid="gem-card" className="flex flex-col gap-4 rounded-3xl border border-line bg-bg-elev p-5 shadow-[0_14px_30px_-18px_rgba(26,36,48,0.45)]">
+    <article
+      ref={pic.ref}
+      data-testid="gem-card"
+      className="flex flex-col gap-4 overflow-hidden rounded-3xl border border-line bg-bg-elev p-5 shadow-[0_14px_30px_-18px_rgba(26,36,48,0.45)]"
+    >
+      {/* The venue, before its name: a wide picture across the top of the card. */}
+      <div className="-mx-5 -mt-5">
+        <GemPicture kind={gem.kind} photo={pic.photo} big className="h-40 w-full" />
+        <PhotoCredit photo={pic.photo} className="px-5 pt-1" />
+      </div>
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="eyebrow text-telha">
