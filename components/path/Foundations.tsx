@@ -44,7 +44,7 @@ export function Foundations({
     <details className="group rounded-2xl border border-line bg-bg-elev" data-testid="foundations">
       <summary className="tap-target flex cursor-pointer list-none items-center gap-3 px-4 py-3">
         <span id="shortcuts" className="eyebrow flex-1 text-fg">
-          Shortcuts
+          Hacks, Bluffs &amp; Cheats
         </span>
         <span className="text-sm tabular-nums text-muted">{shown.length} open</span>
         <span aria-hidden className="text-muted transition-transform group-open:rotate-180">⌄</span>
