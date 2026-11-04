@@ -244,12 +244,18 @@ function count(deck: Deck): string {
       The card is still the measure, because that is what the door counts; anything past it
       is a bonus and says so.
     */
-    const over = deck.cards.length - deck.total
+    /*
+      DONE, NOT DRAWN (2026-11-04). The deck walks the whole catalogue now — every frame,
+      answered or not — so cards.length is the size of the catalogue, and the Legend read
+      "7 OF 7 · +6" for somebody who had answered nothing. The count is what is done.
+    */
+    const have = deck.cards.filter((c) => c.done).length
+    const over = have - deck.total
     if (over > 0) return deck.total + ' of ' + deck.total + ' · +' + over
-    return deck.cards.length + ' of ' + deck.total
+    return have + ' of ' + deck.total
   }
   return (
-    deck.cards.length +
+    deck.cards.filter((c) => c.done).length +
     (deck.id === 'drops' ? ' saved' : deck.id === 'asked' ? ' kept' : ' started')
   )
 }
