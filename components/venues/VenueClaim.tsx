@@ -11,7 +11,8 @@ import { FIRST_REWARD, PAIR_REWARD, PAIR_WINDOW_H, REWARD_TIERS, SECOND_OFFERS, 
  * gives at 150 (Sam: "let venues choose"), and sets a 4-digit PIN its staff type to spend
  * a voucher. No app, no till, no account. The same link edits it later.
  *
- * DRAFT COPY: the agreement line below is a placeholder until Sam approves the venue terms.
+ * The agreement links the DUB venue terms (/venue/terms, content/venue-terms.ts), approved by
+ * Sam on 2026-11-05: free both ways — DUB makes no money from venues.
  */
 export function VenueClaim({ token }: { token: string }) {
   const [v, setV] = useState<{ name: string; address: string; claimed: boolean; card: string; draw: boolean } | null | 'gone'>(null)
@@ -82,7 +83,7 @@ export function VenueClaim({ token }: { token: string }) {
         </div>
         <p className="text-base leading-relaxed">
           People learning Portuguese with DUB come here to say their first sentences to a real person. When enough of them have, you reward them.
-          You choose what, and you can pause at any time.
+          You choose what, and you can pause at any time. It costs you nothing: DUB takes no fee and no commission.
         </p>
 
         <label className="flex items-start gap-3">
@@ -136,7 +137,13 @@ export function VenueClaim({ token }: { token: string }) {
 
         <label className="flex items-start gap-3 text-sm">
           <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 h-5 w-5 accent-[#1f5d8c]" />
-          <span>I can agree this for {v.name}, and I’ve read the DUB venue terms.</span>
+          <span>
+            I can agree this for {v.name}, and I’ve read the{' '}
+            <a href="/venue/terms" target="_blank" rel="noopener" className="font-semibold text-accent underline underline-offset-2" data-testid="claim-terms">
+              DUB venue terms
+            </a>
+            . Free both ways: you pay DUB nothing.
+          </span>
         </label>
 
         <button type="button" disabled={!ok} onClick={save} className="tap-target eyebrow rounded-full bg-accent px-6 py-3 text-accent-ink disabled:opacity-40" data-testid="claim-save">
