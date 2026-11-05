@@ -30,7 +30,8 @@
  * do that.
  */
 import type { CalendarRow } from '@/content/calendar'
-import { POSTCARDS, type CornerId, type PostcardRef } from '@/content/board'
+import { POSTCARDS, WALK_ORDER, type CornerId, type PostcardRef } from '@/content/board'
+import type { Walk } from '@/content/walks'
 import type { Gem } from '@/content/gems'
 import type { Purpose } from '@/content/situations'
 import type { PathNode, PathView } from './progress'
@@ -58,6 +59,8 @@ export interface Lap {
   token: number
   /** Every open room of the level laid: Partida is now the finish. */
   complete: boolean
+  /** The language walk this board's venues come from, if any. */
+  walk: { id: string; title: string } | null
   /** Rooms of this level laid, and open (not paid-locked). */
   done: number
   open: number
@@ -95,6 +98,8 @@ export function lapOf(
     gems: Gem[]
     /** What is on, already filtered to live rows (content/calendar.ts rowsFor). */
     rows: CalendarRow[]
+    /** The language walks (content/walks.ts). The board's walk supplies its venues first. */
+    walks?: Walk[]
     voice?: boolean
   },
 ): Lap {
@@ -117,14 +122,31 @@ export function lapOf(
   const trained = opts.gems.filter((g) => rooms.has(g.room))
   const rest = opts.gems.filter((g) => !rooms.has(g.room))
   const k = index % Math.max(1, rest.length)
-  const venues = [...trained, ...rest.slice(k), ...rest.slice(0, k)]
+  /*
+    THE BOARD'S WALK FIRST (2026-11-05): its stops in walking order, then the places these
+    rooms train for, then the rotation. Only gems that are visible (in opts.gems) count.
+  */
+  const order = WALK_ORDER[purpose]
+  const walk = (opts.walks ?? []).find((x) => x.id === order[index % Math.max(1, order.length)]) ?? null
+  const byId = new Map(opts.gems.map((g) => [g.id, g]))
+  const walked = (walk?.stops ?? []).flatMap((st) => (byId.has(st.gem) ? [byId.get(st.gem)!] : []))
+  const venues = [...walked, ...trained, ...rest.slice(k), ...rest.slice(0, k)]
   const rows = opts.rows.filter((r) => r.purposes.includes(purpose))
   let pc = index * 3
   let vn = 0
   let nb = index
   const usedGems = new Set<string>()
   const stop = (j: number): Body => {
-    const want = STOPS[j % 3]
+    /* While the walk still has places, every other stop is one of them, in walking order. */
+    const want = !walked.length
+      ? STOPS[j % 3]
+      : j % 2 === 0
+        ? j / 2 < walked.length
+          ? 'venue'
+          : 'postcard'
+        : j % 4 === 1
+          ? 'postcard'
+          : 'neighbour'
     if (want === 'venue') {
       while (vn < venues.length && usedGems.has(venues[vn].id)) vn++
       const gem = venues[vn]
@@ -180,5 +202,5 @@ export function lapOf(
   for (const s of squares) s.reached = complete || s.at <= token
   if (complete) token = 0
 
-  return { index, unitId: u.unit.id, w, h, squares, token, complete, done: laid, open }
+  return { index, unitId: u.unit.id, w, h, squares, token, complete, walk: walk ? { id: walk.id, title: walk.title } : null, done: laid, open }
 }

@@ -7,6 +7,8 @@ import { useLearner } from '@/engine/useLearner'
 import { TABLE_KINDS } from '@/content/table-night'
 import { visibleWalks } from '@/content/walks'
 import type { Gem } from '@/content/gems'
+import { CheckIn } from './CheckIn'
+import { useVenues } from './useVenues'
 
 /**
  * At the place: "I said it here", and "host a table here" where it is a place to sit.
@@ -18,10 +20,14 @@ export function GemHere({ gem }: { gem: Gem }) {
   const viaWalk = visibleWalks().some((w) => w.stops.some((s) => s.g.id === gem.id && keys.includes(s.key)))
   const said = viaWalk || keys.includes('gem:' + gem.id)
   const sit = (TABLE_KINDS as readonly string[]).includes(gem.kind)
+  /* Signed in, the counted check-in is the one button; signed out, the old tap stays too. */
+  const { signedIn } = useVenues()
 
   return (
     <div className="flex flex-col gap-2 border-t border-line pt-4" data-testid="gem-here">
-      {said ? (
+      {/* Rewards on the ground (2026-11-05): the counted check-in, for an account. The tap below stays for everyone. */}
+      <CheckIn gem={gem.id} />
+      {signedIn ? null : said ? (
         <p className="flex items-center gap-2 text-sm text-correct" data-testid="gem-said">
           <span aria-hidden>✓</span> You’ve said it here. It’s on Yours, under Your Lisbon.
         </p>

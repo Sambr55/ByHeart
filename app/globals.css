@@ -2645,3 +2645,15 @@ details > summary.list-none::-webkit-details-marker {
 }
 @keyframes board-token { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-2px) } }
 @media (prefers-reduced-motion: reduce) { .board-token { animation: none } }
+.board-badge {
+  position: absolute; left: 3px; top: 3px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 9999px;
+  background: #14243a; color: #fbfaf6; font-size: 9px; font-weight: 800; line-height: 15px; text-align: center;
+}
+.board-badge.is-mine { background: #2e7d4f }
+/* A voucher at the counter: a band that never stops moving, so a screenshot is plainly one. */
+.voucher-live::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
+  animation: voucher-band 2.2s linear infinite;
+}
+@keyframes voucher-band { from { transform: translateX(-100%) } to { transform: translateX(100%) } }
