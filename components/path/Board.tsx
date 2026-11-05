@@ -7,7 +7,7 @@ import { SpokenLine } from '@/components/Opener'
 import { CORNERS, HOLIDAY_PRIZE, type CornerId } from '@/content/board'
 import { rowsFor } from '@/content/calendar'
 import { CHEATS } from '@/content/cheats'
-import { bairroById, gemRotation, visibleGems, KIND_LABEL } from '@/content/gems'
+import { bairroById, gemsHomeFirst, KIND_LABEL } from '@/content/gems'
 import { IDIOMS } from '@/content/idioms'
 import { WALKS } from '@/content/walks'
 import { panelArt } from '@/content/panel'
@@ -112,10 +112,10 @@ export function Board({
     })
   }, [])
 
-  const gems = useMemo(() => gemRotation(visibleGems()), [])
+  const gems = useMemo(() => gemsHomeFirst(chapter), [chapter])
   const rows = useMemo(() => rowsFor(chapter, now), [chapter, now])
   const lap = useMemo(
-    () => (view.units[index] ? lapOf(view, index, purpose, { gems, rows, voice, walks: WALKS }) : null),
+    () => (view.units[index] ? lapOf(view, index, purpose, { gems, rows, voice, walks: WALKS, chapter }) : null),
     [view, index, purpose, gems, rows, voice],
   )
   const [open, setOpen] = useState<Square | null>(null)
@@ -537,7 +537,7 @@ function StopSheet({
     title = '“' + idiom.literal + '”'
     body = (
       <>
-        <p className="text-base leading-relaxed text-muted">{idiom.wtf} It’s “{idiom.english}”. Lisbon says:</p>
+        <p className="text-base leading-relaxed text-muted">{idiom.wtf} It’s “{idiom.english}”. Portugal says:</p>
         <SpokenLine pt={idiom.equivalent} en={idiom.gloss} size="md" />
         <Link href={'/revise?kind=idiom&id=' + encodeURIComponent(idiom.id)} className={btn}>
           Play the card

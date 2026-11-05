@@ -1,4 +1,5 @@
 'use client'
+import type { ChapterId } from '@/content/chapters'
 
 /**
  * The learner, not the lesson.
@@ -776,7 +777,7 @@ export interface LearnerState {
    * Null means Lisbon, not "unknown" — there is exactly one open chapter, and a learner
    * who has not answered should get the club that exists rather than an empty screen.
    */
-  chapter: 'lisbon' | 'porto' | 'algarve' | null
+  chapter: ChapterId | null
   /**
    * Cards pushed to the back, oldest first.
    *
@@ -2593,7 +2594,7 @@ export function setPurpose(purpose: 'visiting' | 'staying' | 'moving') {
   })
 }
 
-export function setChapter(chapter: 'lisbon' | 'porto' | 'algarve') {
+export function setChapter(chapter: ChapterId) {
   update((s) => {
     s.chapter = chapter
   })

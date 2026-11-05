@@ -31,8 +31,8 @@
  *   London    Victorian encaustic floors and the Tube's own tiling (the Leslie Green
  *             ox-blood fronts, the platform friezes).
  *
- * Porto and the Algarve are Portuguese and azulejo too, so until somebody paints theirs they
- * borrow Lisbon's — see panelArt below. That is a stand-in, not a claim; give them their own
+ * Cascais and Sintra have their own (2026-11-05). Porto and the Algarve are Portuguese and
+ * azulejo too, so until somebody paints theirs they borrow Lisbon's — see panelArt below. That is a stand-in, not a claim; give them their own
  * when there is one.
  */
 import type { ChapterId } from './chapters'
@@ -59,6 +59,45 @@ export const PANEL_ART: Partial<Record<ChapterId, Record<Purpose, PanelArt>>> = 
     moving: {
       src: '/panel/moving.jpg',
       alt: 'A tiled townhouse, its front door open, a neighbour waving from the balcony',
+      title: 'Finish the move and the door is open.',
+    },
+  },
+  /*
+    CASCAIS AND SINTRA (2026-11-05): their own paintings, in the same blue-and-white panel as
+    Lisbon's — Portuguese towns, the same tradition, their own views. Generated to match the
+    Lisbon three; the briefs are in the PR that added them.
+  */
+  cascais: {
+    visiting: {
+      src: '/panel/cascais-trip.jpg',
+      alt: 'The fishermen’s beach in Cascais: boats pulled up on the sand, the white town round the bay, a lighthouse on the point',
+      title: 'Finish the trip and the bay is yours.',
+    },
+    staying: {
+      src: '/panel/cascais-season.jpg',
+      alt: 'The seafront path towards Estoril: a café terrace, people walking by the sea wall, a small cove below',
+      title: 'Finish the season and the seafront knows your name.',
+    },
+    moving: {
+      src: '/panel/cascais-moving.jpg',
+      alt: 'A tiled house in the old village, its door open, bougainvillea over the wall and the lane running down to the sea',
+      title: 'Finish the move and the door is open.',
+    },
+  },
+  sintra: {
+    visiting: {
+      src: '/panel/sintra-trip.jpg',
+      alt: 'Sintra’s old town in the green hills, a cobbled street and a café, the Moorish castle on the ridge in the mist',
+      title: 'Finish the trip and the hills are yours.',
+    },
+    staying: {
+      src: '/panel/sintra-season.jpg',
+      alt: 'The Sunday fair in São Pedro: stalls under the trees, fruit, bread and cheese, a fountain, the wooded hills behind',
+      title: 'Finish the season and the fair knows your name.',
+    },
+    moving: {
+      src: '/panel/sintra-moving.jpg',
+      alt: 'A stone house among the Colares vines, its door open, Azenhas do Mar white on the cliff above the Atlantic',
       title: 'Finish the move and the door is open.',
     },
   },

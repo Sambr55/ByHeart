@@ -1,5 +1,7 @@
 'use client'
 
+import { chapterById } from '@/content/chapters'
+import { chapterOfBairro } from '@/content/gems'
 import { useEffect, useRef, useState } from 'react'
 import { track } from '@/engine/analytics'
 import type { Gem } from '@/content/gems'
@@ -27,7 +29,7 @@ export function GemDirections({ gem }: { gem: Gem }) {
   useEffect(() => {
     if (src) mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [src])
-  const where = encodeURIComponent(gem.name + ', ' + gem.address + ', Lisboa')
+  const where = encodeURIComponent(gem.name + ', ' + gem.address + ', ' + chapterById(chapterOfBairro(gem.bairro)).pt)
   const outside = 'https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=' + gem.lat + ',' + gem.lng
 
   if (!EMBED_KEY) {
