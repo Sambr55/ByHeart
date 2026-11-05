@@ -201,16 +201,40 @@ export function Board({
             </li>
           ))}
           <li
-            aria-hidden
-            className="board-middle relative overflow-hidden rounded-md"
+            className="board-middle relative overflow-hidden rounded-md [container-type:inline-size]"
             style={{ gridColumn: `2 / ${lap.w}`, gridRow: `2 / ${lap.h}` }}
           >
             <span
+              aria-hidden
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${art.src})`, opacity: 0.18 + 0.82 * pct, filter: `saturate(${0.3 + 0.7 * pct})` }}
             />
-            <span className="absolute inset-0 bg-gradient-to-t from-[#14243a]/80 via-[#14243a]/25 to-transparent" />
-            <span className="absolute inset-x-2 bottom-2 flex flex-col text-white">
+            <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#14243a]/80 via-[#14243a]/25 to-transparent" />
+            {/*
+              TWO CARDS IN THE MIDDLE (Sam, 2026-11-05: "two small cards laid diagonally at the
+              centre of the board … Invite a friend and Start a Table"). The two things on the
+              Path that need another person, set down across the picture like cards waiting to
+              be drawn. In DUB's own glaze — cream, azulejo blue, gold — and named in
+              Portuguese first, because every ask teaches. Sized in container units, so they
+              are the same cards on a 2×2 middle and a 4×4 one.
+            */}
+            <BoardCard
+              href="/profile#people"
+              pt="Convida um amigo"
+              en="Invite a friend"
+              icon="friend"
+              testid="board-card-invite"
+              style={{ left: '7%', top: '9%', transform: 'rotate(-14deg)' }}
+            />
+            <BoardCard
+              href="/table/new"
+              pt="Junta uma mesa"
+              en="Start a table"
+              icon="table"
+              testid="board-card-table"
+              style={{ right: '7%', top: '30%', transform: 'rotate(10deg)' }}
+            />
+            <span className="pointer-events-none absolute inset-x-2 bottom-2 flex flex-col text-white">
               <span className="eyebrow text-[0.6rem] opacity-80">Level {level}</span>
               <span className="display text-lg leading-tight sm:text-xl">{unit.unit.title}</span>
               <span className="text-[0.7rem] opacity-80">
@@ -662,5 +686,55 @@ function DrawEntry({ board }: { board: string }) {
         How the draw works
       </Link>
     </div>
+  )
+}
+
+/**
+ * A card waiting on the middle of the board: a cream card with a blue frame, an icon, the
+ * Portuguese and the English. A link, so it is reachable by keyboard and says where it goes.
+ */
+function BoardCard({
+  href,
+  pt,
+  en,
+  icon,
+  testid,
+  style,
+}: {
+  href: string
+  pt: string
+  en: string
+  icon: 'friend' | 'table'
+  testid: string
+  style: CSSProperties
+}) {
+  return (
+    <Link
+      href={href}
+      data-testid={testid}
+      onClick={() => track('board_card', { card: icon })}
+      className="absolute flex aspect-[3/2] w-[40%] flex-col items-center justify-center gap-[3%] rounded-[6%] border-[0.35cqw] border-[#1f5d8c] bg-[#fbf6ec] p-[3%] text-center text-[#14243a] shadow-[0_6px_14px_rgba(10,20,40,0.35)] outline outline-1 outline-offset-[-3cqw] outline-[#1f5d8c]/40 transition hover:-translate-y-0.5"
+      style={style}
+    >
+      <svg aria-hidden viewBox="0 0 24 24" className="h-[28%] w-auto text-[#1f5d8c]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        {icon === 'friend' ? (
+          <>
+            <circle cx="9" cy="8" r="3.2" />
+            <path d="M3.5 19a5.5 5.5 0 0111 0" />
+            <path d="M18 8v6M15 11h6" />
+          </>
+        ) : (
+          <>
+            <path d="M3 9h18M5 9v10M19 9v10M8 9l1-4h6l1 4" />
+          </>
+        )}
+      </svg>
+      <span lang="pt-PT" className="pt font-semibold leading-tight text-[#1f5d8c]" style={{ fontSize: 'clamp(0.5rem, 5.4cqw, 0.95rem)' }}>
+        {pt}
+      </span>
+      <span className="eyebrow leading-none text-[#14243a]/70" style={{ fontSize: 'clamp(0.4rem, 3.4cqw, 0.6rem)' }}>
+        {en}
+      </span>
+    </Link>
   )
 }
