@@ -48,7 +48,19 @@ export const INVITE = {
     lib/invites.ts — so the sentence that promises it moved with it.
   */
   reward:
-    'When somebody you brought says their first Lisbon room out loud, with nothing on screen, you both get a month of DUB free. It pays when they can speak, not when they sign up.',
+    'When somebody you brought says their first room out loud, with nothing on screen, you both get a month of DUB free. It pays when they can speak, not when they sign up.',
+  /*
+    THE BOARD'S CARD OPENS A SHEET (Sam, 2026-11-05: "link to a modal overlay rather than deep
+    link to the Yours page where it gets lost"). The ask, said in Portuguese first — every
+    ask teaches — then the button, then the people already asked, then what it earns.
+  */
+  sheet: {
+    eyebrow: 'Convida um amigo',
+    title: 'Bring a friend in',
+    body: 'Somebody you know here who still orders in English. Send them a link; they start from the beginning, and you have somebody to speak Portuguese with.',
+    line: { pt: 'Queres aprender português comigo?', en: 'Do you want to learn Portuguese with me?' },
+    all: 'All your people',
+  },
   /** The three states an invitation can be in. */
   state: {
     waiting: 'Not opened yet',

@@ -1,3 +1,4 @@
+import { INVITE } from '../content/invite'
 /**
  * What an invitation can and cannot do.
  *
@@ -123,6 +124,21 @@ ok(
   /select code, chapter, pair/.test(lib) && !/count\(\*\)/.test(lib),
   'DUB exists because scores are the wrong fuel',
 )
+
+/*
+  THE BOARD'S CARD OPENS A SHEET (Sam, 2026-11-05: "link to a modal overlay rather than deep
+  link to the Yours page where it gets lost"), and the sheet and Yours send the same thing.
+*/
+{
+  const rd = (f: string) => readFileSync(new URL('../' + f, import.meta.url), 'utf8')
+  const board = rd('components/path/Board.tsx')
+  const sheet = rd('components/invite/InviteSheet.tsx')
+  ok('the board invite card opens a sheet, not the foot of Yours', /onOpen=\{\(\) => setInviting\(true\)\}/.test(board) && !/href="\/profile#people"\s+pt="Convida/.test(board))
+  ok('the sheet sends through the shared hook, the same one Yours uses', /useInvites\('board'\)/.test(sheet) && /useInvites\('yours'\)/.test(rd('components/Friends.tsx')))
+  ok('the sheet is a dialog on document.body, above the nav', /role="dialog"/.test(sheet) && /createPortal/.test(sheet) && /z-\[60\]/.test(sheet))
+  ok('the sheet teaches the ask in Portuguese', /line\.pt/.test(sheet))
+  ok('the reward line names no one city', !/Lisbon/.test(INVITE.reward))
+}
 
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)\n')
