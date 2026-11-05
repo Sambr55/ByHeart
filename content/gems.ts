@@ -229,6 +229,16 @@ export function gemOfTheWeek(now: Date = new Date(), all: Gem[] = visibleGems())
   return r.length ? r[weekNumber(now) % r.length] : null
 }
 
+/**
+ * THIS WEEK'S GEM IN ONE CITY (2026-11-05): a Cascais learner's Monday place is in Cascais.
+ * A town with nothing this build can show falls back to Lisbon's, which is forty minutes away
+ * and better than silence.
+ */
+export function gemOfTheWeekIn(chapter: ChapterId | null | undefined, now: Date = new Date()): Gem | null {
+  const own = gemsIn(chapter ?? 'lisbon')
+  return gemOfTheWeek(now, own.length ? own : gemsIn('lisbon'))
+}
+
 /** The Monday this week's gem began, as YYYY-MM-DD — the inbox dates it from there. */
 export function weekStart(now: Date = new Date()): string {
   const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()))

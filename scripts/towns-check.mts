@@ -9,7 +9,10 @@
  * in the town, its walks are its own, its boards walk it first, and nothing a person has not
  * checked reaches the live app.
  */
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
+import { panelArt } from '../content/panel'
+import { weeklyGem } from '../lib/push-plan'
+import { situationById } from '../content/situations'
 import { CHAPTERS, chapterById } from '../content/chapters'
 import { BAIRROS, GEMS, bairrosIn, chapterOfBairro, cityCentre, distanceM, gemsIn } from '../content/gems'
 import { WALKS, walksIn } from '../content/walks'
@@ -88,6 +91,41 @@ ok('Lisbon’s boards are unchanged', lapOf(
 console.log('\nwhat’s on')
 const lis = rowsFor('lisbon', new Date('2026-11-05')).length
 ok('Lisbon’s nights are the towns’ too (forty minutes on the train)', TOWNS.every((t) => rowsFor(t, new Date('2026-11-05')).length >= lis), `${lis} rows`)
+
+console.log('\ntheir own paintings')
+for (const t of TOWNS) {
+  for (const p of ['visiting', 'staying', 'moving'] as const) {
+    const a = panelArt(t, p)
+    ok(`${chapterById(t).pt} · ${p}: its own painting, on disk`, a.src.includes(t) && existsSync(new URL('../public' + a.src, import.meta.url)), a.src)
+  }
+}
+
+console.log('\nMonday’s place')
+for (const t of TOWNS) {
+  const w = weeklyGem(new Date('2026-11-09T10:00:00Z'), null, t)
+  ok(`${chapterById(t).pt}: this week’s place is in the town`, Boolean(w?.title.startsWith('This week in ' + chapterById(t).city + ': ')), w?.title)
+}
+ok('the cron passes the learner’s town', /weeklyGem\(new Date\(\), [^)]*row\.state\?\.chapter/.test(src('app/api/cron/line/route.ts')))
+ok('the inbox’s place is the learner’s town', /gemOfTheWeekIn\(chapter, now\)/.test(src('content/inbox.ts')))
+
+console.log('\nthe lessons are everybody’s')
+/*
+  Path rooms are shared by Lisbon, Cascais and Sintra, so none may say Lisbon unless it is
+  true from all three. One is, on purpose: "the last train to Lisbon" — both towns' lines run in.
+*/
+const ALLOWED = new Set(['A que horas é o último comboio para Lisboa?', 'What time is the last train to Lisbon?'])
+const ids = new Set<string>()
+for (const p of ['visiting', 'staying', 'moving'] as const) for (const u of pathUnits(undefined, new Date('2026-11-05'), p)) for (const r of u.rooms) ids.add(r.id)
+const said: string[] = []
+const SKIP = /^(id|image|src|slug|audio|chapter|sources?|unsure|blocks|pieces)$/
+const scan = (o: unknown, where: string) => {
+  if (typeof o === 'string') { if (/Lisbo[an]/.test(o) && !ALLOWED.has(o) && !/^\/|https?:/.test(o)) said.push(where) }
+  else if (Array.isArray(o)) o.forEach((x, i) => scan(x, where + '[' + i + ']'))
+  else if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) if (!SKIP.test(k)) scan(v, where + '.' + k)
+}
+for (const id of ids) scan(situationById(id), id)
+ok('no path room says Lisbon where a town learner would read it', said.length === 0, said.join(', '))
+ok('a room’s header names the learner’s town', /chapterById\(me\.chapter \?\? situation\.chapter\)/.test(src('components/Errand.tsx')))
 
 console.log('\nthe screens say the town')
 for (const f of ['components/path/PathHome.tsx', 'components/city/City.tsx', 'components/path/RoomGate.tsx']) {
