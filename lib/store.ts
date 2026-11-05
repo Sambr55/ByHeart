@@ -697,6 +697,10 @@ export async function deleteUser(userId: string): Promise<void> {
     await tx`delete from push_subscriptions where user_id = ${userId}`
     await tx`delete from share_cards where user_id = ${userId}`
     await tx`delete from comp_redemptions where user_id = ${userId}`
+    // Rewards on the ground (015_venues.sql): check-ins, vouchers and draw entries are theirs.
+    await tx`delete from venue_checkins where user_id = ${userId}`
+    await tx`delete from venue_vouchers where user_id = ${userId}`
+    await tx`delete from draw_entries where user_id = ${userId}`
     if (email) await tx`delete from waitlist where email = ${email}`
     /*
       The learner row is kept and anonymised — which was fine when it held only what was

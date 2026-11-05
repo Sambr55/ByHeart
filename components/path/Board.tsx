@@ -9,6 +9,7 @@ import { rowsFor } from '@/content/calendar'
 import { CHEATS } from '@/content/cheats'
 import { bairroById, gemRotation, visibleGems, KIND_LABEL } from '@/content/gems'
 import { IDIOMS } from '@/content/idioms'
+import { WALKS } from '@/content/walks'
 import { panelArt } from '@/content/panel'
 import type { ChapterId } from '@/content/chapters'
 import type { Purpose } from '@/content/situations'
@@ -20,6 +21,8 @@ import { UNLOCK_HREF } from './locks'
 import { KindIcon, LockIcon } from './icons'
 import { driftOf } from './Panel'
 import { lapOf, type Lap, type Square } from './lap'
+import { CheckIn } from '@/components/city/CheckIn'
+import { useVenues } from '@/components/city/useVenues'
 
 /**
  * THE BOARD — one level, one lap (Sam, 2026-11-05). What it is: content/board.ts. Where
@@ -112,7 +115,7 @@ export function Board({
   const gems = useMemo(() => gemRotation(visibleGems()), [])
   const rows = useMemo(() => rowsFor(chapter, now), [chapter, now])
   const lap = useMemo(
-    () => (view.units[index] ? lapOf(view, index, purpose, { gems, rows, voice }) : null),
+    () => (view.units[index] ? lapOf(view, index, purpose, { gems, rows, voice, walks: WALKS }) : null),
     [view, index, purpose, gems, rows, voice],
   )
   const [open, setOpen] = useState<Square | null>(null)
@@ -348,10 +351,23 @@ function Cell({
       className={'board-sq board-stop' + (s.reached ? ' is-up' : ' panel-frieze')}
     >
       {s.reached ? <StopMark kind={s.kind} /> : null}
+      {s.reached && s.kind === 'venue' ? <VenueBadge gem={s.gem.id} /> : null}
       {fresh ? <span aria-hidden className="board-new" /> : null}
       {token}
     </button>
   )
+}
+
+/* A venue's count in the corner of its square, and a tick once you've checked in. */
+function VenueBadge({ gem }: { gem: string }) {
+  const v = useVenues()
+  const n = v.counts[gem] ?? 0
+  if (v.mine.includes(gem)) return <span aria-hidden className="board-badge is-mine" data-testid="venue-mine">✓</span>
+  return n ? (
+    <span aria-hidden className="board-badge" data-testid="venue-count">
+      {n}
+    </span>
+  ) : null
 }
 
 function CornerMark({ corner }: { corner: CornerId }) {
@@ -415,6 +431,8 @@ function StopSheet({
   }, [onClose])
 
   const boardKey = purpose + ':' + lap.unitId
+  /* The real holiday shows only with a sponsor's prize set AND HOLIDAY_DRAW on (Sam: "put the holiday behind a switch"). */
+  const holidayLive = useVenues().holiday
   const taken = holidays.some((h) => h.startsWith(boardKey + '@'))
   const btn = 'tap-target eyebrow block w-full rounded-full bg-accent px-6 py-3 text-center text-accent-ink'
   let eyebrow = ''
@@ -433,6 +451,7 @@ function StopSheet({
           <Link href={practiceHref} className={btn} data-testid="board-practice">
             {nextLevel ? 'Practise · then board ' + nextLevel : 'Practise'}
           </Link>
+          <DrawEntry board={purpose + ':' + lap.unitId} />
         </>
       ) : (
         <p className="text-base leading-relaxed">{c.body}</p>
@@ -471,7 +490,7 @@ function StopSheet({
               Take my week off
             </button>
           )}
-          {HOLIDAY_PRIZE ? (
+          {HOLIDAY_PRIZE && holidayLive ? (
             <div className="flex flex-col gap-2 rounded-2xl border border-[#c9973b] px-4 py-3" data-testid="ferias-prize">
               <p className="eyebrow text-[#c9973b]">And a real one</p>
               <p className="display text-xl">{HOLIDAY_PRIZE.title}</p>
@@ -535,9 +554,15 @@ function StopSheet({
         <p className="text-base leading-relaxed">{g.why}</p>
         <SpokenLine pt={gender === 'f' && g.line.f ? g.line.f : g.line.pt} en={g.line.en} size="md" />
         {said ? <p className="text-sm font-semibold text-correct">You’ve said it here.</p> : null}
+        <CheckIn gem={g.id} />
         <Link href={'/city?gem=' + g.id} className={btn} data-testid="board-venue">
-          {said ? 'Open the place' : 'Go and say it there'}
+          Directions and more
         </Link>
+        {lap.walk ? (
+          <Link href={'/walk/' + lap.walk.id} className="eyebrow self-center text-accent underline-offset-4 hover:underline" data-testid="board-walk">
+            Part of {lap.walk.title} →
+          </Link>
+        ) : null}
       </>
     )
   } else if (s.kind === 'neighbour') {
@@ -583,5 +608,45 @@ function StopSheet({
       </div>
     </div>,
     document.body,
+  )
+}
+
+/**
+ * A FINISHED BOARD IN THE PRIZE DRAW (Sam, 2026-11-05) — only while PRIZE_DRAW is on, and
+ * checked on the server against the learner's own record (app/api/draw). Off: nothing shows.
+ */
+function DrawEntry({ board }: { board: string }) {
+  const v = useVenues()
+  const [state, setState] = useState<{ result: string; entries?: number; venuesToGo?: number } | null>(null)
+  useEffect(() => {
+    if (!v.draw || !v.signedIn || state) return
+    void fetch('/api/draw', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ board }) })
+      .then((r) => r.json())
+      .then((j) => {
+        setState(j)
+        if (j.result === 'in') track('draw_entered', { board })
+      })
+      .catch(() => setState({ result: 'error' }))
+  }, [v.draw, v.signedIn, board, state])
+  if (!v.draw) return null
+  if (!v.signedIn) {
+    return (
+      <Link href={'/signin?next=' + encodeURIComponent('/club')} className="text-center text-sm font-semibold text-accent" data-testid="draw-signin">
+        Sign in to be entered in this month’s prize draw →
+      </Link>
+    )
+  }
+  if (state?.result !== 'in') return null
+  return (
+    <div className="flex flex-col gap-1 rounded-2xl border border-[#c9973b] px-4 py-3 text-center" data-testid="draw-in">
+      <p className="eyebrow text-[#c9973b]">You’re in the draw</p>
+      <p className="text-sm">
+        {state.entries === 1 ? '1 entry' : state.entries + ' entries'} this month.
+        {state.venuesToGo ? ` Say it at the ${state.venuesToGo === 1 ? 'last place' : state.venuesToGo + ' places'} on this board for another.` : ''}
+      </p>
+      <Link href="/draw" className="text-xs text-muted underline">
+        How the draw works
+      </Link>
+    </div>
   )
 }

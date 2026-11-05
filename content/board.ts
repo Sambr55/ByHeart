@@ -107,7 +107,8 @@ export const HOLIDAY_DAYS = 7
  * Null until there is a sponsor AND terms Sam has approved: a UK prize draw needs a free
  * route to enter, closing dates and a named promoter, and none of that is copy to guess at.
  * While it is null the Férias corner gives the in-app week off and says nothing about a
- * prize. Set it and the corner's sheet shows the prize and its entry link.
+ * prize. Set it AND switch HOLIDAY_DRAW=on (Sam, 2026-11-05: "put the holiday behind a
+ * switch") and the corner's sheet shows the prize and its entry link.
  */
 export const HOLIDAY_PRIZE: { title: string; body: string; href: string; terms: string } | null = null
 
@@ -173,3 +174,55 @@ export const POSTCARDS: Record<Purpose, PostcardRef[]> = {
     c('bluff_move'),
   ],
 }
+
+/*
+  EACH BOARD IS A REAL WALK (Sam, 2026-11-05: "I want to explore putting real venues into
+  the board from the language walks"). Board n takes the n-th walk in its path's order, and
+  the walk's stops, in walking order, are the board's venue squares; postcards and what's on
+  fill the rest. The order is the argument again: a trip starts on the famous hills, a season
+  where the same faces recognise you, a move where people actually live. Ids are walk ids
+  from content/walks.ts, checked by scripts/lap-check.mts. The basics board (index 0) gets
+  the first walk too — nobody should wait a level to meet a real place.
+*/
+export const WALK_ORDER: Record<Purpose, string[]> = {
+  visiting: ['graca-saturday', 'mouraria-down', 'alfama-back-steps', 'campo-de-ourique-village', 'marvila-east', 'anjos-people'],
+  staying: ['campo-de-ourique-village', 'anjos-people', 'graca-saturday', 'mouraria-down', 'marvila-east', 'alfama-back-steps'],
+  moving: ['anjos-people', 'campo-de-ourique-village', 'marvila-east', 'mouraria-down', 'graca-saturday', 'alfama-back-steps'],
+}
+
+/**
+ * REWARDS ON THE GROUND (Sam, 2026-11-05): "This takes the app from winning pointless points
+ * to actual reward on the ground."
+ *
+ * A venue's count is the number of DUB learners who have checked in there — once each,
+ * ever. At FIRST every learner who has checked in, the first fifty included, gets 25% off one
+ * visit (fixed for every venue, Sam: "as recommended"). At SECOND the venue's own choice
+ * unlocks (Sam: "let venues choose"). Only venues that have signed up give rewards; every
+ * venue counts from day one, so a venue that signs at 48 unlocks almost at once.
+ */
+export const REWARD_TIERS = { first: 50, second: 150 } as const
+export const FIRST_REWARD = '25% off one visit'
+
+export type SecondOffer = 'none' | 'meal_all' | 'small_item' | 'meal_draw'
+export const SECOND_OFFERS: Record<SecondOffer, { label: string; venue: string }> = {
+  none: { label: '', venue: 'Nothing at 150 for now' },
+  meal_all: { label: 'A free meal', venue: 'A free meal for each of them (you set a weekly cap)' },
+  small_item: { label: 'Something on the house', venue: 'Something small on the house for each of them — a coffee, a pastel, a glass' },
+  /* A draw is a prize draw: offered to venues only while PRIZE_DRAW is on (see lib/venues.ts). */
+  meal_draw: { label: 'A monthly draw for dinner for two', venue: 'A monthly draw among them for dinner for two' },
+}
+
+/**
+ * HOW CLOSE IS CLOSE ENOUGH to check in by location: the venue's pin plus this, and the
+ * phone's own accuracy must be under GEO_ACCURACY_M. A partner venue's DUB card is the
+ * stronger proof — asked for in Portuguese at the counter — and needs no location at all.
+ */
+export const GEO_RADIUS_M = 150
+export const GEO_ACCURACY_M = 120
+
+/**
+ * THE DRAW'S TERMS — null until a lawyer has read them and Sam has approved them. While
+ * null, /draw says the draw is not running even if PRIZE_DRAW is switched on by mistake,
+ * because a draw without terms is the one thing worse than no draw.
+ */
+export const DRAW_TERMS: { promoter: string; closes: string; prizes: string; body: string } | null = null

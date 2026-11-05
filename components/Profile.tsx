@@ -21,6 +21,7 @@ import { Walkthrough } from '@/components/Walkthrough'
 import { loadLearner, setDisplayName } from '@/engine/learner'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { YoursOut } from '@/components/YoursOut'
+import { RewardsLink } from '@/components/venues/RewardsLink'
 import { Ticker } from '@/components/Ticker'
 import { useLearner } from '@/engine/useLearner'
 import { useRestore } from '@/engine/useRestore'
@@ -444,6 +445,7 @@ export function Profile() {
       {mounted ? <AtRisk /> : null}
       {mounted ? <CanSay /> : null}
       {/* Your Lisbon: your table, and where you have said it — components/YoursOut.tsx. */}
+      {mounted ? <RewardsLink /> : null}
       {mounted ? <YoursOut /> : null}
 
       {!mounted ? null : !hasSomething ? (
