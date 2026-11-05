@@ -30,7 +30,9 @@
  * do that.
  */
 import type { CalendarRow } from '@/content/calendar'
-import { POSTCARDS, WALK_ORDER, type CornerId, type PostcardRef } from '@/content/board'
+import { POSTCARDS, boardWalks, type CornerId, type PostcardRef } from '@/content/board'
+import type { ChapterId } from '@/content/chapters'
+import { chapterOfBairro } from '@/content/gems'
 import type { Walk } from '@/content/walks'
 import type { Gem } from '@/content/gems'
 import type { Purpose } from '@/content/situations'
@@ -100,6 +102,8 @@ export function lapOf(
     rows: CalendarRow[]
     /** The language walks (content/walks.ts). The board's walk supplies its venues first. */
     walks?: Walk[]
+    /** Which city or town (content/chapters.ts). Its own walks come first; absent is Lisbon. */
+    chapter?: ChapterId
     voice?: boolean
   },
 ): Lap {
@@ -126,7 +130,9 @@ export function lapOf(
     THE BOARD'S WALK FIRST (2026-11-05): its stops in walking order, then the places these
     rooms train for, then the rotation. Only gems that are visible (in opts.gems) count.
   */
-  const order = WALK_ORDER[purpose]
+  const chapter = opts.chapter ?? 'lisbon'
+  const own = (opts.walks ?? []).filter((x) => chapterOfBairro(x.bairro) === chapter).map((x) => x.id)
+  const order = boardWalks(chapter, purpose, own)
   const walk = (opts.walks ?? []).find((x) => x.id === order[index % Math.max(1, order.length)]) ?? null
   const byId = new Map(opts.gems.map((g) => [g.id, g]))
   const walked = (walk?.stops ?? []).flatMap((st) => (byId.has(st.gem) ? [byId.get(st.gem)!] : []))

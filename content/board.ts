@@ -23,6 +23,7 @@
  * corners are Lisbon's: Partida, Miradouro, Férias, A mesa.
  */
 import type { Purpose } from '@/content/situations'
+import type { ChapterId } from '@/content/chapters'
 
 export type CornerId = 'start' | 'miradouro' | 'ferias' | 'mesa'
 
@@ -55,7 +56,7 @@ export const CORNERS: Record<Purpose, Record<CornerId, Corner>> = {
     },
     mesa: {
       pt: 'A mesa',
-      title: 'Eat where Lisbon eats',
+      title: 'Eat where the locals eat',
       body: 'Take your lines to a tasca table — with whoever you’re travelling with, in Portuguese, for one dinner.',
     },
   },
@@ -188,6 +189,15 @@ export const WALK_ORDER: Record<Purpose, string[]> = {
   visiting: ['graca-saturday', 'mouraria-down', 'alfama-back-steps', 'campo-de-ourique-village', 'marvila-east', 'anjos-people'],
   staying: ['campo-de-ourique-village', 'anjos-people', 'graca-saturday', 'mouraria-down', 'marvila-east', 'alfama-back-steps'],
   moving: ['anjos-people', 'campo-de-ourique-village', 'marvila-east', 'mouraria-down', 'graca-saturday', 'alfama-back-steps'],
+}
+
+/**
+ * A TOWN'S BOARDS (2026-11-05): its own walks first, in the order they are written, then
+ * Lisbon's for that reason for being here — Cascais and Sintra are forty minutes from
+ * Lisbon on the train, so the later boards are the day trip in, not the same two walks again.
+ */
+export function boardWalks(chapter: ChapterId, purpose: Purpose, own: string[]): string[] {
+  return chapter === 'lisbon' ? WALK_ORDER[purpose] : [...own, ...WALK_ORDER[purpose].filter((id) => !own.includes(id))]
 }
 
 /**

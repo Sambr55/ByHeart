@@ -17,13 +17,17 @@
  */
 import { DEFAULT_PAIR, pairId } from '@/content/pairs'
 
-export type ChapterId = 'lisbon' | 'porto' | 'algarve'
+export type ChapterId = 'lisbon' | 'cascais' | 'sintra' | 'porto' | 'algarve'
 
 export interface Chapter {
   id: ChapterId
   /** What it is called, everywhere. */
   name: string
   city: string
+  /** On screen, in the language they are learning: Lisboa, Cascais, Sintra. */
+  pt: string
+  /** The three letters on the boarding pass (components/Booker.tsx). Not airport codes: DUB's own. */
+  code: string
   country: string
   /** The language its members are learning. Many chapters, one pair. */
   pair: string
@@ -61,6 +65,44 @@ export const CHAPTERS: Chapter[] = [
     id: 'lisbon',
     name: 'Dub Club — Lisbon',
     city: 'Lisbon',
+    pt: 'Lisboa',
+    code: 'LIS',
+    country: 'Portugal',
+    pair: pairId(DEFAULT_PAIR),
+    zone: 'Europe/Lisbon',
+    open: true,
+    consent_age: 13,
+  },
+  /*
+    CASCAIS AND SINTRA (Sam, 2026-11-05: "In a while we are going to stand up Cascais and
+    Sintra as an alternative to Lisbon … lets do the cascais and sintra from airline selector
+    onwards"). Towns of the same language and country, forty minutes from Lisbon on the train
+    — so the language layer, the country layer and every room are shared, and only the city
+    layer is their own: bairros, gems, walks, venues (content/towns/).
+
+    `open: true` here means BUILT. Whether the selector offers it is chapterOpen() below: a
+    town opens only once it has venues a person has checked (production shows verified gems
+    only), so until then the live app names it as not open yet and preview builds show it
+    whole for review.
+  */
+  {
+    id: 'cascais',
+    name: 'Dub Club — Cascais',
+    city: 'Cascais',
+    pt: 'Cascais',
+    code: 'CAS',
+    country: 'Portugal',
+    pair: pairId(DEFAULT_PAIR),
+    zone: 'Europe/Lisbon',
+    open: true,
+    consent_age: 13,
+  },
+  {
+    id: 'sintra',
+    name: 'Dub Club — Sintra',
+    city: 'Sintra',
+    pt: 'Sintra',
+    code: 'SNT',
     country: 'Portugal',
     pair: pairId(DEFAULT_PAIR),
     zone: 'Europe/Lisbon',
@@ -81,6 +123,8 @@ export const CHAPTERS: Chapter[] = [
     id: 'porto',
     name: 'Dub Club — Porto',
     city: 'Porto',
+    pt: 'Porto',
+    code: 'OPO',
     country: 'Portugal',
     pair: pairId(DEFAULT_PAIR),
     zone: 'Europe/Lisbon',
@@ -91,6 +135,8 @@ export const CHAPTERS: Chapter[] = [
     id: 'algarve',
     name: 'Dub Club — The Algarve',
     city: 'The Algarve',
+    pt: 'Algarve',
+    code: 'FAO',
     country: 'Portugal',
     pair: pairId(DEFAULT_PAIR),
     zone: 'Europe/Lisbon',

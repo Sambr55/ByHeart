@@ -12,7 +12,9 @@
  * gem is hidden (visibleGems) is simply skipped. The `do` lines are written here; every
  * fact about a place comes from its gem.
  */
-import { distanceM, visibleGems, type BairroId, type Gem } from '@/content/gems'
+import { chapterOfBairro, distanceM, visibleGems, type BairroId, type Gem } from '@/content/gems'
+import type { ChapterId } from '@/content/chapters'
+import { TOWN_WALKS } from '@/content/towns'
 
 export interface WalkStop {
   gem: string
@@ -33,7 +35,7 @@ export interface Walk {
   finish: string
 }
 
-export const WALKS: Walk[] = [
+const LISBON_WALKS: Walk[] = [
   {
     id: 'graca-saturday',
     bairro: 'graca',
@@ -148,6 +150,14 @@ export function walkView(walk: Walk, gems: Gem[] = visibleGems()): WalkView | nu
   let metres = 0
   for (let i = 1; i < stops.length; i++) metres += distanceM([stops[i - 1].g.lat, stops[i - 1].g.lng], [stops[i].g.lat, stops[i].g.lng])
   return { walk, stops, metres, minutes: Math.max(10, Math.round((metres * 1.3) / 70)) }
+}
+
+/** Every walk: Lisbon's here, the towns' from content/towns/. */
+export const WALKS: Walk[] = [...LISBON_WALKS, ...TOWN_WALKS]
+
+/** One city's walks. */
+export function walksIn(chapter: ChapterId): Walk[] {
+  return WALKS.filter((w) => chapterOfBairro(w.bairro) === chapter)
 }
 
 export function visibleWalks(gems: Gem[] = visibleGems()): WalkView[] {

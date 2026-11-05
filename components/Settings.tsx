@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Back } from '@/components/Back'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
-import { PurposeChoice, SoundChoice, ThemeChoice } from '@/components/Theme'
+import { PurposeChoice, SoundChoice, ThemeChoice, CityChoice } from '@/components/Theme'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { EndingChoice } from '@/components/SpeakerAsk'
 import { PushChoices } from '@/components/PushChoices'
@@ -190,6 +190,7 @@ export function Settings() {
         >
           <ThemeChoice />
           <SoundChoice />
+          <CityChoice />
           <PurposeChoice />
           <EndingChoice />
         </section>

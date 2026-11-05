@@ -176,8 +176,14 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
     words handed to the library — reads this, so nothing in the room says it the house's way
     when it should say it hers. See content/speaker.ts.
   */
-  const situation = voiced(room, useLearner().profile?.gender ?? null)
-  const chapter = chapterById(situation.chapter)
+  const me = useLearner()
+  const situation = voiced(room, me.profile?.gender ?? null)
+  /*
+    THE CITY OVER THE ROOM IS THE LEARNER'S (2026-11-05). Path rooms are shared by Lisbon,
+    Cascais and Sintra, so a Cascais learner's coffee room says CASCAIS. A drop is an event
+    in one place and shows the event instead (below), so its own city never needs saying.
+  */
+  const chapter = chapterById(me.chapter ?? situation.chapter)
   /*
     The room that asks somebody out, which is the only one worth minting from.
 

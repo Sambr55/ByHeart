@@ -1,5 +1,6 @@
 'use client'
 
+import { chapterById } from '@/content/chapters'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Wordmark } from '@/components/Wordmark'
@@ -82,6 +83,8 @@ export function PathHome() {
     the painting on the panel (content/panel.ts).
   */
   const purpose = learner.purpose ?? null
+  /* Lisboa, Cascais or Sintra — the city chosen on the boarding pass (2026-11-05). */
+  const city = chapterById(learner.chapter)
   const name = PATH_NAMES[pathPurpose(purpose)]
   const units = useMemo(() => pathUnits(undefined, undefined, purpose), [purpose])
   /*
@@ -169,11 +172,12 @@ export function PathHome() {
         <div className="mx-auto flex w-full max-w-md items-center gap-3 md:max-w-6xl">
           <Wordmark mark="club" className="h-7 text-white" />
           <Link
-            href="/settings#purpose"
+            href="/trip"
+            data-testid="header-trip"
             className="flex min-w-0 flex-1 flex-col leading-tight"
-            aria-label={'Lisboa · ' + name.title + ' — change in settings'}
+            aria-label={city.pt + ' · ' + name.title + ' — change your destination'}
           >
-            <span className="eyebrow truncate opacity-90">Lisboa</span>
+            <span className="eyebrow truncate opacity-90">{city.pt} ▾</span>
             <span className="needs-learner truncate text-[0.7rem] font-semibold opacity-75">{name.short}</span>
           </Link>
           {/*

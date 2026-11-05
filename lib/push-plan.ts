@@ -23,7 +23,8 @@
 import { pathUnits } from '@/content/path'
 import type { Purpose } from '@/content/situations'
 import { said } from '@/content/speaker'
-import { gemOfTheWeek, weekStart } from '@/content/gems'
+import { chapterOfBairro, gemOfTheWeekIn, weekStart } from '@/content/gems'
+import { chapterById, type ChapterId } from '@/content/chapters'
 import { pathView, type PathRecord } from '@/components/path/progress'
 import { isFreeRoom } from '@/lib/entitlements'
 
@@ -110,14 +111,17 @@ export function pathLine(
   return null
 }
 
-/** Monday's place: this week's gem and its line. One per week, by the week's Monday. */
-export function weeklyGem(now: Date = new Date(), gender: 'm' | 'f' | null = null): Push | null {
-  const gem = gemOfTheWeek(now)
+/**
+ * Monday's place: this week's gem and its line. One per week, by the week's Monday — in the
+ * subscriber's own city or town (2026-11-05: Cascais and Sintra have their own).
+ */
+export function weeklyGem(now: Date = new Date(), gender: 'm' | 'f' | null = null, chapter: ChapterId | null = null): Push | null {
+  const gem = gemOfTheWeekIn(chapter, now)
   if (!gem) return null
   const line = said(gem.line, gender)
   return {
     id: 'week:' + weekStart(now),
-    title: 'This week in Lisbon: ' + gem.name,
+    title: 'This week in ' + chapterById(chapterOfBairro(gem.bairro)).city + ': ' + gem.name,
     body: '“' + line.pt + '” — ' + line.en,
     url: '/city?gem=' + gem.id + '&n=week',
     tag: 'dub-week',

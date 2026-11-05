@@ -6,7 +6,8 @@ import { GemPicture, PhotoCredit, useGemPhoto } from '@/components/city/GemPhoto
 import type { Gem } from '@/content/gems'
 import { useEffect, useMemo, useState } from 'react'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
-import { BAIRROS, KIND_LABEL, distanceM, visibleGems, type BairroId } from '@/content/gems'
+import { BAIRROS, KIND_LABEL, bairrosIn, cityCentre, distanceM, gemsIn, type BairroId } from '@/content/gems'
+import { chapterById } from '@/content/chapters'
 import { GemCard } from './GemCard'
 import { KnowHowCard } from './KnowHowCard'
 import { knowHowNow } from '@/content/knowhow'
@@ -31,12 +32,18 @@ const CityMap = dynamic(() => import('./CityMap').then((m) => m.CityMap), {
  * a pin or a card and it opens with the line for walking in. "What's on" — the calendar —
  * is one tap away at the top, because the city tab is both: where to go, and when.
  */
+const COUNT: Record<number, string> = { 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five', 6: 'Six', 7: 'Seven', 8: 'Eight' }
+
 export function City() {
-  const gems = useMemo(() => visibleGems(), [])
+  const learner = useLearner()
+  /* CASCAIS AND SINTRA (2026-11-05): the city tab is the learner's own city or town. */
+  const chapter = learner.chapter ?? 'lisbon'
+  const city = chapterById(chapter)
+  const gems = useMemo(() => gemsIn(chapter), [chapter])
+  const bairros = useMemo(() => bairrosIn(chapter), [chapter])
   const [bairro, setBairro] = useState<BairroId | null>(null)
   const [selected, setSelected] = useState<string | null>(null)
   const where = useWhereAmI()
-  const learner = useLearner()
   const gender = learner.profile?.gender ?? null
   const walks = useMemo(() => visibleWalks(gems), [gems])
   /* Read after mount: the week and the season are the phone's, not the server's. */
@@ -76,7 +83,7 @@ export function City() {
       <header className="bar safe-top sticky top-0 z-30 px-5 py-3">
         <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 md:max-w-6xl">
           <div className="leading-tight">
-            <p className="eyebrow opacity-80">Lisboa</p>
+            <p className="eyebrow opacity-80">{city.pt}</p>
             <p className="display text-lg">Like a local</p>
           </div>
           <Link href="/calendar" data-testid="city-whats-on" className="eyebrow tap-target inline-flex items-center rounded-full border border-[rgba(255,255,255,0.4)] px-3 py-1">
@@ -88,8 +95,8 @@ export function City() {
       <main className="mx-auto w-full max-w-md md:max-w-6xl">
         {/* The bairros. */}
         <nav aria-label="Neighbourhoods" className="no-scrollbar flex gap-2 overflow-x-auto px-5 py-3">
-          <Chip on={!bairro} onClick={() => { setBairro(null); setSelected(null) }}>All of Lisbon</Chip>
-          {BAIRROS.map((x) => (
+          <Chip on={!bairro} onClick={() => { setBairro(null); setSelected(null) }}>All of {city.pt}</Chip>
+          {bairros.map((x) => (
             <Chip key={x.id} on={bairro === x.id} onClick={() => { setBairro(x.id); setSelected(null) }}>
               {x.name}
             </Chip>
@@ -98,7 +105,7 @@ export function City() {
 
         <div className="md:grid md:grid-cols-[minmax(0,1fr)_26rem] md:gap-6 md:px-5">
           <div className="relative h-[46svh] overflow-hidden border-y border-line md:sticky md:top-20 md:h-[75svh] md:rounded-3xl md:border">
-            <CityMap gems={shown} selected={selected} focus={bairro} me={where.at} onSelect={setSelected} />
+            <CityMap gems={shown} selected={selected} focus={bairro} me={where.at} onSelect={setSelected} centre={cityCentre(chapter)} zoom={chapter === 'lisbon' ? 13 : 12} />
             <button
               type="button"
               data-testid="city-near-me"
@@ -118,7 +125,7 @@ export function City() {
             ) : (
               <>
                 <div>
-                  <p className="eyebrow text-telha">{b ? b.name : 'Six neighbourhoods, the local way'}</p>
+                  <p className="eyebrow text-telha">{b ? b.name : (COUNT[bairros.length] ?? String(bairros.length)) + ' neighbourhoods, the local way'}</p>
                   <p className="mt-1 text-base leading-relaxed">
                     {b ? b.feel : 'Not the sights — the places people who live here go, who you will meet there, and the line for walking in.'}
                   </p>

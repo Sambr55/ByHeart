@@ -80,6 +80,11 @@ ok('local weekday is theirs', local('Pacific/Auckland', new Date('2026-11-04T20:
 console.log('\nthe rest')
 const wk = weeklyGem(new Date('2026-11-02T10:00:00Z'))
 ok("Monday's place names a gem and links to it", !!wk && wk.title.startsWith('This week in Lisbon: ') && wk.url.includes('&n=week'), wk?.title)
+{
+  /* Cascais and Sintra (2026-11-05): a town's Monday place is in the town (preview builds show the drafts). */
+  const t = weeklyGem(new Date('2026-11-09T10:00:00Z'), null, 'cascais')
+  ok("a Cascais learner's Monday place is in Cascais", !!t && t.title.startsWith('This week in Cascais: ') && t.url.includes('cascais-'), t?.title)
+}
 ok('one per week', wk?.id === weeklyGem(new Date('2026-11-06T10:00:00Z'))?.id)
 const j = tableJoined({ code: 'abc', guest: 'Ana', place: 'Tasca do Chico', sits_at: '2026-11-05T19:00:00Z' }, 'Europe/Lisbon')
 ok('the host hears who is coming', j.title === 'Ana is coming to your table' && j.body === 'Tasca do Chico · Thu 7pm', j.body)

@@ -5,7 +5,7 @@
  * and DUB does not do listings. This holds each one to that, and to the city: inside
  * Lisbon, inside its bairro, linked to a room that exists.
  */
-import { BAIRROS, GEMS, distanceM, gemsNear, visibleGems } from '../content/gems'
+import { BAIRROS, GEMS, chapterOfBairro, distanceM, gemsNear, visibleGems } from '../content/gems'
 import { situationById } from '../content/situations'
 import { WALKS, walkView, walkProgress } from '../content/walks'
 import { KNOWHOW, knowHowNow } from '../content/knowhow'
@@ -23,8 +23,11 @@ ok('ids are unique', new Set(GEMS.map((g) => g.id)).size === GEMS.length)
 for (const g of GEMS) {
   const b = BAIRROS.find((x) => x.id === g.bairro)
   ok(g.id + ': in a known bairro', Boolean(b), g.bairro)
-  ok(g.id + ': inside Lisbon', g.lat > 38.68 && g.lat < 38.8 && g.lng > -9.24 && g.lng < -9.08, g.lat + ',' + g.lng)
-  ok(g.id + ': near its bairro (under 2.5 km from its centre)', !b || distanceM(b.centre, [g.lat, g.lng]) < 2500, b ? Math.round(distanceM(b.centre, [g.lat, g.lng])) + ' m' : '')
+  /* Lisbon's gems inside Lisbon; the towns' are held to their own town by npm run towns. */
+  if (chapterOfBairro(g.bairro) === 'lisbon') ok(g.id + ': inside Lisbon', g.lat > 38.68 && g.lat < 38.8 && g.lng > -9.24 && g.lng < -9.08, g.lat + ',' + g.lng)
+  /* A town's bairro is a parish of vineyards and coast, not six streets: 5 km there (2026-11-05). */
+  const reach = chapterOfBairro(g.bairro) === 'lisbon' ? 2500 : 5000
+  ok(g.id + ': near its bairro (under ' + reach / 1000 + ' km from its centre)', !b || distanceM(b.centre, [g.lat, g.lng]) < reach, b ? Math.round(distanceM(b.centre, [g.lat, g.lng])) + ' m' : '')
   ok(g.id + ': trains in a room that exists', Boolean(situationById(g.room)), g.room)
   ok(g.id + ': has a line, both languages', Boolean(g.line.pt.trim() && g.line.en.trim()))
   ok(g.id + ': names who you will meet, and a tip', Boolean(g.meet.trim() && g.tip.trim() && g.why.trim()))
@@ -44,10 +47,21 @@ console.log('\nlanguage walks\n')
 ok('walk ids are unique', new Set(WALKS.map((w) => w.id)).size === WALKS.length)
 for (const w of WALKS) {
   ok(w.id + ': every stop names a gem that exists', w.stops.every((s) => GEMS.some((g) => g.id === s.gem)), w.stops.filter((s) => !GEMS.some((g) => g.id === s.gem)).map((s) => s.gem).join(', '))
-  ok(w.id + ': every stop is in the walk’s own bairro', w.stops.every((s) => GEMS.find((g) => g.id === s.gem)?.bairro === w.bairro))
+  /* Lisbon walks keep to one bairro; a town walk may cross into the next one, never out of the town. */
+  const town = chapterOfBairro(w.bairro) !== 'lisbon'
+  ok(w.id + (town ? ': every stop is in the walk’s own town' : ': every stop is in the walk’s own bairro'), w.stops.every((s) => {
+    const g = GEMS.find((x) => x.id === s.gem)
+    return town ? Boolean(g) && chapterOfBairro(g!.bairro) === chapterOfBairro(w.bairro) : g?.bairro === w.bairro
+  }))
   ok(w.id + ': no stop twice', new Set(w.stops.map((s) => s.gem)).size === w.stops.length)
   const v = walkView(w, GEMS.filter((g) => g.verified))
-  ok(w.id + ': walkable on verified gems alone (3+ stops)', Boolean(v), String(v?.stops.length ?? 0))
+  /*
+    A town is not offered on the live app until its places are checked (content/gems.ts
+    cityReady), so its walks are held to this only once it has a verified place.
+  */
+  if (!town || GEMS.some((g) => g.verified && chapterOfBairro(g.bairro) === chapterOfBairro(w.bairro))) {
+    ok(w.id + ': walkable on verified gems alone (3+ stops)', Boolean(v), String(v?.stops.length ?? 0))
+  }
   if (v) {
     ok(w.id + ': under 4 km stop to stop', v.metres < 4000, Math.round(v.metres) + ' m')
     ok(w.id + ': progress counts said stops', walkProgress(v, [v.stops[0].key]).done === 1 && !walkProgress(v, []).complete)
