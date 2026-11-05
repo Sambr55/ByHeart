@@ -77,7 +77,8 @@ const zero = lapAt([])
 ok('nothing laid → on Partida, nothing past it reached', zero.token === 0 && zero.squares.filter((s) => s.reached).length === 1)
 const one = lapAt([ids[2]])
 const firstRoom = one.squares.find((s) => s.kind === 'room')!
-ok('one room laid, whichever → on the first room square (order is a suggestion)', one.token === firstRoom.at)
+ok('one room laid, whichever → on the square after the first room (order is a suggestion)', one.token === firstRoom.at + 1)
+ok('and the surprise straight after it is turned over at once', one.squares[firstRoom.at + 1].reached && one.squares[firstRoom.at + 1].kind !== 'room')
 const two = lapAt(ids.slice(0, 2))
 ok('the stop between two laid rooms is turned over', two.squares.some((s) => s.kind !== 'room' && s.kind !== 'corner' && s.reached))
 const all = lapAt(ids)
@@ -90,7 +91,7 @@ const coldRoom = units[u].rooms[0]
 const proof = [{ pt: coldRoom.release.answer, clean: true, at: NOW.toISOString() }]
 const quiet = lapAt([ids[0]], false, { proof } as never)
 const loud = lapAt([ids[0]], true, { proof } as never)
-ok('off: saying it cold does not move you', quiet.token === firstRoom.at)
+ok('off: saying it cold does not move you', quiet.token === firstRoom.at + 1)
 ok('on: a room said cold moves you one square further', loud.token === quiet.token + 1, `${quiet.token} → ${loud.token}`)
 const loudAll = lapOf(
   pathView({ ...empty, finished_cards: ids.slice(0, -1), proof: units[u].rooms.map((r) => ({ pt: r.release.answer, clean: true, at: NOW.toISOString() })) } as never, units, open, NOW),
