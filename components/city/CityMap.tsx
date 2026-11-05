@@ -25,6 +25,8 @@ export function CityMap({
   focus,
   me,
   onSelect,
+  centre = [38.722, -9.14],
+  zoom = 13,
 }: {
   gems: Gem[]
   selected: string | null
@@ -32,6 +34,9 @@ export function CityMap({
   focus: string | null
   me: [number, number] | null
   onSelect: (id: string) => void
+  /** Where the whole-city view sits: Lisbon, or a town (content/gems.ts cityCentre). */
+  centre?: [number, number]
+  zoom?: number
 }) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<LeafletMap | null>(null)
@@ -45,7 +50,7 @@ export function CityMap({
     import('leaflet').then((mod) => {
       if (dead || !box.current || map.current) return
       L.current = mod
-      const m = mod.map(box.current, { zoomControl: false, attributionControl: true }).setView([38.722, -9.14], 13)
+      const m = mod.map(box.current, { zoomControl: false, attributionControl: true }).setView(centre, zoom)
       mod.tileLayer(TILES, { maxZoom: 19, attribution: ATTRIBUTION }).addTo(m)
       mod.control.zoom({ position: 'bottomright' }).addTo(m)
       layer.current = mod.layerGroup().addTo(m)
@@ -90,7 +95,7 @@ export function CityMap({
     else if (focus) {
       const b = BAIRROS.find((x) => x.id === focus)
       if (b) m.flyTo(b.centre, 15, { duration: 0.6 })
-    } else m.flyTo([38.722, -9.14], 13, { duration: 0.6 })
+    } else m.flyTo(centre, zoom, { duration: 0.6 })
   }, [selected, focus, gems])
 
   /* Where the learner is, if they asked. */
@@ -107,5 +112,5 @@ export function CityMap({
     if (!selected) m.flyTo(me, 15, { duration: 0.6 })
   }, [me]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return <div ref={box} data-testid="city-map" className="h-full w-full" role="application" aria-label="Map of Lisbon gems" />
+  return <div ref={box} data-testid="city-map" className="h-full w-full" role="application" aria-label="Map of the gems" />
 }

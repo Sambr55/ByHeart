@@ -17,7 +17,7 @@ export function RewardsLink() {
     <Link href="/rewards" data-testid="yours-rewards" className="flex items-center justify-between gap-3 rounded-2xl bg-[#e5b04a] px-5 py-4 text-[#14243a]">
       <span>
         <span className="eyebrow block">Your rewards</span>
-        <span className="display block text-xl">{n === 1 ? '1 to spend' : n + ' to spend'} in Lisbon</span>
+        <span className="display block text-xl">{n === 1 ? '1 to spend' : n + ' to spend'}</span>
       </span>
       <span aria-hidden className="text-2xl">→</span>
     </Link>

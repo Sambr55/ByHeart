@@ -71,7 +71,7 @@ export function Road({
   return (
     <section aria-labelledby="road-caption" data-testid="road" className="flex flex-col gap-6">
       <p id="road-caption" className="text-sm leading-snug text-muted" data-testid="road-caption">
-        <span className="font-semibold text-fg">Your road through Lisboa</span>
+        <span className="font-semibold text-fg">Your road</span>
       </p>
 
       <PutBack

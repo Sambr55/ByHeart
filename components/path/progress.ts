@@ -322,7 +322,7 @@ export function understoodCheer(milestone: number): string {
   if (milestone === 10) return 'Ten times said out loud and heard. Saying it out loud is a habit now.'
   if (milestone === 25) return 'Twenty-five times said out loud, and heard every one.'
   if (milestone === 50) return 'Fifty times said out loud and heard. You are ready for the counter.'
-  return 'A hundred times said out loud and heard. Lisbon is going to like you.'
+  return 'A hundred times said out loud and heard. Portugal is going to like you.'
 }
 
 /**

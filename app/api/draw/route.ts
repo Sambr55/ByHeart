@@ -8,7 +8,7 @@ import { drawOn } from '@/lib/venue-rules'
 import { DRAW_TERMS } from '@/content/board'
 import { isFreeRoom } from '@/lib/entitlements'
 import { pathUnits } from '@/content/path'
-import { gemRotation, visibleGems } from '@/content/gems'
+import { gemsHomeFirst } from '@/content/gems'
 import { WALKS } from '@/content/walks'
 import { pathView } from '@/components/path/progress'
 import { lapOf } from '@/components/path/lap'
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     (id) => (isFreeRoom(id, purpose) ? 'open' : 'paid'),
     now,
   )
-  const lap = lapOf(view, index, purpose, { gems: gemRotation(visibleGems()), rows: [], walks: WALKS })
+  const lap = lapOf(view, index, purpose, { gems: gemsHomeFirst(rec.chapter ?? 'lisbon'), rows: [], walks: WALKS, chapter: rec.chapter ?? 'lisbon' })
   if (!lap.complete) return NextResponse.json({ result: 'unfinished' }, { status: 422 })
 
   const venues = lap.squares.flatMap((s) => (s.kind === 'venue' ? [s.gem.id] : []))

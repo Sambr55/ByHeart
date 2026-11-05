@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { DEFAULT_CHAPTER } from '@/content/chapters'
+import { chapterById, type ChapterId } from '@/content/chapters'
+import { cityReady } from '@/content/gems'
 import { DEFAULT_PAIR } from '@/content/pairs'
 import { GOAL_QUESTION } from '@/content/profile'
 import { track } from '@/engine/analytics'
@@ -57,8 +58,17 @@ const FROM = [
   { code: 'DE', name: 'German', native: 'Deutsch', open: false },
   { code: 'FR', name: 'French', native: 'Français', open: false },
 ] as const
+/*
+  CASCAIS AND SINTRA (Sam, 2026-11-05: "lets do the cascais and sintra from airline selector
+  onwards"). Two more Portuguese destinations beside Lisbon, the same language and every room
+  shared; their own places, walks and venues (content/towns/). Each boards once it has places
+  a person has checked — cityReady — so on the live app they say "coming soon" until then,
+  and on a preview build they board for review.
+*/
 const TO = [
   { code: 'LIS', id: 'lisbon', city: 'Lisboa', lang: 'Português', speaks: 'PT', open: true },
+  { code: 'CAS', id: 'cascais', city: 'Cascais', lang: 'Português · by the sea', speaks: 'PT', open: cityReady('cascais') },
+  { code: 'SNT', id: 'sintra', city: 'Sintra', lang: 'Português · in the hills', speaks: 'PT', open: cityReady('sintra') },
   { code: 'MAD', id: 'madrid', city: 'Madrid', lang: 'Español', speaks: 'ES', open: false },
   { code: 'BER', id: 'berlin', city: 'Berlin', lang: 'Deutsch', speaks: 'DE', open: false },
   { code: 'PAR', id: 'paris', city: 'Paris', lang: 'Français', speaks: 'FR', open: false },
@@ -78,7 +88,8 @@ export function Booker({ onDone }: { onDone: () => void }) {
   const [company, pick] = useState<Company | null>((learner.profile?.company as Company | undefined) ?? null)
   const [flying, setFlying] = useState(false)
   const [fromLang, setFromLang] = useState<FromCode>('EN')
-  const [dest, setDest] = useState<ToCode>('LIS')
+  /* Starts on the city already chosen, when there is one — changing it in settings comes back here. */
+  const [dest, setDest] = useState<ToCode>(() => (TO.find((t) => t.id === learner.chapter)?.code ?? 'LIS') as ToCode)
   const [picking, setPicking] = useState<'from' | 'to' | null>(null)
   const origin = FROM.find((f) => f.code === fromLang)!
   const place = TO.find((t) => t.code === dest)!
@@ -106,13 +117,15 @@ export function Booker({ onDone }: { onDone: () => void }) {
     if (flying || !option) return
     setPair(DEFAULT_PAIR)
     resetLearnerCache()
-    setChapter(DEFAULT_CHAPTER)
+    /* The destination IS the chapter for the Portuguese ones; anything else never reaches here (routeOpen). */
+    const chapter = chapterById(place.id as ChapterId).id
+    setChapter(chapter)
     if (option.purpose) setPurpose(option.purpose)
     setProfile('goal', option.id)
     if (from) setWhenHere({ from, to: moving ? null : to && to >= from ? to : null })
     else setWhenHere({ unknown: true })
     if (company) setCompany(company)
-    track('chapter_chosen', { chapter: DEFAULT_CHAPTER, locale: DEFAULT_PAIR.target_locale })
+    track('chapter_chosen', { chapter, locale: DEFAULT_PAIR.target_locale })
     track('purpose_chosen', { purpose: option.purpose ?? 'none', goal: option.id, via: 'booker' })
     track('trip_set', { dates: Boolean(from), company: company ?? 'none', via: 'booker' })
     setFlying(true)
@@ -377,7 +390,9 @@ function Soon({ origin, city, lang, route }: { origin: string; city: string; lan
         {city} {origin === 'English' ? '' : 'for ' + origin + ' speakers '}is not boarding yet.
       </p>
       <p className="text-sm text-[#14243a]/65">
-        We are building {lang} the way we built Portuguese for Lisbon. Leave your email and we will tell you the day it opens — nothing else.
+        {lang.startsWith('Português')
+          ? 'Somebody who knows ' + city + ' is checking its places before it opens. Leave your email and we will tell you the day it does — nothing else.'
+          : 'We are building ' + lang + ' the way we built Portuguese for Lisbon. Leave your email and we will tell you the day it opens — nothing else.'}
       </p>
       {state === 'done' ? (
         <p className="rounded-2xl bg-[#2c6b4a]/10 px-4 py-3 text-sm font-semibold text-[#2c6b4a]">You are on the list for {city}.</p>

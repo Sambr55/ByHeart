@@ -1,5 +1,6 @@
 'use client'
 
+import { chapterById } from '@/content/chapters'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { useEntitlements } from '@/engine/useEntitlements'
@@ -26,7 +27,7 @@ export function RoomGate({ id, title, children }: { id: string; title: string; c
   if (canOpenRoom(id, access, learner.purpose ?? null) || access.comped) return <>{children}</>
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-md flex-col justify-center gap-5 bg-bg px-6 text-fg">
-      <p className="eyebrow text-muted">Dub Club · Lisboa</p>
+      <p className="eyebrow text-muted">Dub Club · {chapterById(learner.chapter).pt}</p>
       <h1 className="display text-3xl">{title}</h1>
       <p className="leading-relaxed text-muted">
         This room comes with DUB Pro. The first two levels of your path, and the survival kit,

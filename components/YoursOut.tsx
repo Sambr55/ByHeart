@@ -1,5 +1,6 @@
 'use client'
 
+import { chapterById } from '@/content/chapters'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { visibleWalks, walkProgress } from '@/content/walks'
@@ -67,7 +68,7 @@ export function YoursOut() {
 
   return (
     <section className="flex flex-col gap-3" data-testid="yours-out">
-      <p className="eyebrow text-accent">Your Lisbon</p>
+      <p className="eyebrow text-accent">Your {chapterById(learner.chapter).pt}</p>
       {next ? (
         <Link
           href={'/t/' + next.code}

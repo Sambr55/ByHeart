@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { dayKey, notificationFor, pickLine } from '@/content/daily-line'
 import { db } from '@/lib/db'
 import { pushConfigured, sendPush } from '@/lib/push'
+import type { ChapterId } from '@/content/chapters'
 import { dueToday, local, pathLine, tableSoon, weeklyGem, type Push } from '@/lib/push-plan'
 import { billingConfigured, entitlementsForUser } from '@/lib/billing'
 import { entitlementsForDevice } from '@/lib/comp'
@@ -49,6 +50,8 @@ interface Row {
     lines_seen?: string[]
     purpose?: 'visiting' | 'staying' | 'moving' | null
     profile?: { gender?: 'm' | 'f' | null } | null
+    /** Lisbon, Cascais or Sintra: Monday's place is in their own (2026-11-05). */
+    chapter?: ChapterId | null
   } | null
 }
 
@@ -117,7 +120,7 @@ export async function GET(request: Request) {
       hours apart anyway.
     */
     if (on('PUSH_WEEKLY') && topics.includes('week') && weekday === 1 && hour === WEEK_HOUR) {
-      const push = weeklyGem(new Date(), row.state?.profile?.gender ?? null)
+      const push = weeklyGem(new Date(), row.state?.profile?.gender ?? null, row.state?.chapter ?? null)
       if (push && !(row.sent ?? []).includes(push.id)) {
         if ((await deliver(row, push)) === 'sent') week++
       }
