@@ -130,8 +130,8 @@ ok('none of its names in what is drawn', found.length === 0, found.join(', '))
 
 console.log('\nthe third view')
 const home = src('components/path/PathHome.tsx')
-ok('PathHome: Panel | Road | Board, remembered per device, Panel by default',
-  /<Board\b/.test(home) && /'panel' \| 'road' \| 'board'/.test(home) && /useState<PathMode>\('panel'\)/.test(home))
+ok('PathHome: Board | Panel | Road, remembered per device, Board by default',
+  /<Board\b/.test(home) && /'panel' \| 'road' \| 'board'/.test(home) && /useState<PathMode>\('board'\)/.test(home) && home.indexOf('data-mode="board"') < home.indexOf('data-mode="panel"'))
 
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)')
