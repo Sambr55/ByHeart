@@ -592,6 +592,15 @@ export interface LearnerState {
    * onHoliday in components/path/progress.ts. Optional, like walk_stops.
    */
   holidays?: string[]
+  /**
+   * MET ON A BOARD (2026-11-05): the lap keys ("<purpose>:<unit>:<kind>:<id>") of every
+   * postcard, place and what's-on a level's board turned over for this learner. Kept so the
+   * level recap and Yours can say what each level showed you once the board has moved on.
+   * A record of what was met, never a score: nothing counts these.
+   */
+  board_met?: string[]
+  /** Levels whose recap has been shown ("<purpose>:<unit>"), so it opens once by itself. */
+  recaps_seen?: string[]
   sections_completed: string[]
   /**
    * How many sittings this learner has done, in total, across every vibe.
@@ -876,6 +885,8 @@ export function emptyLearner(): LearnerState {
     walk_stops: [],
     tables_sat: [],
     holidays: [],
+    board_met: [],
+    recaps_seen: [],
     table_lines: [],
     sections_completed: [],
     sittings: 0,
@@ -1114,6 +1125,8 @@ export function loadLearner(): LearnerState {
           walk_stops: arr(parsed.walk_stops, []),
           tables_sat: arr(parsed.tables_sat, []),
           holidays: arr(parsed.holidays, []),
+          board_met: arr(parsed.board_met, []),
+          recaps_seen: arr(parsed.recaps_seen, []),
           table_lines: arr(parsed.table_lines, []),
           sections_completed: arr(parsed.sections_completed, []),
           /*
@@ -2495,6 +2508,25 @@ export function markWalkStop(key: string) {
     const done = s.walk_stops ?? []
     if (done.includes(key)) return
     s.walk_stops = [...done, key]
+  })
+}
+
+/** Stops a level's board turned over for this learner. Append-only. */
+export function markBoardMet(keys: string[]) {
+  /* Checked before update(): a write that changes nothing still re-renders every screen. */
+  const had = getLearner().board_met ?? []
+  const add = keys.filter((k) => !had.includes(k))
+  if (!add.length) return
+  update((s) => {
+    s.board_met = [...(s.board_met ?? []), ...add]
+  })
+}
+
+/** A level's recap, shown. Append-only. */
+export function markRecapSeen(key: string) {
+  if ((getLearner().recaps_seen ?? []).includes(key)) return
+  update((s) => {
+    s.recaps_seen = [...(s.recaps_seen ?? []), key]
   })
 }
 

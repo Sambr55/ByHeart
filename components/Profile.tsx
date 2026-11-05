@@ -8,8 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '@/components/Feed'
 import { CrateIcon } from '@/components/CrateIcon'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
-import { CanSay } from '@/components/yours/CanSay'
-import { Collection } from '@/components/Collection'
+import { YoursViews } from '@/components/yours/YoursViews'
 import { Friends } from '@/components/Friends'
 import { Wordmark } from '@/components/Wordmark'
 import { cardFace, type FeedCard } from '@/content/feed'
@@ -443,7 +442,12 @@ export function Profile() {
         the invitations live where they make sense instead (content/yours.ts, HOMES).
       */}
       {mounted ? <AtRisk /> : null}
-      {mounted ? <CanSay /> : null}
+      {/*
+        BY LEVEL OR BY KIND, AND A SEARCH (2026-11-05). What you can say by level and the
+        library by kind used to be stacked; they are the same things sorted two ways, so
+        they are one switch now, with Procurar over both. components/yours/YoursViews.tsx.
+      */}
+      {mounted && hasSomething ? <YoursViews hasLevels={finished.length > 0} /> : null}
       {/* Your Lisbon: your table, and where you have said it — components/YoursOut.tsx. */}
       {mounted ? <RewardsLink /> : null}
       {mounted ? <YoursOut /> : null}
@@ -546,7 +550,7 @@ export function Profile() {
             Before Friends, because a collection is a thing you have and showing somebody
             is what you do with it.
           */}
-          <Collection />
+          {/* The library is the BY KIND half of YoursViews, above. */}
           {/*
             AND THE ONE THING THAT COULD TAKE IT ALL AWAY, right under it.
 

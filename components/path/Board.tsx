@@ -13,7 +13,7 @@ import { WALKS } from '@/content/walks'
 import { panelArt } from '@/content/panel'
 import type { ChapterId } from '@/content/chapters'
 import type { Purpose } from '@/content/situations'
-import { takeHoliday } from '@/engine/learner'
+import { markBoardMet, takeHoliday } from '@/engine/learner'
 import { track } from '@/engine/analytics'
 import type { PathNode, PathView } from './progress'
 import { milestoneHref, onHoliday } from './progress'
@@ -118,6 +118,16 @@ export function Board({
     () => (view.units[index] ? lapOf(view, index, purpose, { gems, rows, voice, walks: WALKS, chapter }) : null),
     [view, index, purpose, gems, rows, voice],
   )
+  /*
+    WHAT THE BOARD TURNED OVER, KEPT (2026-11-05). A postcard, place or what's on is met once
+    the token passes it; the level recap and Yours list them after the board has moved on.
+    content/level.ts. A record of meeting, never a score.
+  */
+  useEffect(() => {
+    if (!lap) return
+    const keys = lap.squares.filter((s) => s.reached && (s.kind === 'postcard' || s.kind === 'venue' || s.kind === 'neighbour')).map((s) => s.key)
+    if (keys.length) markBoardMet(keys)
+  }, [lap])
   const [open, setOpen] = useState<Square | null>(null)
   const away = onHoliday({ holidays }, now)
   if (!lap) return null

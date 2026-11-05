@@ -98,8 +98,14 @@ ok('What’s on is still a tap from City', /WHAT|What’s on|What's on/i.test(sr
 
 console.log('\nthe order of Yours')
 const profile = src('components/Profile.tsx')
-const order = ['<Identity />', '<AtRisk />', '<CanSay />', '<YoursOut />', '<Collection />', '<Friends />'].map((t) => profile.indexOf(t))
-ok('you, keep it safe, what you can say, your Lisbon, library, people', order.every((n, i) => n > 0 && (i === 0 || n > order[i - 1])), order.join(' < '))
+/*
+  BY LEVEL OR BY KIND (2026-11-05): what you can say and the library are the two halves of one
+  switch now, with a search over both — components/yours/YoursViews.tsx.
+*/
+const order = ['<Identity />', '<AtRisk />', '<YoursViews', '<YoursOut />', '<Friends />'].map((t) => profile.indexOf(t))
+ok('you, keep it safe, what you can say / library, your Lisbon, people', order.every((n, i) => n > 0 && (i === 0 || n > order[i - 1])), order.join(' < '))
+const views = src('components/yours/YoursViews.tsx')
+ok('the switch holds both: by level and by kind', views.includes('<CanSay') && views.includes('<Collection />'))
 
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)')
