@@ -169,7 +169,25 @@ export function gemsHomeFirst(chapter: ChapterId): Gem[] {
 
 export function visibleGems(all: Gem[] = GEMS): Gem[] {
   const production = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
-  return production ? all.filter((g) => g.verified) : all
+  return production && !draftsOn() ? all.filter((g) => g.verified) : all
+}
+
+/**
+ * DRAFTS ON THIS PHONE (Sam, 2026-11-05: "I want to move to Cascais/Sintra and can't"). The
+ * towns' places are drafts until somebody checks them, so the live app keeps the towns shut —
+ * which also shut out the people who have to check them. Opening /settings?drafts=on turns
+ * drafts on for this browser only: the towns board, and their places show, marked as drafts
+ * on Settings. Browser-only by design — the server never shows a draft, so check-ins and
+ * rewards still only count at checked places. /settings?drafts=off turns it back off.
+ */
+export const DRAFTS_KEY = 'dub.drafts'
+export function draftsOn(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    return window.localStorage.getItem(DRAFTS_KEY) === 'on'
+  } catch {
+    return false
+  }
 }
 
 /** One gem, by id — any gem, verified or not; callers decide what to show. */

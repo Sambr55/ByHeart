@@ -36,10 +36,13 @@ const booker = src('components/Booker.tsx')
 for (const t of TOWNS) {
   const c = chapterById(t)
   ok(`${c.pt} is a city (${c.code})`, c.id === t && CHAPTERS.some((x) => x.id === t))
-  ok(`${c.pt} is on the selector, boarding only when ready`, booker.includes(`code: '${c.code}', id: '${t}'`) && booker.includes(`open: cityReady('${t}')`))
+  ok(`${c.pt} is on the selector, boarding only when ready`, booker.includes(`code: '${c.code}', id: '${t}'`) && booker.includes(`open: true, town: '${t}'`) && /boarding\(place\)/.test(booker))
 }
 ok('booking sets the chosen city, not Lisbon', /setChapter\(chapter\)/.test(booker) && !/setChapter\(DEFAULT_CHAPTER\)/.test(booker))
 ok('Settings can change city', /<CityChoice \/>/.test(src('components/Settings.tsx')))
+ok('the boarding pass can be reopened (/trip), from the path header and Settings', existsSync(new URL('../app/trip/page.tsx', import.meta.url)) && /href="\/trip"/.test(src('components/path/PathHome.tsx')) && /href="\/trip"/.test(src('components/Theme.tsx')))
+ok('reopening it never touches progress (it only books)', !/finished_cards|resetLearner\(/.test(src('components/Trip.tsx')))
+ok('drafts can be turned on for one browser, never on the server', /typeof window === 'undefined'\) return false/.test(src('content/gems.ts')) && /drafts=on/.test(src('components/Theme.tsx')))
 
 console.log('\nthe places')
 const rooms = new Set(SITUATIONS.map((s) => s.id))

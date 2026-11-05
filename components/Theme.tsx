@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { PURPOSES, type Purpose } from '@/content/situations'
 import { loadLearner, setChapter, setPurpose } from '@/engine/learner'
 import { CHAPTERS, chapterById, type ChapterId } from '@/content/chapters'
-import { cityReady } from '@/content/gems'
+import { DRAFTS_KEY, cityReady, draftsOn } from '@/content/gems'
 import { setSound, soundOn, tap } from '@/engine/tap'
 
 export type Theme = 'system' | 'light' | 'dark'
@@ -216,34 +216,60 @@ export function ThemeChoice() {
  */
 export function CityChoice() {
   const [chapter, setChapterState] = useState<ChapterId | 'unknown'>('unknown')
-  useEffect(() => setChapterState(loadLearner().chapter ?? 'lisbon'), [])
+  const [drafts, setDrafts] = useState(false)
+  useEffect(() => {
+    /* /settings?drafts=on|off — the reviewer's switch (content/gems.ts draftsOn). */
+    const q = new URLSearchParams(window.location.search).get('drafts')
+    if (q === 'on' || q === 'off') {
+      try {
+        if (q === 'on') window.localStorage.setItem(DRAFTS_KEY, 'on')
+        else window.localStorage.removeItem(DRAFTS_KEY)
+      } catch {
+        /* No storage: nothing to switch. */
+      }
+    }
+    setDrafts(draftsOn())
+    setChapterState(loadLearner().chapter ?? 'lisbon')
+  }, [])
   if (chapter === 'unknown') return null
   const cities = CHAPTERS.filter((c) => c.open && (cityReady(c.id) || c.id === chapter))
-  if (cities.length < 2) return null
   return (
     <div id="city" className="flex scroll-mt-24 flex-col gap-1" data-testid="city-choice">
       <p className="eyebrow text-muted">WHERE</p>
-      <div role="group" aria-label="Which city" className="flex gap-1">
-        {cities.map((c) => (
-          <button
-            key={c.id}
-            type="button"
-            data-testid={'city-set-' + c.id}
-            aria-pressed={chapter === c.id}
-            onClick={() => {
-              setChapter(c.id)
-              setChapterState(c.id)
-            }}
-            className={
-              'tap-target flex-1 rounded border px-3 py-1 text-[0.6rem] uppercase tracking-wider transition ' +
-              (chapter === c.id ? 'border-accent bg-accent/10 text-accent' : 'border-line text-muted hover:text-fg')
-            }
-          >
-            {c.pt}
-          </button>
-        ))}
-      </div>
+      {cities.length > 1 ? (
+        <div role="group" aria-label="Which city" className="flex gap-1">
+          {cities.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              data-testid={'city-set-' + c.id}
+              aria-pressed={chapter === c.id}
+              onClick={() => {
+                setChapter(c.id)
+                setChapterState(c.id)
+              }}
+              className={
+                'tap-target flex-1 rounded border px-3 py-1 text-[0.6rem] uppercase tracking-wider transition ' +
+                (chapter === c.id ? 'border-accent bg-accent/10 text-accent' : 'border-line text-muted hover:text-fg')
+              }
+            >
+              {c.pt}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <a href="/trip" data-testid="settings-trip" className="tap-target mt-1 self-start text-sm font-semibold text-accent">
+        Change destination, dates or who with →
+      </a>
       <p className="mt-1 text-xs leading-relaxed text-muted">The same path everywhere; the places, the walks and the venues are the city’s own.</p>
+      {drafts ? (
+        <p className="mt-1 rounded border border-[#c9973b] px-3 py-2 text-xs leading-relaxed" data-testid="drafts-on">
+          Draft places are on for this browser: towns and places nobody has checked yet are shown. Check-ins only count at checked places.{' '}
+          <a href="/settings?drafts=off#city" className="font-semibold underline">
+            Turn off
+          </a>
+        </p>
+      ) : null}
     </div>
   )
 }

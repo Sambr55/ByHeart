@@ -65,14 +65,20 @@ const FROM = [
   a person has checked — cityReady — so on the live app they say "coming soon" until then,
   and on a preview build they board for review.
 */
+/*
+  Whether a town boards is asked when the pass is DRAWN, not when this file loads: turning
+  drafts on in Settings (content/gems.ts draftsOn) has to open it on the next screen.
+*/
+const boarding = (t: { open: boolean; town: string | null }) => t.open && (!t.town || cityReady(t.town as ChapterId))
+
 const TO = [
-  { code: 'LIS', id: 'lisbon', city: 'Lisboa', lang: 'Português', speaks: 'PT', open: true },
-  { code: 'CAS', id: 'cascais', city: 'Cascais', lang: 'Português · by the sea', speaks: 'PT', open: cityReady('cascais') },
-  { code: 'SNT', id: 'sintra', city: 'Sintra', lang: 'Português · in the hills', speaks: 'PT', open: cityReady('sintra') },
-  { code: 'MAD', id: 'madrid', city: 'Madrid', lang: 'Español', speaks: 'ES', open: false },
-  { code: 'BER', id: 'berlin', city: 'Berlin', lang: 'Deutsch', speaks: 'DE', open: false },
-  { code: 'PAR', id: 'paris', city: 'Paris', lang: 'Français', speaks: 'FR', open: false },
-  { code: 'LON', id: 'london', city: 'London', lang: 'English', speaks: 'EN', open: false },
+  { code: 'LIS', id: 'lisbon', city: 'Lisboa', lang: 'Português', speaks: 'PT', open: true, town: null },
+  { code: 'CAS', id: 'cascais', city: 'Cascais', lang: 'Português · by the sea', speaks: 'PT', open: true, town: 'cascais' },
+  { code: 'SNT', id: 'sintra', city: 'Sintra', lang: 'Português · in the hills', speaks: 'PT', open: true, town: 'sintra' },
+  { code: 'MAD', id: 'madrid', city: 'Madrid', lang: 'Español', speaks: 'ES', open: false, town: null },
+  { code: 'BER', id: 'berlin', city: 'Berlin', lang: 'Deutsch', speaks: 'DE', open: false, town: null },
+  { code: 'PAR', id: 'paris', city: 'Paris', lang: 'Français', speaks: 'FR', open: false, town: null },
+  { code: 'LON', id: 'london', city: 'London', lang: 'English', speaks: 'EN', open: false, town: null },
 ] as const
 type FromCode = (typeof FROM)[number]['code']
 type ToCode = (typeof TO)[number]['code']
@@ -94,7 +100,7 @@ export function Booker({ onDone }: { onDone: () => void }) {
   const origin = FROM.find((f) => f.code === fromLang)!
   const place = TO.find((t) => t.code === dest)!
   /* Open only where both ends are: English speakers, to Lisbon — today. */
-  const routeOpen = origin.open && place.open
+  const routeOpen = origin.open && boarding(place)
   const route = useRef<HTMLDivElement>(null)
   const [still, setStill] = useState(false)
   useEffect(() => setStill(window.matchMedia('(prefers-reduced-motion: reduce)').matches), [])
@@ -309,7 +315,7 @@ function RoutePicker({
   const rows =
     which === 'from'
       ? FROM.map((f) => ({ code: f.code, title: f.native, sub: f.name === f.native ? '' : f.name, open: f.open, same: false }))
-      : TO.map((t) => ({ code: t.code, title: t.city, sub: t.lang, open: t.open, same: t.speaks === from }))
+      : TO.map((t) => ({ code: t.code, title: t.city, sub: t.lang, open: boarding(t), same: t.speaks === from }))
   const current = which === 'from' ? from : to
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 sm:items-center" onClick={onClose}>
