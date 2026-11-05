@@ -18,9 +18,9 @@
  * the right and back along the bottom: Partida → rooms → Miradouro → rooms → Férias →
  * rooms → A mesa → rooms → home. Corners sit at the quarters, so the holiday is halfway.
  *
- * NO DICE (Sam, 2026-11-05). You move by laying rooms: the token stands on the square of
- * the k-th room in lap order when k of the level's rooms are done, whichever ones they are
- * (order is a suggestion, as on the Panel). Every stop and corner behind the token is
+ * NO DICE (Sam, 2026-11-05). You move by laying rooms: when k of the level's rooms are done,
+ * whichever ones they are (order is a suggestion, as on the Panel), the token stands on the
+ * square AFTER the k-th room in lap order — so the stop behind a laid room is already turned. Every stop and corner behind the token is
  * reached. The level's rooms laid and the token comes home to Partida, which then opens the
  * practice session and the next board — the same rule as pathLevel.
  *
@@ -169,7 +169,12 @@ export function lapOf(
   const open = nodes.filter((x) => x.state !== 'paid').length
   const complete = open > 0 ? laid >= open : nodes.every((x) => x.state === 'paid')
   const roomSquares = squares.filter((s) => s.kind === 'room')
-  let token = laid === 0 ? 0 : roomSquares[Math.min(laid, roomSquares.length) - 1].at
+  /*
+    YOU LAND ON THE SQUARE AFTER THE ROOM YOU LAID (Sam, 2026-11-05, on his phone: "Shouldn't
+    that third tile turn over, as the first two are done?"). A room laid turns over the stop
+    that follows it at once — the surprise is the room's reward, not the next room's.
+  */
+  let token = laid === 0 ? 0 : roomSquares[Math.min(laid, roomSquares.length) - 1].at + 1
   if (opts.voice) token += nodes.filter((x) => x.cold).length
   token = Math.min(token, L - 1)
   for (const s of squares) s.reached = complete || s.at <= token
