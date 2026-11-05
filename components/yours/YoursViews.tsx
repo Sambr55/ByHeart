@@ -76,21 +76,51 @@ export function YoursViews({ hasLevels }: { hasLevels: boolean }) {
 
   return (
     <section className="flex flex-col gap-4" data-testid="yours-views">
-      <label className="flex flex-col gap-1">
+      {/*
+        IT HAS TO LOOK LIKE A SEARCH (Sam, 2026-11-05: "make it more obvious that the search box
+        is a search box (across all your content)"). A pill with a magnifier, the word SEARCH in
+        the box, and what it searches said in the box itself. Procurar stays above it as the
+        Portuguese for what the box does.
+      */}
+      <label className="flex flex-col gap-2" data-testid="yours-search-label">
         <span className="eyebrow text-[0.65rem] text-muted">
           <span lang="pt-PT" className="pt text-accent">
             Procurar
           </span>{' '}
-          · to look for · in Portuguese or English
+          · search · everything in Yours
         </span>
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="café, a conta, obrigado…"
-          data-testid="yours-search"
-          className="w-full rounded-xl border border-line bg-bg-elev px-4 py-3 text-base outline-none focus:border-accent"
-        />
+        <span className="relative block">
+          <svg
+            aria-hidden
+            viewBox="0 0 24 24"
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-accent"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.2}
+            strokeLinecap="round"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-4.2-4.2" />
+          </svg>
+          <input
+            type="search"
+            enterKeyHint="search"
+            aria-label="Search everything in Yours, in Portuguese or English"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search lines, words, places…"
+            data-testid="yours-search"
+            /* Inline, because the global focus ring (app/globals.css) squares every focused control's corners and beats a class. */
+            style={{ borderRadius: 9999 }}
+            className="w-full rounded-full border-2 border-accent/40 bg-bg-elev py-3 pl-12 pr-4 text-base shadow-sm outline-none placeholder:text-muted focus:border-accent"
+          />
+        </span>
+        {!searching ? (
+          <span className="text-xs text-muted">
+            In Portuguese or English — try <span lang="pt-PT" className="pt text-accent">café</span>,{' '}
+            <span lang="pt-PT" className="pt text-accent">a conta</span> or “thank you”.
+          </span>
+        ) : null}
       </label>
 
       {searching ? (
