@@ -63,37 +63,20 @@ export const PANEL_ART: Partial<Record<ChapterId, Record<Purpose, PanelArt>>> = 
     },
   },
   /*
-    CASCAIS AND SINTRA (2026-11-05): their own paintings, in the same blue-and-white panel as
-    Lisbon's — Portuguese towns, the same tradition, their own views. Generated to match the
-    Lisbon three; the briefs are in the PR that added them.
+    SINTRA & CASCAIS (2026-11-05): their own paintings, in the same blue-and-white panel as
+    Lisbon's. One city of two towns, so one of each: the hills for the trip, the seafront
+    for the season, and the Colares house between vines and cliff — both at once — for the move.
   */
-  cascais: {
-    visiting: {
-      src: '/panel/cascais-trip.jpg',
-      alt: 'The fishermen’s beach in Cascais: boats pulled up on the sand, the white town round the bay, a lighthouse on the point',
-      title: 'Finish the trip and the bay is yours.',
-    },
-    staying: {
-      src: '/panel/cascais-season.jpg',
-      alt: 'The seafront path towards Estoril: a café terrace, people walking by the sea wall, a small cove below',
-      title: 'Finish the season and the seafront knows your name.',
-    },
-    moving: {
-      src: '/panel/cascais-moving.jpg',
-      alt: 'A tiled house in the old village, its door open, bougainvillea over the wall and the lane running down to the sea',
-      title: 'Finish the move and the door is open.',
-    },
-  },
-  sintra: {
+  'sintra-cascais': {
     visiting: {
       src: '/panel/sintra-trip.jpg',
       alt: 'Sintra’s old town in the green hills, a cobbled street and a café, the Moorish castle on the ridge in the mist',
       title: 'Finish the trip and the hills are yours.',
     },
     staying: {
-      src: '/panel/sintra-season.jpg',
-      alt: 'The Sunday fair in São Pedro: stalls under the trees, fruit, bread and cheese, a fountain, the wooded hills behind',
-      title: 'Finish the season and the fair knows your name.',
+      src: '/panel/cascais-season.jpg',
+      alt: 'The seafront path towards Estoril: a café terrace, people walking by the sea wall, a small cove below',
+      title: 'Finish the season and the seafront knows your name.',
     },
     moving: {
       src: '/panel/sintra-moving.jpg',

@@ -198,8 +198,8 @@ export const CALENDAR: CalendarRow[] = [...LISBON_2026_10, ...LISBON_2026_11, ..
 /** Rows that are live for a date: verified, in window, and not past their review date. */
 export function rowsFor(chapter: ChapterId, now: Date = new Date()): CalendarRow[] {
   const today = now.toISOString().slice(0, 10)
-  /* Cascais and Sintra are forty minutes from Lisbon on the train: Lisbon's nights are theirs too (2026-11-05). */
-  const near = chapter === 'cascais' || chapter === 'sintra'
+  /* Sintra and Cascais are forty minutes from Lisbon on the train: Lisbon's nights are theirs too (2026-11-05). */
+  const near = chapter === 'sintra-cascais'
   return CALENDAR.filter(
     (r) =>
       (r.chapter === chapter || (near && r.chapter === 'lisbon')) &&

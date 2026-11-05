@@ -110,7 +110,7 @@ export function City() {
 
         <div className="md:grid md:grid-cols-[minmax(0,1fr)_26rem] md:gap-6 md:px-5">
           <div className="relative h-[46svh] overflow-hidden border-y border-line md:sticky md:top-20 md:h-[75svh] md:rounded-3xl md:border">
-            <CityMap gems={shown} selected={selected} focus={bairro} me={where.at} onSelect={setSelected} centre={cityCentre(chapter)} zoom={chapter === 'lisbon' ? 13 : 12} />
+            <CityMap gems={shown} selected={selected} focus={bairro} me={where.at} onSelect={setSelected} centre={cityCentre(chapter)} zoom={chapter === 'lisbon' ? 13 : 11} />
             <button
               type="button"
               data-testid="city-near-me"
