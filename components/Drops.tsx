@@ -1,6 +1,8 @@
 'use client'
 
 import Link from 'next/link'
+import { AddToCalendar } from '@/components/AddToCalendar'
+import { eventOfDrop } from '@/content/cal-event'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Wordmark } from '@/components/Wordmark'
 import { useEffect, useState } from 'react'
@@ -168,6 +170,7 @@ export function Drops() {
                 <p className="mt-3 text-xs leading-relaxed text-muted">
                   {d.situations.map((x: Drop['situations'][number]) => x.title).join(' · ')}
                 </p>
+                <AddToCalendar event={eventOfDrop(d)} className="mt-3" />
               </div>
             ))}
           </section>
@@ -207,6 +210,7 @@ export function Drops() {
                 ))}
               </ul>
               <div className="mt-6 flex flex-wrap items-center gap-3">
+                <AddToCalendar event={eventOfDrop(d)} />
                 <Link
                   href="/club"
                   className="tap-target eyebrow text-accent underline underline-offset-4"
@@ -261,6 +265,7 @@ export function Drops() {
                 <p className="mt-1 text-xs text-muted">
                   {next.place.name} · {dropWhen(next)}
                 </p>
+                <AddToCalendar event={eventOfDrop(next)} className="mt-3" />
                 <p className="mt-3 text-xs leading-relaxed text-muted">
                   It opens{' '}
                   {dropOpensOn(next).toLocaleDateString('en-GB', {

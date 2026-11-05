@@ -29,6 +29,8 @@ import type { Drop } from '@/content/drops'
 import { track } from '@/engine/analytics'
 import { voiced } from '@/content/speaker'
 import { completedBy } from '@/content/level'
+import { AddToCalendar } from '@/components/AddToCalendar'
+import { eventOfDrop } from '@/content/cal-event'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { hasFullAccess } from '@/lib/entitlements'
 import { roomLock } from '@/components/path/locks'
@@ -583,6 +585,8 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
               the LAST room, so nothing follows it but this.
             */}
             {isInvite && drop ? <SendInvite situation={situation} drop={drop} /> : null}
+            {/* A room of a night: the night itself, into the diary (Sam, 2026-11-05). */}
+            {drop ? <AddToCalendar event={eventOfDrop(drop)} up className="self-center" /> : null}
             {/* Just said it out loud, with the next room waiting: the moment to offer the
                 next line on the lock screen (components/PushChoices.tsx). */}
             {nextRoom ? <PushAsk room={situation.id} /> : null}
