@@ -1,5 +1,5 @@
 'use client'
-import type { ChapterId } from '@/content/chapters'
+import { chapterIdOf, type ChapterId } from '@/content/chapters'
 
 /**
  * The learner, not the lesson.
@@ -1164,7 +1164,8 @@ export function loadLearner(): LearnerState {
           set_up_at: parsed.set_up_at ?? null,
           asked: arr(parsed.asked, []),
           purpose: parsed.purpose ?? null,
-          chapter: parsed.chapter ?? null,
+          /* Old town ids (cascais, sintra) read as the merged city. */
+          chapter: chapterIdOf(parsed.chapter),
           rejected: arr(parsed.rejected, []),
           tasted: parsed.tasted ?? null,
           deal_accepted_at: parsed.deal_accepted_at ?? null,

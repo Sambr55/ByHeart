@@ -21,7 +21,7 @@ import { TOWN_BAIRROS, TOWN_GEMS } from '@/content/towns'
  */
 
 export type LisbonBairroId = 'graca' | 'mouraria' | 'alfama' | 'campo-de-ourique' | 'arroios' | 'marvila'
-/* The towns' bairros carry their town in the id (content/towns/), so two towns never collide. */
+/* The towns' bairros carry their town in the id (content/towns/): Sintra & Cascais is one city of two towns. */
 export type BairroId = LisbonBairroId | `cascais-${string}` | `sintra-${string}`
 
 export interface Bairro {

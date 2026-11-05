@@ -1,8 +1,13 @@
 /**
- * THE TOWNS BESIDE LISBON (2026-11-05): Cascais and Sintra. Their bairros, gems and walks,
- * drafted from research with sources and `verified: false` until somebody who knows each
- * town has checked them — content/gems.ts visibleGems keeps them off production till then,
- * and the boarding pass (cityReady) says "coming soon" for a town with nothing checked.
+ * SINTRA & CASCAIS — one city of two towns (Sam, 2026-11-05: "consolidate Cascais and
+ * Sintra into one 'City' and then run agents to populate its content and set it live").
+ *
+ * ON WHAT `verified: true` MEANS HERE. Lisbon's flag is a person's word (content/gems.ts).
+ * For this launch Sam asked for the city to go live from research, so a town gem is
+ * verified when a source DATED 2025–26 shows it operating at that address — each gem's
+ * `unsure` says what confirmed it and what is still unchecked. Undated aggregators never
+ * counted. A gem nobody could confirm stays `verified: false`, off production. The places
+ * listed in the PR for a visit in person are the ones to walk past first.
  */
 import type { Bairro, Gem } from '@/content/gems'
 import type { Walk } from '@/content/walks'

@@ -63,7 +63,9 @@ for (const w of WALKS) {
     ok(w.id + ': walkable on verified gems alone (3+ stops)', Boolean(v), String(v?.stops.length ?? 0))
   }
   if (v) {
-    ok(w.id + ': under 4 km stop to stop', v.metres < 4000, Math.round(v.metres) + ' m')
+    /* The towns' walks may take the tram or the coast road between stops (Colares to the sea): 6 km there (2026-11-05). */
+    const span = chapterOfBairro(w.bairro) === 'lisbon' ? 4000 : 6000
+    ok(w.id + ': under ' + span / 1000 + ' km stop to stop', v.metres < span, Math.round(v.metres) + ' m')
     ok(w.id + ': progress counts said stops', walkProgress(v, [v.stops[0].key]).done === 1 && !walkProgress(v, []).complete)
   }
 }

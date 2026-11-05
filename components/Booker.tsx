@@ -59,11 +59,11 @@ const FROM = [
   { code: 'FR', name: 'French', native: 'Français', open: false },
 ] as const
 /*
-  CASCAIS AND SINTRA (Sam, 2026-11-05: "lets do the cascais and sintra from airline selector
-  onwards"). Two more Portuguese destinations beside Lisbon, the same language and every room
-  shared; their own places, walks and venues (content/towns/). Each boards once it has places
-  a person has checked — cityReady — so on the live app they say "coming soon" until then,
-  and on a preview build they board for review.
+  SINTRA & CASCAIS (Sam, 2026-11-05: "consolidate Cascais and Sintra into one 'City'"). One
+  more Portuguese destination beside Lisbon — two towns, the hills and the sea, one line on
+  the pass. The same language and every room shared; its own places, walks and venues
+  (content/towns/). It boards once it has places a person has checked (cityReady), so on the
+  live app it says "coming soon" until then.
 */
 /*
   Whether a town boards is asked when the pass is DRAWN, not when this file loads: turning
@@ -73,8 +73,7 @@ const boarding = (t: { open: boolean; town: string | null }) => t.open && (!t.to
 
 const TO = [
   { code: 'LIS', id: 'lisbon', city: 'Lisboa', lang: 'Português', speaks: 'PT', open: true, town: null },
-  { code: 'CAS', id: 'cascais', city: 'Cascais', lang: 'Português · by the sea', speaks: 'PT', open: true, town: 'cascais' },
-  { code: 'SNT', id: 'sintra', city: 'Sintra', lang: 'Português · in the hills', speaks: 'PT', open: true, town: 'sintra' },
+  { code: 'SCS', id: 'sintra-cascais', city: 'Sintra & Cascais', lang: 'Português · hills & sea', speaks: 'PT', open: true, town: 'sintra-cascais' },
   { code: 'MAD', id: 'madrid', city: 'Madrid', lang: 'Español', speaks: 'ES', open: false, town: null },
   { code: 'BER', id: 'berlin', city: 'Berlin', lang: 'Deutsch', speaks: 'DE', open: false, town: null },
   { code: 'PAR', id: 'paris', city: 'Paris', lang: 'Français', speaks: 'FR', open: false, town: null },
