@@ -1,5 +1,5 @@
 import 'server-only'
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
+import { createHash, randomBytes, timingSafeEqual, randomInt } from 'node:crypto'
 import { cookies, headers } from 'next/headers'
 import { db } from './db'
 
@@ -66,8 +66,14 @@ export async function ensureDevice(): Promise<string> {
 export interface IssuedLink {
   token: string
   url: string
+  /** The six digits for typing into the app (2026-11-05). Same lifetime, same single use. */
+  code: string
   expiresAt: Date
 }
+
+/** Wrong guesses before a code is dead: a million codes, five tries, twenty minutes. */
+export const CODE_TRIES = 5
+const codeHash = (email: string, code: string) => sha('code:' + email + ':' + code)
 
 /**
  * Where a sign-in link is allowed to land, and nowhere else.
@@ -105,9 +111,10 @@ export async function issueLoginToken(
   const expiresAt = new Date(Date.now() + TOKEN_MINUTES * 60_000)
   const ip = (await headers()).get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
 
+  const code = String(randomInt(0, 1_000_000)).padStart(6, '0')
   await sql`
-    insert into login_tokens (token_hash, email, expires_at, request_ip)
-    values (${sha(token)}, ${email}, ${expiresAt}, ${ip})
+    insert into login_tokens (token_hash, email, expires_at, request_ip, code_hash)
+    values (${sha(token)}, ${email}, ${expiresAt}, ${ip}, ${codeHash(email, code)})
   `
   /*
     The destination rides on the link rather than in the row.
@@ -121,7 +128,33 @@ export async function issueLoginToken(
   const url = absoluteUrl(
     '/api/auth/verify?token=' + token + (land === '/account?welcome=1' ? '' : '&next=' + encodeURIComponent(land)),
   )
-  return { token, url, expiresAt }
+  return { token, url, code, expiresAt }
+}
+
+/**
+ * SIGN IN WITH THE CODE, IN THE APP (2026-11-05). Spends the newest live code for this
+ * address if it matches, and the link with it — one email, one way in. A wrong code counts
+ * against every live code for the address, and five wrong guesses kill them all.
+ */
+export async function consumeLoginCode(emailRaw: string, codeRaw: string): Promise<'ok' | 'wrong' | 'dead'> {
+  const sql = db()
+  if (!sql) return 'dead'
+  const email = emailRaw.trim().toLowerCase()
+  const code = codeRaw.replace(/\D/g, '')
+  const live = await sql<{ token_hash: string; code_hash: string | null; attempts: number }[]>`
+    select token_hash, code_hash, attempts from login_tokens
+     where email = ${email} and used_at is null and expires_at > now() and code_hash is not null
+     order by created_at desc limit 3
+  `
+  const open = live.filter((r) => r.attempts < CODE_TRIES)
+  if (!open.length) return 'dead'
+  const hit = code.length === 6 ? open.find((r) => r.code_hash === codeHash(email, code)) : undefined
+  if (!hit) {
+    await sql`update login_tokens set attempts = attempts + 1 where email = ${email} and used_at is null and expires_at > now()`
+    return open.every((r) => r.attempts + 1 >= CODE_TRIES) ? 'dead' : 'wrong'
+  }
+  const spent = await sql`update login_tokens set used_at = now() where token_hash = ${hit.token_hash} and used_at is null`
+  return spent.count ? 'ok' : 'dead'
 }
 
 /** Spends the token and returns the email it was issued to. Single use. */

@@ -48,6 +48,11 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
   >('idle')
   const [message, setMessage] = useState<string | null>(null)
   const [debugUrl, setDebugUrl] = useState<string | null>(null)
+  /* The six digits from the email (2026-11-05), typed here — on the device they are holding. */
+  const [code, setCode] = useState('')
+  const [checking, setChecking] = useState(false)
+  const [codeNote, setCodeNote] = useState<string | null>(null)
+  const [debugCode, setDebugCode] = useState<string | null>(null)
 
   /*
     Read once after mount rather than with useSearchParams, so this page needs no Suspense
@@ -121,6 +126,7 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
       return
     }
     setDebugUrl(data.debug_url ?? null)
+    setDebugCode((data as { debug_code?: string }).debug_code ?? null)
     /*
       Do not say "check your email" when the server has just said it sent nothing.
 
@@ -200,12 +206,61 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
           </Link>
         </div>
       ) : state === 'sent' ? (
-        <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
+        <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6" data-testid="signin-code-step">
           <h1 className="display text-balance text-3xl">Check your email.</h1>
           <p className="text-sm text-fg/80">
-            One link, good for twenty minutes, and it only works once. Open it on the phone you
-            want to learn on.
+            We sent a six-digit code to <span className="font-semibold">{email}</span>. Type it here.
           </p>
+          <form
+            className="flex flex-col gap-3"
+            onSubmit={async (e) => {
+              e.preventDefault()
+              setChecking(true)
+              setCodeNote(null)
+              const res = await fetch('/api/auth/code', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ email, code, next: backTo }),
+              }).catch(() => null)
+              const d = (res ? await res.json().catch(() => ({})) : {}) as { ok?: boolean; next?: string; reason?: string; dead?: boolean }
+              setChecking(false)
+              if (d.ok) {
+                window.location.assign(d.next ?? '/account?welcome=1')
+                return
+              }
+              setCodeNote(d.reason ?? 'That did not work.')
+              setCode('')
+              if (d.dead) setState('idle')
+            }}
+          >
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              autoFocus
+              aria-label="Six-digit code"
+              placeholder="123456"
+              data-testid="signin-code"
+              className="w-full rounded border border-line bg-surface px-4 py-3 text-center text-2xl tracking-[0.4em] outline-none focus:border-accent"
+            />
+            <button
+              type="submit"
+              disabled={code.length !== 6 || checking}
+              data-testid="signin-code-go"
+              className="tap-target w-full rounded-full bg-accent px-5 py-3 text-xs tracking-widest text-accent-ink disabled:opacity-50"
+            >
+              {checking ? 'CHECKING…' : 'SIGN IN'}
+            </button>
+            {codeNote ? <p className="text-sm text-fg/80" role="status">{codeNote}</p> : null}
+          </form>
+          <p className="text-xs text-muted">
+            The email has a link too, for a laptop. The code and the link last twenty minutes and work once.{' '}
+            <button type="button" className="underline" onClick={() => setState('idle')}>
+              Use a different email
+            </button>
+          </p>
+          {debugCode ? <p className="text-xs text-muted" data-testid="signin-debug-code">Test code: {debugCode}</p> : null}
           {debugUrl ? (
             <a href={debugUrl} className="break-all rounded border border-accent/40 bg-accent/5 p-4 text-xs text-accent">
               {debugUrl}
@@ -234,7 +289,7 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
                   : 'Everything you have done so far is on this phone. An account moves it somewhere it cannot be lost, and lets you carry on wherever you are.')}
           </p>
           <p className="text-sm text-muted">
-            No password. We send a link, you tap it, you are in.
+            No password. We email you a six-digit code, you type it here, you are in.
           </p>
 
           {accountsReady ? (
@@ -257,7 +312,7 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
                 disabled={state === 'sending'}
                 className="tap-target w-full rounded-full bg-accent px-5 py-3 text-xs tracking-widest text-accent-ink disabled:opacity-50"
               >
-                {state === 'sending' ? 'SENDING…' : 'SEND ME A LINK'}
+                {state === 'sending' ? 'SENDING…' : 'SEND ME A CODE'}
               </button>
               {message ? <p className="text-xs text-accent">{message}</p> : null}
             </form>
