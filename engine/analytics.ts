@@ -256,6 +256,9 @@ export type EventName =
   | 'table_lines_saved'
   | 'table_finished'
   | 'vocab_search_ask'
+  | 'level_recap'
+  | 'yours_search'
+  | 'yours_view'
   | 'opener_ask'
   /** An email left for a route that is not open yet, from the booker (2026-11-03). */
   | 'waitlist_joined'

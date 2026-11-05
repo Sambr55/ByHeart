@@ -10,6 +10,7 @@ import { useNowAfterMount } from '@/engine/useNow'
 import { useEntitlements } from '@/engine/useEntitlements'
 import { hasFullAccess } from '@/lib/entitlements'
 import { PATH_NAMES, pathPurpose, pathUnits } from '@/content/path'
+import { levelKey } from '@/content/level'
 import {
   milestoneHref,
   pathLevel,
@@ -129,8 +130,33 @@ export function PathHome() {
     view.units.find((u) => u.unit.id === view.next?.unit.id)?.unit ?? view.units[0]?.unit
   const practiceHref = practiceUnit ? milestoneHref(practiceUnit.milestone.cheat) : '/revise'
 
+  /*
+    THE RECAP NOBODY HAS OPENED YET (2026-11-05). The last room of a level opens its recap
+    (Errand), but a level can also be finished from elsewhere; so the latest finished level
+    whose recap has not been seen waits here, above Up next, until it is opened.
+  */
+  const recapDue = useMemo(() => {
+    const u = level.level >= 2 ? view.units[level.level - 2] : undefined
+    if (!u || !u.done) return null
+    const key = levelKey(purpose, u.unit.id)
+    return (learner.recaps_seen ?? []).includes(key) ? null : { id: u.unit.id, n: level.level - 1, title: u.unit.title }
+  }, [level.level, view, purpose, learner.recaps_seen])
+
   const task = (
     <section aria-labelledby="up-next" className="flex flex-col gap-3" data-testid="up-next">
+      {recapDue ? (
+        <Link
+          href={'/level/' + encodeURIComponent(recapDue.id)}
+          data-testid="path-recap-due"
+          className="tap-target flex items-center justify-between gap-3 rounded-2xl border-2 border-[#e2b450] bg-bg-elev px-5 py-4"
+        >
+          <span className="min-w-0">
+            <span className="eyebrow block text-accent">Level {recapDue.n} laid</span>
+            <span className="block text-base">See your recap and test yourself on {recapDue.title}</span>
+          </span>
+          <span aria-hidden className="text-accent">→</span>
+        </Link>
+      ) : null}
       <h2 id="up-next" className="eyebrow text-muted">
         {view.next ? 'Up next' : name.done}
       </h2>

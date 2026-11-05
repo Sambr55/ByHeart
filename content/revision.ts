@@ -55,7 +55,8 @@ import { DROPS } from '@/content/drops'
 import { IDIOMS } from '@/content/idioms'
 import { CHEATS } from '@/content/cheats'
 import type { CardKind } from '@/content/collection'
-import { situationById } from '@/content/situations'
+import { situationById, type Purpose } from '@/content/situations'
+import { levelRevision, unitById } from '@/content/level'
 import { voiced } from '@/content/speaker'
 
 /**
@@ -68,7 +69,7 @@ import { voiced } from '@/content/speaker'
  * for something they never show. Anything that only knows cards keeps taking CardKind;
  * only this file and components/Revise.tsx take the wider one.
  */
-export type RevisionKind = CardKind | 'room'
+export type RevisionKind = CardKind | 'room' | 'level'
 
 export interface RevisionLine {
   /** What they are asked for, in English. */
@@ -132,8 +133,14 @@ export function revisionFor(
     inventory?: Record<string, unknown>
     /** The asked branch's only source — this content lives nowhere else. */
     asked?: { pt: string; en: string; note: string; at: string }[]
+    /** The level branch's rooms and path — see content/level.ts. */
+    finished_cards?: string[]
+    purpose?: Purpose | null
   },
 ): RevisionLine[] {
+  /* A WHOLE LEVEL, everything it taught, asked back from its recap (content/level.ts). */
+  if (kind === 'level') return levelRevision(id, { finished_cards: me.finished_cards, purpose: me.purpose ?? null, gender: me.gender ?? null })
+
   if (kind === 'vibe') {
     /*
       The release, which is the sentence the root was for — culture-free, and the one
@@ -351,9 +358,13 @@ export function revisionFor(
 }
 
 /** What the screen is called, which is the card's own name. */
-export function revisionTitle(kind: RevisionKind, id: string): string {
+export function revisionTitle(kind: RevisionKind, id: string, purpose?: Purpose | null): string {
   /* A room is called what it is called on the Wall. */
   if (kind === 'room') return situationById(id)?.title ?? id
+  if (kind === 'level') {
+    const at = unitById(id, purpose ?? null)
+    return at ? 'Level ' + at.level + ' · ' + at.unit.title : id
+  }
   /* A vibe is a crate and a sheet is a set. Looking a vibe up in SETS never matches. */
   if (kind === 'vibe') return CRATES.find((c) => c.id === id)?.title ?? id
   if (kind === 'sheet') return SETS.find((s) => s.id === id)?.label ?? id
