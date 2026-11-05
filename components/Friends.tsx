@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { track } from '@/engine/analytics'
-import { INVITE, INVITE_TEXT } from '@/content/invite'
+import { INVITE } from '@/content/invite'
+import { useInvites } from '@/components/invite/useInvites'
 import { mintShowing } from '@/engine/showing'
 import { useLearner } from '@/engine/useLearner'
 
@@ -30,13 +31,6 @@ interface Mine {
   returned: boolean
 }
 
-/** One invitation, and what became of it. Never a count — see the note on the component. */
-interface Invited {
-  code: string
-  accepted_at: string | null
-  landed_at: string | null
-}
-
 export function Friends() {
   const learner = useLearner()
   const [mine, setMine] = useState<Mine[] | null>(null)
@@ -44,24 +38,12 @@ export function Friends() {
   const [note, setNote] = useState<string | null>(null)
   /*
     THE PEOPLE YOU HAVE BROUGHT IN, which is a different thing from the people you have
-    shown something to.
-
-    Showing is one card, once — the mechanic this component was built for. An invitation is
-    an ask to come and learn the language of the city you are both in, and it is the half
-    Sam is after: "We need to BUILD communities around language and cities."
+    shown something to. Shared with the board's "Convida um amigo" sheet (useInvites).
   */
-  const [invites, setInvites] = useState<Invited[] | null>(null)
-
+  const brought = useInvites('yours')
+  const invites = brought.invites
   useEffect(() => {
     let live = true
-    fetch('/api/invite')
-      .then((r) => r.json())
-      .then((b: { ok: boolean; invites?: Invited[] }) => {
-        if (live) setInvites(b.ok ? (b.invites ?? []) : [])
-      })
-      .catch(() => {
-        if (live) setInvites([])
-      })
     fetch('/api/showing')
       .then((r) => r.json())
       .then((b: { ok: boolean; showings?: Mine[] }) => {
@@ -95,44 +77,10 @@ export function Friends() {
     setBusy(false)
   }
 
-  /*
-    BRING SOMEBODY, through the operating system's own share sheet.
-
-    Sam chose this over reading the phone book, and it is the right call twice: iOS already
-    shows the sender their contacts in a UI they trust, and DUB never sees a phone number —
-    which is a ceiling on what this feature can become rather than a first version. The
-    consent screen promises the work stays on the phone; an app that then uploads the
-    address book would be contradicting it.
-  */
-  async function bring() {
-    setBusy(true)
-    setNote(null)
-    try {
-      const res = await fetch('/api/invite', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ chapter: learner.chapter ?? null }),
-      })
-      const body = (await res.json()) as { ok: boolean; invite?: Invited & { code: string }; reason?: string }
-      if (!body.ok || !body.invite) {
-        setNote(body.reason ?? 'Could not make an invitation.')
-        setBusy(false)
-        return
-      }
-      const url = window.location.origin + '/come/' + body.invite.code
-      track('invite_sent', {})
-      if (typeof navigator !== 'undefined' && navigator.share) {
-        await navigator.share({ title: 'DUB', text: INVITE_TEXT, url }).catch(() => {})
-      } else {
-        await navigator.clipboard?.writeText(url).catch(() => {})
-        setNote('Link copied.')
-      }
-      setInvites((old) => [body.invite as Invited, ...(old ?? [])])
-    } catch {
-      setNote('Could not make an invitation.')
-    }
-    setBusy(false)
-  }
+  /* BRING SOMEBODY, through the operating system's own share sheet — never the phone book (useInvites). */
+  const bring = brought.bring
+  const busyAny = busy || brought.busy
+  const noteAny = note ?? brought.note
 
   // Before the fetch answers. An empty list flashed at somebody with three friends reads
   // as having lost them.
@@ -255,10 +203,10 @@ export function Friends() {
           type="button"
           data-testid="friends-bring"
           onClick={bring}
-          disabled={busy}
+          disabled={busyAny}
           className="tap-target eyebrow rounded bg-accent px-5 py-3 text-center text-accent-ink disabled:opacity-60"
         >
-          {busy ? 'MAKING A LINK' : INVITE.cta}
+          {brought.busy ? 'MAKING A LINK' : INVITE.cta}
         </button>
 
         {/*
@@ -274,7 +222,7 @@ export function Friends() {
         The reason, when there is one, in the words the engine gave — which for a new
         learner is "say something cold first", and is a instruction rather than an error.
       */}
-      {note ? <p className="text-xs leading-relaxed text-muted">{note}</p> : null}
+      {noteAny ? <p className="text-xs leading-relaxed text-muted">{noteAny}</p> : null}
     </section>
   )
 }

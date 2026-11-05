@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { InviteSheet } from '@/components/invite/InviteSheet'
 import { SpokenLine } from '@/components/Opener'
 import { CORNERS, HOLIDAY_PRIZE, type CornerId } from '@/content/board'
 import { rowsFor } from '@/content/calendar'
@@ -131,6 +132,7 @@ export function Board({
     if (keys.length) markBoardMet(keys)
   }, [lap])
   const [open, setOpen] = useState<Square | null>(null)
+  const [inviting, setInviting] = useState(false)
   const away = onHoliday({ holidays }, now)
   if (!lap) return null
   const art = panelArt(chapter, purpose)
@@ -218,8 +220,9 @@ export function Board({
               Portuguese first, because every ask teaches. Sized in container units, so they
               are the same cards on a 2×2 middle and a 4×4 one.
             */}
+            {/* The invite opens its own sheet here rather than sending people to the foot of Yours (Sam, 2026-11-05). */}
             <BoardCard
-              href="/profile#people"
+              onOpen={() => setInviting(true)}
               pt="Convida um amigo"
               en="Invite a friend"
               icon="friend"
@@ -265,6 +268,8 @@ export function Board({
       </label>
 
       {children}
+
+      {inviting ? <InviteSheet onClose={() => setInviting(false)} /> : null}
 
       {open ? (
         <StopSheet
@@ -695,27 +700,25 @@ function DrawEntry({ board }: { board: string }) {
  */
 function BoardCard({
   href,
+  onOpen,
   pt,
   en,
   icon,
   testid,
   style,
 }: {
-  href: string
+  href?: string
+  onOpen?: () => void
   pt: string
   en: string
   icon: 'friend' | 'table'
   testid: string
   style: CSSProperties
 }) {
-  return (
-    <Link
-      href={href}
-      data-testid={testid}
-      onClick={() => track('board_card', { card: icon })}
-      className="absolute flex aspect-[3/2] w-[40%] flex-col items-center justify-center gap-[3%] rounded-[6%] border-[0.35cqw] border-[#1f5d8c] bg-[#fbf6ec] p-[3%] text-center text-[#14243a] shadow-[0_6px_14px_rgba(10,20,40,0.35)] outline outline-1 outline-offset-[-3cqw] outline-[#1f5d8c]/40 transition hover:-translate-y-0.5"
-      style={style}
-    >
+  const cls =
+    'absolute flex aspect-[3/2] w-[40%] flex-col items-center justify-center gap-[3%] rounded-[6%] border-[0.35cqw] border-[#1f5d8c] bg-[#fbf6ec] p-[3%] text-center text-[#14243a] shadow-[0_6px_14px_rgba(10,20,40,0.35)] outline outline-1 outline-offset-[-3cqw] outline-[#1f5d8c]/40 transition hover:-translate-y-0.5'
+  const face = (
+    <>
       <svg aria-hidden viewBox="0 0 24 24" className="h-[28%] w-auto text-[#1f5d8c]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
         {icon === 'friend' ? (
           <>
@@ -735,6 +738,26 @@ function BoardCard({
       <span className="eyebrow leading-none text-[#14243a]/70" style={{ fontSize: 'clamp(0.4rem, 3.4cqw, 0.6rem)' }}>
         {en}
       </span>
+    </>
+  )
+  const tap = () => track('board_card', { card: icon })
+  return onOpen ? (
+    <button
+      type="button"
+      data-testid={testid}
+      aria-haspopup="dialog"
+      onClick={() => {
+        tap()
+        onOpen()
+      }}
+      className={cls}
+      style={style}
+    >
+      {face}
+    </button>
+  ) : (
+    <Link href={href ?? '/'} data-testid={testid} onClick={tap} className={cls} style={style}>
+      {face}
     </Link>
   )
 }
