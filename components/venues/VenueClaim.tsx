@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { PageShell } from '@/components/PageShell'
-import { FIRST_REWARD, REWARD_TIERS, SECOND_OFFERS, type SecondOffer } from '@/content/board'
+import { FIRST_REWARD, PAIR_REWARD, PAIR_WINDOW_H, REWARD_TIERS, SECOND_OFFERS, type SecondOffer } from '@/content/board'
 
 /**
  * A VENUE SIGNS UP, ON ITS OWN PHONE, IN FIVE MINUTES (Sam, 2026-11-05: "a very simple
@@ -22,6 +22,8 @@ export function VenueClaim({ token }: { token: string }) {
   const [second, setSecond] = useState<SecondOffer>('small_item')
   const [item, setItem] = useState('')
   const [cap, setCap] = useState('')
+  const [pairOn, setPairOn] = useState(false)
+  const [pairItem, setPairItem] = useState('')
   const [agree, setAgree] = useState(false)
   const [note, setNote] = useState<string | null>(null)
   const [done, setDone] = useState(false)
@@ -50,7 +52,7 @@ export function VenueClaim({ token }: { token: string }) {
     const r = await fetch('/api/venues/claim/' + encodeURIComponent(token), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ contactName, contact, pin, offerFirst: first, offerSecond: second, item, cap: cap ? Number(cap) : null }),
+      body: JSON.stringify({ contactName, contact, pin, offerFirst: first, offerSecond: second, item, cap: cap ? Number(cap) : null, offerPair: pairOn, pairItem }),
     }).catch(() => null)
     const j = r ? await r.json().catch(() => ({})) : {}
     if (j.result === 'ok') setDone(true)
@@ -106,6 +108,24 @@ export function VenueClaim({ token }: { token: string }) {
             <input value={cap} onChange={(e) => setCap(e.target.value.replace(/\D/g, ''))} inputMode="numeric" placeholder="Most per week (e.g. 10)" className={field} />
           ) : null}
         </fieldset>
+
+        {/* Bica a dois (2026-11-05): from the first visit, not at a count — two friends who came in together. */}
+        <div className="flex flex-col gap-2">
+          <label className="flex items-start gap-3">
+            <input type="checkbox" checked={pairOn} onChange={(e) => setPairOn(e.target.checked)} className="mt-1 h-5 w-5 accent-[#1f5d8c]" data-testid="claim-pair" />
+            <span>
+              <span className="block font-semibold" lang="pt-PT">
+                {PAIR_REWARD.name}
+              </span>
+              <span className="block text-sm text-muted">
+                {PAIR_REWARD.venue}. Both check in within {PAIR_WINDOW_H} hours; once each, ever. Optional — it brings people in from the first day.
+              </span>
+            </span>
+          </label>
+          {pairOn ? (
+            <input value={pairItem} onChange={(e) => setPairItem(e.target.value)} placeholder="What? e.g. a bica each" className={field} data-testid="claim-pair-item" />
+          ) : null}
+        </div>
 
         <div className="flex flex-col gap-2">
           <input value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="Your name" className={field} />

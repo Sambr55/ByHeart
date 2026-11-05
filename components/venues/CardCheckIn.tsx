@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { PAIR_REWARD } from '@/content/board'
 import { PageShell } from '@/components/PageShell'
 import { CHECKIN_ERRORS, checkIn, useVenues } from '@/components/city/useVenues'
 
@@ -16,6 +17,7 @@ export function CardCheckIn({ code }: { code: string }) {
   const [state, setState] = useState<'wait' | 'ok' | 'error'>('wait')
   const [msg, setMsg] = useState('')
   const [count, setCount] = useState(0)
+  const [pair, setPair] = useState(false)
   const [ran, setRan] = useState(false)
 
   useEffect(() => {
@@ -24,6 +26,7 @@ export function CardCheckIn({ code }: { code: string }) {
     void checkIn(null, code).then((r) => {
       if (r.ok) {
         setCount(r.count)
+        setPair(r.pair)
         setState('ok')
       } else {
         setMsg(CHECKIN_ERRORS[r.error])
@@ -51,6 +54,11 @@ export function CardCheckIn({ code }: { code: string }) {
               Boa!
             </p>
             <p className="text-base leading-relaxed">You’re checked in. {count === 1 ? 'You’re the first DUB learner here.' : count + ' DUB learners have said it here now.'}</p>
+            {pair ? (
+              <p className="text-base font-semibold" data-testid="card-checkin-pair">
+                <span lang="pt-PT" className="pt text-accent">{PAIR_REWARD.name}!</span> You and your friend both have one in your rewards.
+              </p>
+            ) : null}
             <Link href="/rewards" className="tap-target eyebrow rounded-full bg-accent px-6 py-3 text-accent-ink">
               Your rewards
             </Link>
