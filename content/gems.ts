@@ -1,3 +1,6 @@
+import type { ChapterId } from '@/content/chapters'
+import { TOWN_BAIRROS, TOWN_GEMS } from '@/content/towns'
+
 /**
  * LOCAL KNOWLEDGE — the places behind the rooms (Sam, 2026-11-03).
  *
@@ -17,17 +20,21 @@
  * reference for what exists, never a source of text or photographs.
  */
 
-export type BairroId = 'graca' | 'mouraria' | 'alfama' | 'campo-de-ourique' | 'arroios' | 'marvila'
+export type LisbonBairroId = 'graca' | 'mouraria' | 'alfama' | 'campo-de-ourique' | 'arroios' | 'marvila'
+/* The towns' bairros carry their town in the id (content/towns/), so two towns never collide. */
+export type BairroId = LisbonBairroId | `cascais-${string}` | `sintra-${string}`
 
 export interface Bairro {
   id: BairroId
+  /** Which city or town it is in (content/chapters.ts). Absent means Lisbon. */
+  chapter?: ChapterId
   name: string
   /** One line on what the neighbourhood is, as a local would put it. */
   feel: string
   centre: [number, number]
 }
 
-export const BAIRROS: Bairro[] = [
+const LISBON_BAIRROS: Bairro[] = [
   { id: 'graca', name: 'Graça', feel: 'Up the hill from Alfama: viewpoints locals actually use, and the 28 rattling past.', centre: [38.7166, -9.1305] },
   { id: 'mouraria', name: 'Mouraria & Intendente', feel: 'Where fado was born and half the world now cooks; the most mixed square mile in the city.', centre: [38.7178, -9.1355] },
   { id: 'alfama', name: 'Alfama', feel: 'Away from the castle queue: stairways, washing lines, and neighbours who talk across them.', centre: [38.7115, -9.1300] },
@@ -82,7 +89,7 @@ export const KIND_LABEL: Record<GemKind, string> = {
   Imperial de Campo de Ourique and Fábrica do Pastel de Feijão (no recent reviews),
   Renovar a Mouraria (classes may be residents-only), Casa Independente (closes Dec 2026).
 */
-export const GEMS: Gem[] = [
+const LISBON_GEMS: Gem[] = [
   {"id": "piteu-da-graca", "bairro": "graca", "name": "O Pitéu da Graça", "kind": "tasca", "lat": 38.71741, "lng": -9.13033, "address": "Largo da Graça 95-96", "why": "A family tasca on the square that has fed the neighbourhood for decades — at lunch it fills with locals over fish and grilled meat, and the house dish is bacalhau à Pitéu.", "line": {"pt": "Boa tarde, tem mesa para dois ao almoço?", "en": "Good afternoon, do you have a table for two for lunch?"}, "meet": "The waiters who run the floor, and the regulars at the next table", "tip": "Book, or arrive right at opening. Said to close Saturday evening and Sunday.", "room": "lisbon_tasca", "sources": ["https://www.timeout.pt/lisboa/pt/restaurantes/piteu-da-graca", "https://culinarybackstreets.com/?p=18721"], "unsure": "Hours from Time Out; no 2025–26 confirmation.", "verified": true},
   {"id": "tasca-do-jaime-graca", "bairro": "graca", "name": "A Tasca do Jaime", "kind": "venue", "lat": 38.71914, "lng": -9.1298, "address": "Rua da Graça 91", "why": "A small neighbourhood tasca where, on weekend afternoons, anyone can stand up and sing fado vadio — older regulars with a glass of red, and the room going silent for each voice.", "line": {"pt": "Um copo de tinto e um pastel de bacalhau, por favor.", "en": "A glass of red and a codfish cake, please."}, "meet": "Jaime behind the counter, the house guitarists, and whoever sings next", "tip": "Weekend afternoons from about 16:00. When someone says 'silêncio, que se vai cantar o fado', stop talking.", "room": "lisbon_fado", "sources": ["https://www.timeout.pt/lisboa/pt/restaurantes/tasca-do-jaime", "https://lifecooler.com/artigo/atividades/tasca-do-jaime/411829", "https://devourtours.com/blog/free-fado-lisbon/"], "unsure": "Fado schedule differs between sources; no listing dated 2025–26.", "verified": true},
   {"id": "damas-graca", "bairro": "graca", "name": "Damas", "kind": "bar", "lat": 38.71646, "lng": -9.12936, "address": "Rua da Voz do Operário 60", "why": "A bar, kitchen and gig room in an old bakery — the ovens are still in the music room — where the neighbourhood's young crowd comes for small concerts, DJ nights and cheap food.", "line": {"pt": "A que horas começa o concerto hoje?", "en": "What time does the gig start tonight?"}, "meet": "The bar staff and the crowd at the long tables", "tip": "Check their agenda first. Eat in the front room, then move to the back for the music.", "room": "lisbon_bilhetes", "sources": ["https://www.timeout.pt/lisboa/pt/noite/damas", "https://www.viralagenda.com/pt/p/DAMASLISBOA"], "unsure": "Current hours and prices not confirmed.", "verified": true},
@@ -119,6 +126,47 @@ export const GEMS: Gem[] = [
  * What a learner can see. Unverified drafts appear on preview builds (and locally) so they
  * can be reviewed in place; production shows only what somebody has checked.
  */
+/** Every bairro and gem: Lisbon's here, the towns' from content/towns/. */
+export const BAIRROS: Bairro[] = [...LISBON_BAIRROS, ...TOWN_BAIRROS]
+export const GEMS: Gem[] = [...LISBON_GEMS, ...TOWN_GEMS]
+
+/** The city or town a bairro is in. */
+export function chapterOfBairro(id: BairroId): ChapterId {
+  return BAIRROS.find((b) => b.id === id)?.chapter ?? 'lisbon'
+}
+
+/** Where a city's map opens: Lisbon's old centre, or the middle of a town's bairros. */
+export function cityCentre(chapter: ChapterId): [number, number] {
+  const bs = bairrosIn(chapter)
+  if (chapter === 'lisbon' || !bs.length) return [38.722, -9.14]
+  return [bs.reduce((n, b) => n + b.centre[0], 0) / bs.length, bs.reduce((n, b) => n + b.centre[1], 0) / bs.length]
+}
+
+/** One city's bairros. */
+export function bairrosIn(chapter: ChapterId): Bairro[] {
+  return BAIRROS.filter((b) => (b.chapter ?? 'lisbon') === chapter)
+}
+
+/** One city's gems, of those given (visible ones by default). */
+export function gemsIn(chapter: ChapterId, all: Gem[] = visibleGems()): Gem[] {
+  return all.filter((g) => chapterOfBairro(g.bairro) === chapter)
+}
+
+/**
+ * Is this city ready to offer? Lisbon always; a town once it has gems this build can show —
+ * on production, verified ones (Sam's rule: a person's word, not a script's).
+ */
+export function cityReady(chapter: ChapterId): boolean {
+  return chapter === 'lisbon' || gemsIn(chapter).length > 0
+}
+
+/** Every visible gem in board order: this city's rotation first, then everybody else's. */
+export function gemsHomeFirst(chapter: ChapterId): Gem[] {
+  const all = visibleGems()
+  const home = gemsIn(chapter, all)
+  return [...gemRotation(home), ...gemRotation(all.filter((g) => !home.includes(g)))]
+}
+
 export function visibleGems(all: Gem[] = GEMS): Gem[] {
   const production = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
   return production ? all.filter((g) => g.verified) : all

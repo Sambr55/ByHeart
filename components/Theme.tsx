@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { PURPOSES, type Purpose } from '@/content/situations'
-import { loadLearner, setPurpose } from '@/engine/learner'
+import { loadLearner, setChapter, setPurpose } from '@/engine/learner'
+import { CHAPTERS, chapterById, type ChapterId } from '@/content/chapters'
+import { cityReady } from '@/content/gems'
 import { setSound, soundOn, tap } from '@/engine/tap'
 
 export type Theme = 'system' | 'light' | 'dark'
@@ -132,7 +134,7 @@ export function PurposeChoice() {
 
   return (
     <div id="purpose" className="flex scroll-mt-24 flex-col gap-1">
-      <p className="eyebrow text-muted">IN LISBON</p>
+      <p className="eyebrow text-muted">IN {chapterById(loadLearner().chapter).pt.toUpperCase()}</p>
       <div role="group" aria-label="Why you are here" className="flex gap-1">
         {PURPOSES.map((p) => (
           <button
@@ -156,7 +158,7 @@ export function PurposeChoice() {
         ))}
       </div>
       <p className="mt-1 text-xs leading-relaxed text-muted">
-        Changes your path — a trip, a season, or moving here — and what Lisbon offers you.
+        Changes your path — a trip, a season, or moving here — and what the city offers you.
         Nothing you have already done goes anywhere.
       </p>
     </div>
@@ -202,6 +204,46 @@ export function ThemeChoice() {
           </button>
         ))}
       </div>
+    </div>
+  )
+}
+
+/**
+ * WHICH CITY (2026-11-05): Lisboa, Cascais or Sintra — the destination on the boarding pass,
+ * changeable here. Only places that are boarding are offered (content/gems.ts cityReady),
+ * plus wherever this learner already is. The path stays the same — every room is shared —
+ * and the City tab, the board's places and the walks follow the choice.
+ */
+export function CityChoice() {
+  const [chapter, setChapterState] = useState<ChapterId | 'unknown'>('unknown')
+  useEffect(() => setChapterState(loadLearner().chapter ?? 'lisbon'), [])
+  if (chapter === 'unknown') return null
+  const cities = CHAPTERS.filter((c) => c.open && (cityReady(c.id) || c.id === chapter))
+  if (cities.length < 2) return null
+  return (
+    <div id="city" className="flex scroll-mt-24 flex-col gap-1" data-testid="city-choice">
+      <p className="eyebrow text-muted">WHERE</p>
+      <div role="group" aria-label="Which city" className="flex gap-1">
+        {cities.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            data-testid={'city-set-' + c.id}
+            aria-pressed={chapter === c.id}
+            onClick={() => {
+              setChapter(c.id)
+              setChapterState(c.id)
+            }}
+            className={
+              'tap-target flex-1 rounded border px-3 py-1 text-[0.6rem] uppercase tracking-wider transition ' +
+              (chapter === c.id ? 'border-accent bg-accent/10 text-accent' : 'border-line text-muted hover:text-fg')
+            }
+          >
+            {c.pt}
+          </button>
+        ))}
+      </div>
+      <p className="mt-1 text-xs leading-relaxed text-muted">The same path everywhere; the places, the walks and the venues are the city’s own.</p>
     </div>
   )
 }

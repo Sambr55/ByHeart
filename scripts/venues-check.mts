@@ -11,7 +11,7 @@
  */
 import { readFileSync } from 'node:fs'
 import { DRAW_TERMS, HOLIDAY_PRIZE, REWARD_TIERS, SECOND_OFFERS, WALK_ORDER, GEO_RADIUS_M } from '../content/board'
-import { WALKS } from '../content/walks'
+import { WALKS, walksIn } from '../content/walks'
 import { GEMS } from '../content/gems'
 import { countLine, nearEnough, tiersHeld, validPin, MAX_WRONG_PINS } from '../lib/venue-rules'
 import { pinHash } from '../lib/venue-pin'
@@ -28,7 +28,7 @@ for (const [p, ids] of Object.entries(WALK_ORDER)) {
   const bad = ids.filter((id) => !WALKS.some((w) => w.id === id))
   ok(p + ': every board walk is a real walk, none twice', bad.length === 0 && new Set(ids).size === ids.length, bad.join(','))
 }
-ok('every walk is on every path somewhere', WALKS.every((w) => Object.values(WALK_ORDER).every((ids) => ids.includes(w.id))))
+ok('every Lisbon walk is on every Lisbon path somewhere (the towns walk their own first: npm run towns)', walksIn('lisbon').every((w) => Object.values(WALK_ORDER).every((ids) => ids.includes(w.id))))
 
 console.log('\nchecking in')
 const g = GEMS.find((x) => x.id === 'micro-padaria-graca')!
