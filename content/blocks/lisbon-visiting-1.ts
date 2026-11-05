@@ -315,7 +315,7 @@ export const LISBON_VISITING_1: Situation[] = [
       {
         pt: 'Pode parar aqui, por favor.',
         en: 'You can stop here, please.',
-        when: 'The one that matters. Lisbon streets narrow without warning and the door is often nowhere near.',
+        when: 'The one that matters. Old streets narrow without warning and the door is often nowhere near.',
       },
       {
         pt: 'Aceita cartão?',

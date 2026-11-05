@@ -3,7 +3,7 @@
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { KIND_LABEL, bairroById, visibleGems } from '@/content/gems'
+import { KIND_LABEL, bairroById, gemsIn } from '@/content/gems'
 import { HOUSE_RULES, TABLE_KINDS, inviteText, type HouseRule } from '@/content/table-night'
 import { setDisplayName } from '@/engine/learner'
 import { useLearner } from '@/engine/useLearner'
@@ -29,7 +29,9 @@ function defaultWhen(now = new Date()): { date: string; time: string } {
  */
 export function HostTable() {
   const learner = useLearner()
-  const places = useMemo(() => visibleGems().filter((g) => (TABLE_KINDS as readonly string[]).includes(g.kind)), [])
+  /* Your own city's places to sit first (2026-11-05: Cascais and Sintra have their own). */
+  const chapter = learner.chapter ?? 'lisbon'
+  const places = useMemo(() => gemsIn(chapter).filter((g) => (TABLE_KINDS as readonly string[]).includes(g.kind)), [chapter])
   const [gemId, setGemId] = useState<string | null>(null)
   /* Arriving from a venue card's "host a table here" (2026-11-04): that place, chosen. */
   useEffect(() => {

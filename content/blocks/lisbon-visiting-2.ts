@@ -653,7 +653,7 @@ export const LISBON_VISITING_2: Situation[] = [
       },
       {
         pt: 'A que horas é o último comboio para Lisboa?',
-        en: 'What time is the last train back to Lisbon?',
+        en: 'What time is the last train to Lisbon?',
         when: 'Ask in the afternoon, not at the station at midnight.',
       },
     ],

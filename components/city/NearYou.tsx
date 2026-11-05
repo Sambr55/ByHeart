@@ -1,5 +1,7 @@
 'use client'
 
+import { chapterById } from '@/content/chapters'
+import { useLearner } from '@/engine/useLearner'
 import Link from 'next/link'
 import { useMemo } from 'react'
 import { gemsNear, visibleGems, walkMinutes } from '@/content/gems'
@@ -13,6 +15,9 @@ import { useWhereAmI } from './useWhereAmI'
  */
 export function NearYou() {
   const where = useWhereAmI()
+  const learner = useLearner()
+  const chapter = learner.chapter ?? 'lisbon'
+  /* Nearest of every gem (a Cascais learner in Lisbon still sees Lisbon's); otherwise their own town's. */
   const all = useMemo(() => visibleGems(), [])
   const near = useMemo(() => (where.at ? gemsNear(where.at, 2, 1500, all) : []), [where.at, all])
   if (all.length === 0) return null
@@ -20,7 +25,7 @@ export function NearYou() {
   return (
     <section aria-labelledby="near-you" className="needs-learner flex flex-col gap-3" data-testid="near-you">
       <h2 id="near-you" className="eyebrow text-muted">
-        {where.at && near.length ? 'Near you' : 'Lisbon, like a local'}
+        {where.at && near.length ? 'Near you' : chapterById(chapter).pt + ', like a local'}
       </h2>
       {where.at && near.length ? (
         <ul className="flex flex-col gap-2">
@@ -40,7 +45,7 @@ export function NearYou() {
         <div className="flex flex-col gap-2 rounded-2xl border border-line bg-bg-elev px-4 py-4">
           <p className="text-sm leading-relaxed">
             {where.at
-              ? 'Nothing within a short walk yet — the map has the places locals go across six neighbourhoods.'
+              ? 'Nothing within a short walk yet — the map has the places locals go.'
               : 'The places locals go, who you will meet there, and the line for walking in.'}
           </p>
           <div className="flex flex-wrap gap-2">

@@ -29,7 +29,7 @@ export function GemHere({ gem }: { gem: Gem }) {
       <CheckIn gem={gem.id} />
       {signedIn ? null : said ? (
         <p className="flex items-center gap-2 text-sm text-correct" data-testid="gem-said">
-          <span aria-hidden>✓</span> You’ve said it here. It’s on Yours, under Your Lisbon.
+          <span aria-hidden>✓</span> You’ve said it here. It’s on Yours.
         </p>
       ) : (
         <button

@@ -901,9 +901,9 @@ function RouteStrip() {
         <svg viewBox="-16 -11 31 22" className="h-4 w-6 text-[#e5b04a]" aria-hidden="true">
           <path d="M14 0 Q13 -1.6 10 -1.6 L2 -1.6 L-5 -10 L-8.5 -10 L-3 -1.6 L-10 -1.6 L-13 -5.5 L-15.5 -5.5 L-14 -1 L-14 1 L-15.5 5.5 L-13 5.5 L-10 1.6 L-3 1.6 L-8.5 10 L-5 10 L2 1.6 L10 1.6 Q13 1.6 14 0 Z" fill="currentColor" />
         </svg>
-        <span className="display text-xl leading-none text-[#9cc6ea]">LIS</span>
+        <span className="display text-xl leading-none text-[#9cc6ea]">{chapterById(learner.chapter).code}</span>
       </span>
-      <span className="truncate text-right text-xs text-white/70">{bits.join(' · ') || 'Lisboa'}</span>
+      <span className="truncate text-right text-xs text-white/70">{bits.join(' · ') || chapterById(learner.chapter).pt}</span>
     </div>
   )
 }

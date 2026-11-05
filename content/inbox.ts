@@ -1,4 +1,4 @@
-import { bairroById, gemOfTheWeek, weekStart } from '@/content/gems'
+import { bairroById, gemOfTheWeekIn, weekStart } from '@/content/gems'
 import type { Genre } from '@/content/calendar'
 import { DEFAULT_CHAPTER, type ChapterId } from '@/content/chapters'
 import type { Drop } from '@/content/drops'
@@ -108,7 +108,8 @@ export function inboxFor(
     THIS WEEK'S GEM (2026-11-03), first in the list from its Monday: one local place and the
     line for it, so the inbox has something new every week even when nothing is on.
   */
-  const gem = gemOfTheWeek(now)
+  /* In this learner's own city or town (2026-11-05). */
+  const gem = gemOfTheWeekIn(chapter, now)
   const gemMessage: InboxMessage[] = gem
     ? [
         {
