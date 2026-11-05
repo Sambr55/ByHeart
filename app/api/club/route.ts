@@ -62,14 +62,23 @@ export async function GET() {
   const me = await currentUser()
 
   try {
-    const rows = await sql<{ display_name: string }[]>`
-      select display_name
-        from users
-       where deleted_at is null
-         and display_name is not null
-         and display_name <> ''
-         and (${me?.id ?? null}::uuid is null or id <> ${me?.id ?? null}::uuid)
-       order by last_seen_at desc nulls last
+    /*
+      WHO IS HERE NOW (Sam, 2026-11-05: "Who's in the Club right now"). One more fact per
+      name, and only as a yes or no: signed in and active in the last fifteen minutes,
+      which is when sessions.last_seen_at was last touched (lib/auth.ts touches it on every
+      signed-in request). No time ever leaves the server — "here" is decided in the query —
+      so nobody can read from this when somebody else was last on.
+    */
+    const rows = await sql<{ display_name: string; here: boolean }[]>`
+      select u.display_name, coalesce(max(s.last_seen_at) > now() - interval '15 minutes', false) as here
+        from users u
+        left join sessions s on s.user_id = u.id and s.expires_at > now()
+       where u.deleted_at is null
+         and u.display_name is not null
+         and u.display_name <> ''
+         and (${me?.id ?? null}::uuid is null or u.id <> ${me?.id ?? null}::uuid)
+       group by u.id, u.display_name
+       order by max(s.last_seen_at) desc nulls last, max(u.last_seen_at) desc nulls last
        limit 60
     `
     /*
@@ -80,6 +89,7 @@ export async function GET() {
     */
     const seen = new Set<string>()
     const names: string[] = []
+    const here: string[] = []
     for (const row of rows) {
       const first = firstName(row.display_name)
       /*
@@ -91,9 +101,10 @@ export async function GET() {
       if (seen.has(key)) continue
       seen.add(key)
       names.push(first)
+      if (row.here) here.push(first)
       if (names.length >= 24) break
     }
-    return NextResponse.json({ names })
+    return NextResponse.json({ names, here })
   } catch {
     /*
       A broken query is an empty room too. This is decoration at the top of a screen whose

@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { vibeImage } from '@/content/vibe-images'
 import Link from 'next/link'
+import { chapterById } from '@/content/chapters'
 import { InboxDoor } from '@/components/InboxDoor'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '@/components/Feed'
@@ -389,7 +390,27 @@ export function Profile() {
       It adds to the padding rather than replacing it — see .safe-top in globals.css — so
       pt-6 still holds on a phone with no inset.
     */
-    <main className="safe-top mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg">
+    <div className="min-h-svh bg-bg text-fg">
+      {/*
+        THE SAME HEADER AS PATH, CITY AND WHAT'S ON (Sam, 2026-11-05: "bring the design of
+        this screen in line with the others"). The wordmark (to the Path), the city in
+        Portuguese over the screen's name. The bar carries the notch, which is what the
+        safe-top on <main> used to do here.
+      */}
+      <header className="bar safe-top sticky top-0 z-30 px-5 py-3" style={{ borderBottomColor: 'rgba(255,255,255,0.08)' }}>
+        <div className="mx-auto flex w-full max-w-md items-center gap-3">
+          <Link href="/club" aria-label="DUB Club — your path" data-testid="yours-wordmark" className="flex w-fit shrink-0 items-center">
+            <Wordmark mark="club" className="h-7 text-white" title="DUB Club" />
+          </Link>
+          <div className="min-w-0 flex-1 leading-tight">
+            <p className="eyebrow truncate opacity-80">{chapterById(learner.chapter).pt}</p>
+            <p className="display truncate text-lg">Yours</p>
+          </div>
+        </div>
+      </header>
+      {/* Who's in the Club right now, on the header's blue — components/Ticker.tsx. */}
+      <Ticker />
+    <main className="mx-auto flex w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
       {/*
         THE MARK IS NAMED, because the walk has to be able to point at it.
 
@@ -408,11 +429,6 @@ export function Profile() {
         WHERE IT POINTS IS NOT CHANGED HERE. The mark is not a link today; making it one,
         to /club rather than /, is Sam's own separate fix. This only gives it a name.
       */}
-      <header className="flex items-center gap-3">
-        <span data-testid="yours-wordmark" className="flex w-fit items-center">
-          <Wordmark mark="club" className="h-6" title="DUB Club" />
-        </span>
-      </header>
       <BottomNav />
 
       {/*
@@ -431,8 +447,6 @@ export function Profile() {
         It renders null until there are at least two names, so a room with nobody in it is
         silent rather than apologising.
       */}
-      <Ticker />
-
       <Identity />
 
       {/*
@@ -634,6 +648,7 @@ export function Profile() {
       */}
       {mounted && walk ? <Walkthrough onDone={() => setWalk(false)} /> : null}
     </main>
+    </div>
   )
 }
 
