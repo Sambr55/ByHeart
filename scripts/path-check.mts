@@ -284,7 +284,7 @@ console.log('\nthe Road — the winding path, back as a second view (2026-11-02)
   ok('the Road forks no logic: it reads pathView nodes and the Panel’s drift', !/roomSlipping|roomDone|finished_cards/.test(roadSrc) && /driftOf/.test(roadSrc))
   ok('no hard bottom shadows on the Road', !/shadow-\[0_\d+px_0_0/.test(roadSrc))
   const home = readFileSync('components/path/PathHome.tsx', 'utf8')
-  ok('PathHome toggles Panel | Road, remembered per device, Panel by default', /<Road\b/.test(home) && /<Panel\b/.test(home) && /PATH_MODE_KEY = 'dub.path.view'/.test(home) && /useState<PathMode>\('panel'\)/.test(home) && /localStorage\.setItem\(PATH_MODE_KEY/.test(home))
+  ok('PathHome toggles Board | Panel | Road, remembered per device, Board by default (2026-11-05)', /<Road\b/.test(home) && /<Panel\b/.test(home) && /PATH_MODE_KEY = 'dub.path.view'/.test(home) && /useState<PathMode>\('board'\)/.test(home) && /localStorage\.setItem\(PATH_MODE_KEY/.test(home))
 }
 
 console.log('\nevery put-back is a win (2026-11-02)\n')

@@ -101,7 +101,11 @@ export function PathHome() {
   */
   /* Rooms just put back on /revise: they come home with a flourish, once. homecoming.ts. */
   const homing = useHomecoming()
-  const [mode, setMode] = useState<PathMode>('panel')
+  /*
+    THE BOARD IS THE DEFAULT (Sam, 2026-11-05: "the Board should be the default and tiles
+    and road be options"). Anybody who already chose Panel or Road on this phone keeps it.
+  */
+  const [mode, setMode] = useState<PathMode>('board')
   useEffect(() => setMode(readPathMode()), [])
   const chooseMode = useCallback((m: PathMode) => {
     setMode(m)
@@ -296,24 +300,24 @@ export const PATH_MODE_KEY = 'dub.path.view'
 function readPathMode(): PathMode {
   try {
     const m = window.localStorage.getItem(PATH_MODE_KEY)
-    return m === 'road' || m === 'board' ? m : 'panel'
+    return m === 'road' || m === 'panel' ? m : 'board'
   } catch {
-    return 'panel'
+    return 'board'
   }
 }
 
-/** Panel | Road | Board — three segments, small, above the picture (the Board: 2026-11-05). */
+/** Board | Panel | Road — three segments, small, above the picture; the Board first and the default (2026-11-05). */
 function ViewToggle({ mode, onChange }: { mode: PathMode; onChange: (m: PathMode) => void }) {
   return (
     <div role="group" aria-label="How to show your path" className="view-toggle shrink-0" data-testid="view-toggle">
+      <button type="button" aria-pressed={mode === 'board'} onClick={() => onChange('board')} data-mode="board">
+        Board
+      </button>
       <button type="button" aria-pressed={mode === 'panel'} onClick={() => onChange('panel')} data-mode="panel">
         Panel
       </button>
       <button type="button" aria-pressed={mode === 'road'} onClick={() => onChange('road')} data-mode="road">
         Road
-      </button>
-      <button type="button" aria-pressed={mode === 'board'} onClick={() => onChange('board')} data-mode="board">
-        Board
       </button>
     </div>
   )
