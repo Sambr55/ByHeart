@@ -2,8 +2,8 @@ import 'server-only'
 import { createHash, randomBytes } from 'node:crypto'
 import { db } from '@/lib/db'
 import { gemById, visibleGems } from '@/content/gems'
-import { DRAW_TERMS, FIRST_REWARD, SECOND_OFFERS, type SecondOffer } from '@/content/board'
-import { MAX_WRONG_PINS, drawOn, nearEnough, tiersHeld, validPin, type VenueOffer } from '@/lib/venue-rules'
+import { DRAW_TERMS, FIRST_REWARD, PAIR_REWARD, PAIR_TIER, PAIR_WINDOW_H, SECOND_OFFERS, type SecondOffer } from '@/content/board'
+import { MAX_WRONG_PINS, drawOn, nearEnough, pairOffered, tiersHeld, validPin, type VenueOffer } from '@/lib/venue-rules'
 import { pinHash } from '@/lib/venue-pin'
 
 /**
@@ -19,6 +19,8 @@ import { pinHash } from '@/lib/venue-pin'
  *                sets its rewards and a 4-digit staff PIN on its own phone. No venue app.
  *   VOUCHERS     made when the learner looks, from the count and the venue's choices, so
  *                a venue that signs at 48 owes nobody a back-fill. Spent with the PIN.
+ *   BICA A DOIS  a learner and the friend they brought in, checked in at one venue within
+ *                PAIR_WINDOW_H hours: a voucher each, where the venue chose to give one.
  *   DRAW         entries recorded only while PRIZE_DRAW is on. Nothing is drawn by code.
  *
  * NO DATABASE: everything reports 'unavailable' — there is no in-memory version, because
@@ -37,7 +39,7 @@ export async function checkIn(
   userId: string,
   gemId: string | null,
   proof: Proof,
-): Promise<{ ok: true; gem: string; count: number; method: 'geo' | 'card'; first: boolean } | { ok: false; error: string }> {
+): Promise<{ ok: true; gem: string; count: number; method: 'geo' | 'card'; first: boolean; pair: boolean } | { ok: false; error: string }> {
   const sql = db()
   if (!sql) return { ok: false, error: 'unavailable' }
   let gem = gemId ? gemById(gemId) : undefined
@@ -58,11 +60,71 @@ export async function checkIn(
     on conflict (gem, user_id) do nothing
   `
   const [{ n }] = await sql<{ n: number }[]>`select count(*)::int as n from venue_checkins where gem = ${gem.id}`
-  return { ok: true, gem: gem.id, count: n, method, first: ins.count > 0 }
+  const pair = ins.count > 0 ? await pairUp(gem.id, userId) : false
+  return { ok: true, gem: gem.id, count: n, method, first: ins.count > 0, pair }
 }
 
 export interface Partner extends VenueOffer {
   second_item: string | null
+  offer_pair: boolean
+  pair_item: string | null
+}
+
+/*
+  THE FRIENDS A LEARNER BROUGHT IN, AND THE ONE WHO BROUGHT THEM — invitations that have
+  LANDED (the friend said their first room out loud), either direction. An invitation names
+  a user when it was sent or taken up signed in, and otherwise a device; a device belongs to
+  a user once they sign in (learners.user_id, lib/store.ts claimDevice). So both are asked.
+*/
+async function pairedWith(userId: string): Promise<string[]> {
+  const sql = db()
+  if (!sql) return []
+  const rows = await sql<{ id: string | null }[]>`
+    with mine as (select device_id from learners where user_id = ${userId}),
+    landed as (
+      select i.*, coalesce(i.from_user, (select l.user_id from learners l where l.device_id = i.from_device and l.user_id is not null limit 1)) as fu,
+                  coalesce(i.to_user,   (select l.user_id from learners l where l.device_id = i.to_device   and l.user_id is not null limit 1)) as tu
+        from invites i
+       where i.landed_at is not null
+         and (i.from_user = ${userId} or i.to_user = ${userId} or i.from_device in (select device_id from mine) or i.to_device in (select device_id from mine))
+    )
+    select case when fu = ${userId} then tu else fu end as id from landed
+  `
+  return [...new Set(rows.map((r) => r.id).filter((x): x is string => Boolean(x) && x !== userId))]
+}
+
+/**
+ * BICA A DOIS, at check-in: if this learner's friend (either way round) checked in here
+ * within the window, both get the venue's pair voucher — once each per venue, ever, by the
+ * table's own (gem, user_id, tier) key. True when this check-in made one.
+ */
+async function pairUp(gemId: string, userId: string): Promise<boolean> {
+  const sql = db()
+  if (!sql) return false
+  const [v] = await sql<{ offer_pair: boolean; paused: boolean }[]>`
+    select offer_pair, paused from venues where gem = ${gemId} and claimed_at is not null
+  `
+  if (!pairOffered(v ?? null)) return false
+  const friends = await pairedWith(userId)
+  if (!friends.length) return false
+  const [mine] = await sql<{ at: Date }[]>`select at from venue_checkins where gem = ${gemId} and user_id = ${userId}`
+  if (!mine) return false
+  const near = await sql<{ user_id: string }[]>`
+    select user_id from venue_checkins
+     where gem = ${gemId} and user_id = any(${friends}::uuid[])
+       and abs(extract(epoch from (at - ${mine.at}::timestamptz))) <= ${PAIR_WINDOW_H * 3600}
+     order by at desc limit 1
+  `
+  if (!near.length) return false
+  let made = false
+  for (const u of [userId, near[0].user_id]) {
+    const r = await sql`
+      insert into venue_vouchers (id, gem, user_id, tier) values (${token(12)}, ${gemId}, ${u}, ${PAIR_TIER})
+      on conflict (gem, user_id, tier) do nothing
+    `
+    if (u === userId && r.count > 0) made = true
+  }
+  return made
 }
 
 /** Every venue's count, the partners' offers, and — signed in — where this learner has been. */
@@ -76,13 +138,16 @@ export async function venueBoard(userId: string | null): Promise<{
   if (!sql) return null
   const counts = await sql<{ gem: string; n: number }[]>`select gem, count(*)::int as n from venue_checkins group by gem`
   const partners = await sql<(Partner & { gem: string })[]>`
-    select gem, offer_first, offer_second, second_item, paused from venues where claimed_at is not null
+    select gem, offer_first, offer_second, second_item, paused, offer_pair, pair_item from venues where claimed_at is not null
   `
   const mine = userId ? await sql<{ gem: string }[]>`select gem from venue_checkins where user_id = ${userId}` : []
   return {
     counts: Object.fromEntries(counts.map((r) => [r.gem, r.n])),
     partners: Object.fromEntries(
-      partners.map((p) => [p.gem, { offer_first: p.offer_first, offer_second: p.offer_second as SecondOffer, second_item: p.second_item, paused: p.paused }]),
+      partners.map((p) => [
+        p.gem,
+        { offer_first: p.offer_first, offer_second: p.offer_second as SecondOffer, second_item: p.second_item, paused: p.paused, offer_pair: p.offer_pair, pair_item: p.pair_item },
+      ]),
     ),
     mine: mine.map((r) => r.gem),
     draw: drawOn() && DRAW_TERMS !== null,
@@ -93,7 +158,8 @@ export interface VoucherView {
   id: string
   gem: string
   venue: string
-  tier: 1 | 2
+  /** 1 and 2: the 50 and 150 rewards. 3: Bica a dois. */
+  tier: 1 | 2 | 3
   what: string
   usedAt: string | null
   locked: boolean
@@ -118,8 +184,8 @@ export async function vouchersFor(userId: string): Promise<VoucherView[] | null>
       `
     }
   }
-  const held = await sql<{ id: string; gem: string; tier: number; used_at: Date | null; wrong_pins: number; second_item: string | null; offer_second: string }[]>`
-    select w.id, w.gem, w.tier, w.used_at, w.wrong_pins, v.second_item, v.offer_second
+  const held = await sql<{ id: string; gem: string; tier: number; used_at: Date | null; wrong_pins: number; second_item: string | null; offer_second: string; pair_item: string | null }[]>`
+    select w.id, w.gem, w.tier, w.used_at, w.wrong_pins, v.second_item, v.offer_second, v.pair_item
       from venue_vouchers w join venues v on v.gem = w.gem
      where w.user_id = ${userId}
      order by w.used_at nulls first, w.unlocked_at desc
@@ -128,8 +194,13 @@ export async function vouchersFor(userId: string): Promise<VoucherView[] | null>
     id: h.id,
     gem: h.gem,
     venue: gemById(h.gem)?.name ?? h.gem,
-    tier: h.tier === 2 ? 2 : 1,
-    what: h.tier === 2 ? (h.second_item?.trim() || SECOND_OFFERS[h.offer_second as SecondOffer]?.label || 'On the house') : FIRST_REWARD,
+    tier: h.tier === PAIR_TIER ? 3 : h.tier === 2 ? 2 : 1,
+    what:
+      h.tier === PAIR_TIER
+        ? PAIR_REWARD.name + ': ' + (h.pair_item?.trim() || PAIR_REWARD.fallback)
+        : h.tier === 2
+          ? h.second_item?.trim() || SECOND_OFFERS[h.offer_second as SecondOffer]?.label || 'On the house'
+          : FIRST_REWARD,
     usedAt: h.used_at ? new Date(h.used_at).toISOString() : null,
     locked: h.wrong_pins >= MAX_WRONG_PINS,
   }))
@@ -192,7 +263,7 @@ export async function claimFor(t: string): Promise<{ gem: string; claimed: boole
 /** The venue, on its own phone: who to contact, the staff PIN, and what it offers. */
 export async function claim(
   t: string,
-  o: { contactName: string; contact: string; pin: unknown; offerFirst: boolean; offerSecond: SecondOffer; item: string; cap: number | null },
+  o: { contactName: string; contact: string; pin: unknown; offerFirst: boolean; offerSecond: SecondOffer; item: string; cap: number | null; offerPair: boolean; pairItem: string },
 ): Promise<'ok' | 'gone' | 'pin' | 'offer' | 'unavailable'> {
   const sql = db()
   if (!sql) return 'unavailable'
@@ -208,7 +279,8 @@ export async function claim(
       pin_hash = ${pinHash(v.gem, o.pin)},
       offer_first = ${o.offerFirst}, offer_second = ${o.offerSecond},
       second_item = ${clip(o.item, 60) || null},
-      weekly_cap = ${o.cap && o.cap > 0 ? Math.min(500, Math.floor(o.cap)) : null}
+      weekly_cap = ${o.cap && o.cap > 0 ? Math.min(500, Math.floor(o.cap)) : null},
+      offer_pair = ${o.offerPair}, pair_item = ${clip(o.pairItem, 60) || null}
     where gem = ${v.gem}
   `
   return 'ok'

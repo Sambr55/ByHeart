@@ -11,7 +11,7 @@ import type { SecondOffer } from '@/content/board'
  */
 export interface VenueState {
   counts: Record<string, number>
-  partners: Record<string, { offer_first: boolean; offer_second: SecondOffer; second_item: string | null; paused: boolean }>
+  partners: Record<string, { offer_first: boolean; offer_second: SecondOffer; second_item: string | null; paused: boolean; offer_pair?: boolean; pair_item?: string | null }>
   mine: string[]
   signedIn: boolean
   draw: boolean
@@ -48,7 +48,7 @@ export function useVenues(): VenueState {
 }
 
 export type CheckInResult =
-  | { ok: true; count: number; first: boolean }
+  | { ok: true; count: number; first: boolean; /** Bica a dois: this check-in, with a friend's, made a voucher each. */ pair: boolean }
   | { ok: false; error: 'signin' | 'far' | 'denied' | 'nogeo' | 'card' | 'unavailable' | 'other' }
 
 /** I'm here: by the venue's card code, or by where the phone is. */
@@ -69,16 +69,16 @@ export async function checkIn(gem: string | null, card?: string): Promise<CheckI
   }
   const r = await fetch('/api/venues/checkin', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }).catch(() => null)
   if (!r) return { ok: false, error: 'unavailable' }
-  const j = (await r.json().catch(() => ({}))) as { gem?: string; count?: number; first?: boolean; error?: string }
+  const j = (await r.json().catch(() => ({}))) as { gem?: string; count?: number; first?: boolean; pair?: boolean; error?: string }
   if (!r.ok) {
     const e = j.error
     return { ok: false, error: e === 'signin' || e === 'far' || e === 'card' || e === 'unavailable' ? e : 'other' }
   }
   /* The local record agrees, so Yours and the walk see it without waiting for a sync. */
   if (j.gem) markWalkStop('gem:' + j.gem)
-  track('venue_checkin', { gem: j.gem, method: card ? 'card' : 'geo', first: j.first })
+  track('venue_checkin', { gem: j.gem, method: card ? 'card' : 'geo', first: j.first, pair: Boolean(j.pair) })
   void load(true)
-  return { ok: true, count: j.count ?? 0, first: Boolean(j.first) }
+  return { ok: true, count: j.count ?? 0, first: Boolean(j.first), pair: Boolean(j.pair) }
 }
 
 export const CHECKIN_ERRORS: Record<Exclude<CheckInResult, { ok: true }>['error'], string> = {
