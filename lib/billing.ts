@@ -54,6 +54,26 @@ export function trialDays(): number {
   return Number.isFinite(n) && n >= 0 ? Math.min(30, Math.floor(n)) : 7
 }
 
+/**
+ * THE FOUNDING OFFER IS THE FIRST 500 (content: PRICING.founding.cap). Counted at Stripe — the
+ * one place every founding subscription lives — active and in their free week, at the moment
+ * somebody asks for it. Null when it cannot be counted, which the checkout treats as closed.
+ */
+export const FOUNDING_CAP = 500
+export async function foundingLeft(): Promise<number | null> {
+  const s = stripe()
+  const price = process.env.STRIPE_PRICE_FOUNDING
+  if (!s || !price) return null
+  let n = 0
+  for (const status of ['active', 'trialing', 'past_due'] as const) {
+    for await (const _ of s.subscriptions.list({ price, status, limit: 100 })) {
+      n++
+      if (n >= FOUNDING_CAP) return 0
+    }
+  }
+  return FOUNDING_CAP - n
+}
+
 export interface Subscription {
   user_id: string
   source: string
@@ -132,8 +152,21 @@ export async function checkoutUrl(opts: {
      */
     subscription_data: {
       metadata: { user_id: opts.userId },
-      ...(trial ? { trial_period_days: trial } : {}),
+      /* Stripe's recommended billing mode (the integration plan, 2026-11-05). */
+      billing_mode: { type: 'flexible' },
+      ...(trial
+        ? {
+            trial_period_days: trial,
+            /* A trial that somehow ends with no card is cancelled, never left owing. */
+            trial_settings: { end_behavior: { missing_payment_method: 'cancel' as const } },
+          }
+        : {}),
     },
+    /* The card is taken up front even in the free week: that is what a trial means here. */
+    payment_method_collection: 'always',
+    /* The address, for receipts and for tax once DUB has to collect it (Stripe Tax). */
+    billing_address_collection: 'auto',
+    ...(customer ? { customer_update: { address: 'auto' as const, name: 'auto' as const } } : {}),
     client_reference_id: opts.userId,
     allow_promotion_codes: true,
     success_url: opts.returnTo + '?billing=done',
