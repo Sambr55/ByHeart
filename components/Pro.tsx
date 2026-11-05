@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { PLANS } from '@/lib/entitlements'
+import { PLANS, PRICING } from '@/lib/entitlements'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Back } from '@/components/Back'
 import { useEntitlements } from '@/engine/useEntitlements'
@@ -90,21 +90,18 @@ export function Pro() {
           <>
             <div>
               <p className="eyebrow text-muted">THE MONEY</p>
-              <h1 className="display mt-3 text-balance text-2xl">
-                Every vibe, and your Legend finished.
-              </h1>
+              <h1 className="display mt-3 text-balance text-2xl">Every level, every room, every city.</h1>
               <p className="mt-3 text-sm leading-relaxed text-fg/85">
-                Membership opens every vibe DUB has written and every one it writes next —
-                and it carries your Legend the rest of the way, all ten answers, into the
-                Club where it keeps growing. Real Lisbon voices read it back to you.
+                The first two levels of your path are free for good. Membership opens the rest — every level of
+                every path, every room, and every new city as it opens.
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-muted">
-                Your five free vibes stay yours either way, and every drop stays open.
-                There is no hurry here and there is no countdown — a product built on the
-                argument that deadlines do not produce speakers would look ridiculous
-                inventing one at the till.
-              </p>
-            </div>
+              {/*
+                THE FIRST WEEK FREE (Sam, 2026-11-05). Said once and plainly, with the way out in
+                the same breath: a trial nobody can see the end of is the thing that loses trust.
+              */}
+              <p className="mt-3 text-sm leading-relaxed text-muted" data-testid="pro-trial">
+                Your first week is free. Cancel any time in that week, from Account, and you pay nothing.
+              </p>            </div>
 
             <section className="rounded border border-line bg-bg-elev p-5">
               <p className="eyebrow text-accent">{PLANS.pro.name ?? 'DUB'}</p>
@@ -127,7 +124,7 @@ export function Pro() {
                     disabled={busy !== null}
                     className="tap-target rounded-full bg-accent px-5 py-3 text-xs tracking-widest text-accent-ink"
                   >
-                    ANNUAL
+                    ANNUAL · £{PRICING.annual.gbp} A YEAR
                   </button>
                   <button
                     type="button"
@@ -135,8 +132,9 @@ export function Pro() {
                     disabled={busy !== null}
                     className="tap-target rounded-full border border-line px-5 py-3 text-xs tracking-widest"
                   >
-                    MONTHLY
+                    MONTHLY · £{PRICING.monthly.gbp} A MONTH
                   </button>
+                  <p className="w-full text-xs text-muted">First week free on either. No charge until day 8.</p>
                 </div>
               ) : (
                 <p className="mt-6 text-xs leading-relaxed text-muted">
