@@ -4,6 +4,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Wordmark } from '@/components/Wordmark'
+import { AddToCalendar } from '@/components/AddToCalendar'
+import { eventOfDrop } from '@/content/cal-event'
+import { useMyCalendar, type MyCalendarStatus, type MyEvent } from '@/engine/gcal'
 import { GENRES, genreFor } from '@/content/calendar'
 import { Subscribe } from '@/components/Subscribe'
 import { NotYet } from '@/components/NotYet'
@@ -130,6 +133,16 @@ export function Calendar() {
         .toISOString()
         .slice(0, 10)
     : null
+
+  /*
+    YOUR OWN CALENDAR, IF YOU SAY SO (Sam, 2026-11-05). Fetched by this browser from Google
+    and drawn as dots on the same fortnight — see engine/gcal.ts for what is and is not kept.
+  */
+  const fromIso = days[0]?.toISOString().slice(0, 10) ?? null
+  const toIso = days[13] ? new Date(days[13].getTime() + 86_400_000).toISOString().slice(0, 10) : null
+  const mine = useMyCalendar(fromIso, toIso)
+  const mineByDay = new Map<string, MyEvent[]>()
+  for (const e of mine.events) for (const d of e.days) mineByDay.set(d, [...(mineByDay.get(d) ?? []), e])
 
   /* Only the genres actually on in this fortnight, so the key describes what is on the
      screen rather than advertising a taxonomy. */
@@ -266,8 +279,10 @@ export function Calendar() {
                       (isToday ? 'border border-line-strong text-fg' : 'text-muted') +
                       (inTrip ? ' bg-accent/10 font-semibold text-fg' : '')
                     }
+                    aria-label={(mineByDay.get(iso) ?? []).length ? day + ': ' + (mineByDay.get(iso) ?? []).map((e) => e.title).join(', ') : undefined}
                   >
                     {day}
+                    <Dots n={(mineByDay.get(iso) ?? []).length} />
                   </span>
                 )
               }
@@ -307,6 +322,7 @@ export function Calendar() {
                   <span className="line-clamp-2 w-full hyphens-auto break-words text-center text-[0.5rem] leading-tight opacity-95">
                     {on[0].event}
                   </span>
+                  <Dots n={(mineByDay.get(iso) ?? []).length} light />
                 </Link>
               )
             })}
@@ -334,6 +350,9 @@ export function Calendar() {
               ))}
             </ul>
           ) : null}
+          {/* Your own calendar beside DUB's, and DUB's into yours — the same card. */}
+          <MyCalendar {...mine} days={days} mineByDay={mineByDay} />
+          <Subscribe city={chapter.city} />
         </section>
 
         <section className="flex flex-col gap-4">
@@ -367,12 +386,11 @@ export function Calendar() {
                   genre's colour, what sort of night it is, where, the rooms inside it as
                   things you will be able to say, and whether it is open yet.
                 */
-                <Link
+                <article
                   key={d.id}
-                  href={'/club?drop=' + d.id}
-                  data-testid={'cal-drop-' + d.id}
                   className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-bg-elev shadow-sm transition hover:border-accent/60"
                 >
+                <Link href={'/club?drop=' + d.id} data-testid={'cal-drop-' + d.id} className="flex flex-col">
                   <span className="relative block h-36 w-full overflow-hidden" style={{ backgroundColor: colour }}>
                     {image ? (
                       <Image
@@ -436,27 +454,27 @@ export function Calendar() {
                         ))}
                       </span>
                     </span>
-                    <span className="eyebrow flex items-center justify-between border-t border-line pt-3 text-[0.65rem] text-accent">
-                      <span>{open ? 'Learn it for the night' : gone ? 'See what it taught' : 'See what it will teach'}</span>
-                      <span aria-hidden className="transition group-hover:translate-x-1">
-                        →
-                      </span>
-                    </span>
                   </span>
                 </Link>
+                {/*
+                  ADD TO CALENDAR, ON THE NIGHT ITSELF (Sam, 2026-11-05). Beside the link
+                  rather than inside it — a button in a link is two taps fighting.
+                */}
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-line px-5 py-3">
+                  {gone ? <span /> : <AddToCalendar event={eventOfDrop(d)} up />}
+                  <Link href={'/club?drop=' + d.id} className="tap-target eyebrow ml-auto inline-flex items-center gap-2 whitespace-nowrap text-[0.65rem] text-accent" aria-label={'Learn the Portuguese for ' + d.event}>
+                    Learn it
+                    <span aria-hidden className="transition group-hover:translate-x-1">
+                      →
+                    </span>
+                  </Link>
+                </div>
+                </article>
               )
             })
           )}
         </section>
 
-        {/*
-          THE SUBSCRIPTION, UNDER THE LIST rather than above it.
-
-          Somebody arriving here wants to know what is on; the offer to put it in their own
-          calendar makes sense once they have seen that there is something worth putting
-          there. An ask that comes first is an ask about a thing they have not looked at.
-        */}
-        <Subscribe city={chapter.city} />
       </div>
 
       <BottomNavSpace />
@@ -469,4 +487,103 @@ export function Calendar() {
 function fmt(iso: string): string {
   const d = new Date(iso + 'T00:00:00Z')
   return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()].slice(0, 3)
+}
+
+/** Up to three dots for your own events on a day; the count is on the cell's label. */
+function Dots({ n, light = false }: { n: number; light?: boolean }) {
+  if (!n) return null
+  return (
+    <span aria-hidden className="mt-auto flex gap-0.5 pb-0.5" data-testid="cal-mine-dots">
+      {Array.from({ length: Math.min(3, n) }, (_, i) => (
+        <span key={i} className={'block h-1.5 w-1.5 rounded-full ' + (light ? 'bg-white' : 'bg-fg/60')} />
+      ))}
+    </span>
+  )
+}
+
+/**
+ * SHOW MY CALENDAR — the permission, what it is for, and once given, your own plans for these
+ * two weeks under the grid, so a free evening and the night that fills it are on one screen.
+ */
+function MyCalendar({
+  status,
+  events,
+  connect,
+  disconnect,
+  days,
+  mineByDay,
+}: {
+  status: MyCalendarStatus
+  events: MyEvent[]
+  connect: () => void
+  disconnect: () => void
+  days: Date[]
+  mineByDay: Map<string, MyEvent[]>
+}) {
+  if (status === 'unavailable') return null
+  if (status === 'off' || status === 'tap' || status === 'error') {
+    return (
+      <div className="flex items-center gap-3 rounded-2xl border border-line bg-bg px-4 py-3" data-testid="cal-mine-off">
+        <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-accent" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+          <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
+          <path d="M3.5 10h17M8 3v4M16 3v4" />
+          <circle cx="12" cy="15" r="1.4" fill="currentColor" />
+        </svg>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold">{status === 'tap' ? 'Show my calendar again' : 'See my own calendar here'}</span>
+          <span className="block text-xs text-muted">
+            {status === 'error'
+              ? 'Google did not answer. Try again in a moment.'
+              : status === 'tap'
+                ? 'One tap — Google remembers you said yes.'
+                : 'Your Google Calendar on these dates, so you can see when you are free. Read-only; it stays on this phone.'}
+          </span>
+        </span>
+        <button
+          type="button"
+          onClick={connect}
+          data-testid="cal-mine-connect"
+          className="tap-target eyebrow shrink-0 rounded-full bg-accent px-4 py-2 text-[0.65rem] text-accent-ink"
+        >
+          {status === 'tap' ? 'Show' : 'Allow'}
+        </button>
+      </div>
+    )
+  }
+  const shown = days
+    .map((d) => d.toISOString().slice(0, 10))
+    .flatMap((iso) => (mineByDay.get(iso) ?? []).map((e) => ({ iso, e })))
+    .filter((x, i, all) => all.findIndex((y) => y.e.id === x.e.id) === i)
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl border border-line bg-bg px-4 py-3" data-testid="cal-mine-on">
+      <div className="flex items-center gap-2">
+        <span aria-hidden className="block h-2 w-2 rounded-full bg-fg/60" />
+        <span className="min-w-0 flex-1 text-sm font-semibold">
+          Your calendar{status === 'loading' ? '…' : ' · ' + events.length + (events.length === 1 ? ' thing' : ' things') + ' these two weeks'}
+        </span>
+        <button type="button" onClick={disconnect} className="tap-target text-xs text-muted underline underline-offset-4">
+          Hide
+        </button>
+      </div>
+      {shown.length ? (
+        <ul className="flex flex-col gap-1 text-sm">
+          {shown.slice(0, 8).map(({ iso, e }) => (
+            <li key={e.id} className="flex gap-3">
+              <span className="w-16 shrink-0 tabular-nums text-muted">{shortDay(iso)}</span>
+              <span className="min-w-0 flex-1 truncate">{e.title}</span>
+              <span className="shrink-0 tabular-nums text-muted">{e.time ?? 'all day'}</span>
+            </li>
+          ))}
+          {shown.length > 8 ? <li className="text-xs text-muted">and {shown.length - 8} more</li> : null}
+        </ul>
+      ) : status === 'on' ? (
+        <p className="text-xs text-muted">Nothing in your calendar these two weeks — every night here is free.</p>
+      ) : null}
+    </div>
+  )
+}
+
+function shortDay(iso: string): string {
+  const d = new Date(iso + 'T00:00:00Z')
+  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getUTCDay()] + ' ' + d.getUTCDate()
 }

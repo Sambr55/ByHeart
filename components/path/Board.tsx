@@ -22,6 +22,8 @@ import { KindIcon, LockIcon } from './icons'
 import { driftOf } from './Panel'
 import { lapOf, type Lap, type Square } from './lap'
 import { CheckIn } from '@/components/city/CheckIn'
+import { AddToCalendar } from '@/components/AddToCalendar'
+import { eventOfRow } from '@/content/cal-event'
 import { useVenues } from '@/components/city/useVenues'
 
 /**
@@ -585,6 +587,8 @@ function StopSheet({
           {dayOf(r.on + 'T12:00:00Z')}
           {r.where ? ' · ' + r.where.name : ''}
         </p>
+        {/* Sam, 2026-11-05: "Anytime there is an event on a board … add it to calendar". */}
+        <AddToCalendar event={eventOfRow(r)} up className="self-start" />
         <Link href="/calendar" className={btn}>
           See what’s on
         </Link>
