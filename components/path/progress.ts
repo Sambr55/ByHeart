@@ -20,6 +20,7 @@ import type { ResolvedUnit } from '@/content/path'
 import type { Situation } from '@/content/situations'
 import { CHEATS } from '@/content/cheats'
 import { roomPieceIds } from '@/content/roots'
+import { HOLIDAY_DAYS } from '@/content/board'
 /* Either ending counts: obrigado or obrigada is the room said (content/speaker.ts). */
 import { isRelease } from '@/content/speaker'
 
@@ -32,7 +33,29 @@ export type PathRecord = Pick<
   LearnerState,
   'finished_cards' | 'proof' | 'evidence' | 'mission_completed_at'
 > &
-  Partial<Pick<LearnerState, 'inventory'>>
+  Partial<Pick<LearnerState, 'inventory' | 'holidays'>>
+
+/**
+ * ON HOLIDAY — a week taken on the Board's Férias corner (2026-11-05, content/board.ts).
+ *
+ * While one runs, nothing on the path drifts, in every view: the Board, the Panel and the
+ * Road all read slipping from pathView below. Afterwards the words are judged as ever —
+ * a holiday pauses the reminder, it does not pretend the words were practised.
+ */
+export function onHoliday(r: Pick<PathRecord, 'holidays'>, now: Date = new Date()): string | null {
+  let until: string | null = null
+  for (const h of r.holidays ?? []) {
+    const at = Date.parse(h.split('@')[1] ?? '')
+    if (Number.isNaN(at)) continue
+    const end = at + HOLIDAY_DAYS * 24 * 60 * 60 * 1000
+    /* Not `at <= now`: a week taken a second after the screen read its clock is still on. */
+    if (now.getTime() < end) {
+      const iso = new Date(end).toISOString()
+      if (!until || iso > until) until = iso
+    }
+  }
+  return until
+}
 
 export function roomDone(r: PathRecord, id: string): boolean {
   return (r.finished_cards ?? []).includes(id)
@@ -96,6 +119,7 @@ export function pathView(
   let next: PathView['next'] = null
   let done = 0
   let total = 0
+  const away = onHoliday(r, now) !== null
   const out = units.map((unit) => {
     let unitDone = 0
     const nodes = unit.rooms.map((room): PathNode => {
@@ -105,7 +129,7 @@ export function pathView(
       if (isDone) {
         done++
         unitDone++
-        return { room, state: 'done', cold, slipping: roomSlipping(r, room, now) }
+        return { room, state: 'done', cold, slipping: !away && roomSlipping(r, room, now) }
       }
       if (lock(room.id) === 'paid') return { room, state: 'paid', cold: false, slipping: false }
       if (!next) {

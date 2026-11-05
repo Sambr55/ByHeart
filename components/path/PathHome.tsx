@@ -22,6 +22,7 @@ import { roomLock } from './locks'
 import { RoomCard } from './RoomCard'
 import { Panel } from './Panel'
 import { Road } from './Road'
+import { Board } from './Board'
 import { useHomecoming } from './homecoming'
 import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
@@ -208,7 +209,21 @@ export function PathHome() {
         <div className="needs-learner flex flex-col gap-6">
           <LevelBar level={level} toggle={<ViewToggle mode={mode} onChange={chooseMode} />} />
 
-          {mode === 'road' ? (
+          {mode === 'board' ? (
+            <Board
+              view={view}
+              purpose={pathPurpose(purpose)}
+              chapter={learner.chapter ?? 'lisbon'}
+              current={level.complete ? Math.max(0, view.units.length - 1) : level.level - 1}
+              now={now ?? new Date(0)}
+              holidays={learner.holidays ?? []}
+              saidHere={learner.walk_stops ?? []}
+              gender={learner.profile?.gender ?? null}
+              onLaid={setSheet}
+            >
+              {task}
+            </Board>
+          ) : mode === 'road' ? (
             <Road
               view={view}
               inventory={learner.inventory ?? {}}
@@ -275,18 +290,19 @@ function UnderstoodChip({ count }: { count: number }) {
   THE VIEW, PER DEVICE. A preference about a screen, not a fact about the learner — the same
   reasoning as MARKED_KEY below — so it lives in localStorage and never syncs.
 */
-export type PathMode = 'panel' | 'road'
+export type PathMode = 'panel' | 'road' | 'board'
 export const PATH_MODE_KEY = 'dub.path.view'
 
 function readPathMode(): PathMode {
   try {
-    return window.localStorage.getItem(PATH_MODE_KEY) === 'road' ? 'road' : 'panel'
+    const m = window.localStorage.getItem(PATH_MODE_KEY)
+    return m === 'road' || m === 'board' ? m : 'panel'
   } catch {
     return 'panel'
   }
 }
 
-/** Panel | Road — two segments, small, above the picture. */
+/** Panel | Road | Board — three segments, small, above the picture (the Board: 2026-11-05). */
 function ViewToggle({ mode, onChange }: { mode: PathMode; onChange: (m: PathMode) => void }) {
   return (
     <div role="group" aria-label="How to show your path" className="view-toggle shrink-0" data-testid="view-toggle">
@@ -295,6 +311,9 @@ function ViewToggle({ mode, onChange }: { mode: PathMode; onChange: (m: PathMode
       </button>
       <button type="button" aria-pressed={mode === 'road'} onClick={() => onChange('road')} data-mode="road">
         Road
+      </button>
+      <button type="button" aria-pressed={mode === 'board'} onClick={() => onChange('board')} data-mode="board">
+        Board
       </button>
     </div>
   )

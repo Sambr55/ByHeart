@@ -2420,7 +2420,7 @@ summary:focus-visible,
 
 /* The Panel | Road toggle: two segments, one pressed. */
 .view-toggle { display: inline-flex; border-radius: 9999px; border: 1px solid var(--line-strong); padding: 2px }
-.view-toggle button { border-radius: 9999px; padding: 0.25rem 0.85rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted) }
+.view-toggle button { border-radius: 9999px; padding: 0.25rem 0.6rem; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted) }
 .view-toggle button[aria-pressed='true'] { background: var(--azulejo); color: #fbfaf6 }
 
 /* The ground under the panel: the foundation strip, mortar-coloured, edge to edge. */
@@ -2606,3 +2606,42 @@ details > summary.list-none::-webkit-details-marker {
 [data-keyboard='on'] .translator-title {
   display: none;
 }
+
+/*
+  THE BOARD (components/path/Board.tsx, 2026-11-05) — the Panel's glaze on a lap: cream
+  squares, azulejo blue when laid, a gold edge when said cold, the frieze for a stop still
+  face down. Always blue on white, like the Panel: it is a painted board, not a themed card.
+*/
+.board-sq {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-radius: 6px; background-color: #fbfaf6; color: #1f5d8c;
+  box-shadow: inset 0 0 0 0.5px rgba(31, 93, 140, 0.25);
+  transition: transform var(--t-ack) ease, background var(--t-arrive) ease;
+}
+.board-sq:focus-visible { outline: 2px solid #c9973b; outline-offset: 1px; z-index: 2 }
+.board-room { color: rgba(31, 93, 140, 0.45) }
+.board-room.is-laid { background-color: #1f5d8c; color: #fbfaf6; box-shadow: inset 0 -6px 10px -8px rgba(0, 0, 0, 0.35) }
+.board-room.is-laid.is-cold { box-shadow: inset 0 0 0 2px rgba(201, 151, 59, 0.95), inset 0 0 8px 0 rgba(201, 151, 59, 0.45) }
+.board-room.is-drifted {
+  z-index: 1;
+  transform: rotate(var(--rot, 10deg)) translate(var(--dx, 3px), var(--dy, -4px)) scale(0.86);
+  box-shadow: 0 14px 22px -6px rgba(20, 36, 58, 0.7), 0 0 0 2px #fff;
+}
+.board-stop.panel-frieze { border-radius: 6px }
+.board-stop.is-up { background-color: #f3ead6; color: #a8742a }
+.board-corner { background-color: #eef3f8; color: rgba(31, 93, 140, 0.55); gap: 1px }
+.board-corner.is-reached { background-color: #1f5d8c; color: #fbfaf6 }
+.board-corner.is-finish { background-color: #c9973b; color: #14243a; animation: board-finish 2.4s ease-in-out infinite }
+@keyframes board-finish { 0%, 100% { box-shadow: 0 0 0 0 rgba(201, 151, 59, 0.6) } 50% { box-shadow: 0 0 0 5px rgba(201, 151, 59, 0) } }
+@media (prefers-reduced-motion: reduce) { .board-corner.is-finish { animation: none } }
+.board-corner-word { font-size: 8.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1 }
+@media (min-width: 400px) { .board-corner-word { font-size: 9.5px } }
+.board-new { position: absolute; right: 4px; top: 4px; width: 7px; height: 7px; border-radius: 9999px; background: #c9973b; box-shadow: 0 0 0 2px #fbfaf6 }
+.board-token {
+  position: absolute; left: 50%; bottom: -5px; width: 15px; height: 15px; margin-left: -7.5px; border-radius: 9999px; z-index: 3;
+  background: radial-gradient(circle at 35% 30%, #f6d58a, #c9973b 60%, #8a6420);
+  box-shadow: 0 2px 4px rgba(20, 36, 58, 0.55), 0 0 0 2px #fbfaf6;
+  animation: board-token 2.4s ease-in-out infinite;
+}
+@keyframes board-token { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-2px) } }
+@media (prefers-reduced-motion: reduce) { .board-token { animation: none } }

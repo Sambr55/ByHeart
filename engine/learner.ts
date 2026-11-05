@@ -585,6 +585,12 @@ export interface LearnerState {
    */
   tables_sat?: string[]
   table_lines?: string[]
+  /**
+   * HOLIDAYS taken on the Board's Férias corner (2026-11-05): "<purpose>:<unit id>@<ISO>",
+   * one per board. For HOLIDAY_DAYS after one starts nothing on the path drifts — see
+   * onHoliday in components/path/progress.ts. Optional, like walk_stops.
+   */
+  holidays?: string[]
   sections_completed: string[]
   /**
    * How many sittings this learner has done, in total, across every vibe.
@@ -868,6 +874,7 @@ export function emptyLearner(): LearnerState {
     cheats_used: [],
     walk_stops: [],
     tables_sat: [],
+    holidays: [],
     table_lines: [],
     sections_completed: [],
     sittings: 0,
@@ -1105,6 +1112,7 @@ export function loadLearner(): LearnerState {
           cheats_used: arr(parsed.cheats_used, []),
           walk_stops: arr(parsed.walk_stops, []),
           tables_sat: arr(parsed.tables_sat, []),
+          holidays: arr(parsed.holidays, []),
           table_lines: arr(parsed.table_lines, []),
           sections_completed: arr(parsed.sections_completed, []),
           /*
@@ -2497,6 +2505,15 @@ export function markTableSat(code: string, lines: string[] = []) {
     const had = s.table_lines ?? []
     const add = lines.filter((l) => !had.includes(l))
     if (add.length) s.table_lines = [...had, ...add]
+  })
+}
+
+/** The Férias corner of a board, taken: once per board, and the week starts now. */
+export function takeHoliday(board: string, now: Date = new Date()) {
+  update((s) => {
+    const had = s.holidays ?? []
+    if (had.some((h) => h.startsWith(board + '@'))) return
+    s.holidays = [...had, board + '@' + now.toISOString()]
   })
 }
 
