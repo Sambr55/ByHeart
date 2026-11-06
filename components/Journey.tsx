@@ -151,7 +151,7 @@ function Shell({
   drain?: boolean
   children: React.ReactNode
 }) {
-  const { back, goHome, canGoBack, owned, step } = useJourney()
+  const { back, goHome, canGoBack, owned, step, fromPath } = useJourney()
   /*
     AN ERRAND HAS SOMEWHERE TO GO BACK TO, and a chosen vibe does not.
 
@@ -239,7 +239,7 @@ function Shell({
                 onClick={goHome}
                 className="tap-target text-[0.6rem] uppercase tracking-wider opacity-80 transition hover:opacity-100"
               >
-                Vibes
+                {fromPath ? 'Path' : 'Vibes'}
               </button>
             ) : null}
           </div>
@@ -1225,7 +1225,15 @@ const BADGE =
 
 function Picker() {
   const router = useRouter()
-  const { chooseFamily, state } = useJourney()
+  const { chooseFamily, state, fromPath } = useJourney()
+  /*
+    BACK ON THE PICKER AFTER A SITTING FROM THE PATH means back on the path. The shelf here
+    is retired (app/vibes/page.tsx); a learner who came for one vibe and finished it, or
+    passed a Legend or save screen on the way out, was landing on it with the Basics on top.
+  */
+  useEffect(() => {
+    if (fromPath && state.family) router.replace('/club#fun')
+  }, [fromPath, state.family, router])
   const params = useSearchParams()
   const learner = useLearner()
   const access = useEntitlements()
@@ -5772,7 +5780,7 @@ function midSentence(title: string): string {
 }
 
 function SectionComplete() {
-  const { chooseFamily, finishSection, owned, state } = useJourney()
+  const { chooseFamily, finishSection, owned, state, fromPath } = useJourney()
   /*
     The section is finished because this screen exists, not because a button was pressed.
 
@@ -6061,7 +6069,9 @@ function SectionComplete() {
               on the screen where it can be acted on. Every other vibe keeps the open
               sentence, because no other vibe is a door.
             */}
-            {road.open
+            {fromPath
+              ? 'There is more in there whenever you want it.'
+              : road.open
               ? LEGEND_COPY.open_head
               : isDoorway
                 ? PICKER.legend_sitting_done(road.done, road.total)
@@ -6089,7 +6099,8 @@ function SectionComplete() {
           your Legend" to somebody who has never seen one is meaningless. After that it
           is quiet reinforcement, and if they declined it never appears again.
         */}
-        <LegendPayoff justFinished={state.family} />
+        {/* Not from the path: the Legend road is not this learner's way on. */}
+        {fromPath ? null : <LegendPayoff justFinished={state.family} />}
         {/*
           NO BAR HERE, because the Shell already carries one.
 
@@ -6173,7 +6184,21 @@ function SectionComplete() {
 
           The road knows. Walked, and the button is the thing it was walked for.
         */}
-        {road.open ? (
+        {fromPath ? (
+          /*
+            A VIBE FROM THE PATH GOES BACK TO THE PATH (Sam, 2026-11-06: "I just did how to
+            swear which was fine, but then it linked through to ola / Adeus and a load of
+            other lessons, I think that's legacy"). It was: the road below is the Legend's,
+            and its next step is the Basics, which are the path's first level now.
+          */
+          <Link
+            href="/club"
+            data-testid="back-to-path"
+            className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            Back to your path
+          </Link>
+        ) : road.open ? (
           <Link
             href="/legend"
             data-testid="to-legend-now"

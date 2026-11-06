@@ -1136,6 +1136,11 @@ interface JourneyApi {
   recordVoice: (signal: string, pt: string) => void
   finish: () => void
   owned: string[]
+  /**
+   * One sitting, opened from the path's Just for fun row (/vibes?open=…). Its ways out lead
+   * back to the path, never to the retired shelf or the Legend road's Basics.
+   */
+  fromPath: boolean
 }
 
 const Ctx = createContext<JourneyApi | null>(null)
@@ -1153,6 +1158,7 @@ export function JourneyProvider({
 }) {
   const [state, dispatch] = useReducer(reducer, initial)
   const learner = useLearner()
+  const fromPath = enter === 'vibes'
 
   /**
    * The no-bypass rule, and the reason it runs in an effect rather than during render.
@@ -1485,6 +1491,15 @@ export function JourneyProvider({
         afterSitting.push({ kind: 'save' })
       }
 
+      /*
+        A SITTING FROM THE PATH ENDS ON THE PATH (Sam, 2026-11-06: "I just did how to swear
+        which was fine, but then it linked through to ola / Adeus and a load of other
+        lessons"). The shelf behind this is retired, so "another" means the path's own row.
+      */
+      if (decision === 'another' && fromPath && !afterSitting.length) {
+        window.location.assign('/club#fun')
+        return
+      }
       if (decision === 'another') {
         if (afterSitting.length) {
           /*
@@ -1549,14 +1564,19 @@ export function JourneyProvider({
       rememberPlayed([], collision?.id ?? null)
       dispatch({ type: 'append', steps, collisionId: collision?.id, jump: true })
     },
-    [state.collisionsPlayed, state.rootsPlayed, state.steps],
+    [state.collisionsPlayed, state.rootsPlayed, state.steps, fromPath],
   )
 
   const goHome = useCallback(() => {
     const picker = state.steps.findIndex((s) => s.kind === 'picker')
     track('return_home', { from: state.steps[state.index]?.kind })
+    /* From the path, home is the path: the picker behind a sitting is the retired shelf. */
+    if (fromPath) {
+      window.location.assign('/club#fun')
+      return
+    }
     dispatch({ type: 'goto', index: picker < 0 ? 0 : picker })
-  }, [state.index, state.steps])
+  }, [state.index, state.steps, fromPath])
 
   const api = useMemo<JourneyApi>(
     () => ({
@@ -1564,6 +1584,7 @@ export function JourneyProvider({
       step,
       root,
       owned: Object.keys(learner.inventory),
+      fromPath,
       next: () => dispatch({ type: 'next' }),
       back: () => dispatch({ type: 'back' }),
       goHome,
@@ -1581,7 +1602,7 @@ export function JourneyProvider({
         void syncSession('journey_complete')
       },
     }),
-    [state, step, root, learner.inventory, chooseFamily, finishSection, goHome],
+    [state, step, root, learner.inventory, chooseFamily, finishSection, goHome, fromPath],
   )
 
   return (
