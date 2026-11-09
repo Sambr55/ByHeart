@@ -56,7 +56,7 @@ export function WalkScreen({ id }: { id: string }) {
 
   if (!walk || !view) {
     return (
-      <main className="mx-auto flex min-h-svh max-w-md flex-col gap-4 bg-bg px-5 py-10 text-fg">
+      <main className="mx-auto flex min-h-svh max-w-md flex-col gap-4 bg-bg px-5 pb-10 text-fg" style={{ paddingTop: 'calc(2.5rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}>
         <p className="display text-2xl">This walk is not open yet.</p>
         <Link href="/city" className="eyebrow text-accent">
           ← Back to the city

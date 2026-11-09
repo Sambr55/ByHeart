@@ -63,6 +63,7 @@ export function Board({
   saidHere,
   gender,
   onLaid,
+  beckon = false,
   children,
 }: {
   view: PathView
@@ -76,6 +77,8 @@ export function Board({
   saidHere: string[]
   gender: 'm' | 'f' | null
   onLaid: (n: PathNode) => void
+  /** First visit after set-up: the next room's tile says "Start here" (PathHome, ?start=1). */
+  beckon?: boolean
   /* Up next, under the board. */
   children?: ReactNode
 }) {
@@ -197,6 +200,7 @@ export function Board({
                 fresh={seen !== null && s.reached && s.kind !== 'room' && !(s.kind === 'corner' && s.corner === 'start') && !seen.includes(s.key)}
                 onTap={tap}
                 onLaid={onLaid}
+                beckon={beckon}
               />
             </li>
           ))}
@@ -297,6 +301,7 @@ function Cell({
   fresh,
   onTap,
   onLaid,
+  beckon = false,
 }: {
   s: Square
   lap: Lap
@@ -304,6 +309,7 @@ function Cell({
   fresh: boolean
   onTap: (s: Square) => void
   onLaid: (n: PathNode) => void
+  beckon?: boolean
 }) {
   const here = lap.token === s.at
   const token = here ? <span aria-hidden className="board-token" data-testid="board-token" /> : null
@@ -336,9 +342,19 @@ function Cell({
           </span>
         ) : null}
         {token}
+        {/* THE FIRST TILE, NAMED (Sam, 2026-11-09: "show the board before level one starts"). */}
+        {beckon && state === 'next' ? (
+          <span
+            aria-hidden
+            data-testid="board-start-here"
+            className="pointer-events-none absolute -top-2 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#e5b04a] px-2 py-0.5 text-[0.55rem] font-bold uppercase tracking-wider text-[#14243a] shadow-md"
+          >
+            Start here
+          </span>
+        ) : null}
       </>
     )
-    const common = { 'aria-label': label, 'data-testid': 'board-square', 'data-kind': 'room', 'data-state': cold ? 'glazed' : state, 'data-room': room.id, className: cls, style }
+    const common = { 'aria-label': (beckon && state === 'next' ? 'Start here: ' : '') + label, 'data-testid': 'board-square', 'data-kind': 'room', 'data-state': cold ? 'glazed' : state, 'data-room': room.id, className: cls, style }
     return laid ? (
       <button type="button" onClick={() => onLaid(node)} {...common}>
         {inner}
