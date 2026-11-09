@@ -175,8 +175,13 @@ console.log('\nand the people you have shown are in Yours\n')
 */
 await page.goto(BASE + '/profile')
 await page.waitForTimeout(2600)
-const invite = await page.$('[data-testid="friends-invite"]')
-ok('there is a way to show somebody, from Yours', Boolean(invite), invite ? '' : 'buried on /proof')
+/*
+  SHOW SOMEBODY LEFT YOURS (2026-11-09: "the show somebody function only sends a link not
+  examples… let's remove that and double down on invite a friend"). Yours now leads with
+  bringing a friend in; showing itself is still on /proof and in the feed.
+*/
+const invite = await page.$('[data-testid="friends-bring"]')
+ok('Yours leads with bringing a friend in', Boolean(invite), invite ? '' : 'no invite on Yours')
 const body = ((await page.textContent('body')) ?? '').replace(/\s+/g, ' ')
 ok(
   'and it is a list, never a number',

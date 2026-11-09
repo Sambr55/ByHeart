@@ -23,6 +23,14 @@
 export const INVITE_TEXT =
   'I am learning Portuguese properly. Come and do it with me — we can be the ones who actually order in it.'
 
+/*
+  WHAT AN INVITATION EARNS, ONCE (Sam, 2026-11-09: "a month free seems quite generous" — two
+  weeks each). The server's grant (lib/invites.ts) and every line that states it read these,
+  so the promise and the payment cannot say different things.
+*/
+export const INVITE_DAYS = 14
+export const INVITE_GIFT = 'two weeks'
+
 export const INVITE = {
   /** On the Yours section that lists them. */
   eyebrow: 'BRING A FRIEND IN',
@@ -47,8 +55,16 @@ export const INVITE = {
     The trigger moved from the Legend to the first room, said cold — see inviteEarned in
     lib/invites.ts — so the sentence that promises it moved with it.
   */
+  /*
+    THE OFFER, SAID FIRST NOW (Sam, 2026-11-09: "the offer is very small and needs to be
+    upweighted significantly"). It was buried on the argument that a screen leading on free
+    time is a referral scheme. It still pays only when the friend says a room out loud — so a
+    link sent to twenty people who never open it earns nothing — which is what keeps a big
+    offer honest. The headline is the offer; the small print is the rule.
+  */
+  headline: 'You both get ' + INVITE_GIFT + ' free.',
   reward:
-    'When somebody you brought says their first room out loud, with nothing on screen, you both get a month of DUB free. It pays when they can speak, not when they sign up.',
+    'Paid when they say their first room out loud, with nothing on screen — not when they sign up. Every friend who does is another ' + INVITE_GIFT + ' each.',
   /*
     THE BOARD'S CARD OPENS A SHEET (Sam, 2026-11-05: "link to a modal overlay rather than deep
     link to the Yours page where it gets lost"). The ask, said in Portuguese first — every
@@ -65,7 +81,7 @@ export const INVITE = {
   state: {
     waiting: 'Not opened yet',
     accepted: 'Started — not said a room out loud yet',
-    landed: 'Said their first room. You both got a month.',
+    landed: 'Said their first room. You both got ' + INVITE_GIFT + '.',
   },
 } as const
 
