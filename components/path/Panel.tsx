@@ -10,6 +10,7 @@ import { panelArt, tileWord } from '@/content/panel'
 import { pathUnits } from '@/content/path'
 import type { PathNode, PathView } from './progress'
 import { keystoneGlaze, milestoneHref, type Glaze } from './progress'
+import { LevelStops } from './LevelStops'
 import { UNLOCK_HREF } from './locks'
 import { LockIcon } from './icons'
 
@@ -136,12 +137,17 @@ export function Panel({
   onLaid,
   openId = null,
   homing,
+  rung = 1,
+  now,
   children,
 }: {
   view: PathView
   purpose: Purpose
   chapter: ChapterId
   inventory: Record<string, unknown>
+  /** For the level stops (LevelStops): the ladder, and the clock what's on is read against. */
+  rung?: number
+  now?: Date
   onLaid: (n: PathNode) => void
   /*
     The room whose sheet is open, if any. While it is, that tile alone keeps its outline
@@ -274,7 +280,7 @@ export function Panel({
           <span aria-hidden className="text-muted transition-transform group-open:rotate-180">⌄</span>
         </summary>
         <div className="flex flex-col gap-6 px-4 pb-4 pt-2">
-          <Legend view={view} />
+          <Legend view={view} purpose={purpose} chapter={chapter} rung={rung} now={now ?? new Date(0)} />
           <Foundation inventory={inventory} />
         </div>
       </details>
@@ -425,13 +431,14 @@ function Tile({
  * a list is read downwards even though the panel is laid upwards, and "Unit 1" first is
  * what anybody expects of a list.
  */
-function Legend({ view }: { view: PathView }) {
+function Legend({ view, purpose, chapter, rung, now }: { view: PathView; purpose: Purpose; chapter: ChapterId; rung: number; now: Date }) {
   return (
     <ol className="flex flex-col gap-3" aria-label="The units of your panel">
-      {view.units.map(({ unit, nodes, done, stars }) => {
+      {view.units.map(({ unit, nodes, done, stars }, index) => {
         const glaze = keystoneGlaze(stars)
         return (
-          <li key={unit.id} data-unit={unit.id} className="flex items-center gap-3 text-sm">
+          <li key={unit.id} data-unit={unit.id} className="flex flex-col gap-2">
+          <div className="flex items-center gap-3 text-sm">
             <span className="display w-5 shrink-0 text-muted">{unit.n}</span>
             <span className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="truncate">{unit.title}</span>
@@ -460,6 +467,11 @@ function Legend({ view }: { view: PathView }) {
                 {keystoneLabel(unit)}
               </span>
             </Link>
+          </div>
+          {/* The same surprises, places and what's on the board deals this level (LevelStops). */}
+          <div className="pl-8">
+            <LevelStops view={view} index={index} purpose={purpose} chapter={chapter} rung={rung} now={now} />
+          </div>
           </li>
         )
       })}

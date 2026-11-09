@@ -11,6 +11,7 @@ import { useEntitlements } from '@/engine/useEntitlements'
 import { hasFullAccess } from '@/lib/entitlements'
 import { PATH_NAMES, pathPurpose, pathUnits } from '@/content/path'
 import { levelKey } from '@/content/level'
+import { rungReached } from '@/content/roots'
 import {
   milestoneHref,
   pathLevel,
@@ -29,8 +30,6 @@ import { KeepItAsk } from './KeepItAsk'
 import { useHomecoming } from './homecoming'
 import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
-import { Foundations } from './Foundations'
-import { FunShelf } from './FunShelf'
 import { PushAsk } from '@/components/PushChoices'
 import { track } from '@/engine/analytics'
 
@@ -139,6 +138,8 @@ export function PathHome() {
   const level = useMemo(() => pathLevel(view), [view])
 
   const understood = learner.understood ?? 0
+  /* How far up the ladder: whether a vibe surprise opens yet (the sitting's own gate). */
+  const rung = useMemo(() => rungReached(learner.proof ?? []), [learner.proof])
 
   /* Practice goes to the milestone of the unit you are in. */
   const practiceUnit =
@@ -282,6 +283,7 @@ export function PathHome() {
               gender={learner.profile?.gender ?? null}
               onLaid={setSheet}
               beckon={starting && view.done === 0}
+              rung={rung}
             >
               {task}
             </Board>
@@ -289,6 +291,10 @@ export function PathHome() {
             <Road
               view={view}
               inventory={learner.inventory ?? {}}
+              purpose={pathPurpose(purpose)}
+              chapter={learner.chapter ?? 'lisbon'}
+              rung={rung}
+              now={now ?? new Date(0)}
               onLaid={setSheet}
               openId={sheet?.room.id ?? null}
               homing={homing}
@@ -301,6 +307,8 @@ export function PathHome() {
               purpose={pathPurpose(purpose)}
               chapter={learner.chapter ?? 'lisbon'}
               inventory={learner.inventory ?? {}}
+              rung={rung}
+              now={now ?? new Date(0)}
               onLaid={setSheet}
               openId={sheet?.room.id ?? null}
               homing={homing}
@@ -309,12 +317,13 @@ export function PathHome() {
             </Panel>
           )}
 
-          <div className="-mt-3">
-            <Foundations inventory={learner.inventory ?? {}} used={learner.cheats_used ?? []} />
-          </div>
-          <div className="mt-2">
-            <FunShelf proof={learner.proof ?? []} units={units} />
-          </div>
+          {/*
+            NO SIDE ROWS (Sam, 2026-11-09: "should we only see content in a flow… declutter and
+            making it as clear as possible to the user how they move through"). The Hacks,
+            Bluffs & Cheats row and the Just for fun row are gone from here: their content is
+            dealt onto each level's board as surprises (content/surprises.ts), the same in all
+            three views, and everything opened lands in Yours.
+          */}
         </div>
         <BottomNavSpace />
       </main>

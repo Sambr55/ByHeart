@@ -10,6 +10,7 @@ import { rowsFor } from '@/content/calendar'
 import { CHEATS } from '@/content/cheats'
 import { bairroById, gemsHomeFirst, KIND_LABEL } from '@/content/gems'
 import { IDIOMS } from '@/content/idioms'
+import { CRATES, entryRung } from '@/content/roots'
 import { WALKS } from '@/content/walks'
 import { panelArt } from '@/content/panel'
 import type { ChapterId } from '@/content/chapters'
@@ -64,6 +65,7 @@ export function Board({
   gender,
   onLaid,
   beckon = false,
+  rung = 1,
   children,
 }: {
   view: PathView
@@ -79,6 +81,8 @@ export function Board({
   onLaid: (n: PathNode) => void
   /** First visit after set-up: the next room's tile says "Start here" (PathHome, ?start=1). */
   beckon?: boolean
+  /** How far up the ladder this learner is (rungReached) — whether a vibe square opens yet. */
+  rung?: number
   /* Up next, under the board. */
   children?: ReactNode
 }) {
@@ -115,7 +119,7 @@ export function Board({
   */
   useEffect(() => {
     if (!lap) return
-    const keys = lap.squares.filter((s) => s.reached && (s.kind === 'postcard' || s.kind === 'venue' || s.kind === 'neighbour')).map((s) => s.key)
+    const keys = lap.squares.filter((s) => s.reached && (s.kind === 'postcard' || s.kind === 'venue' || s.kind === 'neighbour' || s.kind === 'vibe')).map((s) => s.key)
     if (keys.length) markBoardMet(keys)
   }, [lap])
   const [open, setOpen] = useState<Square | null>(null)
@@ -259,6 +263,7 @@ export function Board({
           lap={lap}
           purpose={purpose}
           gender={gender}
+          rung={rung}
           away={away}
           holidays={holidays}
           saidHere={saidHere}
@@ -374,7 +379,7 @@ function Cell({
   }
 
   /* A stop: face down until reached. */
-  const what = s.kind === 'postcard' ? 'A postcard' : s.kind === 'venue' ? 'A place' : 'What’s on'
+  const what = s.kind === 'postcard' ? 'A postcard' : s.kind === 'venue' ? 'A place' : s.kind === 'vibe' ? 'Just for fun' : 'What’s on'
   return (
     <button
       type="button"
@@ -419,11 +424,13 @@ function CornerMark({ corner }: { corner: CornerId }) {
   )
 }
 
-function StopMark({ kind }: { kind: 'postcard' | 'venue' | 'neighbour' }) {
+function StopMark({ kind }: { kind: 'postcard' | 'venue' | 'neighbour' | 'vibe' }) {
   const d = {
     postcard: 'M4 6h16v12H4zM4 6l8 6 8-6',
     venue: 'M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
     neighbour: 'M4 7a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 10h16M8 4v4M16 4v4',
+    /* A sparkle: the surprise-and-delight square — swearing, flirting, the films. */
+    vibe: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z',
   }[kind]
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="h-[46%] w-[46%]">
@@ -445,11 +452,13 @@ function StopSheet({
   practiceHref,
   nextLevel,
   onClose,
+  rung,
 }: {
   s: Square
   lap: Lap
   purpose: Purpose
   gender: 'm' | 'f' | null
+  rung: number
   away: string | null
   holidays: string[]
   saidHere: string[]
@@ -489,7 +498,16 @@ function StopSheet({
           <DrawEntry board={purpose + ':' + lap.unitId} />
         </>
       ) : (
-        <p className="text-base leading-relaxed">{c.body}</p>
+        <>
+          <p className="text-base leading-relaxed">{c.body}</p>
+          {/*
+            THE LEVEL'S PRACTICE, ANY TIME — as the Panel's and the Road's keystones always
+            offered it (2026-11-09: the three views draw the same content).
+          */}
+          <Link href={practiceHref} className="tap-target eyebrow block w-full rounded-full border border-accent px-6 py-3 text-center text-accent" data-testid="board-practice-early">
+            Practise this level’s shape
+          </Link>
+        </>
       )
     } else if (ahead) {
       body = <p className="text-base leading-relaxed text-muted">Lay more rooms to get here. {c.body}</p>
@@ -598,6 +616,30 @@ function StopSheet({
             Part of {lap.walk.title} →
           </Link>
         ) : null}
+      </>
+    )
+  } else if (s.kind === 'vibe') {
+    /*
+      JUST FOR FUN, ON ITS LEVEL (2026-11-09, content/surprises.ts). The vibes that had a row
+      of their own under the path — swearing, flirting, the films — are dealt onto the board.
+      Opens when the ladder says so (entryRung, the sitting's own gate); until then it says how.
+    */
+    const crate = CRATES.find((x) => x.id === s.crate)
+    const open = crate ? entryRung(crate) <= rung : false
+    eyebrow = 'Just for fun'
+    title = crate?.title ?? s.crate
+    body = (
+      <>
+        {crate?.blurb ? <p className="text-base leading-relaxed">{crate.blurb}</p> : null}
+        {open ? (
+          <Link href={'/vibes?open=' + encodeURIComponent(s.crate)} className={btn} data-testid="board-vibe-open">
+            Open it
+          </Link>
+        ) : (
+          <p className="text-sm leading-relaxed text-muted" data-testid="board-vibe-locked">
+            Say one of this level’s rooms out loud, with nothing on screen, and it opens.
+          </p>
+        )}
       </>
     )
   } else if (s.kind === 'neighbour') {

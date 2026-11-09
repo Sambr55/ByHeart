@@ -231,15 +231,15 @@ export function Collection() {
         vibes via any nav to continue." The shelf is deliberately not a tab, so losing this
         link would have re-made a dead end that took a report to find.
       */}
-      {/* To the Just for fun row on the Path (components/path/FunShelf.tsx), where the vibes live now. */}
+      {/* To the Path, where the vibes are dealt onto each level's board now (content/surprises.ts, 2026-11-09). */}
       {/* Only under the Vibes shelf, where it means something (2026-11-04). */}
       {showing.id === 'vibes' ? (
         <Link
-          href="/club#fun"
+          href="/club"
           data-testid="collection-more"
           className="tap-target eyebrow inline-flex items-center text-accent underline underline-offset-4"
         >
-          MORE VIBES
+          MORE ON YOUR PATH
         </Link>
       ) : null}
     </section>

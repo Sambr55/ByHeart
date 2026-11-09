@@ -58,7 +58,7 @@ for (const p of ['visiting', 'staying', 'moving'] as Purpose[]) {
   units.forEach((u, i) => {
     const lap = lapOf(view, i, p, { gems, rows })
     const rooms = lap.squares.filter((s) => s.kind === 'room').length
-    const stops = lap.squares.filter((s) => s.kind === 'postcard' || s.kind === 'venue' || s.kind === 'neighbour').length
+    const stops = lap.squares.filter((s) => s.kind === 'postcard' || s.kind === 'venue' || s.kind === 'neighbour' || s.kind === 'vibe').length
     const corners = lap.squares.filter((s) => s.kind === 'corner').length
     const venues = lap.squares.flatMap((s) => (s.kind === 'venue' ? [s.gem.id] : []))
     ok(`${p} · ${u.id}: all ${u.rooms.length} rooms, ${stops} stops, 4 corners, no venue twice`,
