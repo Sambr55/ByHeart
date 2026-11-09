@@ -65,8 +65,17 @@ export async function POST(request: Request) {
         break
       case 'invoice.payment_failed':
       case 'invoice.paid': {
-        const invoice = event.data.object as Stripe.Invoice & { subscription?: string | Stripe.Subscription }
-        const ref = invoice.subscription
+        /*
+          WHERE THE SUBSCRIPTION IS ON AN INVOICE (2026-11-09). Since API 2025-03-31.basil it is
+          invoice.parent.subscription_details.subscription; the top-level `subscription` field
+          was removed. Reading only the old one meant these two events never synced on clover
+          or endive — the subscription events covered for it. Both read, newest first.
+        */
+        const invoice = event.data.object as Stripe.Invoice & {
+          subscription?: string | Stripe.Subscription
+          parent?: { subscription_details?: { subscription?: string | Stripe.Subscription } | null } | null
+        }
+        const ref = invoice.parent?.subscription_details?.subscription ?? invoice.subscription
         if (ref) {
           const id = typeof ref === 'string' ? ref : ref.id
           await syncSubscription(await s.subscriptions.retrieve(id))
