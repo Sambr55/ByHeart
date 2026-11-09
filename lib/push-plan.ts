@@ -24,7 +24,7 @@ import { pathUnits } from '@/content/path'
 import type { Purpose } from '@/content/situations'
 import { said } from '@/content/speaker'
 import { chapterOfBairro, gemOfTheWeekIn, weekStart } from '@/content/gems'
-import { chapterById, type ChapterId } from '@/content/chapters'
+import { chapterById, chapterIdOf, type ChapterId } from '@/content/chapters'
 import { pathView, type PathRecord } from '@/components/path/progress'
 import { isFreeRoom } from '@/lib/entitlements'
 
@@ -41,6 +41,8 @@ export interface Push {
   url: string
   /** The notification tag on the phone: a new one of the same kind replaces the old. */
   tag: string
+  /** The room a path line comes from, for a nudge to name (lib/nudge.ts). */
+  room?: string
 }
 
 export function isCadence(x: unknown): x is Cadence {
@@ -105,6 +107,7 @@ export function pathLine(
         body: line.en + ' — ' + room.title,
         url: '/errand/' + room.id + '?n=line',
         tag: 'dub-line',
+        room: room.title,
       }
     }
   }
@@ -115,8 +118,9 @@ export function pathLine(
  * Monday's place: this week's gem and its line. One per week, by the week's Monday — in the
  * subscriber's own city or town (2026-11-05: Cascais and Sintra have their own).
  */
-export function weeklyGem(now: Date = new Date(), gender: 'm' | 'f' | null = null, chapter: ChapterId | null = null): Push | null {
-  const gem = gemOfTheWeekIn(chapter, now)
+export function weeklyGem(now: Date = new Date(), gender: 'm' | 'f' | null = null, chapter: ChapterId | string | null = null): Push | null {
+  /* The cron reads raw stored state, so an old town id is mapped here too. */
+  const gem = gemOfTheWeekIn(chapterIdOf(chapter), now)
   if (!gem) return null
   const line = said(gem.line, gender)
   return {

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { InviteSheet } from '@/components/invite/InviteSheet'
 import { SpokenLine } from '@/components/Opener'
 import { CORNERS, HOLIDAY_PRIZE, type CornerId } from '@/content/board'
 import { rowsFor } from '@/content/calendar'
@@ -63,6 +64,7 @@ export function Board({
   saidHere,
   gender,
   onLaid,
+  beckon = false,
   children,
 }: {
   view: PathView
@@ -76,6 +78,8 @@ export function Board({
   saidHere: string[]
   gender: 'm' | 'f' | null
   onLaid: (n: PathNode) => void
+  /** First visit after set-up: the next room's tile says "Start here" (PathHome, ?start=1). */
+  beckon?: boolean
   /* Up next, under the board. */
   children?: ReactNode
 }) {
@@ -131,6 +135,7 @@ export function Board({
     if (keys.length) markBoardMet(keys)
   }, [lap])
   const [open, setOpen] = useState<Square | null>(null)
+  const [inviting, setInviting] = useState(false)
   const away = onHoliday({ holidays }, now)
   if (!lap) return null
   const art = panelArt(chapter, purpose)
@@ -197,20 +202,46 @@ export function Board({
                 fresh={seen !== null && s.reached && s.kind !== 'room' && !(s.kind === 'corner' && s.corner === 'start') && !seen.includes(s.key)}
                 onTap={tap}
                 onLaid={onLaid}
+                beckon={beckon}
               />
             </li>
           ))}
           <li
-            aria-hidden
-            className="board-middle relative overflow-hidden rounded-md"
+            className="board-middle relative overflow-hidden rounded-md [container-type:inline-size]"
             style={{ gridColumn: `2 / ${lap.w}`, gridRow: `2 / ${lap.h}` }}
           >
             <span
+              aria-hidden
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${art.src})`, opacity: 0.18 + 0.82 * pct, filter: `saturate(${0.3 + 0.7 * pct})` }}
             />
-            <span className="absolute inset-0 bg-gradient-to-t from-[#14243a]/80 via-[#14243a]/25 to-transparent" />
-            <span className="absolute inset-x-2 bottom-2 flex flex-col text-white">
+            <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#14243a]/80 via-[#14243a]/25 to-transparent" />
+            {/*
+              TWO CARDS IN THE MIDDLE (Sam, 2026-11-05: "two small cards laid diagonally at the
+              centre of the board … Invite a friend and Start a Table"). The two things on the
+              Path that need another person, set down across the picture like cards waiting to
+              be drawn. In DUB's own glaze — cream, azulejo blue, gold — and named in
+              Portuguese first, because every ask teaches. Sized in container units, so they
+              are the same cards on a 2×2 middle and a 4×4 one.
+            */}
+            {/* The invite opens its own sheet here rather than sending people to the foot of Yours (Sam, 2026-11-05). */}
+            <BoardCard
+              onOpen={() => setInviting(true)}
+              pt="Convida um amigo"
+              en="Invite a friend"
+              icon="friend"
+              testid="board-card-invite"
+              style={{ left: '7%', top: '9%', transform: 'rotate(-14deg)' }}
+            />
+            <BoardCard
+              href="/table/new"
+              pt="Junta uma mesa"
+              en="Start a table"
+              icon="table"
+              testid="board-card-table"
+              style={{ right: '7%', top: '30%', transform: 'rotate(10deg)' }}
+            />
+            <span className="pointer-events-none absolute inset-x-2 bottom-2 flex flex-col text-white">
               <span className="eyebrow text-[0.6rem] opacity-80">Level {level}</span>
               <span className="display text-lg leading-tight sm:text-xl">{unit.unit.title}</span>
               <span className="text-[0.7rem] opacity-80">
@@ -241,6 +272,8 @@ export function Board({
       </label>
 
       {children}
+
+      {inviting ? <InviteSheet onClose={() => setInviting(false)} /> : null}
 
       {open ? (
         <StopSheet
@@ -273,6 +306,7 @@ function Cell({
   fresh,
   onTap,
   onLaid,
+  beckon = false,
 }: {
   s: Square
   lap: Lap
@@ -280,6 +314,7 @@ function Cell({
   fresh: boolean
   onTap: (s: Square) => void
   onLaid: (n: PathNode) => void
+  beckon?: boolean
 }) {
   const here = lap.token === s.at
   const token = here ? <span aria-hidden className="board-token" data-testid="board-token" /> : null
@@ -312,9 +347,19 @@ function Cell({
           </span>
         ) : null}
         {token}
+        {/* THE FIRST TILE, NAMED (Sam, 2026-11-09: "show the board before level one starts"). */}
+        {beckon && state === 'next' ? (
+          <span
+            aria-hidden
+            data-testid="board-start-here"
+            className="pointer-events-none absolute -top-2 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#e5b04a] px-2 py-0.5 text-[0.55rem] font-bold uppercase tracking-wider text-[#14243a] shadow-md"
+          >
+            Start here
+          </span>
+        ) : null}
       </>
     )
-    const common = { 'aria-label': label, 'data-testid': 'board-square', 'data-kind': 'room', 'data-state': cold ? 'glazed' : state, 'data-room': room.id, className: cls, style }
+    const common = { 'aria-label': (beckon && state === 'next' ? 'Start here: ' : '') + label, 'data-testid': 'board-square', 'data-kind': 'room', 'data-state': cold ? 'glazed' : state, 'data-room': room.id, className: cls, style }
     return laid ? (
       <button type="button" onClick={() => onLaid(node)} {...common}>
         {inner}
@@ -662,5 +707,73 @@ function DrawEntry({ board }: { board: string }) {
         How the draw works
       </Link>
     </div>
+  )
+}
+
+/**
+ * A card waiting on the middle of the board: a cream card with a blue frame, an icon, the
+ * Portuguese and the English. A link, so it is reachable by keyboard and says where it goes.
+ */
+function BoardCard({
+  href,
+  onOpen,
+  pt,
+  en,
+  icon,
+  testid,
+  style,
+}: {
+  href?: string
+  onOpen?: () => void
+  pt: string
+  en: string
+  icon: 'friend' | 'table'
+  testid: string
+  style: CSSProperties
+}) {
+  const cls =
+    'absolute flex aspect-[3/2] w-[40%] flex-col items-center justify-center gap-[3%] rounded-[6%] border-[0.35cqw] border-[#1f5d8c] bg-[#fbf6ec] p-[3%] text-center text-[#14243a] shadow-[0_6px_14px_rgba(10,20,40,0.35)] outline outline-1 outline-offset-[-3cqw] outline-[#1f5d8c]/40 transition hover:-translate-y-0.5'
+  const face = (
+    <>
+      <svg aria-hidden viewBox="0 0 24 24" className="h-[28%] w-auto text-[#1f5d8c]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+        {icon === 'friend' ? (
+          <>
+            <circle cx="9" cy="8" r="3.2" />
+            <path d="M3.5 19a5.5 5.5 0 0111 0" />
+            <path d="M18 8v6M15 11h6" />
+          </>
+        ) : (
+          <>
+            <path d="M3 9h18M5 9v10M19 9v10M8 9l1-4h6l1 4" />
+          </>
+        )}
+      </svg>
+      <span lang="pt-PT" className="pt font-semibold leading-tight text-[#1f5d8c]" style={{ fontSize: 'clamp(0.5rem, 5.4cqw, 0.95rem)' }}>
+        {pt}
+      </span>
+      <span className="eyebrow leading-none text-[#14243a]/70" style={{ fontSize: 'clamp(0.4rem, 3.4cqw, 0.6rem)' }}>
+        {en}
+      </span>
+    </>
+  )
+  const tap = () => track('board_card', { card: icon })
+  return onOpen ? (
+    <button
+      type="button"
+      data-testid={testid}
+      aria-haspopup="dialog"
+      onClick={() => {
+        tap()
+        onOpen()
+      }}
+      className={cls}
+      style={style}
+    >
+      {face}
+    </button>
+  ) : (
+    <Link href={href ?? '/'} data-testid={testid} onClick={tap} className={cls} style={style}>
+      {face}
+    </Link>
   )
 }

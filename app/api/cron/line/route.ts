@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { pushConfigured, sendPush } from '@/lib/push'
 import type { ChapterId } from '@/content/chapters'
 import { dueToday, local, pathLine, tableSoon, weeklyGem, type Push } from '@/lib/push-plan'
+import { daysAway, nudgeBody, pushNudgeDue } from '@/lib/nudge'
 import { billingConfigured, entitlementsForUser } from '@/lib/billing'
 import { entitlementsForDevice } from '@/lib/comp'
 
@@ -42,6 +43,10 @@ interface Row {
   time_zone: string
   last_line_at: Date | null
   sent: string[]
+  /** The latest the app told the server it was open, on this device or the account's. */
+  last_active: Date | null
+  /** When this phone was last nudged for being away (lib/nudge.ts). */
+  nudged_at: Date | null
   state: {
     inventory?: Record<string, unknown>
     /** Salting on this rather than the endpoint keeps one person to one line a day. */
@@ -72,7 +77,8 @@ export async function GET(request: Request) {
 
   const rows = (await sql`
     select s.endpoint, s.device_id, s.user_id, s.cadence, s.topics, s.p256dh, s.auth, s.time_zone, s.last_line_at, s.sent,
-           l.state
+           s.nudged_at, l.state,
+           greatest(l.updated_at, (select max(o.updated_at) from learners o where s.user_id is not null and o.user_id = s.user_id)) as last_active
       from push_subscriptions s
       left join learners l on l.device_id = s.device_id
      where s.expired_at is null
@@ -110,6 +116,7 @@ export async function GET(request: Request) {
   }
 
   let week = 0
+  let nudged = 0
   for (const row of rows) {
     const { hour, day, weekday } = local(row.time_zone)
     const topics = row.topics ?? ['week', 'table']
@@ -130,6 +137,29 @@ export async function GET(request: Request) {
     if (!force && hour !== SEND_HOUR) {
       skipped++
       continue
+    }
+
+    /*
+      AWAY FOR A WHILE, THIS MORNING'S LINE IS THE NUDGE (2026-11-09, lib/nudge.ts). Before
+      the cadence check, so somebody on three-a-week still hears on the day they cross the
+      line — and in place of the Line, never as well as it: the same one push this hour.
+    */
+    if (
+      on('PUSH_NUDGE') &&
+      !(row.last_line_at && local(row.time_zone, row.last_line_at).day === day) &&
+      pushNudgeDue({ lastActive: row.last_active, nudgedAt: row.nudged_at, cadence: row.cadence })
+    ) {
+      const line = pathLine(row.state as Parameters<typeof pathLine>[0], row.sent ?? [], await memberOf(row))
+      if (line?.room) {
+        /* The Portuguese stays the title; the body says how long, names the room, and gives the English. */
+        const en = line.body.split(' — ')[0]
+        const push = { ...line, body: nudgeBody(line.room, daysAway(row.last_active)) + ' “' + en + '”', url: line.url.replace('n=line', 'n=nudge') }
+        if ((await deliver(row, push, true)) === 'sent') {
+          await sql`update push_subscriptions set nudged_at = now() where endpoint = ${row.endpoint}`
+          nudged++
+        }
+        continue
+      }
     }
     // How often is theirs: every day, three a week, or never.
     if (!force && !dueToday(row.cadence, weekday)) {
@@ -210,5 +240,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, considered: rows.length, sent, skipped, expired, week, tables })
+  return NextResponse.json({ ok: true, considered: rows.length, sent, skipped, expired, week, tables, nudged })
 }

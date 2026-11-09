@@ -219,7 +219,7 @@ export function LevelRecap({ id }: { id: string }) {
 function Frame({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-5 bg-bg px-5 pb-10 pt-6 text-fg">
+      <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-5 bg-bg px-5 pb-10 text-fg" style={{ paddingTop: 'calc(1.5rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}>
         <header className="flex items-center gap-3">
           <Link href="/club" className="tap-target shrink-0" aria-label="Back to your path">
             ‹

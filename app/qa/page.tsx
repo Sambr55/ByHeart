@@ -35,7 +35,7 @@ export default function QaPage() {
   const total = crates.reduce((n, c) => n + (ROOTS_BY_FAMILY[c.id] ?? []).length, 0)
 
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-10 text-fg">
+    <main className="safe-top mx-auto flex max-w-3xl flex-col gap-6 px-6 py-10 text-fg">
       <div className="flex flex-col gap-3">
         <p className="eyebrow text-accent">{BRAND.name} · QA</p>
         <h1 className="display text-3xl">European Portuguese QA sheet</h1>

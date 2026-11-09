@@ -1,6 +1,7 @@
 import 'server-only'
 import Stripe from 'stripe'
 import { db } from './db'
+import { billingMoments } from './billing-moments'
 import { entitlementsFor, type Entitlements, type Plan, type SubStatus } from './entitlements'
 
 /**
@@ -45,6 +46,32 @@ export function billingConfigured(): boolean {
       process.env.STRIPE_PRICE_PRO_MONTHLY &&
       process.env.STRIPE_PRICE_PRO_ANNUAL,
   )
+}
+
+/** Days free before the first charge. BILLING_TRIAL_DAYS overrides; 0 turns the trial off. */
+export function trialDays(): number {
+  const n = Number(process.env.BILLING_TRIAL_DAYS ?? 7)
+  return Number.isFinite(n) && n >= 0 ? Math.min(30, Math.floor(n)) : 7
+}
+
+/**
+ * THE FOUNDING OFFER IS THE FIRST 500 (content: PRICING.founding.cap). Counted at Stripe — the
+ * one place every founding subscription lives — active and in their free week, at the moment
+ * somebody asks for it. Null when it cannot be counted, which the checkout treats as closed.
+ */
+export const FOUNDING_CAP = 500
+export async function foundingLeft(): Promise<number | null> {
+  const s = stripe()
+  const price = process.env.STRIPE_PRICE_FOUNDING
+  if (!s || !price) return null
+  let n = 0
+  for (const status of ['active', 'trialing', 'past_due'] as const) {
+    for await (const _ of s.subscriptions.list({ price, status, limit: 100 })) {
+      n++
+      if (n >= FOUNDING_CAP) return 0
+    }
+  }
+  return FOUNDING_CAP - n
 }
 
 export interface Subscription {
@@ -109,25 +136,37 @@ export async function checkoutUrl(opts: {
   if (!price) return null
 
   const customer = await ensureCustomer(opts.userId, opts.email)
+  const had = await subscriptionFor(opts.userId)
+  const trial = had?.stripe_subscription_id ? 0 : trialDays()
   const session = await s.checkout.sessions.create({
     mode: 'subscription',
     customer: customer ?? undefined,
     line_items: [{ price, quantity: 1 }],
     /**
-     * No trial, deliberately.
-     *
-     * A trial is a deadline, and the whole thesis of this product is that deadlines and
-     * streaks do not produce speakers — shipping a countdown to a subscription while the
-     * deal screen promises "no streaks, nothing here will ever congratulate you for
-     * opening the app" is the product arguing with itself at the till.
-     *
-     * The generous free tier does the same job better anyway: seven days is not long
-     * enough to feel one crate collide with another, and three free crates over a month
-     * is. It also keeps the conversion rate honest, since trial starts are not customers.
+     * THE FIRST WEEK FREE (Sam, 2026-11-05: "I think we start with first week free then the
+     * full plan"). This replaces the old "No trial, deliberately" — the owner's decision.
+     * Stripe takes the card at checkout, charges nothing for TRIAL_DAYS, then the plan; they
+     * can cancel any time in the trial from Account (the Stripe portal) and pay nothing.
+     * Once per person: anybody who has had a Stripe subscription before goes straight to
+     * the plan. The two free levels stay free regardless — the website promises them.
      */
     subscription_data: {
       metadata: { user_id: opts.userId },
+      /* Stripe's recommended billing mode (the integration plan, 2026-11-05). */
+      billing_mode: { type: 'flexible' },
+      ...(trial
+        ? {
+            trial_period_days: trial,
+            /* A trial that somehow ends with no card is cancelled, never left owing. */
+            trial_settings: { end_behavior: { missing_payment_method: 'cancel' as const } },
+          }
+        : {}),
     },
+    /* The card is taken up front even in the free week: that is what a trial means here. */
+    payment_method_collection: 'always',
+    /* The address, for receipts and for tax once DUB has to collect it (Stripe Tax). */
+    billing_address_collection: 'auto',
+    ...(customer ? { customer_update: { address: 'auto' as const, name: 'auto' as const } } : {}),
     client_reference_id: opts.userId,
     allow_promotion_codes: true,
     success_url: opts.returnTo + '?billing=done',
@@ -192,6 +231,17 @@ export async function syncSubscription(sub: Stripe.Subscription): Promise<void> 
   const plan: Plan = status === 'canceled' || status === 'inactive' ? 'free' : 'pro'
   const periodEnd = item?.current_period_end ? new Date(item.current_period_end * 1000) : null
 
+  /* The moment, for the admin page (017_billing_events.sql): compared with what we held before. */
+  const [prev] = await sql<{ status: string; cancel_at_period_end: boolean; source: string }[]>`
+    select status, cancel_at_period_end, source from subscriptions where user_id = ${userId}
+  `
+  const priceId = item?.price?.id
+  const detail =
+    priceId && priceId === process.env.STRIPE_PRICE_FOUNDING ? 'founding' : item?.price?.recurring?.interval ?? null
+  for (const kind of billingMoments(prev && prev.source === 'stripe' ? prev : null, { status, cancel_at_period_end: sub.cancel_at_period_end })) {
+    await sql`insert into billing_events (user_id, kind, detail) values (${userId}, ${kind}, ${detail})`
+  }
+
   await sql`
     insert into subscriptions (
       user_id, source, plan, status, stripe_customer_id, stripe_subscription_id,
@@ -220,3 +270,4 @@ async function userIdForCustomer(customerId: string): Promise<string | null> {
   `
   return rows[0]?.user_id ?? null
 }
+

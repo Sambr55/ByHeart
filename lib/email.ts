@@ -27,6 +27,8 @@ interface Mail {
   subject: string
   text: string
   html: string
+  /** Extra headers — the nudge email's List-Unsubscribe pair. */
+  headers?: Record<string, string>
 }
 
 async function deliver(mail: Mail): Promise<boolean> {
@@ -39,7 +41,7 @@ async function deliver(mail: Mail): Promise<boolean> {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { authorization: 'Bearer ' + key, 'content-type': 'application/json' },
-      body: JSON.stringify({ from: FROM, to: mail.to, subject: mail.subject, text: mail.text, html: mail.html }),
+      body: JSON.stringify({ from: FROM, to: mail.to, subject: mail.subject, text: mail.text, html: mail.html, ...(mail.headers ? { headers: mail.headers } : {}) }),
     })
     if (!res.ok) {
       console.error('[email:failed] ' + res.status + ' ' + (await res.text()).slice(0, 300))
@@ -53,28 +55,94 @@ async function deliver(mail: Mail): Promise<boolean> {
 }
 
 /** The tone here is the product's tone. It is the first thing a new person reads. */
-export async function sendLoginLink(to: string, url: string): Promise<boolean> {
+/**
+ * THE SIGN-IN EMAIL: a code first, the link second (2026-11-05). On an iPhone the link opens
+ * in Safari rather than the installed app, so the code — typed into the app itself — is the
+ * way in that works everywhere. The link stays for a laptop.
+ */
+export async function sendLoginLink(to: string, url: string, code?: string): Promise<boolean> {
+  const spaced = code ? code.slice(0, 3) + ' ' + code.slice(3) : null
   const text =
-    'Here is your way in.\n\n' +
+    (spaced ? 'Your DUB code: ' + spaced + '\n\nType it into DUB where you asked for it.\n\nOr open this link on the same device:\n' : 'Here is your way in.\n\n') +
     url +
-    '\n\nThe link works once and expires in twenty minutes. If you did not ask for it, ' +
+    '\n\nThe code and the link work once and expire in twenty minutes. If you did not ask for them, ' +
     'nothing has happened and you can ignore this.\n\n— DUB'
 
   const html = `<!doctype html>
 <div style="font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:34rem;margin:0 auto;padding:32px 24px;color:#111">
   <p style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#888;margin:0 0 24px">DUB</p>
-  <h1 style="font-size:26px;line-height:1.2;margin:0 0 16px">Here is your way in.</h1>
-  <p style="font-size:16px;line-height:1.55;color:#444;margin:0 0 28px">
-    One tap and you are back where you left off.
-  </p>
+  ${
+    spaced
+      ? `<h1 style="font-size:22px;line-height:1.2;margin:0 0 12px">Your code</h1>
+  <p style="font-size:40px;letter-spacing:.18em;font-weight:700;margin:0 0 12px;font-family:ui-monospace,Menlo,monospace">${spaced}</p>
+  <p style="font-size:16px;line-height:1.55;color:#444;margin:0 0 28px">Type it into DUB, where you asked for it.</p>
+  <p style="font-size:14px;line-height:1.55;color:#666;margin:0 0 12px">Or, on the same device:</p>`
+      : `<h1 style="font-size:26px;line-height:1.2;margin:0 0 16px">Here is your way in.</h1>
+  <p style="font-size:16px;line-height:1.55;color:#444;margin:0 0 28px">One tap and you are back where you left off.</p>`
+  }
   <p style="margin:0 0 28px">
     <a href="${url}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 26px;border-radius:999px;font-size:14px;letter-spacing:.08em;text-transform:uppercase">Open DUB</a>
   </p>
   <p style="font-size:13px;line-height:1.5;color:#888;margin:0">
-    The link works once and expires in twenty minutes. If you did not ask for it, nothing has
-    happened and you can ignore this.
+    The code and the link work once and expire in twenty minutes. If you did not ask for them,
+    nothing has happened and you can ignore this.
   </p>
 </div>`
 
-  return deliver({ to, subject: 'Your DUB link', text, html })
+  return deliver({ to, subject: spaced ? 'Your DUB code: ' + spaced : 'Your DUB link', text, html })
+}
+
+const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+/**
+ * THE "IT'S BEEN A WEEK" EMAIL (2026-11-09) — only to people who ticked it (users.nudge_email),
+ * at most one a week (lib/nudge.ts). Their next room, one of its lines with the English,
+ * what is on in their city this week, and a one-tap way to stop. The subject is the room,
+ * not a guilt trip: what is waiting, not how long they have been gone.
+ */
+export async function sendNudgeEmail(o: {
+  to: string
+  name: string | null
+  room: string
+  pt: string
+  en: string
+  roomUrl: string
+  city: string
+  on: { event: string; when: string; url: string }[]
+  unsubscribeUrl: string
+}): Promise<boolean> {
+  const hi = o.name ? 'Olá, ' + o.name + '.' : 'Olá.'
+  const onText = o.on.length ? '\n\nOn in ' + o.city + ' this week:\n' + o.on.map((x) => '· ' + x.event + ' — ' + x.when).join('\n') : ''
+  const text =
+    hi + ' Your next room is waiting: ' + o.room + '.\n\n' + o.pt + '\n' + o.en + '\n\nPick up where you left off: ' + o.roomUrl + onText +
+    '\n\n— DUB\n\nYou asked for these when you go quiet for a week. Stop them: ' + o.unsubscribeUrl
+  const onHtml = o.on.length
+    ? `<p style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#1f5d8c;margin:32px 0 8px">On in ${esc(o.city)} this week</p>` +
+      o.on.map((x) => `<p style="font-size:15px;line-height:1.5;margin:0 0 6px"><a href="${esc(x.url)}" style="color:#14243a">${esc(x.event)}</a> <span style="color:#888">· ${esc(x.when)}</span></p>`).join('')
+    : ''
+  const html = `<!doctype html>
+<div style="font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:34rem;margin:0 auto;padding:32px 24px;color:#14243a">
+  <p style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#888;margin:0 0 24px">DUB</p>
+  <h1 style="font-size:26px;line-height:1.2;margin:0 0 8px">${esc(hi)}</h1>
+  <p style="font-size:16px;line-height:1.55;color:#444;margin:0 0 24px">Your next room is waiting: <strong>${esc(o.room)}</strong>.</p>
+  <div style="border:2px solid #1f5d8c;border-radius:16px;padding:18px 20px;margin:0 0 24px;background:#fbf6ec">
+    <p lang="pt-PT" style="font-size:22px;line-height:1.3;color:#1f5d8c;margin:0 0 6px">${esc(o.pt)}</p>
+    <p style="font-size:15px;line-height:1.5;color:#555;margin:0">${esc(o.en)}</p>
+  </div>
+  <p style="margin:0 0 8px">
+    <a href="${esc(o.roomUrl)}" style="display:inline-block;background:#1f5d8c;color:#fff;text-decoration:none;padding:14px 26px;border-radius:999px;font-size:14px;letter-spacing:.08em;text-transform:uppercase">Pick up where you left off</a>
+  </p>
+  ${onHtml}
+  <p style="font-size:12px;line-height:1.5;color:#999;margin:36px 0 0">
+    You asked for this email if you went quiet for a week. Never more than one a week.
+    <a href="${esc(o.unsubscribeUrl)}" style="color:#999">Stop these emails</a>.
+  </p>
+</div>`
+  return deliver({
+    to: o.to,
+    subject: 'Your next room: ' + o.room,
+    text,
+    html,
+    headers: { 'List-Unsubscribe': '<' + o.unsubscribeUrl + '>', 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
+  })
 }

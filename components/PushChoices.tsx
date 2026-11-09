@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Ground } from '@/components/Native'
 import { track } from '@/engine/analytics'
 import { PushToggle } from '@/components/PushToggle'
 
@@ -170,6 +171,7 @@ export function PushChoices() {
                   ? 'That did not save. Try again in a moment.'
                   : 'Three a week is Monday, Wednesday and Friday. Never the same line twice.'}
           </p>
+          <TryItNow endpoint={endpoint} />
         </>
       )}
     </section>
@@ -301,7 +303,18 @@ export function MorningLineStep({
   }, [])
   const shown = line ?? { title: 'Bom dia. Um café, por favor.', body: 'Good morning. A coffee, please.' }
   return (
-    <div data-testid="setup-line" className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 pt-8 text-white">
+    /*
+      THE EDGES (Sam, 2026-11-09: "fix the top (overlay) and bottom (dark gap) of this screen").
+      Top: pulled to the screen's edge so the blue runs behind the status bar, so the notch is
+      added to the padding (not .safe-top, a margin that would undo -mt-6). Bottom: Ground
+      paints the strip under the page this screen's own navy (components/Native.tsx).
+    */
+    <div
+      data-testid="setup-line"
+      className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 text-white"
+      style={{ paddingTop: 'calc(2rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}
+    >
+      <Ground color="#0f1f33" />
       <p className="eyebrow text-white/60">DUB · Before you board</p>
       <h1 className="display mt-2 text-3xl leading-tight">Your line, every morning</h1>
       <p className="mt-3 text-sm leading-relaxed text-white/75">
@@ -366,6 +379,37 @@ export function MorningLineStep({
           {on ? 'Board' : 'Not now, take me in'}
         </button>
       </div>
+    </div>
+  )
+}
+
+/**
+ * SEND ME TOMORROW'S LINE NOW (2026-11-09) — the 8am push, to this phone only, to see what it
+ * looks like. app/api/push/test; it does not use up the real one.
+ */
+function TryItNow({ endpoint }: { endpoint: string | null }) {
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')
+  const [why, setWhy] = useState('')
+  if (!endpoint) return null
+  return (
+    <div className="flex flex-wrap items-center gap-3" data-testid="push-try">
+      <button
+        type="button"
+        disabled={state === 'sending'}
+        onClick={async () => {
+          setState('sending')
+          const res = await fetch('/api/push/test', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ endpoint }) }).catch(() => null)
+          const body = (await res?.json().catch(() => null)) as { ok?: boolean; reason?: string } | null
+          setWhy(body?.reason ?? '')
+          setState(body?.ok ? 'sent' : 'failed')
+        }}
+        className="tap-target eyebrow rounded-full border border-accent px-4 py-2 text-[0.65rem] text-accent disabled:opacity-60"
+      >
+        {state === 'sending' ? 'Sending…' : 'Send me tomorrow’s line now'}
+      </button>
+      <span className="text-xs text-muted" aria-live="polite">
+        {state === 'sent' ? 'Sent to this phone. Tomorrow’s still comes at 8.' : state === 'failed' ? (why === 'one a minute' ? 'One a minute — try again shortly.' : 'That did not send.') : ''}
+      </span>
     </div>
   )
 }

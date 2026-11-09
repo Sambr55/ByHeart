@@ -223,6 +223,27 @@ export const SECOND_OFFERS: Record<SecondOffer, { label: string; venue: string }
 }
 
 /**
+ * BICA A DOIS (Sam, 2026-11-05) — bring a friend in, then say it together at the counter.
+ *
+ * When a learner and the friend they brought into DUB (the invitation has LANDED: the friend
+ * has said their first room out loud — lib/invites.ts) both check in at the same venue
+ * within PAIR_WINDOW_H hours, each gets one voucher there, if that venue has chosen to
+ * offer it. The venue pays for it and gets two customers who walked in speaking
+ * Portuguese; the friend gets a reason to come out. Once per person per venue, ever, like
+ * the check-in itself, and spent with the venue's staff PIN like any other voucher.
+ */
+export const PAIR_REWARD = {
+  name: 'Bica a dois',
+  /** What the learner sees when the venue has not named its own. */
+  fallback: 'A bica each, on the house',
+  /** What the venue is asked, on its sign-up link. */
+  venue: 'Bica a dois: when a DUB learner comes in with the friend they brought to DUB and both check in, give each of them something small',
+} as const
+export const PAIR_WINDOW_H = 3
+/** venue_vouchers.tier for the pair voucher (1 and 2 are the 50 and 150 rewards). */
+export const PAIR_TIER = 3
+
+/**
  * HOW CLOSE IS CLOSE ENOUGH to check in by location: the venue's pin plus this, and the
  * phone's own accuracy must be under GEO_ACCURACY_M. A partner venue's DUB card is the
  * stronger proof — asked for in Portuguese at the counter — and needs no location at all.

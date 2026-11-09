@@ -25,6 +25,7 @@ interface Props {
     display_name: string | null
     target_language: string
     marketing_opt_in: boolean
+    nudge_email?: boolean
     created_at: string
   }
   entitlements: Entitlements
@@ -50,6 +51,7 @@ const STATUS_LINE: Record<string, string> = {
 export function Account({ user, entitlements, subscription, billingReady }: Props) {
   const [name, setName] = useState(user.display_name ?? '')
   const [optIn, setOptIn] = useState(user.marketing_opt_in)
+  const [nudge, setNudge] = useState(Boolean(user.nudge_email))
   const [saved, setSaved] = useState<'idle' | 'saving' | 'done'>('idle')
   const [busy, setBusy] = useState<string | null>(null)
   const [confirm, setConfirm] = useState('')
@@ -85,7 +87,7 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
     await fetch('/api/account', {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ display_name: name, marketing_opt_in: optIn }),
+      body: JSON.stringify({ display_name: name, marketing_opt_in: optIn, nudge_email: nudge }),
     })
     setSaved('done')
     setTimeout(() => setSaved('idle'), 2200)
@@ -273,6 +275,23 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
           <span className="text-sm text-fg/80">
             Email me when a drop lands that fits what I am learning. Nothing else, and never more
             than one a week.
+          </span>
+        </label>
+        {/*
+          A SEPARATE YES (2026-11-09). The box above promises "nothing else", so a reminder
+          cannot ride on it. Plain, because it is a permission (the one exception to every
+          question being a lesson). Sent by app/api/cron/nudge — lib/nudge.ts has the rules.
+        */}
+        <label className="flex items-start gap-3" data-testid="account-nudge-email">
+          <input
+            type="checkbox"
+            checked={nudge}
+            onChange={(e) => setNudge(e.target.checked)}
+            className="mt-1 size-4 accent-[var(--accent)]"
+          />
+          <span className="text-sm text-fg/80">
+            If I haven’t been back for a week, email me my next room. Never more than one a week,
+            and every one has a way to stop them.
           </span>
         </label>
         <button

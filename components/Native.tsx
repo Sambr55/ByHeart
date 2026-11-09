@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { track } from '@/engine/analytics'
+import { startAutoSync } from '@/engine/learner'
 
 /**
  * The handful of things a browser does not do for you and an app is expected to.
@@ -21,6 +22,8 @@ export function Native() {
   useScrollMemory()
   useStatusBarDefault()
   usePushOpened()
+  /* The server copy kept current: on open, after changes, on leaving — engine/learner.ts. */
+  useEffect(() => startAutoSync(), [])
   return null
 }
 
@@ -341,6 +344,29 @@ export function StatusBar({ color }: { color: string }) {
     // Restored to a colour rather than to an absence, so leaving a dark screen puts the
     // blue back rather than falling through to whatever the manifest happens to say.
     return () => tag.setAttribute('content', before)
+  }, [color])
+  return null
+}
+
+/**
+ * THE GROUND UNDER A FULL-BLEED SCREEN (2026-11-09).
+ *
+ * Installed to the home screen, the page is the height of the visible viewport and the
+ * strip below it — down to the glass — is painted with the root's own background (see the
+ * notes on html in globals.css). On a sand screen that is right. On the dark booker steps
+ * ("DUB · Departures", "Before you board") it showed as a band of a different dark at the
+ * foot (Sam: "the bottom (dark gap)"). This paints the root the screen's own colour while it
+ * is mounted, and puts back what was there on the way out, so overlapping screens cannot
+ * leave the wrong ground behind.
+ */
+export function Ground({ color }: { color: string }) {
+  useEffect(() => {
+    const root = document.documentElement
+    const before = root.style.background
+    root.style.background = color
+    return () => {
+      root.style.background = before
+    }
   }, [color])
   return null
 }

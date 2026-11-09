@@ -2638,12 +2638,20 @@ details > summary.list-none::-webkit-details-marker {
 @media (min-width: 400px) { .board-corner-word { font-size: 9.5px } }
 .board-new { position: absolute; right: 4px; top: 4px; width: 7px; height: 7px; border-radius: 9999px; background: #c9973b; box-shadow: 0 0 0 2px #fbfaf6 }
 .board-token {
-  position: absolute; left: 50%; bottom: -5px; width: 15px; height: 15px; margin-left: -7.5px; border-radius: 9999px; z-index: 3;
+  /*
+    ON the tile, not between two (Sam, 2026-11-09: "put the golden marker at the centre of the
+    active tile, not in between - that's confusing"). Sized to the tile, centred with `translate`
+    so the bob animation's `transform` does not fight it.
+  */
+  position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 34%; aspect-ratio: 1; min-width: 16px; border-radius: 9999px; z-index: 3;
   background: radial-gradient(circle at 35% 30%, #f6d58a, #c9973b 60%, #8a6420);
   box-shadow: 0 2px 4px rgba(20, 36, 58, 0.55), 0 0 0 2px #fbfaf6;
   animation: board-token 2.4s ease-in-out infinite;
 }
 @keyframes board-token { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-2px) } }
+/* The counter takes the tile's place mark rather than sitting on top of it; a corner keeps its word. */
+.board-sq:has(> .board-token) > svg { opacity: 0 }
+.board-corner:has(> .board-token) > .board-token { top: 38% }
 @media (prefers-reduced-motion: reduce) { .board-token { animation: none } }
 .board-badge {
   position: absolute; left: 3px; top: 3px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 9999px;

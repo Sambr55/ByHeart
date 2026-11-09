@@ -50,7 +50,13 @@ export const LANDING = {
     Portuguese a visitor needs to get about Lisbon. No product words — the lint on this
     object holds it to the same rule as the strapline.
   */
-  support: 'The Portuguese you need to get about Lisbon.',
+  /*
+    NOT PORTUGUESE, NOT LISBON (Sam, 2026-11-09: "fix the home page so not Portuguese
+    specific"). The first screen comes before anybody has said where they are going, and
+    DUB is built for more than one language and city (content/pairs.ts, content/chapters.ts).
+    The boarding pass on the next screen is where the place gets named.
+  */
+  support: 'The language you need to get about wherever you’re going.',
   /**
    * What the picture is, for anybody who cannot see it.
    *

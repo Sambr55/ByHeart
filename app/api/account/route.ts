@@ -22,7 +22,7 @@ export async function PATCH(request: Request) {
   const sql = db()
   if (!user || !sql) return NextResponse.json({ error: 'sign in first' }, { status: 401 })
 
-  let body: { display_name?: string; marketing_opt_in?: boolean; target_language?: string; ui_locale?: string }
+  let body: { display_name?: string; marketing_opt_in?: boolean; nudge_email?: boolean; target_language?: string; ui_locale?: string }
   try {
     body = (await request.json()) as typeof body
   } catch {
@@ -39,9 +39,10 @@ export async function PATCH(request: Request) {
        set display_name = ${name},
            marketing_opt_in = ${optIn},
            target_language = ${target},
-           ui_locale = ${locale}
+           ui_locale = ${locale},
+           nudge_email = coalesce(${typeof body.nudge_email === 'boolean' ? body.nudge_email : null}::boolean, nudge_email)
      where id = ${user.id}
-    returning id, email, display_name, target_language, ui_locale, marketing_opt_in, created_at
+    returning id, email, display_name, target_language, ui_locale, marketing_opt_in, nudge_email, created_at
   `
   return NextResponse.json({ user: updated })
 }

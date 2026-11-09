@@ -354,7 +354,8 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
     <>
     <main
       data-stage="REAL WORLD"
-      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 pt-6 text-fg"
+      className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 bg-bg px-5 pb-10 text-fg"
+      style={{ paddingTop: 'calc(1.5rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}
     >
       <header className="flex items-center gap-3">
         {/*

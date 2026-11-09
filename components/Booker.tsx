@@ -1,5 +1,7 @@
 'use client'
 
+import { Ground } from '@/components/Native'
+
 import { useEffect, useRef, useState } from 'react'
 import { chapterById, type ChapterId } from '@/content/chapters'
 import { cityReady } from '@/content/gems'
@@ -59,11 +61,11 @@ const FROM = [
   { code: 'FR', name: 'French', native: 'Français', open: false },
 ] as const
 /*
-  CASCAIS AND SINTRA (Sam, 2026-11-05: "lets do the cascais and sintra from airline selector
-  onwards"). Two more Portuguese destinations beside Lisbon, the same language and every room
-  shared; their own places, walks and venues (content/towns/). Each boards once it has places
-  a person has checked — cityReady — so on the live app they say "coming soon" until then,
-  and on a preview build they board for review.
+  SINTRA & CASCAIS (Sam, 2026-11-05: "consolidate Cascais and Sintra into one 'City'"). One
+  more Portuguese destination beside Lisbon — two towns, the hills and the sea, one line on
+  the pass. The same language and every room shared; its own places, walks and venues
+  (content/towns/). It boards once it has places a person has checked (cityReady), so on the
+  live app it says "coming soon" until then.
 */
 /*
   Whether a town boards is asked when the pass is DRAWN, not when this file loads: turning
@@ -73,8 +75,7 @@ const boarding = (t: { open: boolean; town: string | null }) => t.open && (!t.to
 
 const TO = [
   { code: 'LIS', id: 'lisbon', city: 'Lisboa', lang: 'Português', speaks: 'PT', open: true, town: null },
-  { code: 'CAS', id: 'cascais', city: 'Cascais', lang: 'Português · by the sea', speaks: 'PT', open: true, town: 'cascais' },
-  { code: 'SNT', id: 'sintra', city: 'Sintra', lang: 'Português · in the hills', speaks: 'PT', open: true, town: 'sintra' },
+  { code: 'SCS', id: 'sintra-cascais', city: 'Sintra & Cascais', lang: 'Português · hills & sea', speaks: 'PT', open: true, town: 'sintra-cascais' },
   { code: 'MAD', id: 'madrid', city: 'Madrid', lang: 'Español', speaks: 'ES', open: false, town: null },
   { code: 'BER', id: 'berlin', city: 'Berlin', lang: 'Deutsch', speaks: 'DE', open: false, town: null },
   { code: 'PAR', id: 'paris', city: 'Paris', lang: 'Français', speaks: 'FR', open: false, town: null },
@@ -139,7 +140,19 @@ export function Booker({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div data-testid="booker" className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 pt-8 text-white">
+    /*
+      THE NOTCH (Sam, 2026-11-09: "fix the top of screen 2 (behind clock)"). The card is pulled
+      up to the screen's edge so the blue runs behind the status bar, and nothing then made room
+      for the clock — "DUB · Departures" sat under 19:22. The inset is added to the padding, not
+      as .safe-top: that is a margin and would undo the -mt-6 that takes the blue to the edge.
+    */
+    <div
+      data-testid="booker"
+      className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 text-white"
+      style={{ paddingTop: 'calc(2rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}
+    >
+      {/* The strip under the page, this navy rather than the root's own — components/Native.tsx. */}
+      <Ground color="#0f1f33" />
       <p className="eyebrow text-white/60">DUB · Departures</p>
       <h1 className="display mt-2 text-3xl leading-tight">Where are we taking you?</h1>
       <p className="mt-2 text-sm text-white/70">Tell us like you would an airline. We build your path around it.</p>

@@ -235,3 +235,62 @@ export async function issueCodes(opts: {
   }
   return out
 }
+
+/**
+ * EXISTING USERS GET FREE ACCESS (Sam, 2026-11-05). One action, pressed once from
+ * /admin/people when Stripe goes live: every account and every device that exists before
+ * that moment gets Pro for good, through the same comp rows every access check already
+ * reads — accounts as a comp subscription, devices (most learners never made an account) as
+ * a device comp. Idempotent: pressing it twice changes nothing for anybody already in, and
+ * never touches somebody who pays (a Stripe row is left alone).
+ */
+export const EXISTING_CODE = 'EXISTING-AT-LAUNCH'
+
+export async function compExisting(before: Date): Promise<{ accounts: number; devices: number } | null> {
+  const sql = db()
+  if (!sql) return null
+  await sql`
+    insert into comp_codes (code, plan, note, max_uses, uses)
+    values (${EXISTING_CODE}, 'pro', 'Everybody who was here before Stripe went live', 1000000000, 0)
+    on conflict (code) do nothing
+  `
+  const accounts = await sql`
+    insert into subscriptions (user_id, source, plan, status)
+    select u.id, 'comp', 'pro', 'active' from users u
+     where u.created_at < ${before} and u.deleted_at is null
+    on conflict (user_id) do nothing
+    returning user_id
+  `
+  for (const r of accounts) {
+    await sql`insert into comp_redemptions (code, user_id) values (${EXISTING_CODE}, ${r.user_id}) on conflict do nothing`
+    await sql`insert into billing_events (user_id, kind, detail) values (${r.user_id}, 'comped', 'existing')`
+  }
+  const devices = await sql`
+    insert into device_comps (device_id, code, plan)
+    select l.device_id, ${EXISTING_CODE}, 'pro' from learners l
+     where l.created_at < ${before}
+    on conflict (device_id) do nothing
+    returning device_id
+  `
+  for (const r of devices) await sql`insert into billing_events (device_id, kind, detail) values (${r.device_id}, 'comped', 'existing')`
+  await sql`update comp_codes set uses = uses + ${accounts.length + devices.length} where code = ${EXISTING_CODE}`
+  return { accounts: accounts.length, devices: devices.length }
+}
+
+/**
+ * A device's free access follows its person onto their account at sign-in, so somebody who
+ * was here before launch and signs in on a new phone is still in. Never over a paid row.
+ */
+export async function carryDeviceComp(device: string, userId: string): Promise<void> {
+  const sql = db()
+  if (!sql) return
+  const [d] = await sql<{ plan: string; grants_until: string | null; code: string }[]>`
+    select plan, grants_until, code from device_comps where device_id = ${device}
+  `
+  if (!d || (d.grants_until && new Date(d.grants_until) < new Date())) return
+  await sql`
+    insert into subscriptions (user_id, source, plan, status, current_period_end)
+    values (${userId}, 'comp', ${d.plan}, 'active', ${d.grants_until})
+    on conflict (user_id) do nothing
+  `
+}

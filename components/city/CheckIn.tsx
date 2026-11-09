@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { CHECKIN_ERRORS, checkIn, useVenues } from './useVenues'
-import { countLine } from '@/lib/venue-rules'
+import { countLine, pairOffered } from '@/lib/venue-rules'
+import { PAIR_REWARD, PAIR_WINDOW_H } from '@/content/board'
 
 /**
  * I'M HERE — the check-in, on the venue card and the board's venue square (2026-11-05).
@@ -12,6 +13,9 @@ import { countLine } from '@/lib/venue-rules'
  * partner it says how far off the next reward is. Checking in needs an account. At a
  * partner the better way is the card: ask for it in Portuguese, scan its QR with the camera.
  */
+/** What a check-in that made a Bica a dois says. */
+const PAIR_DONE = 'Boa! You’re both checked in — ' + PAIR_REWARD.name + ' is in your rewards.'
+
 export function CheckIn({ gem }: { gem: string }) {
   const v = useVenues()
   const [busy, setBusy] = useState(false)
@@ -52,7 +56,7 @@ export function CheckIn({ gem }: { gem: string }) {
             setMsg(null)
             const r = await checkIn(gem)
             setBusy(false)
-            setMsg(r.ok ? 'Boa! You’re checked in.' : CHECKIN_ERRORS[r.error])
+            setMsg(r.ok ? (r.pair ? PAIR_DONE : 'Boa! You’re checked in.') : CHECKIN_ERRORS[r.error])
           }}
           className="tap-target eyebrow w-full rounded-2xl border border-correct/50 bg-correct/5 px-4 py-3 text-center text-correct disabled:opacity-60"
           data-testid="checkin-here"
@@ -64,6 +68,14 @@ export function CheckIn({ gem }: { gem: string }) {
         <p className="text-xs leading-snug text-muted" data-testid="checkin-card-hint">
           A DUB venue: ask at the counter <span lang="pt-PT" className="pt font-semibold text-accent">“Tem o cartão DUB?”</span> and scan it with
           your camera.
+        </p>
+      ) : null}
+      {pairOffered(partner) && !been ? (
+        <p className="text-xs leading-snug text-muted" data-testid="checkin-pair-hint">
+          <span lang="pt-PT" className="pt font-semibold text-accent">
+            {PAIR_REWARD.name}
+          </span>
+          : come with the friend you brought to DUB and both check in within {PAIR_WINDOW_H} hours — {(partner?.pair_item?.trim() || PAIR_REWARD.fallback).replace(/^./, (c) => c.toLowerCase())}.
         </p>
       ) : null}
       {msg ? (
