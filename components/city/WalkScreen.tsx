@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { AudioButton } from '@/components/AudioButton'
 import { SayButton } from '@/components/SayButton'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
+import { useFromBoard } from '@/components/BackToBoard'
 import { slugFor } from '@/content/audio-manifest'
 import { KIND_LABEL, bairroById } from '@/content/gems'
 import { walkById, walkProgress, walkView } from '@/content/walks'
@@ -33,6 +34,7 @@ export function WalkScreen({ id }: { id: string }) {
   const walk = walkById(id)
   const view = useMemo(() => (walk ? walkView(walk) : null), [walk])
   const learner = useLearner()
+  const fromBoard = useFromBoard()
   const said = learner.walk_stops ?? []
   const [current, setCurrent] = useState(0)
 
@@ -74,7 +76,7 @@ export function WalkScreen({ id }: { id: string }) {
     <div data-stage="WALK" className="min-h-svh bg-bg text-fg">
       <header className="bar safe-top sticky top-0 z-30 px-5 py-3">
         <div className="mx-auto flex w-full max-w-md items-center gap-3">
-          <Link href="/city" className="eyebrow tap-target opacity-90" aria-label="Back to the city">
+          <Link href={fromBoard ? '/club' : '/city'} className="eyebrow tap-target opacity-90" aria-label={fromBoard ? 'Back to the board' : 'Back to the city'}>
             ←
           </Link>
           <div className="min-w-0 flex-1 leading-tight">

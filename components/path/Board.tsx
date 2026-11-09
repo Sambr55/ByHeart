@@ -50,6 +50,30 @@ const SEEN_KEY = 'dub.board.seen'
 /** The corners in English, over their Portuguese (Sam, 2026-11-09: "the Portuguese words mean nothing to me"). */
 const CORNER_EN: Record<CornerId, string> = { start: 'Start', miradouro: 'Look back', ferias: 'Week off', mesa: 'Your table' }
 
+/* The corners on the warm-up lap: what each will do on every board after it, not an offer now. */
+const WARM_UP: Record<Exclude<CornerId, 'start'>, { title: string; body: string }> = {
+  miradouro: {
+    title: 'Look back, any time',
+    body: 'Every board has a viewpoint. From here you can always see — and hear — everything you can already say. It is all kept in Yours.',
+  },
+  ferias: {
+    title: 'A week off, from Board 2',
+    body: 'Halfway round every board there is a week off: take it and nothing on your path slips while you are away. On the warm-up lap there is nothing to pause yet — your first is on the next board.',
+  },
+  mesa: {
+    title: 'A real table, later',
+    body: 'Every board ends near a table: one dinner with friends where you use what you have learned, out loud. After a board or two you will have enough to host one.',
+  },
+}
+
+/* What each kind of stop is for, said once on the warm-up lap. */
+const STOP_EXPLAINED: Partial<Record<Square['kind'], string>> = {
+  vibe: 'Surprises turn over as you lay rooms — the fun stuff, like how to swear. Anything you open is kept in Yours.',
+  postcard: 'Surprises turn over as you lay rooms — hacks, bluffs and idioms that hand you words for free. Anything you open is kept in Yours.',
+  venue: 'Places are real spots in the city. Each has one line to say there, to a real person. Every board brings new ones.',
+  neighbour: 'What is on in the city, with the Portuguese for going. Every board brings what is on that week.',
+}
+
 function readList(key: string): string[] {
   try {
     const raw = window.localStorage.getItem(key)
@@ -261,6 +285,16 @@ export function Board({
           </li>
         </ol>
       </div>
+
+      {/*
+        THE KEY, ON THE WARM-UP LAP (2026-11-09): which squares teach and which explain.
+      */}
+      {lap.index === 0 ? (
+        <p className="text-center text-xs leading-relaxed text-muted" data-testid="board-key">
+          <span className="font-semibold text-fg">Your warm-up lap.</span> The squares that say <span className="font-semibold text-fg">say / count / at the…</span> are your lessons — lay them to go round.
+          ✦ surprises · 📍 places · 🎟 what’s on · the corners are the board’s rules. Tap any of them to see how it works.
+        </p>
+      ) : null}
 
       {away ? (
         <p className="text-center text-sm text-muted" data-testid="board-away">
@@ -526,9 +560,31 @@ function StopSheet({
   let body: ReactNode = null
 
   const ahead = !s.reached
-  if (s.kind === 'corner') {
+  /*
+    THE WARM-UP LAP (Sam, 2026-11-09: "the first board is confused between introductory and
+    basics… it needs to be clear the difference between explaining and learning"). On Board 1
+    the rooms are the lessons and everything else explains how a board works: each sheet says
+    HOW IT WORKS, the corners explain rather than offer — no week off before there is anything
+    to pause — and the stops say what they will be on every board after this one.
+  */
+  const warmUp = lap.index === 0
+  if (s.kind === 'corner' && warmUp && s.corner !== 'start') {
     const c = CORNERS[purpose][s.corner]
-    eyebrow = ahead ? 'Ahead' : c.pt
+    eyebrow = 'How it works · ' + c.pt
+    title = WARM_UP[s.corner].title
+    body = (
+      <>
+        <p className="text-base leading-relaxed">{WARM_UP[s.corner].body}</p>
+        {s.corner === 'miradouro' && !ahead ? (
+          <Link href="/profile" className="tap-target eyebrow block w-full rounded-full border border-accent px-6 py-3 text-center text-accent">
+            See what I can say
+          </Link>
+        ) : null}
+      </>
+    )
+  } else if (s.kind === 'corner') {
+    const c = CORNERS[purpose][s.corner]
+    eyebrow = (warmUp ? 'How it works · ' : '') + (ahead ? 'Ahead' : c.pt)
     title = c.title
     if (s.corner === 'start') {
       body = lap.complete ? (
@@ -610,9 +666,17 @@ function StopSheet({
       )
     }
   } else if (ahead) {
-    eyebrow = 'Face down'
-    title = 'A surprise, further round'
-    body = <p className="text-base leading-relaxed text-muted">Lay the rooms before it and it turns over.</p>
+    /* Named, as its square is: what it is and how many rooms until it turns over. */
+    const l = stopLabel(s)
+    eyebrow = (warmUp ? 'How it works · ' : '') + (l ? l.kind : 'Ahead')
+    title = l?.title ?? 'Further round'
+    body = (
+      <>
+        <p className="text-base leading-relaxed">
+          {awayText(roomsAway(s, lap)).replace('away', 'more')} and it turns over. {warmUp ? STOP_EXPLAINED[s.kind] ?? '' : ''}
+        </p>
+      </>
+    )
   } else if (s.kind === 'postcard' && s.card.kind === 'cheat') {
     const cheat = CHEATS.find((x) => x.id === s.card.id)!
     eyebrow = 'Postcard · ' + (cheat.kind === 'bluff' ? 'a bluff' : cheat.kind === 'hack' ? 'a hack' : 'a cheat')
@@ -733,10 +797,23 @@ function StopSheet({
     )
   }
 
+  /* On the warm-up lap every stop also says what it is for, on every board after this one. */
+  if (warmUp && s.kind !== 'corner' && !ahead) {
+    eyebrow = 'How it works · ' + eyebrow
+    body = (
+      <>
+        <p className="rounded-2xl bg-surface px-4 py-3 text-sm leading-relaxed" data-testid="board-how-it-works">
+          {STOP_EXPLAINED[s.kind]}
+        </p>
+        {body}
+      </>
+    )
+  }
+
   /* On document.body, as the TileSheet is drawn after the nav: a sheet under the tab bar is half a sheet. */
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-end justify-center" data-testid="board-sheet">
-      <button type="button" aria-label="Close" tabIndex={-1} onClick={onClose} className="absolute inset-0 bg-black/45" />
+      <button type="button" aria-label="Back to the board" tabIndex={-1} onClick={onClose} className="absolute inset-0 bg-black/45" />
       <div
         role="dialog"
         aria-modal="true"
@@ -751,8 +828,9 @@ function StopSheet({
               {title}
             </h2>
           </div>
-          <button ref={close} type="button" onClick={onClose} className="tap-target eyebrow shrink-0 rounded-full border border-line px-3 py-1 text-muted">
-            Close
+          {/* Back to the board, said as where it goes (Sam, 2026-11-09: "Close buttons should read back to Board"). */}
+          <button ref={close} type="button" onClick={onClose} aria-label="Back to the board" className="tap-target eyebrow shrink-0 rounded-full border border-line px-3 py-1 text-muted">
+            ‹ Board
           </button>
         </div>
         {body}
