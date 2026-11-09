@@ -35,6 +35,7 @@ import { chapterOfBairro } from '@/content/gems'
 import type { Walk } from '@/content/walks'
 import type { Gem } from '@/content/gems'
 import type { Purpose } from '@/content/situations'
+import { surprisesFor, type Surprise } from '@/content/surprises'
 import type { PathNode, PathView } from './progress'
 
 type Base = { at: number; col: number; row: number; reached: boolean; key: string }
@@ -45,6 +46,8 @@ type Body =
   | { kind: 'postcard'; card: PostcardRef }
   | { kind: 'venue'; gem: Gem }
   | { kind: 'neighbour'; event: CalendarRow }
+  /** A vibe sitting dealt onto this level (content/surprises.ts): swearing, flirting, the films. */
+  | { kind: 'vibe'; crate: string }
 
 export type Square = Base & Body
 
@@ -88,7 +91,6 @@ export function cornerAt(w: number, h: number): Record<CornerId, number> {
   return { start: 0, miradouro: h - 1, ferias: h + w - 2, mesa: 2 * h + w - 3 }
 }
 
-const STOPS = ['postcard', 'venue', 'neighbour'] as const
 
 export function lapOf(
   view: PathView,
@@ -140,28 +142,33 @@ export function lapOf(
   let vn = 0
   let nb = index
   const usedGems = new Set<string>()
+  /*
+    THE SURPRISES FIRST, SPREAD ROUND THE BOARD (2026-11-09, content/surprises.ts). The level's
+    curated surprises — a hack, a bluff, an idiom, a vibe like swearing — take evenly spaced
+    stops; the rest are the city's places and what's on, with a postcard only if a town has
+    neither. A big level gets more places, not more surprises.
+  */
+  const nStops = Math.max(0, L - 4 - n)
+  const curated = surprisesFor(purpose, index).slice(0, nStops)
+  const surpriseAt = new Map<number, Surprise>()
+  curated.forEach((x, k) => surpriseAt.set(Math.floor(((k + 0.5) * nStops) / curated.length), x))
+  let city = 0
   const stop = (j: number): Body => {
-    /* While the walk still has places, every other stop is one of them, in walking order. */
-    const want = !walked.length
-      ? STOPS[j % 3]
-      : j % 2 === 0
-        ? j / 2 < walked.length
-          ? 'venue'
-          : 'postcard'
-        : j % 4 === 1
-          ? 'postcard'
-          : 'neighbour'
-    if (want === 'venue') {
+    const sur = surpriseAt.get(j)
+    if (sur) return sur.kind === 'vibe' ? { kind: 'vibe', crate: sur.id } : { kind: 'postcard', card: { kind: sur.kind, id: sur.id } }
+    const k = city++
+    /* While the walk still has places, they come in walking order; otherwise place and what's on alternate. */
+    const want = walked.length && k < walked.length * 2 ? (k % 2 === 0 ? 'venue' : 'neighbour') : k % 2 === 0 ? 'venue' : 'neighbour'
+    const venue = (): Body | null => {
       while (vn < venues.length && usedGems.has(venues[vn].id)) vn++
       const gem = venues[vn]
-      if (gem) {
-        usedGems.add(gem.id)
-        vn++
-        return { kind: 'venue', gem }
-      }
+      if (!gem) return null
+      usedGems.add(gem.id)
+      vn++
+      return { kind: 'venue', gem }
     }
-    if (want === 'neighbour' && rows.length) return { kind: 'neighbour', event: rows[nb++ % rows.length] }
-    return { kind: 'postcard', card: cards[pc++ % cards.length] }
+    const neighbour = (): Body | null => (rows.length ? { kind: 'neighbour', event: rows[nb++ % rows.length] } : null)
+    return (want === 'venue' ? venue() ?? neighbour() : neighbour() ?? venue()) ?? { kind: 'postcard', card: cards[pc++ % cards.length] }
   }
 
   /* The edge: room, stop, room, stop … — padded with stops when a level is one room. */
@@ -186,7 +193,9 @@ export function lapOf(
             ? body.card.id
             : body.kind === 'venue'
               ? body.gem.id
-              : body.event.id
+              : body.kind === 'vibe'
+                ? body.crate
+                : body.event.id
     squares.push({ ...body, at: i, col, row, reached: false, key: purpose + ':' + u.unit.id + ':' + body.kind + ':' + id } as Square)
   }
 

@@ -28,6 +28,7 @@ import { CHEATS } from '@/content/cheats'
 import { IDIOMS } from '@/content/idioms'
 import { CALENDAR } from '@/content/calendar'
 import { gemById } from '@/content/gems'
+import { CRATES } from '@/content/roots'
 import { whatYouCanSay, type SayRoom } from '@/content/yours'
 import type { RevisionLine } from '@/content/revision'
 
@@ -88,7 +89,7 @@ export function completedBy(
 }
 
 export interface MetStop {
-  kind: 'postcard' | 'venue' | 'neighbour'
+  kind: 'postcard' | 'venue' | 'neighbour' | 'vibe'
   id: string
   title: string
   /** What it is, in a word: A postcard, A place, What's on. */
@@ -100,6 +101,10 @@ export interface MetStop {
 export function metStop(key: string): MetStop | null {
   const [, , kind, ...rest] = key.split(':')
   const id = rest.join(':')
+  if (kind === 'vibe') {
+    const crate = CRATES.find((x) => x.id === id)
+    return crate ? { kind, id, title: crate.title, what: 'Just for fun', href: '/vibes?open=' + encodeURIComponent(id) } : null
+  }
   if (kind === 'venue') {
     const g = gemById(id)
     return g ? { kind, id, title: g.name, what: 'A place', href: '/city?gem=' + g.id } : null

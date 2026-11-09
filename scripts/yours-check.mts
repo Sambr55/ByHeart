@@ -93,7 +93,11 @@ ok('Your people has the anchor the Path points at', /id="people"/.test(src('comp
 for (const p of ['visiting', 'staying', 'moving'] as const) {
   ok('the Legend is still offered on the ' + p + ' path (Who you are)', pathUnits(undefined, new Date('2026-11-04'), p).some((u) => u.rooms.some((r) => r.id === 'lisbon_legend')))
 }
-ok('Hacks, Bluffs & Cheats and Just for fun are still on the Path', /Hacks, Bluffs &amp; Cheats|Hacks, Bluffs & Cheats/.test(src('components/path/Foundations.tsx')) && /FunShelf/.test(home))
+/*
+  ONE FLOW (2026-11-09): the side rows left the Path, and their content is dealt onto each
+  level's board as surprises — the same in the Board, the Panel and the Road.
+*/
+ok('no side rows on the Path: Hacks, Bluffs & Cheats and Just for fun are on the boards now', !/<Foundations|<FunShelf/.test(home) && /surprisesFor/.test(src('components/path/lap.ts')) && /<LevelStops/.test(src('components/path/Panel.tsx')) && /<LevelStops/.test(src('components/path/Road.tsx')))
 ok('What’s on is still a tap from City', /WHAT|What’s on|What's on/i.test(src('components/city/City.tsx')))
 
 console.log('\nthe order of Yours')

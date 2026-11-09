@@ -286,15 +286,20 @@ const MOVING_UNITS: PathUnit[] = [
 ]
 
 /**
- * BASICS FIRST, AND ONE FUN TILE IN EVERY LEVEL (Sam, 2026-11-03: "basics first, 1–20,
- * Hello, Goodbye and thank you, then arrive etc. … build your legend near the top … it
- * should all be one flow … every section should have a fun section thrown in").
+ * BASICS FIRST (Sam, 2026-11-03: "basics first, 1–20, Hello, Goodbye and thank you, then
+ * arrive etc. … build your legend near the top … it should all be one flow").
  *
  * Basics is the same first level on all three paths: hello and thank you, counting, the
  * save (moved here from each path's first unit, so it is still on every path and still
- * near the very start) and "Who you are", the door to the Legend — then a hack that hands
- * over hundreds of words for free. Every later level gains one fun tile at its end:
- * content/blocks/lisbon-fun.ts. Unit numbers move up by one, so Arrive is Level 2.
+ * near the very start) and "Who you are", the door to the Legend. Unit numbers move up by
+ * one, so Arrive is Level 2.
+ *
+ * NO FUN TILES IN THE LEVELS ANY MORE (Sam, 2026-11-09). Each level used to end on a `fun_`
+ * room — a hack, a bluff, an idiom, a song — so a level counted a joke as a room to finish,
+ * and the same content sat in up to five places. A level is its rooms now; the fun is dealt
+ * onto its board as surprises (content/surprises.ts), with the same content each tile held.
+ * The `fun_` rooms still exist (content/blocks/lisbon-fun.ts) so anything already played
+ * stays in a learner's record.
  */
 export const BASICS_UNIT: PathUnit = {
   id: 'basics',
@@ -302,7 +307,7 @@ export const BASICS_UNIT: PathUnit = {
   title: 'Basics',
   pt: 'O básico',
   learn: ['Say hello, thank you and goodbye', 'Count to twenty', 'Say who you are'],
-  rooms: ['lisbon_ola', 'lisbon_numeros', 'lisbon_save', 'lisbon_legend', 'fun_cao_hack'],
+  rooms: ['lisbon_ola', 'lisbon_numeros', 'lisbon_save', 'lisbon_legend'],
   milestone: {
     cheat: 'nao_verb',
     title: 'Não + verb',
@@ -310,22 +315,22 @@ export const BASICS_UNIT: PathUnit = {
   },
 }
 
-function withBasics(units: PathUnit[], fun: string[]): PathUnit[] {
+function withBasics(units: PathUnit[]): PathUnit[] {
   return [
     BASICS_UNIT,
-    ...units.map((u, i) => ({
+    ...units.map((u) => ({
       ...u,
       n: u.n + 1,
-      rooms: [...u.rooms.filter((r) => r !== 'lisbon_save'), ...(fun[i] ? [fun[i]] : [])],
+      rooms: u.rooms.filter((r) => r !== 'lisbon_save'),
     })),
   ]
 }
 
 /** Every path, by the purpose that chooses it. */
 export const PATHS: Record<Purpose, PathUnit[]> = {
-  visiting: withBasics(VISITING_UNITS, ['fun_bluff_time', 'fun_fl_m_posso_oferecer', 'fun_hold_your_horses', 'fun_dd_wolf', 'fun_bluff_react']),
-  staying: withBasics(STAYING_UNITS, ['fun_bluff_time', 'fun_piece_of_cake', 'fun_fl_m_posso_oferecer', 'fun_the_penny_dropped', 'fun_bluff_react']),
-  moving: withBasics(MOVING_UNITS, ['fun_bluff_time', 'fun_bobs_your_uncle', 'fun_dd_wolf', 'fun_hold_your_horses', 'fun_bluff_react', 'fun_fl_m_posso_oferecer']),
+  visiting: withBasics(VISITING_UNITS),
+  staying: withBasics(STAYING_UNITS),
+  moving: withBasics(MOVING_UNITS),
 }
 
 

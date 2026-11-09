@@ -1,5 +1,5 @@
 /**
- * JUST FOR FUN (components/path/FunShelf.tsx): every vibe on the shelf can actually be
+ * JUST FOR FUN — the vibes dealt onto each level's board (content/surprises.ts): every one can actually be
  * opened from the path. Swearing sat at stage 6 for months while no room on any path
  * reached it — so it could never open, and nobody noticed until Sam asked where it went.
  */

@@ -6,6 +6,9 @@ import type { ReactNode } from 'react'
 import { useMemo, type CSSProperties } from 'react'
 import type { PathNode, PathView } from './progress'
 import { keystoneGlaze, milestoneHref } from './progress'
+import { LevelStops } from './LevelStops'
+import type { Purpose } from '@/content/situations'
+import type { ChapterId } from '@/content/chapters'
 import { UNLOCK_HREF } from './locks'
 import { KindIcon, LockIcon } from './icons'
 import { Burst, Foundation, PutBack, driftOf, keystoneLabel } from './Panel'
@@ -50,6 +53,10 @@ const AMP = 74
 export function Road({
   view,
   inventory,
+  purpose = 'visiting',
+  chapter = 'lisbon',
+  rung = 1,
+  now,
   onLaid,
   openId = null,
   homing,
@@ -57,6 +64,11 @@ export function Road({
 }: {
   view: PathView
   inventory: Record<string, unknown>
+  /** For the level stops (LevelStops) — the same content the Board deals. */
+  purpose?: Purpose
+  chapter?: ChapterId
+  rung?: number
+  now?: Date
   onLaid: (n: PathNode) => void
   openId?: string | null
   /* Rooms just put back, which come home with a flourish once (see Panel). */
@@ -84,7 +96,7 @@ export function Road({
       />
 
       <ol className="flex flex-col gap-6" aria-label="The road, unit by unit">
-        {view.units.map(({ unit, nodes, done, stars }) => {
+        {view.units.map(({ unit, nodes, done, stars }, index) => {
           const start = k
           k += nodes.length
           const xs = nodes.map((_, i) => COL / 2 + SWING[(start + i) % SWING.length] * AMP)
@@ -141,6 +153,10 @@ export function Road({
                   {keystoneLabel(unit)}
                 </span>
               </Link>
+              {/* The same surprises, places and what's on the board deals this level (LevelStops). */}
+              <div className="flex justify-center">
+                <LevelStops view={view} index={index} purpose={purpose} chapter={chapter} rung={rung} now={now ?? new Date(0)} />
+              </div>
               {unit.id === here ? <div className="mt-3">{children}</div> : null}
             </li>
           )
