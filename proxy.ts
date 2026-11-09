@@ -29,9 +29,26 @@ const ADOPT = [
   { handoff: 'dub_handoff_session', cookie: 'dub_session', maxAge: 60 * 60 * 24 * 90 },
 ] as const
 
+/*
+  A DEVICE FROM THE FIRST REQUEST (2026-11-09). The device id used to be minted by whichever
+  route first called ensureDevice — so a new phone whose first two requests overlapped got two
+  ids, the second Set-Cookie won, and anything recorded against the first was orphaned. Found
+  testing invitations end to end: the friend accepted under one id, synced under another, and
+  the free month never landed. Minted here instead, before any route runs, so every request
+  from a phone carries the same id. Same cookie and options as ensureDevice (lib/auth.ts).
+  A website hand-off (above) is adopted first and wins: it is the same person's existing id.
+*/
+const DEVICE = { cookie: 'dub_device', maxAge: 60 * 60 * 24 * 365 * 2 }
+function newDeviceId(): string {
+  const bytes = new Uint8Array(32)
+  crypto.getRandomValues(bytes)
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
 export function proxy(request: NextRequest) {
   const adopt = ADOPT.filter((a) => request.cookies.get(a.handoff)?.value)
-  if (adopt.length === 0) return NextResponse.next()
+  const mint = !request.cookies.get(DEVICE.cookie)?.value && !adopt.some((a) => a.cookie === DEVICE.cookie)
+  if (adopt.length === 0 && !mint) return NextResponse.next()
 
   const taken: { cookie: string; value: string; maxAge: number }[] = []
   for (const a of adopt) {
@@ -40,6 +57,11 @@ export function proxy(request: NextRequest) {
       request.cookies.set(a.cookie, value)
       taken.push({ cookie: a.cookie, value, maxAge: a.maxAge })
     }
+  }
+  if (mint) {
+    const value = newDeviceId()
+    request.cookies.set(DEVICE.cookie, value)
+    taken.push({ cookie: DEVICE.cookie, value, maxAge: DEVICE.maxAge })
   }
 
   const response = NextResponse.next({ request })

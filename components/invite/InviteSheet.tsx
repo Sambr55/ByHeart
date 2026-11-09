@@ -52,6 +52,10 @@ export function InviteSheet({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
+        {/* The offer, up top (Sam, 2026-11-09: "needs to be upweighted significantly"). */}
+        <p className="display rounded-2xl border-2 border-[#e5b04a] bg-[#e5b04a]/10 px-4 py-3 text-xl leading-tight" data-testid="invite-sheet-offer">
+          {INVITE.headline}
+        </p>
         <p className="text-base leading-relaxed text-muted">{s.body}</p>
 
         {/* The ask, to say as well as send. */}

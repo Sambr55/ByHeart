@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { inviteEarned } from '@/content/invite'
+import { INVITE_DAYS, inviteEarned } from '@/content/invite'
 
 /**
  * Bringing somebody in, and what it earns.
@@ -34,7 +34,8 @@ const OPEN_FOR_DAYS = 30
  * recommender would make this an affiliate scheme; paying only the newcomer would make it
  * a coupon. It is neither: it is two people in a city, one of whom can now say something in it.
  */
-export const GRANT_DAYS = 30
+/** content/invite.ts INVITE_DAYS — the number the copy states (two weeks since 2026-11-09). */
+export const GRANT_DAYS = INVITE_DAYS
 
 export interface Invite {
   code: string
@@ -170,9 +171,15 @@ export async function landInvite(opts: {
   const row = rows[0]
   if (!row) return { paid: false }
 
-  await sql`update invites set landed_at = now() where code = ${row.code} and landed_at is null`
+  /*
+    PAID, THEN LANDED (2026-11-09). Landed was written first, and only unlanded invitations
+    are looked at — so a grant that failed was never tried again. Each side's grant is its
+    own transaction and its own once-only guard, so on a retry the side already paid is
+    skipped and only the other is attempted.
+  */
   await grant({ userId: row.from_user, device: row.from_device, code: row.code, side: 'from' })
   await grant({ userId: opts.userId, device: opts.device, code: row.code, side: 'to' })
+  await sql`update invites set landed_at = now() where code = ${row.code} and landed_at is null`
   return { paid: true }
 }
 
@@ -201,51 +208,67 @@ async function grant(opts: {
     The guard and the write in one statement, so a second delivery of the same event
     cannot pay twice however it races.
   */
-  const claimed =
-    opts.side === 'from'
-      ? await sql<{ code: string }[]>`
-          update invites set paid_from_at = now()
-           where code = ${opts.code} and paid_from_at is null returning code`
-      : await sql<{ code: string }[]>`
-          update invites set paid_to_at = now()
-           where code = ${opts.code} and paid_to_at is null returning code`
-  if (!claimed.length) return
+  /*
+    THE CLAIM AND THE GRANT IN ONE TRANSACTION (2026-11-09). They were two statements: the
+    invite was marked paid, then the grant was written — and the device grant always failed
+    (device_comps.code must name a comp_codes row and 'INVITE-…' never existed), so the invite
+    read as paid and nobody got anything, with no way to try again. Now a failed grant rolls
+    the claim back, and the next sync pays it.
+  */
+  await sql.begin(async (tx) => {
+    const claimed =
+      opts.side === 'from'
+        ? await tx<{ code: string }[]>`
+            update invites set paid_from_at = now()
+             where code = ${opts.code} and paid_from_at is null returning code`
+        : await tx<{ code: string }[]>`
+            update invites set paid_to_at = now()
+             where code = ${opts.code} and paid_to_at is null returning code`
+    if (!claimed.length) return
 
-  const until = new Date(Date.now() + GRANT_DAYS * 86_400_000).toISOString()
-  if (opts.userId) {
-    /*
-      `source` IS DELIBERATELY NOT TOUCHED ON UPDATE.
+    const until = new Date(Date.now() + GRANT_DAYS * 86_400_000).toISOString()
+    if (opts.userId) {
+      /*
+        `source` IS DELIBERATELY NOT TOUCHED ON UPDATE: a Stripe subscriber keeps source =
+        'stripe' and gets the free month as extra time on their own period end.
 
-      A Stripe subscriber who brings a friend in keeps source = 'stripe', and that is
-      correct rather than an oversight: Account.tsx hides the billing button on
-      source === 'comp', so retyping a paying member as comped would take away the only
-      route they have to manage a subscription they are still being charged for. They get
-      the free month as extra time on their own period end, which is what was promised and
-      nothing more.
-    */
-    await sql`
-      insert into subscriptions (user_id, source, plan, status, current_period_end)
-      values (${opts.userId}, 'comp', 'pro', 'active', ${until})
-      on conflict (user_id) do update set
-        status = 'active',
-        plan = case when subscriptions.plan = 'pro' then subscriptions.plan else 'pro' end,
-        current_period_end =
-          greatest(coalesce(subscriptions.current_period_end, now()), now())
-          + (${GRANT_DAYS} || ' days')::interval
-    `
-    return
-  }
-  if (opts.device) {
-    await sql`
-      insert into device_comps (device_id, code, plan, grants_until)
-      values (${opts.device}, ${'INVITE-' + opts.code}, 'pro', ${until})
-      on conflict (device_id) do update set
-        plan = 'pro',
-        grants_until =
-          greatest(coalesce(device_comps.grants_until, now()), now())
-          + (${GRANT_DAYS} || ' days')::interval
-    `
-  }
+        AND A GRANT WITH NO END STAYS WITH NO END. A null period end on an active row is
+        free for good (compExisting); adding a month to "now" would have turned it into a
+        month. Only a dated row is extended.
+      */
+      await tx`
+        insert into subscriptions (user_id, source, plan, status, current_period_end)
+        values (${opts.userId}, 'comp', 'pro', 'active', ${until})
+        on conflict (user_id) do update set
+          status = 'active',
+          plan = case when subscriptions.plan = 'pro' then subscriptions.plan else 'pro' end,
+          current_period_end = case
+            when subscriptions.current_period_end is null and subscriptions.status = 'active' then null
+            else greatest(coalesce(subscriptions.current_period_end, now()), now()) + (${GRANT_DAYS} || ' days')::interval
+          end
+      `
+      return
+    }
+    if (opts.device) {
+      /* The code row the foreign key needs, made once per invitation. */
+      const comp = 'INVITE-' + opts.code
+      await tx`
+        insert into comp_codes (code, plan, note, max_uses, uses)
+        values (${comp}, 'pro', 'An invitation that landed', 2, 0)
+        on conflict (code) do nothing
+      `
+      await tx`
+        insert into device_comps (device_id, code, plan, grants_until)
+        values (${opts.device}, ${comp}, 'pro', ${until})
+        on conflict (device_id) do update set
+          plan = 'pro',
+          grants_until = case
+            when device_comps.grants_until is null then null
+            else greatest(device_comps.grants_until, now()) + (${GRANT_DAYS} || ' days')::interval
+          end
+      `
+    }
+  })
 }
 
 /**

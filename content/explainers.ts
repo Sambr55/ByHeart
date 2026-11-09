@@ -444,7 +444,7 @@ export const EXPLAINERS: Explainer[] = [
       'Bring one of them and you will both have somewhere else to put it. One link, and they start where you started.',
     detail: {
       heading: 'What happens when they arrive',
-      body: 'You send a link from Yours. They land on the same first screen you did, with no account and nothing to pay, and they land in the same Lisbon rooms you did — and you will have somebody to use this on who is not a waiter being patient with you. If they stay, you both get a month of everything.',
+      body: 'You send a link from Yours. They land on the same first screen you did, with no account and nothing to pay, and they land in the same Lisbon rooms you did — and you will have somebody to use this on who is not a waiter being patient with you. When they say their first room out loud, you both get two weeks of everything.',
     },
     image: {
       /*

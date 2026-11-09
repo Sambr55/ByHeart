@@ -1,228 +1,86 @@
 'use client'
 
-import Link from 'next/link'
-import { useEffect, useState } from 'react'
-import { track } from '@/engine/analytics'
 import { INVITE } from '@/content/invite'
 import { useInvites } from '@/components/invite/useInvites'
-import { mintShowing } from '@/engine/showing'
-import { useLearner } from '@/engine/useLearner'
 
 /**
- * The people you have shown something to, in Yours.
+ * YOUR PEOPLE — the friends you have brought in, and the offer for bringing the next one.
  *
- * WHY IT MOVED HERE. Showing was fully built — mint a card of what you can say, hand it
- * to one person, they show one back and you are a pair — and lived on /proof, a screen
- * almost nobody finds. So the mechanic existed and the relationship it creates was
- * invisible from anywhere a person actually goes. Yours is where somebody looks for their
- * own things, and a friend they have shown something to is one of them.
+ * ONE CARD, NOT TWO (Sam, 2026-11-09: "the show somebody function only sends a link not
+ * examples and I think that idea never really worked. Let's remove that and double down on
+ * invite a friend"). SHOW A FRIEND sat first here and sent a bare link; it is gone from Yours
+ * (showing itself still lives in the feed and on /proof). BRING A FRIEND IN is the card now,
+ * and it leads on what it earns — "You both get two weeks free." — in the size a headline is
+ * read at, with the rule that keeps it honest underneath: it pays when the friend says a room
+ * out loud, not when they sign up (lib/invites.ts).
  *
- * A LIST AND NEVER A NUMBER, which the API already insists on: showingsFor returns rows
- * and refuses to count them. A tally of who has shown you something is a score with extra
- * steps, and DUB exists because scores are the wrong fuel. So this shows who is waiting on
- * you and who you are waiting on, and nothing that could be compared.
- *
- * SYMMETRIC, NOT RANKED, for the same reason. Nobody is ahead of anybody here. The only
- * two states are "they have shown you back" and "not yet", and neither is a position.
+ * A LIST AND NEVER A COUNT, still: the people you asked, each in one of three states, none
+ * of them a position. Sending is the shared hook the board's sheet uses (useInvites).
  */
-interface Mine {
-  id: string
-  sent: boolean
-  returned: boolean
-}
-
 export function Friends() {
-  const learner = useLearner()
-  const [mine, setMine] = useState<Mine[] | null>(null)
-  const [busy, setBusy] = useState(false)
-  const [note, setNote] = useState<string | null>(null)
-  /*
-    THE PEOPLE YOU HAVE BROUGHT IN, which is a different thing from the people you have
-    shown something to. Shared with the board's "Convida um amigo" sheet (useInvites).
-  */
   const brought = useInvites('yours')
   const invites = brought.invites
-  useEffect(() => {
-    let live = true
-    fetch('/api/showing')
-      .then((r) => r.json())
-      .then((b: { ok: boolean; showings?: Mine[] }) => {
-        if (live) setMine(b.ok ? (b.showings ?? []) : [])
-      })
-      .catch(() => {
-        if (live) setMine([])
-      })
-    return () => {
-      live = false
-    }
-  }, [busy])
-
-  async function invite() {
-    setBusy(true)
-    setNote(null)
-    const { path, reason } = await mintShowing(learner)
-    if (!path) {
-      setNote(reason ?? 'Could not make a link.')
-      setBusy(false)
-      return
-    }
-    const url = window.location.origin + path
-    track('showing_sent', {})
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      await navigator.share({ title: 'DUB', url }).catch(() => {})
-    } else {
-      await navigator.clipboard?.writeText(url).catch(() => {})
-      setNote('Link copied.')
-    }
-    setBusy(false)
-  }
-
-  /* BRING SOMEBODY, through the operating system's own share sheet — never the phone book (useInvites). */
-  const bring = brought.bring
-  const busyAny = busy || brought.busy
-  const noteAny = note ?? brought.note
-
-  // Before the fetch answers. An empty list flashed at somebody with three friends reads
-  // as having lost them.
-  if (mine === null) return null
-
-  const paired = mine.filter((m) => m.returned)
-  const waiting = mine.filter((m) => !m.returned)
-
   return (
-    /*
-      SHOWN AND BROUGHT IN, AS TWO CARDS RATHER THAN TWO HEADINGS.
-
-      These are the only parts of Yours that need another person, and they sat at the foot
-      of the screen as an eyebrow, a muted line and a button on bare sand — under a grid of
-      the learner's own cards, which all have edges. Framed, they read as the two things
-      you can do with what is above them.
-
-      The rule between them is replaced by the gap: two cards a `gap-6` apart say "related
-      but separate" more clearly than a hairline ever did, and the hairline was doing the
-      work of a border on a section that had no border.
-    */
     <section id="people" className="scroll-mt-6 flex flex-col gap-3" data-testid="yours-people">
       <h2 className="eyebrow text-telha">Your people</h2>
-      <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
-        <div className="flex flex-col gap-1">
-          <p className="eyebrow text-muted">SHOW A FRIEND</p>
-          {/* The invitation is the content of this card, so it is read at body size. */}
-          <p className="text-base leading-relaxed text-muted">
-            {mine.length
-              ? 'Sentences you handed to somebody, and what came back.'
-              : 'Send a friend three things you can say, and they send theirs back. A good warm-up before a table.'}
+      <div
+        className="relative flex flex-col gap-4 overflow-hidden rounded-3xl border-2 border-[#e5b04a] bg-bg-elev px-5 py-6 shadow-sm"
+        data-testid="friends-offer"
+      >
+        <div className="flex flex-col gap-2">
+          <p className="eyebrow text-[0.65rem] text-accent">
+            <span lang="pt-PT" className="pt normal-case tracking-normal">
+              {INVITE.sheet.eyebrow}
+            </span>{' '}
+            · bring a friend in
           </p>
-        </div>
-
-        {mine.length ? (
-          <ul className="flex flex-col gap-1">
-            {[...paired, ...waiting].map((m) => (
-              <li key={m.id}>
-                {/*
-                  bg-surface, because this row now sits INSIDE a card. It was bg-bg-elev
-                  when its ground was sand; against its own parent that is the same colour
-                  and the row would lose its edge. Inset is what a row within a card is.
-                */}
-                <Link
-                  href={'/s/' + m.id}
-                  className="tap-target flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3"
-                >
-                  <span className="text-base">
-                    {m.returned ? 'They showed you back' : m.sent ? 'Waiting on them' : 'Waiting on you'}
-                  </span>
-                  <span className="eyebrow shrink-0 text-muted">{m.returned ? 'BOTH' : 'ONE'}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
-        <button
-          type="button"
-          data-testid="friends-invite"
-          onClick={invite}
-          disabled={busy}
-          className="tap-target eyebrow rounded border border-line-strong px-5 py-3 text-center disabled:opacity-60"
-        >
-          {busy ? 'MAKING A LINK' : 'SHOW SOMEBODY'}
-        </button>
-      </div>
-
-      {/*
-        AND THE PEOPLE YOU HAVE BROUGHT IN, which is the other half of community.
-
-        Showing is one card handed to somebody who is already here. This is asking somebody
-        who is not — and in an expat city those are different acts with different stakes.
-        Its own card rather than a ruled-off half of this one, because conflating them
-        would make the invitation read as a share — the separation the rule used to carry
-        is now the gap between two edges, which says it more plainly.
-
-        A LIST AND NEVER A COUNT, the rule this component already holds: three states, none
-        of them a position. "How many people have you recruited" is a leaderboard with extra
-        steps and DUB exists because scores are the wrong fuel.
-      */}
-      <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
-        <div className="flex flex-col gap-1">
-          <p className="eyebrow text-muted">{INVITE.eyebrow}</p>
-          <p className="text-base leading-relaxed text-muted">
-            {invites?.length ? INVITE.some : INVITE.empty}
+          <p className="display text-balance text-3xl leading-tight" data-testid="friends-headline">
+            {INVITE.headline}
           </p>
+          <p className="text-base leading-relaxed text-muted">{INVITE.empty}</p>
         </div>
-
-        {invites?.length ? (
-          <ul className="flex flex-col gap-1">
-            {invites.map((i) => (
-              <li
-                key={i.code}
-                data-testid={'invite-' + i.code}
-                className={
-                  /* bg-surface for the same reason the SHOWN rows above take it: a row
-                     inside a card is an inset, not a second lift. The landed state keeps
-                     its accent tint, which reads against either ground. */
-                  'flex items-center justify-between gap-3 rounded-xl border px-4 py-3 ' +
-                  (i.landed_at ? 'border-accent bg-accent/10' : 'border-line bg-surface')
-                }
-              >
-                <span className="text-base">
-                  {i.landed_at
-                    ? INVITE.state.landed
-                    : i.accepted_at
-                      ? INVITE.state.accepted
-                      : INVITE.state.waiting}
-                </span>
-                <span className={'eyebrow shrink-0 ' + (i.landed_at ? 'text-accent' : 'text-muted')}>
-                  {i.landed_at ? 'LANDED' : i.accepted_at ? 'STARTED' : 'SENT'}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
+        <div className="rounded-2xl bg-surface px-4 py-3">
+          <p lang="pt-PT" className="pt text-lg leading-snug text-accent">
+            {INVITE.sheet.line.pt}
+          </p>
+          <p className="text-sm text-muted">{INVITE.sheet.line.en}</p>
+        </div>
         <button
           type="button"
           data-testid="friends-bring"
-          onClick={bring}
-          disabled={busyAny}
-          className="tap-target eyebrow rounded bg-accent px-5 py-3 text-center text-accent-ink disabled:opacity-60"
+          onClick={brought.bring}
+          disabled={brought.busy}
+          className="tap-target eyebrow rounded-full bg-accent px-5 py-4 text-center text-base text-accent-ink disabled:opacity-60"
         >
           {brought.busy ? 'MAKING A LINK' : INVITE.cta}
         </button>
-
-        {/*
-          What it earns, last and small. It is the second reason to do this and must not
-          become the first — a screen that leads on free months is a referral scheme, and a
-          referral scheme is how somebody ends up sending twenty links to people who will
-          never open them.
-        */}
         <p className="text-xs leading-relaxed text-muted">{INVITE.reward}</p>
+        {invites?.length ? (
+          <div className="flex flex-col gap-2 border-t border-line pt-4">
+            <p className="eyebrow text-[0.6rem] text-muted">{INVITE.some}</p>
+            <ul className="flex flex-col gap-1">
+              {invites.map((i) => (
+                <li
+                  key={i.code}
+                  data-testid={'invite-' + i.code}
+                  className={
+                    'flex items-center justify-between gap-3 rounded-xl border px-4 py-3 ' +
+                    (i.landed_at ? 'border-accent bg-accent/10' : 'border-line bg-surface')
+                  }
+                >
+                  <span className="text-base">
+                    {i.landed_at ? INVITE.state.landed : i.accepted_at ? INVITE.state.accepted : INVITE.state.waiting}
+                  </span>
+                  <span className={'eyebrow shrink-0 ' + (i.landed_at ? 'text-accent' : 'text-muted')}>
+                    {i.landed_at ? 'LANDED' : i.accepted_at ? 'STARTED' : 'SENT'}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {brought.note ? <p className="text-xs leading-relaxed text-muted">{brought.note}</p> : null}
       </div>
-
-      {/*
-        The reason, when there is one, in the words the engine gave — which for a new
-        learner is "say something cold first", and is a instruction rather than an error.
-      */}
-      {noteAny ? <p className="text-xs leading-relaxed text-muted">{noteAny}</p> : null}
     </section>
   )
 }

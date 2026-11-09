@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { track } from '@/engine/analytics'
 import { COME } from '@/content/invite'
@@ -27,7 +27,11 @@ export function Come({ code }: { code: string }) {
   const router = useRouter()
   const [spent, setSpent] = useState(false)
 
+  /* Once per arrival — an effect can run twice, and a second accept is a second request. */
+  const sent = useRef(false)
   useEffect(() => {
+    if (sent.current) return
+    sent.current = true
     let live = true
     track('invite_opened', {})
     fetch('/api/invite', {
@@ -37,7 +41,8 @@ export function Come({ code }: { code: string }) {
     })
       .then((r) => r.json())
       .then((b: { ok: boolean }) => {
-        if (live && !b.ok) setSpent(true)
+        /* Not gated on `live`: with the send-once guard, a double-run effect's cleanup would hide this. */
+        if (!b.ok) setSpent(true)
       })
       .catch(() => {
         /* Offline, or no store. They can still start — see the note on the component. */
