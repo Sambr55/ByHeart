@@ -1,5 +1,8 @@
 'use client'
 
+import { Identity } from '@/components/yours/Identity'
+import { AtRisk } from '@/components/Profile'
+
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Back } from '@/components/Back'
@@ -81,6 +84,15 @@ export function Settings() {
       <BottomNav />
 
       <div className="flex flex-col gap-6">
+        {/*
+          YOU, FIRST (Sam, 2026-11-09: "put the Sam panel into the cog icon so the search bar
+          and labels is at the top" of Yours). Your photo, your name and whether this is kept
+          safe — and, when it is not, the one warning about it — open Settings now.
+        */}
+        <Identity controls={false} />
+        <AfterMount>
+          <AtRisk />
+        </AfterMount>
         <div className="flex flex-col gap-3">
           <h1 className="display text-balance text-2xl">Settings</h1>
           {/*
@@ -321,4 +333,11 @@ function Crashes() {
       </ul>
     </section>
   )
+}
+
+/** Drawn after mount, as it was on Yours: it reads this phone's record, which the server has not got. */
+function AfterMount({ children }: { children: React.ReactNode }) {
+  const [on, setOn] = useState(false)
+  useEffect(() => setOn(true), [])
+  return on ? <>{children}</> : null
 }

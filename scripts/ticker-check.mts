@@ -48,23 +48,33 @@ console.log('\nwhat leaves the server\n')
     display_name here is a field about a person being handed to strangers.
   */
   const select = route.match(/select\s+([\s\S]*?)\s+from\s+users/i)?.[1] ?? ''
-  const columns = select
-    .split(',')
-    .map((c) => c.trim())
-    .filter(Boolean)
+  /*
+    TWO THINGS LEAVE, AND THE SECOND IS A YES OR NO (2026-11-05, "Who's in the Club right
+    now"). The first name, and whether they were active in the last fifteen minutes —
+    decided in the query, so no time ever leaves the server. Anything else here is a field
+    about a person being handed to strangers.
+  */
+  const m = select.match(/^u\.display_name\s*,\s*([\s\S]+?)\s+as\s+here$/)
   ok(
-    'the query returns first names and nothing else',
-    columns.length === 1 && columns[0] === 'display_name',
-    columns.join(', ') || 'no select found',
+    'the query returns first names and a here-now yes or no, nothing else',
+    Boolean(m),
+    select.replace(/\s+/g, ' ') || 'no select found',
+  )
+  const flag = m?.[1] ?? ''
+  ok(
+    'and "here" is a comparison, not a time',
+    /^coalesce\(max\(s\.last_seen_at\)\s*>\s*now\(\)\s*-\s*interval '\d+ minutes',\s*false\)$/.test(flag.trim()),
+    flag.trim() || 'missing',
   )
 
-  const LEAKS = /\b(email|user_id|\bid\b|password|token|stripe|created_at|last_seen_at|legend|profile|state)\b/
+  const LEAKS = /\b(email|user_id|password|token|stripe|created_at|legend|profile|state)\b/
   const selectLeaks = LEAKS.test(select)
   ok(
     'no personal column is selected',
     !selectLeaks,
-    selectLeaks ? 'select mentions ' + (select.match(LEAKS)?.[0] ?? '') : 'display_name only',
+    selectLeaks ? 'select mentions ' + (select.match(LEAKS)?.[0] ?? '') : 'display_name and here only',
   )
+  ok('the response is names and here, nothing more', /NextResponse\.json\(\{ names, here \}\)/.test(route))
 
   /*
     A photograph must never become a thing this endpoint returns. Checked by name because
@@ -136,6 +146,11 @@ console.log('\nwhat the bar is\n')
     'and for a room of one',
     /names\.length === 1/.test(comp) && /Early days/.test(comp),
     'names the other person, not a number',
+  )
+  ok(
+    'right now means right now',
+    /is here now/.test(comp) && /were in earlier/.test(comp),
+    'here now, or who was in earlier — never claims presence it does not have',
   )
 
   /*

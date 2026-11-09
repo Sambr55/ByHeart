@@ -102,8 +102,17 @@ const profile = src('components/Profile.tsx')
   BY LEVEL OR BY KIND (2026-11-05): what you can say and the library are the two halves of one
   switch now, with a search over both — components/yours/YoursViews.tsx.
 */
-const order = ['<Identity />', '<AtRisk />', '<YoursViews', '<YoursOut />', '<Friends />'].map((t) => profile.indexOf(t))
-ok('you, keep it safe, what you can say / library, your Lisbon, people', order.every((n, i) => n > 0 && (i === 0 || n > order[i - 1])), order.join(' < '))
+/*
+  DECLUTTERED (2026-11-09: "put the Sam panel into the cog icon so the search bar and labels is
+  at the top"). Yours opens on who's in the Club, then search and your things; you — photo,
+  name, keep it safe — open Settings, one tap away on the cog in the bar.
+*/
+const order = ['<Ticker />', '<YoursViews', '<YoursOut />', '<Friends />'].map((t) => profile.indexOf(t))
+ok('who is here, what you can say / library, your Lisbon, people', order.every((n, i) => n > 0 && (i === 0 || n > order[i - 1])), order.join(' < '))
+ok('you are not above your things any more', !profile.includes('<Identity'))
+const settings = src('components/Settings.tsx')
+ok('you open Settings: photo, name, and keep it safe', settings.indexOf('<Identity') > 0 && settings.indexOf('<AtRisk') > settings.indexOf('<Identity'))
+ok('and Settings and the inbox are one tap from Yours, in the bar', profile.includes('data-testid="yours-settings"') && profile.includes('<InboxDoor />'))
 const views = src('components/yours/YoursViews.tsx')
 ok('the switch holds both: by level and by kind', views.includes('<CanSay') && views.includes('<Collection />'))
 

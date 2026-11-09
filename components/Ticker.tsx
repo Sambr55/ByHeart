@@ -47,13 +47,17 @@ export function Ticker() {
     from an empty list, which means "asked, and the room is empty".
   */
   const [names, setNames] = useState<string[] | null>(null)
+  /* Those of them signed in and active in the last fifteen minutes — app/api/club. */
+  const [here, setHere] = useState<string[]>([])
 
   useEffect(() => {
     let live = true
     fetch('/api/club')
       .then((r) => (r.ok ? r.json() : { names: [] }))
-      .then((d: { names?: string[] }) => {
-        if (live) setNames(Array.isArray(d.names) ? d.names : [])
+      .then((d: { names?: string[]; here?: string[] }) => {
+        if (!live) return
+        setNames(Array.isArray(d.names) ? d.names : [])
+        setHere(Array.isArray(d.here) ? d.here : [])
       })
       /*
         A failed fetch is an empty room. This sits above somebody's own work and must
@@ -92,50 +96,50 @@ export function Ticker() {
   */
   if (!names || names.length === 0) return null
 
+  /*
+    WHO'S IN THE CLUB RIGHT NOW (Sam, 2026-11-05: "show it like the users at the top of the
+    table screen"). The table's own look — overlapping gold initials on the header blue —
+    with whoever is here this minute first and marked with a green dot, and one line that
+    says who is here now, or who was in earlier when nobody is. Still first names only,
+    still nothing to tap, and still no number: past eight the circles simply stop.
+  */
+  const now = names.filter((n) => here.includes(n))
+  const order = [...now, ...names.filter((n) => !here.includes(n))]
+  const list = (xs: string[]) => (xs.length <= 3 ? xs.join(xs.length === 2 ? ' and ' : ', ') : xs.slice(0, 3).join(', ') + ' and others')
+  const line = now.length
+    ? list(now) + (now.length === 1 ? ' is here now' : ' are here now')
+    : names.length === 1
+      ? /* Under "right now", "You and Sammy" would claim Sammy is here. Early days, and honest about it. */
+        names[0] + ' was in earlier. Early days.'
+      : 'Nobody else this minute. ' + list(names) + ' were in earlier.'
+
   return (
-    <div
-      data-testid="club-ticker"
-      /*
-        A STRIP RATHER THAN A CARD, because it is not one of the things on this screen —
-        it is the line above them. Every block on Yours is a white card on sand; making
-        this a seventh would give the room the same weight as the learner's Legend.
-
-        It wraps rather than scrolls horizontally. A single clipped line would hide most
-        of the names and imply there are more in a direction nobody can go, which is the
-        scoreboard this is trying not to be.
-      */
-      className="flex flex-col gap-1"
-    >
-      <p className="eyebrow text-muted">IN THE CLUB</p>
-      {/*
-        ONE LINE, CLIPPED — which is what makes it a strip rather than a block.
-
-        Photographed at 390px with ten names and it wrapped to two lines, taking real
-        vertical space above the learner's own card. Sam asked for "a little ticker bar",
-        and the whole claim of a bar is that it is a rule under the title rather than a
-        thing on the page. truncate holds it to one line however many names arrive.
-
-        Unclickable, as asked, and said in the markup rather than only by the absence of a
-        link: nothing here is a button, nothing has a href. A name in this bar is somebody
-        being in the room, not a profile to go and look at.
-      */}
-      {/*
-        THREE STATES, AND EACH ONE IS TRUE.
-
-        Nobody but you — the room is one, and the honest reading of that is that you got
-        here first. That is a better sentence than a count and it is the one Sam uses out
-        loud at a festival: "there are two of us, you'd be the third."
-
-        A handful — the names themselves, which is what this was always for.
-
-        The copy never says how many. A number is honest and cold, and at this size it is
-        also a roster; the Club intro card settled that and the rule holds here.
-      */}
-      <p className="truncate text-sm leading-relaxed text-fg/75">
-        {names.length === 1
-            ? 'You and ' + names[0] + '. Early days.'
-            : names.join(' · ')}
-      </p>
+    <div data-testid="club-ticker" className="border-b border-black/15 bg-[var(--bar-bg)] px-5 pb-4 pt-3 text-[var(--bar-ink)]">
+      <div className="mx-auto flex w-full max-w-md flex-col gap-2">
+      <p className="eyebrow text-[0.6rem] text-[#e5b04a]">Who’s in the Club right now</p>
+      <div className="flex items-center gap-3">
+        <span className="flex shrink-0 items-center" aria-hidden>
+          {order.slice(0, 8).map((n, i) => (
+            <span
+              key={n}
+              title={n}
+              /* The first on top, so each one's here-now dot sits over its neighbour, not under it. */
+              style={{ zIndex: 10 - i }}
+              className={
+                'relative flex h-9 w-9 items-center justify-center rounded-full border-2 border-[#1f5d8c] bg-[#e5b04a] text-sm font-bold text-[#0f1f33] ' +
+                (i ? '-ml-2' : '')
+              }
+            >
+              {n.charAt(0).toUpperCase()}
+              {here.includes(n) ? (
+                <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#1f5d8c] bg-[#4cc38a]" />
+              ) : null}
+            </span>
+          ))}
+        </span>
+        <p className="min-w-0 truncate text-sm text-white/85">{line}</p>
+      </div>
+      </div>
     </div>
   )
 }
