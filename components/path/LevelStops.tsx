@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { useEffect, useMemo } from 'react'
 import { rowsFor } from '@/content/calendar'
 import type { ChapterId } from '@/content/chapters'
-import { gemsHomeFirst, type Gem } from '@/content/gems'
-import { GemPicture, useGemPhoto } from '@/components/city/GemPhoto'
+import { gemsHomeFirst } from '@/content/gems'
+import { awayText, roomsAway, stopLabel } from './stop-label'
 import { metStop } from '@/content/level'
 import { CRATES, entryRung } from '@/content/roots'
 import type { Purpose } from '@/content/situations'
@@ -53,27 +53,24 @@ export function LevelStops({
   return (
     <ul className="flex flex-wrap gap-1.5" data-testid="level-stops" aria-label="Surprises, places and what's on, on this level">
       {stops.map((s) => {
-        if (!s.reached) {
-          return (
-            <li key={s.key} className="panel-frieze h-7 w-7 rounded-md border border-line" title="Turns over as you lay this level’s rooms" aria-label="A surprise, ahead" />
-          )
-        }
+        /* Named before it is reached, as on the board (stop-label.ts) — greyed, with how far away. */
+        const l = stopLabel(s)
+        if (!l) return null
         const m = metStop(s.key)
-        if (!m) return null
         const locked = s.kind === 'vibe' ? !CRATES.some((c) => c.id === s.crate && entryRung(c) <= rung) : false
         const chip = (
           <>
-            {/* A place shows itself, as on the board's square (Sam, 2026-11-09). */}
-            {s.kind === 'venue' ? <VenueThumb gem={s.gem} /> : null}
-            <span className="eyebrow text-[0.5rem] text-telha">{m.what}</span>
-            <span className="max-w-[9rem] truncate">{m.title}</span>
-            {locked ? <span aria-label="opens when you say one of this level's rooms out loud">🔒</span> : null}
+            <span aria-hidden>{l.mark}</span>
+            <span className="eyebrow text-[0.5rem] text-telha">{l.kind}</span>
+            <span className="max-w-[9rem] truncate">{l.title}</span>
+            {!s.reached ? <span className="text-[0.6rem] text-[#a8742a]">· {awayText(roomsAway(s, lap!))}</span> : null}
+            {s.reached && locked ? <span aria-label="opens when you say one of this level's rooms out loud">🔒</span> : null}
           </>
         )
         return (
           <li key={s.key}>
-            {locked ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-1 text-xs text-muted">{chip}</span>
+            {!s.reached || locked || !m ? (
+              <span className={'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ' + (s.reached ? 'border-line bg-surface text-muted' : 'border-dashed border-line text-muted')}>{chip}</span>
             ) : (
               <Link href={m.href} className="tap-target inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-elev px-2.5 py-1 text-xs" data-testid={'level-stop-' + s.kind}>
                 {chip}
@@ -86,11 +83,3 @@ export function LevelStops({
   )
 }
 
-function VenueThumb({ gem }: { gem: Gem }) {
-  const { ref, photo } = useGemPhoto(gem.id, 96)
-  return (
-    <span ref={ref as unknown as React.Ref<HTMLSpanElement>} className="-ml-1 inline-block">
-      <GemPicture kind={gem.kind} photo={photo} className="h-5 w-5 rounded-full text-[0.6rem]" />
-    </span>
-  )
-}

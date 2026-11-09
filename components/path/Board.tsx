@@ -23,6 +23,8 @@ import { UNLOCK_HREF } from './locks'
 import { KindIcon, LockIcon } from './icons'
 import { driftOf } from './Panel'
 import { lapOf, type Lap, type Square } from './lap'
+import { awayText, headliners, roomsAway, stopLabel } from './stop-label'
+import { tileWord } from '@/content/panel'
 import { CheckIn } from '@/components/city/CheckIn'
 import { GemPicture, PhotoCredit, useGemPhoto } from '@/components/city/GemPhoto'
 import { AddToCalendar } from '@/components/AddToCalendar'
@@ -45,6 +47,8 @@ import { useVenues } from '@/components/city/useVenues'
  * The middle of the board is the level's picture, coming through as the rooms are laid.
  */
 const SEEN_KEY = 'dub.board.seen'
+/** The corners in English, over their Portuguese (Sam, 2026-11-09: "the Portuguese words mean nothing to me"). */
+const CORNER_EN: Record<CornerId, string> = { start: 'Start', miradouro: 'Look back', ferias: 'Week off', mesa: 'Your table' }
 
 function readList(key: string): string[] {
   try {
@@ -170,6 +174,17 @@ export function Board({
         </button>
       </div>
 
+      {/*
+        ON THIS BOARD (Sam, 2026-11-09: "there is no excitement or sell as to what is on the
+        board"). Its headliners, named — the surprises first, then a place and what's on.
+      */}
+      {headliners(lap).length ? (
+        <p className="text-center text-sm leading-snug" data-testid="board-headliners">
+          <span className="eyebrow mr-1 text-[0.65rem] text-accent">On this board</span>{' '}
+          {headliners(lap).join(' · ')}
+        </p>
+      ) : null}
+
       <div className="panel-frame rounded-[1.25rem] p-2.5">
         <ol
           className="board-grid relative grid gap-[3px]"
@@ -183,7 +198,7 @@ export function Board({
           data-h={lap.h}
         >
           {lap.squares.map((s) => (
-            <li key={s.at} style={{ gridColumn: s.col + 1, gridRow: s.row + 1 }} className="relative">
+            <li key={s.at} style={{ gridColumn: s.col + 1, gridRow: s.row + 1 }} className="relative [container-type:inline-size]">
               <Cell
                 s={s}
                 lap={lap}
@@ -324,7 +339,12 @@ function Cell({
     const style = d ? ({ '--rot': d.rot + 'deg', '--dx': d.dx + 'px', '--dy': d.dy + 'px' } as CSSProperties) : undefined
     const inner = (
       <>
-        <KindIcon kind={room.kind} className="h-[46%] w-[46%]" />
+        {/*
+          A ROOM SAYS ITS WORD (2026-11-09). It was the kind's icon — a calendar for a moment, a
+          pin for a place — the same marks as an event and a place stop, so a lesson read as a
+          gig. Its word (content/panel.ts tileWord) says what it is: Hello, 1–20, Airport.
+        */}
+        <span className="board-word" data-testid="board-room-word">{tileWord(room)}</span>
         {state === 'paid' ? (
           <span aria-hidden className="absolute right-0.5 top-0.5 rounded-full bg-[#fbfaf6]/90 p-0.5 text-[#14243a]">
             <LockIcon className="h-2.5 w-2.5" />
@@ -370,8 +390,10 @@ function Cell({
         className={'board-sq board-corner' + (s.reached ? ' is-reached' : '') + (finish ? ' is-finish' : '')}
       >
         <CornerMark corner={s.corner} />
-        <span className="board-corner-word" lang="pt-PT">
-          {c.pt}
+        {/* English first — what it is to you — and the Portuguese under it, to learn (2026-11-09). */}
+        <span className="board-corner-word">{CORNER_EN[s.corner]}</span>
+        <span className="board-corner-pt" lang="pt-PT">
+          {c.pt.toLowerCase()}
         </span>
         {fresh ? <span aria-hidden className="board-new" /> : null}
         {token}
@@ -379,24 +401,31 @@ function Cell({
     )
   }
 
-  /* A stop: face down until reached. */
-  const what = s.kind === 'postcard' ? 'A postcard' : s.kind === 'venue' ? 'A place' : s.kind === 'vibe' ? 'Just for fun' : 'What’s on'
+  /*
+    A STOP SAYS WHAT IT IS, REACHED OR NOT (Sam, 2026-11-09: "name them on the board"). Its
+    mark, its kind in English and its name; ahead of the token, greyed with how many rooms
+    away. A place is its kind and its bairro — the photo is for its sheet, not the board.
+  */
+  const l = stopLabel(s)
+  const away = roomsAway(s, lap)
   return (
     <button
       type="button"
       onClick={() => onTap(s)}
-      aria-label={s.reached ? what : 'A surprise, ahead'}
+      aria-label={(l ? l.kind + ': ' + l.title : 'A stop') + (s.reached ? '' : ', ' + awayText(away))}
       data-testid="board-square"
       data-kind={s.kind}
       data-reached={s.reached ? 'true' : undefined}
-      className={'board-sq board-stop' + (s.reached ? ' is-up' : ' panel-frieze')}
+      className={'board-sq board-stop is-' + s.kind + (s.reached ? ' is-up' : ' is-ahead')}
     >
-      {/*
-        A PLACE LOOKS LIKE A PLACE (Sam, 2026-11-09: "the place tiles on the board need the image
-        so it is clear it is an actual place, not a piece of Portuguese I don't understand yet").
-        Its photo fills the square, with a pin in the corner; every other stop keeps its mark.
-      */}
-      {s.reached && s.kind === 'venue' ? <VenueFace gem={s.gem} /> : s.reached ? <StopMark kind={s.kind} /> : null}
+      {l ? (
+        <>
+          <span aria-hidden className="board-stop-mark">{l.mark}</span>
+          <span className="board-stop-kind">{l.kind}</span>
+          <span className="board-stop-title">{l.title}</span>
+          {s.reached ? null : <span className="board-stop-away">{awayText(away)}</span>}
+        </>
+      ) : null}
       {s.reached && s.kind === 'venue' ? <VenueBadge gem={s.gem.id} /> : null}
       {fresh ? <span aria-hidden className="board-new" /> : null}
       {token}
@@ -831,21 +860,6 @@ function BoardCard({
     <Link href={href ?? '/'} data-testid={testid} onClick={tap} className={cls} style={style}>
       {face}
     </Link>
-  )
-}
-
-/** A place's square, turned over: its photo (or its kind's mark until the photo arrives), with a pin. */
-function VenueFace({ gem }: { gem: Gem }) {
-  const { ref, photo } = useGemPhoto(gem.id, 240)
-  return (
-    <span ref={ref as unknown as React.Ref<HTMLSpanElement>} aria-hidden className="absolute inset-0 overflow-hidden rounded-[inherit]" data-testid="board-venue-photo">
-      <GemPicture kind={gem.kind} photo={photo} className="h-full w-full" />
-      <span className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#fbfaf6]/95 text-[#c66a4a] shadow">
-        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
-        </svg>
-      </span>
-    </span>
   )
 }
 

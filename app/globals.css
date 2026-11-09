@@ -2628,7 +2628,7 @@ details > summary.list-none::-webkit-details-marker {
   box-shadow: 0 14px 22px -6px rgba(20, 36, 58, 0.7), 0 0 0 2px #fff;
 }
 .board-stop.panel-frieze { border-radius: 6px }
-.board-stop.is-up { background-color: #f3ead6; color: #a8742a }
+.board-stop.is-up { background-color: #f3ead6; color: #6b4a16 }
 .board-corner { background-color: #eef3f8; color: rgba(31, 93, 140, 0.55); gap: 1px }
 .board-corner.is-reached { background-color: #1f5d8c; color: #fbfaf6 }
 .board-corner.is-finish { background-color: #c9973b; color: #14243a; animation: board-finish 2.4s ease-in-out infinite }
@@ -2636,6 +2636,25 @@ details > summary.list-none::-webkit-details-marker {
 @media (prefers-reduced-motion: reduce) { .board-corner.is-finish { animation: none } }
 .board-corner-word { font-size: 8.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1 }
 @media (min-width: 400px) { .board-corner-word { font-size: 9.5px } }
+/*
+  WORDS ON THE BOARD (Sam, 2026-11-09: "the Portuguese words mean nothing to me and there is no
+  excitement or sell"). Sized to the square (each square is an inline-size container), so the
+  same board reads on a 4×4 and a 6×6, on a 320px phone and a 430px one.
+*/
+.board-corner-pt { font-size: clamp(6px, 9cqw, 9px); font-weight: 600; font-style: italic; opacity: 0.75; line-height: 1; margin-top: 1px }
+.board-word { padding: 0 6%; text-align: center; font-weight: 700; line-height: 1.05; font-size: clamp(8px, 15cqw, 14px); overflow-wrap: anywhere }
+.board-stop { gap: 1px; padding: 6% 5%; text-align: center }
+.board-stop-mark { font-size: clamp(10px, 20cqw, 18px); line-height: 1 }
+.board-stop-kind { font-size: clamp(5.5px, 8.5cqw, 8.5px); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.05; opacity: 0.85 }
+.board-stop-title { font-size: clamp(6.5px, 11cqw, 11px); font-weight: 600; line-height: 1.1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere }
+.board-stop-away { font-size: clamp(5.5px, 8cqw, 8px); font-weight: 700; line-height: 1; margin-top: 1px; color: #a8742a }
+/* Ahead of the token: named, greyed, dashed — there to look forward to. */
+.board-stop.is-ahead { background-color: #fbfaf6; color: rgba(20, 36, 58, 0.5); box-shadow: inset 0 0 0 1px rgba(31, 93, 140, 0.28); border: 1px dashed rgba(31, 93, 140, 0.3) }
+.board-stop.is-ahead .board-stop-mark { filter: grayscale(1); opacity: 0.6 }
+/* The counter on a stop takes the mark's place at the top, so the stop's name stays readable. */
+.board-stop:has(> .board-token) > .board-stop-mark,
+.board-stop:has(> .board-token) > .board-stop-kind { visibility: hidden }
+.board-stop:has(> .board-token) > .board-token { top: 30%; width: 28% }
 .board-new { position: absolute; right: 4px; top: 4px; width: 7px; height: 7px; border-radius: 9999px; background: #c9973b; box-shadow: 0 0 0 2px #fbfaf6 }
 .board-token {
   /*
