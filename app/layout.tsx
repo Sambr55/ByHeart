@@ -1,3 +1,4 @@
+import { BackToBoard } from '@/components/BackToBoard'
 import { THEME_SCRIPT } from '@/components/Theme'
 import type { Metadata, Viewport } from 'next'
 import { Archivo, Inter } from 'next/font/google'
@@ -84,6 +85,8 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <Tap />
         {/* Keyboard room, the hydration flag, and where you were on each tab. */}
         <Native />
+        {/* One tap back to the board from anywhere it sent you (components/BackToBoard.tsx). */}
+        <BackToBoard />
       </body>
     </html>
   )

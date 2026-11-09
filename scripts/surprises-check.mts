@@ -70,6 +70,13 @@ ok('and so does the Road', /<LevelStops/.test(src('components/path/Road.tsx')))
 ok('which are the board’s own lap, not a copy', /lapOf\(/.test(src('components/path/LevelStops.tsx')))
 ok('practice is offered any time on the Board too, as on the keystones', /board-practice-early/.test(src('components/path/Board.tsx')))
 
+console.log('\nthe first lap, and one tap back')
+const board = src('components/path/Board.tsx')
+ok('the warm-up lap explains its corners instead of offering them', /WARM_UP/.test(board) && /lap\.index === 0/.test(board))
+ok('sheets close to the board, by name', /‹ Board/.test(board) && /‹ Board/.test(src('components/path/TileSheet.tsx')))
+ok('leaving the path marks the way back', /markFromBoard/.test(home))
+ok('and every screen offers it until the path is open again', /<BackToBoard/.test(src('app/layout.tsx')))
+
 if (problems.length) {
   console.log('\n' + problems.length + ' problem(s)')
   process.exit(1)

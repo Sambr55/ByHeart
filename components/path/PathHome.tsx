@@ -27,6 +27,7 @@ import { Panel } from './Panel'
 import { Road } from './Road'
 import { Board } from './Board'
 import { KeepItAsk } from './KeepItAsk'
+import { markFromBoard } from '@/components/BackToBoard'
 import { useHomecoming } from './homecoming'
 import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
@@ -211,7 +212,19 @@ export function PathHome() {
   )
 
   return (
-    <div data-stage="LISBON" className="min-h-svh bg-bg text-fg">
+    <div
+      data-stage="LISBON"
+      className="min-h-svh bg-bg text-fg"
+      /*
+        Anything that leaves the Path from here — a square, a sheet (portalled, but still in this
+        tree), a chip — marks the way back, so the next screen offers "‹ Back to board".
+      */
+      onClickCapture={(e) => {
+        const a = (e.target as Element).closest?.('a[href]')
+        const href = a?.getAttribute('href') ?? ''
+        if (href && !href.startsWith('/club') && !href.startsWith('#')) markFromBoard()
+      }}
+    >
       <header className="bar safe-top sticky top-0 z-30 px-5 py-3">
         <div className="mx-auto flex w-full max-w-md items-center gap-3 md:max-w-6xl">
           <Wordmark mark="club" className="h-7 text-white" />

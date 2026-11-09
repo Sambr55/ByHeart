@@ -113,7 +113,7 @@ export function TileSheet({
             onClick={onClose}
             className="tap-target eyebrow shrink-0 rounded-full border border-line px-3 py-1 text-muted"
           >
-            Close
+            ‹ Board
           </button>
         </div>
 
