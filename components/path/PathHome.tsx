@@ -2,7 +2,7 @@
 
 import { chapterById } from '@/content/chapters'
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Wordmark } from '@/components/Wordmark'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { useLearner } from '@/engine/useLearner'
@@ -111,7 +111,21 @@ export function PathHome() {
     and road be options"). Anybody who already chose Panel or Road on this phone keeps it.
   */
   const [mode, setMode] = useState<PathMode>('board')
-  useEffect(() => setMode(readPathMode()), [])
+  /*
+    ARRIVING FROM "YOUR PATH IS READY" (?start=1, 2026-11-09): the board first, whatever view
+    this phone chose before, with the first tile marked — so the first room is the first tile
+    of something they can see. Not saved as the view choice; the address is tidied after.
+  */
+  const [starting, setStarting] = useState(false)
+  /* Remembered, because the address is tidied on the first run and an effect can run twice. */
+  const cameFromReveal = useRef(false)
+  useEffect(() => {
+    const fromReveal = cameFromReveal.current || new URLSearchParams(window.location.search).get('start') === '1'
+    cameFromReveal.current = fromReveal
+    setStarting(fromReveal)
+    setMode(fromReveal ? 'board' : readPathMode())
+    if (fromReveal) window.history.replaceState(null, '', window.location.pathname)
+  }, [])
   const chooseMode = useCallback((m: PathMode) => {
     setMode(m)
     try {
@@ -246,6 +260,16 @@ export function PathHome() {
         <div className="needs-learner flex flex-col gap-6">
           <LevelBar level={level} toggle={<ViewToggle mode={mode} onChange={chooseMode} />} />
 
+          {mode === 'board' && starting && view.done === 0 && view.next ? (
+            <div className="flex flex-col gap-1 rounded-2xl border-2 border-[#e5b04a] bg-bg-elev px-4 py-3" data-testid="board-first-note">
+              <p className="eyebrow text-[0.65rem] text-accent">Your first board · Level 1</p>
+              <p className="text-sm leading-relaxed">
+                Every room you play lays a tile and moves you round. Your first is{' '}
+                <span className="font-semibold">{view.next.room.title}</span> — tap the tile marked{' '}
+                <span className="font-semibold">Start here</span>.
+              </p>
+            </div>
+          ) : null}
           {mode === 'board' ? (
             <Board
               view={view}
@@ -257,6 +281,7 @@ export function PathHome() {
               saidHere={learner.walk_stops ?? []}
               gender={learner.profile?.gender ?? null}
               onLaid={setSheet}
+              beckon={starting && view.done === 0}
             >
               {task}
             </Board>

@@ -35,6 +35,13 @@ const BECAUSE: Record<'visiting' | 'staying' | 'moving', string> = {
   staying: 'the rooms of a longer stay — settling in, the daily round, the same faces every week, and when it goes wrong.',
   moving: 'the rooms of a move — the paperwork, a place to live, everyday life, health and family, and becoming local.',
 }
+/*
+  TO THE BOARD, NOT STRAIGHT INTO THE ROOM (Sam, 2026-11-09: "We should show the board before
+  level one starts (first tile) so a user sees where they are going"). The Path opens on the
+  board with the first tile saying "Start here" (PathHome, ?start=1); tapping it opens the room.
+*/
+const START = '/club?start=1'
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const day = (iso: string) => {
   const d = new Date(iso + 'T12:00:00Z')
@@ -57,7 +64,7 @@ export function PathReveal({ first }: { first: string }) {
 
   let tile = 0
   return (
-    <main data-testid="path-reveal" className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg px-5 pb-10 pt-8 text-fg">
+    <main data-testid="path-reveal" className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg px-5 pb-10 text-fg" style={{ paddingTop: 'calc(2rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}>
       <p className="eyebrow text-telha">Your path is ready</p>
       <h1 className="display mt-2 text-4xl leading-tight">
         {name.title}
@@ -86,7 +93,14 @@ export function PathReveal({ first }: { first: string }) {
       {/* THE BOARD — every level, every tile, falling into place. */}
       <ol className="mt-6 flex flex-col gap-3">
         {units.map((u) => (
-          <li key={u.id} className="rounded-2xl border border-line bg-bg-elev px-4 py-3">
+          <li key={u.id} className={'relative rounded-2xl border bg-bg-elev px-4 py-3 ' + (u.n === 1 ? 'border-accent/60' : 'border-line')}>
+            {/*
+              LEVEL 1 TAPS THROUGH (Sam, 2026-11-09: "level one needs to be tappable"). To the
+              board, like the button: see where you are going before the first room.
+            */}
+            {u.n === 1 ? (
+              <Link href={START} data-testid="reveal-level-1" aria-label={'Level 1 · ' + u.title + ' — see your board'} className="absolute inset-0 z-10 rounded-2xl" />
+            ) : null}
             <div className="flex items-baseline justify-between gap-3">
               <p className="display text-lg leading-tight">
                 <span className="eyebrow mr-2 text-telha">Level {u.n}</span>
@@ -123,7 +137,7 @@ export function PathReveal({ first }: { first: string }) {
 
       <div className="sticky bottom-0 -mx-5 mt-6 bg-gradient-to-t from-bg via-bg to-transparent px-5 pb-4 pt-6">
         <Link
-          href={'/errand/' + first + '?first=1'}
+          href={START}
           data-testid="reveal-start"
           className="tap-target eyebrow block w-full rounded-2xl bg-accent px-5 py-4 text-center text-base text-accent-ink shadow-[0_6px_0_0_rgba(0,0,0,0.25)]"
         >

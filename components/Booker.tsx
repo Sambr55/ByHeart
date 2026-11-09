@@ -1,5 +1,7 @@
 'use client'
 
+import { Ground } from '@/components/Native'
+
 import { useEffect, useRef, useState } from 'react'
 import { chapterById, type ChapterId } from '@/content/chapters'
 import { cityReady } from '@/content/gems'
@@ -149,6 +151,8 @@ export function Booker({ onDone }: { onDone: () => void }) {
       className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 text-white"
       style={{ paddingTop: 'calc(2rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}
     >
+      {/* The strip under the page, this navy rather than the root's own — components/Native.tsx. */}
+      <Ground color="#0f1f33" />
       <p className="eyebrow text-white/60">DUB · Departures</p>
       <h1 className="display mt-2 text-3xl leading-tight">Where are we taking you?</h1>
       <p className="mt-2 text-sm text-white/70">Tell us like you would an airline. We build your path around it.</p>

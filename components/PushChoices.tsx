@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Ground } from '@/components/Native'
 import { track } from '@/engine/analytics'
 import { PushToggle } from '@/components/PushToggle'
 
@@ -302,7 +303,18 @@ export function MorningLineStep({
   }, [])
   const shown = line ?? { title: 'Bom dia. Um café, por favor.', body: 'Good morning. A coffee, please.' }
   return (
-    <div data-testid="setup-line" className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 pt-8 text-white">
+    /*
+      THE EDGES (Sam, 2026-11-09: "fix the top (overlay) and bottom (dark gap) of this screen").
+      Top: pulled to the screen's edge so the blue runs behind the status bar, so the notch is
+      added to the padding (not .safe-top, a margin that would undo -mt-6). Bottom: Ground
+      paints the strip under the page this screen's own navy (components/Native.tsx).
+    */
+    <div
+      data-testid="setup-line"
+      className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 text-white"
+      style={{ paddingTop: 'calc(2rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}
+    >
+      <Ground color="#0f1f33" />
       <p className="eyebrow text-white/60">DUB · Before you board</p>
       <h1 className="display mt-2 text-3xl leading-tight">Your line, every morning</h1>
       <p className="mt-3 text-sm leading-relaxed text-white/75">

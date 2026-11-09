@@ -1,5 +1,7 @@
 'use client'
 
+import { Ground } from '@/components/Native'
+
 import { Booker } from '@/components/Booker'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -489,7 +491,9 @@ export function SetUp({ onDone }: { onDone?: () => void } = {}) {
           consent is the last thing on the card before boarding. Consent is unchanged in
           substance — an unticked box only the learner's tap can tick — just set in the pass.
         */
-        <div data-testid="checkin" className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 pt-8 text-white">
+        <div data-testid="checkin" className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 text-white" style={{ paddingTop: 'calc(2rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}>
+          {/* Below the clock, and navy to the glass — the same as Booker and the morning-line step. */}
+          <Ground color="#0f1f33" />
           <p className="eyebrow text-white/60">DUB · Check-in</p>
           <h1 className="display mt-2 text-3xl leading-tight">Passenger details</h1>
           <p className="mt-2 text-sm text-white/70">
