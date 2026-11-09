@@ -25,6 +25,7 @@ import { RoomCard } from './RoomCard'
 import { Panel } from './Panel'
 import { Road } from './Road'
 import { Board } from './Board'
+import { KeepItAsk } from './KeepItAsk'
 import { useHomecoming } from './homecoming'
 import { TileSheet } from './TileSheet'
 import { DoorIcon, SpeechIcon } from './icons'
@@ -144,6 +145,8 @@ export function PathHome() {
 
   const task = (
     <section aria-labelledby="up-next" className="flex flex-col gap-3" data-testid="up-next">
+      {/* Sign in, asked after rooms 2 and 4 and at Level 2 — skippable (KeepItAsk.tsx). */}
+      <KeepItAsk rooms={view.done} level={level.level} />
       {recapDue ? (
         <Link
           href={'/level/' + encodeURIComponent(recapDue.id)}

@@ -263,6 +263,7 @@ export type EventName =
   | 'gcal_connect'
   | 'board_card'
   | 'app_open'
+  | 'signin_ask'
   | 'cal_sync_open'
   | 'opener_ask'
   /** An email left for a route that is not open yet, from the booker (2026-11-03). */
