@@ -118,6 +118,19 @@ export default function AdminPage() {
 
   return (
     <PageShell eyebrow="DUB · TESTERS" stage="CHOICE">
+      {/* The other admin pages, which nothing linked to (2026-11-09). */}
+      <nav className="mb-4 flex flex-wrap gap-2" aria-label="Admin">
+        {[
+          ['/admin/people', 'People'],
+          ['/admin/push', 'Push'],
+          ['/admin/reports', 'Reports'],
+          ['/admin/venues', 'Venues'],
+        ].map(([href, label]) => (
+          <a key={href} href={href} className="tap-target eyebrow rounded-full border border-line px-3 py-1 text-[0.65rem] text-accent">
+            {label}
+          </a>
+        ))}
+      </nav>
       <h1 className="display text-3xl">Who tested, and what they said</h1>
 
       <div className="mt-3 flex gap-3">

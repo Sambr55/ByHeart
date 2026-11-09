@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { track } from '@/engine/analytics'
+import { startAutoSync } from '@/engine/learner'
 
 /**
  * The handful of things a browser does not do for you and an app is expected to.
@@ -21,6 +22,8 @@ export function Native() {
   useScrollMemory()
   useStatusBarDefault()
   usePushOpened()
+  /* The server copy kept current: on open, after changes, on leaving — engine/learner.ts. */
+  useEffect(() => startAutoSync(), [])
   return null
 }
 
