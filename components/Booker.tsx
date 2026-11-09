@@ -138,7 +138,17 @@ export function Booker({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div data-testid="booker" className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 pt-8 text-white">
+    /*
+      THE NOTCH (Sam, 2026-11-09: "fix the top of screen 2 (behind clock)"). The card is pulled
+      up to the screen's edge so the blue runs behind the status bar, and nothing then made room
+      for the clock — "DUB · Departures" sat under 19:22. The inset is added to the padding, not
+      as .safe-top: that is a margin and would undo the -mt-6 that takes the blue to the edge.
+    */
+    <div
+      data-testid="booker"
+      className="booker -mx-5 -mt-6 min-h-svh px-5 pb-10 text-white"
+      style={{ paddingTop: 'calc(2rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}
+    >
       <p className="eyebrow text-white/60">DUB · Departures</p>
       <h1 className="display mt-2 text-3xl leading-tight">Where are we taking you?</h1>
       <p className="mt-2 text-sm text-white/70">Tell us like you would an airline. We build your path around it.</p>
