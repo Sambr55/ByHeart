@@ -170,6 +170,7 @@ export function PushChoices() {
                   ? 'That did not save. Try again in a moment.'
                   : 'Three a week is Monday, Wednesday and Friday. Never the same line twice.'}
           </p>
+          <TryItNow endpoint={endpoint} />
         </>
       )}
     </section>
@@ -366,6 +367,37 @@ export function MorningLineStep({
           {on ? 'Board' : 'Not now, take me in'}
         </button>
       </div>
+    </div>
+  )
+}
+
+/**
+ * SEND ME TOMORROW'S LINE NOW (2026-11-09) — the 8am push, to this phone only, to see what it
+ * looks like. app/api/push/test; it does not use up the real one.
+ */
+function TryItNow({ endpoint }: { endpoint: string | null }) {
+  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle')
+  const [why, setWhy] = useState('')
+  if (!endpoint) return null
+  return (
+    <div className="flex flex-wrap items-center gap-3" data-testid="push-try">
+      <button
+        type="button"
+        disabled={state === 'sending'}
+        onClick={async () => {
+          setState('sending')
+          const res = await fetch('/api/push/test', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ endpoint }) }).catch(() => null)
+          const body = (await res?.json().catch(() => null)) as { ok?: boolean; reason?: string } | null
+          setWhy(body?.reason ?? '')
+          setState(body?.ok ? 'sent' : 'failed')
+        }}
+        className="tap-target eyebrow rounded-full border border-accent px-4 py-2 text-[0.65rem] text-accent disabled:opacity-60"
+      >
+        {state === 'sending' ? 'Sending…' : 'Send me tomorrow’s line now'}
+      </button>
+      <span className="text-xs text-muted" aria-live="polite">
+        {state === 'sent' ? 'Sent to this phone. Tomorrow’s still comes at 8.' : state === 'failed' ? (why === 'one a minute' ? 'One a minute — try again shortly.' : 'That did not send.') : ''}
+      </span>
     </div>
   )
 }
