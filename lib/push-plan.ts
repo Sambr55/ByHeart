@@ -41,6 +41,8 @@ export interface Push {
   url: string
   /** The notification tag on the phone: a new one of the same kind replaces the old. */
   tag: string
+  /** The room a path line comes from, for a nudge to name (lib/nudge.ts). */
+  room?: string
 }
 
 export function isCadence(x: unknown): x is Cadence {
@@ -105,6 +107,7 @@ export function pathLine(
         body: line.en + ' — ' + room.title,
         url: '/errand/' + room.id + '?n=line',
         tag: 'dub-line',
+        room: room.title,
       }
     }
   }

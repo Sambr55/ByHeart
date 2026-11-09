@@ -9,7 +9,7 @@ import { currentUser, deviceId } from '@/lib/auth'
 import { billingConfigured, entitlementsForUser, subscriptionFor } from '@/lib/billing'
 import { entitlementsForDevice } from '@/lib/comp'
 import { sendable } from '@/lib/email'
-import { hasDb } from '@/lib/db'
+import { db, hasDb } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,14 +21,16 @@ export default async function AccountPage() {
   // a link without a mail sender. So they get a page of their own instead.
   if (!user) return <SignedOut />
 
-  const [subscription, entitlements] = await Promise.all([
+  const [subscription, entitlements, nudgeEmail] = await Promise.all([
     subscriptionFor(user.id),
     entitlementsForUser(user.id),
+    /* Read on its own, so the user record every request loads does not depend on migration 019. */
+    nudgeEmailFor(user.id),
   ])
 
   return (
     <Account
-      user={{ ...user, created_at: user.created_at.toISOString() }}
+      user={{ ...user, created_at: user.created_at.toISOString(), nudge_email: nudgeEmail }}
       entitlements={entitlements}
       subscription={
         subscription
@@ -112,4 +114,15 @@ async function SignedOut() {
       <BottomNav />
     </main>
   )
+}
+
+async function nudgeEmailFor(id: string): Promise<boolean> {
+  const sql = db()
+  if (!sql) return false
+  try {
+    const [row] = await sql<{ nudge_email: boolean }[]>`select nudge_email from users where id = ${id}`
+    return Boolean(row?.nudge_email)
+  } catch {
+    return false
+  }
 }
