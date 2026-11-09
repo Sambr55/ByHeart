@@ -163,6 +163,60 @@ export const TILE_WORDS: Record<string, string> = {
   lisbon_save: 'The save',
 }
 
+/*
+  WHAT YOU DO IN THE ROOM, OVER ITS WORD (Sam, 2026-11-09: "quite inconsistent in
+  capitalisation… could we say HELLO, count 1–20, place GRAÇA"). Every board square reads the
+  same way: a small lower-case line saying what you do or what kind of thing it is, then the
+  name in capitals. A room's line is its verb — by its kind, or one of these where the kind's
+  verb would read oddly.
+*/
+const VERB_OF_KIND: Record<string, string> = { moment: 'say', errand: 'sort out', place: 'at the', person: 'talk to' }
+const ROOM_VERB: Record<string, string> = {
+  lisbon_numeros: 'count',
+  lisbon_save: 'when you’re lost',
+  lisbon_legend: 'say who you are',
+  lisbon_checkin: 'hotel',
+  lisbon_cartao_sim: 'get a',
+  lisbon_padaria: 'at the',
+  lisbon_cafe: 'order a',
+  lisbon_mesa: 'book a',
+  lisbon_conta: 'ask for the',
+  lisbon_multibanco: 'get',
+  lisbon_taxi: 'take a',
+  lisbon_perdido: 'ask for',
+  lisbon_comboio: 'train to',
+  lisbon_bilhetes: 'buy',
+  lisbon_foto: 'ask for a',
+  lisbon_fado: 'a night of',
+  lisbon_sem: 'explain',
+  lisbon_casa_de_banho: 'find the',
+  lisbon_emergencia: 'when it’s an',
+  lisbon_roubo: 'report a',
+  lisbon_telemovel: 'get a',
+  lisbon_navegante: 'get the',
+  lisbon_costume: 'become a',
+  lisbon_vizinho: 'meet the',
+  lisbon_cabeleireiro: 'get a',
+  lisbon_ginasio: 'join the',
+  lisbon_aulas: 'sign up for',
+  lisbon_arranjar: 'get',
+  lisbon_centro_saude: 'register at the',
+  lisbon_nif: 'get your',
+  lisbon_banco: 'open a',
+  lisbon_loja_cidadao: 'at the',
+  lisbon_junta: 'at the',
+  lisbon_visita: 'flat',
+  lisbon_contrato: 'sign the',
+  lisbon_luz_agua: 'turn on the',
+  lisbon_carro: 'buy a',
+  lisbon_escola: 'a place at',
+}
+
+/** The small line over a room's word: what you do there. */
+export function tileVerb(room: Pick<Situation, 'id' | 'kind'>): string {
+  return ROOM_VERB[room.id] ?? VERB_OF_KIND[room.kind] ?? ''
+}
+
 /** The tile's word: the listed one, or the last word of the room's title. */
 export function tileWord(room: Pick<Situation, 'id' | 'title'>): string {
   return TILE_WORDS[room.id] ?? room.title.replace(/[.,?!…]/g, '').split(' ').filter(Boolean).pop() ?? ''
