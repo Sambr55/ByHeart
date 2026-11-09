@@ -738,6 +738,7 @@ export async function deleteUser(userId: string): Promise<void> {
          set email = 'deleted+' || id || '@dub.invalid',
              display_name = null,
              marketing_opt_in = false,
+             nudge_email = false,
              deleted_at = now()
        where id = ${userId}
     `
