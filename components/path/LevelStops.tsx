@@ -61,8 +61,8 @@ export function LevelStops({
         const chip = (
           <>
             <span aria-hidden>{l.mark}</span>
-            <span className="eyebrow text-[0.5rem] text-telha">{l.kind}</span>
-            <span className="max-w-[9rem] truncate">{l.title}</span>
+            <span className="text-[0.6rem] lowercase text-telha">{l.kind}</span>
+            <span className="max-w-[9rem] truncate font-bold uppercase tracking-wide">{l.title}</span>
             {!s.reached ? <span className="text-[0.6rem] text-[#a8742a]">· {awayText(roomsAway(s, lap!))}</span> : null}
             {s.reached && locked ? <span aria-label="opens when you say one of this level's rooms out loud">🔒</span> : null}
           </>

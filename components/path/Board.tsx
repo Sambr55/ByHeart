@@ -24,7 +24,7 @@ import { KindIcon, LockIcon } from './icons'
 import { driftOf } from './Panel'
 import { lapOf, type Lap, type Square } from './lap'
 import { awayText, headliners, roomsAway, stopLabel } from './stop-label'
-import { tileWord } from '@/content/panel'
+import { tileVerb, tileWord } from '@/content/panel'
 import { CheckIn } from '@/components/city/CheckIn'
 import { GemPicture, PhotoCredit, useGemPhoto } from '@/components/city/GemPhoto'
 import { AddToCalendar } from '@/components/AddToCalendar'
@@ -179,10 +179,16 @@ export function Board({
         board"). Its headliners, named — the surprises first, then a place and what's on.
       */}
       {headliners(lap).length ? (
-        <p className="text-center text-sm leading-snug" data-testid="board-headliners">
-          <span className="eyebrow mr-1 text-[0.65rem] text-accent">On this board</span>{' '}
-          {headliners(lap).join(' · ')}
-        </p>
+        <div className="flex flex-col items-center gap-1.5" data-testid="board-headliners">
+          <span className="eyebrow text-[0.65rem] text-accent">On this board</span>
+          <ul className="flex flex-wrap justify-center gap-1.5">
+            {headliners(lap).map((h) => (
+              <li key={h} className="rounded-full border border-line px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide">
+                {h}
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : null}
 
       <div className="panel-frame rounded-[1.25rem] p-2.5">
@@ -344,7 +350,8 @@ function Cell({
           pin for a place — the same marks as an event and a place stop, so a lesson read as a
           gig. Its word (content/panel.ts tileWord) says what it is: Hello, 1–20, Airport.
         */}
-        <span className="board-word" data-testid="board-room-word">{tileWord(room)}</span>
+        <span className="board-kicker">{tileVerb(room)}</span>
+        <span className={'board-main' + (longest(tileWord(room)) > 9 ? ' is-long' : '')} data-testid="board-room-word">{tileWord(room)}</span>
         {state === 'paid' ? (
           <span aria-hidden className="absolute right-0.5 top-0.5 rounded-full bg-[#fbfaf6]/90 p-0.5 text-[#14243a]">
             <LockIcon className="h-2.5 w-2.5" />
@@ -391,8 +398,8 @@ function Cell({
       >
         <CornerMark corner={s.corner} />
         {/* English first — what it is to you — and the Portuguese under it, to learn (2026-11-09). */}
-        <span className="board-corner-word">{CORNER_EN[s.corner]}</span>
-        <span className="board-corner-pt" lang="pt-PT">
+        <span className="board-main">{CORNER_EN[s.corner]}</span>
+        <span className="board-kicker board-pt" lang="pt-PT">
           {c.pt.toLowerCase()}
         </span>
         {fresh ? <span aria-hidden className="board-new" /> : null}
@@ -421,8 +428,8 @@ function Cell({
       {l ? (
         <>
           <span aria-hidden className="board-stop-mark">{l.mark}</span>
-          <span className="board-stop-kind">{l.kind}</span>
-          <span className="board-stop-title">{l.title}</span>
+          <span className="board-kicker board-stop-kind">{l.kind.toLowerCase()}</span>
+          <span className={'board-main board-stop-title' + (longest(l.title) > 9 ? ' is-long' : '')}>{l.title}</span>
           {s.reached ? null : <span className="board-stop-away">{awayText(away)}</span>}
         </>
       ) : null}
@@ -872,4 +879,9 @@ function VenueHero({ gem }: { gem: Gem }) {
       <PhotoCredit photo={photo} />
     </div>
   )
+}
+
+/** The longest single word in a label: what decides whether it fits a square at full size. */
+function longest(text: string): number {
+  return Math.max(0, ...text.split(/\s+/).map((w) => w.length))
 }

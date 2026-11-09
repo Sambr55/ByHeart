@@ -56,19 +56,21 @@ export function awayText(n: number): string {
   return n === 1 ? '1 room away' : n + ' rooms away'
 }
 
-/** The board's headliners, for "On this board": its surprises, then a place and what's on. */
+/**
+ * The board's headliners, for "On this board": its surprises, then a place and what's on —
+ * each with its mark, shown in capitals like the squares, so the line reads in one voice.
+ */
 export function headliners(lap: Lap): string[] {
   const stops = lap.squares.filter((s) => s.kind === 'vibe' || s.kind === 'postcard')
-  /* A vibe is its own title ("How to swear in Portuguese"); a hack or a bluff says what it is first. */
   const out = stops
     .map((s) => {
       const l = stopLabel(s)
-      return l ? (s.kind === 'vibe' ? l.title : l.kind + ': ' + l.title) : null
+      return l ? l.mark + ' ' + (s.kind === 'vibe' ? l.title : l.kind + ': ' + l.title) : null
     })
     .filter((t): t is string => Boolean(t))
   const place = lap.squares.find((s) => s.kind === 'venue')
-  if (place?.kind === 'venue') out.push('a ' + KIND_LABEL[place.gem.kind].toLowerCase() + ' in ' + bairroById(place.gem.bairro).name)
+  if (place?.kind === 'venue') out.push('📍 ' + KIND_LABEL[place.gem.kind] + ' in ' + bairroById(place.gem.bairro).name)
   const on = lap.squares.find((s) => s.kind === 'neighbour')
-  if (on?.kind === 'neighbour') out.push(on.event.name)
+  if (on?.kind === 'neighbour') out.push('🎟 ' + on.event.name)
   return out.slice(0, 4)
 }
