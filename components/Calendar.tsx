@@ -1,9 +1,13 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { Wordmark } from '@/components/Wordmark'
+import { AddToCalendar } from '@/components/AddToCalendar'
+import { eventOfDrop } from '@/content/cal-event'
+import { useMyCalendar, type MyCalendarStatus, type MyEvent } from '@/engine/gcal'
 import { GENRES, genreFor } from '@/content/calendar'
-import { Back } from '@/components/Back'
 import { Subscribe } from '@/components/Subscribe'
 import { NotYet } from '@/components/NotYet'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
@@ -17,6 +21,9 @@ const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
 ]
+
+/** For the date badge, Sunday-first like getUTCDay. */
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 /** Monday first, because Portugal's week does. */
 const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
@@ -127,6 +134,16 @@ export function Calendar() {
         .slice(0, 10)
     : null
 
+  /*
+    YOUR OWN CALENDAR, IF YOU SAY SO (Sam, 2026-11-05). Fetched by this browser from Google
+    and drawn as dots on the same fortnight — see engine/gcal.ts for what is and is not kept.
+  */
+  const fromIso = days[0]?.toISOString().slice(0, 10) ?? null
+  const toIso = days[13] ? new Date(days[13].getTime() + 86_400_000).toISOString().slice(0, 10) : null
+  const mine = useMyCalendar(fromIso, toIso)
+  const mineByDay = new Map<string, MyEvent[]>()
+  for (const e of mine.events) for (const d of e.days) mineByDay.set(d, [...(mineByDay.get(d) ?? []), e])
+
   /* Only the genres actually on in this fortnight, so the key describes what is on the
      screen rather than advertising a taxonomy. */
   const keyed = GENRES.filter((g) => drops.some((d) => d.genre === g.id))
@@ -153,30 +170,45 @@ export function Calendar() {
       data-stage="CHOICE"
       className="mx-auto flex min-h-svh w-full max-w-md flex-col bg-bg text-fg"
     >
-      <header className="bar sticky top-0 z-30 flex items-center gap-3 px-5 py-3">
-        {/*
-          BACK TO THE CLUB, because that is what is behind this.
-
-          Back defaults to Yours, and Calendar took the default — but Calendar is a tab
-          of its own on the bottom bar ("On"), so nobody arrives here from Yours. The
-          arrow was pointing at a sibling tab and announcing it as the way back. Drops
-          are Club content and the Club feed is what surfaces them, so that is the one
-          honest answer for a screen that is not itself inside Yours.
-        */}
-        <Back href="/club" label="CLUB" />
-        <span className="eyebrow flex-1">{chapter.city}</span>
+      {/*
+        THE SAME HEADER AS PATH AND CITY (Sam, 2026-11-05: "missing its logo … in line with the
+        path and city screens with the correct header"). The wordmark, the city in Portuguese
+        over the screen's name, and the map one tap away — City's own header points here with
+        "What's on →", so this points back. The BACK arrow went: this is a tab, and the bar
+        under it is the way out.
+      */}
+      <header className="bar safe-top sticky top-0 z-30 px-5 py-3">
+        <div className="mx-auto flex w-full max-w-md items-center gap-3">
+          <Link href="/club" aria-label="DUB Club — your path" className="shrink-0">
+            <Wordmark mark="club" className="h-7 text-white" />
+          </Link>
+          <div className="min-w-0 flex-1 leading-tight">
+            <p className="eyebrow truncate opacity-80">{chapter.pt}</p>
+            <p className="display truncate text-lg">What’s on</p>
+          </div>
+          <Link
+            href="/city"
+            data-testid="cal-map"
+            className="eyebrow tap-target inline-flex shrink-0 items-center rounded-full border border-[rgba(255,255,255,0.4)] px-3 py-1"
+          >
+            Map →
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-1 flex-col gap-6 px-5 pb-10 pt-6">
         <div>
-          <h1 className="display text-balance text-2xl">What is on, while you are here.</h1>
+          <p lang="pt-PT" className="pt text-base text-accent">
+            O que se passa em {chapter.pt}
+          </p>
+          <h1 className="display mt-1 text-balance text-3xl leading-tight">What is on, while you are here.</h1>
           <p className="mt-3 text-sm leading-relaxed text-muted">
             Everything pegged to a date in {chapter.city}. Tap one and you land in the
             Portuguese for it — where it is, how to get there, how to ask somebody to come.
           </p>
         </div>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4 rounded-3xl border border-line bg-bg-elev p-4 shadow-sm">
           {trip ? (
             <p data-testid="cal-trip" className="rounded-2xl bg-accent/10 px-4 py-3 text-sm text-fg">
               <span className="eyebrow mr-2 text-accent">Your trip</span>
@@ -190,11 +222,11 @@ export function Calendar() {
               data-testid="cal-prev"
               aria-label="The fortnight before"
               onClick={() => setOffset((o) => o - 1)}
-              className="tap-target eyebrow rounded border border-line px-3 py-3"
+              className="tap-target flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line bg-bg text-lg text-accent"
             >
               ←
             </button>
-            <h2 data-testid="cal-month" className="display min-w-0 flex-1 text-center text-base">
+            <h2 data-testid="cal-month" className="display min-w-0 flex-1 text-center text-lg">
               {anchor
                 ? anchor.getUTCDate() +
                   ' ' +
@@ -210,7 +242,7 @@ export function Calendar() {
               data-testid="cal-next"
               aria-label="The fortnight after"
               onClick={() => setOffset((o) => o + 1)}
-              className="tap-target eyebrow rounded border border-line px-3 py-3"
+              className="tap-target flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-line bg-bg text-lg text-accent"
             >
               →
             </button>
@@ -243,12 +275,14 @@ export function Calendar() {
                   <span
                     key={iso}
                     className={
-                      'flex min-h-[3.5rem] flex-col items-center justify-start rounded py-1 text-sm tabular-nums ' +
+                      'flex min-h-[3.5rem] flex-col items-center justify-start rounded-xl py-1 text-sm tabular-nums ' +
                       (isToday ? 'border border-line-strong text-fg' : 'text-muted') +
                       (inTrip ? ' bg-accent/10 font-semibold text-fg' : '')
                     }
+                    aria-label={(mineByDay.get(iso) ?? []).length ? day + ': ' + (mineByDay.get(iso) ?? []).map((e) => e.title).join(', ') : undefined}
                   >
                     {day}
+                    <Dots n={(mineByDay.get(iso) ?? []).length} />
                   </span>
                 )
               }
@@ -269,13 +303,13 @@ export function Calendar() {
                     is a cell in a grid rather than a button in a row.
                   */
                   className={
-                    'flex min-h-[3.5rem] flex-col items-center gap-1 overflow-hidden rounded px-1 py-1 text-white ' +
+                    'flex min-h-[3.5rem] flex-col items-center gap-1 overflow-hidden rounded-xl px-1 py-1 text-white shadow-sm ' +
                     (isToday ? 'ring-1 ring-fg' : '') +
                     (inTrip ? ' outline outline-2 outline-offset-1 outline-accent' : '')
                   }
                   style={{ backgroundColor: g?.colour ?? 'var(--accent)' }}
                 >
-                  <span className="text-sm tabular-nums">{day}</span>
+                  <span className="text-sm font-semibold tabular-nums">{day}</span>
                   {/*
                     THE NAME, WHICH IS THE WHOLE POINT OF THE FORTNIGHT.
 
@@ -288,6 +322,7 @@ export function Calendar() {
                   <span className="line-clamp-2 w-full hyphens-auto break-words text-center text-[0.5rem] leading-tight opacity-95">
                     {on[0].event}
                   </span>
+                  <Dots n={(mineByDay.get(iso) ?? []).length} light />
                 </Link>
               )
             })}
@@ -315,9 +350,12 @@ export function Calendar() {
               ))}
             </ul>
           ) : null}
+          {/* Your own calendar beside DUB's, and DUB's into yours — the same card. */}
+          <MyCalendar {...mine} days={days} mineByDay={mineByDay} />
+          <Subscribe city={chapter.city} />
         </section>
 
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-4">
           <div className="flex items-baseline gap-3">
             <h2 className="eyebrow min-w-0 text-accent">
               {offset === 0 ? 'NEXT TWO WEEKS' : 'THAT FORTNIGHT'}
@@ -327,7 +365,7 @@ export function Calendar() {
           </div>
 
           {!drops.length ? (
-            <p className="rounded border border-line bg-bg-elev px-4 py-3 text-sm text-muted">
+            <p className="rounded-2xl border border-line bg-bg-elev px-4 py-4 text-sm text-muted">
               Nothing pegged to a date this month. Try the month after — the big ones are
               usually in the diary long before they open.
             </p>
@@ -335,54 +373,108 @@ export function Calendar() {
             drops.map((d) => {
               const on = new Date(d.on + 'T00:00:00Z')
               const open = now ? dropLive(d, now) : false
+              /* A night already gone is not "opening nearer the time" — it said that about 3 Nov on 5 Nov. */
+              const gone = Boolean(todayIso && d.on < todayIso)
+              const g = genreFor(d.genre)
+              const colour = g?.colour ?? 'var(--accent)'
+              /* The first of its rooms with a picture is the night's picture. */
+              const image = d.situations.find((x) => x.image)?.image
               return (
-                <Link
+                /*
+                  A NIGHT, NOT A LISTING ROW (Sam, 2026-11-05: "the layout of the events is
+                  too bland"). The picture its rooms already carry, the date as a badge in the
+                  genre's colour, what sort of night it is, where, the rooms inside it as
+                  things you will be able to say, and whether it is open yet.
+                */
+                <article
                   key={d.id}
-                  href={'/club?drop=' + d.id}
-                  data-testid={'cal-drop-' + d.id}
-                  className="tap-target flex items-start gap-3 rounded border border-line px-4 py-3 transition hover:border-accent/60"
+                  className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-bg-elev shadow-sm transition hover:border-accent/60"
                 >
-                  <span className="flex w-10 shrink-0 flex-col items-center">
-                    <span className="display text-lg tabular-nums leading-none">
-                      {on.getUTCDate()}
+                <Link href={'/club?drop=' + d.id} data-testid={'cal-drop-' + d.id} className="flex flex-col">
+                  <span className="relative block h-36 w-full overflow-hidden" style={{ backgroundColor: colour }}>
+                    {image ? (
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        fill
+                        sizes="(max-width: 448px) 100vw, 448px"
+                        className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                      />
+                    ) : (
+                      <span aria-hidden className="panel-frieze absolute inset-0 opacity-25" />
+                    )}
+                    <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                    <span
+                      className="absolute left-4 top-4 flex w-14 flex-col items-center rounded-2xl px-2 py-2 text-white shadow-md"
+                      style={{ backgroundColor: colour }}
+                    >
+                      <span className="text-[0.55rem] font-semibold uppercase tracking-wider opacity-90">{WEEKDAYS[on.getUTCDay()]}</span>
+                      <span className="display text-2xl leading-none tabular-nums">{on.getUTCDate()}</span>
+                      <span className="text-[0.55rem] uppercase tracking-wider opacity-90">{MONTHS[on.getUTCMonth()].slice(0, 3)}</span>
                     </span>
-                    <span className="text-[0.55rem] uppercase tracking-wider text-muted">
-                      {MONTHS[on.getUTCMonth()].slice(0, 3)}
+                    {g ? (
+                      <span className="eyebrow absolute bottom-3 left-4 rounded-full bg-black/40 px-3 py-1 text-[0.6rem] text-white backdrop-blur-sm">
+                        {g.label}
+                      </span>
+                    ) : null}
+                    <span
+                      className={
+                        'eyebrow absolute right-4 top-4 rounded-full px-3 py-1 text-[0.6rem] shadow-sm ' +
+                        (open ? 'bg-accent text-accent-ink' : 'bg-bg-elev/95 text-muted')
+                      }
+                    >
+                      {/* Honest about the one thing that would otherwise surprise them. */}
+                      {open ? 'Open now' : gone ? 'Been and gone' : 'Opens nearer the time'}
                     </span>
                   </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="display block text-base">{d.event}</span>
-                    <span className="mt-1 block text-xs text-muted">
-                      {d.place.name} · {d.place.area}
+                  <span className="flex flex-col gap-3 px-5 py-4">
+                    <span>
+                      <span className="display block text-balance text-xl leading-tight">{d.event}</span>
+                      <span className="mt-1 flex items-center gap-1 text-sm text-muted">
+                        <svg aria-hidden viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-telha" fill="none" stroke="currentColor" strokeWidth={2}>
+                          <path d="M12 21s-6-5.3-6-10a6 6 0 0112 0c0 4.7-6 10-6 10z" />
+                          <circle cx="12" cy="11" r="2.2" />
+                        </svg>
+                        <span className="truncate">
+                          {d.place.name} · {d.place.area}
+                        </span>
+                      </span>
                     </span>
                     {/*
                       What is inside it, which is the only reason to tap. A calendar row
                       naming an event and nothing else is a listing; this says what you get.
                     */}
-                    <span className="mt-3 block text-xs leading-relaxed text-muted">
-                      {d.situations.map((x) => x.title).join(' · ')}
-                    </span>
-                    {!open ? (
-                      /* Honest about the one thing that would otherwise surprise them. */
-                      <span className="mt-3 block text-[0.6rem] uppercase tracking-wider text-muted">
-                        opens nearer the time
+                    <span className="flex flex-col gap-2">
+                      <span className="eyebrow text-[0.6rem] text-accent">The Portuguese for the night</span>
+                      <span className="flex flex-wrap gap-2">
+                        {d.situations.map((x) => (
+                          <span key={x.id} className="rounded-full border border-line bg-surface px-3 py-1 text-xs">
+                            {x.title}
+                          </span>
+                        ))}
                       </span>
-                    ) : null}
+                    </span>
                   </span>
                 </Link>
+                {/*
+                  ADD TO CALENDAR, ON THE NIGHT ITSELF (Sam, 2026-11-05). Beside the link
+                  rather than inside it — a button in a link is two taps fighting.
+                */}
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-line px-5 py-3">
+                  {gone ? <span /> : <AddToCalendar event={eventOfDrop(d)} up />}
+                  <Link href={'/club?drop=' + d.id} className="tap-target eyebrow ml-auto inline-flex items-center gap-2 whitespace-nowrap text-[0.65rem] text-accent" aria-label={'Learn the Portuguese for ' + d.event}>
+                    Learn it
+                    <span aria-hidden className="transition group-hover:translate-x-1">
+                      →
+                    </span>
+                  </Link>
+                </div>
+                </article>
               )
             })
           )}
         </section>
 
-        {/*
-          THE SUBSCRIPTION, UNDER THE LIST rather than above it.
-
-          Somebody arriving here wants to know what is on; the offer to put it in their own
-          calendar makes sense once they have seen that there is something worth putting
-          there. An ask that comes first is an ask about a thing they have not looked at.
-        */}
-        <Subscribe city={chapter.city} />
       </div>
 
       <BottomNavSpace />
@@ -395,4 +487,103 @@ export function Calendar() {
 function fmt(iso: string): string {
   const d = new Date(iso + 'T00:00:00Z')
   return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()].slice(0, 3)
+}
+
+/** Up to three dots for your own events on a day; the count is on the cell's label. */
+function Dots({ n, light = false }: { n: number; light?: boolean }) {
+  if (!n) return null
+  return (
+    <span aria-hidden className="mt-auto flex gap-0.5 pb-0.5" data-testid="cal-mine-dots">
+      {Array.from({ length: Math.min(3, n) }, (_, i) => (
+        <span key={i} className={'block h-1.5 w-1.5 rounded-full ' + (light ? 'bg-white' : 'bg-fg/60')} />
+      ))}
+    </span>
+  )
+}
+
+/**
+ * SHOW MY CALENDAR — the permission, what it is for, and once given, your own plans for these
+ * two weeks under the grid, so a free evening and the night that fills it are on one screen.
+ */
+function MyCalendar({
+  status,
+  events,
+  connect,
+  disconnect,
+  days,
+  mineByDay,
+}: {
+  status: MyCalendarStatus
+  events: MyEvent[]
+  connect: () => void
+  disconnect: () => void
+  days: Date[]
+  mineByDay: Map<string, MyEvent[]>
+}) {
+  if (status === 'unavailable') return null
+  if (status === 'off' || status === 'tap' || status === 'error') {
+    return (
+      <div className="flex items-center gap-3 rounded-2xl border border-line bg-bg px-4 py-3" data-testid="cal-mine-off">
+        <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-accent" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+          <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
+          <path d="M3.5 10h17M8 3v4M16 3v4" />
+          <circle cx="12" cy="15" r="1.4" fill="currentColor" />
+        </svg>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold">{status === 'tap' ? 'Show my calendar again' : 'See my own calendar here'}</span>
+          <span className="block text-xs text-muted">
+            {status === 'error'
+              ? 'Google did not answer. Try again in a moment.'
+              : status === 'tap'
+                ? 'One tap — Google remembers you said yes.'
+                : 'Your Google Calendar on these dates, so you can see when you are free. Read-only; it stays on this phone.'}
+          </span>
+        </span>
+        <button
+          type="button"
+          onClick={connect}
+          data-testid="cal-mine-connect"
+          className="tap-target eyebrow shrink-0 rounded-full bg-accent px-4 py-2 text-[0.65rem] text-accent-ink"
+        >
+          {status === 'tap' ? 'Show' : 'Allow'}
+        </button>
+      </div>
+    )
+  }
+  const shown = days
+    .map((d) => d.toISOString().slice(0, 10))
+    .flatMap((iso) => (mineByDay.get(iso) ?? []).map((e) => ({ iso, e })))
+    .filter((x, i, all) => all.findIndex((y) => y.e.id === x.e.id) === i)
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl border border-line bg-bg px-4 py-3" data-testid="cal-mine-on">
+      <div className="flex items-center gap-2">
+        <span aria-hidden className="block h-2 w-2 rounded-full bg-fg/60" />
+        <span className="min-w-0 flex-1 text-sm font-semibold">
+          Your calendar{status === 'loading' ? '…' : ' · ' + events.length + (events.length === 1 ? ' thing' : ' things') + ' these two weeks'}
+        </span>
+        <button type="button" onClick={disconnect} className="tap-target text-xs text-muted underline underline-offset-4">
+          Hide
+        </button>
+      </div>
+      {shown.length ? (
+        <ul className="flex flex-col gap-1 text-sm">
+          {shown.slice(0, 8).map(({ iso, e }) => (
+            <li key={e.id} className="flex gap-3">
+              <span className="w-16 shrink-0 tabular-nums text-muted">{shortDay(iso)}</span>
+              <span className="min-w-0 flex-1 truncate">{e.title}</span>
+              <span className="shrink-0 tabular-nums text-muted">{e.time ?? 'all day'}</span>
+            </li>
+          ))}
+          {shown.length > 8 ? <li className="text-xs text-muted">and {shown.length - 8} more</li> : null}
+        </ul>
+      ) : status === 'on' ? (
+        <p className="text-xs text-muted">Nothing in your calendar these two weeks — every night here is free.</p>
+      ) : null}
+    </div>
+  )
+}
+
+function shortDay(iso: string): string {
+  const d = new Date(iso + 'T00:00:00Z')
+  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getUTCDay()] + ' ' + d.getUTCDate()
 }

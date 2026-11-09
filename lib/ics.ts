@@ -1,4 +1,5 @@
 import type { Drop } from '@/content/drops'
+import { CAL_DESCRIPTION, dayAfter, eventOfDrop, type CalEvent } from '@/content/cal-event'
 import { BRAND } from '@/content/brand'
 
 /**
@@ -121,43 +122,39 @@ export function icsFor(drops: Drop[], opts: FeedOptions): string {
     'X-PUBLISHED-TTL:PT12H',
   ]
 
-  for (const d of drops) {
-    const on = new Date(d.on + 'T00:00:00Z')
-    const next = new Date(on.getTime() + 86_400_000)
-    lines.push(
-      'BEGIN:VEVENT',
-      /*
-        Stable across every fetch, so a phone updates the entry somebody already has
-        rather than adding a second one beside it. A calendar that duplicates on refresh
-        is the single most common way a subscription feed becomes an enemy.
-      */
-      'UID:' + esc(d.id) + '@thisisdub.club',
-      'DTSTAMP:' + utcStamp(now),
-      /* All-day. A drop is a date rather than a time — the door time belongs to the venue
-         and guessing it would put somebody outside an hour early. */
-      'DTSTART;VALUE=DATE:' + stamp(d.on),
-      'DTEND;VALUE=DATE:' + stamp(next.toISOString().slice(0, 10)),
-      'SUMMARY:' + esc(d.event),
-      'LOCATION:' + esc(d.place.name + (d.place.area ? ', ' + d.place.area : '')),
-      /*
-        DUB in the description, where somebody who opened the entry finds it — and the
-        link that opens the card. The order matters: what the night is, then what we can
-        do about it, then the way in.
-      */
-      'DESCRIPTION:' +
-        esc(
-          'From DUB — the Portuguese for being there: where it is, how to get there, and ' +
-            'how to ask somebody to come.\n\n' +
-            opts.origin +
-            '/club?drop=' +
-            d.id,
-        ),
-      'URL:' + esc(opts.origin + '/club?drop=' + d.id),
-      'TRANSP:TRANSPARENT',
-      'END:VEVENT',
-    )
-  }
+  for (const d of drops) lines.push(...veventLines(eventOfDrop(d), opts.origin, now))
 
   lines.push('END:VCALENDAR')
+  return lines.map(fold).join(CRLF) + CRLF
+}
+
+/**
+ * One VEVENT, the same for the feed and for a single Add to calendar.
+ *
+ * Stable UID across every fetch, so a phone updates the entry somebody already has rather
+ * than adding a second one beside it. All-day, because a date is what DUB knows: the door
+ * time belongs to the venue and guessing it would put somebody outside an hour early. The
+ * event's own name as the summary; DUB, and the link that opens the Portuguese for it, in
+ * the description, where somebody who opens the entry finds it.
+ */
+export function veventLines(e: CalEvent, origin: string, now: Date = new Date()): string[] {
+  return [
+    'BEGIN:VEVENT',
+    'UID:' + esc(e.id) + '@thisisdub.club',
+    'DTSTAMP:' + utcStamp(now),
+    'DTSTART;VALUE=DATE:' + stamp(e.on),
+    'DTEND;VALUE=DATE:' + stamp(dayAfter(e.until ?? e.on)),
+    'SUMMARY:' + esc(e.title),
+    ...(e.location ? ['LOCATION:' + esc(e.location)] : []),
+    'DESCRIPTION:' + esc(CAL_DESCRIPTION + '\n\n' + origin + e.path),
+    'URL:' + esc(origin + e.path),
+    'TRANSP:TRANSPARENT',
+    'END:VEVENT',
+  ]
+}
+
+/** A calendar holding one event: what Add to calendar hands a phone. */
+export function icsOne(e: CalEvent, origin: string, now: Date = new Date()): string {
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//DUB//' + esc(BRAND.name) + '//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', ...veventLines(e, origin, now), 'END:VCALENDAR']
   return lines.map(fold).join(CRLF) + CRLF
 }

@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import { Wordmark } from '@/components/Wordmark'
 import { GemPicture, PhotoCredit, useGemPhoto } from '@/components/city/GemPhoto'
 import type { Gem } from '@/content/gems'
 import { useEffect, useMemo, useState } from 'react'
@@ -81,13 +82,17 @@ export function City() {
   return (
     <div data-stage="CITY" className="min-h-svh bg-bg text-fg">
       <header className="bar safe-top sticky top-0 z-30 px-5 py-3">
-        <div className="mx-auto flex w-full max-w-md items-center justify-between gap-3 md:max-w-6xl">
-          <div className="leading-tight">
-            <p className="eyebrow opacity-80">{city.pt}</p>
-            <p className="display text-lg">Like a local</p>
+        {/* The wordmark, as on Path and What's on (Sam, 2026-11-05: "same here. Logo is missing"). */}
+        <div className="mx-auto flex w-full max-w-md items-center gap-3 md:max-w-6xl">
+          <Link href="/club" aria-label="DUB Club — your path" className="shrink-0">
+            <Wordmark mark="club" className="h-7 text-white" />
+          </Link>
+          <div className="min-w-0 flex-1 leading-tight">
+            <p className="eyebrow truncate opacity-80">{city.pt}</p>
+            <p className="display truncate text-base min-[360px]:text-lg">Like a local</p>
           </div>
-          <Link href="/calendar" data-testid="city-whats-on" className="eyebrow tap-target inline-flex items-center rounded-full border border-[rgba(255,255,255,0.4)] px-3 py-1">
-            What’s on →
+          <Link href="/calendar" data-testid="city-whats-on" className="eyebrow tap-target inline-flex shrink-0 items-center rounded-full border border-[rgba(255,255,255,0.4)] px-3 py-1">
+            What’s on<span className="hidden min-[360px]:inline">&nbsp;→</span>
           </Link>
         </div>
       </header>
@@ -105,7 +110,7 @@ export function City() {
 
         <div className="md:grid md:grid-cols-[minmax(0,1fr)_26rem] md:gap-6 md:px-5">
           <div className="relative h-[46svh] overflow-hidden border-y border-line md:sticky md:top-20 md:h-[75svh] md:rounded-3xl md:border">
-            <CityMap gems={shown} selected={selected} focus={bairro} me={where.at} onSelect={setSelected} centre={cityCentre(chapter)} zoom={chapter === 'lisbon' ? 13 : 12} />
+            <CityMap gems={shown} selected={selected} focus={bairro} me={where.at} onSelect={setSelected} centre={cityCentre(chapter)} zoom={chapter === 'lisbon' ? 13 : 11} />
             <button
               type="button"
               data-testid="city-near-me"

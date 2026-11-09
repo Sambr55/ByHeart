@@ -15,7 +15,7 @@ interface Voucher {
   id: string
   gem: string
   venue: string
-  tier: 1 | 2
+  tier: 1 | 2 | 3
   what: string
   usedAt: string | null
   locked: boolean

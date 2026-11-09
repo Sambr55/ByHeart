@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { PageShell } from '@/components/PageShell'
-import { FIRST_REWARD, REWARD_TIERS, SECOND_OFFERS, type SecondOffer } from '@/content/board'
+import { FIRST_REWARD, PAIR_REWARD, PAIR_WINDOW_H, REWARD_TIERS, SECOND_OFFERS, type SecondOffer } from '@/content/board'
 
 /**
  * A VENUE SIGNS UP, ON ITS OWN PHONE, IN FIVE MINUTES (Sam, 2026-11-05: "a very simple
@@ -11,7 +11,8 @@ import { FIRST_REWARD, REWARD_TIERS, SECOND_OFFERS, type SecondOffer } from '@/c
  * gives at 150 (Sam: "let venues choose"), and sets a 4-digit PIN its staff type to spend
  * a voucher. No app, no till, no account. The same link edits it later.
  *
- * DRAFT COPY: the agreement line below is a placeholder until Sam approves the venue terms.
+ * The agreement links the DUB venue terms (/venue/terms, content/venue-terms.ts), approved by
+ * Sam on 2026-11-05: free both ways — DUB makes no money from venues.
  */
 export function VenueClaim({ token }: { token: string }) {
   const [v, setV] = useState<{ name: string; address: string; claimed: boolean; card: string; draw: boolean } | null | 'gone'>(null)
@@ -22,6 +23,8 @@ export function VenueClaim({ token }: { token: string }) {
   const [second, setSecond] = useState<SecondOffer>('small_item')
   const [item, setItem] = useState('')
   const [cap, setCap] = useState('')
+  const [pairOn, setPairOn] = useState(false)
+  const [pairItem, setPairItem] = useState('')
   const [agree, setAgree] = useState(false)
   const [note, setNote] = useState<string | null>(null)
   const [done, setDone] = useState(false)
@@ -50,7 +53,7 @@ export function VenueClaim({ token }: { token: string }) {
     const r = await fetch('/api/venues/claim/' + encodeURIComponent(token), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ contactName, contact, pin, offerFirst: first, offerSecond: second, item, cap: cap ? Number(cap) : null }),
+      body: JSON.stringify({ contactName, contact, pin, offerFirst: first, offerSecond: second, item, cap: cap ? Number(cap) : null, offerPair: pairOn, pairItem }),
     }).catch(() => null)
     const j = r ? await r.json().catch(() => ({})) : {}
     if (j.result === 'ok') setDone(true)
@@ -80,7 +83,7 @@ export function VenueClaim({ token }: { token: string }) {
         </div>
         <p className="text-base leading-relaxed">
           People learning Portuguese with DUB come here to say their first sentences to a real person. When enough of them have, you reward them.
-          You choose what, and you can pause at any time.
+          You choose what, and you can pause at any time. It costs you nothing: DUB takes no fee and no commission.
         </p>
 
         <label className="flex items-start gap-3">
@@ -107,6 +110,24 @@ export function VenueClaim({ token }: { token: string }) {
           ) : null}
         </fieldset>
 
+        {/* Bica a dois (2026-11-05): from the first visit, not at a count — two friends who came in together. */}
+        <div className="flex flex-col gap-2">
+          <label className="flex items-start gap-3">
+            <input type="checkbox" checked={pairOn} onChange={(e) => setPairOn(e.target.checked)} className="mt-1 h-5 w-5 accent-[#1f5d8c]" data-testid="claim-pair" />
+            <span>
+              <span className="block font-semibold" lang="pt-PT">
+                {PAIR_REWARD.name}
+              </span>
+              <span className="block text-sm text-muted">
+                {PAIR_REWARD.venue}. Both check in within {PAIR_WINDOW_H} hours; once each, ever. Optional — it brings people in from the first day.
+              </span>
+            </span>
+          </label>
+          {pairOn ? (
+            <input value={pairItem} onChange={(e) => setPairItem(e.target.value)} placeholder="What? e.g. a bica each" className={field} data-testid="claim-pair-item" />
+          ) : null}
+        </div>
+
         <div className="flex flex-col gap-2">
           <input value={contactName} onChange={(e) => setContactName(e.target.value)} placeholder="Your name" className={field} />
           <input value={contact} onChange={(e) => setContact(e.target.value)} placeholder="Phone or email" className={field} />
@@ -116,7 +137,13 @@ export function VenueClaim({ token }: { token: string }) {
 
         <label className="flex items-start gap-3 text-sm">
           <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 h-5 w-5 accent-[#1f5d8c]" />
-          <span>I can agree this for {v.name}, and I’ve read the DUB venue terms.</span>
+          <span>
+            I can agree this for {v.name}, and I’ve read the{' '}
+            <a href="/venue/terms" target="_blank" rel="noopener" className="font-semibold text-accent underline underline-offset-2" data-testid="claim-terms">
+              DUB venue terms
+            </a>
+            . Free both ways: you pay DUB nothing.
+          </span>
         </label>
 
         <button type="button" disabled={!ok} onClick={save} className="tap-target eyebrow rounded-full bg-accent px-6 py-3 text-accent-ink disabled:opacity-40" data-testid="claim-save">

@@ -122,6 +122,8 @@ export default function AdminPage() {
       {/* The other admin pages (2026-11-05), one tap from here. */}
       <nav className="mt-3 flex flex-wrap gap-2 text-sm" aria-label="Admin pages" data-testid="admin-nav">
         <a href="/admin/people" className="rounded-full border border-accent px-3 py-1 font-semibold text-accent">People &amp; billing</a>
+        <a href="/admin/visitors" className="rounded-full border border-accent px-3 py-1 font-semibold text-accent">Visitors &amp; progress</a>
+        <a href="/admin/reports" className="rounded-full border border-line px-3 py-1">Reports</a>
         <a href="/admin/venues" className="rounded-full border border-line px-3 py-1">Venues</a>
         <a href="/admin/push" className="rounded-full border border-line px-3 py-1">Broadcast</a>
       </nav>

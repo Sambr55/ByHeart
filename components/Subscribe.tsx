@@ -97,21 +97,31 @@ export function Subscribe({ city }: { city: string }) {
       that boundary; the card's own border draws it now, and keeping both would be the
       same line twice.
     */
-    <section
-      data-testid="subscribe"
-      className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6"
-    >
-      <h2 className="eyebrow text-accent">YOUR CALENDAR</h2>
-      <p className="text-sm leading-relaxed text-muted">
-        Put what is on in {city} into the calendar you already look at. Tap one and it opens
-        the Portuguese for being there.
-      </p>
-
-      {/*
-        The genres, as things somebody wants rather than as a taxonomy. Each one wears its
-        own colour when chosen, which is the same colour it has on the grid above — so the
-        filter and the calendar are visibly the same idea.
-      */}
+    /*
+      ONE ROW, BESIDE THE CALENDAR IT SYNCS (Sam, 2026-11-05: "This add to your calendar idea
+      seems to have recessed … I'm not sure why it's distinct from the calendar above it").
+      It was a whole card at the foot of the page, after every event, so it read as a second
+      calendar. It is the same calendar, sent the other way — so it sits inside the fortnight's
+      card as one line that folds open to its two questions. Adding a single night is on
+      every event (components/AddToCalendar.tsx); this is "all of them, and keep up".
+    */
+    <details data-testid="subscribe" className="group rounded-2xl border border-line bg-bg">
+      <summary
+        className="tap-target flex cursor-pointer list-none items-center gap-3 px-4 py-3"
+        onClick={() => track('cal_sync_open')}
+      >
+        <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-accent" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+          <path d="M20 12a8 8 0 01-13.7 5.6M4 12a8 8 0 0113.7-5.6M18 3v4h-4M6 21v-4h4" />
+        </svg>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-semibold">Sync all of this to my calendar</span>
+          <span className="block text-xs text-muted">What is on in {city}, kept up to date in the calendar you already use</span>
+        </span>
+        <span aria-hidden className="text-muted transition group-open:rotate-180">
+          ▾
+        </span>
+      </summary>
+      <div className="flex flex-col gap-3 border-t border-line px-4 pb-4 pt-3">
       <ul className="flex flex-wrap gap-1">
         {GENRES.map((g) => {
           const on = picked.includes(g.id)
@@ -123,7 +133,7 @@ export function Subscribe({ city }: { city: string }) {
                 aria-pressed={on}
                 onClick={() => toggle(g.id)}
                 className={
-                  'tap-target rounded border px-3 py-1 text-xs transition ' +
+                  'tap-target rounded-full border px-3 py-1 text-xs transition ' +
                   (on ? 'border-transparent text-white' : 'border-line text-muted')
                 }
                 style={on ? { backgroundColor: g.colour } : undefined}
@@ -157,7 +167,7 @@ export function Subscribe({ city }: { city: string }) {
               aria-pressed={perWeek === n}
               onClick={() => setPerWeek(n)}
               className={
-                'tap-target rounded border px-3 py-1 text-sm tabular-nums transition ' +
+                'tap-target rounded-full border px-3 py-1 text-sm tabular-nums transition ' +
                 (perWeek === n ? 'border-accent bg-accent text-accent-ink' : 'border-line text-muted')
               }
             >
@@ -172,9 +182,9 @@ export function Subscribe({ city }: { city: string }) {
         data-testid="subscribe-go"
         disabled={busy}
         onClick={subscribe}
-        className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink disabled:opacity-60"
+        className="tap-target eyebrow w-full rounded-full bg-accent px-5 py-3 text-center text-accent-ink disabled:opacity-60"
       >
-        {busy ? 'ONE MOMENT' : 'ADD TO MY CALENDAR'}
+        {busy ? 'ONE MOMENT' : 'SYNC TO MY CALENDAR'}
       </button>
 
       {failed ? <p className="text-xs leading-relaxed text-accent">{failed}</p> : null}
@@ -190,6 +200,7 @@ export function Subscribe({ city }: { city: string }) {
           <span className="break-all text-fg">{link}</span>
         </p>
       ) : null}
-    </section>
+      </div>
+    </details>
   )
 }

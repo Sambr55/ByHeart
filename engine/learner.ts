@@ -1,5 +1,5 @@
 'use client'
-import type { ChapterId } from '@/content/chapters'
+import { chapterIdOf, type ChapterId } from '@/content/chapters'
 
 /**
  * The learner, not the lesson.
@@ -10,7 +10,7 @@ import type { ChapterId } from '@/content/chapters'
  * tester's own phone plus a resume link that carries the whole state in the URL.
  */
 
-import { drainEvents, returnEvents } from './analytics'
+import { drainEvents, returnEvents, track } from './analytics'
 import type { MissionId, PropertyId } from '@/content/types'
 import { BLOCK_ORDER, TARGETS } from '@/content/targets'
 
@@ -592,6 +592,15 @@ export interface LearnerState {
    * onHoliday in components/path/progress.ts. Optional, like walk_stops.
    */
   holidays?: string[]
+  /**
+   * MET ON A BOARD (2026-11-05): the lap keys ("<purpose>:<unit>:<kind>:<id>") of every
+   * postcard, place and what's-on a level's board turned over for this learner. Kept so the
+   * level recap and Yours can say what each level showed you once the board has moved on.
+   * A record of what was met, never a score: nothing counts these.
+   */
+  board_met?: string[]
+  /** Levels whose recap has been shown ("<purpose>:<unit>"), so it opens once by itself. */
+  recaps_seen?: string[]
   sections_completed: string[]
   /**
    * How many sittings this learner has done, in total, across every vibe.
@@ -876,6 +885,8 @@ export function emptyLearner(): LearnerState {
     walk_stops: [],
     tables_sat: [],
     holidays: [],
+    board_met: [],
+    recaps_seen: [],
     table_lines: [],
     sections_completed: [],
     sittings: 0,
@@ -1114,6 +1125,8 @@ export function loadLearner(): LearnerState {
           walk_stops: arr(parsed.walk_stops, []),
           tables_sat: arr(parsed.tables_sat, []),
           holidays: arr(parsed.holidays, []),
+          board_met: arr(parsed.board_met, []),
+          recaps_seen: arr(parsed.recaps_seen, []),
           table_lines: arr(parsed.table_lines, []),
           sections_completed: arr(parsed.sections_completed, []),
           /*
@@ -1151,7 +1164,8 @@ export function loadLearner(): LearnerState {
           set_up_at: parsed.set_up_at ?? null,
           asked: arr(parsed.asked, []),
           purpose: parsed.purpose ?? null,
-          chapter: parsed.chapter ?? null,
+          /* Old town ids (cascais, sintra) read as the merged city. */
+          chapter: chapterIdOf(parsed.chapter),
           rejected: arr(parsed.rejected, []),
           tasted: parsed.tasted ?? null,
           deal_accepted_at: parsed.deal_accepted_at ?? null,
@@ -1443,7 +1457,7 @@ export function voiceLean(): { lean: string; count: number } | null {
  * must never cost the tester anything, so this is fire-and-forget and the local copy
  * stays authoritative.
  */
-export async function syncSession(reason: string): Promise<boolean> {
+export async function syncSession(reason: string, opts: { leaving?: boolean } = {}): Promise<boolean> {
   if (typeof window === 'undefined') return false
   const s = getLearner()
   const pending = drainEvents()
@@ -1451,73 +1465,40 @@ export async function syncSession(reason: string): Promise<boolean> {
     const res = await fetch('/api/session', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
+      /*
+        Leaving the app: keepalive lets the request finish after the page is hidden. Browsers
+        cap a keepalive body at 64KB, so a record bigger than that is sent normally and
+        simply may not land — the next open sends it again.
+      */
+      keepalive: opts.leaving ? true : undefined,
+      /*
+        THE WHOLE RECORD, NOT A LIST OF FIELDS (2026-11-09).
+
+        This was a hand-kept list, and every field added since it was written was missing
+        from it: finished_cards, purpose, chapter, walk_stops, tables, holidays, the
+        library's decks — the entire Path. So "Keep it safe" kept the set-up and lost the
+        rooms, and the morning Line read a server copy with no progress on it. A list that
+        has to be remembered is a list that gets forgotten; the record itself is the list.
+
+        Safe to send whole: the photograph is not on it (engine/avatar.ts keeps it in its
+        own storage), and the server's mergeLearner already knows every field. Evidence is
+        still trimmed to the last 400, as before.
+      */
       body: JSON.stringify({
+        ...s,
+        evidence: s.evidence.slice(-400),
         session_id: s.learner_id,
-        tester_label: s.tester_label,
         recorded_at: new Date().toISOString(),
         reason,
-        experiment: s.experiment,
-        affinity: s.affinity,
-        profile: s.profile,
-        inventory: s.inventory,
-        voice_signals: s.voice_signals,
-        evidence: s.evidence.slice(-400),
-        missions_completed: s.missions_completed,
-        /**
-         * proof was missing, and it is the only number the product counts — the
-         * sentences said cold, the thing on the share card, and what rungReached is
-         * derived from. Without it the server could not say how many learners had said
-         * anything or what stage anyone had reached, which makes every question you
-         * would ask before pricing unanswerable.
-         */
-        proof: s.proof,
-        /*
-          Whose copy this is, sent up so the server's merge can refuse for the same reason
-          the device's does. Both sides of the round trip run mergeLearner and both have to
-          be able to say no — a rule enforced on one side only is a rule the other side
-          quietly breaks.
-        */
-        user_id: s.user_id,
-        display_name: s.display_name,
-        osmosis_seen: s.osmosis_seen,
-        roots_played: s.roots_played,
-        sections_completed: s.sections_completed,
-        sittings: s.sittings,
-        /* The tally travels like the sittings: a count of work done, merged as the max. */
-        understood: s.understood,
-        club_welcomed_at: s.club_welcomed_at,
-        club_walked_at: s.club_walked_at,
-        /* Synced, because who is teaching you is not a fact about one handset. */
-        mentor: s.mentor,
-        inbox_opened_at: s.inbox_opened_at,
-        collisions_played: s.collisions_played,
-        nocue_done: s.nocue_done,
-        lines_seen: s.lines_seen,
-        legend: s.legend,
-        legend_prompt: s.legend_prompt,
-        save_prompt: s.save_prompt,
-        sheet_got: s.sheet_got,
-        set_up_at: s.set_up_at,
-        switch_seen_at: s.switch_seen_at,
-        deal_accepted_at: s.deal_accepted_at,
-        created_at: s.created_at,
         user_agent: navigator.userAgent,
-        /*
-          The events, at last.
-
-          /api/session has accepted an `events` array and written it to the events table
-          since it was built, and nothing had ever sent one — so DUB had no analytics
-          egress whatsoever. Every event a tester generated lived in sessionStorage until
-          they closed the tab, which means every question you would ask before pricing
-          was unanswerable from data that was being collected the whole time.
-
-          Piggy-backed on the sync rather than given its own beacon: the sync already
-          runs at every meaningful moment, already carries the device identity, and a
-          second endpoint is a second thing to fail.
-        */
         events: pending.map((e) => ({ name: e.name, payload: e.props, at: new Date(Date.now() - 0).toISOString() })),
       }),
+    }).catch((e) => {
+      /* A keepalive body over the browser's cap throws at once: send it the ordinary way. */
+      if (opts.leaving) return syncSession(reason).then(() => null)
+      throw e
     })
+    if (!res) return false
     const body = await res.json()
     if (!body?.stored) returnEvents(pending.length)
     return Boolean(body?.stored)
@@ -2498,6 +2479,25 @@ export function markWalkStop(key: string) {
   })
 }
 
+/** Stops a level's board turned over for this learner. Append-only. */
+export function markBoardMet(keys: string[]) {
+  /* Checked before update(): a write that changes nothing still re-renders every screen. */
+  const had = getLearner().board_met ?? []
+  const add = keys.filter((k) => !had.includes(k))
+  if (!add.length) return
+  update((s) => {
+    s.board_met = [...(s.board_met ?? []), ...add]
+  })
+}
+
+/** A level's recap, shown. Append-only. */
+export function markRecapSeen(key: string) {
+  if ((getLearner().recaps_seen ?? []).includes(key)) return
+  update((s) => {
+    s.recaps_seen = [...(s.recaps_seen ?? []), key]
+  })
+}
+
 /** A table sat at, and the lines this learner says they said there. */
 export function markTableSat(code: string, lines: string[] = []) {
   update((s) => {
@@ -2741,4 +2741,53 @@ export function chooseMentor(id: string) {
   update((s) => {
     s.mentor = id
   })
+}
+
+/**
+ * KEEP THE SERVER COPY CURRENT, WITHOUT ANYBODY PRESSING ANYTHING (2026-11-09).
+ *
+ * The sync ran at set-up and at a few moments of the old vibes journey, and nowhere else —
+ * so a room laid on the Path never left the phone, "Keep it safe" kept a copy from the
+ * first day, and the server could not say who had visited or what they had done since.
+ *
+ * Now: once when the app opens, twenty seconds after the record last changed (a room laid,
+ * a word banked — quiet enough to send one sync for a whole sitting), and when the app is
+ * put away. Coming back after ten minutes counts as opening it again.
+ *
+ * NEVER BEFORE CONSENT. Nothing is sent until deal_accepted_at is set, which is the plain
+ * consent block in set-up (content/consent.ts) — the one thing in DUB that must come first.
+ */
+let autoSyncing = false
+export function startAutoSync(): () => void {
+  if (typeof window === 'undefined' || autoSyncing) return () => {}
+  autoSyncing = true
+  let last = 0
+  let timer: number | undefined
+  const allowed = () => Boolean(getLearner().deal_accepted_at)
+  const run = (why: string, leaving = false) => {
+    if (!allowed()) return
+    last = Date.now()
+    /* A visit, counted: the admin's visitors-per-day reads these (app/api/admin/visitors). */
+    if (why === 'open') track('app_open', {})
+    void syncSession(why, { leaving })
+  }
+  const opened = window.setTimeout(() => run('open'), 2500)
+  const off = subscribeLearner(() => {
+    window.clearTimeout(timer)
+    timer = window.setTimeout(() => run('change'), 20_000)
+  })
+  const seen = () => {
+    if (document.visibilityState === 'hidden') {
+      window.clearTimeout(timer)
+      if (Date.now() - last > 3000) run('leave', true)
+    } else if (Date.now() - last > 10 * 60_000) run('open')
+  }
+  document.addEventListener('visibilitychange', seen)
+  return () => {
+    autoSyncing = false
+    window.clearTimeout(opened)
+    window.clearTimeout(timer)
+    off()
+    document.removeEventListener('visibilitychange', seen)
+  }
 }

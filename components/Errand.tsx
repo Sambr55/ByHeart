@@ -28,6 +28,12 @@ import { authoredLine } from '@/engine/showable'
 import type { Drop } from '@/content/drops'
 import { track } from '@/engine/analytics'
 import { voiced } from '@/content/speaker'
+import { completedBy } from '@/content/level'
+import { AddToCalendar } from '@/components/AddToCalendar'
+import { eventOfDrop } from '@/content/cal-event'
+import { useEntitlements } from '@/engine/useEntitlements'
+import { hasFullAccess } from '@/lib/entitlements'
+import { roomLock } from '@/components/path/locks'
 
 /**
  * Turn the ask into something you can actually send.
@@ -282,7 +288,29 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
     it is an argument here rather than a constant — the cold stage passes true, the reveal
     passes false, and the proof card keeps counting only the first.
   */
+  /*
+    THE LAST ROOM OF A LEVEL OPENS ITS RECAP (Sam, 2026-11-05: "when the last room is
+    laid"). Worked out at the moment of banking, from the record as it was before this room —
+    so replaying a room of a level already finished does not announce it again.
+  */
+  const access = useEntitlements()
+  const member = hasFullAccess(access) || access.comped
+  const [levelDone, setLevelDone] = useState<{ id: string; level: number } | null>(null)
+  const recapHref = levelDone ? '/level/' + encodeURIComponent(levelDone.id) : null
+  const finishesLevel = () => {
+    const had = learner.finished_cards ?? []
+    if (had.includes(situation.id)) return null
+    const purpose = learner.purpose ?? null
+    const hit = completedBy(situation.id, { finished_cards: had, purpose }, (id) => roomLock(id, member, purpose))
+    return hit ? { id: hit.unit.id, level: hit.level } : null
+  }
+
+  /* The GOT IT button's own label, before anything is banked. */
+  const gotFinishes = stage === 'done' ? finishesLevel() : null
+
   const bank = (clean: boolean) => {
+    const done = finishesLevel()
+    if (done) setLevelDone(done)
     recordProof({
       pt: situation.release.answer,
       en: situation.release.ask,
@@ -319,6 +347,7 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
     */ else revealPieces(piecesIn(situation.release.answer))
     rememberFinishedCard(situation.id)
     track('errand_done', { id: situation.id, clean })
+    return done
   }
 
   return (
@@ -530,6 +559,15 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
               with a subject. The way out is still there underneath, because a sequence
               somebody cannot leave is a trap rather than a flow.
             */}
+            {recapHref && levelDone ? (
+              <Link
+                href={recapHref}
+                data-testid="errand-recap"
+                className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+              >
+                LEVEL {levelDone.level} LAID · SEE YOUR RECAP
+              </Link>
+            ) : null}
             {nextRoom ? (
               <Link
                 href={onward(nextRoom.id)}
@@ -547,6 +585,8 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
               the LAST room, so nothing follows it but this.
             */}
             {isInvite && drop ? <SendInvite situation={situation} drop={drop} /> : null}
+            {/* A room of a night: the night itself, into the diary (Sam, 2026-11-05). */}
+            {drop ? <AddToCalendar event={eventOfDrop(drop)} up className="self-center" /> : null}
             {/* Just said it out loud, with the next room waiting: the moment to offer the
                 next line on the lock screen (components/PushChoices.tsx). */}
             {nextRoom ? <PushAsk room={situation.id} /> : null}
@@ -556,7 +596,7 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
               onClick={() => window.location.assign(back)}
               className={
                 'tap-target eyebrow w-full rounded px-5 py-3 text-center ' +
-                (nextRoom || isInvite
+                (nextRoom || isInvite || recapHref
                   ? 'border border-line text-muted'
                   : 'bg-accent text-accent-ink')
               }
@@ -603,12 +643,12 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
               type="button"
               data-testid="errand-got"
               onClick={() => {
-                bank(false)
-                window.location.assign(nextRoom ? onward(nextRoom.id) : back)
+                const done = bank(false)
+                window.location.assign(done ? '/level/' + encodeURIComponent(done.id) : nextRoom ? onward(nextRoom.id) : back)
               }}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
             >
-              {nextRoom ? 'GOT IT — ' + nextRoom.title.toUpperCase() : back === '/legend' ? 'GOT IT — NOW MAKE IT YOURS' : 'GOT IT'}
+              {gotFinishes ? 'GOT IT — LEVEL ' + gotFinishes.level + ' RECAP' : nextRoom ? 'GOT IT — ' + nextRoom.title.toUpperCase() : back === '/legend' ? 'GOT IT — NOW MAKE IT YOURS' : 'GOT IT'}
             </button>
             <button
               type="button"

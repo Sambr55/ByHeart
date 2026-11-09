@@ -10,11 +10,12 @@
  * drifts, or if a prize can show without its switch and its approved terms.
  */
 import { readFileSync } from 'node:fs'
-import { DRAW_TERMS, HOLIDAY_PRIZE, REWARD_TIERS, SECOND_OFFERS, WALK_ORDER, GEO_RADIUS_M } from '../content/board'
+import { DRAW_TERMS, HOLIDAY_PRIZE, REWARD_TIERS, SECOND_OFFERS, WALK_ORDER, GEO_RADIUS_M, PAIR_TIER } from '../content/board'
 import { WALKS, walksIn } from '../content/walks'
 import { GEMS } from '../content/gems'
-import { countLine, nearEnough, tiersHeld, validPin, MAX_WRONG_PINS } from '../lib/venue-rules'
+import { countLine, nearEnough, tiersHeld, validPin, MAX_WRONG_PINS, together, pairOffered } from '../lib/venue-rules'
 import { pinHash } from '../lib/venue-pin'
+import { VENUE_TERMS } from '../content/venue-terms'
 
 const problems: string[] = []
 const ok = (label: string, cond: boolean, detail = '') => {
@@ -59,6 +60,29 @@ ok('a PIN is no use at another venue', pinHash('a', '4321') !== pinHash('b', '43
 ok(`five wrong PINs lock a voucher`, MAX_WRONG_PINS === 5 && /wrong_pins/.test(src('lib/venues.ts')))
 ok('a voucher is spent once', /where id = \$\{id\} and used_at is null/.test(src('lib/venues.ts')))
 ok('a voucher on screen keeps moving (a screenshot will not pass)', /voucher-live/.test(src('components/venues/Rewards.tsx')) && /toLocaleTimeString/.test(src('components/venues/Rewards.tsx')))
+
+console.log('\nbica a dois')
+{
+  const v = src('lib/venues.ts')
+  ok('two check-ins three hours apart are together; four are not', together('2026-11-05T10:00:00Z', '2026-11-05T13:00:00Z') && !together('2026-11-05T10:00:00Z', '2026-11-05T14:00:01Z'))
+  ok('only a signed-up venue that chose it, and is not paused', pairOffered({ offer_pair: true, paused: false }) && !pairOffered({ offer_pair: true, paused: true }) && !pairOffered({ offer_pair: false, paused: false }) && !pairOffered(null))
+  ok('only friends whose invitation LANDED (they said a room out loud)', /i\.landed_at is not null/.test(v))
+  ok('either way round: the one who asked and the one who came', /case when fu = \$\{userId\} then tu else fu end/.test(v))
+  ok('once per person per venue, by the voucher table’s own key', /\$\{PAIR_TIER\}\)\s*\n\s*on conflict \(gem, user_id, tier\) do nothing/.test(v))
+  ok('the pair voucher is never one of the count tiers', !([1, 2] as number[]).includes(PAIR_TIER))
+  ok('a venue opts in on its own sign-up link; off by default', /claim-pair/.test(src('components/venues/VenueClaim.tsx')) && /offer_pair boolean not null default false/.test(src('db/migrations/018_bica_a_dois.sql')))
+  ok('the venue card tells a learner how it works', /checkin-pair-hint/.test(src('components/city/CheckIn.tsx')))
+}
+
+console.log('\nthe venue terms')
+{
+  const t = JSON.stringify(VENUE_TERMS)
+  ok('the terms exist and the sign-up links them', VENUE_TERMS.length >= 10 && /href="\/venue\/terms"/.test(src('components/venues/VenueClaim.tsx')) && /VENUE_TERMS/.test(src('app/venue/terms/page.tsx')))
+  ok('no money either way: DUB makes no revenue from venues (Sam, 2026-11-05)', /You pay DUB nothing/.test(t) && /DUB makes no money from venues/.test(t) && !/commission of|% of sales|monthly fee/i.test(t))
+  ok('the terms say what the code does: PIN, five wrong, once each, counts only', /4-digit staff PIN/.test(t) && /Five wrong PINs/.test(t) && /used once/.test(t) && /never receive a learner/.test(t))
+  ok('the terms name the rewards the code gives', t.includes(String(REWARD_TIERS.first)) && t.includes(String(REWARD_TIERS.second)) && t.includes('Bica a dois'))
+  ok('the terms promise no prize draw with venues', /does not run a prize draw with venues/.test(t))
+}
 
 console.log('\nthe switches')
 ok('the real holiday stays off until there is a sponsor', HOLIDAY_PRIZE === null)

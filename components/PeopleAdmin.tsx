@@ -58,6 +58,10 @@ export function PeopleAdmin() {
   return (
     <PageShell eyebrow="PEOPLE" stage="REAL WORLD" back="/admin" backLabel="ADMIN">
       <div className="flex flex-col gap-6" data-testid="people-admin">
+        {/* Its pair: who visits and how far they have got. */}
+        <a href="/admin/visitors" className="text-sm text-accent underline underline-offset-4">
+          Visitors &amp; progress →
+        </a>
         <input
           type="password"
           value={key}

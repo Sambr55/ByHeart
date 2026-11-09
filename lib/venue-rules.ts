@@ -1,4 +1,4 @@
-import { GEO_ACCURACY_M, GEO_RADIUS_M, REWARD_TIERS, type SecondOffer } from '@/content/board'
+import { GEO_ACCURACY_M, GEO_RADIUS_M, PAIR_WINDOW_H, REWARD_TIERS, type SecondOffer } from '@/content/board'
 import { distanceM, type Gem } from '@/content/gems'
 
 /**
@@ -47,6 +47,15 @@ export function countLine(count: number, v: VenueOffer | null): string {
   }
   return said + '.'
 }
+
+/** Bica a dois: two check-ins close enough in time to have been made together. */
+export function together(a: Date | string, b: Date | string, hours: number = PAIR_WINDOW_H): boolean {
+  const ms = Math.abs(new Date(a).getTime() - new Date(b).getTime())
+  return Number.isFinite(ms) && ms <= hours * 3_600_000
+}
+
+/** Bica a dois is given only by a venue that signed up, chose it, and is not paused. */
+export const pairOffered = (v: { offer_pair?: boolean; paused: boolean } | null): boolean => Boolean(v && v.offer_pair && !v.paused)
 
 export const validPin = (pin: unknown): pin is string => typeof pin === 'string' && /^\d{4}$/.test(pin)
 

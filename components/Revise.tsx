@@ -49,7 +49,13 @@ export function Revise() {
     the Wall, 2026-11-02, and BACK TO THE PANEL until the Road came back beside it the same
     day — the home screen can be either now, so it names neither.)
   */
-  const back = kind === 'room' || kind === 'cheat' ? { href: '/club', label: 'BACK TO YOUR PATH', aria: 'Back to your path' } : { href: '/profile', label: 'BACK TO YOURS', aria: 'Back to Yours' }
+  const back =
+    kind === 'level'
+      ? /* A level is tested from its recap, and goes back to it (content/level.ts). */
+        { href: '/level/' + encodeURIComponent(id), label: 'BACK TO THE RECAP', aria: 'Back to the level recap' }
+      : kind === 'room' || kind === 'cheat'
+        ? { href: '/club', label: 'BACK TO YOUR PATH', aria: 'Back to your path' }
+        : { href: '/profile', label: 'BACK TO YOURS', aria: 'Back to Yours' }
   const backTo = back
   const [at, setAt] = useState(0)
   const [done, setDone] = useState(false)
@@ -97,8 +103,11 @@ export function Revise() {
         inventory: learner.inventory ?? {},
         /* And the asked deck's content lives on the record and nowhere else. */
         asked: learner.asked ?? [],
+        /* And the level kind asks every finished room of the level on this learner's path. */
+        finished_cards: learner.finished_cards ?? [],
+        purpose: learner.purpose ?? null,
       }),
-    [kind, id, learner.legend, learner.profile?.gender, learner.inventory, learner.asked],
+    [kind, id, learner.legend, learner.profile?.gender, learner.inventory, learner.asked, learner.finished_cards, learner.purpose],
   )
   const line = lines[at]
 
@@ -108,7 +117,7 @@ export function Revise() {
   */
   if (!lines.length) {
     return (
-      <Shell title={revisionTitle(kind, id)} back={back}>
+      <Shell title={revisionTitle(kind, id, learner.purpose ?? null)} back={back}>
         {/*
           THE WHITE CARD ON THE EMPTY STATE TOO, which is the half of this screen that
           never got it.
@@ -167,7 +176,7 @@ export function Revise() {
     const back = (round.length ? round : [room.id]).map((rid) => situationById(rid)).filter((r): r is NonNullable<typeof r> => Boolean(r))
     const home = back.filter((r) => (learner.finished_cards ?? []).includes(r.id) && !roomSlipping(learner, r, new Date())).length
     return (
-      <Shell title={revisionTitle(kind, id)} back={backTo}>
+      <Shell title={revisionTitle(kind, id, learner.purpose ?? null)} back={backTo}>
         <div className="win-card flex flex-col gap-3 rounded-2xl border-2 border-[#e2b450] bg-bg-elev px-5 py-6" data-testid="put-back-win" role="status">
           <p className="eyebrow text-accent">{wasLoose ? '✓ Back in place' : '✓ Said cold'}</p>
           <h1 className="display text-balance text-2xl">{room.title}</h1>
@@ -201,7 +210,7 @@ export function Revise() {
 
   if (done || !line) {
     return (
-      <Shell title={revisionTitle(kind, id)} back={back}>
+      <Shell title={revisionTitle(kind, id, learner.purpose ?? null)} back={back}>
         {/*
           AND THE SAME CARD ON THE DONE BEAT, so the screen keeps its shape to the end.
 
@@ -217,8 +226,9 @@ export function Revise() {
             {lines.length === 1 ? 'That is still there.' : 'All ' + lines.length + ' still there.'}
           </h1>
           <p className="text-sm leading-relaxed text-muted">
-            Nothing on this card can be lost by getting it wrong. It is here whenever you want it
-            again.
+            {kind === 'level'
+              ? 'Nothing on this level can be lost by getting it wrong. All of it is kept in Yours, whenever you want it again.'
+              : 'Nothing on this card can be lost by getting it wrong. It is here whenever you want it again.'}
           </p>
         </div>
         <Dock>
@@ -228,13 +238,18 @@ export function Revise() {
           >
             {back.label}
           </Link>
+          {kind === 'level' ? (
+            <Link href={'/profile?level=' + encodeURIComponent(id)} className="tap-target eyebrow mt-2 block w-full text-center text-sm text-accent" data-testid="revise-level-yours">
+              SEE IT IN YOURS
+            </Link>
+          ) : null}
         </Dock>
       </Shell>
     )
   }
 
   return (
-    <Shell title={revisionTitle(kind, id)} back={back}>
+    <Shell title={revisionTitle(kind, id, learner.purpose ?? null)} back={back}>
       <div className="flex items-baseline gap-3">
         <p className="eyebrow min-w-0 text-accent">SAY IT BACK</p>
         <span className="h-px flex-1 bg-line" />

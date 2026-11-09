@@ -32,6 +32,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
     offerSecond: (typeof b.offerSecond === 'string' ? b.offerSecond : 'none') as SecondOffer,
     item: typeof b.item === 'string' ? b.item : '',
     cap: typeof b.cap === 'number' ? b.cap : null,
+    offerPair: b.offerPair === true,
+    pairItem: typeof b.pairItem === 'string' ? b.pairItem : '',
   })
   return NextResponse.json({ result: r }, { status: r === 'ok' ? 200 : r === 'gone' ? 404 : r === 'unavailable' ? 503 : 422 })
 }

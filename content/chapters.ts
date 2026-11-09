@@ -17,7 +17,7 @@
  */
 import { DEFAULT_PAIR, pairId } from '@/content/pairs'
 
-export type ChapterId = 'lisbon' | 'cascais' | 'sintra' | 'porto' | 'algarve'
+export type ChapterId = 'lisbon' | 'sintra-cascais' | 'porto' | 'algarve'
 
 export interface Chapter {
   id: ChapterId
@@ -85,24 +85,19 @@ export const CHAPTERS: Chapter[] = [
     only), so until then the live app names it as not open yet and preview builds show it
     whole for review.
   */
+  /*
+    SINTRA & CASCAIS, ONE CITY (Sam, 2026-11-05: "consolidate Cascais and Sintra into one
+    'City'"). They were two towns on the pass; they are one place to live — the hills and the
+    sea of the same concelho pair, one train line apart, one natural park between them
+    (Parque Natural de Sintra-Cascais). One chapter, two towns of bairros (content/towns/):
+    ids still carry the town (sintra-…, cascais-…) because a place is in one or the other.
+  */
   {
-    id: 'cascais',
-    name: 'Dub Club — Cascais',
-    city: 'Cascais',
-    pt: 'Cascais',
-    code: 'CAS',
-    country: 'Portugal',
-    pair: pairId(DEFAULT_PAIR),
-    zone: 'Europe/Lisbon',
-    open: true,
-    consent_age: 13,
-  },
-  {
-    id: 'sintra',
-    name: 'Dub Club — Sintra',
-    city: 'Sintra',
-    pt: 'Sintra',
-    code: 'SNT',
+    id: 'sintra-cascais',
+    name: 'Dub Club — Sintra & Cascais',
+    city: 'Sintra & Cascais',
+    pt: 'Sintra & Cascais',
+    code: 'SCS',
     country: 'Portugal',
     pair: pairId(DEFAULT_PAIR),
     zone: 'Europe/Lisbon',
@@ -147,8 +142,22 @@ export const CHAPTERS: Chapter[] = [
 
 export const DEFAULT_CHAPTER: ChapterId = 'lisbon'
 
-export function chapterById(id: ChapterId | null | undefined): Chapter {
-  return CHAPTERS.find((c) => c.id === id) ?? CHAPTERS[0]
+/*
+  The two towns were chapters of their own for a day (PR #42/#43). Anybody who booked one
+  keeps it: they are in the merged city now, never quietly moved to Lisbon.
+*/
+const MERGED: Record<string, ChapterId> = { cascais: 'sintra-cascais', sintra: 'sintra-cascais' }
+
+/** A stored chapter id, read safely: old town ids become the merged city. */
+export function chapterIdOf(id: string | null | undefined): ChapterId | null {
+  if (!id) return null
+  const m = MERGED[id] ?? id
+  return CHAPTERS.some((c) => c.id === m) ? (m as ChapterId) : null
+}
+
+export function chapterById(id: ChapterId | string | null | undefined): Chapter {
+  const m = chapterIdOf(id)
+  return CHAPTERS.find((c) => c.id === m) ?? CHAPTERS[0]
 }
 
 /** The chapters a learner on this pair could belong to. */
