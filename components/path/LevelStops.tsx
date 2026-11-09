@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { useEffect, useMemo } from 'react'
 import { rowsFor } from '@/content/calendar'
 import type { ChapterId } from '@/content/chapters'
-import { gemsHomeFirst } from '@/content/gems'
+import { gemsHomeFirst, type Gem } from '@/content/gems'
+import { GemPicture, useGemPhoto } from '@/components/city/GemPhoto'
 import { metStop } from '@/content/level'
 import { CRATES, entryRung } from '@/content/roots'
 import type { Purpose } from '@/content/situations'
@@ -62,6 +63,8 @@ export function LevelStops({
         const locked = s.kind === 'vibe' ? !CRATES.some((c) => c.id === s.crate && entryRung(c) <= rung) : false
         const chip = (
           <>
+            {/* A place shows itself, as on the board's square (Sam, 2026-11-09). */}
+            {s.kind === 'venue' ? <VenueThumb gem={s.gem} /> : null}
             <span className="eyebrow text-[0.5rem] text-telha">{m.what}</span>
             <span className="max-w-[9rem] truncate">{m.title}</span>
             {locked ? <span aria-label="opens when you say one of this level's rooms out loud">🔒</span> : null}
@@ -80,5 +83,14 @@ export function LevelStops({
         )
       })}
     </ul>
+  )
+}
+
+function VenueThumb({ gem }: { gem: Gem }) {
+  const { ref, photo } = useGemPhoto(gem.id, 96)
+  return (
+    <span ref={ref as unknown as React.Ref<HTMLSpanElement>} className="-ml-1 inline-block">
+      <GemPicture kind={gem.kind} photo={photo} className="h-5 w-5 rounded-full text-[0.6rem]" />
+    </span>
   )
 }

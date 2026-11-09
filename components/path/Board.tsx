@@ -8,7 +8,7 @@ import { SpokenLine } from '@/components/Opener'
 import { CORNERS, HOLIDAY_PRIZE, type CornerId } from '@/content/board'
 import { rowsFor } from '@/content/calendar'
 import { CHEATS } from '@/content/cheats'
-import { bairroById, gemsHomeFirst, KIND_LABEL } from '@/content/gems'
+import { bairroById, gemsHomeFirst, KIND_LABEL, type Gem } from '@/content/gems'
 import { IDIOMS } from '@/content/idioms'
 import { CRATES, entryRung } from '@/content/roots'
 import { WALKS } from '@/content/walks'
@@ -24,6 +24,7 @@ import { KindIcon, LockIcon } from './icons'
 import { driftOf } from './Panel'
 import { lapOf, type Lap, type Square } from './lap'
 import { CheckIn } from '@/components/city/CheckIn'
+import { GemPicture, PhotoCredit, useGemPhoto } from '@/components/city/GemPhoto'
 import { AddToCalendar } from '@/components/AddToCalendar'
 import { eventOfRow } from '@/content/cal-event'
 import { useVenues } from '@/components/city/useVenues'
@@ -390,7 +391,12 @@ function Cell({
       data-reached={s.reached ? 'true' : undefined}
       className={'board-sq board-stop' + (s.reached ? ' is-up' : ' panel-frieze')}
     >
-      {s.reached ? <StopMark kind={s.kind} /> : null}
+      {/*
+        A PLACE LOOKS LIKE A PLACE (Sam, 2026-11-09: "the place tiles on the board need the image
+        so it is clear it is an actual place, not a piece of Portuguese I don't understand yet").
+        Its photo fills the square, with a pin in the corner; every other stop keeps its mark.
+      */}
+      {s.reached && s.kind === 'venue' ? <VenueFace gem={s.gem} /> : s.reached ? <StopMark kind={s.kind} /> : null}
       {s.reached && s.kind === 'venue' ? <VenueBadge gem={s.gem.id} /> : null}
       {fresh ? <span aria-hidden className="board-new" /> : null}
       {token}
@@ -600,22 +606,52 @@ function StopSheet({
   } else if (s.kind === 'venue') {
     const g = s.gem
     const said = saidHere.includes('gem:' + g.id)
+    /* The board's walk in full, whether this place is one of its stops, and whether any walk has been walked. */
+    const walk = lap.walk ? WALKS.find((w) => w.id === lap.walk!.id) ?? null : null
+    const onWalk = Boolean(walk?.stops.some((st) => st.gem === g.id))
+    const walkedAny = saidHere.length > 0
     eyebrow = KIND_LABEL[g.kind] + ' · ' + bairroById(g.bairro).name
     title = g.name
     body = (
       <>
+        <VenueHero gem={g} />
         <p className="text-base leading-relaxed">{g.why}</p>
         <SpokenLine pt={gender === 'f' && g.line.f ? g.line.f : g.line.pt} en={g.line.en} size="md" />
         {said ? <p className="text-sm font-semibold text-correct">You’ve said it here.</p> : null}
-        <CheckIn gem={g.id} />
-        <Link href={'/city?gem=' + g.id} className={btn} data-testid="board-venue">
-          Directions and more
-        </Link>
-        {lap.walk ? (
-          <Link href={'/walk/' + lap.walk.id} className="eyebrow self-center text-accent underline-offset-4 hover:underline" data-testid="board-walk">
-            Part of {lap.walk.title} →
+        {/*
+          THE WALK, INTRODUCED BEFORE IT IS ASKED FOR (Sam, 2026-11-09: "directions and check in
+          are premature here. I haven't discovered language walks, so I need to be introduced to
+          the concept"). Somebody who has never walked one is told what a language walk is —
+          this place is a stop on one — and offered it; once they have walked any stop, it is
+          the one line it was. Check in waits for that too: it is the walk's own gesture.
+        */}
+        {walk && onWalk && !walkedAny ? (
+          <div className="flex flex-col gap-2 rounded-2xl border-2 border-[#e5b04a] bg-[#e5b04a]/10 px-4 py-4" data-testid="board-walk-intro">
+            <p className="eyebrow text-[0.65rem] text-accent">
+              A language walk ·{' '}
+              <span lang="pt-PT" className="pt normal-case tracking-normal">
+                {walk.pt}
+              </span>
+            </p>
+            <p className="display text-lg leading-tight">{walk.title}</p>
+            <p className="text-sm leading-relaxed">
+              {walk.stops.length} places in {bairroById(walk.bairro).name} · {walk.when}. At each one there is one line to say — to a real
+              person, in the street. This place is one of them.
+            </p>
+            <Link href={'/walk/' + walk.id} className={btn} data-testid="board-walk">
+              See the walk
+            </Link>
+          </div>
+        ) : null}
+        {walkedAny ? <CheckIn gem={g.id} /> : null}
+        {walk && onWalk && walkedAny ? (
+          <Link href={'/walk/' + walk.id} className="eyebrow self-center text-accent underline-offset-4 hover:underline" data-testid="board-walk">
+            Part of {walk.title} →
           </Link>
         ) : null}
+        <Link href={'/city?gem=' + g.id} className="self-center text-sm text-muted underline underline-offset-4" data-testid="board-venue">
+          Where it is, and more about it
+        </Link>
       </>
     )
   } else if (s.kind === 'vibe') {
@@ -795,5 +831,31 @@ function BoardCard({
     <Link href={href ?? '/'} data-testid={testid} onClick={tap} className={cls} style={style}>
       {face}
     </Link>
+  )
+}
+
+/** A place's square, turned over: its photo (or its kind's mark until the photo arrives), with a pin. */
+function VenueFace({ gem }: { gem: Gem }) {
+  const { ref, photo } = useGemPhoto(gem.id, 240)
+  return (
+    <span ref={ref as unknown as React.Ref<HTMLSpanElement>} aria-hidden className="absolute inset-0 overflow-hidden rounded-[inherit]" data-testid="board-venue-photo">
+      <GemPicture kind={gem.kind} photo={photo} className="h-full w-full" />
+      <span className="absolute bottom-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#fbfaf6]/95 text-[#c66a4a] shadow">
+        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11zM12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
+        </svg>
+      </span>
+    </span>
+  )
+}
+
+/** The place, seen, at the top of its sheet — with the photographer's credit, as Google requires. */
+function VenueHero({ gem }: { gem: Gem }) {
+  const { ref, photo } = useGemPhoto(gem.id, 640)
+  return (
+    <div ref={ref} className="flex flex-col gap-1">
+      <GemPicture kind={gem.kind} photo={photo} big className="h-40 w-full rounded-2xl" />
+      <PhotoCredit photo={photo} />
+    </div>
   )
 }
