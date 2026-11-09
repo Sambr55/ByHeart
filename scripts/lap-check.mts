@@ -71,8 +71,8 @@ console.log('\nno dice: rooms move you')
 const units = pathUnits(undefined, NOW, 'visiting')
 const u = 1 // the first board after the basics
 const ids = units[u].rooms.map((r) => r.id)
-const lapAt = (finished: string[], voice = false, extra: Partial<typeof empty> = {}) =>
-  lapOf(pathView({ ...empty, ...extra, finished_cards: finished }, units, open, NOW), u, 'visiting', { gems, rows, voice })
+const lapAt = (finished: string[], extra: Partial<typeof empty> = {}) =>
+  lapOf(pathView({ ...empty, ...extra, finished_cards: finished }, units, open, NOW), u, 'visiting', { gems, rows })
 const zero = lapAt([])
 ok('nothing laid → on Partida, nothing past it reached', zero.token === 0 && zero.squares.filter((s) => s.reached).length === 1)
 const one = lapAt([ids[2]])
@@ -86,19 +86,11 @@ ok('every room laid → home on Partida, the lap complete, everything reached', 
 const code = (src('components/path/lap.ts') + src('components/path/Board.tsx')).replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '')
 ok('there is no dice anywhere', !/Math\.random|dice|roll\(/i.test(code))
 
-console.log('\nvoice, optional')
+console.log('\nonly rooms move you')
 const coldRoom = units[u].rooms[0]
 const proof = [{ pt: coldRoom.release.answer, clean: true, at: NOW.toISOString() }]
-const quiet = lapAt([ids[0]], false, { proof } as never)
-const loud = lapAt([ids[0]], true, { proof } as never)
-ok('off: saying it cold does not move you', quiet.token === firstRoom.at + 1)
-ok('on: a room said cold moves you one square further', loud.token === quiet.token + 1, `${quiet.token} → ${loud.token}`)
-const loudAll = lapOf(
-  pathView({ ...empty, finished_cards: ids.slice(0, -1), proof: units[u].rooms.map((r) => ({ pt: r.release.answer, clean: true, at: NOW.toISOString() })) } as never, units, open, NOW),
-  u, 'visiting', { gems, rows, voice: true },
-)
-ok('on: voice can never finish a level — only the rooms do', !loudAll.complete)
-ok('off by default, kept per device', /useState\(false\)/.test(src('components/path/Board.tsx')) && /dub\.board\.voice/.test(src('components/path/Board.tsx')))
+ok('saying a room cold does not move you a square further — the gold edge rewards it', lapAt([ids[0]], { proof } as never).token === firstRoom.at + 1)
+ok('and there is no voice switch on the board any more', !/board-voice|dub\.board\.voice/.test(src('components/path/Board.tsx')))
 
 console.log('\nthe holiday')
 const rec = { holidays: ['visiting:arrive@' + NOW.toISOString()] }

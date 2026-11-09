@@ -43,7 +43,6 @@ import { useVenues } from '@/components/city/useVenues'
  * The middle of the board is the level's picture, coming through as the rooms are laid.
  */
 const SEEN_KEY = 'dub.board.seen'
-const VOICE_KEY = 'dub.board.voice'
 
 function readList(key: string): string[] {
   try {
@@ -85,25 +84,10 @@ export function Board({
 }) {
   const [index, setIndex] = useState(current)
   useEffect(() => setIndex(current), [current])
-  /*
-    VOICE, OFF UNLESS ASKED (Sam: "Voice progression needs to be optional"). A preference
-    about the game on this phone, like the Panel | Road choice, so it lives in localStorage.
-  */
-  const [voice, setVoice] = useState(false)
   const [seen, setSeen] = useState<string[] | null>(null)
   useEffect(() => {
-    setVoice(readList(VOICE_KEY)[0] === 'on')
     setSeen(readList(SEEN_KEY))
   }, [])
-  const chooseVoice = (on: boolean) => {
-    setVoice(on)
-    track('board_voice', { on })
-    try {
-      window.localStorage.setItem(VOICE_KEY, JSON.stringify([on ? 'on' : 'off']))
-    } catch {
-      /* The choice lasts as long as the screen. */
-    }
-  }
   const markSeen = useCallback((key: string) => {
     setSeen((had) => {
       const list = had ?? []
@@ -121,8 +105,8 @@ export function Board({
   const gems = useMemo(() => gemsHomeFirst(chapter), [chapter])
   const rows = useMemo(() => rowsFor(chapter, now), [chapter, now])
   const lap = useMemo(
-    () => (view.units[index] ? lapOf(view, index, purpose, { gems, rows, voice, walks: WALKS, chapter }) : null),
-    [view, index, purpose, gems, rows, voice],
+    () => (view.units[index] ? lapOf(view, index, purpose, { gems, rows, walks: WALKS, chapter }) : null),
+    [view, index, purpose, gems, rows],
   )
   /*
     WHAT THE BOARD TURNED OVER, KEPT (2026-11-05). A postcard, place or what's on is met once
@@ -258,18 +242,12 @@ export function Board({
         </p>
       ) : null}
 
-      <label className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-bg-elev px-4 py-3" data-testid="board-voice">
-        <span className="min-w-0">
-          <span className="block text-sm font-semibold">Move further by voice</span>
-          <span className="block text-xs text-muted">Every room said out loud, with nothing on screen, moves you one more square.</span>
-        </span>
-        <input
-          type="checkbox"
-          checked={voice}
-          onChange={(e) => chooseVoice(e.target.checked)}
-          className="h-5 w-5 shrink-0 accent-[#1f5d8c]"
-        />
-      </label>
+      {/*
+        "MOVE FURTHER BY VOICE" WENT (Sam, 2026-11-09). An extra square only turned over a stop a
+        room early — nothing kept, nothing unlocked — behind a switch few people found. Saying a
+        room out loud is rewarded where it shows: the tile's gold edge, the gold mark in Yours,
+        the understood count.
+      */}
 
       {children}
 

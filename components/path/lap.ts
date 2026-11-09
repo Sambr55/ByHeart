@@ -24,10 +24,9 @@
  * reached. The level's rooms laid and the token comes home to Partida, which then opens the
  * practice session and the next board — the same rule as pathLevel.
  *
- * VOICE, IF YOU WANT IT ("Voice progression needs to be optional"): with it on, every room
- * said cold moves the token one square further. It can carry you to a surprise or the
- * holiday sooner; it can never lay a room for you or finish a level, because only the rooms
- * do that.
+ * ONLY ROOMS MOVE YOU. An optional voice bonus (a square per room said cold) was removed on
+ * 2026-11-09: it showed a stop a room early and gave nothing to keep. Speaking is rewarded by
+ * the gold edge on the tile instead.
  */
 import type { CalendarRow } from '@/content/calendar'
 import { POSTCARDS, boardWalks, type CornerId, type PostcardRef } from '@/content/board'
@@ -104,7 +103,6 @@ export function lapOf(
     walks?: Walk[]
     /** Which city or town (content/chapters.ts). Its own walks come first; absent is Lisbon. */
     chapter?: ChapterId
-    voice?: boolean
   },
 ): Lap {
   const u = view.units[index]
@@ -203,7 +201,6 @@ export function lapOf(
     that follows it at once — the surprise is the room's reward, not the next room's.
   */
   let token = laid === 0 ? 0 : roomSquares[Math.min(laid, roomSquares.length) - 1].at + 1
-  if (opts.voice) token += nodes.filter((x) => x.cold).length
   token = Math.min(token, L - 1)
   for (const s of squares) s.reached = complete || s.at <= token
   if (complete) token = 0
