@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { absoluteUrl, consumeLoginToken, ensureDevice, returnTo, startSession, upsertUser } from '@/lib/auth'
 import { claimDevice } from '@/lib/store'
+import { carryDeviceComp } from '@/lib/comp'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -25,6 +26,8 @@ export async function GET(request: Request) {
   const session = await startSession(user.id)
   const device = await ensureDevice()
   await claimDevice(device, user.id)
+  /* Free access given to this device at launch follows the person onto their account. */
+  await carryDeviceComp(device, user.id)
 
   /*
     Back where they were, when the link says so.

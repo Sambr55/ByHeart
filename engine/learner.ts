@@ -2767,7 +2767,7 @@ export function startAutoSync(): () => void {
   const run = (why: string, leaving = false) => {
     if (!allowed()) return
     last = Date.now()
-    /* A visit, counted: the admin's visitors-per-day reads these (app/api/admin/people). */
+    /* A visit, counted: the admin's visitors-per-day reads these (app/api/admin/visitors). */
     if (why === 'open') track('app_open', {})
     void syncSession(why, { leaving })
   }

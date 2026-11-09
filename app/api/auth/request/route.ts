@@ -41,13 +41,13 @@ export async function POST(request: Request) {
   const link = await issueLoginToken(email, next)
   if (!link) return NextResponse.json({ ok: false, reason: 'could not issue a link' }, { status: 500 })
 
-  const delivered = await sendLoginLink(email, link.url)
+  const delivered = await sendLoginLink(email, link.url, link.code)
 
   // Before an email domain is verified there is no way to receive the link, so a
   // facilitated session can opt into getting it back in the response. Guarded by an
   // env var precisely because it hands out a session to whoever asks.
   if (!delivered && debugLinksOn()) {
-    return NextResponse.json({ ok: true, sent: false, debug_url: link.url })
+    return NextResponse.json({ ok: true, sent: false, debug_url: link.url, debug_code: link.code })
   }
   return NextResponse.json({ ok: true, sent: delivered, configured: sendable() })
 }

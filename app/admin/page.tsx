@@ -118,20 +118,15 @@ export default function AdminPage() {
 
   return (
     <PageShell eyebrow="DUB · TESTERS" stage="CHOICE">
-      {/* The other admin pages, which nothing linked to (2026-11-09). */}
-      <nav className="mb-4 flex flex-wrap gap-2" aria-label="Admin">
-        {[
-          ['/admin/people', 'People'],
-          ['/admin/push', 'Push'],
-          ['/admin/reports', 'Reports'],
-          ['/admin/venues', 'Venues'],
-        ].map(([href, label]) => (
-          <a key={href} href={href} className="tap-target eyebrow rounded-full border border-line px-3 py-1 text-[0.65rem] text-accent">
-            {label}
-          </a>
-        ))}
-      </nav>
       <h1 className="display text-3xl">Who tested, and what they said</h1>
+      {/* The other admin pages (2026-11-05), one tap from here. */}
+      <nav className="mt-3 flex flex-wrap gap-2 text-sm" aria-label="Admin pages" data-testid="admin-nav">
+        <a href="/admin/people" className="rounded-full border border-accent px-3 py-1 font-semibold text-accent">People &amp; billing</a>
+        <a href="/admin/visitors" className="rounded-full border border-accent px-3 py-1 font-semibold text-accent">Visitors &amp; progress</a>
+        <a href="/admin/reports" className="rounded-full border border-line px-3 py-1">Reports</a>
+        <a href="/admin/venues" className="rounded-full border border-line px-3 py-1">Venues</a>
+        <a href="/admin/push" className="rounded-full border border-line px-3 py-1">Broadcast</a>
+      </nav>
 
       <div className="mt-3 flex gap-3">
         <input

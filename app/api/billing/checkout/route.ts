@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { absoluteUrl, currentUser } from '@/lib/auth'
-import { billingConfigured, checkoutUrl } from '@/lib/billing'
+import { billingConfigured, checkoutUrl, foundingLeft } from '@/lib/billing'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -43,6 +43,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'the founding offer is not configured' }, { status: 503 })
   }
   const interval: 'monthly' | 'annual' | 'founding' = asked
+  /* The founding price is for the first 500 only — and closed, not substituted, once they are in. */
+  if (interval === 'founding' && !((await foundingLeft()) ?? 0)) {
+    return NextResponse.json({ error: 'the founding offer is full' }, { status: 409 })
+  }
 
   const url = await checkoutUrl({
     userId: user.id,
