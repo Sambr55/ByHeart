@@ -273,6 +273,7 @@ export function Board({
                 lap={lap}
                 purpose={purpose}
                 fresh={seen !== null && s.reached && s.kind !== 'room' && !(s.kind === 'corner' && s.corner === 'start') && !seen.includes(s.key)}
+                opened={seen !== null && s.reached && seen.includes(s.key)}
                 onTap={tap}
                 onLaid={onLaid}
                 beckon={beckon}
@@ -405,6 +406,7 @@ function Cell({
   lap,
   purpose,
   fresh,
+  opened,
   onTap,
   onLaid,
   beckon = false,
@@ -413,6 +415,8 @@ function Cell({
   lap: Lap
   purpose: Purpose
   fresh: boolean
+  /** Turned over and looked at: done, so blue like a laid room. */
+  opened: boolean
   onTap: (s: Square) => void
   onLaid: (n: PathNode) => void
   beckon?: boolean
@@ -519,7 +523,7 @@ function Cell({
       data-testid="board-square"
       data-kind={s.kind}
       data-reached={s.reached ? 'true' : undefined}
-      className={'board-sq board-stop is-' + s.kind + (s.reached ? ' is-up' : ' is-ahead')}
+      className={'board-sq board-stop is-' + s.kind + (s.reached ? ' is-up' + (opened ? ' is-done' : '') : ' is-ahead')}
     >
       {l ? (
         <>
