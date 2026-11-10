@@ -11,9 +11,9 @@
  */
 import { readFileSync } from 'node:fs'
 import { pathUnits } from '../content/path'
-import { pathView, onHoliday } from '../components/path/progress'
+import { pathView, recapWaiting } from '../components/path/progress'
 import { boardSize, cellOf, cornerAt, lapOf } from '../components/path/lap'
-import { CORNERS, HOLIDAY_DAYS, HOLIDAY_PRIZE, POSTCARDS } from '../content/board'
+import { CORNERS, POSTCARDS } from '../content/board'
 import { CHEATS } from '../content/cheats'
 import { IDIOMS } from '../content/idioms'
 import { GEMS, gemRotation } from '../content/gems'
@@ -35,7 +35,7 @@ const empty = { finished_cards: [] as string[], proof: [], evidence: [], mission
 console.log('\nthe shape')
 for (const n of [1, 2, 4, 5, 6, 7, 8]) {
   const { w, h } = boardSize(n)
-  ok(`${n} rooms → ${w}×${h}, one stop per room and four corners`, 2 * (w + h) - 4 === 4 + 2 * Math.max(2, n) && w <= h && w >= 3)
+  ok(`${n} rooms → ${w}×${h}, a stop after every room and three corners`, 2 * (w + h) - 4 === 4 + 2 * Math.max(2, n) && w <= h && w >= 3)
 }
 for (const [w, h] of [[4, 4], [4, 5], [5, 5], [6, 6]]) {
   const L = 2 * (w + h) - 4
@@ -46,9 +46,9 @@ for (const [w, h] of [[4, 4], [4, 5], [5, 5], [6, 6]]) {
   })
   ok(`${w}×${h}: every square on the edge, none twice`, cells.size === L && edge)
   const c = cornerAt(w, h)
-  ok(`${w}×${h}: Partida bottom left, Miradouro top left, Férias top right, A mesa bottom right`,
-    cellOf(c.start, w, h).join() === `0,${h - 1}` && cellOf(c.miradouro, w, h).join() === '0,0' &&
-    cellOf(c.ferias, w, h).join() === `${w - 1},0` && cellOf(c.mesa, w, h).join() === `${w - 1},${h - 1}`)
+  ok(`${w}×${h}: Partida bottom left, A mesa top right, Até agora the last square before home`,
+    cellOf(c.start, w, h).join() === `0,${h - 1}` && cellOf(c.mesa, w, h).join() === `${w - 1},0` &&
+    c.trip === L - 1 && cellOf(c.trip, w, h).join() === `1,${h - 1}`)
 }
 
 console.log('\nevery board, on every path')
@@ -61,8 +61,8 @@ for (const p of ['visiting', 'staying', 'moving'] as Purpose[]) {
     const stops = lap.squares.filter((s) => s.kind === 'postcard' || s.kind === 'venue' || s.kind === 'neighbour' || s.kind === 'vibe').length
     const corners = lap.squares.filter((s) => s.kind === 'corner').length
     const venues = lap.squares.flatMap((s) => (s.kind === 'venue' ? [s.gem.id] : []))
-    ok(`${p} · ${u.id}: all ${u.rooms.length} rooms, ${stops} stops, 4 corners, no venue twice`,
-      rooms === u.rooms.length && corners === 4 && stops >= rooms && new Set(venues).size === venues.length,
+    ok(`${p} · ${u.id}: all ${u.rooms.length} rooms, ${stops} stops, 3 corners, no venue twice`,
+      rooms === u.rooms.length && corners === 3 && stops > rooms && new Set(venues).size === venues.length,
       `${lap.w}×${lap.h}`)
   })
 }
@@ -83,6 +83,26 @@ const two = lapAt(ids.slice(0, 2))
 ok('the stop between two laid rooms is turned over', two.squares.some((s) => s.kind !== 'room' && s.kind !== 'corner' && s.reached))
 const all = lapAt(ids)
 ok('every room laid → home on Partida, the lap complete, everything reached', all.complete && all.token === 0 && all.squares.every((s) => s.reached))
+const waiting = lapOf(pathView({ ...empty, finished_cards: ids }, units, open, NOW), u, 'visiting', { gems, rows, recapSeen: false })
+ok('…but until the recap is seen the token waits on Até agora, the last square', waiting.complete && waiting.token === waiting.squares.length - 1 && waiting.squares[waiting.token].kind === 'corner')
+const rooms = all.squares.filter((s) => s.kind === 'room')
+ok('and every room comes before it', rooms.every((s) => s.at < all.squares.length - 1))
+ok('the path shows a finished board until its recap is seen', /recapDue \? recapDue\.n - 1/.test(src('components/path/PathHome.tsx')))
+
+console.log('\nso far, in order, and never on a paid board (review, 2026-11-10)')
+{
+  const paidFrom2 = (id: string) => (units.findIndex((x) => x.rooms.some((r) => r.id === id)) >= 2 ? ('paid' as const) : ('open' as const))
+  const laid = [...units[0].rooms, ...units[1].rooms].map((r) => r.id)
+  const v = pathView({ ...empty, finished_cards: laid }, units, paidFrom2, NOW)
+  const paidLap = lapOf(v, 2, 'visiting', { gems, rows, recapSeen: false })
+  ok('a board of only paid rooms is not complete, and its token stays home', !paidLap.complete && paidLap.token === 0)
+  ok('the first unseen summary waits, not the last level finished', recapWaiting(v, () => false) === 0)
+  ok('then the next one', recapWaiting(v, (id) => id === units[0].id) === 1)
+  ok('and none once both are seen', recapWaiting(v, () => true) === -1)
+  const early = pathView({ ...empty, finished_cards: units[1].rooms.map((r) => r.id) }, units, open, NOW)
+  ok('a later board finished first still waits for its summary', recapWaiting(early, () => false) === 1)
+  ok('a recap opened halfway round is not marked seen', /!whole\) return/.test(src('components/LevelRecap.tsx')))
+}
 const code = (src('components/path/lap.ts') + src('components/path/Board.tsx')).replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '')
 ok('there is no dice anywhere', !/Math\.random|dice|roll\(/i.test(code))
 
@@ -92,14 +112,8 @@ const proof = [{ pt: coldRoom.release.answer, clean: true, at: NOW.toISOString()
 ok('saying a room cold does not move you a square further — the gold edge rewards it', lapAt([ids[0]], { proof } as never).token === firstRoom.at + 1)
 ok('and there is no voice switch on the board any more', !/board-voice|dub\.board\.voice/.test(src('components/path/Board.tsx')))
 
-console.log('\nthe holiday')
-const rec = { holidays: ['visiting:arrive@' + NOW.toISOString()] }
-ok(`a week off: on holiday for ${HOLIDAY_DAYS} days, then not`,
-  onHoliday(rec, new Date(NOW.getTime() + 6 * 864e5)) !== null && onHoliday(rec, new Date(NOW.getTime() + 8 * 864e5)) === null)
-ok('nothing drifts in any view while away (pathView reads it)', /!away && roomSlipping/.test(src('components/path/progress.ts')))
-ok('holidays sync between devices', /holidays: setUnion/.test(src('lib/merge.ts')))
-ok('one holiday per board', /startsWith\(board \+ '@'\)/.test(src('engine/learner.ts')))
-ok('the real prize stays off until there is a sponsor and approved terms', HOLIDAY_PRIZE === null)
+console.log('\nno week off (Sam, 2026-11-10: "it doesn\'t add anything")')
+ok('no Férias corner, and nothing on the board to take one', !/ferias|takeHoliday|board-away/.test(src('components/path/Board.tsx') + src('components/path/lap.ts') + src('content/board.ts').replace(/\/\*[\s\S]*?\*\//g, '')))
 
 console.log('\ntailored to the reason for being here')
 for (const p of ['visiting', 'staying', 'moving'] as Purpose[]) {
@@ -108,8 +122,12 @@ for (const p of ['visiting', 'staying', 'moving'] as Purpose[]) {
   const blue = POSTCARDS[p].filter((c) => c.kind === 'idiom' && IDIOMS.find((x) => x.id === c.id)?.blue)
   ok(`${p}: no blue idiom turns up unasked on a postcard`, blue.length === 0)
 }
+/* Bob's your uncle teaches these twelve as a vibe: a postcard of the same idiom meets it twice (review, 2026-11-10). */
+const BOB_IDIOMS = ['bobs_your_uncle', 'hold_your_horses', 'better_late_than_never', 'so_far_so_good', 'storm_in_a_teacup', 'here_we_go_again', 'once_in_a_blue_moon', 'youre_having_a_laugh', 'it_is_what_it_is', 'god_knows', 'the_last_straw', 'speak_of_the_devil']
+const twice = Object.values(POSTCARDS).flat().filter((c) => c.kind === 'idiom' && BOB_IDIOMS.includes(c.id))
+ok('no postcard repeats an idiom the Bob vibe teaches', twice.length === 0, twice.map((c) => c.id).join(', '))
 ok('three reasons, three different orders of postcards', new Set(Object.values(POSTCARDS).map((l) => l.map((c) => c.id).join())).size === 3)
-ok('the corners speak to each reason', CORNERS.visiting.mesa.title !== CORNERS.moving.mesa.title && CORNERS.visiting.ferias.title !== CORNERS.moving.ferias.title)
+ok('the corners speak to each reason', CORNERS.visiting.mesa.title !== CORNERS.moving.mesa.title && CORNERS.visiting.trip.title !== CORNERS.moving.trip.title)
 const food = lapOf(pathView(empty, units, open, NOW), units.findIndex((x) => x.id === 'food'), 'visiting', { gems, rows })
 const trains = food.squares.filter((s) => s.kind === 'venue' && units.find((x) => x.id === 'food')!.rooms.some((r) => r.id === s.gem.room))
 ok('venues are the places these rooms train for, when there are any', trains.length > 0, trains.length + ' on Coffee & food')

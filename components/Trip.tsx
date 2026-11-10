@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Booker } from '@/components/Booker'
 
@@ -17,7 +18,11 @@ import { Booker } from '@/components/Booker'
 export function Trip() {
   const router = useRouter()
   return (
-    <main data-testid="trip" className="booker mx-auto flex min-h-svh w-full max-w-md flex-col px-5 pt-6 text-fg">
+    <main data-testid="trip" className="booker mx-auto flex min-h-svh w-full max-w-md flex-col px-5 pt-6 text-fg" style={{ paddingTop: 'calc(1.5rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}>
+      {/* Changing nothing is a choice too (review, 2026-11-10: this screen had no way out but booking). */}
+      <Link href="/club" className="tap-target eyebrow self-start text-accent" data-testid="trip-back" aria-label="Back to the board, changing nothing">
+        ‹ Board
+      </Link>
       <Booker onDone={() => router.push('/club')} />
     </main>
   )

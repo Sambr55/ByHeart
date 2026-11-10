@@ -55,6 +55,13 @@ export function DockSlot() {
     setH(el2.getBoundingClientRect().height)
     return () => ro.disconnect()
   }, [])
+  /* So the back-to-board pill can sit above the dock rather than on its button (components/BackToBoard.tsx). */
+  useEffect(() => {
+    document.documentElement.style.setProperty('--dock-h', h + 'px')
+    return () => {
+      document.documentElement.style.removeProperty('--dock-h')
+    }
+  }, [h])
   return (
     <>
       {/* The room the dock would have taken, so nothing scrolls behind it. */}

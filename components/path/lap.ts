@@ -7,7 +7,8 @@
  * Panel and the Road could draw the same stops tomorrow (face-down tiles, side-stops) from
  * the same function.
  *
- * ONE LEVEL, ONE BOARD. Four corners, the level's rooms, and one stop after every room:
+ * ONE LEVEL, ONE BOARD. Three corners, the level's rooms, and a stop after every room
+ * (one more at the end, since Férias went on 2026-11-10):
  *
  *   squares = 4 + 2n   →   a w × h rectangle with w + h = n + 4
  *
@@ -15,8 +16,10 @@
  * level, which is half of what keeps this from looking like a board everybody knows.
  *
  * THE LAP starts on Partida, bottom left, and goes up the left side, along the top, down
- * the right and back along the bottom: Partida → rooms → Miradouro → rooms → Férias →
- * rooms → A mesa → rooms → home. Corners sit at the quarters, so the holiday is halfway.
+ * the right and back along the bottom: Partida → rooms → A mesa (top right, halfway) →
+ * rooms → Até agora → home. Até agora — your trip so far — is the last square before
+ * Partida (Sam, 2026-11-10: "the last time before next level"): with the level's rooms
+ * laid, the token waits there until the level recap has been seen, then comes home.
  *
  * NO DICE (Sam, 2026-11-05). You move by laying rooms: when k of the level's rooms are done,
  * whichever ones they are (order is a suggestion, as on the Panel), the token stands on the
@@ -88,7 +91,7 @@ export function cellOf(i: number, w: number, h: number): [number, number] {
 
 /** The lap index of each corner on a w × h board. */
 export function cornerAt(w: number, h: number): Record<CornerId, number> {
-  return { start: 0, miradouro: h - 1, ferias: h + w - 2, mesa: 2 * h + w - 3 }
+  return { start: 0, mesa: h + w - 2, trip: 2 * (w + h) - 5 }
 }
 
 
@@ -105,6 +108,12 @@ export function lapOf(
     walks?: Walk[]
     /** Which city or town (content/chapters.ts). Its own walks come first; absent is Lisbon. */
     chapter?: ChapterId
+    /**
+     * Whether this level's recap has been seen (recaps_seen). Until it has, a finished board
+     * keeps its token on Até agora instead of going home. Absent counts as seen, for the
+     * scripts and views that only want the squares.
+     */
+    recapSeen?: boolean
   },
 ): Lap {
   const u = view.units[index]
@@ -148,7 +157,7 @@ export function lapOf(
     stops; the rest are the city's places and what's on, with a postcard only if a town has
     neither. A big level gets more places, not more surprises.
   */
-  const nStops = Math.max(0, L - 4 - n)
+  const nStops = Math.max(0, L - 3 - n)
   const curated = surprisesFor(purpose, index).slice(0, nStops)
   const surpriseAt = new Map<number, Surprise>()
   curated.forEach((x, k) => surpriseAt.set(Math.floor(((k + 0.5) * nStops) / curated.length), x))
@@ -173,7 +182,7 @@ export function lapOf(
 
   /* The edge: room, stop, room, stop … — padded with stops when a level is one room. */
   const edge: Body[] = []
-  const slots = L - 4
+  const slots = L - 3
   for (let j = 0, r = 0, s = 0; j < slots; j++) {
     if (j % 2 === 0 && r < n) edge.push({ kind: 'room', node: nodes[r++] })
     else edge.push(stop(s++))
@@ -202,7 +211,8 @@ export function lapOf(
   /* How far round: the k-th room square, plus a square for every room said cold if asked. */
   const laid = nodes.filter((x) => x.state === 'done').length
   const open = nodes.filter((x) => x.state !== 'paid').length
-  const complete = open > 0 ? laid >= open : nodes.every((x) => x.state === 'paid')
+  /* A board of only paid rooms is not complete: nothing of yours is laid on it (content/level.ts levelComplete). */
+  const complete = open > 0 && laid >= open
   const roomSquares = squares.filter((s) => s.kind === 'room')
   /*
     YOU LAND ON THE SQUARE AFTER THE ROOM YOU LAID (Sam, 2026-11-05, on his phone: "Shouldn't
@@ -212,7 +222,8 @@ export function lapOf(
   let token = laid === 0 ? 0 : roomSquares[Math.min(laid, roomSquares.length) - 1].at + 1
   token = Math.min(token, L - 1)
   for (const s of squares) s.reached = complete || s.at <= token
-  if (complete) token = 0
+  /* Rooms laid: the token waits on Até agora until the recap is seen, then comes home. */
+  if (complete) token = opts.recapSeen === false ? corners.trip : 0
 
   return { index, unitId: u.unit.id, w, h, squares, token, complete, walk: walk ? { id: walk.id, title: walk.title } : null, done: laid, open }
 }

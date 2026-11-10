@@ -36,7 +36,7 @@ const v = (id: string): Surprise => ({ kind: 'vibe', id })
 const SIX: Surprise[][] = [
   /* 1 */ [c('cao_hack'), v('bobs_your_uncle'), v('world_of_wizardry')],
   /* 2 */ [v('portuguese_swearing'), c('bluff_time')],
-  /* 3 */ [v('flirting_m2f'), v('flirting_f2m'), i('hold_your_horses')],
+  /* 3 */ [v('flirting_m2f'), v('flirting_f2m'), i('fingers_crossed')],
   /* 4 */ [v('duran_duran_lisboa'), c('bluff_react'), v('bridget_jones')],
   /* 5 */ [v('bowie_golden_years'), v('audrey_hepburn'), v('marcus_aurelius')],
   /* 6 */ [v('pulp_fiction'), v('top_gun'), v('james_bond')],

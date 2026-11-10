@@ -8,7 +8,9 @@ import { slugFor } from '@/content/audio-manifest'
 import { rowsFor } from '@/content/calendar'
 import { gemsHomeFirst } from '@/content/gems'
 import { WALKS } from '@/content/walks'
-import { levelRecap, levelRevision, unitById } from '@/content/level'
+import { CRATES, entryRung, rungReached } from '@/content/roots'
+import { levelComplete, levelRecap, levelRevision, unitById } from '@/content/level'
+import { LEGEND_FRAMES, fillEnglish, fillFrame } from '@/content/legend'
 import { pathUnits } from '@/content/path'
 import { markBoardMet, markRecapSeen } from '@/engine/learner'
 import { track } from '@/engine/analytics'
@@ -40,6 +42,7 @@ export function LevelRecap({ id }: { id: string }) {
   const access = useEntitlements()
   const member = hasFullAccess(access) || access.comped
   const purpose = learner.purpose ?? null
+  const rung = useMemo(() => rungReached(learner.proof ?? []), [learner.proof])
   const chapter = learner.chapter ?? 'lisbon'
 
   const recap = useMemo(() => (now ? levelRecap(id, learner, now) : null), [id, learner, now])
@@ -57,9 +60,18 @@ export function LevelRecap({ id }: { id: string }) {
   */
   const key = recap?.key
   const hasRooms = Boolean(recap?.rooms.length)
+  /*
+    Seen only once the level is laid (review, 2026-11-10): opening it from Yours halfway round
+    must not spend the board's "So far", which waits for the finished level.
+  */
+  const whole = useMemo(() => {
+    if (!now) return false
+    const at = unitById(id, purpose, now)
+    return at ? levelComplete(at.unit, learner.finished_cards ?? [], (rid) => roomLock(rid, member, purpose)) : false
+  }, [now, id, purpose, learner.finished_cards, member])
   const metCount = recap?.met.length ?? 0
   useEffect(() => {
-    if (!now || !key || !hasRooms) return
+    if (!now || !key || !hasRooms || !whole) return
     markRecapSeen(key)
     track('level_recap', { level: id })
     if (metCount) return
@@ -70,7 +82,7 @@ export function LevelRecap({ id }: { id: string }) {
     const lap = lapOf(view, index, purpose ?? 'visiting', { gems: gemsHomeFirst(chapter), rows: rowsFor(chapter, now), walks: WALKS, chapter })
     const keys = lap.squares.filter((s) => s.reached && (s.kind === 'postcard' || s.kind === 'venue' || s.kind === 'neighbour')).map((s) => s.key)
     if (keys.length) markBoardMet(keys)
-  }, [now, key, hasRooms])
+  }, [now, key, hasRooms, whole])
 
   if (!now) return <Frame>{null}</Frame>
   const at = unitById(id, purpose, now)
@@ -82,7 +94,7 @@ export function LevelRecap({ id }: { id: string }) {
             {at ? 'Lay a room of ' + at.unit.title + ' and its recap starts here.' : 'This level is not on your path.'}
           </p>
           <Link href="/club" className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink">
-            BACK TO YOUR PATH
+            ‹ BACK TO THE BOARD
           </Link>
         </div>
       </Frame>
@@ -91,6 +103,15 @@ export function LevelRecap({ id }: { id: string }) {
 
   const next = unitById(pathUnits(undefined, now, purpose)[recap.level]?.id ?? '', purpose, now)
   const testHref = '/revise?kind=level&id=' + encodeURIComponent(id)
+  const mine =
+    at.unit.rooms.some((r) => r.id === 'lisbon_legend')
+      ? ['name', 'origin'].flatMap((fid) => {
+          const frame = LEGEND_FRAMES.find((f) => f.id === fid)
+          const values = (learner.legend ?? []).find((a) => a.frame_id === fid)?.values
+          if (!frame || !values || !Object.keys(values).length) return []
+          return [{ pt: fillFrame(frame, values, learner.profile?.gender ?? null), en: fillEnglish(frame, values) }]
+        })
+      : []
   const yoursHref = '/profile?level=' + encodeURIComponent(id)
 
   return (
@@ -98,16 +119,17 @@ export function LevelRecap({ id }: { id: string }) {
       {/* 1. THE LEVEL, LAID */}
       <section className="flex flex-col gap-4 rounded-2xl border-2 border-[#e2b450] bg-bg-elev px-5 py-6" data-testid="level-recap">
         <div className="flex flex-col gap-1">
-          <p className="eyebrow text-accent">Level {recap.level} · laid</p>
+          <p className="eyebrow text-accent">Your trip so far · Level {recap.level} laid</p>
           <h1 className="display text-balance text-3xl leading-tight">{recap.title}</h1>
           <p lang="pt-PT" className="pt text-lg text-accent">
             {recap.pt}
           </p>
         </div>
-        <div className="grid grid-cols-3 gap-2 text-center">
+        {/* No zeros on the celebration (review, 2026-11-10): a stat shows once it has something in it. */}
+        <div className="flex gap-2 text-center [&>*]:flex-1">
           <Stat n={recap.lines} label={recap.lines === 1 ? 'line' : 'lines'} />
-          <Stat n={recap.words.length} label={recap.words.length === 1 ? 'word' : 'words'} />
-          <Stat n={recap.cold} label="said cold" gold />
+          {recap.words.length ? <Stat n={recap.words.length} label={recap.words.length === 1 ? 'word' : 'words'} /> : null}
+          {recap.cold ? <Stat n={recap.cold} label="said cold" gold /> : null}
         </div>
         {/* 2. THE TEST, without going anywhere else first. */}
         <Link href={testHref} data-testid="level-test" className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink">
@@ -121,6 +143,29 @@ export function LevelRecap({ id }: { id: string }) {
       {/* What you can say */}
       <section className="flex flex-col gap-4 rounded-2xl border border-line bg-bg-elev px-5 py-6">
         <p className="eyebrow text-accent">What you can say now</p>
+        {/*
+          WHO YOU ARE, IN YOUR OWN WORDS (review, 2026-11-10). The room speaks as a sample person,
+          so the recap leaves its script out — and showed nothing of the most personal line on
+          the board. Your own name and where you are from, from your Legend, lead instead.
+        */}
+        {mine.length ? (
+          <div className="flex flex-col gap-2" data-testid="recap-who">
+            <p className="eyebrow text-[0.6rem] text-muted">Who you are</p>
+            <ul className="flex flex-col gap-2">
+              {mine.map((l) => (
+                <li key={l.pt} className="flex items-start gap-3">
+                  <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
+                  <span className="min-w-0 flex-1">
+                    <span lang="pt-PT" className="pt block text-base leading-snug text-accent">
+                      {l.pt}
+                    </span>
+                    <span className="block text-sm leading-snug text-muted">{l.en}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         {recap.rooms.map((room) => (
           <div key={room.id} className="flex flex-col gap-2">
             <Link href={'/errand/' + room.id} className="eyebrow text-[0.6rem] text-muted hover:text-accent">
@@ -182,7 +227,17 @@ export function LevelRecap({ id }: { id: string }) {
         <section className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6" data-testid="level-met">
           <p className="eyebrow text-accent">Met on this board</p>
           <ul className="flex flex-col divide-y divide-line">
-            {recap.met.map((m) => (
+            {recap.met.map((m) =>
+              /* A vibe still above the ladder is named, not linked: its door is the retired shelf (review, 2026-11-10). */
+              m.kind === 'vibe' && CRATES.some((c) => c.id === m.id && entryRung(c) > rung) ? (
+                <li key={m.kind + m.id} className="flex items-center justify-between gap-3 py-2 text-muted">
+                  <span className="min-w-0">
+                    <span className="eyebrow block text-[0.6rem] text-telha">{m.what}</span>
+                    <span className="block truncate text-base">{m.title}</span>
+                  </span>
+                  <span aria-label="opens a little further up the path">🔒</span>
+                </li>
+              ) : (
               <li key={m.kind + m.id}>
                 <Link href={m.href} className="tap-target flex items-center justify-between gap-3 py-2">
                   <span className="min-w-0">
@@ -194,7 +249,8 @@ export function LevelRecap({ id }: { id: string }) {
                   </span>
                 </Link>
               </li>
-            ))}
+              ),
+            )}
           </ul>
         </section>
       ) : null}
@@ -208,10 +264,12 @@ export function LevelRecap({ id }: { id: string }) {
         <Link href={yoursHref} className="tap-target eyebrow block w-full rounded border border-accent px-5 py-3 text-center text-accent">
           OPEN LEVEL {recap.level} IN YOURS
         </Link>
-        <Link href="/club" className="tap-target eyebrow block w-full text-center text-sm text-muted">
-          {next ? 'ON TO LEVEL ' + next.level + ' · ' + next.unit.title.toUpperCase() : 'BACK TO YOUR PATH'}
-        </Link>
       </section>
+      {/* THEN THE NEXT BOARD — the recap is the last square of this one (lap.ts, Até agora). */}
+      <Link href="/club" data-testid="level-next-board" className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink">
+        {/* Not "Board N+1" by number: a paid board may be stepped over, or an earlier one still waiting. */}
+        {whole && next ? 'ON TO THE NEXT BOARD →' : '‹ BACK TO THE BOARD'}
+      </Link>
     </Frame>
   )
 }
@@ -221,10 +279,12 @@ function Frame({ children }: { children: React.ReactNode }) {
     <>
       <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-5 bg-bg px-5 pb-10 text-fg" style={{ paddingTop: 'calc(1.5rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}>
         <header className="flex items-center gap-3">
-          <Link href="/club" className="tap-target shrink-0" aria-label="Back to your path">
-            ‹
+          {/* "Close buttons should read back to Board" (Sam, 2026-11-09). */}
+          <Link href="/club" className="tap-target eyebrow shrink-0 text-accent" aria-label="Back to the board">
+            ‹ Board
           </Link>
-          <p className="eyebrow min-w-0 flex-1 truncate">Level recap</p>
+          {/* Reached from the board's last square, Até agora (Sam, 2026-11-10: "a summary of your trip so far"). */}
+          <p className="eyebrow min-w-0 flex-1 truncate text-right text-muted">So far · até agora</p>
         </header>
         {children}
         <BottomNavSpace />

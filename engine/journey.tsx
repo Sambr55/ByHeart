@@ -325,7 +325,7 @@ type Action =
       /** Jump to the first appended step rather than nudging the index forward. */
       jump?: boolean
     }
-  | { type: 'next' }
+  | { type: 'next'; from?: number }
   | { type: 'back' }
   | { type: 'goto'; index: number }
   | { type: 'answer'; key: string; value: unknown }
@@ -475,6 +475,13 @@ export function sectionRoots(
     alternative is teaching a lesson the ladder says they are not ready for.
   */
   wantRoot?: string | null,
+  /*
+    A SITTING THE BOARD OPENED (2026-11-10). The board deals a vibe as a surprise under its
+    own title, so it opens on what the title promises — the freebie, then the vibe's own
+    kind of thing — and not on a Legend road step. Bond from the board opened "My name is…
+    James Bond", Top Gun "Top Gun is a school" instead of "Talk to me, Goose".
+  */
+  opts?: { board?: boolean },
 ): Root[] {
   const all = ROOTS_BY_FAMILY[family] ?? []
   if (!all.length) return []
@@ -649,7 +656,7 @@ export function sectionRoots(
     `onRoad` is the steps for this crate; `all` is already this crate's roots, so a step
     naming another family simply finds nothing and drops out.
   */
-  const onRoad = roadFor(purpose ?? null).filter((step) => step.family === family)
+  const onRoad = opts?.board ? [] : roadFor(purpose ?? null).filter((step) => step.family === family)
   if (onRoad.length) {
     const wanted = onRoad
       .map((step) => all.find((r) => r.root_id === step.root))
@@ -824,7 +831,14 @@ export function sectionRoots(
       crate, and neither is paying for the other.
     */
     if (wanted.length) return pack(wantRoot ? wanted : [...wanted, ...rest], family)
-    return pack(rest, family)
+    /*
+      NEVER AN EMPTY SITTING. Once a road vibe's road roots are played, `roadCeiling` falls
+      back to the learner's rung and `rest` can be empty — Duran Duran or Bridget at rung 1
+      on a second visit, Top Gun at rung 2 — and chooseFamily queued a sitting of nothing.
+      Fall through to the sort below instead, which replays what the learner can reach, or
+      the crate's lowest rung, exactly as it does for every other vibe.
+    */
+    if (rest.length) return pack(rest, family)
   }
   const doorway = new Set(doorwayRoots(purpose).map((r) => r.root_id))
   const early = new Set(earlyRoots(purpose).map((r) => r.root_id))
@@ -945,6 +959,13 @@ function reducer(state: JourneyState, action: Action): JourneyState {
           : state.collisionsPlayed,
       }
     case 'next':
+      /*
+        ONE STEP PER SCREEN. A screen that skips itself calls next() in an effect, and dev
+        runs effects twice — so Osmosis skipping jumped over section-complete as well and
+        every sitting ended on the sitting break, with nothing recorded. `from` is the index
+        the caller was rendered at; a second call from the same screen is a no-op.
+      */
+      if (action.from !== undefined && action.from !== state.index) return state
       return { ...state, index: Math.min(state.index + 1, state.steps.length) }
     case 'back':
       return { ...state, index: Math.max(state.index - 1, 0) }
@@ -1130,7 +1151,7 @@ interface JourneyApi {
   back: () => void
   goHome: () => void
   canGoBack: boolean
-  chooseFamily: (family: CultureFamily, wantRoot?: string | null) => void
+  chooseFamily: (family: CultureFamily, wantRoot?: string | null, opts?: { board?: boolean }) => void
   finishSection: (decision: 'another' | 'done') => void
   answer: (key: string, value: unknown) => void
   recordVoice: (signal: string, pt: string) => void
@@ -1320,6 +1341,8 @@ export function JourneyProvider({
         that dropped the learner mid-queue would have no beginning.
       */
       wantRoot?: string | null,
+      /* A sitting the board opened — see sectionRoots. No road steps, no sitting break. */
+      opts?: { board?: boolean },
     ) => {
       dispatch({ type: 'choose-family', family })
       setAffinity({ next_world_pre: family })
@@ -1347,7 +1370,7 @@ export function JourneyProvider({
         The purpose goes with it, so the front-loading rule front-loads THIS learner's
         doorway rather than the union of all three cards. See doorwayRoots.
       */
-      const roots = sectionRoots(family, reached, state.rootsPlayed, me.purpose ?? null, wantRoot)
+      const roots = sectionRoots(family, reached, state.rootsPlayed, me.purpose ?? null, wantRoot, opts)
       const steps: Step[] = []
 
       /**
@@ -1404,7 +1427,11 @@ export function JourneyProvider({
         progress stated first to be about anything.
       */
       steps.push({ kind: 'section-complete' })
-      steps.push({ kind: 'sitting-break' })
+      /*
+        Not from the board: a board sitting ends on its summary, which takes the learner back
+        to the board. The break is the road's "carry on?" and the board is not the road.
+      */
+      if (!opts?.board) steps.push({ kind: 'sitting-break' })
       dispatch({
         type: 'append',
         steps,
@@ -1564,7 +1591,7 @@ export function JourneyProvider({
       step,
       root,
       owned: Object.keys(learner.inventory),
-      next: () => dispatch({ type: 'next' }),
+      next: () => dispatch({ type: 'next', from: state.index }),
       back: () => dispatch({ type: 'back' }),
       goHome,
       canGoBack: state.index > state.entryIndex,

@@ -129,7 +129,7 @@ export const WALK: WalkStep[] = [
   {
     id: 'why',
     target: '',
-    say: 'Every big app teaches you Brazilian Portuguese. You live in Lisbon.',
+    say: 'Every big app teaches you Brazilian Portuguese. You are going to Lisbon.',
     more: 'DUB teaches the one they actually speak here — estás, telemóvel, uma bica.',
   },
   {

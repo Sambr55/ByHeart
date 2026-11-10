@@ -2619,7 +2619,7 @@ details > summary.list-none::-webkit-details-marker {
   transition: transform var(--t-ack) ease, background var(--t-arrive) ease;
 }
 .board-sq:focus-visible { outline: 2px solid #c9973b; outline-offset: 1px; z-index: 2 }
-.board-room { color: rgba(31, 93, 140, 0.45) }
+.board-room { color: rgba(31, 93, 140, 0.82) } /* full-strength enough to read as the thing to tap (review, 2026-11-10); was 0.45 */
 .board-room.is-laid { background-color: #1f5d8c; color: #fbfaf6; box-shadow: inset 0 -6px 10px -8px rgba(0, 0, 0, 0.35) }
 .board-room.is-laid.is-cold { box-shadow: inset 0 0 0 2px rgba(201, 151, 59, 0.95), inset 0 0 8px 0 rgba(201, 151, 59, 0.45) }
 .board-room.is-drifted {

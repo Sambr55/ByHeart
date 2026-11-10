@@ -76,8 +76,8 @@ export function WalkScreen({ id }: { id: string }) {
     <div data-stage="WALK" className="min-h-svh bg-bg text-fg">
       <header className="bar safe-top sticky top-0 z-30 px-5 py-3">
         <div className="mx-auto flex w-full max-w-md items-center gap-3">
-          <Link href={fromBoard ? '/club' : '/city'} className="eyebrow tap-target opacity-90" aria-label={fromBoard ? 'Back to the board' : 'Back to the city'}>
-            ←
+          <Link href={fromBoard ? '/club' : '/city'} className="eyebrow tap-target shrink-0 opacity-90" aria-label={fromBoard ? 'Back to the board' : 'Back to the city'}>
+            {fromBoard ? '‹ Board' : '←'}
           </Link>
           <div className="min-w-0 flex-1 leading-tight">
             <p className="eyebrow truncate opacity-80">Language walk · {bairro.name}</p>

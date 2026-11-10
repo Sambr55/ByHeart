@@ -54,6 +54,12 @@ export function Legend() {
   const [mode, setMode] = useState<Mode>('deck')
   /* ?next=1 — the path's Who you are tile — asks for the first unanswered question once the record is read. */
   const wantNext = useRef(false)
+  /*
+    FROM THE BOARD (review, 2026-11-10). ?next=1 is the board's "Who you are" room. It is a
+    board room, so it says "‹ Board" rather than Yours, asks only the two questions the room
+    stands for — your name, where you are from — and goes back to the board after them.
+  */
+  const [fromBoard, setFromBoard] = useState(false)
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     setMounted(true)
@@ -76,7 +82,10 @@ export function Legend() {
     */
     const build = q.get('build')
     if (build && LEGEND_FRAMES.some((f) => f.id === build)) setMode({ build })
-    if (q.get('next') === '1') wantNext.current = true
+    if (q.get('next') === '1') {
+      wantNext.current = true
+      setFromBoard(true)
+    }
   }, [])
 
   const owned = useMemo(
@@ -242,8 +251,15 @@ export function Legend() {
   useEffect(() => {
     if (!mounted || !wantNext.current) return
     wantNext.current = false
+    /* From the board, only the room's own two questions; with both answered, straight back (review, 2026-11-10). */
+    if (fromBoard) {
+      const mine = cardOpen.find((f) => f.id === 'name' || f.id === 'origin')
+      if (mine) setMode({ build: mine.id })
+      else window.location.assign('/club')
+      return
+    }
     if (cardOpen.length) setMode({ build: cardOpen[0].id })
-  }, [mounted, cardOpen])
+  }, [mounted, cardOpen, fromBoard])
   /*
     WHO YOU ARE IS LAID when the two questions it stands for — your name, where you are
     from — are on the card (2026-11-03). Idempotent; it never comes back off.
@@ -443,7 +459,7 @@ export function Legend() {
   if (typeof mode === 'object' && (!mounted || unlocked)) {
     const frame = LEGEND_FRAMES.find((f) => f.id === mode.build)!
     return (
-      <Shell>
+      <Shell back={fromBoard ? { href: '/club', label: 'BOARD' } : undefined}>
         <BuildCard
           key={frame.id}
           frame={frame}
@@ -452,9 +468,13 @@ export function Legend() {
           owned={owned}
           onDone={() => {
             const next = nextAfter(frame.id)
+            if (fromBoard && (!next || !['name', 'origin'].includes(next))) {
+              window.location.assign('/club')
+              return
+            }
             setMode(next ? { build: next } : 'deck')
           }}
-          onStop={() => setMode('deck')}
+          onStop={() => (fromBoard ? window.location.assign('/club') : setMode('deck'))}
           remaining={
             LEGEND_FRAMES.filter(
               (f) => frameApplies(f, answers) && reachable.some((r) => r.id === f.id),
@@ -884,7 +904,7 @@ function missingFrom(
   }
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, back }: { children: React.ReactNode; back?: { href: string; label: string } }) {
   return (
     <div
       data-stage="REAL WORLD"
@@ -894,7 +914,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     >
       <Framed className="mx-auto flex w-full max-w-md flex-col gap-6 px-5 pb-10 pt-6">
       <div className="flex items-center gap-3">
-        <Back />
+        <Back {...back} />
         <span className="flex-1" />
       </div>
       {children}
