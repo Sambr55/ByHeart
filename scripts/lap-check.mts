@@ -122,6 +122,10 @@ for (const p of ['visiting', 'staying', 'moving'] as Purpose[]) {
   const blue = POSTCARDS[p].filter((c) => c.kind === 'idiom' && IDIOMS.find((x) => x.id === c.id)?.blue)
   ok(`${p}: no blue idiom turns up unasked on a postcard`, blue.length === 0)
 }
+/* Bob's your uncle teaches these twelve as a vibe: a postcard of the same idiom meets it twice (review, 2026-11-10). */
+const BOB_IDIOMS = ['bobs_your_uncle', 'hold_your_horses', 'better_late_than_never', 'so_far_so_good', 'storm_in_a_teacup', 'here_we_go_again', 'once_in_a_blue_moon', 'youre_having_a_laugh', 'it_is_what_it_is', 'god_knows', 'the_last_straw', 'speak_of_the_devil']
+const twice = Object.values(POSTCARDS).flat().filter((c) => c.kind === 'idiom' && BOB_IDIOMS.includes(c.id))
+ok('no postcard repeats an idiom the Bob vibe teaches', twice.length === 0, twice.map((c) => c.id).join(', '))
 ok('three reasons, three different orders of postcards', new Set(Object.values(POSTCARDS).map((l) => l.map((c) => c.id).join())).size === 3)
 ok('the corners speak to each reason', CORNERS.visiting.mesa.title !== CORNERS.moving.mesa.title && CORNERS.visiting.trip.title !== CORNERS.moving.trip.title)
 const food = lapOf(pathView(empty, units, open, NOW), units.findIndex((x) => x.id === 'food'), 'visiting', { gems, rows })

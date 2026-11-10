@@ -116,6 +116,7 @@ import type { ProfileAsk } from '@/content/roots'
 import { buzz, nope } from '@/engine/tap'
 import { useLearner } from '@/engine/useLearner'
 import { useEntitlements } from '@/engine/useEntitlements'
+import { useFromBoard } from '@/components/BackToBoard'
 import { AudioButton } from './AudioButton'
 import { CopyButton } from './CopyButton'
 
@@ -151,7 +152,7 @@ function Shell({
   drain?: boolean
   children: React.ReactNode
 }) {
-  const { back, goHome, canGoBack, owned, step } = useJourney()
+  const { back, goHome, canGoBack, owned, step, state } = useJourney()
   /*
     AN ERRAND HAS SOMEWHERE TO GO BACK TO, and a chosen vibe does not.
 
@@ -196,7 +197,11 @@ function Shell({
       {nav || eyebrow ? (
         <header className="bar sticky top-0 z-30 px-5 py-3">
           <div className="mx-auto flex w-full max-w-md items-center gap-3">
-            {nav && canGoBack ? (
+            {/*
+              Not on the first screen of a board sitting: one step back is the picker, which
+              is the retired shelf, and ‹ BOARD on the right already goes home in one tap.
+            */}
+            {nav && canGoBack && !(fromBoard && state.steps[state.index - 1]?.kind === 'picker') ? (
               <button
                 type="button"
                 data-testid="back"
@@ -311,7 +316,8 @@ function Shell({
         two rules deciding one thing and is how every drift this week started. The padding
         exists only when the div has something in it.
       */}
-      {nav ? (
+      {/* Not on a board sitting: the board is the path there, not the Legend road. */}
+      {nav && !fromBoard ? (
         <div className="mx-auto w-full max-w-md px-5 empty:hidden has-[div]:pt-3">
           <ToLegend />
         </div>
@@ -471,7 +477,33 @@ function SetUpStep() {
  */
 function useBoardSitting(): boolean {
   const params = useSearchParams()
-  return Boolean(params.get('open')) && params.get('from') !== 'legend'
+  /*
+    AND ONLY FROM THE BOARD. /vibes?open= is also linked from Profile, Vocab and the Club
+    feed, and those sittings keep their Legend payoff. The board's own mark is the tab flag
+    PathHome sets when a link on the Path is followed (components/BackToBoard.tsx), or an
+    explicit ?from=board.
+
+    useFromBoard reads the flag in an effect, so it is false on the first render. The same
+    flag is read once here synchronously as well — the Journey only renders after mount
+    (JourneyProvider waits for `settled`), so there is no server render to disagree with —
+    because the auto-open decides how to pack the sitting on its first pass.
+  */
+  const marked = useFromBoard()
+  const [markedAtMount] = useState(readBoardMark)
+  const open = Boolean(params.get('open'))
+  const from = params.get('from')
+  if (!open || from === 'legend') return false
+  return from === 'board' || marked || markedAtMount
+}
+
+/* The tab flag components/BackToBoard.tsx writes ('dub.fromBoard', a timestamp, an hour). */
+function readBoardMark(): boolean {
+  try {
+    const at = Number(sessionStorage.getItem('dub.fromBoard') ?? 0)
+    return at > 0 && Date.now() - at < 60 * 60 * 1000
+  } catch {
+    return false
+  }
 }
 
 /**
@@ -482,12 +514,90 @@ function useBoardSitting(): boolean {
 function PickerOrBoard() {
   const { state } = useJourney()
   const router = useRouter()
-  const leave = useBoardSitting() && state.family !== null
+  const board = useBoardSitting()
+  const leave = board && state.family !== null
   useEffect(() => {
     if (leave) router.replace('/club')
   }, [leave, router])
   if (leave) return <div className="min-h-svh bg-bg" aria-hidden />
+  /* A board sitting never shows the retired shelf, not even while it decides. */
+  if (board) return <BoardOpen />
   return <Picker />
+}
+
+/**
+ * OPENING A VIBE THE BOARD DEALT — the Picker's ?open= auto-entry without the Picker.
+ *
+ * The same guard the Picker's auto-open runs (the ladder, the free allowance, whether the
+ * vibe is live), because a URL must not open what a tap could not. Where the Picker then
+ * gave up silently and left the whole old shelf on screen — /vibes?open=portuguese_swearing
+ * at rung 1 — this says which vibe it is, why it is not open yet, and goes back to the board.
+ */
+function BoardOpen() {
+  const { chooseFamily, state } = useJourney()
+  const params = useSearchParams()
+  const learner = useLearner()
+  const access = useEntitlements()
+  const now = useNowAfterMount()
+  const wanted = params.get('open')
+  const crate = CRATES.find((c) => c.id === wanted)
+  const ready = now !== null && access.known
+  const rung: Rung = rungReached(learner.proof)
+  /* Open at once, not ever touched — the Picker's `claimed`, `spent` and `atLimit`. */
+  const claimed = new Set<string>()
+  for (const id of state.rootsPlayed) {
+    const f = rootById(id)?.culture_family
+    const c = f ? CRATES.find((x) => x.id === f) : undefined
+    if (c && !c.drop) claimed.add(c.id)
+  }
+  const finished = new Set(learner.sections_completed ?? [])
+  const spent = [...claimed].filter((id) => !finished.has(id)).length
+  const atLimit = access.known && access.billingReady && spent >= access.entitlements.crates
+  const why: 'gone' | 'rung' | 'cap' | null = !ready
+    ? null
+    : !crate || !isLive(crate, now!)
+      ? 'gone'
+      : !(crate.drop || entryRung(crate) <= rung)
+        ? 'rung'
+        : !crate.drop && atLimit && !claimed.has(crate.id)
+          ? 'cap'
+          : null
+  const go = ready && why === null && crate
+  const opened = useRef(false)
+  useEffect(() => {
+    if (!go || opened.current) return
+    opened.current = true
+    chooseFamily(crate!.id, params.get('root'), { board: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [go])
+  if (!ready || go) return <div className="min-h-svh bg-bg" aria-hidden />
+  return (
+    <Shell stage="CHOICE" nav={false}>
+      <div data-testid="board-vibe-not-yet" className="flex flex-1 flex-col justify-center gap-3">
+        <p className="eyebrow text-accent">NOT YET</p>
+        <h1 className="display text-balance text-3xl">{crate?.title ?? 'This vibe'}</h1>
+        <p className="text-sm leading-relaxed text-fg/85">
+          {why === 'rung'
+            ? 'This one opens a little further up the path. Keep going on the board and it will be waiting.'
+            : why === 'cap'
+              ? 'Your free sittings are in use. Finish one you have started, or see what membership opens.'
+              : 'This one is not on right now.'}
+        </p>
+        {why === 'cap' ? (
+          <Link href="/pro" className="text-sm text-accent underline underline-offset-4">
+            See membership
+          </Link>
+        ) : null}
+      </div>
+      <Link
+        href="/club"
+        data-testid="sitting-back-to-board"
+        className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+      >
+        ‹ Back to board
+      </Link>
+    </Shell>
+  )
 }
 
 export function Journey() {
@@ -3832,8 +3942,13 @@ function Osmosis() {
     is still holding" is a nice sentence and it is the same non-event: nothing new to point
     at, said at length.
   */
+  /* Once: dev runs effects twice, and two next() calls skipped section-complete too. */
+  const skipped = useRef(false)
   useEffect(() => {
-    if (!insights.length) next()
+    if (!insights.length && !skipped.current) {
+      skipped.current = true
+      next()
+    }
   }, [insights.length, next])
   if (!insights.length) return null
 
@@ -5836,8 +5951,16 @@ function SectionComplete() {
     it here removes the split instead: by the time anything on this screen speaks, the
     section is real.
   */
+  /*
+    Once per mount. rememberSection bumps `sittings` unconditionally and dev runs effects
+    twice, so a single sitting counted as two (measured: a fresh Bob sitting left sittings: 2).
+  */
+  const remembered = useRef<string | null>(null)
   useEffect(() => {
-    if (state.family) rememberSection(state.family)
+    if (state.family && remembered.current !== state.family) {
+      remembered.current = state.family
+      rememberSection(state.family)
+    }
   }, [state.family])
   const learner = useLearner()
   const acts = capabilities(owned)

@@ -730,7 +730,7 @@ function StopSheet({
       <>
         {crate?.blurb ? <p className="text-base leading-relaxed">{crate.blurb}</p> : null}
         {open ? (
-          <Link href={'/vibes?open=' + encodeURIComponent(s.crate)} className={btn} data-testid="board-vibe-open">
+          <Link href={'/vibes?open=' + encodeURIComponent(s.crate) + '&from=board'} className={btn} data-testid="board-vibe-open">
             Open it
           </Link>
         ) : (

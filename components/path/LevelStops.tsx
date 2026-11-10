@@ -72,7 +72,7 @@ export function LevelStops({
             {!s.reached || locked || !m ? (
               <span className={'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ' + (s.reached ? 'border-line bg-surface text-muted' : 'border-dashed border-line text-muted')}>{chip}</span>
             ) : (
-              <Link href={m.href} className="tap-target inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-elev px-2.5 py-1 text-xs" data-testid={'level-stop-' + s.kind}>
+              <Link href={s.kind === 'vibe' ? m.href + '&from=board' : m.href} className="tap-target inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-elev px-2.5 py-1 text-xs" data-testid={'level-stop-' + s.kind}>
                 {chip}
               </Link>
             )}
