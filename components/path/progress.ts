@@ -365,10 +365,21 @@ export function recapWaiting(view: PathView, seen: (unitId: string) => boolean):
   })
 }
 
-export function pathLevel(view: PathView): PathLevel {
+export function pathLevel(view: PathView, boardDone?: (unitId: string) => boolean): PathLevel {
   /* A unit of nothing but paid rooms is stepped over rather than standing in the way. */
-  const finished = (u: PathView['units'][number]) => u.nodes.every((n) => n.state === 'done' || n.state === 'paid')
-  const at = view.units.findIndex((u) => !finished(u))
+  const laidAll = (u: PathView['units'][number]) => u.nodes.every((n) => n.state === 'done' || n.state === 'paid')
+  /*
+    AND ITS BOARD FINISHED (Sam, 2026-11-10: "Every square"). With boardDone given, a level
+    with rooms of yours is passed only once its board is — every square opened and So far
+    seen (recaps_seen). Somebody already laying rooms further on is not pulled back to it.
+  */
+  const finished = (u: PathView['units'][number], i: number) =>
+    laidAll(u) &&
+    (!boardDone ||
+      u.nodes.every((n) => n.state === 'paid') ||
+      boardDone(u.unit.id) ||
+      view.units.slice(i + 1).some((v) => v.nodes.some((n) => n.state === 'done')))
+  const at = view.units.findIndex((u, i) => !finished(u, i))
   if (at === -1) {
     return { level: view.units.length + 1, unit: null, toNext: 0, laid: 0, open: 0, complete: true }
   }

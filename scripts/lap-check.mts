@@ -11,7 +11,7 @@
  */
 import { readFileSync } from 'node:fs'
 import { pathUnits } from '../content/path'
-import { pathView, recapWaiting } from '../components/path/progress'
+import { pathLevel, pathView, recapWaiting } from '../components/path/progress'
 import { boardSize, cellOf, cornerAt, lapOf } from '../components/path/lap'
 import { CORNERS, POSTCARDS } from '../content/board'
 import { CHEATS } from '../content/cheats'
@@ -87,7 +87,29 @@ const waiting = lapOf(pathView({ ...empty, finished_cards: ids }, units, open, N
 ok('…but until the recap is seen the token waits on Até agora, the last square', waiting.complete && waiting.token === waiting.squares.length - 1 && waiting.squares[waiting.token].kind === 'corner')
 const rooms = all.squares.filter((s) => s.kind === 'room')
 ok('and every room comes before it', rooms.every((s) => s.at < all.squares.length - 1))
-ok('the path shows a finished board until its recap is seen', /recapDue \? recapDue\.n - 1/.test(src('components/path/PathHome.tsx')))
+
+console.log('\nevery square (Sam, 2026-11-10: "board two is closing before I have completed it")')
+{
+  const v = pathView({ ...empty, finished_cards: ids }, units, open, NOW)
+  const bare = lapOf(v, u, 'visiting', { gems, rows, recapSeen: false, opened: [] })
+  const stops = bare.squares.filter((s) => s.kind !== 'room' && s.kind !== 'corner')
+  ok('lessons laid, nothing opened → not complete', bare.roomsLaid && !bare.complete && bare.toOpen.length === stops.length)
+  ok('…every stop is face up to open, but So far is not', stops.every((s) => s.reached) && !bare.squares[bare.squares.length - 1].reached)
+  ok('…and the token stands on the first square still to open', bare.token === stops[0].at)
+  const most = lapOf(v, u, 'visiting', { gems, rows, recapSeen: false, opened: stops.slice(1).map((s) => s.key) })
+  ok('one left → still not complete, token on it', !most.complete && most.toOpen.length === 1 && most.token === stops[0].at)
+  const all = lapOf(v, u, 'visiting', { gems, rows, recapSeen: false, opened: stops.map((s) => s.key) })
+  ok('every square opened → complete, token on So far', all.complete && all.token === all.squares.length - 1)
+  const lvl = (seen: string[], finished: string[]) =>
+    pathLevel(pathView({ ...empty, finished_cards: finished }, units, open, NOW), (id) => seen.includes(id)).level
+  const twoLaid = [...units[0].rooms, ...units[1].rooms].map((r) => r.id)
+  ok('a board with its lessons laid is still the level you are on until its So far is seen', lvl([units[0].id], twoLaid) === 2)
+  ok('…and passed once it is', lvl([units[0].id, units[1].id], twoLaid) === 3)
+  ok('somebody already laying rooms further on is not pulled back', lvl([], [...twoLaid, units[2].rooms[0].id]) === 3)
+  ok('opening is synced between devices', /board_opened: setUnion/.test(src('lib/merge.ts')))
+  ok('the Panel and the Road count a chip as opening', /markBoardOpened/.test(src('components/path/LevelStops.tsx')))
+  ok('the trip so far is only seen once the board is complete', /opened: learner\.board_opened/.test(src('components/LevelRecap.tsx')))
+}
 
 console.log('\nso far, in order, and never on a paid board (review, 2026-11-10)')
 {

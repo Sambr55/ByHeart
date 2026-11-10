@@ -11,11 +11,14 @@ import { useEntitlements } from '@/engine/useEntitlements'
 import { hasFullAccess } from '@/lib/entitlements'
 import { PATH_NAMES, pathPurpose, pathUnits } from '@/content/path'
 import { levelKey } from '@/content/level'
+import { gemsHomeFirst } from '@/content/gems'
+import { rowsFor } from '@/content/calendar'
+import { WALKS } from '@/content/walks'
+import { lapOf } from './lap'
 import { rungReached } from '@/content/roots'
 import {
   milestoneHref,
   pathLevel,
-  recapWaiting,
   pathView,
   type PathLevel,
   understoodCheer,
@@ -137,7 +140,9 @@ export function PathHome() {
   }, [])
   const closeSheet = useCallback(() => setSheet(null), [])
   /* THE ONE LADDER (2026-11-03) — see pathLevel. */
-  const level = useMemo(() => pathLevel(view), [view])
+  const seenRecaps = learner.recaps_seen
+  /* A level is passed when its board is finished: every square opened, So far seen (pathLevel). */
+  const level = useMemo(() => pathLevel(view, (id) => (seenRecaps ?? []).includes(levelKey(purpose, id))), [view, purpose, seenRecaps])
 
   const understood = learner.understood ?? 0
   /* How far up the ladder: whether a vibe surprise opens yet (the sitting's own gate). */
@@ -149,31 +154,42 @@ export function PathHome() {
   const practiceHref = practiceUnit ? milestoneHref(practiceUnit.milestone.cheat) : '/revise'
 
   /*
-    THE RECAP NOBODY HAS OPENED YET (2026-11-05). The last room of a level opens its recap
-    (Errand), but a level can also be finished from elsewhere; so the latest finished level
-    whose recap has not been seen waits here, above Up next, until it is opened.
+    THE BOARD YOU ARE ON, AS THE BOARD DRAWS IT (Sam, 2026-11-10: "Every square"). Its lessons
+    may be laid with squares still to open, or everything opened and So far waiting; the
+    banner, the bar and Up next say which, rather than offering the next board's first room.
   */
-  const recapDue = useMemo(() => {
-    const seen = learner.recaps_seen ?? []
-    const i = recapWaiting(view, (id) => seen.includes(levelKey(purpose, id)))
-    if (i === -1) return null
-    const u = view.units[i]
-    return { id: u.unit.id, n: i + 1, title: u.unit.title, last: i === view.units.length - 1 }
-  }, [view, purpose, learner.recaps_seen])
-  /*
-    WHILE A BOARD WAITS ON SO FAR, IT IS THE LEVEL YOU ARE ON (review, 2026-11-10): the header
-    chip, the bar, the board and Up next all name it, rather than the board after it.
-  */
-  const shown: PathLevel = useMemo(() => {
-    if (!recapDue) return level
-    const u = view.units[recapDue.n - 1]
-    const open = u.nodes.filter((x) => x.state !== 'paid').length
-    return { level: recapDue.n, unit: u.unit, toNext: 0, laid: u.done, open, complete: false }
-  }, [recapDue, level, view])
+  const opened = learner.board_opened
+  const here = useMemo(() => {
+    const i = level.complete ? -1 : level.level - 1
+    if (i < 0 || !view.units[i] || !now) return null
+    const chapter = learner.chapter ?? 'lisbon'
+    const p = pathPurpose(purpose)
+    const lap = lapOf(view, i, p, {
+      gems: gemsHomeFirst(chapter),
+      rows: rowsFor(chapter, now),
+      walks: WALKS,
+      chapter,
+      recapSeen: (seenRecaps ?? []).includes(levelKey(purpose, view.units[i].unit.id)),
+      opened: opened ?? [],
+    })
+    return { n: i + 1, id: view.units[i].unit.id, lap, last: i === view.units.length - 1 }
+  }, [level, view, now, learner.chapter, purpose, seenRecaps, opened])
+  const recapDue = here && here.lap.complete && here.lap.token !== 0 ? here : null
+  const leftToOpen = here && here.lap.roomsLaid && !here.lap.complete ? here.lap.toOpen.length : 0
+  const boardBusy = Boolean(recapDue || leftToOpen)
+  const shown: PathLevel = level
 
   const task = (
     <section aria-labelledby="up-next" className="flex flex-col gap-3" data-testid="up-next">
       {/* Sign in, asked after rooms 2 and 4 and at Level 2 — skippable (KeepItAsk.tsx). */}
+      {leftToOpen && here ? (
+        <div data-testid="path-board-left" className="flex flex-col gap-1 rounded-2xl border-2 border-[#e5b04a] bg-bg-elev px-5 py-4">
+          <span className="eyebrow block text-accent">Board {here.n} · lessons done</span>
+          <span className="block text-base">
+            {leftToOpen === 1 ? 'One square still to open' : leftToOpen + ' squares still to open'} — then So far, and the next board.
+          </span>
+        </div>
+      ) : null}
       {recapDue ? (
         <Link
           href={'/level/' + encodeURIComponent(recapDue.id)}
@@ -192,12 +208,12 @@ export function PathHome() {
       {/* With a board waiting on So far, that is what is next — not a room on the board after it. */}
       {/* After the reward, not before it (review, 2026-11-10). Sign in, asked after rooms 2 and 4 and at Level 2 — skippable (KeepItAsk.tsx). */}
       <KeepItAsk rooms={view.done} level={level.level} />
-      {recapDue ? null : (
+      {boardBusy ? null : (
         <h2 id="up-next" className="eyebrow text-muted">
           {view.next ? 'Up next' : name.done}
         </h2>
       )}
-      {recapDue ? null : view.next ? (
+      {boardBusy ? null : view.next ? (
         <RoomCard room={view.next.room} tag={view.next.unit.title} state="next" big />
       ) : (
         <div className="flex flex-col gap-3 rounded-3xl border border-line bg-bg-elev p-5">
@@ -292,7 +308,7 @@ export function PathHome() {
       */}
       <main className="mx-auto w-full max-w-md px-5 py-6 md:max-w-xl">
         <div className="needs-learner flex flex-col gap-6">
-          <LevelBar level={shown} toggle={<ViewToggle mode={mode} onChange={chooseMode} />} />
+          <LevelBar level={shown} left={leftToOpen} toggle={<ViewToggle mode={mode} onChange={chooseMode} />} />
 
           {/* The gold "Your first board" note went (review, 2026-11-10): the key above Board 1 says the same, and the first lesson has to be on the first screen. */}
           {mode === 'board' ? (
@@ -301,9 +317,10 @@ export function PathHome() {
               purpose={pathPurpose(purpose)}
               chapter={learner.chapter ?? 'lisbon'}
               /* A finished board stays until its trip-so-far is seen (lap.ts, Até agora). */
-              current={recapDue ? recapDue.n - 1 : level.complete ? Math.max(0, view.units.length - 1) : level.level - 1}
+              current={level.complete ? Math.max(0, view.units.length - 1) : level.level - 1}
               now={now ?? new Date(0)}
               recapsSeen={learner.recaps_seen ?? []}
+              opened={learner.board_opened ?? []}
               saidHere={learner.walk_stops ?? []}
               gender={learner.profile?.gender ?? null}
               onLaid={setSheet}
@@ -545,7 +562,7 @@ function Understood({ count }: { count: number }) {
  * to do and why it matters sit together. When every open room is laid it says so, and
  * points at the Foundations and the practice instead of a number that cannot move.
  */
-function LevelBar({ level, toggle }: { level: PathLevel; toggle: ReactNode }) {
+function LevelBar({ level, toggle, left = 0 }: { level: PathLevel; toggle: ReactNode; left?: number }) {
   if (level.complete || !level.unit) {
     return (
       <section aria-label="Your level" className="needs-learner flex flex-col gap-1" data-testid="level">
@@ -580,7 +597,7 @@ function LevelBar({ level, toggle }: { level: PathLevel; toggle: ReactNode }) {
       <p className="text-sm text-muted" data-testid="level-next">
         {level.laid} of {level.open} rooms laid ·{' '}
         <span className="font-semibold text-fg">
-          {level.toNext === 0 ? 'See your trip so far' : (level.toNext === 1 ? '1 room' : level.toNext + ' rooms') + ' to Level ' + (level.level + 1)}
+          {level.toNext === 0 ? (left ? (left === 1 ? '1 square to open' : left + ' squares to open') : 'See your trip so far') : (level.toNext === 1 ? '1 room' : level.toNext + ' rooms') + ' to Level ' + (level.level + 1)}
         </span>
       </p>
     </section>

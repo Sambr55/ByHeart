@@ -64,11 +64,17 @@ export function LevelRecap({ id }: { id: string }) {
     Seen only once the level is laid (review, 2026-11-10): opening it from Yours halfway round
     must not spend the board's "So far", which waits for the finished level.
   */
+  /* …and every square on its board opened (Sam, 2026-11-10: "Every square"): the board's own rule, from lap.ts. */
   const whole = useMemo(() => {
     if (!now) return false
     const at = unitById(id, purpose, now)
-    return at ? levelComplete(at.unit, learner.finished_cards ?? [], (rid) => roomLock(rid, member, purpose)) : false
-  }, [now, id, purpose, learner.finished_cards, member])
+    if (!at || !levelComplete(at.unit, learner.finished_cards ?? [], (rid) => roomLock(rid, member, purpose))) return false
+    const units = pathUnits(undefined, now, purpose)
+    const index = units.findIndex((u) => u.id === id)
+    if (index === -1) return false
+    const view = pathView(learner, units, (rid) => roomLock(rid, member, purpose), now)
+    return lapOf(view, index, purpose ?? 'visiting', { gems: gemsHomeFirst(chapter), rows: rowsFor(chapter, now), walks: WALKS, chapter, opened: learner.board_opened ?? [] }).complete
+  }, [now, id, purpose, learner, member, chapter])
   const metCount = recap?.met.length ?? 0
   useEffect(() => {
     if (!now || !key || !hasRooms || !whole) return

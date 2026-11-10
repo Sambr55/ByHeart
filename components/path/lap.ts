@@ -64,8 +64,15 @@ export interface Lap {
   squares: Square[]
   /** The square the token stands on. 0 is Partida — the start, or home once complete. */
   token: number
-  /** Every open room of the level laid: Partida is now the finish. */
+  /**
+   * The board finished: every open room laid AND every square on it opened (Sam, 2026-11-10,
+   * "Every square"). Then So far turns over, and once it is seen Partida is the finish.
+   */
   complete: boolean
+  /** Every open room laid — the lessons are done, whatever is still to open. */
+  roomsLaid: boolean
+  /** Squares turned over and not yet opened, in lap order. Empty when the board is complete. */
+  toOpen: Square[]
   /** The language walk this board's venues come from, if any. */
   walk: { id: string; title: string } | null
   /** Rooms of this level laid, and open (not paid-locked). */
@@ -114,6 +121,11 @@ export function lapOf(
      * scripts and views that only want the squares.
      */
     recapSeen?: boolean
+    /**
+     * Lap keys this learner has opened (board_opened). When given, a board is complete only
+     * once every square on it is opened; absent, rooms alone decide (scripts, listings).
+     */
+    opened?: string[]
   },
 ): Lap {
   const u = view.units[index]
@@ -208,12 +220,21 @@ export function lapOf(
     squares.push({ ...body, at: i, col, row, reached: false, key: purpose + ':' + u.unit.id + ':' + body.kind + ':' + id } as Square)
   }
 
-  /* How far round: the k-th room square, plus a square for every room said cold if asked. */
+  /* How far round: the k-th room square. */
   const laid = nodes.filter((x) => x.state === 'done').length
   const open = nodes.filter((x) => x.state !== 'paid').length
-  /* A board of only paid rooms is not complete: nothing of yours is laid on it (content/level.ts levelComplete). */
-  const complete = open > 0 && laid >= open
+  /* A board of only paid rooms is never laid: nothing of yours is on it (content/level.ts levelComplete). */
+  const roomsLaid = open > 0 && laid >= open
   const roomSquares = squares.filter((s) => s.kind === 'room')
+  /*
+    EVERY SQUARE (Sam, 2026-11-10: "board two is closing before I have completed it"). What a
+    board asks to be opened: every stop — surprise, place, what's on. Not the corners: So far
+    is the reward for the rest, and A mesa is an offer the Panel and the Road do not draw.
+  */
+  const opened = opts.opened ? new Set(opts.opened) : null
+  const asked = squares.filter((s) => s.kind !== 'room' && s.kind !== 'corner')
+  const toOpenAll = opened ? asked.filter((s) => !opened.has(s.key)) : []
+  const complete = roomsLaid && toOpenAll.length === 0
   /*
     YOU LAND ON THE SQUARE AFTER THE ROOM YOU LAID (Sam, 2026-11-05, on his phone: "Shouldn't
     that third tile turn over, as the first two are done?"). A room laid turns over the stop
@@ -221,9 +242,15 @@ export function lapOf(
   */
   let token = laid === 0 ? 0 : roomSquares[Math.min(laid, roomSquares.length) - 1].at + 1
   token = Math.min(token, L - 1)
-  for (const s of squares) s.reached = complete || s.at <= token
-  /* Rooms laid: the token waits on Até agora until the recap is seen, then comes home. */
-  if (complete) token = opts.recapSeen === false ? corners.trip : 0
+  if (!roomsLaid) {
+    for (const s of squares) s.reached = s.at <= token
+  } else {
+    /* Lessons done: everything is face up but So far, which turns over when the rest is opened. */
+    for (const s of squares) s.reached = !(s.kind === 'corner' && s.corner === 'trip') || complete
+    /* The token walks to the next square still to open; then So far until it is seen; then home. */
+    token = complete ? (opts.recapSeen === false ? corners.trip : 0) : toOpenAll[0].at
+  }
+  const toOpen = toOpenAll.filter((s) => s.reached)
 
-  return { index, unitId: u.unit.id, w, h, squares, token, complete, walk: walk ? { id: walk.id, title: walk.title } : null, done: laid, open }
+  return { index, unitId: u.unit.id, w, h, squares, token, complete, roomsLaid, toOpen, walk: walk ? { id: walk.id, title: walk.title } : null, done: laid, open }
 }
