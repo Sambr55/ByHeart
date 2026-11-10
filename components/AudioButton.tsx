@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { play } from '@/engine/audio'
+import { useEffect, useRef, useState } from 'react'
+import { play, probe } from '@/engine/audio'
 
 /**
  * Speaker control. First tap plays at natural pace; a second tap plays slowly.
@@ -19,6 +19,29 @@ export function AudioButton({
   size?: 'sm' | 'md'
 }) {
   const [played, setPlayed] = useState(false)
+  /*
+    The recording, fetched when the button comes into view, so the first tap plays it rather
+    than the phone's voice — and a long list in Yours does not download every line at once.
+  */
+  const self = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    const el = self.current
+    if (!el || typeof IntersectionObserver === 'undefined') return probe(slug)
+    const io = new IntersectionObserver((seen) => {
+      if (seen.some((x) => x.isIntersecting)) {
+        probe(slug)
+        io.disconnect()
+      }
+    }, { rootMargin: '200px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [slug])
+  /* No recording and no Portuguese voice on this device: say so, rather than read it in English. */
+  const [noVoice, setNoVoice] = useState(false)
+  const say = (slow: boolean) => {
+    const source = play({ slug, text }, { slow, screenId })
+    setNoVoice(source === 'novoice')
+  }
   const dim = size === 'sm' ? 'h-11 w-11' : 'h-12 w-12'
   /*
     Hold it down for slow, rather than tapping twice.
@@ -38,7 +61,7 @@ export function AudioButton({
     long.current = false
     held.current = setTimeout(() => {
       long.current = true
-      play({ slug, text }, { slow: true, screenId })
+      say(true)
       setPlayed(true)
     }, 420)
   }
@@ -48,7 +71,9 @@ export function AudioButton({
   }
 
   return (
+    <>
     <button
+      ref={self}
       type="button"
       data-testid="audio"
       aria-label={played ? 'Play ' + text + ' slowly' : 'Play ' + text}
@@ -64,7 +89,7 @@ export function AudioButton({
           long.current = false
           return
         }
-        play({ slug, text }, { slow: played, screenId })
+        say(played)
         setPlayed(true)
       }}
       className={
@@ -96,5 +121,43 @@ export function AudioButton({
         <span className="sr-only">Slow playback available on the next tap</span>
       ) : null}
     </button>
+    {noVoice ? <NoVoice onClose={() => setNoVoice(false)} /> : null}
+    </>
+  )
+}
+
+/*
+  ADD A PORTUGUESE VOICE (2026-11-10). Shown only when a line has no recording yet AND this
+  device has no Portuguese voice — the case that used to read it in English. The steps for the
+  phone in hand; the line itself is still on screen to read.
+*/
+function NoVoice({ onClose }: { onClose: () => void }) {
+  const ua = typeof navigator === 'undefined' ? '' : navigator.userAgent
+  const touch = typeof navigator !== 'undefined' && navigator.maxTouchPoints > 1
+  /* iPadOS calls itself a Mac; a Mac with no touch screen is a Mac. */
+  const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && touch)
+  const steps = ios
+    ? 'Settings → Accessibility → Spoken Content → Voices → Portuguese → Portuguese (Portugal). Download one, then come back.'
+    : /Macintosh/.test(ua)
+      ? 'System Settings → Accessibility → Spoken Content → System voice → Manage Voices → Portuguese (Portugal). Then reload this page.'
+      : /Android/.test(ua)
+      ? 'Settings → search "Text-to-speech" → Google → Settings → Install voice data → Português (Portugal).'
+      : "Your computer's speech settings → add a Portuguese (Portugal) voice, then reload this page."
+  return (
+    <div
+      role="status"
+      data-testid="no-voice"
+      onClick={(e) => e.stopPropagation()}
+      className="fixed inset-x-3 z-[70] mx-auto max-w-md rounded-2xl border border-line bg-bg-elev p-4 text-left text-fg shadow-xl"
+      style={{ bottom: 'calc(var(--bar-h, 64px) + 12px)' }}
+    >
+      <p className="eyebrow text-[0.65rem] text-accent">No Portuguese voice on this device</p>
+      <p className="mt-1 text-sm leading-relaxed">
+        This line hasn&apos;t been recorded yet, and your device would read it in an English accent — so it stays quiet. To hear it now: {steps}
+      </p>
+      <button type="button" onClick={onClose} className="tap-target eyebrow mt-2 text-xs text-accent">
+        OK
+      </button>
+    </div>
   )
 }

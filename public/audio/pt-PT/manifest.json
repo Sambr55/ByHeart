@@ -265,6 +265,5626 @@
       "slug": "chamo-me-james-bond",
       "text": "Chamo-me James Bond.",
       "kind": "example"
+    },
+    {
+      "slug": "isto-e-uma-escola-estas-aqui-para-trabalhar",
+      "text": "Isto é uma escola. Estás aqui para trabalhar.",
+      "kind": "example"
+    },
+    {
+      "slug": "trabalho-em-lisboa",
+      "text": "Trabalho em Lisboa.",
+      "kind": "example"
+    },
+    {
+      "slug": "ando-numa-escola-de-portugues",
+      "text": "Ando numa escola de português.",
+      "kind": "example"
+    },
+    {
+      "slug": "trabalho-com-coisas-criativas",
+      "text": "Trabalho com coisas criativas.",
+      "kind": "example"
+    },
+    {
+      "slug": "a-escola",
+      "text": "a escola",
+      "kind": "example"
+    },
+    {
+      "slug": "trabalho",
+      "text": "trabalho",
+      "kind": "example"
+    },
+    {
+      "slug": "fala-comigo-goose",
+      "text": "Fala comigo, Goose.",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-ser-o-meu-parceiro-quando-quiseres",
+      "text": "Podes ser o meu parceiro quando quiseres.",
+      "kind": "example"
+    },
+    {
+      "slug": "quando-quiseres",
+      "text": "Quando quiseres.",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-repetir-por-favor",
+      "text": "Podes repetir, por favor?",
+      "kind": "example"
+    },
+    {
+      "slug": "em-que-estavas-a-pensar",
+      "text": "Em que estavas a pensar?",
+      "kind": "example"
+    },
+    {
+      "slug": "em-que-estas-a-pensar",
+      "text": "Em que estás a pensar?",
+      "kind": "example"
+    },
+    {
+      "slug": "estava-a-pensar",
+      "text": "Estava a pensar…",
+      "kind": "example"
+    },
+    {
+      "slug": "estava-a-pensar-em-ti",
+      "text": "Estava a pensar em ti.",
+      "kind": "example"
+    },
+    {
+      "slug": "estavas-a",
+      "text": "estavas a",
+      "kind": "example"
+    },
+    {
+      "slug": "em-que",
+      "text": "em que?",
+      "kind": "example"
+    },
+    {
+      "slug": "sinto-que-preciso",
+      "text": "Sinto que preciso…",
+      "kind": "example"
+    },
+    {
+      "slug": "preciso-de-ajuda",
+      "text": "Preciso de ajuda.",
+      "kind": "example"
+    },
+    {
+      "slug": "preciso-de-tempo",
+      "text": "Preciso de tempo.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-vou-deixar-o-meu-parceiro",
+      "text": "Não vou deixar o meu parceiro.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-vou-sair",
+      "text": "Não vou sair.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-vou-amanha",
+      "text": "Não vou amanhã.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-vou-fazer-isso",
+      "text": "Não vou fazer isso.",
+      "kind": "example"
+    },
+    {
+      "slug": "vou-deixar-isso",
+      "text": "Vou deixar isso.",
+      "kind": "example"
+    },
+    {
+      "slug": "deixar",
+      "text": "deixar",
+      "kind": "example"
+    },
+    {
+      "slug": "acho-que-nao-vou",
+      "text": "Acho que não vou.",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-esta-o-meu-parceiro",
+      "text": "Onde está o meu parceiro?",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-esta-a-casa-de-banho",
+      "text": "Onde está a casa de banho?",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-esta-o-meu-cafe",
+      "text": "Onde está o meu café?",
+      "kind": "example"
+    },
+    {
+      "slug": "esta-aqui",
+      "text": "Está aqui.",
+      "kind": "example"
+    },
+    {
+      "slug": "este-e-o-meu-parceiro",
+      "text": "Este é o meu parceiro.",
+      "kind": "example"
+    },
+    {
+      "slug": "parceiro",
+      "text": "parceiro",
+      "kind": "example"
+    },
+    {
+      "slug": "onde",
+      "text": "onde",
+      "kind": "example"
+    },
+    {
+      "slug": "esta",
+      "text": "está",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-ingles",
+      "text": "Sou inglês.",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-inglesa-de-londres",
+      "text": "Sou inglesa, de Londres.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-sou-portugues",
+      "text": "Não sou português.",
+      "kind": "example"
+    },
+    {
+      "slug": "chamo-me-ana-sou-ingles",
+      "text": "Chamo-me Ana. Sou inglês.",
+      "kind": "example"
+    },
+    {
+      "slug": "sou",
+      "text": "sou",
+      "kind": "example"
+    },
+    {
+      "slug": "ingles",
+      "text": "inglês",
+      "kind": "example"
+    },
+    {
+      "slug": "inglesa",
+      "text": "inglesa",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-inglesa-sou-de-londres",
+      "text": "Sou inglesa. Sou de Londres.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-tu-como-te-chamas",
+      "text": "E tu, como te chamas?",
+      "kind": "example"
+    },
+    {
+      "slug": "como-se-chama",
+      "text": "Como se chama?",
+      "kind": "example"
+    },
+    {
+      "slug": "amanha-nunca-morre",
+      "text": "Amanhã nunca morre.",
+      "kind": "example"
+    },
+    {
+      "slug": "ate-amanha",
+      "text": "Até amanhã.",
+      "kind": "example"
+    },
+    {
+      "slug": "amanha-nao-posso",
+      "text": "Amanhã não posso.",
+      "kind": "example"
+    },
+    {
+      "slug": "nunca-mais",
+      "text": "Nunca mais.",
+      "kind": "example"
+    },
+    {
+      "slug": "nunca",
+      "text": "nunca",
+      "kind": "example"
+    },
+    {
+      "slug": "da-russia-com-amor",
+      "text": "Da Rússia com amor.",
+      "kind": "example"
+    },
+    {
+      "slug": "cafe-com-leite",
+      "text": "Café com leite.",
+      "kind": "example"
+    },
+    {
+      "slug": "com-acucar",
+      "text": "Com açúcar?",
+      "kind": "example"
+    },
+    {
+      "slug": "com-amor",
+      "text": "Com amor.",
+      "kind": "example"
+    },
+    {
+      "slug": "com",
+      "text": "com",
+      "kind": "example"
+    },
+    {
+      "slug": "amor",
+      "text": "amor",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-digas-nunca-outra-vez",
+      "text": "Não digas “nunca” outra vez.",
+      "kind": "example"
+    },
+    {
+      "slug": "diz-outra-vez",
+      "text": "Diz outra vez.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-digas-isso",
+      "text": "Não digas isso.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-digas",
+      "text": "não digas",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-dizer-outra-vez-por-favor",
+      "text": "Podes dizer outra vez, por favor?",
+      "kind": "example"
+    },
+    {
+      "slug": "sem-tempo-para-morrer",
+      "text": "Sem tempo para morrer.",
+      "kind": "example"
+    },
+    {
+      "slug": "sem-acucar",
+      "text": "Sem açúcar.",
+      "kind": "example"
+    },
+    {
+      "slug": "sem-gelo",
+      "text": "Sem gelo.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-tenho-tempo",
+      "text": "Não tenho tempo.",
+      "kind": "example"
+    },
+    {
+      "slug": "sem",
+      "text": "sem",
+      "kind": "example"
+    },
+    {
+      "slug": "tempo",
+      "text": "tempo",
+      "kind": "example"
+    },
+    {
+      "slug": "zero-zero-sete",
+      "text": "Zero zero sete.",
+      "kind": "example"
+    },
+    {
+      "slug": "sete-euros",
+      "text": "Sete euros.",
+      "kind": "example"
+    },
+    {
+      "slug": "mesa-sete",
+      "text": "Mesa sete.",
+      "kind": "example"
+    },
+    {
+      "slug": "zero-problemas",
+      "text": "Zero problemas.",
+      "kind": "example"
+    },
+    {
+      "slug": "zero",
+      "text": "zero",
+      "kind": "example"
+    },
+    {
+      "slug": "sete",
+      "text": "sete",
+      "kind": "example"
+    },
+    {
+      "slug": "quanto-custa",
+      "text": "Quanto custa?",
+      "kind": "example"
+    },
+    {
+      "slug": "quanto-custa-isto",
+      "text": "Quanto custa isto?",
+      "kind": "example"
+    },
+    {
+      "slug": "quanto-e",
+      "text": "Quanto é?",
+      "kind": "example"
+    },
+    {
+      "slug": "custa-sete-euros",
+      "text": "Custa sete euros.",
+      "kind": "example"
+    },
+    {
+      "slug": "quanto",
+      "text": "quanto",
+      "kind": "example"
+    },
+    {
+      "slug": "custa",
+      "text": "custa",
+      "kind": "example"
+    },
+    {
+      "slug": "es-casada",
+      "text": "És casada?",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-casado",
+      "text": "Sou casado.",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-solteira-e-estou-bem-assim",
+      "text": "Sou solteira, e estou bem assim.",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-divorciado",
+      "text": "Sou divorciado.",
+      "kind": "example"
+    },
+    {
+      "slug": "casado",
+      "text": "casado",
+      "kind": "example"
+    },
+    {
+      "slug": "solteiro",
+      "text": "solteiro",
+      "kind": "example"
+    },
+    {
+      "slug": "divorciado",
+      "text": "divorciado",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-desculpe-desculpe",
+      "text": "Desculpe, desculpe — desculpe.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-com-licenca",
+      "text": "Desculpe, com licença.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-o-atraso",
+      "text": "Desculpe o atraso.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-obrigada",
+      "text": "Desculpe, obrigada.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe",
+      "text": "desculpe",
+      "kind": "example"
+    },
+    {
+      "slug": "falei-demais",
+      "text": "Falei demais.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-falei-demais",
+      "text": "Desculpa, falei demais.",
+      "kind": "example"
+    },
+    {
+      "slug": "comi-demais",
+      "text": "Comi demais.",
+      "kind": "example"
+    },
+    {
+      "slug": "bebi-demais",
+      "text": "Bebi demais.",
+      "kind": "example"
+    },
+    {
+      "slug": "demais",
+      "text": "demais",
+      "kind": "example"
+    },
+    {
+      "slug": "falei",
+      "text": "falei",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-o-atraso",
+      "text": "Desculpa o atraso.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa",
+      "text": "Desculpa.",
+      "kind": "example"
+    },
+    {
+      "slug": "peco-desculpa",
+      "text": "Peço desculpa.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-atraso",
+      "text": "o atraso",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-como-te-chamas",
+      "text": "Desculpa… como te chamas?",
+      "kind": "example"
+    },
+    {
+      "slug": "como-te-chamas",
+      "text": "Como te chamas?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-nao-era-isso-que-queria-dizer",
+      "text": "Desculpa. Não era isso que queria dizer.",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-dizer",
+      "text": "Queria dizer…",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-era-isso",
+      "text": "Não era isso.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-queria-dizer-outra-coisa",
+      "text": "Desculpa, queria dizer outra coisa.",
+      "kind": "example"
+    },
+    {
+      "slug": "era-uma-piada",
+      "text": "Era uma piada.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-a-brincar",
+      "text": "Estou a brincar.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-uma-piada",
+      "text": "É uma piada?",
+      "kind": "example"
+    },
+    {
+      "slug": "era",
+      "text": "era",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-piada",
+      "text": "uma piada",
+      "kind": "example"
+    },
+    {
+      "slug": "um-copo-de-vinho-por-favor",
+      "text": "Um copo de vinho, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "um-copo-de-agua-por-favor",
+      "text": "Um copo de água, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "dois-copos-de-vinho",
+      "text": "Dois copos de vinho.",
+      "kind": "example"
+    },
+    {
+      "slug": "vinho-tinto-por-favor",
+      "text": "Vinho tinto, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "copo",
+      "text": "copo",
+      "kind": "example"
+    },
+    {
+      "slug": "vinho",
+      "text": "vinho",
+      "kind": "example"
+    },
+    {
+      "slug": "por-favor",
+      "text": "por favor",
+      "kind": "example"
+    },
+    {
+      "slug": "ele-gosta-de-mim",
+      "text": "Ele gosta de mim?",
+      "kind": "example"
+    },
+    {
+      "slug": "ela-gosta-de-ti",
+      "text": "Ela gosta de ti.",
+      "kind": "example"
+    },
+    {
+      "slug": "ele-nao-gosta-de-vinho",
+      "text": "Ele não gosta de vinho.",
+      "kind": "example"
+    },
+    {
+      "slug": "eles-gostam-de-ti",
+      "text": "Eles gostam de ti.",
+      "kind": "example"
+    },
+    {
+      "slug": "ele",
+      "text": "ele",
+      "kind": "example"
+    },
+    {
+      "slug": "gosta-de",
+      "text": "gosta de",
+      "kind": "example"
+    },
+    {
+      "slug": "ele-gosta-de-ti",
+      "text": "Ele gosta de ti.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-percebi-mais-devagar-por-favor",
+      "text": "Não percebi. Mais devagar, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-nao-percebi",
+      "text": "Desculpe, não percebi.",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-falar-mais-devagar",
+      "text": "Pode falar mais devagar?",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-devagar-por-favor",
+      "text": "Mais devagar, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-percebi",
+      "text": "não percebi",
+      "kind": "example"
+    },
+    {
+      "slug": "devagar",
+      "text": "devagar",
+      "kind": "example"
+    },
+    {
+      "slug": "royale-com-queijo",
+      "text": "Royale com queijo.",
+      "kind": "example"
+    },
+    {
+      "slug": "com-gelo",
+      "text": "Com gelo.",
+      "kind": "example"
+    },
+    {
+      "slug": "com-queijo",
+      "text": "Com queijo.",
+      "kind": "example"
+    },
+    {
+      "slug": "queijo",
+      "text": "queijo",
+      "kind": "example"
+    },
+    {
+      "slug": "diz-o-que-outra-vez",
+      "text": "Diz “o quê” outra vez!",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que",
+      "text": "O quê?",
+      "kind": "example"
+    },
+    {
+      "slug": "diz",
+      "text": "diz",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-o-que",
+      "text": "Desculpa, o quê?",
+      "kind": "example"
+    },
+    {
+      "slug": "esse-hamburguer-e-mesmo-bom",
+      "text": "Esse hambúrguer é mesmo bom.",
+      "kind": "example"
+    },
+    {
+      "slug": "isso-e-mesmo-bom",
+      "text": "Isso é mesmo bom.",
+      "kind": "example"
+    },
+    {
+      "slug": "muito-bom",
+      "text": "Muito bom.",
+      "kind": "example"
+    },
+    {
+      "slug": "esse-e-bom",
+      "text": "Esse é bom.",
+      "kind": "example"
+    },
+    {
+      "slug": "mesmo",
+      "text": "mesmo",
+      "kind": "example"
+    },
+    {
+      "slug": "bom",
+      "text": "bom",
+      "kind": "example"
+    },
+    {
+      "slug": "tem-calma",
+      "text": "Tem calma.",
+      "kind": "example"
+    },
+    {
+      "slug": "calma",
+      "text": "Calma.",
+      "kind": "example"
+    },
+    {
+      "slug": "esta-tudo-bem",
+      "text": "Está tudo bem.",
+      "kind": "example"
+    },
+    {
+      "slug": "como-e-que-se-chama",
+      "text": "Como é que se chama?",
+      "kind": "example"
+    },
+    {
+      "slug": "como-se-chama-isto",
+      "text": "Como se chama isto?",
+      "kind": "example"
+    },
+    {
+      "slug": "chama-se",
+      "text": "Chama-se…",
+      "kind": "example"
+    },
+    {
+      "slug": "um-batido-de-cinco-euros",
+      "text": "Um batido de cinco euros.",
+      "kind": "example"
+    },
+    {
+      "slug": "cinco-euros",
+      "text": "Cinco euros.",
+      "kind": "example"
+    },
+    {
+      "slug": "um-batido-por-favor",
+      "text": "Um batido, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "dois-batidos",
+      "text": "Dois batidos.",
+      "kind": "example"
+    },
+    {
+      "slug": "euro",
+      "text": "euro",
+      "kind": "example"
+    },
+    {
+      "slug": "cinco",
+      "text": "cinco",
+      "kind": "example"
+    },
+    {
+      "slug": "batido",
+      "text": "batido",
+      "kind": "example"
+    },
+    {
+      "slug": "eles-chamam-lhe-royale-com-queijo",
+      "text": "Eles chamam-lhe Royale com queijo.",
+      "kind": "example"
+    },
+    {
+      "slug": "eles-chamam-me-ana",
+      "text": "Eles chamam-me Ana.",
+      "kind": "example"
+    },
+    {
+      "slug": "eles-estao-aqui",
+      "text": "Eles estão aqui.",
+      "kind": "example"
+    },
+    {
+      "slug": "como-e-que-eles-chamam-isto",
+      "text": "Como é que eles chamam isto?",
+      "kind": "example"
+    },
+    {
+      "slug": "eles",
+      "text": "eles",
+      "kind": "example"
+    },
+    {
+      "slug": "chamam",
+      "text": "chamam",
+      "kind": "example"
+    },
+    {
+      "slug": "quem-e-o-zed",
+      "text": "Quem é o Zed?",
+      "kind": "example"
+    },
+    {
+      "slug": "quem-e-este",
+      "text": "Quem é este?",
+      "kind": "example"
+    },
+    {
+      "slug": "quem-e-ele",
+      "text": "Quem é ele?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-o-meu-parceiro",
+      "text": "É o meu parceiro.",
+      "kind": "example"
+    },
+    {
+      "slug": "quem",
+      "text": "quem",
+      "kind": "example"
+    },
+    {
+      "slug": "e",
+      "text": "é",
+      "kind": "example"
+    },
+    {
+      "slug": "adoro-pessoas-que-me-fazem-rir",
+      "text": "Adoro pessoas que me fazem rir.",
+      "kind": "example"
+    },
+    {
+      "slug": "adoro-lisboa",
+      "text": "Adoro Lisboa.",
+      "kind": "example"
+    },
+    {
+      "slug": "porque-quero",
+      "text": "Porque quero.",
+      "kind": "example"
+    },
+    {
+      "slug": "porque-sim",
+      "text": "Porque sim.",
+      "kind": "example"
+    },
+    {
+      "slug": "quero-um-cafe-por-favor",
+      "text": "Quero um café, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "adoro",
+      "text": "adoro",
+      "kind": "example"
+    },
+    {
+      "slug": "quero",
+      "text": "quero",
+      "kind": "example"
+    },
+    {
+      "slug": "porque",
+      "text": "porque",
+      "kind": "example"
+    },
+    {
+      "slug": "paris-e-sempre-uma-boa-ideia",
+      "text": "Paris é sempre uma boa ideia.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-uma-boa-ideia",
+      "text": "É uma boa ideia.",
+      "kind": "example"
+    },
+    {
+      "slug": "sempre",
+      "text": "Sempre.",
+      "kind": "example"
+    },
+    {
+      "slug": "acho-que-e-uma-boa-ideia",
+      "text": "Acho que é uma boa ideia.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-ideia",
+      "text": "boa ideia",
+      "kind": "example"
+    },
+    {
+      "slug": "aproveita-a-vida",
+      "text": "Aproveita a vida.",
+      "kind": "example"
+    },
+    {
+      "slug": "aproveita-o-dia",
+      "text": "Aproveita o dia.",
+      "kind": "example"
+    },
+    {
+      "slug": "aproveita",
+      "text": "Aproveita!",
+      "kind": "example"
+    },
+    {
+      "slug": "quero-aproveitar",
+      "text": "Quero aproveitar.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-a-vida",
+      "text": "É a vida.",
+      "kind": "example"
+    },
+    {
+      "slug": "vida",
+      "text": "vida",
+      "kind": "example"
+    },
+    {
+      "slug": "as-pessoas-importam-mais-do-que-as-coisas",
+      "text": "As pessoas importam mais do que as coisas.",
+      "kind": "example"
+    },
+    {
+      "slug": "tu-importas",
+      "text": "Tu importas.",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-do-que-isso",
+      "text": "Mais do que isso.",
+      "kind": "example"
+    },
+    {
+      "slug": "isto-importa",
+      "text": "Isto importa.",
+      "kind": "example"
+    },
+    {
+      "slug": "as-coisas-mudam",
+      "text": "As coisas mudam.",
+      "kind": "example"
+    },
+    {
+      "slug": "coisa",
+      "text": "coisa",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-do-que",
+      "text": "mais do que",
+      "kind": "example"
+    },
+    {
+      "slug": "importa",
+      "text": "importa",
+      "kind": "example"
+    },
+    {
+      "slug": "procura-o-lado-bom-das-pessoas",
+      "text": "Procura o lado bom das pessoas.",
+      "kind": "example"
+    },
+    {
+      "slug": "procura-aqui",
+      "text": "Procura aqui.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-lado-bom",
+      "text": "O lado bom.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-uma-boa-pessoa",
+      "text": "É uma boa pessoa.",
+      "kind": "example"
+    },
+    {
+      "slug": "procura",
+      "text": "procura",
+      "kind": "example"
+    },
+    {
+      "slug": "o-mais-importante-e-ser-feliz",
+      "text": "O mais importante é ser feliz.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-importante",
+      "text": "É importante.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que-e-mais-importante",
+      "text": "O que é mais importante?",
+      "kind": "example"
+    },
+    {
+      "slug": "quero-ser-feliz",
+      "text": "Quero ser feliz.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-mais-importante-e-isto",
+      "text": "O mais importante é isto.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-mais-importante",
+      "text": "o mais importante",
+      "kind": "example"
+    },
+    {
+      "slug": "feliz",
+      "text": "feliz",
+      "kind": "example"
+    },
+    {
+      "slug": "para-mim-e-importante",
+      "text": "Para mim é importante.",
+      "kind": "example"
+    },
+    {
+      "slug": "os-meus-filhos-sao-o-que-tenho",
+      "text": "Os meus filhos são o que tenho.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-tres-filhos",
+      "text": "Tenho três filhos.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-meu-filho-chama-se-oscar",
+      "text": "O meu filho chama-se Oscar.",
+      "kind": "example"
+    },
+    {
+      "slug": "os-meus-filhos-estao-em-inglaterra",
+      "text": "Os meus filhos estão em Inglaterra.",
+      "kind": "example"
+    },
+    {
+      "slug": "filhos",
+      "text": "filhos",
+      "kind": "example"
+    },
+    {
+      "slug": "o-meu",
+      "text": "o meu",
+      "kind": "example"
+    },
+    {
+      "slug": "controla-o-que-podes-controlar",
+      "text": "Controla o que podes controlar.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que-posso-fazer",
+      "text": "O que posso fazer?",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-posso-controlar-isso",
+      "text": "Não posso controlar isso.",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-controlar-isto",
+      "text": "Podes controlar isto.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-controlas-o-que-acontece-controlas-como-reages",
+      "text": "Não controlas o que acontece. Controlas como reages.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que-aconteceu",
+      "text": "O que aconteceu?",
+      "kind": "example"
+    },
+    {
+      "slug": "como-reagiste",
+      "text": "Como reagiste?",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que-acontece",
+      "text": "o que acontece",
+      "kind": "example"
+    },
+    {
+      "slug": "como",
+      "text": "como",
+      "kind": "example"
+    },
+    {
+      "slug": "o-unico-momento-que-tens-e-agora",
+      "text": "O único momento que tens é agora.",
+      "kind": "example"
+    },
+    {
+      "slug": "agora-nao",
+      "text": "Agora não.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-agora",
+      "text": "E agora?",
+      "kind": "example"
+    },
+    {
+      "slug": "tens-tempo",
+      "text": "Tens tempo?",
+      "kind": "example"
+    },
+    {
+      "slug": "agora",
+      "text": "agora",
+      "kind": "example"
+    },
+    {
+      "slug": "tens",
+      "text": "tens",
+      "kind": "example"
+    },
+    {
+      "slug": "agora-nao-posso-desculpa",
+      "text": "Agora não posso, desculpa.",
+      "kind": "example"
+    },
+    {
+      "slug": "se-nao-e-verdade-nao-digas",
+      "text": "Se não é verdade, não digas.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-verdade",
+      "text": "É verdade?",
+      "kind": "example"
+    },
+    {
+      "slug": "se-quiseres",
+      "text": "Se quiseres.",
+      "kind": "example"
+    },
+    {
+      "slug": "se",
+      "text": "se",
+      "kind": "example"
+    },
+    {
+      "slug": "aceita-o-que-nao-podes-mudar",
+      "text": "Aceita o que não podes mudar.",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-mudar-isto",
+      "text": "Posso mudar isto?",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-posso-mudar-isso",
+      "text": "Não posso mudar isso.",
+      "kind": "example"
+    },
+    {
+      "slug": "quero-mudar",
+      "text": "Quero mudar.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-podes-mudar-isso",
+      "text": "Não podes mudar isso.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-podes",
+      "text": "não podes",
+      "kind": "example"
+    },
+    {
+      "slug": "mudar",
+      "text": "mudar",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-posso",
+      "text": "Não posso.",
+      "kind": "example"
+    },
+    {
+      "slug": "acho-que-nao-posso",
+      "text": "Acho que não posso.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-tenhas-vergonha-de-pedir-ajuda",
+      "text": "Não tenhas vergonha de pedir ajuda.",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-ajudar-me",
+      "text": "Podes ajudar-me?",
+      "kind": "example"
+    },
+    {
+      "slug": "vou-pedir-ajuda",
+      "text": "Vou pedir ajuda.",
+      "kind": "example"
+    },
+    {
+      "slug": "ajuda",
+      "text": "ajuda",
+      "kind": "example"
+    },
+    {
+      "slug": "pedir",
+      "text": "pedir",
+      "kind": "example"
+    },
+    {
+      "slug": "as-pessoas-fazem-o-que-sabem",
+      "text": "As pessoas fazem o que sabem.",
+      "kind": "example"
+    },
+    {
+      "slug": "as-pessoas-sao-assim",
+      "text": "As pessoas são assim.",
+      "kind": "example"
+    },
+    {
+      "slug": "eles-fazem-o-mesmo",
+      "text": "Eles fazem o mesmo.",
+      "kind": "example"
+    },
+    {
+      "slug": "as-pessoas-aqui-sao-boas",
+      "text": "As pessoas aqui são boas.",
+      "kind": "example"
+    },
+    {
+      "slug": "as-pessoas",
+      "text": "as pessoas",
+      "kind": "example"
+    },
+    {
+      "slug": "fazem",
+      "text": "fazem",
+      "kind": "example"
+    },
+    {
+      "slug": "nos-somos-feitos-uns-para-os-outros",
+      "text": "Nós somos feitos uns para os outros.",
+      "kind": "example"
+    },
+    {
+      "slug": "nos-somos-amigos",
+      "text": "Nós somos amigos.",
+      "kind": "example"
+    },
+    {
+      "slug": "somos-dois",
+      "text": "Somos dois.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-somos-iguais",
+      "text": "Não somos iguais.",
+      "kind": "example"
+    },
+    {
+      "slug": "nos",
+      "text": "nós",
+      "kind": "example"
+    },
+    {
+      "slug": "somos",
+      "text": "somos",
+      "kind": "example"
+    },
+    {
+      "slug": "somos-amigos",
+      "text": "Somos amigos.",
+      "kind": "example"
+    },
+    {
+      "slug": "vai-a-merda-estou-farto",
+      "text": "Vai à merda, estou farto.",
+      "kind": "example"
+    },
+    {
+      "slug": "vai-para-casa",
+      "text": "Vai para casa.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-farto-disto",
+      "text": "Estou farto disto.",
+      "kind": "example"
+    },
+    {
+      "slug": "vai-com-calma",
+      "text": "Vai com calma.",
+      "kind": "example"
+    },
+    {
+      "slug": "vai",
+      "text": "Vai",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-farto",
+      "text": "estou farto",
+      "kind": "example"
+    },
+    {
+      "slug": "foda-se-esqueci-me",
+      "text": "Foda-se, esqueci-me.",
+      "kind": "example"
+    },
+    {
+      "slug": "esqueci-me-do-telemovel",
+      "text": "Esqueci-me do telemóvel.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-esqueci-me",
+      "text": "Desculpa, esqueci-me.",
+      "kind": "example"
+    },
+    {
+      "slug": "foda-se-outra-vez",
+      "text": "Foda-se, outra vez!",
+      "kind": "example"
+    },
+    {
+      "slug": "foda-se",
+      "text": "Foda-se",
+      "kind": "example"
+    },
+    {
+      "slug": "esqueci-me",
+      "text": "esqueci-me",
+      "kind": "example"
+    },
+    {
+      "slug": "fogo",
+      "text": "Fogo!",
+      "kind": "example"
+    },
+    {
+      "slug": "que-se-foda-vou-na-mesma",
+      "text": "Que se foda, vou na mesma.",
+      "kind": "example"
+    },
+    {
+      "slug": "vou-na-mesma",
+      "text": "Vou na mesma.",
+      "kind": "example"
+    },
+    {
+      "slug": "obrigado-na-mesma",
+      "text": "Obrigado na mesma.",
+      "kind": "example"
+    },
+    {
+      "slug": "que-se-foda-vamos",
+      "text": "Que se foda, vamos.",
+      "kind": "example"
+    },
+    {
+      "slug": "que-se-foda",
+      "text": "Que se foda",
+      "kind": "example"
+    },
+    {
+      "slug": "na-mesma",
+      "text": "na mesma",
+      "kind": "example"
+    },
+    {
+      "slug": "que-caralho-e-isto",
+      "text": "Que caralho é isto?",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que-e-isto",
+      "text": "O que é isto?",
+      "kind": "example"
+    },
+    {
+      "slug": "isto-e-do-caralho",
+      "text": "Isto é do caralho!",
+      "kind": "example"
+    },
+    {
+      "slug": "que-caralho-estas-a-fazer",
+      "text": "Que caralho estás a fazer?",
+      "kind": "example"
+    },
+    {
+      "slug": "que-caralho",
+      "text": "Que caralho",
+      "kind": "example"
+    },
+    {
+      "slug": "isto",
+      "text": "isto",
+      "kind": "example"
+    },
+    {
+      "slug": "que-raio-e-isto",
+      "text": "Que raio é isto?",
+      "kind": "example"
+    },
+    {
+      "slug": "hoje-estou-uma-merda",
+      "text": "Hoje estou uma merda.",
+      "kind": "example"
+    },
+    {
+      "slug": "hoje-nao",
+      "text": "Hoje não.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-filme-e-uma-merda",
+      "text": "O filme é uma merda.",
+      "kind": "example"
+    },
+    {
+      "slug": "isto-e-uma-merda",
+      "text": "Isto é uma merda.",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-merda",
+      "text": "uma merda",
+      "kind": "example"
+    },
+    {
+      "slug": "hoje",
+      "text": "Hoje",
+      "kind": "example"
+    },
+    {
+      "slug": "es-um-grande-cabrao",
+      "text": "És um grande cabrão.",
+      "kind": "example"
+    },
+    {
+      "slug": "es-uma-grande-cabra",
+      "text": "És uma grande cabra.",
+      "kind": "example"
+    },
+    {
+      "slug": "es-um-grande-amigo",
+      "text": "És um grande amigo.",
+      "kind": "example"
+    },
+    {
+      "slug": "que-grande-merda",
+      "text": "Que grande merda.",
+      "kind": "example"
+    },
+    {
+      "slug": "que-cabrao",
+      "text": "Que cabrão!",
+      "kind": "example"
+    },
+    {
+      "slug": "grande",
+      "text": "grande",
+      "kind": "example"
+    },
+    {
+      "slug": "cabrao",
+      "text": "cabrão",
+      "kind": "example"
+    },
+    {
+      "slug": "es-um-grande-chato",
+      "text": "És um grande chato.",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-muito-gira-hoje",
+      "text": "Estás muito gira hoje.",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-linda",
+      "text": "Estás linda.",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-bem",
+      "text": "Estás bem?",
+      "kind": "example"
+    },
+    {
+      "slug": "hoje-estas-gira",
+      "text": "Hoje estás gira.",
+      "kind": "example"
+    },
+    {
+      "slug": "estas",
+      "text": "Estás",
+      "kind": "example"
+    },
+    {
+      "slug": "gira",
+      "text": "gira",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-gira",
+      "text": "Estás gira.",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-oferecer-te-uma-bebida",
+      "text": "Posso oferecer-te uma bebida?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-sentar-me",
+      "text": "Posso sentar-me?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-ajudar-te",
+      "text": "Posso ajudar-te?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-oferecer-te-um-cafe",
+      "text": "Posso oferecer-te um café?",
+      "kind": "example"
+    },
+    {
+      "slug": "oferecer-te",
+      "text": "oferecer-te",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-sentar-me-aqui",
+      "text": "Posso sentar-me aqui?",
+      "kind": "example"
+    },
+    {
+      "slug": "gostava-de-te-ver-outra-vez",
+      "text": "Gostava de te ver outra vez.",
+      "kind": "example"
+    },
+    {
+      "slug": "gostava-de-te-conhecer-melhor",
+      "text": "Gostava de te conhecer melhor.",
+      "kind": "example"
+    },
+    {
+      "slug": "gostava-de-um-cafe",
+      "text": "Gostava de um café.",
+      "kind": "example"
+    },
+    {
+      "slug": "gostava-de-te-ver-amanha",
+      "text": "Gostava de te ver amanhã.",
+      "kind": "example"
+    },
+    {
+      "slug": "gostava-de",
+      "text": "Gostava de",
+      "kind": "example"
+    },
+    {
+      "slug": "te-ver",
+      "text": "te ver",
+      "kind": "example"
+    },
+    {
+      "slug": "das-me-o-teu-numero",
+      "text": "Dás-me o teu número?",
+      "kind": "example"
+    },
+    {
+      "slug": "gostava-de-um-cafe-por-favor",
+      "text": "Gostava de um café, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "vim-aqui-para-te-pedir-uma-coisa",
+      "text": "Vim aqui para te pedir uma coisa.",
+      "kind": "example"
+    },
+    {
+      "slug": "vim-aqui-para-te-ver",
+      "text": "Vim aqui para te ver.",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-pedir-te-uma-coisa",
+      "text": "Posso pedir-te uma coisa?",
+      "kind": "example"
+    },
+    {
+      "slug": "vim-para-ficar",
+      "text": "Vim para ficar.",
+      "kind": "example"
+    },
+    {
+      "slug": "vim-para-te-pedir-ajuda",
+      "text": "Vim para te pedir ajuda.",
+      "kind": "example"
+    },
+    {
+      "slug": "vim-aqui",
+      "text": "Vim aqui",
+      "kind": "example"
+    },
+    {
+      "slug": "te-pedir",
+      "text": "te pedir",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-nervoso-nao-sou-bom-nisto",
+      "text": "Estou nervoso, não sou bom nisto.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-sou-bom-a-dancar",
+      "text": "Não sou bom a dançar.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-nervoso-desculpa",
+      "text": "Estou nervoso, desculpa.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-sou-bom-nisto-mas-estou-a-tentar",
+      "text": "Não sou bom nisto, mas estou a tentar.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-nervoso",
+      "text": "Estou nervoso",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-sou-bom",
+      "text": "não sou bom",
+      "kind": "example"
+    },
+    {
+      "slug": "das-me-o-teu-instagram",
+      "text": "Dás-me o teu Instagram?",
+      "kind": "example"
+    },
+    {
+      "slug": "das-me-um-minuto",
+      "text": "Dás-me um minuto?",
+      "kind": "example"
+    },
+    {
+      "slug": "este-e-o-meu-numero",
+      "text": "Este é o meu número.",
+      "kind": "example"
+    },
+    {
+      "slug": "das-me",
+      "text": "Dás-me",
+      "kind": "example"
+    },
+    {
+      "slug": "o-teu",
+      "text": "o teu",
+      "kind": "example"
+    },
+    {
+      "slug": "das-me-o-teu-email",
+      "text": "Dás-me o teu email?",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-muito-giro-hoje",
+      "text": "Estás muito giro hoje.",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-lindo",
+      "text": "Estás lindo.",
+      "kind": "example"
+    },
+    {
+      "slug": "hoje-estas-giro",
+      "text": "Hoje estás giro.",
+      "kind": "example"
+    },
+    {
+      "slug": "giro",
+      "text": "giro",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-giro",
+      "text": "Estás giro.",
+      "kind": "example"
+    },
+    {
+      "slug": "apetece-te-ir-beber-qualquer-coisa",
+      "text": "Apetece-te ir beber qualquer coisa?",
+      "kind": "example"
+    },
+    {
+      "slug": "apetece-te-um-cafe",
+      "text": "Apetece-te um café?",
+      "kind": "example"
+    },
+    {
+      "slug": "apetece-te-dancar",
+      "text": "Apetece-te dançar?",
+      "kind": "example"
+    },
+    {
+      "slug": "queres-beber-qualquer-coisa",
+      "text": "Queres beber qualquer coisa?",
+      "kind": "example"
+    },
+    {
+      "slug": "apetece-te",
+      "text": "Apetece-te",
+      "kind": "example"
+    },
+    {
+      "slug": "qualquer-coisa",
+      "text": "qualquer coisa",
+      "kind": "example"
+    },
+    {
+      "slug": "vamos-beber-qualquer-coisa",
+      "text": "Vamos beber qualquer coisa?",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-conhecer-te-melhor",
+      "text": "Queria conhecer-te melhor.",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-ver-te-outra-vez",
+      "text": "Queria ver-te outra vez.",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-um-cafe-por-favor",
+      "text": "Queria um café, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "conhecer-te",
+      "text": "conhecer-te",
+      "kind": "example"
+    },
+    {
+      "slug": "es-muito-engracado",
+      "text": "És muito engraçado.",
+      "kind": "example"
+    },
+    {
+      "slug": "es-muito-simpatico",
+      "text": "És muito simpático.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-es-nada-engracado",
+      "text": "Não és nada engraçado.",
+      "kind": "example"
+    },
+    {
+      "slug": "es-giro-quando-ris",
+      "text": "És giro quando ris.",
+      "kind": "example"
+    },
+    {
+      "slug": "es",
+      "text": "És",
+      "kind": "example"
+    },
+    {
+      "slug": "engracado",
+      "text": "engraçado",
+      "kind": "example"
+    },
+    {
+      "slug": "e-muito-engracado",
+      "text": "É muito engraçado.",
+      "kind": "example"
+    },
+    {
+      "slug": "da-me-um-beijinho",
+      "text": "Dá-me um beijinho.",
+      "kind": "example"
+    },
+    {
+      "slug": "dois-beijinhos",
+      "text": "Dois beijinhos.",
+      "kind": "example"
+    },
+    {
+      "slug": "da-me-um-minuto",
+      "text": "Dá-me um minuto.",
+      "kind": "example"
+    },
+    {
+      "slug": "apetece-te-um-cafezinho",
+      "text": "Apetece-te um cafezinho?",
+      "kind": "example"
+    },
+    {
+      "slug": "beijinho",
+      "text": "beijinho",
+      "kind": "example"
+    },
+    {
+      "slug": "da-me",
+      "text": "Dá-me",
+      "kind": "example"
+    },
+    {
+      "slug": "ligas-me-logo",
+      "text": "Ligas-me logo?",
+      "kind": "example"
+    },
+    {
+      "slug": "ligo-te-logo",
+      "text": "Ligo-te logo.",
+      "kind": "example"
+    },
+    {
+      "slug": "ate-logo",
+      "text": "Até logo.",
+      "kind": "example"
+    },
+    {
+      "slug": "ligas-me-amanha",
+      "text": "Ligas-me amanhã?",
+      "kind": "example"
+    },
+    {
+      "slug": "ligas-me",
+      "text": "Ligas-me",
+      "kind": "example"
+    },
+    {
+      "slug": "logo",
+      "text": "logo",
+      "kind": "example"
+    },
+    {
+      "slug": "ligo-te-amanha",
+      "text": "Ligo-te amanhã.",
+      "kind": "example"
+    },
+    {
+      "slug": "terca-quarta-quinta-sexta",
+      "text": "Terça, quarta, quinta, sexta.",
+      "kind": "example"
+    },
+    {
+      "slug": "ate-terca",
+      "text": "Até terça.",
+      "kind": "example"
+    },
+    {
+      "slug": "na-sexta-a-noite",
+      "text": "Na sexta à noite.",
+      "kind": "example"
+    },
+    {
+      "slug": "terca-ou-sexta",
+      "text": "Terça ou sexta?",
+      "kind": "example"
+    },
+    {
+      "slug": "terca",
+      "text": "terça",
+      "kind": "example"
+    },
+    {
+      "slug": "sexta",
+      "text": "sexta",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-uma-fome-de-lobo",
+      "text": "Tenho uma fome de lobo.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-fome",
+      "text": "Tenho fome.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-tenho-fome",
+      "text": "Não tenho fome.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-sede",
+      "text": "Tenho sede.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho",
+      "text": "tenho",
+      "kind": "example"
+    },
+    {
+      "slug": "fome",
+      "text": "fome",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-cheio-de-fome",
+      "text": "Estou cheio de fome.",
+      "kind": "example"
+    },
+    {
+      "slug": "lua-nova-na-segunda-feira",
+      "text": "Lua nova na segunda-feira.",
+      "kind": "example"
+    },
+    {
+      "slug": "ate-segunda-feira",
+      "text": "Até segunda-feira.",
+      "kind": "example"
+    },
+    {
+      "slug": "na-segunda-feira-nao-posso",
+      "text": "Na segunda-feira não posso.",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-vida-nova",
+      "text": "Uma vida nova.",
+      "kind": "example"
+    },
+    {
+      "slug": "segunda-feira",
+      "text": "segunda-feira",
+      "kind": "example"
+    },
+    {
+      "slug": "nova",
+      "text": "nova",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-alguma-coisa-que-eu-deva-saber",
+      "text": "Há alguma coisa que eu deva saber?",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-um-problema",
+      "text": "Há um problema.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-ha-problema",
+      "text": "Não há problema.",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-alguma-coisa-boa",
+      "text": "Há alguma coisa boa?",
+      "kind": "example"
+    },
+    {
+      "slug": "ha",
+      "text": "há",
+      "kind": "example"
+    },
+    {
+      "slug": "alguma-coisa",
+      "text": "alguma coisa",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-faz-mal",
+      "text": "Não faz mal.",
+      "kind": "example"
+    },
+    {
+      "slug": "guarda-uma-oracao-para-a-manha-seguinte",
+      "text": "Guarda uma oração para a manhã seguinte.",
+      "kind": "example"
+    },
+    {
+      "slug": "guarda-isto",
+      "text": "Guarda isto.",
+      "kind": "example"
+    },
+    {
+      "slug": "guarda-me-um-lugar",
+      "text": "Guarda-me um lugar.",
+      "kind": "example"
+    },
+    {
+      "slug": "de-manha",
+      "text": "De manhã.",
+      "kind": "example"
+    },
+    {
+      "slug": "guarda",
+      "text": "guarda",
+      "kind": "example"
+    },
+    {
+      "slug": "manha",
+      "text": "manhã",
+      "kind": "example"
+    },
+    {
+      "slug": "tudo-o-que-precisas-e-agora",
+      "text": "Tudo o que precisas é agora.",
+      "kind": "example"
+    },
+    {
+      "slug": "tudo-bem",
+      "text": "Tudo bem?",
+      "kind": "example"
+    },
+    {
+      "slug": "precisas-de-ajuda",
+      "text": "Precisas de ajuda?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-tudo",
+      "text": "É tudo.",
+      "kind": "example"
+    },
+    {
+      "slug": "tudo",
+      "text": "tudo",
+      "kind": "example"
+    },
+    {
+      "slug": "precisas",
+      "text": "precisas",
+      "kind": "example"
+    },
+    {
+      "slug": "precisas-de-alguma-coisa",
+      "text": "Precisas de alguma coisa?",
+      "kind": "example"
+    },
+    {
+      "slug": "um-mundo-normal",
+      "text": "Um mundo normal.",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-vida-normal",
+      "text": "Uma vida normal.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-e-normal",
+      "text": "Não é normal.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-mundo-e-assim",
+      "text": "O mundo é assim.",
+      "kind": "example"
+    },
+    {
+      "slug": "mundo",
+      "text": "mundo",
+      "kind": "example"
+    },
+    {
+      "slug": "normal",
+      "text": "normal",
+      "kind": "example"
+    },
+    {
+      "slug": "gostas-de-musica",
+      "text": "Gostas de música?",
+      "kind": "example"
+    },
+    {
+      "slug": "gosto-de-musica",
+      "text": "Gosto de música.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-gosto-de-musica",
+      "text": "Não gosto de música.",
+      "kind": "example"
+    },
+    {
+      "slug": "gosto-de",
+      "text": "gosto de",
+      "kind": "example"
+    },
+    {
+      "slug": "musica",
+      "text": "música",
+      "kind": "example"
+    },
+    {
+      "slug": "anos-dourados",
+      "text": "Anos dourados.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-trinta-anos",
+      "text": "Tenho trinta anos.",
+      "kind": "example"
+    },
+    {
+      "slug": "dois-anos",
+      "text": "Dois anos.",
+      "kind": "example"
+    },
+    {
+      "slug": "anos",
+      "text": "anos",
+      "kind": "example"
+    },
+    {
+      "slug": "dourados",
+      "text": "dourados",
+      "kind": "example"
+    },
+    {
+      "slug": "so-por-um-dia",
+      "text": "Só por um dia.",
+      "kind": "example"
+    },
+    {
+      "slug": "so-um-cafe",
+      "text": "Só um café.",
+      "kind": "example"
+    },
+    {
+      "slug": "so-isto",
+      "text": "Só isto.",
+      "kind": "example"
+    },
+    {
+      "slug": "so",
+      "text": "só",
+      "kind": "example"
+    },
+    {
+      "slug": "um-dia",
+      "text": "um dia",
+      "kind": "example"
+    },
+    {
+      "slug": "so-isto-obrigado",
+      "text": "Só isto, obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "vamos-dancar",
+      "text": "Vamos dançar.",
+      "kind": "example"
+    },
+    {
+      "slug": "vamos-embora",
+      "text": "Vamos embora.",
+      "kind": "example"
+    },
+    {
+      "slug": "vamos-ver",
+      "text": "Vamos ver.",
+      "kind": "example"
+    },
+    {
+      "slug": "vamos",
+      "text": "vamos",
+      "kind": "example"
+    },
+    {
+      "slug": "dancar",
+      "text": "dançar",
+      "kind": "example"
+    },
+    {
+      "slug": "a-espera",
+      "text": "À espera.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-a-espera",
+      "text": "Estou à espera.",
+      "kind": "example"
+    },
+    {
+      "slug": "a-espera-de-ti",
+      "text": "À espera de ti.",
+      "kind": "example"
+    },
+    {
+      "slug": "no-ceu",
+      "text": "No céu.",
+      "kind": "example"
+    },
+    {
+      "slug": "ceu",
+      "text": "céu",
+      "kind": "example"
+    },
+    {
+      "slug": "tudo-muda",
+      "text": "Tudo muda.",
+      "kind": "example"
+    },
+    {
+      "slug": "tudo-bem-obrigado",
+      "text": "Tudo bem, obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "muda",
+      "text": "muda",
+      "kind": "example"
+    },
+    {
+      "slug": "nove-e-tres-quartos",
+      "text": "Nove e três quartos.",
+      "kind": "example"
+    },
+    {
+      "slug": "um-dois-tres",
+      "text": "Um, dois, três.",
+      "kind": "example"
+    },
+    {
+      "slug": "nove-euros",
+      "text": "Nove euros.",
+      "kind": "example"
+    },
+    {
+      "slug": "tres-cafes-por-favor",
+      "text": "Três cafés, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "nove",
+      "text": "nove",
+      "kind": "example"
+    },
+    {
+      "slug": "tres",
+      "text": "três",
+      "kind": "example"
+    },
+    {
+      "slug": "silencio",
+      "text": "Silêncio.",
+      "kind": "example"
+    },
+    {
+      "slug": "silencio-por-favor",
+      "text": "Silêncio, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "em-silencio",
+      "text": "Em silêncio.",
+      "kind": "example"
+    },
+    {
+      "slug": "faz-silencio",
+      "text": "Faz silêncio.",
+      "kind": "example"
+    },
+    {
+      "slug": "luz-noite",
+      "text": "Luz. Noite.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-ha-luz",
+      "text": "Não há luz.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-noite",
+      "text": "Boa noite.",
+      "kind": "example"
+    },
+    {
+      "slug": "toda-a-noite",
+      "text": "Toda a noite.",
+      "kind": "example"
+    },
+    {
+      "slug": "luz",
+      "text": "luz",
+      "kind": "example"
+    },
+    {
+      "slug": "noite",
+      "text": "noite",
+      "kind": "example"
+    },
+    {
+      "slug": "agua-sem-gas",
+      "text": "Água sem gás.",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-agua-por-favor",
+      "text": "Mais água, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "agua",
+      "text": "água",
+      "kind": "example"
+    },
+    {
+      "slug": "a-porta-esta-fechada",
+      "text": "A porta está fechada.",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-e-a-porta",
+      "text": "Onde é a porta?",
+      "kind": "example"
+    },
+    {
+      "slug": "fecha-a-porta-por-favor",
+      "text": "Fecha a porta, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "esta-fechado",
+      "text": "Está fechado.",
+      "kind": "example"
+    },
+    {
+      "slug": "a-loja-esta-fechada",
+      "text": "A loja está fechada.",
+      "kind": "example"
+    },
+    {
+      "slug": "porta",
+      "text": "porta",
+      "kind": "example"
+    },
+    {
+      "slug": "fechada",
+      "text": "fechada",
+      "kind": "example"
+    },
+    {
+      "slug": "ja-fechou",
+      "text": "Já fechou.",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-e-a-plataforma-do-comboio",
+      "text": "Onde é a plataforma do comboio?",
+      "kind": "example"
+    },
+    {
+      "slug": "o-comboio-para-lisboa",
+      "text": "O comboio para Lisboa.",
+      "kind": "example"
+    },
+    {
+      "slug": "a-que-horas-e-o-comboio",
+      "text": "A que horas é o comboio?",
+      "kind": "example"
+    },
+    {
+      "slug": "que-plataforma",
+      "text": "Que plataforma?",
+      "kind": "example"
+    },
+    {
+      "slug": "plataforma",
+      "text": "plataforma",
+      "kind": "example"
+    },
+    {
+      "slug": "comboio",
+      "text": "comboio",
+      "kind": "example"
+    },
+    {
+      "slug": "e-proibido",
+      "text": "É proibido.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-proibido-fumar",
+      "text": "É proibido fumar.",
+      "kind": "example"
+    },
+    {
+      "slug": "entrada-proibida",
+      "text": "Entrada proibida.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-e-proibido",
+      "text": "Não é proibido.",
+      "kind": "example"
+    },
+    {
+      "slug": "proibido",
+      "text": "proibido",
+      "kind": "example"
+    },
+    {
+      "slug": "isto-e-ridiculo",
+      "text": "Isto é ridículo.",
+      "kind": "example"
+    },
+    {
+      "slug": "que-ridiculo",
+      "text": "Que ridículo!",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-sejas-ridiculo",
+      "text": "Não sejas ridículo.",
+      "kind": "example"
+    },
+    {
+      "slug": "isto-e-mesmo-ridiculo",
+      "text": "Isto é mesmo ridículo.",
+      "kind": "example"
+    },
+    {
+      "slug": "ridiculo",
+      "text": "ridículo",
+      "kind": "example"
+    },
+    {
+      "slug": "ola-adeus",
+      "text": "Olá, adeus.",
+      "kind": "example"
+    },
+    {
+      "slug": "ola-bom-dia",
+      "text": "Olá, bom dia.",
+      "kind": "example"
+    },
+    {
+      "slug": "ola-tudo-bem",
+      "text": "Olá, tudo bem?",
+      "kind": "example"
+    },
+    {
+      "slug": "adeus-ate-logo",
+      "text": "Adeus, até logo.",
+      "kind": "example"
+    },
+    {
+      "slug": "ola",
+      "text": "olá",
+      "kind": "example"
+    },
+    {
+      "slug": "adeus",
+      "text": "adeus",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-inglesa",
+      "text": "Sou inglesa.",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-de-londres",
+      "text": "Sou de Londres.",
+      "kind": "example"
+    },
+    {
+      "slug": "um-dois-tres-quatro",
+      "text": "Um, dois, três, quatro.",
+      "kind": "example"
+    },
+    {
+      "slug": "um-cafe-por-favor",
+      "text": "Um café, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "dois-cafes-por-favor",
+      "text": "Dois cafés, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "tres-dias",
+      "text": "Três dias.",
+      "kind": "example"
+    },
+    {
+      "slug": "um",
+      "text": "um",
+      "kind": "example"
+    },
+    {
+      "slug": "dois",
+      "text": "dois",
+      "kind": "example"
+    },
+    {
+      "slug": "tu-dizes-sim-eu-digo-nao",
+      "text": "Tu dizes sim, eu digo não.",
+      "kind": "example"
+    },
+    {
+      "slug": "sim-por-favor",
+      "text": "Sim, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-obrigado",
+      "text": "Não, obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "sim-ou-nao",
+      "text": "Sim ou não?",
+      "kind": "example"
+    },
+    {
+      "slug": "sim",
+      "text": "sim",
+      "kind": "example"
+    },
+    {
+      "slug": "nao",
+      "text": "não",
+      "kind": "example"
+    },
+    {
+      "slug": "obrigado-pela-musica",
+      "text": "Obrigado pela música.",
+      "kind": "example"
+    },
+    {
+      "slug": "muito-obrigado",
+      "text": "Muito obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "obrigada-e-muito-simpatico",
+      "text": "Obrigada, é muito simpático.",
+      "kind": "example"
+    },
+    {
+      "slug": "obrigado-pelo-cafe",
+      "text": "Obrigado pelo café.",
+      "kind": "example"
+    },
+    {
+      "slug": "obrigado",
+      "text": "obrigado",
+      "kind": "example"
+    },
+    {
+      "slug": "obrigada",
+      "text": "obrigada",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-a-aprender-tenha-paciencia",
+      "text": "Estou a aprender. Tenha paciência.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-a-aprender-portugues",
+      "text": "Estou a aprender português.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenha-paciencia-por-favor",
+      "text": "Tenha paciência, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "falo-pouco-mas-estou-a-tentar",
+      "text": "Falo pouco, mas estou a tentar.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-a-aprender",
+      "text": "estou a aprender",
+      "kind": "example"
+    },
+    {
+      "slug": "paciencia",
+      "text": "paciência",
+      "kind": "example"
+    },
+    {
+      "slug": "ela-nao-e-casada",
+      "text": "Ela não é casada.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-tu-es-casado",
+      "text": "E tu, és casado?",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-solteiro-e-estou-bem-assim",
+      "text": "Sou solteiro, e estou bem assim.",
+      "kind": "example"
+    },
+    {
+      "slug": "trabalho-com-computadores",
+      "text": "Trabalho com computadores.",
+      "kind": "example"
+    },
+    {
+      "slug": "trabalho-aqui",
+      "text": "Trabalho aqui.",
+      "kind": "example"
+    },
+    {
+      "slug": "vens-comigo",
+      "text": "Vens comigo?",
+      "kind": "example"
+    },
+    {
+      "slug": "quantos-anos-tens",
+      "text": "Quantos anos tens?",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-dois-filhos",
+      "text": "Tenho dois filhos.",
+      "kind": "example"
+    },
+    {
+      "slug": "trinta",
+      "text": "trinta",
+      "kind": "example"
+    },
+    {
+      "slug": "quatro-casamentos-e-um-funeral",
+      "text": "Quatro casamentos e um funeral.",
+      "kind": "example"
+    },
+    {
+      "slug": "quatro-dias",
+      "text": "Quatro dias.",
+      "kind": "example"
+    },
+    {
+      "slug": "quatro-cafes-por-favor",
+      "text": "Quatro cafés, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "quatro-ou-cinco",
+      "text": "Quatro ou cinco?",
+      "kind": "example"
+    },
+    {
+      "slug": "quatro",
+      "text": "quatro",
+      "kind": "example"
+    },
+    {
+      "slug": "quatro-por-favor",
+      "text": "Quatro, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "seis-dias-sete-noites",
+      "text": "Seis dias, sete noites.",
+      "kind": "example"
+    },
+    {
+      "slug": "seis-dias-em-lisboa",
+      "text": "Seis dias em Lisboa.",
+      "kind": "example"
+    },
+    {
+      "slug": "sete-noites",
+      "text": "Sete noites.",
+      "kind": "example"
+    },
+    {
+      "slug": "seis-ou-sete",
+      "text": "Seis ou sete?",
+      "kind": "example"
+    },
+    {
+      "slug": "seis",
+      "text": "seis",
+      "kind": "example"
+    },
+    {
+      "slug": "o-dia",
+      "text": "o dia",
+      "kind": "example"
+    },
+    {
+      "slug": "oito-dias-por-semana",
+      "text": "Oito dias por semana.",
+      "kind": "example"
+    },
+    {
+      "slug": "duas-vezes-por-semana",
+      "text": "Duas vezes por semana.",
+      "kind": "example"
+    },
+    {
+      "slug": "oito-euros",
+      "text": "Oito euros.",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-semana-em-lisboa",
+      "text": "Uma semana em Lisboa.",
+      "kind": "example"
+    },
+    {
+      "slug": "oito",
+      "text": "oito",
+      "kind": "example"
+    },
+    {
+      "slug": "a-semana",
+      "text": "a semana",
+      "kind": "example"
+    },
+    {
+      "slug": "dez-coisas",
+      "text": "Dez coisas.",
+      "kind": "example"
+    },
+    {
+      "slug": "dez-euros",
+      "text": "Dez euros.",
+      "kind": "example"
+    },
+    {
+      "slug": "dez-minutos",
+      "text": "Dez minutos.",
+      "kind": "example"
+    },
+    {
+      "slug": "nove-ou-dez",
+      "text": "Nove ou dez?",
+      "kind": "example"
+    },
+    {
+      "slug": "dez",
+      "text": "dez",
+      "kind": "example"
+    },
+    {
+      "slug": "das-nove-as-cinco",
+      "text": "Das nove às cinco.",
+      "kind": "example"
+    },
+    {
+      "slug": "cinco-minutos",
+      "text": "Cinco minutos.",
+      "kind": "example"
+    },
+    {
+      "slug": "das-cinco-as-nove",
+      "text": "Das cinco às nove.",
+      "kind": "example"
+    },
+    {
+      "slug": "talvez-talvez-talvez",
+      "text": "Talvez, talvez, talvez.",
+      "kind": "example"
+    },
+    {
+      "slug": "talvez-amanha",
+      "text": "Talvez amanhã.",
+      "kind": "example"
+    },
+    {
+      "slug": "talvez-sim-talvez-nao",
+      "text": "Talvez sim, talvez não.",
+      "kind": "example"
+    },
+    {
+      "slug": "talvez-um-cafe",
+      "text": "Talvez um café?",
+      "kind": "example"
+    },
+    {
+      "slug": "talvez",
+      "text": "talvez",
+      "kind": "example"
+    },
+    {
+      "slug": "febre-de-sabado-a-noite",
+      "text": "Febre de Sábado à Noite.",
+      "kind": "example"
+    },
+    {
+      "slug": "sabado-a-noite",
+      "text": "Sábado à noite.",
+      "kind": "example"
+    },
+    {
+      "slug": "talvez-no-sabado",
+      "text": "Talvez no sábado.",
+      "kind": "example"
+    },
+    {
+      "slug": "sabado",
+      "text": "sábado",
+      "kind": "example"
+    },
+    {
+      "slug": "a-noite",
+      "text": "a noite",
+      "kind": "example"
+    },
+    {
+      "slug": "domingo-maldito-domingo",
+      "text": "Domingo, maldito domingo.",
+      "kind": "example"
+    },
+    {
+      "slug": "domingo-a-tarde",
+      "text": "Domingo à tarde.",
+      "kind": "example"
+    },
+    {
+      "slug": "sabado-ou-domingo",
+      "text": "Sábado ou domingo?",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-no-domingo-nao",
+      "text": "Não, no domingo não.",
+      "kind": "example"
+    },
+    {
+      "slug": "domingo",
+      "text": "domingo",
+      "kind": "example"
+    },
+    {
+      "slug": "futebol-praia-e-festas",
+      "text": "Futebol, praia e festas.",
+      "kind": "example"
+    },
+    {
+      "slug": "gosto-de-futebol",
+      "text": "Gosto de futebol.",
+      "kind": "example"
+    },
+    {
+      "slug": "vamos-a-praia",
+      "text": "Vamos à praia.",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-festas-todo-o-ano",
+      "text": "Há festas todo o ano.",
+      "kind": "example"
+    },
+    {
+      "slug": "futebol",
+      "text": "futebol",
+      "kind": "example"
+    },
+    {
+      "slug": "praia",
+      "text": "praia",
+      "kind": "example"
+    },
+    {
+      "slug": "festas",
+      "text": "festas",
+      "kind": "example"
+    },
+    {
+      "slug": "gosto-muito-disto",
+      "text": "Gosto muito disto.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-gosto-de-cafe",
+      "text": "Não gosto de café.",
+      "kind": "example"
+    },
+    {
+      "slug": "qual-e-o-teu-e-mail",
+      "text": "Qual é o teu e-mail?",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-tenho-e-mail-aqui",
+      "text": "Não tenho e-mail aqui.",
+      "kind": "example"
+    },
+    {
+      "slug": "qual-e-a-tua-morada",
+      "text": "Qual é a tua morada?",
+      "kind": "example"
+    },
+    {
+      "slug": "qual-e",
+      "text": "qual é",
+      "kind": "example"
+    },
+    {
+      "slug": "e-mail",
+      "text": "e-mail",
+      "kind": "example"
+    },
+    {
+      "slug": "porque-porque-quero",
+      "text": "Porquê? Porque quero.",
+      "kind": "example"
+    },
+    {
+      "slug": "ainda-estou-a-aprender",
+      "text": "Ainda estou a aprender.",
+      "kind": "example"
+    },
+    {
+      "slug": "porque-ainda-nao-percebi",
+      "text": "Porque ainda não percebi.",
+      "kind": "example"
+    },
+    {
+      "slug": "ainda",
+      "text": "ainda",
+      "kind": "example"
+    },
+    {
+      "slug": "e-pronto",
+      "text": "E pronto.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-pronto",
+      "text": "Estou pronto.",
+      "kind": "example"
+    },
+    {
+      "slug": "pronto-ja-esta",
+      "text": "Pronto, já está.",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-pronto",
+      "text": "Estás pronto?",
+      "kind": "example"
+    },
+    {
+      "slug": "pronto",
+      "text": "pronto",
+      "kind": "example"
+    },
+    {
+      "slug": "calma-nao-ha-pressa",
+      "text": "Calma, não há pressa.",
+      "kind": "example"
+    },
+    {
+      "slug": "esta-tudo-calmo",
+      "text": "Está tudo calmo.",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-vale-tarde-do-que-nunca",
+      "text": "Mais vale tarde do que nunca.",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-vale-agora",
+      "text": "Mais vale agora.",
+      "kind": "example"
+    },
+    {
+      "slug": "chego-tarde",
+      "text": "Chego tarde.",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-vale",
+      "text": "mais vale",
+      "kind": "example"
+    },
+    {
+      "slug": "tarde",
+      "text": "tarde",
+      "kind": "example"
+    },
+    {
+      "slug": "para-ja-tudo-bem",
+      "text": "Para já, tudo bem.",
+      "kind": "example"
+    },
+    {
+      "slug": "para-ja-nao",
+      "text": "Para já, não.",
+      "kind": "example"
+    },
+    {
+      "slug": "para-ja",
+      "text": "para já",
+      "kind": "example"
+    },
+    {
+      "slug": "e-muito-barulho-para-nada",
+      "text": "É muito barulho para nada.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-e-nada",
+      "text": "Não é nada.",
+      "kind": "example"
+    },
+    {
+      "slug": "muito-bem",
+      "text": "Muito bem.",
+      "kind": "example"
+    },
+    {
+      "slug": "muito",
+      "text": "muito",
+      "kind": "example"
+    },
+    {
+      "slug": "nada",
+      "text": "nada",
+      "kind": "example"
+    },
+    {
+      "slug": "la-vamos-nos",
+      "text": "Lá vamos nós.",
+      "kind": "example"
+    },
+    {
+      "slug": "esta-la",
+      "text": "Está lá?",
+      "kind": "example"
+    },
+    {
+      "slug": "vamos-la",
+      "text": "Vamos lá.",
+      "kind": "example"
+    },
+    {
+      "slug": "la",
+      "text": "lá",
+      "kind": "example"
+    },
+    {
+      "slug": "de-vez-em-quando",
+      "text": "De vez em quando.",
+      "kind": "example"
+    },
+    {
+      "slug": "quando-chegas",
+      "text": "Quando chegas?",
+      "kind": "example"
+    },
+    {
+      "slug": "as-vezes",
+      "text": "Às vezes.",
+      "kind": "example"
+    },
+    {
+      "slug": "vez",
+      "text": "vez",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-a-brincar",
+      "text": "Estás a brincar.",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-a-brincar-comigo",
+      "text": "Estás a brincar comigo?",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-a-falar-comigo",
+      "text": "Estás a falar comigo?",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-estou-a-brincar",
+      "text": "Não estou a brincar.",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-a",
+      "text": "estás a",
+      "kind": "example"
+    },
+    {
+      "slug": "brincar",
+      "text": "brincar",
+      "kind": "example"
+    },
+    {
+      "slug": "e-o-que-temos",
+      "text": "É o que temos.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-temos-mais",
+      "text": "Não temos mais.",
+      "kind": "example"
+    },
+    {
+      "slug": "temos-tempo",
+      "text": "Temos tempo.",
+      "kind": "example"
+    },
+    {
+      "slug": "temos-uma-mesa",
+      "text": "Temos uma mesa.",
+      "kind": "example"
+    },
+    {
+      "slug": "temos",
+      "text": "temos",
+      "kind": "example"
+    },
+    {
+      "slug": "sabe-se-la",
+      "text": "Sabe-se lá.",
+      "kind": "example"
+    },
+    {
+      "slug": "sabe-onde-e",
+      "text": "Sabe onde é?",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-sabe",
+      "text": "Não sabe.",
+      "kind": "example"
+    },
+    {
+      "slug": "sabe-a-que-horas-abre",
+      "text": "Sabe a que horas abre?",
+      "kind": "example"
+    },
+    {
+      "slug": "sabe",
+      "text": "sabe",
+      "kind": "example"
+    },
+    {
+      "slug": "foi-a-gota-de-agua",
+      "text": "Foi a gota de água.",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-agua-por-favor",
+      "text": "Uma água, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "nem-uma-gota",
+      "text": "Nem uma gota.",
+      "kind": "example"
+    },
+    {
+      "slug": "gota",
+      "text": "gota",
+      "kind": "example"
+    },
+    {
+      "slug": "falar-no-diabo-e-ele-aparece",
+      "text": "Falar no diabo e ele aparece.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-falo-portugues",
+      "text": "Não falo português.",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-falar-devagar",
+      "text": "Pode falar devagar?",
+      "kind": "example"
+    },
+    {
+      "slug": "quero-falar-contigo",
+      "text": "Quero falar contigo.",
+      "kind": "example"
+    },
+    {
+      "slug": "falar",
+      "text": "falar",
+      "kind": "example"
+    },
+    {
+      "slug": "ola-um-copo-de-vinho-por-favor",
+      "text": "Olá, um copo de vinho, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "ola-chamo-me-ana",
+      "text": "Olá, chamo-me Ana.",
+      "kind": "example"
+    },
+    {
+      "slug": "sim-uma-agua-por-favor",
+      "text": "Sim, uma água, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "cinco-euros-obrigado",
+      "text": "Cinco euros. Obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-percebi-tenha-paciencia",
+      "text": "Não percebi. Tenha paciência.",
+      "kind": "example"
+    },
+    {
+      "slug": "ola-silencio-desculpe",
+      "text": "Olá. Silêncio, desculpe.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-fome-adeus-na-mesma",
+      "text": "Tenho fome. Adeus na mesma.",
+      "kind": "example"
+    },
+    {
+      "slug": "sim-com-queijo",
+      "text": "Sim, com queijo.",
+      "kind": "example"
+    },
+    {
+      "slug": "sim-tres",
+      "text": "Sim, três.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-nao-tenho-fome",
+      "text": "Não, não tenho fome.",
+      "kind": "example"
+    },
+    {
+      "slug": "talvez-tenho-fome",
+      "text": "Talvez. Tenho fome.",
+      "kind": "example"
+    },
+    {
+      "slug": "gostava-de-te-ver-quando-quiseres",
+      "text": "Gostava de te ver quando quiseres.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-estou-nervoso",
+      "text": "Desculpa, estou nervoso.",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-perguntar-como-se-chama",
+      "text": "Posso perguntar como se chama?",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-feliz",
+      "text": "Estás feliz?",
+      "kind": "example"
+    },
+    {
+      "slug": "gostava-de-te-ver-agora",
+      "text": "Gostava de te ver agora.",
+      "kind": "example"
+    },
+    {
+      "slug": "foda-se-estou-nervoso",
+      "text": "Foda-se, estou nervoso.",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-dar-te-um-beijinho",
+      "text": "Posso dar-te um beijinho?",
+      "kind": "example"
+    },
+    {
+      "slug": "apetece-te-vir-comigo",
+      "text": "Apetece-te vir comigo?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-es-engracado",
+      "text": "Desculpa, és engraçado.",
+      "kind": "example"
+    },
+    {
+      "slug": "es-mesmo-engracado",
+      "text": "És mesmo engraçado.",
+      "kind": "example"
+    },
+    {
+      "slug": "es-feliz",
+      "text": "És feliz?",
+      "kind": "example"
+    },
+    {
+      "slug": "apetece-te-ir-agora",
+      "text": "Apetece-te ir agora?",
+      "kind": "example"
+    },
+    {
+      "slug": "es-um-grande-engracado",
+      "text": "És um grande engraçado.",
+      "kind": "example"
+    },
+    {
+      "slug": "hoje-nao-vou",
+      "text": "Hoje não vou.",
+      "kind": "example"
+    },
+    {
+      "slug": "isto-outra-vez",
+      "text": "Isto outra vez?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-estou-farto",
+      "text": "Desculpa, estou farto.",
+      "kind": "example"
+    },
+    {
+      "slug": "a-vida-e-uma-merda",
+      "text": "A vida é uma merda.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-podes-mudar-isto",
+      "text": "Não podes mudar isto.",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-vir-comigo-amanha",
+      "text": "Podes vir comigo amanhã?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-podes-dizer-outra-vez",
+      "text": "Desculpa. Podes dizer outra vez?",
+      "kind": "example"
+    },
+    {
+      "slug": "isso-e-mesmo-uma-boa-ideia",
+      "text": "Isso é mesmo uma boa ideia.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-vou-agora",
+      "text": "Não vou agora.",
+      "kind": "example"
+    },
+    {
+      "slug": "calma-diz-outra-vez",
+      "text": "Calma. Diz outra vez.",
+      "kind": "example"
+    },
+    {
+      "slug": "chamo-me-ana-como-se-chama-isto",
+      "text": "Chamo-me Ana. Como se chama isto?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-preciso-de-ajuda",
+      "text": "Desculpa, preciso de ajuda.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-agora-nao",
+      "text": "Desculpa, agora não.",
+      "kind": "example"
+    },
+    {
+      "slug": "calma-nao-vou",
+      "text": "Calma. Não vou.",
+      "kind": "example"
+    },
+    {
+      "slug": "amanha-boa-ideia",
+      "text": "Amanhã? Boa ideia.",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-mesmo",
+      "text": "Podes mesmo?",
+      "kind": "example"
+    },
+    {
+      "slug": "podes-vir-sempre",
+      "text": "Podes vir sempre.",
+      "kind": "example"
+    },
+    {
+      "slug": "calma-era-uma-piada",
+      "text": "Calma. Era uma piada.",
+      "kind": "example"
+    },
+    {
+      "slug": "peco-sempre-desculpa",
+      "text": "Peço sempre desculpa.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-mesmo-verdade",
+      "text": "É mesmo verdade?",
+      "kind": "example"
+    },
+    {
+      "slug": "aproveita-agora",
+      "text": "Aproveita agora.",
+      "kind": "example"
+    },
+    {
+      "slug": "precisas-de-vir-comigo",
+      "text": "Precisas de vir comigo?",
+      "kind": "example"
+    },
+    {
+      "slug": "ate-amanha-de-manha",
+      "text": "Até amanhã de manhã.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-ha-um-problema",
+      "text": "Desculpa, há um problema?",
+      "kind": "example"
+    },
+    {
+      "slug": "calma-esta-tudo-bem",
+      "text": "Calma, está tudo bem.",
+      "kind": "example"
+    },
+    {
+      "slug": "nem-tudo-dura-sempre",
+      "text": "Nem tudo dura sempre.",
+      "kind": "example"
+    },
+    {
+      "slug": "foda-se-tenho-uma-fome-de-lobo",
+      "text": "Foda-se, tenho uma fome de lobo.",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-oferecer-te-alguma-coisa",
+      "text": "Posso oferecer-te alguma coisa?",
+      "kind": "example"
+    },
+    {
+      "slug": "ligas-me-na-segunda-feira",
+      "text": "Ligas-me na segunda-feira?",
+      "kind": "example"
+    },
+    {
+      "slug": "traz-agua-contigo",
+      "text": "Traz água contigo.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-comboio-amanha",
+      "text": "O comboio amanhã.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpa-porta-errada",
+      "text": "Desculpa, porta errada.",
+      "kind": "example"
+    },
+    {
+      "slug": "a-agua-e-boa",
+      "text": "A água é boa.",
+      "kind": "example"
+    },
+    {
+      "slug": "a-luz-aqui-e-vida",
+      "text": "A luz aqui é vida.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-noite-agora",
+      "text": "É noite agora.",
+      "kind": "example"
+    },
+    {
+      "slug": "isto-e-ridiculo-estou-farto",
+      "text": "Isto é ridículo. Estou farto.",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-oferecer-te-uma-agua",
+      "text": "Posso oferecer-te uma água?",
+      "kind": "example"
+    },
+    {
+      "slug": "ligas-me-a-noite",
+      "text": "Ligas-me à noite?",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-ha-luz-e-tenho-fome",
+      "text": "Não há luz e tenho fome.",
+      "kind": "example"
+    },
+    {
+      "slug": "com-queijo-por-favor",
+      "text": "Com queijo, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "fala-ingles",
+      "text": "Fala inglês?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-nao-percebi-sou-ingles",
+      "text": "Desculpe, não percebi. Sou inglês.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-nao-percebi-sou-inglesa",
+      "text": "Desculpe, não percebi. Sou inglesa.",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia",
+      "text": "Bom dia.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde",
+      "text": "Boa tarde.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-obrigado",
+      "text": "Boa tarde. Obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-obrigada",
+      "text": "Boa tarde. Obrigada.",
+      "kind": "example"
+    },
+    {
+      "slug": "um-dois-tres-quatro-cinco",
+      "text": "um, dois, três, quatro, cinco",
+      "kind": "example"
+    },
+    {
+      "slug": "seis-sete-oito-nove-dez",
+      "text": "seis, sete, oito, nove, dez",
+      "kind": "example"
+    },
+    {
+      "slug": "onze-doze-treze-catorze-quinze",
+      "text": "onze, doze, treze, catorze, quinze",
+      "kind": "example"
+    },
+    {
+      "slug": "dezasseis-dezassete-dezoito-dezanove-vinte",
+      "text": "dezasseis, dezassete, dezoito, dezanove, vinte",
+      "kind": "example"
+    },
+    {
+      "slug": "sao-dezasseis-euros",
+      "text": "São dezasseis euros.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-ca-de-ferias",
+      "text": "Estou cá de férias.",
+      "kind": "example"
+    },
+    {
+      "slug": "chamo-me-ana-sou-de-londres",
+      "text": "Chamo-me Ana. Sou de Londres.",
+      "kind": "example"
+    },
+    {
+      "slug": "informacao",
+      "text": "informação",
+      "kind": "example"
+    },
+    {
+      "slug": "situacao",
+      "text": "situação",
+      "kind": "example"
+    },
+    {
+      "slug": "confirmacao",
+      "text": "confirmação",
+      "kind": "example"
+    },
+    {
+      "slug": "entao",
+      "text": "Então…",
+      "kind": "example"
+    },
+    {
+      "slug": "pois",
+      "text": "Pois…",
+      "kind": "example"
+    },
+    {
+      "slug": "enfim",
+      "text": "Enfim…",
+      "kind": "example"
+    },
+    {
+      "slug": "a-serio",
+      "text": "A sério?",
+      "kind": "example"
+    },
+    {
+      "slug": "que-bom",
+      "text": "Que bom!",
+      "kind": "example"
+    },
+    {
+      "slug": "que-pena",
+      "text": "Que pena.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-canja",
+      "text": "É canja",
+      "kind": "example"
+    },
+    {
+      "slug": "caiu-a-ficha",
+      "text": "Caiu a ficha",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-preciso-de-um-numero-de-contribuinte",
+      "text": "Bom dia. Preciso de um número de contribuinte.",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-estrangeiro-e-vivo-ca-agora",
+      "text": "Sou estrangeiro e vivo cá agora.",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-estrangeira-e-vivo-ca-agora",
+      "text": "Sou estrangeira e vivo cá agora.",
+      "kind": "example"
+    },
+    {
+      "slug": "trouxe-o-passaporte-e-um-comprovativo-de-morada",
+      "text": "Trouxe o passaporte e um comprovativo de morada.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-nao-percebi-pode-repetir-mais-devagar",
+      "text": "Desculpe, não percebi. Pode repetir mais devagar?",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-de-voltar-noutro-dia",
+      "text": "Tenho de voltar noutro dia?",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-queria-abrir-uma-conta",
+      "text": "Bom dia. Queria abrir uma conta.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-nif-e-comprovativo-de-morada",
+      "text": "Tenho NIF e comprovativo de morada.",
+      "kind": "example"
+    },
+    {
+      "slug": "trabalho-por-conta-propria",
+      "text": "Trabalho por conta própria.",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-explicar-outra-vez-por-favor",
+      "text": "Pode explicar outra vez, por favor?",
+      "kind": "example"
+    },
+    {
+      "slug": "quando-e-que-recebo-o-cartao",
+      "text": "Quando é que recebo o cartão?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-queria-um-cartao-com-numero-portugues",
+      "text": "Boa tarde. Queria um cartão com número português.",
+      "kind": "example"
+    },
+    {
+      "slug": "quanto-e-por-mes",
+      "text": "Quanto é por mês?",
+      "kind": "example"
+    },
+    {
+      "slug": "tem-alguma-coisa-sem-fidelizacao",
+      "text": "Tem alguma coisa sem fidelização?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-pagar-com-cartao",
+      "text": "Posso pagar com cartão?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-pode-repetir",
+      "text": "Desculpe, pode repetir?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-venho-ver-o-apartamento",
+      "text": "Boa tarde. Venho ver o apartamento.",
+      "kind": "example"
+    },
+    {
+      "slug": "qual-e-a-renda-por-mes",
+      "text": "Qual é a renda por mês?",
+      "kind": "example"
+    },
+    {
+      "slug": "as-despesas-estao-incluidas",
+      "text": "As despesas estão incluídas?",
+      "kind": "example"
+    },
+    {
+      "slug": "quantos-meses-de-caucao",
+      "text": "Quantos meses de caução?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-pensar-e-ligar-amanha",
+      "text": "Posso pensar e ligar amanhã?",
+      "kind": "example"
+    },
+    {
+      "slug": "antes-de-assinar-tenho-algumas-perguntas",
+      "text": "Antes de assinar, tenho algumas perguntas.",
+      "kind": "example"
+    },
+    {
+      "slug": "por-quanto-tempo-e-o-contrato",
+      "text": "Por quanto tempo é o contrato?",
+      "kind": "example"
+    },
+    {
+      "slug": "como-e-que-devolvem-a-caucao",
+      "text": "Como é que devolvem a caução?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-escrever-isso-por-favor",
+      "text": "Pode escrever isso, por favor?",
+      "kind": "example"
+    },
+    {
+      "slug": "preciso-de-ler-com-calma",
+      "text": "Preciso de ler com calma.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-queria-por-a-luz-em-meu-nome",
+      "text": "Boa tarde. Queria pôr a luz em meu nome.",
+      "kind": "example"
+    },
+    {
+      "slug": "mudei-me-para-uma-casa-nova",
+      "text": "Mudei-me para uma casa nova.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-o-numero-do-contador-aqui",
+      "text": "Tenho o número do contador aqui.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-a-ligacao-esta-ma-pode-repetir",
+      "text": "Desculpe, a ligação está má. Pode repetir?",
+      "kind": "example"
+    },
+    {
+      "slug": "a-partir-de-quando-e-que-fica-ativo",
+      "text": "A partir de quando é que fica ativo?",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-queria-inscrever-me-no-centro-de-saude",
+      "text": "Bom dia. Queria inscrever-me no centro de saúde.",
+      "kind": "example"
+    },
+    {
+      "slug": "ainda-nao-tenho-numero-de-utente",
+      "text": "Ainda não tenho número de utente.",
+      "kind": "example"
+    },
+    {
+      "slug": "trouxe-o-nif-e-o-atestado-de-residencia",
+      "text": "Trouxe o NIF e o atestado de residência.",
+      "kind": "example"
+    },
+    {
+      "slug": "como-e-que-marco-uma-consulta",
+      "text": "Como é que marco uma consulta?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-pode-escrever-o-nome",
+      "text": "Desculpe, pode escrever o nome?",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-onde-tiro-a-senha",
+      "text": "Bom dia. Onde tiro a senha?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-para-o-registo-civil",
+      "text": "É para o registo civil.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-este-numero-e-o-meu",
+      "text": "Desculpe, este número é o meu?",
+      "kind": "example"
+    },
+    {
+      "slug": "quanto-tempo-e-a-espera",
+      "text": "Quanto tempo é a espera?",
+      "kind": "example"
+    },
+    {
+      "slug": "volto-ja",
+      "text": "Volto já.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-ainda-esta-a-venda",
+      "text": "Boa tarde. Ainda está à venda?",
+      "kind": "example"
+    },
+    {
+      "slug": "quantos-quilometros-tem",
+      "text": "Quantos quilómetros tem?",
+      "kind": "example"
+    },
+    {
+      "slug": "tem-a-inspecao-em-dia",
+      "text": "Tem a inspeção em dia?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-dar-uma-volta",
+      "text": "Posso dar uma volta?",
+      "kind": "example"
+    },
+    {
+      "slug": "fazemos-a-transferencia-quando",
+      "text": "Fazemos a transferência quando?",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-queria-inscrever-o-meu-filho",
+      "text": "Bom dia. Queria inscrever o meu filho.",
+      "kind": "example"
+    },
+    {
+      "slug": "ele-tem-seis-anos",
+      "text": "Ele tem seis anos.",
+      "kind": "example"
+    },
+    {
+      "slug": "ainda-nao-fala-portugues",
+      "text": "Ainda não fala português.",
+      "kind": "example"
+    },
+    {
+      "slug": "quais-sao-os-documentos-necessarios",
+      "text": "Quais são os documentos necessários?",
+      "kind": "example"
+    },
+    {
+      "slug": "quando-e-que-sabemos",
+      "text": "Quando é que sabemos?",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-sou-o-novo-vizinho-do-terceiro",
+      "text": "Bom dia, sou o novo vizinho do terceiro.",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-sou-a-nova-vizinha-do-terceiro",
+      "text": "Bom dia, sou a nova vizinha do terceiro.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-o-barulho-de-ontem",
+      "text": "Desculpe o barulho de ontem.",
+      "kind": "example"
+    },
+    {
+      "slug": "recebeu-uma-encomenda-para-mim",
+      "text": "Recebeu uma encomenda para mim?",
+      "kind": "example"
+    },
+    {
+      "slug": "se-precisar-de-alguma-coisa-diga",
+      "text": "Se precisar de alguma coisa, diga.",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-o-novo-vizinho-do-terceiro",
+      "text": "Sou o novo vizinho do terceiro.",
+      "kind": "example"
+    },
+    {
+      "slug": "sou-a-nova-vizinha-do-terceiro",
+      "text": "Sou a nova vizinha do terceiro.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-costume-por-favor",
+      "text": "O costume, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "hoje-e-diferente-um-galao-se-faz-favor",
+      "text": "Hoje é diferente — um galão, se faz favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-pagar-tudo-no-fim-da-semana",
+      "text": "Posso pagar tudo no fim da semana?",
+      "kind": "example"
+    },
+    {
+      "slug": "como-esta-a-familia",
+      "text": "Como está a família?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-queria-um-passe-navegante",
+      "text": "Boa tarde. Queria um passe Navegante.",
+      "kind": "example"
+    },
+    {
+      "slug": "preciso-de-foto",
+      "text": "Preciso de foto?",
+      "kind": "example"
+    },
+    {
+      "slug": "serve-para-o-comboio-tambem",
+      "text": "Serve para o comboio também?",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-e-que-carrego",
+      "text": "Onde é que carrego?",
+      "kind": "example"
+    },
+    {
+      "slug": "quanto-custa-por-mes",
+      "text": "Quanto custa por mês?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-quanto-e-uma-maquina",
+      "text": "Boa tarde. Quanto é uma máquina?",
+      "kind": "example"
+    },
+    {
+      "slug": "tem-detergente-a-venda",
+      "text": "Tem detergente à venda?",
+      "kind": "example"
+    },
+    {
+      "slug": "quanto-tempo-demora",
+      "text": "Quanto tempo demora?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-deixar-e-voltar",
+      "text": "Posso deixar e voltar?",
+      "kind": "example"
+    },
+    {
+      "slug": "a-que-horas-fecham",
+      "text": "A que horas fecham?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-preciso-de-marcacao",
+      "text": "Boa tarde. Preciso de marcação?",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-cortar-o-cabelo-nao-muito-curto",
+      "text": "Queria cortar o cabelo, não muito curto.",
+      "kind": "example"
+    },
+    {
+      "slug": "so-as-pontas-por-favor",
+      "text": "Só as pontas, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "assim-esta-bom-obrigado",
+      "text": "Assim está bom, obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "assim-esta-bom-obrigada",
+      "text": "Assim está bom, obrigada.",
+      "kind": "example"
+    },
+    {
+      "slug": "um-bocadinho-mais-atras",
+      "text": "Um bocadinho mais atrás.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-queria-inscrever-me-por-tres-meses",
+      "text": "Boa tarde. Queria inscrever-me por três meses.",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-fidelizacao",
+      "text": "Há fidelização?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-cancelar-quando-quiser",
+      "text": "Posso cancelar quando quiser?",
+      "kind": "example"
+    },
+    {
+      "slug": "qual-e-a-joia-de-inscricao",
+      "text": "Qual é a joia de inscrição?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-experimentar-primeiro",
+      "text": "Posso experimentar primeiro?",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-trezentos-gramas-por-favor",
+      "text": "Bom dia. Trezentos gramas, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "um-bocadinho-mais",
+      "text": "Um bocadinho mais.",
+      "kind": "example"
+    },
+    {
+      "slug": "assim-chega",
+      "text": "Assim chega.",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-amanhar-o-peixe",
+      "text": "Pode amanhar o peixe?",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-nada-obrigado",
+      "text": "Mais nada, obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-nada-obrigada",
+      "text": "Mais nada, obrigada.",
+      "kind": "example"
+    },
+    {
+      "slug": "trezentos-gramas-por-favor",
+      "text": "Trezentos gramas, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-veio-uma-encomenda-para-mim",
+      "text": "Boa tarde. Veio uma encomenda para mim?",
+      "kind": "example"
+    },
+    {
+      "slug": "em-nome-de-silva",
+      "text": "Em nome de Silva.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-o-codigo-aqui",
+      "text": "Tenho o código aqui.",
+      "kind": "example"
+    },
+    {
+      "slug": "ate-que-dia-posso-levantar",
+      "text": "Até que dia posso levantar?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-pode-repetir-o-numero",
+      "text": "Desculpe, pode repetir o número?",
+      "kind": "example"
+    },
+    {
+      "slug": "veio-uma-encomenda-para-mim",
+      "text": "Veio uma encomenda para mim?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-isto-tem-arranjo",
+      "text": "Boa tarde. Isto tem arranjo?",
+      "kind": "example"
+    },
+    {
+      "slug": "vale-a-pena-arranjar",
+      "text": "Vale a pena arranjar?",
+      "kind": "example"
+    },
+    {
+      "slug": "quanto-fica",
+      "text": "Quanto fica?",
+      "kind": "example"
+    },
+    {
+      "slug": "para-quando-fica-pronto",
+      "text": "Para quando fica pronto?",
+      "kind": "example"
+    },
+    {
+      "slug": "deixo-aqui-entao",
+      "text": "Deixo aqui, então.",
+      "kind": "example"
+    },
+    {
+      "slug": "isto-tem-arranjo",
+      "text": "Isto tem arranjo?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-queria-inscrever-me-nas-aulas-de-portugues",
+      "text": "Boa tarde. Queria inscrever-me nas aulas de português.",
+      "kind": "example"
+    },
+    {
+      "slug": "que-nivel-me-recomenda",
+      "text": "Que nível me recomenda?",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-turmas-a-noite",
+      "text": "Há turmas à noite?",
+      "kind": "example"
+    },
+    {
+      "slug": "quando-comeca-o-proximo-curso",
+      "text": "Quando começa o próximo curso?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-assistir-a-uma-aula-primeiro",
+      "text": "Posso assistir a uma aula primeiro?",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-inscrever-me-nas-aulas-de-portugues",
+      "text": "Queria inscrever-me nas aulas de português.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-noite-uma-mesa-para-dois-por-favor",
+      "text": "Boa noite. Uma mesa para dois, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-temos-reserva-ha-muita-espera",
+      "text": "Não temos reserva. Há muita espera?",
+      "kind": "example"
+    },
+    {
+      "slug": "podemos-ficar-la-fora",
+      "text": "Podemos ficar lá fora?",
+      "kind": "example"
+    },
+    {
+      "slug": "so-um-momento-ainda-nao-escolhemos",
+      "text": "Só um momento, ainda não escolhemos.",
+      "kind": "example"
+    },
+    {
+      "slug": "o-couvert-nao-pedimos-pode-levar",
+      "text": "O couvert não pedimos, pode levar.",
+      "kind": "example"
+    },
+    {
+      "slug": "a-conta-por-favor",
+      "text": "A conta, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "podemos-pagar-com-cartao",
+      "text": "Podemos pagar com cartão?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-dividir-em-dois",
+      "text": "Pode dividir em dois?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-isto-o-que-e",
+      "text": "Desculpe, isto o que é?",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-dois-bilhetes-por-favor",
+      "text": "Bom dia. Dois bilhetes, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "a-fila-e-aqui",
+      "text": "A fila é aqui?",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-desconto-para-estudantes",
+      "text": "Há desconto para estudantes?",
+      "kind": "example"
+    },
+    {
+      "slug": "a-que-horas-fecha",
+      "text": "A que horas fecha?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-pode-escrever",
+      "text": "Desculpe, pode escrever?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-pode-tirar-nos-uma-foto",
+      "text": "Desculpe, pode tirar-nos uma foto?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-so-carregar-aqui",
+      "text": "É só carregar aqui.",
+      "kind": "example"
+    },
+    {
+      "slug": "com-o-castelo-atras-se-faz-favor",
+      "text": "Com o castelo atrás, se faz favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-tirar-mais-uma",
+      "text": "Pode tirar mais uma?",
+      "kind": "example"
+    },
+    {
+      "slug": "muito-obrigado-ficou-otima",
+      "text": "Muito obrigado, ficou ótima.",
+      "kind": "example"
+    },
+    {
+      "slug": "muito-obrigada-ficou-otima",
+      "text": "Muito obrigada, ficou ótima.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-para-a-rua-garrett-por-favor",
+      "text": "Boa tarde. Para a Rua Garrett, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "sabe-onde-fica",
+      "text": "Sabe onde fica?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-parar-aqui-por-favor",
+      "text": "Pode parar aqui, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "aceita-cartao",
+      "text": "Aceita cartão?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-onde-fica-o-chiado",
+      "text": "Desculpe, onde fica o Chiado?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-longe-daqui",
+      "text": "É longe daqui?",
+      "kind": "example"
+    },
+    {
+      "slug": "a-esquerda-ou-a-direita",
+      "text": "À esquerda ou à direita?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-mostrar-me-no-mapa",
+      "text": "Pode mostrar-me no mapa?",
+      "kind": "example"
+    },
+    {
+      "slug": "muito-obrigado-foi-simpatico",
+      "text": "Muito obrigado, foi simpático.",
+      "kind": "example"
+    },
+    {
+      "slug": "muito-obrigada-foi-simpatico",
+      "text": "Muito obrigada, foi simpático.",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-quanto-e-ao-quilo",
+      "text": "Bom dia. Quanto é ao quilo?",
+      "kind": "example"
+    },
+    {
+      "slug": "meio-quilo-por-favor",
+      "text": "Meio quilo, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "assim-chega-obrigado",
+      "text": "Assim chega, obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "assim-chega-obrigada",
+      "text": "Assim chega, obrigada.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-para-levar",
+      "text": "É para levar.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-noite-queria-reservar-uma-mesa-para-as-nove",
+      "text": "Boa noite. Queria reservar uma mesa para as nove.",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-consumo-minimo",
+      "text": "Há consumo mínimo?",
+      "kind": "example"
+    },
+    {
+      "slug": "a-que-horas-comeca-o-fado",
+      "text": "A que horas começa o fado?",
+      "kind": "example"
+    },
+    {
+      "slug": "fica-se-em-silencio-durante-o-fado",
+      "text": "Fica-se em silêncio durante o fado?",
+      "kind": "example"
+    },
+    {
+      "slug": "foi-lindo-obrigado",
+      "text": "Foi lindo. Obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "foi-lindo-obrigada",
+      "text": "Foi lindo. Obrigada.",
+      "kind": "example"
+    },
+    {
+      "slug": "um-bilhete-para-sintra-ida-e-volta",
+      "text": "Um bilhete para Sintra, ida e volta.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-de-validar-aqui",
+      "text": "Tenho de validar aqui?",
+      "kind": "example"
+    },
+    {
+      "slug": "de-que-linha-parte",
+      "text": "De que linha parte?",
+      "kind": "example"
+    },
+    {
+      "slug": "o-proximo-e-a-que-horas",
+      "text": "O próximo é a que horas?",
+      "kind": "example"
+    },
+    {
+      "slug": "este-comboio-vai-a-sintra",
+      "text": "Este comboio vai a Sintra?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-alergia-nao-e-preferencia",
+      "text": "É alergia, não é preferência.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-posso-comer-gluten",
+      "text": "Não posso comer glúten.",
+      "kind": "example"
+    },
+    {
+      "slug": "isto-leva-peixe",
+      "text": "Isto leva peixe?",
+      "kind": "example"
+    },
+    {
+      "slug": "tem-alguma-coisa-sem-carne",
+      "text": "Tem alguma coisa sem carne?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-perguntar-na-cozinha",
+      "text": "Pode perguntar na cozinha?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-onde-e-o-metro",
+      "text": "Desculpe, onde é o metro?",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-um-cartao-viva-viagem-por-favor",
+      "text": "Queria um cartão Viva Viagem, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "como-e-que-carrego-o-cartao",
+      "text": "Como é que carrego o cartão?",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-e-que-mudo-para-a-linha-verde",
+      "text": "Onde é que mudo para a linha verde?",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-e-a-paragem-do-aerobus",
+      "text": "Onde é a paragem do Aerobus?",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-ou-menos-quanto-custa-um-taxi-ate-a-baixa",
+      "text": "Mais ou menos, quanto custa um táxi até à Baixa?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-mostrar-me-por-favor",
+      "text": "Pode mostrar-me, por favor?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-tenho-uma-reserva-para-duas-noites",
+      "text": "Boa tarde. Tenho uma reserva para duas noites.",
+      "kind": "example"
+    },
+    {
+      "slug": "esta-em-nome-de-smith",
+      "text": "Está em nome de Smith.",
+      "kind": "example"
+    },
+    {
+      "slug": "qual-e-a-palavra-passe-do-wi-fi",
+      "text": "Qual é a palavra-passe do wi-fi?",
+      "kind": "example"
+    },
+    {
+      "slug": "a-que-horas-e-o-pequeno-almoco",
+      "text": "A que horas é o pequeno-almoço?",
+      "kind": "example"
+    },
+    {
+      "slug": "ate-que-horas-temos-de-deixar-o-quarto",
+      "text": "Até que horas temos de deixar o quarto?",
+      "kind": "example"
+    },
+    {
+      "slug": "podemos-deixar-as-malas-aqui-ate-a-tarde",
+      "text": "Podemos deixar as malas aqui até à tarde?",
+      "kind": "example"
+    },
+    {
+      "slug": "o-codigo-da-porta-nao-esta-a-funcionar",
+      "text": "O código da porta não está a funcionar.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-uma-reserva-para-duas-noites",
+      "text": "Tenho uma reserva para duas noites.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-onde-e-a-casa-de-banho",
+      "text": "Desculpe, onde é a casa de banho?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-usar-a-casa-de-banho",
+      "text": "Posso usar a casa de banho?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-so-para-clientes",
+      "text": "É só para clientes?",
+      "kind": "example"
+    },
+    {
+      "slug": "entao-um-cafe-por-favor",
+      "text": "Então, um café, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-preciso-pedir-a-chave",
+      "text": "É preciso pedir a chave?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-nao-ha-papel",
+      "text": "Desculpe, não há papel.",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-queria-um-cartao-sim-pre-pago",
+      "text": "Boa tarde. Queria um cartão SIM pré-pago.",
+      "kind": "example"
+    },
+    {
+      "slug": "tem-tarifarios-para-turistas",
+      "text": "Tem tarifários para turistas?",
+      "kind": "example"
+    },
+    {
+      "slug": "quantos-gigas-tem",
+      "text": "Quantos gigas tem?",
+      "kind": "example"
+    },
+    {
+      "slug": "tambem-tem-esim",
+      "text": "Também têm eSIM?",
+      "kind": "example"
+    },
+    {
+      "slug": "precisa-do-meu-passaporte",
+      "text": "Precisa do meu passaporte?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-ajudar-me-a-ativar",
+      "text": "Pode ajudar-me a ativar?",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-um-cartao-sim-pre-pago",
+      "text": "Queria um cartão SIM pré-pago.",
+      "kind": "example"
+    },
+    {
+      "slug": "socorro-preciso-de-ajuda",
+      "text": "Socorro! Preciso de ajuda!",
+      "kind": "example"
+    },
+    {
+      "slug": "chame-uma-ambulancia-por-favor",
+      "text": "Chame uma ambulância, por favor!",
+      "kind": "example"
+    },
+    {
+      "slug": "liguem-para-o-112",
+      "text": "Liguem para o 112!",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-fica-a-urgencia-mais-proxima",
+      "text": "Onde fica a urgência mais próxima?",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-seguro-de-viagem",
+      "text": "Tenho seguro de viagem.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-e-urgente-ha-uma-farmacia-de-servico",
+      "text": "Não é urgente. Há uma farmácia de serviço?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-ir-a-um-centro-de-saude",
+      "text": "Posso ir a um centro de saúde?",
+      "kind": "example"
+    },
+    {
+      "slug": "roubaram-me-a-carteira",
+      "text": "Roubaram-me a carteira.",
+      "kind": "example"
+    },
+    {
+      "slug": "roubaram-me-o-telemovel",
+      "text": "Roubaram-me o telemóvel.",
+      "kind": "example"
+    },
+    {
+      "slug": "foi-no-eletrico-28-ha-meia-hora",
+      "text": "Foi no elétrico 28, há meia hora.",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-e-a-esquadra-mais-proxima",
+      "text": "Onde é a esquadra mais próxima?",
+      "kind": "example"
+    },
+    {
+      "slug": "quero-apresentar-queixa",
+      "text": "Quero apresentar queixa.",
+      "kind": "example"
+    },
+    {
+      "slug": "preciso-de-uma-copia-para-o-seguro",
+      "text": "Preciso de uma cópia para o seguro.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-pode-falar-mais-devagar",
+      "text": "Desculpe, pode falar mais devagar?",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-obrigado-nao-preciso-de-saco",
+      "text": "Não, obrigado, não preciso de saco.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-obrigada-nao-preciso-de-saco",
+      "text": "Não, obrigada, não preciso de saco.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-de-pesar-a-fruta",
+      "text": "Tenho de pesar a fruta?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-ser-com-cartao",
+      "text": "Pode ser com cartão?",
+      "kind": "example"
+    },
+    {
+      "slug": "contribuinte-nao-obrigado",
+      "text": "Contribuinte? — Não, obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "contribuinte-nao-obrigada",
+      "text": "Contribuinte? — Não, obrigada.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-tenho-cartao",
+      "text": "Não tenho cartão.",
+      "kind": "example"
+    },
+    {
+      "slug": "sim-quero-o-talao-por-favor",
+      "text": "Sim, quero o talão, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "este-comboio-para-em-carcavelos",
+      "text": "Este comboio para em Carcavelos?",
+      "kind": "example"
+    },
+    {
+      "slug": "ainda-falta-muito-para-cascais",
+      "text": "Ainda falta muito para Cascais?",
+      "kind": "example"
+    },
+    {
+      "slug": "hoje-pode-se-tomar-banho",
+      "text": "Hoje pode-se tomar banho?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-tomar-conta-das-minhas-coisas-um-minuto",
+      "text": "Pode tomar conta das minhas coisas um minuto?",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-se-aluga-um-chapeu-de-sol",
+      "text": "Onde se aluga um chapéu de sol?",
+      "kind": "example"
+    },
+    {
+      "slug": "a-que-horas-e-o-ultimo-comboio-para-lisboa",
+      "text": "A que horas é o último comboio para Lisboa?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-qual-e-o-prato-do-dia",
+      "text": "Boa tarde. Qual é o prato do dia?",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que-e-que-recomenda",
+      "text": "O que é que recomenda?",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-meia-dose-por-favor",
+      "text": "Uma meia dose, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "meio-jarro-de-vinho-da-casa-tinto",
+      "text": "Meio jarro de vinho da casa, tinto.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-pode-dizer-outra-vez-mais-devagar",
+      "text": "Desculpe, pode dizer outra vez, mais devagar?",
+      "kind": "example"
+    },
+    {
+      "slug": "estava-tudo-otimo-obrigado",
+      "text": "Estava tudo ótimo, obrigado.",
+      "kind": "example"
+    },
+    {
+      "slug": "estava-tudo-otimo-obrigada",
+      "text": "Estava tudo ótimo, obrigada.",
+      "kind": "example"
+    },
+    {
+      "slug": "qual-e-o-prato-do-dia",
+      "text": "Qual é o prato do dia?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-ha-um-multibanco-aqui-perto",
+      "text": "Desculpe, há um multibanco aqui perto?",
+      "kind": "example"
+    },
+    {
+      "slug": "so-aceitam-dinheiro",
+      "text": "Só aceitam dinheiro?",
+      "kind": "example"
+    },
+    {
+      "slug": "o-cartao-nao-passou",
+      "text": "O cartão não passou.",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-tentar-outra-vez-por-favor",
+      "text": "Pode tentar outra vez, por favor?",
+      "kind": "example"
+    },
+    {
+      "slug": "entao-pago-em-dinheiro",
+      "text": "Então pago em dinheiro.",
+      "kind": "example"
+    },
+    {
+      "slug": "tem-troco-para-vinte-euros",
+      "text": "Tem troco para vinte euros?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-preciso-de-ajuda",
+      "text": "Boa tarde. Preciso de ajuda.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-me-sinto-bem",
+      "text": "Não me sinto bem.",
+      "kind": "example"
+    },
+    {
+      "slug": "tem-alguma-coisa-para-isto",
+      "text": "Tem alguma coisa para isto?",
+      "kind": "example"
+    },
+    {
+      "slug": "quantas-por-dia",
+      "text": "Quantas por dia?",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-me-sinto-bem-tem-alguma-coisa-para-isto",
+      "text": "Não me sinto bem. Tem alguma coisa para isto?",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-meia-de-leite",
+      "text": "Uma meia de leite.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-um-pastel-de-nata",
+      "text": "E um pastel de nata.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-para-aqui",
+      "text": "É para aqui.",
+      "kind": "example"
+    },
+    {
+      "slug": "um-cafe-e-um-pastel-de-nata-por-favor",
+      "text": "Um café e um pastel de nata, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-um-pao-por-favor",
+      "text": "Bom dia. Um pão, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "meia-duzia-de-pasteis-de-nata",
+      "text": "Meia dúzia de pastéis de nata.",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-alguma-coisa-nao-e-so-isso",
+      "text": "Mais alguma coisa? — Não, é só isso.",
+      "kind": "example"
+    },
+    {
+      "slug": "obrigado-bom-dia",
+      "text": "Obrigado. Bom dia.",
+      "kind": "example"
+    },
+    {
+      "slug": "obrigada-bom-dia",
+      "text": "Obrigada. Bom dia.",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-e-a-primeira-vez-que-venho-aqui",
+      "text": "Bom dia. É a primeira vez que venho aqui.",
+      "kind": "example"
+    },
+    {
+      "slug": "preciso-de-um-atestado-de-residencia",
+      "text": "Preciso de um atestado de residência.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-os-documentos-aqui",
+      "text": "Tenho os documentos aqui.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-pode-repetir-mais-devagar",
+      "text": "Desculpe, pode repetir mais devagar?",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-preciso-de-um-atestado-de-residencia",
+      "text": "Bom dia. Preciso de um atestado de residência.",
+      "kind": "example"
+    },
+    {
+      "slug": "este-vai-para-o-chiado",
+      "text": "Este vai para o Chiado?",
+      "kind": "example"
+    },
+    {
+      "slug": "um-bilhete-por-favor",
+      "text": "Um bilhete, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "com-licenca",
+      "text": "Com licença.",
+      "kind": "example"
+    },
+    {
+      "slug": "desco-na-proxima",
+      "text": "Desço na próxima.",
+      "kind": "example"
+    },
+    {
+      "slug": "obrigado-boa-tarde",
+      "text": "Obrigado, boa tarde.",
+      "kind": "example"
+    },
+    {
+      "slug": "obrigada-boa-tarde",
+      "text": "Obrigada, boa tarde.",
+      "kind": "example"
+    },
+    {
+      "slug": "onde-e-o-concerto",
+      "text": "Onde é o concerto?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-longe",
+      "text": "É longe?",
+      "kind": "example"
+    },
+    {
+      "slug": "a-que-horas-abre",
+      "text": "A que horas abre?",
+      "kind": "example"
+    },
+    {
+      "slug": "ainda-ha-bilhetes",
+      "text": "Ainda há bilhetes?",
+      "kind": "example"
+    },
+    {
+      "slug": "dois-se-faz-favor",
+      "text": "Dois, se faz favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "qual-e-a-linha-para-o-oriente",
+      "text": "Qual é a linha para o Oriente?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-a-linha-vermelha",
+      "text": "É a linha vermelha.",
+      "kind": "example"
+    },
+    {
+      "slug": "queres-vir-comigo-ao-concerto",
+      "text": "Queres vir comigo ao concerto?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-no-dia-tres",
+      "text": "É no dia três.",
+      "kind": "example"
+    },
+    {
+      "slug": "eu-compro-os-bilhetes",
+      "text": "Eu compro os bilhetes.",
+      "kind": "example"
+    },
+    {
+      "slug": "queres-vir-comigo-ao-concerto-no-dia-tres",
+      "text": "Queres vir comigo ao concerto no dia três?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-tem-mesa-para-dois-ao-almoco",
+      "text": "Boa tarde, tem mesa para dois ao almoço?",
+      "kind": "example"
+    },
+    {
+      "slug": "um-copo-de-tinto-e-um-pastel-de-bacalhau-por-favor",
+      "text": "Um copo de tinto e um pastel de bacalhau, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "a-que-horas-comeca-o-concerto-hoje",
+      "text": "A que horas começa o concerto hoje?",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-qual-e-o-pao-de-hoje",
+      "text": "Bom dia, qual é o pão de hoje?",
+      "kind": "example"
+    },
+    {
+      "slug": "qual-e-o-bolo-do-dia",
+      "text": "Qual é o bolo do dia?",
+      "kind": "example"
+    },
+    {
+      "slug": "importam-se-que-me-sente-aqui",
+      "text": "Importam-se que me sente aqui?",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que-e-que-me-aconselha-hoje",
+      "text": "O que é que me aconselha hoje?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-para-oferta-pode-embrulhar",
+      "text": "É para oferta, pode embrulhar?",
+      "kind": "example"
+    },
+    {
+      "slug": "ainda-ha-vagas-nas-aulas-de-portugues",
+      "text": "Ainda há vagas nas aulas de português?",
+      "kind": "example"
+    },
+    {
+      "slug": "ainda-ha-lugar-para-duas-pessoas",
+      "text": "Ainda há lugar para duas pessoas?",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-dose-de-sardinhas-se-faz-favor",
+      "text": "Uma dose de sardinhas, se faz favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-o-miradouro-e-por-aqui",
+      "text": "Desculpe, o miradouro é por aqui?",
+      "kind": "example"
+    },
+    {
+      "slug": "hoje-ha-fado-a-tarde",
+      "text": "Hoje há fado à tarde?",
+      "kind": "example"
+    },
+    {
+      "slug": "um-pastel-de-feijao-e-uma-bica-por-favor",
+      "text": "Um pastel de feijão e uma bica, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "quanto-custa-o-quilo-das-laranjas",
+      "text": "Quanto custa o quilo das laranjas?",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-dois-pasteis-de-nata-por-favor",
+      "text": "Queria dois pastéis de nata, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "qual-e-o-prato-do-dia-hoje",
+      "text": "Qual é o prato do dia hoje?",
+      "kind": "example"
+    },
+    {
+      "slug": "que-tinto-me-recomenda-ate-quinze-euros",
+      "text": "Que tinto me recomenda até quinze euros?",
+      "kind": "example"
+    },
+    {
+      "slug": "um-bilhete-por-favor-ha-desconto-para-estudantes",
+      "text": "Um bilhete, por favor. Há desconto para estudantes?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-cortar-isto-em-bifes-finos-por-favor",
+      "text": "Pode cortar isto em bifes finos, por favor?",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-dose-da-para-duas-pessoas",
+      "text": "Uma dose dá para duas pessoas?",
+      "kind": "example"
+    },
+    {
+      "slug": "so-aparar-por-favor-nao-muito-curto",
+      "text": "Só aparar, por favor. Não muito curto.",
+      "kind": "example"
+    },
+    {
+      "slug": "tem-aulas-para-principiantes-esta-semana",
+      "text": "Têm aulas para principiantes esta semana?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-a-primeira-vez-que-venho-ca",
+      "text": "É a primeira vez que venho cá.",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-trazer-a-conta-se-faz-favor",
+      "text": "Pode trazer a conta, se faz favor?",
+      "kind": "example"
+    },
+    {
+      "slug": "quanto-e-a-entrada-hoje-a-noite",
+      "text": "Quanto é a entrada hoje à noite?",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-tirar-fotografias-as-obras",
+      "text": "Posso tirar fotografias às obras?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-onde-fica-a-biblioteca-de-marvila",
+      "text": "Desculpe, onde fica a Biblioteca de Marvila?",
+      "kind": "example"
+    },
+    {
+      "slug": "um-pratinho-de-caracois-e-uma-imperial-por-favor",
+      "text": "Um pratinho de caracóis e uma imperial, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-queria-meio-quilo-de-carapaus-se-faz-favor",
+      "text": "Bom dia, queria meio quilo de carapaus, se faz favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-que-pao-e-que-fizeram-hoje",
+      "text": "Bom dia! Que pão é que fizeram hoje?",
+      "kind": "example"
+    },
+    {
+      "slug": "um-galao-e-uma-torrada-por-favor",
+      "text": "Um galão e uma torrada, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-os-barcos-ja-chegaram",
+      "text": "Bom dia! Os barcos já chegaram?",
+      "kind": "example"
+    },
+    {
+      "slug": "que-peixe-e-que-chegou-hoje",
+      "text": "Que peixe é que chegou hoje?",
+      "kind": "example"
+    },
+    {
+      "slug": "a-caldeirada-da-para-duas-pessoas",
+      "text": "A caldeirada dá para duas pessoas?",
+      "kind": "example"
+    },
+    {
+      "slug": "que-vinho-a-copo-e-que-me-aconselha",
+      "text": "Que vinho a copo é que me aconselha?",
+      "kind": "example"
+    },
+    {
+      "slug": "a-que-horas-comeca-a-musica-hoje",
+      "text": "A que horas começa a música hoje?",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-bica-e-uma-queijada-por-favor",
+      "text": "Uma bica e uma queijada, por favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-amanhar-o-peixe-se-faz-favor",
+      "text": "Pode amanhar o peixe, se faz favor?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-para-a-praia-da-poca-e-por-aqui",
+      "text": "Desculpe, para a Praia da Poça é por aqui?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-tirar-nos-uma-fotografia-se-faz-favor",
+      "text": "Pode tirar-nos uma fotografia, se faz favor?",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-uma-bica-e-uma-tosta-mista-se-faz-favor",
+      "text": "Bom dia! Uma bica e uma tosta mista, se faz favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "que-pao-e-que-tem-hoje",
+      "text": "Que pão é que tem hoje?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-a-minha-primeira-vez-ha-aulas-para-principiantes-amanha",
+      "text": "É a minha primeira vez. Há aulas para principiantes amanhã?",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-duas-bolas-de-berlim-para-levar-se-faz-favor",
+      "text": "Queria duas bolas de Berlim para levar, se faz favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "que-pao-e-que-acabou-de-sair-do-forno",
+      "text": "Que pão é que acabou de sair do forno?",
+      "kind": "example"
+    },
+    {
+      "slug": "que-bolo-e-que-ha-hoje",
+      "text": "Que bolo é que há hoje?",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-a-que-horas-e-a-mare-baixa-hoje",
+      "text": "Desculpe, a que horas é a maré baixa hoje?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-queria-um-bilhete-para-o-rossio-se-faz-favor",
+      "text": "Boa tarde, queria um bilhete para o Rossio, se faz favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-queria-meia-duzia-de-queijadas-para-levar",
+      "text": "Bom dia, queria meia dúzia de queijadas para levar.",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-um-travesseiro-para-comer-aqui-e-quatro-para-levar",
+      "text": "Queria um travesseiro para comer aqui e quatro para levar.",
+      "kind": "example"
+    },
+    {
+      "slug": "desculpe-esta-agua-e-boa-para-beber",
+      "text": "Desculpe, esta água é boa para beber?",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que-e-que-ha-hoje-de-petiscos",
+      "text": "O que é que há hoje de petiscos?",
+      "kind": "example"
+    },
+    {
+      "slug": "pago-ja-ou-no-fim",
+      "text": "Pago já ou no fim?",
+      "kind": "example"
+    },
+    {
+      "slug": "ainda-ha-bilhetes-para-hoje-a-noite",
+      "text": "Ainda há bilhetes para hoje à noite?",
+      "kind": "example"
+    },
+    {
+      "slug": "bom-dia-isto-e-antigo-quanto-pede-por-ele",
+      "text": "Bom dia! Isto é antigo? Quanto pede por ele?",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-bica-e-uma-queijada-de-leite-se-faz-favor",
+      "text": "Uma bica e uma queijada de leite, se faz favor.",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-reservar-uma-mesa-para-domingo-ao-almoco",
+      "text": "Queria reservar uma mesa para domingo ao almoço.",
+      "kind": "example"
+    },
+    {
+      "slug": "ainda-ha-mesa-para-duas-pessoas",
+      "text": "Ainda há mesa para duas pessoas?",
+      "kind": "example"
+    },
+    {
+      "slug": "que-vinho-de-colares-me-recomenda-para-oferecer",
+      "text": "Que vinho de Colares me recomenda para oferecer?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-aqui-que-se-apanha-o-eletrico-para-a-praia",
+      "text": "É aqui que se apanha o elétrico para a praia?",
+      "kind": "example"
+    },
+    {
+      "slug": "queria-marcar-uma-prova-de-vinhos-que-dias-tem",
+      "text": "Queria marcar uma prova de vinhos. Que dias têm?",
+      "kind": "example"
+    },
+    {
+      "slug": "qual-e-o-peixe-de-hoje-da-para-duas-pessoas",
+      "text": "Qual é o peixe de hoje? Dá para duas pessoas?",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-tarde-tenho-uma-visita-marcada-para-as-tres",
+      "text": "Boa tarde, tenho uma visita marcada para as três.",
+      "kind": "example"
+    },
+    {
+      "slug": "importa-se-de-nos-tirar-uma-fotografia",
+      "text": "Importa-se de nos tirar uma fotografia?",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-quero",
+      "text": "Não quero.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-tenho",
+      "text": "Não tenho.",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-dois-dias",
+      "text": "Há dois dias.",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-tres-anos",
+      "text": "Há três anos.",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-uma-semana",
+      "text": "Há uma semana.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-a-trabalhar",
+      "text": "Estou a trabalhar.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-de-ir",
+      "text": "Tenho de ir.",
+      "kind": "example"
+    },
+    {
+      "slug": "tenho-de-trabalhar",
+      "text": "Tenho de trabalhar.",
+      "kind": "example"
+    },
+    {
+      "slug": "temos-de-falar",
+      "text": "Temos de falar.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-cansado",
+      "text": "Estou cansado.",
+      "kind": "example"
+    },
+    {
+      "slug": "estou-em-portugal",
+      "text": "Estou em Portugal.",
+      "kind": "example"
+    },
+    {
+      "slug": "diz-me",
+      "text": "Diz-me.",
+      "kind": "example"
+    },
+    {
+      "slug": "ajuda-me",
+      "text": "Ajuda-me.",
+      "kind": "example"
+    },
+    {
+      "slug": "liga-me",
+      "text": "Liga-me.",
+      "kind": "example"
+    },
+    {
+      "slug": "normalmente",
+      "text": "normalmente",
+      "kind": "example"
+    },
+    {
+      "slug": "provavelmente",
+      "text": "provavelmente",
+      "kind": "example"
+    },
+    {
+      "slug": "finalmente",
+      "text": "finalmente",
+      "kind": "example"
+    },
+    {
+      "slug": "quero-comer",
+      "text": "Quero comer.",
+      "kind": "example"
+    },
+    {
+      "slug": "quero-uma-cerveja",
+      "text": "Quero uma cerveja.",
+      "kind": "example"
+    },
+    {
+      "slug": "quero-ver",
+      "text": "Quero ver.",
+      "kind": "example"
+    },
+    {
+      "slug": "posso-ver",
+      "text": "Posso ver?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-repetir",
+      "text": "Pode repetir?",
+      "kind": "example"
+    },
+    {
+      "slug": "pode-ajudar-me",
+      "text": "Pode ajudar-me?",
+      "kind": "example"
+    },
+    {
+      "slug": "quero-isto",
+      "text": "Quero isto.",
+      "kind": "example"
+    },
+    {
+      "slug": "aquela-coisa",
+      "text": "Aquela coisa.",
+      "kind": "example"
+    },
+    {
+      "slug": "uma-coisa-pequena",
+      "text": "Uma coisa pequena.",
+      "kind": "example"
+    },
+    {
+      "slug": "como-se-diz",
+      "text": "Como se diz?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-bom",
+      "text": "É bom.",
+      "kind": "example"
+    },
+    {
+      "slug": "e-caro",
+      "text": "É caro?",
+      "kind": "example"
+    },
+    {
+      "slug": "e-aqui",
+      "text": "É aqui?",
+      "kind": "example"
+    },
+    {
+      "slug": "muito-caro",
+      "text": "Muito caro.",
+      "kind": "example"
+    },
+    {
+      "slug": "com-sem",
+      "text": "com / sem",
+      "kind": "example"
+    },
+    {
+      "slug": "mais-menos",
+      "text": "mais / menos",
+      "kind": "example"
+    },
+    {
+      "slug": "antes-depois",
+      "text": "antes / depois",
+      "kind": "example"
+    },
+    {
+      "slug": "como-se-diz-isto-em-portugues",
+      "text": "Como se diz isto em português?",
+      "kind": "example"
+    },
+    {
+      "slug": "como-se-diz-ticket",
+      "text": "Como se diz “ticket”?",
+      "kind": "example"
+    },
+    {
+      "slug": "o-que-quer-dizer-isso",
+      "text": "O que quer dizer isso?",
+      "kind": "example"
+    },
+    {
+      "slug": "exato",
+      "text": "Exato.",
+      "kind": "example"
+    },
+    {
+      "slug": "depende",
+      "text": "Depende.",
+      "kind": "example"
+    },
+    {
+      "slug": "se-calhar",
+      "text": "Se calhar.",
+      "kind": "example"
+    },
+    {
+      "slug": "esta-bem",
+      "text": "Está bem.",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-faz-o-meu-genero",
+      "text": "Não faz o meu género",
+      "kind": "example"
+    },
+    {
+      "slug": "nao-te-passes",
+      "text": "Não te passes",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-mais-mares-que-marinheiros",
+      "text": "Há mais marés que marinheiros",
+      "kind": "example"
+    },
+    {
+      "slug": "boa-sorte",
+      "text": "Boa sorte",
+      "kind": "example"
+    },
+    {
+      "slug": "fazer-das-tripas-coracao",
+      "text": "Fazer das tripas coração",
+      "kind": "example"
+    },
+    {
+      "slug": "ninguem-quer-falar-disso",
+      "text": "Ninguém quer falar disso",
+      "kind": "example"
+    },
+    {
+      "slug": "ja-se-via",
+      "text": "Já se via",
+      "kind": "example"
+    },
+    {
+      "slug": "ha-males-que-vem-por-bem",
+      "text": "Há males que vêm por bem",
+      "kind": "example"
+    },
+    {
+      "slug": "ca-se-fazem-ca-se-pagam",
+      "text": "Cá se fazem, cá se pagam",
+      "kind": "example"
+    },
+    {
+      "slug": "bate-na-madeira",
+      "text": "Bate na madeira",
+      "kind": "example"
+    },
+    {
+      "slug": "tomara",
+      "text": "Tomara",
+      "kind": "example"
+    },
+    {
+      "slug": "sao-coisas-que-acontecem",
+      "text": "São coisas que acontecem",
+      "kind": "example"
+    },
+    {
+      "slug": "estas-a-gozar-comigo",
+      "text": "Estás a gozar comigo?",
+      "kind": "example"
+    },
+    {
+      "slug": "caramba",
+      "text": "Caramba",
+      "kind": "example"
+    },
+    {
+      "slug": "so-por-cima-do-meu-cadaver",
+      "text": "Só por cima do meu cadáver",
+      "kind": "example"
     }
   ]
 }

@@ -43,7 +43,7 @@ function src(slug: string) {
  * The timeout matters: a request that neither loads nor errors would otherwise leave the
  * slug permanently "never probed" and re-request it on every tap.
  */
-function probe(slug: string): void {
+export function probe(slug: string): void {
   if (cache.has(slug)) return
   cache.set(slug, null)
   const el = new Audio(src(slug))
@@ -79,8 +79,23 @@ function pickVoice(): SpeechSynthesisVoice | undefined {
   )
 }
 
-function speak(text: string, slow: boolean): boolean {
+/*
+  NEVER PORTUGUESE IN SOMEBODY ELSE'S VOICE (Sam, 2026-11-10: a tester heard "male / English
+  accent audio"). A phone with no Portuguese voice read the lines in its default English one,
+  which teaches the wrong sounds while looking like it works. When the device has voices and
+  none is Portuguese, say nothing and tell the button why. An empty list is not proof — iOS
+  fills it late, and picks a voice by lang — so then it still speaks.
+*/
+export function hasPortugueseVoice(): boolean | null {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false
+  if (!voices.length) warmVoices()
+  if (!voices.length) return null
+  return Boolean(pickVoice())
+}
+
+function speak(text: string, slow: boolean): boolean | 'novoice' {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false
+  if (hasPortugueseVoice() === false) return 'novoice'
   const synth = window.speechSynthesis
   const u = new SpeechSynthesisUtterance(text)
   u.lang = 'pt-PT'
@@ -106,7 +121,7 @@ function speak(text: string, slow: boolean): boolean {
 export function play(u: Utterance, opts: { slow?: boolean; screenId?: string } = {}) {
   const slow = opts.slow ?? false
   const el = cache.get(u.slug)
-  let source: 'asset' | 'tts' | 'none' = 'none'
+  let source: 'asset' | 'tts' | 'none' | 'novoice' = 'none'
 
   if (el) {
     el.playbackRate = slow ? RATE_SLOW : 1
@@ -119,7 +134,8 @@ export function play(u: Utterance, opts: { slow?: boolean; screenId?: string } =
     })
     source = 'asset'
   } else {
-    source = speak(u.text, slow) ? 'tts' : 'none'
+    const said = speak(u.text, slow)
+    source = said === 'novoice' ? 'novoice' : said ? 'tts' : 'none'
     // For next time. After the sound, never before it.
     probe(u.slug)
   }
