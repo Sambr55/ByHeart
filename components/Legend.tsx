@@ -60,6 +60,8 @@ export function Legend() {
     stands for — your name, where you are from — and goes back to the board after them.
   */
   const [fromBoard, setFromBoard] = useState(false)
+  /* The room's last beat, from the board: you, said whole (Sam, 2026-11-10: "board done after just one question"). */
+  const [showWho, setShowWho] = useState(false)
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     setMounted(true)
@@ -255,7 +257,7 @@ export function Legend() {
     if (fromBoard) {
       const mine = cardOpen.find((f) => f.id === 'name' || f.id === 'origin')
       if (mine) setMode({ build: mine.id })
-      else window.location.assign('/club')
+      else setShowWho(true)
       return
     }
     if (cardOpen.length) setMode({ build: cardOpen[0].id })
@@ -456,6 +458,48 @@ export function Legend() {
     }
   }, [mounted, unlocked, answered.length, mode])
 
+  /*
+    WHO YOU ARE, SAID WHOLE. However many of its two questions set-up had already answered —
+    often only one is left — the room ends on both lines together, heard and said out loud,
+    so it is a lesson and not a form (memory: every question is a lesson). Then the board.
+  */
+  if (fromBoard && showWho) {
+    const lines = ['name', 'origin'].flatMap((fid) => {
+      const frame = LEGEND_FRAMES.find((f) => f.id === fid)
+      const values = valuesFor(fid)
+      if (!frame || !values || !Object.keys(values).length) return []
+      return [{ pt: fillFrame(frame, values, learner.profile?.gender ?? null), en: fillEnglish(frame, values) }]
+    })
+    return (
+      <Shell back={{ href: '/club', label: 'BOARD' }}>
+        <section className="flex flex-col gap-4 rounded-2xl border-2 border-[#e2b450] bg-bg-elev px-5 py-6" data-testid="who-you-are">
+          <p className="eyebrow text-accent">Who you are · this is you</p>
+          <p className="text-base leading-relaxed text-muted">The first thing anybody asks. Say it whole, out loud, until it comes without reading.</p>
+          <ul className="flex flex-col gap-4">
+            {lines.map((l) => (
+              <li key={l.pt} className="flex flex-col gap-2">
+                <div className="flex items-start gap-3">
+                  <AudioButton slug={slugFor(l.pt)} text={l.pt} size="sm" />
+                  <span className="min-w-0 flex-1">
+                    <span lang="pt-PT" className="pt block text-xl leading-snug text-accent">
+                      {l.pt}
+                    </span>
+                    <span className="block text-sm text-muted">{l.en}</span>
+                  </span>
+                </div>
+                <SayButton key={l.pt} want={l.pt} />
+              </li>
+            ))}
+          </ul>
+          <p className="text-sm text-muted">Kept in Yours, with everything else about you.</p>
+        </section>
+        <Link href="/club" className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink" data-testid="who-back">
+          ‹ BACK TO THE BOARD
+        </Link>
+      </Shell>
+    )
+  }
+
   if (typeof mode === 'object' && (!mounted || unlocked)) {
     const frame = LEGEND_FRAMES.find((f) => f.id === mode.build)!
     return (
@@ -469,7 +513,7 @@ export function Legend() {
           onDone={() => {
             const next = nextAfter(frame.id)
             if (fromBoard && (!next || !['name', 'origin'].includes(next))) {
-              window.location.assign('/club')
+              setShowWho(true)
               return
             }
             setMode(next ? { build: next } : 'deck')

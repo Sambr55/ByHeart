@@ -11,11 +11,12 @@ import { rowsFor } from '@/content/calendar'
 import { CHEATS } from '@/content/cheats'
 import { bairroById, gemsHomeFirst, KIND_LABEL, type Gem } from '@/content/gems'
 import { IDIOMS } from '@/content/idioms'
-import { CRATES, entryRung } from '@/content/roots'
+import { CRATES, ROOTS, entryRung } from '@/content/roots'
 import { WALKS } from '@/content/walks'
 import { panelArt } from '@/content/panel'
 import type { ChapterId } from '@/content/chapters'
-import type { Purpose } from '@/content/situations'
+import { situationById, type Purpose } from '@/content/situations'
+import { SayButton } from '@/components/SayButton'
 import { markBoardMet } from '@/engine/learner'
 import { track } from '@/engine/analytics'
 import type { PathNode, PathView } from './progress'
@@ -69,6 +70,32 @@ const STOP_EXPLAINED: Partial<Record<Square['kind'], string>> = {
   postcard: 'Surprises turn over as you lay rooms — hacks, bluffs and idioms that hand you words for free. Anything you open is kept in Yours.',
   venue: 'Places are real spots in the city. Each has one line to say there, to a real person. Every board brings new ones.',
   neighbour: 'What is on in the city, with the Portuguese for going. Every board brings what is on that week.',
+}
+
+/*
+  A TASTE OF WHAT IS INSIDE (Sam, 2026-11-10, on Bob's your uncle: "needs at least an
+  example"). One real line from the square — a vibe's first line (its freebie), a postcard's
+  example, a place's line to say — shown on its sheet before it turns over and after. A vibe
+  of strong language keeps its taste until it is opened.
+*/
+function tasteOf(s: Square): { pt: string; en: string } | null {
+  if (s.kind === 'vibe') {
+    const crate = CRATES.find((c) => c.id === s.crate)
+    if (!crate || crate.tone === 'blunt') return null
+    const roots = ROOTS.filter((r) => r.culture_family === s.crate)
+    const r = roots.find((x) => x.freebie_flag) ?? roots[0]
+    return r ? { pt: r.target, en: r.source } : null
+  }
+  if (s.kind === 'postcard' && s.card.kind === 'cheat') {
+    const say = CHEATS.find((x) => x.id === s.card.id)?.says[0]
+    return say ? { pt: say.pt, en: say.en } : null
+  }
+  if (s.kind === 'postcard') {
+    const i = IDIOMS.find((x) => x.id === s.card.id)
+    return i ? { pt: i.equivalent, en: i.english } : null
+  }
+  if (s.kind === 'venue') return { pt: s.gem.line.pt, en: s.gem.line.en }
+  return null
 }
 
 function readList(key: string): string[] {
@@ -163,6 +190,9 @@ export function Board({
 
   /* The lesson words Board 1 actually shows (tileVerb), for the key — not a list from another board. */
   const verbs = [...new Set(lap.squares.flatMap((s) => (s.kind === 'room' ? [tileVerb(s.node.room).trim()] : [])).filter(Boolean))].slice(0, 4)
+
+  /* Turned over, never looked at — the dot on the square. */
+  const unopened = seen === null ? [] : lap.squares.filter((s) => s.reached && s.kind !== 'room' && s.kind !== 'corner' && !seen.includes(s.key))
 
   const tap = (s: Square) => {
     if (s.kind === 'room') return // rooms are links or open their sheet, as on the Panel
@@ -296,6 +326,29 @@ export function Board({
       </div>
 
 
+
+      {/*
+        STILL TO OPEN (Sam, 2026-11-10: "it said board done … and three tiles left"). The board
+        is laid when its lessons are, but what it turned over and nobody has looked at is
+        named here, one tap each, before the trip so far.
+      */}
+      {lap.complete && unopened.length ? (
+        <div className="flex flex-col items-center gap-1.5" data-testid="board-unopened">
+          <span className="eyebrow text-[0.65rem] text-[#a8742a]">Still to open on this board</span>
+          <ul className="flex flex-wrap justify-center gap-1.5">
+            {unopened.map((s) => {
+              const l = stopLabel(s)
+              return l ? (
+                <li key={s.key}>
+                  <button type="button" onClick={() => tap(s)} className="tap-target rounded-full border-2 border-[#e5b04a] bg-bg-elev px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide">
+                    {l.mark} {l.title}
+                  </button>
+                </li>
+              ) : null
+            })}
+          </ul>
+        </div>
+      ) : null}
 
       {/*
         ON THIS BOARD, UNDER IT since 2026-11-10 so the first lesson is on the first screen (Sam, 2026-11-09: "there is no excitement or sell as to what is on the
@@ -630,6 +683,7 @@ function StopSheet({
   } else if (ahead) {
     /* Named, as its square is: what it is and how many rooms until it turns over. */
     const l = stopLabel(s)
+    const taste = tasteOf(s)
     eyebrow = (warmUp ? 'How it works · ' : '') + (l ? l.kind : 'Ahead')
     title = l?.title ?? 'Further round'
     body = (
@@ -637,6 +691,12 @@ function StopSheet({
         <p className="text-base leading-relaxed">
           {awayText(roomsAway(s, lap)).replace('away', 'more')} and it turns over. {warmUp ? STOP_EXPLAINED[s.kind] ?? '' : ''}
         </p>
+        {taste ? (
+          <div className="flex flex-col gap-2 rounded-2xl border border-line bg-bg-elev px-4 py-4" data-testid="board-taste">
+            <p className="eyebrow text-[0.65rem] text-accent">A taste of what’s inside</p>
+            <SpokenLine pt={taste.pt} en={taste.en} size="md" />
+          </div>
+        ) : null}
       </>
     )
   } else if (s.kind === 'postcard' && s.card.kind === 'cheat') {
@@ -674,12 +734,39 @@ function StopSheet({
     const walkedAny = saidHere.length > 0
     eyebrow = KIND_LABEL[g.kind] + ' · ' + bairroById(g.bairro).name
     title = g.name
+    const line = gender === 'f' && g.line.f ? g.line.f : g.line.pt
+    /* The room on the path that trains this very line (Gem.room) — the whole lesson behind it. */
+    const behind = situationById(g.room)
     body = (
       <>
+        {/*
+          A PLACE IS A LESSON FIRST (Sam, 2026-11-10, on his phone: "there is no actual lesson
+          in this places screen on board 1"). Its one line, heard, then said out loud — the
+          microphone listens — then who to say it to there, and the local's tip. The picture
+          and the history come after, and the room that trains the line is one tap away.
+        */}
+        <div className="flex flex-col gap-3 rounded-2xl border-2 border-accent/30 bg-bg-elev px-4 py-4" data-testid="venue-lesson">
+          <p className="eyebrow text-[0.65rem] text-accent">The line to say here</p>
+          <SpokenLine pt={line} en={g.line.en} size="md" />
+          <div className="flex items-center gap-3">
+            <SayButton key={line} want={line} />
+            <p className="text-sm leading-snug text-muted">Say it out loud — tap the microphone and DUB listens.</p>
+          </div>
+          {g.meet ? (
+            <p className="text-sm leading-relaxed">
+              <span className="font-semibold">Then say it there,</span> to {/^(The|A|An) /.test(g.meet) ? g.meet.charAt(0).toLowerCase() + g.meet.slice(1) : g.meet}.
+            </p>
+          ) : null}
+          {g.tip ? <p className="text-sm leading-relaxed text-muted">💡 {g.tip}</p> : null}
+          {behind ? (
+            <Link href={'/errand/' + behind.id} className="tap-target eyebrow block w-full rounded-full border border-accent px-6 py-3 text-center text-accent" data-testid="venue-room">
+              The lesson behind it · {behind.title}
+            </Link>
+          ) : null}
+        </div>
+        {said ? <p className="text-sm font-semibold text-correct">You’ve said it here.</p> : null}
         <VenueHero gem={g} />
         <p className="text-base leading-relaxed">{g.why}</p>
-        <SpokenLine pt={gender === 'f' && g.line.f ? g.line.f : g.line.pt} en={g.line.en} size="md" />
-        {said ? <p className="text-sm font-semibold text-correct">You’ve said it here.</p> : null}
         {/*
           THE WALK, INTRODUCED BEFORE IT IS ASKED FOR (Sam, 2026-11-09: "directions and check in
           are premature here. I haven't discovered language walks, so I need to be introduced to
@@ -729,6 +816,12 @@ function StopSheet({
     body = (
       <>
         {crate?.blurb ? <p className="text-base leading-relaxed">{crate.blurb}</p> : null}
+        {tasteOf(s) ? (
+          <div className="flex flex-col gap-2 rounded-2xl border border-line bg-bg-elev px-4 py-4" data-testid="board-taste">
+            <p className="eyebrow text-[0.65rem] text-accent">How it starts</p>
+            <SpokenLine pt={tasteOf(s)!.pt} en={tasteOf(s)!.en} size="md" />
+          </div>
+        ) : null}
         {open ? (
           <Link href={'/vibes?open=' + encodeURIComponent(s.crate) + '&from=board'} className={btn} data-testid="board-vibe-open">
             Open it
@@ -760,12 +853,12 @@ function StopSheet({
   }
 
   /* On the warm-up lap every stop also says what it is for, on every board after this one. */
+  /* A turned-over stop is the real thing, so its label says what it is, not "How it works" (2026-11-10); the note says how. */
   if (warmUp && s.kind !== 'corner' && !ahead) {
-    eyebrow = 'How it works · ' + eyebrow
     body = (
       <>
-        <p className="rounded-2xl bg-surface px-4 py-3 text-sm leading-relaxed" data-testid="board-how-it-works">
-          {STOP_EXPLAINED[s.kind]}
+        <p className="rounded-2xl bg-surface px-4 py-3 text-sm leading-relaxed text-muted" data-testid="board-how-it-works">
+          <span className="font-semibold text-fg">How it works:</span> {STOP_EXPLAINED[s.kind]}
         </p>
         {body}
       </>
