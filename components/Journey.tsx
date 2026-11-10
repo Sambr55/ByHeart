@@ -2573,7 +2573,8 @@ export function MiniBuild({
         /* A seam for the walkthrough. The tile pool is shuffled, so without this the
            harness can only brute-force permutations, which is slow and flaky. */
         data-answer={target}
-        className="min-h-[3.5rem] rounded border border-dashed border-line bg-bg-elev/60 p-2"
+        /* The line you build, as a card (2026-11-10: "they feel outdated to our overall UI now"). */
+        className="min-h-[4.25rem] rounded-2xl border-2 border-dashed border-accent/25 bg-bg-elev p-3 transition-colors"
       >
         {placed.length || bounced ? (
           <div className="flex flex-wrap gap-3">
@@ -2584,8 +2585,8 @@ export function MiniBuild({
                 disabled={state === 'done'}
                 onClick={() => setPlaced((cur) => cur.filter((x) => x.id !== p.id))}
                 className={
-                  'tap-target rounded border px-3 py-3 ' +
-                  (state === 'done' ? 'border-correct/50 bg-correct/10' : 'border-accent/50 bg-chip')
+                  'build-tile tap-target rounded-xl border px-4 py-2.5 text-lg font-semibold ' +
+                  (state === 'done' ? 'border-correct/50 bg-correct/10 text-fg' : 'border-accent bg-accent text-accent-ink')
                 }
               >
                 <span className="pt">{p.text}</span>
@@ -2602,14 +2603,14 @@ export function MiniBuild({
               <span
                 data-testid="tile-bounced"
                 aria-hidden
-                className="rounded border border-coach/60 bg-coach/10 px-3 py-3 text-coach"
+                className="rounded-xl border border-coach/60 bg-coach/10 px-4 py-2.5 text-lg font-semibold text-coach"
               >
                 <span className="pt">{bounced.text}</span>
               </span>
             ) : null}
           </div>
         ) : (
-          <p className="px-1 py-3 text-xs text-muted">Tap the pieces in order.</p>
+          <p className="px-1 py-2.5 text-sm text-muted">Tap the words in order to build it.</p>
         )}
       </div>
 
@@ -2627,13 +2628,13 @@ export function MiniBuild({
       ) : null}
 
       {state === 'done' ? null : (
-        <div data-testid="tile-pool" className="mt-3 flex flex-wrap gap-3">
+        <div data-testid="tile-pool" className="mt-4 flex flex-wrap gap-2.5">
           {pool.map((t) => (
             <button
               key={t.id}
               type="button"
               onClick={() => tapTile(t)}
-              className="tap-target rounded border border-line bg-bg-elev px-3 py-3 hover:border-accent/50"
+              className="build-tile tap-target rounded-xl border border-line bg-bg-elev px-4 py-2.5 text-lg font-semibold text-accent hover:border-accent/50"
             >
               <span className="pt">{t.text}</span>
             </button>
@@ -2671,7 +2672,7 @@ export function MiniBuild({
       ) : null}
 
       {state === 'done' ? (
-        <div className="animate-bank mt-3 flex items-center gap-3 rounded border border-correct/40 bg-correct/10 px-4 py-3">
+        <div className="animate-bank mt-4 flex items-center gap-3 rounded-2xl border border-correct/40 bg-correct/10 px-4 py-3">
           <AudioButton slug={slugFor(target)} text={target} size="sm" />
           <span className="pt min-w-0 flex-1 text-lg">{target}</span>
           {/*
@@ -2700,14 +2701,14 @@ export function MiniBuild({
           is the way past for somebody who has read it out and wants to move. Neither
           un-helps: the proof card still refuses this line, because it was seen.
         */
-        <div className="mt-3 flex gap-3">
+        <div className="mt-5 flex gap-3">
           {helped ? (
             <>
               <button
                 type="button"
                 data-testid="build-retry"
                 onClick={retry}
-                className="tap-target eyebrow flex-1 rounded border border-accent bg-accent/10 px-4 py-3 text-accent"
+                className="tap-target eyebrow flex-1 rounded-full border border-accent bg-accent/10 px-4 py-3 text-accent"
               >
                 RETRY
               </button>
@@ -2715,7 +2716,7 @@ export function MiniBuild({
                 type="button"
                 data-testid="build-said"
                 onClick={() => check(true)}
-                className="tap-target eyebrow flex-1 rounded border border-line-strong px-4 py-3 text-muted transition hover:text-fg"
+                className="tap-target eyebrow flex-1 rounded-full border border-line-strong px-4 py-3 text-muted transition hover:text-fg"
               >
                 {/*
                   GOT IT, because that is the act.
@@ -2735,7 +2736,7 @@ export function MiniBuild({
               type="button"
               data-testid="build-help"
               onClick={showOrder}
-              className="tap-target eyebrow w-full rounded border border-line-strong px-4 py-3 text-muted transition hover:text-fg"
+              className="tap-target eyebrow w-full rounded-full border border-line-strong px-4 py-3 text-muted transition hover:text-fg"
             >
               SHOW ME
             </button>

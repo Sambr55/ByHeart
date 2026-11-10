@@ -438,7 +438,7 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
       ) : null}
 
       {stage === 'cold' ? (
-        <div className="flex flex-1 flex-col justify-center gap-6">
+        <div className="flex flex-1 flex-col gap-5 pt-2">
           {/*
             YOUR TURN IS THE PROOF NOW, not a softer option beside it.
 
@@ -462,9 +462,26 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
             the reveal is not gone, it is what MiniBuild offers after three failed goes,
             which is the right moment for it rather than the first one.
           */}
-          <div className="flex flex-col gap-3">
-            <p className="eyebrow text-accent">YOUR TURN</p>
-            <p className="t-ask display text-balance text-2xl">{situation.release.ask}</p>
+          {/*
+            THE ASK, AS A CARD — the room's own picture and title over it, so this screen is
+            still the room you were in, in the same glaze as its lines (2026-11-10: "they feel
+            outdated to our overall UI now"). It sat high on bare sand, with nothing above it.
+          */}
+          <div className="overflow-hidden rounded-3xl border border-line bg-bg-elev">
+            {situation.image ? (
+              <div className="relative h-28 w-full">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={situation.image.src} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-[#14243a]/80 to-transparent" />
+                <span className="absolute inset-x-5 bottom-3 text-white">
+                  <span className="eyebrow block text-[0.65rem] opacity-80">{situation.title}</span>
+                </span>
+              </div>
+            ) : null}
+            <div className="flex flex-col gap-2 px-5 py-5">
+              <p className="eyebrow text-accent">Your turn · say it in Portuguese</p>
+              <p className="t-ask display text-balance text-3xl leading-tight">{situation.release.ask}</p>
+            </div>
           </div>
           <MiniBuild
             target={situation.release.answer}
