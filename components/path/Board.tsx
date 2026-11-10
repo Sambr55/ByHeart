@@ -191,6 +191,9 @@ export function Board({
   /* The lesson words Board 1 actually shows (tileVerb), for the key — not a list from another board. */
   const verbs = [...new Set(lap.squares.flatMap((s) => (s.kind === 'room' ? [tileVerb(s.node.room).trim()] : [])).filter(Boolean))].slice(0, 4)
 
+  /* Turned over, never looked at — the dot on the square. */
+  const unopened = seen === null ? [] : lap.squares.filter((s) => s.reached && s.kind !== 'room' && s.kind !== 'corner' && !seen.includes(s.key))
+
   const tap = (s: Square) => {
     if (s.kind === 'room') return // rooms are links or open their sheet, as on the Panel
     track('board_square', { kind: s.kind, reached: s.reached })
@@ -323,6 +326,29 @@ export function Board({
       </div>
 
 
+
+      {/*
+        STILL TO OPEN (Sam, 2026-11-10: "it said board done … and three tiles left"). The board
+        is laid when its lessons are, but what it turned over and nobody has looked at is
+        named here, one tap each, before the trip so far.
+      */}
+      {lap.complete && unopened.length ? (
+        <div className="flex flex-col items-center gap-1.5" data-testid="board-unopened">
+          <span className="eyebrow text-[0.65rem] text-[#a8742a]">Still to open on this board</span>
+          <ul className="flex flex-wrap justify-center gap-1.5">
+            {unopened.map((s) => {
+              const l = stopLabel(s)
+              return l ? (
+                <li key={s.key}>
+                  <button type="button" onClick={() => tap(s)} className="tap-target rounded-full border-2 border-[#e5b04a] bg-bg-elev px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide">
+                    {l.mark} {l.title}
+                  </button>
+                </li>
+              ) : null
+            })}
+          </ul>
+        </div>
+      ) : null}
 
       {/*
         ON THIS BOARD, UNDER IT since 2026-11-10 so the first lesson is on the first screen (Sam, 2026-11-09: "there is no excitement or sell as to what is on the
