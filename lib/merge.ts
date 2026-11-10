@@ -353,6 +353,7 @@ export function mergeLearner(local: Partial<LearnerState>, remote: Partial<Learn
     holidays: setUnion(l.holidays, r.holidays),
     board_met: setUnion(l.board_met, r.board_met),
     recaps_seen: setUnion(l.recaps_seen, r.recaps_seen),
+    board_opened: setUnion(l.board_opened, r.board_opened),
     table_lines: setUnion(l.table_lines, r.table_lines),
     /*
       GOT BEATS MISSED, which is why this is not two plain unions.

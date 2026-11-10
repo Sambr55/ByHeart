@@ -601,6 +601,13 @@ export interface LearnerState {
   board_met?: string[]
   /** Levels whose recap has been shown ("<purpose>:<unit>"), so it opens once by itself. */
   recaps_seen?: string[]
+  /**
+   * OPENED ON A BOARD (Sam, 2026-11-10: "board two is closing before I have completed it").
+   * The lap keys of squares whose sheet this learner opened. A board is finished when its
+   * rooms are laid AND every square on it is opened AND its So far is seen (lap.ts). Synced,
+   * because finishing a board now depends on it; it was a device-only list before.
+   */
+  board_opened?: string[]
   sections_completed: string[]
   /**
    * How many sittings this learner has done, in total, across every vibe.
@@ -886,6 +893,7 @@ export function emptyLearner(): LearnerState {
     tables_sat: [],
     holidays: [],
     board_met: [],
+    board_opened: [],
     recaps_seen: [],
     table_lines: [],
     sections_completed: [],
@@ -1126,6 +1134,7 @@ export function loadLearner(): LearnerState {
           tables_sat: arr(parsed.tables_sat, []),
           holidays: arr(parsed.holidays, []),
           board_met: arr(parsed.board_met, []),
+          board_opened: arr(parsed.board_opened, []),
           recaps_seen: arr(parsed.recaps_seen, []),
           table_lines: arr(parsed.table_lines, []),
           sections_completed: arr(parsed.sections_completed, []),
@@ -2487,6 +2496,16 @@ export function markBoardMet(keys: string[]) {
   if (!add.length) return
   update((s) => {
     s.board_met = [...(s.board_met ?? []), ...add]
+  })
+}
+
+/** Squares whose sheet was opened (lap keys). Append-only. */
+export function markBoardOpened(keys: string[]) {
+  const had = getLearner().board_opened ?? []
+  const add = keys.filter((k) => !had.includes(k))
+  if (!add.length) return
+  update((s) => {
+    s.board_opened = [...(s.board_opened ?? []), ...add]
   })
 }
 

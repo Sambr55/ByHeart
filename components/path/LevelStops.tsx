@@ -10,7 +10,8 @@ import { metStop } from '@/content/level'
 import { CRATES, entryRung } from '@/content/roots'
 import type { Purpose } from '@/content/situations'
 import { WALKS } from '@/content/walks'
-import { markBoardMet } from '@/engine/learner'
+import { markBoardMet, markBoardOpened } from '@/engine/learner'
+import { useLearner } from '@/engine/useLearner'
 import { lapOf } from './lap'
 import type { PathView } from './progress'
 
@@ -43,6 +44,7 @@ export function LevelStops({
     () => (view.units[index] ? lapOf(view, index, purpose, { gems: gemsHomeFirst(chapter), rows: rowsFor(chapter, now), walks: WALKS, chapter }) : null),
     [view, index, purpose, chapter, now],
   )
+  const opened = useLearner().board_opened ?? []
   const stops = useMemo(() => (lap ? lap.squares.filter((s) => s.kind !== 'room' && s.kind !== 'corner') : []), [lap])
   useEffect(() => {
     const keys = stops.filter((s) => s.reached).map((s) => s.key)
@@ -69,10 +71,15 @@ export function LevelStops({
         )
         return (
           <li key={s.key}>
-            {!s.reached || locked || !m ? (
-              <span className={'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ' + (s.reached ? 'border-line bg-surface text-muted' : 'border-dashed border-line text-muted')}>{chip}</span>
+            {/* Opening a chip opens the square, as on the board — a board is finished when every one is (Sam, 2026-11-10). */}
+            {!s.reached ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-line px-2.5 py-1 text-xs text-muted">{chip}</span>
+            ) : locked || !m ? (
+              <button type="button" onClick={() => markBoardOpened([s.key])} className={'tap-target inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ' + (opened.includes(s.key) ? 'border-accent bg-accent text-accent-ink' : 'border-line bg-surface text-muted')}>
+                {chip}
+              </button>
             ) : (
-              <Link href={s.kind === 'vibe' ? m.href + '&from=board' : m.href} className="tap-target inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-elev px-2.5 py-1 text-xs" data-testid={'level-stop-' + s.kind}>
+              <Link href={s.kind === 'vibe' ? m.href + '&from=board' : m.href} onClick={() => markBoardOpened([s.key])} className="tap-target inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-elev px-2.5 py-1 text-xs" data-testid={'level-stop-' + s.kind}>
                 {chip}
               </Link>
             )}

@@ -296,7 +296,8 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
   const access = useEntitlements()
   const member = hasFullAccess(access) || access.comped
   const [levelDone, setLevelDone] = useState<{ id: string; level: number } | null>(null)
-  const recapHref = levelDone ? '/level/' + encodeURIComponent(levelDone.id) : null
+  /* The last lesson of a board goes back to it: what is still to open is there, then So far (Sam, 2026-11-10: "Every square"). */
+  const recapHref = levelDone ? '/club' : null
   const finishesLevel = () => {
     const had = learner.finished_cards ?? []
     if (had.includes(situation.id)) return null
@@ -569,7 +570,7 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
                 data-testid="errand-recap"
                 className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
               >
-                BOARD {levelDone.level} DONE · SEE YOUR TRIP SO FAR
+                BOARD {levelDone.level}: LESSONS DONE · BACK TO THE BOARD
               </Link>
             ) : null}
             {nextRoom ? (
@@ -648,11 +649,11 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
               data-testid="errand-got"
               onClick={() => {
                 const done = bank(false)
-                window.location.assign(done ? '/level/' + encodeURIComponent(done.id) : nextRoom ? onward(nextRoom.id) : back)
+                window.location.assign(done ? '/club' : nextRoom ? onward(nextRoom.id) : back)
               }}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
             >
-              {gotFinishes ? 'GOT IT — SEE YOUR TRIP SO FAR' : nextRoom ? 'GOT IT — ' + nextRoom.title.toUpperCase() : back === '/legend' ? 'GOT IT — NOW MAKE IT YOURS' : 'GOT IT'}
+              {gotFinishes ? 'GOT IT — BACK TO THE BOARD' : nextRoom ? 'GOT IT — ' + nextRoom.title.toUpperCase() : back === '/legend' ? 'GOT IT — NOW MAKE IT YOURS' : 'GOT IT'}
             </button>
             <button
               type="button"

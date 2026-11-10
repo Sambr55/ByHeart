@@ -17,7 +17,7 @@ import { panelArt } from '@/content/panel'
 import type { ChapterId } from '@/content/chapters'
 import { situationById, type Purpose } from '@/content/situations'
 import { SayButton } from '@/components/SayButton'
-import { markBoardMet } from '@/engine/learner'
+import { markBoardMet, markBoardOpened } from '@/engine/learner'
 import { track } from '@/engine/analytics'
 import type { PathNode, PathView } from './progress'
 import { milestoneHref } from './progress'
@@ -56,7 +56,7 @@ const CORNER_EN: Record<CornerId, string> = { start: 'Start', trip: 'So far', me
 const WARM_UP: Record<Exclude<CornerId, 'start'>, { title: string; body: string }> = {
   trip: {
     title: 'Your trip so far',
-    body: 'The last square of every board. Lay this board’s rooms and it gathers everything they gave you — what you can now say, with its sound, and a quick test. Then the next board opens.',
+    body: 'The last square of every board. Lay its lessons and open every square, and it gathers everything they gave you — what you can now say, with its sound, and a quick test. Then the next board opens.',
   },
   mesa: {
     title: 'A real table, later',
@@ -114,6 +114,7 @@ export function Board({
   current,
   now,
   recapsSeen,
+  opened = [],
   saidHere,
   gender,
   onLaid,
@@ -129,6 +130,8 @@ export function Board({
   now: Date
   /** recaps_seen: a finished board waits on Até agora until its recap is seen (lap.ts). */
   recapsSeen: string[]
+  /** board_opened: squares opened, synced — a board is finished when every one is (lap.ts). */
+  opened?: string[]
   /** walk_stops: a venue said there carries its mark. */
   saidHere: string[]
   gender: 'm' | 'f' | null
@@ -142,32 +145,28 @@ export function Board({
 }) {
   const [index, setIndex] = useState(current)
   useEffect(() => setIndex(current), [current])
-  const [seen, setSeen] = useState<string[] | null>(null)
+  /*
+    OPENED, ONE LIST (2026-11-10). This was a device-only list (dub.board.seen) for the dot;
+    finishing a board now depends on it, so it lives in the synced record (board_opened). The
+    old list on this phone is carried over once.
+  */
+  const [mounted, setMounted] = useState(false)
   useEffect(() => {
-    setSeen(readList(SEEN_KEY))
+    setMounted(true)
+    const local = readList(SEEN_KEY)
+    if (local.length) markBoardOpened(local)
   }, [])
-  const markSeen = useCallback((key: string) => {
-    setSeen((had) => {
-      const list = had ?? []
-      if (list.includes(key)) return had
-      const next = [...list, key]
-      try {
-        window.localStorage.setItem(SEEN_KEY, JSON.stringify(next))
-      } catch {
-        /* Then the dot stays, which is the quieter failure. */
-      }
-      return next
-    })
-  }, [])
+  const seen = mounted ? opened : null
+  const markSeen = useCallback((key: string) => markBoardOpened([key]), [])
 
   const gems = useMemo(() => gemsHomeFirst(chapter), [chapter])
   const rows = useMemo(() => rowsFor(chapter, now), [chapter, now])
   const lap = useMemo(
     () =>
       view.units[index]
-        ? lapOf(view, index, purpose, { gems, rows, walks: WALKS, chapter, recapSeen: recapsSeen.includes(levelKey(purpose, view.units[index].unit.id)) })
+        ? lapOf(view, index, purpose, { gems, rows, walks: WALKS, chapter, recapSeen: recapsSeen.includes(levelKey(purpose, view.units[index].unit.id)), opened })
         : null,
-    [view, index, purpose, gems, rows, chapter, recapsSeen],
+    [view, index, purpose, gems, rows, chapter, recapsSeen, opened],
   )
   /*
     WHAT THE BOARD TURNED OVER, KEPT (2026-11-05). A postcard, place or what's on is met once
@@ -192,7 +191,7 @@ export function Board({
   const verbs = [...new Set(lap.squares.flatMap((s) => (s.kind === 'room' ? [tileVerb(s.node.room).trim()] : [])).filter(Boolean))].slice(0, 4)
 
   /* Turned over, never looked at — the dot on the square. */
-  const unopened = seen === null ? [] : lap.squares.filter((s) => s.reached && s.kind !== 'room' && s.kind !== 'corner' && !seen.includes(s.key))
+  const unopened = seen === null ? [] : lap.toOpen
 
   const tap = (s: Square) => {
     if (s.kind === 'room') return // rooms are links or open their sheet, as on the Panel
@@ -218,7 +217,7 @@ export function Board({
           <span className="font-semibold text-fg">
             Board {level} of {view.units.length}
           </span>
-          {lap.complete ? ' · done' : index === current ? '' : index < current ? ' · done' : ' · ahead'}
+          {lap.complete ? (lap.token === 0 ? ' · done' : ' · So far is open') : lap.roomsLaid ? ' · lessons done' : index === current ? '' : index < current ? ' · done' : ' · ahead'}
         </p>
         <button
           type="button"
@@ -248,7 +247,7 @@ export function Board({
               <span className="font-semibold">2. Squares turn over as you pass</span> <span className="text-muted">— ✦ surprises, 📍 places, 🎟 what’s on.</span>
             </li>
             <li>
-              <span className="font-semibold">3. All {lap.open} done?</span> <span className="text-muted">“So far” shows your trip, then Board 2 opens.</span>
+              <span className="font-semibold">3. Open every square.</span> <span className="text-muted">With all {lap.open} lessons laid and every square opened, “So far” shows your trip — then Board 2 opens.</span>
             </li>
           </ol>
         </div>
@@ -319,7 +318,15 @@ export function Board({
               <span className="eyebrow text-[0.6rem] opacity-80">Level {level}</span>
               <span className="display text-lg leading-tight sm:text-xl">{unit.unit.title}</span>
               <span className="text-[0.7rem] opacity-80">
-                {lap.complete ? (lap.token !== 0 ? 'Laid. See your trip so far.' : index + 1 < view.units.length ? 'Laid. On to the next board.' : 'Laid. Every board, round.') : `${lap.done} of ${lap.open} rooms laid`}
+                {lap.complete
+                  ? lap.token !== 0
+                    ? 'Done. See your trip so far.'
+                    : index + 1 < view.units.length
+                      ? 'Done. On to the next board.'
+                      : 'Done. Every board, round.'
+                  : lap.roomsLaid
+                    ? `Lessons laid · ${lap.toOpen.length} to open`
+                    : `${lap.done} of ${lap.open} rooms laid`}
               </span>
             </span>
           </li>
@@ -333,7 +340,7 @@ export function Board({
         is laid when its lessons are, but what it turned over and nobody has looked at is
         named here, one tap each, before the trip so far.
       */}
-      {lap.complete && unopened.length ? (
+      {lap.roomsLaid && unopened.length ? (
         <div className="flex flex-col items-center gap-1.5" data-testid="board-unopened">
           <span className="eyebrow text-[0.65rem] text-[#a8742a]">Still to open on this board</span>
           <ul className="flex flex-wrap justify-center gap-1.5">
@@ -663,7 +670,7 @@ function StopSheet({
         </>
       )
     } else if (ahead) {
-      body = <p className="text-base leading-relaxed text-muted">{s.corner === 'trip' ? 'Lay this board’s rooms to get here. ' : 'Lay more rooms to get here. '}{c.body}</p>
+      body = <p className="text-base leading-relaxed text-muted">{s.corner === 'trip' ? 'Lay every lesson on this board and open every square to get here. ' : 'Lay more rooms to get here. '}{c.body}</p>
     } else if (s.corner === 'trip') {
       body = (
         <>
