@@ -2679,6 +2679,9 @@ details > summary.list-none::-webkit-details-marker {
 /* The counter takes the tile's place mark rather than sitting on top of it; a corner keeps its word. */
 .board-sq:has(> .board-token) > svg { opacity: 0 }
 .board-corner:has(> .board-token) > .board-token { top: 38% }
+/* On a lesson (two lessons back to back, as on Sam's Board 1 order): the token sits above the word, so the lesson still reads. */
+.board-room:has(> .board-token) > .board-token { top: 20%; width: 26% }
+.board-room:has(> .board-token) > .board-kicker { margin-top: 34% }
 @media (prefers-reduced-motion: reduce) { .board-token { animation: none } }
 .board-badge {
   position: absolute; left: 3px; top: 3px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 9999px;

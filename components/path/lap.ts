@@ -39,6 +39,7 @@ import type { Walk } from '@/content/walks'
 import type { Gem } from '@/content/gems'
 import type { Purpose } from '@/content/situations'
 import { surprisesFor, type Surprise } from '@/content/surprises'
+import { boardOrder } from '@/content/board-order'
 import type { PathNode, PathView } from './progress'
 
 type Base = { at: number; col: number; row: number; reached: boolean; key: string }
@@ -200,25 +201,54 @@ export function lapOf(
     else edge.push(stop(s++))
   }
 
-  const squares: Square[] = []
+  const idOf = (body: Body): string =>
+    body.kind === 'corner'
+      ? body.corner
+      : body.kind === 'room'
+        ? body.node.room.id
+        : body.kind === 'postcard'
+          ? body.card.id
+          : body.kind === 'venue'
+            ? body.gem.id
+            : body.kind === 'vibe'
+              ? body.crate
+              : body.event.id
+  /* Dealt round the lap: corners at their places, the edge between them. */
+  let bodies: Body[] = []
   for (let i = 0, e = 0; i < L; i++) {
-    const [col, row] = cellOf(i, w, h)
     const corner = cornerOf.get(i)
-    const body = corner ? { kind: 'corner' as const, corner } : edge[e++]
-    const id =
-      body.kind === 'corner'
-        ? body.corner
-        : body.kind === 'room'
-          ? body.node.room.id
-          : body.kind === 'postcard'
-            ? body.card.id
-            : body.kind === 'venue'
-              ? body.gem.id
-              : body.kind === 'vibe'
-                ? body.crate
-                : body.event.id
-    squares.push({ ...body, at: i, col, row, reached: false, key: purpose + ':' + u.unit.id + ':' + body.kind + ':' + id } as Square)
+    bodies.push(corner ? { kind: 'corner' as const, corner } : edge[e++])
   }
+  /*
+    OR IN THE ORDER SET BY HAND (content/board-order.ts, from Sam's board map). Named squares
+    first, in order; a rotated place or what's on takes the next of its kind; anything left
+    over keeps its order, before So far.
+  */
+  const handOrder = boardOrder(purpose, u.unit.id)
+  if (handOrder) {
+    const pool = [...bodies]
+    const take = (pick: (b: Body) => boolean) => {
+      const i = pool.findIndex(pick)
+      return i === -1 ? null : pool.splice(i, 1)[0]
+    }
+    const placed: Body[] = []
+    for (const entry of handOrder) {
+      const [kind, ...rest] = entry.split(':')
+      const id = rest.join(':')
+      const b = take((x) => x.kind === kind && idOf(x) === id) ?? (kind === 'venue' || kind === 'neighbour' ? take((x) => x.kind === kind) : null)
+      if (b) placed.push(b)
+    }
+    const trip = placed.findIndex((x) => x.kind === 'corner' && x.corner === 'trip')
+    const rest = pool
+    if (trip === -1) placed.push(...rest)
+    else placed.splice(trip, 0, ...rest)
+    if (placed.length === L) bodies = placed
+  }
+  const squares: Square[] = bodies.map((body, i) => {
+    const [col, row] = cellOf(i, w, h)
+    return { ...body, at: i, col, row, reached: false, key: purpose + ':' + u.unit.id + ':' + body.kind + ':' + idOf(body) } as Square
+  })
+  const tripAt = squares.findIndex((x) => x.kind === 'corner' && x.corner === 'trip')
 
   /* How far round: the k-th room square. */
   const laid = nodes.filter((x) => x.state === 'done').length
@@ -248,7 +278,7 @@ export function lapOf(
     /* Lessons done: everything is face up but So far, which turns over when the rest is opened. */
     for (const s of squares) s.reached = !(s.kind === 'corner' && s.corner === 'trip') || complete
     /* The token walks to the next square still to open; then So far until it is seen; then home. */
-    token = complete ? (opts.recapSeen === false ? corners.trip : 0) : toOpenAll[0].at
+    token = complete ? (opts.recapSeen === false ? tripAt : 0) : toOpenAll[0].at
   }
   const toOpen = toOpenAll.filter((s) => s.reached)
 

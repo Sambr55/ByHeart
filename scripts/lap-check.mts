@@ -14,6 +14,7 @@ import { pathUnits } from '../content/path'
 import { pathLevel, pathView, recapWaiting } from '../components/path/progress'
 import { boardSize, cellOf, cornerAt, lapOf } from '../components/path/lap'
 import { CORNERS, POSTCARDS } from '../content/board'
+import { BOARD_ORDER } from '../content/board-order'
 import { CHEATS } from '../content/cheats'
 import { IDIOMS } from '../content/idioms'
 import { GEMS, gemRotation } from '../content/gems'
@@ -87,6 +88,21 @@ const waiting = lapOf(pathView({ ...empty, finished_cards: ids }, units, open, N
 ok('…but until the recap is seen the token waits on Até agora, the last square', waiting.complete && waiting.token === waiting.squares.length - 1 && waiting.squares[waiting.token].kind === 'corner')
 const rooms = all.squares.filter((s) => s.kind === 'room')
 ok('and every room comes before it', rooms.every((s) => s.at < all.squares.length - 1))
+
+console.log('\nboards in the order set by hand (content/board-order.ts, from Sam\'s board map)')
+for (const [p, boards] of Object.entries(BOARD_ORDER) as [Purpose, Record<string, string[]>][]) {
+  const us = pathUnits(undefined, NOW, p)
+  for (const [unitId, order] of Object.entries(boards)) {
+    const i = us.findIndex((x) => x.id === unitId)
+    ok(`${p} · ${unitId}: is a board on that path`, i !== -1)
+    if (i === -1) continue
+    const lap = lapOf(pathView(empty, us, open, NOW), i, p, { gems, rows })
+    const got = lap.squares.map((s) => s.key.split(':').slice(2, 3)[0] + ':' + s.key.split(':').slice(3).join(':'))
+    /* Places and what's on rotate with the city: the slot's kind is what must hold. */
+    const same = order.length === got.length && order.every((e, k) => (e.startsWith('venue:') || e.startsWith('neighbour:') ? got[k].split(':')[0] === e.split(':')[0] : got[k] === e))
+    ok(`${p} · ${unitId}: laid out exactly as the map says`, same, same ? '' : got.join(' '))
+  }
+}
 
 console.log('\nevery square (Sam, 2026-11-10: "board two is closing before I have completed it")')
 {
