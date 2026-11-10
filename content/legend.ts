@@ -3064,6 +3064,33 @@ export function childrenSentence(all: Child[]): { frame: string; en: string } {
   }
 }
 
+/*
+  PLACES HAVE TWO NAMES (Sam, 2026-11-10: "I am from Londres"). A typed town went into both
+  sentences verbatim, so Londres read "I am from Londres" and London read "Sou de London".
+  The towns a visitor is most likely to type, each way round; anything else stays as typed.
+*/
+const PLACES: [pt: string, en: string][] = [
+  ['Londres', 'London'], ['Edimburgo', 'Edinburgh'], ['Dublim', 'Dublin'], ['Cardife', 'Cardiff'],
+  ['Nova Iorque', 'New York'], ['Filadélfia', 'Philadelphia'], ['Washington', 'Washington'],
+  ['Paris', 'Paris'], ['Bruxelas', 'Brussels'], ['Amesterdão', 'Amsterdam'], ['Berlim', 'Berlin'],
+  ['Munique', 'Munich'], ['Colónia', 'Cologne'], ['Viena', 'Vienna'], ['Genebra', 'Geneva'],
+  ['Zurique', 'Zurich'], ['Roma', 'Rome'], ['Milão', 'Milan'], ['Florença', 'Florence'],
+  ['Nápoles', 'Naples'], ['Veneza', 'Venice'], ['Atenas', 'Athens'], ['Copenhaga', 'Copenhagen'],
+  ['Estocolmo', 'Stockholm'], ['Varsóvia', 'Warsaw'], ['Praga', 'Prague'], ['Moscovo', 'Moscow'],
+  ['Sevilha', 'Seville'], ['Cidade do Cabo', 'Cape Town'], ['Sidney', 'Sydney'], ['Toronto', 'Toronto'],
+  ['Montreal', 'Montreal'], ['Cantão', 'Canton'], ['Pequim', 'Beijing'], ['Tóquio', 'Tokyo'],
+  ['Escócia', 'Scotland'], ['Inglaterra', 'England'], ['Irlanda', 'Ireland'], ['País de Gales', 'Wales'],
+  ['Estados Unidos', 'the United States'], ['Alemanha', 'Germany'], ['França', 'France'],
+  ['Holanda', 'the Netherlands'], ['Suécia', 'Sweden'], ['Canadá', 'Canada'], ['Austrália', 'Australia'],
+]
+const fold = (x: string) => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+/** A typed place, in the language asked for: Londres ↔ London. Unknown places stay as typed. */
+export function placeIn(lang: 'pt' | 'en', typed: string): string {
+  const k = fold(typed)
+  const hit = PLACES.find(([pt, en]) => fold(pt) === k || fold(en) === k)
+  return hit ? (lang === 'pt' ? hit[0] : hit[1]) : typed
+}
+
 export function fillFrame(
   frame: LegendFrame,
   values: Record<string, string>,
@@ -3111,6 +3138,7 @@ export function fillFrame(
       const option = slot.options?.find((o) => o.value === raw)
       return option?.f ?? raw
     }
+    if (slot?.kind === 'place') return placeIn('pt', raw)
     return raw
   })
 }
@@ -3184,6 +3212,7 @@ export function fillEnglish(
     const slot = shape.slots.find((sl) => sl.key === key)
     /* A pick shows its English label; a typed answer is already the learner's own words. */
     const option = slot?.options?.find((o) => o.value === raw || o.f === raw)
+    if (!option && slot?.kind === 'place') return placeIn('en', raw)
     return option?.en ?? raw
   })
 }

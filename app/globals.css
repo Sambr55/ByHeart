@@ -2629,6 +2629,8 @@ details > summary.list-none::-webkit-details-marker {
 }
 .board-stop.panel-frieze { border-radius: 6px }
 .board-stop.is-up { background-color: #f3ead6; color: #6b4a16 }
+/* OPENED, SO DONE: blue like a laid room (Sam, 2026-11-10: "all completed tiles on the board should turn blue to show clear progress around the board"). Turned over but not yet opened stays cream, with its dot. */
+.board-stop.is-done { background-color: #1f5d8c; color: #fbfaf6; box-shadow: inset 0 -6px 10px -8px rgba(0, 0, 0, 0.35) }
 .board-corner { background-color: #eef3f8; color: rgba(31, 93, 140, 0.55); gap: 1px }
 .board-corner.is-reached { background-color: #1f5d8c; color: #fbfaf6 }
 .board-corner.is-finish { background-color: #c9973b; color: #14243a; animation: board-finish 2.4s ease-in-out infinite }
