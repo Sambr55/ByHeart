@@ -566,7 +566,7 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
                 data-testid="errand-recap"
                 className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
               >
-                LEVEL {levelDone.level} LAID · SEE YOUR RECAP
+                BOARD {levelDone.level} DONE · SEE YOUR TRIP SO FAR
               </Link>
             ) : null}
             {nextRoom ? (
@@ -649,7 +649,7 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
               }}
               className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
             >
-              {gotFinishes ? 'GOT IT — LEVEL ' + gotFinishes.level + ' RECAP' : nextRoom ? 'GOT IT — ' + nextRoom.title.toUpperCase() : back === '/legend' ? 'GOT IT — NOW MAKE IT YOURS' : 'GOT IT'}
+              {gotFinishes ? 'GOT IT — SEE YOUR TRIP SO FAR' : nextRoom ? 'GOT IT — ' + nextRoom.title.toUpperCase() : back === '/legend' ? 'GOT IT — NOW MAKE IT YOURS' : 'GOT IT'}
             </button>
             <button
               type="button"

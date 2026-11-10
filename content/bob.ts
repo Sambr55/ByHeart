@@ -77,6 +77,52 @@ const idiom = (
 
 export const BOB: Root[] = [
   idiom({
+    root_id: 'bob_bobs_your_uncle',
+    culture_family: 'bobs_your_uncle',
+    rung: 1,
+    root_type: 'other',
+    credit: "Bob's your uncle",
+    source_label: "Bob's your uncle — the phrase this whole shelf is named after",
+    source_status: 'verified',
+    root_display: "Bob's your uncle",
+    source: "And Bob's your uncle.",
+    target: 'E pronto.',
+    wreckage: {
+      target: 'O Bob é teu tio.',
+      why: 'There is no Bob. There has never been a Bob. Portugal is now waiting to hear about your uncle.',
+    },
+    semantic_bridge:
+      'E PRONTO is the equivalent, and it is two of the most useful words in the language — it closes an explanation, a story or an argument, and you will hear it forty times a day.',
+    subtext: 'The name on the door, and the phrase that shuts it.',
+    /*
+      THE FREEBIE, SO THE VIBE OPENS ON ITS OWN NAME. sectionRoots leads with the freebie,
+      and this used to be Hold your horses — so a vibe the board advertises as "Bob's your
+      uncle" opened on a different idiom, one the board also deals as a card. A vibe must
+      open on the line its title promises; this is that line.
+    */
+    freebie_flag: true,
+    extracts: [
+      { id: 'pronto', target: 'pronto', gloss: 'ready', shelf: 'just_say', note: 'On its own it closes a thing: right, done, there you go. You will hear it constantly.' },
+    ],
+    branches: [
+      { target: 'Estou pronto.', en: 'I am ready.', demonstrates: ['pronto'] },
+      { target: 'Pronto, já está.', en: 'Right, it is done.', demonstrates: ['pronto'] },
+      { target: 'Estás pronto?', en: 'Are you ready?', demonstrates: ['pronto'], address: 'tu', formal: 'Está pronto?' },
+    ],
+    helpers: {
+      'estou': 'I am',
+      'já': 'already',
+      'está': 'it is',
+      'estás': 'you are',
+    },
+    transfer_prompt: {
+      context: 'Somebody is waiting at the door with their coat on.',
+      ask: 'I am ready.',
+      answer: 'Estou pronto.',
+    },
+    starter_tags: ['first-day'],
+  }),
+  idiom({
     root_id: 'bob_hold_your_horses',
     culture_family: 'bobs_your_uncle',
     rung: 1,
@@ -94,7 +140,6 @@ export const BOB: Root[] = [
     semantic_bridge:
       'Portuguese does the whole job with one word. Calma is the most useful thing on this shelf: it works on a queue, a driver, a child and an argument, and it is a complete sentence on its own.',
     subtext: 'Four English words, one Portuguese one, and the Portuguese one is better.',
-    freebie_flag: true,
     extracts: [
       { id: 'calma', target: 'calma', gloss: 'calm', shelf: 'just_say', note: 'A whole sentence on its own. Also the adjective, and the noun.' },
     ],
@@ -156,45 +201,6 @@ export const BOB: Root[] = [
       ask: 'Never again.',
       answer: 'Nunca mais.',
     },
-  }),
-  idiom({
-    root_id: 'bob_bobs_your_uncle',
-    culture_family: 'bobs_your_uncle',
-    rung: 1,
-    root_type: 'other',
-    credit: "Bob's your uncle",
-    source_label: "Bob's your uncle — the phrase this whole shelf is named after",
-    source_status: 'verified',
-    root_display: "Bob's your uncle",
-    source: "And Bob's your uncle.",
-    target: 'E pronto.',
-    wreckage: {
-      target: 'O Bob é teu tio.',
-      why: 'There is no Bob. There has never been a Bob. Portugal is now waiting to hear about your uncle.',
-    },
-    semantic_bridge:
-      'E PRONTO is the equivalent, and it is two of the most useful words in the language — it closes an explanation, a story or an argument, and you will hear it forty times a day.',
-    subtext: 'The name on the door, and the phrase that shuts it.',
-    extracts: [
-      { id: 'pronto', target: 'pronto', gloss: 'ready', shelf: 'just_say', note: 'On its own it closes a thing: right, done, there you go. You will hear it constantly.' },
-    ],
-    branches: [
-      { target: 'Estou pronto.', en: 'I am ready.', demonstrates: ['pronto'] },
-      { target: 'Pronto, já está.', en: 'Right, it is done.', demonstrates: ['pronto'] },
-      { target: 'Estás pronto?', en: 'Are you ready?', demonstrates: ['pronto'], address: 'tu', formal: 'Está pronto?' },
-    ],
-    helpers: {
-      'estou': 'I am',
-      'já': 'already',
-      'está': 'it is',
-      'estás': 'you are',
-    },
-    transfer_prompt: {
-      context: 'Somebody is waiting at the door with their coat on.',
-      ask: 'I am ready.',
-      answer: 'Estou pronto.',
-    },
-    starter_tags: ['first-day'],
   }),
   idiom({
     root_id: 'bob_so_far_so_good',

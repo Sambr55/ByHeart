@@ -168,6 +168,7 @@ function Shell({
   */
   const cameFrom = useSearchParams().get('from')
   const errand = cameFrom === 'legend'
+  const fromBoard = useBoardSitting()
   /*
     A token that changes exactly when the screen does.
 
@@ -231,6 +232,21 @@ function Shell({
                 className="tap-target text-[0.6rem] uppercase tracking-wider opacity-80 transition hover:opacity-100"
               >
                 Legend
+              </Link>
+            ) : nav && fromBoard ? (
+              /*
+                A SITTING THE BOARD OPENED GOES BACK TO THE BOARD (Sam, 2026-11-10: "when it's
+                done it wanders off into one of the old flows"). VIBES jumped to the picker —
+                the retired shelf — and, like the errand's door above, this is drawn on the
+                first screen too, where canGoBack is false.
+              */
+              <Link
+                href="/club"
+                data-testid="home-board"
+                aria-label="Back to the board"
+                className="tap-target text-[0.6rem] uppercase tracking-wider opacity-80 transition hover:opacity-100"
+              >
+                ‹ Board
               </Link>
             ) : nav && canGoBack ? (
               <button
@@ -444,6 +460,36 @@ function SetUpStep() {
   )
 }
 
+/**
+ * A VIBE SITTING THE BOARD OPENED — /vibes?open=<crate>, which is the only way into /vibes now
+ * that the shelf is retired (app/vibes/page.tsx sends a bare /vibes to /club).
+ *
+ * Every way out of such a sitting lands back on the board: the header, the session-done
+ * screen, and a back gesture that steps past the first screen onto the picker. The one
+ * exception is the Legend's errand (?from=legend), which carries its own way back to the card
+ * that sent it.
+ */
+function useBoardSitting(): boolean {
+  const params = useSearchParams()
+  return Boolean(params.get('open')) && params.get('from') !== 'legend'
+}
+
+/**
+ * The picker, unless this is a board sitting that has already been entered — then the shelf
+ * would be a dead end (Sam: "it wanders off into one of the old flows"), so it is the board.
+ * Before entry the picker still renders, because it is what reads ?open= and opens the vibe.
+ */
+function PickerOrBoard() {
+  const { state } = useJourney()
+  const router = useRouter()
+  const leave = useBoardSitting() && state.family !== null
+  useEffect(() => {
+    if (leave) router.replace('/club')
+  }, [leave, router])
+  if (leave) return <div className="min-h-svh bg-bg" aria-hidden />
+  return <Picker />
+}
+
 export function Journey() {
   const { step } = useJourney()
   if (!step) return null
@@ -461,7 +507,7 @@ export function Journey() {
     case 'theway':
       return <TheWay />
     case 'picker':
-      return <Picker />
+      return <PickerOrBoard />
     case 'root':
       return (
         <RootBeatView
@@ -5773,6 +5819,8 @@ function midSentence(title: string): string {
 
 function SectionComplete() {
   const { chooseFamily, finishSection, owned, state } = useJourney()
+  /* Opened from the board: it ends on the board, with no Legend and no next vibe in the way. */
+  const fromBoard = useBoardSitting()
   /*
     The section is finished because this screen exists, not because a button was pressed.
 
@@ -5967,7 +6015,12 @@ function SectionComplete() {
     language — because what changed is what the learner can do, not what they have earned.
   */
   const [showOpened, setShowOpened] = useState(true)
-  if (opened.length && showOpened) {
+  /*
+    NOT FROM THE BOARD. A board sitting ends on its summary and goes back to the board; this
+    interstitial's buttons lead into /legend, which is exactly the "old flow" Sam reported a
+    vibe from the board wandering off into. The questions stay ready on the Legend regardless.
+  */
+  if (opened.length && showOpened && !fromBoard) {
     return (
       <LegendOpened
         frames={opened}
@@ -6061,7 +6114,9 @@ function SectionComplete() {
               on the screen where it can be acted on. Every other vibe keeps the open
               sentence, because no other vibe is a door.
             */}
-            {road.open
+            {fromBoard
+              ? 'There is more in there whenever you want it.'
+              : road.open
               ? LEGEND_COPY.open_head
               : isDoorway
                 ? PICKER.legend_sitting_done(road.done, road.total)
@@ -6089,7 +6144,7 @@ function SectionComplete() {
           your Legend" to somebody who has never seen one is meaningless. After that it
           is quiet reinforcement, and if they declined it never appears again.
         */}
-        <LegendPayoff justFinished={state.family} />
+        {fromBoard ? null : <LegendPayoff justFinished={state.family} />}
         {/*
           NO BAR HERE, because the Shell already carries one.
 
@@ -6173,7 +6228,22 @@ function SectionComplete() {
 
           The road knows. Walked, and the button is the thing it was walked for.
         */}
-        {road.open ? (
+        {fromBoard ? (
+          /*
+            BACK TO THE BOARD, AND ONLY THAT (Sam, 2026-11-10: "when it's done it wanders off
+            into one of the old flows"). The two buttons below — the Legend once the road is
+            walked, otherwise the road's next vibe or the basics — are the old flows: a vibe
+            the board dealt as a surprise is one square of a level, and when it is done the
+            level is where the learner goes on from.
+          */
+          <Link
+            href="/club"
+            data-testid="sitting-back-to-board"
+            className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+          >
+            ‹ Back to board
+          </Link>
+        ) : road.open ? (
           <Link
             href="/legend"
             data-testid="to-legend-now"

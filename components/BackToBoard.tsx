@@ -41,6 +41,11 @@ export function useFromBoard(): boolean {
         setShow(false)
         return
       }
+      /* The trip so far has its own "‹ Board" at the top and "On to Board N" at the foot; the way back stays marked for its test. */
+      if (path.startsWith('/level/')) {
+        setShow(false)
+        return
+      }
       const at = Number(sessionStorage.getItem(KEY) ?? 0)
       setShow(at > 0 && Date.now() - at < TTL)
     } catch {

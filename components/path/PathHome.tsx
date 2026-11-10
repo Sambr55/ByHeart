@@ -170,8 +170,8 @@ export function PathHome() {
           className="tap-target flex items-center justify-between gap-3 rounded-2xl border-2 border-[#e2b450] bg-bg-elev px-5 py-4"
         >
           <span className="min-w-0">
-            <span className="eyebrow block text-accent">Level {recapDue.n} laid</span>
-            <span className="block text-base">See your recap and test yourself on {recapDue.title}</span>
+            <span className="eyebrow block text-accent">Board {recapDue.n} done</span>
+            <span className="block text-base">See your trip so far, then Board {recapDue.n + 1} opens</span>
           </span>
           <span aria-hidden className="text-accent">→</span>
         </Link>
@@ -289,9 +289,10 @@ export function PathHome() {
               view={view}
               purpose={pathPurpose(purpose)}
               chapter={learner.chapter ?? 'lisbon'}
-              current={level.complete ? Math.max(0, view.units.length - 1) : level.level - 1}
+              /* A finished board stays until its trip-so-far is seen (lap.ts, Até agora). */
+              current={recapDue ? recapDue.n - 1 : level.complete ? Math.max(0, view.units.length - 1) : level.level - 1}
               now={now ?? new Date(0)}
-              holidays={learner.holidays ?? []}
+              recapsSeen={learner.recaps_seen ?? []}
               saidHere={learner.walk_stops ?? []}
               gender={learner.profile?.gender ?? null}
               onLaid={setSheet}

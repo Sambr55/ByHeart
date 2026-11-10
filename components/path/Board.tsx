@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, 
 import { createPortal } from 'react-dom'
 import { InviteSheet } from '@/components/invite/InviteSheet'
 import { SpokenLine } from '@/components/Opener'
-import { CORNERS, HOLIDAY_PRIZE, type CornerId } from '@/content/board'
+import { CORNERS, type CornerId } from '@/content/board'
+import { levelKey } from '@/content/level'
 import { rowsFor } from '@/content/calendar'
 import { CHEATS } from '@/content/cheats'
 import { bairroById, gemsHomeFirst, KIND_LABEL, type Gem } from '@/content/gems'
@@ -15,10 +16,10 @@ import { WALKS } from '@/content/walks'
 import { panelArt } from '@/content/panel'
 import type { ChapterId } from '@/content/chapters'
 import type { Purpose } from '@/content/situations'
-import { markBoardMet, takeHoliday } from '@/engine/learner'
+import { markBoardMet } from '@/engine/learner'
 import { track } from '@/engine/analytics'
 import type { PathNode, PathView } from './progress'
-import { milestoneHref, onHoliday } from './progress'
+import { milestoneHref } from './progress'
 import { UNLOCK_HREF } from './locks'
 import { KindIcon, LockIcon } from './icons'
 import { driftOf } from './Panel'
@@ -41,28 +42,24 @@ import { useVenues } from '@/components/city/useVenues'
  *               cold, tilted when it has drifted. Tap: the room, or its sheet once laid.
  *   stop        face down (the frieze) until the token has passed it, then turned over:
  *               a postcard, a venue or what's on. A dot until it has been looked at.
- *   corner      Partida, Miradouro, Férias, A mesa — always face up, opened once reached.
+ *   corner      Partida, A mesa, Até agora (your trip so far) — always face up, opened once reached.
  *   token       a gold counter on the square you have reached.
  *
  * The middle of the board is the level's picture, coming through as the rooms are laid.
  */
 const SEEN_KEY = 'dub.board.seen'
 /** The corners in English, over their Portuguese (Sam, 2026-11-09: "the Portuguese words mean nothing to me"). */
-const CORNER_EN: Record<CornerId, string> = { start: 'Start', miradouro: 'Look back', ferias: 'Week off', mesa: 'Your table' }
+const CORNER_EN: Record<CornerId, string> = { start: 'Start', trip: 'So far', mesa: 'Your table' }
 
 /* The corners on the warm-up lap: what each will do on every board after it, not an offer now. */
 const WARM_UP: Record<Exclude<CornerId, 'start'>, { title: string; body: string }> = {
-  miradouro: {
-    title: 'Look back, any time',
-    body: 'Every board has a viewpoint. From here you can always see — and hear — everything you can already say. It is all kept in Yours.',
-  },
-  ferias: {
-    title: 'A week off, from Board 2',
-    body: 'Halfway round every board there is a week off: take it and nothing on your path slips while you are away. On the warm-up lap there is nothing to pause yet — your first is on the next board.',
+  trip: {
+    title: 'Your trip so far',
+    body: 'The last square of every board. Lay this board’s rooms and it gathers everything they gave you — what you can now say, with its sound, and a quick test. Then the next board opens.',
   },
   mesa: {
     title: 'A real table, later',
-    body: 'Every board ends near a table: one dinner with friends where you use what you have learned, out loud. After a board or two you will have enough to host one.',
+    body: 'Every board has a table: one dinner with friends where you use what you have learned, out loud. After a board or two you will have enough to host one.',
   },
 }
 
@@ -89,7 +86,7 @@ export function Board({
   chapter,
   current,
   now,
-  holidays,
+  recapsSeen,
   saidHere,
   gender,
   onLaid,
@@ -103,7 +100,8 @@ export function Board({
   /** The level you are on, 0-based. The board opens there; the arrows go either way. */
   current: number
   now: Date
-  holidays: string[]
+  /** recaps_seen: a finished board waits on Até agora until its recap is seen (lap.ts). */
+  recapsSeen: string[]
   /** walk_stops: a venue said there carries its mark. */
   saidHere: string[]
   gender: 'm' | 'f' | null
@@ -138,8 +136,11 @@ export function Board({
   const gems = useMemo(() => gemsHomeFirst(chapter), [chapter])
   const rows = useMemo(() => rowsFor(chapter, now), [chapter, now])
   const lap = useMemo(
-    () => (view.units[index] ? lapOf(view, index, purpose, { gems, rows, walks: WALKS, chapter }) : null),
-    [view, index, purpose, gems, rows],
+    () =>
+      view.units[index]
+        ? lapOf(view, index, purpose, { gems, rows, walks: WALKS, chapter, recapSeen: recapsSeen.includes(levelKey(purpose, view.units[index].unit.id)) })
+        : null,
+    [view, index, purpose, gems, rows, chapter, recapsSeen],
   )
   /*
     WHAT THE BOARD TURNED OVER, KEPT (2026-11-05). A postcard, place or what's on is met once
@@ -153,7 +154,6 @@ export function Board({
   }, [lap])
   const [open, setOpen] = useState<Square | null>(null)
   const [inviting, setInviting] = useState(false)
-  const away = onHoliday({ holidays }, now)
   if (!lap) return null
   const art = panelArt(chapter, purpose)
   const unit = view.units[index]
@@ -198,6 +198,28 @@ export function Board({
         </button>
       </div>
 
+      {/*
+        HOW THE BOARD WORKS, ABOVE IT (Sam, 2026-11-10: "the description needs to be above the
+        board and much clearer"). On the warm-up lap only: three plain steps, in the order they
+        happen, before the squares they describe.
+      */}
+      {lap.index === 0 ? (
+        <div className="flex flex-col gap-2 rounded-2xl border border-line bg-bg-elev px-4 py-3.5" data-testid="board-key">
+          <p className="eyebrow text-[0.65rem] text-accent">Board 1 is your warm-up · how it works</p>
+          <ol className="flex flex-col gap-1.5 text-sm leading-snug">
+            <li>
+              <span className="font-semibold">1. Play a lesson to move.</span> <span className="text-muted">Lessons are the squares that start <span className="font-semibold text-fg">say</span>, <span className="font-semibold text-fg">count</span> or <span className="font-semibold text-fg">at the</span>. Each one you play moves you round.</span>
+            </li>
+            <li>
+              <span className="font-semibold">2. The square after it turns over.</span> <span className="text-muted">✦ a surprise, 📍 a real place to say it, or 🎟 what’s on. All of it is kept in Yours.</span>
+            </li>
+            <li>
+              <span className="font-semibold">3. Finish on “So far”.</span> <span className="text-muted">Lay all {lap.open} lessons and you see your trip so far, then Board 2 opens.</span>
+            </li>
+          </ol>
+          <p className="text-xs text-muted">Tap any square to see what it is.</p>
+        </div>
+      ) : null}
       {/*
         ON THIS BOARD (Sam, 2026-11-09: "there is no excitement or sell as to what is on the
         board"). Its headliners, named — the surprises first, then a place and what's on.
@@ -279,28 +301,14 @@ export function Board({
               <span className="eyebrow text-[0.6rem] opacity-80">Level {level}</span>
               <span className="display text-lg leading-tight sm:text-xl">{unit.unit.title}</span>
               <span className="text-[0.7rem] opacity-80">
-                {lap.complete ? 'Laid. Partida opens the next board.' : `${lap.done} of ${lap.open} rooms laid`}
+                {lap.complete ? (lap.token === 0 ? 'Laid. Partida opens the next board.' : 'Laid. See your trip so far.') : `${lap.done} of ${lap.open} rooms laid`}
               </span>
             </span>
           </li>
         </ol>
       </div>
 
-      {/*
-        THE KEY, ON THE WARM-UP LAP (2026-11-09): which squares teach and which explain.
-      */}
-      {lap.index === 0 ? (
-        <p className="text-center text-xs leading-relaxed text-muted" data-testid="board-key">
-          <span className="font-semibold text-fg">Your warm-up lap.</span> The squares that say <span className="font-semibold text-fg">say / count / at the…</span> are your lessons — lay them to go round.
-          ✦ surprises · 📍 places · 🎟 what’s on · the corners are the board’s rules. Tap any of them to see how it works.
-        </p>
-      ) : null}
 
-      {away ? (
-        <p className="text-center text-sm text-muted" data-testid="board-away">
-          <span className="font-semibold text-fg">On holiday</span> until {dayOf(away)}: nothing slips while you’re away.
-        </p>
-      ) : null}
 
       {/*
         "MOVE FURTHER BY VOICE" WENT (Sam, 2026-11-09). An extra square only turned over a stop a
@@ -320,8 +328,6 @@ export function Board({
           purpose={purpose}
           gender={gender}
           rung={rung}
-          away={away}
-          holidays={holidays}
           saidHere={saidHere}
           practiceHref={milestoneHref(unit.unit.milestone.cheat)}
           nextLevel={index + 2 <= view.units.length ? index + 2 : null}
@@ -489,8 +495,8 @@ function VenueBadge({ gem }: { gem: string }) {
 function CornerMark({ corner }: { corner: CornerId }) {
   const d: Record<CornerId, string> = {
     start: 'M5 19V5m0 0h11l-2 3.5L16 12H5',
-    miradouro: 'M3 18h18M6 18l4-7 3 4 2-3 3 6M17 6.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z',
-    ferias: 'M12 21V9m0 0C9 6 5 6.5 3.5 9 6 8 9 8.5 12 9zm0 0c3-3 7-2.5 8.5 0C18 8 15 8.5 12 9zm0 0c-1-3.5 1-6 3-6.5M6 21h12',
+    /* A ticked list: everything so far. */
+    trip: 'M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2',
     mesa: 'M4 10h16M6 10l-1 9m13-9 1 9M9 10V7m6 3V7M8 7h8',
   }
   return (
@@ -522,8 +528,6 @@ function StopSheet({
   lap,
   purpose,
   gender,
-  away,
-  holidays,
   saidHere,
   practiceHref,
   nextLevel,
@@ -535,8 +539,6 @@ function StopSheet({
   purpose: Purpose
   gender: 'm' | 'f' | null
   rung: number
-  away: string | null
-  holidays: string[]
   saidHere: string[]
   practiceHref: string
   nextLevel: number | null
@@ -550,10 +552,6 @@ function StopSheet({
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  const boardKey = purpose + ':' + lap.unitId
-  /* The real holiday shows only with a sponsor's prize set AND HOLIDAY_DRAW on (Sam: "put the holiday behind a switch"). */
-  const holidayLive = useVenues().holiday
-  const taken = holidays.some((h) => h.startsWith(boardKey + '@'))
   const btn = 'tap-target eyebrow block w-full rounded-full bg-accent px-6 py-3 text-center text-accent-ink'
   let eyebrow = ''
   let title = ''
@@ -568,18 +566,15 @@ function StopSheet({
     to pause — and the stops say what they will be on every board after this one.
   */
   const warmUp = lap.index === 0
-  if (s.kind === 'corner' && warmUp && s.corner !== 'start') {
+  /* Once Board 1 is laid, So far stops explaining and simply opens (the branch below). */
+  if (s.kind === 'corner' && warmUp && s.corner !== 'start' && !(s.corner === 'trip' && lap.complete)) {
     const c = CORNERS[purpose][s.corner]
     eyebrow = 'How it works · ' + c.pt
     title = WARM_UP[s.corner].title
     body = (
       <>
         <p className="text-base leading-relaxed">{WARM_UP[s.corner].body}</p>
-        {s.corner === 'miradouro' && !ahead ? (
-          <Link href="/profile" className="tap-target eyebrow block w-full rounded-full border border-accent px-6 py-3 text-center text-accent">
-            See what I can say
-          </Link>
-        ) : null}
+
       </>
     )
   } else if (s.kind === 'corner') {
@@ -608,50 +603,14 @@ function StopSheet({
         </>
       )
     } else if (ahead) {
-      body = <p className="text-base leading-relaxed text-muted">Lay more rooms to get here. {c.body}</p>
-    } else if (s.corner === 'miradouro') {
+      body = <p className="text-base leading-relaxed text-muted">{s.corner === 'trip' ? 'Lay this board’s rooms to get here. ' : 'Lay more rooms to get here. '}{c.body}</p>
+    } else if (s.corner === 'trip') {
       body = (
         <>
           <p className="text-base leading-relaxed">{c.body}</p>
-          <Link href="/profile" className={btn}>
-            What I can say
+          <Link href={'/level/' + encodeURIComponent(lap.unitId)} className={btn} data-testid="board-trip">
+            {lap.token === s.at ? 'See your trip so far' : 'See it again'}
           </Link>
-        </>
-      )
-    } else if (s.corner === 'ferias') {
-      body = (
-        <>
-          <p className="text-base leading-relaxed">{c.body}</p>
-          {away ? (
-            <p className="text-sm text-muted" data-testid="ferias-away">
-              You’re on holiday until {dayOf(away)}.
-            </p>
-          ) : taken ? (
-            <p className="text-sm text-muted">You’ve had this board’s week off. The next one is on the next board.</p>
-          ) : (
-            <button
-              type="button"
-              className={btn}
-              data-testid="ferias-take"
-              onClick={() => {
-                takeHoliday(boardKey)
-                track('board_holiday', { board: boardKey })
-              }}
-            >
-              Take my week off
-            </button>
-          )}
-          {HOLIDAY_PRIZE && holidayLive ? (
-            <div className="flex flex-col gap-2 rounded-2xl border border-[#c9973b] px-4 py-3" data-testid="ferias-prize">
-              <p className="eyebrow text-[#c9973b]">And a real one</p>
-              <p className="display text-xl">{HOLIDAY_PRIZE.title}</p>
-              <p className="text-sm leading-relaxed">{HOLIDAY_PRIZE.body}</p>
-              <a href={HOLIDAY_PRIZE.href} className="eyebrow text-accent underline">
-                Enter
-              </a>
-              <p className="text-xs text-muted">{HOLIDAY_PRIZE.terms}</p>
-            </div>
-          ) : null}
         </>
       )
     } else {

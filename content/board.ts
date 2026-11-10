@@ -20,12 +20,18 @@
  * Chance or Community Chest (or the Portuguese editions' Sorte and Caixa da Comunidade);
  * there is no money, no property, no rent, no houses, no coloured band across a square, no
  * fixed forty squares. The boards are azulejo, change shape with the level, and their
- * corners are Lisbon's: Partida, Miradouro, Férias, A mesa.
+ * corners are Lisbon's: Partida, A mesa, and Até agora (so far) before home.
  */
 import type { Purpose } from '@/content/situations'
 import type { ChapterId } from '@/content/chapters'
 
-export type CornerId = 'start' | 'miradouro' | 'ferias' | 'mesa'
+/*
+ * THREE CORNERS (Sam, 2026-11-10). Férias, the week off, went: "it doesn't add anything".
+ * Miradouro went with its metaphor ("I don't like the metaphor, it should be a summary of
+ * your trip so far") and came back as Até agora — so far — the LAST square of every board,
+ * just before Partida, which opens the level recap. The board waits there until it is seen.
+ */
+export type CornerId = 'start' | 'trip' | 'mesa'
 
 export interface Corner {
   /** On the square: Portuguese, short enough for a 50px tile. */
@@ -37,23 +43,14 @@ export interface Corner {
 }
 
 /*
-  THE CORNERS, BY REASON FOR BEING HERE. Same four places on every board; what they say is
+  THE CORNERS, BY REASON FOR BEING HERE. Same three places on every board; what they say is
   the visitor's, the season's or the mover's. Partida is the start of the lap and, once the
   board's rooms are laid, its finish — the practice session that opens the next board.
 */
 export const CORNERS: Record<Purpose, Record<CornerId, Corner>> = {
   visiting: {
     start: { pt: 'Partida', title: 'Start', body: 'Round the board, room by room. Back here and the next stretch of the trip opens.' },
-    miradouro: {
-      pt: 'Miradouro',
-      title: 'The viewpoint',
-      body: 'Stop and look back down the hill: everything you can already say on this trip, with its sound.',
-    },
-    ferias: {
-      pt: 'Férias',
-      title: 'A holiday from the holiday',
-      body: 'You made it halfway round. Take a week off: nothing on your path slips out of place while you’re away.',
-    },
+    trip: { pt: 'Até agora', title: 'Your trip so far', body: 'Everything this board gave you, in one place: what you can now say, with its sound, and a quick test. Then the next board.' },
     mesa: {
       pt: 'A mesa',
       title: 'Eat where the locals eat',
@@ -62,16 +59,7 @@ export const CORNERS: Record<Purpose, Record<CornerId, Corner>> = {
   },
   staying: {
     start: { pt: 'Partida', title: 'Start', body: 'Round the board, room by room. Back here and the next part of the season opens.' },
-    miradouro: {
-      pt: 'Miradouro',
-      title: 'The viewpoint',
-      body: 'Stop and look back over the weeks: everything you can already say, with its sound.',
-    },
-    ferias: {
-      pt: 'Férias',
-      title: 'A week off',
-      body: 'Halfway round. Take a week off: nothing on your path slips out of place while you’re away.',
-    },
+    trip: { pt: 'Até agora', title: 'Your season so far', body: 'Everything this board gave you, in one place: what you can now say, with its sound, and a quick test. Then the next board.' },
     mesa: {
       pt: 'A mesa',
       title: 'Host a table',
@@ -80,16 +68,7 @@ export const CORNERS: Record<Purpose, Record<CornerId, Corner>> = {
   },
   moving: {
     start: { pt: 'Partida', title: 'Start', body: 'Round the board, room by room. Back here and the next part of the move opens.' },
-    miradouro: {
-      pt: 'Miradouro',
-      title: 'The viewpoint',
-      body: 'Stop and look back at how far the move has come: everything you can already say, with its sound.',
-    },
-    ferias: {
-      pt: 'Férias',
-      title: 'A week off the paperwork',
-      body: 'Halfway round. Take a week off: nothing on your path slips out of place while you’re away.',
-    },
+    trip: { pt: 'Até agora', title: 'Your move so far', body: 'Everything this board gave you, in one place: what you can now say, with its sound, and a quick test. Then the next board.' },
     mesa: {
       pt: 'A mesa',
       title: 'Host your first table',
@@ -132,7 +111,7 @@ export const POSTCARDS: Record<Purpose, PostcardRef[]> = {
     i('piece_of_cake'),
     c('isto_hack'),
     c('bluff_agree'),
-    i('hold_your_horses'),
+    i('touch_wood'),
     c('mente_hack'),
     c('bluff_react'),
     i('not_my_cup_of_tea'),
@@ -170,7 +149,7 @@ export const POSTCARDS: Record<Purpose, PostcardRef[]> = {
     i('the_last_straw'),
     c('opposites_hack'),
     c('bluff_react'),
-    i('bobs_your_uncle'),
+    i('blessing_in_disguise'),
     c('e_hack'),
     c('bluff_move'),
   ],

@@ -82,7 +82,7 @@ export function LevelRecap({ id }: { id: string }) {
             {at ? 'Lay a room of ' + at.unit.title + ' and its recap starts here.' : 'This level is not on your path.'}
           </p>
           <Link href="/club" className="tap-target eyebrow w-full rounded bg-accent px-5 py-3 text-center text-accent-ink">
-            BACK TO YOUR PATH
+            ‹ BACK TO THE BOARD
           </Link>
         </div>
       </Frame>
@@ -98,7 +98,7 @@ export function LevelRecap({ id }: { id: string }) {
       {/* 1. THE LEVEL, LAID */}
       <section className="flex flex-col gap-4 rounded-2xl border-2 border-[#e2b450] bg-bg-elev px-5 py-6" data-testid="level-recap">
         <div className="flex flex-col gap-1">
-          <p className="eyebrow text-accent">Level {recap.level} · laid</p>
+          <p className="eyebrow text-accent">Your trip so far · Level {recap.level} laid</p>
           <h1 className="display text-balance text-3xl leading-tight">{recap.title}</h1>
           <p lang="pt-PT" className="pt text-lg text-accent">
             {recap.pt}
@@ -208,10 +208,11 @@ export function LevelRecap({ id }: { id: string }) {
         <Link href={yoursHref} className="tap-target eyebrow block w-full rounded border border-accent px-5 py-3 text-center text-accent">
           OPEN LEVEL {recap.level} IN YOURS
         </Link>
-        <Link href="/club" className="tap-target eyebrow block w-full text-center text-sm text-muted">
-          {next ? 'ON TO LEVEL ' + next.level + ' · ' + next.unit.title.toUpperCase() : 'BACK TO YOUR PATH'}
-        </Link>
       </section>
+      {/* THEN THE NEXT BOARD — the recap is the last square of this one (lap.ts, Até agora). */}
+      <Link href="/club" data-testid="level-next-board" className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink">
+        {next ? 'ON TO BOARD ' + next.level + ' · ' + next.unit.title.toUpperCase() + ' →' : '‹ BACK TO THE BOARD'}
+      </Link>
     </Frame>
   )
 }
@@ -221,10 +222,12 @@ function Frame({ children }: { children: React.ReactNode }) {
     <>
       <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-5 bg-bg px-5 pb-10 text-fg" style={{ paddingTop: 'calc(1.5rem + var(--safe-top, env(safe-area-inset-top, 0px)))' }}>
         <header className="flex items-center gap-3">
-          <Link href="/club" className="tap-target shrink-0" aria-label="Back to your path">
-            ‹
+          {/* "Close buttons should read back to Board" (Sam, 2026-11-09). */}
+          <Link href="/club" className="tap-target eyebrow shrink-0 text-accent" aria-label="Back to the board">
+            ‹ Board
           </Link>
-          <p className="eyebrow min-w-0 flex-1 truncate">Level recap</p>
+          {/* Reached from the board's last square, Até agora (Sam, 2026-11-10: "a summary of your trip so far"). */}
+          <p className="eyebrow min-w-0 flex-1 truncate text-right text-muted">So far · até agora</p>
         </header>
         {children}
         <BottomNavSpace />
