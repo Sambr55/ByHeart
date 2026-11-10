@@ -831,9 +831,30 @@ function StopSheet({
             Open it
           </Link>
         ) : (
-          <p className="text-sm leading-relaxed text-muted" data-testid="board-vibe-locked">
-            Say one of this level’s rooms out loud, with nothing on screen, and it opens.
-          </p>
+          /*
+            THE WAY IN, NAMED (Sam, 2026-11-10: "there is no way into this lesson"). A vibe opens
+            at a rung (entryRung), and laying a room lifts you to one above its own. So: the
+            room on this board that gets you there — not yet laid first — with a button into it.
+          */
+          (() => {
+            const at = crate ? entryRung(crate) : 6
+            const lifts = lap.squares.flatMap((x) => (x.kind === 'room' && (x.node.room.rung ?? 1) >= at - 1 ? [x.node] : []))
+            const key = lifts.find((n) => n.state !== 'done' && n.state !== 'paid') ?? null
+            return key ? (
+              <>
+                <p className="text-sm leading-relaxed" data-testid="board-vibe-locked">
+                  Opens once you’ve played <span className="font-semibold">{key.room.title}</span> — the room on this board that takes you far enough.
+                </p>
+                <Link href={'/errand/' + key.room.id} className={btn} data-testid="board-vibe-way-in">
+                  Play {key.room.title}
+                </Link>
+              </>
+            ) : (
+              <p className="text-sm leading-relaxed text-muted" data-testid="board-vibe-locked">
+                Opens a little further up the path.
+              </p>
+            )
+          })()
         )}
       </>
     )
