@@ -171,7 +171,13 @@ export function RoomSteps({
           <span className={'room-en text-lg leading-snug text-fg ' + (shown ? 'is-shown' : '')} aria-hidden={!shown}>
             {line.en}
           </span>
-          {shown ? null : <span className="text-sm text-muted">Tap for the English</span>}
+          {/* Animated so it reads as something to do, not a caption (Sam, 2026-11-10: "animate Tap for the English so it is more obvious"). */}
+          {shown ? null : (
+            <span className="room-hint" data-testid="room-hint">
+              <span aria-hidden className="room-hint-finger">👆</span>
+              Tap for the English
+            </span>
+          )}
         </button>
         {/* Obrigado or obrigada: asked here, the first time a line will not let you say it until it knows. */}
         <SpeakerAsk line={line} gender={gender} />
