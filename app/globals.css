@@ -2696,6 +2696,31 @@ details > summary.list-none::-webkit-details-marker {
 }
 @keyframes voucher-band { from { transform: translateX(-100%) } to { transform: translateX(100%) } }
 
+/*
+  "TAP FOR THE ENGLISH", MADE OBVIOUS (Sam, 2026-11-10). A pill with a finger that taps, and a
+  soft glow that breathes, starting a beat after the card lands so the Portuguese is read
+  first. Still with reduced motion: the pill alone.
+*/
+.room-hint {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 0.45rem;
+  margin-top: 0.25rem; padding: 0.45rem 0.9rem; border-radius: 9999px;
+  font-size: 0.875rem; font-weight: 700; color: var(--accent);
+  background: color-mix(in srgb, #c9973b 16%, transparent);
+  box-shadow: 0 0 0 0 rgba(201, 151, 59, 0.5);
+  animation: room-hint-glow 2.2s ease-in-out 1.2s infinite;
+}
+.room-hint-finger { display: inline-block; transform-origin: 50% 90%; animation: room-hint-tap 2.2s ease-in-out 1.2s infinite }
+@keyframes room-hint-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 151, 59, 0.45) }
+  50% { box-shadow: 0 0 0 8px rgba(201, 151, 59, 0) }
+}
+@keyframes room-hint-tap {
+  0%, 60%, 100% { transform: translateY(0) scale(1) }
+  20% { transform: translateY(-4px) scale(1.05) }
+  35% { transform: translateY(2px) scale(0.92) }
+}
+@media (prefers-reduced-motion: reduce) { .room-hint, .room-hint-finger { animation: none } }
+
 /* A word tile you can press: it sits up off the card and goes down when tapped (MiniBuild, 2026-11-10). */
 .build-tile { box-shadow: 0 2px 0 rgba(20, 36, 58, 0.14), 0 1px 2px rgba(20, 36, 58, 0.08); transition: transform 90ms ease, box-shadow 90ms ease, background-color 150ms ease }
 .build-tile:active { transform: translateY(2px); box-shadow: 0 0 0 rgba(20, 36, 58, 0) }
