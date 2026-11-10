@@ -11,7 +11,7 @@
  */
 import { readFileSync } from 'node:fs'
 import { pathUnits } from '../content/path'
-import { pathView } from '../components/path/progress'
+import { pathView, recapWaiting } from '../components/path/progress'
 import { boardSize, cellOf, cornerAt, lapOf } from '../components/path/lap'
 import { CORNERS, POSTCARDS } from '../content/board'
 import { CHEATS } from '../content/cheats'
@@ -88,6 +88,21 @@ ok('…but until the recap is seen the token waits on Até agora, the last squar
 const rooms = all.squares.filter((s) => s.kind === 'room')
 ok('and every room comes before it', rooms.every((s) => s.at < all.squares.length - 1))
 ok('the path shows a finished board until its recap is seen', /recapDue \? recapDue\.n - 1/.test(src('components/path/PathHome.tsx')))
+
+console.log('\nso far, in order, and never on a paid board (review, 2026-11-10)')
+{
+  const paidFrom2 = (id: string) => (units.findIndex((x) => x.rooms.some((r) => r.id === id)) >= 2 ? ('paid' as const) : ('open' as const))
+  const laid = [...units[0].rooms, ...units[1].rooms].map((r) => r.id)
+  const v = pathView({ ...empty, finished_cards: laid }, units, paidFrom2, NOW)
+  const paidLap = lapOf(v, 2, 'visiting', { gems, rows, recapSeen: false })
+  ok('a board of only paid rooms is not complete, and its token stays home', !paidLap.complete && paidLap.token === 0)
+  ok('the first unseen summary waits, not the last level finished', recapWaiting(v, () => false) === 0)
+  ok('then the next one', recapWaiting(v, (id) => id === units[0].id) === 1)
+  ok('and none once both are seen', recapWaiting(v, () => true) === -1)
+  const early = pathView({ ...empty, finished_cards: units[1].rooms.map((r) => r.id) }, units, open, NOW)
+  ok('a later board finished first still waits for its summary', recapWaiting(early, () => false) === 1)
+  ok('a recap opened halfway round is not marked seen', /!whole\) return/.test(src('components/LevelRecap.tsx')))
+}
 const code = (src('components/path/lap.ts') + src('components/path/Board.tsx')).replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '')
 ok('there is no dice anywhere', !/Math\.random|dice|roll\(/i.test(code))
 

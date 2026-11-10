@@ -59,13 +59,13 @@ const WARM_UP: Record<Exclude<CornerId, 'start'>, { title: string; body: string 
   },
   mesa: {
     title: 'A real table, later',
-    body: 'Every board has a table: one dinner with friends where you use what you have learned, out loud. After a board or two you will have enough to host one.',
+    body: 'Every board has a table: one dinner with friends where you use what you have learned, out loud. You can start one any time from the middle of the board — most people wait until a board or two in, when there is more to say.',
   },
 }
 
 /* What each kind of stop is for, said once on the warm-up lap. */
 const STOP_EXPLAINED: Partial<Record<Square['kind'], string>> = {
-  vibe: 'Surprises turn over as you lay rooms — the fun stuff, like how to swear. Anything you open is kept in Yours.',
+  vibe: 'Surprises turn over as you lay rooms — the fun stuff: idioms, film lines, and later how to swear. Anything you open is kept in Yours.',
   postcard: 'Surprises turn over as you lay rooms — hacks, bluffs and idioms that hand you words for free. Anything you open is kept in Yours.',
   venue: 'Places are real spots in the city. Each has one line to say there, to a real person. Every board brings new ones.',
   neighbour: 'What is on in the city, with the Portuguese for going. Every board brings what is on that week.',
@@ -148,10 +148,11 @@ export function Board({
     content/level.ts. A record of meeting, never a score.
   */
   useEffect(() => {
-    if (!lap) return
+    /* Not from the first render's placeholder date (new Date(0)): its what's-on is not this board's (review, 2026-11-10). */
+    if (!lap || now.getTime() === 0) return
     const keys = lap.squares.filter((s) => s.reached && (s.kind === 'postcard' || s.kind === 'venue' || s.kind === 'neighbour' || s.kind === 'vibe')).map((s) => s.key)
     if (keys.length) markBoardMet(keys)
-  }, [lap])
+  }, [lap, now])
   const [open, setOpen] = useState<Square | null>(null)
   const [inviting, setInviting] = useState(false)
   if (!lap) return null
@@ -159,6 +160,9 @@ export function Board({
   const unit = view.units[index]
   const pct = lap.open ? lap.done / lap.open : 1
   const level = index + 1
+
+  /* The lesson words Board 1 actually shows (tileVerb), for the key — not a list from another board. */
+  const verbs = [...new Set(lap.squares.flatMap((s) => (s.kind === 'room' ? [tileVerb(s.node.room).trim()] : [])).filter(Boolean))].slice(0, 4)
 
   const tap = (s: Square) => {
     if (s.kind === 'room') return // rooms are links or open their sheet, as on the Panel
@@ -184,7 +188,7 @@ export function Board({
           <span className="font-semibold text-fg">
             Board {level} of {view.units.length}
           </span>
-          {index === current ? '' : index < current ? ' · done' : ' · ahead'}
+          {lap.complete ? ' · done' : index === current ? '' : index < current ? ' · done' : ' · ahead'}
         </p>
         <button
           type="button"
@@ -203,37 +207,20 @@ export function Board({
         board and much clearer"). On the warm-up lap only: three plain steps, in the order they
         happen, before the squares they describe.
       */}
-      {lap.index === 0 ? (
-        <div className="flex flex-col gap-2 rounded-2xl border border-line bg-bg-elev px-4 py-3.5" data-testid="board-key">
+      {lap.index === 0 && !lap.complete ? (
+        <div className="flex flex-col gap-1.5 rounded-2xl border border-line bg-bg-elev px-4 py-3" data-testid="board-key">
           <p className="eyebrow text-[0.65rem] text-accent">Board 1 is your warm-up · how it works</p>
-          <ol className="flex flex-col gap-1.5 text-sm leading-snug">
+          <ol className="flex flex-col gap-1 text-sm leading-snug">
             <li>
-              <span className="font-semibold">1. Play a lesson to move.</span> <span className="text-muted">Lessons are the squares that start <span className="font-semibold text-fg">say</span>, <span className="font-semibold text-fg">count</span> or <span className="font-semibold text-fg">at the</span>. Each one you play moves you round.</span>
+              <span className="font-semibold">1. Play a lesson</span> <span className="text-muted">— the blue-lettered squares{verbs.length ? ' (' + verbs.join(', ') + ')' : ''}. Start where it says Start here.</span>
             </li>
             <li>
-              <span className="font-semibold">2. The square after it turns over.</span> <span className="text-muted">✦ a surprise, 📍 a real place to say it, or 🎟 what’s on. All of it is kept in Yours.</span>
+              <span className="font-semibold">2. Squares turn over as you pass</span> <span className="text-muted">— ✦ surprises, 📍 places, 🎟 what’s on.</span>
             </li>
             <li>
-              <span className="font-semibold">3. Finish on “So far”.</span> <span className="text-muted">Lay all {lap.open} lessons and you see your trip so far, then Board 2 opens.</span>
+              <span className="font-semibold">3. All {lap.open} done?</span> <span className="text-muted">“So far” shows your trip, then Board 2 opens.</span>
             </li>
           </ol>
-          <p className="text-xs text-muted">Tap any square to see what it is.</p>
-        </div>
-      ) : null}
-      {/*
-        ON THIS BOARD (Sam, 2026-11-09: "there is no excitement or sell as to what is on the
-        board"). Its headliners, named — the surprises first, then a place and what's on.
-      */}
-      {headliners(lap).length ? (
-        <div className="flex flex-col items-center gap-1.5" data-testid="board-headliners">
-          <span className="eyebrow text-[0.65rem] text-accent">On this board</span>
-          <ul className="flex flex-wrap justify-center gap-1.5">
-            {headliners(lap).map((h) => (
-              <li key={h} className="rounded-full border border-line px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide">
-                {h}
-              </li>
-            ))}
-          </ul>
         </div>
       ) : null}
 
@@ -301,7 +288,7 @@ export function Board({
               <span className="eyebrow text-[0.6rem] opacity-80">Level {level}</span>
               <span className="display text-lg leading-tight sm:text-xl">{unit.unit.title}</span>
               <span className="text-[0.7rem] opacity-80">
-                {lap.complete ? (lap.token === 0 ? 'Laid. Partida opens the next board.' : 'Laid. See your trip so far.') : `${lap.done} of ${lap.open} rooms laid`}
+                {lap.complete ? (lap.token !== 0 ? 'Laid. See your trip so far.' : index + 1 < view.units.length ? 'Laid. On to the next board.' : 'Laid. Every board, round.') : `${lap.done} of ${lap.open} rooms laid`}
               </span>
             </span>
           </li>
@@ -310,6 +297,22 @@ export function Board({
 
 
 
+      {/*
+        ON THIS BOARD, UNDER IT since 2026-11-10 so the first lesson is on the first screen (Sam, 2026-11-09: "there is no excitement or sell as to what is on the
+        board"). Its headliners, named — the surprises first, then a place and what's on.
+      */}
+      {headliners(lap).length ? (
+        <div className="flex flex-col items-center gap-1.5" data-testid="board-headliners">
+          <span className="eyebrow text-[0.65rem] text-accent">On this board</span>
+          <ul className="flex flex-wrap justify-center gap-1.5">
+            {headliners(lap).map((h) => (
+              <li key={h} className="rounded-full border border-line px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide">
+                {h}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       {/*
         "MOVE FURTHER BY VOICE" WENT (Sam, 2026-11-09). An extra square only turned over a stop a
         room early — nothing kept, nothing unlocked — behind a switch few people found. Saying a
@@ -579,14 +582,14 @@ function StopSheet({
     )
   } else if (s.kind === 'corner') {
     const c = CORNERS[purpose][s.corner]
-    eyebrow = (warmUp ? 'How it works · ' : '') + (ahead ? 'Ahead' : c.pt)
+    eyebrow = (warmUp && ahead ? 'How it works · ' : '') + (ahead ? 'Ahead' : c.pt)
     title = c.title
     if (s.corner === 'start') {
       body = lap.complete ? (
         <>
-          <p className="text-base leading-relaxed">Every room on this board, laid. One practice session, said cold, and you’re round.</p>
+          <p className="text-base leading-relaxed">Every room on this board, laid. Practise them said cold, any time — it keeps them from slipping.</p>
           <Link href={practiceHref} className={btn} data-testid="board-practice">
-            {nextLevel ? 'Practise · then board ' + nextLevel : 'Practise'}
+            Practise this board
           </Link>
           <DrawEntry board={purpose + ':' + lap.unitId} />
         </>
@@ -657,7 +660,7 @@ function StopSheet({
       <>
         <p className="text-base leading-relaxed text-muted">{idiom.wtf} It’s “{idiom.english}”. Portugal says:</p>
         <SpokenLine pt={idiom.equivalent} en={idiom.gloss} size="md" />
-        <Link href={'/revise?kind=idiom&id=' + encodeURIComponent(idiom.id)} className={btn}>
+        <Link href={'/revise?kind=idiom&from=board&id=' + encodeURIComponent(idiom.id)} className={btn}>
           Play the card
         </Link>
       </>

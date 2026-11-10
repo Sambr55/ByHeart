@@ -46,6 +46,15 @@ const DAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
  * card in the Club, opened, which is the same place a swipe right would have put them. A
  * calendar that ends in a paragraph about a concert is a listings site.
  */
+/*
+  A NIGHT OPENS ITS FIRST ROOM (review, 2026-11-10). These went to /club/feed — the retired
+  feed — and to /club?drop=, which the board ignores, so "Learn it" quietly did nothing.
+*/
+function nightHref(d: { situations?: { id: string }[] }): string {
+  const first = d.situations?.[0]
+  return first ? '/errand/' + first.id : '/calendar'
+}
+
 export function Calendar() {
   const club = useClub()
   /*
@@ -290,7 +299,7 @@ export function Calendar() {
               return (
                 <Link
                   key={iso}
-                  href={'/club/feed?drop=' + on[0].id}
+                  href={nightHref(on[0])}
                   data-testid={'cal-day-' + day}
                   aria-label={on.map((x) => x.event).join(', ') + ' on the ' + day + 'th'}
                   /*
@@ -390,7 +399,7 @@ export function Calendar() {
                   key={d.id}
                   className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-bg-elev shadow-sm transition hover:border-accent/60"
                 >
-                <Link href={'/club?drop=' + d.id} data-testid={'cal-drop-' + d.id} className="flex flex-col">
+                <Link href={nightHref(d)} data-testid={'cal-drop-' + d.id} className="flex flex-col">
                   <span className="relative block h-36 w-full overflow-hidden" style={{ backgroundColor: colour }}>
                     {image ? (
                       <Image
@@ -462,7 +471,7 @@ export function Calendar() {
                 */}
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-line px-5 py-3">
                   {gone ? <span /> : <AddToCalendar event={eventOfDrop(d)} up />}
-                  <Link href={'/club?drop=' + d.id} className="tap-target eyebrow ml-auto inline-flex items-center gap-2 whitespace-nowrap text-[0.65rem] text-accent" aria-label={'Learn the Portuguese for ' + d.event}>
+                  <Link href={nightHref(d)} className="tap-target eyebrow ml-auto inline-flex items-center gap-2 whitespace-nowrap text-[0.65rem] text-accent" aria-label={'Learn the Portuguese for ' + d.event}>
                     Learn it
                     <span aria-hidden className="transition group-hover:translate-x-1">
                       →

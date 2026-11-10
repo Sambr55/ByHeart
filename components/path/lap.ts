@@ -211,7 +211,8 @@ export function lapOf(
   /* How far round: the k-th room square, plus a square for every room said cold if asked. */
   const laid = nodes.filter((x) => x.state === 'done').length
   const open = nodes.filter((x) => x.state !== 'paid').length
-  const complete = open > 0 ? laid >= open : nodes.every((x) => x.state === 'paid')
+  /* A board of only paid rooms is not complete: nothing of yours is laid on it (content/level.ts levelComplete). */
+  const complete = open > 0 && laid >= open
   const roomSquares = squares.filter((s) => s.kind === 'room')
   /*
     YOU LAND ON THE SQUARE AFTER THE ROOM YOU LAID (Sam, 2026-11-05, on his phone: "Shouldn't

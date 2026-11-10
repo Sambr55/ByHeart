@@ -352,6 +352,19 @@ export interface PathLevel {
   complete: boolean
 }
 
+/**
+ * THE FIRST BOARD WAITING ON ITS "SO FAR" (2026-11-10, review). A level whose open rooms are
+ * all laid — at least one of them — and whose recap has not been seen. In path order, so an
+ * earlier summary is never skipped because a later level was finished too; a level of only
+ * paid rooms is never waiting (nothing of yours to sum up). -1 when none is.
+ */
+export function recapWaiting(view: PathView, seen: (unitId: string) => boolean): number {
+  return view.units.findIndex((u) => {
+    const open = u.nodes.filter((n) => n.state !== 'paid')
+    return open.length > 0 && open.every((n) => n.state === 'done') && !seen(u.unit.id)
+  })
+}
+
 export function pathLevel(view: PathView): PathLevel {
   /* A unit of nothing but paid rooms is stepped over rather than standing in the way. */
   const finished = (u: PathView['units'][number]) => u.nodes.every((n) => n.state === 'done' || n.state === 'paid')

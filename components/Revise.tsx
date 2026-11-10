@@ -52,9 +52,9 @@ export function Revise() {
   const back =
     kind === 'level'
       ? /* A level is tested from its recap, and goes back to it (content/level.ts). */
-        { href: '/level/' + encodeURIComponent(id), label: 'BACK TO THE RECAP', aria: 'Back to the level recap' }
-      : kind === 'room' || kind === 'cheat'
-        ? { href: '/club', label: 'BACK TO YOUR PATH', aria: 'Back to your path' }
+        { href: '/level/' + encodeURIComponent(id), label: '‹ YOUR TRIP SO FAR', aria: 'Back to your trip so far' }
+      : kind === 'room' || kind === 'cheat' || params.get('from') === 'board'
+        ? { href: '/club', label: '‹ BACK TO THE BOARD', aria: 'Back to the board' }
         : { href: '/profile', label: 'BACK TO YOURS', aria: 'Back to Yours' }
   const backTo = back
   const [at, setAt] = useState(0)
@@ -232,12 +232,19 @@ export function Revise() {
           </p>
         </div>
         <Dock>
+          {/* A level's test is the end of its board: the next board is the way on (review, 2026-11-10). */}
           <Link
-            href={back.href}
+            href={kind === 'level' ? '/club' : back.href}
             className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
+            data-testid={kind === 'level' ? 'revise-level-on' : undefined}
           >
-            {back.label}
+            {kind === 'level' ? 'ON TO THE BOARD →' : back.label}
           </Link>
+          {kind === 'level' ? (
+            <Link href={back.href} className="tap-target eyebrow mt-2 block w-full text-center text-sm text-accent">
+              {back.label}
+            </Link>
+          ) : null}
           {kind === 'level' ? (
             <Link href={'/profile?level=' + encodeURIComponent(id)} className="tap-target eyebrow mt-2 block w-full text-center text-sm text-accent" data-testid="revise-level-yours">
               SEE IT IN YOURS

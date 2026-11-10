@@ -15,6 +15,7 @@ import { rungReached } from '@/content/roots'
 import {
   milestoneHref,
   pathLevel,
+  recapWaiting,
   pathView,
   type PathLevel,
   understoodCheer,
@@ -153,16 +154,26 @@ export function PathHome() {
     whose recap has not been seen waits here, above Up next, until it is opened.
   */
   const recapDue = useMemo(() => {
-    const u = level.level >= 2 ? view.units[level.level - 2] : undefined
-    if (!u || !u.done) return null
-    const key = levelKey(purpose, u.unit.id)
-    return (learner.recaps_seen ?? []).includes(key) ? null : { id: u.unit.id, n: level.level - 1, title: u.unit.title }
-  }, [level.level, view, purpose, learner.recaps_seen])
+    const seen = learner.recaps_seen ?? []
+    const i = recapWaiting(view, (id) => seen.includes(levelKey(purpose, id)))
+    if (i === -1) return null
+    const u = view.units[i]
+    return { id: u.unit.id, n: i + 1, title: u.unit.title, last: i === view.units.length - 1 }
+  }, [view, purpose, learner.recaps_seen])
+  /*
+    WHILE A BOARD WAITS ON SO FAR, IT IS THE LEVEL YOU ARE ON (review, 2026-11-10): the header
+    chip, the bar, the board and Up next all name it, rather than the board after it.
+  */
+  const shown: PathLevel = useMemo(() => {
+    if (!recapDue) return level
+    const u = view.units[recapDue.n - 1]
+    const open = u.nodes.filter((x) => x.state !== 'paid').length
+    return { level: recapDue.n, unit: u.unit, toNext: 0, laid: u.done, open, complete: false }
+  }, [recapDue, level, view])
 
   const task = (
     <section aria-labelledby="up-next" className="flex flex-col gap-3" data-testid="up-next">
       {/* Sign in, asked after rooms 2 and 4 and at Level 2 — skippable (KeepItAsk.tsx). */}
-      <KeepItAsk rooms={view.done} level={level.level} />
       {recapDue ? (
         <Link
           href={'/level/' + encodeURIComponent(recapDue.id)}
@@ -171,15 +182,22 @@ export function PathHome() {
         >
           <span className="min-w-0">
             <span className="eyebrow block text-accent">Board {recapDue.n} done</span>
-            <span className="block text-base">See your trip so far, then Board {recapDue.n + 1} opens</span>
+            <span className="block text-base">
+              {recapDue.last ? 'See your trip so far — every board, laid' : 'See your trip so far, then the next board opens'}
+            </span>
           </span>
           <span aria-hidden className="text-accent">→</span>
         </Link>
       ) : null}
-      <h2 id="up-next" className="eyebrow text-muted">
-        {view.next ? 'Up next' : name.done}
-      </h2>
-      {view.next ? (
+      {/* With a board waiting on So far, that is what is next — not a room on the board after it. */}
+      {/* After the reward, not before it (review, 2026-11-10). Sign in, asked after rooms 2 and 4 and at Level 2 — skippable (KeepItAsk.tsx). */}
+      <KeepItAsk rooms={view.done} level={level.level} />
+      {recapDue ? null : (
+        <h2 id="up-next" className="eyebrow text-muted">
+          {view.next ? 'Up next' : name.done}
+        </h2>
+      )}
+      {recapDue ? null : view.next ? (
         <RoomCard room={view.next.room} tag={view.next.unit.title} state="next" big />
       ) : (
         <div className="flex flex-col gap-3 rounded-3xl border border-line bg-bg-elev p-5">
@@ -220,6 +238,8 @@ export function PathHome() {
         tree), a chip — marks the way back, so the next screen offers "‹ Back to board".
       */
       onClickCapture={(e) => {
+        /* The tab bar is not "leaving through the board": the Path tab is already the way back (review, 2026-11-10). */
+        if ((e.target as Element).closest?.('[data-testid=bottom-nav]')) return
         const a = (e.target as Element).closest?.('a[href]')
         const href = a?.getAttribute('href') ?? ''
         if (href && !href.startsWith('/club') && !href.startsWith('#')) markFromBoard()
@@ -243,7 +263,7 @@ export function PathHome() {
             what is on is the On tab — two doors to one room was half the maze.
           */}
           <p className="eyebrow needs-learner rounded-full bg-[rgba(255,255,255,0.14)] px-3 py-1" data-testid="level-chip">
-            Level {level.level}
+            Level {Math.min(shown.level, view.units.length)}
           </p>
           {/*
             THE PROMINENT SPOT IS THE UNDERSTOOD TALLY NOW, NOT THE STREAK (2026-11-02).
@@ -272,18 +292,9 @@ export function PathHome() {
       */}
       <main className="mx-auto w-full max-w-md px-5 py-6 md:max-w-xl">
         <div className="needs-learner flex flex-col gap-6">
-          <LevelBar level={level} toggle={<ViewToggle mode={mode} onChange={chooseMode} />} />
+          <LevelBar level={shown} toggle={<ViewToggle mode={mode} onChange={chooseMode} />} />
 
-          {mode === 'board' && starting && view.done === 0 && view.next ? (
-            <div className="flex flex-col gap-1 rounded-2xl border-2 border-[#e5b04a] bg-bg-elev px-4 py-3" data-testid="board-first-note">
-              <p className="eyebrow text-[0.65rem] text-accent">Your first board · Level 1</p>
-              <p className="text-sm leading-relaxed">
-                Every room you play lays a tile and moves you round. Your first is{' '}
-                <span className="font-semibold">{view.next.room.title}</span> — tap the tile marked{' '}
-                <span className="font-semibold">Start here</span>.
-              </p>
-            </div>
-          ) : null}
+          {/* The gold "Your first board" note went (review, 2026-11-10): the key above Board 1 says the same, and the first lesson has to be on the first screen. */}
           {mode === 'board' ? (
             <Board
               view={view}
@@ -569,7 +580,7 @@ function LevelBar({ level, toggle }: { level: PathLevel; toggle: ReactNode }) {
       <p className="text-sm text-muted" data-testid="level-next">
         {level.laid} of {level.open} rooms laid ·{' '}
         <span className="font-semibold text-fg">
-          {level.toNext === 1 ? '1 room' : level.toNext + ' rooms'} to Level {level.level + 1}
+          {level.toNext === 0 ? 'See your trip so far' : (level.toNext === 1 ? '1 room' : level.toNext + ' rooms') + ' to Level ' + (level.level + 1)}
         </span>
       </p>
     </section>

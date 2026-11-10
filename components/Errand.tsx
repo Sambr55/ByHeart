@@ -374,6 +374,9 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
           <span aria-hidden>←</span>
           {back === '/profile' ? (
             <span>YOURS</span>
+          ) : back === '/club' ? (
+            /* Every room on the board goes back to it, and says so ("‹ Board", Sam, 2026-11-09). */
+            <span aria-label="Back to the board">BOARD</span>
           ) : (
             <Wordmark mark="club" className="h-5" title="Back to the Club" />
           )}
@@ -515,7 +518,7 @@ export function Errand({ situation: room, drop }: { situation: Situation; drop?:
               </span>
               <span className="flex flex-col gap-1">
                 <span className="eyebrow text-accent">A tile laid</span>
-                <span className="text-sm leading-snug text-muted">It is on your panel now. Tap it there for the line, any time.</span>
+                <span className="text-sm leading-snug text-muted">It is on your path now. Tap it there for the line, any time.</span>
               </span>
             </div>
           ) : null}
