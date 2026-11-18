@@ -5,7 +5,7 @@ import { Account } from '@/components/Account'
 import { Back } from '@/components/Back'
 import { RedeemCode } from '@/components/RedeemCode'
 import { Wordmark } from '@/components/Wordmark'
-import { currentUser, deviceId } from '@/lib/auth'
+import { currentUser, deviceId, memberFor } from '@/lib/auth'
 import { billingConfigured, entitlementsForUser, subscriptionFor } from '@/lib/billing'
 import { entitlementsForDevice } from '@/lib/comp'
 import { sendable } from '@/lib/email'
@@ -21,11 +21,13 @@ export default async function AccountPage() {
   // a link without a mail sender. So they get a page of their own instead.
   if (!user) return <SignedOut />
 
-  const [subscription, entitlements, nudgeEmail] = await Promise.all([
+  const [subscription, entitlements, nudgeEmail, member] = await Promise.all([
     subscriptionFor(user.id),
     entitlementsForUser(user.id),
+    /* The membership card (2026-11-18): sócio nº, read on its own like nudge_email. */
     /* Read on its own, so the user record every request loads does not depend on migration 019. */
     nudgeEmailFor(user.id),
+    memberFor(user),
   ])
 
   return (
@@ -44,6 +46,7 @@ export default async function AccountPage() {
           : null
       }
       billingReady={billingConfigured()}
+      member={member}
     />
   )
 }

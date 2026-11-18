@@ -247,7 +247,8 @@ console.log('\nthe way back in says the right thing to whoever is reading it\n')
   await page.reload()
   await page.waitForTimeout(1200)
   const full = ((await page.textContent('main')) ?? '').replace(/\s+/g, ' ')
-  ok('a device with proof is offered the protection', /Keep what you have learned/i.test(full))
+  /* The headline became the line you join with (2026-11-18); the protection is the sentence under it. */
+  ok('a device with proof is offered the protection', /Quero ser sóci[oa] do Dub Club/i.test(full) && /cannot be lost/i.test(full))
   ok(
     'and told exactly what is at stake',
     /\d+ sentence/.test(full),

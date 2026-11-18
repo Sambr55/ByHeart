@@ -320,6 +320,10 @@ export type EventName =
   */
   | 'invite_sent'
   | 'save_offered'
+  /* Signed in with the emailed code, and where (2026-11-18): the lesson, or the sign-in screen. */
+  | 'signed_in'
+  /* The membership card's choice after signing in: free sócio, or founding. */
+  | 'membership_choice'
   /*
     A sentence said out loud and judged on the device — see engine/listen.ts. Carries
     whether it was close and a rough score, and never what was said: the transcript is a

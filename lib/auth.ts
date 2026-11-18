@@ -92,7 +92,7 @@ const codeHash = (email: string, code: string) => sha('code:' + email + ':' + co
  * start with a slash, and a rule clever enough to allow /vibes?open=top_gun is a rule
  * somebody has to keep being right about.
  */
-const CAN_RETURN_TO = new Set(['/vibes', '/club', '/profile', '/legend', '/line', '/proof', '/vocab', '/drops'])
+const CAN_RETURN_TO = new Set(['/reset', '/vibes', '/club', '/profile', '/legend', '/line', '/proof', '/vocab', '/drops'])
 
 export function returnTo(path: string | null | undefined): string {
   const want = (path ?? '').trim()
@@ -198,6 +198,38 @@ export async function upsertUser(email: string): Promise<DubUser | null> {
     returning id, email, display_name, target_language, ui_locale, marketing_opt_in, created_at
   `
   return rows[0] ?? null
+}
+
+/** What goes on the membership card. */
+export interface Membership {
+  /** sócio nº — null until migration 021 has run. */
+  no: number | null
+  since: string
+  /** Joined in the last few minutes: this sign-in made them a member, rather than welcomed them back. */
+  isNew: boolean
+}
+
+/**
+ * THE MEMBERSHIP CARD'S FACTS (2026-11-18). Read on its own rather than in currentUser, so
+ * every request does not depend on migration 021 — the same move /account makes for
+ * nudge_email. A missing column is a card with no number, never a failed sign-in.
+ */
+export async function memberFor(user: Pick<DubUser, 'id' | 'created_at'>): Promise<Membership> {
+  const since = new Date(user.created_at)
+  const out: Membership = {
+    no: null,
+    since: since.toISOString(),
+    isNew: Date.now() - since.getTime() < 10 * 60_000,
+  }
+  const sql = db()
+  if (!sql) return out
+  try {
+    const [row] = await sql<{ member_no: number | null }[]>`select member_no from users where id = ${user.id}`
+    out.no = row?.member_no ?? null
+  } catch {
+    /* Before migration 021. */
+  }
+  return out
 }
 
 export async function startSession(userId: string): Promise<SessionCookie | null> {

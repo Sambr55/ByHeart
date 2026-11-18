@@ -8,6 +8,7 @@ import { PIECES } from '@/content/roots'
 import { Wordmark } from '@/components/Wordmark'
 import { learnerStorageKey, loadLearner, wipeLearner } from '@/engine/learner'
 import { Dock, Framed } from '@/components/Dock'
+import { forgetEntitlements, useEntitlements } from '@/engine/useEntitlements'
 
 /**
  * Start again on this device.
@@ -28,7 +29,7 @@ import { Dock, Framed } from '@/components/Dock'
  * without saying "sure about what?" is not a confirmation.
  */
 export function Reset() {
-  const [state, setState] = useState<'reading' | 'ready' | 'wiping' | 'done' | 'signedin'>(
+  const [state, setState] = useState<'reading' | 'ready' | 'wiping' | 'done' | 'needsignin'>(
     'reading',
   )
   const [what, setWhat] = useState({ pieces: 0, proof: 0, sections: 0, legend: 0, key: '' })
@@ -107,31 +108,42 @@ export function Reset() {
   */
   const [dropComp, setDropComp] = useState(false)
   /*
-    AND WHETHER THE ACCOUNT GOES TOO.
+    WHICH RESET (2026-11-18): this phone, or everywhere.
 
-    ?signout=1 is what the route reads to mean "start again everywhere" — it deletes the
-    learner row keyed to the ACCOUNT and ends the session, which is the only way to stop a
-    later sign-in restoring everything. This screen never sent it, so the account copy was
-    unreachable from the one page whose whole job is starting again.
+    "This phone" is the default and the safe one: the device's copy and the device cookie
+    go, anybody signed in is signed out, and the account is untouched — so signing back in
+    with the email brings everything back, which is what a returning learner should get.
 
-    Default ON, because somebody on /reset wants a clean run and the account copy is the
-    one that silently undoes it. Turning it off keeps the old behaviour for anybody who
-    genuinely wants only this device cleared.
+    "Everywhere" also deletes the account's copy, and is only offered to somebody signed in:
+    deleting an account's work needs proof it is theirs. Sam reset while signed out, the old
+    toggle said "Your account copy is gone too" regardless, and his next sign-in brought the
+    lot back. The done screen now reports what the server SAYS it deleted.
   */
-  const [dropAccount, setDropAccount] = useState(true)
+  const access = useEntitlements()
+  const signedIn = access.known && access.signedIn
+  const [everywhere, setEverywhere] = useState(false)
+  const [result, setResult] = useState<{ accountCleared: boolean; signedOut: boolean } | null>(null)
 
   async function wipe() {
     setState('wiping')
     try {
-      const q = [dropComp ? 'comp=drop' : '', dropAccount ? 'signout=1' : '']
+      const q = [dropComp ? 'comp=drop' : '', everywhere && signedIn ? 'scope=everywhere' : '']
         .filter(Boolean)
         .join('&')
       const res = await fetch('/api/reset' + (q ? '?' + q : ''), { method: 'POST' })
-      const body = (await res.json()) as { ok?: boolean; signed_in?: boolean }
-      if (!body.ok && body.signed_in) {
-        setState('signedin')
+      const body = (await res.json()) as {
+        ok?: boolean
+        need_sign_in?: boolean
+        account_cleared?: boolean
+        signed_out?: boolean
+      }
+      if (!body.ok && body.need_sign_in) {
+        setState('needsignin')
         return
       }
+      setResult({ accountCleared: Boolean(body.account_cleared), signedOut: Boolean(body.signed_out) })
+      /* The session may have just ended: what this tab cached about access is stale. */
+      forgetEntitlements()
     } catch {
       // Offline. The local wipe below is still worth doing, and the server copy will be
       // merged back in — which is the honest outcome and is said on the next screen.
@@ -203,39 +215,37 @@ export function Reset() {
       })
   }, [])
 
-  if (state === 'signedin') {
+  if (state === 'needsignin') {
     return (
       <Frame>
         <div className="flex flex-1 flex-col justify-center gap-3">
           <p className="eyebrow text-accent">NOT YET</p>
-          <h1 className="display text-balance text-2xl">You are signed in.</h1>
+          <h1 className="display text-balance text-2xl">Sign in first.</h1>
           {/*
-            REACHED ONLY WHEN THE ACCOUNT TOGGLE IS OFF, now that it defaults on — the
-            route refuses a signed-in caller who did not ask to sign out. So the message
-            names the toggle rather than only the remedy: somebody who wanted a clean run
-            should be told they can have one from the screen they are already on.
+            Reached only if the session lapsed between opening this screen and pressing the
+            button — the everywhere choice is not offered to somebody signed out. Nothing has
+            been deleted: the route refuses before it touches anything.
           */}
           <p className="text-sm leading-relaxed text-muted">
-            So this device is not the only copy — your account holds it too, and would
-            put it straight back. Either sign out here, or go back and tick “sign out and
-            delete the copy your account is holding”.
+            Deleting your account&rsquo;s copy needs proof the account is yours, and this phone
+            is not signed in any more. Nothing has been deleted yet.
           </p>
         </div>
         <Dock>
-          <a
-            href="/api/auth/logout"
-            data-testid="reset-signout"
+          <Link
+            href="/signin?next=%2Freset"
+            data-testid="reset-signin"
             className="tap-target eyebrow block w-full rounded bg-accent px-5 py-3 text-center text-accent-ink"
           >
-            SIGN OUT
-          </a>
+            SIGN IN
+          </Link>
           <button
             type="button"
             data-testid="reset-back"
             onClick={() => setState('ready')}
             className="tap-target text-center text-xs text-muted underline underline-offset-4"
           >
-            Back — I will tick the box instead
+            Back
           </button>
         </Dock>
       </Frame>
@@ -258,10 +268,12 @@ export function Reset() {
           <p className="text-sm leading-relaxed text-muted">
             Everything DUB had stored here is gone — pieces, sentences, sections, your
             Legend and the language pair — and so is the copy the server was holding for
-            this device.{' '}
-            {dropAccount
-              ? 'Your account copy is gone too, and you are signed out. Nothing will come back.'
-              : 'Your ACCOUNT copy is untouched, so signing back in will restore it over the top of this.'}
+            this device. This phone is a guest again.{' '}
+            {result?.accountCleared
+              ? 'Your account’s copy is gone too, and you are signed out. Nothing will come back.'
+              : result?.signedOut
+                ? 'You are signed out. Your account still holds your progress, so signing back in with your email brings it all back.'
+                : 'If you have an account, it still holds your progress, so signing in with your email brings it back.'}
           </p>
         </div>
         <Dock>
@@ -305,9 +317,9 @@ export function Reset() {
           A reset that a sign-in can undo is worse than no reset: it looks like it worked.
         */}
         <p className="text-sm leading-relaxed text-muted">
-          If you have ever signed in, your account holds a third copy — and signing back in
-          merges it over the top of a clean device. Use the second option below to clear
-          that too.
+          If you have an account, it holds its own copy. Starting this phone fresh leaves that
+          alone, so signing back in brings your progress back. To delete the account&rsquo;s
+          copy as well, you need to be signed in.
         </p>
       </div>
 
@@ -449,30 +461,63 @@ export function Reset() {
         </button>
 
         {/*
-          THE ACCOUNT TOGGLE, beside the comp one and above the button.
-
-          Same construction as the comp chip for the same reason: it modifies the wipe
-          rather than being a second destructive button, and a 16px checkbox is a 16px
-          target.
+          WHICH RESET — two chips, one chosen. Same aria-pressed construction as the comp
+          chip, because a 16px radio is a 16px target.
         */}
-        <button
-          type="button"
-          data-testid="reset-drop-account"
-          aria-pressed={dropAccount}
-          onClick={() => setDropAccount(!dropAccount)}
-          className={
-            'tap-target flex w-full items-start gap-3 rounded border px-4 py-3 text-left text-xs leading-relaxed transition ' +
-            (dropAccount ? 'border-accent bg-accent/10 text-fg' : 'border-line text-muted')
-          }
-        >
-          <span aria-hidden className="mt-px shrink-0 font-semibold">
-            {dropAccount ? '✓' : '·'}
-          </span>
-          <span>
-            Sign out and delete the copy your account is holding. Without this, signing back
-            in puts your old progress straight back over the clean device.
-          </span>
-        </button>
+        <div role="radiogroup" aria-label="What to delete" className="flex flex-col gap-3">
+          <button
+            type="button"
+            role="radio"
+            data-testid="reset-scope-phone"
+            aria-checked={!everywhere}
+            onClick={() => setEverywhere(false)}
+            className={
+              'tap-target flex w-full items-start gap-3 rounded border px-4 py-3 text-left text-xs leading-relaxed transition ' +
+              (!everywhere ? 'border-accent bg-accent/10 text-fg' : 'border-line text-muted')
+            }
+          >
+            <span aria-hidden className="mt-px shrink-0 font-semibold">
+              {!everywhere ? '✓' : '·'}
+            </span>
+            <span>
+              <span className="font-semibold">Start this phone fresh.</span> Signs you out. Your
+              account keeps its copy, so signing back in brings it back.
+            </span>
+          </button>
+          {signedIn ? (
+            <button
+              type="button"
+              role="radio"
+              data-testid="reset-scope-everywhere"
+              aria-checked={everywhere}
+              onClick={() => setEverywhere(true)}
+              className={
+                'tap-target flex w-full items-start gap-3 rounded border px-4 py-3 text-left text-xs leading-relaxed transition ' +
+                (everywhere ? 'border-telha bg-telha/10 text-fg' : 'border-line text-muted')
+              }
+            >
+              <span aria-hidden className="mt-px shrink-0 font-semibold">
+                {everywhere ? '✓' : '·'}
+              </span>
+              <span>
+                <span className="font-semibold">Delete my progress everywhere.</span> Your
+                account&rsquo;s copy goes too, on every phone. This cannot be undone.
+              </span>
+            </button>
+          ) : (
+            <Link
+              href="/signin?next=%2Freset"
+              data-testid="reset-scope-signin"
+              className="tap-target flex w-full items-start gap-3 rounded border border-line px-4 py-3 text-left text-xs leading-relaxed text-muted"
+            >
+              <span aria-hidden className="mt-px shrink-0 font-semibold">→</span>
+              <span>
+                Sign in to delete your account&rsquo;s progress too. Deleting an account&rsquo;s
+                copy needs proof that it is yours.
+              </span>
+            </Link>
+          )}
+        </div>
 
         <button
           type="button"

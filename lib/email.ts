@@ -18,7 +18,17 @@ export function sendable(): boolean {
   return Boolean(process.env.RESEND_API_KEY)
 }
 
+/**
+ * REFUSED ON PRODUCTION, whatever the variable says (2026-11-18).
+ *
+ * With this on and no mail sender, /api/auth/request hands the sign-in link and code back
+ * to whoever asked — so anybody could type anybody's address and walk into their account,
+ * their Legend and their history. The comment above said "must never be set in production";
+ * a rule with no check behind it decays, so this is the check. Preview and local builds
+ * still get it for facilitated sessions.
+ */
 export function debugLinksOn(): boolean {
+  if (process.env.VERCEL_ENV === 'production') return false
   return process.env.AUTH_DEBUG_LINKS === '1'
 }
 

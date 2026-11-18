@@ -545,13 +545,31 @@ console.log('the reset can reach the account copy')
   const route = strip(readFileSync('app/api/reset/route.ts', 'utf8'))
   check(
     'the reset screen can ask for the account copy',
-    /signout=1/.test(screen),
+    /scope=everywhere/.test(screen),
     'without it a sign-in restores everything the wipe removed',
   )
+  /*
+    AND THE SCREEN REPORTS WHAT THE SERVER DID, NOT WHAT WAS TICKED (2026-11-18).
+
+    Sam reset while signed out, the screen said "Your account copy is gone too. Nothing will
+    come back", and his next sign-in brought the lot back. The route can only delete an
+    account's copy for the account that is signed in, so it refuses `everywhere` without one
+    and says `account_cleared` when it did — and the done screen reads that field.
+  */
   check(
-    'and it is on by default',
-    /useState\(true\)[^\n]*$|const \[dropAccount, setDropAccount\] = useState\(true\)/m.test(screen),
-    'somebody on /reset wants a clean run',
+    'the route refuses everywhere to somebody signed out',
+    /everywhere\s*&&\s*!user/.test(route) && /need_sign_in/.test(route),
+    'a reset that promises the account copy and cannot reach it is the bug',
+  )
+  check(
+    'the route says whether the account copy went',
+    /account_cleared/.test(route),
+    'otherwise the screen can only report the checkbox',
+  )
+  check(
+    'and the done screen reads it',
+    /result\?\.accountCleared/.test(screen) && !/dropAccount\s*\n?\s*\?/.test(screen),
+    'the old screen said "gone" whenever the box was ticked',
   )
   /*
     AND THE LEARNER CAN SEE WHICH STATE THEY ARE IN.
