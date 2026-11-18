@@ -26,13 +26,26 @@ export const dynamic = 'force-dynamic'
  * the exact thing testers are asked to do — would have silently landed back behind the
  * paywall. The grant is carried to the new device id. Progress goes; access does not.
  *
- * A SIGNED-IN LEARNER IS REFUSED. Their account is the durable copy and this endpoint
- * would delete a device row while the account quietly restored it — a reset that looks
- * like it failed. Sign out first, which this also does on request, and then reset.
+ * TWO RESETS, AND THE ANSWER SAYS WHICH ONE HAPPENED (2026-11-18).
+ *
+ *   this phone (the default)  — this device's copy goes, the device cookie goes, and anybody
+ *                               signed in is signed out. The ACCOUNT is not touched: signing
+ *                               back in with the email brings it all back, which is exactly
+ *                               what a returning learner should get.
+ *   ?scope=everywhere         — the account's copy goes too. Only for somebody signed in,
+ *                               because deleting an account's work needs proof it is theirs.
+ *                               (`?signout=1` is the old spelling and means the same.)
+ *
+ * Sam reset, typed his email, and his old lessons came back. He was not signed in on that
+ * browser when he reset, so `if (user)` skipped the account delete — and the screen said
+ * "Your account copy is gone too. Nothing will come back." anyway, because it reported the
+ * box he ticked rather than what the server did. So the answer now carries
+ * `account_cleared`, and the screen reads that.
  */
 export async function POST(request: Request) {
   const user = await currentUser()
-  const alsoSignOut = new URL(request.url).searchParams.get('signout') === '1'
+  const params = new URL(request.url).searchParams
+  const everywhere = params.get('scope') === 'everywhere' || params.get('signout') === '1'
   /*
     ?comp=drop turns this device back into an ordinary free one.
 
@@ -40,40 +53,37 @@ export async function POST(request: Request) {
     product and wrong for anybody trying to see what a new person sees — including the
     person who built it, who could not reach the paywall on any device.
   */
-  const dropComp = new URL(request.url).searchParams.get('comp') === 'drop'
+  const dropComp = params.get('comp') === 'drop'
 
-  if (user && !alsoSignOut) {
+  /*
+    EVERYWHERE NEEDS SOMEBODY TO BE EVERYWHERE AS. Refused before anything is touched, so
+    the learner can sign in and ask again with nothing half done.
+  */
+  if (everywhere && !user) {
     return NextResponse.json(
       {
         ok: false,
-        reason:
-          'You are signed in, so this device is not the only copy — your account would ' +
-          'restore it. Sign out first.',
-        signed_in: true,
+        need_sign_in: true,
+        reason: 'Sign in first — deleting your account\'s copy needs proof the account is yours.',
       },
-      { status: 409 },
+      { status: 401 },
     )
   }
 
   /*
-    THE ACCOUNT'S COPY GOES TOO, when the learner signed out to get here.
-
-    Sam reset, signed back in, and was inside the Club with no Legend: "I got into the club
-    even though I have no legend." The door was working. His ACCOUNT row still held
-    club_welcomed_at, mergeLearner takes the earliest of the two timestamps, and clubOpen
-    grandfathers anybody who has one — so signing in handed back the membership the reset
-    had just removed.
-
-    Half a reset is worse than none: it looks like it worked until the next sign-in, and
-    then the thing that undoes it is the sync doing its job. `?signout=1` is the learner
-    saying start again everywhere, so everywhere is what it means.
-
-    Read BEFORE endSession, because after it there is no user to scope the delete to.
+    THE ACCOUNT'S COPY, when asked for. Read BEFORE endSession, because after it there is
+    no user to scope the delete to. (Sam, earlier: "I got into the club even though I have
+    no legend" — the account row still held club_welcomed_at, and the next sign-in merged
+    it back. Half a reset is worse than none.)
   */
-  if (user) {
+  let accountCleared = false
+  if (user && everywhere) {
     await forgetAccountLearner(user.id)
-    await endSession()
+    accountCleared = true
   }
+  /* Either way this phone stops being signed in: a fresh phone is a guest. */
+  const signedOut = Boolean(user)
+  if (user) await endSession()
 
   const device = await deviceId()
   // Nothing to forget is a success: the caller wanted a clean device and has one.
@@ -106,6 +116,8 @@ export async function POST(request: Request) {
   return NextResponse.json({
     ok: true,
     forgot: Boolean(device),
+    account_cleared: accountCleared,
+    signed_out: signedOut,
     kept_comp: keptComp,
     dropped_comp: droppedComp,
   })

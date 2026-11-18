@@ -5,7 +5,11 @@ import { useEffect, useState } from 'react'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Back } from '@/components/Back'
 import { Wordmark } from '@/components/Wordmark'
-import { loadLearner } from '@/engine/learner'
+import { loadLearner, restoreLearner } from '@/engine/learner'
+import { MemberCard } from '@/components/MemberCard'
+import { forgetEntitlements } from '@/engine/useEntitlements'
+import { track } from '@/engine/analytics'
+import { PLANS, PRICING } from '@/lib/entitlements'
 
 /**
  * Sign in.
@@ -44,8 +48,25 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
   }, [])
   const [email, setEmail] = useState('')
   const [state, setState] = useState<
-    'idle' | 'sending' | 'sent' | 'error' | 'undeliverable'
+    'idle' | 'sending' | 'sent' | 'error' | 'undeliverable' | 'member'
   >('idle')
+  /*
+    BECOMING A MEMBER IS THE MOMENT (2026-11-18). Sam: the sign-in "doesn't feel meaty
+    enough". A correct code used to bounce straight to the next screen, so the whole act of
+    joining was a text field and a redirect. Now it stops here: the card is issued, with a
+    number, and — where billing is on and they are not already Pro — the one honest choice
+    that goes with joining a club: stay a free sócio, or go Pro (first week free).
+  */
+  const [member, setMember] = useState<{ no: number | null; since: string; isNew: boolean } | null>(null)
+  const [landing, setLanding] = useState('/account?welcome=1')
+  const [offerPro, setOfferPro] = useState(false)
+  /* Places left in the founding 500, or null when it is closed or not set up (then: annual). */
+  const [founding, setFounding] = useState<number | null>(null)
+  const [feminine, setFeminine] = useState(false)
+  const [paying, setPaying] = useState(false)
+  useEffect(() => {
+    setFeminine(loadLearner().profile?.gender === 'f')
+  }, [])
   const [message, setMessage] = useState<string | null>(null)
   const [debugUrl, setDebugUrl] = useState<string | null>(null)
   /* The six digits from the email (2026-11-05), typed here — on the device they are holding. */
@@ -186,7 +207,117 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
         One card per state, because the three states are three different screens that
         happen to share a route.
       */}
-      {state === 'undeliverable' ? (
+      {state === 'member' && member ? (
+        <div className="flex flex-col gap-5" data-testid="signin-member">
+          <div>
+            <p className="eyebrow text-accent">
+              {member.isNew ? 'BEM-VINDO' : 'DE VOLTA'}
+            </p>
+            <h1 className="display mt-2 text-balance text-3xl">
+              {member.isNew
+                ? 'You are a ' + (feminine ? 'sócia' : 'sócio') + ' of the Dub Club.'
+                : 'Welcome back, ' + (feminine ? 'sócia' : 'sócio') + '.'}
+            </h1>
+            <p className="mt-2 text-sm text-fg/80">
+              {member.isNew
+                ? 'Everything on this phone is saved to your account now, and comes back on any phone you sign in on.'
+                : 'Everything you have done is coming back to this phone now.'}
+            </p>
+          </div>
+
+          <MemberCard no={member.no} since={member.since} name={email} feminine={feminine} />
+
+          {offerPro ? (
+            <div className="flex flex-col gap-3" data-testid="signin-membership-choice">
+              <p className="eyebrow text-muted">MEMBERSHIP</p>
+              <a
+                href={landing}
+                data-testid="signin-stay-free"
+                onClick={() => track('membership_choice', { choice: 'free', new_member: member.isNew })}
+                className="tap-target flex flex-col gap-1 rounded-2xl border border-line bg-bg-elev px-5 py-4"
+              >
+                <span className="text-base font-semibold">
+                  {feminine ? 'Sócia' : 'Sócio'} <span className="font-normal text-muted">· free, for good</span>
+                </span>
+                <span className="text-sm text-fg/80">{PLANS.free.line}</span>
+                <span className="eyebrow mt-1 text-accent">CARRY ON →</span>
+              </a>
+              <button
+                type="button"
+                data-testid="signin-go-pro"
+                disabled={paying}
+                onClick={async () => {
+                  setPaying(true)
+                  track('membership_choice', { choice: founding ? 'founding' : 'pro', new_member: member.isNew })
+                  const r = (await fetch('/api/billing/checkout', {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/json' },
+                    /* Exactly the price on the button. If founding closes in between, the route says so. */
+                    body: JSON.stringify({ interval: founding ? 'founding' : 'annual' }),
+                  })
+                    .then((x) => x.json())
+                    .catch(() => null)) as { url?: string; error?: string } | null
+                  if (r?.url) {
+                    window.location.href = r.url
+                    return
+                  }
+                  setPaying(false)
+                  setCodeNote(r?.error ?? 'Checkout did not open. You can go Pro any time from Account.')
+                }}
+                className="tap-target flex flex-col gap-1 rounded-2xl border-2 border-accent bg-accent/5 px-5 py-4 text-left disabled:opacity-60"
+              >
+                {founding ? (
+                  <>
+                    {/*
+                      SÓCIO FUNDADOR (Sam, 2026-11-18): the founding 500, when places are left.
+                      Founding member — the one genuinely scarce thing, scarce for a real reason.
+                    */}
+                    <span className="text-base font-semibold">
+                      <span lang="pt-PT">{feminine ? 'Sócia fundadora' : 'Sócio fundador'}</span>{' '}
+                      <span className="font-normal text-muted">
+                        · founding member, £{PRICING.founding.gbp} a year, first week free
+                      </span>
+                    </span>
+                    <span className="text-sm text-fg/80">
+                      {PLANS.pro.line} {PRICING.founding.line}
+                    </span>
+                    <span className="text-xs text-muted" data-testid="signin-founding-left">
+                      {founding} of the first {PRICING.founding.cap} places left.
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-base font-semibold">
+                      {feminine ? 'Sócia' : 'Sócio'} Pro{' '}
+                      <span className="font-normal text-muted">· £{PRICING.annual.gbp} a year, first week free</span>
+                    </span>
+                    <span className="text-sm text-fg/80">{PLANS.pro.line}</span>
+                  </>
+                )}
+                <span className="eyebrow mt-1 text-accent">
+                  {paying ? 'OPENING…' : founding ? 'BE A FOUNDER →' : 'GO PRO →'}
+                </span>
+              </button>
+              <p className="text-xs text-muted">
+                Cancel in the first week and you pay nothing. Other plans are on{' '}
+                <Link href="/pro" className="underline">
+                  the membership page
+                </Link>
+                .
+              </p>
+              {codeNote ? <p className="text-sm text-fg/80" role="status">{codeNote}</p> : null}
+            </div>
+          ) : (
+            <a
+              href={landing}
+              data-testid="signin-carry-on"
+              className="tap-target eyebrow block w-full rounded-full bg-accent px-5 py-3 text-center text-accent-ink"
+            >
+              CARRY ON
+            </a>
+          )}
+        </div>
+      ) : state === 'undeliverable' ? (
         <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
           <h1 className="display text-balance text-3xl">No email is going to arrive.</h1>
           <p className="text-sm leading-relaxed text-fg/85">
@@ -222,10 +353,34 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
                 headers: { 'content-type': 'application/json' },
                 body: JSON.stringify({ email, code, next: backTo }),
               }).catch(() => null)
-              const d = (res ? await res.json().catch(() => ({})) : {}) as { ok?: boolean; next?: string; reason?: string; dead?: boolean }
+              const d = (res ? await res.json().catch(() => ({})) : {}) as {
+                ok?: boolean
+                next?: string
+                reason?: string
+                dead?: boolean
+                member?: { no: number | null; since: string; isNew: boolean }
+              }
               setChecking(false)
               if (d.ok) {
-                window.location.assign(d.next ?? '/account?welcome=1')
+                track('signed_in', { where: 'signin', new_member: Boolean(d.member?.isNew) })
+                forgetEntitlements()
+                /* The account's copy comes down while the card is on screen. Only ever gains. */
+                void restoreLearner()
+                setLanding(d.next ?? '/account?welcome=1')
+                /* Whether there is a paid choice to offer: billing on, and not already Pro. */
+                const a = (await fetch('/api/entitlements')
+                  .then((r) => r.json())
+                  .catch(() => null)) as { billingReady?: boolean; entitlements?: { plan?: string } } | null
+                const pro = Boolean(a?.billingReady) && a?.entitlements?.plan !== 'pro'
+                setOfferPro(pro)
+                if (pro) {
+                  const f = (await fetch('/api/billing/founding')
+                    .then((r) => r.json())
+                    .catch(() => null)) as { open?: boolean; left?: number } | null
+                  setFounding(f?.open && f.left ? f.left : null)
+                }
+                setMember(d.member ?? { no: null, since: new Date().toISOString(), isNew: false })
+                setState('member')
                 return
               }
               setCodeNote(d.reason ?? 'That did not work.')
@@ -269,9 +424,20 @@ export function SignIn({ accountsReady }: { accountsReady: boolean }) {
         </div>
       ) : (
         <div className="flex flex-col gap-3 rounded-2xl border border-line bg-bg-elev px-5 py-6">
-          <h1 className="display text-balance text-3xl">
-            {returning ? 'Welcome back.' : 'Keep what you have learned.'}
+          {/*
+            THE LINE YOU JOIN WITH (2026-11-18). Every question is a lesson, and this screen
+            asks the biggest one: so it teaches the sentence for it first. Somebody coming
+            back is greeted in Portuguese instead.
+          */}
+          <p className="eyebrow text-accent" data-testid="signin-eyebrow">
+            {returning ? 'DE VOLTA' : 'SER SÓCIO'}
+          </p>
+          <h1 className="display text-balance text-3xl" lang={returning ? undefined : 'pt-PT'}>
+            {returning ? 'Welcome back.' : 'Quero ser ' + (feminine ? 'sócia' : 'sócio') + ' do Dub Club.'}
           </h1>
+          {returning ? null : (
+            <p className="-mt-1 text-sm italic text-muted">I would like to join the Dub Club.</p>
+          )}
           <p className="text-sm text-fg/80">
             {returning
               ? 'There is nothing on this device yet. Sign in and everything you have already done comes back — the sentences, your Legend, the lot.'

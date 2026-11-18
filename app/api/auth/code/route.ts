@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { consumeLoginCode, ensureDevice, returnTo, startSession, upsertUser } from '@/lib/auth'
+import { consumeLoginCode, ensureDevice, memberFor, returnTo, startSession, upsertUser } from '@/lib/auth'
 import { claimDevice } from '@/lib/store'
 import { carryDeviceComp } from '@/lib/comp'
 
@@ -28,7 +28,13 @@ export async function POST(request: Request) {
   await claimDevice(device, user.id)
   /* Free access given to this device at launch follows the person onto their account. */
   await carryDeviceComp(device, user.id)
-  const out = NextResponse.json({ ok: true, next: returnTo(typeof b.next === 'string' ? b.next : null) })
+  /* The card the sign-in screen hands over: becoming a member is the moment (2026-11-18). */
+  const member = await memberFor(user)
+  const out = NextResponse.json({
+    ok: true,
+    next: returnTo(typeof b.next === 'string' ? b.next : null),
+    member,
+  })
   /* On this response itself, as /api/auth/verify learned: a constructed response does not carry the jar's cookies. */
   if (session) out.cookies.set(session.name, session.value, session.options)
   return out

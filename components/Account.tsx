@@ -6,7 +6,8 @@ import { PLANS } from '@/lib/entitlements'
 import { BottomNav, BottomNavSpace } from '@/components/BottomNav'
 import { Back } from '@/components/Back'
 import { IDENTITY } from '@/content/identity'
-import { restoreLearner, wipeLearner } from '@/engine/learner'
+import { loadLearner, restoreLearner, wipeLearner } from '@/engine/learner'
+import { MemberCard } from '@/components/MemberCard'
 import { Wordmark } from '@/components/Wordmark'
 import { RedeemCode } from '@/components/RedeemCode'
 
@@ -38,6 +39,8 @@ interface Props {
     source?: string | null
   } | null
   billingReady: boolean
+  /** The membership card (2026-11-18). Optional so an older caller still renders. */
+  member?: { no: number | null; since: string; isNew: boolean }
 }
 
 const STATUS_LINE: Record<string, string> = {
@@ -48,7 +51,12 @@ const STATUS_LINE: Record<string, string> = {
   inactive: 'Not active.',
 }
 
-export function Account({ user, entitlements, subscription, billingReady }: Props) {
+export function Account({ user, entitlements, subscription, billingReady, member }: Props) {
+  /* Sócia or sócio, as the lessons say it — read from the learner after mount. */
+  const [feminine, setFeminine] = useState(false)
+  useEffect(() => {
+    setFeminine(loadLearner().profile?.gender === 'f')
+  }, [])
   const [name, setName] = useState(user.display_name ?? '')
   const [optIn, setOptIn] = useState(user.marketing_opt_in)
   const [nudge, setNudge] = useState(Boolean(user.nudge_email))
@@ -161,6 +169,18 @@ export function Account({ user, entitlements, subscription, billingReady }: Prop
           </div>
         </section>
       ) : null}
+
+      {/*
+        THE CARD FIRST (2026-11-18): who you are here is a member, not an email address. The
+        address stays underneath, because it is still the answer to "which account is this".
+      */}
+      <MemberCard
+        no={member?.no ?? null}
+        since={member?.since ?? user.created_at}
+        name={user.display_name || user.email}
+        feminine={feminine}
+        tier={subscription?.source === 'comp' ? 'comp' : entitlements.plan === 'pro' ? 'pro' : 'free'}
+      />
 
       <section>
         <p className="eyebrow text-muted">SIGNED IN AS</p>

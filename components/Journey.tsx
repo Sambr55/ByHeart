@@ -95,6 +95,7 @@ import {
   setLegendPrompt,
   setSaveDeclined,
   resetLearnerCache,
+  restoreLearner,
   setAffinity,
   setProfile,
   voiceLean,
@@ -115,7 +116,7 @@ import { roadFor, roadProgress } from '@/content/road'
 import type { ProfileAsk } from '@/content/roots'
 import { buzz, nope } from '@/engine/tap'
 import { useLearner } from '@/engine/useLearner'
-import { useEntitlements } from '@/engine/useEntitlements'
+import { forgetEntitlements, useEntitlements } from '@/engine/useEntitlements'
 import { useFromBoard } from '@/components/BackToBoard'
 import { AudioButton } from './AudioButton'
 import { CopyButton } from './CopyButton'
@@ -4541,11 +4542,18 @@ function AskAge({
  * eletrónico are more common)." The root above has just said that; this is where it is
  * used for something.
  *
- * WHAT IT PROMISES IS WHAT IT DOES. The front door says "nothing here will take your email
- * and promise to let you know", and that promise is kept — this is not a signup, there is
- * no newsletter, and the copy says the only thing the address is for. Asking inside a
- * lesson makes that easier to be honest about rather than harder: there is no offer
- * attached to it.
+ * IT SIGNS YOU IN NOW, OR IT SAYS IT DID NOT (2026-11-18). This used to write the address
+ * into the record on the phone and stop: no code, no account, nothing on the server — while
+ * the copy said "This saves your progress". Worse, having an address on file made the real
+ * save step skip itself, so somebody who typed one here was never offered the thing they
+ * thought they had done. Now KEEP IT SAFE sends the six-digit code, the code is typed here,
+ * inside the lesson, and only a code that checks out signs them in. The address alone never
+ * restores anything: proof is the code, and the code only goes to that inbox.
+ *
+ * Every question is a lesson, so the code step teaches its word too: o código.
+ *
+ * NO NEWSLETTER, as the front door promises — the address is for signing in and nothing
+ * else unless they ask.
  *
  * NOT SHOWN AT ALL TO SOMEBODY UNDER THE CONSENT AGE, because there is nowhere to put a
  * parental authorisation and no way to verify one. The honest answer is to not collect it.
@@ -4560,12 +4568,21 @@ function AskEmail({
   onDone: () => void
 }) {
   const learner = useLearner()
+  const access = useEntitlements()
   const [typed, setTyped] = useState(learner.profile?.email ?? '')
+  const [step, setStep] = useState<'email' | 'sending' | 'code' | 'checking'>('email')
+  const [code, setCode] = useState('')
+  const [note, setNote] = useState<string | null>(null)
+  const [debugCode, setDebugCode] = useState<string | null>(null)
   const chapter = chapterById(learner.chapter)
   const age = learner.profile?.age ?? null
   const said = learner.profile?.email ?? null
   const skipped = (learner.profile?.skipped ?? []).includes('email')
   const valid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(typed.trim())
+  const signedIn = access.known && access.signedIn
+  /* Where accounts cannot send anything, there is no code to ask for — and no promise to make. */
+  const canSignIn = !access.known || access.signInReady
+  const member = learner.profile?.gender === 'f' ? 'sócia' : 'sócio'
 
   /* Too young for an account is too young to be asked. Nothing is collected. */
   if (age != null && age < chapter.consent_age) {
@@ -4577,9 +4594,130 @@ function AskEmail({
     )
   }
 
+  if (signedIn && !open) {
+    return <AskSettled line={(said ?? 'Signed in') + ' · saved to your account'} onChange={onOpen} />
+  }
   if ((said || skipped) && !open) {
+    /* An address typed under the old ask was never confirmed. Say so, and offer the fix. */
     return (
-      <AskSettled line={said ? said : 'You skipped this one.'} onChange={onOpen} />
+      <AskSettled
+        line={said ? (canSignIn ? said + ' · not confirmed yet' : said) : 'You skipped this one.'}
+        onChange={onOpen}
+      />
+    )
+  }
+
+  const send = async () => {
+    const email = typed.trim()
+    if (!canSignIn) {
+      /* Nothing can be sent here. Kept on the phone, and the copy below says exactly that. */
+      setProfile('email', email)
+      track('profile_answer', { question: 'email', answer: 'given', where: 'lesson' })
+      onDone()
+      return
+    }
+    setStep('sending')
+    setNote(null)
+    const res = await fetch('/api/auth/request', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email, next: window.location.pathname }),
+    }).catch(() => null)
+    const d = (res ? await res.json().catch(() => ({})) : {}) as {
+      ok?: boolean
+      sent?: boolean
+      reason?: string
+      debug_code?: string
+    }
+    if (!d.ok || (d.sent === false && !d.debug_code)) {
+      setStep('email')
+      setNote(d.reason ?? 'The code could not be sent just now. Try again, or skip and add it later from Yours.')
+      return
+    }
+    setDebugCode(d.debug_code ?? null)
+    track('profile_answer', { question: 'email', answer: 'given', where: 'lesson' })
+    setStep('code')
+  }
+
+  const check = async () => {
+    const email = typed.trim()
+    setStep('checking')
+    setNote(null)
+    const res = await fetch('/api/auth/code', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email, code }),
+    }).catch(() => null)
+    const d = (res ? await res.json().catch(() => ({})) : {}) as { ok?: boolean; reason?: string; dead?: boolean }
+    if (!d.ok) {
+      setCode('')
+      setNote(d.reason ?? 'That did not work.')
+      setStep(d.dead ? 'email' : 'code')
+      return
+    }
+    setProfile('email', email)
+    track('signed_in', { where: 'lesson' })
+    /* Signed in now: what this tab knew about access is stale, and the account may hold more. */
+    forgetEntitlements()
+    await restoreLearner()
+    onDone()
+  }
+
+  if (step === 'code' || step === 'checking') {
+    return (
+      <div className="flex flex-col gap-3 rounded border border-accent/40 bg-bg-elev p-4" data-testid="ask-email-code-step">
+        <p className="eyebrow text-accent">
+          <span lang="pt-PT">O CÓDIGO</span>
+        </p>
+        <p className="-mt-2 text-xs italic text-muted">the code</p>
+        <p className="text-sm leading-relaxed">
+          Six digits are on their way to <span className="font-semibold">{typed.trim()}</span>. Type
+          them here and your progress is saved to your account, and you are a {member} of the Club.
+        </p>
+        <input
+          value={code}
+          data-testid="ask-email-code"
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          aria-label="Six-digit code"
+          placeholder="123456"
+          className="tap-target rounded border border-line bg-bg px-4 py-3 text-center text-2xl tracking-[0.4em]"
+        />
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            data-testid="ask-email-code-go"
+            disabled={code.length !== 6 || step === 'checking'}
+            onClick={check}
+            className="tap-target eyebrow rounded bg-accent px-5 py-3 text-accent-ink disabled:opacity-50"
+          >
+            {step === 'checking' ? 'CHECKING…' : 'THAT\u2019S IT'}
+          </button>
+          <button
+            type="button"
+            data-testid="ask-email-code-later"
+            onClick={() => {
+              /* Not confirmed, so not kept: an unconfirmed address is not an account. */
+              setProfile('email', null)
+              track('profile_answer', { question: 'email', answer: 'later', where: 'lesson' })
+              onDone()
+            }}
+            className="tap-target eyebrow rounded border border-line px-5 py-3 text-muted"
+          >
+            LATER
+          </button>
+        </div>
+        {note ? <p className="text-sm text-fg/80" role="status">{note}</p> : null}
+        {debugCode ? <p className="text-xs text-muted" data-testid="ask-email-debug-code">Test code: {debugCode}</p> : null}
+        <p className="text-xs leading-relaxed text-muted">
+          Nothing in your inbox? Check spam, or{' '}
+          <button type="button" className="underline" onClick={() => setStep('email')}>
+            use a different e-mail
+          </button>
+          . The code lasts twenty minutes and works once.
+        </p>
+      </div>
     )
   }
 
@@ -4587,18 +4725,17 @@ function AskEmail({
     <div className="flex flex-col gap-3 rounded border border-accent/40 bg-bg-elev p-4">
       <p className="eyebrow text-accent">YOURS</p>
       {/*
-        WHAT IT BUYS THEM, first and plainly.
+        WHAT IT BUYS THEM, first and plainly — and only what it really does.
 
         Sam: "on the email screen explain entering it will allow us to save their
-        progress." The old copy led with what it would NOT do — no newsletter, nothing sold
-        — which is a reassurance about a thing nobody had been offered yet, and never said
-        what the address was actually for. The reassurance is still worth having; it is
-        just the second sentence.
+        progress." True now: the address gets a code, the code signs them in, and signing in
+        is what puts their work somewhere it survives the phone. Where accounts are not
+        switched on, it says that instead of promising a save that cannot happen.
       */}
       <p className="text-sm leading-relaxed">
-        This saves your progress. Everything you have learned lives on this phone until you
-        give DUB an address — with one, your words, your Legend and your Portuguese come
-        back on any phone you sign in on.
+        {canSignIn
+          ? 'This saves your progress. Everything you have learned lives on this phone until you confirm an address — we send a six-digit code, you type it here, and your words, your Legend and your Portuguese come back on any phone you sign in on.'
+          : 'Accounts are not open yet, so DUB keeps this address on this phone for now. Your progress stays here too, and moves to an account the moment you can sign in.'}
       </p>
       <p className="text-xs leading-relaxed text-muted">
         No newsletter, nothing sold, and DUB will not write to you unless you ask it to.
@@ -4621,28 +4758,17 @@ function AskEmail({
           <button
             type="button"
             data-testid="ask-email-done"
-            onClick={() => {
-              setProfile('email', typed.trim())
-              track('profile_answer', { question: 'email', answer: 'given', where: 'lesson' })
-              onDone()
-            }}
-            className="tap-target eyebrow rounded bg-accent px-5 py-3 text-accent-ink"
+            disabled={step === 'sending'}
+            onClick={send}
+            className="tap-target eyebrow rounded bg-accent px-5 py-3 text-accent-ink disabled:opacity-50"
           >
-            KEEP IT SAFE
+            {step === 'sending' ? 'SENDING…' : canSignIn ? 'SEND MY CODE' : 'KEEP IT SAFE'}
           </button>
         ) : null}
         {/*
-          THE WAY PAST, WHICH DID NOT EXIST.
-
-          There was no skip button at all: `skipped` was read three lines up and nothing in
-          this component ever set it, so a learner with no address to give — or no wish to
-          give one — had exactly one control on the screen, and it only appeared once the
-          field validated. That was survivable at step twelve, where the road was already
-          walked. At step three it is a wall in front of the whole product.
-
-          Moving the ask earlier is what makes this non-negotiable rather than tidy: the
-          earlier something is asked, the more certain it must be that declining costs
-          nothing. So the decline is explicit, it is recorded, and the road carries on.
+          THE WAY PAST. The earlier something is asked, the more certain it must be that
+          declining costs nothing — so the decline is explicit, recorded, and the road
+          carries on.
         */}
         <button
           type="button"
@@ -4658,13 +4784,9 @@ function AskEmail({
           NOT NOW
         </button>
       </div>
+      {note ? <p className="text-sm text-fg/80" role="status">{note}</p> : null}
       {/*
         WHAT DECLINING COSTS, said before they decline rather than after.
-
-        Sam: "explain they run the risk of losing their data if they dont supply their
-        email." It is the honest half of asking early — somebody saying no here should know
-        what they are saying no to, and the answer is not abstract: this phone is the only
-        copy.
       */}
       <p className="text-xs leading-relaxed text-muted">
         Skip it and nothing is lost today — your Portuguese just lives on this phone alone.
@@ -5677,6 +5799,8 @@ function LegendOpen() {
 function SittingBreakStep() {
   const { next } = useJourney()
   const learner = useLearner()
+  /* Saved means signed in, not an address typed somewhere — see AskEmail. */
+  const access = useEntitlements()
   const road = roadProgress({
     rootsPlayed: learner.roots_played ?? [],
     sectionsCompleted: learner.sections_completed ?? [],
@@ -5766,7 +5890,7 @@ function SittingBreakStep() {
   }, [pastTheEnd, next])
   if (pastTheEnd) return null
   /* Already saved, or already said no — then there is one way out, not two. */
-  const offerSave = learner.save_prompt === 'unseen' && !learner.profile?.email
+  const offerSave = learner.save_prompt === 'unseen' && !(access.known && access.signedIn)
 
   return (
     <Shell stage="CHOICE" nav={false}>
@@ -5861,11 +5985,12 @@ function SaveStep() {
   const access = useEntitlements()
   const me = useLearner()
   /*
-    Skipped where there is no sign-in to offer, and where they have already given an
-    address in a lesson — see the note on saveOffer. A whole screen asking for something
-    the learner has handed over is worse than a panel doing it.
+    Skipped where there is no sign-in to offer, and where they are already signed in. Not
+    skipped merely because an address was typed in a lesson: until 2026-11-18 that address
+    went nowhere, so skipping on it meant the learner who most believed they were saved
+    was the one never offered a save.
   */
-  const skip = (access.known && !access.signInReady) || Boolean(me.profile?.email)
+  const skip = (access.known && !access.signInReady) || (access.known && access.signedIn)
   useEffect(() => {
     if (skip) next()
   }, [skip, next])
